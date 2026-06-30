@@ -1758,21 +1758,21 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/serverless/api_integration/test_suites/data_usage @elastic/kibana-management
 /x-pack/platform/test/serverless/functional/test_suites/data_usage @elastic/kibana-management
 /x-pack/platform/test/serverless/functional/page_objects/svl_data_usage.ts @elastic/kibana-management
-/x-pack/solutions/observability/test/observability_ai_assistant_functional @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant.index.ts @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant.stateful.config.ts @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant_local.index.ts  @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant_local.serverless.config.ts  @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant_local.index.ts  @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant_local.stateful.config.ts  @elastic/obs-ai-team
+/x-pack/solutions/observability/test/observability_ai_assistant_functional @elastic/nightshift-context-and-research-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant @elastic/nightshift-context-and-research-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant.index.ts @elastic/nightshift-context-and-research-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant.stateful.config.ts @elastic/nightshift-context-and-research-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant_local.index.ts  @elastic/nightshift-context-and-research-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant_local.serverless.config.ts  @elastic/nightshift-context-and-research-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant_local.index.ts  @elastic/nightshift-context-and-research-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant_local.stateful.config.ts  @elastic/nightshift-context-and-research-team
 
 # Observability Agent Builder
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent_builder @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_agent.index.ts @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_agent.serverless.config.ts @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.index.ts @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.stateful.config.ts @elastic/obs-ai-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent_builder @elastic/nightshift-context-and-research-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_agent.index.ts @elastic/nightshift-context-and-research-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_agent.serverless.config.ts @elastic/nightshift-context-and-research-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.index.ts @elastic/nightshift-context-and-research-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.stateful.config.ts @elastic/nightshift-context-and-research-team
 
 # Infra Obs
 ## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.
@@ -3142,8 +3142,8 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 /src/platform/packages/shared/kbn-connector-schemas/mcp @elastic/workchat-eng
 
 # Inference API
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/search-kibana @elastic/security-generative-ai @elastic/obs-ai-team
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/search-kibana @elastic/security-generative-ai @elastic/obs-ai-team
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/search-kibana @elastic/security-generative-ai
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/search-kibana @elastic/security-generative-ai
 /x-pack/platform/plugins/shared/stack_connectors/server/usage/inference @elastic/search-kibana
 /src/platform/packages/shared/kbn-connector-schemas/inference @elastic/search-kibana @elastic/security-generative-ai @elastic/obs-ai-team
 
@@ -3658,8 +3658,8 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.agents/skills/scout-ui-testing/** @elastic/appex-qa
 /.agents/skills/flaky-test-investigator/** @elastic/appex-qa
 /.agents/skills/enzyme-to-rtl/** @elastic/appex-qa
-/.agents/skills/evals-create-suite/** @elastic/obs-ai-team @elastic/security-genai-research-and-development
-/.agents/skills/evals-write-spec/** @elastic/obs-ai-team @elastic/security-genai-research-and-development
+/.agents/skills/evals-create-suite/** @elastic/nightshift-context-and-research-team @elastic/security-genai-research-and-development
+/.agents/skills/evals-write-spec/** @elastic/nightshift-context-and-research-team @elastic/security-genai-research-and-development
 
 # Security team skills: API authorization, CodeQL, and privilege deprecation guidance.
 /.agents/skills/api-authz/** @elastic/kibana-security
@@ -3725,8 +3725,8 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.buildkite/scout_ci_config.yml @elastic/appex-qa
 
 # Evals (Buildkite + scripts)
-/.buildkite/pipelines/evals/ @elastic/obs-ai-team @elastic/security-genai-research-and-development
-/.buildkite/scripts/steps/evals/ @elastic/obs-ai-team @elastic/security-genai-research-and-development
+/.buildkite/pipelines/evals/ @elastic/nightshift-context-and-research-team @elastic/security-genai-research-and-development
+/.buildkite/scripts/steps/evals/ @elastic/nightshift-context-and-research-team @elastic/security-genai-research-and-development
 
 # Inbox FTR test directory (no kibana.jsonc — manual entry)
 /x-pack/platform/test/inbox_api_integration/ @elastic/security-genai-research-and-development
