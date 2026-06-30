@@ -105,12 +105,7 @@ export function MobileFilters() {
   const groupDirection: EuiFlexGroupProps['direction'] = isLarge ? 'column' : 'row';
 
   return (
-    <EuiFlexGroup
-      justifyContent="flexEnd"
-      gutterSize={isMedium ? 's' : 'm'}
-      responsive={false}
-      direction={groupDirection}
-    >
+    <EuiFlexGroup gutterSize={isMedium ? 's' : 'm'} responsive={false} direction={groupDirection}>
       {MOBILE_FILTERS.map(({ key, label }) => {
         const selectOptions =
           data?.mobileFilters.find((filter: MobileFilter) => filter.key === key)?.options ?? [];

@@ -137,7 +137,6 @@ export const mobileServiceDetailRoute = {
             defaultMessage: 'Overview',
           }),
           searchBarOptions: {
-            showTransactionTypeSelector: true,
             showTimeComparison: true,
             showMobileFilters: true,
           },
@@ -163,7 +162,6 @@ export const mobileServiceDetailRoute = {
           }),
           element: <Outlet />,
           searchBarOptions: {
-            showTransactionTypeSelector: true,
             showTimeComparison: true,
             showMobileFilters: true,
           },

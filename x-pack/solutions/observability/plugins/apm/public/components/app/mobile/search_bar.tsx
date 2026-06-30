@@ -13,16 +13,17 @@ import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { TimeComparison } from '../../shared/time_comparison';
 import { MobileFilters } from './service_overview/filters';
 import { UnifiedSearchBar } from '../../shared/unified_search_bar';
+import { AnomalyThresholdSelect } from '../../shared/charts/latency_chart/anomaly_threshold_select';
 
 interface Props {
   hidden?: boolean;
   showUnifiedSearchBar?: boolean;
   showFilterBar?: boolean;
   showTimeComparison?: boolean;
-  showTransactionTypeSelector?: boolean;
   showEnvironmentFilter?: boolean;
   showQueryInput?: boolean;
   showMobileFilters?: boolean;
+  showAnomalyThresholdSelector?: boolean;
   searchBarPlaceholder?: string;
 }
 
@@ -31,10 +32,10 @@ export function MobileSearchBar({
   showUnifiedSearchBar = true,
   showFilterBar = false,
   showTimeComparison = false,
-  showTransactionTypeSelector = false,
   showEnvironmentFilter = false,
   showQueryInput = true,
   showMobileFilters = false,
+  showAnomalyThresholdSelector = false,
   searchBarPlaceholder,
 }: Props) {
   const { isSmall, isMedium, isLarge, isXl, isXXXL } = useBreakpoints();
@@ -67,26 +68,35 @@ export function MobileSearchBar({
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiFlexGroup
-        justifyContent="spaceBetween"
         gutterSize={isMedium ? 's' : 'm'}
         direction={isLarge || isMedium ? 'column' : 'row'}
       >
         {showEnvironmentFilter && (
           <EuiFlexItem grow={isSmall}>
-            <ApmEnvironmentFilter fullWidth compressed />
+            <ApmEnvironmentFilter
+              fullWidth
+              compressed
+              cssOverride={isLarge ? {} : { width: '225px' }}
+            />
           </EuiFlexItem>
         )}
         {showTimeComparison && (
-          <EuiFlexItem grow={isSmall}>
+          <EuiFlexItem grow={isSmall} css={{ width: '225px' }}>
             <TimeComparison fullWidth compressed />
           </EuiFlexItem>
         )}
-        {showMobileFilters && (
-          <EuiFlexItem grow={isSmall}>
-            <MobileFilters />
+        {showAnomalyThresholdSelector && (
+          <EuiFlexItem grow={isSmall} css={{ width: '225px' }}>
+            <AnomalyThresholdSelect compressed fullWidth />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      {showMobileFilters && (
+        <>
+          <EuiSpacer size="s" />
+          <MobileFilters />
+        </>
+      )}
     </>
   );
 }
