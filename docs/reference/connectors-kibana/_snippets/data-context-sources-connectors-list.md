@@ -27,6 +27,7 @@
 * [Slack (v2)](/reference/connectors-kibana/slack-v2-action-type.md): Search and send messages in Slack.
 * [Snowflake](/reference/connectors-kibana/snowflake-action-type.md): Query Snowflake, discover databases, schemas, tables, and views, and run semantic searches through Cortex Search.
 * [Tavily](/reference/connectors-kibana/tavily-action-type.md): Search the web and extract content from web pages.
+* [Workday](/reference/connectors-kibana/workday-action-type.md): Query workers, org charts, recruiting, learning, expenses, projects, and procurement data in Workday.
 * [Zoom](/reference/connectors-kibana/zoom-action-type.md): Access Zoom meetings, recordings, transcripts, and participants.
 * [Zendesk](/reference/connectors-kibana/zendesk-action-type.md): Search and retrieve Zendesk tickets, users, organizations, and Help Center articles using the Zendesk API.
 
