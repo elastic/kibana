@@ -336,6 +336,10 @@ export async function deleteOrphanedMultipleIsolatedAssets({
     }
   }
 
+  // The Spaces extension must be excluded here. For multiple-isolated types the namespaces
+  // filter below is applied at the repository layer (not by the extension), so namespace
+  // isolation is preserved. Keeping the extension active triggers a _has_privileges ES call
+  // that the unsafe internal client has no credentials to satisfy, crashing the server.
   const internalSoClient = appContextService.getSavedObjects().getUnsafeInternalClient({
     includedHiddenTypes: [KibanaSavedObjectType.alertingRuleTemplate],
     excludedExtensions: [SPACES_EXTENSION_ID],
@@ -375,7 +379,7 @@ export async function deleteOrphanedMultipleIsolatedAssets({
   if (!orphansToDelete.length) return;
 
   logger.info(
-    `[Fleet] Deleting ${orphansToDelete.length} orphaned saved object(s) before package install ` +
+    `[Fleet] Deleting ${orphansToDelete.length} orphaned saved object(s) in space '${spaceId}' before package install ` +
       `to prevent ambiguous_conflict errors`
   );
   logger.debug(

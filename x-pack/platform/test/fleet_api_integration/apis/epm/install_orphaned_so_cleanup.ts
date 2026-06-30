@@ -82,7 +82,11 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   const deleteOrphanedTag = async (soId: string) => {
-    await es.delete({ index: '.kibana', id: `tag:${soId}`, refresh: 'wait_for' }).catch(() => {});
+    await es
+      .delete({ index: '.kibana', id: `tag:${soId}`, refresh: 'wait_for' })
+      .catch((err: Error & { statusCode?: number }) => {
+        if (err?.statusCode !== 404) throw err;
+      });
   };
 
   const orphanExists = async (soId: string) => {
