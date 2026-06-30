@@ -192,9 +192,7 @@ test.describe(
 
       await test.step('removes the muted indicator icon from the alert rows', async () => {
         await alertsTablePage.countForQuery(ruleQuery);
-        await expect
-          .poll(() => alertsTablePage.getVisibleSnoozedBadgeCount(), ASYNC_POLL)
-          .toBe(0);
+        await expect.poll(() => alertsTablePage.getVisibleSnoozedBadgeCount(), ASYNC_POLL).toBe(0);
       });
     });
   }
