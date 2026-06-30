@@ -7,32 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readdir } from 'fs/promises';
-import { relative } from 'path';
-
 import type { Task } from '../lib';
 import { exec } from '../lib';
 
 const YARN_EXEC = process.env.npm_execpath || 'yarn';
-const NODE_EXEC = process.execPath || 'node';
-
-const hasNodeModulePatches = async (patchesDir: string) => {
-  try {
-    const entries = await readdir(patchesDir, { recursive: true, withFileTypes: true });
-    return entries.some((entry) => entry.isFile() && entry.name.endsWith('.patch'));
-  } catch (error) {
-    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
-      return false;
-    }
-
-    throw error;
-  }
-};
 
 export const InstallDependencies: Task = {
   description: 'Installing node_modules, including production builds of packages',
 
-  async run(config, log, build) {
+  async run(_config, log, build) {
     await exec(
       log,
       YARN_EXEC,
@@ -52,23 +35,5 @@ export const InstallDependencies: Task = {
         cwd: build.resolvePath(),
       }
     );
-
-    const patchesDir = config.resolveFromRepo('patches');
-
-    if (await hasNodeModulePatches(patchesDir)) {
-      await exec(
-        log,
-        NODE_EXEC,
-        [
-          config.resolveFromRepo('node_modules/.bin/patch-package'),
-          '--error-on-fail',
-          '--patch-dir',
-          relative(build.resolvePath(), patchesDir),
-        ],
-        {
-          cwd: build.resolvePath(),
-        }
-      );
-    }
   },
 };
