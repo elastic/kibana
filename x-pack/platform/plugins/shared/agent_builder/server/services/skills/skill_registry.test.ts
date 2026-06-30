@@ -7,6 +7,7 @@
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
+import { AGENT_BUILDER_TRACING_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { createSkillRegistry } from './skill_registry';
 import type { ReadonlySkillProvider, WritableSkillProvider } from './skill_provider';
 
@@ -804,6 +805,7 @@ describe('createSkillRegistry', () => {
       name: 'agent-builder-traces',
       experimental: true,
       readonly: true,
+      uiSettingRequired: AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
     });
 
     it('hides the traces skill when tracing features are disabled', async () => {

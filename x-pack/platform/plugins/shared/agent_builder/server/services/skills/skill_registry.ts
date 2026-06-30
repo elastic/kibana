@@ -16,6 +16,7 @@ import {
   maxToolsPerSkill,
 } from '@kbn/agent-builder-common';
 import type { SkillRegistryListOptions } from '@kbn/agent-builder-server/runner';
+import { AGENT_BUILDER_TRACING_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { ReadonlySkillProvider, WritableSkillProvider } from './skill_provider';
 
 /**
@@ -73,8 +74,13 @@ export const createSkillRegistry = ({
     if (skill.experimental && !experimentalFeaturesEnabled) {
       return false;
     }
-    if (skill.id === 'agent-builder-traces' && !tracingFeaturesEnabled) {
-      return false;
+    if (skill.uiSettingRequired) {
+      if (
+        skill.uiSettingRequired === AGENT_BUILDER_TRACING_ENABLED_SETTING_ID &&
+        !tracingFeaturesEnabled
+      ) {
+        return false;
+      }
     }
     return true;
   };

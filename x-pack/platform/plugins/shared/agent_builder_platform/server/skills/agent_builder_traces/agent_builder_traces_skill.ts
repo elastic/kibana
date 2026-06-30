@@ -8,12 +8,14 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID, createTracesEsqlTool } from './inline_tools';
+import { AGENT_BUILDER_TRACING_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 
 export const agentBuilderTracesSkill = defineSkillType({
   id: 'agent-builder-traces',
   name: 'agent-builder-traces',
   basePath: 'skills/platform/agent-builder',
   experimental: true,
+  uiSettingRequired: AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   description:
     'Answer questions about Agent Builder OTel (OpenTelemetry) traces and activity: token usage, ' +
     'model and provider breakdowns, conversation and agent latency, tool-call volume, and error ' +
@@ -150,7 +152,7 @@ FROM <traces-index>
 ## Edge Cases
 
 - If a query returns no rows, explain that the time window may be empty or that
-  \`xpack.agentBuilder.tracing.send_to_self\` is not enabled. Do not fabricate values.
+  the \`${AGENT_BUILDER_TRACING_ENABLED_SETTING_ID}\` UI setting is not enabled. Do not fabricate values.
 - Token fields can be missing on non-LLM spans; always filter to \`span.name LIKE "chat *"\`
   before aggregating token usage.
 - \`duration\` is in nanoseconds — never report it raw; convert to seconds (or ms) for the user.
