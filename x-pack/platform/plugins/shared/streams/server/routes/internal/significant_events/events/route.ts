@@ -218,6 +218,11 @@ const eventsLifecycleRoute = createServerRoute({
   },
 });
 
+/**
+ * Used by the managed investigation workflow (`investigation_workflow.yaml`). Keep the endpoint
+ * path and body shape (`significantEventInvestigationSchema`) in sync with its
+ * `attach_pending_to_significant_event` / `attach_to_significant_event` `kibana.request` steps.
+ */
 const eventsAttachInvestigationRoute = createServerRoute({
   endpoint: 'POST /internal/sig_events/events/{id}/investigations',
   options: {
