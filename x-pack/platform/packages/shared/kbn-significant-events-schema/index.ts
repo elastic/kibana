@@ -24,6 +24,8 @@ export {
   streamQuerySchema,
 } from './src/queries';
 
+export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';
+
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
