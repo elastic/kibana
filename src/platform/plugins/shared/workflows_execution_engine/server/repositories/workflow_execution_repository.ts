@@ -171,44 +171,14 @@ export class WorkflowExecutionRepository {
   public async updateWorkflowExecution(
     workflowExecution: Partial<EsWorkflowExecution>
   ): Promise<void> {
-    if (!workflowExecution.id) {
-      throw new Error('Workflow execution ID is required for update');
-    }
-
-    for (let attempt = 1; attempt <= UPDATE_RETRY_ATTEMPTS; attempt++) {
-      const writeIndex = await resolveWriteIndex({
-        esClient: this.esClient,
-        dataStreamName: this.dataStreamName,
-      });
-
-      const versions = await resolveDocumentVersionsByIds<EsWorkflowExecution>({
-        esClient: this.esClient,
-        ids: [workflowExecution.id],
-        writeIndex,
-        dataStreamName: this.dataStreamName,
-        entityName: 'workflow execution',
-      });
-      const version = versions[workflowExecution.id];
-
-      try {
-        await this.esClient.update<Partial<EsWorkflowExecution>>({
-          index: version.index,
-          id: workflowExecution.id,
-          refresh: false,
-          doc: workflowExecution,
-          if_seq_no: version.seqNo,
-          if_primary_term: version.primaryTerm,
-        });
-        return;
-      } catch (error) {
-        if (!isVersionConflictError(error) || attempt === UPDATE_RETRY_ATTEMPTS) {
-          console.log('UPDATE_WORKFLOW_EXECUTION: error', error);
-          throw error;
-        }
-
-        await delayMs(1000);
-      }
-    }
+    await bulkUpdateDocuments<Partial<EsWorkflowExecution>>({
+      esClient: this.esClient,
+      dataStreamName: this.dataStreamName,
+      docs: [workflowExecution],
+      entityName: 'workflow execution',
+      refresh: true,
+      idRequiredMessage: 'Workflow execution ID is required for bulk update',
+    });
   }
 
   /**

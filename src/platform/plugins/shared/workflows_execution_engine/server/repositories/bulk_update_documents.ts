@@ -8,14 +8,26 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { delayMs } from '@kbn/occ';
 import { resolveDocumentVersionsByIds } from './document_version';
 import { resolveWriteIndex } from './resolve_write_index';
 
 const DEFAULT_RETRY_ATTEMPTS = 3;
+const DEFAULT_RETRY_BASE_DELAY_MS = 100;
 
 export interface IdentifiedDocument {
   id?: string;
 }
+
+/**
+ * Full-jitter exponential backoff: returns a random delay in the range
+ * `[0, baseDelayMs * 2 ** (attempt - 1)]`. Jitter spreads concurrent writers
+ * apart so they do not retry version conflicts in lockstep.
+ */
+const getBackoffWithJitterMs = (baseDelayMs: number, attempt: number): number => {
+  const exponentialDelayMs = baseDelayMs * 2 ** (attempt - 1);
+  return Math.round(Math.random() * exponentialDelayMs);
+};
 
 export const isVersionConflictError = (error: unknown): boolean => {
   const maybeError = error as {
@@ -48,6 +60,7 @@ export const bulkUpdateDocuments = async <TDocument extends IdentifiedDocument>(
   idRequiredMessage = `${entityName} ID is required for bulk update`,
   failureVerb = 'update',
   retryAttempts = DEFAULT_RETRY_ATTEMPTS,
+  retryBaseDelayMs = DEFAULT_RETRY_BASE_DELAY_MS,
 }: {
   esClient: ElasticsearchClient;
   dataStreamName: string;
@@ -57,6 +70,7 @@ export const bulkUpdateDocuments = async <TDocument extends IdentifiedDocument>(
   idRequiredMessage?: string;
   failureVerb?: string;
   retryAttempts?: number;
+  retryBaseDelayMs?: number;
 }): Promise<void> => {
   if (docs.length === 0) {
     return;
@@ -134,6 +148,10 @@ export const bulkUpdateDocuments = async <TDocument extends IdentifiedDocument>(
     pendingDocs = pendingDocs.filter(({ id }) => id && conflictedIds.has(id));
     if (pendingDocs.length === 0) {
       return;
+    }
+
+    if (attempt < retryAttempts) {
+      await delayMs(getBackoffWithJitterMs(retryBaseDelayMs, attempt));
     }
   }
 

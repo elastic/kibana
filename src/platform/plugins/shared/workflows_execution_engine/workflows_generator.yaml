@@ -213,17 +213,26 @@ steps:
                           ctx._source.backing_indexes_fingerprint = params.current_fingerprint;
                           ctx._source.backing_indexes_count = params.backing_indices.size();
                           ctx._source["@timestamp"] = params.timestamp;
+                
+                - name: var
+                  type: data.set
+                  with:
+                    rolloverMetricValue: |
+                      {%- if steps.update_alias_state.output.result == 'updated' -%}
+                      10
+                      {%- else -%}
+                      0
+                      {%- endif -%}
 
                 - name: index_rollover_event
                   type: elasticsearch.request
-                  if: "${{ steps.update_alias_state.output.result == 'updated' }}"
                   with:
                     method: POST
                     path: /{{consts.WORKFLOW_METRICS_COLLECTOR_INDEX}}/_doc
                     body:
                       "@timestamp": "${{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ', 'UTC' }}"
                       metric: '{{foreach.item.group}}.rollover_event'
-                      value: 1
+                      value: ${{variables.rolloverMetricValue}}
                       unit: int
                       tags:
                         - '{{foreach.item.alias_name}}'
