@@ -12,7 +12,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -823,16 +822,15 @@ export const WorkflowYAMLEditor = ({
       />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions */}
-      <EuiText
-        component="div"
+      <div
         css={styles.stepActionsContainer}
         style={positionStyles ?? undefined}
         data-test-subj={`workflowStepActionsContainer-${focusedStepInfo?.stepId}`}
       >
         <StepActions onStepRun={onStepRun} />
-      </EuiText>
+      </div>
       {(isAgentBuilderAvailable || isDevelopment) && !isReadOnlyYaml ? (
-        <EuiText component="div" css={styles.agentBuilderSectionCss}>
+        <div css={styles.agentBuilderSectionCss}>
           <WorkflowYamlEditorAssistActions
             isAgentBuilderAvailable={isAgentBuilderAvailable}
             isDevelopment={isDevelopment}
@@ -842,10 +840,9 @@ export const WorkflowYAMLEditor = ({
             onOpenAgentChat={openAgentChat}
             onDownloadSchema={downloadSchema}
           />
-        </EuiText>
+        </div>
       ) : null}
-      <EuiText
-        component="div"
+      <div
         css={styles.editorContainer}
         className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
       >
@@ -860,8 +857,8 @@ export const WorkflowYAMLEditor = ({
           enableFindAction={true}
           dataTestSubj="workflowYamlEditor"
         />
-      </EuiText>
-      <EuiText component="div" css={styles.validationErrorsContainer}>
+      </div>
+      <div css={styles.validationErrorsContainer}>
         <WorkflowYamlValidationAccordion
           isMounted={isEditorMounted}
           isLoading={isLoadingValidation}
@@ -870,7 +867,7 @@ export const WorkflowYAMLEditor = ({
           onErrorClick={handleErrorClick}
           extraAction={extraActionElement}
         />
-      </EuiText>
+      </div>
     </EuiFlexGroup>
   );
 };

@@ -41,9 +41,6 @@ const TILE_GAP = 16;
 const TILE_FOOTER_PADDING_X = 10;
 const SELECTED_TILE_TINT_ALPHA = 0.04;
 
-const ADDED_BAR_COLOR = '#16c5c0';
-const REMOVED_BAR_COLOR = '#f6726a';
-
 const ILLUSTRATION_BAR_HEIGHT = 8;
 const ILLUSTRATION_BAR_GROUP_HEIGHT = 36;
 const ILLUSTRATION_BAR_TOP = (COMPARE_TILE_ILLUSTRATION_HEIGHT - ILLUSTRATION_BAR_GROUP_HEIGHT) / 2;
@@ -52,11 +49,15 @@ const ILLUSTRATION_BAR_ROW_OFFSETS = [0, 14, 28] as const;
 interface CompareModeIllustrationProps {
   mode: WorkflowChangeHistoryCompareMode;
   borderColor: string;
+  addedColor: string;
+  removedColor: string;
 }
 
 const CompareModeIllustration = ({
   mode,
   borderColor,
+  addedColor,
+  removedColor,
 }: CompareModeIllustrationProps): JSX.Element => {
   const barY = (rowIndex: number): number =>
     ILLUSTRATION_BAR_TOP + ILLUSTRATION_BAR_ROW_OFFSETS[rowIndex];
@@ -76,7 +77,7 @@ const CompareModeIllustration = ({
           width="80"
           height={ILLUSTRATION_BAR_HEIGHT}
           rx="4"
-          fill={ADDED_BAR_COLOR}
+          fill={addedColor}
         />
         <rect
           x="0"
@@ -84,7 +85,7 @@ const CompareModeIllustration = ({
           width="60"
           height={ILLUSTRATION_BAR_HEIGHT}
           rx="4"
-          fill={ADDED_BAR_COLOR}
+          fill={addedColor}
         />
         <rect
           x="0"
@@ -92,7 +93,7 @@ const CompareModeIllustration = ({
           width="80"
           height={ILLUSTRATION_BAR_HEIGHT}
           rx="4"
-          fill={REMOVED_BAR_COLOR}
+          fill={removedColor}
         />
       </svg>
     );
@@ -120,7 +121,7 @@ const CompareModeIllustration = ({
         width="33"
         height={ILLUSTRATION_BAR_HEIGHT}
         rx="4"
-        fill={ADDED_BAR_COLOR}
+        fill={addedColor}
       />
       <rect
         x="53"
@@ -128,7 +129,7 @@ const CompareModeIllustration = ({
         width="32"
         height={ILLUSTRATION_BAR_HEIGHT}
         rx="4"
-        fill={REMOVED_BAR_COLOR}
+        fill={removedColor}
       />
       <rect
         x="0"
@@ -136,7 +137,7 @@ const CompareModeIllustration = ({
         width="33"
         height={ILLUSTRATION_BAR_HEIGHT}
         rx="4"
-        fill={ADDED_BAR_COLOR}
+        fill={addedColor}
       />
       <rect
         x="53"
@@ -144,7 +145,7 @@ const CompareModeIllustration = ({
         width="32"
         height={ILLUSTRATION_BAR_HEIGHT}
         rx="4"
-        fill={REMOVED_BAR_COLOR}
+        fill={removedColor}
       />
       <rect
         x="0"
@@ -152,7 +153,7 @@ const CompareModeIllustration = ({
         width="26"
         height={ILLUSTRATION_BAR_HEIGHT}
         rx="4"
-        fill={ADDED_BAR_COLOR}
+        fill={addedColor}
       />
       <rect
         x="53"
@@ -160,7 +161,7 @@ const CompareModeIllustration = ({
         width="26"
         height={ILLUSTRATION_BAR_HEIGHT}
         rx="4"
-        fill={REMOVED_BAR_COLOR}
+        fill={removedColor}
       />
     </svg>
   );
@@ -302,7 +303,12 @@ export const WorkflowChangeHistoryPreviewSettingsPopover = ({
               />
             ) : null}
             <EuiText component="span" css={styles.compareTileIllustration} aria-hidden={true}>
-              <CompareModeIllustration mode={mode} borderColor={euiTheme.colors.borderBasePlain} />
+              <CompareModeIllustration
+                mode={mode}
+                borderColor={euiTheme.colors.borderBasePlain}
+                addedColor={euiTheme.colors.success}
+                removedColor={euiTheme.colors.danger}
+              />
             </EuiText>
             <EuiText component="span" css={styles.compareTileDivider} aria-hidden={true} />
             <EuiText component="span" css={styles.compareTileFooter}>
