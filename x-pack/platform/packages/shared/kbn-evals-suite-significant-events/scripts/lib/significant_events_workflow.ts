@@ -11,11 +11,12 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { Discovery, Feature, KIsOnboardingStep } from '@kbn/significant-events-schema';
+import type { Discovery, Feature } from '@kbn/significant-events-schema';
+import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import {
-  STREAMS_SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-  STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  STREAMS_SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
@@ -108,15 +109,15 @@ export async function configureModelSelectionSettings(
     {
       features: [
         {
-          feature_id: STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+          feature_id: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
           endpoints: [{ id: connectorId }],
         },
         {
-          feature_id: STREAMS_SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+          feature_id: SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
           endpoints: [{ id: connectorId }],
         },
         {
-          feature_id: STREAMS_SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+          feature_id: SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
           endpoints: [{ id: connectorId }],
         },
       ],
