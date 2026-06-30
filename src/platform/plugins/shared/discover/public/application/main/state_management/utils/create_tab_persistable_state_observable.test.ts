@@ -89,7 +89,9 @@ describe('createTabPersistableStateObservable', () => {
       getState: internalState.getState,
     });
 
-    const emittedValues: Array<Pick<TabState, 'appState' | 'globalState' | 'attributes'>> = [];
+    const emittedValues: Array<
+      Pick<TabState, 'appState' | 'globalState' | 'attributes' | 'profileState'>
+    > = [];
     const subscription = observable$.subscribe((value) => {
       emittedValues.push(value);
     });
@@ -109,7 +111,9 @@ describe('createTabPersistableStateObservable', () => {
       getState: internalState.getState,
     });
 
-    const emittedValues: Array<Pick<TabState, 'appState' | 'globalState' | 'attributes'>> = [];
+    const emittedValues: Array<
+      Pick<TabState, 'appState' | 'globalState' | 'attributes' | 'profileState'>
+    > = [];
     const subscription = observable$.subscribe((value) => {
       emittedValues.push(value);
     });
@@ -137,7 +141,9 @@ describe('createTabPersistableStateObservable', () => {
       getState: internalState.getState,
     });
 
-    const emittedValues: Array<Pick<TabState, 'appState' | 'globalState' | 'attributes'>> = [];
+    const emittedValues: Array<
+      Pick<TabState, 'appState' | 'globalState' | 'attributes' | 'profileState'>
+    > = [];
     const subscription = observable$.subscribe((value) => {
       emittedValues.push(value);
     });
@@ -167,7 +173,9 @@ describe('createTabPersistableStateObservable', () => {
       getState: internalState.getState,
     });
 
-    const emittedValues: Array<Pick<TabState, 'appState' | 'globalState' | 'attributes'>> = [];
+    const emittedValues: Array<
+      Pick<TabState, 'appState' | 'globalState' | 'attributes' | 'profileState'>
+    > = [];
     const subscription = observable$.subscribe((value) => {
       emittedValues.push(value);
     });
@@ -186,6 +194,38 @@ describe('createTabPersistableStateObservable', () => {
     subscription.unsubscribe();
   });
 
+  it('should emit when profile state changes', async () => {
+    const { internalState, internalState$, tabId } = await setup();
+
+    const observable$ = createTabPersistableStateObservable({
+      tabId,
+      internalState$,
+      getState: internalState.getState,
+    });
+
+    const emittedValues: Array<
+      Pick<TabState, 'appState' | 'globalState' | 'attributes' | 'profileState'>
+    > = [];
+    const subscription = observable$.subscribe((value) => {
+      emittedValues.push(value);
+    });
+
+    internalState.dispatch(
+      internalStateActions.setProfileState({
+        tabId,
+        key: 'testProfileState',
+        profileState: { color: 'primary' },
+      })
+    );
+
+    expect(emittedValues).toHaveLength(1);
+    expect(emittedValues[0].profileState).toEqual({
+      testProfileState: { color: 'primary' },
+    });
+
+    subscription.unsubscribe();
+  });
+
   it('should not emit when state has not changed (distinctUntilChanged)', async () => {
     const { internalState, internalState$, tabId } = await setup();
 
@@ -195,7 +235,9 @@ describe('createTabPersistableStateObservable', () => {
       getState: internalState.getState,
     });
 
-    const emittedValues: Array<Pick<TabState, 'appState' | 'globalState' | 'attributes'>> = [];
+    const emittedValues: Array<
+      Pick<TabState, 'appState' | 'globalState' | 'attributes' | 'profileState'>
+    > = [];
     const subscription = observable$.subscribe((value) => {
       emittedValues.push(value);
     });
@@ -216,7 +258,7 @@ describe('createTabPersistableStateObservable', () => {
     subscription.unsubscribe();
   });
 
-  it('should emit only the picked properties (appState, globalState, attributes)', async () => {
+  it('should emit only the picked persistable properties', async () => {
     const { internalState, internalState$, tabId } = await setup();
 
     const observable$ = createTabPersistableStateObservable({
@@ -225,7 +267,9 @@ describe('createTabPersistableStateObservable', () => {
       getState: internalState.getState,
     });
 
-    const emittedValues: Array<Pick<TabState, 'appState' | 'globalState' | 'attributes'>> = [];
+    const emittedValues: Array<
+      Pick<TabState, 'appState' | 'globalState' | 'attributes' | 'profileState'>
+    > = [];
     const subscription = observable$.subscribe((value) => {
       emittedValues.push(value);
     });
@@ -244,6 +288,7 @@ describe('createTabPersistableStateObservable', () => {
     expect(emittedState).toHaveProperty('appState');
     expect(emittedState).toHaveProperty('globalState');
     expect(emittedState).toHaveProperty('attributes');
+    expect(emittedState).toHaveProperty('profileState');
 
     // Should not have other TabState properties
     expect(emittedState).not.toHaveProperty('id');
@@ -262,7 +307,9 @@ describe('createTabPersistableStateObservable', () => {
       getState: internalState.getState,
     });
 
-    const emittedValues: Array<Pick<TabState, 'appState' | 'globalState' | 'attributes'>> = [];
+    const emittedValues: Array<
+      Pick<TabState, 'appState' | 'globalState' | 'attributes' | 'profileState'>
+    > = [];
     const subscription = observable$.subscribe((value) => {
       emittedValues.push(value);
     });

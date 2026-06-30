@@ -28,6 +28,11 @@ import * as resolveDataViewModule from '../../utils/resolve_data_view';
 
 const { initializeAndSync, stopSyncing } = tabSyncApi;
 
+type PersistableTabState = Pick<
+  TabState,
+  'appState' | 'globalState' | 'attributes' | 'profileState'
+>;
+
 const setup = async () => {
   const services = createDiscoverServicesMock();
   const toolkit = getDiscoverInternalStateMock({
@@ -220,9 +225,7 @@ describe('tab_sync actions', () => {
     });
 
     it('should subscribe to createTabPersistableStateObservable for syncing locally persisted tab state', async () => {
-      const mockTabState$ = new Subject<
-        Pick<TabState, 'appState' | 'globalState' | 'attributes'>
-      >();
+      const mockTabState$: Subject<PersistableTabState> = new Subject();
       const createTabPersistableStateObservableSpy = jest
         .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
         .mockReturnValue(mockTabState$);
@@ -244,9 +247,7 @@ describe('tab_sync actions', () => {
     });
 
     it('should dispatch syncLocallyPersistedTabState when tabState observable emits', async () => {
-      const mockTabState$ = new Subject<
-        Pick<TabState, 'appState' | 'globalState' | 'attributes'>
-      >();
+      const mockTabState$: Subject<PersistableTabState> = new Subject();
       jest
         .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
         .mockReturnValue(mockTabState$);
@@ -264,8 +265,8 @@ describe('tab_sync actions', () => {
       // Clear any calls that happened during initialization
       syncLocallyPersistedTabStateSpy.mockClear();
 
-      const { appState, globalState, attributes } = getCurrentTab();
-      const nextState = { appState, globalState, attributes };
+      const { appState, globalState, attributes, profileState } = getCurrentTab();
+      const nextState = { appState, globalState, attributes, profileState };
 
       // Emit a state change
       mockTabState$.next(nextState);
@@ -275,9 +276,7 @@ describe('tab_sync actions', () => {
     });
 
     it('should unsubscribe from tabStateSubscription when stopSyncing is called', async () => {
-      const mockTabState$ = new Subject<
-        Pick<TabState, 'appState' | 'globalState' | 'attributes'>
-      >();
+      const mockTabState$: Subject<PersistableTabState> = new Subject();
       jest
         .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
         .mockReturnValue(mockTabState$);

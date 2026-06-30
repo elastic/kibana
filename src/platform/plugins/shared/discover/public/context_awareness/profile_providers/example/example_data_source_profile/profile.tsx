@@ -9,7 +9,11 @@
 
 import { EuiBadge, EuiFlyout, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { RowControlColumn } from '@kbn/discover-utils';
+import type {
+  RowControlColumn,
+  RowControlComponent,
+  RowControlRowProps,
+} from '@kbn/discover-utils';
 import { AppMenuActionId, getFieldValue } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,7 +26,11 @@ import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import { ChartWithCustomButtons, CustomDocViewerFooter, CustomDocViewerHeader } from './components';
 import { CustomDocView } from './components/custom_doc_view';
 import { RestorableStateDocView } from './components/restorable_state_doc_view';
-import { EXAMPLE_PROFILE_STATE_DEF } from '../profile_state';
+import {
+  EXAMPLE_PROFILE_STATE_DEFAULTS,
+  EXAMPLE_PROFILE_STATE_DEF,
+  type ExampleProfileState,
+} from '../profile_state';
 
 const timestampColorOptions = [
   {
@@ -80,6 +88,52 @@ const timestampColorOptions = [
     ),
   },
 ];
+
+const rowControlColorOptions: Array<{
+  value: ExampleProfileState['rowControlColor'];
+  text: string;
+}> = [
+  {
+    value: 'text',
+    text: i18n.translate('discover.exampleProfile.rowControlColorTextDropDownOptionLabel', {
+      defaultMessage: 'Text',
+    }),
+  },
+  {
+    value: 'primary',
+    text: i18n.translate('discover.exampleProfile.rowControlColorPrimaryDropDownOptionLabel', {
+      defaultMessage: 'Primary',
+    }),
+  },
+  {
+    value: 'accent',
+    text: i18n.translate('discover.exampleProfile.rowControlColorAccentDropDownOptionLabel', {
+      defaultMessage: 'Accent',
+    }),
+  },
+  {
+    value: 'success',
+    text: i18n.translate('discover.exampleProfile.rowControlColorSuccessDropDownOptionLabel', {
+      defaultMessage: 'Success',
+    }),
+  },
+  {
+    value: 'warning',
+    text: i18n.translate('discover.exampleProfile.rowControlColorWarningDropDownOptionLabel', {
+      defaultMessage: 'Warning',
+    }),
+  },
+  {
+    value: 'danger',
+    text: i18n.translate('discover.exampleProfile.rowControlColorDangerDropDownOptionLabel', {
+      defaultMessage: 'Danger',
+    }),
+  },
+];
+
+const getRowControlColor = (value: string) =>
+  rowControlColorOptions.find((option) => option.value === value)?.value ??
+  EXAMPLE_PROFILE_STATE_DEFAULTS.rowControlColor;
 
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
@@ -157,6 +211,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
             function ProfileStateExample() {
               const profileState = useObservable(profileState$, stateAdapter.getState());
               const timestampColor = profileState.timestampColor;
+              const rowControlColor = profileState.rowControlColor;
 
               return (
                 <>
@@ -181,6 +236,31 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
                       value={timestampColor}
                       onChange={(event) => {
                         stateAdapter.updateState({ timestampColor: event.target.value });
+                      }}
+                    />
+                  </EuiFormRow>
+                  <EuiFormRow
+                    label={
+                      <FormattedMessage
+                        id="discover.exampleProfile.rowControlColorLabel"
+                        defaultMessage="Row control color"
+                      />
+                    }
+                  >
+                    <EuiSelect
+                      data-test-subj="exampleProfileStateRowControlColorSelect"
+                      aria-label={i18n.translate(
+                        'discover.exampleProfile.rowControlColorAriaLabel',
+                        {
+                          defaultMessage: 'Select row control color',
+                        }
+                      )}
+                      options={rowControlColorOptions}
+                      value={rowControlColor}
+                      onChange={(event) => {
+                        stateAdapter.updateState({
+                          rowControlColor: getRowControlColor(event.target.value),
+                        });
                       }}
                     />
                   </EuiFormRow>
@@ -291,31 +371,50 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
         },
       };
     },
-    getRowAdditionalLeadingControls: (prev) => (params) => {
-      const additionalControls = prev(params) || [];
+    getRowAdditionalLeadingControls:
+      (prev, { toolkit }) =>
+      (params) => {
+        const stateAdapter = toolkit.getStateAdapter(EXAMPLE_PROFILE_STATE_DEF);
+        const profileState$ = stateAdapter.getState$();
+        const additionalControls = prev(params) || [];
 
-      return [
-        ...additionalControls,
-        ...['chartBarVerticalStack', 'heart', 'inspect'].map(
-          (iconType): RowControlColumn => ({
-            id: `exampleControl_${iconType}`,
-            render: (Control, rowProps) => {
-              return (
-                <Control
-                  data-test-subj={`exampleLogsControl_${iconType}`}
-                  label={`Example ${iconType}`}
-                  tooltipContent={`Example ${iconType}`}
-                  iconType={iconType}
-                  onClick={() => {
-                    alert(`Example "${iconType}" control clicked. Row index: ${rowProps.rowIndex}`);
-                  }}
-                />
-              );
-            },
-          })
-        ),
-      ];
-    },
+        function ExampleRowControl({
+          Control,
+          iconType,
+          rowProps,
+        }: {
+          Control: RowControlComponent;
+          iconType: string;
+          rowProps: RowControlRowProps;
+        }) {
+          const profileState = useObservable(profileState$, stateAdapter.getState());
+
+          return (
+            <Control
+              data-test-subj={`exampleLogsControl_${iconType}`}
+              label={`Example ${iconType}`}
+              tooltipContent={`Example ${iconType}`}
+              iconType={iconType}
+              color={profileState.rowControlColor}
+              onClick={() => {
+                alert(`Example "${iconType}" control clicked. Row index: ${rowProps.rowIndex}`);
+              }}
+            />
+          );
+        }
+
+        return [
+          ...additionalControls,
+          ...['chartBarVerticalStack', 'heart', 'inspect'].map(
+            (iconType): RowControlColumn => ({
+              id: `exampleControl_${iconType}`,
+              render: (Control, rowProps) => (
+                <ExampleRowControl Control={Control} iconType={iconType} rowProps={rowProps} />
+              ),
+            })
+          ),
+        ];
+      },
     getDefaultAppState: () => () => ({
       breakdownField: 'log.level',
       columns: [

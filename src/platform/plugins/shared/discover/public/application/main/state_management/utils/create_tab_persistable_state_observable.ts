@@ -20,14 +20,18 @@ export const createTabPersistableStateObservable = ({
   tabId: string;
   internalState$: Observable<DiscoverInternalState>;
   getState: () => DiscoverInternalState;
-}): Observable<Pick<TabState, 'appState' | 'globalState' | 'attributes'>> => {
-  const getTabState = (): Pick<TabState, 'appState' | 'globalState' | 'attributes'> => {
+}): Observable<Pick<TabState, 'appState' | 'globalState' | 'attributes' | 'profileState'>> => {
+  const getTabState = (): Pick<
+    TabState,
+    'appState' | 'globalState' | 'attributes' | 'profileState'
+  > => {
     const tabState = selectTab(getState(), tabId);
 
     return {
       appState: tabState.appState,
       globalState: tabState.globalState,
       attributes: tabState.attributes,
+      profileState: tabState.profileState,
     };
   };
 
@@ -37,7 +41,8 @@ export const createTabPersistableStateObservable = ({
       (a, b) =>
         isEqualState(a.appState, b.appState) &&
         isEqualState(a.globalState, b.globalState) &&
-        isEqual(a.attributes, b.attributes)
+        isEqual(a.attributes, b.attributes) &&
+        isEqual(a.profileState, b.profileState)
     ),
     skip(1)
   );
