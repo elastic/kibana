@@ -106,6 +106,32 @@ describe('update_stream tool', () => {
       expect(data.result).toBe('created');
     });
 
+    it('creates a query stream with a description when both are provided', async () => {
+      const { tool, context, streamsClient } = setup();
+
+      streamsClient.getStream.mockRejectedValue(new DefinitionNotFoundError('not found'));
+
+      const result = await tool.handler(
+        {
+          name: 'logs.ecs.errors',
+          changes: {
+            query: { esql: 'FROM logs.ecs | WHERE log.level == "error"' },
+            description: 'Error-level logs from the ECS stream',
+          },
+        },
+        context
+      );
+
+      expect(streamsClient.createQueryStream).toHaveBeenCalledWith({
+        name: 'logs.ecs.errors',
+        query: { view: '$.logs.ecs.errors', esql: 'FROM logs.ecs | WHERE log.level == "error"' },
+        description: 'Error-level logs from the ECS stream',
+      });
+
+      const data = getData(result).data as Record<string, unknown>;
+      expect(data.applied_changes).toEqual(['query', 'description']);
+    });
+
     it('updates the ES|QL of an existing query stream', async () => {
       const { tool, context, streamsClient } = setup();
 
@@ -133,6 +159,33 @@ describe('update_stream tool', () => {
       const data = getData(result).data as Record<string, unknown>;
       expect(data.result).toBe('updated');
       expect(data.applied_changes).toEqual(['query']);
+    });
+
+    it('updates the description of an existing query stream alongside its ES|QL', async () => {
+      const { tool, context, streamsClient } = setup();
+
+      streamsClient.getStream.mockResolvedValue(queryStreamDef('logs.ecs.errors'));
+      streamsClient.upsertStream.mockResolvedValue({ acknowledged: true, result: 'updated' });
+
+      await tool.handler(
+        {
+          name: 'logs.ecs.errors',
+          changes: {
+            query: { esql: 'FROM logs.ecs | WHERE log.level == "warn"' },
+            description: 'Warn-level logs',
+          },
+        },
+        context
+      );
+
+      expect(streamsClient.upsertStream).toHaveBeenCalledWith({
+        name: 'logs.ecs.errors',
+        request: expect.objectContaining({
+          stream: expect.objectContaining({
+            description: 'Warn-level logs',
+          }),
+        }),
+      });
     });
 
     it('returns an error when query streams are not enabled', async () => {

@@ -28,12 +28,14 @@ export async function upsertQueryStream({
   name,
   esql,
   fieldDescriptions,
+  description,
 }: {
   streamsClient: StreamsClient;
   attachmentClient: AttachmentClient;
   name: string;
   esql: string;
   fieldDescriptions?: Record<string, string>;
+  description?: string;
 }): Promise<UpsertStreamResponse> {
   // Generate the view name from the stream name. The query reference carries the esql so the
   // state management layer can create/update and validate the view.
@@ -58,6 +60,7 @@ export async function upsertQueryStream({
         name,
         query: queryReference,
         field_descriptions: fieldDescriptions,
+        ...(description !== undefined && { description }),
       });
     }
     throw error;
@@ -83,6 +86,7 @@ export async function upsertQueryStream({
       ...stream,
       query: queryReference,
       ...(mergedFieldDescriptions && { field_descriptions: mergedFieldDescriptions }),
+      ...(description !== undefined && { description }),
     },
     rules,
   };

@@ -116,7 +116,7 @@ const updateStreamSchema = z.object({
       query: queryStreamSchema
         .optional()
         .describe(
-          'Create or update a query stream (a read-only ES|QL view). If the named stream does not exist it is created as a query stream; if it already exists as a query stream its ES|QL is updated. Mutually exclusive with processing, lifecycle, fields, and failure_store — query streams have no ingest configuration.'
+          'Create or update a query stream (a read-only ES|QL view). If the named stream does not exist it is created as a query stream; if it already exists as a query stream its ES|QL is updated. Mutually exclusive with processing, lifecycle, fields, and failure_store — query streams have no ingest configuration. May be combined with changes.description.'
         ),
     })
     .describe(
@@ -167,7 +167,7 @@ export const createUpdateStreamTool = ({
 
     **Query streams:** Set changes.query = {esql, field_descriptions?} to create or update a query stream (a read-only ES|QL view).
     - If the named stream does not exist, it is created as a query stream. If it already exists as a query stream, its ES|QL is updated.
-    - changes.query is mutually exclusive with processing, lifecycle, fields, and failure_store — query streams have no ingest configuration.
+    - changes.query is mutually exclusive with processing, lifecycle, fields, and failure_store — query streams have no ingest configuration. It may be combined with changes.description.
     - For a child query stream, the esql FROM clause must reference the parent stream (or its ES|QL view). Use ${INSPECT_STREAMS} on the parent first if unsure of the source.
   `),
   tags: ['streams'],
@@ -377,7 +377,6 @@ const handleQueryStreamChange = async ({
     otherChanges.lifecycle && 'lifecycle',
     otherChanges.fields && 'fields',
     otherChanges.failure_store && 'failure_store',
-    otherChanges.description !== undefined && 'description',
   ].filter((key): key is string => Boolean(key));
 
   if (conflictingKeys.length > 0) {
@@ -419,11 +418,22 @@ const handleQueryStreamChange = async ({
   }
 
   const { esql, field_descriptions: fieldDescriptions } = query;
+  const description = otherChanges.description;
 
   const upsertResult = await writeQueue.enqueue(
-    () => upsertQueryStream({ streamsClient, attachmentClient, name, esql, fieldDescriptions }),
+    () =>
+      upsertQueryStream({
+        streamsClient,
+        attachmentClient,
+        name,
+        esql,
+        fieldDescriptions,
+        description,
+      }),
     signal
   );
+
+  const appliedChanges = ['query', ...(description !== undefined ? ['description'] : [])];
 
   return {
     results: [
@@ -433,7 +443,7 @@ const handleQueryStreamChange = async ({
           success: true,
           stream: name,
           stream_type: 'query',
-          applied_changes: ['query'],
+          applied_changes: appliedChanges,
           applied_at: new Date().toISOString(),
           result: upsertResult.result,
           note:
