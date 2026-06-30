@@ -248,7 +248,13 @@ async function listAllPages(
   return body.entries ?? [];
 }
 
-export async function seedMemory({ kibanaUrl, username, password, version, log }: SeedMemoryOptions) {
+export async function seedMemory({
+  kibanaUrl,
+  username,
+  password,
+  version,
+  log,
+}: SeedMemoryOptions) {
   const authHeader = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
   const pages = getOtelDemoMemoryPages(version);
   const ownedNames = new Set(pages.map((p) => p.name));
