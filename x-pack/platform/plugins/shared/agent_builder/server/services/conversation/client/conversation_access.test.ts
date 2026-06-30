@@ -125,6 +125,49 @@ describe('conversation_access', () => {
       });
     });
 
+    it('builds observability investigation template without scheduled hooks', () => {
+      const snapshot = resolveTemplateSnapshotOnCreate({
+        conversation: { template_id: 'observability-investigation-v1' },
+        creationDate: new Date('2024-06-01T12:00:00.000Z'),
+      });
+
+      expect(snapshot).toEqual({
+        template_id: 'observability-investigation-v1',
+        profile: 'investigation',
+        captured_at: '2024-06-01T12:00:00.000Z',
+        chat_mode: 'collaborative',
+        write_privileges: ['write_observability_investigation'],
+      });
+    });
+
+    it('builds observability incident template with current state timeline output', () => {
+      const snapshot = resolveTemplateSnapshotOnCreate({
+        conversation: { template_id: 'observability-incident-v1' },
+        creationDate: new Date('2024-06-01T12:00:00.000Z'),
+      });
+
+      expect(snapshot).toEqual(
+        expect.objectContaining({
+          template_id: 'observability-incident-v1',
+          profile: 'incident',
+          captured_at: '2024-06-01T12:00:00.000Z',
+          chat_mode: 'collaborative',
+          write_privileges: ['write_observability_incident'],
+        })
+      );
+      expect(snapshot?.workflow_hooks).toEqual([
+        expect.objectContaining({
+          id: 'observability-incident-current-state',
+          trigger: 'schedule',
+          interval: '5m',
+          workflow_name: 'Observability incident current state refresh',
+        }),
+      ]);
+      expect(snapshot?.workflow_hooks?.[0].inline_workflow_yaml).toContain('type: data.set');
+      expect(snapshot?.workflow_hooks?.[0].inline_workflow_yaml).toContain('timeline:');
+      expect(snapshot?.workflow_hooks?.[0].inline_workflow_yaml).toContain('source: incident');
+    });
+
     it('returns undefined for unknown template_id', () => {
       expect(
         resolveTemplateSnapshotOnCreate({

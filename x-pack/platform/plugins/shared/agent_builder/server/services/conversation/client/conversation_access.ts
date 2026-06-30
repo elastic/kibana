@@ -28,13 +28,23 @@ triggers:
           type: string
         current_state:
           type: string
+        now:
+          type: string
         custom_fields:
           type: object
 steps:
   - name: current_state
-    type: console
+    type: data.set
     with:
-      message: "{{ inputs.current_state }}"
+      current_state: "{{ inputs.current_state }}"
+      timeline:
+        - at: "{{ inputs.now }}"
+          actor: observability current state refresh
+          source: incident
+          summary: "{{ inputs.current_state }}"
+          metadata:
+            conversation_id: "{{ inputs.conversation_id }}"
+            title: "{{ inputs.title }}"
 `;
 
 /**
