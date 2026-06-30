@@ -39,8 +39,21 @@ export type ServiceNowExecutorResultData =
   | GetCommonFieldsResponse
   | GetChoicesResponse;
 
+export type ServiceNowEndpoint = 'table' | 'import_set' | 'oauth' | 'jwt' | 'event' | 'other';
+
 export interface CreateCommentRequest {
   [key: string]: string;
+}
+
+export interface RequestContext {
+  endpoint: ServiceNowEndpoint;
+  method?: 'get' | 'post' | 'patch';
+}
+
+export interface ServiceNowApiError extends Error {
+  readonly __serviceNowApi: true;
+  readonly status: number;
+  readonly body?: unknown;
 }
 
 export type ExecutorParams =
