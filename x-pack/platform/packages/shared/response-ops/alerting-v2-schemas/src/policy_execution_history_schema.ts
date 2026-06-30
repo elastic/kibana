@@ -60,16 +60,25 @@ const namedRefSchema = z.object({
   name: z.string().nullable().optional(),
 });
 
-// Defensive upper bound to keep response payloads sane.
+// Defensive upper bounds to keep response payloads sane.
 const MAX_WORKFLOWS_PER_ITEM = 100;
+// Cap rule lookups per page to keep the KQL filter and SO `find` bounded —
+// a single broad Action Policy can emit one event referencing thousands of rules.
+// Rule IDs over this cap render as the raw ID in the UI.
+export const MAX_RULES_PER_ITEM = 1000;
 
 export const policyExecutionHistoryItemSchema = z.object({
   '@timestamp': z.string(),
   policy: namedRefSchema,
-  rule: namedRefSchema,
   outcome: policyExecutionOutcomeSchema,
   episode_count: z.number(),
   action_group_count: z.number(),
+  rules: z
+    .array(namedRefSchema)
+    .max(MAX_RULES_PER_ITEM)
+    .describe(
+      'Rules referenced by this event. When a search resolves to specific rule IDs, this array is filtered to that subset server-side.'
+    ),
   workflows: z.array(namedRefSchema).max(MAX_WORKFLOWS_PER_ITEM),
 });
 export type PolicyExecutionHistoryItem = z.infer<typeof policyExecutionHistoryItemSchema>;

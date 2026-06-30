@@ -18,6 +18,7 @@ import {
   type PolicyExecutionOutcome,
   type PolicyExecutionOutcomeFilter,
   type SearchMatchCounts,
+  MAX_RULES_PER_ITEM,
 } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyClient } from '../action_policy_client';
 import { RulesClient } from '../rules_client';
@@ -36,11 +37,6 @@ import { collectIdsFromEvents, denormalizeEvent, type NameMaps } from './denorma
 const TIME_WINDOW_HOURS = 24;
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = POLICY_EXECUTION_HISTORY_MAX_PER_PAGE;
-
-// Cap rule lookups per page to keep the KQL filter and SO `find` bounded —
-// a single broad Action Policy can emit one event referencing thousands of rules.
-// Rule IDs over this cap render as the raw ID in the UI.
-const MAX_RULES_PER_LOOKUP = 1000;
 
 const SEARCH_ID_CAP = 500;
 const DEFAULT_OUTCOME_FILTER: PolicyExecutionOutcomeFilter = 'all';
@@ -219,11 +215,11 @@ export class ActionPolicyExecutionHistoryClient {
   private async lookupRulesByIds(ruleIds: string[]): Promise<RuleResponse[]> {
     if (ruleIds.length === 0) return [];
 
-    const cappedRuleIds = ruleIds.slice(0, MAX_RULES_PER_LOOKUP);
+    const cappedRuleIds = ruleIds.slice(0, MAX_RULES_PER_ITEM);
 
     const response = await this.rulesClient.findRules({
       filter: this.buildRuleIdsFilter(cappedRuleIds),
-      perPage: MAX_RULES_PER_LOOKUP,
+      perPage: MAX_RULES_PER_ITEM,
     });
 
     return response.items;
