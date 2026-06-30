@@ -8,13 +8,15 @@
 // rotations, notification preferences). Those live in a private overlay repo
 // and are joined to this registry by team "id".
 //
-// Each entry: { id, name, area?, description?, github: { team?, label? }, responsibilities? }
-// "area" must be one of @kbn/code-owners CODE_OWNER_AREAS.
+// Each entry: { id, name, areas?, description?, github: { team?, label? }, responsibilities? }
+// "areas" entries must each be one of @kbn/code-owners CODE_OWNER_AREAS.
 [
   {
     "id": "actionable-obs",
     "name": "Obs UX: Actionable Obs",
-    "area": "observability",
+    "areas": [
+      "observability"
+    ],
     "github": {
       "team": "elastic/actionable-obs-team",
       "label": "Team:actionable-obs"
@@ -40,7 +42,9 @@
   {
     "id": "ai-infra",
     "name": "AI Infrastructure",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/appex-ai-infra",
       "label": "Team:AI Infra"
@@ -52,7 +56,9 @@
   {
     "id": "qa",
     "name": "QA",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/appex-qa",
       "label": "Team:QA"
@@ -66,7 +72,9 @@
   {
     "id": "shared-ux",
     "name": "Appex SharedUX",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/appex-sharedux",
       "label": "Team:SharedUX"
@@ -99,7 +107,9 @@
   {
     "id": "contextual-security-apps",
     "name": "Contextual Security Apps",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/contextual-security-apps",
       "label": "Team:Cloud Security"
@@ -108,7 +118,9 @@
   {
     "id": "security-core-analysis",
     "name": "Core Analysis",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/core-analysis",
       "label": "Team:Core Analysis"
@@ -117,7 +129,9 @@
   {
     "id": "docs",
     "name": "Docs",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/docs"
     }
@@ -132,7 +146,9 @@
   {
     "id": "eui-team",
     "name": "Eui Team",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/eui-team",
       "label": "EUI"
@@ -149,7 +165,9 @@
   {
     "id": "fleet",
     "name": "Fleet",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/fleet",
       "label": "Team:Fleet"
@@ -158,7 +176,9 @@
   {
     "id": "integration-experience",
     "name": "Security Integrations Integration Experience",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/integration-experience",
       "label": "Team:Integration-Experience"
@@ -167,7 +187,9 @@
   {
     "id": "jinastic",
     "name": "Jinastic",
-    "area": "search",
+    "areas": [
+      "search"
+    ],
     "github": {
       "team": "elastic/jinastic"
     }
@@ -183,7 +205,9 @@
   {
     "id": "cases",
     "name": "Cases",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/kibana-cases",
       "label": "Team:Cases"
@@ -196,7 +220,9 @@
   {
     "id": "kibana-cloud-security-posture",
     "name": "Contextual Security Apps Team",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/kibana-cloud-security-posture",
       "label": "Team:Cloud Security"
@@ -205,7 +231,9 @@
   {
     "id": "core",
     "name": "Core",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/kibana-core",
       "label": "Team:Core"
@@ -232,7 +260,9 @@
   {
     "id": "discovery",
     "name": "Data Discovery",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/kibana-data-discovery",
       "label": "Team:DataDiscovery"
@@ -245,7 +275,9 @@
   {
     "id": "design",
     "name": "Design",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "description": "UI/UX design for Kibana Analytics and Stack Management (incl. Platform) areas of Kibana",
     "github": {
       "team": "elastic/kibana-design",
@@ -255,7 +287,9 @@
   {
     "id": "kibana-esql",
     "name": "Kibana ES|QL Team",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/kibana-esql",
       "label": "Team:ESQL"
@@ -264,7 +298,9 @@
   {
     "id": "localization",
     "name": "Localization",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/kibana-localization",
       "label": "Project:i18n"
@@ -276,7 +312,9 @@
   {
     "id": "management",
     "name": "Kibana Management",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/kibana-management",
       "label": "Team:Kibana Management"
@@ -292,7 +330,9 @@
   {
     "id": "operations",
     "name": "Operations",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/kibana-operations",
       "label": "Team:Operations"
@@ -311,7 +351,9 @@
   {
     "id": "kibana-performance-testing",
     "name": "Kibana Performance Testing",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/kibana-performance-testing"
     }
@@ -319,7 +361,9 @@
   {
     "id": "presentation",
     "name": "Presentation",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/kibana-presentation",
       "label": "Team:Presentation"
@@ -333,7 +377,9 @@
   {
     "id": "reporting-services",
     "name": "Reporting Services",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/kibana-reporting-services",
       "label": "Team:Reporting Services"
@@ -345,7 +391,9 @@
   {
     "id": "security",
     "name": "Security",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/kibana-security",
       "label": "Team:Security"
@@ -362,7 +410,9 @@
   {
     "id": "kibana-tech-leads",
     "name": "Kibana Tech Leads",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/kibana-tech-leads"
     }
@@ -386,7 +436,9 @@
   {
     "id": "visualizations",
     "name": "AnalystXP Visualization Team",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/kibana-visualizations",
       "label": "Team:Visualizations"
@@ -406,7 +458,9 @@
   {
     "id": "logstash",
     "name": "Logstash",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/logstash",
       "label": "Team:Logstash"
@@ -415,7 +469,9 @@
   {
     "id": "machine-learning",
     "name": "Machine Learning",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/ml-ui",
       "label": ":ml"
@@ -427,7 +483,9 @@
   {
     "id": "obs-ai",
     "name": "Observability AI",
-    "area": "observability",
+    "areas": [
+      "observability"
+    ],
     "github": {
       "team": "elastic/obs-ai-team",
       "label": "Team:obs-ai"
@@ -443,7 +501,9 @@
   {
     "id": "obs-cloudnative-monitoring",
     "name": "Obs Cloudnative Monitoring",
-    "area": "observability",
+    "areas": [
+      "observability"
+    ],
     "github": {
       "team": "elastic/obs-cloudnative-monitoring"
     }
@@ -451,7 +511,9 @@
   {
     "id": "obs-docs",
     "name": "Obs Docs",
-    "area": "observability",
+    "areas": [
+      "observability"
+    ],
     "github": {
       "team": "elastic/obs-docs"
     }
@@ -467,7 +529,9 @@
   {
     "id": "obs-exploration-team",
     "name": "Obs UX: Obs Exploration",
-    "area": "observability",
+    "areas": [
+      "observability"
+    ],
     "github": {
       "team": "elastic/obs-exploration-team",
       "label": "Team:obs-exploration"
@@ -482,7 +546,9 @@
   {
     "id": "obs-knowledge-team",
     "name": "Obs Knowledge Team",
-    "area": "observability",
+    "areas": [
+      "observability"
+    ],
     "github": {
       "team": "elastic/obs-knowledge-team"
     }
@@ -490,7 +556,9 @@
   {
     "id": "obs-onboarding",
     "name": "Obs UX: Obs Onboarding",
-    "area": "observability",
+    "areas": [
+      "observability"
+    ],
     "github": {
       "team": "elastic/obs-onboarding-team",
       "label": "Team:obs-onboarding"
@@ -503,7 +571,9 @@
   {
     "id": "obs-presentation",
     "name": "Obs UX: Presentation",
-    "area": "observability",
+    "areas": [
+      "observability"
+    ],
     "github": {
       "team": "elastic/obs-presentation-team",
       "label": "Team:obs-presentation"
@@ -519,7 +589,9 @@
   {
     "id": "obs-sig-events-team",
     "name": "Obs Sig Events Team",
-    "area": "observability",
+    "areas": [
+      "observability"
+    ],
     "github": {
       "team": "elastic/obs-sig-events-team"
     }
@@ -527,7 +599,9 @@
   {
     "id": "obs-ux-management-team",
     "name": "Obs Ux Management Team",
-    "area": "observability",
+    "areas": [
+      "observability"
+    ],
     "github": {
       "team": "elastic/obs-ux-management-team",
       "label": "Team:obs-ux-management"
@@ -536,7 +610,9 @@
   {
     "id": "observability-bi",
     "name": "Observability Bi",
-    "area": "observability",
+    "areas": [
+      "observability"
+    ],
     "github": {
       "team": "elastic/observability-bi"
     }
@@ -544,7 +620,9 @@
   {
     "id": "observability-design",
     "name": "Observability Design",
-    "area": "observability",
+    "areas": [
+      "observability"
+    ],
     "github": {
       "team": "elastic/observability-design"
     }
@@ -552,7 +630,9 @@
   {
     "id": "observability-ui",
     "name": "Observability Ui",
-    "area": "observability",
+    "areas": [
+      "observability"
+    ],
     "github": {
       "team": "elastic/observability-ui"
     }
@@ -560,7 +640,9 @@
   {
     "id": "observablt-robots",
     "name": "Observablt Robots",
-    "area": "observability",
+    "areas": [
+      "observability"
+    ],
     "github": {
       "team": "elastic/observablt-robots"
     }
@@ -568,7 +650,9 @@
   {
     "id": "platform-docs",
     "name": "Platform Docs",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/platform-docs"
     }
@@ -576,7 +660,9 @@
   {
     "id": "response-ops",
     "name": "ResponseOps",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/response-ops",
       "label": "Team:ResponseOps"
@@ -593,7 +679,9 @@
   {
     "id": "rna-project-team",
     "name": "Rules and Alerts Project Team",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "description": "Rules and Alerts Project Team",
     "github": {
       "team": "elastic/rna-project-team",
@@ -606,7 +694,9 @@
   {
     "id": "search-design",
     "name": "Search Design",
-    "area": "search",
+    "areas": [
+      "search"
+    ],
     "github": {
       "team": "elastic/search-design"
     }
@@ -621,7 +711,11 @@
   {
     "id": "search-kibana",
     "name": "Search Solution",
-    "area": "search",
+    "areas": [
+      "search",
+      "workplaceai",
+      "vectordb"
+    ],
     "description": "Enterprise Search & Search Solution",
     "github": {
       "team": "elastic/search-kibana",
@@ -631,7 +725,9 @@
   {
     "id": "security-data-analytics",
     "name": "Security Data Analytics",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/security-data-analytics",
       "label": "Team: SecuritySolution"
@@ -643,7 +739,9 @@
   {
     "id": "security-defend-workflows",
     "name": "Security Defend Workflows",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/security-defend-workflows",
       "label": "Team:Defend Workflows"
@@ -652,7 +750,9 @@
   {
     "id": "security-design",
     "name": "Security Design",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/security-design"
     }
@@ -660,7 +760,9 @@
   {
     "id": "security-detection-engine",
     "name": "Security Detection Engine",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/security-detection-engine",
       "label": "Team:Detection Engine"
@@ -669,7 +771,9 @@
   {
     "id": "security-detection-engineering",
     "name": "Security Detection Engineering",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/security-detection-engineering"
     }
@@ -677,7 +781,9 @@
   {
     "id": "security-detection-platform",
     "name": "Security Detection Platform",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/security-detection-platform"
     }
@@ -685,7 +791,9 @@
   {
     "id": "security-detection-rule-management",
     "name": "Security Detection Rule Management",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/security-detection-rule-management",
       "label": "Team:Detection Rule Management"
@@ -694,7 +802,9 @@
   {
     "id": "security-engineering-productivity",
     "name": "Security Engineering Productivity",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/security-engineering-productivity"
     }
@@ -702,7 +812,9 @@
   {
     "id": "security-entity-analytics",
     "name": "Security Entity Analytics",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/security-entity-analytics",
       "label": "Team:Entity Analytics"
@@ -714,7 +826,9 @@
   {
     "id": "security-genai-research-and-development",
     "name": "Security Genai Research And Development",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/security-genai-research-and-development"
     }
@@ -722,7 +836,9 @@
   {
     "id": "security-generative-ai",
     "name": "Security Generative AI",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/security-generative-ai",
       "label": "Team:Security Generative AI"
@@ -738,7 +854,9 @@
   {
     "id": "security-pds-deployment",
     "name": "Security Pds Deployment",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/security-pds-deployment"
     }
@@ -746,7 +864,9 @@
   {
     "id": "security-service-integrations",
     "name": "Security Service Integrations",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/security-service-integrations"
     }
@@ -754,7 +874,9 @@
   {
     "id": "security-solution",
     "name": "Security Solution",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/security-solution",
       "label": "Team: SecuritySolution"
@@ -763,7 +885,9 @@
   {
     "id": "security-threat-hunting",
     "name": "Security Threat Hunting",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/security-threat-hunting",
       "label": "Team:Threat Hunting"
@@ -772,7 +896,9 @@
   {
     "id": "security-threat-hunting-investigations",
     "name": "Security Threat Hunting Investigations",
-    "area": "security",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/security-threat-hunting-investigations",
       "label": "Team:Threat Hunting:Investigations"
@@ -788,7 +914,9 @@
   {
     "id": "stack-monitoring",
     "name": "Stack Monitoring",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/stack-monitoring",
       "label": "Team:Monitoring"
@@ -797,7 +925,9 @@
   {
     "id": "streams-program",
     "name": "Streams Program",
-    "area": "observability",
+    "areas": [
+      "observability"
+    ],
     "github": {
       "team": "elastic/streams-program-team",
       "label": "Team:streams-program"
@@ -809,7 +939,9 @@
   {
     "id": "workchat-eng",
     "name": "Agent Builder",
-    "area": "workplaceai",
+    "areas": [
+      "workplaceai"
+    ],
     "github": {
       "team": "elastic/workchat-eng",
       "label": "Team:agent-builder"
@@ -818,7 +950,9 @@
   {
     "id": "workflows-eng",
     "name": "One Workflow Engineering",
-    "area": "platform",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/workflows-eng",
       "label": "Team:One Workflow"

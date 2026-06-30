@@ -28,7 +28,7 @@ export type CodeOwnerArea = (typeof CODE_OWNER_AREAS)[number];
 export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } =
   CODE_OWNER_AREAS.reduce((mappings, area) => {
     mappings[area] = getTeams()
-      .filter((team) => team.area === area && team.github.team !== undefined)
+      .filter((team) => team.github.team !== undefined && team.areas?.includes(area))
       .map((team) => team.github.team as string);
     return mappings;
   }, {} as { [area in CodeOwnerArea]: string[] });
@@ -36,9 +36,14 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } =
 /**
  * Find what area a code owner belongs to
  *
+ * A team may belong to several areas; the primary area is the first one in
+ * {@link CODE_OWNER_AREAS} order, preserving the historical lookup behavior.
+ *
  * @param owner Owner to find an area name
  * @returns The code owner area if a match for the given owner is found
  */
 export function findAreaForCodeOwner(owner: string): CodeOwnerArea | undefined {
-  return getTeamByGithubHandle(owner)?.area;
+  const areas = getTeamByGithubHandle(owner)?.areas;
+  if (areas === undefined) return undefined;
+  return CODE_OWNER_AREAS.find((area) => areas.includes(area));
 }

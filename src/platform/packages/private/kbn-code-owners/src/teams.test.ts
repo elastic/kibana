@@ -44,8 +44,8 @@ describe('team registry', () => {
 
     it('only uses known areas', () => {
       for (const team of getTeams()) {
-        if (team.area !== undefined) {
-          expect(CODE_OWNER_AREAS).toContain(team.area);
+        for (const area of team.areas ?? []) {
+          expect(CODE_OWNER_AREAS).toContain(area);
         }
       }
     });

@@ -29,8 +29,12 @@ export interface Team {
   id: string;
   /** Human-readable team name. */
   name: string;
-  /** Kibana solution/area this team belongs to, when applicable. */
-  area?: CodeOwnerArea;
+  /**
+   * Kibana solution/area(s) this team belongs to, when applicable.
+   *
+   * A team can belong to more than one area).
+   */
+  areas?: readonly CodeOwnerArea[];
   /** Optional longer description of the team. */
   description?: string;
   github: {
