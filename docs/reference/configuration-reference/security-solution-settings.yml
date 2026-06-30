@@ -87,7 +87,7 @@ groups:
 
       - setting: xpack.securitySolution.enableExperimental
         description: |
-          Set experimental feature flags to enable functionality that is not yet released. Valid values must be defined in the `allowedExperimentalValues` object in the Security Solution plugin.
+          A list of experimental feature flags to enable.
         datatype: string
         applies_to:
           stack: ga
