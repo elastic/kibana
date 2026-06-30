@@ -379,22 +379,13 @@ export class RulesClient {
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
 
+    // The update path always emits `ruleUpdated` and never distinguishes
+    // enable/disable — lifecycle transitions are owned by the dedicated
+    // enableRule/disableRule endpoints.
     if (Object.keys(parsed).length > 0) {
       this.ruleEventPublisher.emitRuleUpdated(this.request, [
         { id: rule.id, spaceId: this.spaceId },
       ]);
-
-      if (parsed.enabled !== undefined && parsed.enabled !== existingAttrs.enabled) {
-        if (rule.enabled) {
-          this.ruleEventPublisher.emitRuleEnabled(this.request, [
-            { id: rule.id, spaceId: this.spaceId },
-          ]);
-        } else {
-          this.ruleEventPublisher.emitRuleDisabled(this.request, [
-            { id: rule.id, spaceId: this.spaceId },
-          ]);
-        }
-      }
     }
 
     return rule;

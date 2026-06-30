@@ -2494,7 +2494,7 @@ describe('RulesClient', () => {
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
       });
 
-      it('emits ruleUpdated and ruleEnabled for enable-only PATCH', async () => {
+      it('emits only ruleUpdated for an enable-only PATCH (no lifecycle event via the update path)', async () => {
         const client = createClient();
         mockGetExistingRule('rule-id-wf-3', { ...workflowSoAttrs, enabled: false });
 
@@ -2503,13 +2503,11 @@ describe('RulesClient', () => {
         expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
           { id: 'rule-id-wf-3', spaceId: 'space-1' },
         ]);
-        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-3', spaceId: 'space-1' },
-        ]);
+        expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
       });
 
-      it('emits ruleUpdated and ruleDisabled for disable-only PATCH', async () => {
+      it('emits only ruleUpdated for a disable-only PATCH (no lifecycle event via the update path)', async () => {
         const client = createClient();
         mockGetExistingRule('rule-id-wf-3b');
 
@@ -2518,13 +2516,11 @@ describe('RulesClient', () => {
         expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
           { id: 'rule-id-wf-3b', spaceId: 'space-1' },
         ]);
-        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-3b', spaceId: 'space-1' },
-        ]);
         expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
+        expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
       });
 
-      it('emits ruleUpdated and ruleEnabled when content and enabled change together', async () => {
+      it('emits only ruleUpdated when content and enabled change together', async () => {
         const client = createClient();
         mockGetExistingRule('rule-id-wf-3c', { ...workflowSoAttrs, enabled: false });
 
@@ -2536,9 +2532,7 @@ describe('RulesClient', () => {
         expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
           { id: 'rule-id-wf-3c', spaceId: 'space-1' },
         ]);
-        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-3c', spaceId: 'space-1' },
-        ]);
+        expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
       });
 
