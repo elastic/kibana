@@ -18,7 +18,7 @@ import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { ChatResponse } from '../../../../common/http_api/chat';
 import type { ListConversationsResponse } from '../../../../common/http_api/conversations';
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
-import { publicApiPath } from '../../../../common/constants';
+import { internalApiPath, publicApiPath } from '../../../../common/constants';
 import { apiTest } from '../fixtures';
 import {
   CHAT_CONVERSATIONS_INDEX,
@@ -79,6 +79,7 @@ apiTest.describe(
     const testRunId = randomUUID();
     const accessControlSpaceId = `${ACCESS_CONTROL_TEST_PREFIX}-space-${testRunId}`;
     const accessControlApiBase = spaceUrl(publicApiPath, accessControlSpaceId);
+    const accessControlInternalBase = spaceUrl(internalApiPath, accessControlSpaceId);
 
     // Two native Kibana users with `manageAgents`, distinct usernames.
     // Lets us exercise owner-vs-non-owner scenarios against a real authn identity.
@@ -345,6 +346,40 @@ apiTest.describe(
       );
     };
 
+    const markConversationReadAs = async (
+      apiClient: any,
+      user: { username: string; password: string },
+      conversationId: string,
+      read: boolean
+    ) => {
+      return apiClient.post(
+        `${accessControlInternalBase}/conversations/${encodeURIComponent(
+          conversationId
+        )}/_mark_read`,
+        {
+          headers: headersFor(user),
+          body: { read },
+          responseType: 'json',
+        }
+      );
+    };
+
+    const renameConversationAs = async (
+      apiClient: any,
+      user: { username: string; password: string },
+      conversationId: string,
+      title: string
+    ) => {
+      return apiClient.post(
+        `${accessControlInternalBase}/conversations/${encodeURIComponent(conversationId)}/_rename`,
+        {
+          headers: headersFor(user),
+          body: { title },
+          responseType: 'json',
+        }
+      );
+    };
+
     // ── public conversation access ──────────────────────────────────────────
 
     apiTest(
@@ -411,6 +446,47 @@ apiTest.describe(
           }
         );
 
+        await apiTest.step('Bob can mark a public conversation read', async () => {
+          const markReadResponse = await markConversationReadAs(
+            apiClient,
+            bob,
+            publicConversation.conversation_id,
+            true
+          );
+          expect(markReadResponse).toHaveStatusCode(200);
+          expect(markReadResponse.body).toMatchObject({
+            id: publicConversation.conversation_id,
+            read: true,
+          });
+        });
+
+        await apiTest.step('Bob cannot rename or delete Alice public conversation', async () => {
+          const renameResponse = await renameConversationAs(
+            apiClient,
+            bob,
+            publicConversation.conversation_id,
+            'Bob renamed public conversation'
+          );
+          expect(renameResponse).toHaveStatusCode(404);
+
+          const deleteResponse = await apiClient.delete(
+            `${accessControlApiBase}/conversations/${encodeURIComponent(
+              publicConversation.conversation_id
+            )}`,
+            { headers: headersFor(bob), responseType: 'json' }
+          );
+          expect(deleteResponse).toHaveStatusCode(404);
+
+          const getResponse = await apiClient.get(
+            `${accessControlApiBase}/conversations/${encodeURIComponent(
+              publicConversation.conversation_id
+            )}`,
+            { headers: headersFor(alice), responseType: 'json' }
+          );
+          expect(getResponse).toHaveStatusCode(200);
+          expect((getResponse.body as Conversation).title).toBe('Public Conversation Access Test');
+        });
+
         await apiTest.step('Bob cannot list or get Alice private conversations', async () => {
           const bobConversationIds = await listConversationIdsAs(apiClient, bob);
           expect(bobConversationIds).not.toContain(privateConversation.conversation_id);
@@ -439,6 +515,14 @@ apiTest.describe(
               { headers: headersFor(bob), responseType: 'json' }
             );
             expect(getPublicResponse).toHaveStatusCode(404);
+
+            const markReadResponse = await markConversationReadAs(
+              apiClient,
+              bob,
+              publicConversation.conversation_id,
+              false
+            );
+            expect(markReadResponse).toHaveStatusCode(404);
           }
         );
       }

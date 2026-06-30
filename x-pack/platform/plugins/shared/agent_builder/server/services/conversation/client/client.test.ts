@@ -288,6 +288,34 @@ describe('ConversationClient', () => {
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
+    it('allows public non-owner conversations to be marked read with converse access', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              userId: 'other-user-id',
+              username: 'other-user',
+              accessMode: ConversationAccessControlMode.Public,
+            }),
+          ],
+        },
+      });
+
+      const result = await client.update(
+        { id: 'conversation-1', read: true },
+        { access: 'converse' }
+      );
+
+      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'conversation-1',
+          document: expect.objectContaining({ read: true }),
+        })
+      );
+      expect(result.read).toBe(true);
+    });
+
     it('returns not found for converse updates when agent use access fails', async () => {
       agentRegistry.get.mockRejectedValue(new Error('agent not found'));
       mockEsClient.search.mockResolvedValue({
@@ -308,6 +336,28 @@ describe('ConversationClient', () => {
 
       expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
       expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('delete', () => {
+    it('remains owner-only for public conversations', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              userId: 'other-user-id',
+              username: 'other-user',
+              accessMode: ConversationAccessControlMode.Public,
+            }),
+          ],
+        },
+      });
+
+      await expect(client.delete('conversation-1')).rejects.toThrow(
+        'Conversation conversation-1 not found'
+      );
+
+      expect(mockEsClient.delete).not.toHaveBeenCalled();
     });
   });
 });
