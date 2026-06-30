@@ -676,21 +676,25 @@ describe('Case View Attachments tab', () => {
     });
 
     it('renders the sidebar toggle button when redesign is enabled', () => {
-      jest
+      const spy = jest
         .spyOn(KibanaServices, 'getConfig')
-        .mockReturnValueOnce({ casesRedesign: { details: true } } as ReturnType<
+        .mockReturnValue({ casesRedesign: { details: true } } as ReturnType<
           typeof KibanaServices.getConfig
         >);
 
-      renderWithTestingProviders(
-        <CaseViewAttachments
-          caseData={caseData}
-          onSearch={onSearchMock}
-          onUpdateField={onUpdateFieldMock}
-        />
-      );
+      try {
+        renderWithTestingProviders(
+          <CaseViewAttachments
+            caseData={caseData}
+            onSearch={onSearchMock}
+            onUpdateField={onUpdateFieldMock}
+          />
+        );
 
-      expect(screen.getByTestId('case-view-sidebar-toggle')).toBeInTheDocument();
+        expect(screen.getByTestId('case-view-sidebar-toggle')).toBeInTheDocument();
+      } finally {
+        spy.mockRestore();
+      }
     });
   });
 });
