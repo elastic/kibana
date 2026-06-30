@@ -66,15 +66,27 @@ describe('buildCaseDoc', () => {
     expect(doc['@timestamp']).toBe('2026-05-01T00:00:00.000Z');
   });
 
-  it('populates kibana.space_ids from the SO namespaces', () => {
+  it('populates top-level space_id from the SO namespaces (singular)', () => {
     const doc = buildCaseDoc(fullCaseSO());
-    expect(doc.kibana.space_ids).toEqual(['default']);
+    expect(doc.space_id).toBe('default');
   });
 
-  it('defaults kibana.space_ids to ["default"] when namespaces is missing', () => {
+  it('defaults space_id to "default" when namespaces is missing', () => {
     const so = fullCaseSO();
     const doc = buildCaseDoc({ ...so, namespaces: undefined });
-    expect(doc.kibana.space_ids).toEqual(['default']);
+    expect(doc.space_id).toBe('default');
+  });
+
+  it('takes the first namespace as space_id (cases are space-isolated)', () => {
+    const so = fullCaseSO();
+    const doc = buildCaseDoc({ ...so, namespaces: ['security-1'] });
+    expect(doc.space_id).toBe('security-1');
+  });
+
+  it('emits owner at the document root (DLS field) and mirrors it under cases.*', () => {
+    const doc = buildCaseDoc(fullCaseSO());
+    expect(doc.owner).toBe('securitySolution');
+    expect(doc.cases.owner).toBe('securitySolution');
   });
 
   it('converts numeric severity to a human-readable string', () => {

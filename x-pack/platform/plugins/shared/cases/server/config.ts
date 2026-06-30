@@ -60,7 +60,7 @@ export const ConfigSchema = schema.object({
      * in every space the cluster knows about. That's exactly what the
      * route is designed for, but a misclick from an unaware tenant can
      * be disruptive. Keeping it off by default forces administrators to
-     * opt in via `xpack.cases.analyticsV2.enable_admin_routes: true` in
+     * opt in via `xpack.cases.analyticsV2.enableAdminRoutes: true` in
      * `kibana.yml`, which is also the right knob for repeated dev /
      * test invocations during local development.
      *
@@ -69,7 +69,7 @@ export const ConfigSchema = schema.object({
      * the gating contract retires alongside the v2 service if both are
      * ever sunset together.
      */
-    enable_admin_routes: schema.boolean({ defaultValue: false }),
+    enableAdminRoutes: schema.boolean({ defaultValue: false }),
     /**
      * Wall-clock budget for the one-shot reset task scheduled by
      * `POST /internal/cases/_analyticsV2/reset`. The reset task does a

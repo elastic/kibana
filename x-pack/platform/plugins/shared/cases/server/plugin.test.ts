@@ -35,7 +35,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     analyticsV2: {
       enabled: false,
       reconciliationIntervalMinutes: 30,
-      enable_admin_routes: false,
+      enableAdminRoutes: false,
       resetTaskTimeoutMinutes: 60,
       resetPageDelayMs: 0,
     },
@@ -188,7 +188,7 @@ describe('Cases Plugin', () => {
               },
             },
             "analyticsV2": Object {
-              "enable_admin_routes": false,
+              "enableAdminRoutes": false,
               "enabled": false,
               "reconciliationIntervalMinutes": 30,
               "resetPageDelayMs": 0,

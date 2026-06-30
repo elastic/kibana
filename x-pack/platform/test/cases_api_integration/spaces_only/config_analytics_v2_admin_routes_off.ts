@@ -10,7 +10,7 @@ import { createTestConfig } from '../common/config';
 /**
  * FTR config that exercises the partial-gating case for cases-analytics v2:
  * `xpack.cases.analyticsV2.enabled=true` (v2 service starts, `/state` is
- * registered) but `xpack.cases.analyticsV2.enable_admin_routes=false` (the
+ * registered) but `xpack.cases.analyticsV2.enableAdminRoutes=false` (the
  * mutating admin routes are NOT registered, requests return HTTP 404).
  *
  * The 404 (vs 403) on the gated paths is intentional — it prevents health
@@ -20,7 +20,7 @@ import { createTestConfig } from '../common/config';
  * contract.
  *
  * Kept in its own config (vs added to `config_analytics_v2.ts`) because
- * `enable_admin_routes` is a startup flag — toggling it mid-suite is not
+ * `enableAdminRoutes` is a startup flag — toggling it mid-suite is not
  * supported. Test surface is intentionally tiny (three HTTP status
  * assertions) so the additional Kibana boot is a fixed, bounded cost.
  */
@@ -33,6 +33,6 @@ export default createTestConfig('spaces_only', {
     '--xpack.cases.analyticsV2.enabled=true',
     // Explicit `false` (default) — the assertion is exactly this gating
     // contract, so the flag must be visible in the config.
-    '--xpack.cases.analyticsV2.enable_admin_routes=false',
+    '--xpack.cases.analyticsV2.enableAdminRoutes=false',
   ],
 });

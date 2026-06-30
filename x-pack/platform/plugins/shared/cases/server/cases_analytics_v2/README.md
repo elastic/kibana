@@ -74,7 +74,7 @@ xpack.cases.analyticsV2:
     # therefore requires a Kibana restart to
     # take effect — runtime changes are not
     # picked up automatically.
-  enable_admin_routes:
+  enableAdminRoutes:
     false # default — set to true to register the
     # mutating administrator routes (/reset and
     # /reconcile/run_soon). The read-only /state
@@ -100,7 +100,7 @@ xpack.cases.analyticsV2:
 
 When `analyticsV2.enabled: false`, the v2 service is a no-op. Nothing
 registers, nothing schedules, nothing writes. v1 is unaffected regardless of
-v2's state. When `analyticsV2.enable_admin_routes: false` (the default) but
+v2's state. When `analyticsV2.enableAdminRoutes: false` (the default) but
 `analyticsV2.enabled: true`, v2 runs normally and `/state` is reachable; only
 the two mutating routes return HTTP 404.
 
@@ -130,8 +130,11 @@ PUT _security/role/cases_analytics_reader
 A future Kibana-side provider (built on the `ImplicitPrivilegesProvider` SPI
 tracked in [elastic/elasticsearch#147176](https://github.com/elastic/elasticsearch/pull/147176))
 will scope which case documents a user can read inside `.cases` via DLS on
-`cases.owner` + `kibana.space_ids`. Until that lands, role-granted access to
-`.cases` is unrestricted across cases — apply with care.
+the top-level `space_id` + `owner` fields. These are deliberately placed at
+the document root (not under `cases.*`) to match the implicit-privileges DLS
+convention — `space_id` is singular because cases are space-isolated. Until
+that provider lands, role-granted access to `.cases` is unrestricted across
+cases — apply with care.
 
 ## Data views (per-space)
 
@@ -297,7 +300,7 @@ The two routes below mutate subsystem state cluster-wide and operate
 URL. They're gated behind a second flag:
 
 ```yaml
-xpack.cases.analyticsV2.enable_admin_routes: true # default false
+xpack.cases.analyticsV2.enableAdminRoutes: true # default false
 ```
 
 When the flag is off, neither route is registered — requests return HTTP
@@ -312,7 +315,7 @@ POST /internal/cases/_analyticsV2/reconcile/run_soon
 
 Triggers Task Manager's `runSoon` for the reconciliation task. Useful if you
 suspect the primary write path dropped a case. **Requires
-`xpack.cases.analyticsV2.enable_admin_routes: true`.** Superuser only.
+`xpack.cases.analyticsV2.enableAdminRoutes: true`.** Superuser only.
 
 ### Reset the index
 
@@ -339,7 +342,7 @@ the data view bootstrap cache). The full backfill walk that repopulates
 Task Manager job (`cases.analyticsV2.fullReset`). The route returns 202
 once the synchronous portion completes; the administrator polls
 `/state.active_reset` to track the backfill. **Requires
-`xpack.cases.analyticsV2.enable_admin_routes: true`.**
+`xpack.cases.analyticsV2.enableAdminRoutes: true`.**
 
 **Why async.** Even at PR-1 scale (~50K cases on a ~1K-space tenant) the
 backfill walk runs for several minutes — well past any reasonable HTTP

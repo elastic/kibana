@@ -22,8 +22,16 @@ import { CASE_DYNAMIC_TEMPLATES } from './dynamic_templates';
  * Field group conventions:
  *   - `@timestamp` — required by Discover / Lens; set to the case's
  *     latest activity timestamp at write time.
- *   - `kibana.space_ids` — every space this case belongs to. Future
- *     DLS key.
+ *   - `space_id` / `owner` — top-level (document-root) scoping fields,
+ *     deliberately NOT under `cases.*`. This mirrors the Kibana
+ *     implicit-privileges DLS convention (elasticsearch#148331): a future
+ *     ES `ImplicitPrivilegesProvider` can DLS-scope `.cases` by top-level
+ *     `space_id` (+ `owner` for solution scoping) the same way the alerts
+ *     provider scopes `.rule-events` by top-level `space_id`. Cases SOs
+ *     are `multiple-isolated`, so a case lives in exactly one space —
+ *     `space_id` is therefore singular, not an array. `owner` is also
+ *     mirrored at `cases.owner` so analysts see it in the grouped
+ *     data-view namespace; the top-level copy is the DLS field.
  *   - `cases.*` — case-specific fields, namespaced so runtime fields at
  *     `cases.<snake>` can lift extended-field keywords without
  *     colliding.
@@ -62,15 +70,19 @@ export const CASE_INDEX_MAPPING: MappingTypeMapping = {
   properties: {
     '@timestamp': { type: 'date' },
 
-    kibana: {
-      properties: {
-        space_ids: { type: 'keyword' },
-      },
-    },
+    // Top-level scoping fields for implicit-privileges DLS (see the
+    // file-level comment). `space_id` is singular — cases are
+    // space-isolated. `owner` carries the solution dimension; it is also
+    // mirrored at `cases.owner` below for data-view grouping.
+    space_id: { type: 'keyword' },
+    owner: { type: 'keyword' },
 
     cases: {
       properties: {
         id: { type: 'keyword' },
+        // Mirror of the top-level `owner` (the DLS field). Kept under
+        // `cases.*` so analysts see it in the grouped data-view namespace
+        // alongside the other case fields.
         owner: { type: 'keyword' },
         title: {
           type: 'text',
