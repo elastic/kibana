@@ -8,10 +8,8 @@
 /**
  * Pre-processing service for `PUT /api/synthetics/monitors/_bulk_update`.
  *
- * Per id, mirrors the single-PUT (`editSyntheticsMonitorRoute`) pipeline so
- * one bad monitor doesn't fail the whole batch. Returns a `{ survivors,
- * perIdErrors }` result the route hands to `syncEditedMonitorBulk` for the
- * ES write + Fleet sync in one shot.
+ * Per id, mirrors the single-PUT pipeline so one bad monitor doesn't fail
+ * the whole batch. Returns `{ survivors, perIdErrors }` for `syncEditedMonitorBulk`.
  */
 
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
@@ -103,12 +101,7 @@ export class UpdateMonitorAPI {
     return this.result;
   }
 
-  /**
-   * Single decrypt round-trip. Uses a CONFIG_ID-based KQL filter so the SO
-   * client can fetch every requested monitor in one call (vs. the per-id
-   * loop that `ResetMonitorAPI` and `DeleteMonitorAPI` use). This is the
-   * main reason this endpoint scales better than calling PUT N times.
-   */
+  // Single round-trip via CONFIG_ID KQL filter instead of per-id fetches.
   private async findDecryptedMonitors(
     ids: string[]
   ): Promise<Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>> {
@@ -226,27 +219,14 @@ export class UpdateMonitorAPI {
     this.result.survivors.push(this.buildSurvivor(decryptedMonitor, decodedMonitor, prevAttrs));
   }
 
-  /**
-   * Origin policy (Option A from the kibana-34 plan): reject anything whose
-   * existing `origin` is not `'ui'`. Mirrors the single-PUT precedent at
-   * `edit_monitor.ts` line 103. If/when we flip to Option B (allow patches
-   * limited to "sticky" project-monitor fields like `enabled`), this is the
-   * single seam to extend — accept the patch on the same predicate that
-   * `ProjectMonitorFormatter` uses to skip overwriting on the next CLI push.
-   */
+  // Rejects non-ui-origin monitors (project, terraform) — same policy as the single PUT.
+  // To allow patches on project monitors in future, this is the seam to extend.
   private shouldRejectProjectMonitor(prevAttrs: SyntheticsMonitorWithSecretsAttributes): boolean {
     return prevAttrs[ConfigKey.MONITOR_SOURCE_TYPE] !== 'ui';
   }
 
-  /**
-   * Decrypt the previous attributes back into monitor shape (so secrets are
-   * re-merged), strip REVISION (we own that), then run `mergeSourceMonitor`
-   * which knows to deep-merge METADATA / shallow-merge ALERT_CONFIG.
-   *
-   * Important: we do NOT call `formatSecrets` here. Validation runs on the
-   * decrypted shape; `formatSecrets` happens once at the end, only for
-   * survivors, in `buildSurvivor`.
-   */
+  // Validation runs on the decrypted shape; `formatSecrets` is deferred to
+  // `buildSurvivor` so it runs once, only for survivors.
   private mergePatch(
     decryptedMonitor: SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>,
     patch: Partial<EncryptedSyntheticsMonitor>
@@ -312,18 +292,8 @@ export class UpdateMonitorAPI {
     return errors;
   }
 
-  /**
-   * Per-monitor permission gate. Both underlying checks are request-scoped
-   * (they depend on the caller and the target spaces, not on the individual
-   * monitor), so each resolves at most once per bulk request:
-   *   - Elastic-managed-locations capability: cached for the whole request
-   *     via `getLocationPermissions` (the first survivor with a public
-   *     location pays for `resolveCapabilities`; the rest reuse it).
-   *   - Saved-objects `bulk_update` privilege: cached per unique space set
-   *     via `assertCanUpdateInSpaces`.
-   * This turns the previous O(N) capability/privilege calls into O(1) /
-   * O(distinct space sets).
-   */
+  // Location capability resolves once per request; space privilege once per
+  // distinct space set — both cached to avoid O(N) round-trips.
   private async checkPermissions(
     decodedMonitor: SyntheticsMonitor,
     savedObjectType: string
@@ -342,12 +312,10 @@ export class UpdateMonitorAPI {
     }
 
     /*
-     * `assertCanUpdateMonitorInAllSpaces` returns either `undefined` (OK) or
-     * a Kibana `forbidden` response object (used by single-PUT for early
-     * return). We can't propagate the response object to a per-id slot, so
-     * we collapse the failure to a generic "missing space privileges"
-     * message. The privilege itself was already audit-logged by core when
-     * `checkSavedObjectsPrivileges` ran inside the assertion.
+     * `assertCanUpdateMonitorInAllSpaces` returns a Kibana response object on
+     * failure (designed for single-PUT early-return). We can't put that in a
+     * per-id slot, so collapse to a generic forbidden message. The privilege
+     * was already audit-logged by core.
      */
     const spaceAuthError = await this.assertCanUpdateInSpaces(editedMonitorSpaces, savedObjectType);
     if (spaceAuthError) {
@@ -356,11 +324,6 @@ export class UpdateMonitorAPI {
     return undefined;
   }
 
-  /**
-   * Resolve (and cache) the caller's Elastic-managed-locations capability.
-   * The answer is request-scoped, so we only pay for the underlying
-   * `resolveCapabilities` round-trip once per bulk request.
-   */
   private getLocationPermissions(): ReturnType<typeof validateLocationPermissions> {
     if (!this.locationPermissionsPromise) {
       this.locationPermissionsPromise = validateLocationPermissions(this.routeContext);
@@ -368,11 +331,6 @@ export class UpdateMonitorAPI {
     return this.locationPermissionsPromise;
   }
 
-  /**
-   * Memoize the saved-objects `bulk_update` privilege check per unique
-   * `(savedObjectType, sorted space set)` key, so monitors shared to the
-   * same spaces resolve to a single `checkSavedObjectsPrivileges` call.
-   */
   private assertCanUpdateInSpaces(
     spaceIds: string[],
     savedObjectType: string
@@ -411,16 +369,8 @@ export class UpdateMonitorAPI {
     return { code: 'forbidden', message: plSpaceError.message };
   }
 
-  /**
-   * Build the input shape `syncEditedMonitorBulk` expects:
-   *   - `normalizedMonitor`: io-ts-decoded merged monitor (no secret rewrap)
-   *   - `monitorWithRevision`: same shape with `revision` bumped, `hash`
-   *     reset to `''` (so the next CLI `push` re-evaluates the AAD set)
-   *     and `formatSecrets` applied so secrets are wrapped back into the
-   *     encrypted-attribute envelope.
-   *   - `decryptedPreviousMonitor`: original decrypted SO, kept verbatim
-   *     for `bulk_cruds/edit_monitor_bulk.ts` to use as rollback source.
-   */
+  // CONFIG_HASH reset to '' so the next CLI push re-evaluates the AAD set;
+  // formatSecrets wraps secrets back into the encrypted-attribute envelope.
   private buildSurvivor(
     decryptedMonitor: SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>,
     decodedMonitor: SyntheticsMonitor,
