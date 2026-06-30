@@ -13,7 +13,6 @@ import {
   ChangeHistoryModal,
   ChangeHistoryProvider,
 } from '@kbn/change-history-ui';
-import type { AnalyticsServiceStart } from '@kbn/core/public';
 
 import { BACK_TO_WORKFLOW } from './translations';
 import {
@@ -53,13 +52,6 @@ export const WorkflowChangeHistoryProvider = ({
     }),
     []
   );
-  const analytics = useMemo((): Pick<AnalyticsServiceStart, 'reportEvent'> | undefined => {
-    if (!coreAnalytics) {
-      return undefined;
-    }
-
-    return { reportEvent: coreAnalytics.reportEvent };
-  }, [coreAnalytics]);
 
   if (!isEnabled) {
     return <>{children}</>;
@@ -78,7 +70,7 @@ export const WorkflowChangeHistoryProvider = ({
       features={{ restore: true }}
       permissions={{ canRestore }}
       scope={scope}
-      analytics={analytics}
+      analytics={coreAnalytics}
     >
       {children}
       <ChangeHistoryModal />
