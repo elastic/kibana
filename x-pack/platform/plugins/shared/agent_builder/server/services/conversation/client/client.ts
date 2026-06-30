@@ -93,7 +93,8 @@ class ConversationClientImpl implements ConversationClient {
 
   async list(options: ConversationListOptions = {}): Promise<ConversationWithoutRounds[]> {
     const { agentId } = options;
-    const accessibleAgentIds = await this.getAccessibleAgentIds();
+    const agents = await this.agentRegistry.list();
+    const accessibleAgentIds = agents.map(({ id }) => id);
 
     if (accessibleAgentIds.length === 0 || (agentId && !accessibleAgentIds.includes(agentId))) {
       return [];
@@ -218,11 +219,6 @@ class ConversationClientImpl implements ConversationClient {
     } else {
       return response.hits.hits[0] as Document;
     }
-  }
-
-  private async getAccessibleAgentIds(): Promise<string[]> {
-    const agents = await this.agentRegistry.list();
-    return agents.map(({ id }) => id);
   }
 
   /**
