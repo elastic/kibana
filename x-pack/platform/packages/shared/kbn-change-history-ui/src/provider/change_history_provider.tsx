@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { ChangeHistoryBadgeRenderFn } from '../types/change_history_badge';
 import type {
   ChangeHistoryFeatures,
@@ -14,6 +15,8 @@ import type {
 import type { ChangeHistoryLabels } from '../types/change_history_labels';
 import type { ChangeHistoryPreviewRenderFn } from '../types/change_history_preview';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
+import { createChangeHistoryTelemetryReporter } from '../telemetry/create_change_history_telemetry_reporter';
+import type { ChangeHistoryScope } from '../telemetry/types';
 import { ChangeHistoryConfigContext } from './change_history_config_context';
 import { ChangeHistoryModalContext } from './change_history_modal_context';
 import { resolveChangeHistorySupports } from './resolve_change_history_supports';
@@ -27,6 +30,8 @@ export interface ChangeHistoryProviderProps {
   labels: ChangeHistoryLabels;
   features?: ChangeHistoryFeatures;
   permissions?: ChangeHistoryPermissions;
+  scope?: ChangeHistoryScope;
+  analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
   children: React.ReactNode;
 }
 
@@ -38,6 +43,8 @@ export const ChangeHistoryProvider = ({
   labels,
   features,
   permissions,
+  scope,
+  analytics,
   children,
 }: ChangeHistoryProviderProps): JSX.Element => {
   const [isOpen, setIsOpen] = useState(false);
@@ -61,6 +68,16 @@ export const ChangeHistoryProvider = ({
     [adapter, features, permissions]
   );
 
+  const telemetry = useMemo(
+    () =>
+      createChangeHistoryTelemetryReporter({
+        analytics,
+        scope,
+        enabled: features?.telemetry !== false,
+      }),
+    [analytics, features?.telemetry, scope]
+  );
+
   const configValue = useMemo(
     () => ({
       objectId,
@@ -72,6 +89,7 @@ export const ChangeHistoryProvider = ({
         previewTitle: labels.previewTitle,
       },
       supports,
+      telemetry,
     }),
     [
       adapter,
@@ -81,6 +99,7 @@ export const ChangeHistoryProvider = ({
       renderBadge,
       renderPreview,
       supports,
+      telemetry,
     ]
   );
 

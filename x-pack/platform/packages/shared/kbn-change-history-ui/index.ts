@@ -65,6 +65,7 @@ export {
   changeHistoryTelemetryEventNames,
   changeHistoryTelemetryEventSchemas,
   ChangeHistoryTelemetryEventTypes,
+  createChangeHistoryTelemetryReporter,
 } from './src/telemetry';
 export type {
   ChangeHistoryCompareMode,
@@ -75,7 +76,9 @@ export type {
   ChangeHistoryTelemetryEvent,
   ChangeHistoryTelemetryEventType,
   ChangeHistoryTelemetryEventsMap,
+  ChangeHistoryTelemetryReporter,
   ChangeHistoryTelemetryScopeFields,
+  CreateChangeHistoryTelemetryReporterOptions,
   ReportChangeHistoryChangeSelectedActionParams,
   ReportChangeHistoryDiffViewedActionParams,
   ReportChangeHistoryFilterAppliedActionParams,

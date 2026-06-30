@@ -111,3 +111,49 @@ export interface ChangeHistoryTelemetryEventsMap {
 
 export type ChangeHistoryTelemetryEventType =
   (typeof ChangeHistoryTelemetryEventTypes)[keyof typeof ChangeHistoryTelemetryEventTypes];
+
+/** Caller params — scope and eventName are merged by the reporter. */
+export type ChangeHistoryTelemetryOpenedParams = Omit<
+  ReportChangeHistoryOpenedActionParams,
+  keyof ChangeHistoryTelemetryScopeFields | 'eventName'
+>;
+
+export type ChangeHistoryTelemetryChangeSelectedParams = Omit<
+  ReportChangeHistoryChangeSelectedActionParams,
+  keyof ChangeHistoryTelemetryScopeFields | 'eventName'
+>;
+
+export type ChangeHistoryTelemetryFilterAppliedParams = Omit<
+  ReportChangeHistoryFilterAppliedActionParams,
+  keyof ChangeHistoryTelemetryScopeFields | 'eventName'
+>;
+
+export type ChangeHistoryTelemetryDiffViewedParams = Omit<
+  ReportChangeHistoryDiffViewedActionParams,
+  keyof ChangeHistoryTelemetryScopeFields | 'eventName'
+>;
+
+export type ChangeHistoryTelemetryRestoreConfirmedParams = Omit<
+  ReportChangeHistoryRestoreConfirmedActionParams,
+  keyof ChangeHistoryTelemetryScopeFields | 'eventName'
+>;
+
+export type ChangeHistoryTelemetryRestoreCompletedParams = Omit<
+  ReportChangeHistoryRestoreCompletedActionParams,
+  keyof ChangeHistoryTelemetryScopeFields | 'eventName'
+>;
+
+export type ChangeHistoryTelemetryRestoreFailedParams = Omit<
+  ReportChangeHistoryRestoreFailedActionParams,
+  keyof ChangeHistoryTelemetryScopeFields | 'eventName'
+>;
+
+export interface ChangeHistoryTelemetryReporter {
+  reportOpened: (params?: ChangeHistoryTelemetryOpenedParams) => void;
+  reportChangeSelected: (params: ChangeHistoryTelemetryChangeSelectedParams) => void;
+  reportFilterApplied: (params: ChangeHistoryTelemetryFilterAppliedParams) => void;
+  reportDiffViewed: (params: ChangeHistoryTelemetryDiffViewedParams) => void;
+  reportRestoreConfirmed: (params?: ChangeHistoryTelemetryRestoreConfirmedParams) => void;
+  reportRestoreCompleted: (params?: ChangeHistoryTelemetryRestoreCompletedParams) => void;
+  reportRestoreFailed: (params?: ChangeHistoryTelemetryRestoreFailedParams) => void;
+}

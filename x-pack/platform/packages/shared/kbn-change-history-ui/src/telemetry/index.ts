@@ -7,6 +7,8 @@
 
 export { changeHistoryTelemetryEvents } from './events';
 export type { ChangeHistoryTelemetryEvent } from './events';
+export { createChangeHistoryTelemetryReporter } from './create_change_history_telemetry_reporter';
+export type { CreateChangeHistoryTelemetryReporterOptions } from './create_change_history_telemetry_reporter';
 export { changeHistoryTelemetryEventNames, changeHistoryTelemetryEventSchemas } from './schemas';
 export {
   ChangeHistoryTelemetryEventTypes,
@@ -16,8 +18,16 @@ export {
   type ChangeHistoryScope,
   type ChangeHistorySelectionSource,
   type ChangeHistoryTelemetryBaseParams,
+  type ChangeHistoryTelemetryChangeSelectedParams,
+  type ChangeHistoryTelemetryDiffViewedParams,
   type ChangeHistoryTelemetryEventType,
   type ChangeHistoryTelemetryEventsMap,
+  type ChangeHistoryTelemetryFilterAppliedParams,
+  type ChangeHistoryTelemetryOpenedParams,
+  type ChangeHistoryTelemetryReporter,
+  type ChangeHistoryTelemetryRestoreCompletedParams,
+  type ChangeHistoryTelemetryRestoreConfirmedParams,
+  type ChangeHistoryTelemetryRestoreFailedParams,
   type ChangeHistoryTelemetryScopeFields,
   type ReportChangeHistoryChangeSelectedActionParams,
   type ReportChangeHistoryDiffViewedActionParams,
