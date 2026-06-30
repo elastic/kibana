@@ -7,8 +7,8 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
-import { AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID, createTracesEsqlTool } from './inline_tools';
 import { AGENT_BUILDER_TRACING_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID, createTracesEsqlTool } from './inline_tools';
 
 export const agentBuilderTracesSkill = defineSkillType({
   id: 'agent-builder-traces',
