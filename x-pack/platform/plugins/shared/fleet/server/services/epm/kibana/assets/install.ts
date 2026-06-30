@@ -368,7 +368,7 @@ export async function deleteOrphanedMultipleIsolatedAssets({
       }
 
       fetched += findResult.saved_objects.length;
-      if (fetched >= findResult.total) break;
+      if (findResult.saved_objects.length === 0 || fetched >= findResult.total) break;
     }
   });
 
