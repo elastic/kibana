@@ -21,16 +21,18 @@ import {
 } from '@elastic/eui';
 import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
+  ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { RuleQueryInspector } from '@kbn/triggers-actions-ui-plugin/public';
-import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 
 import { useKibana } from '../../../utils/kibana_react';
 import type { TopAlert } from '../../../typings/alerts';
+import { useAuthorizedToReadRuleType } from '../../../hooks/use_authorized_to_read_rule_type';
+import { observabilityFeatureId } from '../../../../common';
 import { paths } from '../../../../common/locators/paths';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 import {
@@ -63,10 +65,24 @@ export function HeaderActions({
     cases,
     triggersActionsUi: { getRuleSnoozeModal: RuleSnoozeModal },
     http,
-    notifications: { toasts },
   } = services;
 
-  const { authorizedToReadAnyRules } = useGetRuleTypesPermissions({ http, toasts });
+  const authorizedToReadRuleType = useAuthorizedToReadRuleType();
+
+  // Rule read is authorized per rule type (and consumer), so gate the "Go to rule
+  // details" action on the specific rule behind this alert rather than a coarse
+  // "any rules" flag.
+  const alertRuleTypeId = alert?.fields[ALERT_RULE_TYPE_ID];
+  const alertConsumer = alert?.fields[ALERT_RULE_CONSUMER];
+  const canReadAlertRule = Boolean(
+    alertRuleTypeId && authorizedToReadRuleType(alertRuleTypeId, alertConsumer)
+  );
+
+  // Attaching an alert to a case requires both reading cases and adding comments
+  // to them, so gate the "Add to case" button on those case privileges rather
+  // than merely on the cases plugin being present.
+  const casesPermissions = cases?.helpers.canUseCases([observabilityFeatureId]);
+  const canAddToCase = Boolean(casesPermissions?.read && casesPermissions?.createComment);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
@@ -129,7 +145,7 @@ export function HeaderActions({
           </EuiFlexItem>
         )}
 
-        {cases && (
+        {cases && canAddToCase && (
           <EuiFlexItem grow={false}>
             <ObsCasesContext>
               <AddToCaseButton
@@ -221,7 +237,7 @@ export function HeaderActions({
                   </EuiText>
                 </EuiButtonEmpty>
 
-                {authorizedToReadAnyRules && (
+                {canReadAlertRule && (
                   <>
                     <EuiHorizontalRule margin="none" />
 
