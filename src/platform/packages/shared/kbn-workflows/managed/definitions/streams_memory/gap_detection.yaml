@@ -126,11 +126,26 @@ steps:
 
         Read the current _gaps/overview page using platform_streams_memory_read.
 
-        The following are structured outputs from recent investigation workflow runs. Each hit may contain a gaps_found array of knowledge gaps encountered during root cause analysis:
+        The following are structured outputs from recent investigation workflow runs. Each hit may contain a gaps_found array from the investigation's structured output:
 
         {{ steps.collect_step_outputs.output | json }}
 
-        Check whether any of those investigation gaps reveal something not already covered in the existing report. If every gap is already reflected in the page, stop — do not write anything. Only if there are genuinely new gaps, incorporate them by weaving them into the appropriate existing sections naturally. Do not create a separate section for investigation gaps.
+        Before incorporating any gap, apply this strict filter: only keep items that represent **missing data that could reasonably be provided** — a data source that was absent or inaccessible and would have helped the investigation. Discard anything that is an incident-specific observation (e.g. "the pod crashed", "no logs existed during the outage window", "the service was down") — those describe what happened, not a knowledge gap that can be fixed.
+
+        Good examples of gaps to incorporate (actionable, structural deficiencies):
+        - "No traces available for the cart service"
+        - "Infrastructure metrics absent for host X"
+        - "No code repository access for service Y"
+        - "Cart service logs not flowing into logs.otel"
+
+        Bad examples to discard (incident observations, not gaps):
+        - "Cart service logs were absent during the failure window"
+        - "The pod crashed and produced no telemetry"
+        - "During the RCA, traces were unavailable because the service was fully down"
+
+        When incorporating a gap, distill it to the underlying structural deficiency and note why it would help future investigations. Keep it brief and actionable.
+
+        Check whether any of the filtered gaps reveal something not already covered in the existing report. If every remaining gap is already reflected in the page, stop — do not write anything. Only if there are genuinely new gaps, incorporate them by weaving them into the appropriate existing sections naturally. Do not create a separate section for investigation gaps.
 
         Write the updated page using platform_streams_memory_write with categories ["_system/gaps"] only if you made changes.
     on-failure:
