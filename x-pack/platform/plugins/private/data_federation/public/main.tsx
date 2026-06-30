@@ -63,7 +63,12 @@ export interface MainProps {
   };
 }
 
-export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, cloudInfo, featureFlags }) => {
+export const Main: FunctionComponent<MainProps> = ({
+  httpClient,
+  toasts,
+  cloudInfo,
+  featureFlags,
+}) => {
   const enableFederatedIdentityAuth = featureFlags?.enableFederatedIdentityAuth;
   const enableGoogleCloudStorageDataSourceType =
     featureFlags?.enableGoogleCloudStorageDataSourceType;

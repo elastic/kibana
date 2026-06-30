@@ -530,9 +530,7 @@ function AllFormatsAdvancedSettings({ control }: { control: Control<CreateDatase
           fullWidth
           aria-label={createDatasetFlyoutStrings.settingsOptimizedReaderLabel()}
           value={optimizedReaderField.value}
-          onChange={(e) =>
-            optimizedReaderField.onChange(e.target.value as DatasetBooleanFormValue)
-          }
+          onChange={(e) => optimizedReaderField.onChange(e.target.value as DatasetBooleanFormValue)}
           name={optimizedReaderField.name}
           inputRef={optimizedReaderField.ref}
         />
@@ -998,10 +996,7 @@ function ParquetAdvancedSettings({ control }: { control: Control<CreateDatasetFo
             inputRef={optimizedReaderField.ref}
           />
         </EuiFormRow>
-        <EuiFormRow
-          label={createDatasetFlyoutStrings.settingsLateMaterializationLabel()}
-          fullWidth
-        >
+        <EuiFormRow label={createDatasetFlyoutStrings.settingsLateMaterializationLabel()} fullWidth>
           <EuiSelect
             options={BOOLEAN_OPTIONS(
               createDatasetFlyoutStrings.settingsLateMaterializationPlaceholder(),
