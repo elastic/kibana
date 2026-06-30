@@ -69,11 +69,11 @@ export interface ScoutTestRunInfo {
     file?: ScoutFileInfo;
     category?: ScoutTestRunConfigCategory;
     /**
-     * Scout area sub-directory (e.g. `entity_analytics` for `test/scout/entity_analytics/ui/`).
-     * Absent for configs that live directly under `test/scout/{api,ui}/` (no area).
+     * Scout namespace sub-directory (e.g. `entity_analytics` for `test/scout/entity_analytics/ui/`).
+     * Absent for configs that live directly under `test/scout/{api,ui}/` (no namespace).
      * Distinct from `file.area` which is the code-owner team area from CODEOWNERS.
      */
-    scout_area?: string;
+    namespace?: string;
   };
   status?: string;
   duration?: number;

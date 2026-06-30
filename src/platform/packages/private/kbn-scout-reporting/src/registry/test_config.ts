@@ -21,8 +21,8 @@ export interface ScoutTestConfig {
   path: string;
   category: string;
   type: string;
-  /** Optional area sub-directory (e.g. `detection_engine` for `test/scout/detection_engine/ui/`). */
-  area?: string;
+  /** Namespace sub-directory (e.g. `detection_engine` for `test/scout/detection_engine/ui/`). `undefined` for configs directly under `test/scout/{ui,api}/`. */
+  namespace: string | undefined;
   module: ScoutTestableModule;
   manifest: ScoutConfigManifest;
   server: {
@@ -59,7 +59,7 @@ const resolveModuleMetadata = (
 ): {
   module: ScoutTestableModule;
   serverConfigSet: string | undefined;
-  area: string | undefined;
+  namespace: string | undefined;
   testCategory: string;
   testConfigType: string;
 } => {
@@ -102,7 +102,7 @@ const resolveModuleMetadata = (
   return {
     module,
     serverConfigSet: g.serverConfigSet,
-    area: g.area,
+    namespace: g.namespace,
     testCategory: g.testCategory,
     testConfigType: g.testConfigType,
   };
@@ -123,18 +123,16 @@ export const testConfig = {
     }
 
     const moduleRoot = configPath.split('/test/scout')[0];
-    const { module, serverConfigSet, area, testCategory, testConfigType } = resolveModuleMetadata(
-      configPath,
-      moduleRoot
-    );
+    const { module, serverConfigSet, namespace, testCategory, testConfigType } =
+      resolveModuleMetadata(configPath, moduleRoot);
 
     const scoutDirName = `scout${serverConfigSet ? `_${serverConfigSet}` : ''}`;
-    const manifestPath = area
+    const manifestPath = namespace
       ? path.join(
           moduleRoot,
           'test',
           scoutDirName,
-          area,
+          namespace,
           '.meta',
           testCategory,
           `${testConfigType || 'standard'}.json`
@@ -153,7 +151,7 @@ export const testConfig = {
       path: configPath,
       category: testCategory,
       type: testConfigType || 'standard',
-      ...(area ? { area } : {}),
+      namespace,
       module,
       manifest: {
         path: manifestPath,
@@ -189,7 +187,7 @@ export const testConfigs = {
     this.log.info(`Loaded ${this._configs.length} Scout test configs in ${duration.toFixed(2)}s`);
 
     // Structural validation: a scout root must be either entirely root-level or
-    // entirely area-based, never both. Group by (module.root + serverConfigSet) because
+    // entirely namespace-based, never both. Group by (module.root + serverConfigSet) because
     // custom config sets (scout_*) are independent roots from the scout runtime's perspective.
     const byRoot = new Map<string, ScoutTestConfig[]>();
     for (const config of this._configs) {
@@ -201,22 +199,26 @@ export const testConfigs = {
     }
     const mixedRoots: string[] = [];
     for (const [scoutRoot, rootConfigs] of byRoot) {
-      const hasRootLevel = rootConfigs.some((c) => !c.area);
-      const hasArea = rootConfigs.some((c) => Boolean(c.area));
-      if (hasRootLevel && hasArea) {
-        const areaNames = [...new Set(rootConfigs.filter((c) => c.area).map((c) => c.area!))];
+      const hasRootLevel = rootConfigs.some((c) => !c.namespace);
+      const hasNamespace = rootConfigs.some((c) => Boolean(c.namespace));
+      if (hasRootLevel && hasNamespace) {
+        const namespaceNames = [
+          ...new Set(rootConfigs.filter((c) => c.namespace).map((c) => c.namespace as string)),
+        ];
         mixedRoots.push(
-          `  • ${scoutRoot}: root-level {ui,api}/ coexists with area dirs [${areaNames.join(', ')}]`
+          `  • ${scoutRoot}: root-level {ui,api}/ coexists with namespace dirs [${namespaceNames.join(
+            ', '
+          )}]`
         );
       }
     }
     if (mixedRoots.length > 0) {
       throw new Error(
         `[Scout] Mixed test structure detected — a scout root must use either ` +
-          `root-level (test/scout/{ui,api}/) or area-based (test/scout/<area>/{ui,api}/) ` +
+          `root-level (test/scout/{ui,api}/) or namespace-based (test/scout/<namespace>/{ui,api}/) ` +
           `structure, never both:\n\n` +
           mixedRoots.join('\n') +
-          `\n\nMigrate root-level tests into area sub-directories or remove the area configs.`
+          `\n\nMigrate root-level tests into namespace sub-directories or remove the namespace configs.`
       );
     }
   },

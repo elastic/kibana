@@ -71,42 +71,42 @@ describe('ScoutPlaywrightReporter', () => {
 
     it('returns ui-test category for root-level ui config', () => {
       expect(getInfo('src/platform/plugins/shared/foo/test/scout/ui/playwright.config.ts')).toEqual(
-        { category: 'ui-test', area: undefined }
+        { category: 'ui-test', namespace: undefined }
       );
     });
 
     it('returns api-test category for root-level api config', () => {
       expect(
         getInfo('src/platform/plugins/shared/foo/test/scout/api/playwright.config.ts')
-      ).toEqual({ category: 'api-test', area: undefined });
+      ).toEqual({ category: 'api-test', namespace: undefined });
     });
 
     it('returns ui-test category for scout_* root ui config', () => {
       expect(
         getInfo('src/platform/plugins/shared/foo/test/scout_custom/ui/playwright.config.ts')
-      ).toEqual({ category: 'ui-test', area: undefined });
+      ).toEqual({ category: 'ui-test', namespace: undefined });
     });
 
-    it('returns ui-test category and area for area-based ui config', () => {
+    it('returns ui-test category and namespace for namespace-based ui config', () => {
       expect(
         getInfo(
           'x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel.playwright.config.ts'
         )
-      ).toEqual({ category: 'ui-test', area: 'entity_analytics' });
+      ).toEqual({ category: 'ui-test', namespace: 'entity_analytics' });
     });
 
-    it('returns api-test category and area for area-based api config', () => {
+    it('returns api-test category and namespace for namespace-based api config', () => {
       expect(
         getInfo(
           'x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/playwright.config.ts'
         )
-      ).toEqual({ category: 'api-test', area: 'entity_analytics' });
+      ).toEqual({ category: 'api-test', namespace: 'entity_analytics' });
     });
 
-    it('returns UNKNOWN category and no area for unrecognised path', () => {
+    it('returns UNKNOWN category and no namespace for unrecognised path', () => {
       expect(getInfo('some/other/path/config.ts')).toEqual({
         category: 'unknown',
-        area: undefined,
+        namespace: undefined,
       });
     });
   });

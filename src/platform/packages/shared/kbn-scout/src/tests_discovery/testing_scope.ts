@@ -94,9 +94,9 @@ export const deriveScoutConfigsForFile = (
     return [];
   }
 
-  const [, prefix, scoutDir, area, type, rest = ''] = match;
-  const scope = area
-    ? `${prefix}/test/${scoutDir}/${area}/${type}`
+  const [, prefix, scoutDir, namespace, type, rest = ''] = match;
+  const scope = namespace
+    ? `${prefix}/test/${scoutDir}/${namespace}/${type}`
     : `${prefix}/test/${scoutDir}/${type}`;
 
   if (rest.startsWith('tests/')) {

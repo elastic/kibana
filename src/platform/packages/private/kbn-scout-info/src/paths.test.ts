@@ -73,7 +73,7 @@ describe('Scout path globs', () => {
       'examples/hello_world/test/scout_examples/ui/playwright.config.ts',
       'x-pack/examples/hello_world/test/scout_examples/api/playwright.config.ts',
       'x-pack/examples/hello_world/test/scout/ui/parallel.playwright.config.ts',
-      // area variants
+      // namespace variants
       'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel.playwright.config.ts',
       'x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/playwright.config.ts',
       'src/platform/plugins/shared/my_plugin/test/scout/my_area/api/playwright.config.ts',
@@ -101,7 +101,7 @@ describe('Scout path globs', () => {
       'x-pack/solutions/security/plugins/my_plugin/test/scout/.meta/api/standard.json',
       'examples/hello_world/test/scout_examples/.meta/api/standard.json',
       'x-pack/examples/hello_world/test/scout_examples/.meta/ui/standard.json',
-      // area variants
+      // namespace variants
       'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/.meta/ui/parallel.json',
       'src/platform/plugins/shared/my_plugin/test/scout/my_area/.meta/api/standard.json',
     ];
@@ -192,7 +192,7 @@ describe('Scout path regexes', () => {
   });
 
   describe('SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX', () => {
-    // Groups: 1=examplesRoot, 2=plugin, 3=serverConfigSet, 4=area (optional), 5=category, 6=configType
+    // Groups: 1=examplesRoot, 2=plugin, 3=serverConfigSet, 4=namespace (optional), 5=category, 6=configType
     it('matches examples/ plugin config with custom config set', () => {
       const match = 'examples/hello_world/test/scout_examples/api/playwright.config.ts'.match(
         SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX
@@ -201,7 +201,7 @@ describe('Scout path regexes', () => {
       expect(match![1]).toBe('examples');
       expect(match![2]).toBe('hello_world');
       expect(match![3]).toBe('examples');
-      expect(match![4]).toBeUndefined(); // no area
+      expect(match![4]).toBeUndefined(); // no namespace
       expect(match![5]).toBe('api');
       expect(match![6]).toBe('');
     });
@@ -214,7 +214,7 @@ describe('Scout path regexes', () => {
       expect(match![1]).toBe('x-pack/examples');
       expect(match![2]).toBe('hello_world');
       expect(match![3]).toBe('examples');
-      expect(match![4]).toBeUndefined(); // no area
+      expect(match![4]).toBeUndefined(); // no namespace
       expect(match![5]).toBe('ui');
     });
 
@@ -236,7 +236,7 @@ describe('Scout path regexes', () => {
       expect(match![6]).toBe('parallel');
     });
 
-    it('matches examples/ plugin config with area', () => {
+    it('matches examples/ plugin config with namespace', () => {
       const match = 'examples/hello_world/test/scout/my_area/ui/playwright.config.ts'.match(
         SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX
       );
@@ -415,7 +415,7 @@ describe('Scout path regexes', () => {
       );
     });
 
-    it('captures area when a sub-directory is present between scout root and category', () => {
+    it('captures namespace when a sub-directory is present between scout root and category', () => {
       const match =
         'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel.playwright.config.ts'.match(
           SCOUT_UNIFIED_CONFIG_PATH_REGEX
@@ -425,38 +425,38 @@ describe('Scout path regexes', () => {
           solution: 'security',
           moduleName: 'security_solution',
           serverConfigSet: undefined,
-          area: 'detection_engine',
+          namespace: 'detection_engine',
           testCategory: 'ui',
           testConfigType: 'parallel',
         })
       );
     });
 
-    it('leaves area undefined for paths without an area segment', () => {
+    it('leaves namespace undefined for paths without a namespace segment', () => {
       const match =
         'x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel.playwright.config.ts'.match(
           SCOUT_UNIFIED_CONFIG_PATH_REGEX
         );
-      expect(match?.groups?.area).toBeUndefined();
+      expect(match?.groups?.namespace).toBeUndefined();
     });
 
-    it('does not capture api or ui as area (backtracking)', () => {
+    it('does not capture api or ui as namespace (backtracking)', () => {
       const uiMatch =
         'src/platform/plugins/shared/my_plugin/test/scout/ui/playwright.config.ts'.match(
           SCOUT_UNIFIED_CONFIG_PATH_REGEX
         );
-      expect(uiMatch?.groups?.area).toBeUndefined();
+      expect(uiMatch?.groups?.namespace).toBeUndefined();
       expect(uiMatch?.groups?.testCategory).toBe('ui');
 
       const apiMatch =
         'src/platform/plugins/shared/my_plugin/test/scout/api/playwright.config.ts'.match(
           SCOUT_UNIFIED_CONFIG_PATH_REGEX
         );
-      expect(apiMatch?.groups?.area).toBeUndefined();
+      expect(apiMatch?.groups?.namespace).toBeUndefined();
       expect(apiMatch?.groups?.testCategory).toBe('api');
     });
 
-    it('captures area together with custom serverConfigSet', () => {
+    it('captures namespace together with custom serverConfigSet', () => {
       const match =
         'src/platform/plugins/shared/my_plugin/test/scout_custom/my_area/api/playwright.config.ts'.match(
           SCOUT_UNIFIED_CONFIG_PATH_REGEX
@@ -464,7 +464,7 @@ describe('Scout path regexes', () => {
       expect(match?.groups).toEqual(
         expect.objectContaining({
           serverConfigSet: 'custom',
-          area: 'my_area',
+          namespace: 'my_area',
           testCategory: 'api',
         })
       );

@@ -13,24 +13,24 @@ const path = require('path');
 
 /**
  * Matches Scout test file paths following the supported patterns:
- *   {scout,scout_*}/{ui,api}/{tests,parallel_tests}/**\/*.spec.ts          (no area)
- *   {scout,scout_*}/<area>/{ui,api}/{tests,parallel_tests}/**\/*.spec.ts   (single area level)
+ *   {scout,scout_*}/{ui,api}/{tests,parallel_tests}/**\/*.spec.ts               (no namespace)
+ *   {scout,scout_*}/<namespace>/{ui,api}/{tests,parallel_tests}/**\/*.spec.ts   (single namespace level)
  *
- * The optional area segment `(?:\/[^/]+)?` uses regex backtracking to avoid
- * consuming `ui`/`api` as an area: if the area group claims `ui`, the
+ * The optional namespace segment `(?:\/[^/]+)?` uses regex backtracking to avoid
+ * consuming `ui`/`api` as a namespace: if the namespace group claims `ui`, the
  * following required `\/(?:ui|api)\/` fails, the engine backtracks, and
- * area is left empty.
+ * namespace is left empty.
  */
 const SCOUT_TEST_PATH_PATTERN =
   /\/test\/scout(?:_[^/]+)?(?:\/[^/]+)?\/(?:ui|api)\/(?:parallel_)?tests\//;
 
 /**
- * Detects unsupported two-level area paths, e.g.
- * test/scout/<area1>/<area2>/{ui,api}/
- * Only a single area level is allowed between the scout root and the
+ * Detects unsupported two-level namespace paths, e.g.
+ * test/scout/<namespace1>/<namespace2>/{ui,api}/
+ * Only a single namespace level is allowed between the scout root and the
  * {ui,api} category directory.
  */
-const SCOUT_TOO_DEEP_AREA_PATTERN = /\/test\/scout(?:_[^/]+)?\/[^/]+\/[^/]+\/(?:ui|api)\//;
+const SCOUT_TOO_DEEP_NAMESPACE_PATTERN = /\/test\/scout(?:_[^/]+)?\/[^/]+\/[^/]+\/(?:ui|api)\//;
 
 /**
  * Checks if a file path is in a Scout test directory
@@ -108,12 +108,12 @@ module.exports = {
       invalidExtension:
         'Scout test files must end with .spec.ts extension. Found: "{{actual}}", expected: "{{expected}}"',
       invalidPath:
-        'Scout test files must be located in scout{_*}/[<area>/]{ui,api}/{parallel_,}tests/ directories, ' +
-        'where the optional <area> is a single sub-directory level.',
-      invalidAreaDepth:
-        'Scout test files support at most one area sub-directory between the scout root and the ' +
-        '{ui,api} directory: scout{_*}/<area>/{ui,api}/{parallel_,}tests/. ' +
-        'Found more than one area level; rename to use a single area segment.',
+        'Scout test files must be located in scout{_*}/[<namespace>/]{ui,api}/{parallel_,}tests/ directories, ' +
+        'where the optional <namespace> is a single sub-directory level.',
+      invalidNamespaceDepth:
+        'Scout test files support at most one namespace sub-directory between the scout root and the ' +
+        '{ui,api} directory: scout{_*}/<namespace>/{ui,api}/{parallel_,}tests/. ' +
+        'Found more than one namespace level; rename to use a single namespace segment.',
       invalidPlaywrightConfigName: `Scout Playwright config files must be named one of the following: ${[
         ...ALLOWED_PLAYWRIGHT_CONFIG_NAMES,
       ].join(', ')}. Found: "{{actual}}"`,
@@ -168,13 +168,13 @@ module.exports = {
         };
       }
 
-      // Check for unsupported two-level area paths, e.g. scout/<a>/<b>/{ui,api}/
-      if (SCOUT_TOO_DEEP_AREA_PATTERN.test(filename)) {
+      // Check for unsupported two-level namespace paths, e.g. scout/<a>/<b>/{ui,api}/
+      if (SCOUT_TOO_DEEP_NAMESPACE_PATTERN.test(filename)) {
         return {
           Program(node) {
             context.report({
               node,
-              messageId: 'invalidAreaDepth',
+              messageId: 'invalidNamespaceDepth',
             });
           },
         };

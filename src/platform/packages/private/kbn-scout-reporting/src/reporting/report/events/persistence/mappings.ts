@@ -178,7 +178,7 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
       category: {
         type: 'keyword',
       },
-      scout_area: {
+      namespace: {
         type: 'keyword',
       },
     },

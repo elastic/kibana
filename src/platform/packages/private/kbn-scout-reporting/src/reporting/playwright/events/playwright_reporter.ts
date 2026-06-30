@@ -117,13 +117,13 @@ export class ScoutPlaywrightReporter implements Reporter {
 
   private getScoutConfigInfo(absoluteConfigPath: string): {
     category: ScoutTestRunConfigCategory;
-    area: string | undefined;
+    namespace: string | undefined;
   } {
     const relativePath = path.relative(REPO_ROOT, absoluteConfigPath);
     const groups = SCOUT_UNIFIED_CONFIG_PATH_REGEX.exec(relativePath)?.groups;
 
     if (!groups) {
-      return { category: ScoutTestRunConfigCategory.UNKNOWN, area: undefined };
+      return { category: ScoutTestRunConfigCategory.UNKNOWN, namespace: undefined };
     }
 
     const category =
@@ -131,7 +131,7 @@ export class ScoutPlaywrightReporter implements Reporter {
         ? ScoutTestRunConfigCategory.API_TEST
         : ScoutTestRunConfigCategory.UI_TEST;
 
-    return { category, area: groups.area };
+    return { category, namespace: groups.namespace };
   }
 
   private getSuitePropsFromTest(test: TestCase): ScoutReportEvent['suite'] {
@@ -196,11 +196,11 @@ export class ScoutPlaywrightReporter implements Reporter {
     let configInfo: ScoutTestRunInfo['config'];
 
     if (config.configFile !== undefined) {
-      const { category, area } = this.getScoutConfigInfo(config.configFile);
+      const { category, namespace } = this.getScoutConfigInfo(config.configFile);
       configInfo = {
         file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, config.configFile)),
         category,
-        ...(area !== undefined && { scout_area: area }),
+        ...(namespace !== undefined && { namespace }),
       };
     }
 

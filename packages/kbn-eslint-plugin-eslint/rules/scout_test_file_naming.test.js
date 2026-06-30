@@ -129,68 +129,68 @@ ruleTester.run('@kbn/eslint/scout_test_file_naming', rule, {
         'x-pack/solutions/observability/plugins/my_plugin/test/scout/api/tests/global.teardown.ts',
     },
 
-    // ── Area (new structure) ──────────────────────────────────────────────────
-    // Valid: area UI test with .spec.ts
+    // ── Namespace (new structure) ─────────────────────────────────────────────
+    // Valid: namespace UI test with .spec.ts
     {
       code: '',
       filename:
         'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/tests/my_rule.spec.ts',
     },
-    // Valid: area UI test inside a sub-folder of tests/
+    // Valid: namespace UI test inside a sub-folder of tests/
     {
       code: '',
       filename:
         'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/tests/sub-feature/my_rule.spec.ts',
     },
-    // Valid: area parallel_tests
+    // Valid: namespace parallel_tests
     {
       code: '',
       filename:
         'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/my_rule.spec.ts',
     },
-    // Valid: area API test
+    // Valid: namespace API test
     {
       code: '',
       filename:
         'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/api/tests/my_rule.spec.ts',
     },
-    // Valid: area with scout_* root
+    // Valid: namespace with scout_* root
     {
       code: '',
       filename:
         'x-pack/solutions/security/plugins/security_solution/test/scout_custom/detection_engine/ui/tests/my_rule.spec.ts',
     },
-    // Valid: global.setup.ts inside an area parallel_tests directory
+    // Valid: global.setup.ts inside a namespace parallel_tests directory
     {
       code: '',
       filename:
         'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/global.setup.ts',
     },
-    // Valid: global.teardown.ts inside an area tests directory
+    // Valid: global.teardown.ts inside a namespace tests directory
     {
       code: '',
       filename:
         'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/tests/global.teardown.ts',
     },
-    // Valid: Playwright config inside an area directory (non-test file)
+    // Valid: Playwright config inside a namespace directory (non-test file)
     {
       code: '',
       filename:
         'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/playwright.config.ts',
     },
-    // Valid: parallel Playwright config inside an area directory
+    // Valid: parallel Playwright config inside a namespace directory
     {
       code: '',
       filename:
         'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel.playwright.config.ts',
     },
-    // Valid: fixture file inside an area directory (non-test file)
+    // Valid: fixture file inside a namespace directory (non-test file)
     {
       code: '',
       filename:
         'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/fixtures/index.ts',
     },
-    // Valid: helper file inside an area directory (non-test file)
+    // Valid: helper file inside a namespace directory (non-test file)
     {
       code: '',
       filename:
@@ -341,8 +341,8 @@ ruleTester.run('@kbn/eslint/scout_test_file_naming', rule, {
       ],
     },
 
-    // ── Area (new structure) – invalid cases ──────────────────────────────────
-    // Invalid: area UI test with .ts instead of .spec.ts
+    // ── Namespace (new structure) – invalid cases ─────────────────────────────
+    // Invalid: namespace UI test with .ts instead of .spec.ts
     {
       code: '',
       filename:
@@ -357,7 +357,7 @@ ruleTester.run('@kbn/eslint/scout_test_file_naming', rule, {
         },
       ],
     },
-    // Invalid: area API test with .test.ts instead of .spec.ts
+    // Invalid: namespace API test with .test.ts instead of .spec.ts
     {
       code: '',
       filename:
@@ -372,7 +372,7 @@ ruleTester.run('@kbn/eslint/scout_test_file_naming', rule, {
         },
       ],
     },
-    // Invalid: area parallel_tests with wrong extension
+    // Invalid: namespace parallel_tests with wrong extension
     {
       code: '',
       filename:
@@ -383,7 +383,7 @@ ruleTester.run('@kbn/eslint/scout_test_file_naming', rule, {
         },
       ],
     },
-    // Invalid: non-standard Playwright config in an area directory
+    // Invalid: non-standard Playwright config in a namespace directory
     {
       code: '',
       filename:
@@ -397,47 +397,47 @@ ruleTester.run('@kbn/eslint/scout_test_file_naming', rule, {
         },
       ],
     },
-    // Invalid: two-level area – spec file (invalidAreaDepth)
+    // Invalid: two-level namespace – spec file (invalidNamespaceDepth)
     {
       code: '',
       filename:
         'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/my_team/ui/tests/my_rule.spec.ts',
       errors: [
         {
-          messageId: 'invalidAreaDepth',
+          messageId: 'invalidNamespaceDepth',
         },
       ],
     },
-    // Invalid: two-level area – parallel_tests spec file (invalidAreaDepth)
+    // Invalid: two-level namespace – parallel_tests spec file (invalidNamespaceDepth)
     {
       code: '',
       filename:
         'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/my_team/ui/parallel_tests/my_rule.spec.ts',
       errors: [
         {
-          messageId: 'invalidAreaDepth',
+          messageId: 'invalidNamespaceDepth',
         },
       ],
     },
-    // Invalid: two-level area – non-spec .ts file (invalidAreaDepth)
+    // Invalid: two-level namespace – non-spec .ts file (invalidNamespaceDepth)
     {
       code: '',
       filename:
         'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/my_team/ui/fixtures/index.ts',
       errors: [
         {
-          messageId: 'invalidAreaDepth',
+          messageId: 'invalidNamespaceDepth',
         },
       ],
     },
-    // Invalid: two-level area with scout_* root (invalidAreaDepth)
+    // Invalid: two-level namespace with scout_* root (invalidNamespaceDepth)
     {
       code: '',
       filename:
         'x-pack/solutions/security/plugins/security_solution/test/scout_custom/area1/area2/ui/tests/my_rule.spec.ts',
       errors: [
         {
-          messageId: 'invalidAreaDepth',
+          messageId: 'invalidNamespaceDepth',
         },
       ],
     },
