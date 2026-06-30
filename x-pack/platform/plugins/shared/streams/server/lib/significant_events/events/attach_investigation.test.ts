@@ -6,7 +6,7 @@
  */
 
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { SigEventInvestigation } from '@kbn/streams-schema';
+import type { SignificantEventInvestigation } from '@kbn/streams-schema';
 import { attachInvestigationToEvent } from './attach_investigation';
 import { EventClient } from './event_client';
 import type { SignificantEvent } from './data_stream';
@@ -28,8 +28,8 @@ const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEven
 });
 
 const createInvestigation = (
-  overrides: Partial<SigEventInvestigation> = {}
-): SigEventInvestigation => ({
+  overrides: Partial<SignificantEventInvestigation> = {}
+): SignificantEventInvestigation => ({
   workflow_execution_id: 'exec-1',
   status: 'pending',
   started_at: '2026-01-01T01:00:00.000Z',

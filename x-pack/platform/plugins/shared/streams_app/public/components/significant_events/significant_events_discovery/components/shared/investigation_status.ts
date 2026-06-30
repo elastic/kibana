@@ -6,15 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SigEvent, SigEventInvestigationStatus } from '@kbn/streams-schema';
+import type { SigEvent, SignificantEventInvestigationStatus } from '@kbn/streams-schema';
 
-export const INVESTIGATION_STATUS_COLORS: Record<SigEventInvestigationStatus, string> = {
+export const INVESTIGATION_STATUS_COLORS: Record<SignificantEventInvestigationStatus, string> = {
   pending: 'warning',
   success: 'success',
   failed: 'danger',
 };
 
-export const INVESTIGATION_STATUS_LABELS: Record<SigEventInvestigationStatus, string> = {
+export const INVESTIGATION_STATUS_LABELS: Record<SignificantEventInvestigationStatus, string> = {
   pending: i18n.translate('xpack.streams.investigation.status.pending', {
     defaultMessage: 'Running',
   }),

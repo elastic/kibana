@@ -7,7 +7,7 @@
 
 import {
   significantEventSchema,
-  sigEventInvestigationSchema,
+  significantEventInvestigationSchema,
   type Detection,
   type SignificantEvent,
   type Discovery,
@@ -235,7 +235,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
-    body: sigEventInvestigationSchema,
+    body: significantEventInvestigationSchema,
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
     const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });

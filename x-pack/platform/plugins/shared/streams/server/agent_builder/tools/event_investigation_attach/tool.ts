@@ -10,7 +10,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { sigEventInvestigationStatusSchema } from '@kbn/streams-schema';
+import { significantEventInvestigationStatusSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -38,7 +38,7 @@ const eventInvestigationAttachSchema = z.object({
       }
     )
   ),
-  status: sigEventInvestigationStatusSchema.describe(
+  status: significantEventInvestigationStatusSchema.describe(
     i18n.translate('xpack.streams.agentBuilder.tools.eventInvestigationAttach.schema.status', {
       defaultMessage:
         'Status of the investigation: "pending" while running, "success" or "failed" when done.',

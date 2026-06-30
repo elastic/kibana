@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import type { SigEventInvestigation } from '@kbn/streams-schema';
+import type { SignificantEventInvestigation } from '@kbn/streams-schema';
 import type { EventClient } from './event_client';
 
 export const attachInvestigationToEvent = async ({
@@ -17,7 +17,7 @@ export const attachInvestigationToEvent = async ({
 }: {
   eventClient: EventClient;
   eventId: string;
-  investigation: SigEventInvestigation;
+  investigation: SignificantEventInvestigation;
 }): Promise<{ event_id: string; updated: number; ignored: number }> => {
   const { hits } = await eventClient.findById(eventId);
   const latest = hits[hits.length - 1];
@@ -34,7 +34,7 @@ export const attachInvestigationToEvent = async ({
     (i) => i.workflow_execution_id === investigation.workflow_execution_id
   );
 
-  let investigations: SigEventInvestigation[];
+  let investigations: SignificantEventInvestigation[];
   if (existingIdx !== -1) {
     if (isEqual(existing[existingIdx], investigation)) {
       return { event_id: eventId, updated: 0, ignored: 1 };

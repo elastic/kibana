@@ -282,7 +282,7 @@ export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
-  SIG_EVENT_INVESTIGATION_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_INVESTIGATION_STATUS_OPTIONS,
   detectionSchema,
   type Detection,
   discoverySchema,
@@ -292,10 +292,10 @@ export {
   type SignificantEvent,
   type KnowledgeIndicator,
   type SignificantEventStatus,
-  type SigEventInvestigation,
-  type SigEventInvestigationStatus,
-  sigEventInvestigationSchema,
-  sigEventInvestigationStatusSchema,
+  type SignificantEventInvestigation,
+  type SignificantEventInvestigationStatus,
+  significantEventInvestigationSchema,
+  significantEventInvestigationStatusSchema,
 } from './src/significant_events';
 export type {
   StreamsKIsOnboardingResult,

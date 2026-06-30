@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SigEvent, SigEventInvestigation } from '@kbn/streams-schema';
+import type { SigEvent, SignificantEventInvestigation } from '@kbn/streams-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
 import {
   INVESTIGATION_STATUS_COLORS,
@@ -41,7 +41,7 @@ const formatDuration = (startedAt: string, completedAt?: string): string => {
   return `${hours}h ${totalMinutes % 60}m`;
 };
 
-const InvestigationRow = ({ investigation }: { investigation: SigEventInvestigation }) => {
+const InvestigationRow = ({ investigation }: { investigation: SignificantEventInvestigation }) => {
   const { status, started_at, completed_at } = investigation;
   const duration = formatDuration(started_at, completed_at);
   const isRunning = status === 'pending';
