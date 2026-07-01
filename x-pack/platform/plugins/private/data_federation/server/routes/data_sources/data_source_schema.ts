@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-const optionalString = schema.maybe(schema.string());
+const optionalString = schema.maybe(schema.string({ maxLength: 4096 }));
 
 const s3SettingsWithSecretsSchema = schema.object({
   region: optionalString,
@@ -52,17 +52,17 @@ const azureSettingsWithSecretsSchema = schema.object({
 export const putDataSourceBodySchema = schema.oneOf([
   schema.object({
     type: schema.literal('s3'),
-    description: schema.string(),
+    description: schema.string({ maxLength: 1024 }),
     settings: s3SettingsWithSecretsSchema,
   }),
   schema.object({
     type: schema.literal('gcs'),
-    description: schema.string(),
+    description: schema.string({ maxLength: 1024 }),
     settings: gcsSettingsWithSecretsSchema,
   }),
   schema.object({
     type: schema.literal('azure'),
-    description: schema.string(),
+    description: schema.string({ maxLength: 1024 }),
     settings: azureSettingsWithSecretsSchema,
   }),
 ]);

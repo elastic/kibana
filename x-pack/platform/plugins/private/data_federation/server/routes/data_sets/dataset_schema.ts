@@ -7,15 +7,15 @@
 
 import { schema } from '@kbn/config-schema';
 
-const optionalString = schema.maybe(schema.string());
+const optionalString = schema.maybe(schema.string({ maxLength: 4096 }));
 
 /**
  * Request body for `PUT .../data_sets/{id}`: {@link Dataset} (no top-level `name`;
  * the path supplies the id).
  */
 export const datasetSchema = schema.object({
-  data_source: schema.string(),
-  resource: schema.string(),
+  data_source: schema.string({ maxLength: 256 }),
+  resource: schema.string({ maxLength: 4096 }),
   description: optionalString,
   settings: schema.maybe(
     schema.object({

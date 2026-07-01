@@ -30,7 +30,7 @@ export function registerCreateDataSource(router: IRouter, config: DataFederation
       },
       validate: {
         params: schema.object({
-          id: schema.string(),
+          id: schema.string({ maxLength: 256 }),
         }),
         body: putDataSourceBodySchema,
       },

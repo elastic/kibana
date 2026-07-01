@@ -29,7 +29,7 @@ export function registerCreateDataset(router: IRouter): void {
       },
       validate: {
         params: schema.object({
-          id: schema.string(),
+          id: schema.string({ maxLength: 256 }),
         }),
         body: datasetSchema,
       },

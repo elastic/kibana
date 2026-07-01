@@ -27,7 +27,7 @@ export function registerDeleteDataSource(router: IRouter): void {
       },
       validate: {
         params: schema.object({
-          id: schema.string(),
+          id: schema.string({ maxLength: 256 }),
         }),
       },
     },

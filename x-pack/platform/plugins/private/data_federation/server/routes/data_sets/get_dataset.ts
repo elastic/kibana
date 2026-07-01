@@ -26,7 +26,7 @@ export function registerGetDataset(router: IRouter): void {
       },
       validate: {
         params: schema.object({
-          id: schema.string(),
+          id: schema.string({ maxLength: 256 }),
         }),
       },
     },
