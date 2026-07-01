@@ -42,6 +42,7 @@ import { getColumns } from './get_columns';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getComparisonEnabled } from '../time_comparison/get_comparison_enabled';
 import type { ApmFlyoutState } from '../../../hooks/use_alert_slo_actions';
+import { TableRollupOptions } from '../table_rollup_options';
 import { useTransactionActions } from './get_transaction_actions';
 
 type ApiResponse =
@@ -266,18 +267,29 @@ export function TransactionsTable({
                   <h2>{title}</h2>
                 </EuiTitle>
               </EuiFlexItem>
+
               {!hideViewTransactionsLink && (
                 <EuiFlexItem grow={false}>
-                  <TransactionOverviewLink
-                    serviceName={serviceName}
-                    latencyAggregationType={latencyAggregationType}
-                    transactionType={transactionType}
-                    query={query}
-                  >
-                    {i18n.translate('xpack.apm.transactionsTable.linkText', {
-                      defaultMessage: 'View transactions',
-                    })}
-                  </TransactionOverviewLink>
+                  <EuiFlexGroup direction="row">
+                    <EuiFlexItem>
+                      <TableRollupOptions
+                        rollupInterval={undefined}
+                        onRollupIntervalChange={() => {}}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <TransactionOverviewLink
+                        serviceName={serviceName}
+                        latencyAggregationType={latencyAggregationType}
+                        transactionType={transactionType}
+                        query={query}
+                      >
+                        {i18n.translate('xpack.apm.transactionsTable.linkText', {
+                          defaultMessage: 'View transactions',
+                        })}
+                      </TransactionOverviewLink>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
