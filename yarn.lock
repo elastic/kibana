@@ -10036,6 +10036,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/workflows-library@link:src/platform/packages/shared/kbn-workflows-library":
+  version "0.0.0"
+  uid ""
+
 "@kbn/workflows-management-plugin@link:src/platform/plugins/shared/workflows_management":
   version "0.0.0"
   uid ""
@@ -17828,11 +17832,6 @@ bl@^5.0.0:
     buffer "^6.0.3"
     inherits "^2.0.4"
     readable-stream "^3.4.0"
-
-blob-polyfill@9.0.20240710:
-  version "9.0.20240710"
-  resolved "https://registry.yarnpkg.com/blob-polyfill/-/blob-polyfill-9.0.20240710.tgz#2ef075a207311ea327704f04dc4a98cbefe4143b"
-  integrity sha512-DPUO/EjNANCgSVg0geTy1vmUpu5hhp9tV2F7xUSTUd1jwe4XpwupGB+lt5PhVUqpqAk+zK1etqp6Pl/HVf71Ug==
 
 blob-util@^2.0.2:
   version "2.0.2"
