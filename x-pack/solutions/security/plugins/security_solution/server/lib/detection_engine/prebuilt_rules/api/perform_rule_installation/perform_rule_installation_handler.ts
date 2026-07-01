@@ -17,6 +17,7 @@ import type {
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { aggregatePrebuiltRuleErrors } from '../../logic/aggregate_prebuilt_rule_errors';
+import { PREBUILT_RULE_BATCH_SIZE } from '../../constants';
 import { ensureLatestRulesPackageInstalled } from '../../logic/integrations/ensure_latest_rules_package_installed';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
@@ -108,15 +109,20 @@ export const performRuleInstallationHandler = async (
       ruleInstallQueue.push(...(await excludeLicenseRestrictedRules(allInstallableRules, mlAuthz)));
     }
 
-    const { assets: ruleAssets } = await ruleAssetsClient.fetchAssetsByVersion(ruleInstallQueue);
-    const { results, errors } = await detectionRulesClient.bulkCreatePrebuiltRules({
-      rules: ruleAssets,
-    });
-    installedRules.push(...results);
-    ruleErrors.push(...errors);
-    logger.debug(
-      `bulkCreatePrebuiltRules: ${results.length} created, ${errors.length} failed out of ${ruleAssets.length} total`
-    );
+    for (let i = 0; i < ruleInstallQueue.length; i += PREBUILT_RULE_BATCH_SIZE) {
+      const batch = ruleInstallQueue.slice(i, i + PREBUILT_RULE_BATCH_SIZE);
+      const { assets: ruleAssets } = await ruleAssetsClient.fetchAssetsByVersion(batch);
+      const { results, errors } = await detectionRulesClient.bulkCreatePrebuiltRules({
+        rules: ruleAssets,
+      });
+      installedRules.push(...results);
+      ruleErrors.push(...errors);
+      logger.debug(
+        `bulkCreatePrebuiltRules: batch ${Math.floor(i / PREBUILT_RULE_BATCH_SIZE) + 1} — ${
+          results.length
+        } created, ${errors.length} failed out of ${ruleAssets.length}`
+      );
+    }
 
     const { error: timelineInstallationError } = await performTimelinesInstallation(
       ctx.securitySolution
