@@ -74,7 +74,10 @@ describe('renderTagParser', () => {
 
   describe('with markdown parsed by remark (real pipeline)', () => {
     it('parses a tag that stands alone in its own paragraph', () => {
-      const tree = parseMarkdown(tag('/workspace/renders/dashboard/sales.json', 'dashboard'));
+      const tree = parseMarkdown(
+        tag('/workspace/renders/dashboard/sales.json', 'dashboard'),
+        renderTagParser
+      );
 
       const nodes = collectNodesByType(tree, renderElement.tagName);
       expect(nodes).toHaveLength(1);
@@ -90,7 +93,7 @@ describe('renderTagParser', () => {
         '/workspace/renders/dashboard/sales.json'
       )} is ready.\n\nOps:\n${tag('/workspace/renders/dashboard/ops.json')}`;
 
-      const tree = parseMarkdown(markdown);
+      const tree = parseMarkdown(markdown, renderTagParser);
 
       const nodes = collectNodesByType(tree, renderElement.tagName);
       expect(nodes.map((n) => n.path)).toEqual([
@@ -110,7 +113,7 @@ describe('renderTagParser', () => {
     it('does not capture <render_attachment> tags (word-boundary disjoint)', () => {
       const markdown = `<${renderAttachmentElement.tagName} ${renderAttachmentElement.attributes.attachmentId}="dash-1"/>`;
 
-      const tree = parseMarkdown(markdown);
+      const tree = parseMarkdown(markdown, renderTagParser);
 
       expect(collectNodesByType(tree, renderElement.tagName)).toHaveLength(0);
     });

@@ -41,6 +41,7 @@ import type {
   IBashService,
 } from '../runner';
 import type { AttachmentStateManager } from '../attachments';
+import type { RendererTypeDefinition } from '../renderers';
 import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
@@ -156,6 +157,11 @@ export interface AgentHandlerContext {
    * Attachment service to interact with attachments.
    */
   attachments: AttachmentsService;
+  /**
+   * Renderer types registered in agentBuilder, used to advertise available
+   * renderers (and their payload schemas) to the agent in the prompt.
+   */
+  renderers: RendererTypeDefinition[];
   /**
    * Skills service to interact with skills.
    */

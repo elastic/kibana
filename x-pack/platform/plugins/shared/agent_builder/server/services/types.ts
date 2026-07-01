@@ -27,6 +27,7 @@ import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './execution/runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
+import type { WorkspaceService } from './workspaces';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
 import type { RendererServiceSetup, RendererServiceStart } from './renderers';
 import type { SkillServiceSetup, SkillServiceStart } from './skills';
@@ -55,6 +56,7 @@ export interface InternalStartServices {
   renderers: RendererServiceStart;
   skills: SkillServiceStart;
   conversations: ConversationService;
+  workspaces: WorkspaceService;
   runnerFactory: RunnerFactory;
   hooks: HooksServiceStart;
   auditLogService: AuditLogService;

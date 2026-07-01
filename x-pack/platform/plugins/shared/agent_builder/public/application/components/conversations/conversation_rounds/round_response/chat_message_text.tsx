@@ -30,6 +30,7 @@ import type {
 import {
   visualizationElement,
   renderAttachmentElement,
+  renderElement,
 } from '@kbn/agent-builder-common/tools/custom_rendering';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -42,6 +43,7 @@ import {
   renderAttachmentTagParser,
   createRenderAttachmentRenderer,
   renderTagParser,
+  createRenderRenderer,
 } from './markdown_plugins';
 import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
@@ -83,7 +85,8 @@ export function ChatMessageText({
     }
   `;
 
-  const { attachmentsService, startDependencies } = useAgentBuilderServices();
+  const { attachmentsService, renderersService, conversationsService, startDependencies } =
+    useAgentBuilderServices();
   const stepsFromPrevRounds = useStepsFromPrevRounds();
   const { isEmbeddedContext: isSidebar } = useConversationContext();
   const {
@@ -137,6 +140,17 @@ export function ChatMessageText({
       attachmentsService,
       isStreaming,
     ]
+  );
+
+  const renderRenderer = useMemo(
+    () =>
+      createRenderRenderer({
+        renderersService,
+        conversationsService,
+        conversationId,
+        isStreaming,
+      }),
+    [renderersService, conversationsService, conversationId, isStreaming]
   );
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
@@ -220,6 +234,7 @@ export function ChatMessageText({
       },
       [visualizationElement.tagName]: visualizationRenderer,
       [renderAttachmentElement.tagName]: renderAttachmentRenderer,
+      [renderElement.tagName]: renderRenderer,
     };
 
     return {
@@ -233,7 +248,7 @@ export function ChatMessageText({
       ],
       processingPluginList: processingPlugins,
     };
-  }, [visualizationRenderer, renderAttachmentRenderer, handleLinkClick]);
+  }, [visualizationRenderer, renderAttachmentRenderer, renderRenderer, handleLinkClick]);
 
   return (
     <>
