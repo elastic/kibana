@@ -18,6 +18,7 @@ describe('PluginsConfig', () => {
     const env = Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { dev: false } }));
     const rawConfig: PluginsConfigType = {
       initialize: true,
+      globalTokenValidation: 'warn',
       paths: ['some-path', 'another-path'],
     };
     const config = new PluginsConfig(rawConfig, env);
@@ -28,6 +29,7 @@ describe('PluginsConfig', () => {
     const env = Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { dev: true } }));
     const rawConfig: PluginsConfigType = {
       initialize: true,
+      globalTokenValidation: 'warn',
       paths: ['some-path', 'another-path'],
     };
     const config = new PluginsConfig(rawConfig, env);
@@ -38,6 +40,7 @@ describe('PluginsConfig', () => {
     const env = Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { dev: true } }));
     const rawConfig: PluginsConfigType = {
       initialize: true,
+      globalTokenValidation: 'warn',
       paths: ['some-path', 'another-path'],
       forceEnableAllPlugins: true,
     };
@@ -49,6 +52,7 @@ describe('PluginsConfig', () => {
     const env = Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { dev: true } }));
     const rawConfig: PluginsConfigType = {
       initialize: true,
+      globalTokenValidation: 'warn',
       paths: ['some-path', 'another-path'],
       forceEnableAllPlugins: true,
       allowlistPluginGroups: ['search'],

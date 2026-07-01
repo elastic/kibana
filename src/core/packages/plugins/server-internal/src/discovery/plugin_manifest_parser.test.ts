@@ -388,6 +388,10 @@ test('set defaults for all missing optional fields', async () => {
     kibanaVersion: '7.0.0',
     type: 'standard',
     optionalPlugins: [],
+    globals: {
+      services: { provides: [], consumes: [] },
+      extensionPoints: { hosts: [], contributes: [] },
+    },
     requiredPlugins: [],
     requiredBundles: [],
     runtimePluginDependencies: [],
@@ -426,6 +430,10 @@ test('return all set optional fields as they are in manifest', async () => {
     kibanaVersion: '7.0.0',
     type: 'preboot',
     optionalPlugins: ['some-optional-plugin'],
+    globals: {
+      services: { provides: [], consumes: [] },
+      extensionPoints: { hosts: [], contributes: [] },
+    },
     requiredBundles: [],
     requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
     runtimePluginDependencies: ['runtime-plugin-dependency'],
@@ -461,6 +469,10 @@ test('return manifest when plugin expected Kibana version matches actual version
     kibanaVersion: '7.0.0-alpha2',
     type: 'standard',
     optionalPlugins: [],
+    globals: {
+      services: { provides: [], consumes: [] },
+      extensionPoints: { hosts: [], contributes: [] },
+    },
     requiredPlugins: ['some-required-plugin'],
     requiredBundles: [],
     runtimePluginDependencies: [],
@@ -495,6 +507,10 @@ test('return manifest when plugin expected Kibana version is `kibana`', async ()
     kibanaVersion: 'kibana',
     type: 'standard',
     optionalPlugins: [],
+    globals: {
+      services: { provides: [], consumes: [] },
+      extensionPoints: { hosts: [], contributes: [] },
+    },
     requiredPlugins: ['some-required-plugin'],
     requiredBundles: [],
     runtimePluginDependencies: [],

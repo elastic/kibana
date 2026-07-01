@@ -9,10 +9,10 @@
 
 import { mockInitializer, mockPlugin, mockPluginReader } from './plugin.test.mocks';
 
-import { ContainerModule } from 'inversify';
+import { Container, ContainerModule } from 'inversify';
 import type { DiscoveredPlugin } from '@kbn/core-base-common';
 import { PluginType } from '@kbn/core-base-common';
-import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
+import { OnStart, PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-browser';
 import { createPluginInitializerContextMock } from './test_helpers';
@@ -31,6 +31,10 @@ function createManifest(
     optionalPlugins: optional,
     requiredBundles: [],
     runtimePluginDependencies: [],
+    globals: {
+      services: { provides: [], consumes: [] },
+      extensionPoints: { hosts: [], contributes: [] },
+    },
     owner: {
       name: 'foo',
     },
@@ -99,6 +103,24 @@ describe('PluginWrapper', () => {
     expect(container.get(PluginSetup('otherDep'))).toBe('value');
   });
 
+  test('`setup` prefers `services` over `module` when both are exported', () => {
+    const servicesCallback = jest.fn(({ bind }) => {
+      bind(Setup).toConstantValue({ from: 'services' });
+    });
+    const legacyCallback = jest.fn(({ bind }) => {
+      bind(Setup).toConstantValue({ from: 'module' });
+    });
+    mockPluginReader.mockReturnValueOnce({
+      services: new ContainerModule(servicesCallback),
+      module: new ContainerModule(legacyCallback),
+    } as any);
+    const injection = injectionServiceMock.createInternalSetupContract();
+
+    expect(plugin.setup({ injection } as any, {})).toEqual({ from: 'services' });
+    expect(servicesCallback).toHaveBeenCalledTimes(1);
+    expect(legacyCallback).not.toHaveBeenCalled();
+  });
+
   test('`start` fails if setup is not called first', () => {
     expect(() => plugin.start({} as any, {} as any)).toThrowErrorMatchingInlineSnapshot(
       `"Plugin \\"plugin-a\\" can't be started since it isn't set up."`
@@ -157,6 +179,56 @@ describe('PluginWrapper', () => {
     const container = injection.getContainer();
     expect(container.get(CoreStart('injection'))).toBeDefined();
     expect(container.get(PluginStart('otherDep'))).toBe('value');
+  });
+
+  test('`start` bridges the classic start contract into DI before OnStart hooks resolve Start', () => {
+    // Mimic PluginModule: a default Start binding plus a container-module
+    // activation that fires OnStart hooks. The wrapper operates on a child
+    // scope, matching production, so the rebound Start is observed by the hooks.
+    const root = new Container({ defaultScope: 'Singleton' });
+    const activated = new WeakSet<Container>();
+    root.loadSync(
+      new ContainerModule(({ bind, onActivation }) => {
+        bind(Setup)
+          .toResolvedValue(() => undefined)
+          .inRequestScope();
+        bind(Start)
+          .toResolvedValue(() => undefined)
+          .inRequestScope();
+        onActivation(Start, ({ get }, contract) => {
+          const container = get(Container);
+          if (!activated.has(container)) {
+            activated.add(container);
+            container.getAll(OnStart, { chained: true }).forEach((callback) => callback(container));
+          }
+          return contract;
+        });
+      })
+    );
+    const child = new Container({ defaultScope: 'Singleton', parent: root });
+    child.bind(Container).toConstantValue(child);
+    const injection = { getContainer: () => child, fork: () => child };
+
+    const classicStartContract = { value: 'classic-start' };
+    mockPluginReader.mockReturnValueOnce({ plugin: mockInitializer, module: pluginModule } as any);
+    mockInitializer.mockReturnValueOnce({
+      setup: jest.fn(),
+      start: jest.fn().mockReturnValue(classicStartContract),
+      stop: jest.fn(),
+    });
+
+    let observedStart: unknown;
+    mockContainerModuleCallback.mockImplementationOnce(({ bind }) => {
+      bind(OnStart).toConstantValue((container: Container) => {
+        observedStart = container.get(Start);
+      });
+    });
+
+    plugin.setup({ injection } as any, {});
+    const startContract = plugin.start({ injection } as any, {});
+
+    expect(startContract).toBe(classicStartContract);
+    expect(observedStart).toBe(classicStartContract);
   });
 
   test('`stop` fails if plugin is not setup up', async () => {
