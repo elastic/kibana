@@ -24,6 +24,7 @@ import { timeSeriesAggFunctionDefinitions } from '../generated/time_series_agg_f
 import { groupingFunctionDefinitions } from '../generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../generated/scalar_functions';
 import { inlineCastsMapping } from '../generated/inline_casts_mapping';
+import { EsqlFunctionNames } from '../generated/function_names';
 import type { ESQLColumnData, ISuggestionItem } from '../../registry/types';
 import { withAutoSuggest } from './autocomplete/helpers';
 import { buildFunctionDocumentation } from './documentation';
@@ -430,8 +431,12 @@ export function getFunctionForInlineCast(castingType: InlineCastingType): string
   return inlineCastsMapping[castingType];
 }
 
+// TODO: Remove the hardcoded TO_TEXT handling once Elasticsearch adds text -> to_text
+// to the ES|QL inline_cast.json metadata.
 export function isTypeConversionFunction(functionName: string): boolean {
   const lower = functionName.toLowerCase();
 
-  return Object.values<string>(inlineCastsMapping).includes(lower);
+  return (
+    lower === EsqlFunctionNames.TO_TEXT || Object.values<string>(inlineCastsMapping).includes(lower)
+  );
 }
