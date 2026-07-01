@@ -32,7 +32,7 @@ export {
   getLegendLayout,
 } from './legend';
 
-export { getComputedColumnWarningForColumns } from './computed_column_warning';
+export { isFilterableColumnSet, getFilterDrilldownWarningMessage } from './computed_column_warning';
 export { ChartTooltipFooterMessage } from './components/chart_tooltip_footer_message';
 export type { Simplify, MakeOverridesSerializable, ChartSizeSpec, ChartSizeEvent } from './types';
 export { isChartSizeEvent } from './types';

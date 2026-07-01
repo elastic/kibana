@@ -33,7 +33,7 @@ import {
   ChartTooltipFooterMessage,
   getAccessorByDimension,
   getFormatByAccessor,
-  getComputedColumnWarningForColumns,
+  getFilterDrilldownWarningMessage,
   getOverridesFor,
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
@@ -461,8 +461,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
 
     // Compute warning message for ES|QL computed columns that cannot be filtered.
     const warningMessage = useMemo(
-      () =>
-        isEsqlMode ? getComputedColumnWarningForColumns([xAxisColumn, yAxisColumn]) : undefined,
+      () => (isEsqlMode ? getFilterDrilldownWarningMessage([xAxisColumn, yAxisColumn]) : undefined),
       [isEsqlMode, xAxisColumn, yAxisColumn]
     );
 
