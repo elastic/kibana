@@ -380,10 +380,32 @@ apiTest.describe(
       );
     };
 
+    const deleteConversationAs = async (
+      apiClient: any,
+      user: { username: string; password: string },
+      conversationId: string
+    ) => {
+      return apiClient.delete(
+        `${accessControlApiBase}/conversations/${encodeURIComponent(conversationId)}`,
+        { headers: headersFor(user), responseType: 'json' }
+      );
+    };
+
+    const deleteAgentAs = async (
+      apiClient: any,
+      user: { username: string; password: string },
+      agentId: string
+    ) => {
+      return apiClient.delete(`${accessControlApiBase}/agents/${encodeURIComponent(agentId)}`, {
+        headers: headersFor(user),
+        responseType: 'json',
+      });
+    };
+
     // ── public conversation access ──────────────────────────────────────────
 
     apiTest(
-      'public conversations require same-space conversation access and agent use access',
+      'public conversations require conversation access and agent use access',
       async ({ apiClient }) => {
         const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-agent-${testRunId.slice(0, 8)}`;
         await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Shared));
@@ -404,6 +426,14 @@ apiTest.describe(
           input: 'Bob-owned public conversation access test',
           title: 'Bob-Owned Public Conversation Access Test',
           accessMode: ConversationAccessControlMode.Public,
+        });
+
+        const ownerMutationConversation = await createConversationAs({
+          apiClient,
+          user: alice,
+          agentId,
+          input: 'Owner mutation conversation access test',
+          title: 'Owner Mutation Conversation Access Test',
         });
 
         const privateConversation = await createConversationAs({
@@ -496,6 +526,46 @@ apiTest.describe(
           expect((getResponse.body as Conversation).title).toBe('Public Conversation Access Test');
         });
 
+        await apiTest.step('Alice can rename and delete her own conversation', async () => {
+          const renamedTitle = 'Alice Renamed Owner Conversation';
+          const renameResponse = await renameConversationAs(
+            apiClient,
+            alice,
+            ownerMutationConversation.conversation_id,
+            renamedTitle
+          );
+          expect(renameResponse).toHaveStatusCode(200);
+          expect(renameResponse.body).toMatchObject({
+            id: ownerMutationConversation.conversation_id,
+            title: renamedTitle,
+          });
+
+          const getRenamedResponse = await apiClient.get(
+            `${accessControlApiBase}/conversations/${encodeURIComponent(
+              ownerMutationConversation.conversation_id
+            )}`,
+            { headers: headersFor(alice), responseType: 'json' }
+          );
+          expect(getRenamedResponse).toHaveStatusCode(200);
+          expect((getRenamedResponse.body as Conversation).title).toBe(renamedTitle);
+
+          const deleteResponse = await deleteConversationAs(
+            apiClient,
+            alice,
+            ownerMutationConversation.conversation_id
+          );
+          expect(deleteResponse).toHaveStatusCode(200);
+          expect(deleteResponse.body).toMatchObject({ success: true });
+
+          const getDeletedResponse = await apiClient.get(
+            `${accessControlApiBase}/conversations/${encodeURIComponent(
+              ownerMutationConversation.conversation_id
+            )}`,
+            { headers: headersFor(alice), responseType: 'json' }
+          );
+          expect(getDeletedResponse).toHaveStatusCode(404);
+        });
+
         await apiTest.step('Bob cannot list or get Alice private conversations', async () => {
           const bobConversationIds = await listConversationIdsAs(apiClient, bob);
           expect(bobConversationIds).not.toContain(privateConversation.conversation_id);
@@ -508,6 +578,35 @@ apiTest.describe(
           );
           expect(getPrivateResponse).toHaveStatusCode(404);
         });
+
+        await apiTest.step(
+          'Bob cannot continue or mark read Alice private conversations',
+          async () => {
+            const continuePrivateResponse = await apiClient.post(
+              `${accessControlApiBase}/converse`,
+              {
+                headers: headersFor(bob),
+                body: {
+                  agent_id: agentId,
+                  conversation_id: privateConversation.conversation_id,
+                  input: 'Bob private follow-up',
+                  connector_id: connectorId,
+                  _execution_mode: 'local',
+                },
+                responseType: 'json',
+              }
+            );
+            expect(continuePrivateResponse).toHaveStatusCode(404);
+
+            const markReadResponse = await markConversationReadAs(
+              apiClient,
+              bob,
+              privateConversation.conversation_id,
+              true
+            );
+            expect(markReadResponse).toHaveStatusCode(404);
+          }
+        );
 
         await apiTest.step(
           'Bob loses access when the underlying agent becomes private',
@@ -565,6 +664,44 @@ apiTest.describe(
               false
             );
             expect(markOwnReadResponse).toHaveStatusCode(404);
+          }
+        );
+
+        await apiTest.step(
+          'Bob regains access when the underlying agent becomes shared',
+          async () => {
+            await setAgentAccessModeAs(apiClient, alice, agentId, AgentAccessControlMode.Shared);
+
+            const bobConversationIds = await listConversationIdsAs(apiClient, bob);
+            expect(bobConversationIds).toContain(publicConversation.conversation_id);
+            expect(bobConversationIds).toContain(bobOwnedPublicConversation.conversation_id);
+
+            const getPublicResponse = await apiClient.get(
+              `${accessControlApiBase}/conversations/${encodeURIComponent(
+                publicConversation.conversation_id
+              )}`,
+              { headers: headersFor(bob), responseType: 'json' }
+            );
+            expect(getPublicResponse).toHaveStatusCode(200);
+            expect((getPublicResponse.body as Conversation).id).toBe(
+              publicConversation.conversation_id
+            );
+          }
+        );
+
+        await apiTest.step(
+          'Deleted agents make referenced conversations inaccessible',
+          async () => {
+            const deleteAgentResponse = await deleteAgentAs(apiClient, alice, agentId);
+            expect(deleteAgentResponse).toHaveStatusCode(200);
+
+            const getOrphanedResponse = await apiClient.get(
+              `${accessControlApiBase}/conversations/${encodeURIComponent(
+                publicConversation.conversation_id
+              )}`,
+              { headers: headersFor(alice), responseType: 'json' }
+            );
+            expect(getOrphanedResponse).toHaveStatusCode(404);
           }
         );
       }
