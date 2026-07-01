@@ -27,6 +27,11 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/otel_semconv_sync.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/otel_semconv_sync.yml
+            cleanup_sparse_state: true
       provider_settings:
         build_branches: false
         build_pull_requests: false
@@ -48,7 +53,7 @@ spec:
           access_level: BUILD_AND_READ
       schedules:
         Weekly build:
-          cronline: 0 2 * * 1 America/New_York  # Monday 2 AM EST (matches GitHub Actions)
+          cronline: 0 2 * * 1 America/New_York # Monday 2 AM EST (matches GitHub Actions)
           message: Weekly OpenTelemetry semantic conventions sync
           branch: main
       tags:

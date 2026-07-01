@@ -33,6 +33,11 @@ spec:
       # Trimmed on-merge variant: build the distribution and run the full test fanout
       # (Jest, Scout, FTR, Cypress, serverless) without lint/typecheck/storybooks/api-docs/etc.
       pipeline_file: .buildkite/pipelines/rspack_e2e_test.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/rspack_e2e_test.yml
+            cleanup_sparse_state: true
       skip_intermediate_builds: false
       provider_settings:
         # Don't auto-build on commits; only run via schedule / manual trigger.

@@ -21,7 +21,7 @@
  */
 
 import fs from 'fs';
-import { parseDocument, isMap, isSeq, Pair, YAMLSeq, type Document, type YAMLMap } from 'yaml';
+import { parseAllDocuments, isMap, isSeq, Pair, YAMLSeq, type Document, type YAMLMap } from 'yaml';
 
 const SPARSE_PLUGIN_KEY = 'sparse-checkout#v1.6.0';
 const SPARSE_PLUGIN_PREFIX = 'sparse-checkout';
@@ -47,27 +47,40 @@ async function main() {
 
 function ensureSparseCheckoutForFile(file: string): Outcome {
   const original = fs.readFileSync(file, 'utf8');
-  const doc = parseDocument(original);
 
+  // RRE files may contain multiple resources separated by `---`.
+  const docs = parseAllDocuments(original);
+  if (docs.some((doc) => doc.errors.length > 0)) {
+    return 'skipped';
+  }
+
+  let changed = false;
+  for (const doc of docs) {
+    changed = ensureSparsePluginForDoc(doc) || changed;
+  }
+
+  if (!changed) {
+    return 'unchanged';
+  }
+
+  fs.writeFileSync(file, docs.map((doc) => doc.toString({ lineWidth: 0 })).join(''));
+  return 'updated';
+}
+
+function ensureSparsePluginForDoc(doc: Document): boolean {
   const specNode = doc.getIn(['spec', 'implementation', 'spec'], true);
   if (!isMap(specNode)) {
-    return 'skipped';
+    return false;
   }
 
   const pipelineFile = specNode.get('pipeline_file');
   if (typeof pipelineFile !== 'string' || !isYamlFile(pipelineFile)) {
-    return 'skipped';
+    return false;
   }
 
+  const before = doc.toString({ lineWidth: 0 });
   ensureSparsePlugin(doc, specNode, pipelineFile);
-
-  const next = doc.toString({ lineWidth: 0 });
-  if (next === original) {
-    return 'unchanged';
-  }
-
-  fs.writeFileSync(file, next);
-  return 'updated';
+  return doc.toString({ lineWidth: 0 }) !== before;
 }
 
 function ensureSparsePlugin(doc: Document, specNode: YAMLMap, pipelineFile: string) {
