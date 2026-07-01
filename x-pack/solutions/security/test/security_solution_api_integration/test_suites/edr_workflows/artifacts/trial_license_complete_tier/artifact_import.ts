@@ -87,6 +87,12 @@ const ENDPOINT_ARTIFACTS: readonly {
     read: 'trusted_devices_read',
     all: 'trusted_devices_all',
   },
+  {
+    listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+    name: 'Custom YARA Signatures',
+    read: 'custom_yara_signatures_read',
+    all: 'custom_yara_signatures_all',
+  },
 ]);
 
 export default function artifactImportAPIIntegrationTests({ getService }: FtrProviderContext) {
@@ -182,7 +188,20 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
             let fetchArtifacts: ReturnType<typeof getFetchArtifacts>;
 
             before(async () => {
-              fetchArtifacts = getFetchArtifacts(endpointOpsAnalystSupertest, log, artifact.listId);
+              if (artifact.listId === ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id) {
+                // Custom YARA signatures privileges is not added to pre-defined roles yet
+                fetchArtifacts = getFetchArtifacts(
+                  supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege,
+                  log,
+                  artifact.listId
+                );
+              } else {
+                fetchArtifacts = getFetchArtifacts(
+                  endpointOpsAnalystSupertest,
+                  log,
+                  artifact.listId
+                );
+              }
 
               await optInForPerPolicyEndpointExceptions(kbnServer);
             });
