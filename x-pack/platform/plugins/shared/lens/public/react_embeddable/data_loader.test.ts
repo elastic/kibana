@@ -275,8 +275,8 @@ describe('Data Loader', () => {
       { meta: { alias: 'external filter', negate: false, disabled: false } },
     ];
 
-    const vizQuery: Query = { language: 'kquery', query: 'saved filter' };
-    const vizFilters: Filter[] = [
+    const visQuery = { language: 'kquery', query: 'saved filter' };
+    const visFilters = [
       { meta: { alias: 'test', negate: false, disabled: false, index: 'filter-0' } },
     ];
 
@@ -285,11 +285,11 @@ describe('Data Loader', () => {
       ...attributes,
       state: {
         ...attributes.state,
-        query: vizQuery,
-        filters: vizFilters,
+        query: visQuery,
+        filters: visFilters,
       },
       references: [
-        { type: 'index-pattern', name: vizFilters[0].meta.index!, id: 'my-index-pattern-id' },
+        { type: 'index-pattern', name: visFilters[0].meta.index!, id: 'my-index-pattern-id' },
       ],
     };
 
@@ -303,10 +303,10 @@ describe('Data Loader', () => {
         const params = internalApi.expressionParams$.getValue()!;
         expect(params.searchContext).toEqual(
           expect.objectContaining({
-            query: [parentApiQuery, vizQuery],
+            query: [parentApiQuery, visQuery],
             filters: [
               ...parentApiFilters,
-              ...vizFilters.map(({ meta }) => ({ meta: { ...meta, index: 'injected!' } })),
+              ...visFilters.map(({ meta }) => ({ meta: { ...meta, index: 'injected!' } })),
             ],
           })
         );

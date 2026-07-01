@@ -481,6 +481,32 @@ module.exports = {
   overrides: [
     {
       files: [
+        'src/platform/plugins/private/event_annotation/**/*',
+        'src/platform/plugins/private/event_annotation_listing/**/*',
+        'src/platform/plugins/private/vis_default_editor/**/*',
+        'src/platform/plugins/private/vis_types/**/*',
+        'src/platform/plugins/shared/chart_expressions/**/*',
+        'src/platform/plugins/shared/charts/**/*',
+        'src/platform/plugins/shared/expressions/**/*',
+        'src/platform/plugins/shared/vis_types/**/*',
+        'src/platform/plugins/shared/visualization_listing/**/*',
+        'src/platform/plugins/shared/visualizations/**/*',
+        'x-pack/platform/plugins/shared/lens/**/*',
+        'x-pack/platform/plugins/private/graph/**/*',
+        'src/platform/packages/private/kbn-lens-formula-docs/**/*',
+        'src/platform/packages/shared/kbn-lens-common/**/*',
+        'src/platform/packages/shared/kbn-lens-common-2/**/*',
+        'src/platform/packages/shared/kbn-coloring/**/*',
+        'src/platform/packages/shared/kbn-chart-icons/**/*',
+        'src/platform/packages/shared/kbn-event-annotation-common/**/*',
+        'src/platform/packages/shared/kbn-event-annotation-components/**/*',
+      ],
+      rules: {
+        '@kbn/eslint/no_viz_naming': 'error',
+      },
+    },
+    {
+      files: [
         'src/platform/plugins/**/server/index.ts',
         'x-pack/platform/plugins/**/server/index.ts',
         'x-pack/solutions/**/plugins/**/server/index.ts',
