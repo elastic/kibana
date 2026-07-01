@@ -57,24 +57,6 @@ export const EntityAnalyticsReadPrivilegesCallout = React.memo(
     const message = useMemo<CallOutMessage | null>(() => {
       const indexPrivileges: MissingIndexPrivileges[] = [
         ...getRiskEngineMissingReadPrivileges(riskEngineReadPrivileges),
-        ...getEntityStoreMissingReadPrivileges(entityEnginePrivileges),
-        ...getEntityStoreMissingReadPrivileges(leadGenerationPrivileges),
-        ...getEntityStoreMissingReadPrivileges(anomalyPrivileges),
-      ];
-
-      const featurePrivileges: MissingFeaturePrivileges[] = [
-        ...getAnomalyMissingKibanaPrivileges(anomalyPrivileges),
-      ];
-
-  }: {
-    riskEngineReadPrivileges: RiskEngineMissingPrivilegesResponse;
-    entityEnginePrivileges: EntityAnalyticsPrivileges | undefined;
-    leadGenerationPrivileges?: EntityAnalyticsPrivileges;
-    anomalyPrivileges?: EntityAnalyticsPrivileges;
-  }) => {
-    const message = useMemo(() => {
-      const indexPrivileges: MissingIndexPrivileges[] = [
-        ...getRiskEngineMissingReadPrivileges(riskEngineReadPrivileges),
         ...getAnyMissingReadPrivileges(entityEnginePrivileges),
         ...getAnyMissingReadPrivileges(leadGenerationPrivileges),
         ...getAnyMissingReadPrivileges(anomalyPrivileges),
@@ -104,7 +86,6 @@ export const EntityAnalyticsReadPrivilegesCallout = React.memo(
       entityEnginePrivileges,
       leadGenerationPrivileges,
       anomalyPrivileges,
-      id,
     ]);
 
     if (!message) return null;

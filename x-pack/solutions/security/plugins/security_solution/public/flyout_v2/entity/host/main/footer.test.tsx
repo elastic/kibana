@@ -7,30 +7,30 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { TestProviders } from '../../../common/mock';
-import { HostPanelFooter } from './footer';
+import { TestProviders } from '../../../../common/mock';
+import { Footer } from './footer';
 import {
   ADD_TO_NEW_CASE_TEST_ID,
   ADD_TO_EXISTING_CASE_TEST_ID,
-} from '../../../../common/cases/attachments/entity/test_ids';
-import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+} from '../../../../../common/cases/attachments/entity/test_ids';
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
 jest.mock('@kbn/entity-store/public', () => ({
   useEntityStoreEuidApi: jest.fn(() => null),
 }));
 
 const mockUseIsExperimentalFeatureEnabled = jest.fn();
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
 }));
 
 const mockUseKibana = jest.fn();
-jest.mock('../../../common/lib/kibana', () => ({
+jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => mockUseKibana(),
 }));
 
 // Render additionalItems inline so tests can assert on them without opening the popover.
-jest.mock('../shared/components/take_action', () => ({
+jest.mock('../../../../flyout/entity_details/shared/components/take_action', () => ({
   TakeAction: ({
     additionalItems,
   }: {
@@ -38,17 +38,20 @@ jest.mock('../shared/components/take_action', () => ({
   }) => <div data-test-subj="mockTakeAction">{additionalItems?.(() => {}) ?? []}</div>,
 }));
 
-jest.mock('../../../entity_analytics/components/ai_assistant_button/ai_assistant_button', () => ({
-  AiAssistantButton: () => <div data-test-subj="mockAiAssistantButton" />,
-}));
+jest.mock(
+  '../../../../entity_analytics/components/ai_assistant_button/ai_assistant_button',
+  () => ({
+    AiAssistantButton: () => <div data-test-subj="mockAiAssistantButton" />,
+  })
+);
 
 // Render the real menu items but with minimal markup — footer tests only care about presence.
-jest.mock('../../../cases/attachments/entity/components/add_to_new_case', () => ({
+jest.mock('../../../../cases/attachments/entity/components/add_to_new_case', () => ({
   AddToNewCase: ({ 'data-test-subj': testSubj }: { 'data-test-subj'?: string }) => (
     <div data-test-subj={testSubj} />
   ),
 }));
-jest.mock('../../../cases/attachments/entity/components/add_to_existing_case', () => ({
+jest.mock('../../../../cases/attachments/entity/components/add_to_existing_case', () => ({
   AddToExistingCase: ({ 'data-test-subj': testSubj }: { 'data-test-subj'?: string }) => (
     <div data-test-subj={testSubj} />
   ),
@@ -79,12 +82,12 @@ const renderFooter = (
 
   return render(
     <TestProviders>
-      <HostPanelFooter identityFields={identityFields} entity={entity} />
+      <Footer identityFields={identityFields} entity={entity} />
     </TestProviders>
   );
 };
 
-describe('HostPanelFooter – entity attachment actions', () => {
+describe('Footer – entity attachment actions', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('renders Add to new case and Add to existing case when all conditions are met', () => {
