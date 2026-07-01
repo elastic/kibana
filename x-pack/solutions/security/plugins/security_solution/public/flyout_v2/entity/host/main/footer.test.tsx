@@ -19,6 +19,10 @@ jest.mock('@kbn/entity-store/public', () => ({
   useEntityStoreEuidApi: jest.fn(() => null),
 }));
 
+jest.mock('../../../../common/hooks/is_in_security_app', () => ({
+  useIsInSecurityApp: jest.fn(() => true),
+}));
+
 const mockUseIsExperimentalFeatureEnabled = jest.fn();
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
