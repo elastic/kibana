@@ -194,13 +194,16 @@ const configSchema = schema.object(
         schema.string({ validate: match(/^\//, 'must start with a slash') }),
         { defaultValue: [], maxSize: 100 }
       ),
+      // `as const` on the defaultValues keeps `TypeOf<>` inferring the literal union
+      // ('apikey' | 'bearer') instead of widening to `string` — without it, the plain
+      // array literal here out-infers the item schema's literal type.
       allowedSchemes: offeringBasedSchema({
         serverless: schema.arrayOf(xsrfSchemeSchema, {
-          defaultValue: ['apikey', 'bearer'],
+          defaultValue: ['apikey', 'bearer'] as const,
           maxSize: 100,
         }),
         traditional: schema.arrayOf(xsrfSchemeSchema, {
-          defaultValue: [],
+          defaultValue: [] as const,
           maxSize: 100,
         }),
       }),
@@ -397,7 +400,14 @@ export class HttpConfig implements IHttpConfig {
   public csp: ICspConfig;
   public prototypeHardening: boolean;
   public externalUrl: IExternalUrlConfig;
-  public xsrf: { disableProtection: boolean; allowlist: string[]; allowedSchemes: string[] };
+  // Typed to the literal union (rather than `string[]`) so that adding a new exemptable
+  // scheme in `xsrfSchemeSchema` without updating every consumer (e.g. `lifecycle_handlers.ts`)
+  // is a compile error instead of a silent gap in CSRF-bypass logic.
+  public xsrf: {
+    disableProtection: boolean;
+    allowlist: string[];
+    allowedSchemes: Array<'apikey' | 'bearer'>;
+  };
   public excludeRoutes: string[];
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
   public versioned: {
