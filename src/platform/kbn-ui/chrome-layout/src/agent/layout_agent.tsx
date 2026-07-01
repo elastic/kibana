@@ -34,6 +34,7 @@ export const LayoutAgent = ({ children }: LayoutAgentProps) => {
     agentWorkspaceOpen = true,
     applicationWorkspaceOpen = true,
     applicationWorkspaceTransitionPhase = 'none',
+    agentPanelResizing = false,
     agentPreferredWidth = 0,
     navigationWidth = 0,
     sidebarWidth = 0,
@@ -70,6 +71,7 @@ export const LayoutAgent = ({ children }: LayoutAgentProps) => {
     agentWorkspaceOpen,
     applicationWorkspaceOpen,
     applicationWorkspaceTransitionPhase,
+    agentPanelResizing,
   });
 
   const shouldSyncVisibleWidth = chromeStyle === 'project';
@@ -98,20 +100,28 @@ export const LayoutAgent = ({ children }: LayoutAgentProps) => {
   }, [isDualPanelClose, shouldAnimateWidth]);
 
   useLayoutEffect(() => {
-    if (!shouldSyncVisibleWidth || shouldAnimateWidth) {
+    if (!shouldSyncVisibleWidth || (shouldAnimateWidth && !agentPanelResizing)) {
       return;
     }
 
     flushWidth(targetWidth);
-  }, [flushWidth, shouldAnimateWidth, shouldSyncVisibleWidth, targetWidth]);
+  }, [
+    agentPanelResizing,
+    flushWidth,
+    shouldAnimateWidth,
+    shouldSyncVisibleWidth,
+    targetWidth,
+  ]);
 
   useLayoutEffect(() => {
     const prevOpen = prevAgentWorkspaceOpenRef.current;
     const prevWidth = prevTargetWidthRef.current;
 
-    if (!shouldAnimateWidth) {
-      setContentOpacity(agentWorkspaceOpen ? 1 : 0);
-      setIsContentVisibilityHidden(!agentWorkspaceOpen);
+    if (!shouldAnimateWidth || agentPanelResizing) {
+      if (!shouldAnimateWidth) {
+        setContentOpacity(agentWorkspaceOpen ? 1 : 0);
+        setIsContentVisibilityHidden(!agentWorkspaceOpen);
+      }
       prevAgentWorkspaceOpenRef.current = agentWorkspaceOpen;
       prevTargetWidthRef.current = targetWidth;
       return;
@@ -131,6 +141,7 @@ export const LayoutAgent = ({ children }: LayoutAgentProps) => {
     prevAgentWorkspaceOpenRef.current = agentWorkspaceOpen;
     prevTargetWidthRef.current = targetWidth;
   }, [
+    agentPanelResizing,
     agentWorkspaceOpen,
     applicationWorkspaceOpen,
     shouldAnimateWidth,

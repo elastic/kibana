@@ -45,6 +45,8 @@ export type LayoutConfig = Pick<
 > & {
   chromeStyle?: ChromeStyle;
   applicationWorkspaceTransitionPhase?: ApplicationWorkspaceTransitionPhase;
+  /** True while the user is dragging the agent workspace resize handle. */
+  agentPanelResizing?: boolean;
 };
 
 /** Update function type for layout config */

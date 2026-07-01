@@ -30,13 +30,15 @@ export const shouldAnimateAgentPanelWidth = ({
   chromeStyle,
   applicationWorkspaceOpen,
   applicationWorkspaceTransitionPhase = 'none',
+  agentPanelResizing = false,
 }: {
   chromeStyle?: ChromeStyle;
   agentWorkspaceOpen: boolean;
   applicationWorkspaceOpen: boolean;
   applicationWorkspaceTransitionPhase?: ApplicationWorkspaceTransitionPhase;
+  agentPanelResizing?: boolean;
 }): boolean => {
-  if (chromeStyle !== 'project' || prefersReducedMotion()) {
+  if (chromeStyle !== 'project' || prefersReducedMotion() || agentPanelResizing) {
     return false;
   }
 
@@ -44,7 +46,7 @@ export const shouldAnimateAgentPanelWidth = ({
     return applicationWorkspaceTransitionPhase !== 'none';
   }
 
-  // Dual-panel: animate agent show/hide and resize.
+  // Dual-panel: animate agent show/hide (not user resize drags).
   return true;
 };
 
