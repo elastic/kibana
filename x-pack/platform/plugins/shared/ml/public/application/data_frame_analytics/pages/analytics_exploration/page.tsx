@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -136,6 +136,12 @@ export const Page: FC<{
     <>
       <JobInfoFlyoutsProvider>
         <AnalyticsDetailFlyout />
+        <MlAppHeader
+          title={i18n.translate('xpack.ml.dataframe.analyticsExploration.title', {
+            defaultMessage: 'Results explorer',
+          })}
+        />
+        <EuiSpacer size="m" />
         <AnalyticsIdSelectorControls
           setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
           selectedId={jobIdToUse}
@@ -146,11 +152,6 @@ export const Page: FC<{
             setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
           />
         ) : null}
-        <MlAppHeader
-          title={i18n.translate('xpack.ml.dataframe.analyticsExploration.title', {
-            defaultMessage: 'Results explorer',
-          })}
-        />
 
         <SavedObjectsWarning onCloseFlyout={refresh} />
 

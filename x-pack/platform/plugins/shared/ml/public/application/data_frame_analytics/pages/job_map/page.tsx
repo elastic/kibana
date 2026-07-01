@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -106,6 +106,12 @@ export const Page: FC = () => {
   return (
     <JobInfoFlyoutsProvider>
       <AnalyticsDetailFlyout />
+      <MlAppHeader
+        title={i18n.translate('xpack.ml.dataframe.analyticsMap.title', {
+          defaultMessage: 'Analytics map',
+        })}
+      />
+      <EuiSpacer size="m" />
       <AnalyticsIdSelectorControls
         setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
         selectedId={jobId ?? modelId}
@@ -116,11 +122,6 @@ export const Page: FC = () => {
           setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
         />
       ) : null}
-      <MlAppHeader
-        title={i18n.translate('xpack.ml.dataframe.analyticsMap.title', {
-          defaultMessage: 'Analytics map',
-        })}
-      />
 
       <NodeAvailableWarning />
 

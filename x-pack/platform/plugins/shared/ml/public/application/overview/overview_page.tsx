@@ -249,6 +249,7 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
           defaultMessage: 'Machine Learning Overview',
         })}
         showDatePicker
+        docLink={helpLink}
         tabs={tabs.map((tab) => ({
           id: tab.id,
           label:
