@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Logger } from '@kbn/logging';
 import { TRACES_INDEX_PATTERN } from '@kbn/evals-common';
 import pRetry from 'p-retry';
 import { extractChatEvidence } from '../chat_evidence';
 import type { TraceAccessor } from '../types';
+import { createTraceAccessor } from '../trace_accessor';
+import { asOptionalString, rowsFromEsqlResponse } from '../esql_utils';
 
 interface GroundednessEvidence {
   user_query: string;
@@ -22,7 +23,6 @@ interface GroundednessEvidence {
     result?: unknown;
   }>;
 }
-import { createTraceAccessor } from './trace_accessor';
 
 export class IncompleteGroundednessEvidenceError extends Error {
   constructor(public readonly evidence: GroundednessEvidence, options?: { cause?: unknown }) {
@@ -51,34 +51,6 @@ const parseJsonIfPossible = (value: unknown): unknown => {
   } catch {
     return value;
   }
-};
-
-const asString = (value: unknown): string => {
-  if (typeof value === 'string') {
-    return value;
-  }
-  if (value == null) {
-    return '';
-  }
-
-  return String(value);
-};
-
-const asOptionalString = (value: unknown): string | undefined => {
-  const stringValue = asString(value).trim();
-  return stringValue ? stringValue : undefined;
-};
-
-const rowsFromEsqlResponse = (response: ESQLSearchResponse): Array<Record<string, unknown>> => {
-  const columns = response.columns ?? [];
-  const values = response.values ?? [];
-
-  return values.map((row) => {
-    return columns.reduce<Record<string, unknown>>((acc, column, columnIndex) => {
-      acc[column.name] = row[columnIndex];
-      return acc;
-    }, {});
-  });
 };
 
 const buildToolSpansQuery = () => {
@@ -135,10 +107,10 @@ export const extractGroundednessEvidence = async (
 
   try {
     return await pRetry(fetchGroundednessEvidence, {
-      retries: 5,
+      retries: 2,
       factor: 2,
       minTimeout: 2000,
-      maxTimeout: 60000,
+      maxTimeout: 10000,
       onFailedAttempt: (error) => {
         const isLastAttempt = error.retriesLeft === 0;
         if (isLastAttempt) {

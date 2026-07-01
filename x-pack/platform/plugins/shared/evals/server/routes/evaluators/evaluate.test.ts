@@ -125,7 +125,9 @@ describe('POST /internal/evals/_evaluate', () => {
         body: {
           subject: {
             mode: 'single-turn',
-            traces: [{ trace_id: 'trace-123', reference_data: { expected: 'ok' } }],
+            traces: [
+              { trace_id: '0af7651916cd43dd8448eb211c80319c', reference_data: { expected: 'ok' } },
+            ],
           },
           evaluators: [
             { name: 'groundedness', connector_id: 'connector-123' },
@@ -149,7 +151,7 @@ describe('POST /internal/evals/_evaluate', () => {
     });
     expect(firstEvaluate).toHaveBeenCalledWith(
       expect.objectContaining({
-        trace: expect.objectContaining({ traceId: 'trace-123' }),
+        trace: expect.objectContaining({ traceId: '0af7651916cd43dd8448eb211c80319c' }),
         referenceData: { expected: 'ok' },
         inferenceClient: expect.any(Object),
         log: logger,
@@ -274,6 +276,31 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(response.payload).toEqual({ message: 'single-turn mode requires exactly one trace' });
   });
 
+  it('returns 400 for an invalid trace_id', async () => {
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([buildEvaluator({ name: 'groundedness' })]),
+      inferenceStart: {
+        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+      } as unknown as InferenceServerStart,
+    });
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: { traces: [{ trace_id: 'x" OR true OR "' }] },
+          evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.payload).toEqual({
+      message: 'Invalid trace_id: must be a 32-character hex string',
+    });
+  });
+
   it('returns per-item runtime errors while keeping sibling evaluator results', async () => {
     const failingEvaluate = jest.fn().mockRejectedValue(new Error('failed badly'));
     const successfulEvaluate = jest.fn().mockResolvedValue({
@@ -301,7 +328,7 @@ describe('POST /internal/evals/_evaluate', () => {
       buildContext() as unknown as Parameters<typeof handler>[0],
       {
         body: {
-          subject: { traces: [{ trace_id: 'trace-1' }] },
+          subject: { traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }] },
           evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }, { name: 'latency' }],
         },
       } as unknown as Parameters<typeof handler>[1],
@@ -347,7 +374,14 @@ describe('POST /internal/evals/_evaluate', () => {
       buildContext() as unknown as Parameters<typeof handler>[0],
       {
         body: {
-          subject: { traces: [{ trace_id: 'trace-1', reference_data: { expected: 'answer' } }] },
+          subject: {
+            traces: [
+              {
+                trace_id: '0af7651916cd43dd8448eb211c80319c',
+                reference_data: { expected: 'answer' },
+              },
+            ],
+          },
           evaluators: [{ name: 'correctness', connector_id: 'connector-1' }],
         },
       } as unknown as Parameters<typeof handler>[1],

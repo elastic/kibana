@@ -7,7 +7,7 @@
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { LOGS_INDEX_PATTERN, TRACES_INDEX_PATTERN } from '@kbn/evals-common';
-import type { TraceAccessor } from '../types';
+import type { TraceAccessor } from './types';
 
 export interface TraceAccessorWithEsql extends TraceAccessor {
   runEsql(query: string): Promise<ESQLSearchResponse>;

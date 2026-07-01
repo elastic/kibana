@@ -139,7 +139,6 @@ describe('trace groundedness evaluator integration', () => {
           grounded
             ? {
                 summary_verdict: 'GROUNDED',
-                evidence_source: 'trace',
                 analysis: [
                   {
                     claim: 'Payment service is healthy',
@@ -185,7 +184,7 @@ describe('trace groundedness evaluator integration', () => {
         body: {
           subject: {
             mode: 'single-turn',
-            traces: [{ trace_id: 'grounded-trace-001' }],
+            traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }],
           },
           evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }],
         },
@@ -199,7 +198,6 @@ describe('trace groundedness evaluator integration', () => {
     expect(groundedResult.scores).toHaveLength(1);
     const groundedScore = groundedResult.scores[0];
     expect(groundedScore.label).toBe('GROUNDED');
-    expect(groundedScore.metadata?.evidence_source).toBe('trace');
     const groundedAnalysis = groundedScore.metadata?.analysis as Array<{
       evidence?: { tool_id?: string };
     }>;
@@ -211,7 +209,7 @@ describe('trace groundedness evaluator integration', () => {
         body: {
           subject: {
             mode: 'single-turn',
-            traces: [{ trace_id: 'grounded-trace-001' }],
+            traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }],
           },
           evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }, { name: 'latency' }],
         },
@@ -265,7 +263,7 @@ describe('trace groundedness evaluator integration', () => {
         body: {
           subject: {
             mode: 'single-turn',
-            traces: [{ trace_id: 'hallucinated-trace-001' }],
+            traces: [{ trace_id: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4' }],
           },
           evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }],
         },
@@ -289,9 +287,9 @@ describe('trace groundedness evaluator integration', () => {
 
         const analysis: CorrectnessAnalysis = {
           summary: {
-            factual_accuracy_summary: 'MOSTLY_FACTUAL',
+            factual_accuracy_summary: 'ACCURATE',
             relevance_summary: 'RELEVANT',
-            sequence_accuracy_summary: 'MOSTLY_IN_ORDER',
+            sequence_accuracy_summary: 'MATCH',
           },
           analysis: [
             {
@@ -323,7 +321,7 @@ describe('trace groundedness evaluator integration', () => {
             mode: 'single-turn',
             traces: [
               {
-                trace_id: 'correctness-trace-001',
+                trace_id: 'fedcba9876543210fedcba9876543210',
                 reference_data: {
                   expected: 'The payment service is healthy.',
                 },

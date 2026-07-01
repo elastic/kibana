@@ -5,38 +5,15 @@
  * 2.0.
  */
 
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Logger } from '@kbn/logging';
 import { LOGS_INDEX_PATTERN } from '@kbn/evals-common';
 import pRetry from 'p-retry';
 import type { TraceAccessor } from './types';
-import { createTraceAccessor } from './groundedness/trace_accessor';
+import { createTraceAccessor } from './trace_accessor';
+import { asString, rowsFromEsqlResponse } from './esql_utils';
 
 const USER_MESSAGE_CONTENT_COLUMN = 'attributes.content';
 const AGENT_RESPONSE_CONTENT_COLUMN = 'attributes.message.content';
-
-const asString = (value: unknown): string => {
-  if (typeof value === 'string') {
-    return value;
-  }
-  if (value == null) {
-    return '';
-  }
-
-  return String(value);
-};
-
-const rowsFromEsqlResponse = (response: ESQLSearchResponse): Array<Record<string, unknown>> => {
-  const columns = response.columns ?? [];
-  const values = response.values ?? [];
-
-  return values.map((row) => {
-    return columns.reduce<Record<string, unknown>>((acc, column, columnIndex) => {
-      acc[column.name] = row[columnIndex];
-      return acc;
-    }, {});
-  });
-};
 
 const buildUserMessageQuery = () => {
   return `FROM ${LOGS_INDEX_PATTERN}
@@ -79,10 +56,10 @@ export const extractChatEvidence = async (
       return { user_query: userQuery, agent_response: agentResponse };
     },
     {
-      retries: 5,
+      retries: 2,
       factor: 2,
       minTimeout: 2000,
-      maxTimeout: 60000,
+      maxTimeout: 10000,
       onFailedAttempt: (error) => {
         const isLastAttempt = error.retriesLeft === 0;
         if (isLastAttempt) {

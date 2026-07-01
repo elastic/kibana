@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { BoundInferenceClient } from '@kbn/inference-common';
-import { createTraceAccessor } from '../groundedness/trace_accessor';
+import { createTraceAccessor } from '../trace_accessor';
 import { createEvaluatorRegistry } from '../registry';
 import { correctnessEvaluator } from '.';
 

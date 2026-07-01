@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { extractGroundednessEvidence } from './extractor';
-import { createTraceAccessor } from './trace_accessor';
+import { createTraceAccessor } from '../trace_accessor';
 
 describe('groundedness trace extractor', () => {
   const traceId = 'trace-id-123';

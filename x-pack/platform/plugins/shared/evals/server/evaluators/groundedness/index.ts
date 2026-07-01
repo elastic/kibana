@@ -32,15 +32,7 @@ export const groundednessEvaluator: EvaluatorDefinition = {
   supportedInputs: ['trace'],
   async evaluate({ trace, inferenceClient, log }) {
     if (!inferenceClient) {
-      return {
-        scores: [
-          {
-            name: 'groundedness',
-            label: 'error',
-            explanation: 'Inference client is required for groundedness evaluator',
-          },
-        ],
-      };
+      throw new Error('Inference client is required for groundedness evaluator');
     }
 
     let evidence;
@@ -85,15 +77,7 @@ export const groundednessEvaluator: EvaluatorDefinition = {
 
     const analysis = getGroundednessAnalysis(response);
     if (!analysis) {
-      return {
-        scores: [
-          {
-            name: 'groundedness',
-            label: 'error',
-            explanation: 'No tool call in judge response',
-          },
-        ],
-      };
+      throw new Error('No tool call in judge response');
     }
 
     return {

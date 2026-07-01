@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { isValidTraceId } from '@opentelemetry/api';
 import {
   API_VERSIONS,
   EVALS_EVALUATE_URL,
   EvaluateRequestBody,
+  type EvaluateResponse,
   INTERNAL_API_ACCESS,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
-import { createTraceAccessor } from '../../evaluators/groundedness/trace_accessor';
+import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import type { EvaluatorDefinition } from '../../evaluators/types';
 import type { RouteDependencies } from '../register_routes';
 
@@ -89,6 +91,12 @@ export const registerEvaluateRoute = ({
         }
 
         const [{ trace_id: traceId, reference_data: referenceData }] = subject.traces;
+        if (!isValidTraceId(traceId)) {
+          return response.badRequest({
+            body: { message: 'Invalid trace_id: must be a 32-character hex string' },
+          });
+        }
+
         const coreContext = await context.core;
         const traceAccessor = createTraceAccessor({
           traceId,
@@ -124,7 +132,7 @@ export const registerEvaluateRoute = ({
           return inferenceClient;
         };
 
-        const results = [];
+        const results: EvaluateResponse['results'] = [];
         for (const { config, definition } of resolvedEvaluators) {
           try {
             const inferenceClient =

@@ -8,32 +8,8 @@
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import pRetry from 'p-retry';
 import type { EvaluatorDefinition, EvaluatorResult } from '../types';
-import { createTraceAccessor } from '../groundedness/trace_accessor';
-
-const rowsFromEsqlResponse = (response: ESQLSearchResponse): Array<Record<string, unknown>> => {
-  const columns = response.columns ?? [];
-  const values = response.values ?? [];
-
-  return values.map((row) => {
-    return columns.reduce<Record<string, unknown>>((acc, column, columnIndex) => {
-      acc[column.name] = row[columnIndex];
-      return acc;
-    }, {});
-  });
-};
-
-const asNumber = (value: unknown): number | undefined => {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return value;
-  }
-
-  if (typeof value === 'string' && value.trim()) {
-    const parsedNumber = Number(value);
-    return Number.isFinite(parsedNumber) ? parsedNumber : undefined;
-  }
-
-  return undefined;
-};
+import { createTraceAccessor } from '../trace_accessor';
+import { asNumber, rowsFromEsqlResponse } from '../esql_utils';
 
 const getTraceMetricResult = async ({
   evaluatorName,
