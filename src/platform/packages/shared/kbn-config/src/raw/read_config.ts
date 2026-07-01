@@ -14,7 +14,7 @@ import { isPlainObject } from 'lodash';
 import { ensureValidObjectPath } from '@kbn/std';
 import { splitKey, getUnsplittableKey, replaceEnvVarRefs } from './utils';
 
-const readYaml = (path: string) => parse(readFileSync(path, 'utf8'), { version: '1.1' });
+const readYaml = (path: string) => parse(readFileSync(path, 'utf8'));
 
 interface YamlEntry {
   path: string[];
