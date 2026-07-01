@@ -732,6 +732,9 @@ export function initRoutes(
           tasksFound = tasks.length;
           await Promise.all(tasks.map((task) => taskManager.remove(task.id)));
         } while (tasksFound > 0);
+        // The invalidate-API-keys task's in-use guard searches for live `task` saved objects, so the
+        // removals above must be visible to search (not just to get-by-id) before that guard runs.
+        await ensureIndexIsRefreshed((await context.core).elasticsearch.client);
         return res.ok({ body: 'OK' });
       } catch ({ isBoom, output, message }) {
         return res.ok({ body: isBoom ? output.payload : { message } });
