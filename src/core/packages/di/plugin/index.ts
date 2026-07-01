@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Context, useContainer, useExtensions, useService } from './src/react';
 export {
-  Application,
-  type ApplicationDefinition,
-  type ApplicationHandler,
-  ApplicationParameters,
-} from './src/services/application';
-export { CoreSetup, CoreStart, PluginInitializer } from './src/services/lifecycle';
+  declare,
+  implementedBy,
+  withValue,
+  fromToken,
+  using,
+  type DeclareOptions,
+  type Fulfillment,
+  type FulfillmentScope,
+  type RequiresPluginStart,
+} from './src/declare_services';
+export { createTokenFactory, type TokenFactory } from './src/create_token_factory';

@@ -11,7 +11,7 @@ import type { ContainerModuleLoadOptions } from 'inversify';
 import type { RequestHandler, RouteRegistrar } from '@kbn/core-http-server';
 import { CoreSetup, CoreStart, Request, Response, Route, Router } from '@kbn/core-di-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { cacheInScope, Global } from '@kbn/core-di-internal';
+import { cacheInScope, ProvidedService } from '@kbn/core-di-internal';
 import { OnSetup } from '@kbn/core-di';
 
 export function loadHttp({ bind, onActivation }: ContainerModuleLoadOptions): void {
@@ -26,11 +26,19 @@ export function loadHttp({ bind, onActivation }: ContainerModuleLoadOptions): vo
 
       scope.bind(Request).toConstantValue(request);
       scope.bind(Response).toConstantValue(response);
-      scope.bind(Global).toConstantValue(Request);
-      scope.bind(Global).toConstantValue(Response);
+      scope.bind(ProvidedService).toConstantValue(Request);
+      scope.bind(ProvidedService).toConstantValue(Response);
+
+      let routeHandler: InstanceType<typeof route>;
+      try {
+        routeHandler = scope.get(route, { autobind: true });
+      } catch (err) {
+        scope.unbindAll();
+        throw err;
+      }
 
       try {
-        return await scope.get(route, { autobind: true }).handle();
+        return await routeHandler.handle();
       } finally {
         scope.unbindAll();
       }

@@ -4,22 +4,17 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node",
-      "react"
+      "node"
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core-application-browser",
-    "@kbn/core-lifecycle-browser",
-    "@kbn/core-plugins-browser",
-    "@kbn/core-di-internal",
-    "@kbn/core-di",
+    "@kbn/core-di"
   ]
 }
