@@ -42,7 +42,7 @@ export const ContextSwitcherTriggerButton = ({
         color={isSelected ? 'primary' : 'text'}
         data-test-subj="contextSwitcherTriggerButton"
         display={isSelected ? 'base' : 'empty'}
-        iconType={solutionIcon}
+        iconType="apps"
         onClick={onClick}
         size="s"
       />

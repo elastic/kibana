@@ -192,6 +192,10 @@ const createStartContractMock = () => {
           nextProjectPickerState$.next(content ?? null);
         }),
       }),
+      homeLogoIcon: lazyObject({
+        set: jest.fn(),
+        get$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
+      }),
       inlineAppHeader: lazyObject({
         get$: jest.fn().mockReturnValue(inlineAppHeaderState$),
         set: jest.fn((value: boolean) => inlineAppHeaderState$.next(value)),

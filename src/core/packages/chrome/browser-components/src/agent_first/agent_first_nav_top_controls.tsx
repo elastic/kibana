@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { isValidElement, useCallback } from 'react';
+import React, { isValidElement, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiHorizontalRule, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { useAgentWorkspaceOpen } from '@kbn/core-chrome-browser-hooks';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { ChromeNextGlobalHeaderLogo } from '../chrome_next/global_header/global_header_logo';
+import { useNavigationItems } from '../project/sidenav/navigation/navigation';
 import { useContextSwitcher } from '../shared/chrome_hooks';
 import { useChromeComponentsDeps } from '../context';
 import { AgentFirstAgentsNavItem } from './agent_first_agents_nav_item';
@@ -28,6 +29,11 @@ export const AgentFirstNavTopControls = ({ isCollapsed }: AgentFirstNavTopContro
   const { application } = useChromeComponentsDeps();
   const showAgentsToggle = application.capabilities.agentBuilder?.show === true;
   const switcher = useContextSwitcher();
+  const navigationState = useNavigationItems();
+  const solutionHomeHref = useMemo(
+    () => navigationState?.navItems.primaryItems.find((item) => item.iconType === 'home')?.href,
+    [navigationState]
+  );
   const navSwitcher =
     switcher && isValidElement(switcher)
       ? React.cloneElement(switcher, { iconOnly: true })
@@ -53,7 +59,6 @@ export const AgentFirstNavTopControls = ({ isCollapsed }: AgentFirstNavTopContro
       `}
       data-test-subj="agentFirstNavTopControls"
     >
-      <ChromeNextGlobalHeaderLogo />
       {navSwitcher ? (
         <div
           css={css`
@@ -66,6 +71,7 @@ export const AgentFirstNavTopControls = ({ isCollapsed }: AgentFirstNavTopContro
           {navSwitcher}
         </div>
       ) : null}
+      <ChromeNextGlobalHeaderLogo homeHref={solutionHomeHref} />
       {showAgentsToggle ? (
         <AgentFirstAgentsNavItem
           isActive={agentWorkspaceOpen}

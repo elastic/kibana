@@ -10,7 +10,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { useBasePath, useCustomBranding, useProjectHome } from '../../shared/chrome_hooks';
+import { useBasePath, useCustomBranding, useHomeLogoIcon, useProjectHome } from '../../shared/chrome_hooks';
 import { LoadingIndicator } from '../../shared/loading_indicator';
 import { headerButtonBaseStyles, useHeaderButtonStyleVars } from './header_action_button';
 
@@ -32,21 +32,33 @@ const logoLinkStyles = css`
   }
 `;
 
-export const ChromeNextGlobalHeaderLogo = React.memo(() => {
+export interface ChromeNextGlobalHeaderLogoProps {
+  /** When set, overrides `useProjectHome()` (e.g. agent-first solution home nav href). */
+  homeHref?: string;
+}
+
+export const ChromeNextGlobalHeaderLogo = React.memo(({ homeHref }: ChromeNextGlobalHeaderLogoProps) => {
   const basePath = useBasePath();
-  const homeHref = basePath.prepend(useProjectHome());
+  const projectHome = useProjectHome();
+  const resolvedHomeHref = basePath.prepend(basePath.remove(homeHref ?? projectHome));
   const { logo: customLogo } = useCustomBranding();
+  const homeLogoIcon = useHomeLogoIcon();
   const styleVars = useHeaderButtonStyleVars();
+  const iconType = customLogo ? undefined : homeLogoIcon ?? 'logoElastic';
 
   return (
     <a
-      href={homeHref}
+      href={resolvedHomeHref}
       aria-label={LOGO_ARIA_LABEL}
       data-test-subj="nav-header-logo"
       css={logoLinkStyles}
       style={styleVars}
     >
-      <LoadingIndicator customLogo={customLogo} elasticLogoColor={'text'} />
+      <LoadingIndicator
+        customLogo={customLogo}
+        iconType={iconType}
+        elasticLogoColor={iconType === 'logoElastic' ? 'text' : undefined}
+      />
     </a>
   );
 });

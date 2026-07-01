@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import {
@@ -68,6 +68,10 @@ const ContextSwitcherInner = ({
     allowSolutionVisibility,
     serverlessProjectType: isServerless ? cloud?.serverless.projectType : undefined,
   });
+
+  useEffect(() => {
+    core.chrome.next.homeLogoIcon.set(activeSpaceItem?.solutionIcon ?? 'logoElastic');
+  }, [activeSpaceItem?.solutionIcon, core]);
 
   const environmentContext = useEnvironmentContext({
     cloud,

@@ -79,11 +79,6 @@ export function createChromeApi({
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params),
     getBreadcrumbs$: () => projectNavigation.getProjectBreadcrumbs$(),
     getProjectHome$: () => projectNavigation.getProjectHome$(),
-    setNavigationCustomization: (customization) =>
-      projectNavigation.setNavigationCustomization(customization),
-    getCustomizeNavigationHandler$: () => projectNavigation.getCustomizeNavigationHandler$(),
-    registerCustomizeNavigationHandler: (handler) =>
-      projectNavigation.registerCustomizeNavigationHandler(handler),
   };
 
   let appHeaderRegistrationId = 0;
@@ -283,9 +278,9 @@ export function createChromeApi({
         get$: () => state.contextSwitcher.$,
         set: state.contextSwitcher.set,
       },
-      projectPicker: {
-        get$: () => state.projectPicker.$,
-        set: state.projectPicker.set,
+      homeLogoIcon: {
+        get$: () => state.homeLogoIcon.$,
+        set: (iconType) => state.homeLogoIcon.set(iconType),
       },
       inlineAppHeader: {
         get$: () => state.inlineAppHeader.$,

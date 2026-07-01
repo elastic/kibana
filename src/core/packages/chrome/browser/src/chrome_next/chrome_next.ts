@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement, ReactNode, MouseEventHandler } from 'react';
 import type { IconType } from '@elastic/eui';
+import type { ReactElement, ReactNode, MouseEventHandler } from 'react';
 import type { Observable } from 'rxjs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { GlobalHeaderAiButton } from './ai_button';
@@ -20,10 +20,7 @@ export type AppHeaderBack = string | AppHeaderBackTarget;
 /** @public */
 export interface AppHeaderBackTarget {
   href: string;
-  /**
-   * Optional handler for behavior that differs from `href` navigation.
-   * Do not use it to navigate to `href`; Kibana handles same-origin links as SPA navigation.
-   */
+  /** Click handler, called alongside href navigation when provided. */
   onClick?: MouseEventHandler;
   /** Destination name for accessibility (e.g. "Back to {label}"). */
   label?: string;
@@ -38,10 +35,7 @@ export interface AppHeaderBadge {
   onClick?: () => void;
   onClickAriaLabel?: string;
   'data-test-subj'?: string;
-  /**
-   * @deprecated Escape hatch for badges that cannot be represented with structured props.
-   * Prefer structured badge props for consistent behavior and styling.
-   */
+  /** @deprecated Used for compatibility with existing breadcrumb badge custom renderers. */
   renderCustomBadge?: (props: { badgeText: string }) => ReactElement;
   /** Popover menu items for badge context menus. When provided, the badge becomes a dropdown trigger. */
   items?: AppHeaderBadgeItem[];
@@ -62,68 +56,16 @@ export interface AppHeaderBadgeItem {
 }
 
 /** @public */
-export interface AppHeaderTabIconBadge {
-  /** EUI icon type rendered in the tab badge. */
-  iconType: string;
-  /** Optional tooltip shown when hovering the badge icon. */
-  tooltip?: string;
-}
-
-/**
- * Tab badge: either a numeric count (rendered as a notification badge) or an icon
- * with an optional tooltip.
- *
- * @public
- */
-export type AppHeaderTabBadge = number | AppHeaderTabIconBadge;
-
-/** @public */
-export interface AppHeaderTabAction {
-  id: string;
-  label: string;
-  /** EUI icon type rendered next to the action label. */
-  iconType?: IconType;
-  /** Disables the action if `true` or if the function returns `true`. */
-  disabled?: boolean | (() => boolean);
-  onClick: () => void;
-  'data-test-subj'?: string;
-}
-
-/**
- * Optional overflow actions for a tab, rendered as an ellipsis popover appended to the tab.
- *
- * @remarks
- * Actions are intentionally flat (a single level of items). Nested submenus, modals/flyouts and
- * focus return are not supported yet; when a use case arises, mirror the AppMenu approach
- * (`AppMenuRunActionParams` in `@kbn/core-chrome-app-menu-components`) by adding a nested `items`
- * prop and passing an anchor/`returnFocus` handler down to `onClick`.
- *
- * @public
- */
-export interface AppHeaderTabActions {
-  /** Accessible label and tooltip for the ellipsis trigger. */
-  ariaLabel: string;
-  items: AppHeaderTabAction[];
-  /** `data-test-subj` for the ellipsis trigger button. */
-  'data-test-subj'?: string;
-}
-
-/** @public */
 export interface AppHeaderTab {
   id: string;
   label: string;
   isSelected?: boolean;
   onClick?: () => void;
   href?: string;
-  badge?: AppHeaderTabBadge;
+  badge?: number;
   'data-test-subj'?: string;
   disabled?: boolean;
   toolTipContent?: string;
-  /**
-   * Optional overflow actions rendered as an ellipsis popover appended to the tab. Only surfaced
-   * for the selected tab (`isSelected`); may be provided unconditionally.
-   */
-  actions?: AppHeaderTabActions;
 }
 
 /** @public */
@@ -142,10 +84,7 @@ export type AppHeaderMetadataItems = readonly [
 /** @public */
 export interface AppHeaderMetadataTextItem {
   type: 'text';
-  /** When `value` is set, this acts as the bold key (e.g. "Created by"). */
   label: string;
-  /** Optional value rendered next to `label` in a subdued color. */
-  value?: string;
   'data-test-subj'?: string;
 }
 
@@ -158,6 +97,7 @@ export type AppHeaderMetadataButtonItem =
 export interface AppHeaderMetadataButtonBase {
   type: 'button';
   label: string;
+  iconType?: string;
   'data-test-subj'?: string;
 }
 
@@ -210,66 +150,16 @@ export interface AppHeaderEditableTitle {
 /** @public */
 export type AppHeaderTitle = string | AppHeaderEditableTitle;
 
-/**
- * Outer header spacing. `standard` (also the default when omitted) is a 16px symmetric inset,
- * `compact` is an 8px inset, and `flush` lets the surrounding layout own the inset. `bleed` and
- * `largeBleed` must match a direct parent's 16px or 24px symmetric padding respectively (e.g. when
- * the header is wrapped by `EuiPageTemplate`). Bleed modes are compatibility options for headers
- * that cannot yet move outside the padded content section.
- *
- * @public
- */
-export type AppHeaderSpacing = 'standard' | 'compact' | 'flush' | 'bleed' | 'largeBleed';
-
 /** @public */
-export type AppHeaderFavoriteStatus = 'unfavorited' | 'favorited' | 'adding' | 'removing';
-
-/**
- * Favorite action for the app-header title-actions area.
- *
- * @public
- */
-export interface AppHeaderFavoriteAction {
-  status: AppHeaderFavoriteStatus;
-  onToggle: () => void;
-  isDisabled?: boolean;
-}
-
-/**
- * Plain-text page description. Use the object form to add a URL rendered with a fixed
- * "Learn more" label.
- *
- * @public
- */
-export type AppHeaderDescription =
-  | string
-  | {
-      text: string;
-      learnMoreUrl: string;
-    };
-
-interface AppHeaderConfigBase {
+export interface AppHeaderConfig {
   title?: AppHeaderTitle;
   back?: AppHeaderBack;
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;
-  favorite?: AppHeaderFavoriteAction;
-  spacing?: AppHeaderSpacing;
+  favorite?: ReactNode;
+  metadata?: AppHeaderMetadataItems;
 }
-
-type AppHeaderSecondaryContent =
-  | {
-      description?: AppHeaderDescription;
-      metadata?: never;
-    }
-  | {
-      description?: never;
-      metadata?: AppHeaderMetadataItems;
-    };
-
-/** @public */
-export type AppHeaderConfig = AppHeaderConfigBase & AppHeaderSecondaryContent;
 
 /**
  * Chrome Next rollout APIs.
@@ -319,13 +209,13 @@ export interface ChromeNext {
      */
     set(content?: ReactNode): void;
   };
-  /** Project picker content. */
-  projectPicker: {
+  /** Home logo icon override (e.g. active space solution logo). */
+  homeLogoIcon: {
     /**
-     * Set the project picker content for the Chrome-Next header.
-     * Pass `undefined` to remove. Global — persists across app changes.
+     * Set the icon for the Chrome-Next global header home logo.
+     * Pass `undefined` to fall back to the Elastic logo. Global — persists across app changes.
      */
-    set(content?: ReactNode): void;
+    set(iconType?: IconType): void;
   };
   appHeader: {
     /**

@@ -24,7 +24,11 @@ export const AgentFirstProjectNavigation = (props: ChromeNavigationProps) => {
       return null;
     }
 
-    return state.navItems;
+    return {
+      ...state.navItems,
+      // Agent-first POC: solution logo in nav top controls replaces the Home item.
+      primaryItems: state.navItems.primaryItems.filter((item) => item.iconType !== 'home'),
+    };
   }, [state]);
 
   if (!state || !navItems) {
