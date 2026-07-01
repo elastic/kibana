@@ -31,6 +31,7 @@ import { internalMemoryRoutes } from './internal/memory/route';
 import { significantEventsRoutes } from './significant_events/streams/significant_events/route';
 import { internalSignificantEventsAvailabilityRoutes } from './internal/significant_events/availability/route';
 import { internalSignificantEventsDetectionsRoutes } from './internal/significant_events/detections/route';
+import { internalSignificantEventsDetectionsWorkflowRoutes } from './internal/significant_events/detections/workflow_route';
 import { internalSignificantEventsDiscoveriesRoutes } from './internal/significant_events/discoveries/route';
 import { internalSignificantEventsDiscoveryRoutes } from './internal/significant_events/discovery/route';
 import { internalSignificantEventsEligibleStreamsRoutes } from './internal/significant_events/extraction/eligible_streams_route';
@@ -59,6 +60,7 @@ export const streamsRouteRepository = {
   ...internalMemoryRoutes,
   ...internalSignificantEventsAvailabilityRoutes,
   ...internalSignificantEventsDetectionsRoutes,
+  ...internalSignificantEventsDetectionsWorkflowRoutes,
   ...internalSignificantEventsDiscoveryRoutes,
   ...internalSignificantEventsDiscoveriesRoutes,
   ...internalSignificantEventsFeatureRoutes,
