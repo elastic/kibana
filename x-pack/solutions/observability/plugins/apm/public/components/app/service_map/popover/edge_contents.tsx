@@ -68,7 +68,8 @@ export function EdgeContents({
   const { query } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
+    '/mobile-services/{serviceName}/service-map',
+    '/services/{serviceName}/overview'
   );
   const { offset, comparisonEnabled, rangeFrom, rangeTo } = query;
 

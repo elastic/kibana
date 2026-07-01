@@ -10,8 +10,9 @@
  *
  * The module exposes three related hooks that all resolve the
  * service-scoped alerts-tab destination from the current map route
- * (`/service-map`, `/services/{serviceName}/service-map`, or
- * `/mobile-services/{serviceName}/service-map`) while preserving the
+ * (`/service-map`, `/services/{serviceName}/service-map`,
+ * `/mobile-services/{serviceName}/service-map`, or
+ * `/services/{serviceName}/overview`) while preserving the
  * shared time range / environment params and **stripping `kuery`** (alerts
  * aggregate across all visible services, so a node-scoped click would
  * otherwise carry the map's service-name filter into a destination where
@@ -29,8 +30,9 @@
  * kuery-stripping rule is enforced in one place.
  *
  * All three rely on `useAnyOfApmParams` and will throw if called outside a
- * matching APM map route — callers must mount inside `ServiceMapGraph`, which
- * is wrapped by `ApmEmbeddableContext` on dashboard embeds.
+ * matching APM map route — callers must mount inside `ServiceMapGraph` or
+ * `ContextualServiceMapGraph`, which are wrapped by `ApmEmbeddableContext` on
+ * dashboard embeds.
  */
 
 import type { KeyboardEvent, MouseEvent } from 'react';
@@ -51,7 +53,8 @@ function useAlertsTabHrefBuilder(): (serviceName: string) => string {
   const { query } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
+    '/mobile-services/{serviceName}/service-map',
+    '/services/{serviceName}/overview'
   );
 
   return useCallback(

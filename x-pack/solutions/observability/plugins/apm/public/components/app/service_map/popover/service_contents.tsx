@@ -46,7 +46,8 @@ export function ServiceContents({
   const { query } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
+    '/mobile-services/{serviceName}/service-map',
+    '/services/{serviceName}/overview'
   );
 
   if (!('rangeFrom' in query && 'rangeTo' in query) || !query.rangeFrom || !query.rangeTo) {
