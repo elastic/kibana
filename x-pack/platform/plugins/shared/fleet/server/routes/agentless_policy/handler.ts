@@ -141,19 +141,11 @@ export const bulkUpgradeAgentlessPoliciesHandler: FleetRequestHandler<
   const policyIds = uniq(request.body.policyIds);
   const body = await agentlessPoliciesService.bulkUpgradeAgentlessPolicies(policyIds, request);
 
-  // Mirror the package-policy bulk upgrade handler: promote the first per-policy fatal
-  // error (a 404 guard failure or an ineligible-upgrade error) to a top-level HTTP error
-  // so consumers and error-rate monitoring see a non-2xx. Note this returns a message-only
-  // body: the per-policy array is only returned on the 200 path, so any ids that upgraded
-  // successfully in the same batch are persisted but not reported back to the caller here.
-  const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
-  if (firstFatalError?.statusCode) {
-    return response.customError({
-      statusCode: firstFatalError.statusCode,
-      body: { message: firstFatalError.body?.message ?? 'Bulk upgrade failed' },
-    });
-  }
-
+  // Unlike the package-policy bulk upgrade handler, we deliberately do NOT promote the first
+  // per-policy fatal error to a top-level HTTP status. The batch always returns 200 with the
+  // full per-policy array, so a caller sees every outcome — which ids upgraded and which
+  // failed (with their per-item `success: false` / `statusCode` / `body`) — instead of a
+  // single top-level error that would hide a partially-successful batch.
   return response.ok({ body });
 };
 
@@ -179,18 +171,11 @@ export const upgradeAgentlessPoliciesDryRunHandler: FleetRequestHandler<
   const policyIds = uniq(request.body.policyIds);
   const body = await agentlessPoliciesService.getAgentlessPolicyUpgradeDryRunDiff(policyIds);
 
-  // Mirror the package-policy dry-run handler: a per-policy hard failure (guard 404 or a
-  // fatal dry-run error) is promoted to a top-level HTTP error with a message-only body,
-  // so the per-policy previews are only returned on the 200 path. Soft migration errors
-  // (which carry `errors`/`proposedPolicy` but no `statusCode`) keep the batch at 200.
-  const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
-  if (firstFatalError?.statusCode) {
-    return response.customError({
-      statusCode: firstFatalError.statusCode,
-      body: { message: firstFatalError.body?.message ?? 'Upgrade dry-run failed' },
-    });
-  }
-
+  // Unlike the package-policy dry-run handler, we deliberately do NOT promote a per-policy
+  // hard failure (guard 404 or fatal dry-run error) to a top-level HTTP status. The batch
+  // always returns 200 with the full per-policy array, so a caller sees every preview
+  // alongside any per-item failures (`statusCode` / `body`) and soft migration errors
+  // (`errors`).
   return response.ok({ body });
 };
 

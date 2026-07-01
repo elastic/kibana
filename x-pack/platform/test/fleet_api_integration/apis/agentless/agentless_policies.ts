@@ -922,7 +922,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.map((item) => item.id).sort()).to.eql([policyId1, policyId2].sort());
       });
 
-      it('should reject the batch with a 404 when an id is missing or non-agentless', async () => {
+      it('should return 200 with per-policy failures for missing/non-agentless ids while upgrading valid ids', async () => {
         const policyId = uuidv4();
         await createTestAgentlessPolicy(policyId, `test_agentless-${Date.now()}`);
 
@@ -948,17 +948,28 @@ export default function (providerContext: FtrProviderContext) {
 
         const missingId = uuidv4();
 
-        // Mirrors package-policy bulk upgrade: the first per-policy guard failure is promoted
-        // to a top-level HTTP error, even when other ids in the batch are valid.
-        await expectToRejectWithError(
-          () =>
-            apiClient.bulkUpgradeAgentlessPolicies([
-              policyId,
-              regularPackagePolicyRes.item.id,
-              missingId,
-            ]),
-          /404/
-        );
+        // No top-level promotion: the batch returns 200 with a per-policy array, so valid
+        // ids upgrade while missing / non-agentless ids surface a per-item 404. Results stay
+        // in request order.
+        const res = await apiClient.bulkUpgradeAgentlessPolicies([
+          policyId,
+          regularPackagePolicyRes.item.id,
+          missingId,
+        ]);
+
+        expect(res.length).to.be(3);
+        expect(res.map((item) => item.id)).to.eql([
+          policyId,
+          regularPackagePolicyRes.item.id,
+          missingId,
+        ]);
+
+        const [validRes, regularRes, missingRes] = res;
+        expect(validRes.success).to.be(true);
+        expect(regularRes.success).to.be(false);
+        expect(regularRes.statusCode).to.be(404);
+        expect(missingRes.success).to.be(false);
+        expect(missingRes.statusCode).to.be(404);
 
         // The non-agentless policy must remain untouched (not upgraded through this API).
         await apiClient.getPackagePolicy(regularPackagePolicyRes.item.id);
@@ -986,15 +997,18 @@ export default function (providerContext: FtrProviderContext) {
         expect(item.proposedPolicy).to.not.have.property('supports_agentless');
       });
 
-      it('should reject the dry-run with a 404 for a missing policy', async () => {
+      it('should return 200 with a per-policy failure for a missing policy in the dry-run', async () => {
         const missingId = uuidv4();
 
-        // A per-policy guard failure is promoted to a top-level HTTP error (mirrors
-        // package-policy dry-run).
-        await expectToRejectWithError(
-          () => apiClient.upgradeAgentlessPoliciesDryRun([missingId]),
-          /404/
-        );
+        // A per-policy guard failure is surfaced as a dry-run item (`hasErrors: true` +
+        // per-item 404), not promoted to a top-level HTTP error.
+        const res = await apiClient.upgradeAgentlessPoliciesDryRun([missingId]);
+
+        expect(res.length).to.be(1);
+        const [item] = res;
+        expect(item.id).to.be(missingId);
+        expect(item.hasErrors).to.be(true);
+        expect(item.statusCode).to.be(404);
       });
 
       it('should reject the bulk upgrade for a user without writeIntegrationPolicies', async () => {

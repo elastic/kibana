@@ -9,7 +9,7 @@ requestBody:
               - d52a7812-5736-4fdc-aed8-72152afa1ffa
 responses:
   200:
-    description: 'Indicates a successful response. Each item previews the migrated policy as a consumable agentless policy.'
+    description: 'Indicates a successful response. Each item previews the migrated policy as a consumable agentless policy; a missing or non-agentless id is reported as a per-item failure (`hasErrors: true` + `statusCode`) without failing the batch. Inspect every item.'
     content:
       application/json:
         examples:
@@ -49,6 +49,60 @@ responses:
                 proposedVersion: 1.6.0
                 errors:
                   - message: 'Variable "organization_id" is required'
+          upgradeAgentlessPoliciesDryRunMixedResponseExample:
+            description: 'Example dry-run response for a mixed batch: one policy previews cleanly while two ids are missing or not agentless. Missing / non-agentless ids are surfaced as per-item failures (`hasErrors: true` + `statusCode`) without failing the batch, and results stay in request order.'
+            value:
+              - id: 2e426392-f856-4ab2-bc31-92d4dbb8d134
+                name: agentless_hello_world-16
+                hasErrors: false
+                currentVersion: 0.5.0
+                proposedVersion: 0.5.0
+                proposedPolicy:
+                  id: 2e426392-f856-4ab2-bc31-92d4dbb8d134
+                  name: agentless_hello_world-16
+                  description: ''
+                  namespace: default
+                  package:
+                    name: agentless_hello_world
+                    title: Agentless Hello World
+                    version: 0.5.0
+                  inputs:
+                    agentless_hello_world-cel:
+                      enabled: true
+                      streams:
+                        agentless_hello_world.generic:
+                          enabled: true
+                          vars:
+                            url: https://epr.elastic.co
+                        agentless_hello_world.mock_counter:
+                          enabled: false
+                          vars:
+                            mode: constant
+                            events_per_second: 10
+                            spike_events: 100
+                            spike_every_seconds: 60
+                    agentless_hello_world-httpjson:
+                      enabled: false
+                      streams:
+                        agentless_hello_world.generic:
+                          enabled: false
+                          vars:
+                            url: https://epr.elastic.co
+                  cloud_connector: null
+                  created_at: '2026-07-01T15:59:08.299Z'
+                  created_by: admin
+                  updated_at: '2026-07-01T16:02:14.067Z'
+                  updated_by: admin
+              - id: 9300464c-6cfc-4566-850d-e9e7927457fe
+                hasErrors: true
+                statusCode: 404
+                body:
+                  message: 'Agentless policy 9300464c-6cfc-4566-850d-e9e7927457fe not found'
+              - id: 5b8763e9-791a-4038-be29-b384d578200e
+                hasErrors: true
+                statusCode: 404
+                body:
+                  message: 'Agentless policy 5b8763e9-791a-4038-be29-b384d578200e not found'
   400:
     description: 'Bad Request'
     content:
@@ -60,14 +114,3 @@ responses:
               statusCode: 400
               error: 'Bad Request'
               message: 'An error message describing what went wrong'
-  404:
-    description: 'Returned when a requested policy does not exist or is not an agentless policy. The first such per-policy failure in the batch is returned as a top-level error.'
-    content:
-      application/json:
-        examples:
-          notFoundResponseExample:
-            description: 'Example of a not-found error response'
-            value:
-              statusCode: 404
-              error: 'Not Found'
-              message: 'Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found'
