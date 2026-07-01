@@ -188,13 +188,10 @@ describe('createRuleSmlType', () => {
               'ops, cpu',
               (baseRuleAttrs.query as { breach: { query: string } }).breach.query,
             ].join('\n'),
-            permissions: {
-              kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
-              elasticsearch: { indices: [] },
-            },
           },
         ],
       });
+      expect(result?.chunks[0]).not.toHaveProperty('permissions');
     });
 
     it('falls back to originId for title when metadata.name is missing', async () => {
@@ -221,6 +218,16 @@ describe('createRuleSmlType', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining("SML rule: failed to get data for 'rule-missing'")
       );
+    });
+  });
+
+  describe('getPermissions', () => {
+    it('returns the rules-read API privilege', () => {
+      const permissions = buildDefinition().getPermissions!('rule-1', buildSmlContext());
+      expect(permissions).toEqual({
+        kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
+        elasticsearch: { indices: [] },
+      });
     });
   });
 
