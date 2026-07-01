@@ -17,7 +17,6 @@ import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import { esqlAdditionalInstructions } from '../shared/esql_instructions';
 import { normalizeVegaSpec } from './normalize_spec';
 import { createAuthorVegaSpecPrompt } from './prompts';
-import { validateVegaSpec } from './vega_validator';
 import {
   GENERATE_ESQL_NODE,
   AUTHOR_SPEC_NODE,
@@ -37,9 +36,9 @@ import {
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
 
 /**
- * Default range used only to bind `?_tstart`/`?_tend` when executing a provided
- * query server-side for sample rows. The live dashboard range is applied by
- * Kibana at render time; this only affects the rows used for validation.
+ * Default range used only to bind `?_tstart`/`?_tend` when executing a query
+ * server-side to collect its result columns. The live dashboard range is applied
+ * by Kibana at render time, so this default never reaches the stored spec.
  */
 const DEFAULT_VALIDATION_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
 
@@ -58,28 +57,6 @@ const RENDERABLE_VIEW_KEYS = [
 const hasRenderableView = (spec: Record<string, unknown>): boolean =>
   RENDERABLE_VIEW_KEYS.some((key) => key in spec);
 
-/**
- * Warning substrings that signal a real authoring mistake (not cosmetic noise)
- * and so are worth a bounded repair retry. A spec that renders but emits one of
- * these is sent back to the author with the warning as feedback; if it still
- * warns once the retry budget is spent, the rendered spec is kept (warnings
- * never block returning a usable chart).
- */
-const RETRYABLE_WARNING_PATTERNS: readonly RegExp[] = [
-  // Layered/faceted specs whose merged scale/legend/sort properties conflict,
-  // e.g. `Conflicting legend property "disable" (false and true). Using false.`
-  /conflicting/i,
-  // Author-positioned text marks that collide (e.g. an indicator's big value
-  // printed on top of its label); the author can re-space or shrink them.
-  /overlapping text/i,
-];
-
-/** Whether any warning matches a {@link RETRYABLE_WARNING_PATTERNS} pattern. */
-const hasRetryableWarning = (warnings: string[] | undefined): boolean =>
-  !!warnings?.some((warning) =>
-    RETRYABLE_WARNING_PATTERNS.some((pattern) => pattern.test(warning))
-  );
-
 const parseSpecFromResponse = (responseText: string): Record<string, unknown> => {
   const jsonMatches = Array.from(responseText.matchAll(INLINE_JSON_REGEX));
   const jsonText = jsonMatches.length > 0 ? jsonMatches[0][1].trim() : responseText.trim();
@@ -88,25 +65,6 @@ const parseSpecFromResponse = (responseText: string): Record<string, unknown> =>
     throw new Error('Response is not a valid JSON object');
   }
   return parsed as Record<string, unknown>;
-};
-
-/** Convert ES|QL columnar results into Vega-style row objects keyed by column name. */
-const toRowObjects = (
-  columns: EsqlEsqlColumnInfo[] | undefined,
-  values: unknown[][] | undefined
-): Array<Record<string, unknown>> => {
-  if (!Array.isArray(columns) || !Array.isArray(values)) {
-    return [];
-  }
-  return values.map((row) => {
-    const rowObject: Record<string, unknown> = {};
-    columns.forEach((column, index) => {
-      if (column?.name) {
-        rowObject[column.name] = row[index];
-      }
-    });
-    return rowObject;
-  });
 };
 
 const VegaStateAnnotation = Annotation.Root({
@@ -118,8 +76,6 @@ const VegaStateAnnotation = Annotation.Root({
   // internal
   esqlQuery: Annotation<string>(),
   columns: Annotation<EsqlEsqlColumnInfo[] | undefined>(),
-  /** Result rows (objects keyed by column name) used to render-validate the spec. */
-  rows: Annotation<Array<Record<string, unknown>> | undefined>(),
   currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
   actions: Annotation<VegaAction[]>({
     reducer: (a, b) => [...a, ...b],
@@ -134,9 +90,9 @@ type VegaState = typeof VegaStateAnnotation.State;
 
 /**
  * Build the LangGraph that authors a Vega-Lite spec: resolve an ES|QL query
- * (executing it for sample rows + columns), ask the model to author a spec,
- * normalize and render-validate it in a worker thread, and retry authoring with
- * error/warning feedback until it renders or the attempt budget is exhausted.
+ * (executing it for its result columns), ask the model to author a spec,
+ * structurally check + normalize it, and retry authoring with error feedback
+ * until it succeeds or the attempt budget is exhausted.
  */
 export const createVegaGraph = async (
   modelProvider: ModelProvider,
@@ -146,20 +102,17 @@ export const createVegaGraph = async (
 ) => {
   const defaultModel = await modelProvider.getDefaultModel();
 
-  // Resolve the ES|QL query and its result columns + sample rows. A query may
-  // reference time-picker params (?_tstart/?_tend); bind a default range so it
-  // runs server-side. Kibana binds the live range at render time, so this only
-  // affects the sampled rows used for validation.
+  // Resolve the ES|QL query and its result columns. A query may reference
+  // time-picker params (?_tstart/?_tend); bind a default range so it runs
+  // server-side. Kibana binds the live range at render time.
   const generateESQLNode = async (state: VegaState) => {
     const timeRangeParams = buildTimeRangeParams(DEFAULT_VALIDATION_TIME_RANGE);
 
     let action: GenerateEsqlAction;
-    let rows: Array<Record<string, unknown>> = [];
 
     try {
       let query = state.esqlQuery;
       let columns: EsqlEsqlColumnInfo[] | undefined;
-      let values: unknown[][] | undefined;
 
       // A provided query is only trustworthy if it actually runs: the caller may
       // pass an LLM-invented query whose error (e.g. a type mismatch) AST
@@ -169,7 +122,7 @@ export const createVegaGraph = async (
       if (query) {
         try {
           logger.debug('Validating provided ES|QL query for Vega visualization');
-          ({ columns, values } = await executeEsql({
+          ({ columns } = await executeEsql({
             query,
             params: timeRangeParams,
             esClient: esClient.asCurrentUser,
@@ -211,13 +164,13 @@ export const createVegaGraph = async (
           };
         }
         query = response.query;
-        // generateEsql already executed the query; reuse its rows instead of
+        // generateEsql already executed the query; reuse its columns instead of
         // running it a second time. Re-execute only if it ran without returning
         // results.
         if (response.results) {
-          ({ columns, values } = response.results);
+          ({ columns } = response.results);
         } else {
-          ({ columns, values } = await executeEsql({
+          ({ columns } = await executeEsql({
             query,
             params: timeRangeParams,
             esClient: esClient.asCurrentUser,
@@ -226,7 +179,6 @@ export const createVegaGraph = async (
       }
 
       action = { type: 'generate_esql', success: true, query, columns };
-      rows = toRowObjects(columns, values);
     } catch (error) {
       logger.error(`Failed to resolve ES|QL query for Vega: ${error.message}`);
       action = { type: 'generate_esql', success: false, error: error.message };
@@ -235,7 +187,6 @@ export const createVegaGraph = async (
     return {
       esqlQuery: action.query ?? state.esqlQuery,
       columns: action.columns,
-      rows,
       actions: [action],
     };
   };
@@ -244,8 +195,8 @@ export const createVegaGraph = async (
     const attempt = state.currentAttempt + 1;
     logger.debug(`Authoring Vega-Lite spec (attempt ${attempt}/${MAX_RETRY_ATTEMPTS})`);
 
-    // Feed back both authoring failures and validation failures/warnings so the
-    // next attempt can fix render-time problems, not just malformed JSON.
+    // Feed back authoring and structural-check failures so the next attempt can
+    // fix them, not just malformed JSON.
     const previousContext = state.actions
       .filter((action) => isAuthorSpecAction(action) || isValidateSpecAction(action))
       .map((action) => {
@@ -254,14 +205,9 @@ export const createVegaGraph = async (
             ? undefined
             : `Authoring attempt ${action.attempt} failed: ${action.error}`;
         }
-        if (!action.success) {
-          return `Validation attempt ${action.attempt} failed: ${action.error}`;
-        }
-        return action.warnings?.length
-          ? `Validation attempt ${
-              action.attempt
-            } succeeded with warnings to address: ${action.warnings.join('; ')}`
-          : undefined;
+        return action.success
+          ? undefined
+          : `Validation attempt ${action.attempt} failed: ${action.error}`;
       })
       .filter(Boolean)
       .join('\n');
@@ -293,8 +239,8 @@ export const createVegaGraph = async (
     return { currentAttempt: attempt, actions: [action] };
   };
 
-  // Normalize (harden) the authored spec, then compile + render it in a worker
-  // to catch render-time errors before it is stored.
+  // Structurally check the authored spec (it must declare a renderable view),
+  // then normalize (harden) it into the render-ready form that is stored.
   const validateSpecNode = async (state: VegaState) => {
     const attempt = state.currentAttempt;
     const lastAuthor = [...state.actions].reverse().find(isAuthorSpecAction);
@@ -319,22 +265,12 @@ export const createVegaGraph = async (
         columns: state.columns,
       });
 
-      const { error: renderError, warnings } = await validateVegaSpec({
-        spec: normalized,
-        rows: state.rows,
-        logger,
-      });
-      if (renderError) {
-        throw new Error(`Vega could not render the spec: ${renderError}`);
-      }
-
       action = {
         type: 'validate_spec',
         success: true,
         // Pretty-print so the stored/displayed spec stays human-readable.
         spec: JSON.stringify(normalized, null, 2),
         attempt,
-        warnings,
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -346,9 +282,7 @@ export const createVegaGraph = async (
   };
 
   const finalizeNode = async (state: VegaState) => {
-    // Prefer the most recent validation that actually rendered, even if it had
-    // warnings: a retry triggered by warnings must never lose a usable spec
-    // (e.g. when the repair attempt later failed to render).
+    // Use the most recent spec that passed the structural check + normalization.
     const lastRendered = [...state.actions]
       .reverse()
       .find((action) => isValidateSpecAction(action) && action.success && !!action.spec) as
@@ -392,9 +326,9 @@ export const createVegaGraph = async (
   const shouldRetryRouter = (state: VegaState): string => {
     const lastValidate = [...state.actions].reverse().find(isValidateSpecAction);
 
-    // Retry render failures, and also specs that render but emit an actionable
-    // warning (so the author can fix it) — both are bounded by the attempt budget.
-    const needsRepair = !lastValidate?.success || hasRetryableWarning(lastValidate.warnings);
+    // Retry authoring when the spec failed the structural check or normalization,
+    // bounded by the attempt budget.
+    const needsRepair = !lastValidate?.success;
 
     if (!needsRepair) {
       return FINALIZE_NODE;

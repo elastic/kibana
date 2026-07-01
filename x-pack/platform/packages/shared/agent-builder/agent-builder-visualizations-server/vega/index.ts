@@ -11,5 +11,3 @@ export { createVegaGraph } from './graph';
 export { normalizeVegaSpec, VEGA_LITE_SCHEMA } from './normalize_spec';
 export { escapeVegaFieldReferences } from './field_escaping';
 export { createAuthorVegaSpecPrompt } from './prompts';
-export { validateVegaSpec } from './vega_validator';
-export type { VegaValidationResult } from './vega_validator';

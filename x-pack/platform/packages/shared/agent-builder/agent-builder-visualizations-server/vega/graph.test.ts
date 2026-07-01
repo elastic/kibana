@@ -10,7 +10,6 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { generateEsql, executeEsql } from '@kbn/agent-builder-genai-utils';
 import { VEGA_LITE_SCHEMA } from './normalize_spec';
-import { validateVegaSpec } from './vega_validator';
 import { createVegaGraph } from './graph';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
@@ -27,13 +26,8 @@ jest.mock('../shared/esql_instructions', () => ({
   esqlAdditionalInstructions: 'esql-instructions',
 }));
 
-jest.mock('./vega_validator', () => ({
-  validateVegaSpec: jest.fn(),
-}));
-
 const mockedGenerateEsql = jest.mocked(generateEsql);
 const mockedExecuteEsql = jest.mocked(executeEsql);
-const mockedValidateVegaSpec = jest.mocked(validateVegaSpec);
 
 const createMockLogger = (): Logger =>
   ({ debug: jest.fn(), error: jest.fn(), info: jest.fn(), warn: jest.fn() } as unknown as Logger);
@@ -64,7 +58,6 @@ describe('createVegaGraph', () => {
     mockedExecuteEsql.mockResolvedValue({ columns: [], values: [] } as Awaited<
       ReturnType<typeof executeEsql>
     >);
-    mockedValidateVegaSpec.mockResolvedValue({ warnings: [] });
   });
 
   const run = async (input: { esqlQuery?: string; existingSpec?: string } = {}) => {
@@ -129,21 +122,6 @@ describe('createVegaGraph', () => {
     expect(JSON.parse(state.spec!).mark).toBe('line');
   });
 
-  it('retries authoring when the spec fails render validation, then succeeds', async () => {
-    invoke
-      .mockResolvedValueOnce(asCodeBlock({ mark: 'bar', encoding: { x: { field: 'status' } } }))
-      .mockResolvedValueOnce(asCodeBlock({ mark: 'line', encoding: { x: { field: 'status' } } }));
-    mockedValidateVegaSpec
-      .mockResolvedValueOnce({ error: 'Unrecognized scale type', warnings: [] })
-      .mockResolvedValueOnce({ warnings: [] });
-
-    const state = await run({ esqlQuery: PROVIDED_ESQL });
-
-    expect(invoke).toHaveBeenCalledTimes(2);
-    expect(state.error).toBeNull();
-    expect(JSON.parse(state.spec!).mark).toBe('line');
-  });
-
   it('rejects an authored spec with no renderable view and retries', async () => {
     invoke
       .mockResolvedValueOnce(asCodeBlock({ title: 'no mark here' }))
@@ -154,68 +132,6 @@ describe('createVegaGraph', () => {
     expect(invoke).toHaveBeenCalledTimes(2);
     expect(state.error).toBeNull();
     expect(JSON.parse(state.spec!).mark).toBe('arc');
-  });
-
-  it('retries when a rendered spec emits an actionable warning, then accepts the clean spec', async () => {
-    invoke
-      .mockResolvedValueOnce(asCodeBlock({ layer: [{ mark: 'rule' }, { mark: 'circle' }] }))
-      .mockResolvedValueOnce(asCodeBlock({ layer: [{ mark: 'bar' }] }));
-    mockedValidateVegaSpec
-      .mockResolvedValueOnce({
-        warnings: ['Conflicting legend property "disable" (false and true). Using false.'],
-      })
-      .mockResolvedValueOnce({ warnings: [] });
-
-    const state = await run({ esqlQuery: PROVIDED_ESQL });
-
-    expect(invoke).toHaveBeenCalledTimes(2);
-    expect(state.error).toBeNull();
-    expect(JSON.parse(state.spec!).layer).toEqual([{ mark: 'bar' }]);
-  });
-
-  it('retries when rendered text marks overlap, then accepts the clean spec', async () => {
-    invoke
-      .mockResolvedValueOnce(asCodeBlock({ layer: [{ mark: 'text' }, { mark: 'text' }] }))
-      .mockResolvedValueOnce(asCodeBlock({ layer: [{ mark: 'text' }] }));
-    mockedValidateVegaSpec
-      .mockResolvedValueOnce({
-        warnings: [
-          'Overlapping text marks detected ("4" overlaps "Current Period"); space the text marks out (or shrink the font) so labels do not collide.',
-        ],
-      })
-      .mockResolvedValueOnce({ warnings: [] });
-
-    const state = await run({ esqlQuery: PROVIDED_ESQL });
-
-    expect(invoke).toHaveBeenCalledTimes(2);
-    expect(state.error).toBeNull();
-    expect(JSON.parse(state.spec!).layer).toEqual([{ mark: 'text' }]);
-  });
-
-  it('does not retry for a benign warning', async () => {
-    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
-    mockedValidateVegaSpec.mockResolvedValue({ warnings: ['Dropping a duplicate something'] });
-
-    const state = await run({ esqlQuery: PROVIDED_ESQL });
-
-    expect(invoke).toHaveBeenCalledTimes(1);
-    expect(state.error).toBeNull();
-    expect(JSON.parse(state.spec!).mark).toBe('bar');
-  });
-
-  it('keeps the rendered spec when an actionable warning persists past the retry budget', async () => {
-    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
-    mockedValidateVegaSpec.mockResolvedValue({
-      warnings: ['Conflicting legend property "disable" (false and true). Using false.'],
-    });
-
-    const state = await run({ esqlQuery: PROVIDED_ESQL });
-
-    // Exhausts the retry budget trying to repair the warning, but never blocks:
-    // the last rendered spec is still returned.
-    expect(invoke).toHaveBeenCalledTimes(3);
-    expect(state.error).toBeNull();
-    expect(JSON.parse(state.spec!).mark).toBe('bar');
   });
 
   it('regenerates a corrected query when the provided ES|QL fails to execute', async () => {

@@ -7,8 +7,8 @@ Builder. It builds a visualization config for the renderer chosen by the caller
 
 - `lens/` — the Lens engine (`buildVisualizationConfig`): chart-type selection,
   schemas, prompts, and palettes.
-- `vega/` — the Vega-Lite engine (`buildVegaConfig`): authors, normalizes, and
-  render-validates a Vega-Lite spec for requests Lens cannot express.
+- `vega/` — the Vega-Lite engine (`buildVegaConfig`): authors and normalizes a
+  Vega-Lite spec for requests Lens cannot express.
 - `shared/` — guidance reused by both engines (e.g. ES|QL authoring instructions).
 - `utils/` — small renderer-agnostic helpers.
 
