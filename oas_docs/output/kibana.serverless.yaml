@@ -36097,6 +36097,12 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        allow_edit:
+                          items:
+                            maxLength: 100
+                            type: string
+                          maxItems: 100
+                          type: array
                         host_urls:
                           items:
                             type: string
@@ -36280,6 +36286,12 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                allow_edit:
+                  items:
+                    maxLength: 100
+                    type: string
+                  maxItems: 100
+                  type: array
                 host_urls:
                   items:
                     type: string
@@ -36403,6 +36415,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      allow_edit:
+                        items:
+                          maxLength: 100
+                          type: string
+                        maxItems: 100
+                        type: array
                       host_urls:
                         items:
                           type: string
@@ -36671,6 +36689,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      allow_edit:
+                        items:
+                          maxLength: 100
+                          type: string
+                        maxItems: 100
+                        type: array
                       host_urls:
                         items:
                           type: string
@@ -36860,6 +36884,12 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                allow_edit:
+                  items:
+                    maxLength: 100
+                    type: string
+                  maxItems: 100
+                  type: array
                 host_urls:
                   items:
                     type: string
@@ -36975,6 +37005,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      allow_edit:
+                        items:
+                          maxLength: 100
+                          type: string
+                        maxItems: 100
+                        type: array
                       host_urls:
                         items:
                           type: string
