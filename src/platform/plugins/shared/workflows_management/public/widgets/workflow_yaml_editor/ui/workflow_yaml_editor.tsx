@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
 import throttle from 'lodash/throttle';
@@ -345,6 +338,14 @@ export const WorkflowYAMLEditor = ({
     workflowName: workflow?.name ?? workflowDefinition?.name,
     validationErrors,
   });
+
+  useEffect(() => {
+    if (!isAgentBuilderAvailable) {
+      return;
+    }
+
+    openAgentChat();
+  }, [isAgentBuilderAvailable, openAgentChat]);
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
     if (!editorRef.current) {
@@ -902,31 +903,6 @@ const WorkflowYamlEditorAssistActions = React.memo(function WorkflowYamlEditorAs
   const styles = useWorkflowEditorStyles();
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      {isAgentBuilderAvailable && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={
-              <FormattedMessage
-                id="workflows.yamlEditor.aiAgentTooltip"
-                defaultMessage="Ask AI to help edit this workflow"
-              />
-            }
-          >
-            <EuiButtonEmpty
-              iconType="sparkles"
-              size="xs"
-              aria-label="Open AI Agent"
-              onClick={onOpenAgentChat}
-              data-test-subj="workflowYamlEditorAiAgentButton"
-            >
-              <FormattedMessage
-                id="workflows.yamlEditor.aiAgentButtonLabel"
-                defaultMessage="AI Agent"
-              />
-            </EuiButtonEmpty>
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
       {isDevelopment && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
