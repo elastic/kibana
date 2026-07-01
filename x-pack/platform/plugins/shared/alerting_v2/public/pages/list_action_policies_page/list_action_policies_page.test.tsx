@@ -11,6 +11,8 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter } from 'react-router-dom';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ListActionPoliciesPage } from './list_action_policies_page';
 
@@ -181,13 +183,15 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
 
 const renderPage = () =>
   render(
-    <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter>
-        <I18nProvider>
-          <ListActionPoliciesPage />
-        </I18nProvider>
-      </MemoryRouter>
-    </QueryClientProvider>
+    <MockChromeContextProvider>
+      <QueryClientProvider client={createQueryClient()}>
+        <MemoryRouter>
+          <I18nProvider>
+            <ListActionPoliciesPage />
+          </I18nProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
+    </MockChromeContextProvider>
   );
 
 describe('ListActionPoliciesPage', () => {
@@ -221,7 +225,19 @@ describe('ListActionPoliciesPage', () => {
   it('renders the experimental badge in the page header', () => {
     renderPage();
 
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Action Policies');
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+  });
+
+  it('navigates to create action policy when the create button is clicked', async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.click(screen.getByTestId('createActionPolicyButton'));
+
+    expect(mockNavigateToUrl).toHaveBeenCalledWith(
+      '/app/management/alertingV2/action_policies/create'
+    );
   });
 
   it('formats updatedAt using the user date format setting', () => {

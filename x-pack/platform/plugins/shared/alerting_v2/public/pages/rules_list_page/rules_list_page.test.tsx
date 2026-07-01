@@ -10,6 +10,7 @@ import { act, render, screen, fireEvent, waitFor, within } from '@testing-librar
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
+import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
 import { RulesListPage, SEARCH_DEBOUNCE_MS } from './rules_list_page';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT } from '../../constants';
 
@@ -158,13 +159,15 @@ const createQueryClient = () =>
 
 const renderPage = () => {
   return render(
-    <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter>
-        <I18nProvider>
-          <RulesListPage />
-        </I18nProvider>
-      </MemoryRouter>
-    </QueryClientProvider>
+    <MockChromeContextProvider>
+      <QueryClientProvider client={createQueryClient()}>
+        <MemoryRouter>
+          <I18nProvider>
+            <RulesListPage />
+          </I18nProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
+    </MockChromeContextProvider>
   );
 };
 
@@ -802,7 +805,7 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    fireEvent.click(screen.getByTestId('createRulePopoverButton'));
+    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
 
     await waitFor(() => {
       expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument();
@@ -823,7 +826,7 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    fireEvent.click(screen.getByTestId('createRulePopoverButton'));
+    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
 
     await waitFor(() => {
       expect(screen.getByTestId('createWithAgentButton')).toBeInTheDocument();
@@ -850,7 +853,7 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    fireEvent.click(screen.getByTestId('createRulePopoverButton'));
+    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
 
     await waitFor(() => {
       expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument();
