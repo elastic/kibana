@@ -12,3 +12,8 @@ export {
   type DeveloperToolbarItemProps,
 } from './src/components/developer_toolbar_item';
 export { DeveloperToolbar, type DeveloperToolbarProps } from './src/components/developer_toolbar';
+export { ColorThemeToggle } from './src/toolbar_items/color_theme/color_theme_toggle';
+export {
+  installLocalColorThemeOverride,
+  type LocalColorThemeController,
+} from './src/toolbar_items/color_theme/local_color_theme';
