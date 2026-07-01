@@ -43,6 +43,14 @@ describe('createAuthorVegaSpecPrompt', () => {
     expect(text).toContain('set explicit "width" and "height" INSIDE the inner "spec"');
   });
 
+  it('defers colors to the Kibana theme instead of hardcoding them', () => {
+    const text = systemText('any chart');
+    expect(text).toContain('Do NOT hardcode colors');
+    expect(text).toContain('theme-aware Elastic palette');
+    // Categorical color should not set a scheme/range (that would override the theme).
+    expect(text).toContain('do NOT set a "scheme", "range"');
+  });
+
   it('includes the chart-type hint only when one is provided', () => {
     expect(systemText('any chart')).not.toContain('Suggested chart style');
 

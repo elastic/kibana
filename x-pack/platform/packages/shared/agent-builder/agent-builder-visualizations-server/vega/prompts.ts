@@ -95,7 +95,10 @@ CHART CHOICE:
 - Keep the spec minimal: include only what is needed to render the requested chart. Do NOT add decorative text layers with a constant "value" (e.g. a center label that just repeats a word); a text layer must encode a real field.
 
 COLOR:
-- Use "color" only for a meaningful dimension, and do NOT hand-author a "domain"; let it derive from the data. For categorical fields prefer a built-in scheme; for quantitative fields a sequential "scheme" ("blues", "viridis") is fine.
+- Kibana applies a theme-aware Elastic palette and adapts chart colors to the active light/dark theme. Do NOT hardcode colors: no hex values, no "config" block setting mark/axis/text colors, and no "mark": { "color": … } — hardcoding overrides the theme and breaks dark mode.
+- Use the "color" ENCODING only to distinguish a meaningful categorical dimension, and leave its scale to the theme: do NOT set a "scheme", "range", or hand-authored "domain" for categorical color.
+- Only for a quantitative color encoding may you set a sequential "scheme" ("blues", "viridis"), since there is no themed default for continuous scales.
+- Single-series charts need no color at all — the theme supplies the default series color.
 
 LAYOUT & STYLE RULES:
 - DO NOT set top-level "width" or "height"; the system makes the chart fill its container. Do NOT set fixed mark sizes (e.g. arc "outerRadius") that prevent the chart from filling its panel.
