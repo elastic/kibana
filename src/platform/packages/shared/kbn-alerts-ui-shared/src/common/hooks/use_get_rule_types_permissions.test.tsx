@@ -114,32 +114,7 @@ describe('useGetRuleTypesPermissions', () => {
     expect(result.current.ruleTypesState.data.size).toBe(0);
     expect(result.current.hasAnyAuthorizedRuleType).toBe(false);
     expect(result.current.authorizedToReadAnyRules).toBe(false);
-    expect(result.current.authorizedToReadAnyAlerts).toBe(false);
     expect(result.current.authorizedToCreateAnyRules).toBe(false);
-  });
-
-  it('should return authorizedToReadAnyAlerts=true when capabilities grant stackAlertsOnly.show', async () => {
-    getRuleTypes.mockResolvedValueOnce([]);
-    const { result } = renderHook(
-      () =>
-        useGetRuleTypesPermissions({
-          http,
-          toasts,
-          enabled: true,
-          capabilities: {
-            navLinks: {},
-            management: {},
-            catalogue: {},
-            stackAlertsOnly: { show: true },
-          },
-        }),
-      {
-        wrapper: Wrapper,
-      }
-    );
-    await waitFor(() => result.current.isSuccess);
-    expect(result.current.authorizedToReadAnyAlerts).toBe(true);
-    expect(result.current.authorizedToReadAnyRules).toBe(false);
   });
 
   it('should return the correct authz flags for read-only rule types', async () => {
@@ -190,5 +165,63 @@ describe('useGetRuleTypesPermissions', () => {
     expect(result.current.hasAnyAuthorizedRuleType).toBe(true);
     expect(result.current.authorizedToReadAnyRules).toBe(true);
     expect(result.current.authorizedToCreateAnyRules).toBe(true);
+  });
+
+  describe('authorizedToReadRuleType', () => {
+    it('should return true for a readable rule type and false for an unknown rule type', async () => {
+      getRuleTypes.mockResolvedValueOnce([
+        {
+          id: 'rule-type-1',
+          authorizedConsumers: { alerts: { read: true, all: false } },
+        },
+      ]);
+      const { result } = renderHook(
+        () =>
+          useGetRuleTypesPermissions({
+            http,
+            toasts,
+            enabled: true,
+          }),
+        {
+          wrapper: Wrapper,
+        }
+      );
+      await waitFor(() => result.current.isSuccess);
+      expect(result.current.authorizedToReadRuleType('rule-type-1')).toBe(true);
+      expect(result.current.authorizedToReadRuleType('unknown-rule-type')).toBe(false);
+    });
+
+    it('should respect the consumer argument when provided', async () => {
+      getRuleTypes.mockResolvedValueOnce([
+        {
+          id: 'rule-type-1',
+          authorizedConsumers: {
+            alerts: { read: true, all: false },
+            logs: { read: false, all: false },
+          },
+        },
+      ]);
+      const { result } = renderHook(
+        () =>
+          useGetRuleTypesPermissions({
+            http,
+            toasts,
+            enabled: true,
+          }),
+        {
+          wrapper: Wrapper,
+        }
+      );
+      await waitFor(() => result.current.isSuccess);
+      // Authorized under the `alerts` consumer
+      expect(result.current.authorizedToReadRuleType('rule-type-1', 'alerts')).toBe(true);
+      // Present but not readable under the `logs` consumer
+      expect(result.current.authorizedToReadRuleType('rule-type-1', 'logs')).toBe(false);
+      // A consumer the user is not authorized for is denied (strict per-consumer
+      // check), even though another consumer is readable.
+      expect(result.current.authorizedToReadRuleType('rule-type-1', 'unknown-consumer')).toBe(
+        false
+      );
+    });
   });
 });
