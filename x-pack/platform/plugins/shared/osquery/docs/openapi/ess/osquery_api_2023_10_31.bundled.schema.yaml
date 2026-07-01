@@ -411,6 +411,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              filteredExport:
+                summary: Export only rows matching a KQL filter
+                value:
+                  kuery: 'user.name: "root"'
             schema:
               $ref: '#/components/schemas/ExportRequestBody'
         required: false
@@ -418,6 +423,25 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                jsonExport:
+                  summary: JSON export with metadata and results
+                  value:
+                    _meta:
+                      action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+                      exported_by: elastic
+                      format: json
+                      query: SELECT * FROM users;
+                      timestamp: '2026-04-30T09:12:00.000Z'
+                      total_results: 2
+                    results:
+                      - '@timestamp': '2026-04-30T09:11:58.321Z'
+                        agent:
+                          id: 980a6b73-0b03-4d1e-8915-67c202e4a980
+                          name: prod-host-1
+                        user:
+                          id: '1000'
+                          name: ubuntu
               schema:
                 $ref: '#/components/schemas/ExportJsonResponse'
                 description: >
@@ -425,10 +449,13 @@ paths:
                   (all result rows). Rows are held in memory before writing;
                   prefer `ndjson` for large exports.
             application/ndjson:
-              example: |
-                {"_meta":{"action_id":"609c4c66-ba3d-43fa-afdd-53e244577aa0","query":"SELECT * FROM users;","timestamp":"2026-04-30T09:12:00.000Z","exported_by":"elastic","format":"ndjson","total_results":2}}
-                {"@timestamp":"2026-04-30T09:11:58.321Z","agent":{"id":"980a6b73-0b03-4d1e-8915-67c202e4a980","name":"prod-host-1"},"user":{"id":"1000","name":"ubuntu"}}
-                {"@timestamp":"2026-04-30T09:11:58.456Z","agent":{"id":"980a6b73-0b03-4d1e-8915-67c202e4a980","name":"prod-host-1"},"user":{"id":"0","name":"root"}}
+              examples:
+                ndjsonExport:
+                  summary: NDJSON export with a leading metadata line
+                  value: |
+                    {"_meta":{"action_id":"609c4c66-ba3d-43fa-afdd-53e244577aa0","query":"SELECT * FROM users;","timestamp":"2026-04-30T09:12:00.000Z","exported_by":"elastic","format":"ndjson","total_results":2}}
+                    {"@timestamp":"2026-04-30T09:11:58.321Z","agent":{"id":"980a6b73-0b03-4d1e-8915-67c202e4a980","name":"prod-host-1"},"user":{"id":"1000","name":"ubuntu"}}
+                    {"@timestamp":"2026-04-30T09:11:58.456Z","agent":{"id":"980a6b73-0b03-4d1e-8915-67c202e4a980","name":"prod-host-1"},"user":{"id":"0","name":"root"}}
               schema:
                 description: >
                   Newline-delimited JSON stream. The first line is a metadata
@@ -436,10 +463,13 @@ paths:
                 format: binary
                 type: string
             text/csv:
-              example: |
-                agent.name,agent.id,user.id,user.name
-                prod-host-1,980a6b73-0b03-4d1e-8915-67c202e4a980,1000,ubuntu
-                prod-host-1,980a6b73-0b03-4d1e-8915-67c202e4a980,0,root
+              examples:
+                csvExport:
+                  summary: CSV export with a header row
+                  value: |
+                    agent.name,agent.id,user.id,user.name
+                    prod-host-1,980a6b73-0b03-4d1e-8915-67c202e4a980,1000,ubuntu
+                    prod-host-1,980a6b73-0b03-4d1e-8915-67c202e4a980,0,root
               schema:
                 description: >
                   CSV file with a header row derived from the ECS mapping of the
@@ -461,6 +491,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                rowLimitExceeded:
+                  summary: Result count exceeds the export limit
+                  value:
+                    message: Export limited to 500,000 results. Found 500,001. Please add filters to
+                      narrow results.
               schema:
                 type: object
                 properties:
@@ -479,6 +515,11 @@ paths:
         '404':
           content:
             application/json:
+              examples:
+                actionNotFound:
+                  summary: The id/actionId pair refers to different queries
+                  value:
+                    message: Live query action not found
               schema:
                 type: object
                 properties:
@@ -1197,6 +1238,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              filteredExport:
+                summary: Export only rows matching a KQL filter
+                value:
+                  kuery: 'agent.name: "prod-host-1"'
             schema:
               $ref: '#/components/schemas/ExportRequestBody'
         required: false
@@ -1204,6 +1250,25 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                jsonExport:
+                  summary: JSON export with metadata and results
+                  value:
+                    _meta:
+                      action_id: 90f342ee-9c05-4844-849b-173993234f22
+                      execution_count: 17384
+                      exported_by: elastic
+                      format: json
+                      timestamp: '2026-04-30T09:12:00.000Z'
+                      total_results: 1
+                    results:
+                      - '@timestamp': '2026-04-30T09:11:58.321Z'
+                        agent:
+                          id: 5b1bb334-a23d-4006-80fe-bd129b979c9f
+                          name: prod-host-1
+                        osquery:
+                          uid: '1000'
+                          username: ubuntu
               schema:
                 $ref: '#/components/schemas/ExportJsonResponse'
                 description: >
@@ -1211,9 +1276,12 @@ paths:
                   (all result rows). Rows are held in memory before writing;
                   prefer `ndjson` for large exports.
             application/ndjson:
-              example: |
-                {"_meta":{"action_id":"90f342ee-9c05-4844-849b-173993234f22","execution_count":17384,"timestamp":"2026-04-30T09:12:00.000Z","exported_by":"elastic","format":"ndjson","total_results":32}}
-                {"@timestamp":"2026-04-30T09:11:58.321Z","agent":{"id":"5b1bb334-a23d-4006-80fe-bd129b979c9f","name":"prod-host-1"},"osquery":{"uid":"1000","username":"ubuntu"}}
+              examples:
+                ndjsonExport:
+                  summary: NDJSON export with a leading metadata line
+                  value: |
+                    {"_meta":{"action_id":"90f342ee-9c05-4844-849b-173993234f22","execution_count":17384,"timestamp":"2026-04-30T09:12:00.000Z","exported_by":"elastic","format":"ndjson","total_results":32}}
+                    {"@timestamp":"2026-04-30T09:11:58.321Z","agent":{"id":"5b1bb334-a23d-4006-80fe-bd129b979c9f","name":"prod-host-1"},"osquery":{"uid":"1000","username":"ubuntu"}}
               schema:
                 description: >
                   Newline-delimited JSON stream. The first line is a metadata
@@ -1222,10 +1290,13 @@ paths:
                 format: binary
                 type: string
             text/csv:
-              example: |
-                osquery.description,agent.name,agent.id,osquery.uid,osquery.username
-                Ubuntu,prod-host-1,5b1bb334-a23d-4006-80fe-bd129b979c9f,1000,ubuntu
-                root,prod-host-1,5b1bb334-a23d-4006-80fe-bd129b979c9f,0,root
+              examples:
+                csvExport:
+                  summary: CSV export with a header row
+                  value: |
+                    osquery.description,agent.name,agent.id,osquery.uid,osquery.username
+                    Ubuntu,prod-host-1,5b1bb334-a23d-4006-80fe-bd129b979c9f,1000,ubuntu
+                    root,prod-host-1,5b1bb334-a23d-4006-80fe-bd129b979c9f,0,root
               schema:
                 description: >
                   CSV file with a header row. No metadata block is included in
@@ -1246,6 +1317,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                rowLimitExceeded:
+                  summary: Result count exceeds the export limit
+                  value:
+                    message: Export limited to 500,000 results. Found 500,001. Please add filters to
+                      narrow results.
               schema:
                 type: object
                 properties:
