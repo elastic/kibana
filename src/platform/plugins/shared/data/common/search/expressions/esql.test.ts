@@ -17,7 +17,6 @@ import type {
   IEsqlSearchResult,
 } from '@kbn/search-types';
 import type { KibanaContext } from '..';
-import type { ESQLColumn } from '@kbn/es-types';
 
 interface MockTypedSearchService {
   esql: jest.Mock<Promise<IEsqlSearchResult>, [IEsqlSearchParams, IEsqlSearchOptions?]>;
@@ -41,7 +40,7 @@ const createExecutionContext = (): ExecutionContext =>
   } as unknown as ExecutionContext);
 
 const getMockSearchService = (
-  columns: ESQLColumn[],
+  columns: Array<{ name: string; type: string; _meta?: Record<string, unknown> }>,
   values: unknown[][] = [['v1']]
 ): MockTypedSearchService => {
   const mockTyped = {
@@ -161,6 +160,33 @@ describe('getEsqlFn', () => {
     expect(result?.columns?.[0]?.name).toBe('c');
   });
 
+  it('passes ES column _meta through to meta.esMeta', async () => {
+    const columnMeta = { approximation: { type: 'count_distinct', column: '@timestamp' } };
+    const mockSearchService = getMockSearchService([
+      { name: 'count', type: 'long', _meta: columnMeta },
+    ]);
+
+    const result = await createEsqlFn(mockSearchService).fn(
+      null,
+      { query: 'FROM index | STATS COUNT(DISTINCT @timestamp)' },
+      createExecutionContext()
+    );
+
+    expect(result?.columns?.[0]?.meta?.esMeta).toEqual(columnMeta);
+  });
+
+  it('omits meta.esMeta when ES column has no _meta', async () => {
+    const mockSearchService = getMockSearchService([{ name: 'host', type: 'keyword' }]);
+
+    const result = await createEsqlFn(mockSearchService).fn(
+      null,
+      { query: 'FROM index' },
+      createExecutionContext()
+    );
+
+    expect(result?.columns?.[0]?.meta?.esMeta).toBeUndefined();
+  });
+
   it('resolves meta.sourceParams.sourceField for STATS BY alias = column', async () => {
     const mockSearchService = getMockSearchService([
       { name: 'cnt', type: 'long' },
@@ -181,60 +207,25 @@ describe('getEsqlFn', () => {
     ).toBe('cnt');
   });
 
-  describe('resolves meta.sourceParams.params for bucket metadata', () => {
-    it('maps bucket _meta to used_interval using the datemath unit suffix', async () => {
-      const mockSearchService = getMockSearchService([
-        { name: '@timestamp', type: 'date', _meta: { bucket: { interval: 30, unit: 'second' } } },
-      ]);
+  describe('resolves meta.sourceParams.appliedTimeRange for date columns when an input time range is provided', () => {
+    it('sets appliedTimeRange for date columns when an input time range is provided', async () => {
+      const mockSearchService = getMockSearchService([{ name: '@timestamp', type: 'date' }]);
+
+      const input: KibanaContext = {
+        type: 'kibana_context',
+        timeRange: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
+      };
 
       const result = await createEsqlFn(mockSearchService).fn(
-        null,
-        { query: 'FROM index | STATS COUNT(*) BY BUCKET(@timestamp, 30 seconds)' },
-        createExecutionContext()
-      );
-
-      const params = result?.columns?.[0]?.meta?.sourceParams?.params;
-      expect(params).toBeDefined();
-      expect(params).toHaveProperty('used_interval', '30s');
-      expect(params).toHaveProperty('used_time_zone', 'UTC');
-    });
-
-    it('falls back to the raw interval when the unit is not a known datemath unit', async () => {
-      const mockSearchService = getMockSearchService([
-        { name: '@timestamp', type: 'date', _meta: { bucket: { interval: 3, unit: 'quarter' } } },
-      ]);
-
-      const result = await createEsqlFn(mockSearchService).fn(
-        null,
+        input,
         { query: 'FROM index' },
         createExecutionContext()
       );
 
-      const params = result?.columns?.[0]?.meta?.sourceParams?.params;
-      expect(params).toBeDefined();
-      expect(params).toHaveProperty('used_interval', 3);
-    });
-
-    describe('resolves meta.sourceParams.appliedTimeRange for date columns when an input time range is provided', () => {
-      it('sets appliedTimeRange for date columns when an input time range is provided', async () => {
-        const mockSearchService = getMockSearchService([{ name: '@timestamp', type: 'date' }]);
-
-        const input: KibanaContext = {
-          type: 'kibana_context',
-          timeRange: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
-        };
-
-        const result = await createEsqlFn(mockSearchService).fn(
-          input,
-          { query: 'FROM index' },
-          createExecutionContext()
-        );
-
-        const sourceParams = result?.columns?.[0]?.meta?.sourceParams;
-        expect(sourceParams).toHaveProperty('appliedTimeRange', {
-          from: '2026-01-01T00:00:00.000Z',
-          to: '2026-01-02T00:00:00.000Z',
-        });
+      const sourceParams = result?.columns?.[0]?.meta?.sourceParams;
+      expect(sourceParams).toHaveProperty('appliedTimeRange', {
+        from: '2026-01-01T00:00:00.000Z',
+        to: '2026-01-02T00:00:00.000Z',
       });
     });
   });
