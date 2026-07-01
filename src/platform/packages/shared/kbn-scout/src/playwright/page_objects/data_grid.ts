@@ -30,7 +30,7 @@ export class DataGrid {
     );
   }
 
-  private async readFieldTokenLabels(scope: Locator, limit: number): Promise<string[]> {
+  async readFieldTokenLabels(scope: Locator, limit: number): Promise<string[]> {
     return scope
       .locator('.kbnFieldIcon svg')
       .evaluateAll(

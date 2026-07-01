@@ -56,12 +56,7 @@ export class DocViewer {
   async getFieldTokens(limit = 10): Promise<string[]> {
     const flyout = this.page.testSubj.locator('docViewerFlyout');
     await flyout.waitFor({ state: 'visible' });
-    return flyout
-      .locator('.kbnFieldIcon svg')
-      .evaluateAll(
-        (icons, max) => icons.slice(0, max).map((icon) => icon.getAttribute('aria-label') ?? ''),
-        limit
-      );
+    return this.dataGrid.readFieldTokenLabels(flyout, limit);
   }
 
   async getRowActionCount(): Promise<number> {
