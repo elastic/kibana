@@ -70,6 +70,30 @@ export const clampAgentWorkspaceWidth = (
     )
   );
 
+/** Full-width agent column when the application workspace is hidden. */
+export const getSoloAgentWorkspaceWidth = ({
+  navigationWidth,
+  sidebarWidth,
+  agentMarginLeft = 0,
+  applicationMarginRight = 0,
+}: {
+  navigationWidth: number;
+  sidebarWidth: number;
+  agentMarginLeft?: number;
+  applicationMarginRight?: number;
+}): number => {
+  if (typeof window === 'undefined') {
+    return MIN_AGENT_WIDTH;
+  }
+
+  return Math.max(
+    MIN_AGENT_WIDTH,
+    Math.floor(
+      window.innerWidth - navigationWidth - sidebarWidth - agentMarginLeft - applicationMarginRight
+    )
+  );
+};
+
 export const APP_FIXED_VIEWPORT_ID = 'app-fixed-viewport';
 
 export const FLYOUT_SELECTOR = '.euiFlyout[role="dialog"]';

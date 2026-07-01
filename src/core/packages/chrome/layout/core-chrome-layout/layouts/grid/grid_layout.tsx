@@ -53,6 +53,7 @@ import {
   AGENT_FIRST_LAYOUT_OVERRIDES,
   AgentFirstChromeGlobalStyles,
   GridLayoutGlobalStyles,
+  resolveAgentPanelTargetWidth,
 } from '@kbn/ui-chrome-layout';
 import {
   clampAgentWorkspaceWidth,
@@ -214,8 +215,19 @@ export class GridLayout implements LayoutService {
           ...(showAgentWorkspace ? AGENT_FIRST_LAYOUT_OVERRIDES : {}),
           sidebarWidth,
           navigationWidth,
-          agentWidth:
-            showAgentWorkspace && effectiveAgentWorkspaceOpen ? agentWorkspaceWidth : 0,
+          agentPreferredWidth: showAgentWorkspace ? agentWorkspaceWidth : 0,
+          agentWidth: showAgentWorkspace
+            ? resolveAgentPanelTargetWidth({
+                chromeStyle: 'project',
+                agentWorkspaceOpen: effectiveAgentWorkspaceOpen,
+                applicationWorkspaceOpen: effectiveApplicationWorkspaceOpen,
+                agentPreferredWidth: agentWorkspaceWidth,
+                navigationWidth,
+                sidebarWidth,
+                agentMarginLeft: 0,
+                applicationMarginRight: AGENT_FIRST_LAYOUT_OVERRIDES.applicationMarginRight ?? 0,
+              })
+            : 0,
           applicationWorkspaceOpen: effectiveApplicationWorkspaceOpen,
           applicationWorkspaceTransitionPhase,
           agentWorkspaceOpen: effectiveAgentWorkspaceOpen,

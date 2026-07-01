@@ -14,21 +14,9 @@ import { getHighContrastBorder } from '@kbn/ui-chrome-layout-utils';
 import type { ChromeStyle } from '../layout.types';
 import type { EmotionFn } from '../types';
 
-export const AGENT_PANEL_WIDTH_CSS_VAR = '--agent-panel-width';
-export const AGENT_PANEL_WIDTH_TRANSITION_MS = 220;
-export const CONTENT_FADE_MS = 120;
-/** Shell opacity fade begins this far into the width collapse. */
-export const AGENT_PANEL_SHELL_FADE_DELAY_MS = 120;
-export const AGENT_PANEL_SHELL_FADE_MS = 90;
-
-const root = (
-  chromeStyle: ChromeStyle = 'classic',
-  animateWidth = false
-): EmotionFn => {
-  const isProjectStyle = chromeStyle === 'project';
-
-  return (useEuiTheme: UseEuiTheme) => {
-    return css`
+const shell = (): EmotionFn => {
+  return () =>
+    css`
       grid-area: agent;
 
       height: calc(
@@ -46,35 +34,22 @@ const root = (
       flex-direction: column;
       min-height: 0;
       min-width: 0;
+      overflow: hidden;
+    `;
+};
 
-      ${animateWidth
-        ? css`
-            width: var(${AGENT_PANEL_WIDTH_CSS_VAR});
-            opacity: 1;
-            overflow: hidden;
+const panel = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
+  const isProjectStyle = chromeStyle === 'project';
 
-            &.isClosingShell {
-              opacity: 0;
-              transition:
-                width ${AGENT_PANEL_WIDTH_TRANSITION_MS}ms ease-in-out,
-                opacity ${AGENT_PANEL_SHELL_FADE_MS}ms ease-out
-                  ${AGENT_PANEL_SHELL_FADE_DELAY_MS}ms;
-            }
-
-            &:not(.isClosingShell) {
-              transition: width ${AGENT_PANEL_WIDTH_TRANSITION_MS}ms ease-in-out;
-            }
-
-            &.isCollapsed {
-              width: 0;
-            }
-          `
-        : css`
-            width: calc(
-              100% - ${layoutVar('application.marginRight')} -
-                ${layoutVar('agent.marginLeft', '0px')}
-            );
-          `}
+  return (useEuiTheme: UseEuiTheme) => {
+    return css`
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      min-width: 0;
+      width: 100%;
+      height: 100%;
 
       ${isProjectStyle &&
       css`
@@ -113,16 +88,13 @@ const content: EmotionFn = () => css`
   width: 100%;
 `;
 
-export const contentFadeStyles = (animateOpacity: boolean) => css`
-  transition: ${animateOpacity ? `opacity ${CONTENT_FADE_MS}ms ease-in-out` : 'none'};
-`;
-
 export const contentHiddenStyles = css`
   visibility: hidden;
   pointer-events: none;
 `;
 
 export const styles = {
-  root,
+  shell,
+  panel,
   content,
 };

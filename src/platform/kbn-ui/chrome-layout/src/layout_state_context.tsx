@@ -58,6 +58,7 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
     hasNavigation,
     navigationWidth: hasNavigation ? layoutConfig.navigationWidth ?? 0 : 0,
     hasAgent,
+    agentPreferredWidth: hasAgent ? layoutConfig.agentPreferredWidth ?? 0 : 0,
     agentWidth: hasAgent ? layoutConfig.agentWidth ?? 0 : 0,
     applicationWorkspaceOpen: layoutConfig.applicationWorkspaceOpen ?? true,
     agentWorkspaceOpen: layoutConfig.agentWorkspaceOpen ?? true,

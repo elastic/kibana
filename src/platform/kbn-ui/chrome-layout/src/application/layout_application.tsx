@@ -9,16 +9,16 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { css } from '@emotion/react';
+import { motion } from 'motion/react';
 
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/ui-chrome-layout-constants';
 
 import { contentHiddenStyles, styles } from './layout_application.styles';
 import { useLayoutConfig } from '../layout_config_context';
-
-const hiddenStyles = css`
-  display: none;
-`;
+import {
+  getPanelLayoutTransition,
+  shouldAnimateApplicationPanelWidth,
+} from '../panel_layout_transition';
 
 /**
  * The application slot wrapper
@@ -41,27 +41,37 @@ export const LayoutApplication = ({
     applicationWorkspaceTransitionPhase = 'none',
   } = useLayoutConfig();
 
-  const parkContent = applicationWorkspaceTransitionPhase !== 'none';
-  const shouldHidePanel =
-    !applicationWorkspaceOpen && applicationWorkspaceTransitionPhase === 'none';
+  // Park real app content only while the closing decoy plays — opening reveals content via width tween.
+  const parkContent = applicationWorkspaceTransitionPhase === 'closing';
+
+  const targetWidth = applicationWorkspaceOpen ? '100%' : 0;
+
+  const shouldAnimateWidth = shouldAnimateApplicationPanelWidth({
+    chromeStyle,
+    applicationWorkspaceTransitionPhase,
+  });
 
   return (
-    <div
-      css={[styles.root(chromeStyle), shouldHidePanel ? hiddenStyles : undefined]}
+    <motion.div
+      css={styles.shell}
       className="kbnChromeLayoutApplication"
-      id={APP_MAIN_SCROLL_CONTAINER_ID}
+      initial={false}
+      animate={{ width: targetWidth }}
+      transition={getPanelLayoutTransition(shouldAnimateWidth)}
       data-test-subj="kbnChromeLayoutApplication"
       data-application-workspace-open={applicationWorkspaceOpen}
     >
-      {topBar && (
-        <div css={[styles.topBar, parkContent ? contentHiddenStyles : undefined]}>{topBar}</div>
-      )}
-      <div css={[styles.content, parkContent ? contentHiddenStyles : undefined]}>{children}</div>
-      {bottomBar && (
-        <div css={[styles.bottomBar, parkContent ? contentHiddenStyles : undefined]}>
-          {bottomBar}
-        </div>
-      )}
-    </div>
+      <div css={styles.panel(chromeStyle)} id={APP_MAIN_SCROLL_CONTAINER_ID}>
+        {topBar && (
+          <div css={[styles.topBar, parkContent ? contentHiddenStyles : undefined]}>{topBar}</div>
+        )}
+        <div css={[styles.content, parkContent ? contentHiddenStyles : undefined]}>{children}</div>
+        {bottomBar && (
+          <div css={[styles.bottomBar, parkContent ? contentHiddenStyles : undefined]}>
+            {bottomBar}
+          </div>
+        )}
+      </div>
+    </motion.div>
   );
 };
