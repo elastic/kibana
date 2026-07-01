@@ -153,7 +153,7 @@ describe('visualizationSmlType', () => {
   });
 
   describe('getSmlData', () => {
-    it('returns chunk with correct type, title, content, permissions', async () => {
+    it('returns chunk with correct type, title, content (permissions are handled by getPermissions)', async () => {
       const savedObject = {
         id: 'viz-1',
         type: 'lens',
@@ -186,13 +186,10 @@ describe('visualizationSmlType', () => {
             type: 'visualization',
             title: 'My Visualization',
             content: 'My Visualization\nA test viz\nlnsXY\nFROM test',
-            permissions: {
-              kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-              elasticsearch: { indices: [] },
-            },
           },
         ],
       });
+      expect(result!.chunks[0]).not.toHaveProperty('permissions');
     });
 
     it('content includes title, description, chartType, esql joined by newline', async () => {
@@ -261,10 +258,16 @@ describe('visualizationSmlType', () => {
         type: 'visualization',
         title: 'Minimal Viz',
         content: 'Minimal Viz\nlnsXY',
-        permissions: {
-          kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-          elasticsearch: { indices: [] },
-        },
+      });
+    });
+  });
+
+  describe('getPermissions', () => {
+    it('returns the saved_object:lens/get privilege (via kibanaSavedObjectPermissions helper)', () => {
+      const permissions = visualizationSmlType.getPermissions!('viz-1', createContext() as never);
+      expect(permissions).toEqual({
+        kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+        elasticsearch: { indices: [] },
       });
     });
   });
