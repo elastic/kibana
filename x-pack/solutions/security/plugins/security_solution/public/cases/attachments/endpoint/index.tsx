@@ -12,6 +12,7 @@ import type {
   UnifiedReferenceAttachmentViewProps,
 } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { SECURITY_ENDPOINT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { EndpointAttachmentPayloadSchema } from '../../../../common/cases/attachments/endpoint';
 import type { EndpointMetadata } from './types';
 import { ENDPOINT_DISPLAY_NAME } from './translations';
 
@@ -28,6 +29,7 @@ export const getEndpointUnifiedAttachment = (): UnifiedReferenceAttachmentType =
   id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   icon: 'lockOpen',
   displayName: ENDPOINT_DISPLAY_NAME,
+  schema: EndpointAttachmentPayloadSchema,
   getAttachmentViewObject: (props) => {
     const metadata = props.metadata as EndpointMetadata | undefined;
     const iconType = metadata?.command === 'isolate' ? 'lock' : 'lockOpen';

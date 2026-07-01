@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { CasesServerSetupDependencies } from '../types';
 import type { CasesClient } from '../client';
+import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 
 import { getCaseStepDefinition } from './steps/get_case';
 import { createCaseStepDefinition } from './steps/create_case';
@@ -43,7 +44,15 @@ import {
 
 export function registerCaseWorkflowSteps(
   workflowsExtensions: CasesServerSetupDependencies['workflowsExtensions'],
-  getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
+  getCasesClient: (request: KibanaRequest) => Promise<CasesClient>,
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
+  isCasesAttachmentsEnabled: boolean,
+  /**
+   * Resolves once cases's own `start()` has been called by core
+   * Used by the `cases.addAttachments`loader so the discriminated union sees
+   * solution-contributed attachment types.
+   */
+  waitForStartServices: () => Promise<unknown>
 ) {
   if (!workflowsExtensions) {
     return;
@@ -65,6 +74,18 @@ export function registerCaseWorkflowSteps(
   workflowsExtensions.registerStepDefinition(unassignCaseStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(addAlertsStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(addEventsStepDefinition(getCasesClient));
+  // Solutions register their attachment types in their own `setup` (after
+  // cases's), and the server step registry invokes loaders eagerly at
+  // register-time — awaiting start services here delays the registry snapshot
+  // until every plugin's `setup` has completed, so the discriminated union
+  // sees the full authorable type list.
+  if (isCasesAttachmentsEnabled) {
+    workflowsExtensions.registerStepDefinition(async () => {
+      await waitForStartServices();
+      const { addAttachmentsStepDefinition } = await import('./steps/add_attachments');
+      return addAttachmentsStepDefinition(unifiedAttachmentTypeRegistry, getCasesClient);
+    });
+  }
   workflowsExtensions.registerStepDefinition(findSimilarCasesStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(setDescriptionStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(setTitleStepDefinition(getCasesClient));

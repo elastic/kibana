@@ -19,6 +19,7 @@ import {
 } from '@kbn/cases-plugin/common';
 import type { UnifiedReferenceAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { UserActionTitle } from '@kbn/cases-components';
+import { SecurityEventAttachmentPayloadSchema } from '../../../../common/cases/attachments/event';
 import { getNonEmptyField } from './utils';
 import {
   DELETE_EVENTS_SUCCESS_TITLE,
@@ -99,6 +100,7 @@ export const getEventType = (): UnifiedReferenceAttachmentType => ({
   id: SECURITY_EVENT_ATTACHMENT_TYPE,
   displayName: EVENT_DISPLAY_NAME,
   icon: 'bell',
+  schema: SecurityEventAttachmentPayloadSchema,
   getAttachmentViewObject: (props) => getAttachmentViewObject(props),
   getAttachmentRemovalObject: (props) => getAttachmentRemovalObject(props),
   getAttachmentTabViewObject: () => ({
