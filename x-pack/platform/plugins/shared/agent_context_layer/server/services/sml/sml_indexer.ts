@@ -435,24 +435,16 @@ class SmlIndexerImpl implements SmlIndexer {
    * failure can abort the write without leaving the origin in a
    * half-deleted state.
    *
-   * - Registered type with `getPermissions` AND `requestedPermissions`
-   *   supplied → **throws {@link SmlPermissionsConflictError}**. The hook
-   *   is always authoritative for hook-backed types; silently discarding
-   *   `requestedPermissions` here would let a workflow author believe their
-   *   caller-supplied `permissions` took effect when it did not.
-   * - Registered type with `getPermissions`, no `requestedPermissions` →
-   *   the hook's result is used (with arrays defensively defaulted to `[]`
-   *   so the stored document always has fully-shaped inner arrays). A
-   *   throw from the hook itself is propagated — see below.
-   * - Registered type without `getPermissions` (or unregistered),
-   *   `requestedPermissions` supplied → the requested value is used
-   *   directly (arrays defensively defaulted to `[]`). This only narrows
-   *   access relative to the prior default (empty/public), so it never
-   *   escalates privilege for these types.
-   * - Registered type without `getPermissions` (or unregistered), no
-   *   `requestedPermissions` → empty `SmlPermissions` (unchanged prior
-   *   behavior — an explicit opt-in by the SML type author, or an ad-hoc
-   *   namespace, signalling that the data is space-readable).
+   * - Hook + `requestedPermissions` supplied → throws
+   *   {@link SmlPermissionsConflictError}. The hook is always authoritative,
+   *   so a caller-supplied value can't silently be ignored.
+   * - Hook, no `requestedPermissions` → hook's result (arrays defaulted to
+   *   `[]`). A throw from the hook itself propagates.
+   * - No hook (or unregistered), `requestedPermissions` supplied → used
+   *   directly (arrays defaulted to `[]`); only narrows access, never
+   *   escalates.
+   * - No hook (or unregistered), no `requestedPermissions` → empty
+   *   `SmlPermissions` (space-readable, unchanged prior behavior).
    *
    * **Fail-closed on `getPermissions` throw.** When `getPermissions`
    * throws, the error propagates before any ES mutation. Callers see this:
@@ -464,9 +456,7 @@ class SmlIndexerImpl implements SmlIndexer {
    * - HTTP upsert route: bubbles to a 500.
    *
    * The trade-off is intentional: a transient blip becomes a visible
-   * write failure rather than an invisible privilege escalation. The same
-   * fail-closed-before-mutation property holds for the conflict throw
-   * above.
+   * write failure rather than an invisible privilege escalation.
    */
   private async resolvePermissionsForOrigin({
     definition,

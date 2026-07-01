@@ -10,11 +10,8 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SmlChunk, SmlPermissions, SmlService } from './services/sml/types';
 import { buildIndexAttachment, buildDeleteAttachment } from './start_contract';
 
-// Deliberately hand-built rather than `coreMock` — these builders only ever
-// touch `elasticsearch.client.asInternalUser` and
-// `savedObjects.getScopedClient`, so a full core mock would be dead weight.
-// `smlService` only implements the two methods these builders call; the cast
-// stands in for the rest of `SmlService`, which is irrelevant here.
+// Hand-built rather than `coreMock` — these builders only touch
+// `elasticsearch.client.asInternalUser` and `savedObjects.getScopedClient`.
 const buildDeps = ({ spaceFromRequest }: { spaceFromRequest?: string } = {}) => {
   const smlService = {
     indexAttachment: jest.fn().mockResolvedValue(undefined),

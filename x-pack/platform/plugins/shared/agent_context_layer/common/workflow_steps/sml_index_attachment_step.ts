@@ -87,14 +87,11 @@ const ChunkSchema = z
   .strict();
 
 /**
- * Step input.
- *
- * `permissions` (upsert only) is used when the resolved `attachmentType` has
- * no `getPermissions` hook (or is unregistered); it is rejected when the
- * type derives permissions via a hook, since that hook is always
- * authoritative and cannot be overridden by a workflow author. Omit to
- * preserve prior behavior. `upsert` is a full replace; `delete` wipes all
- * chunks for the origin regardless of how they were produced.
+ * Step input. `permissions` (upsert only) applies when `attachmentType` has
+ * no `getPermissions` hook; supplying it for a hook-backed type is rejected,
+ * since the hook is always authoritative. `upsert` is a full replace;
+ * `delete` wipes all chunks for the origin regardless of how they were
+ * produced.
  */
 const AttachmentTypeSchema = z
   .string()
@@ -109,19 +106,9 @@ const AttachmentTypeSchema = z
   );
 
 /**
- * Optional permissions to stamp on the written chunks, for `attachmentType`s
- * whose registered `SmlTypeDefinition` has no `getPermissions` hook (e.g. the
- * built-in `corpus_entry` type). Mirrors the shape of the server-side
- * `SmlPermissions` type — `elasticsearch.indices` / `kibana.privileges` are
- * arrays of `{ name }` objects (not bare strings) so a later revision can add
- * sibling keys (e.g. document- or field-level grants) without a breaking
- * shape change.
- *
- * Ignored (and rejected — see the indexer's `resolvePermissionsForOrigin`)
- * when the registered type already derives permissions via `getPermissions`:
- * that hook is always authoritative and cannot be overridden by a workflow
- * author. Omit this field entirely to preserve prior behavior (hook wins if
- * present, otherwise empty/public permissions).
+ * Mirrors the server-side `SmlPermissions` shape — `indices`/`privileges`
+ * are arrays of `{ name }` objects (not bare strings) so a later revision
+ * can add sibling keys without a breaking change.
  */
 export const SmlPermissionsInputSchema = z
   .object({

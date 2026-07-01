@@ -33,12 +33,9 @@ import { WRITE_SECURITY, toSmlHttpItem, withSmlFeatureFlag } from './common';
  * ("claim the origin" semantic). Omitting `tags` clears them — PUT is a
  * full-document replace, not a merge.
  *
- * `permissions` is optional and mirrors the workflow step's `contextEngine.addEntry`
- * input: used only when `type` resolves to a registered `SmlTypeDefinition` with
- * no `getPermissions` hook (or is unregistered). When the type derives permissions
- * via a hook, supplying `permissions` is a conflict — the indexer throws
- * {@link SmlPermissionsConflictError}, mapped below to 409. Omitting it preserves
- * prior behavior (hook wins if present, otherwise empty/public permissions).
+ * `permissions` mirrors the workflow step's `contextEngine.addEntry` input:
+ * applies only when `type` has no `getPermissions` hook. Supplying it for a
+ * hook-backed type throws {@link SmlPermissionsConflictError}, mapped below to 409.
  *
  * Cross-space guard: origins invisible from the caller's space return 404.
  * Per-chunk privilege guard: caller must hold read access to every existing
@@ -100,9 +97,7 @@ export const registerUpsertRoute = ({
               }
             )
           ),
-          // Optional — used only when `type` has no `getPermissions` hook (or is
-          // unregistered). Rejected as a conflict by the indexer when the type
-          // already derives permissions via a hook; see the route JSDoc above.
+          // See the route JSDoc above for the hook-conflict behavior.
           permissions: schema.maybe(
             schema.object(
               {
@@ -210,10 +205,7 @@ export const registerUpsertRoute = ({
           isVisibleInSpace(d.spaces, spaceId)
         )?.created_at;
 
-        // Mirrors the `contextEngine.addEntry` workflow step: fold in empty
-        // arrays for any omitted half of the caller-supplied shape. The
-        // indexer decides what to do with the resolved value — a conflict
-        // with a hook-backed type's `getPermissions` is caught below.
+        // Fold in empty arrays for any omitted half, as the workflow step does.
         const permissions: SmlPermissions | undefined =
           body.permissions !== undefined
             ? {

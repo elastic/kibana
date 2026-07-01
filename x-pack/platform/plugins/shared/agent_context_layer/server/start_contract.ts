@@ -24,16 +24,12 @@ interface StartContractDeps {
 }
 
 /**
- * Builds `AgentContextLayerPluginStart.indexAttachment` — translates the
- * public, request-scoped params into the internal `SmlIndexerParams` the
- * indexer expects (an internally-scoped ES client, a resolved space, a
- * resolved saved-objects client).
+ * Builds `AgentContextLayerPluginStart.indexAttachment`, translating public
+ * request-scoped params into the internal `SmlIndexerParams` shape.
  *
- * `createdAt` and `permissions` are only valid in content mode (see
- * {@link SmlIndexAttachmentContentMode}) — that's why they're folded in
- * conditionally after `base` rather than included in it. Hoisting them into
- * `base` would make them reachable from the origin-mode branch too, which
- * `SmlIndexerParams`'s discriminated union forbids by construction.
+ * `createdAt`/`permissions` are folded in after `base` rather than included
+ * in it because they're content-mode-only; hoisting them into `base` would
+ * make them reachable from the origin-mode branch too.
  */
 export const buildIndexAttachment =
   ({ smlService, elasticsearch, savedObjects, spaces, logger }: StartContractDeps) =>
