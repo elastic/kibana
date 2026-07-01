@@ -143,19 +143,31 @@ describe('resolveSmlAttachItems', () => {
     expect(mockGetTypeDefinition).not.toHaveBeenCalled();
   });
 
-  it('returns error when getTypeDefinition is undefined', async () => {
-    const smlDoc = createSmlDoc({ type: 'orphan-type' });
+  it('returns a generic text attachment when getTypeDefinition is undefined (unregistered SML type)', async () => {
+    const smlDoc = createSmlDoc({
+      type: 'orphan-type',
+      title: 'Ad-hoc note',
+      content: 'free-form note body',
+      origin: { uri: 'orphan-type://note-1' },
+    });
     mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
     mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
     mockGetTypeDefinition.mockReturnValue(undefined);
+
     const results = await resolveSmlAttachItems({
       ...baseParams,
       chunkIds: ['chunk-1'],
     });
-    expect(results[0].success).toBe(false);
-    if (!results[0].success) {
-      expect(results[0].message).toContain('does not support conversion');
-      expect(results[0].attachment_type).toBe('orphan-type');
+
+    expect(results[0].success).toBe(true);
+    if (results[0].success) {
+      expect(results[0].attachment).toEqual({
+        type: 'text',
+        data: { title: 'Ad-hoc note', content: 'free-form note body' },
+        origin: 'orphan-type://note-1',
+        description: 'orphan-type/Ad-hoc note',
+      });
+      expect(results[0].chunk_id).toBe('chunk-1');
     }
   });
 
