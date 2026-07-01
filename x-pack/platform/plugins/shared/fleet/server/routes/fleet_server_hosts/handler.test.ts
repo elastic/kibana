@@ -61,8 +61,7 @@ describe('fleet server hosts handler', () => {
 
     expect(res).toEqual({
       body: {
-        message:
-          'Fleet Server host must have a default URL in Serverless: http://elasticsearch:9200',
+        message: 'Fleet server host must have default URL in serverless: http://elasticsearch:9200',
       },
       statusCode: 403,
     });
@@ -177,8 +176,7 @@ describe('fleet server hosts handler', () => {
 
     expect(res).toEqual({
       body: {
-        message:
-          'Fleet Server host must have a default URL in Serverless: http://elasticsearch:9200',
+        message: 'Fleet server host must have default URL in serverless: http://elasticsearch:9200',
       },
       statusCode: 403,
     });
@@ -280,7 +278,7 @@ describe('fleet server hosts handler', () => {
       expect(res).toEqual({
         body: {
           message:
-            'Fleet Server host must have a default URL in Serverless: http://elasticsearch:9200',
+            'Fleet server host must have default URL in serverless: http://elasticsearch:9200',
         },
         statusCode: 403,
       });
@@ -314,7 +312,7 @@ describe('fleet server hosts handler', () => {
       expect(res).toEqual({
         body: {
           message:
-            'Fleet Server host must have a default URL in Serverless: http://elasticsearch:9200',
+            'Fleet server host must have default URL in serverless: http://elasticsearch:9200',
         },
         statusCode: 403,
       });

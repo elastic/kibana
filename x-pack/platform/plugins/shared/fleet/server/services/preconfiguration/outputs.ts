@@ -193,8 +193,8 @@ export async function createOrUpdatePreconfiguredOutputs(
         });
         // Bump revision of all policies using that output
         await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, id, {
-          isDefault: outputData.is_default,
-          isDefaultMonitoring: outputData.is_default_monitoring,
+          isDefault: data.is_default,
+          isDefaultMonitoring: data.is_default_monitoring,
         });
       }
     }

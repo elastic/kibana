@@ -90,7 +90,7 @@ async function checkFleetServerHostsWriteAPIsAllowed(
   }
 
   throw new FleetServerHostUnauthorizedError(
-    `Fleet Server host must have a default URL in Serverless: ${serverlessDefaultFleetServerHost.host_urls}`
+    `Fleet server host must have default URL in serverless: ${serverlessDefaultFleetServerHost.host_urls}`
   );
 }
 
