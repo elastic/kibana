@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent, ReactNode } from 'react';
+import type { FunctionComponent } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { EuiBreadcrumb, EuiThemeComputed } from '@elastic/eui';
 import type { Index } from './types';
@@ -30,8 +30,8 @@ export type IndexDetailsTabId = IndexDetailsSection | string;
 export interface IndexDetailsTab {
   // a unique key to identify the tab
   id: IndexDetailsTabId;
-  // a text that is displayed on the tab label, usually a Formatted message component
-  name: ReactNode;
+  // a string displayed on the tab label
+  name: string;
   /**
    * A function that renders the content of the tab.
    *

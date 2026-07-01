@@ -78,6 +78,8 @@
     "@kbn/index-lifecycle-management-common-shared",
     "@kbn/core-chrome-layout-constants",
     "@kbn/streams-schema",
+    "@kbn/core-chrome-app-menu-components",
+    "@kbn/app-header",
   ],
   "exclude": ["target/**/*"]
 }
