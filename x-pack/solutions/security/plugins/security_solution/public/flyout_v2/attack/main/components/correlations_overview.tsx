@@ -17,8 +17,7 @@ export interface CorrelationsOverviewProps {
 }
 
 /**
- * Prop-driven Correlation section for the attack flyout v2.
- * Renders related alerts count. 'See all' is a no-op until v2 left panel is available.
+ * Correlation section for the attack flyout. Renders the related alerts count.
  */
 export const CorrelationsOverview: React.FC<CorrelationsOverviewProps> = memo(({ alertIds }) => {
   const { euiTheme } = useEuiTheme();

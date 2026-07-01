@@ -25,8 +25,7 @@ export interface EntitiesOverviewProps {
 }
 
 /**
- * Prop-driven Entities section for the attack flyout v2.
- * Renders related users and related hosts counts. 'See all' is a no-op until v2 left panel is available.
+ * Entities section for the attack flyout. Renders related users and hosts counts.
  */
 export const EntitiesOverview: React.FC<EntitiesOverviewProps> = memo(({ alertIds }) => {
   const { euiTheme } = useEuiTheme();

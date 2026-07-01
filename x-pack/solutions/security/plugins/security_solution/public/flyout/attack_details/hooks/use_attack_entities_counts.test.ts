@@ -8,116 +8,43 @@
 import { renderHook } from '@testing-library/react';
 import { useAttackEntitiesCounts } from './use_attack_entities_counts';
 import { useOriginalAlertIds } from './use_original_alert_ids';
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { useAttackEntitiesCounts as useAttackEntitiesCountsV2 } from '../../../flyout_v2/attack/main/hooks/use_attack_entities_counts';
 
 jest.mock('./use_original_alert_ids', () => ({
   useOriginalAlertIds: jest.fn(),
 }));
 
-jest.mock('../../../detections/containers/detection_engine/alerts/use_query', () => ({
-  useQueryAlerts: jest.fn(),
+jest.mock('../../../flyout_v2/attack/main/hooks/use_attack_entities_counts', () => ({
+  useAttackEntitiesCounts: jest.fn(),
 }));
 
 describe('useAttackEntitiesCounts', () => {
   const mockUseOriginalAlertIds = jest.mocked(useOriginalAlertIds);
-  const mockUseQueryAlerts = jest.mocked(useQueryAlerts);
+  const mockUseAttackEntitiesCountsV2 = jest.mocked(useAttackEntitiesCountsV2);
+
+  const defaultResult = { relatedUsers: 0, relatedHosts: 0, loading: false, error: false };
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseOriginalAlertIds.mockReturnValue([]);
-    mockUseQueryAlerts.mockReturnValue({
-      loading: false,
-      data: null,
-      setQuery: jest.fn(),
-      response: '',
-      request: '',
-      refetch: null,
-    });
+    mockUseAttackEntitiesCountsV2.mockReturnValue(defaultResult);
   });
 
-  it('returns zero counts and skips query when alertIds is empty', () => {
-    mockUseOriginalAlertIds.mockReturnValue([]);
-
-    const { result } = renderHook(() => useAttackEntitiesCounts());
-
-    expect(mockUseQueryAlerts).toHaveBeenCalledWith(
-      expect.objectContaining({
-        skip: true,
-      })
-    );
-    expect(result.current.relatedUsers).toBe(0);
-    expect(result.current.relatedHosts).toBe(0);
-    expect(result.current.loading).toBe(false);
-  });
-
-  it('passes query with ids filter and cardinality aggs when alertIds exist', () => {
+  it('reads alert IDs from context and forwards them to the v2 hook', () => {
     mockUseOriginalAlertIds.mockReturnValue(['id1', 'id2']);
 
     renderHook(() => useAttackEntitiesCounts());
 
-    expect(mockUseQueryAlerts).toHaveBeenCalledWith(
-      expect.objectContaining({
-        skip: false,
-        query: expect.objectContaining({
-          query: { ids: { values: ['id1', 'id2'] } },
-          size: 0,
-          aggs: {
-            unique_users: { cardinality: { field: 'user.name' } },
-            unique_hosts: { cardinality: { field: 'host.name' } },
-          },
-        }),
-      })
-    );
+    expect(mockUseAttackEntitiesCountsV2).toHaveBeenCalledWith(['id1', 'id2']);
   });
 
-  it('parses relatedUsers and relatedHosts from aggregations', () => {
+  it('returns the result from the v2 hook unchanged', () => {
     mockUseOriginalAlertIds.mockReturnValue(['id1']);
-    mockUseQueryAlerts.mockReturnValue({
-      loading: false,
-      data: {
-        _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
-        hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
-        took: 0,
-        timeout: false,
-        aggregations: {
-          unique_users: { value: 6 },
-          unique_hosts: { value: 10 },
-        },
-      },
-      setQuery: jest.fn(),
-      response: '',
-      request: '',
-      refetch: null,
-    });
+    const v2Result = { relatedUsers: 3, relatedHosts: 5, loading: false, error: false };
+    mockUseAttackEntitiesCountsV2.mockReturnValue(v2Result);
 
     const { result } = renderHook(() => useAttackEntitiesCounts());
 
-    expect(result.current.relatedUsers).toBe(6);
-    expect(result.current.relatedHosts).toBe(10);
-    expect(result.current.loading).toBe(false);
-    expect(result.current.error).toBe(false);
-  });
-
-  it('returns zero when aggregations are missing', () => {
-    mockUseOriginalAlertIds.mockReturnValue(['id1']);
-    mockUseQueryAlerts.mockReturnValue({
-      loading: false,
-      data: {
-        _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
-        hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
-        took: 0,
-        timeout: false,
-        aggregations: {},
-      },
-      setQuery: jest.fn(),
-      response: '',
-      request: '',
-      refetch: null,
-    });
-
-    const { result } = renderHook(() => useAttackEntitiesCounts());
-
-    expect(result.current.relatedUsers).toBe(0);
-    expect(result.current.relatedHosts).toBe(0);
+    expect(result.current).toEqual(v2Result);
   });
 });

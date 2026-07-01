@@ -14,7 +14,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { OVERVIEW_TAB_TEST_ID } from '../constants/test_ids';
 import { AISummarySection } from '../../../flyout_v2/attack/main/components/ai_summary_section';
 import { VisualizationsSection } from '../../../flyout_v2/attack/main/components/visualizations_section';
-import { InsightsSection } from '../components/insights_section';
+import { InsightsSection } from '../../../flyout_v2/attack/main/components/insights_section';
 import { useAttackDetailsContext } from '../context';
 
 /**
@@ -39,7 +39,7 @@ export const OverviewTab = memo(() => {
       <EuiHorizontalRule margin="m" />
       <VisualizationsSection hit={hit} />
       <EuiHorizontalRule margin="m" />
-      <InsightsSection />
+      <InsightsSection hit={hit} />
     </EuiPanel>
   );
 });

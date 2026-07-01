@@ -23,8 +23,7 @@ export interface InsightsSectionProps {
 }
 
 /**
- * Prop-driven Insights section for the attack flyout v2.
- * Renders EntitiesOverview and CorrelationsOverview side by side.
+ * Insights section for the attack flyout. Renders entities and correlations panels.
  */
 export const InsightsSection = memo(({ hit }: InsightsSectionProps) => {
   const expanded = useExpandSection({

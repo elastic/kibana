@@ -5,76 +5,16 @@
  * 2.0.
  */
 
-import { useMemo, useEffect } from 'react';
 import { useOriginalAlertIds } from './use_original_alert_ids';
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { fetchQueryAlerts } from '../../../detections/containers/detection_engine/alerts/api';
-import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
+import { useAttackEntitiesCounts as useAttackEntitiesCountsV2 } from '../../../flyout_v2/attack/main/hooks/use_attack_entities_counts';
 
-interface AttackEntitiesAggregations {
-  unique_users?: { value: number };
-  unique_hosts?: { value: number };
-}
-
-export interface UseAttackEntitiesCountsResult {
-  relatedUsers: number;
-  relatedHosts: number;
-  loading: boolean;
-  error: boolean;
-}
+export type { UseAttackEntitiesCountsResult } from '../../../flyout_v2/attack/main/hooks/use_attack_entities_counts';
 
 /**
- * Hook that returns distinct user and host counts across all alerts that belong to the current attack.
- * Queries the detection alerts index filtered by the attack's alert IDs and uses cardinality aggregations.
+ * Reads the alert IDs from context and returns distinct user and host counts
+ * across all alerts that belong to the current attack.
  */
-export const useAttackEntitiesCounts = (): UseAttackEntitiesCountsResult => {
-  const originalAlertIds = useOriginalAlertIds();
-
-  const query = useMemo(
-    () => ({
-      query: {
-        ids: {
-          values: originalAlertIds,
-        },
-      },
-      size: 0,
-      aggs: {
-        unique_users: {
-          cardinality: {
-            field: 'user.name',
-          },
-        },
-        unique_hosts: {
-          cardinality: {
-            field: 'host.name',
-          },
-        },
-      },
-    }),
-    [originalAlertIds]
-  );
-
-  const { loading, data, setQuery } = useQueryAlerts<unknown, AttackEntitiesAggregations>({
-    fetchMethod: fetchQueryAlerts,
-    query,
-    skip: originalAlertIds.length === 0,
-    queryName: ALERTS_QUERY_NAMES.ATTACK_ENTITIES_COUNTS,
-  });
-
-  useEffect(() => {
-    setQuery(query);
-  }, [query, setQuery]);
-
-  return useMemo(() => {
-    const relatedUsers = data?.aggregations?.unique_users?.value ?? 0;
-    const relatedHosts = data?.aggregations?.unique_hosts?.value ?? 0;
-    const error = !loading && data === undefined && originalAlertIds.length > 0;
-
-    return {
-      relatedUsers,
-      relatedHosts,
-      loading,
-      error,
-    };
-  }, [data, loading, originalAlertIds.length]);
+export const useAttackEntitiesCounts = () => {
+  const alertIds = useOriginalAlertIds();
+  return useAttackEntitiesCountsV2(alertIds);
 };
