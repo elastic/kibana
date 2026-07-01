@@ -8,7 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { ConcurrencySettings } from '@kbn/workflows';
+import type { ConcurrencySettings, EsWorkflowExecution } from '@kbn/workflows';
 import {
   ConcurrencySlotOccupyingExecutionStatuses,
   ExecutionStatus,
@@ -122,6 +122,48 @@ export async function drainConcurrencyQueueSlots(params: {
         }
       }
     }
+  }
+}
+
+/** Pre-enqueue drain when a new execution joins a queue concurrency group. */
+export async function maybeDrainConcurrencyQueueBeforeEnqueue({
+  workflowExecution,
+  workflowExecutionRepository,
+  workflowTaskManager,
+  logger,
+  failureLogLabel,
+}: {
+  workflowExecution: Pick<
+    EsWorkflowExecution,
+    'spaceId' | 'concurrencyGroupKey' | 'workflowDefinition'
+  >;
+  workflowExecutionRepository: WorkflowExecutionRepository;
+  workflowTaskManager: WorkflowTaskManager;
+  logger: Logger;
+  failureLogLabel: string;
+}): Promise<void> {
+  const concurrencySettings = workflowExecution.workflowDefinition?.settings?.concurrency;
+  if (
+    concurrencySettings?.strategy !== 'queue' ||
+    !workflowExecution.concurrencyGroupKey ||
+    !workflowExecution.spaceId
+  ) {
+    return;
+  }
+
+  try {
+    await drainConcurrencyQueueSlots({
+      workflowExecutionRepository,
+      workflowTaskManager,
+      logger,
+      spaceId: workflowExecution.spaceId,
+      concurrencyGroupKey: workflowExecution.concurrencyGroupKey,
+      concurrencySettings,
+    });
+  } catch (drainErr) {
+    logger.debug(
+      `${failureLogLabel}: ${drainErr instanceof Error ? drainErr.message : String(drainErr)}`
+    );
   }
 }
 

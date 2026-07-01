@@ -34,8 +34,8 @@ import {
 import { readWorkflowVersioningEnabled } from '@kbn/workflows/server';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import {
-  drainConcurrencyQueueSlots,
   maybeDrainConcurrencyQueueAfterTerminal,
+  maybeDrainConcurrencyQueueBeforeEnqueue,
 } from './concurrency/concurrency_queue_drainer';
 import { maybeScheduleDormantQueuedRunIfNeeded } from './concurrency/maybe_schedule_dormant_queued_run';
 import type { WorkflowsExecutionEngineConfig } from './config';
@@ -582,29 +582,13 @@ export class WorkflowsExecutionEnginePlugin
                 };
               }
 
-              const scheduledConcurrency = workflow.definition?.settings?.concurrency;
-              if (
-                scheduledConcurrency?.strategy === 'queue' &&
-                workflowExecution.concurrencyGroupKey &&
-                workflowExecution.spaceId
-              ) {
-                try {
-                  await drainConcurrencyQueueSlots({
-                    workflowExecutionRepository,
-                    workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
-                    logger,
-                    spaceId: workflowExecution.spaceId,
-                    concurrencyGroupKey: workflowExecution.concurrencyGroupKey,
-                    concurrencySettings: scheduledConcurrency,
-                  });
-                } catch (drainErr) {
-                  logger.debug(
-                    `Scheduled workflow concurrency queue drain failed: ${
-                      drainErr instanceof Error ? drainErr.message : String(drainErr)
-                    }`
-                  );
-                }
-              }
+              await maybeDrainConcurrencyQueueBeforeEnqueue({
+                workflowExecution,
+                workflowExecutionRepository,
+                workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
+                logger,
+                failureLogLabel: 'Scheduled workflow concurrency queue drain failed',
+              });
 
               // Use refresh: 'wait_for' to ensure the execution is immediately searchable
               // for deduplication checks by subsequent scheduled tasks
@@ -764,29 +748,13 @@ export class WorkflowsExecutionEnginePlugin
         now: new Date(),
       });
 
-      const prePersistConcurrency = workflow.definition?.settings?.concurrency;
-      if (
-        prePersistConcurrency?.strategy === 'queue' &&
-        workflowExecution.concurrencyGroupKey &&
-        workflowExecution.spaceId
-      ) {
-        try {
-          await drainConcurrencyQueueSlots({
-            workflowExecutionRepository,
-            workflowTaskManager,
-            logger: this.logger,
-            spaceId: workflowExecution.spaceId,
-            concurrencyGroupKey: workflowExecution.concurrencyGroupKey,
-            concurrencySettings: prePersistConcurrency,
-          });
-        } catch (drainErr) {
-          this.logger.debug(
-            `Concurrency queue drain before enqueue failed: ${
-              drainErr instanceof Error ? drainErr.message : String(drainErr)
-            }`
-          );
-        }
-      }
+      await maybeDrainConcurrencyQueueBeforeEnqueue({
+        workflowExecution,
+        workflowExecutionRepository,
+        workflowTaskManager,
+        logger: this.logger,
+        failureLogLabel: 'Concurrency queue drain before enqueue failed',
+      });
 
       // Only pay the refresh cost when the concurrency check will actually run.
       // Without a concurrencyGroupKey there is no check, so refresh:false is fine.
@@ -1125,29 +1093,13 @@ export class WorkflowsExecutionEnginePlugin
         ...keylessItems.map(runCheck),
         ...Array.from(bucketsByGroup.values()).map(async (bucket) => {
           for (const p of bucket) {
-            const bulkConc = p.workflowExecution.workflowDefinition?.settings?.concurrency;
-            if (
-              bulkConc?.strategy === 'queue' &&
-              p.workflowExecution.concurrencyGroupKey &&
-              p.workflowExecution.spaceId
-            ) {
-              try {
-                await drainConcurrencyQueueSlots({
-                  workflowExecutionRepository,
-                  workflowTaskManager,
-                  logger: this.logger,
-                  spaceId: p.workflowExecution.spaceId,
-                  concurrencyGroupKey: p.workflowExecution.concurrencyGroupKey,
-                  concurrencySettings: bulkConc,
-                });
-              } catch (drainErr) {
-                this.logger.debug(
-                  `Bulk concurrency queue drain failed: ${
-                    drainErr instanceof Error ? drainErr.message : String(drainErr)
-                  }`
-                );
-              }
-            }
+            await maybeDrainConcurrencyQueueBeforeEnqueue({
+              workflowExecution: p.workflowExecution,
+              workflowExecutionRepository,
+              workflowTaskManager,
+              logger: this.logger,
+              failureLogLabel: 'Bulk concurrency queue drain failed',
+            });
             await runCheck(p);
           }
         }),
