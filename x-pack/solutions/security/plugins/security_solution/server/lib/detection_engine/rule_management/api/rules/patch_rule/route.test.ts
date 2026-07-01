@@ -7,6 +7,11 @@
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import { getPatchRulesSchemaMock } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
+import {
+  OSQUERY_QUERY_OVER_LIMIT_FIELD_PATH,
+  OSQUERY_RESPONSE_ACTION_QUERY_MAX_LENGTH,
+  getOverLimitOsqueryResponseActionMock,
+} from '../../../../../../../common/api/detection_engine/model/rule_response_actions/response_actions.mock';
 
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import {
@@ -244,6 +249,25 @@ describe('Patch rule route', () => {
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
         expect.stringContaining('from: Failed to parse date-math expression')
+      );
+    });
+
+    test('rejects over-limit osquery response action query', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getPatchRulesSchemaMock(),
+          response_actions: [getOverLimitOsqueryResponseActionMock()],
+        },
+      });
+      const result = server.validate(request);
+      expect(result.badRequest).toHaveBeenCalled();
+      const [[message]] = result.badRequest.mock.calls;
+
+      expect(message).toEqual(expect.stringContaining(OSQUERY_QUERY_OVER_LIMIT_FIELD_PATH));
+      expect(message).toEqual(
+        expect.stringContaining(String(OSQUERY_RESPONSE_ACTION_QUERY_MAX_LENGTH))
       );
     });
   });

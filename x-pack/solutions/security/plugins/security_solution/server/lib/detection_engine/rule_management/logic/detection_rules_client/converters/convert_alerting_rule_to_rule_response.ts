@@ -7,13 +7,14 @@
 
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
-import { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleParams } from '../../../../rule_schema';
 import { internalRuleToAPIResponse } from './internal_rule_to_api_response';
+import { safeParseRuleResponseForRead } from './rule_response_read_schema';
 import { RuleResponseValidationError } from '../utils';
 
 export function convertAlertingRuleToRuleResponse(rule: SanitizedRule<RuleParams>): RuleResponse {
-  const parseResult = RuleResponse.safeParse(internalRuleToAPIResponse(rule));
+  const parseResult = safeParseRuleResponseForRead(internalRuleToAPIResponse(rule));
 
   if (!parseResult.success) {
     throw new RuleResponseValidationError({

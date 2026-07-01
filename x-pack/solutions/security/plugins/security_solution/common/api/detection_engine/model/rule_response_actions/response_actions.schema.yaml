@@ -14,35 +14,43 @@ components:
 
     EcsMapping:
       type: object
-      description: 'Map Osquery results columns or static values to Elastic Common Schema (ECS) fields. Example: "ecs_mapping": {"process.pid": {"field": "pid"}}'
+      description: 'Map Osquery results columns or static values to Elastic Common Schema (ECS) fields. Example: "ecs_mapping": {"process.pid": {"field": "pid"}}.'
       additionalProperties:
         type: object
         properties:
           field:
             type: string
+            maxLength: 1024
           value:
             oneOf:
               - type: string
+                maxLength: 1024
               - type: array
+                maxItems: 100
                 items:
                   type: string
+                  maxLength: 1024
 
     OsqueryQuery:
       type: object
       properties:
         id:
           type: string
+          maxLength: 256
           description: Query ID
         query:
           type: string
+          maxLength: 10000
           description: Query to run
         ecs_mapping:
           $ref: '#/components/schemas/EcsMapping'
         version:
           type: string
+          maxLength: 256
           description: Query version
         platform:
           type: string
+          maxLength: 256
         removed:
           type: boolean
         snapshot:
@@ -56,18 +64,22 @@ components:
       properties:
         query:
           type: string
+          maxLength: 10000
           description: 'To run a single query, use the query field and enter a SQL query. Example: "query": "SELECT * FROM processes;"'
         ecs_mapping:
           $ref: '#/components/schemas/EcsMapping'
         queries:
           type: array
+          maxItems: 100
           items:
             $ref: '#/components/schemas/OsqueryQuery'
         pack_id:
           type: string
+          maxLength: 256
           description: 'To specify a query pack, use the packId field. Example: "packId": "processes_elastic"'
         saved_query_id:
           type: string
+          maxLength: 256
           description: 'To run a saved query, use the saved_query_id field and specify the saved query ID. Example: "saved_query_id": "processes_elastic"'
         timeout:
           type: number
@@ -78,16 +90,20 @@ components:
       properties:
         query:
           type: string
+          maxLength: 10000
         ecsMapping:
           $ref: '#/components/schemas/EcsMapping'
         queries:
           type: array
+          maxItems: 100
           items:
             $ref: '#/components/schemas/OsqueryQuery'
         packId:
           type: string
+          maxLength: 256
         savedQueryId:
           type: string
+          maxLength: 256
         timeout:
           type: number
 
@@ -127,6 +143,7 @@ components:
             - isolate
         comment:
           type: string
+          maxLength: 10000
       required:
         - command
 
@@ -136,9 +153,11 @@ components:
       properties:
         scriptId:
           type: string
+          maxLength: 256
           description: The ID of the script to run (from the Kibana Script library)
         scriptInput:
           type: string
+          maxLength: 8192
           description: The arguments to pass to the script (if any)
         timeout:
           type: integer
@@ -158,6 +177,7 @@ components:
             - runscript
         comment:
           type: string
+          maxLength: 10000
           description: Add a note that explains or describes the action. You can find your comment in the response actions history log
         config:
           type: object
@@ -180,6 +200,7 @@ components:
           description: 'To run an endpoint response action, specify a value for the command field. Example: "command": "isolate"'
         comment:
           type: string
+          maxLength: 10000
           description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
         config:
           required:
@@ -188,6 +209,7 @@ components:
           properties:
             field:
               type: string
+              maxLength: 1024
               description: Field to use instead of process.pid
             overwrite:
               type: boolean

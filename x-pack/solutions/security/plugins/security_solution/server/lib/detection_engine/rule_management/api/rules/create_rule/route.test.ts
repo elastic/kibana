@@ -22,6 +22,11 @@ import {
   getCreateNewTermsRulesSchemaMock,
   getCreateRulesSchemaMock,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import {
+  OSQUERY_QUERY_OVER_LIMIT_FIELD_PATH,
+  OSQUERY_RESPONSE_ACTION_QUERY_MAX_LENGTH,
+  getOverLimitOsqueryResponseActionMock,
+} from '../../../../../../../common/api/detection_engine/model/rule_response_actions/response_actions.mock';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
@@ -225,6 +230,25 @@ describe('Create rule route', () => {
         expect(response.status).toEqual(200);
       }
     );
+
+    test('rejects over-limit osquery response action query', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [getOverLimitOsqueryResponseActionMock()],
+        },
+      });
+      const result = server.validate(request);
+      expect(result.badRequest).toHaveBeenCalled();
+      const [[message]] = result.badRequest.mock.calls;
+
+      expect(message).toEqual(expect.stringContaining(OSQUERY_QUERY_OVER_LIMIT_FIELD_PATH));
+      expect(message).toEqual(
+        expect.stringContaining(String(OSQUERY_RESPONSE_ACTION_QUERY_MAX_LENGTH))
+      );
+    });
 
     test('fails when isolate rbac is set to false', async () => {
       (context.securitySolution.getEndpointAuthz as jest.Mock).mockReturnValue(() => ({

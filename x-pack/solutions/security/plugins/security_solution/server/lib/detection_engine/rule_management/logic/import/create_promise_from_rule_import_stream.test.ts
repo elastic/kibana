@@ -14,6 +14,11 @@ import {
   getSampleDetailsAsNdjson,
 } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import type { InvestigationFields } from '../../../../../../common/api/detection_engine';
+import {
+  OSQUERY_QUERY_OVER_LIMIT_FIELD_PATH,
+  OSQUERY_RESPONSE_ACTION_QUERY_MAX_LENGTH,
+  getOverLimitOsqueryResponseActionMock,
+} from '../../../../../../common/api/detection_engine/model/rule_response_actions/response_actions.mock';
 import { createPromiseFromRuleImportStream } from './create_promise_from_rule_import_stream';
 
 export const getOutputSample = (): Partial<RuleToImport> => ({
@@ -350,6 +355,28 @@ describe('createPromiseFromRuleImportStream', () => {
     });
     const resultOrError = result as BadRequestError[];
     expect(resultOrError[1] instanceof BadRequestError).toEqual(true);
+  });
+
+  test('returns an import row error for over-limit osquery response action query', async () => {
+    const sample = {
+      ...getOutputSample(),
+      response_actions: [getOverLimitOsqueryResponseActionMock()],
+    };
+    const ndJsonStream = new Readable({
+      read() {
+        this.push(getSampleAsNdjson(sample));
+        this.push(null);
+      },
+    });
+    const [{ rules: result }] = await createPromiseFromRuleImportStream({
+      stream: ndJsonStream,
+      objectLimit: 1000,
+    });
+    const resultOrError = result as BadRequestError[];
+
+    expect(resultOrError[0] instanceof BadRequestError).toEqual(true);
+    expect(resultOrError[0].message).toContain(OSQUERY_QUERY_OVER_LIMIT_FIELD_PATH);
+    expect(resultOrError[0].message).toContain(String(OSQUERY_RESPONSE_ACTION_QUERY_MAX_LENGTH));
   });
 
   test('migrates investigation_fields', async () => {
