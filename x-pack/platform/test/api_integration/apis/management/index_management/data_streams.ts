@@ -75,6 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
           indexTemplateName: testDataStreamName,
           hidden: false,
           failureStoreEnabled: false,
+          matchesFailureStoreClusterPattern: false,
           failureStoreRetention: {
             defaultRetentionPeriod: '30d',
             retentionDisabled: false,
@@ -129,6 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
             enabled: true,
           },
           failureStoreEnabled: false,
+          matchesFailureStoreClusterPattern: false,
           failureStoreRetention: {
             defaultRetentionPeriod: '30d',
             retentionDisabled: false,
@@ -174,6 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
             enabled: true,
           },
           failureStoreEnabled: false,
+          matchesFailureStoreClusterPattern: false,
           failureStoreRetention: {
             defaultRetentionPeriod: '30d',
             retentionDisabled: false,

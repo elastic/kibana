@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutFooter,
   EuiSpacer,
   EuiTitle,
+  type EuiFlyoutProps,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -35,7 +36,13 @@ import type {
   DlmPhasesSelectorProps,
   DlmPhaseDuration,
   SerializedDlmPhases,
+  DlmPhasesSelectorValue,
 } from '../dlm_phases_selector';
+import {
+  mergeDefaultValue,
+  serializeDlmPhases,
+  validateDurations,
+} from '../dlm_phases_selector/utils/duration_utils';
 import { editDataLifecycleFlyoutStrings as strings } from './strings';
 
 type TabId = 'successful_data' | 'failed_data';
@@ -47,13 +54,14 @@ const TABS: NonEmptyFlyoutTabs<TabId> = [
 
 export interface EditDataLifecycleFlyoutOnApplyArgs {
   successfulData: DataLifecycleApplyPayload | undefined;
-  failedData: FailedDataLifecycleApplyPayload;
+  failedData?: FailedDataLifecycleApplyPayload;
 }
 
 export interface EditDataLifecycleFlyoutProps {
   onClose: () => void;
   onApply: (args: EditDataLifecycleFlyoutOnApplyArgs) => void;
   initialTabId?: TabId;
+  container?: EuiFlyoutProps['container'];
   /**
    * When true, only the Delete phase is shown in the DLM phase selector.
    * The Frozen phase and Hot phase are hidden (Serverless deployments).
@@ -64,6 +72,7 @@ export interface EditDataLifecycleFlyoutProps {
   successfulData: {
     inheritLifecycle: boolean;
     onInheritLifecycleChange?: (next: boolean) => void;
+    inheritLabel?: string;
     indexTemplateHref?: string;
     /**
      * DLM phase selector configuration.
@@ -89,6 +98,7 @@ export interface EditDataLifecycleFlyoutProps {
   failedData: {
     inheritLifecycle: boolean;
     onInheritLifecycleChange?: (next: boolean) => void;
+    inheritLabel?: string;
     indexTemplateHref?: string;
     failureStoreEnabled: boolean;
     onFailureStoreChange: (next: boolean) => void;
@@ -106,6 +116,7 @@ export const EditDataLifecycleFlyout = ({
   onClose,
   onApply,
   initialTabId,
+  container,
   isServerless = false,
   successfulData,
   failedData,
@@ -115,14 +126,62 @@ export const EditDataLifecycleFlyout = ({
     prefix: 'editDataLifecycle-failedDeletePhase',
   });
 
+  const forceFailedDeletePhaseEnabled = isServerless && failedData.failureStoreEnabled;
+
   const { ilm } = successfulData;
   const effectiveMethod = ilm?.method ?? 'dlm';
 
   const [isDlmValid, setIsDlmValid] = useState(true);
   const dlmSerializedRef = useRef<SerializedDlmPhases>({});
+  const [dlmValue, setDlmValue] = useState<DlmPhasesSelectorValue | undefined>(undefined);
+  const hasUserModifiedDlmRef = useRef(false);
   const [failedDeletePhase, setFailedDeletePhase] = useState<DlmPhaseDuration>(
     () => failedData.deletePhaseDefaultValue ?? { enabled: false, value: '60', unit: 'd' }
   );
+  const hasUserModifiedFailedDeletePhaseRef = useRef(false);
+
+  const dlmDefaultValueKey = useMemo(
+    () => JSON.stringify(successfulData.dlm?.defaultValue ?? null),
+    [successfulData.dlm?.defaultValue]
+  );
+
+  useEffect(() => {
+    if (!successfulData.dlm) {
+      return;
+    }
+
+    if (hasUserModifiedDlmRef.current) {
+      return;
+    }
+
+    const nextValue = mergeDefaultValue(successfulData.dlm.defaultValue);
+    setDlmValue(nextValue);
+    dlmSerializedRef.current = serializeDlmPhases(nextValue);
+    setIsDlmValid(validateDurations(nextValue).isValid);
+  }, [dlmDefaultValueKey, successfulData.dlm]);
+
+  const failedDeletePhaseDefaultValueKey = useMemo(
+    () => JSON.stringify(failedData.deletePhaseDefaultValue ?? null),
+    [failedData.deletePhaseDefaultValue]
+  );
+
+  useEffect(() => {
+    if (hasUserModifiedFailedDeletePhaseRef.current) {
+      return;
+    }
+
+    if (failedData.deletePhaseDefaultValue) {
+      setFailedDeletePhase(failedData.deletePhaseDefaultValue);
+    }
+  }, [failedDeletePhaseDefaultValueKey, failedData.deletePhaseDefaultValue]);
+
+  useEffect(() => {
+    if (!forceFailedDeletePhaseEnabled || failedData.inheritLifecycle) {
+      return;
+    }
+
+    setFailedDeletePhase((prev) => (prev.enabled ? prev : { ...prev, enabled: true }));
+  }, [failedData.inheritLifecycle, forceFailedDeletePhaseEnabled]);
 
   const handleApply = () => {
     const { frozen_after: frozenAfter, data_retention: dataRetention } = dlmSerializedRef.current;
@@ -135,10 +194,25 @@ export const EditDataLifecycleFlyout = ({
     });
 
     const { enabled, value, unit } = failedDeletePhase;
+    const effectiveFailedDeletePhaseEnabled = forceFailedDeletePhaseEnabled ? true : enabled;
+    // When the user is not inheriting, we always persist the failure store retention shown in
+    // the flyout (the effective/default value if untouched). Otherwise Elasticsearch would
+    // resolve it from the template (`default_failures_retention`) and the saved configuration
+    // would be (incorrectly) interpreted as inherited.
+    const shouldPersistFailedRetentionOverride = failedData.failureStoreEnabled === true;
     const failedPayload = buildFailedDataLifecycleApplyPayload({
       inheritLifecycle: failedData.inheritLifecycle,
       failureStoreEnabled: failedData.failureStoreEnabled,
-      retention: enabled ? `${value}${unit}` : undefined,
+      retention:
+        shouldPersistFailedRetentionOverride && effectiveFailedDeletePhaseEnabled
+          ? `${value}${unit}`
+          : undefined,
+      // In stateful, an unchecked Delete phase means "disable retention" (keep indefinitely).
+      // Serverless does not support this, so we only set it when explicitly allowed.
+      retentionDisabled:
+        !isServerless && shouldPersistFailedRetentionOverride && !effectiveFailedDeletePhaseEnabled
+          ? true
+          : undefined,
     });
 
     onApply({ successfulData: successfulPayload, failedData: failedPayload });
@@ -192,9 +266,18 @@ export const EditDataLifecycleFlyout = ({
         <EuiSpacer size="s" />
         <DlmPhasesSelector
           {...successfulData.dlm}
+          defaultValue={
+            successfulData.inheritLifecycle
+              ? successfulData.dlm.defaultValue
+              : dlmValue
+              ? { frozen: dlmValue.frozen, delete: dlmValue.delete }
+              : successfulData.dlm.defaultValue
+          }
           isDisabled={successfulData.inheritLifecycle}
           serverless={isServerless}
           onChange={(value, serialized, isValid) => {
+            hasUserModifiedDlmRef.current = true;
+            setDlmValue(value);
             dlmSerializedRef.current = serialized;
             setIsDlmValid(isValid);
           }}
@@ -210,10 +293,27 @@ export const EditDataLifecycleFlyout = ({
       <EuiSpacer size="s" />
       <DeletePhaseCard
         id={failedDeletePhaseCardId}
-        duration={failedDeletePhase}
+        duration={
+          // When inheriting, preview the template's configuration instead of the
+          // data stream's own (possibly user-edited) value.
+          failedData.inheritLifecycle
+            ? failedData.deletePhaseDefaultValue ?? { enabled: false, value: '60', unit: 'd' }
+            : forceFailedDeletePhaseEnabled
+            ? { ...failedDeletePhase, enabled: true }
+            : failedDeletePhase
+        }
         isCardDisabled={failedData.inheritLifecycle}
+        // In serverless the failure store delete phase cannot be disabled, so the toggle is
+        // hidden regardless of whether the lifecycle is inherited from the index template.
+        hideToggle={forceFailedDeletePhaseEnabled}
         isFormDisabled={failedData.inheritLifecycle}
-        onChange={setFailedDeletePhase}
+        onChange={(next) => {
+          if (forceFailedDeletePhaseEnabled && next.enabled === false) {
+            return;
+          }
+          hasUserModifiedFailedDeletePhaseRef.current = true;
+          setFailedDeletePhase(next);
+        }}
       />
     </>
   );
@@ -237,6 +337,7 @@ export const EditDataLifecycleFlyout = ({
       onClose={onClose}
       size={400}
       type="overlay"
+      container={container}
     >
       {(selectedTabId) => (
         <>
@@ -247,7 +348,7 @@ export const EditDataLifecycleFlyout = ({
                   ? {
                       value: successfulData.inheritLifecycle,
                       onChange: successfulData.onInheritLifecycleChange ?? (() => {}),
-                      label: strings.inheritLabel,
+                      label: successfulData.inheritLabel ?? strings.inheritLabel,
                       link: inheritLink,
                     }
                   : undefined
@@ -273,7 +374,7 @@ export const EditDataLifecycleFlyout = ({
                   ? {
                       value: failedData.inheritLifecycle,
                       onChange: failedData.onInheritLifecycleChange ?? (() => {}),
-                      label: strings.inheritLabel,
+                      label: failedData.inheritLabel ?? strings.inheritLabel,
                       link: failedInheritLink,
                     }
                   : undefined

@@ -65,6 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
         storageSize: expect.any(String),
         storageSizeBytes: expect.any(Number),
         failureStoreEnabled: false,
+        matchesFailureStoreClusterPattern: false,
         indexMode: 'standard',
         failureStoreRetention: {
           defaultRetentionPeriod: '30d',

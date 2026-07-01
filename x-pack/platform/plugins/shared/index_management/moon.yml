@@ -69,7 +69,6 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/upgrade-assistant-pkg-common'
   - '@kbn/ml-common-types'
-  - '@kbn/failure-store-modal'
   - '@kbn/data-lifecycle-phases'
   - '@kbn/react-query'
   - '@kbn/scout'
@@ -81,6 +80,8 @@ dependsOn:
   - '@kbn/cloud-connect-plugin'
   - '@kbn/shared-ux-column-presets'
   - '@kbn/index-lifecycle-management-common-shared'
+  - '@kbn/core-chrome-layout-constants'
+  - '@kbn/streams-schema'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/app-header'
 tags:
