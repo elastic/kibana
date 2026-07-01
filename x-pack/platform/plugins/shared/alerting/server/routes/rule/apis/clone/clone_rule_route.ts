@@ -57,6 +57,11 @@ export const cloneRuleRoute = (
             const cloneRule: Rule<RuleParamsV1> = (await rulesClient.clone({
               id: params.id,
               newId: params.newId,
+              data: {
+                name: rule.name,
+                enabled: rule.enabled,
+                schedule: rule.schedule,
+              },
             })) as Rule<RuleParamsV1>;
 
             const response: CloneRuleResponseV1<RuleParamsV1> = {
