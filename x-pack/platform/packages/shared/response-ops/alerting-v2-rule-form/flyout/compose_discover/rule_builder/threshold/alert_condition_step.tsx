@@ -27,13 +27,9 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import type { ComposeFormValues } from '../../compose_form_types';
+import type { FormValues } from '../../../../form/types';
 import { useDataFields } from '../../../../form/hooks/use_data_fields';
 import { useIndexSources } from '../../../../form/hooks/use_index_sources';
-import { ScheduleField } from '../../../../form/fields/schedule_field';
-import { LookbackWindowField } from '../../../../form/fields/lookback_window_field';
-import { AlertDelayField } from '../../../../form/fields/alert_delay_field';
-import { ModeSelect } from '../../../../form/fields/mode_select';
 import type { RuleBuilderStepProps } from '../types';
 import { useBuilderState } from '../builder_state_context';
 import type {
@@ -75,7 +71,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 }) => {
   const { state: thresholdValues, setState: onThresholdValuesChange } =
     useBuilderState<ThresholdFormValues>();
-  const { setValue, watch } = useFormContext<ComposeFormValues>();
+  const { setValue, watch } = useFormContext<FormValues>();
   const isAlert = watch('kind') === 'alert';
 
   const { data: indexOptions, isLoading: isLoadingIndices } = useIndexSources({
@@ -203,10 +199,24 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         next,
         thresholdValues.evaluations
       );
+      const updatedRecoveryConditions = thresholdValues.recovery
+        ? syncConditionsForLabelChange(
+            thresholdValues.recovery.conditions,
+            statLabels,
+            index,
+            oldLabel,
+            newLabel,
+            next,
+            thresholdValues.evaluations
+          )
+        : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
         stats: next,
         alertConditions: updatedConditions,
+        ...(thresholdValues.recovery && {
+          recovery: { ...thresholdValues.recovery, conditions: updatedRecoveryConditions! },
+        }),
       });
     },
     [thresholdValues, onThresholdValuesChange]
@@ -236,10 +246,25 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         remainingStats,
         thresholdValues.evaluations
       );
+      const cleanedRecoveryConditions = thresholdValues.recovery
+        ? reconcileAlertConditionMetrics(
+            clearConditionsForRemovedMetric(
+              thresholdValues.recovery.conditions,
+              removedLabel,
+              remainingStats,
+              thresholdValues.evaluations
+            ),
+            remainingStats,
+            thresholdValues.evaluations
+          )
+        : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
         stats: remainingStats,
         alertConditions: cleanedConditions,
+        ...(thresholdValues.recovery && {
+          recovery: { ...thresholdValues.recovery, conditions: cleanedRecoveryConditions! },
+        }),
       });
     },
     [thresholdValues, onThresholdValuesChange]
@@ -273,10 +298,24 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         thresholdValues.stats,
         next
       );
+      const updatedRecoveryConditions = thresholdValues.recovery
+        ? syncConditionsForLabelChange(
+            thresholdValues.recovery.conditions,
+            evalLabels,
+            index,
+            oldLabel,
+            newLabel,
+            thresholdValues.stats,
+            next
+          )
+        : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
         evaluations: next,
         alertConditions: updatedConditions,
+        ...(thresholdValues.recovery && {
+          recovery: { ...thresholdValues.recovery, conditions: updatedRecoveryConditions! },
+        }),
       });
     },
     [thresholdValues, onThresholdValuesChange]
@@ -296,10 +335,25 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         thresholdValues.stats,
         remainingEvaluations
       );
+      const cleanedRecoveryConditions = thresholdValues.recovery
+        ? reconcileAlertConditionMetrics(
+            clearConditionsForRemovedMetric(
+              thresholdValues.recovery.conditions,
+              removedLabel,
+              thresholdValues.stats,
+              remainingEvaluations
+            ),
+            thresholdValues.stats,
+            remainingEvaluations
+          )
+        : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
         evaluations: remainingEvaluations,
         alertConditions: cleanedConditions,
+        ...(thresholdValues.recovery && {
+          recovery: { ...thresholdValues.recovery, conditions: cleanedRecoveryConditions! },
+        }),
       });
     },
     [thresholdValues, onThresholdValuesChange]
@@ -344,23 +398,8 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     [thresholdValues, onThresholdValuesChange]
   );
 
-  const handleModeChange = useCallback(
-    (kind: 'signal' | 'alert') => {
-      setValue('kind', kind);
-    },
-    [setValue]
-  );
-
   return (
     <>
-      {/* ── Mode select ── */}
-      <ModeSelect
-        value={isAlert ? 'alert' : 'signal'}
-        onChange={handleModeChange}
-        compressed
-        data-test-subj="ruleBuilderModeSelect"
-      />
-      <EuiSpacer size="m" />
       {/* ── Header with preview icon ── */}
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -918,19 +957,6 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
           defaultMessage="Add condition"
         />
       </EuiButtonEmpty>
-
-      {isAlert && (
-        <>
-          <EuiSpacer size="m" />
-          <AlertDelayField />
-        </>
-      )}
-
-      {/* ── Schedule and lookback ── */}
-      <EuiSpacer size="m" />
-      <ScheduleField />
-      <EuiSpacer size="m" />
-      <LookbackWindowField />
     </>
   );
 };

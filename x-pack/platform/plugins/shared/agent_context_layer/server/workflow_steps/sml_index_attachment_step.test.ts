@@ -9,10 +9,17 @@ import type { z } from '@kbn/zod/v4';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import type { SmlIndexAttachmentInputSchema } from '../../common/workflow_steps/sml_index_attachment_step';
+import { SmlIndexAttachmentInputSchema } from '../../common/workflow_steps/sml_index_attachment_step';
 import { apiPrivileges } from '../../common/features';
 import type { AgentContextLayerPluginStart } from '../types';
 import { createContextEngineAddEntryStepDefinition } from './sml_index_attachment_step';
+import { createSmlIndexer } from '../services/sml/sml_indexer';
+import { createSmlTypeRegistry } from '../services/sml/sml_type_registry';
+import { kibanaSavedObjectPermissions } from '../services/sml/permissions/kibana_saved_object';
+// Imported as a namespace so we can spy on `createSmlStorage` without
+// adding a `__mock__` shim. `jest.spyOn(target, method)` needs a
+// concrete object reference, which is what the `* as` form gives us.
+import * as smlStorage from '../services/sml/sml_storage';
 
 const buildStartContract = (): jest.Mocked<AgentContextLayerPluginStart> => ({
   search: jest.fn(),
@@ -142,13 +149,15 @@ describe('createContextEngineAddEntryStepDefinition', () => {
       // handler comment for why.
       action: 'create',
       // Workflow writes always go through content-mode → manual chunks.
+      // Permissions are NOT forwarded — the indexer derives them from the
+      // registered type's `getPermissions` hook so the workflow author
+      // cannot spoof them.
       content: [
         {
           type: 'custom',
           title: 'My title',
           content: 'My content',
           description: 'desc',
-          permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
         },
       ],
     });
@@ -187,18 +196,12 @@ describe('createContextEngineAddEntryStepDefinition', () => {
         type: 'custom',
         title: 't',
         content: 'c',
-        permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
       },
     ]);
-    expect(Object.keys((callArgs as any).content[0])).toEqual([
-      'type',
-      'title',
-      'content',
-      'permissions',
-    ]);
+    expect(Object.keys((callArgs as any).content[0])).toEqual(['type', 'title', 'content']);
   });
 
-  it('preserves optional chunk fields when provided', async () => {
+  it('preserves optional chunk fields when provided (no permissions field — derived by indexer)', async () => {
     const startContract = buildStartContract();
     const definition = createContextEngineAddEntryStepDefinition({
       getStartContract: () => startContract,
@@ -219,7 +222,6 @@ describe('createContextEngineAddEntryStepDefinition', () => {
           description: 'd',
           user_id: 'u',
           references: ['r1'],
-          permissions: ['p1'],
         },
       ],
     });
@@ -233,11 +235,12 @@ describe('createContextEngineAddEntryStepDefinition', () => {
       description: 'd',
       user_id: 'u',
       references: [{ uri: 'r1' }],
-      permissions: {
-        kibana: { privileges: [{ name: 'p1' }] },
-        elasticsearch: { indices: [] },
-      },
     });
+    // The chunk forwarded to the start contract never carries `permissions`.
+    // The indexer stamps them from `SmlTypeDefinition.getPermissions`, so
+    // the workflow step cannot spoof them either via the input schema or
+    // via the forwarded chunk.
+    expect((callArgs as any).content[0]).not.toHaveProperty('permissions');
   });
 
   it('handles delete by calling deleteAttachment with ingestionMethod="all" and reports requestedChunkCount = 0', async () => {
@@ -313,9 +316,15 @@ describe('createContextEngineAddEntryStepDefinition', () => {
     expect(result.output?.action).toBe('delete');
   });
 
-  it('returns an error result when upsert targets an unregistered attachment type', async () => {
+  it('upserts under an unregistered attachment type by handing the call to the indexer', async () => {
+    // Content-mode writes accept any `attachmentType` — the indexer
+    // stamps empty permissions and emits a once-per-process warn when
+    // the type isn't registered. The workflow step's job is to forward
+    // the call, not to pre-validate the type, so the only assertion
+    // here is that the call reaches `indexAttachment` with the
+    // unregistered identifier intact and a success result is returned.
     const startContract = buildStartContract();
-    startContract.getTypeDefinition.mockReturnValueOnce(undefined);
+    startContract.indexAttachment.mockResolvedValueOnce(undefined);
     const definition = createContextEngineAddEntryStepDefinition({
       getStartContract: () => startContract,
       getSpaces: () => undefined,
@@ -325,16 +334,24 @@ describe('createContextEngineAddEntryStepDefinition', () => {
 
     const context = buildHandlerContext({
       originId: 'doc-1',
-      attachmentType: 'unknown',
+      attachmentType: 'my_notes',
       action: 'upsert',
-      chunks: [{ type: 'unknown', title: 't', content: 'c' }],
+      chunks: [{ type: 'my_notes', title: 't', content: 'c' }],
     });
 
     const result = await definition.handler(context as any);
-    expect(result.output).toBeUndefined();
-    expect(result.error).toBeInstanceOf(Error);
-    expect((result.error as Error).message).toBe("Unknown Context Engine entry type: 'unknown'");
-    expect(startContract.indexAttachment).not.toHaveBeenCalled();
+
+    expect(startContract.indexAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        originId: 'doc-1',
+        attachmentType: 'my_notes',
+        action: 'create',
+      })
+    );
+    // Registration handling lives in the indexer — the step never calls getTypeDefinition.
+    expect(startContract.getTypeDefinition).not.toHaveBeenCalled();
+    expect(result.error).toBeUndefined();
+    expect(result.output?.action).toBe('upsert');
   });
 
   it('returns an error result and logs when indexAttachment throws', async () => {
@@ -526,7 +543,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
     });
   });
 
-  describe('experimental feature-flag check', () => {
+  describe('Context Engine feature-flag check', () => {
     it('calls isFeatureEnabled with the workflow fake request and proceeds when enabled', async () => {
       const startContract = buildStartContract();
       const isFeatureEnabled = jest.fn().mockResolvedValue(true);
@@ -576,7 +593,11 @@ describe('createContextEngineAddEntryStepDefinition', () => {
 
       expect(result.output).toBeUndefined();
       expect(result.error).toBeInstanceOf(Error);
-      expect((result.error as Error).message).toContain('experimental features are disabled');
+      // Surfaces the experimental nature, since this error reaches workflow
+      // authors/operators.
+      expect((result.error as Error).message).toContain(
+        'Context Engine (experimental feature) is disabled'
+      );
       expect((result.error as Error).message).toContain('upsert');
       expect(startContract.indexAttachment).not.toHaveBeenCalled();
       // Privilege check must be skipped — the feature-flag gate is an
@@ -605,10 +626,152 @@ describe('createContextEngineAddEntryStepDefinition', () => {
 
       expect(result.output).toBeUndefined();
       expect(result.error).toBeInstanceOf(Error);
-      expect((result.error as Error).message).toContain('experimental features are disabled');
+      expect((result.error as Error).message).toContain(
+        'Context Engine (experimental feature) is disabled'
+      );
       expect((result.error as Error).message).toContain('delete');
       expect(startContract.deleteAttachment).not.toHaveBeenCalled();
       expect(security.authz.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('end-to-end: real indexer derives permissions from getPermissions', () => {
+    // Wires a real `SmlIndexer` (with a registry holding a visualization-like
+    // type whose `getPermissions` uses the `kibanaSavedObjectPermissions`
+    // helper) behind the workflow step's start contract, then runs the
+    // handler. Asserts the indexed document carries `saved_object:lens/get`
+    // — proving the workflow author cannot bypass type-level gating in
+    // content mode even though they no longer have any chunk field with
+    // which to attempt it.
+
+    it('stamps `saved_object:lens/get` on content-mode chunks for a visualization-like type', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      jest
+        .spyOn(smlStorage, 'createSmlStorage')
+        .mockReturnValue({ getClient: getClientMock } as any);
+
+      const visualizationType = {
+        id: 'lens',
+        list() {
+          // unused — workflow step writes via content mode
+          return (async function* () {})();
+        },
+        getSmlData: jest.fn(),
+        toAttachment: jest.fn(),
+        getPermissions: () => kibanaSavedObjectPermissions({ savedObjectType: 'lens' }),
+      };
+
+      const registry = createSmlTypeRegistry();
+      registry.register(visualizationType);
+
+      const logger = {
+        debug: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+        error: jest.fn(),
+        log: jest.fn(),
+        trace: jest.fn(),
+        fatal: jest.fn(),
+        get: jest.fn().mockReturnThis(),
+        isLevelEnabled: jest.fn().mockReturnValue(true),
+      };
+
+      const esClient = {
+        deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+        count: jest.fn().mockResolvedValue({ count: 0 }),
+      };
+
+      const realIndexer = createSmlIndexer({ registry, logger });
+
+      // Fake start contract that delegates content-mode writes to the real
+      // indexer instead of using the default mocks.
+      const startContract = buildStartContract();
+      startContract.indexAttachment.mockImplementation(async (params: any) => {
+        await realIndexer.indexAttachment({
+          ...params,
+          spaces: ['default'],
+          esClient,
+          savedObjectsClient: {},
+          logger,
+        });
+      });
+      // The handler still checks the registry to reject unknown types;
+      // since we registered 'lens' on the real registry, mirror that on
+      // the start-contract mock so the guard passes.
+      startContract.getTypeDefinition.mockImplementation((id: string) => registry.get(id));
+
+      const definition = createContextEngineAddEntryStepDefinition({
+        getStartContract: () => startContract,
+        getSpaces: () => undefined,
+        getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+        isFeatureEnabled: async () => true,
+      });
+
+      const context = buildHandlerContext({
+        originId: 'viz-1',
+        attachmentType: 'lens',
+        action: 'upsert',
+        chunks: [{ type: 'lens', title: 'My Viz', content: 'content' }],
+      });
+
+      const result = await definition.handler(context as any);
+
+      expect(result.error).toBeUndefined();
+      expect(bulkMock).toHaveBeenCalledTimes(1);
+      const ops = bulkMock.mock.calls[0][0].operations;
+      expect(ops).toHaveLength(1);
+      // The workflow author supplied no permissions (the schema does not
+      // accept any); the indexer stamps the visualization type's
+      // `getPermissions` output verbatim.
+      expect(ops[0].index.document.permissions).toEqual({
+        kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+        elasticsearch: { indices: [] },
+      });
+      // The stamped doc carries `ingestion_method: 'manual'` because this
+      // came through content mode, but the permissions match what the
+      // crawler (origin mode) would have written — single source of truth.
+      expect(ops[0].index.document.ingestion_method).toBe('manual');
+    });
+  });
+
+  describe('input-schema permission spoofing guard', () => {
+    // The chunk schema is `strict()` so an unknown `permissions` field is
+    // rejected at parse time rather than being silently dropped. The handler
+    // would also strip it, but rejecting up-front makes the misuse loud —
+    // a workflow author trying to "set permissions for this chunk" gets a
+    // schema error instead of believing it worked.
+    it('rejects a chunk that carries a permissions field (schema is strict)', () => {
+      const parsed = SmlIndexAttachmentInputSchema.safeParse({
+        originId: 'doc-1',
+        attachmentType: 'custom',
+        action: 'upsert',
+        chunks: [
+          {
+            type: 'custom',
+            title: 't',
+            content: 'c',
+            permissions: ['saved_object:lens/get'],
+          },
+        ],
+      });
+
+      expect(parsed.success).toBe(false);
+      const issues = parsed.success ? [] : parsed.error.issues;
+      // Zod v4 emits `unrecognized_keys` for `.strict()` violations; the
+      // exact message wording is checked rather than the code so we
+      // don't tightly couple to internals that have moved between versions.
+      expect(JSON.stringify(issues)).toContain('permissions');
+    });
+
+    it('accepts a chunk that omits the permissions field', () => {
+      const parsed = SmlIndexAttachmentInputSchema.safeParse({
+        originId: 'doc-1',
+        attachmentType: 'custom',
+        action: 'upsert',
+        chunks: [{ type: 'custom', title: 't', content: 'c' }],
+      });
+      expect(parsed.success).toBe(true);
     });
   });
 });

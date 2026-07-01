@@ -319,6 +319,7 @@ tags:
     x-displayName: System
     description: |
       Get information about the system status, resource usage, features, and installed plugins.
+  - name: Tags
   - description: Task manager APIs enable you to check the health of the Kibana task manager, which is used by features such as alerting, actions, and reporting to run mission critical work as persistent background tasks.
     externalDocs:
       description: Task manager
@@ -361,6 +362,7 @@ paths:
           name: feature_id
           required: false
           schema:
+            maxLength: 100
             type: string
       responses:
         '200':
@@ -456,6 +458,40 @@ paths:
       summary: ''
       tags: []
       x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/actions/connector/{connectorId}/oauth/start:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/connector/{connectorId}/oauth/start</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: actions:oauth.
+      operationId: get-actions-connector-connectorid-oauth-start
+      parameters:
+        - description: An identifier for the connector.
+          in: path
+          name: connectorId
+          required: true
+          schema:
+            maxLength: 36
+            type: string
+      responses:
+        '302':
+          description: Redirects to the identity provider to begin OAuth authorization.
+        '400':
+          description: Invalid request, such as a disallowed returnUrl.
+        '401':
+          description: User is not authenticated.
+        '404':
+          description: Connector not found.
+      summary: Start OAuth authorization (redirects to the identity provider)
+      tags:
+        - connectors
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -892,7 +928,8 @@ paths:
                   description: Example response that returns one built-in Elastic agent and one created by the user
                   value:
                     results:
-                      - configuration:
+                      - access_control: null
+                        configuration:
                           tools:
                             - tool_ids:
                                 - platform.core.search
@@ -902,8 +939,17 @@ paths:
                         description: Elastic AI Agent
                         id: elastic-ai-agent
                         name: Elastic AI Agent
+                        permissions:
+                          update_access_control: false
+                          update_agent: false
                         type: chat
-                      - avatar_color: '#BFDBFF'
+                      - access_control:
+                          access_mode: private
+                          entries:
+                            - name: alice
+                              role: manager
+                              type: user
+                        avatar_color: '#BFDBFF'
                         avatar_symbol: SI
                         configuration:
                           instructions: You are a custom agent that wants to help searching data using all indices starting with prefix "content-".
@@ -919,6 +965,9 @@ paths:
                           - custom-indices
                           - department-search
                         name: Search Index Helper
+                        permissions:
+                          update_access_control: true
+                          update_agent: true
                         type: chat
           description: Indicates a successful response
       summary: List agents
@@ -982,6 +1031,19 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                access_control:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    access_mode:
+                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
+                      enum:
+                        - public
+                        - shared
+                        - private
+                      type: string
+                  required:
+                    - access_mode
                 avatar_color:
                   description: Optional hex color code for the agent avatar.
                   type: string
@@ -1057,13 +1119,6 @@ paths:
                   type: array
                 name:
                   description: Display name for the agent.
-                  type: string
-                visibility:
-                  description: '**Technical Preview; added in 9.4.0.** Optional visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
-                  enum:
-                    - public
-                    - shared
-                    - private
                   type: string
               required:
                 - id
@@ -1391,6 +1446,12 @@ paths:
                 getAgentByIdResponseExample:
                   description: Example response that an agent created by the user that will query elasticsearch indices starting with 'content-' prefix to answer the questions.
                   value:
+                    access_control:
+                      access_mode: private
+                      entries:
+                        - name: alice
+                          role: manager
+                          type: user
                     avatar_color: '#BFDBFF'
                     avatar_symbol: SI
                     configuration:
@@ -1407,6 +1468,9 @@ paths:
                       - custom-indices
                       - department-search
                     name: Search Index Helper
+                    permissions:
+                      update_access_control: true
+                      update_agent: true
                     type: chat
           description: Indicates a successful response
       summary: Get an agent by ID
@@ -1477,6 +1541,19 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                access_control:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    access_mode:
+                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
+                      enum:
+                        - public
+                        - shared
+                        - private
+                      type: string
+                  required:
+                    - access_mode
                 avatar_color:
                   description: Updated hex color code for the agent avatar.
                   type: string
@@ -1547,13 +1624,6 @@ paths:
                   type: array
                 name:
                   description: Updated display name for the agent.
-                  type: string
-                visibility:
-                  description: '**Technical Preview; added in 9.4.0.** Updated visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
-                  enum:
-                    - public
-                    - shared
-                    - private
                   type: string
       responses:
         '200':
@@ -1636,19 +1706,19 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/agent_builder/agents/{id}/acl:
+  /api/agent_builder/agents/{id}/access_control:
     get:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{id}/acl</span></div>
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{id}/access_control</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get the access control list (ACL) for a specific agent. Callers without permission to manage the ACL receive `can_manage: false` and an empty `entries` list — the principal list itself is sensitive. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
-      operationId: get-agent-builder-agents-id-acl
+        Get the access control for a specific agent. Callers without permission to manage access control receive `permissions.update_access_control: false` and only their own entry. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-agents-id-access-control
       parameters:
-        - description: The unique identifier of the agent whose ACL to retrieve.
+        - description: The unique identifier of the agent whose access control to retrieve.
           in: path
           name: id
           required: true
@@ -1659,16 +1729,22 @@ paths:
           content:
             application/json:
               examples:
-                getAgentAclMaskedResponseExample:
-                  description: Example response for a caller without manage permission — the principal list is hidden and `entries` is always empty.
+                getAgentAccessControlMaskedResponseExample:
+                  description: Example response for a caller without manage permission — only the caller's own entry is returned.
                   value:
-                    acl:
-                      entries: []
-                    can_manage: false
-                getAgentAclResponseExample:
-                  description: Example response for a caller who can manage the ACL — the agent has two grantees.
+                    access_control:
+                      access_mode: private
+                      entries:
+                        - name: bob
+                          role: user
+                          type: user
+                    permissions:
+                      update_access_control: false
+                getAgentAccessControlResponseExample:
+                  description: Example response for a caller who can manage access control — the agent has two grantees.
                   value:
-                    acl:
+                    access_control:
+                      access_mode: private
                       entries:
                         - name: alice
                           role: editor
@@ -1676,7 +1752,8 @@ paths:
                         - name: bob
                           role: user
                           type: user
-                    can_manage: true
+                    permissions:
+                      update_access_control: true
           description: Indicates a successful response
         '404':
           content:
@@ -1697,11 +1774,11 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "${KIBANA_URL}/api/agent_builder/agents/{id}/acl" \
+              -X GET "${KIBANA_URL}/api/agent_builder/agents/{id}/access_control" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
-            GET kbn://api/agent_builder/agents/{id}/acl
+            GET kbn://api/agent_builder/agents/{id}/access_control
       x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -1710,12 +1787,12 @@ paths:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{id}/acl</span></div>
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{id}/access_control</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Replace the per-agent access control list (ACL). The agent owner, cluster admins, and anyone the ACL grants Editor or higher can call this endpoint (or anyone with `manageAgents` on a Public agent). Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageAgents.
-      operationId: put-agent-builder-agents-id-acl
+        Replace the per-agent access-control entries. The agent owner, cluster admins, and anyone access control grants Manager can call this endpoint. Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageAgents.
+      operationId: put-agent-builder-agents-id-access-control
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -1724,7 +1801,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The unique identifier of the agent whose ACL to update.
+        - description: The unique identifier of the agent whose access control to update.
           in: path
           name: id
           required: true
@@ -1734,12 +1811,12 @@ paths:
         content:
           application/json:
             examples:
-              clearAgentAclRequestExample:
-                description: Submit an empty entries list to remove all ACL grants. Access then falls back to the agent's visibility setting.
+              clearAgentAccessControlRequestExample:
+                description: Submit an empty entries list to remove all custom grants. Access then falls back to the agent's access-control mode.
                 value:
                   entries: []
-              updateAgentAclRequestExample:
-                description: Example request granting two users access to the agent — Alice as Editor (can update the agent and its ACL), Bob as User (can run the agent).
+              updateAgentAccessControlRequestExample:
+                description: Example request granting two users access to the agent — Alice as Editor (can update the agent and its access control), Bob as User (can run the agent).
                 value:
                   entries:
                     - name: alice
@@ -1753,7 +1830,7 @@ paths:
               type: object
               properties:
                 entries:
-                  description: Access control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported; role-based grants are planned for a future release), a `name` (the principal username), and a `role`. Submitting this field replaces the existing ACL entirely; submit an empty array to clear all grants.
+                  description: Access-control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported), a `name` (the principal username), and a `role`.
                   items:
                     additionalProperties: false
                     type: object
@@ -1764,7 +1841,7 @@ paths:
                         minLength: 1
                         type: string
                       role:
-                        description: 'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent and its ACL; `manager` adds deleting the agent and changing visibility.'
+                        description: 'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent and its access control; `manager` adds deleting the agent and managing access control.'
                         enum:
                           - user
                           - editor
@@ -1787,9 +1864,10 @@ paths:
           content:
             application/json:
               examples:
-                updateAgentAclResponseExample:
-                  description: Example response returning the persisted ACL after the update.
+                updateAgentAccessControlResponseExample:
+                  description: Example response returning the persisted access control after the update.
                   value:
+                    access_mode: private
                     entries:
                       - name: alice
                         role: editor
@@ -1802,8 +1880,8 @@ paths:
           content:
             application/json:
               examples:
-                aclOnDefaultAgentResponseExample:
-                  description: The built-in Elastic default agent (`elastic-ai-agent`) cannot have a custom ACL — its access is governed by the platform, not per-agent grants.
+                accessControlOnDefaultAgentResponseExample:
+                  description: The built-in Elastic default agent (`elastic-ai-agent`) cannot have custom access control — its access is governed by the platform, not per-agent grants.
                   value:
                     attributes:
                       trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
@@ -1816,7 +1894,7 @@ paths:
                     error: Bad Request
                     message: '[request body.entries]: array size is [101], but cannot be greater than [100]'
                     statusCode: 400
-          description: Bad Request — the request body failed validation, or the request targets the built-in Elastic default agent (which cannot have an ACL).
+          description: Bad Request — the request body failed validation, or the request targets the built-in Elastic default agent (which cannot have custom access control).
         '404':
           content:
             application/json:
@@ -1836,7 +1914,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X PUT "${KIBANA_URL}/api/agent_builder/agents/{id}/acl" \
+              -X PUT "${KIBANA_URL}/api/agent_builder/agents/{id}/access_control" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -1848,7 +1926,7 @@ paths:
               }'
         - lang: Console
           source: |
-            PUT kbn://api/agent_builder/agents/{id}/acl
+            PUT kbn://api/agent_builder/agents/{id}/access_control
             {
               "entries": [
                 { "type": "user", "name": "alice", "role": "editor" },
@@ -2637,6 +2715,14 @@ paths:
         content:
           application/json:
             examples:
+              conversePublicRequestExample:
+                description: Example request to create a public conversation
+                value:
+                  access_control:
+                    access_mode: public
+                  agent_id: elastic-ai-agent
+                  connector_id: my-connector-id
+                  input: What is Elasticsearch?
               converseRequestExample:
                 description: Example request to send a message to the agent as a part of the conversation
                 value:
@@ -2659,6 +2745,19 @@ paths:
                     - local
                     - task_manager
                   type: string
+                access_control:
+                  additionalProperties: false
+                  description: '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.'
+                  type: object
+                  properties:
+                    access_mode:
+                      description: Access mode to apply when creating a new conversation. Set to public to make the conversation visible to other users who can access the underlying agent. This setting is ignored when continuing an existing conversation.
+                      enum:
+                        - private
+                        - public
+                      type: string
+                  required:
+                    - access_mode
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -2819,6 +2918,8 @@ paths:
                 converseResponseExample:
                   description: Example response containing the chain of events representing a conversation with the agent
                   value:
+                    access_control:
+                      access_mode: private
                     conversation_id: 696ccd6d-4bff-4b26-a62e-522ccf2dcd16
                     response:
                       message: Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease.
@@ -2850,13 +2951,20 @@ paths:
               -H "Content-Type: application/json" \
               -d '{
                 "input": "What is Elasticsearch?",
-                "agent_id": "elastic-ai-agent"}'
+                "agent_id": "elastic-ai-agent",
+                "access_control": {
+                  "access_mode": "public"
+                }
+              }'
         - lang: Console
           source: |
             POST kbn://api/agent_builder/converse
             {
               "input": "What is Elasticsearch?",
-              "agent_id": "elastic-ai-agent"
+              "agent_id": "elastic-ai-agent",
+              "access_control": {
+                "access_mode": "public"
+              }
             }
       x-state: ''
       x-metaTags:
@@ -3063,6 +3171,13 @@ paths:
         content:
           application/json:
             examples:
+              converseAsyncPublicRequestExample:
+                description: Example request to create a public conversation
+                value:
+                  access_control:
+                    access_mode: public
+                  agent_id: elastic-ai-agent
+                  input: Hello
               converseAsyncRequestExample:
                 description: Example request to send a message to the agent as a part of the conversation
                 value:
@@ -3085,6 +3200,19 @@ paths:
                     - local
                     - task_manager
                   type: string
+                access_control:
+                  additionalProperties: false
+                  description: '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.'
+                  type: object
+                  properties:
+                    access_mode:
+                      description: Access mode to apply when creating a new conversation. Set to public to make the conversation visible to other users who can access the underlying agent. This setting is ignored when continuing an existing conversation.
+                      enum:
+                        - private
+                        - public
+                      type: string
+                  required:
+                    - access_mode
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -3277,6 +3405,13 @@ paths:
                             response:
                               message: Hello! How can I help you today?
                       event: round_complete
+                    - data:
+                        data:
+                          access_control:
+                            access_mode: private
+                          conversation_id: c250305b-1929-4248-b568-b9e3f065fda5
+                          title: Hello
+                      event: conversation_created
           description: Indicates a successful response
       summary: Send chat message (streaming)
       tags:
@@ -6388,6 +6523,127 @@ paths:
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/alerting/rule/{rule_id}/alert/{alert_id}/_snooze:
+    post:
+      operationId: post-alerting-rule-rule-id-alert-alert-id-snooze
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The identifier for the rule.
+          in: path
+          name: rule_id
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+        - description: The identifier for the alert.
+          in: path
+          name: alert_id
+          required: true
+          schema:
+            maxLength: 1000
+            type: string
+        - description: Set to `true` to validate that the specified alert exists. If a `400` error is returned, the specified alert does not exist. Defaults to `true`.
+          in: query
+          name: validate_alerts_existence
+          required: false
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                condition_operator:
+                  description: Logical operator applied to the conditions array. "any" expires the snooze when at least one condition is met; "all" requires every condition to be met. When conditions are provided but this field is omitted, defaults to "any".
+                  enum:
+                    - any
+                    - all
+                  type: string
+                conditions:
+                  description: 'One or more conditions that, when met, automatically expire the snooze. Supported types: `field_change`, `severity_change`, `severity_equals`.'
+                  items:
+                    anyOf:
+                      - additionalProperties: false
+                        description: Expires the snooze when the value of the specified alert field changes.
+                        type: object
+                        properties:
+                          field:
+                            description: The alert field to watch, written as a dot-notation path. When the value of the specified alert field changes, the snooze expires
+                            maxLength: 1000
+                            type: string
+                          type:
+                            enum:
+                              - field_change
+                            type: string
+                        required:
+                          - type
+                          - field
+                      - additionalProperties: false
+                        description: Expires the snooze when the severity of the specified alert changes.
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - severity_change
+                            type: string
+                        required:
+                          - type
+                      - additionalProperties: false
+                        description: Expires the snooze when the severity of the specified alert equals a target level.
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - severity_equals
+                            type: string
+                          value:
+                            description: 'The target severity level: critical, high, medium, low, or info.'
+                            enum:
+                              - critical
+                              - high
+                              - medium
+                              - low
+                              - info
+                            type: string
+                        required:
+                          - type
+                          - value
+                  maxItems: 10
+                  type: array
+                expires_at:
+                  description: The datetime at which the snooze expires, in ISO 8601 format (`YYYY-MM-DDTHH:mm:ss.sssZ`). When omitted, the snooze persists indefinitely unless manually removed or a defined condition is met.
+                  maxLength: 30
+                  type: string
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates the specified rule or alert doesn't exist.
+      summary: Snooze an alert
+      tags:
+        - alerting
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{rule_id}/alert/{alert_id}/_snooze</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute:
     post:
       operationId: post-alerting-rule-rule-id-alert-alert-id-unmute
@@ -6430,6 +6686,53 @@ paths:
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/alerting/rule/{rule_id}/alert/{alert_id}/_unsnooze:
+    post:
+      operationId: post-alerting-rule-rule-id-alert-alert-id-unsnooze
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The identifier for the rule.
+          in: path
+          name: rule_id
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+        - description: The identifier for the alert.
+          in: path
+          name: alert_id
+          required: true
+          schema:
+            maxLength: 1000
+            type: string
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates the specified rule or alert doesn't exist.
+      summary: Unsnooze an alert
+      tags:
+        - alerting
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{rule_id}/alert/{alert_id}/_unsnooze</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}:
@@ -6566,7 +6869,8 @@ paths:
           required: false
           schema:
             type: string
-        - in: query
+        - description: 'Filters the returned rules by the consumer (Kibana application) that owns them, for example: `siem`, `apm`, `infrastructure`.'
+          in: query
           name: filter_consumers
           required: false
           schema:
@@ -8026,12 +8330,15 @@ paths:
           name: product_name
   /api/asset_criticality:
     delete:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/asset_criticality</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to unassign asset criticality for a specific entity.
 
         Delete the asset criticality record for a specific entity.
       operationId: DeleteAssetCriticalityRecord
@@ -8083,6 +8390,7 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     get:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -8090,7 +8398,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get the asset criticality record for a specific entity.
+        **Deprecated in 9.4.0.** Get the asset criticality record for a specific entity.
       operationId: GetAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
@@ -8125,12 +8433,15 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     post:
+      deprecated: true
       description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/asset_criticality</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to assign asset criticality to an entity.
 
         Create or update an asset criticality record for a specific entity.
 
@@ -8171,12 +8482,15 @@ paths:
           name: product_name
   /api/asset_criticality/bulk:
     post:
+      deprecated: true
       description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/asset_criticality/bulk</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to bulk assign asset criticality.
 
         Bulk upsert up to 1000 asset criticality records.
 
@@ -8246,6 +8560,7 @@ paths:
           name: product_name
   /api/asset_criticality/list:
     get:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -8253,7 +8568,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List asset criticality records, paging, sorting and filtering as needed.
+        **Deprecated in 9.4.0.** List asset criticality records, paging, sorting and filtering as needed.
       operationId: FindAssetCriticalityRecords
       parameters:
         - description: The field to sort by.
@@ -13700,7 +14015,7 @@ paths:
                             interval: 15m
                             license: Elastic License v2
                             machine_learning_job_id:
-                              - packetbeat_dns_tunneling_ea
+                              - dns_tunneling_ea
                             max_signals: 100
                             name: DNS Tunneling [Duplicate]
                             references:
@@ -25614,6 +25929,168 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/fleet/agentless_policies:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agentless_policies</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List agentless policies
+      operationId: get-fleet-agentless-policies
+      parameters:
+        - description: Page number. Defaults to `1`.
+          in: query
+          name: page
+          required: false
+          schema:
+            type: number
+        - description: Number of results per page. Defaults to `20`.
+          in: query
+          name: perPage
+          required: false
+          schema:
+            type: number
+        - description: Field to sort results by. Defaults to `updated_at`.
+          in: query
+          name: sortField
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+        - description: Sort order, ascending or descending. Defaults to `desc`.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            enum:
+              - desc
+              - asc
+            type: string
+        - description: 'A KQL query string to filter results. Filtering is restricted to the following fields: `name`, `namespace`, `package.name`.'
+          in: query
+          name: kuery
+          required: false
+          schema:
+            maxLength: 4096
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                listAgentlessPoliciesResponseExample:
+                  description: Example response for listing agentless policies
+                  value:
+                    items:
+                      - created_at: '2025-11-06T18:27:43.541Z'
+                        created_by: test_user
+                        description: test
+                        id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                        inputs:
+                          ESS Billing-cel:
+                            enabled: true
+                            streams:
+                              ess_billing.billing:
+                                enabled: true
+                              ess_billing.credits:
+                                enabled: false
+                            vars:
+                              api_key:
+                                id: QY1sWpoBbWcMW-edr0Ee
+                                isSecretRef: true
+                              organization_id: '1234'
+                              url: https://billing.elastic-cloud.com
+                        name: ess_billing-1
+                        namespace: default
+                        package:
+                          name: ess_billing
+                          title: Elasticsearch Service Billing
+                          version: 1.6.0
+                        updated_at: '2025-11-06T18:27:43.541Z'
+                        updated_by: test_user
+                      - cloud_connector:
+                          cloud_connector_id: aws-connector-67890
+                          enabled: true
+                        created_at: '2025-11-06T18:27:43.541Z'
+                        created_by: test_user
+                        description: CSPM integration for AWS with cloud connector
+                        id: aws-policy-12345
+                        inputs:
+                          cspm-cloudbeat/cis_aws:
+                            enabled: true
+                        name: cspm-aws-policy
+                        namespace: default
+                        package:
+                          name: cloud_security_posture
+                          title: Cloud Security Posture Management
+                          version: 3.1.1
+                        updated_at: '2025-11-06T18:27:43.541Z'
+                        updated_by: test_user
+                        vars:
+                          deployment: aws
+                          posture: cspm
+                    page: 1
+                    perPage: 20
+                    total: 2
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy'
+                    maxItems: 10000
+                    type: array
+                  page:
+                    type: number
+                  perPage:
+                    type: number
+                  total:
+                    type: number
+                required:
+                  - items
+                  - total
+                  - page
+                  - perPage
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Get agentless policies
+      tags:
+        - Fleet agentless policies
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
     post:
       description: |-
         **Spaces method and path for this operation:**
@@ -25631,16 +26108,6 @@ paths:
           required: true
           schema:
             example: 'true'
-            type: string
-        - description: The format of the response package policy.
-          in: query
-          name: format
-          required: false
-          schema:
-            default: simplified
-            enum:
-              - legacy
-              - simplified
             type: string
       requestBody:
         content:
@@ -25785,13 +26252,12 @@ paths:
             application/json:
               examples:
                 createAgentlessPoliciesResponseExample:
-                  description: Example response showing the successful result of communication initialisation over MCP protocol
+                  description: Example response for creating an agentless policy
                   value:
                     item:
                       created_at: '2025-11-06T18:27:43.541Z'
                       created_by: test_user
                       description: test
-                      enabled: true
                       id: d52a7812-5736-4fdc-aed8-72152afa1ffa
                       inputs:
                         ESS Billing-cel:
@@ -25820,22 +26286,18 @@ paths:
                         name: ess_billing
                         title: Elasticsearch Service Billing
                         version: 1.6.0
-                      revision: 1
-                      secret_references:
-                        - id: QY1sWpoBbWcMW-edr0Ee
-                      supports_agentless: true
                       updated_at: '2025-11-06T18:27:43.541Z'
                       updated_by: test_user
-                      version: WzE0OTgsMV0=
                 createAgentlessPoliciesWithAWSCloudConnectorResponseExample:
                   description: Example response for AWS cloud connector integration
                   value:
                     item:
-                      cloud_connector_id: aws-connector-67890
+                      cloud_connector:
+                        cloud_connector_id: aws-connector-67890
+                        enabled: true
                       created_at: '2025-11-06T18:27:43.541Z'
                       created_by: test_user
                       description: CSPM integration for AWS with cloud connector
-                      enabled: true
                       id: aws-policy-12345
                       inputs:
                         cspm-cloudbeat/cis_aws:
@@ -25862,26 +26324,21 @@ paths:
                         name: cloud_security_posture
                         title: Cloud Security Posture Management
                         version: 3.1.1
-                      revision: 1
-                      secret_references:
-                        - id: secret-external-id-123
-                      supports_agentless: true
-                      supports_cloud_connector: true
                       updated_at: '2025-11-06T18:27:43.541Z'
                       updated_by: test_user
                       vars:
                         deployment: aws
                         posture: cspm
-                      version: WzE0OTgsMV0=
                 createAgentlessPoliciesWithAzureCloudConnectorResponseExample:
                   description: Example response for Azure cloud connector integration
                   value:
                     item:
-                      cloud_connector_id: azure-connector-67890
+                      cloud_connector:
+                        cloud_connector_id: azure-connector-67890
+                        enabled: true
                       created_at: '2025-11-06T18:27:43.541Z'
                       created_by: test_user
                       description: CSPM integration for Azure with cloud connector
-                      enabled: true
                       id: azure-policy-12345
                       inputs:
                         cspm-cloudbeat/cis_aws:
@@ -25910,488 +26367,13 @@ paths:
                         name: cloud_security_posture
                         title: Cloud Security Posture Management
                         version: 3.1.1
-                      revision: 1
-                      secret_references:
-                        - id: tenant-secret-id-123
-                        - id: client-secret-id-456
-                      supports_agentless: true
-                      supports_cloud_connector: true
                       updated_at: '2025-11-06T18:27:43.541Z'
                       updated_by: test_user
                       vars:
                         deployment: azure
                         posture: cspm
-                      version: WzE0OTgsMV0=
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  item:
-                    additionalProperties: false
-                    description: The created agentless package policy.
-                    type: object
-                    properties:
-                      additional_datastreams_permissions:
-                        description: Additional data stream permissions that will be added to the agent policy.
-                        items:
-                          type: string
-                        maxItems: 1000
-                        nullable: true
-                        type: array
-                      agents:
-                        type: number
-                      cloud_connector_id:
-                        description: ID of the cloud connector associated with this package policy.
-                        nullable: true
-                        type: string
-                      cloud_connector_name:
-                        description: Transient field for cloud connector name during creation.
-                        maxLength: 255
-                        minLength: 1
-                        nullable: true
-                        type: string
-                      condition:
-                        description: Agent condition expression to evaluate whether to apply this integration to its inputs.
-                        maxLength: 10000
-                        nullable: true
-                        type: string
-                      created_at:
-                        type: string
-                      created_by:
-                        type: string
-                      description:
-                        description: Package policy description
-                        type: string
-                      elasticsearch:
-                        additionalProperties: true
-                        type: object
-                        properties:
-                          privileges:
-                            additionalProperties: true
-                            type: object
-                            properties:
-                              cluster:
-                                items:
-                                  type: string
-                                maxItems: 100
-                                type: array
-                      enabled:
-                        type: boolean
-                      global_data_tags:
-                        items:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            name:
-                              description: The name of the custom field. Cannot contain spaces.
-                              type: string
-                            value:
-                              anyOf:
-                                - type: string
-                                - type: number
-                              description: The value of the custom field.
-                          required:
-                            - name
-                            - value
-                        maxItems: 100
-                        nullable: true
-                        type: array
-                      id:
-                        description: Package policy unique identifier.
-                        type: string
-                      inputs:
-                        anyOf:
-                          - items:
-                              additionalProperties: false
-                              type: object
-                              properties:
-                                compiled_input:
-                                  nullable: true
-                                condition:
-                                  description: Agent condition expression to evaluate whether to apply this input.
-                                  maxLength: 10000
-                                  nullable: true
-                                  type: string
-                                config:
-                                  additionalProperties:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      frozen:
-                                        type: boolean
-                                      type:
-                                        type: string
-                                      value:
-                                        nullable: true
-                                    required:
-                                      - value
-                                  description: Package variable (see integration documentation for more information)
-                                  type: object
-                                deprecated:
-                                  $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
-                                enabled:
-                                  type: boolean
-                                id:
-                                  type: string
-                                keep_enabled:
-                                  type: boolean
-                                migrate_from:
-                                  type: string
-                                name:
-                                  type: string
-                                policy_template:
-                                  type: string
-                                streams:
-                                  items:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      compiled_stream:
-                                        nullable: true
-                                      condition:
-                                        description: Agent condition expression to evaluate whether to apply this stream.
-                                        maxLength: 10000
-                                        nullable: true
-                                        type: string
-                                      config:
-                                        additionalProperties:
-                                          additionalProperties: false
-                                          type: object
-                                          properties:
-                                            frozen:
-                                              type: boolean
-                                            type:
-                                              type: string
-                                            value:
-                                              nullable: true
-                                          required:
-                                            - value
-                                        description: Package variable (see integration documentation for more information)
-                                        type: object
-                                      data_stream:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          dataset:
-                                            type: string
-                                          elasticsearch:
-                                            additionalProperties: false
-                                            type: object
-                                            properties:
-                                              dynamic_dataset:
-                                                type: boolean
-                                              dynamic_namespace:
-                                                type: boolean
-                                              privileges:
-                                                additionalProperties: false
-                                                type: object
-                                                properties:
-                                                  indices:
-                                                    items:
-                                                      type: string
-                                                    maxItems: 100
-                                                    type: array
-                                          type:
-                                            type: string
-                                        required:
-                                          - dataset
-                                      deprecated:
-                                        $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
-                                      enabled:
-                                        type: boolean
-                                      id:
-                                        type: string
-                                      keep_enabled:
-                                        type: boolean
-                                      migrate_from:
-                                        type: string
-                                      release:
-                                        enum:
-                                          - ga
-                                          - beta
-                                          - experimental
-                                        type: string
-                                      var_group_selections:
-                                        additionalProperties:
-                                          type: string
-                                        description: Variable group selections. Maps var_group name to the selected option name within that group.
-                                        type: object
-                                      vars:
-                                        additionalProperties:
-                                          additionalProperties: false
-                                          type: object
-                                          properties:
-                                            frozen:
-                                              type: boolean
-                                            type:
-                                              type: string
-                                            value:
-                                              nullable: true
-                                          required:
-                                            - value
-                                        description: Package variable (see integration documentation for more information)
-                                        type: object
-                                    required:
-                                      - enabled
-                                      - data_stream
-                                      - compiled_stream
-                                  maxItems: 1000
-                                  type: array
-                                type:
-                                  type: string
-                                var_group_selections:
-                                  additionalProperties:
-                                    type: string
-                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
-                                  type: object
-                                vars:
-                                  additionalProperties:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      frozen:
-                                        type: boolean
-                                      type:
-                                        type: string
-                                      value:
-                                        nullable: true
-                                    required:
-                                      - value
-                                  description: Package variable (see integration documentation for more information)
-                                  type: object
-                              required:
-                                - type
-                                - enabled
-                                - streams
-                                - compiled_input
-                            maxItems: 100
-                            type: array
-                          - additionalProperties:
-                              additionalProperties: false
-                              type: object
-                              properties:
-                                condition:
-                                  description: Agent condition expression to evaluate whether to apply this input.
-                                  maxLength: 10000
-                                  nullable: true
-                                  type: string
-                                deprecated:
-                                  $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
-                                enabled:
-                                  description: Enable or disable that input. Defaults to `true` (enabled).
-                                  type: boolean
-                                streams:
-                                  additionalProperties:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      condition:
-                                        description: Agent condition expression to evaluate whether to apply this stream.
-                                        maxLength: 10000
-                                        nullable: true
-                                        type: string
-                                      deprecated:
-                                        $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
-                                      enabled:
-                                        description: Enable or disable that stream. Defaults to `true` (enabled).
-                                        type: boolean
-                                      var_group_selections:
-                                        additionalProperties:
-                                          type: string
-                                        description: Variable group selections. Maps var_group name to the selected option name within that group.
-                                        type: object
-                                      vars:
-                                        additionalProperties:
-                                          anyOf:
-                                            - type: string
-                                            - type: number
-                                            - type: boolean
-                                            - items:
-                                                type: string
-                                              maxItems: 100
-                                              type: array
-                                            - items:
-                                                type: number
-                                              maxItems: 100
-                                              type: array
-                                            - additionalProperties: false
-                                              type: object
-                                              properties:
-                                                id:
-                                                  type: string
-                                                isSecretRef:
-                                                  type: boolean
-                                              required:
-                                                - id
-                                                - isSecretRef
-                                          default: null
-                                          nullable: true
-                                        description: Input/stream level variable. Refer to the integration documentation for more information.
-                                        type: object
-                                  description: Input streams. Refer to the integration documentation to know which streams are available.
-                                  type: object
-                                vars:
-                                  additionalProperties:
-                                    anyOf:
-                                      - type: string
-                                      - type: number
-                                      - type: boolean
-                                      - items:
-                                          type: string
-                                        maxItems: 100
-                                        type: array
-                                      - items:
-                                          type: number
-                                        maxItems: 100
-                                        type: array
-                                      - additionalProperties: false
-                                        type: object
-                                        properties:
-                                          id:
-                                            type: string
-                                          isSecretRef:
-                                            type: boolean
-                                        required:
-                                          - id
-                                          - isSecretRef
-                                    default: null
-                                    nullable: true
-                                  description: Input/stream level variable. Refer to the integration documentation for more information.
-                                  type: object
-                            description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
-                            type: object
-                        description: Package policy inputs.
-                      is_managed:
-                        type: boolean
-                      name:
-                        description: Unique name for the package policy.
-                        type: string
-                      namespace:
-                        description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
-                        type: string
-                      output_id:
-                        nullable: true
-                        type: string
-                      overrides:
-                        additionalProperties: false
-                        description: Override settings that are defined in the package policy. The override option should be used only in unusual circumstances and not as a routine procedure.
-                        nullable: true
-                        type: object
-                        properties:
-                          inputs:
-                            additionalProperties:
-                              nullable: true
-                            type: object
-                      package:
-                        $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_package'
-                      package_agent_version_condition:
-                        type: string
-                      policy_id:
-                        deprecated: true
-                        description: ID of the agent policy which the package policy will be added to.
-                        nullable: true
-                        type: string
-                      policy_ids:
-                        items:
-                          description: IDs of the agent policies that the package policy will be added to.
-                          type: string
-                        maxItems: 1000
-                        type: array
-                      revision:
-                        description: Package policy revision.
-                        type: number
-                      secret_references:
-                        items:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            id:
-                              type: string
-                          required:
-                            - id
-                        maxItems: 1000
-                        type: array
-                      spaceIds:
-                        items:
-                          type: string
-                        maxItems: 100
-                        type: array
-                      supports_agentless:
-                        description: Indicates whether the package policy belongs to an agentless agent policy.
-                        nullable: true
-                        type: boolean
-                      supports_cloud_connector:
-                        description: Indicates whether the package policy supports cloud connectors.
-                        nullable: true
-                        type: boolean
-                      updated_at:
-                        type: string
-                      updated_by:
-                        type: string
-                      var_group_selections:
-                        additionalProperties:
-                          type: string
-                        description: Variable group selections. Maps var_group name to the selected option name within that group.
-                        type: object
-                      vars:
-                        anyOf:
-                          - additionalProperties:
-                              additionalProperties: false
-                              type: object
-                              properties:
-                                frozen:
-                                  type: boolean
-                                type:
-                                  type: string
-                                value:
-                                  nullable: true
-                              required:
-                                - value
-                            description: Package variable (see integration documentation for more information)
-                            type: object
-                          - additionalProperties:
-                              anyOf:
-                                - type: string
-                                - type: number
-                                - type: boolean
-                                - items:
-                                    type: string
-                                  maxItems: 100
-                                  type: array
-                                - items:
-                                    type: number
-                                  maxItems: 100
-                                  type: array
-                                - additionalProperties: false
-                                  type: object
-                                  properties:
-                                    id:
-                                      type: string
-                                    isSecretRef:
-                                      type: boolean
-                                  required:
-                                    - id
-                                    - isSecretRef
-                              default: null
-                              nullable: true
-                            description: Input/stream level variable. Refer to the integration documentation for more information.
-                            type: object
-                        description: Package level variable.
-                      version:
-                        description: Package policy ES version.
-                        type: string
-                    required:
-                      - name
-                      - enabled
-                      - inputs
-                      - id
-                      - revision
-                      - updated_at
-                      - updated_by
-                      - created_at
-                      - created_by
-                required:
-                  - item
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy_response'
           description: Indicates a successful response
         '400':
           content:
@@ -26482,6 +26464,7 @@ paths:
           name: policyId
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: Force delete the policy even if the policy is managed.
           in: query
@@ -26569,6 +26552,122 @@ paths:
                   - attributes
           description: Conflict
       summary: Delete an agentless policy
+      tags:
+        - Fleet agentless policies
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agentless_policies/{policyId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get an agentless policy by ID
+      operationId: get-fleet-agentless-policies-policyid
+      parameters:
+        - description: The ID of the agentless policy to retrieve.
+          in: path
+          name: policyId
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getAgentlessPolicyResponseExample:
+                  description: Example response for getting an agentless policy by ID
+                  value:
+                    item:
+                      created_at: '2025-11-06T18:27:43.541Z'
+                      created_by: test_user
+                      description: test
+                      id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      inputs:
+                        ESS Billing-cel:
+                          enabled: true
+                          streams:
+                            ess_billing.billing:
+                              enabled: true
+                              vars:
+                                hide_sensitive: true
+                                http_client_timeout: 30s
+                                lookbehind: 365
+                                tags:
+                                  - forwarded
+                                  - billing
+                            ess_billing.credits:
+                              enabled: false
+                          vars:
+                            api_key:
+                              id: QY1sWpoBbWcMW-edr0Ee
+                              isSecretRef: true
+                            organization_id: '1234'
+                            url: https://billing.elastic-cloud.com
+                      name: ess_billing-1
+                      namespace: default
+                      package:
+                        name: ess_billing
+                        title: Elasticsearch Service Billing
+                        version: 1.6.0
+                      updated_at: '2025-11-06T18:27:43.541Z'
+                      updated_by: test_user
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy_response'
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
+      summary: Get an agentless policy
       tags:
         - Fleet agentless policies
       x-state: Experimental
@@ -33095,7 +33194,7 @@ paths:
               - metrics
               - traces
               - synthetics
-              - profiling
+              - profiles
             type: string
         - description: Filter data streams by dataset name
           in: query
@@ -35636,7 +35735,7 @@ paths:
               - metrics
               - traces
               - synthetics
-              - profiling
+              - profiles
             type: string
         - description: When true, only return packages with active data streams
           in: query
@@ -58304,7 +58403,6 @@ paths:
                       simulate: true
                       text_structure: true
                       view_index_metadata: true
-                    queries: []
                     rules: []
                     stream:
                       description: Web server access logs, routed by severity
@@ -58373,7 +58471,6 @@ paths:
               createQueryStream:
                 value:
                   dashboards: []
-                  queries: []
                   rules: []
                   stream:
                     description: All error-level logs across every stream
@@ -58384,7 +58481,6 @@ paths:
               createWiredStream:
                 value:
                   dashboards: []
-                  queries: []
                   rules: []
                   stream:
                     description: Web server access logs, routed by severity
@@ -58414,7 +58510,6 @@ paths:
               updateClassicStream:
                 value:
                   dashboards: []
-                  queries: []
                   rules: []
                   stream:
                     description: Legacy application logs managed as a classic data stream
@@ -58930,7 +59025,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Exports the content associated to a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.
+        Exports a content pack with the stream structure (routing, mappings, and processing). Significant-event queries are not included; manage them via the /api/streams/{name}/queries endpoints.<br/><br/>[Required authorization] Route required privileges: manage_stream.
       operationId: post-streams-name-content-export
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -58994,7 +59089,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Links content objects to a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.
+        Imports stream structure (routing, mappings, and processing) from a content pack into a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.
       operationId: post-streams-name-content-import
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -59165,6 +59260,10 @@ paths:
                                 items:
                                   type: string
                                 type: array
+                              expires_at:
+                                format: date-time
+                                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
+                                type: string
                               id:
                                 description: A non-empty string.
                                 minLength: 1
@@ -59318,6 +59417,10 @@ paths:
                   items:
                     type: string
                   type: array
+                expires_at:
+                  format: date-time
+                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
+                  type: string
                 severity_score:
                   type: number
                 title:
@@ -59766,6 +59869,425 @@ paths:
       summary: Link an attachment to a stream
       tags:
         - streams
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/tags:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/tags</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a paginated list of tags matching the optional `query` text.
+      operationId: get-tags
+      parameters:
+        - description: Filters results by `name` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.
+          in: query
+          name: query
+          required: false
+          schema:
+            type: string
+        - description: The page of results to return.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: The number of results to return per page.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            maximum: 1000
+            minimum: 1
+            type: number
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                searchTagsResponse:
+                  summary: Tags matching a search query
+                  value:
+                    data:
+                      - data:
+                          color: '#1BA9F5'
+                          description: Dashboards owned by engineering teams.
+                          name: Engineering
+                        id: tag-engineering
+                        meta:
+                          created_at: '2026-06-01T12:00:00.000Z'
+                          managed: false
+                          updated_at: '2026-06-01T12:00:00.000Z'
+                          version: WzEsMV0=
+                      - data:
+                          color: '#54B399'
+                          description: Content used by operations teams.
+                          name: Operations
+                        id: tag-operations
+                        meta:
+                          created_at: '2026-06-02T09:30:00.000Z'
+                          managed: false
+                          updated_at: '2026-06-02T09:30:00.000Z'
+                          version: WzIsMV0=
+                    meta:
+                      page: 1
+                      per_page: 20
+                      total: 2
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    description: List of tags matching the query.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        data:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-attributes'
+                        id:
+                          description: The tag ID.
+                          type: string
+                        meta:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                      required:
+                        - id
+                        - data
+                        - meta
+                    maxItems: 1000
+                    minItems: 0
+                    type: array
+                  meta:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      page:
+                        default: 1
+                        description: The returned page of results.
+                        minimum: 1
+                        type: number
+                      per_page:
+                        default: 20
+                        description: The number of results returned per page.
+                        maximum: 1000
+                        minimum: 1
+                        type: number
+                      total:
+                        description: The total number of results matching the query.
+                        type: number
+                    required:
+                      - total
+                required:
+                  - data
+                  - meta
+          description: success
+        '403':
+          description: forbidden
+      summary: Search tags
+      tags:
+        - Tags
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/tags</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a new tag and returns it.
+      operationId: post-tags
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createTagRequest:
+                summary: Create a tag
+                value:
+                  color: '#F04E98'
+                  description: Content related to security investigations.
+                  name: Security
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-request-attributes'
+      responses:
+        '201':
+          content:
+            application/json:
+              examples:
+                createTagResponse:
+                  summary: The created tag
+                  value:
+                    data:
+                      color: '#F04E98'
+                      description: Content related to security investigations.
+                      name: Security
+                    id: tag-security
+                    meta:
+                      created_at: '2026-06-03T14:15:00.000Z'
+                      managed: false
+                      updated_at: '2026-06-03T14:15:00.000Z'
+                      version: WzMsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-attributes'
+                  id:
+                    description: The tag ID.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: created
+        '400':
+          description: invalid request
+        '403':
+          description: forbidden
+        '409':
+          description: conflict
+      summary: Create a tag
+      tags:
+        - Tags
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/tags/{id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/tags/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Permanently deletes a tag by ID.
+      operationId: delete-tags-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The tag ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: deleted
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+      summary: Delete a tag
+      tags:
+        - Tags
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/tags/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a tag by ID.
+      operationId: get-tags-id
+      parameters:
+        - description: The tag ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                readTagResponse:
+                  summary: The requested tag
+                  value:
+                    data:
+                      color: '#1BA9F5'
+                      description: Dashboards owned by engineering teams.
+                      name: Engineering
+                    id: tag-engineering
+                    meta:
+                      created_at: '2026-06-01T12:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-06-01T12:00:00.000Z'
+                      version: WzEsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-attributes'
+                  id:
+                    description: The tag ID.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: success
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+      summary: Get a tag
+      tags:
+        - Tags
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/tags/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Updates a tag if it exists, or creates it at the provided ID.
+      operationId: put-tags-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The tag ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              upsertTagRequest:
+                summary: Update or create a tag
+                value:
+                  color: '#006BB4'
+                  description: Dashboards and visualizations owned by engineering teams.
+                  name: Engineering
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-request-attributes'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateTagResponse:
+                  summary: The updated tag
+                  value:
+                    data:
+                      color: '#006BB4'
+                      description: Dashboards and visualizations owned by engineering teams.
+                      name: Engineering
+                    id: tag-engineering
+                    meta:
+                      created_at: '2026-06-01T12:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-06-05T16:45:00.000Z'
+                      version: WzEsMl0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-attributes'
+                  id:
+                    description: The tag ID.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: updated
+        '201':
+          content:
+            application/json:
+              examples:
+                upsertTagCreatedResponse:
+                  summary: The created tag
+                  value:
+                    data:
+                      color: '#9170B8'
+                      description: Content used for compliance reporting.
+                      name: Compliance
+                    id: tag-compliance
+                    meta:
+                      created_at: '2026-06-06T10:20:00.000Z'
+                      managed: false
+                      updated_at: '2026-06-06T10:20:00.000Z'
+                      version: WzQsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-attributes'
+                  id:
+                    description: The tag ID.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: created
+        '400':
+          description: invalid request
+        '403':
+          description: forbidden
+        '409':
+          description: conflict
+      summary: Upsert a tag
+      tags:
+        - Tags
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -61039,7 +61561,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:readExecution.
+        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read OR workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
       operationId: get-workflows
       parameters:
         - description: Free-text search query.
@@ -61314,7 +61836,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve distinct values and their counts for the specified workflow fields. Useful for building filters such as lists of tags or creators.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+        Retrieve distinct values and their counts for the specified workflow fields. Useful for building filters such as lists of tags or creators.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read.
       operationId: get-workflows-aggs
       parameters:
         - description: Field or fields to aggregate on.
@@ -61448,7 +61970,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve details of a single workflow execution by its ID.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+        Retrieve details of a single workflow execution by its ID.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
       operationId: get-workflows-executions-executionid
       parameters:
         - description: Workflow execution ID
@@ -61609,7 +62131,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve child workflow executions spawned by sub-workflow steps within a parent execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+        Retrieve child workflow executions spawned by sub-workflow steps within a parent execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
       operationId: get-workflows-executions-executionid-children
       parameters:
         - description: Workflow execution ID
@@ -61672,7 +62194,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve paginated logs for a workflow execution. Optionally filter by a specific step execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+        Retrieve paginated logs for a workflow execution. Optionally filter by a specific step execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
       operationId: get-workflows-executions-executionid-logs
       parameters:
         - description: Workflow execution ID
@@ -61867,7 +62389,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve details of a single step execution within a workflow execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+        Retrieve details of a single step execution within a workflow execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
       operationId: get-workflows-executions-executionid-step-stepexecutionid
       parameters:
         - description: Workflow execution ID.
@@ -61965,7 +62487,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Export one or more workflows as JSON with YAML content and metadata.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+        Export one or more workflows as JSON with YAML content and metadata.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read.
       operationId: post-workflows-export
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -62169,7 +62691,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve multiple workflows by their IDs in a single request. Optionally use the `source` parameter to return only specific fields from each workflow document.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+        Retrieve multiple workflows by their IDs in a single request. Optionally use the `source` parameter to return only specific fields from each workflow document.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read.
       operationId: post-workflows-mget
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -62333,7 +62855,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve summary statistics about workflows, including total, enabled, and disabled counts; execution history metrics for the last 30 days are included only when the caller has execution read privilege.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:readExecution.
+        Retrieve summary statistics about workflows, including total, enabled, and disabled counts; execution history metrics for the last 30 days are included only when the caller has execution read privilege.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read OR workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
       operationId: get-workflows-stats
       parameters: []
       responses:
@@ -62804,7 +63326,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a single workflow by its ID.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+        Retrieve a single workflow by its ID.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read.
       operationId: get-workflows-workflow-id
       parameters:
         - description: Workflow ID
@@ -63179,7 +63701,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a paginated list of executions for a specific workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+        Retrieve a paginated list of executions for a specific workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
       operationId: get-workflows-workflow-workflowid-executions
       parameters:
         - description: Workflow ID
@@ -63415,7 +63937,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a paginated list of step-level execution records for a specific workflow. Optionally filter by step ID and include input or output data.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+        Retrieve a paginated list of step-level execution records for a specific workflow. Optionally filter by step ID and include input or output data.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
       operationId: get-workflows-workflow-workflowid-executions-steps
       parameters:
         - description: Workflow ID
@@ -68649,6 +69171,259 @@ components:
         - revision
       title: agent_policy_response
       type: object
+    Kibana_HTTP_APIs_agentless_policy:
+      additionalProperties: false
+      properties:
+        additional_datastreams_permissions:
+          description: Additional data stream permissions granted to the agentless agent policy.
+          items:
+            maxLength: 256
+            type: string
+          maxItems: 1000
+          type: array
+        cloud_connector:
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy_cloud_connector'
+          nullable: true
+        created_at:
+          description: Creation timestamp (ISO 8601).
+          maxLength: 64
+          type: string
+        created_by:
+          description: User who created the policy.
+          maxLength: 1024
+          type: string
+        description:
+          description: Agentless policy description.
+          maxLength: 2048
+          type: string
+        global_data_tags:
+          description: Custom data tags applied to all data produced by this policy.
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              name:
+                description: The name of the custom field.
+                maxLength: 1024
+                type: string
+              value:
+                anyOf:
+                  - maxLength: 1024
+                    type: string
+                  - type: number
+                description: The value of the custom field.
+            required:
+              - name
+              - value
+          maxItems: 100
+          type: array
+        id:
+          description: Agentless policy unique identifier.
+          maxLength: 255
+          type: string
+        inputs:
+          additionalProperties:
+            additionalProperties: false
+            type: object
+            properties:
+              condition:
+                description: Agent condition expression to evaluate whether to apply this input.
+                maxLength: 10000
+                nullable: true
+                type: string
+              deprecated:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+              enabled:
+                description: Enable or disable that input. Defaults to `true` (enabled).
+                type: boolean
+              streams:
+                additionalProperties:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    condition:
+                      description: Agent condition expression to evaluate whether to apply this stream.
+                      maxLength: 10000
+                      nullable: true
+                      type: string
+                    deprecated:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
+                    enabled:
+                      description: Enable or disable that stream. Defaults to `true` (enabled).
+                      type: boolean
+                    var_group_selections:
+                      additionalProperties:
+                        type: string
+                      description: Variable group selections. Maps var_group name to the selected option name within that group.
+                      type: object
+                    vars:
+                      additionalProperties:
+                        anyOf:
+                          - type: string
+                          - type: number
+                          - type: boolean
+                          - items:
+                              type: string
+                            maxItems: 100
+                            type: array
+                          - items:
+                              type: number
+                            maxItems: 100
+                            type: array
+                          - additionalProperties: false
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              isSecretRef:
+                                type: boolean
+                            required:
+                              - id
+                              - isSecretRef
+                        default: null
+                        nullable: true
+                      description: Input/stream level variable. Refer to the integration documentation for more information.
+                      type: object
+                description: Input streams. Refer to the integration documentation to know which streams are available.
+                type: object
+              vars:
+                additionalProperties:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                    - items:
+                        type: string
+                      maxItems: 100
+                      type: array
+                    - items:
+                        type: number
+                      maxItems: 100
+                      type: array
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        isSecretRef:
+                          type: boolean
+                      required:
+                        - id
+                        - isSecretRef
+                  default: null
+                  nullable: true
+                description: Input/stream level variable. Refer to the integration documentation for more information.
+                type: object
+          description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
+          type: object
+        name:
+          description: Agentless policy name.
+          maxLength: 255
+          type: string
+        namespace:
+          description: Policy namespace. Defaults to the agent policy namespace.
+          maxLength: 100
+          type: string
+        package:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy_package'
+        updated_at:
+          description: Last update timestamp (ISO 8601).
+          maxLength: 64
+          type: string
+        updated_by:
+          description: User who last updated the policy.
+          maxLength: 1024
+          type: string
+        var_group_selections:
+          additionalProperties:
+            type: string
+          description: Variable group selections. Maps var_group name to the selected option name within that group.
+          type: object
+        vars:
+          additionalProperties:
+            anyOf:
+              - type: string
+              - type: number
+              - type: boolean
+              - items:
+                  type: string
+                maxItems: 100
+                type: array
+              - items:
+                  type: number
+                maxItems: 100
+                type: array
+              - additionalProperties: false
+                type: object
+                properties:
+                  id:
+                    type: string
+                  isSecretRef:
+                    type: boolean
+                required:
+                  - id
+                  - isSecretRef
+            default: null
+            nullable: true
+          description: Input/stream level variable. Refer to the integration documentation for more information.
+          type: object
+      required:
+        - id
+        - name
+        - package
+        - inputs
+        - created_at
+        - created_by
+        - updated_at
+        - updated_by
+      title: agentless_policy
+      type: object
+    Kibana_HTTP_APIs_agentless_policy_cloud_connector:
+      additionalProperties: false
+      properties:
+        cloud_connector_id:
+          description: The ID of the cloud connector.
+          maxLength: 255
+          type: string
+        enabled:
+          description: Whether the cloud connector is active for this policy.
+          type: boolean
+      required:
+        - enabled
+        - cloud_connector_id
+      title: agentless_policy_cloud_connector
+      type: object
+    Kibana_HTTP_APIs_agentless_policy_package:
+      additionalProperties: false
+      properties:
+        name:
+          description: Integration package name.
+          maxLength: 255
+          type: string
+        title:
+          description: Integration package display title.
+          maxLength: 255
+          type: string
+        version:
+          description: Integration package version.
+          maxLength: 50
+          type: string
+      required:
+        - name
+        - title
+        - version
+      title: agentless_policy_package
+      type: object
+    Kibana_HTTP_APIs_agentless_policy_response:
+      additionalProperties: false
+      properties:
+        item:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy'
+      required:
+        - item
+      title: agentless_policy_response
+      type: object
     Kibana_HTTP_APIs_aiops_change_point_chart:
       additionalProperties: false
       description: Change point detection chart embeddable schema
@@ -70142,56 +70917,6 @@ components:
           items:
             type: string
           type: array
-        queries:
-          items:
-            type: object
-            properties:
-              description:
-                type: string
-              esql:
-                type: object
-                properties:
-                  query:
-                    type: string
-                required:
-                  - query
-              evidence:
-                items:
-                  type: string
-                type: array
-              features:
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    run_id:
-                      type: string
-                  required:
-                    - id
-                type: array
-              id:
-                description: A non-empty string.
-                minLength: 1
-                type: string
-              severity_score:
-                type: number
-              title:
-                description: A non-empty string.
-                minLength: 1
-                type: string
-              type:
-                default: match
-                enum:
-                  - match
-                  - stats
-                type: string
-            required:
-              - id
-              - title
-              - description
-              - esql
-          type: array
         rules:
           items:
             type: string
@@ -70285,7 +71010,6 @@ components:
       required:
         - dashboards
         - rules
-        - queries
         - stream
     Kibana_HTTP_APIs_collapseBy:
       description: Aggregation function used to collapse a breakdown dimension into a single value.
@@ -70734,15 +71458,6 @@ components:
               properties:
                 mappings:
                   type: boolean
-                queries:
-                  items:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                    required:
-                      - id
-                  type: array
                 routing:
                   items:
                     allOf:
@@ -70756,7 +71471,6 @@ components:
                   type: array
               required:
                 - mappings
-                - queries
                 - routing
           required:
             - objects
@@ -71152,11 +71866,6 @@ components:
                 - azure
                 - gcp
               type: string
-        condition:
-          description: Agent condition expression to evaluate whether to apply this integration to its inputs.
-          maxLength: 10000
-          nullable: true
-          type: string
         create_dataset_templates:
           description: When true, install dedicated index templates for streams with a custom data_stream.dataset. Defaults to true for input packages, false for integration packages.
           type: boolean
@@ -71347,7 +72056,7 @@ components:
                   - metrics
                   - traces
                   - synthetics
-                  - profiling
+                  - profiles
                 type: string
             required:
               - name
@@ -79271,6 +79980,8 @@ components:
           type: array
         name:
           type: string
+        rolledBack:
+          type: boolean
         status:
           type: string
         title:
@@ -82290,6 +83001,39 @@ components:
         - geo_point
       title: Type
       type: string
+    Kibana_HTTP_APIs_kbn-tags-attributes:
+      additionalProperties: false
+      properties:
+        color:
+          description: The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.
+          type: string
+        description:
+          description: Optional description of the tag.
+          type: string
+        name:
+          description: The display name of the tag.
+          type: string
+      required:
+        - name
+        - color
+      title: kbn-tags-attributes
+      type: object
+    Kibana_HTTP_APIs_kbn-tags-request-attributes:
+      additionalProperties: false
+      properties:
+        color:
+          description: The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.
+          type: string
+        description:
+          description: Optional description of the tag.
+          type: string
+        name:
+          description: The display name of the tag.
+          type: string
+      required:
+        - name
+      title: kbn-tags-request-attributes
+      type: object
     Kibana_HTTP_APIs_kibana_asset_reference:
       additionalProperties: false
       properties:
@@ -93777,56 +94521,6 @@ components:
           items:
             type: string
           type: array
-        queries:
-          items:
-            type: object
-            properties:
-              description:
-                type: string
-              esql:
-                type: object
-                properties:
-                  query:
-                    type: string
-                required:
-                  - query
-              evidence:
-                items:
-                  type: string
-                type: array
-              features:
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    run_id:
-                      type: string
-                  required:
-                    - id
-                type: array
-              id:
-                description: A non-empty string.
-                minLength: 1
-                type: string
-              severity_score:
-                type: number
-              title:
-                description: A non-empty string.
-                minLength: 1
-                type: string
-              type:
-                default: match
-                enum:
-                  - match
-                  - stats
-                type: string
-            required:
-              - id
-              - title
-              - description
-              - esql
-          type: array
         rules:
           items:
             type: string
@@ -93872,7 +94566,6 @@ components:
       required:
         - dashboards
         - rules
-        - queries
         - stream
     Kibana_HTTP_APIs_range_key:
       additionalProperties: false
@@ -102394,56 +103087,6 @@ components:
           items:
             type: string
           type: array
-        queries:
-          items:
-            type: object
-            properties:
-              description:
-                type: string
-              esql:
-                type: object
-                properties:
-                  query:
-                    type: string
-                required:
-                  - query
-              evidence:
-                items:
-                  type: string
-                type: array
-              features:
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    run_id:
-                      type: string
-                  required:
-                    - id
-                type: array
-              id:
-                description: A non-empty string.
-                minLength: 1
-                type: string
-              severity_score:
-                type: number
-              title:
-                description: A non-empty string.
-                minLength: 1
-                type: string
-              type:
-                default: match
-                enum:
-                  - match
-                  - stats
-                type: string
-            required:
-              - id
-              - title
-              - description
-              - esql
-          type: array
         rules:
           items:
             type: string
@@ -102563,7 +103206,6 @@ components:
       required:
         - dashboards
         - rules
-        - queries
         - stream
     Kibana_HTTP_APIs_xpack-ml-anomaly-detection-alert-create-rule-body-alerting:
       additionalProperties: false
@@ -103156,10 +103798,30 @@ components:
           additionalProperties: false
           description: The parameters for the synthetics tls rule. These parameters are appropriate when `rule_type_id` is `xpack.synthetics.alerts.tls`.
           properties:
+            browserResourceTypes:
+              items:
+                maxLength: 1024
+                type: string
+              maxItems: 100
+              type: array
             certAgeThreshold:
               type: number
             certExpirationThreshold:
               type: number
+            certOrigin:
+              items:
+                maxLength: 256
+                type: string
+              maxItems: 100
+              type: array
+            includeBrowserCerts:
+              type: boolean
+            issuers:
+              items:
+                maxLength: 4096
+                type: string
+              maxItems: 1000
+              type: array
             kqlQuery:
               type: string
             locations:
@@ -112920,7 +113582,9 @@ components:
       description: 'The reason for closing the alerts. Can be one of following predefined reasons: [false_positive, duplicate, true_positive, benign_positive, automated_closure, other] or a custom reason provided by the user through the advanced settings.'
       oneOf:
         - $ref: '#/components/schemas/Security_Detections_API_ReasonEnum'
-        - type: string
+        - maxLength: 1024
+          minLength: 1
+          type: string
     Security_Detections_API_ReasonEnum:
       enum:
         - false_positive

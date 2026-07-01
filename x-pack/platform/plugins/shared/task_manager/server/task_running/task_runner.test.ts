@@ -863,6 +863,70 @@ describe('TaskManagerRunner', () => {
       expect(store.update).not.toHaveBeenCalled();
     });
 
+    test('logs a warning for mget claim strategy when a ready-to-run task has a null startedAt', async () => {
+      const { runner, logger, store } = await pendingStageSetup({
+        instance: {
+          schedule: {
+            interval: '10m',
+          },
+          status: TaskStatus.Running,
+          // a claim anomaly can leave a ready-to-run mget task without a startedAt,
+          // which breaks the running-task invariant; the runner should surface it
+          startedAt: null,
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `1m`,
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+        strategy: CLAIM_STRATEGY_MGET,
+      });
+
+      const result = await runner.markTaskAsRunning();
+
+      expect(result).toBe(true);
+      expect(store.update).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Task bar "foo" is ready to run (mget) without a startedAt, which breaks the running-task invariant'
+        ),
+        expect.objectContaining({ tags: ['bar', 'foo'] })
+      );
+    });
+
+    test('does not log for mget claim strategy when startedAt is already set', async () => {
+      const startedAt = new Date('1970-01-01T00:00:00.000Z');
+      const { runner, logger } = await pendingStageSetup({
+        instance: {
+          schedule: {
+            interval: '10m',
+          },
+          status: TaskStatus.Running,
+          startedAt,
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `1m`,
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+        strategy: CLAIM_STRATEGY_MGET,
+      });
+
+      const result = await runner.markTaskAsRunning();
+
+      expect(result).toBe(true);
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(runner.startedAt).toEqual(startedAt);
+    });
+
     describe('cost', () => {
       test('task instance cost takes precedence over task definition cost', async () => {
         const { runner } = await pendingStageSetup({
@@ -1196,7 +1260,7 @@ describe('TaskManagerRunner', () => {
       expect(enrichFakeRequest).toHaveBeenCalledTimes(1);
       expect(enrichFakeRequest).toHaveBeenCalledWith(
         expect.objectContaining({ headers: expect.any(Object) }),
-        'u_profile_123'
+        { profileId: 'u_profile_123', username: undefined }
       );
     });
 
@@ -1289,7 +1353,10 @@ describe('TaskManagerRunner', () => {
       createTaskRunnerParams.enrichRequest(childRequest);
 
       expect(enrichFakeRequest).toHaveBeenCalledTimes(2);
-      expect(enrichFakeRequest).toHaveBeenLastCalledWith(childRequest, 'u_profile_123');
+      expect(enrichFakeRequest).toHaveBeenLastCalledWith(childRequest, {
+        profileId: 'u_profile_123',
+        username: undefined,
+      });
     });
 
     test('runs without error and passes undefined enrichRequest when no enrichFakeRequest hook is provided', async () => {
@@ -1349,7 +1416,7 @@ describe('TaskManagerRunner', () => {
       expect(enrichFakeRequest).toHaveBeenCalledTimes(1);
       expect(enrichFakeRequest).toHaveBeenCalledWith(
         expect.objectContaining({ headers: expect.any(Object) }),
-        'u_profile_123'
+        { profileId: 'u_profile_123', username: undefined }
       );
       const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
       expect(createTaskRunnerParams.enrichRequest).toBeDefined();
