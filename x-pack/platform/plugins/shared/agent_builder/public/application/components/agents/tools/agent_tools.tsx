@@ -292,7 +292,6 @@ export const AgentTools: React.FC = () => {
                             iconType="plusInCircle"
                             iconSide="left"
                             onClick={() => setIsAddMenuOpen((prev) => !prev)}
-                            data-test-subj="agentBuilderAddToolButton"
                           >
                             {labels.agentTools.addToolButton}
                           </EuiButton>

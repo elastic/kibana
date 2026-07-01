@@ -7,7 +7,7 @@
 
 import '@testing-library/jest-dom';
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
@@ -116,27 +116,27 @@ describe('AgentTools', () => {
 
   it('renders the Add tool button', () => {
     renderComponent();
-    expect(screen.getByTestId('agentBuilderAddToolButton')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add tool' })).toBeInTheDocument();
   });
 
   it('opens dropdown with two menu items when Add tool is clicked', async () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
     renderComponent();
 
-    await user.click(screen.getByTestId('agentBuilderAddToolButton'));
+    await user.click(screen.getByRole('button', { name: 'Add tool' }));
 
     expect(screen.getByText('Import from tool library')).toBeInTheDocument();
     expect(screen.getByText('Create a tool')).toBeInTheDocument();
   });
 
-  it('opens library flyout when "Add from library" is clicked', async () => {
+  it('opens library flyout when "Import from tool library" is clicked', async () => {
     const openFlyout = jest.fn();
     useFlyoutState.mockReturnValue({ isOpen: false, openFlyout, closeFlyout: jest.fn() });
 
     const user = userEvent.setup({ pointerEventsCheck: 0 });
     renderComponent();
 
-    await user.click(screen.getByTestId('agentBuilderAddToolButton'));
+    await user.click(screen.getByRole('button', { name: 'Add tool' }));
     await user.click(screen.getByText('Import from tool library'));
 
     expect(openFlyout).toHaveBeenCalledTimes(1);
@@ -146,17 +146,17 @@ describe('AgentTools', () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
     renderComponent();
 
-    await user.click(screen.getByTestId('agentBuilderAddToolButton'));
+    await user.click(screen.getByRole('button', { name: 'Add tool' }));
     expect(screen.getByText('Create a tool')).toBeInTheDocument();
 
     await user.click(screen.getByText('Create a tool'));
 
-    expect(screen.queryByText('Create a tool')).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText('Create a tool')).not.toBeInTheDocument());
   });
 
   it('hides the Add tool button when canEditAgent is false', () => {
     useCanUpdateAgent.mockReturnValue(false);
     renderComponent();
-    expect(screen.queryByTestId('agentBuilderAddToolButton')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Add tool' })).not.toBeInTheDocument();
   });
 });
