@@ -25,6 +25,10 @@ export default function (providerContext: FtrProviderContext) {
     const { getService } = providerContext;
     const es = getService('es');
     const supertest = getService('supertest');
+    // Authz tests must run as a specific test user; the shared `supertest` service is
+    // pre-authenticated as the superuser and ignores per-request `.auth()`, so a
+    // dedicated `supertestWithoutAuth` agent is required to exercise a non-superuser.
+    const supertestWithoutAuth = getService('supertestWithoutAuth');
 
     const kibanaServer = getService('kibanaServer');
 
@@ -581,7 +585,11 @@ export default function (providerContext: FtrProviderContext) {
       }> = [];
 
       // A user with integrations read (but not write) to assert the route's write authz.
-      const readOnlyApiClient = new SpaceTestApiClient(supertest, testUsers.fleet_all_int_read);
+      // Must use `supertestWithoutAuth` so the request runs as this user rather than the superuser.
+      const readOnlyApiClient = new SpaceTestApiClient(
+        supertestWithoutAuth,
+        testUsers.fleet_all_int_read
+      );
 
       const createTestAgentlessPolicy = (id: string, name: string) =>
         apiClient.createAgentlessPolicy({
