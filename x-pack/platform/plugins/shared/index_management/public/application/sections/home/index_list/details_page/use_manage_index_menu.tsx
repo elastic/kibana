@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
@@ -41,6 +41,7 @@ interface UseManageIndexMenuArgs {
 interface UseManageIndexMenuReturn {
   manageIndexItems: AppMenuPopoverItem[];
   modalHost: ReactNode;
+  isLoading: boolean;
 }
 
 export function useManageIndexMenu({
@@ -59,12 +60,19 @@ export function useManageIndexMenu({
 
   const modalRef = useRef<ModalHostHandles | null>(null);
   const indexNames = useMemo(() => [index.name], [index]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const reloadIndices = useCallback(async () => {
-    await reloadIndexDetails();
+    setIsLoading(true);
+    try {
+      await reloadIndexDetails();
+    } finally {
+      setIsLoading(false);
+    }
   }, [reloadIndexDetails]);
 
   const closeIndices = useCallback(async () => {
+    setIsLoading(true);
     try {
       await closeIndicesRequest(indexNames);
       await reloadIndices();
@@ -76,10 +84,13 @@ export function useManageIndexMenu({
       );
     } catch (error) {
       notificationService.showDangerToast(error.body.message);
+    } finally {
+      setIsLoading(false);
     }
   }, [reloadIndices, indexNames, notificationService]);
 
   const openIndices = useCallback(async () => {
+    setIsLoading(true);
     try {
       await openIndicesRequest(indexNames);
       await reloadIndices();
@@ -91,10 +102,13 @@ export function useManageIndexMenu({
       );
     } catch (error) {
       notificationService.showDangerToast(error.body.message);
+    } finally {
+      setIsLoading(false);
     }
   }, [reloadIndices, indexNames, notificationService]);
 
   const flushIndices = useCallback(async () => {
+    setIsLoading(true);
     try {
       await flushIndicesRequest(indexNames);
       await reloadIndices();
@@ -106,10 +120,13 @@ export function useManageIndexMenu({
       );
     } catch (error) {
       notificationService.showDangerToast(error.body.message);
+    } finally {
+      setIsLoading(false);
     }
   }, [reloadIndices, indexNames, notificationService]);
 
   const refreshIndices = useCallback(async () => {
+    setIsLoading(true);
     try {
       await refreshIndicesRequest(indexNames);
       await reloadIndices();
@@ -122,10 +139,13 @@ export function useManageIndexMenu({
       );
     } catch (error) {
       notificationService.showDangerToast(error.body.message);
+    } finally {
+      setIsLoading(false);
     }
   }, [reloadIndices, indexNames, onIndexRefresh, notificationService]);
 
   const clearCacheIndices = useCallback(async () => {
+    setIsLoading(true);
     try {
       await clearCacheIndicesRequest(indexNames);
       await reloadIndices();
@@ -137,11 +157,14 @@ export function useManageIndexMenu({
       );
     } catch (error) {
       notificationService.showDangerToast(error.body.message);
+    } finally {
+      setIsLoading(false);
     }
   }, [reloadIndices, indexNames, notificationService]);
 
   const forcemergeIndices = useCallback(
     async (maxNumSegments: string) => {
+      setIsLoading(true);
       try {
         await forcemergeIndicesRequest(indexNames, maxNumSegments);
         await reloadIndices();
@@ -153,12 +176,15 @@ export function useManageIndexMenu({
         );
       } catch (error) {
         notificationService.showDangerToast(error.body.message);
+      } finally {
+        setIsLoading(false);
       }
     },
     [reloadIndices, indexNames, notificationService]
   );
 
   const deleteIndices = useCallback(async () => {
+    setIsLoading(true);
     try {
       await deleteIndicesRequest(indexNames);
       notificationService.showSuccessToast(
@@ -170,6 +196,8 @@ export function useManageIndexMenu({
       navigateToIndicesList();
     } catch (error) {
       notificationService.showDangerToast(error.body.message);
+    } finally {
+      setIsLoading(false);
     }
   }, [navigateToIndicesList, indexNames, notificationService]);
 
@@ -178,12 +206,15 @@ export function useManageIndexMenu({
       requestMethod: (names: string[], http: HttpSetup) => Promise<void>,
       successMessage: string
     ) => {
+      setIsLoading(true);
       try {
         await requestMethod(indexNames, httpService.httpClient);
         await reloadIndices();
         notificationService.showSuccessToast(successMessage);
       } catch (error) {
         notificationService.showDangerToast(error.body.message);
+      } finally {
+        setIsLoading(false);
       }
     },
     [reloadIndices, indexNames, notificationService]
@@ -395,5 +426,5 @@ export function useManageIndexMenu({
     ]
   );
 
-  return { manageIndexItems, modalHost };
+  return { manageIndexItems, modalHost, isLoading };
 }

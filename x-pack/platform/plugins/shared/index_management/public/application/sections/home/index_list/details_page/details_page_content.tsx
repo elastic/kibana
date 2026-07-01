@@ -160,7 +160,11 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     return resendDocumentsSampleRequest();
   }, [resendDocumentsSampleRequest]);
 
-  const { manageIndexItems, modalHost } = useManageIndexMenu({
+  const {
+    manageIndexItems,
+    modalHost,
+    isLoading: isManageIndexLoading,
+  } = useManageIndexMenu({
     index,
     reloadIndexDetails: fetchIndexDetails,
     navigateToIndicesList,
@@ -171,7 +175,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     () =>
       tabs.map((tabConfig) => ({
         id: tabConfig.id,
-        label: tabConfig.name as string,
+        label: tabConfig.name,
         isSelected: tabConfig.id === tab,
         onClick: () => onSectionChange(tabConfig.id),
         'data-test-subj': `indexDetailsTab-${tabConfig.id}`,
@@ -244,11 +248,12 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
           }),
           iconType: 'managementApp' as const,
           items: manageIndexItems,
+          isLoading: isManageIndexLoading,
           testId: 'indexActionsContextMenuButton',
         },
       ],
     }),
-    [index.name, discoverLocator, notificationService, manageIndexItems]
+    [index.name, discoverLocator, notificationService, manageIndexItems, isManageIndexLoading]
   );
 
   return (
