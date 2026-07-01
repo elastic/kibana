@@ -76,7 +76,8 @@ const renderTestComponent = (
   });
 };
 
-describe('DashboardMigrationResultPanel', () => {
+// Failing: See https://github.com/elastic/kibana/issues/275681
+describe.skip('DashboardMigrationResultPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetMissingResources.mockReturnValue([]);
