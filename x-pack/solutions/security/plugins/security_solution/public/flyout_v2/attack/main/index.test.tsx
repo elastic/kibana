@@ -12,6 +12,17 @@ import { AttackFlyout } from '.';
 import { TestProviders } from '../../../common/mock';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 
+jest.mock('./footer', () => ({
+  Footer: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
+    <button
+      type="button"
+      data-test-subj="mock-footer"
+      data-has-on-attack-updated={String(onAttackUpdated != null)}
+      onClick={onAttackUpdated}
+    />
+  ),
+}));
+
 jest.mock('./header', () => ({
   Header: ({
     onAttackUpdated,
@@ -115,7 +126,7 @@ describe('<AttackFlyout />', () => {
     );
   });
 
-  it('passes onAttackUpdated callback to the header', () => {
+  it('passes onAttackUpdated callback to the header and footer', () => {
     const onAttackUpdated = jest.fn();
     const { getByTestId } = render(
       <TestProviders>
@@ -124,5 +135,18 @@ describe('<AttackFlyout />', () => {
     );
 
     expect(getByTestId('mock-header')).toHaveAttribute('data-has-on-attack-updated', 'true');
+    expect(getByTestId('mock-footer')).toHaveAttribute('data-has-on-attack-updated', 'true');
+  });
+
+  it('forwards onAttackUpdated unchanged so the wrapper-supplied refetch fires', () => {
+    const onAttackUpdated = jest.fn();
+    const { getByTestId } = render(
+      <TestProviders>
+        <AttackFlyout hit={createAttackHit()} onAttackUpdated={onAttackUpdated} />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('mock-footer'));
+    expect(onAttackUpdated).toHaveBeenCalledTimes(1);
   });
 });
