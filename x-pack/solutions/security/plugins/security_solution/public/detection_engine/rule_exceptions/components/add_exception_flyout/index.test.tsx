@@ -88,9 +88,10 @@ describe('When the add exception modal is opened', () => {
     let wrapper: ShallowWrapper;
     beforeEach(() => {
       // Mocks one of the hooks as loading
+      const indexPatterns = { fields: [], title: 'foo' };
       mockFetchIndexPatterns.mockImplementation(() => ({
         isLoading: true,
-        indexPatterns: { fields: [], title: 'foo' },
+        indexPatterns,
         getExtendedFields: () => Promise.resolve([]),
       }));
 
