@@ -78,6 +78,10 @@ import {
   createContinuousKiOnboardingWorkflowService,
   type ContinuousKiOnboardingWorkflowService,
 } from './lib/workflows/continuous_onboarding_workflow';
+import {
+  createSignificantEventsScheduledDiscoveryWorkflowService,
+  type SignificantEventsScheduledDiscoveryWorkflowService,
+} from './lib/workflows/significant_events_scheduled_discovery_workflow';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
 import { isInvestigationEnabled } from './lib/investigations/is_investigation_enabled';
@@ -326,6 +330,9 @@ export class StreamsPlugin
     }
 
     let continuousKiOnboardingWorkflowService: ContinuousKiOnboardingWorkflowService | undefined;
+    let significantEventsScheduledDiscoveryWorkflowService:
+      | SignificantEventsScheduledDiscoveryWorkflowService
+      | undefined;
 
     if (plugins.workflowsManagement && streamsKIsOnboardingClient) {
       continuousKiOnboardingWorkflowService = createContinuousKiOnboardingWorkflowService({
@@ -336,6 +343,23 @@ export class StreamsPlugin
     }
 
     plugins.workflowsExtensions?.registerManagedWorkflowOwner(STREAMS_MANAGED_WORKFLOW_OWNER);
+
+    if (plugins.workflowsManagement && plugins.workflowsExtensions) {
+      significantEventsScheduledDiscoveryWorkflowService =
+        createSignificantEventsScheduledDiscoveryWorkflowService({
+          logger: this.logger,
+          managementApi: plugins.workflowsManagement.management,
+          getManagedWorkflowsClient: async () => {
+            const [, pluginsStart] = await core.getStartServices();
+            if (!pluginsStart.workflowsExtensions) {
+              throw new Error('Workflows extensions are not available');
+            }
+            return pluginsStart.workflowsExtensions.initManagedWorkflowsClient(
+              STREAMS_MANAGED_WORKFLOW_OWNER
+            );
+          },
+        });
+    }
 
     taskService.registerTasks({
       getScopedClients: this.streamsGetScopedClients,
@@ -412,6 +436,7 @@ export class StreamsPlugin
         patternExtractionService: this.patternExtractionService,
         getScopedClients: this.streamsGetScopedClients,
         continuousKiOnboardingWorkflowService,
+        significantEventsScheduledDiscoveryWorkflowService,
         workflowClients,
         getSpaceId: async (request: KibanaRequest) => {
           const [, pluginsStart] = await core.getStartServices();
