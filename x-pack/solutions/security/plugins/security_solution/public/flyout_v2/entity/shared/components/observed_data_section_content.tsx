@@ -89,14 +89,7 @@ const resolveEntityAnomalyConfig = ({
 };
 
 export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps) => {
-  const {
-    entityType,
-    observedData,
-    identityFields,
-    entityRecord,
-    contextID,
-    scopeId,
-  } = props;
+  const { entityType, observedData, identityFields, entityRecord, contextID, scopeId } = props;
 
   const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
 
