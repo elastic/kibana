@@ -26,6 +26,7 @@ export const CreateAgentlessPolicyRequestSchema = {
       condition: undefined,
       policy_template: schema.maybe(
         schema.string({
+          maxLength: 256,
           meta: {
             description:
               'The policy template to use for the agentless package policy. If not provided, the default policy template is used.',
@@ -62,6 +63,7 @@ export const CreateAgentlessPolicyRequestSchema = {
             }),
             cloud_connector_id: schema.maybe(
               schema.string({
+                maxLength: 256,
                 meta: {
                   description:
                     'ID of an existing cloud connector to reuse. If not provided, a new connector is created.',
@@ -105,6 +107,7 @@ export const CreateAgentlessPolicyRequestSchema = {
 export const UpdateAgentlessPolicyRequestSchema = {
   params: schema.object({
     policyId: schema.string({
+      maxLength: 256,
       meta: {
         description: 'The ID of the agentless policy to update.',
       },
