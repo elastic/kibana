@@ -7,6 +7,7 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
+import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 
 /**
  * Describe the result columns of the backing ES|QL query so the model binds
@@ -25,15 +26,20 @@ export const createAuthorVegaSpecPrompt = ({
   esqlQuery,
   columns,
   existingSpec,
+  chartType,
   additionalContext,
 }: {
   nlQuery: string;
   esqlQuery: string;
   columns?: EsqlEsqlColumnInfo[];
   existingSpec?: string;
+  chartType?: SupportedChartType;
   additionalContext?: string;
 }): BaseMessageLike[] => {
   const esqlQueryJson = JSON.stringify(esqlQuery);
+  const chartTypeHint = chartType
+    ? `\nSuggested chart style: "${chartType}". Treat it as a hint for the visual form; adapt if the data or request calls for something else.`
+    : '';
 
   return [
     [
@@ -41,6 +47,7 @@ export const createAuthorVegaSpecPrompt = ({
       `You are a Vega-Lite visualization expert. Author a single valid Vega-Lite (v6) specification for the user's request.
 
 Author Vega-Lite ONLY — never raw Vega (v5). Use Vega-Lite for charts a standard Lens chart cannot express, for example faceted charts / small multiples, layered or combination charts (e.g. bars with an overlaid line), or scatter/bubble plots with an encoded size. If the request needs a diagram Vega-Lite cannot express (e.g. Sankey / flow, network, chord), build the closest chart Vega-Lite supports (such as a sorted bar chart of the top combinations) rather than attempting an unsupported diagram.
+${chartTypeHint}
 ${
   existingSpec
     ? `Existing specification to modify (keep what still applies, change only what the request asks for):

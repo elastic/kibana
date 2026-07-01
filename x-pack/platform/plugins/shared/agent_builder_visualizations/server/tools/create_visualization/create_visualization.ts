@@ -127,9 +127,7 @@ This tool will:
         } else {
           const approach = await decideVisualizationApproach(modelProvider, nlQuery);
           renderer = approach.renderer;
-          if (approach.renderer === 'lens') {
-            decidedChartType = approach.chartType;
-          }
+          decidedChartType = approach.chartType;
         }
 
         // Step 3: Generate the spec/config for the chosen renderer and assemble
@@ -144,6 +142,7 @@ This tool will:
             index,
             esql,
             existingSpec,
+            chartType: chartType ?? decidedChartType,
             modelProvider,
             logger,
             events,

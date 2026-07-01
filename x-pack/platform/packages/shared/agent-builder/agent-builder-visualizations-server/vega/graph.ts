@@ -10,6 +10,7 @@ import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { generateEsql, executeEsql } from '@kbn/agent-builder-genai-utils';
 import { buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
@@ -137,6 +138,7 @@ const VegaStateAnnotation = Annotation.Root({
   nlQuery: Annotation<string>(),
   index: Annotation<string | undefined>(),
   existingSpec: Annotation<string | undefined>(),
+  chartType: Annotation<SupportedChartType | undefined>(),
   // internal
   esqlQuery: Annotation<string>(),
   columns: Annotation<EsqlEsqlColumnInfo[] | undefined>(),
@@ -293,6 +295,7 @@ export const createVegaGraph = async (
       esqlQuery: state.esqlQuery,
       columns: state.columns,
       existingSpec: state.existingSpec,
+      chartType: state.chartType,
       additionalContext: previousContext
         ? `Previous attempts:\n${previousContext}\n\nReturn a single valid JSON object that fixes the issues above.`
         : undefined,

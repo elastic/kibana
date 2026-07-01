@@ -8,6 +8,7 @@
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
+import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import { createVegaGraph } from './graph';
@@ -18,6 +19,8 @@ export interface BuildVegaConfigParams {
   esql?: string;
   /** Existing serialized Vega spec to edit, if any. */
   existingSpec?: string;
+  /** Optional chart-type hint for the intended visual form (Vega authors free-form). */
+  chartType?: SupportedChartType;
   modelProvider: ModelProvider;
   logger: Logger;
   events: ToolEventEmitter;
@@ -42,6 +45,7 @@ export const buildVegaConfig = async ({
   index,
   esql,
   existingSpec,
+  chartType,
   modelProvider,
   logger,
   events,
@@ -74,6 +78,7 @@ export const buildVegaConfig = async ({
     nlQuery,
     index,
     existingSpec,
+    chartType,
     esqlQuery: providedEsql || '',
     currentAttempt: 0,
     actions: [],

@@ -17,13 +17,14 @@ import { getChartTypeSelectionPromptContent } from './lens/chart_type_guidance';
 export type VisualizationRenderer = 'lens' | 'vega';
 
 /**
- * The chosen rendering approach. When Lens is selected the best-fitting chart
- * type is carried so the Lens generator can skip a redundant chart-type guess;
- * Vega carries no chart type because it authors a free-form spec.
+ * The chosen rendering approach. The best-fitting chart type is carried for both
+ * renderers: Lens uses it to skip a redundant chart-type guess, and Vega treats
+ * it as an authoring hint for the visual form (Vega still authors a free-form
+ * spec, so the hint is optional there).
  */
 export type VisualizationApproach =
   | { renderer: 'lens'; chartType: SupportedChartType; reasoning?: string }
-  | { renderer: 'vega'; reasoning?: string };
+  | { renderer: 'vega'; chartType?: SupportedChartType; reasoning?: string };
 
 const approachSchema = z
   .object({
@@ -35,7 +36,9 @@ const approachSchema = z
     chartType: z
       .nativeEnum(SupportedChartType)
       .optional()
-      .describe('Required when renderer is "lens": the best-fitting Lens chart type.'),
+      .describe(
+        'The best-fitting chart type. Required for "lens"; for "vega" provide it as a hint to the intended visual form when one applies.'
+      ),
     reasoning: z.string().optional().describe('Brief explanation for the decision.'),
   })
   .describe('Decision on how to render a data visualization.');
@@ -74,7 +77,7 @@ export async function decideVisualizationApproach(
   ]);
 
   if (response.renderer === 'vega') {
-    return { renderer: 'vega', reasoning: response.reasoning };
+    return { renderer: 'vega', chartType: response.chartType, reasoning: response.reasoning };
   }
 
   return {

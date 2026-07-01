@@ -46,7 +46,7 @@ describe('decideVisualizationApproach', () => {
     });
   });
 
-  it('returns the Vega renderer without a chart type', async () => {
+  it('returns the Vega renderer with the chart type as a hint', async () => {
     invoke.mockResolvedValue({
       renderer: 'vega',
       chartType: SupportedChartType.XY,
@@ -58,8 +58,23 @@ describe('decideVisualizationApproach', () => {
       'a grid of latency charts split by region'
     );
 
-    expect(approach).toEqual({ renderer: 'vega', reasoning: 'needs small multiples' });
-    expect(approach).not.toHaveProperty('chartType');
+    expect(approach).toEqual({
+      renderer: 'vega',
+      chartType: SupportedChartType.XY,
+      reasoning: 'needs small multiples',
+    });
+  });
+
+  it('returns the Vega renderer with no chart type when the model omits it', async () => {
+    invoke.mockResolvedValue({ renderer: 'vega', reasoning: 'custom encoding' });
+
+    const approach = await decideVisualizationApproach(modelProvider, 'a custom viz');
+
+    expect(approach).toEqual({
+      renderer: 'vega',
+      chartType: undefined,
+      reasoning: 'custom encoding',
+    });
   });
 
   it('instructs the model to honor an explicit request for Vega', async () => {
