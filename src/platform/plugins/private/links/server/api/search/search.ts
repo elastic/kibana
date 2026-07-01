@@ -39,7 +39,7 @@ export async function search(
         id: so.id,
         data: {
           ...(description && { description }),
-          title: title ?? '',
+          title,
         },
         meta: getMeta(so),
       };

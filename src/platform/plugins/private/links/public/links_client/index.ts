@@ -93,8 +93,9 @@ export function getLinksClient<
       return { item: { id: result.id, attributes: result.data } };
     },
     update: async ({ id, data, options }) => {
-      const transformedData = transformOut({ title: '', ...data }, options?.references ?? []);
       const original = await linksClient.get(id); // get the original library item so we can perform a full update
+      const { title = original.data.title } = data;
+      const transformedData = transformOut({ ...data, title }, options?.references ?? []);
       const tags = savedObjectsTaggingService
         ? savedObjectsTaggingService
             .getTaggingApi()

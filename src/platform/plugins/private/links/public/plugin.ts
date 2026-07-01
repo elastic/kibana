@@ -57,7 +57,7 @@ export class LinksPlugin
           {
             panelType: LINKS_EMBEDDABLE_TYPE,
             serializedState: {
-              title: savedObject.attributes.title ?? '',
+              title: savedObject.attributes.title,
               ref_id: savedObject.id,
             },
           },
