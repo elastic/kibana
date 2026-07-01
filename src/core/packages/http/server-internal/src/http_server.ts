@@ -199,6 +199,7 @@ export type LifecycleRegistrar = Pick<
   | 'registerAuth'
   | 'registerOnPostAuth'
   | 'registerOnPreResponse'
+  | 'auth'
 >;
 
 export interface HttpServerSetupOptions {

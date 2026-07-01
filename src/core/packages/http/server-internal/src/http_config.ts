@@ -45,12 +45,7 @@ const RESPONSE_HEADER_DENY_LIST = ['location', 'refresh'];
 // Auth schemes operators may exempt from the kbn-xsrf check via `server.xsrf.allowedSchemes`.
 // All must be stateless, per-request credentials that cannot carry a browser session. `basic` is
 // intentionally excluded: browsers can cache Basic credentials and replay them cross-origin.
-const XSRF_EXEMPTABLE_SCHEMES = new Set(['apikey', 'bearer']);
-
-const validateXsrfScheme = (value: string) =>
-  XSRF_EXEMPTABLE_SCHEMES.has(value.trim().toLowerCase())
-    ? undefined
-    : `must be one of [${[...XSRF_EXEMPTABLE_SCHEMES].join(', ')}]`;
+const xsrfSchemeSchema = schema.oneOf([schema.literal('apikey'), schema.literal('bearer')]);
 
 const validHostName = () => {
   // see https://github.com/elastic/kibana/issues/139730
@@ -200,17 +195,14 @@ const configSchema = schema.object(
         { defaultValue: [], maxSize: 100 }
       ),
       allowedSchemes: offeringBasedSchema({
-        serverless: schema.arrayOf(schema.string({ validate: validateXsrfScheme, maxLength: 50 }), {
+        serverless: schema.arrayOf(xsrfSchemeSchema, {
           defaultValue: ['apikey', 'bearer'],
           maxSize: 100,
         }),
-        traditional: schema.arrayOf(
-          schema.string({ validate: validateXsrfScheme, maxLength: 50 }),
-          {
-            defaultValue: [],
-            maxSize: 100,
-          }
-        ),
+        traditional: schema.arrayOf(xsrfSchemeSchema, {
+          defaultValue: [],
+          maxSize: 100,
+        }),
       }),
     }),
     excludeRoutes: schema.arrayOf(
@@ -463,14 +455,7 @@ export class HttpConfig implements IHttpConfig {
     this.csp = new CspConfig({ ...rawCspConfig, disableEmbedding }, this.cdn.getCspConfig());
     this.prototypeHardening = rawHttpConfig.prototypeHardening;
     this.externalUrl = rawExternalUrlConfig;
-    this.xsrf = {
-      ...rawHttpConfig.xsrf,
-      allowedSchemes: [
-        ...new Set(
-          (rawHttpConfig.xsrf.allowedSchemes ?? []).map((scheme) => scheme.trim().toLowerCase())
-        ),
-      ],
-    };
+    this.xsrf = rawHttpConfig.xsrf;
     this.excludeRoutes = rawHttpConfig.excludeRoutes;
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;

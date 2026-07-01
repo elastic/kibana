@@ -33,10 +33,11 @@ export const createXsrfPostAuthHandler = (
   getAuthState: GetAuthState
 ): OnPostAuthHandler => {
   const { allowlist, disableProtection, allowedSchemes } = config.xsrf;
-  // `allowedSchemes` is validated against a stateless-credential safe set and normalized to
-  // lower-case in HttpConfig, so the values are canonical here. Core reads
-  // http_authentication_scheme from AuthenticatedUser (set by the security plugin's HTTP auth
-  // provider), which only sets it for requests authenticated via an Authorization header.
+  // `allowedSchemes` only accepts the canonical lower-case literals `apikey`/`bearer` via config
+  // schema validation, so the values are canonical here. Core reads http_authentication_scheme from
+  // AuthenticatedUser (set by the security plugin's HTTP auth provider at
+  // x-pack/.../authentication/providers/http.ts, the sole writer, which lowercases the scheme), so
+  // both sides are guaranteed lower-case and need no runtime normalization here.
   const exemptSchemes = new Set(allowedSchemes);
 
   return (request, response, toolkit) => {
@@ -51,7 +52,7 @@ export const createXsrfPostAuthHandler = (
     if (exemptSchemes.size > 0 && !isSafeMethod(request.route.method)) {
       const authState = getAuthState<AuthenticatedUser>(request);
       const scheme = authState.state?.http_authentication_scheme;
-      if (scheme != null && exemptSchemes.has(scheme.toLowerCase())) {
+      if (scheme != null && exemptSchemes.has(scheme)) {
         return toolkit.next();
       }
     }

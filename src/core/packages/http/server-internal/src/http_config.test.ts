@@ -283,13 +283,28 @@ test('throws if xsrf.allowlist element does not start with a slash', () => {
 describe('xsrf.allowedSchemes', () => {
   it('rejects schemes outside the apikey/bearer safe set', () => {
     const httpSchema = config.schema;
-    expect(() =>
-      httpSchema.validate({ xsrf: { allowedSchemes: ['basic'] } })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[xsrf.allowedSchemes.0]: must be one of [apikey, bearer]"`
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['basic'] } })).toThrow(
+      /\[xsrf.allowedSchemes.0\]/
     );
     expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['foo'] } })).toThrow(
-      /must be one of \[apikey, bearer\]/
+      /\[xsrf.allowedSchemes.0\]/
+    );
+  });
+
+  it('rejects mixed-case values — only the canonical lower-case literals are accepted', () => {
+    const httpSchema = config.schema;
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['ApiKey'] } })).toThrow(
+      /\[xsrf.allowedSchemes.0\]/
+    );
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['BEARER'] } })).toThrow(
+      /\[xsrf.allowedSchemes.0\]/
+    );
+  });
+
+  it('rejects values padded with whitespace — no trimming is applied', () => {
+    const httpSchema = config.schema;
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: [' apikey'] } })).toThrow(
+      /\[xsrf.allowedSchemes.0\]/
     );
   });
 
@@ -299,11 +314,15 @@ describe('xsrf.allowedSchemes', () => {
     );
   });
 
-  it('accepts apikey and bearer case-insensitively and an empty list', () => {
+  it('accepts the canonical apikey and bearer literals unchanged and an empty list', () => {
     const httpSchema = config.schema;
     expect(
-      httpSchema.validate({ xsrf: { allowedSchemes: ['ApiKey', 'BEARER'] } }).xsrf.allowedSchemes
-    ).toEqual(['ApiKey', 'BEARER']);
+      httpSchema.validate({ xsrf: { allowedSchemes: ['apikey', 'bearer'] } }).xsrf.allowedSchemes
+    ).toEqual(['apikey', 'bearer']);
+    // Values round-trip with no normalization applied at the class layer.
+    expect(
+      httpSchema.validate({ xsrf: { allowedSchemes: ['bearer'] } }).xsrf.allowedSchemes
+    ).toEqual(['bearer']);
     expect(
       httpSchema.validate({ xsrf: { allowedSchemes: [] } }, { serverless: true }).xsrf
         .allowedSchemes
@@ -856,9 +875,9 @@ describe('HttpConfig', () => {
     expect(httpConfig.restrictInternalApis).toBe(true);
   });
 
-  it('normalizes xsrf.allowedSchemes to a deduped, lower-cased list', () => {
+  it('passes xsrf.allowedSchemes through unchanged (schema guarantees canonical values)', () => {
     const rawConfig = config.schema.validate({
-      xsrf: { allowedSchemes: ['ApiKey', ' bearer ', 'apikey'] },
+      xsrf: { allowedSchemes: ['bearer', 'apikey'] },
     });
     const rawCspConfig = cspConfig.schema.validate({});
     const rawPermissionsPolicyConfig = permissionsPolicyConfig.schema.validate({});
@@ -868,6 +887,7 @@ describe('HttpConfig', () => {
       ExternalUrlConfig.DEFAULT,
       rawPermissionsPolicyConfig
     );
-    expect(httpConfig.xsrf.allowedSchemes).toEqual(['apikey', 'bearer']);
+    // Order preserved, no normalization/dedupe applied at the class layer.
+    expect(httpConfig.xsrf.allowedSchemes).toEqual(['bearer', 'apikey']);
   });
 });

@@ -282,12 +282,6 @@ describe('xsrf post-auth handler', () => {
         extraHeaders: { 'kbn-xsrf': 'xsrf' },
       },
       {
-        label: 'mixed-case incoming scheme, POST',
-        config: apikeyBearerConfig,
-        scheme: 'ApiKey',
-        method: 'post' as RouteMethod,
-      },
-      {
         label: 'apikey scheme when only apikey is allowed',
         config: apikeyOnlyConfig,
         scheme: 'apikey',

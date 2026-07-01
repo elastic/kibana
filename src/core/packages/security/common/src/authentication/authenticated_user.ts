@@ -96,7 +96,6 @@ export interface AuthenticatedUser extends User {
    * The HTTP Authorization scheme used to authenticate the user (e.g. `'apikey'`, `'bearer'`, `'basic'`),
    * lowercased. Set by the HTTP authentication provider (`HTTPAuthenticationProvider`) when it handles
    * the request; `null` for all other providers (session-cookie, PKI, SAML, etc.).
-   * May be `undefined` on proxy objects that block identity fields (e.g. fake enriched requests).
    */
-  http_authentication_scheme: string | null | undefined;
+  http_authentication_scheme: string | null;
 }
