@@ -25,12 +25,12 @@
     "@kbn/i18n",
     "@kbn/kibana-react-plugin",
     "@kbn/css-utils",
-    "@kbn/monaco",
     "@kbn/core-elasticsearch-server",
     "@kbn/logging-mocks",
     "@kbn/core-http-server",
     "@kbn/workflows-yaml",
     "@kbn/react-query",
-    "@kbn/agent-builder-workflow-gen"
+    "@kbn/agent-builder-workflow-gen",
+    "@kbn/security-plugin-types-server"
   ]
 }

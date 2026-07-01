@@ -92,6 +92,23 @@ template-metadata:
     }
   });
 
+  it('should strip unknown `template-metadata` fields in lenient mode (forward-compat)', () => {
+    const raw = `
+template-metadata:
+  slug: future-template
+  version: "1.0.0"
+  availability: ">=9.5.0"
+  name: "Future template"
+  description: "Has a field this Kibana version does not know about yet."
+  categories: [utility]
+  someFutureField: hello
+`;
+    const result = parseTemplateYaml(raw, { lenient: true });
+
+    expect(result.metadata.slug).toBe('future-template');
+    expect(result.metadata).not.toHaveProperty('someFutureField');
+  });
+
   it('should throw `invalid-yaml` when the YAML is malformed', () => {
     expect.assertions(2);
     try {

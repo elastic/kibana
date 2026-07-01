@@ -97,12 +97,7 @@ interface AppMenuItemBase {
    */
   iconType: IconType;
   /**
-   * Sets the `data-test-subj` attribute for the item, used for testing purposes.
-   *
-   * When provided, it fully replaces the element's default subject. When omitted, the element falls
-   * back to a structural subject derived from `id` (`app-menu-item-<id>` for menu items,
-   * `app-menu-action-button-<id>` for primary action buttons). Either way, derived sub-elements use
-   * the resolved value as a prefix (e.g. the label badge is `<resolved>-badge`).
+   * A unique identifier for the item, used for testing purposes. Maps to `data-test-subj` attribute.
    */
   testId?: string;
   /**
@@ -215,24 +210,40 @@ type AppMenuItemWithPopover = AppMenuItemBase & {
 
 export type AppMenuItemCommon = AppMenuButtonItem | AppMenuItemWithPopover | AppMenuLinkItem;
 
-/**
- * Full item type for use in `config.items` arrays.
- */
-export type AppMenuItemType = AppMenuItemCommon & {
+type AppMenuItemTypeBase = AppMenuItemCommon & {
   /**
    * Order of the item in the menu. Lower numbers appear first.
    */
   order: number;
-  /**
-   * If `true`, the item will be moved to the "More" menu. Only used in top-level items, not in popover items.
-   */
-  overflow?: boolean;
   /**
    * Adds a separator line above or below the item when rendered inside a popover menu.
    * Ignored for top-level, non-popover items.
    */
   separator?: 'above' | 'below';
 };
+
+type AppMenuItemTopLevel = AppMenuItemTypeBase & {
+  overflow?: boolean;
+  isDestructive?: never;
+};
+
+type AppMenuItemOverflow = AppMenuItemTypeBase & {
+  /**
+   * The item will be moved to the "More" menu. Only used in top-level items, not in popover items.
+   */
+  overflow: true;
+  /**
+   * Marks the item as destructive (e.g. delete) by rendering in danger/red color.
+   */
+  isDestructive?: boolean;
+};
+
+/**
+ * Full item type for use in `config.items` arrays.
+ * Can be a top-level item or an overflow item.
+ *
+ */
+export type AppMenuItemType = AppMenuItemTopLevel | AppMenuItemOverflow;
 
 export type AppMenuStaticItem = AppMenuItemType & {
   /**

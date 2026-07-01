@@ -67,14 +67,15 @@ const bulkStorageStatsRoute = createServerRoute({
           esClient.indices.stats({
             index: chunk,
             metric: ['store'],
-            filter_path: 'indices.*.primaries.store.size_in_bytes',
+            // Using `total_data_set_size_in_bytes` so DLM frozen (searchable-snapshot) data is counted in total size.
+            filter_path: 'indices.*.primaries.store.total_data_set_size_in_bytes',
           }),
       });
 
       for (const statsResponse of statsResponses) {
         if (!statsResponse.indices) continue;
         for (const [indexName, stats] of Object.entries(statsResponse.indices)) {
-          const sizeBytes = stats.primaries?.store?.size_in_bytes ?? 0;
+          const sizeBytes = stats.primaries?.store?.total_data_set_size_in_bytes ?? 0;
           const stream = backingIndexToStream.get(indexName) ?? indexName;
           sizeByStream[stream] = (sizeByStream[stream] ?? 0) + sizeBytes;
         }

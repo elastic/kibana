@@ -12,7 +12,7 @@
       "solutions": ["security"],
       "categories": ["enrichment", "threat-intel"],
       "definitionUrl": "templates/ip-reputation-check/1.0.0.yaml",
-      "contentHash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "contentHash": "sha256:7f879190f5a58a3956571566fc027b8f47f9f3fc89479516ed11033363fdff90",
       "stepTypes": ["abuseipdb.checkIp"],
       "triggerTypes": ["manual"]
     }

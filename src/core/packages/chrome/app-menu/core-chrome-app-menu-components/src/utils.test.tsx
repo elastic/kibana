@@ -440,6 +440,16 @@ describe('utils', () => {
       expect(result.toolTipContent).toBe('Content');
       expect(result.toolTipProps?.title).toBe('Title');
     });
+
+    it('should set danger color when isDestructive is true', () => {
+      const result = mapAppMenuItemToPanelItem({ ...baseItem, isDestructive: true });
+      expect(result.color).toBe('danger');
+    });
+
+    it('should not set color when isDestructive is falsy', () => {
+      const result = mapAppMenuItemToPanelItem(baseItem);
+      expect(result.color).toBeUndefined();
+    });
   });
 
   describe('getPopoverActionItems', () => {
