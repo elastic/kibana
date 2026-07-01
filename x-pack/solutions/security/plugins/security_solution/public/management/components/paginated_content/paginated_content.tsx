@@ -64,6 +64,11 @@ export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> exten
    * and `error` among others
    */
   children?: ReactNode;
+  /**
+   * Optional callback to customize the React key for each item. Useful when item props change
+   * in ways that require remounting the item component (e.g. triggering CSS animations).
+   */
+  getItemKey?: (item: T, props: ComponentProps<C>) => Key;
 }
 
 // Using `memo()` on generic typed Functional component is not supported (generic is lost),
@@ -146,6 +151,7 @@ export const PaginatedContent = memo(
     CardDecorator,
     dataUpdatedAt,
     children,
+    getItemKey,
   }: PaginatedContentProps<T, C>) => {
     const [itemKeys] = useState<WeakMap<T, string>>(new WeakMap());
 
@@ -217,9 +223,12 @@ export const PaginatedContent = memo(
         // `...has signatures, but none of those signatures are compatible with each other.`
         // Can read more about it here: https://github.com/microsoft/TypeScript/issues/33591
         return (items as T[]).map((item) => {
+          const itemProps = itemComponentProps(item);
           let key: Key;
 
-          if (itemId) {
+          if (getItemKey) {
+            key = getItemKey(item, itemProps);
+          } else if (itemId) {
             key = item[itemId] as unknown as Key;
           } else {
             if (itemKeys.has(item)) {
@@ -233,7 +242,7 @@ export const PaginatedContent = memo(
 
           const itemKey = dataUpdatedAt ? `${key}-${dataUpdatedAt}` : key;
 
-          return <Item {...itemComponentProps(item)} key={itemKey} Decorator={CardDecorator} />;
+          return <Item {...itemProps} key={itemKey} Decorator={CardDecorator} />;
         });
       }
       if (!loading)
@@ -250,6 +259,7 @@ export const PaginatedContent = memo(
       CardDecorator,
       itemKeys,
       dataUpdatedAt,
+      getItemKey,
     ]);
 
     return (

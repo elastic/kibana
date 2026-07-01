@@ -17,6 +17,7 @@ import type { AnyArtifact, MenuItemPropsByPolicyId } from './types';
 import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { CardContainerPanel } from './components/card_container_panel';
+import { ArtifactEntryHighlightWrapper } from './components/artifact_entry_highlight_wrapper';
 import { CardSectionPanel } from './components/card_section_panel';
 import { CardComments } from './components/card_comments';
 import { usePolicyNavLinks } from './hooks/use_policy_nav_links';
@@ -50,6 +51,8 @@ export interface ArtifactEntryCardProps extends CommonArtifactEntryCardProps {
   hideDescription?: boolean;
   // A flag to hide comments section, false by default
   hideComments?: boolean;
+  isHighlighted?: boolean;
+  highlightFlashKey?: number;
 }
 
 export interface ArtifactEntryCardDecoratorProps extends CommonProps {
@@ -68,6 +71,8 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
     actions,
     hideDescription = false,
     hideComments = false,
+    isHighlighted = false,
+    highlightFlashKey,
     Decorator,
     'data-test-subj': dataTestSubj,
     ...commonProps
@@ -77,52 +82,54 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
     const policyNavLinks = usePolicyNavLinks(artifact, policies);
 
     return (
-      <CardContainerPanel {...commonProps} item={item} data-test-subj={dataTestSubj}>
-        <CardSectionPanel className="top-section">
-          <CardHeader
-            name={artifact.name}
-            createdDate={artifact.created_at}
-            updatedDate={artifact.updated_at}
-            actions={actions}
-            data-test-subj={getTestId('header')}
-          />
-          <CardSubHeader
-            createdBy={artifact.created_by}
-            updatedBy={artifact.updated_by}
-            policies={policyNavLinks}
-            loadingPoliciesList={loadingPoliciesList}
-            data-test-subj={getTestId('subHeader')}
-          />
+      <ArtifactEntryHighlightWrapper isActive={isHighlighted} flashKey={highlightFlashKey}>
+        <CardContainerPanel {...commonProps} item={item} data-test-subj={dataTestSubj}>
+          <CardSectionPanel className="top-section">
+            <CardHeader
+              name={artifact.name}
+              createdDate={artifact.created_at}
+              updatedDate={artifact.updated_at}
+              actions={actions}
+              data-test-subj={getTestId('header')}
+            />
+            <CardSubHeader
+              createdBy={artifact.created_by}
+              updatedBy={artifact.updated_by}
+              policies={policyNavLinks}
+              loadingPoliciesList={loadingPoliciesList}
+              data-test-subj={getTestId('subHeader')}
+            />
 
-          {!hideDescription && (
-            <>
-              <EuiSpacer size="l" />
-              <DescriptionField data-test-subj={getTestId('description')}>
-                {artifact.description}
-              </DescriptionField>
-            </>
-          )}
+            {!hideDescription && (
+              <>
+                <EuiSpacer size="l" />
+                <DescriptionField data-test-subj={getTestId('description')}>
+                  {artifact.description}
+                </DescriptionField>
+              </>
+            )}
 
-          {!hideComments ? (
-            <>
-              {hideDescription && <EuiSpacer size="l" />}
-              <CardComments comments={artifact.comments} data-test-subj={getTestId('comments')} />
-            </>
-          ) : null}
-        </CardSectionPanel>
+            {!hideComments ? (
+              <>
+                {hideDescription && <EuiSpacer size="l" />}
+                <CardComments comments={artifact.comments} data-test-subj={getTestId('comments')} />
+              </>
+            ) : null}
+          </CardSectionPanel>
 
-        <EuiHorizontalRule margin="none" />
+          <EuiHorizontalRule margin="none" />
 
-        <CardSectionPanel className="bottom-section">
-          {Decorator && <Decorator item={item} data-test-subj={getTestId('decorator')} />}
+          <CardSectionPanel className="bottom-section">
+            {Decorator && <Decorator item={item} data-test-subj={getTestId('decorator')} />}
 
-          <CriteriaConditions
-            os={artifact.os as CriteriaConditionsProps['os']}
-            entries={artifact.entries}
-            data-test-subj={getTestId('criteriaConditions')}
-          />
-        </CardSectionPanel>
-      </CardContainerPanel>
+            <CriteriaConditions
+              os={artifact.os as CriteriaConditionsProps['os']}
+              entries={artifact.entries}
+              data-test-subj={getTestId('criteriaConditions')}
+            />
+          </CardSectionPanel>
+        </CardContainerPanel>
+      </ArtifactEntryHighlightWrapper>
     );
   }
 );

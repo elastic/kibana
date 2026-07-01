@@ -20,6 +20,8 @@ export interface ArtifactListPageUrlParams {
   includedPolicies?: string;
   show?: 'create' | 'edit' | 'import';
   itemId?: string;
+  /** Prototype: highlights a specific artifact row after navigating from version history */
+  highlightItemId?: string;
 }
 
 export interface ArtifactFormComponentProps {

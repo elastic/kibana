@@ -8,7 +8,7 @@
 import styled from '@emotion/styled';
 import { EuiPanel } from '@elastic/eui';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { MaybeImmutable } from '../../../../../common/endpoint/types';
 import { CardArtifactProvider } from './card_artifact_context';
 import type { AnyArtifact } from '..';
@@ -25,12 +25,18 @@ export type CardContainerPanelProps = Exclude<EuiPanelProps, 'hasBorder' | 'padd
 
 export const CardContainerPanel = memo<CardContainerPanelProps>(
   ({ className, item, children, ...props }) => {
+    const dataArtifactItemId = useMemo(() => {
+      return 'item_id' in item ? item.item_id : undefined;
+    }, [item]);
+
     return (
       <EuiPanelStyled
         {...props}
         hasBorder={true}
         paddingSize="none"
         className={`artifactEntryCard ${className ?? ''}`}
+        data-artifact-item-id={dataArtifactItemId}
+        data-test-subj={props['data-test-subj']}
       >
         <CardArtifactProvider item={item}>{children}</CardArtifactProvider>
       </EuiPanelStyled>
