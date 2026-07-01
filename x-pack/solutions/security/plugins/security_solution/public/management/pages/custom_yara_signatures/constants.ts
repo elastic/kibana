@@ -11,7 +11,7 @@ import type {
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
-export const YARA_CUSTOM_SIGNATURES_LIST_TYPE: ExceptionListType =
+export const CUSTOM_YARA_SIGNATURES_LIST_TYPE: ExceptionListType =
   ExceptionListTypeEnum.ENDPOINT_CUSTOM_YARA_SIGNATURES;
 
 export const CUSTOM_YARA_SIGNATURES_LIST_DEFINITION: CreateExceptionListSchema = {
@@ -19,7 +19,7 @@ export const CUSTOM_YARA_SIGNATURES_LIST_DEFINITION: CreateExceptionListSchema =
   namespace_type: 'agnostic',
   description: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.description,
   list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
-  type: YARA_CUSTOM_SIGNATURES_LIST_TYPE,
+  type: CUSTOM_YARA_SIGNATURES_LIST_TYPE,
 };
 
 export const SEARCHABLE_FIELDS: Readonly<string[]> = [

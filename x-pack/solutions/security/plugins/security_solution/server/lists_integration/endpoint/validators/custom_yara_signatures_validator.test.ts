@@ -150,7 +150,6 @@ describe('YARA Signatures API validations', () => {
 
         try {
           await customYaraSignaturesValidator.validatePreCreateItem(item);
-          // expect(true).toBe(true);
         } catch (error) {
           // If it throws, it should not be the feature flag error
           expect(error.message).not.toContain('Custom YARA signatures feature is not released yet');
