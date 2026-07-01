@@ -102,10 +102,12 @@ afterEach(() => {
 describe('xsrf post-auth handler', () => {
   let toolkit: ToolkitMock;
   let responseFactory: ReturnType<typeof mockRouter.createResponseFactory>;
+  let logger: jest.Mocked<Logger>;
 
   beforeEach(() => {
     toolkit = createToolkit();
     responseFactory = mockRouter.createResponseFactory();
+    logger = loggerMock.create();
   });
 
   describe('non destructive methods', () => {
@@ -113,7 +115,7 @@ describe('xsrf post-auth handler', () => {
       const config = createConfig({
         xsrf: { allowlist: [], disableProtection: false, allowedSchemes: [] },
       });
-      const handler = createXsrfPostAuthHandler(config, createGetAuthState());
+      const handler = createXsrfPostAuthHandler(config, createGetAuthState(), logger);
       const request = forgeRequest({ method: 'get', headers: {} });
 
       toolkit.next.mockReturnValue('next' as any);
@@ -131,7 +133,7 @@ describe('xsrf post-auth handler', () => {
       const config = createConfig({
         xsrf: { allowlist: [], disableProtection: false, allowedSchemes: [] },
       });
-      const handler = createXsrfPostAuthHandler(config, createGetAuthState());
+      const handler = createXsrfPostAuthHandler(config, createGetAuthState(), logger);
       const request = forgeRequest({ method: 'post', headers: { 'kbn-xsrf': 'xsrf' } });
 
       toolkit.next.mockReturnValue('next' as any);
@@ -147,7 +149,7 @@ describe('xsrf post-auth handler', () => {
       const config = createConfig({
         xsrf: { allowlist: [], disableProtection: false, allowedSchemes: [] },
       });
-      const handler = createXsrfPostAuthHandler(config, createGetAuthState());
+      const handler = createXsrfPostAuthHandler(config, createGetAuthState(), logger);
       const request = forgeRequest({ method: 'post', headers: { 'kbn-version': 'some-version' } });
 
       toolkit.next.mockReturnValue('next' as any);
@@ -163,7 +165,7 @@ describe('xsrf post-auth handler', () => {
       const config = createConfig({
         xsrf: { allowlist: [], disableProtection: false, allowedSchemes: [] },
       });
-      const handler = createXsrfPostAuthHandler(config, createGetAuthState());
+      const handler = createXsrfPostAuthHandler(config, createGetAuthState(), logger);
       const request = forgeRequest({ method: 'post' });
 
       responseFactory.badRequest.mockReturnValue('badRequest' as any);
@@ -184,7 +186,7 @@ describe('xsrf post-auth handler', () => {
       const config = createConfig({
         xsrf: { allowlist: [], disableProtection: true, allowedSchemes: [] },
       });
-      const handler = createXsrfPostAuthHandler(config, createGetAuthState());
+      const handler = createXsrfPostAuthHandler(config, createGetAuthState(), logger);
       const request = forgeRequest({ method: 'post', headers: {} });
 
       toolkit.next.mockReturnValue('next' as any);
@@ -204,7 +206,7 @@ describe('xsrf post-auth handler', () => {
           allowedSchemes: [],
         },
       });
-      const handler = createXsrfPostAuthHandler(config, createGetAuthState());
+      const handler = createXsrfPostAuthHandler(config, createGetAuthState(), logger);
       const request = forgeRequest({ method: 'post', headers: {}, path: '/some-path' });
 
       toolkit.next.mockReturnValue('next' as any);
@@ -220,7 +222,7 @@ describe('xsrf post-auth handler', () => {
       const config = createConfig({
         xsrf: { allowlist: [], disableProtection: false, allowedSchemes: [] },
       });
-      const handler = createXsrfPostAuthHandler(config, createGetAuthState());
+      const handler = createXsrfPostAuthHandler(config, createGetAuthState(), logger);
       const request = forgeRequest({
         method: 'post',
         headers: {},
@@ -299,7 +301,8 @@ describe('xsrf post-auth handler', () => {
       ({ config, scheme, method, extraHeaders }) => {
         const handler = createXsrfPostAuthHandler(
           config,
-          createGetAuthState({ http_authentication_scheme: scheme })
+          createGetAuthState({ http_authentication_scheme: scheme }),
+          logger
         );
         const request = forgeRequest({ method, headers: extraHeaders ?? {} });
 
@@ -316,7 +319,8 @@ describe('xsrf post-auth handler', () => {
     it('exempts a safe (GET) request regardless of the authentication scheme', () => {
       const handler = createXsrfPostAuthHandler(
         apikeyBearerConfig,
-        createGetAuthState({ http_authentication_scheme: 'basic' })
+        createGetAuthState({ http_authentication_scheme: 'basic' }),
+        logger
       );
       const request = forgeRequest({ method: 'get', headers: {} });
 
@@ -378,7 +382,7 @@ describe('xsrf post-auth handler', () => {
       },
     ];
     it.each(rejectedRequestTestCases)('rejects POST when $label', ({ config, getAuthState }) => {
-      const handler = createXsrfPostAuthHandler(config, getAuthState());
+      const handler = createXsrfPostAuthHandler(config, getAuthState(), logger);
       const request = forgeRequest({ method: 'post', headers: {} });
 
       responseFactory.badRequest.mockReturnValue('badRequest' as any);
@@ -388,6 +392,28 @@ describe('xsrf post-auth handler', () => {
       expect(toolkit.next).not.toHaveBeenCalled();
       expect(responseFactory.badRequest).toHaveBeenCalledTimes(1);
       expect(result).toEqual('badRequest');
+      // None of these cases involve a scheme that's exempt except for casing, so the contract-
+      // violation warning must never fire here.
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('rejects POST and logs a warning when the scheme is exempt except for its casing', () => {
+      const handler = createXsrfPostAuthHandler(
+        apikeyBearerConfig,
+        createGetAuthState({ http_authentication_scheme: 'ApiKey' }),
+        logger
+      );
+      const request = forgeRequest({ method: 'post', headers: {} });
+
+      responseFactory.badRequest.mockReturnValue('badRequest' as any);
+
+      const result = handler(request, responseFactory, toolkit);
+
+      expect(toolkit.next).not.toHaveBeenCalled();
+      expect(responseFactory.badRequest).toHaveBeenCalledTimes(1);
+      expect(result).toEqual('badRequest');
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('"ApiKey"'));
     });
   });
 });

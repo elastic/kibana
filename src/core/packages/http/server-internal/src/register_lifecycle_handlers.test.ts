@@ -80,6 +80,6 @@ describe('registerCoreHandlers', () => {
     registerCoreHandlers(registrarMock, config, createTestEnv(), logger);
 
     expect(createXsrfPostAuthHandler).toHaveBeenCalledTimes(1);
-    expect(createXsrfPostAuthHandler).toHaveBeenCalledWith(config, authGet);
+    expect(createXsrfPostAuthHandler).toHaveBeenCalledWith(config, authGet, logger);
   });
 });

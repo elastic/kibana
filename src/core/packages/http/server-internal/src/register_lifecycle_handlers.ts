@@ -35,7 +35,7 @@ export const registerCoreHandlers = (
   );
   // add extra request checks stuff
   registrar.registerOnPreAuth(createExcludeRoutesPreAuthHandler(config, log));
-  registrar.registerOnPostAuth(createXsrfPostAuthHandler(config, registrar.auth.get));
+  registrar.registerOnPostAuth(createXsrfPostAuthHandler(config, registrar.auth.get, log));
   if (config.versioned.strictClientVersionCheck !== false) {
     // add check on version
     registrar.registerOnPostAuth(createVersionCheckPostAuthHandler(env.packageInfo.version));
