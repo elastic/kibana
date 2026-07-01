@@ -115,7 +115,7 @@ export const getDashboardListingTabs = ({
 
   const dashboardsTab: DashboardListingTab = {
     title: i18n.translate('dashboard.listing.tabs.dashboards.title', {
-      defaultMessage: 'Dashboards',
+      defaultMessage: 'Devonboards',
     }),
     id: 'dashboards',
     getTableList: (parentProps) => (

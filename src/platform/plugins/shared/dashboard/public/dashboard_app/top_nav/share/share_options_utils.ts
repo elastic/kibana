@@ -84,7 +84,7 @@ export function buildDashboardShareOptions({
   const title =
     dashboardTitle ||
     i18n.translate('dashboard.share.defaultDashboardTitle', {
-      defaultMessage: 'Dashboard [{date}]',
+      defaultMessage: 'Devonboard [{date}]',
       values: { date: moment().toISOString(true) },
     });
 
@@ -103,7 +103,7 @@ export function buildDashboardShareOptions({
 export function getExportObjectTypeMeta() {
   return {
     title: i18n.translate('dashboard.share.shareModal.title', {
-      defaultMessage: 'Share dashboard',
+      defaultMessage: 'Share devonboard',
     }),
     config: {
       integration: {

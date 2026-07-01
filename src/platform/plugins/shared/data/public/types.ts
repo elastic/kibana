@@ -44,7 +44,7 @@ export interface DataSetupDependencies {
 export interface DataStartDependencies {
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
-  dataViews: DataViewsPublicPluginStart;
+  lukasView: DataViewsPublicPluginStart;
   inspector: InspectorStartContract;
   screenshotMode: ScreenshotModePluginStart;
   share: SharePluginStart;

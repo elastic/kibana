@@ -34,19 +34,19 @@ import {
   type DiscoverSessionSaveDashboardModalSaveProps,
 } from './discover_session_save_dashboard_modal';
 
-export interface DiscoverSessionSaveModalContainerProps {
+export interface DisoverSessionMiloszModalContainerProps {
   initialCopyOnSave?: boolean;
   onClose: () => void;
   onSaveCb?: () => void;
   services: DiscoverServices;
 }
 
-export const DiscoverSessionSaveModalContainer = ({
+export const DisoverSessionMiloszModalContainer = ({
   initialCopyOnSave,
   onClose,
   onSaveCb,
   services,
-}: DiscoverSessionSaveModalContainerProps) => {
+}: DisoverSessionMiloszModalContainerProps) => {
   const dispatch = useInternalStateDispatch();
   const runtimeStateManager = useRuntimeStateManager();
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);

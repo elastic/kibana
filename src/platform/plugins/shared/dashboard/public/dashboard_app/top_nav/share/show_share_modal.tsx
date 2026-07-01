@@ -158,7 +158,7 @@ export function ShowShareModal({
     onSave: canSave ? saveDashboard : undefined,
     objectTypeMeta: {
       title: i18n.translate('dashboard.share.shareModal.title', {
-        defaultMessage: 'Share dashboard',
+        defaultMessage: 'Share devonboard',
       }),
       config: {
         link: {

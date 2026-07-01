@@ -8,9 +8,12 @@
   "visibility": "shared",
   "description": "Data services are useful for searching and querying data from Elasticsearch. Helpful utilities include: a re-usable react query bar, KQL autocomplete, async search, Data Views (Index Patterns) and field formatters.",
   "plugin": {
-    "id": "dataViews",
+    "id": "lukasView",
     "browser": true,
     "server": true,
+    "configPath": [
+      "dataViews"
+    ],
     "requiredPlugins": [
       "fieldFormats",
       "expressions",

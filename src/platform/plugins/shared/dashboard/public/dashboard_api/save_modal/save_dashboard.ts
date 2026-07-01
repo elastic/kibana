@@ -47,7 +47,7 @@ export const saveDashboard = async ({
   } catch (error) {
     coreServices.notifications.toasts.addDanger({
       title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
-        defaultMessage: `Dashboard ''{title}'' was not saved. Error: {errorMessage}`,
+        defaultMessage: `Devonboard ''{title}'' was not saved. Error: {errorMessage}`,
         values: {
           title: dashboardState.title,
           errorMessage: error.message,

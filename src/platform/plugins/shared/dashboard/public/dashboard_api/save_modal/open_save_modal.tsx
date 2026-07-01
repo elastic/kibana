@@ -170,12 +170,12 @@ export async function openSaveModal({
 function getCustomModalTitle(viewMode: ViewMode, lastSavedId: string | undefined) {
   if (!lastSavedId || viewMode === 'edit')
     return i18n.translate('dashboard.topNav.editModeInteractiveSave.modalTitle', {
-      defaultMessage: 'Save as new dashboard',
+      defaultMessage: 'Save as new devonboard',
     });
 
   if (viewMode === 'view')
     return i18n.translate('dashboard.topNav.viewModeInteractiveSave.modalTitle', {
-      defaultMessage: 'Duplicate dashboard',
+      defaultMessage: 'Duplicate devonboard',
     });
   return undefined;
 }
@@ -183,7 +183,7 @@ function getCustomModalTitle(viewMode: ViewMode, lastSavedId: string | undefined
 function generateDashboardNotSavedToast(title: string, errorMessage: any) {
   return {
     title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
-      defaultMessage: `Dashboard ''{title}'' was not saved. Error: {errorMessage}`,
+      defaultMessage: `Devonboard ''{title}'' was not saved. Error: {errorMessage}`,
       values: {
         title,
         errorMessage,

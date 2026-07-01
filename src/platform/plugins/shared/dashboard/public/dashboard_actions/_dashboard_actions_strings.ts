@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 export const dashboardCopyToDashboardActionStrings = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.copyToDashboard.title', {
-      defaultMessage: 'Copy to dashboard',
+      defaultMessage: 'Copy to devonboard',
     }),
   getCancelButtonName: () =>
     i18n.translate('dashboard.panel.copyToDashboard.cancel', {
@@ -20,15 +20,15 @@ export const dashboardCopyToDashboardActionStrings = {
     }),
   getAcceptButtonName: () =>
     i18n.translate('dashboard.panel.copyToDashboard.goToDashboard', {
-      defaultMessage: 'Copy and go to dashboard',
+      defaultMessage: 'Copy and go to devonboard',
     }),
   getNewDashboardOption: () =>
     i18n.translate('dashboard.panel.copyToDashboard.newDashboardOptionLabel', {
-      defaultMessage: 'New dashboard',
+      defaultMessage: 'New devonboard',
     }),
   getExistingDashboardOption: () =>
     i18n.translate('dashboard.panel.copyToDashboard.existingDashboardOptionLabel', {
-      defaultMessage: 'Existing dashboard',
+      defaultMessage: 'Existing devonboard',
     }),
   getPanelNotFoundError: (id: string) =>
     i18n.translate('dashboard.panel.copyToDashboard.panelNotFoundError', {

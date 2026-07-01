@@ -81,7 +81,7 @@ export const DashboardListing = ({
       const activeTabTitle = tabs.find((tab) => tab.id === activeTabId)?.title;
       const dashboardBreadcrumb = {
         text: i18n.translate('dashboard.listing.title', {
-          defaultMessage: 'Dashboards',
+          defaultMessage: 'Devonboards',
         }),
         href: coreServices.application.getUrlForApp(appId, {
           path: `#${LANDING_PAGE_PATH}`,
@@ -146,7 +146,7 @@ export const DashboardListing = ({
         testId: 'dashboardListingCreateButton',
         iconType: 'plus',
         label: i18n.translate('dashboard.listing.createButtonLabel', {
-          defaultMessage: 'Create dashboard',
+          defaultMessage: 'Create devonboard',
         }),
         run: createDashboardAction,
         popoverWidth: 200,
@@ -156,7 +156,7 @@ export const DashboardListing = ({
                 secondaryButtonAriaLabel: i18n.translate(
                   'dashboard.listing.createMoreActionsButtonAriaLabel',
                   {
-                    defaultMessage: 'Create more dashboard content',
+                    defaultMessage: 'Create more devonboard content',
                   }
                 ),
                 items: createMenuItems,
@@ -172,7 +172,7 @@ export const DashboardListing = ({
         {children}
         <AppHeader
           title={i18n.translate('dashboard.listing.title', {
-            defaultMessage: 'Dashboards',
+            defaultMessage: 'Devonboards',
           })}
           tabs={headerTabs}
           menu={appMenu}

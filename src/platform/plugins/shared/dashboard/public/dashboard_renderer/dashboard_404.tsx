@@ -21,7 +21,7 @@ export const Dashboard404Page = ({
   return (
     <NotFoundPrompt
       title={i18n.translate('dashboard.renderer.404Title', {
-        defaultMessage: 'Dashboard not found',
+        defaultMessage: 'Devonboard not found',
       })}
       body={i18n.translate('dashboard.renderer.404Body', {
         defaultMessage:
@@ -36,7 +36,7 @@ export const Dashboard404Page = ({
                 onClick={() => dashboardRedirect({ destination: 'listing' })}
               >
                 {i18n.translate('dashboard.renderer.404Action', {
-                  defaultMessage: 'View available dashboards',
+                  defaultMessage: 'View available devonboards',
                 })}
               </EuiButtonEmpty>,
             ]

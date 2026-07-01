@@ -12,7 +12,7 @@ import type { ServiceDetailsPageTabName } from './service_details_tab';
 import { ServiceDetailsTab } from './service_details_tab';
 import { EXTENDED_TIMEOUT } from '../../constants';
 
-export class DashboardsTab extends ServiceDetailsTab {
+export class DevonboardsZac extends ServiceDetailsTab {
   public readonly tabName: ServiceDetailsPageTabName = 'dashboards';
   public readonly tab: Locator;
 
