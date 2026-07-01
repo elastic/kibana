@@ -9,8 +9,10 @@ import React, { useCallback } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
-import type { SignificantEventsTuningConfig } from '@kbn/streams-schema';
-import { validateSignificantEventsTuningConfig } from '@kbn/streams-schema';
+import {
+  type SignificantEventsTuningConfig,
+  validateSignificantEventsTuningConfig,
+} from '@kbn/significant-events-schema';
 
 /**
  * Converts a SignificantEventsTuningConfig to an annotated YAML string with section headers

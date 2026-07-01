@@ -7,7 +7,12 @@
 
 import type { RetrieverContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { Feature, KnowledgeIndicator, QueryLink } from '@kbn/significant-events-schema';
+import type {
+  Feature,
+  KnowledgeIndicator,
+  QueryLink,
+  SignificantEventsTuningConfig,
+} from '@kbn/significant-events-schema';
 import {
   isStoredFeatureKnowledgeIndicator,
   isStoredQueryKnowledgeIndicator,
@@ -26,7 +31,7 @@ import {
 import { fromStoredFeature, fromStoredQuery } from './serializers';
 import { searchWithKeywordFallback } from '../../errors/search_with_keyword_fallback';
 import type { SearchMode } from '../../../../../common/queries';
-import type { SignificantEventsTuningConfig } from '../../../../../common/significant_events_tuning_config';
+
 import type { RevisionReader } from './revision_reader';
 import type { RuleUnbackedFilter } from './types';
 
