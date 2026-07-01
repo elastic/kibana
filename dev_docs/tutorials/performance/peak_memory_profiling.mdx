@@ -203,7 +203,7 @@ const sample = (event = 'sample') => {
       heapUsed: memory.heapUsed,
       external: memory.external,
       arrayBuffers: memory.arrayBuffers,
-      maxRss: resourceUsage.maxRSS * 1024,
+      maxRss: process.platform === 'darwin' ? resourceUsage.maxRSS : resourceUsage.maxRSS * 1024,
     })}\n`
   );
 };
