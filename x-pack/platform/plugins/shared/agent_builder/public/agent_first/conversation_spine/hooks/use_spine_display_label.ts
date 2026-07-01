@@ -10,5 +10,10 @@ import type { SpineType } from '../types';
 
 export { getSpineTypeLabel };
 
+/** POC: omit conversation id suffix from badge labels until identifier UX is finalized. */
+const SHOW_SPINE_IDENTIFIER_IN_BADGE = false;
+
 export const formatSpineDisplayLabel = (type: SpineType, identifier: string): string =>
-  `${getSpineTypeLabel(type)} · ${identifier}`;
+  SHOW_SPINE_IDENTIFIER_IN_BADGE
+    ? `${getSpineTypeLabel(type)} · ${identifier}`
+    : getSpineTypeLabel(type);
