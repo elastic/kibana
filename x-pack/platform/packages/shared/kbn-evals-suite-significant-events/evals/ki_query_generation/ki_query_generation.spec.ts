@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { generateSignificantEvents } from '@kbn/streams-ai';
+import { identifyKIQueries } from '@kbn/streams-ai';
 import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
 import { tags } from '@kbn/scout';
 
 import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
-import type { Feature, Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import type { Feature } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   canonicalKIFeaturesFromExpectedGroundTruth,
@@ -323,7 +324,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     `ki_types=${JSON.stringify(kiTypeCounts)}, sample_logs=${sampleLogs.length}`
                 );
 
-                const { queries, toolUsage } = await generateSignificantEvents({
+                const { queries, toolUsage } = await identifyKIQueries({
                   stream,
                   esClient,
                   inferenceClient,
@@ -428,7 +429,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 emptyDataStreamTestIndex!
               );
 
-              const { queries } = await generateSignificantEvents({
+              const { queries } = await identifyKIQueries({
                 stream: streamFromApi as Streams.all.Definition,
                 esClient,
                 inferenceClient,
