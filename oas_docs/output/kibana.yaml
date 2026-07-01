@@ -29871,6 +29871,7 @@ paths:
           name: policyId
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -84709,6 +84710,7 @@ components:
           properties:
             cloud_connector_id:
               description: ID of an existing cloud connector to reuse. If not provided, a new connector is created.
+              maxLength: 256
               type: string
             enabled:
               default: false
@@ -84861,6 +84863,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_package'
         policy_template:
           description: The policy template to use for the agentless package policy. If not provided, the default policy template is used.
+          maxLength: 256
           type: string
         var_group_selections:
           additionalProperties:
