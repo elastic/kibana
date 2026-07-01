@@ -104,6 +104,14 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: '7e13967e0f1185cbd309f016b25d3631b514706e5217da41f8655e93d23d90c6',
   },
   {
+    id: 'entityStore.entityAssetCriticalityUpdated',
+    schemaHash: '442ed32dd5ab5c75dcb04f311e0400983b01ae53625a50aea2b559e25848d545',
+  },
+  {
+    id: 'entityStore.entityRiskScoreChanged',
+    schemaHash: 'e7989debb026bd415fa6fbe125cd362f337fe89d77af21b799ec38883e769af0',
+  },
+  {
     id: 'workflows.failed',
     schemaHash: '2ac7a279823d7ca59c4d47de93ea7bd7103b1953ea484cef7f489d12d0c81980',
   },
