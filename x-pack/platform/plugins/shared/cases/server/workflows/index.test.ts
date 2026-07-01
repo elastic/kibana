@@ -5,27 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
 import { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import { registerCaseWorkflowSteps } from '.';
 
 describe('registerCaseWorkflowSteps', () => {
-  const buildRegistryWithComment = () => {
-    const registry = new UnifiedAttachmentTypeRegistry();
-    registry.register({
-      id: 'comment',
-      schema: z.object({
-        type: z.literal('comment'),
-        owner: z.string(),
-        data: z.object({ content: z.string() }),
-      }),
-    });
-    return registry;
-  };
-
   const registerWithFlag = (
     isCasesAttachmentsEnabled: boolean,
-    registry: UnifiedAttachmentTypeRegistry
+    registry: UnifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry()
   ) => {
     const workflowsExtensions = { registerStepDefinition: jest.fn() };
     const getCasesClient = jest.fn();
@@ -40,17 +26,15 @@ describe('registerCaseWorkflowSteps', () => {
     return workflowsExtensions.registerStepDefinition;
   };
 
-  it('registers generic attachment steps only when unified attachments are enabled', () => {
-    const disabled = registerWithFlag(false, buildRegistryWithComment());
-    const enabled = registerWithFlag(true, buildRegistryWithComment());
+  // The attachment registry is populated by solutions' `setup` (which runs
+  // after cases's), so we can't rely on any authorable type being present here.
+  // Registration is therefore deferred to an async loader that resolves to
+  // `undefined` when the registry is empty at load-time — meaning the flag
+  // alone controls whether the +1 loader is enqueued.
+  it('registers the generic attachments step loader only when unified attachments are enabled', () => {
+    const disabled = registerWithFlag(false);
+    const enabled = registerWithFlag(true);
 
-    expect(enabled).toHaveBeenCalledTimes(disabled.mock.calls.length + 2);
-  });
-
-  it('skips the generic attachment steps when no authorable attachment type is registered', () => {
-    const disabled = registerWithFlag(false, new UnifiedAttachmentTypeRegistry());
-    const enabled = registerWithFlag(true, new UnifiedAttachmentTypeRegistry());
-
-    expect(enabled).toHaveBeenCalledTimes(disabled.mock.calls.length);
+    expect(enabled).toHaveBeenCalledTimes(disabled.mock.calls.length + 1);
   });
 });

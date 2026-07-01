@@ -17,11 +17,25 @@ import type { CasesClient } from '../../client';
 import { createCasesStepHandler, safeParseCaseForWorkflowOutput, withCaseOwner } from './utils';
 import { selectAuthorableAttachmentSchemas } from './unified_attachment_schemas';
 
+/**
+ * Builds the `cases.addAttachments` server step definition, or returns
+ * `undefined` when no authorable attachment type is registered — which the
+ * step registry treats as a silently skipped registration.
+ *
+ * Must be invoked from a deferred loader (async import) at `setup` so the
+ * registry has been populated by solution plugins whose `setup` runs after
+ * cases's. Composing the union eagerly at cases `setup` would snapshot only
+ * the built-in types (see PR #269993 review).
+ */
 export const addAttachmentsStepDefinition = (
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
 ) => {
   const members = selectAuthorableAttachmentSchemas(unifiedAttachmentTypeRegistry);
+  if (members.length === 0) {
+    return undefined;
+  }
+
   const definition = buildAddAttachmentsStepCommonDefinition(members);
 
   return createServerStepDefinition({

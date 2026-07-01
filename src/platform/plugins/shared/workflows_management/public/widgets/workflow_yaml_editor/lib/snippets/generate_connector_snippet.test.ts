@@ -61,12 +61,6 @@ jest.mock('../get_required_params_for_connector', () => ({
     if (connectorType === 'no_id_connector') {
       return [{ name: 'body', defaultValue: '{}' }];
     }
-    if (connectorType === 'cases.addAttachment') {
-      return [
-        { name: 'case_id', example: '' },
-        { name: 'attachment', example: { type: '' } },
-      ];
-    }
     if (connectorType === 'cases.addAttachments') {
       return [
         { name: 'case_id', example: '' },
@@ -187,20 +181,8 @@ describe('generateConnectorSnippet', () => {
         { type: 'elasticsearch.request', hasConnectorId: undefined },
         { type: 'custom.connector', hasConnectorId: 'required' },
         { type: 'no_id_connector', hasConnectorId: undefined },
-        { type: 'cases.addAttachment', hasConnectorId: undefined },
         { type: 'cases.addAttachments', hasConnectorId: undefined },
       ]);
-    });
-
-    it('should scaffold attachment as a nested map with type for cases.addAttachment', () => {
-      const result = generateConnectorSnippet('cases.addAttachment', {
-        full: true,
-        withStepsSection: false,
-      });
-      expect(result).toContain('attachment:');
-      expect(result).toContain('type: ""');
-      // Sanity-check we did not regress to the flat empty-string form.
-      expect(result).not.toMatch(/attachment:\s*""\n/);
     });
 
     it('should scaffold attachments as a list of {type} maps for cases.addAttachments', () => {

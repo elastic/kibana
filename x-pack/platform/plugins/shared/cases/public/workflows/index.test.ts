@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { UnifiedAttachmentTypeRegistry } from '../client/attachment_framework/unified_attachment_registry';
 import { registerCasesSteps } from '.';
-import { getAddAttachmentStepDefinition, getAddAttachmentsStepDefinition } from './add_attachment';
+import { getAddAttachmentsStepDefinition } from './add_attachments';
 
 const buildRegistryWithComment = () => {
   const registry = new UnifiedAttachmentTypeRegistry();
@@ -37,29 +37,27 @@ describe('registerCasesSteps', () => {
   };
 
   // The attachment registry is populated during `start`, after `registerCasesSteps`
-  // runs at `setup`. Registration is therefore deferred to the (lazy) loaders, so
-  // the +2 loaders are always registered when the flag is on regardless of the
+  // runs at `setup`. Registration is therefore deferred to the (lazy) loader, so
+  // the +1 loader is always registered when the flag is on regardless of the
   // registry's contents at this point.
-  it('registers the generic attachment step loaders only when unified attachments are enabled', () => {
+  it('registers the generic attachments step loader only when unified attachments are enabled', () => {
     const disabled = registerWithFlag(false);
     const enabled = registerWithFlag(true);
 
-    expect(enabled).toHaveBeenCalledTimes(disabled.mock.calls.length + 2);
+    expect(enabled).toHaveBeenCalledTimes(disabled.mock.calls.length + 1);
   });
 });
 
-describe('generic attachment step definitions', () => {
-  it('build a definition when an authorable attachment type is registered', () => {
+describe('generic attachments step definition', () => {
+  it('builds a definition when an authorable attachment type is registered', () => {
     const registry = buildRegistryWithComment();
 
-    expect(getAddAttachmentStepDefinition(registry)).toBeDefined();
     expect(getAddAttachmentsStepDefinition(registry)).toBeDefined();
   });
 
-  it('return undefined when no authorable attachment type is registered', () => {
+  it('returns undefined when no authorable attachment type is registered', () => {
     const registry = new UnifiedAttachmentTypeRegistry();
 
-    expect(getAddAttachmentStepDefinition(registry)).toBeUndefined();
     expect(getAddAttachmentsStepDefinition(registry)).toBeUndefined();
   });
 });

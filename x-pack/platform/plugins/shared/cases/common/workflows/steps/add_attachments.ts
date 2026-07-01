@@ -15,9 +15,23 @@ import {
   CasesStepSingleCaseOutputSchema,
 } from './shared';
 import { MAX_BULK_CREATE_ATTACHMENTS } from '../../constants';
-import { composeAttachmentUnion } from './add_attachment';
 
 export const AddAttachmentsStepTypeId = 'cases.addAttachments';
+
+/**
+ * Composes the per-attachment-type discriminated union from registered
+ * full-payload zod schemas. `owner` is stripped because the workflow step
+ * injects it from the target case, not the YAML author.
+ */
+export const composeAttachmentUnion = (members: z.ZodObject[]): z.ZodDiscriminatedUnion => {
+  if (members.length === 0) {
+    throw new Error(
+      'cases.addAttachments: cannot compose input schema with zero registered attachment types'
+    );
+  }
+  const stripped = members.map((m) => m.omit({ owner: true }));
+  return z.discriminatedUnion('type', stripped as [z.ZodObject, ...z.ZodObject[]]);
+};
 
 export const buildAddAttachmentsStepCommonDefinition = (
   members: z.ZodObject[]
