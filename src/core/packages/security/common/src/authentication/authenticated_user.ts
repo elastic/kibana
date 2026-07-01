@@ -94,8 +94,9 @@ export interface AuthenticatedUser extends User {
 
   /**
    * The HTTP Authorization scheme used to authenticate the user, lowercased. Set by the HTTP
-   * authentication provider (`HTTPAuthenticationProvider`) when it handles the request; `null`
-   * for all other providers (session-cookie, PKI, SAML, etc.).
+   * authentication provider (`HTTPAuthenticationProvider`). `null` when authentication does not
+   * use an Authorization header (session-cookie, PKI, SAML, etc. authenticate through other
+   * mechanisms).
    *
    * Contract: this is the only writer, and it always lowercases the scheme. Consumers may assume
    * lowercase and skip normalizing; do not add a second writer that doesn't lowercase.
