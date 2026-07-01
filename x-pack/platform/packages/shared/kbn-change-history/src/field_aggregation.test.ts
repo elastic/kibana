@@ -100,5 +100,20 @@ describe('field aggregation helpers', () => {
         )
       ).toThrow('Expected string bucket key for keyword field [user.name]');
     });
+
+    it('accepts empty string bucket keys', () => {
+      const result = parseFieldAggregationResult(
+        {
+          [FIELD_AGGREGATION_NAME]: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [{ key: '', doc_count: 1 }],
+          },
+        },
+        { field: 'user.name' }
+      );
+
+      expect(result.buckets).toEqual([{ key: '', docCount: 1 }]);
+    });
   });
 });

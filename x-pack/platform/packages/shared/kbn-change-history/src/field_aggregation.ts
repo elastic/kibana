@@ -98,8 +98,15 @@ export const parseFieldAggregationResult = (
     );
   }
 
+  const { buckets } = valuesAgg;
+  if (!Array.isArray(buckets)) {
+    throw new Error(
+      `Expected string terms aggregation for field [${field}], got unexpected aggregation shape`
+    );
+  }
+
   return {
-    buckets: valuesAgg.buckets.map((bucket) => toFieldBucket(bucket, field)),
+    buckets: buckets.map((bucket) => toFieldBucket(bucket, field)),
     sumOtherDocCount: valuesAgg.sum_other_doc_count ?? 0,
   };
 };
@@ -120,7 +127,7 @@ const toFieldBucket = (
   field: ChangeHistoryAggregateField
 ): ChangeHistoryFieldBucket => {
   const key = bucket.key;
-  if (typeof key !== 'string' || key.length === 0) {
+  if (typeof key !== 'string') {
     throw new Error(`Expected string bucket key for keyword field [${field}], got [${typeof key}]`);
   }
 
