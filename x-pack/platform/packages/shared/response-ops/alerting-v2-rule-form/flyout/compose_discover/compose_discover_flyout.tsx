@@ -260,15 +260,15 @@ export function ComposeDiscoverFlyout({
   });
 
   const lastFocusedRef = useRef<HTMLElement | null>(null);
+  /* Wraps rawDispatch to snapshot the focused trigger before the sandbox opens so focus can be restored when it closes. */
   const dispatch = useCallback(
     (action: ComposeDiscoverAction) => {
-      // this is to ensure that the last focused element is focused after the sandbox is closed
-      if (action.type === 'OPEN_CHILD' || action.type === 'OPEN_CHILD_FOR_STEP') {
+      if (!uiState.childOpen) {
         lastFocusedRef.current = document.activeElement as HTMLElement;
       }
       rawDispatch(action);
     },
-    [rawDispatch]
+    [rawDispatch, uiState.childOpen]
   );
 
   const wasChildOpenRef = useRef(uiState.childOpen);
