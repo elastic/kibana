@@ -6,7 +6,6 @@
  */
 
 import type { ScoutPage, KibanaUrl, Locator } from '@kbn/scout-oblt';
-import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { FormMonitorType } from '../constants';
 
@@ -129,10 +128,7 @@ export class SyntheticsAppPage {
 
   async fillFirstMonitorDetails({ url, location }: { url: string; location: string }) {
     await this.page.testSubj.fill('urls-input', url);
-    const comboBox = new EuiComboBoxWrapper(this.page, {
-      dataTestSubj: 'syntheticsServiceLocations',
-    });
-    await comboBox.selectMultiOption(location);
+    await this.page.components.comboBox('syntheticsServiceLocations').setSelectedOptions([location]);
   }
 
   async createBasicMonitorDetails({
@@ -471,9 +467,7 @@ export class SyntheticsAppPage {
   }
 
   getDefaultConnectorsComboBox() {
-    return new EuiComboBoxWrapper(this.page, {
-      dataTestSubj: 'default-connectors-input-loaded',
-    });
+    return this.page.components.comboBox('default-connectors-input-loaded');
   }
 
   isEuiFormFieldInValid(locator: Locator): Promise<boolean> {

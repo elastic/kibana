@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiComboBoxWrapper, type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+import { type KbnComboBoxObject, type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
 import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT, SERVICE_OPBEANS_JAVA } from '../constants';
 
@@ -39,7 +39,7 @@ export class ServiceMapPage {
   public serviceMapFindMatchSummary: Locator;
   public readonly serviceMapEmbeddable: Locator;
   public readonly serviceMapEditorSaveButton: Locator;
-  public readonly serviceMapEditorServiceNameComboBox: EuiComboBoxWrapper;
+  public readonly serviceMapEditorServiceNameComboBox: KbnComboBoxObject;
   public readonly serviceMapEditorEnvironmentComboBoxInput: Locator;
   public readonly serviceMapEditorKueryInput: Locator;
   public readonly serviceMapViewFullMapButton: Locator;
@@ -81,8 +81,7 @@ export class ServiceMapPage {
     this.serviceMapFindMatchSummary = page.testSubj.locator('serviceMapFindMatchSummary');
     this.serviceMapEmbeddable = page.testSubj.locator('apmServiceMapEmbeddable');
     this.serviceMapEditorSaveButton = page.testSubj.locator('apmServiceMapEditorSaveButton');
-    this.serviceMapEditorServiceNameComboBox = new EuiComboBoxWrapper(
-      page,
+    this.serviceMapEditorServiceNameComboBox = page.components.comboBox(
       'apmServiceMapEditorServiceNameComboBox'
     );
     this.serviceMapEditorServiceNameComboBoxLoading = page.testSubj.locator(

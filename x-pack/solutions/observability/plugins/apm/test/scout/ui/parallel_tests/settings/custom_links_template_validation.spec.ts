@@ -6,7 +6,6 @@
  */
 
 import { randomUUID } from 'crypto';
-import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
@@ -136,19 +135,15 @@ test.describe(
         await page
           .getByTestId('service.name.value')
           .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-        const serviceNameComboBox = new EuiComboBoxWrapper(page, {
-          dataTestSubj: 'service.name.value',
-        });
-        const serviceNameValue = await serviceNameComboBox.getSelectedValue();
+        const serviceNameComboBox = page.components.comboBox('service.name.value');
+        const [serviceNameValue] = await serviceNameComboBox.getSelectedOptions();
         expect(serviceNameValue).toBe(SERVICE_SYNTH_NODE_1);
 
         await page
           .getByTestId('service.environment.value')
           .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-        const serviceEnvComboBox = new EuiComboBoxWrapper(page, {
-          dataTestSubj: 'service.environment.value',
-        });
-        const serviceEnvValue = await serviceEnvComboBox.getSelectedValue();
+        const serviceEnvComboBox = page.components.comboBox('service.environment.value');
+        const [serviceEnvValue] = await serviceEnvComboBox.getSelectedOptions();
         expect(serviceEnvValue).toBe(PRODUCTION_ENVIRONMENT);
 
         await customLinksPage.fillLabel(defaultLabel);

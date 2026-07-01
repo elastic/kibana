@@ -8,7 +8,7 @@
  */
 
 import type { ScoutPage } from '..';
-import { EuiComboBoxWrapper, expect } from '..';
+import { expect } from '..';
 
 export class LensApp {
   private readonly lensApp;
@@ -21,7 +21,6 @@ export class LensApp {
   private readonly confirmSaveButton;
   private readonly closeDimensionEditorButton;
   public readonly applyChangesButton;
-  private readonly dimensionFieldComboBox;
 
   constructor(private readonly page: ScoutPage) {
     this.lensApp = this.page.testSubj.locator('lnsApp');
@@ -36,7 +35,6 @@ export class LensApp {
       'lns-indexPattern-dimensionContainerClose'
     );
     this.applyChangesButton = this.page.testSubj.locator('lnsApplyChanges__apply');
-    this.dimensionFieldComboBox = new EuiComboBoxWrapper(this.page, 'indexPattern-dimension-field');
   }
 
   async waitForLensApp() {
@@ -225,9 +223,7 @@ export class LensApp {
   }
 
   private async selectField(field: string) {
-    await this.dimensionFieldComboBox.selectSingleOption(field, {
-      optionTestSubj: `lns-fieldOption-${field}`,
-    });
+    await this.page.components.comboBox('indexPattern-dimension-field').setSelectedOptions([field]);
   }
 
   private async openChartSwitchPopover() {

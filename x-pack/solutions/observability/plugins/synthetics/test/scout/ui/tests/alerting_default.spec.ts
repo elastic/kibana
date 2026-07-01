@@ -31,8 +31,8 @@ test.describe('AlertingDefaults', { tag: tags.stateful.classic }, () => {
     await pageObjects.syntheticsApp.saveConnectorInFlyout();
 
     const defaultConnectors = pageObjects.syntheticsApp.getDefaultConnectorsComboBox();
-    await defaultConnectors.selectMultiOption('Test slack');
-    expect(await defaultConnectors.getSelectedMultiOptions()).toStrictEqual(['Test slack']);
+    await defaultConnectors.setSelectedOptions(['Test slack']);
+    expect(await defaultConnectors.getSelectedOptions()).toStrictEqual(['Test slack']);
     await defaultConnectors.clear();
   });
 
@@ -53,8 +53,8 @@ test.describe('AlertingDefaults', { tag: tags.stateful.classic }, () => {
 
     await test.step('configure email recipients', async () => {
       const defaultConnectors = pageObjects.syntheticsApp.getDefaultConnectorsComboBox();
-      await defaultConnectors.selectMultiOption('Test email');
-      expect(await defaultConnectors.getSelectedMultiOptions()).toStrictEqual(['Test email']);
+      await defaultConnectors.setSelectedOptions(['Test email']);
+      expect(await defaultConnectors.getSelectedOptions()).toStrictEqual(['Test email']);
 
       await page.testSubj.locator('toEmailAddressInput').locator('input').fill('test@gmail.com');
       await page.keyboard.press('Enter');

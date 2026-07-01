@@ -187,15 +187,8 @@ export class FeatureSettingsPage {
     await this.addModelButton(featureId).waitFor({ state: 'visible' });
   }
 
-  /**
-   * Picks a connector by visible name in the Global model combobox.
-   * Avoids {@link EuiComboBoxWrapper.selectSingleOption}'s initial `clear()`, which asserts an empty
-   * search input — that fails when the current selection is "No default model" (plain-text mode).
-   */
+  /** Picks a connector by visible name in the Global model combobox. */
   public async selectGlobalModel(name: string): Promise<void> {
-    const combo = this.globalModelComboBox;
-    await combo.locator('[data-test-subj="comboBoxInput"]').click();
-    await combo.locator('[data-test-subj="comboBoxSearchInput"]').fill(name);
-    await this.page.getByRole('option', { name, exact: false }).click();
+    await this.page.components.comboBox('globalModelComboBox').setSelectedOptions([name]);
   }
 }
