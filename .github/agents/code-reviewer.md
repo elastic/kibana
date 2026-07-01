@@ -42,14 +42,15 @@ Ground architectural and maintainability findings in local code and clear behavi
 ## Review process
 
 1. Start with workflow-provided PR context artifacts under `/tmp/gh-aw/agent/`: read `pr-metadata.json` and `pr-files.json` first to understand scope before reading any diff content.
-2. Select the highest-risk changed areas from the file list, then inspect only targeted diff hunks and nearby source needed to confirm concrete findings.
-3. If the PR is large, the full diff is large, or any tool output would be persisted because of size, do not read the whole artifact. Use targeted searches, file paths from `pr-files.json`, and small excerpts.
-4. Do not create derived full-diff dumps or print generated files, snapshots, OpenAPI specs, or repo-wide search output back into context.
-5. Do not run local validation or setup commands, including tests, type checks, lint, bootstrap, package installs, builds, or repo scripts. Review from static source, prefetched artifacts, and GitHub data only.
-6. If artifacts are missing or insufficient, use GitHub tools to gather only the extra pull request or repository context needed for a specific question.
-7. Inspect nearby implementation and tests to confirm whether the concern is real and whether coverage is sufficient.
-8. If no concrete issue is found after the bounded pass, stop and call `noop` with exactly `No issues found`.
-9. If prior review comments or reviews are available in the provided context, avoid repeating feedback that already applies to unchanged lines.
+2. Walk the changed files in the order listed in `pr-files.json`, skipping generated or output-only files. Review each non-generated changed file once unless later context makes a second look necessary.
+3. For the current file, use `pr-files.json` to build the exact diff header (`diff --git a/${previous_filename ?? filename} b/${filename}`), then search `pr-diff.txt` for that section and inspect it. Do not read `pr-diff.txt` from top to bottom or create derived full-diff dumps.
+4. Use source files, tests, and nearby implementation context as needed to verify concrete concerns. Avoid repo-wide searches unless you need to answer a specific question raised by the current file's diff.
+5. Do not print generated files, snapshots, OpenAPI specs, full diffs, or repo-wide search output back into context.
+6. Do not run local validation or setup commands, including tests, type checks, lint, bootstrap, package installs, builds, or repo scripts. Review from static source, prefetched artifacts, and GitHub data only.
+7. If artifacts are missing or insufficient, use GitHub tools to gather only the extra pull request or repository context needed for a specific question. Using `.github/scripts/prefetch_pr_context.js` as an example on how to retrieve the missing artifacts.
+8. If a time-budget hook message says to stop exploration and prepare output, finish the current verification and then emit concrete review comments or `noop`.
+9. If no concrete issue is found after the ordered pass, stop and call `noop` with exactly `No issues found`.
+10. If prior review comments or reviews are available in the provided context, avoid repeating feedback that already applies to unchanged lines.
 
 ## Review mode output
 
@@ -61,7 +62,7 @@ Use review mode when the importing workflow is triggered by a pull request event
 - Use suggestion blocks only for minimal replacements on the commented lines. Do not use them for broad rewrites, speculative fixes, or changes that require broader context than the review comment can safely capture.
 - If you create one or more inline comments, submit exactly one final review with `submit-pull-request-review`.
 - Keep the final review body concise. It may summarize the overall review outcome, but it must not repeat inline comment details, risks, or suggested changes verbatim.
-- Submit reviews with the non-blocking `COMMENT` event. Do not use `REQUEST_CHANGES` or `APPROVE`.
+- Submit reviews with only the non-blocking `COMMENT` event. NEVER use `REQUEST_CHANGES` or `APPROVE`.
 - If there are no findings, do not call `submit-pull-request-review`; call `noop` with exactly `No issues found`.
 - Do not use `add-comment`, `reply-to-pull-request-review-comment`, other GitHub write paths, or ask the workflow to post separate top-level comments.
 
