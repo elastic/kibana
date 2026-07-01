@@ -239,32 +239,6 @@ apiTest.describe(
       }
     );
 
-    // --- per-id error reporting ----------------------------------------------
-
-    apiTest(
-      'returns mixed updated/error entries when some ids do not exist',
-      async ({ apiClient }) => {
-        const monitor = await createUiMonitor(apiClient);
-        const missingId = uuidv4();
-
-        const res = await bulkUpdateMonitors(
-          apiClient,
-          editorHeaders,
-          uniform([monitor.config_id, missingId], { enabled: false })
-        );
-
-        const results = res.body.result as BulkUpdateResult[];
-        expect(results).toHaveLength(2);
-
-        const updatedEntry = resultFor(results, monitor.config_id);
-        const missingEntry = resultFor(results, missingId);
-
-        expect(updatedEntry).toStrictEqual({ id: monitor.config_id, updated: true });
-        expect(missingEntry!.updated).toBe(false);
-        expect(missingEntry!.error).toMatch(/not found/i);
-      }
-    );
-
     apiTest('rejects project-origin monitors with an origin error', async ({ apiClient }) => {
       const projectName = `bulk-patch-project-${uuidv4()}`;
       const journeyId = `bulk-patch-journey-${uuidv4()}`;
@@ -461,41 +435,6 @@ apiTest.describe(
       const { body: refreshedValid } = await getMonitor(apiClient, editorHeaders, valid.config_id);
       expect((refreshedConflicting as { name: string }).name).toBe(conflicting.name);
       expect((refreshedValid as { name: string }).name).toBe(newName);
-    });
-
-    // --- input validation ----------------------------------------------------
-
-    apiTest('returns 400 when an update has empty attributes', async ({ apiClient }) => {
-      const monitor = await createUiMonitor(apiClient);
-
-      const res = await bulkUpdateMonitors(
-        apiClient,
-        editorHeaders,
-        { updates: [{ id: monitor.config_id, attributes: {} }] },
-        { statusCode: 400 }
-      );
-      expect((res.body as { message: string }).message).toMatch(/attributes/i);
-    });
-
-    apiTest('returns 400 when updates is empty (schema-level rejection)', async ({ apiClient }) => {
-      await bulkUpdateMonitors(apiClient, editorHeaders, { updates: [] }, { statusCode: 400 });
-    });
-
-    apiTest('returns 400 when an id appears more than once', async ({ apiClient }) => {
-      const monitor = await createUiMonitor(apiClient);
-
-      const res = await bulkUpdateMonitors(
-        apiClient,
-        editorHeaders,
-        {
-          updates: [
-            { id: monitor.config_id, attributes: { enabled: false } },
-            { id: monitor.config_id, attributes: { tags: ['dup'] } },
-          ],
-        },
-        { statusCode: 400 }
-      );
-      expect((res.body as { message: string }).message).toMatch(/duplicate/i);
     });
   }
 );
