@@ -9,8 +9,14 @@ import type { RouteDependencies } from '../../../types';
 
 import { registerGetOneRoute, registerGetAllRoute } from './register_get_route';
 import { registerDeleteRoute } from './register_delete_route';
-import { registerPutDataRetention, registerPutDataStreamFailureStore } from './register_put_route';
+import {
+  registerPutDataRetention,
+  registerPutDataLifecycle,
+  registerPutDataStreamFailureStore,
+  registerPutDataStreamSettings,
+} from './register_put_route';
 import { registerPostOneApplyLatestMappings, registerPostOneRollover } from './register_post_route';
+import { registerGetIlmPoliciesRoute } from './register_get_ilm_policies_route';
 
 export function registerDataStreamRoutes(dependencies: RouteDependencies) {
   registerGetOneRoute(dependencies);
@@ -19,5 +25,8 @@ export function registerDataStreamRoutes(dependencies: RouteDependencies) {
   registerGetAllRoute(dependencies);
   registerDeleteRoute(dependencies);
   registerPutDataRetention(dependencies);
+  registerPutDataLifecycle(dependencies);
+  registerPutDataStreamSettings(dependencies);
   registerPutDataStreamFailureStore(dependencies);
+  registerGetIlmPoliciesRoute(dependencies);
 }

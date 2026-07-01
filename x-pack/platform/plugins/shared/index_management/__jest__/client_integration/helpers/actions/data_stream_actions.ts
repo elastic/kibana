@@ -119,18 +119,14 @@ export const createDataStreamTabActions = () => {
 
   const clickDeleteDataStreamButton = async () => {
     fireEvent.click(await screen.findByTestId('manageDataStreamButton'));
-    await screen.findByText('Data stream options');
     fireEvent.click(await screen.findByTestId('deleteDataStreamButton'));
   };
 
-  const clickEditDataRetentionButton = async () => {
+  const openEditDataLifecycleFlyout = async () => {
     fireEvent.click(await screen.findByTestId('manageDataStreamButton'));
-    await screen.findByText('Data stream options');
-    fireEvent.click(await screen.findByTestId('editDataRetentionButton'));
-    // Wait for modal to be fully rendered, including all EuiPopover components
-    await screen.findByTestId('dataRetentionValue');
-    // Wait for popover button to be ready (indicates EuiPopover is initialized)
-    await screen.findByTestId('show-filters-button');
+    fireEvent.click(await screen.findByTestId('editDataLifecycleButton'));
+    // Wait for the flyout (and its async template/ILM data) to be fully rendered.
+    await screen.findByTestId('editDataLifecycleFlyoutApplyButton');
   };
 
   const clickManageDataStreamsButton = () => {
@@ -208,7 +204,7 @@ export const createDataStreamTabActions = () => {
     selectDataStream,
     clickConfirmDelete,
     clickDeleteDataStreamButton,
-    clickEditDataRetentionButton,
+    openEditDataLifecycleFlyout,
     clickManageDataStreamsButton,
     openBulkActionsPopover,
     closeBulkActionsPopover,
@@ -249,19 +245,21 @@ export const createDataStreamDetailPanelActions = () => {
   };
 
   const findIlmPolicyDetail = () => {
-    return screen.queryByTestId('ilmPolicyDetail');
+    // The successful ingest lifecycle now surfaces the ILM policy as a link; when there is no
+    // ILM policy the link is absent.
+    return screen.queryByTestId('ilmPolicyLink');
   };
 
   const findDataRetentionDetail = () => {
-    return screen.queryByTestId('dataRetentionDetail');
+    return screen.queryByTestId('successfulIngestLifecycleDetail');
   };
 
   const findFailureStoreDetail = () => {
-    return screen.queryByTestId('failureStoreDetail');
+    return screen.queryByTestId('failedIngestLifecycleDetail');
   };
 
   const findFailureStoreRetentionDetail = () => {
-    return screen.queryByTestId('failureStoreRetentionDetail');
+    return screen.queryByTestId('failedIngestLifecycleDetail');
   };
 
   const clickIndexTemplateLink = () => {
@@ -283,8 +281,68 @@ export const createDataStreamDetailPanelActions = () => {
   };
 };
 
+export const createDataLifecycleFlyoutActions = () => {
+  const goToSuccessfulDataTab = async () => {
+    fireEvent.click(await screen.findByTestId('flyoutTab-successful_data'));
+  };
+
+  const goToFailedDataTab = async () => {
+    fireEvent.click(await screen.findByTestId('flyoutTab-failed_data'));
+  };
+
+  const toggleInheritLifecycle = async () => {
+    const checkbox = await screen.findByTestId('dataLifecycleInheritCheckbox');
+    fireEvent.click(checkbox);
+  };
+
+  const stopInheritingLifecycle = async () => {
+    const checkbox = screen.queryByTestId('dataLifecycleInheritCheckbox');
+    if (checkbox && (checkbox as HTMLInputElement).checked) {
+      fireEvent.click(checkbox);
+    }
+  };
+
+  const setSuccessfulRetention = async (value: string, unit: 'd' | 'h' | 'm' | 's' = 'd') => {
+    const valueInput = await screen.findByTestId('deleteDurationValue');
+    fireEvent.change(valueInput, { target: { value } });
+    const unitSelect = await screen.findByTestId('deleteDurationUnit');
+    fireEvent.change(unitSelect, { target: { value: unit } });
+  };
+
+  const toggleSuccessfulDeletePhase = async () => {
+    fireEvent.click(await screen.findByTestId('dlmPhasesSelectorDeletePhaseCard'));
+  };
+
+  const findFailureStoreCheckbox = async () =>
+    (await screen.findByTestId(
+      'editFailedDataLifecycle-enableFailureStoreCheckbox'
+    )) as HTMLInputElement;
+
+  const setFailureStoreEnabled = async (enabled: boolean) => {
+    const checkbox = await findFailureStoreCheckbox();
+    if (checkbox.checked !== enabled) {
+      fireEvent.click(checkbox);
+    }
+  };
+
+  const clickApplyButton = async () => {
+    fireEvent.click(await screen.findByTestId('editDataLifecycleFlyoutApplyButton'));
+  };
+
+  return {
+    goToSuccessfulDataTab,
+    goToFailedDataTab,
+    toggleInheritLifecycle,
+    stopInheritingLifecycle,
+    setSuccessfulRetention,
+    toggleSuccessfulDeletePhase,
+    setFailureStoreEnabled,
+    clickApplyButton,
+  };
+};
+
 /**
- * Form actions for data retention modal.
+ * Form actions for data retention modal (bulk edit).
  */
 export const createDataRetentionFormActions = () => {
   const setDataRetentionValue = async (value: string) => {

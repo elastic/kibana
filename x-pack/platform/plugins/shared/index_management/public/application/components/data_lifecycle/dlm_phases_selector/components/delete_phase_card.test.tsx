@@ -65,6 +65,17 @@ describe('DeletePhaseCard', () => {
     });
   });
 
+  it('renders without a checkbox when hideToggle is true', () => {
+    const { queryByRole, getByTestId } = renderDeletePhaseCard({
+      hideToggle: true,
+      duration: { ...defaultDuration, enabled: true },
+    });
+
+    expect(queryByRole('checkbox')).not.toBeInTheDocument();
+    expect(getByTestId('deleteDurationValue')).toBeInTheDocument();
+    expect(getByTestId('deleteDurationUnit')).toBeInTheDocument();
+  });
+
   it('disables the duration fields when isCardDisabled is true', () => {
     const { getByTestId } = renderDeletePhaseCard({
       isCardDisabled: true,

@@ -9,7 +9,7 @@ import { addBasePath } from '..';
 import type { RequestMock } from '../../../test/helpers';
 import { RouterMock, routeDependencies } from '../../../test/helpers';
 
-import { registerPutDataStreamFailureStore } from './register_put_route';
+import { registerPutDataLifecycle, registerPutDataStreamFailureStore } from './register_put_route';
 
 describe('registerPutDataStreamFailureStore', () => {
   let router: RouterMock;
@@ -92,6 +92,63 @@ describe('registerPutDataStreamFailureStore', () => {
     expect(res).toEqual({
       body: { success: true },
     });
+  });
+
+  it('should re-apply the index template failure store when inheriting', async () => {
+    const simulateIndexTemplate = router.getMockESApiFn('indices.simulateIndexTemplate');
+    simulateIndexTemplate.mockResolvedValue({
+      template: {
+        data_stream_options: {
+          failure_store: { enabled: true, lifecycle: { data_retention: '21d' } },
+        },
+      },
+    });
+
+    const mockRequest: RequestMock = {
+      method: 'put',
+      path: addBasePath('/data_streams/configure_failure_store'),
+      body: { dataStreams: ['test-stream'], dsFailureStore: false, inheritFailureStore: true },
+    };
+
+    updateDataStreamOptions.mockResolvedValue({ success: true });
+
+    const res = await router.runRequest(mockRequest);
+
+    expect(simulateIndexTemplate).toHaveBeenCalledWith({ name: 'test-stream' });
+    expect(updateDataStreamOptions).toHaveBeenCalledWith(
+      {
+        name: 'test-stream',
+        failure_store: { enabled: true, lifecycle: { data_retention: '21d' } },
+      },
+      { meta: true }
+    );
+
+    expect(res).toEqual({
+      body: { success: true },
+    });
+  });
+
+  it('should disable the failure store when inheriting from a template without failure store', async () => {
+    const simulateIndexTemplate = router.getMockESApiFn('indices.simulateIndexTemplate');
+    simulateIndexTemplate.mockResolvedValue({ template: {} });
+
+    const mockRequest: RequestMock = {
+      method: 'put',
+      path: addBasePath('/data_streams/configure_failure_store'),
+      body: { dataStreams: ['test-stream'], dsFailureStore: false, inheritFailureStore: true },
+    };
+
+    updateDataStreamOptions.mockResolvedValue({ success: true });
+
+    await router.runRequest(mockRequest);
+
+    expect(updateDataStreamOptions).toHaveBeenCalledWith(
+      {
+        name: 'test-stream',
+        failure_store: { enabled: false },
+      },
+      { meta: true }
+    );
   });
 
   it('should handle requests without custom retention period', async () => {
@@ -267,5 +324,138 @@ describe('registerPutDataStreamFailureStore', () => {
       { meta: true }
     );
     expect(res).toEqual({ body: { success: true } });
+  });
+});
+
+describe('registerPutDataLifecycle', () => {
+  let router: RouterMock;
+  let putDataLifecycle: jest.Mock;
+  let getDataStream: jest.Mock;
+
+  const setupRouter = () => {
+    router = new RouterMock();
+    const mockDependencies = {
+      ...routeDependencies,
+      router,
+    };
+
+    registerPutDataLifecycle(mockDependencies);
+    putDataLifecycle = router.getMockESApiFn('indices.putDataLifecycle');
+    getDataStream = router.getMockESApiFn('indices.getDataStream');
+  };
+
+  beforeEach(() => {
+    setupRouter();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('preserves downsampling when updating DSL lifecycle', async () => {
+    const mockRequest: RequestMock = {
+      method: 'put',
+      path: addBasePath('/data_streams/data_lifecycle'),
+      body: {
+        dataStreams: ['test-stream'],
+        enabled: true,
+        dataRetention: '30d',
+      },
+    };
+
+    getDataStream.mockResolvedValue({
+      data_streams: [
+        {
+          name: 'test-stream',
+          lifecycle: {
+            downsampling: [{ after: '7d', fixed_interval: '1h' }],
+          },
+        },
+      ],
+    });
+    putDataLifecycle.mockResolvedValue({ headers: {} });
+
+    const res = await router.runRequest(mockRequest);
+
+    expect(putDataLifecycle).toHaveBeenCalledWith(
+      {
+        name: ['test-stream'],
+        enabled: true,
+        data_retention: '30d',
+        downsampling: [{ after: '7d', fixed_interval: '1h' }],
+      },
+      { meta: true }
+    );
+    expect(res).toEqual({ body: { success: true } });
+  });
+
+  it('does not include downsampling when none exists', async () => {
+    const mockRequest: RequestMock = {
+      method: 'put',
+      path: addBasePath('/data_streams/data_lifecycle'),
+      body: {
+        dataStreams: ['test-stream'],
+        enabled: true,
+        dataRetention: '30d',
+      },
+    };
+
+    getDataStream.mockResolvedValue({ data_streams: [{ name: 'test-stream', lifecycle: {} }] });
+    putDataLifecycle.mockResolvedValue({ headers: {} });
+
+    await router.runRequest(mockRequest);
+
+    expect(putDataLifecycle).toHaveBeenCalledWith(
+      {
+        name: ['test-stream'],
+        enabled: true,
+        data_retention: '30d',
+      },
+      { meta: true }
+    );
+  });
+
+  it('groups putDataLifecycle calls by existing downsampling', async () => {
+    const mockRequest: RequestMock = {
+      method: 'put',
+      path: addBasePath('/data_streams/data_lifecycle'),
+      body: {
+        dataStreams: ['stream-a', 'stream-b'],
+        enabled: true,
+        frozenAfter: '5d',
+      },
+    };
+
+    getDataStream.mockResolvedValue({
+      data_streams: [
+        { name: 'stream-a', lifecycle: { downsampling: [{ after: '7d', fixed_interval: '1h' }] } },
+        { name: 'stream-b', lifecycle: { downsampling: [{ after: '30d', fixed_interval: '1d' }] } },
+      ],
+    });
+    putDataLifecycle.mockResolvedValue({ headers: {} });
+
+    await router.runRequest(mockRequest);
+
+    expect(putDataLifecycle).toHaveBeenCalledTimes(2);
+    expect(putDataLifecycle).toHaveBeenNthCalledWith(
+      1,
+      {
+        name: ['stream-a'],
+        enabled: true,
+        frozen_after: '5d',
+        downsampling: [{ after: '7d', fixed_interval: '1h' }],
+      },
+      { meta: true }
+    );
+    expect(putDataLifecycle).toHaveBeenNthCalledWith(
+      2,
+      {
+        name: ['stream-b'],
+        enabled: true,
+        frozen_after: '5d',
+        downsampling: [{ after: '30d', fixed_interval: '1d' }],
+      },
+      { meta: true }
+    );
   });
 });
