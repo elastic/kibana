@@ -21,6 +21,7 @@ const LIST_BREADCRUMB = [
 export class DataFederationPlugin
   implements Plugin<void, DataFederationPluginStart, SetupDependencies, StartDependencies>
 {
+  private readonly enabled: boolean;
   private readonly enableFederatedIdentityAuth: boolean;
   private readonly enableGoogleCloudStorageDataSourceType: boolean;
   private readonly enableAzureDataSourceType: boolean;
@@ -29,16 +30,19 @@ export class DataFederationPlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     const {
+      enabled,
       enableFederatedIdentityAuth,
       enableGoogleCloudStorageDataSourceType,
       enableAzureDataSourceType,
       workloadIdentityIssuerUrl,
     } = initializerContext.config.get<{
+      enabled: boolean;
       enableFederatedIdentityAuth: boolean;
       enableGoogleCloudStorageDataSourceType: boolean;
       enableAzureDataSourceType: boolean;
       workloadIdentityIssuerUrl?: string;
     }>();
+    this.enabled = enabled;
     this.enableFederatedIdentityAuth = enableFederatedIdentityAuth;
     this.enableGoogleCloudStorageDataSourceType = enableGoogleCloudStorageDataSourceType;
     this.enableAzureDataSourceType = enableAzureDataSourceType;
@@ -46,6 +50,10 @@ export class DataFederationPlugin
   }
 
   public setup(core: CoreSetup<StartDependencies>, { management, cloud }: SetupDependencies): void {
+    if (!this.enabled) {
+      return;
+    }
+
     const enableFederatedIdentityAuth = this.enableFederatedIdentityAuth;
     const enableGoogleCloudStorageDataSourceType = this.enableGoogleCloudStorageDataSourceType;
     const enableAzureDataSourceType = this.enableAzureDataSourceType;

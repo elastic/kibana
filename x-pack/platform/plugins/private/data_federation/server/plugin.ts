@@ -21,6 +21,10 @@ export class DataFederationServerPlugin
   }
 
   public setup({ http }: CoreSetup, { features }: { features: FeaturesPluginSetup }) {
+    if (!this.config.enabled) {
+      return;
+    }
+
     features.registerElasticsearchFeature({
       id: PLUGIN_ID,
       management: {
