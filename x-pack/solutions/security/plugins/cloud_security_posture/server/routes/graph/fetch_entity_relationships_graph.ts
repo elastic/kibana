@@ -32,6 +32,7 @@ import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
 interface BuildRelationshipsEsqlQueryParams {
   indexName: string;
   relationshipFields: readonly string[];
+  entityIds: EntityId[];
 }
 
 const RESOLUTION_RELATIONSHIP_FIELD = 'resolution.resolved_to' as const;
@@ -55,10 +56,16 @@ const buildRelationshipTargetsEval = (field: string): string => {
  * Uses FORK to expand each relationship field and aggregates results.
  * The filter is applied via the DSL filter parameter.
  * Target enrichment is applied later in TypeScript via fetchEntityEnrichment.
+ *
+ * After FORK expansion each row is filtered to only include relationships where the actor
+ * or the target is one of the originally requested entity IDs. This prevents entities
+ * fetched because they point TO a requested entity (via the DSL should clauses) from
+ * leaking their unrelated outbound relationships into the result set.
  */
 const buildRelationshipsEsqlQuery = ({
   indexName,
   relationshipFields,
+  entityIds,
 }: BuildRelationshipsEsqlQueryParams): string => {
   const targetsEval = relationshipFields
     .map((field) => buildRelationshipTargetsEval(field))
@@ -72,6 +79,12 @@ const buildRelationshipsEsqlQuery = ({
     })
     .join('\n');
 
+  // Restrict rows to only those where the actor or target is one of the requested entity IDs.
+  // Without this, entities fetched because they point TO a requested entity would expose all
+  // of their own outbound relationships, not just the ones touching the requested entity.
+  const idParams = entityIds.map((_, idx) => `?entityId${idx}`).join(', ');
+  const relevantEntityFilter = `TO_STRING(entity.id) IN (${idParams}) OR _target_id IN (${idParams})`;
+
   return `SET unmapped_fields="nullify";
 FROM ${indexName}
 | EVAL _source_source_fields = ${buildSourceFieldsJson(GRAPH_ACTOR_EUID_SOURCE_FIELDS)}
@@ -80,6 +93,7 @@ FROM ${indexName}
 | FORK
 ${forkBranches}
 | WHERE _target_id != ""
+| WHERE ${relevantEntityFilter}
 // Build actors doc data with entity metadata (from the entity store source entity)
 | EVAL actorDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprSafe('id', 'entity.id')},
@@ -203,8 +217,10 @@ export const fetchEntityRelationships = async ({
   const query = buildRelationshipsEsqlQuery({
     indexName,
     relationshipFields: ENTITY_RELATIONSHIP_FIELDS,
+    entityIds,
   });
   const filter = buildRelationshipDslFilter(entityIds);
+  const params = entityIds.map((entity, idx) => ({ [`entityId${idx}`]: entity.id }));
 
   logger.trace(`Relationships ES|QL query: ${query}`);
   logger.trace(`Relationships filter: ${JSON.stringify(filter)}`);
@@ -214,6 +230,7 @@ export const fetchEntityRelationships = async ({
       columnar: false,
       filter,
       query,
+      params,
     })
     .toRecords<RelationshipEsqlRow>();
 
@@ -328,14 +345,13 @@ const buildSourceFieldsJson = (fields: EuidSourceFields): string => {
 };
 
 interface RelationshipGroup {
-  actorId: string;
+  actorIds: Set<string>;
   actorEntityType: string | null | undefined;
   actorEntitySubType: string | null | undefined;
   actorEntityName: string | string[] | null | undefined;
   actorHostIps: Set<string>;
   actorsDocData: Set<string>;
   relationship: string;
-  relationshipNodeId: string;
   targetType: string | null;
   targetSubType: string | null;
   badge: number;
@@ -344,10 +360,13 @@ interface RelationshipGroup {
 }
 
 /**
- * Groups per-triple relationship rows by (actorId, relationship, targetType, targetSubType)
- * using entity-store enrichment for target type/sub_type. Actor type/sub_type and name come
- * directly off the row (the entity store IS the actor source). All aggregation (badge,
- * actorIdsCount, targetIdsCount, targetIds collection, host IPs) is computed in TypeScript.
+ * Groups per-triple relationship rows by (actorEntityType, actorEntitySubType, relationship,
+ * targetType, targetSubType) — NOT by raw actorId. Two actors of the same type sharing the
+ * same relationship and target type produce one relationship node instead of two.
+ *
+ * Actor type/sub_type and name come directly off the row (the entity store IS the actor source).
+ * All aggregation (badge, actorIdsCount, targetIdsCount, targetIds collection, host IPs) is
+ * computed in TypeScript.
  *
  * Does NOT rebuild docData — raw ESQL JSON strings are passed through as-is. Use
  * enrichRelationshipDocData afterwards to apply entity-store enrichment to docData payloads.
@@ -368,12 +387,18 @@ export const regroupRelationships = (
     const targetType = targetEnrichment?.type ?? null;
     const targetSubType = targetEnrichment?.subType ?? null;
 
-    const groupKey = JSON.stringify([actorId, record.relationship, targetType, targetSubType]);
+    const groupKey = JSON.stringify([
+      record.actorEntityType ?? null,
+      record.actorEntitySubType ?? null,
+      record.relationship,
+      targetType,
+      targetSubType,
+    ]);
 
     let group = groups.get(groupKey);
     if (!group) {
       group = {
-        actorId,
+        actorIds: new Set(),
         actorEntityType: record.actorEntityType,
         actorEntitySubType: record.actorEntitySubType,
         actorEntityName: record.actorEntityName,
@@ -382,7 +407,6 @@ export const regroupRelationships = (
         ),
         actorsDocData: record.actorDocData ? new Set([record.actorDocData]) : new Set(),
         relationship: record.relationship,
-        relationshipNodeId: record.relationshipNodeId,
         targetType,
         targetSubType,
         badge: 0,
@@ -392,6 +416,7 @@ export const regroupRelationships = (
       groups.set(groupKey, group);
     }
 
+    group.actorIds.add(actorId);
     group.badge += 1;
     group.targetIds.add(targetId);
     if (record.targetDocData) group.targetsDocData.add(record.targetDocData);
@@ -402,7 +427,14 @@ export const regroupRelationships = (
   }
 
   return Array.from(groups.values()).map((group): RelationshipEdge => {
-    const targetIds = [...group.targetIds];
+    const actorIds = [...group.actorIds].sort((a, b) => a.localeCompare(b));
+    // Single actor: use raw entity ID (preserves rel(entity.id-relationship) format).
+    // Multiple actors: hash of sorted IDs — consistent with actorNodeId/targetNodeId
+    // grouping pattern in fetch_events_graph.ts.
+    const actorKey = actorIds.length === 1 ? actorIds[0] : hashIds(actorIds);
+    const actorNodeId = actorKey;
+
+    const targetIds = [...group.targetIds].sort((a, b) => a.localeCompare(b));
     const targetNodeId =
       targetIds.length === 0 ? '' : targetIds.length === 1 ? targetIds[0] : hashIds(targetIds);
 
@@ -414,10 +446,15 @@ export const regroupRelationships = (
     ];
     const actorHostIps = [...group.actorHostIps];
 
+    // relationshipNodeId drives rel(...) node ID in parse_records.ts.
+    // Single actor: "entity.id-relationship" (unchanged format, no test regression).
+    // Merged actors: "<hashIds(actorIds)>-relationship".
+    const relationshipNodeId = `${actorKey}-${group.relationship}`;
+
     return {
       badge: group.badge,
-      actorNodeId: group.actorId,
-      actorIdsCount: 1,
+      actorNodeId,
+      actorIdsCount: actorIds.length,
       actorEntityType: group.actorEntityType,
       actorEntitySubType: group.actorEntitySubType,
       actorEntityName: group.actorEntityName,
@@ -432,8 +469,8 @@ export const regroupRelationships = (
       targetHostIps: targetHostIps.length > 0 ? targetHostIps : undefined,
       targetsDocData: [...group.targetsDocData],
       relationship: group.relationship,
-      relationshipNodeId: group.relationshipNodeId,
-      actorIds: [group.actorId],
+      relationshipNodeId,
+      actorIds,
       targetIds,
     };
   });

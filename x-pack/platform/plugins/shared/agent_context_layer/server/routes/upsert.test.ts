@@ -18,11 +18,11 @@ import {
 import { registerUpsertRoute } from './upsert';
 
 const validBody = {
-  type: 'visualization',
   title: 'Test Viz',
-  origin_id: 'viz-1',
   content: 'some content',
 };
+
+const validParams = { type: 'visualization', originId: 'viz-1' };
 
 describe('registerUpsertRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
@@ -56,64 +56,220 @@ describe('registerUpsertRoute', () => {
   };
 
   it('returns 404 when feature flag is disabled', async () => {
-    const response = await callHandler({ params: { id: 'chunk-1' }, body: validBody }, false);
+    const response = await callHandler({ params: validParams, body: validBody }, false);
     expect(response.notFound).toHaveBeenCalled();
-    expect(mockSmlService.upsertDocument).not.toHaveBeenCalled();
+    expect(mockSmlService.indexAttachment).not.toHaveBeenCalled();
   });
 
-  it('returns 200 with the new document when created', async () => {
-    mockSmlService.upsertDocument.mockResolvedValue({ document: sampleDocument, created: true });
-    const response = await callHandler({ params: { id: 'chunk-1' }, body: validBody });
-    expect(mockSmlService.upsertDocument).toHaveBeenCalledWith({
-      id: 'chunk-1',
-      spaceId: 'test-space',
-      document: validBody,
-      esClient: expect.any(Object),
-    });
+  it('creates a new origin via indexAttachment content-mode when no chunks exist', async () => {
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
+    mockSmlService.indexAttachment.mockResolvedValue(undefined);
+    mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
+
+    const response = await callHandler({ params: validParams, body: validBody });
+
+    // The route resolves the canonical `(type, originId)` from the URL
+    // and hands them to the indexer; the body never carried the type.
+    expect(mockSmlService.findByOriginAcrossSpaces).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'visualization', originId: 'viz-1' })
+    );
+    expect(mockSmlService.indexAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        originId: 'viz-1',
+        attachmentType: 'visualization',
+        action: 'create',
+        spaces: ['test-space'],
+        content: [
+          expect.objectContaining({
+            type: 'visualization',
+            title: 'Test Viz',
+            content: 'some content',
+          }),
+        ],
+      })
+    );
     expect(response.ok).toHaveBeenCalledWith({
       body: {
-        item: expect.objectContaining({ id: sampleDocument.id, origin: sampleDocument.origin }),
+        items: [expect.objectContaining({ id: sampleDocument.id, origin: sampleDocument.origin })],
         created: true,
       },
     });
   });
 
-  it('forwards permissions to sml.upsertDocument when provided', async () => {
-    mockSmlService.upsertDocument.mockResolvedValue({ document: sampleDocument, created: true });
-    const bodyWithPermissions = {
-      ...validBody,
-      permissions: {
-        kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-        elasticsearch: {
-          indices: [{ name: 'logs-app-*' }, { name: 'metrics-prod' }],
-        },
-      },
-    };
-    await callHandler({ params: { id: 'chunk-1' }, body: bodyWithPermissions });
-    expect(mockSmlService.upsertDocument).toHaveBeenCalledWith({
-      id: 'chunk-1',
-      spaceId: 'test-space',
-      document: bodyWithPermissions,
-      esClient: expect.any(Object),
-    });
-  });
+  it('passes action=update and created=false when origin already exists in caller space', async () => {
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([sampleDocument]);
+    // Privilege-checks existing chunks before overwriting — authorize the read so the happy path proceeds.
+    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
+    mockSmlService.indexAttachment.mockResolvedValue(undefined);
+    mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
 
-  it('returns 200 with created=false when the document already existed', async () => {
-    mockSmlService.upsertDocument.mockResolvedValue({ document: sampleDocument, created: false });
-    const response = await callHandler({ params: { id: 'chunk-1' }, body: validBody });
+    const response = await callHandler({ params: validParams, body: validBody });
+
+    expect(mockSmlService.indexAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'update', createdAt: sampleDocument.created_at })
+    );
     const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
     expect(body.created).toBe(false);
-    expect(body.item).toEqual(
-      expect.objectContaining({ id: sampleDocument.id, origin: sampleDocument.origin })
+  });
+
+  it('threads existing created_at through to indexAttachment on update', async () => {
+    // Regression guard: created_at must be in FIND_ACROSS_SPACES_SOURCE_FIELDS or the
+    // update path silently destroys the origin (empty string fails the ES date field).
+    const existingWithTimestamp = { ...sampleDocument, created_at: '2024-06-01T12:00:00.000Z' };
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([existingWithTimestamp]);
+    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
+    mockSmlService.indexAttachment.mockResolvedValue(undefined);
+    mockSmlService.findByOrigin.mockResolvedValue([existingWithTimestamp]);
+
+    await callHandler({ params: validParams, body: validBody });
+
+    expect(mockSmlService.indexAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ createdAt: '2024-06-01T12:00:00.000Z' })
     );
   });
 
-  it('returns 404 when the document exists in another space', async () => {
-    mockSmlService.upsertDocument.mockResolvedValue(null);
-    const response = await callHandler({ params: { id: 'chunk-1' }, body: validBody });
+  it('forwards tags to the indexer when provided', async () => {
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
+    mockSmlService.indexAttachment.mockResolvedValue(undefined);
+    mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
+    const bodyWithTags = { ...validBody, tags: ['otel', 'claude-code'] };
+
+    await callHandler({ params: validParams, body: bodyWithTags });
+
+    expect(mockSmlService.indexAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        content: [expect.objectContaining({ tags: ['otel', 'claude-code'] })],
+      })
+    );
+  });
+
+  it('clears existing tags when the PUT body omits tags (full-document replace semantic)', async () => {
+    const taggedDoc = { ...sampleDocument, tags: ['stale-tag-1', 'stale-tag-2'] };
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([taggedDoc]);
+    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
+    mockSmlService.indexAttachment.mockResolvedValue(undefined);
+    mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
+
+    // Body explicitly does NOT include `tags`.
+    await callHandler({ params: validParams, body: validBody });
+
+    const [callArgs] = mockSmlService.indexAttachment.mock.calls;
+    const passedContent = callArgs[0].content as Array<{ tags?: unknown }>;
+    expect(passedContent).toHaveLength(1);
+    expect(passedContent[0]).not.toHaveProperty('tags');
+  });
+
+  it('returns 404 when origin is owned by another space', async () => {
+    const otherSpaceDoc = { ...sampleDocument, spaces: ['other-space'] };
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([otherSpaceDoc]);
+
+    const response = await callHandler({ params: validParams, body: validBody });
+
     expect(response.notFound).toHaveBeenCalledWith({
-      body: { message: "SML document 'chunk-1' not found" },
+      body: { message: "SML origin 'visualization/viz-1' not found" },
     });
+    expect(mockSmlService.indexAttachment).not.toHaveBeenCalled();
+  });
+
+  it('returns 404 (and does not overwrite) when caller lacks read access to existing chunks', async () => {
+    const gatedDoc = { ...sampleDocument, id: 'chunk-1', spaces: ['test-space'] };
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([gatedDoc]);
+    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([['chunk-1', false]]));
+
+    const response = await callHandler({ params: validParams, body: validBody });
+
+    expect(mockSmlService.checkItemsAccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ids: ['chunk-1'],
+        spaceId: 'test-space',
+      })
+    );
+    expect(response.notFound).toHaveBeenCalledWith({
+      body: { message: "SML origin 'visualization/viz-1' not found" },
+    });
+    expect(mockSmlService.indexAttachment).not.toHaveBeenCalled();
+  });
+
+  it('skips checkItemsAccess for a fresh create (no existing chunks)', async () => {
+    // A brand-new origin has nothing to read-gate — the privilege check
+    // would have to short-circuit anyway. Asserting it isn't called
+    // both avoids a wasted ES round-trip and documents the contract.
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
+    mockSmlService.indexAttachment.mockResolvedValue(undefined);
+    mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
+
+    await callHandler({
+      params: { type: 'visualization', originId: 'viz-new' },
+      body: validBody,
+    });
+
+    expect(mockSmlService.checkItemsAccess).not.toHaveBeenCalled();
+    expect(mockSmlService.indexAttachment).toHaveBeenCalled();
+  });
+
+  it('accepts an unregistered type and writes it through the indexer (which stamps empty permissions)', async () => {
+    // Any identifier regex-valid type passes schema validation; the
+    // indexer stamps empty permissions for unregistered types (covered
+    // by the indexer's own tests).
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
+    mockSmlService.indexAttachment.mockResolvedValue(undefined);
+    mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
+
+    const response = await callHandler({
+      params: { type: 'my_notes', originId: 'note-1' },
+      body: validBody,
+    });
+
+    expect(response.ok).toHaveBeenCalled();
+    expect(mockSmlService.indexAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ attachmentType: 'my_notes' })
+    );
+    expect(response.badRequest).not.toHaveBeenCalled();
+  });
+
+  it('exposes the type identifier regex on the route params schema', () => {
+    // Syntactic guard at the route layer — the indexer is permissive
+    // about *whether* a type is registered, but the params schema
+    // still refuses junk values (slashes, uppercase, leading digits)
+    // from leaking in as durable chunk namespaces. The httpServerMock
+    // test setup bypasses schema validation entirely, so we extract
+    // and exercise the schema directly here.
+    const [routeConfig] = router.put.mock.calls[0];
+    const paramsSchema = (routeConfig as any).validate.params;
+    expect(() => paramsSchema.validate({ type: 'BadType/slash', originId: 'a' })).toThrow(
+      /lowercase identifier/
+    );
+    expect(() => paramsSchema.validate({ type: '1startswithdigit', originId: 'a' })).toThrow(
+      /lowercase identifier/
+    );
+    expect(() => paramsSchema.validate({ type: 'my_notes', originId: 'a' })).not.toThrow();
+    expect(() => paramsSchema.validate({ type: 'visualization', originId: 'a' })).not.toThrow();
+  });
+
+  it('rejects body/param payloads that overflow the maxLength caps', () => {
+    // Pin each cap so a future refactor can't silently drop them. Testing at length+1
+    // keeps assertions agnostic of the literal MAX_SML_* values.
+    const [routeConfig] = router.put.mock.calls[0];
+    const bodySchema = (routeConfig as any).validate.body;
+    const paramsSchema = (routeConfig as any).validate.params;
+
+    // title cap: > MAX_SML_TITLE_LENGTH (1024) chars
+    expect(() => bodySchema.validate({ title: 'x'.repeat(1025), content: 'c' })).toThrow(/title/);
+
+    // content cap: > MAX_SML_CONTENT_LENGTH (50_000) chars
+    expect(() => bodySchema.validate({ title: 't', content: 'x'.repeat(50_001) })).toThrow(
+      /content/
+    );
+
+    // type cap: > MAX_SML_TYPE_LENGTH (256) chars — even when the
+    // regex matches, the length envelope must bite. The type now lives
+    // in the URL params, not the body.
+    expect(() => paramsSchema.validate({ type: 'a'.repeat(257), originId: 'o' })).toThrow(/type/);
+
+    // originId URL param cap: > MAX_SML_ORIGIN_ID_LENGTH (512) chars.
+    expect(() => paramsSchema.validate({ type: 'lens', originId: 'x'.repeat(513) })).toThrow(
+      /originId/
+    );
   });
 
   it('falls back to default space when spaces plugin is unavailable', async () => {
@@ -127,21 +283,27 @@ describe('registerUpsertRoute', () => {
 
     const [, localHandler] = localRouter.put.mock.calls[0];
     const request = httpServerMock.createKibanaRequest({
-      params: { id: 'chunk-1' },
+      params: validParams,
       body: validBody,
     });
     const response = httpServerMock.createResponseFactory();
 
-    mockSmlService.upsertDocument.mockResolvedValue({ document: sampleDocument, created: true });
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
+    mockSmlService.indexAttachment.mockResolvedValue(undefined);
+    mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
+
     await localHandler(buildMockContext(true), request, response);
-    expect(mockSmlService.upsertDocument).toHaveBeenCalledWith(
-      expect.objectContaining({ spaceId: 'default' })
+
+    expect(mockSmlService.indexAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ spaces: ['default'] })
     );
   });
 
-  it('propagates errors from sml.upsertDocument', async () => {
-    mockSmlService.upsertDocument.mockRejectedValue(new Error('write failed'));
-    await expect(callHandler({ params: { id: 'chunk-1' }, body: validBody })).rejects.toThrow(
+  it('propagates unexpected errors from sml.indexAttachment', async () => {
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
+    mockSmlService.indexAttachment.mockRejectedValue(new Error('write failed'));
+
+    await expect(callHandler({ params: validParams, body: validBody })).rejects.toThrow(
       'write failed'
     );
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('write failed'));

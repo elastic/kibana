@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import type { EuiPageHeaderProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -15,7 +16,6 @@ import { useLocation } from 'react-router-dom';
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
-import { EnvironmentsContextProvider } from '../../../../context/environments_context/environments_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { ServiceGroupSaveButton } from '../../../app/service_groups';
@@ -24,6 +24,11 @@ import { getNoDataConfig } from '../no_data_config';
 
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
+
+// Garantee's responsiveness of the header content
+const headerContentStyles = css`
+  contain: inline-size;
+`;
 
 /*
  * This template contains:
@@ -138,7 +143,7 @@ export function ApmMainTemplate({
   const callerChildren = pageHeader?.children;
   const callerTabs = pageHeader?.tabs;
   const headerChildren = (
-    <>
+    <div css={headerContentStyles}>
       {callerChildren}
       {callerTabs && callerTabs.length > 0 && (
         <EuiTabs bottomBorder={false} size="m">
@@ -155,26 +160,24 @@ export function ApmMainTemplate({
           {searchBar}
         </>
       )}
-    </>
+    </div>
   );
 
   return (
-    <EnvironmentsContextProvider>
-      <ObservabilityPageTemplate
-        noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
-        isPageDataLoaded={isLoading === false}
-        pageHeader={{
-          ...pageHeader,
-          color: 'subdued' as unknown as EuiPageHeaderProps['color'],
-          tabs: undefined,
-          rightSideItems: [],
-          pageTitle: titleWithActions,
-          children: headerChildren,
-        }}
-        {...pageTemplateProps}
-      >
-        {children}
-      </ObservabilityPageTemplate>
-    </EnvironmentsContextProvider>
+    <ObservabilityPageTemplate
+      noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
+      isPageDataLoaded={isLoading === false}
+      pageHeader={{
+        ...pageHeader,
+        color: 'subdued' as unknown as EuiPageHeaderProps['color'],
+        tabs: undefined,
+        rightSideItems: [],
+        pageTitle: titleWithActions,
+        children: headerChildren,
+      }}
+      {...pageTemplateProps}
+    >
+      {children}
+    </ObservabilityPageTemplate>
   );
 }

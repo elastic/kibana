@@ -21,6 +21,7 @@ import {
   processStaticItems,
 } from './utils';
 import { APP_MENU_ITEM_LIMIT } from './constants';
+import { APP_MENU_TEST_SUBJECTS } from './test_subjects';
 import type { AppMenuItemType, AppMenuPopoverItem, AppMenuSwitch } from './types';
 
 describe('utils', () => {
@@ -31,7 +32,7 @@ describe('utils', () => {
     beforeEach(() => {
       triggerElement = document.createElement('button');
       overflowButton = document.createElement('button');
-      overflowButton.setAttribute('data-test-subj', 'app-menu-overflow-button');
+      overflowButton.setAttribute('data-test-subj', APP_MENU_TEST_SUBJECTS.overflowButton);
     });
 
     afterEach(() => {
@@ -438,6 +439,16 @@ describe('utils', () => {
 
       expect(result.toolTipContent).toBe('Content');
       expect(result.toolTipProps?.title).toBe('Title');
+    });
+
+    it('should set danger color when isDestructive is true', () => {
+      const result = mapAppMenuItemToPanelItem({ ...baseItem, isDestructive: true });
+      expect(result.color).toBe('danger');
+    });
+
+    it('should not set color when isDestructive is falsy', () => {
+      const result = mapAppMenuItemToPanelItem(baseItem);
+      expect(result.color).toBeUndefined();
     });
   });
 

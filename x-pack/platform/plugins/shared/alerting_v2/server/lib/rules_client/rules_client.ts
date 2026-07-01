@@ -13,10 +13,13 @@ import {
   updateRuleDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
-import { Request } from '@kbn/core-di-server';
+import { Request, PluginInitializer } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
+import type {
+  KibanaRequest as CoreKibanaRequest,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
@@ -27,11 +30,18 @@ import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
+import { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
+import type { EventRule } from '../events/rule_event_publisher/rule_event_publisher';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
-import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
+import {
+  RulesSavedObjectServiceInternalToken,
+  RulesSavedObjectServiceScopedToken,
+} from '../services/rules_saved_object_service/tokens';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
+import type { PluginConfig } from '../../config';
+import { convertEveryToSchedulesPerMinute, parseDurationToMs } from '../duration';
 import { buildRuleSoFilter } from './build_rule_filter';
 import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
 import type {
@@ -82,6 +92,8 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
 
 @injectable()
 export class RulesClient {
+  private readonly config: PluginConfig;
+
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
     @inject(RulesSavedObjectServiceScopedToken)
@@ -89,11 +101,103 @@ export class RulesClient {
     @inject(PluginStart<TaskManagerStartContract>('taskManager'))
     private readonly taskManager: TaskManagerStartContract,
     @inject(UserService) private readonly userService: UserServiceContract,
-    @inject(RequestSpaceIdToken) private readonly spaceId: string
-  ) {}
+    @inject(RequestSpaceIdToken) private readonly spaceId: string,
+    @inject(PluginInitializer('config'))
+    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config'],
+    @inject(RulesSavedObjectServiceInternalToken)
+    private readonly rulesSavedObjectServiceInternal: RulesSavedObjectServiceContract,
+    @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher
+  ) {
+    this.config = pluginConfigAccessor.get<PluginConfig>();
+  }
 
   private getSpaceContext(): { spaceId: string } {
     return { spaceId: this.spaceId };
+  }
+
+  /**
+   * Validates a rule's schedule against the configured guardrails: the interval
+   * may not be shorter than `minimumScheduleInterval`, and (when `checkLimit`)
+   * scheduling it may not push the cluster past `maxScheduledPerMinute`. The
+   * limit is only relevant when the rule contributes to the scheduled load
+   * (i.e. it is, or is becoming, enabled).
+   */
+  private async validateSchedule({
+    updatedEvery,
+    prevEvery,
+    checkLimit,
+  }: {
+    updatedEvery: string;
+    prevEvery?: string;
+    checkLimit: boolean;
+  }): Promise<void> {
+    this.assertScheduleIntervalAllowed(updatedEvery);
+    if (checkLimit) {
+      await this.assertScheduleLimitNotExceeded({ updatedEvery, prevEvery });
+    }
+  }
+
+  /**
+   * Rejects a rule whose `schedule.every` is shorter than the configured
+   * `xpack.alerting_v2.rules.minimumScheduleInterval`.
+   */
+  private assertScheduleIntervalAllowed(every: string): void {
+    const { minimumScheduleInterval } = this.config.rules;
+    const everyMs = parseDurationToMs(every);
+    const minimumMs = parseDurationToMs(minimumScheduleInterval);
+
+    if (Number.isFinite(everyMs) && everyMs < minimumMs) {
+      throw Boom.badRequest(
+        `Rule schedule interval of "${every}" is shorter than the allowed minimum of "${minimumScheduleInterval}"`,
+        {
+          code: ALERTING_V2_ERROR_CODES.SCHEDULE_INTERVAL_TOO_SHORT,
+          details: { interval: every, minimumScheduleInterval },
+        }
+      );
+    }
+  }
+
+  /**
+   * Rejects a rule whose schedule would push the total number of rule runs per
+   * minute across all spaces past the configured
+   * `xpack.alerting_v2.rules.maxScheduledPerMinute`. When editing an
+   * already-scheduled rule, its previous schedule is added back before
+   * comparing so an unchanged or relaxed schedule is never rejected.
+   */
+  private async assertScheduleLimitNotExceeded({
+    updatedEvery,
+    prevEvery,
+  }: {
+    updatedEvery: string;
+    prevEvery?: string;
+  }): Promise<void> {
+    const { maxScheduledPerMinute } = this.config.rules;
+
+    const updatedSchedulesPerMinute = convertEveryToSchedulesPerMinute(updatedEvery);
+    const prevSchedulesPerMinute = prevEvery ? convertEveryToSchedulesPerMinute(prevEvery) : 0;
+
+    // An unchanged or less-frequent schedule adds no scheduled load, so it can
+    // never breach the limit. Skip the cluster-wide scan in that case (the
+    // previous schedule is already counted in the total).
+    if (updatedSchedulesPerMinute <= prevSchedulesPerMinute) {
+      return;
+    }
+
+    const totalScheduledPerMinute =
+      await this.rulesSavedObjectServiceInternal.getTotalScheduledPerMinute();
+
+    const remainingSchedulesPerMinute =
+      Math.max(maxScheduledPerMinute - totalScheduledPerMinute, 0) + prevSchedulesPerMinute;
+
+    if (updatedSchedulesPerMinute > remainingSchedulesPerMinute) {
+      throw Boom.badRequest(
+        `Rule schedule of "${updatedEvery}" would exceed the limit of ${maxScheduledPerMinute} rule runs per minute`,
+        {
+          code: ALERTING_V2_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
+          details: { interval: updatedEvery, maxScheduledPerMinute },
+        }
+      );
+    }
   }
 
   private parseRuleData<T>(
@@ -190,6 +294,9 @@ export class RulesClient {
       updatedAt: nowIso,
     });
 
+    // A freshly created rule is always enabled, so it always counts towards the limit.
+    await this.validateSchedule({ updatedEvery: ruleAttributes.schedule.every, checkLimit: true });
+
     let created: { id: string; version?: string };
     try {
       created = await this.rulesSavedObjectService.create({
@@ -220,7 +327,9 @@ export class RulesClient {
       throw e;
     }
 
-    return transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes, version);
+    const rule = transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes, version);
+    this.ruleEventPublisher.emitRuleCreated(this.request, [{ id: rule.id, spaceId: this.spaceId }]);
+    return rule;
   }
 
   @withApm
@@ -250,6 +359,12 @@ export class RulesClient {
       updatedAt: nowIso,
     });
 
+    await this.validateSchedule({
+      updatedEvery: nextAttrs.schedule.every,
+      prevEvery: existingAttrs.schedule.every,
+      checkLimit: existingAttrs.enabled,
+    });
+
     await this.scheduleRuleExecutorTask({
       ruleId: id,
       spaceId,
@@ -262,7 +377,18 @@ export class RulesClient {
       version: options?.version ?? existingVersion,
     });
 
-    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+
+    // The update path always emits `ruleUpdated` and never distinguishes
+    // enable/disable — lifecycle transitions are owned by the dedicated
+    // enableRule/disableRule endpoints.
+    if (Object.keys(parsed).length > 0) {
+      this.ruleEventPublisher.emitRuleUpdated(this.request, [
+        { id: rule.id, spaceId: this.spaceId },
+      ]);
+    }
+
+    return rule;
   }
 
   @withApm
@@ -304,17 +430,16 @@ export class RulesClient {
   public async deleteRule({ id }: { id: string }): Promise<void> {
     const { spaceId } = this.getSpaceContext();
 
-    if (!(await this.ruleExists({ id }))) {
-      throw Boom.notFound(`Rule with id "${id}" not found`, {
-        code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
-        details: { rule_id: id },
-      });
-    }
+    // Assert the rule exists (surfaces an enriched RULE_NOT_FOUND 404) before
+    // touching the task or emitting. Only the id is needed for the event payload.
+    await this.getExistingRule(id);
 
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
     await this.taskManager.removeIfExists(taskId);
 
     await this.rulesSavedObjectService.delete({ id });
+
+    this.ruleEventPublisher.emitRuleDeleted(this.request, [{ id, spaceId: this.spaceId }]);
   }
 
   @withApm
@@ -333,6 +458,14 @@ export class RulesClient {
       updatedAt: nowIso,
     };
 
+    // Re-enabling an already-enabled rule is intentionally not short-circuited:
+    // it re-writes the SO and re-ensures the executor task (self-heal), and still
+    // emits `ruleEnabled`. Only count new scheduled load on an actual transition —
+    // an already-enabled rule already contributes to the total.
+    if (!existingAttrs.enabled) {
+      await this.validateSchedule({ updatedEvery: nextAttrs.schedule.every, checkLimit: true });
+    }
+
     await this.scheduleRuleExecutorTask({
       ruleId: id,
       spaceId,
@@ -345,7 +478,9 @@ export class RulesClient {
       version: existingVersion,
     });
 
-    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    this.ruleEventPublisher.emitRuleEnabled(this.request, [{ id: rule.id, spaceId: this.spaceId }]);
+    return rule;
   }
 
   @withApm
@@ -357,6 +492,9 @@ export class RulesClient {
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
 
+    // Disabling an already-disabled rule is intentionally not short-circuited: it
+    // re-writes the SO and removes the executor task (self-heal), and still emits
+    // `ruleDisabled`.
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: false,
@@ -373,7 +511,11 @@ export class RulesClient {
       version: existingVersion,
     });
 
-    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    this.ruleEventPublisher.emitRuleDisabled(this.request, [
+      { id: rule.id, spaceId: this.spaceId },
+    ]);
+    return rule;
   }
 
   @withApm
@@ -502,6 +644,7 @@ export class RulesClient {
     }
 
     const deleteResults = await this.rulesSavedObjectService.bulkDelete(ids);
+    const deletedRules: EventRule[] = [];
     for (const result of deleteResults) {
       if (!result.success) {
         errors.push({
@@ -511,12 +654,19 @@ export class RulesClient {
             statusCode: result.error.statusCode,
           },
         });
+        continue;
       }
+      deletedRules.push({ id: result.id, spaceId });
     }
+
+    this.ruleEventPublisher.emitRuleDeleted(this.request, deletedRules);
 
     return { rules: [], errors, ...this.bulkFilterResponseFields(resolution) };
   }
 
+  // NOTE: The minimumScheduleInterval / maxScheduledPerMinute guardrails are
+  // enforced on the single-rule write paths (create / update / upsert / enable).
+  // Bulk enable does not re-check them; see https://github.com/elastic/rna-program/issues/585.
   @withApm
   public async bulkEnableRules(params: BulkRulesParams): Promise<BulkOperationResponse> {
     const { spaceId } = this.getSpaceContext();
@@ -568,6 +718,10 @@ export class RulesClient {
     if (itemsToUpdate.length > 0) {
       const updateResults = await this.rulesSavedObjectService.bulkUpdate(itemsToUpdate);
 
+      // Rules that actually transitioned to enabled (excludes already-enabled
+      // no-ops and failed updates) — emitted as workflow events below.
+      const enabledRules: EventRule[] = [];
+
       const tasksToSchedule: Array<{
         id: string;
         taskType: string;
@@ -593,7 +747,9 @@ export class RulesClient {
           continue;
         }
 
-        rules.push(transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs));
+        const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
+        rules.push(rule);
+        enabledRules.push({ id: rule.id, spaceId });
 
         tasksToSchedule.push({
           id: getRuleExecutorTaskId({ ruleId: item.id, spaceId }),
@@ -615,6 +771,8 @@ export class RulesClient {
           // Task scheduling failure is non-fatal for bulk operations
         }
       }
+
+      this.ruleEventPublisher.emitRuleEnabled(this.request, enabledRules);
     }
 
     return { rules, errors, ...this.bulkFilterResponseFields(resolution) };
@@ -625,6 +783,10 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
     const errors: BulkOperationError[] = [];
     const rules: RuleResponse[] = [];
+    // Rules that actually transitioned to disabled (excludes already-disabled
+    // no-ops and failed updates) — used for both task disabling and the emit.
+    const disabledRules: EventRule[] = [];
+    const disabledTaskIds: string[] = [];
     const resolution = await this.resolveRuleIds(params);
     const { ids } = resolution;
 
@@ -686,15 +848,14 @@ export class RulesClient {
           continue;
         }
 
-        rules.push(transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs));
+        const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
+        rules.push(rule);
+        disabledRules.push({ id: rule.id, spaceId });
+        disabledTaskIds.push(getRuleExecutorTaskId({ ruleId: item.id, spaceId }));
       }
     }
 
     // Disable tasks for the successfully disabled rules (best-effort)
-    const disabledTaskIds = itemsToUpdate
-      .filter((item) => !errors.some((e) => e.id === item.id))
-      .map((item) => getRuleExecutorTaskId({ ruleId: item.id, spaceId }));
-
     if (disabledTaskIds.length > 0) {
       try {
         await this.taskManager.bulkDisable(disabledTaskIds);
@@ -702,6 +863,8 @@ export class RulesClient {
         // Task disable failure is non-fatal for bulk operations
       }
     }
+
+    this.ruleEventPublisher.emitRuleDisabled(this.request, disabledRules);
 
     return { rules, errors, ...this.bulkFilterResponseFields(resolution) };
   }
@@ -739,6 +902,12 @@ export class RulesClient {
       updatedAt: nowIso,
     });
 
+    await this.validateSchedule({
+      updatedEvery: nextAttrs.schedule.every,
+      prevEvery: existingAttrs.schedule.every,
+      checkLimit: existingAttrs.enabled,
+    });
+
     await this.scheduleRuleExecutorTask({
       ruleId: id,
       spaceId,
@@ -751,9 +920,8 @@ export class RulesClient {
       version: existingVersion,
     });
 
-    return {
-      rule: transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion),
-      created: false,
-    };
+    const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    this.ruleEventPublisher.emitRuleUpdated(this.request, [{ id: rule.id, spaceId: this.spaceId }]);
+    return { rule, created: false };
   }
 }

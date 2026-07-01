@@ -1,0 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ChangeHistoryDetail } from './change_history_detail';
+import type {
+  GetChangeParams,
+  ListChangeHistoryParams,
+  ListChangeHistoryResult,
+} from './list_change_history_params';
+import type { RestoreChangeParams } from './restore_change_params';
+
+/** Integration surface between a domain plugin and the shared UI. */
+export interface ChangeHistoryAdapter {
+  /**
+   * Returns paginated changes for the object.
+   *
+   * `items` MUST be in descending timestamp order (newest first). Required for
+   * compare-with-previous preview (`findPreviousChangeId`) and timeline display.
+   */
+  listChanges: (params: ListChangeHistoryParams) => Promise<ListChangeHistoryResult>;
+  getChange: (params: GetChangeParams) => Promise<ChangeHistoryDetail>;
+  restoreChange?: (params: RestoreChangeParams) => Promise<void>;
+}
