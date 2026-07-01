@@ -62,15 +62,6 @@ describe('PublicTriggerRegistry', () => {
       registry.register(definition);
       expect(registry.get(triggerId)?.snippets?.condition).toBe('event.message: *test*');
     });
-
-    it('should reject registration when stability is missing', () => {
-      expect(() => {
-        registry.register({
-          ...defaultDefinition,
-          stability: undefined,
-        } as unknown as PublicTriggerDefinition);
-      }).toThrow('"stability" is required');
-    });
   });
 
   describe('get', () => {

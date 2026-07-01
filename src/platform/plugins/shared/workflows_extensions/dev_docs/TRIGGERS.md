@@ -60,7 +60,7 @@ export const commonMyTriggerDefinition: CommonTriggerDefinition = {
 };
 ```
 
-- Set `stability: 'tech_preview'` on every trigger (required). Until event-driven triggers GA, registration accepts only `'tech_preview'`. After GA, promote production-ready triggers to `stability: 'stable'`.
+- Set `stability` (required) to `'tech_preview'`, `'beta'`, or `'stable'` based on the trigger's maturity. Use `'stable'` for GA triggers (no badge in the editor).
 - Use `.describe()` on schema fields so the UI and docs show helpful text.
 - `eventSchema` must be a Zod object schema; payloads are validated at emit time.
 - When you provide `documentation.examples`, each example must only reference fields present on `eventSchema` (agents pattern-match YAML examples).
