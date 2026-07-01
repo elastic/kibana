@@ -10,9 +10,11 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { connectorsSpecs } from '@kbn/connector-specs';
-import type { ConnectorSpec } from '@kbn/connector-specs';
-import { supportsAgentBuilder } from './utils';
+import { AgentBuilderConnectorFeatureId } from '@kbn/actions-plugin/common';
+import type { ActionType } from '@kbn/actions-plugin/common';
+import { getConnectorSpec } from '@kbn/connector-specs';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { getConnectorTypeDisplayName, isConnectorTypeAvailable } from './utils';
 
 interface ListedConnectorAction {
   name: string;
@@ -29,25 +31,32 @@ interface ListedConnectorType {
   tool_actions: ListedConnectorAction[];
 }
 
-const isConnectorSpec = (value: unknown): value is ConnectorSpec =>
-  !!value && typeof value === 'object' && 'metadata' in value && 'actions' in value;
+const projectConnectorType = (actionType: ActionType): ListedConnectorType => {
+  const spec = getConnectorSpec(actionType.id);
 
-const projectConnectorType = (spec: ConnectorSpec): ListedConnectorType => ({
-  connector_type: spec.metadata.id,
-  name: spec.metadata.displayName,
-  description: spec.metadata.description,
-  minimum_license: spec.metadata.minimumLicense,
-  technical_preview: spec.metadata.isTechnicalPreview ?? false,
-  auth_methods: (spec.auth?.types ?? []).map((authType) =>
+  const authMethods = (spec?.auth?.types ?? []).map((authType) =>
     typeof authType === 'string' ? authType : authType.type
-  ),
-  tool_actions: Object.entries(spec.actions)
-    .filter(([, action]) => action.isTool)
-    .map(([actionName, action]) => ({
-      name: actionName,
-      description: action.description ?? actionName,
-    })),
-});
+  );
+
+  const toolActions = spec
+    ? Object.entries(spec.actions)
+        .filter(([, action]) => action.isTool)
+        .map(([actionName, action]) => ({
+          name: actionName,
+          description: action.description ?? actionName,
+        }))
+    : [];
+
+  return {
+    connector_type: actionType.id,
+    name: getConnectorTypeDisplayName(actionType),
+    description: spec?.metadata.description ?? actionType.description ?? '',
+    minimum_license: actionType.minimumLicenseRequired,
+    technical_preview: actionType.isExperimental ?? spec?.metadata.isTechnicalPreview ?? false,
+    auth_methods: authMethods,
+    tool_actions: toolActions,
+  };
+};
 
 const listConnectorTypesSchema = z.object({}).describe('No parameters.');
 
@@ -56,18 +65,15 @@ export type ListConnectorTypesInput = z.infer<typeof listConnectorTypesSchema>;
 /**
  * Inline tool that enumerates the connector types the agent can create from chat.
  *
- * Only spec-backed connector types ({@link https://github.com/elastic/kibana | @kbn/connector-specs})
- * that declare support for Agent Builder are returned, because those are the
- * ones the agent can subsequently *use* (their tool sub-actions are described by
- * the spec). The `connector-authoring` skill mandates calling this BEFORE
- * `propose_connector` so the draft references a real connector type id.
- *
- * Deployment-level enablement/licensing is enforced later by the connector
- * flyout the user completes — this list reflects the full spec catalog.
+ * Lists Agent Builder connector types from the Actions registry (same source as
+ * the Connectors UI), enriched from `@kbn/connector-specs` when a spec exists.
+ * Filtered by {@link isConnectorTypeAvailable}. Call before `propose_connector`.
  */
-export const createListConnectorTypesTool = (): BuiltinSkillBoundedTool<
-  typeof listConnectorTypesSchema
-> => ({
+export const createListConnectorTypesTool = ({
+  getActionsStart,
+}: {
+  getActionsStart: () => Promise<ActionsPluginStart>;
+}): BuiltinSkillBoundedTool<typeof listConnectorTypesSchema> => ({
   id: 'list_connector_types',
   type: ToolType.builtin,
   description:
@@ -76,9 +82,10 @@ export const createListConnectorTypesTool = (): BuiltinSkillBoundedTool<
   confirmation: { askUser: 'never' },
   handler: async () => {
     try {
-      const connectorTypes = Object.values(connectorsSpecs)
-        .filter(isConnectorSpec)
-        .filter(supportsAgentBuilder)
+      const actionsStart = await getActionsStart();
+      const connectorTypes = actionsStart
+        .listTypes(AgentBuilderConnectorFeatureId)
+        .filter((t) => isConnectorTypeAvailable(t))
         .map(projectConnectorType)
         .sort((a, b) => a.name.localeCompare(b.name));
 

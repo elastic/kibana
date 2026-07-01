@@ -50,7 +50,11 @@ export class AgentBuilderPlatformPlugin
       coreSetup,
       setupDeps,
     });
-    registerSkills(setupDeps.agentBuilder);
+    const getActionsStart = async () => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return startDeps.actions;
+    };
+    registerSkills(setupDeps.agentBuilder, getActionsStart);
     setupDeps.agentContextLayer.registerType(visualizationSmlType);
 
     const connectorSmlType = createConnectorSmlType({
