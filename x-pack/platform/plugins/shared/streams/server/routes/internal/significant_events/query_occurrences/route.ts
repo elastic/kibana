@@ -9,7 +9,7 @@ import type {
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/significant-events-schema';
-import { TaskStatus, deriveQueryType } from '@kbn/streams-schema';
+import { MAX_STREAM_NAME_LENGTH, TaskStatus, deriveQueryType } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/significant_events/helpers/fill_bucket_gaps';
 import { fetchQueryOccurrencesFromAlerts } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
@@ -27,7 +27,10 @@ import { handleTaskAction } from '../../../utils/task_helpers';
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
-const dateFromString = z.string().transform((input) => new Date(input));
+const dateFromString = z
+  .string()
+  .max(100)
+  .transform((input) => new Date(input));
 
 /**
  * Guards against stale task results from a previous Kibana version that stored
@@ -56,7 +59,9 @@ const sanitizeTaskResult = (
 const significantEventsQueriesGenerationStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/significant_events/_status',
   params: z.object({
-    path: z.object({ name: z.string().describe('The name of the stream') }),
+    path: z.object({
+      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
+    }),
   }),
   options: {
     access: 'internal',
@@ -96,7 +101,9 @@ const significantEventsQueriesGenerationStatusRoute = createServerRoute({
 const significantEventsQueriesGenerationTaskRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/significant_events/_task',
   params: z.object({
-    path: z.object({ name: z.string().describe('The name of the stream') }),
+    path: z.object({
+      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
+    }),
     body: taskActionSchema({
       from: dateFromString.describe('Start of the time range'),
       to: dateFromString.describe('End of the time range'),
@@ -168,11 +175,18 @@ const readQueryOccurrenceStatsRoute = createServerRoute({
       to: dateFromString.describe('End of the time range'),
       bucketSize: z
         .string()
+        .max(20)
         .regex(BUCKET_SIZE_PATTERN)
         .describe('Size of time buckets for aggregation'),
       query: z.string().max(4096).optional().describe('Query string to filter stream queries'),
       streamNames: z
-        .union([z.string().transform((val) => [val]), z.array(z.string())])
+        .union([
+          z
+            .string()
+            .max(MAX_STREAM_NAME_LENGTH)
+            .transform((val) => [val]),
+          z.array(z.string().max(MAX_STREAM_NAME_LENGTH)),
+        ])
         .optional()
         .describe('Stream names to filter results by'),
       searchMode: searchModeSchema,
