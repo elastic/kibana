@@ -56,7 +56,11 @@ import type {
 } from './types';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
-import { KnowledgeIndicatorService, initializeKnowledgeIndicatorsTemplate } from './lib/streams/ki';
+import {
+  type KnowledgeIndicatorClient,
+  KnowledgeIndicatorService,
+  initializeKnowledgeIndicatorsTemplate,
+} from './lib/streams/ki';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { TaskService } from './lib/tasks/task_service';
@@ -226,12 +230,13 @@ export class StreamsPlugin
           ? pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID)
           : undefined;
 
-      const resolveSigEventsAlertingContext = createSignificantEventsAlertingContextResolver({
-        uiSettingsClient,
-        getAlertingRulesClient,
-        getAlertingV2RulesClient,
-        logger: this.logger,
-      });
+      const resolveSignificantEventsAlertingContext =
+        createSignificantEventsAlertingContextResolver({
+          uiSettingsClient,
+          getAlertingRulesClient,
+          getAlertingV2RulesClient,
+          logger: this.logger,
+        });
 
       const createKnowledgeIndicatorClient = (context: SignificantEventsAlertingContext) =>
         knowledgeIndicatorService.getClient({
@@ -242,11 +247,15 @@ export class StreamsPlugin
         });
 
       let kiClientPromise: ReturnType<typeof createKnowledgeIndicatorClient> | undefined;
-      const getKnowledgeIndicatorClient = this.kiProvider
-        ? () => this.kiProvider!(request)
+      // The provider is typed as returning KnowledgeIndicatorClientContract (minimal interface) at
+      // the cross-plugin boundary, but every concrete provider (including the fallback below and
+      // the significant_events plugin in Stage 2) supplies a full KnowledgeIndicatorClient.
+      // The sig-events routes still living in streams need the full type until Stage 3 moves them.
+      const getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient> = this.kiProvider
+        ? () => this.kiProvider!(request) as Promise<KnowledgeIndicatorClient>
         : () => {
             kiClientPromise ??= (async () =>
-              createKnowledgeIndicatorClient(await resolveSigEventsAlertingContext()))();
+              createKnowledgeIndicatorClient(await resolveSignificantEventsAlertingContext()))();
             return kiClientPromise;
           };
 
@@ -272,7 +281,7 @@ export class StreamsPlugin
         soClient,
         attachmentClient,
         streamsClient,
-        getSignificantEventsAlertingContext: resolveSigEventsAlertingContext,
+        getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
         ...significantEventsClients,
         inferenceClient,
