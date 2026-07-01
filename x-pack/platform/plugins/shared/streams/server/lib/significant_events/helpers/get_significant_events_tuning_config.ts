@@ -43,7 +43,7 @@ export async function getSignificantEventsTuningConfig(
   // previous version) so they don't trigger a full reset via validateSignificantEventsTuningConfig.
   const knownKeys = new Set(Object.keys(SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS));
   const safeStored = Object.fromEntries(
-    Object.entries(stored).filter(([key]) => knownKeys.has(key))
+    Object.entries(stored ?? {}).filter(([key]) => knownKeys.has(key))
   ) as Partial<SignificantEventsTuningConfig>;
 
   const merged = { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, ...safeStored };
