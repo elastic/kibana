@@ -149,6 +149,48 @@ describe('Fleet server hosts secrets', () => {
         ],
       ]);
     });
+
+    it('should delete secrets when explicitly set to null', async () => {
+      const updatedFleetServerHost = {
+        ...fleetServerHost,
+        secrets: {
+          ssl: {
+            key: null,
+            es_key: null,
+          },
+        },
+      };
+      const res = await extractAndUpdateFleetServerHostsSecrets({
+        oldFleetServerHost: fleetServerHost,
+        fleetServerHostUpdate: updatedFleetServerHost,
+        esClient: esClientMock,
+      });
+      expect(res.secretReferences).toEqual([]);
+      expect(res.secretsToDelete).toEqual([{ id: 'key1' }, { id: 'key2' }]);
+      expect(res.fleetServerHostUpdate.secrets?.ssl?.key).toBeUndefined();
+      expect(res.fleetServerHostUpdate.secrets?.ssl?.es_key).toBeUndefined();
+      expect(esClientMock.transport.request.mock.calls).toEqual([]);
+    });
+
+    it('should not delete anything when null is sent for a never-set secret field', async () => {
+      const updatedFleetServerHost = {
+        ...fleetServerHost,
+        secrets: {
+          ssl: {
+            agent_key: null,
+          },
+        },
+      };
+      const res = await extractAndUpdateFleetServerHostsSecrets({
+        oldFleetServerHost: fleetServerHost,
+        fleetServerHostUpdate: updatedFleetServerHost,
+        esClient: esClientMock,
+      });
+      expect(res.secretReferences).toEqual([]);
+      expect(res.secretsToDelete).toEqual([]);
+      expect(res.fleetServerHostUpdate.secrets?.ssl?.agent_key).toBeUndefined();
+      expect(esClientMock.transport.request.mock.calls).toEqual([]);
+    });
   });
   describe('deleteFleetServerHostsSecrets', () => {
     it('should delete existing secrets', async () => {

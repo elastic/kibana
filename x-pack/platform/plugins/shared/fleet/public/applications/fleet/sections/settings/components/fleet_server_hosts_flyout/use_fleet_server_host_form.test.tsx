@@ -225,4 +225,45 @@ describe('useFleetServerHostsForm', () => {
     await act(() => result.current.submit());
     await testRenderer.waitFor(() => expect(onSuccess).toBeCalled());
   });
+
+  it('should send explicit null when clearing an existing ssl secret key', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    const onSuccess = jest.fn();
+    testRenderer.startServices.http.put.mockResolvedValue({});
+    const { result } = testRenderer.renderHook(() =>
+      useFleetServerHostsForm(
+        {
+          id: 'id1',
+          name: 'fleet server 1',
+          host_urls: ['https://test.fr'],
+          is_default: false,
+          is_preconfigured: false,
+          secrets: {
+            ssl: {
+              key: { id: 'secret-key-id-123' },
+            },
+          },
+        },
+        onSuccess
+      )
+    );
+
+    act(() => result.current.inputs.sslKeySecretInput.setValue(''));
+
+    await act(() => result.current.submit());
+
+    await testRenderer.waitFor(() => {
+      expect(onSuccess).toBeCalled();
+      expect(testRenderer.startServices.http.put).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          secrets: expect.objectContaining({
+            ssl: expect.objectContaining({
+              key: null,
+            }),
+          }),
+        })
+      );
+    });
+  });
 });
