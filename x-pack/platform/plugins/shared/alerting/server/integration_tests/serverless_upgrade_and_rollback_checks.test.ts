@@ -10,7 +10,7 @@ import {
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import { uniq } from 'lodash';
-import { z } from '@kbn/zod/v4';
+import { z, setLazySchemaDisabled } from '@kbn/zod/v4';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { setupTestServers } from './lib';
 import type { RuleTypeRegistry } from '../rule_type_registry';
@@ -71,68 +71,6 @@ const ruleTypesInSecurityProjects: string[] = [
   'siem.newTermsRule',
 ];
 
-/**
- * Replaces lazySchema Proxy wrappers with real Zod schema instances so that
- * z.toJSONSchema() works correctly.
- *
- * lazySchema() wraps schemas in a Proxy (target: empty `{}`). z.toJSONSchema()
- * keys its internal seen-map by object identity: it stores the proxy, but the
- * processJSONSchema closure captures the real materialized instance — so the
- * lookup fails and throws. Converting proxies to real instances before calling
- * z.toJSONSchema() avoids the mismatch.
- *
- * Assumption: only the top-level schema is proxy-wrapped, and its materialized
- * children are already real (non-proxy) instances. That holds for all current
- * rule-type params schemas — which is why the proxy branch below rebuilds the
- * top node from its def without descending into children.
- *
- * If a future rule type nests a lazySchema-wrapped schema inside its params,
- * z.toJSONSchema() could throw again with the same seen-map identity mismatch.
- * Naive recursion is not a safe fix here: Zod schemas can be self-referential
- * and this helper has no cycle guard, so it would need one before recursing
- * through proxies. The object/intersection branches below only fire for a real
- * (non-proxy) top-level schema and are retained for defensive completeness.
- */
-function resolveSchemaProxies(schema: z.ZodType): z.ZodType {
-  if (!schema || typeof schema !== 'object') return schema;
-
-  const zod = (
-    schema as unknown as {
-      _zod?: { def?: { type?: string }; constr?: new (def: unknown) => z.ZodType };
-    }
-  )._zod;
-  if (!zod?.def) return schema;
-
-  if (Object.getPrototypeOf(schema) === Object.prototype) {
-    // Proxy branch: rebuild the top node only.
-    return new zod.constr!(zod.def);
-  }
-
-  const def = zod.def as Record<string, unknown>;
-  switch (def.type) {
-    case 'intersection': {
-      const left = resolveSchemaProxies(def.left as z.ZodType);
-      const right = resolveSchemaProxies(def.right as z.ZodType);
-      if (left === def.left && right === def.right) return schema;
-      return new zod.constr!({ ...def, left, right });
-    }
-    case 'object': {
-      const shape = def.shape as Record<string, z.ZodType>;
-      const newShape: Record<string, z.ZodType> = {};
-      let changed = false;
-      for (const key of Object.keys(shape)) {
-        const resolved = resolveSchemaProxies(shape[key]);
-        newShape[key] = resolved;
-        if (resolved !== shape[key]) changed = true;
-      }
-      if (!changed) return schema;
-      return new zod.constr!({ ...def, shape: newShape });
-    }
-    default:
-      return schema;
-  }
-}
-
 describe('Serverless upgrade and rollback checks', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
@@ -142,6 +80,7 @@ describe('Serverless upgrade and rollback checks', () => {
   );
 
   beforeAll(async () => {
+    setLazySchemaDisabled(true);
     const setupResult = await setupTestServers();
     esServer = setupResult.esServer;
     kibanaServer = setupResult.kibanaServer;
@@ -152,6 +91,7 @@ describe('Serverless upgrade and rollback checks', () => {
   });
 
   afterAll(async () => {
+    setLazySchemaDisabled(false);
     if (kibanaServer) {
       await kibanaServer.stop();
     }
@@ -174,8 +114,7 @@ describe('Serverless upgrade and rollback checks', () => {
         let jsonSchema: Record<string, unknown>;
         if (schema && typeof schema === 'object' && '_zod' in schema) {
           // Zod v4 schema
-          const resolvedSchema = resolveSchemaProxies(schema as z.ZodType);
-          const { $schema, ...rest } = z.toJSONSchema(resolvedSchema, {
+          const { $schema, ...rest } = z.toJSONSchema(schema as z.ZodType, {
             unrepresentable: 'any',
             io: 'input',
             reused: 'ref',
