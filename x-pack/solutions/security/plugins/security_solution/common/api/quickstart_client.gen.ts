@@ -33,13 +33,13 @@ import type {
   SearchAttacksResponse,
 } from './detection_engine/attacks/search/search_route.gen';
 import type {
-  SetAttacksTagsRequestBodyInput,
-  SetAttacksTagsResponse,
-} from './detection_engine/attacks/set_tags/set_attacks_tags_route.gen';
-import type {
   SetAttacksAssigneesRequestBodyInput,
   SetAttacksAssigneesResponse,
 } from './detection_engine/attacks/set_assignees/set_assignees_route.gen';
+import type {
+  SetAttacksTagsRequestBodyInput,
+  SetAttacksTagsResponse,
+} from './detection_engine/attacks/set_tags/set_attacks_tags_route.gen';
 import type {
   SetAttacksStatusRequestBodyInput,
   SetAttacksStatusResponse,
