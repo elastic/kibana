@@ -81,16 +81,36 @@ const getBranchSteps = (branch: unknown): ParsedWorkflowStep[] | undefined => {
   return isWorkflowStepArray(steps) ? steps : undefined;
 };
 
+const countSiblingStepNames = (steps: ParsedWorkflowYaml['steps']): Map<string, number> => {
+  const nameCounts = new Map<string, number>();
+
+  if (!steps) {
+    return nameCounts;
+  }
+
+  for (const step of steps) {
+    if (isValidStepName(step.name)) {
+      nameCounts.set(step.name, (nameCounts.get(step.name) ?? 0) + 1);
+    }
+  }
+
+  return nameCounts;
+};
+
 const flattenSteps = (steps: ParsedWorkflowYaml['steps'], parentPath = ''): FlattenedStep[] => {
   if (!steps) {
     return [];
   }
 
+  const siblingNameCounts = countSiblingStepNames(steps);
   const flattened: FlattenedStep[] = [];
 
-  for (const step of steps) {
+  for (let index = 0; index < steps.length; index += 1) {
+    const step = steps[index];
     if (isValidStepName(step.name)) {
-      const path = parentPath ? `${parentPath}.${step.name}` : step.name;
+      const hasDuplicateSiblingName = (siblingNameCounts.get(step.name) ?? 0) > 1;
+      const pathSegment = hasDuplicateSiblingName ? `${step.name}[${index}]` : step.name;
+      const path = parentPath ? `${parentPath}.${pathSegment}` : pathSegment;
       flattened.push({ path, name: step.name, step });
 
       if ('steps' in step && isWorkflowStepArray(step.steps)) {

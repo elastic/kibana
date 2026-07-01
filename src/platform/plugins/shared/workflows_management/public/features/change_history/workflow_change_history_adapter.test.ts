@@ -145,7 +145,15 @@ describe('createWorkflowChangeHistoryAdapter', () => {
     expect(pageTwoResult.updatedItems).toEqual([
       expect.objectContaining({
         id: 'evt-current',
-        changes: { count: 1 },
+        changes: expect.objectContaining({
+          count: 1,
+          summary: [
+            {
+              title: 'Settings:',
+              lines: ['1 updated'],
+            },
+          ],
+        }),
       }),
     ]);
   });

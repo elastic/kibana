@@ -136,6 +136,39 @@ describe('computeWorkflowYamlChanges', () => {
     );
   });
 
+  it('counts changes for sibling steps that share the same name', () => {
+    const duplicateNamedSteps = (firstMessage: string, secondMessage: string): string =>
+      [
+        'name: workflow',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: foo',
+        '    type: console',
+        '    with:',
+        `      message: ${firstMessage}`,
+        '  - name: foo',
+        '    type: console',
+        '    with:',
+        `      message: ${secondMessage}`,
+      ].join('\n');
+
+    const result = computeWorkflowYamlChanges(
+      duplicateNamedSteps('hello', 'world'),
+      duplicateNamedSteps('hello', 'changed')
+    );
+
+    expect(result.count).toBe(1);
+    expect(result.summaryGroups).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          title: 'Steps:',
+          lines: expect.arrayContaining([expect.stringMatching(/updated/)]),
+        }),
+      ])
+    );
+  });
+
   it('does not treat reordered step keys as modifications', () => {
     const nameFirstStep = [
       'name: workflow',
