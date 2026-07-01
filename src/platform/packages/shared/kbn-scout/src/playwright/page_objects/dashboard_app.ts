@@ -227,10 +227,18 @@ export class DashboardApp {
   }
 
   async saveDashboard(name: string) {
-    await this.page.testSubj.click('dashboardInteractiveSaveMenuItem');
+    await this.clickAppMenuItem('dashboardInteractiveSaveMenuItem');
     await this.savedObjectTitleInput.fill(name);
     await this.confirmSaveButton.click();
     await expect(this.confirmSaveButton).toBeHidden();
+  }
+
+  private async clickAppMenuItem(testSubj: string) {
+    const item = this.page.testSubj.locator(testSubj);
+    if (!(await item.isVisible())) {
+      await this.page.testSubj.click('app-menu-overflow-button');
+    }
+    await item.click();
   }
 
   async saveChangesToExistingDashboard() {
@@ -544,7 +552,9 @@ export class DashboardApp {
    * Uses the data-render-complete attribute to determine panel rendering completion.
    */
   async waitForRenderComplete() {
-    await expect(this.dashboardViewport).toBeVisible();
+    // Dashboard viewport can be slow to appear on cold CI runs (see https://github.com/elastic/kibana/pull/275767);
+    // the default 10s flakes on slower agents. Revisit once the root cause is fixed.
+    await this.dashboardViewport.waitFor({ state: 'visible', timeout: 30_000 });
 
     await this.waitForControlsReady();
 
@@ -1032,7 +1042,7 @@ export class DashboardApp {
   // ============================================================
 
   async enterFullscreen() {
-    await this.page.testSubj.click('dashboardFullScreenMode');
+    await this.clickAppMenuItem('dashboardFullScreenMode');
     await expect(this.page.testSubj.locator('exitFullScreenModeButton')).toBeVisible();
   }
 

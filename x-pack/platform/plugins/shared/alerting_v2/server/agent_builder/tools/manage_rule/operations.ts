@@ -22,8 +22,28 @@ import {
   isStateTransitionAllowed,
   isSignalUsingStandaloneFormat,
   isSignalQueryBreachOnly,
+  isRecoveryQueryConsistentWithStrategy,
+  isRecoveryQueryProvidedForStrategy,
 } from '@kbn/alerting-v2-schemas';
 import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
+import { AGENT_BUILDER_TAG } from '../../common/constants';
+
+// Mirrors the `tagsSchema` cap in @kbn/alerting-v2-schemas (max 20 tags). Kept
+// local to avoid forcing an export purely for this guard.
+const MAX_RULE_TAGS = 20;
+
+/**
+ * Ensures the agent-builder provenance tag is present without clobbering any
+ * tags the user or LLM already set. Skips silently if the tag cap is already
+ * reached, so we never push a payload that fails schema validation.
+ */
+const withAgentBuilderTag = (tags: string[] | undefined): string[] => {
+  const existing = tags ?? [];
+  if (existing.includes(AGENT_BUILDER_TAG) || existing.length >= MAX_RULE_TAGS) {
+    return existing;
+  }
+  return [...existing, AGENT_BUILDER_TAG];
+};
 
 // ─── Operation schemas ────────────────────────────────────────────────────────
 // Every field-level schema is derived from the shared alerting-v2-schemas
@@ -171,10 +191,8 @@ export const executeRuleOperations = async (
         break;
       }
 
-      case 'set_query':
+      case 'set_query': {
         if (esClient) {
-          // Validate the root query (the one with the FROM clause) so column
-          // metadata is available for downstream set_grouping validation.
           lastQueryColumns = await validateEsqlQuery(esClient, getRootEsqlQuery(op.query));
         }
         next = {
@@ -185,7 +203,20 @@ export const executeRuleOperations = async (
             : {}),
           ...(op.no_data_strategy !== undefined ? { no_data_strategy: op.no_data_strategy } : {}),
         };
+
+        if (!isRecoveryQueryConsistentWithStrategy(next)) {
+          throw new RuleOperationValidationError(
+            'query.recovery is only allowed when recovery_strategy is "query".'
+          );
+        }
+        if (!isRecoveryQueryProvidedForStrategy(next)) {
+          throw new RuleOperationValidationError(
+            'recovery_strategy "query" requires a recovery block in the query ' +
+              '(recovery: { segment } for composed, recovery: { query } for standalone).'
+          );
+        }
         break;
+      }
 
       case 'set_grouping': {
         if (lastQueryColumns && lastQueryColumns.length > 0) {
@@ -240,6 +271,21 @@ export const executeRuleOperations = async (
     throw new RuleOperationValidationError(
       'A rule name is required when creating a new rule. Use a set_metadata operation with a name.'
     );
+  }
+
+  // Stamp the agent-builder provenance tag on every rule created or edited via
+  // Agent Builder so they can be measured (telemetry) and filtered in the Rules
+  // list. Merged after all operations so it never overwrites user/LLM-provided
+  // tags. Applied on edits too, so a rule that loses the tag regains it whenever
+  // the agent touches it.
+  if (next.metadata) {
+    next = {
+      ...next,
+      metadata: {
+        ...next.metadata,
+        tags: withAgentBuilderTag(next.metadata.tags),
+      },
+    };
   }
 
   if (!isStateTransitionAllowed(next)) {

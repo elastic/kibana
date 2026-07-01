@@ -126,6 +126,100 @@ describe('validateExtendedFields', () => {
     });
   });
 
+  describe('required_on_close flag', () => {
+    it('does not report an error when required_on_close field is empty (onClose not set)', () => {
+      const fields: FieldSchemaType[] = [
+        makeInputTextField({ validation: { required_on_close: true } }),
+      ];
+      const errors = validateExtendedFields({}, fields);
+      expect(errors).toEqual([]);
+    });
+
+    it('does not report an error when required_on_close field is an empty string (onClose not set)', () => {
+      const fields: FieldSchemaType[] = [
+        makeInputTextField({ validation: { required_on_close: true } }),
+      ];
+      const errors = validateExtendedFields({ summary_as_keyword: '' }, fields);
+      expect(errors).toEqual([]);
+    });
+
+    it('does not treat required_on_close as required even alongside required: false (onClose not set)', () => {
+      const fields: FieldSchemaType[] = [
+        makeInputTextField({ validation: { required: false, required_on_close: true } }),
+      ];
+      const errors = validateExtendedFields({}, fields);
+      expect(errors).toEqual([]);
+    });
+
+    it('reports error when required_on_close field is missing and onClose is true', () => {
+      const fields: FieldSchemaType[] = [
+        makeInputTextField({ validation: { required_on_close: true } }),
+      ];
+      // FAILURE SCENARIO: case is being closed but the required_on_close field was never filled
+      const errors = validateExtendedFields({}, fields, { onClose: true });
+      expect(errors).toContain('Field "Summary" is required');
+    });
+
+    it('reports error when required_on_close field is empty string and onClose is true', () => {
+      const fields: FieldSchemaType[] = [
+        makeInputTextField({ validation: { required_on_close: true } }),
+      ];
+      // FAILURE SCENARIO: field exists but was explicitly cleared before closing
+      const errors = validateExtendedFields({ summary_as_keyword: '' }, fields, { onClose: true });
+      expect(errors).toContain('Field "Summary" is required');
+    });
+
+    it('does not report error when required_on_close field has a value and onClose is true', () => {
+      const fields: FieldSchemaType[] = [
+        makeInputTextField({ validation: { required_on_close: true } }),
+      ];
+      const errors = validateExtendedFields({ summary_as_keyword: 'resolution notes' }, fields, {
+        onClose: true,
+      });
+      expect(errors).toEqual([]);
+    });
+
+    it('skips required_on_close for hidden fields when onClose is true', () => {
+      const fields: FieldSchemaType[] = [
+        makeInputTextField({ name: 'trigger', label: 'Trigger', type: 'keyword' }),
+        makeInputTextField({
+          name: 'summary',
+          label: 'Summary',
+          type: 'keyword',
+          display: {
+            show_when: { field: 'trigger', operator: 'eq', value: 'show_me' },
+          },
+          validation: { required_on_close: true },
+        }),
+      ];
+      // trigger is not 'show_me', so summary is hidden → skip required_on_close
+      const errors = validateExtendedFields({ trigger_as_keyword: 'other' }, fields, {
+        onClose: true,
+      });
+      expect(errors).toEqual([]);
+    });
+
+    it('enforces required_on_close for visible conditional fields when onClose is true', () => {
+      const fields: FieldSchemaType[] = [
+        makeInputTextField({ name: 'trigger', label: 'Trigger', type: 'keyword' }),
+        makeInputTextField({
+          name: 'summary',
+          label: 'Summary',
+          type: 'keyword',
+          display: {
+            show_when: { field: 'trigger', operator: 'eq', value: 'show_me' },
+          },
+          validation: { required_on_close: true },
+        }),
+      ];
+      // trigger equals 'show_me' → field is visible → required on close
+      const errors = validateExtendedFields({ trigger_as_keyword: 'show_me' }, fields, {
+        onClose: true,
+      });
+      expect(errors).toContain('Field "Summary" is required');
+    });
+  });
+
   describe('required_when condition', () => {
     it('treats field as required when required_when evaluates to true', () => {
       const fields: FieldSchemaType[] = [

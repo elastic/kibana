@@ -12,6 +12,7 @@ import {
   RuleOperationValidationError,
   type RuleOperation,
 } from './operations';
+import { AGENT_BUILDER_TAG } from '../../common/constants';
 
 const createMockEsClient = () => elasticsearchServiceMock.createScopedClusterClient();
 
@@ -179,6 +180,142 @@ describe('executeRuleOperations', () => {
     });
   });
 
+  describe('set_query with composed format', () => {
+    it('validates composed query using base for the LIMIT 0 call', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [
+          { name: 'host.name', type: 'keyword' },
+          { name: 'avg_cpu', type: 'double' },
+        ],
+        values: [],
+      } as never);
+
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'composed',
+            base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
+            breach: { segment: 'WHERE avg_cpu > 0.9' },
+          },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops, esClient);
+
+      expect(esClient.asCurrentUser.esql.query).toHaveBeenCalledWith({
+        query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name | LIMIT 0',
+        format: 'json',
+      });
+      expect(result.data.query).toEqual({
+        format: 'composed',
+        base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
+        breach: { segment: 'WHERE avg_cpu > 0.9' },
+      });
+      expect(result.queryColumns).toEqual([
+        { name: 'host.name', type: 'keyword' },
+        { name: 'avg_cpu', type: 'double' },
+      ]);
+    });
+
+    it('stores composed query with recovery segment and recovery_strategy', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'composed',
+            base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
+            breach: { segment: 'WHERE avg_cpu > 0.9' },
+            recovery: { segment: 'WHERE avg_cpu < 0.5' },
+          },
+          recovery_strategy: 'query',
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.recovery_strategy).toBe('query');
+      expect((result.data.query as { recovery?: { segment: string } }).recovery).toEqual({
+        segment: 'WHERE avg_cpu < 0.5',
+      });
+    });
+  });
+
+  describe('set_query recovery cross-field validation', () => {
+    it('throws when recovery block is present but recovery_strategy is not "query"', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+            recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
+          },
+          recovery_strategy: 'no_breach',
+        },
+      ];
+
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
+        'query.recovery is only allowed when recovery_strategy is "query"'
+      );
+    });
+
+    it('throws when recovery block is present with no recovery_strategy on existing rule', async () => {
+      const existing: Partial<RuleAttachmentData> = { recovery_strategy: 'no_breach' };
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+            recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
+          },
+        },
+      ];
+
+      await expect(executeRuleOperations(existing, ops)).rejects.toThrow(
+        'query.recovery is only allowed when recovery_strategy is "query"'
+      );
+    });
+
+    it('throws when recovery_strategy is "query" but no recovery block is provided', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+          },
+          recovery_strategy: 'query',
+        },
+      ];
+
+      const promise = executeRuleOperations({}, ops);
+      await expect(promise).rejects.toThrow('recovery_strategy "query" requires a recovery block');
+      await expect(executeRuleOperations({}, ops)).rejects.toBeInstanceOf(
+        RuleOperationValidationError
+      );
+    });
+
+    it('passes when recovery_strategy is "query" and recovery block is provided', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+            recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
+          },
+          recovery_strategy: 'query',
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+      expect(result.data.recovery_strategy).toBe('query');
+    });
+  });
+
   describe('set_grouping with column validation', () => {
     it('accepts grouping fields that exist in query columns', async () => {
       const esClient = createMockEsClient();
@@ -256,6 +393,68 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
 
       expect(result.data.metadata?.name).toBe('My Rule');
+    });
+  });
+
+  describe('agent-builder provenance tag', () => {
+    it('stamps the agent-builder tag on a newly created rule', async () => {
+      const ops: RuleOperation[] = [{ operation: 'set_metadata', name: 'My Rule' }];
+
+      const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
+
+      expect(result.data.metadata?.tags).toEqual([AGENT_BUILDER_TAG]);
+    });
+
+    it('appends the tag without clobbering user/LLM-provided tags', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_metadata', name: 'My Rule', tags: ['production', 'cpu'] },
+      ];
+
+      const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
+
+      expect(result.data.metadata?.tags).toEqual(['production', 'cpu', AGENT_BUILDER_TAG]);
+    });
+
+    it('does not duplicate the tag when it is already present', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_metadata', name: 'My Rule', tags: [AGENT_BUILDER_TAG] },
+      ];
+
+      const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
+
+      expect(result.data.metadata?.tags).toEqual([AGENT_BUILDER_TAG]);
+    });
+
+    it('skips stamping when the 20-tag cap is already reached', async () => {
+      const maxTags = Array.from({ length: 20 }, (_, i) => `tag-${i}`);
+      const ops: RuleOperation[] = [{ operation: 'set_metadata', name: 'My Rule', tags: maxTags }];
+
+      const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
+
+      expect(result.data.metadata?.tags).toEqual(maxTags);
+      expect(result.data.metadata?.tags).toHaveLength(20);
+    });
+
+    it('stamps the tag when editing an existing rule, preserving existing tags', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        metadata: { name: 'Existing Rule', tags: ['cpu'] },
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_metadata', description: 'updated' }];
+
+      const result = await executeRuleOperations(existing, ops, undefined, { isNew: false });
+
+      expect(result.data.metadata?.tags).toEqual(['cpu', AGENT_BUILDER_TAG]);
+    });
+
+    it('re-adds the tag on edit when the user previously removed it', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        metadata: { name: 'Existing Rule', tags: ['cpu'] },
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_metadata', tags: ['cpu'] }];
+
+      const result = await executeRuleOperations(existing, ops, undefined, { isNew: false });
+
+      expect(result.data.metadata?.tags).toEqual(['cpu', AGENT_BUILDER_TAG]);
     });
 
     it('throws when state_transition is set on a non-alert kind', async () => {
@@ -511,7 +710,7 @@ describe('executeRuleOperations', () => {
       expect(result.data.metadata).toEqual({
         name: 'Test Rule',
         description: 'A test',
-        tags: ['test'],
+        tags: ['test', AGENT_BUILDER_TAG],
       });
     });
 

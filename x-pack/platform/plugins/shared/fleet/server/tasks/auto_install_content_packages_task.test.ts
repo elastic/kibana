@@ -114,7 +114,7 @@ describe('AutoInstallContentPackagesTask', () => {
       await mockTask.start({ taskManager: mockTaskManagerStart });
       const createTaskRunner =
         mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance, abortController: new AbortController() });
+      const taskRunner = createTaskRunner(taskManagerMock.createRunContext({ taskInstance }));
       return taskRunner.run();
     };
 
@@ -241,6 +241,35 @@ describe('AutoInstallContentPackagesTask', () => {
 
       expect(packageClientMock.installPackage).not.toHaveBeenCalled();
       expect(dataStreamService.getAllFleetDataStreamNames).not.toHaveBeenCalled();
+    });
+
+    it('should not install package that has been rolled back', async () => {
+      mockGetInstalledPackages.mockResolvedValue({
+        items: [
+          {
+            name: 'kubernetes_otel',
+            version: '1.0.0',
+            rolledBack: true,
+          },
+          {
+            name: 'test_package',
+            version: '1.0.0',
+          },
+        ],
+      });
+
+      await runTask();
+
+      expect(packageClientMock.installPackage).toHaveBeenCalledTimes(1);
+      expect(packageClientMock.installPackage).toHaveBeenCalledWith({
+        pkgName: 'test_package',
+        pkgVersion: '1.1.0',
+        useStreaming: true,
+        automaticInstall: true,
+      });
+      expect(packageClientMock.installPackage).not.toHaveBeenCalledWith(
+        expect.objectContaining({ pkgName: 'kubernetes_otel' })
+      );
     });
 
     it('should not downgrade package when a newer prerelease version is installed', async () => {

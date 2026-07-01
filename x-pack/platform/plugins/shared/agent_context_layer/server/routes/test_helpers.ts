@@ -7,18 +7,19 @@
 
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlDocument } from '../services/sml/types';
 
 export const createMockSmlService = () => ({
   search: jest.fn(),
+  autocomplete: jest.fn(),
   checkItemsAccess: jest.fn(),
   indexAttachment: jest.fn(),
   deleteAttachment: jest.fn(),
   getDocuments: jest.fn(),
   listDocuments: jest.fn(),
-  upsertDocument: jest.fn(),
-  deleteDocument: jest.fn(),
+  findByOrigin: jest.fn(),
+  findByOriginAcrossSpaces: jest.fn(),
   getTypeDefinition: jest.fn(),
   listTypeDefinitions: jest.fn(),
   getCrawler: jest.fn(),
@@ -26,7 +27,7 @@ export const createMockSmlService = () => ({
 
 export const createMockUiSettingsClient = (enabled = true) => ({
   get: jest.fn().mockImplementation(async (key: string) => {
-    if (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) return enabled;
+    if (key === CONTEXT_ENGINE_ENABLED_SETTING_ID) return enabled;
     return undefined;
   }),
 });
@@ -53,6 +54,7 @@ export const buildMockContext = (uiSettingsEnabled = true) => ({
   core: Promise.resolve({
     uiSettings: { client: createMockUiSettingsClient(uiSettingsEnabled) },
     elasticsearch: { client: { asInternalUser: {}, asCurrentUser: {} } },
+    savedObjects: { client: {} },
   }),
 });
 

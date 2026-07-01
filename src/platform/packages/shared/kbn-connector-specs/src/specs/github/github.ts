@@ -79,13 +79,28 @@ export const GithubConnector: ConnectorSpec = {
 
   auth: {
     types: [
-      'bearer',
       {
         type: 'oauth_authorization_code',
         defaults: {
           authorizationUrl: 'https://github.com/login/oauth/authorize',
           tokenUrl: 'https://github.com/login/oauth/access_token',
           scope: 'repo',
+        },
+        overrides: {
+          meta: {
+            authorizationUrl: { hidden: true },
+            tokenUrl: { hidden: true },
+            scope: { hidden: true },
+          },
+        },
+      },
+      {
+        type: 'bearer',
+        defaults: {},
+        overrides: {
+          label: i18n.translate('core.kibanaConnectorSpecs.github.auth.bearer.label', {
+            defaultMessage: 'Personal Access Token (PAT)',
+          }),
         },
       },
     ],
@@ -102,6 +117,7 @@ export const GithubConnector: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'https://api.githubcopilot.com/mcp/',
+          hidden: true,
           label: i18n.translate('connectorSpecs.github.config.serverUrl.label', {
             defaultMessage: 'MCP Server URL',
           }),

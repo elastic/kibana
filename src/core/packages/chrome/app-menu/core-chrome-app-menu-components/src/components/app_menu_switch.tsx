@@ -9,9 +9,11 @@
 
 import React from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiSwitch, useEuiTheme } from '@elastic/eui';
+import { EuiSwitch, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AppMenuSwitch } from '../types';
+import { getTooltip } from '../utils';
+import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 
 interface AppMenuSwitchComponentProps {
   switchConfig: AppMenuSwitch;
@@ -26,6 +28,8 @@ export const AppMenuSwitchComponent = ({ switchConfig }: AppMenuSwitchComponentP
     checked,
     onChange,
     disabled,
+    tooltipContent,
+    tooltipTitle,
     'data-test-subj': dataTestSubj,
   } = switchConfig;
 
@@ -37,7 +41,10 @@ export const AppMenuSwitchComponent = ({ switchConfig }: AppMenuSwitchComponentP
     onChange(e.target.checked);
   };
 
-  return (
+  const { title, content } = getTooltip({ tooltipContent, tooltipTitle });
+  const showTooltip = Boolean(content || title);
+
+  const switchElement = (
     <EuiSwitch
       id={id}
       label={label}
@@ -47,7 +54,15 @@ export const AppMenuSwitchComponent = ({ switchConfig }: AppMenuSwitchComponentP
       disabled={disabled}
       compressed
       css={switchCss}
-      data-test-subj={dataTestSubj ?? 'app-menu-switch'}
+      data-test-subj={dataTestSubj ?? APP_MENU_TEST_SUBJECTS.switch}
     />
+  );
+
+  return showTooltip ? (
+    <EuiToolTip content={content} title={title}>
+      {switchElement}
+    </EuiToolTip>
+  ) : (
+    switchElement
   );
 };

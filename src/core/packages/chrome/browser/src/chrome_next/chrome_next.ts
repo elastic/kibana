@@ -55,13 +55,29 @@ export interface AppHeaderBadgeItem {
 }
 
 /** @public */
+export interface AppHeaderTabIconBadge {
+  /** EUI icon type rendered in the tab badge. */
+  iconType: string;
+  /** Optional tooltip shown when hovering the badge icon. */
+  tooltip?: string;
+}
+
+/**
+ * Tab badge: either a numeric count (rendered as a notification badge) or an icon
+ * with an optional tooltip.
+ *
+ * @public
+ */
+export type AppHeaderTabBadge = number | AppHeaderTabIconBadge;
+
+/** @public */
 export interface AppHeaderTab {
   id: string;
   label: string;
   isSelected?: boolean;
   onClick?: () => void;
   href?: string;
-  badge?: number;
+  badge?: AppHeaderTabBadge;
   'data-test-subj'?: string;
   disabled?: boolean;
   toolTipContent?: string;
@@ -83,7 +99,10 @@ export type AppHeaderMetadataItems = readonly [
 /** @public */
 export interface AppHeaderMetadataTextItem {
   type: 'text';
+  /** When `value` is set, this acts as the bold key (e.g. "Created by"). */
   label: string;
+  /** Optional value rendered next to `label` in a subdued color. */
+  value?: string;
   'data-test-subj'?: string;
 }
 
@@ -96,7 +115,6 @@ export type AppHeaderMetadataButtonItem =
 export interface AppHeaderMetadataButtonBase {
   type: 'button';
   label: string;
-  iconType?: string;
   'data-test-subj'?: string;
 }
 
