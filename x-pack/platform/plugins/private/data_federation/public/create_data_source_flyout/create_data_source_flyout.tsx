@@ -205,7 +205,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
 
   const handleSave = (data: CreateDataSourceFlyoutFormValues) =>
     onSave(
-        applyAuthenticationModeToDataSource(
+      applyAuthenticationModeToDataSource(
         { ...data, type: dataSourceType } as DataSourceWithSecrets,
         authenticationMode
       )
