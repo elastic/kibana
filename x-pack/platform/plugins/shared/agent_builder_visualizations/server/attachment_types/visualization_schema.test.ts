@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { visualizationAttachmentDataSchema } from './visualization_schema';
+import { MAX_VEGA_SPEC_LENGTH, visualizationAttachmentDataSchema } from './visualization_schema';
 
 describe('visualizationAttachmentDataSchema', () => {
   it('accepts a Lens attachment with an explicit renderer', () => {
@@ -73,5 +73,27 @@ describe('visualizationAttachmentDataSchema', () => {
     });
 
     expect(result.success).toBe(false);
+  });
+
+  it('rejects a Vega attachment whose spec exceeds the maximum length', () => {
+    const result = visualizationAttachmentDataSchema.safeParse({
+      renderer: 'vega',
+      query: 'faceted bars by host',
+      visualization: { spec: 'x'.repeat(MAX_VEGA_SPEC_LENGTH + 1) },
+      esql: 'FROM logs | STATS count() BY host',
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts a Vega attachment whose spec is at the maximum length', () => {
+    const result = visualizationAttachmentDataSchema.safeParse({
+      renderer: 'vega',
+      query: 'faceted bars by host',
+      visualization: { spec: 'x'.repeat(MAX_VEGA_SPEC_LENGTH) },
+      esql: 'FROM logs | STATS count() BY host',
+    });
+
+    expect(result.success).toBe(true);
   });
 });
