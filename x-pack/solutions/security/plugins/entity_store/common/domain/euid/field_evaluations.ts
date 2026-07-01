@@ -44,11 +44,13 @@ function isFieldMappingThen(
 function resolveConditionThen(
   then: string | FieldEvaluationWhenClauseFieldMappingThen,
   doc: any
-): string | undefined {
-  if (!isFieldMappingThen(then)) return then;
+): { value: string; matchedKey?: string } | undefined {
+  if (!isFieldMappingThen(then)) return { value: then };
   const raw = getFieldValue(doc, then.field);
   if (!raw) return undefined;
-  return then.mapping[raw];
+  const mapped = then.mapping[raw];
+  if (mapped === undefined) return undefined;
+  return { value: mapped, matchedKey: raw };
 }
 
 export function getFieldValue(doc: any, field: string): string | undefined {
@@ -108,7 +110,11 @@ function matchFirstWhenClause(
     } else if (isConditionClause(clause) && evaluateStreamlangCondition(doc, clause.condition)) {
       const resolved = resolveConditionThen(clause.then, doc);
       if (resolved !== undefined) {
-        return { then: resolved, winningCondition: clause.condition };
+        const fieldMappingMatch =
+          isFieldMappingThen(clause.then) && resolved.matchedKey !== undefined
+            ? { field: clause.then.field, matchedKey: resolved.matchedKey }
+            : undefined;
+        return { then: resolved.value, winningCondition: clause.condition, fieldMappingMatch };
       }
     }
   }
@@ -130,10 +136,25 @@ function resolveFinalFieldValue(
 /** Builds `SourceMatchSpec` for filter construction without re-evaluating the document. */
 function buildEvaluationSourceMatchSpec(
   rawValueFromSources: string | undefined,
-  whenMatch: { winningCondition?: Condition; matchedSourceValues?: string[] } | undefined
+  whenMatch:
+    | {
+        winningCondition?: Condition;
+        matchedSourceValues?: string[];
+        fieldMappingMatch?: { field: string; matchedKey: string };
+      }
+    | undefined
 ): SourceMatchSpec {
   if (whenMatch?.winningCondition !== undefined) {
-    return { type: 'condition', condition: whenMatch.winningCondition };
+    const condition: Condition =
+      whenMatch.fieldMappingMatch !== undefined
+        ? {
+            and: [
+              whenMatch.winningCondition,
+              { field: whenMatch.fieldMappingMatch.field, eq: whenMatch.fieldMappingMatch.matchedKey },
+            ],
+          }
+        : whenMatch.winningCondition;
+    return { type: 'condition', condition };
   }
   if (rawValueFromSources === undefined) {
     return { type: 'unknown' };

@@ -493,17 +493,82 @@ describe('getSourceMatchSpec', () => {
     });
   });
 
-  it('should return condition spec when asset + cloud.provider whenClause wins', () => {
-    const doc = {
-      user: { name: 'u' },
-      event: { kind: 'asset', module: 'x' },
+  it('should return compound condition when asset + cloud.provider field-mapping whenClause wins', () => {
+    // The returned condition narrows to both event.kind=asset AND the specific cloud.provider
+    // that triggered the mapping, so per-document filters are provider-specific (not too broad).
+    expect(
+      getSourceMatchSpec(
+        { user: { name: 'u' }, event: { kind: 'asset', module: 'x' }, cloud: { provider: 'gcp' } },
+        userEval
+      )
+    ).toEqual({
+      type: 'condition',
+      condition: {
+        and: [{ field: 'event.kind', includes: 'asset' }, { field: 'cloud.provider', eq: 'gcp' }],
+      },
+    });
+
+    expect(
+      getSourceMatchSpec(
+        { user: { name: 'u' }, event: { kind: 'asset', module: 'x' }, cloud: { provider: 'aws' } },
+        userEval
+      )
+    ).toEqual({
+      type: 'condition',
+      condition: {
+        and: [{ field: 'event.kind', includes: 'asset' }, { field: 'cloud.provider', eq: 'aws' }],
+      },
+    });
+
+    expect(
+      getSourceMatchSpec(
+        {
+          user: { name: 'u' },
+          event: { kind: 'asset', module: 'x' },
+          cloud: { provider: 'azure' },
+        },
+        userEval
+      )
+    ).toEqual({
+      type: 'condition',
+      condition: {
+        and: [
+          { field: 'event.kind', includes: 'asset' },
+          { field: 'cloud.provider', eq: 'azure' },
+        ],
+      },
+    });
+  });
+
+  it('should produce different compound conditions for two docs sharing user.name but differing in cloud.provider', () => {
+    const awsDoc = {
+      user: { name: 'shared-user' },
+      event: { kind: 'asset', module: 'asset_discovery' },
+      cloud: { provider: 'aws' },
+    };
+    const gcpDoc = {
+      user: { name: 'shared-user' },
+      event: { kind: 'asset', module: 'asset_discovery' },
       cloud: { provider: 'gcp' },
     };
-    // The winning condition is the outer event.kind=asset check; cloud.provider
-    // lookup happens inside the then resolution, not as part of the condition.
-    expect(getSourceMatchSpec(doc, userEval)).toEqual({
+
+    const awsSpec = getSourceMatchSpec(awsDoc, userEval);
+    const gcpSpec = getSourceMatchSpec(gcpDoc, userEval);
+
+    expect(awsSpec).toEqual({
       type: 'condition',
-      condition: { field: 'event.kind', includes: 'asset' },
+      condition: {
+        and: [{ field: 'event.kind', includes: 'asset' }, { field: 'cloud.provider', eq: 'aws' }],
+      },
     });
+    expect(gcpSpec).toEqual({
+      type: 'condition',
+      condition: {
+        and: [{ field: 'event.kind', includes: 'asset' }, { field: 'cloud.provider', eq: 'gcp' }],
+      },
+    });
+
+    // The two specs differ — an AWS entity's filter will not accidentally match a GCP doc.
+    expect(awsSpec).not.toEqual(gcpSpec);
   });
 });
