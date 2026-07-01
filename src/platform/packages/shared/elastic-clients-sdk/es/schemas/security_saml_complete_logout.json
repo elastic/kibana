@@ -1,0 +1,58 @@
+{
+  "type": "object",
+  "properties": {
+    "realm": {
+      "type": "string",
+      "description": "The name of the SAML realm in Elasticsearch for which the configuration is used to verify the logout response.",
+      "x-found-in": "body"
+    },
+    "ids": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        }
+      ],
+      "description": "A JSON array with all the valid SAML Request Ids that the caller of the API has for the current user.",
+      "$ref": "#/$defs/Ids",
+      "x-found-in": "body"
+    },
+    "query_string": {
+      "type": "string",
+      "description": "If the SAML IdP sends the logout response with the HTTP-Redirect binding, this field must be set to the query string of the redirect URI.",
+      "x-found-in": "body"
+    },
+    "content": {
+      "type": "string",
+      "description": "If the SAML IdP sends the logout response with the HTTP-Post binding, this field must be set to the value of the SAMLResponse form parameter from the logout response.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "realm",
+    "ids"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Ids": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "from": {
+      "description": "The offset from the first result to fetch.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "size": {
+      "description": "The maximum number of results to retrieve.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "integer": {
+      "type": "number"
+    }
+  }
+}

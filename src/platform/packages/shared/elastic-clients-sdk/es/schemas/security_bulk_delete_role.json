@@ -1,0 +1,38 @@
+{
+  "type": "object",
+  "properties": {
+    "refresh": {
+      "description": "If `true` (the default) then refresh the affected shards to make this operation visible to search, if `wait_for` then wait for a refresh to make this operation visible to search, if `false` then do nothing with refreshes.",
+      "$ref": "#/$defs/Refresh",
+      "x-found-in": "query"
+    },
+    "names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "An array of role names to delete",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "names"
+  ],
+  "$defs": {
+    "Refresh": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string",
+          "enum": [
+            "true",
+            "false",
+            "wait_for"
+          ]
+        }
+      ]
+    }
+  }
+}

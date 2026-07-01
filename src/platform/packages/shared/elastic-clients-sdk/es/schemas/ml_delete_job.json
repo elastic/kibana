@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Identifier for the anomaly detection job.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "force": {
+      "type": "boolean",
+      "description": "Use to forcefully delete an opened job; this method is quicker than closing and deleting the job.",
+      "x-found-in": "query"
+    },
+    "delete_user_annotations": {
+      "type": "boolean",
+      "description": "Specifies whether annotations that have been added by the user should be deleted along with any auto-generated annotations when the job is reset.",
+      "x-found-in": "query"
+    },
+    "wait_for_completion": {
+      "type": "boolean",
+      "description": "Specifies whether the request should return immediately or wait until the job deletion completes.",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "job_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

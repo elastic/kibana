@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The view name to remove.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

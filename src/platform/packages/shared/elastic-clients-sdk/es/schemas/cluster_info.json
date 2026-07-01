@@ -1,0 +1,49 @@
+{
+  "type": "object",
+  "properties": {
+    "target": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ClusterInfoTarget"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ClusterInfoTarget"
+          }
+        }
+      ],
+      "description": "Limits the information returned to the specific target. Supports a comma-separated list, such as http,ingest.",
+      "$ref": "#/$defs/ClusterInfoTargets",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "target"
+  ],
+  "$defs": {
+    "ClusterInfoTarget": {
+      "type": "string",
+      "enum": [
+        "_all",
+        "http",
+        "ingest",
+        "thread_pool",
+        "script"
+      ]
+    },
+    "ClusterInfoTargets": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ClusterInfoTarget"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ClusterInfoTarget"
+          }
+        }
+      ]
+    }
+  }
+}

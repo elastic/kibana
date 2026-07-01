@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "properties": {
+    "set_id": {
+      "type": "string",
+      "description": "The ID of the synonym set.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "rule_id": {
+      "type": "string",
+      "description": "The ID of the synonym rule to be updated or created.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "synonyms": {
+      "type": "string",
+      "description": "The synonym rule information definition, which must be in Solr format.",
+      "$ref": "#/$defs/SynonymsSynonymString",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "set_id",
+    "rule_id",
+    "synonyms"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "SynonymsSynonymString": {
+      "type": "string"
+    }
+  }
+}

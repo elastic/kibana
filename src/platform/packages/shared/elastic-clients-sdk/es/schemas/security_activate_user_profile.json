@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "properties": {
+    "access_token": {
+      "type": "string",
+      "description": "The user's Elasticsearch access token or JWT. Both `access` and `id` JWT token types are supported and they depend on the underlying JWT realm configuration. If you specify the `access_token` grant type, this parameter is required. It is not valid with other grant types.",
+      "x-found-in": "body"
+    },
+    "grant_type": {
+      "type": "string",
+      "enum": [
+        "password",
+        "access_token"
+      ],
+      "description": "The type of grant.",
+      "$ref": "#/$defs/SecurityGrantType",
+      "x-found-in": "body"
+    },
+    "password": {
+      "type": "string",
+      "description": "The user's password. If you specify the `password` grant type, this parameter is required. It is not valid with other grant types.",
+      "x-found-in": "body"
+    },
+    "username": {
+      "type": "string",
+      "description": "The username that identifies the user. If you specify the `password` grant type, this parameter is required. It is not valid with other grant types.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "grant_type"
+  ],
+  "$defs": {
+    "SecurityGrantType": {
+      "type": "string",
+      "enum": [
+        "password",
+        "access_token"
+      ]
+    }
+  }
+}

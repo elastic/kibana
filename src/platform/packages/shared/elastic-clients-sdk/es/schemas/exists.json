@@ -1,0 +1,133 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "A unique document identifier.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "index": {
+      "type": "string",
+      "description": "A comma-separated list of data streams, indices, and aliases. It supports wildcards (`*`).",
+      "$ref": "#/$defs/IndexName",
+      "x-found-in": "path"
+    },
+    "preference": {
+      "type": "string",
+      "description": "The node or shard the operation should be performed on. By default, the operation is randomized between the shard replicas. If it is set to `_local`, the operation will prefer to be run on a local allocated shard when possible. If it is set to a custom value, the value is used to guarantee that the same shards will be used for the same custom value. This can help with \"jumping values\" when hitting different shards in different refresh states. A sample value can be something like the web session ID or the user name.",
+      "x-found-in": "query"
+    },
+    "realtime": {
+      "type": "boolean",
+      "description": "If `true`, the request is real-time as opposed to near-real-time.",
+      "x-found-in": "query"
+    },
+    "refresh": {
+      "type": "boolean",
+      "description": "If `true`, the request refreshes the relevant shards before retrieving the document. Setting it to `true` should be done after careful thought and verification that this does not cause a heavy load on the system (and slow down indexing).",
+      "x-found-in": "query"
+    },
+    "routing": {
+      "description": "A custom value used to route operations to a specific shard.",
+      "$ref": "#/$defs/Routing",
+      "x-found-in": "query"
+    },
+    "_source": {
+      "description": "Indicates whether to return the `_source` field (`true` or `false`) or lists the fields to return.",
+      "$ref": "#/$defs/SearchSourceConfigParam",
+      "x-found-in": "query"
+    },
+    "_source_excludes": {
+      "description": "A comma-separated list of source fields to exclude from the response. You can also use this parameter to exclude fields from the subset specified in `_source_includes` query parameter. If the `_source` parameter is `false`, this parameter is ignored.",
+      "$ref": "#/$defs/Fields",
+      "x-found-in": "query"
+    },
+    "_source_includes": {
+      "description": "A comma-separated list of source fields to include in the response. If this parameter is specified, only these source fields are returned. You can exclude fields from this subset using the `_source_excludes` query parameter. If the `_source` parameter is `false`, this parameter is ignored.",
+      "$ref": "#/$defs/Fields",
+      "x-found-in": "query"
+    },
+    "stored_fields": {
+      "description": "A comma-separated list of stored fields to return as part of a hit. If no fields are specified, no stored fields are included in the response. If this field is specified, the `_source` parameter defaults to `false`.",
+      "$ref": "#/$defs/Fields",
+      "x-found-in": "query"
+    },
+    "version": {
+      "type": "number",
+      "description": "Explicit version number for concurrency control. The specified version must match the current version of the document for the request to succeed.",
+      "$ref": "#/$defs/VersionNumber",
+      "x-found-in": "query"
+    },
+    "version_type": {
+      "description": "The version type.",
+      "$ref": "#/$defs/VersionType",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "id",
+    "index"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "IndexName": {
+      "type": "string"
+    },
+    "Routing": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "Fields": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Field"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Field"
+          }
+        }
+      ]
+    },
+    "Field": {
+      "type": "string"
+    },
+    "SearchSourceConfigParam": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "$ref": "#/$defs/Fields"
+        }
+      ]
+    },
+    "VersionNumber": {
+      "$ref": "#/$defs/long"
+    },
+    "long": {
+      "type": "number"
+    },
+    "VersionType": {
+      "type": "string",
+      "enum": [
+        "internal",
+        "external",
+        "external_gte"
+      ]
+    }
+  }
+}

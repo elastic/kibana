@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "An identifier for the pipeline.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "node_id": {
+      "description": "The names of the nodes in the cluster to target.",
+      "$ref": "#/$defs/NodeIds",
+      "x-found-in": "path"
+    }
+  },
+  "$defs": {
+    "NodeId": {
+      "type": "string"
+    },
+    "NodeIds": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/NodeId"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NodeId"
+          }
+        }
+      ]
+    }
+  }
+}

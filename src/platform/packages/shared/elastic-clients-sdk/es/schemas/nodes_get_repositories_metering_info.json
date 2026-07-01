@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "properties": {
+    "node_id": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/NodeId"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NodeId"
+          }
+        }
+      ],
+      "description": "Comma-separated list of node IDs or names used to limit returned information.",
+      "$ref": "#/$defs/NodeIds",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "node_id"
+  ],
+  "$defs": {
+    "NodeId": {
+      "type": "string"
+    },
+    "NodeIds": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/NodeId"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NodeId"
+          }
+        }
+      ]
+    }
+  }
+}

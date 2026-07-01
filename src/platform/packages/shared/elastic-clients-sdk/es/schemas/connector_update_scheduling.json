@@ -1,0 +1,54 @@
+{
+  "type": "object",
+  "properties": {
+    "connector_id": {
+      "type": "string",
+      "description": "The unique identifier of the connector to be updated",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "scheduling": {
+      "$ref": "#/$defs/ConnectorSchedulingConfiguration",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "connector_id",
+    "scheduling"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "ConnectorConnectorScheduling": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "interval": {
+          "type": "string",
+          "description": "The interval is expressed using the crontab syntax"
+        }
+      },
+      "required": [
+        "enabled",
+        "interval"
+      ]
+    },
+    "ConnectorSchedulingConfiguration": {
+      "type": "object",
+      "properties": {
+        "access_control": {
+          "$ref": "#/$defs/ConnectorConnectorScheduling"
+        },
+        "full": {
+          "$ref": "#/$defs/ConnectorConnectorScheduling"
+        },
+        "incremental": {
+          "$ref": "#/$defs/ConnectorConnectorScheduling"
+        }
+      }
+    }
+  }
+}

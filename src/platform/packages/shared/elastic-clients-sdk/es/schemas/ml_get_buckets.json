@@ -1,0 +1,106 @@
+{
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Identifier for the anomaly detection job.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "timestamp": {
+      "description": "The timestamp of a single bucket result. If you do not specify this parameter, the API returns information about all buckets.",
+      "$ref": "#/$defs/DateTime",
+      "x-found-in": "path"
+    },
+    "from": {
+      "description": "Skips the specified number of buckets.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "size": {
+      "description": "Specifies the maximum number of buckets to obtain.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "anomaly_score": {
+      "description": "Refer to the description for the `anomaly_score` query parameter.",
+      "$ref": "#/$defs/double",
+      "x-found-in": "body"
+    },
+    "desc": {
+      "type": "boolean",
+      "description": "Refer to the description for the `desc` query parameter.",
+      "x-found-in": "body"
+    },
+    "end": {
+      "description": "Refer to the description for the `end` query parameter.",
+      "$ref": "#/$defs/DateTime",
+      "x-found-in": "body"
+    },
+    "exclude_interim": {
+      "type": "boolean",
+      "description": "Refer to the description for the `exclude_interim` query parameter.",
+      "x-found-in": "body"
+    },
+    "expand": {
+      "type": "boolean",
+      "description": "Refer to the description for the `expand` query parameter.",
+      "x-found-in": "body"
+    },
+    "page": {
+      "$ref": "#/$defs/MlPage",
+      "x-found-in": "body"
+    },
+    "sort": {
+      "description": "Refer to the desription for the `sort` query parameter.",
+      "$ref": "#/$defs/Field",
+      "x-found-in": "body"
+    },
+    "start": {
+      "description": "Refer to the description for the `start` query parameter.",
+      "$ref": "#/$defs/DateTime",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "job_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "EpochTime": {},
+    "DateTime": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/EpochTime"
+        }
+      ]
+    },
+    "integer": {
+      "type": "number"
+    },
+    "double": {
+      "type": "number"
+    },
+    "MlPage": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "description": "Skips the specified number of items.",
+          "$ref": "#/$defs/integer"
+        },
+        "size": {
+          "description": "Specifies the maximum number of items to obtain.",
+          "$ref": "#/$defs/integer"
+        }
+      }
+    },
+    "Field": {
+      "type": "string"
+    }
+  }
+}

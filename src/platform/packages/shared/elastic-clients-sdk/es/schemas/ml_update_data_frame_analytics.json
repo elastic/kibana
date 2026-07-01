@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identifier for the data frame analytics job. This identifier can contain lowercase alphanumeric characters (a-z and 0-9), hyphens, and underscores. It must start and end with alphanumeric characters.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "description": {
+      "type": "string",
+      "description": "A description of the job.",
+      "x-found-in": "body"
+    },
+    "model_memory_limit": {
+      "type": "string",
+      "description": "The approximate maximum amount of memory resources that are permitted for analytical processing. If your `elasticsearch.yml` file contains an `xpack.ml.max_model_memory_limit` setting, an error occurs when you try to create data frame analytics jobs that have `model_memory_limit` values greater than that setting.",
+      "x-found-in": "body"
+    },
+    "max_num_threads": {
+      "description": "The maximum number of threads to be used by the analysis. Using more threads may decrease the time necessary to complete the analysis at the cost of using more CPU. Note that the process may use additional threads for operational functionality other than the analysis itself.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "body"
+    },
+    "allow_lazy_start": {
+      "type": "boolean",
+      "description": "Specifies whether this job can start when there is insufficient machine learning node capacity for it to be immediately assigned to a node.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "integer": {
+      "type": "number"
+    }
+  }
+}

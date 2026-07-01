@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "properties": {
+    "index": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IndexName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IndexName"
+          }
+        }
+      ],
+      "description": "The index or data stream name.",
+      "$ref": "#/$defs/Indices",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "index"
+  ],
+  "$defs": {
+    "IndexName": {
+      "type": "string"
+    },
+    "Indices": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IndexName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IndexName"
+          }
+        }
+      ]
+    }
+  }
+}

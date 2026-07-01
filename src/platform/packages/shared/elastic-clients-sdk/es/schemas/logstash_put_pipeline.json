@@ -1,0 +1,127 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "An identifier for the pipeline. Pipeline IDs must begin with a letter or underscore and contain only letters, underscores, dashes, hyphens and numbers.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "pipeline": {
+      "$ref": "#/$defs/LogstashPipeline",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "id",
+    "pipeline"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "EpochTime": {},
+    "DateTime": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/EpochTime"
+        }
+      ]
+    },
+    "LogstashPipelineMetadata": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "version"
+      ]
+    },
+    "integer": {
+      "type": "number"
+    },
+    "LogstashPipelineSettings": {
+      "type": "object",
+      "properties": {
+        "pipeline.workers": {
+          "description": "The number of workers that will, in parallel, execute the filter and output stages of the pipeline.",
+          "$ref": "#/$defs/integer"
+        },
+        "pipeline.batch.size": {
+          "description": "The maximum number of events an individual worker thread will collect from inputs before attempting to execute its filters and outputs.",
+          "$ref": "#/$defs/integer"
+        },
+        "pipeline.batch.delay": {
+          "description": "When creating pipeline event batches, how long in milliseconds to wait for each event before dispatching an undersized batch to pipeline workers.",
+          "$ref": "#/$defs/integer"
+        },
+        "queue.type": {
+          "type": "string",
+          "description": "The internal queuing model to use for event buffering."
+        },
+        "queue.max_bytes": {
+          "type": "string",
+          "description": "The total capacity of the queue (`queue.type: persisted`) in number of bytes."
+        },
+        "queue.checkpoint.writes": {
+          "description": "The maximum number of written events before forcing a checkpoint when persistent queues are enabled (`queue.type: persisted`).",
+          "$ref": "#/$defs/integer"
+        }
+      },
+      "required": [
+        "pipeline.workers",
+        "pipeline.batch.size",
+        "pipeline.batch.delay",
+        "queue.type",
+        "queue.max_bytes",
+        "queue.checkpoint.writes"
+      ]
+    },
+    "LogstashPipeline": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "A description of the pipeline. This description is not used by Elasticsearch or Logstash."
+        },
+        "last_modified": {
+          "description": "The date the pipeline was last updated. It must be in the `yyyy-MM-dd'T'HH:mm:ss.SSSZZ` strict_date_time format.",
+          "$ref": "#/$defs/DateTime"
+        },
+        "pipeline": {
+          "type": "string",
+          "description": "The configuration for the pipeline."
+        },
+        "pipeline_metadata": {
+          "description": "Optional metadata about the pipeline, which can have any contents. This metadata is not generated or used by Elasticsearch or Logstash.",
+          "$ref": "#/$defs/LogstashPipelineMetadata"
+        },
+        "pipeline_settings": {
+          "description": "Settings for the pipeline. It supports only flat keys in dot notation.",
+          "$ref": "#/$defs/LogstashPipelineSettings"
+        },
+        "username": {
+          "type": "string",
+          "description": "The user who last updated the pipeline."
+        }
+      },
+      "required": [
+        "description",
+        "last_modified",
+        "pipeline",
+        "pipeline_metadata",
+        "pipeline_settings",
+        "username"
+      ]
+    }
+  }
+}

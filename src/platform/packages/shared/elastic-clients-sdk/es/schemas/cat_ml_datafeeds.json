@@ -1,0 +1,80 @@
+{
+  "type": "object",
+  "properties": {
+    "datafeed_id": {
+      "description": "A numerical character string that uniquely identifies the datafeed.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "allow_no_match": {
+      "type": "boolean",
+      "description": "Specifies what to do when the request: * Contains wildcard expressions and there are no datafeeds that match. * Contains the `_all` string or no identifiers and there are no matches. * Contains wildcard expressions and there are only partial matches. If `true`, the API returns an empty datafeeds array when there are no matches and the subset of results when there are partial matches. If `false`, the API returns a 404 status code when there are no matches or only partial matches.",
+      "x-found-in": "query"
+    },
+    "h": {
+      "description": "Comma-separated list of column names to display.",
+      "$ref": "#/$defs/CatCatDatafeedColumns",
+      "x-found-in": "query"
+    },
+    "s": {
+      "description": "Comma-separated list of column names or column aliases used to sort the response.",
+      "$ref": "#/$defs/CatCatDatafeedColumns",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "CatCatDatafeedColumn": {
+      "type": "string",
+      "enum": [
+        "ae",
+        "assignment_explanation",
+        "bc",
+        "buckets.count",
+        "bucketsCount",
+        "id",
+        "na",
+        "node.address",
+        "nodeAddress",
+        "ne",
+        "node.ephemeral_id",
+        "nodeEphemeralId",
+        "ni",
+        "node.id",
+        "nodeId",
+        "nn",
+        "node.name",
+        "nodeName",
+        "sba",
+        "search.bucket_avg",
+        "searchBucketAvg",
+        "sc",
+        "search.count",
+        "searchCount",
+        "seah",
+        "search.exp_avg_hour",
+        "searchExpAvgHour",
+        "st",
+        "search.time",
+        "searchTime",
+        "s",
+        "state"
+      ]
+    },
+    "CatCatDatafeedColumns": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CatCatDatafeedColumn"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CatCatDatafeedColumn"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "type": "object",
+  "properties": {
+    "model_id": {
+      "description": "The unique identifier of the trained model or a model alias. You can get information for multiple trained models in a single API request by using a comma-separated list of model IDs or a wildcard expression.",
+      "$ref": "#/$defs/Ids",
+      "x-found-in": "path"
+    },
+    "allow_no_match": {
+      "type": "boolean",
+      "description": "Specifies what to do when the request: - Contains wildcard expressions and there are no models that match. - Contains the _all string or no identifiers and there are no matches. - Contains wildcard expressions and there are only partial matches. If true, it returns an empty array when there are no matches and the subset of results when there are partial matches.",
+      "x-found-in": "query"
+    },
+    "decompress_definition": {
+      "type": "boolean",
+      "description": "Specifies whether the included model definition should be returned as a JSON map (true) or in a custom compressed format (false).",
+      "x-found-in": "query"
+    },
+    "exclude_generated": {
+      "type": "boolean",
+      "description": "Indicates if certain fields should be removed from the configuration on retrieval. This allows the configuration to be in an acceptable format to be retrieved and then added to another cluster.",
+      "x-found-in": "query"
+    },
+    "from": {
+      "description": "Skips the specified number of models.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "include": {
+      "description": "A comma delimited string of optional fields to include in the response body.",
+      "$ref": "#/$defs/MlInclude",
+      "x-found-in": "query"
+    },
+    "size": {
+      "description": "Specifies the maximum number of models to obtain.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "tags": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ],
+      "description": "A comma delimited string of tags. A trained model can have many tags, or none. When supplied, only trained models that contain all the supplied tags are returned.",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Ids": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        }
+      ]
+    },
+    "integer": {
+      "type": "number"
+    },
+    "MlInclude": {
+      "type": "string",
+      "enum": [
+        "definition",
+        "feature_importance_baseline",
+        "hyperparameters",
+        "total_feature_importance",
+        "definition_status"
+      ]
+    }
+  }
+}

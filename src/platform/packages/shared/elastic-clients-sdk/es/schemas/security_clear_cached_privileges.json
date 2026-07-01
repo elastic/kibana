@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "properties": {
+    "application": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ],
+      "description": "A comma-separated list of applications. To clear all applications, use an asterism (`*`). It does not support other wildcard patterns.",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "application"
+  ],
+  "$defs": {
+    "Name": {
+      "type": "string"
+    },
+    "Names": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ]
+    }
+  }
+}

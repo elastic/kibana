@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "from": {
+      "description": "The starting offset for synonyms sets to retrieve.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "size": {
+      "description": "The maximum number of synonyms sets to retrieve.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "integer": {
+      "type": "number"
+    }
+  }
+}

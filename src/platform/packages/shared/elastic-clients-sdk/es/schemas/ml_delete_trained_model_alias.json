@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "model_alias": {
+      "type": "string",
+      "description": "The model alias to delete.",
+      "$ref": "#/$defs/Name",
+      "x-found-in": "path"
+    },
+    "model_id": {
+      "type": "string",
+      "description": "The trained model ID to which the model alias refers.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "model_alias",
+    "model_id"
+  ],
+  "$defs": {
+    "Name": {
+      "type": "string"
+    },
+    "Id": {
+      "type": "string"
+    }
+  }
+}

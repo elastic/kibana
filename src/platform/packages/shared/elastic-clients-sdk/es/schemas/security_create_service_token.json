@@ -1,0 +1,57 @@
+{
+  "type": "object",
+  "properties": {
+    "namespace": {
+      "type": "string",
+      "description": "The name of the namespace, which is a top-level grouping of service accounts.",
+      "$ref": "#/$defs/Namespace",
+      "x-found-in": "path"
+    },
+    "service": {
+      "type": "string",
+      "description": "The name of the service.",
+      "$ref": "#/$defs/Service",
+      "x-found-in": "path"
+    },
+    "name": {
+      "description": "The name for the service account token. If omitted, a random name will be generated. Token names must be at least one and no more than 256 characters. They can contain alphanumeric characters (a-z, A-Z, 0-9), dashes (`-`), and underscores (`_`), but cannot begin with an underscore. NOTE: Token names must be unique in the context of the associated service account. They must also be globally unique with their fully qualified names, which are comprised of the service account principal and token name, such as `<namespace>/<service>/<token-name>`.",
+      "$ref": "#/$defs/Name",
+      "x-found-in": "path"
+    },
+    "refresh": {
+      "description": "If `true` (the default) then refresh the affected shards to make this operation visible to search, if `wait_for` then wait for a refresh to make this operation visible to search, if `false` then do nothing with refreshes.",
+      "$ref": "#/$defs/Refresh",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "namespace",
+    "service"
+  ],
+  "$defs": {
+    "Namespace": {
+      "type": "string"
+    },
+    "Service": {
+      "type": "string"
+    },
+    "Name": {
+      "type": "string"
+    },
+    "Refresh": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string",
+          "enum": [
+            "true",
+            "false",
+            "wait_for"
+          ]
+        }
+      ]
+    }
+  }
+}

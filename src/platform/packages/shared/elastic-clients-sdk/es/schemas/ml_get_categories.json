@@ -1,0 +1,67 @@
+{
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Identifier for the anomaly detection job.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "category_id": {
+      "type": "number",
+      "description": "Identifier for the category, which is unique in the job. If you specify neither the category ID nor the partition_field_value, the API returns information about all categories. If you specify only the partition_field_value, it returns information about all categories for the specified partition.",
+      "$ref": "#/$defs/CategoryId",
+      "x-found-in": "path"
+    },
+    "from": {
+      "description": "Skips the specified number of categories.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "partition_field_value": {
+      "type": "string",
+      "description": "Only return categories for the specified partition.",
+      "x-found-in": "query"
+    },
+    "size": {
+      "description": "Specifies the maximum number of categories to obtain.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "page": {
+      "description": "Configures pagination. This parameter has the `from` and `size` properties.",
+      "$ref": "#/$defs/MlPage",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "job_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "CategoryId": {
+      "$ref": "#/$defs/long"
+    },
+    "long": {
+      "type": "number"
+    },
+    "integer": {
+      "type": "number"
+    },
+    "MlPage": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "description": "Skips the specified number of items.",
+          "$ref": "#/$defs/integer"
+        },
+        "size": {
+          "description": "Specifies the maximum number of items to obtain.",
+          "$ref": "#/$defs/integer"
+        }
+      }
+    }
+  }
+}

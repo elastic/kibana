@@ -1,0 +1,77 @@
+{
+  "type": "object",
+  "properties": {
+    "from": {
+      "description": "Starting offset",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "size": {
+      "description": "Specifies a max number of results to get",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "index_name": {
+      "description": "A comma-separated list of connector index names to fetch connector documents for",
+      "$ref": "#/$defs/Indices",
+      "x-found-in": "query"
+    },
+    "connector_name": {
+      "description": "A comma-separated list of connector names to fetch connector documents for",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "query"
+    },
+    "service_type": {
+      "description": "A comma-separated list of connector service types to fetch connector documents for",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "query"
+    },
+    "include_deleted": {
+      "type": "boolean",
+      "description": "A flag to indicate if the desired connector should be fetched, even if it was soft-deleted.",
+      "x-found-in": "query"
+    },
+    "query": {
+      "type": "string",
+      "description": "A wildcard query string that filters connectors with matching name, description or index name",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "integer": {
+      "type": "number"
+    },
+    "IndexName": {
+      "type": "string"
+    },
+    "Indices": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IndexName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IndexName"
+          }
+        }
+      ]
+    },
+    "Name": {
+      "type": "string"
+    },
+    "Names": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ]
+    }
+  }
+}

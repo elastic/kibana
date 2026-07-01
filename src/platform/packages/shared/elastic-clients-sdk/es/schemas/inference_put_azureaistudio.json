@@ -1,0 +1,231 @@
+{
+  "type": "object",
+  "properties": {
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "completion",
+        "rerank",
+        "text_embedding"
+      ],
+      "description": "The type of the inference task that the model will perform.",
+      "$ref": "#/$defs/InferenceAzureAiStudioTaskType",
+      "x-found-in": "path"
+    },
+    "azureaistudio_inference_id": {
+      "type": "string",
+      "description": "The unique identifier of the inference endpoint.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "timeout": {
+      "description": "Specifies the amount of time to wait for the inference endpoint to be created.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "chunking_settings": {
+      "description": "The chunking configuration object. Applies only to the `text_embedding` task type. Not applicable to the `rerank` or `completion` task types.",
+      "$ref": "#/$defs/InferenceInferenceChunkingSettings",
+      "x-found-in": "body"
+    },
+    "service": {
+      "type": "string",
+      "enum": [
+        "azureaistudio"
+      ],
+      "description": "The type of service supported for the specified task type. In this case, `azureaistudio`.",
+      "$ref": "#/$defs/InferenceAzureAiStudioServiceType",
+      "x-found-in": "body"
+    },
+    "service_settings": {
+      "type": "object",
+      "properties": {
+        "api_key": {
+          "type": "string",
+          "description": "A valid API key of your Azure AI Studio model deployment. This key can be found on the overview page for your deployment in the management section of your Azure AI Studio account. IMPORTANT: You need to provide the API key only once, during the inference model creation. The get inference endpoint API does not retrieve your API key."
+        },
+        "endpoint_type": {
+          "type": "string",
+          "description": "The type of endpoint that is available for deployment through Azure AI Studio: `token` or `realtime`. The `token` endpoint type is for \"pay as you go\" endpoints that are billed per token. The `realtime` endpoint type is for \"real-time\" endpoints that are billed per hour of usage."
+        },
+        "target": {
+          "type": "string",
+          "description": "The target URL of your Azure AI Studio model deployment. This can be found on the overview page for your deployment in the management section of your Azure AI Studio account."
+        },
+        "provider": {
+          "type": "string",
+          "description": "The model provider for your deployment. Note that some providers may support only certain task types. Supported providers include: * `cohere` - available for `text_embedding`, `rerank` and `completion` task types * `databricks` - available for `completion` task type only * `meta` - available for `completion` task type only * `microsoft_phi` - available for `completion` task type only * `mistral` - available for `completion` task type only * `openai` - available for `text_embedding` and `completion` task types"
+        },
+        "rate_limit": {
+          "description": "This setting helps to minimize the number of rate limit errors returned from Azure AI Studio. By default, the `azureaistudio` service sets the number of requests allowed per minute to 240.",
+          "$ref": "#/$defs/InferenceRateLimitSetting"
+        }
+      },
+      "required": [
+        "api_key",
+        "endpoint_type",
+        "target",
+        "provider"
+      ],
+      "description": "Settings used to install the inference model. These settings are specific to the `azureaistudio` service.",
+      "$ref": "#/$defs/InferenceAzureAiStudioServiceSettings",
+      "x-found-in": "body"
+    },
+    "task_settings": {
+      "description": "Settings to configure the inference task. These settings are specific to the task type you specified.",
+      "$ref": "#/$defs/InferenceAzureAiStudioTaskSettings",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "task_type",
+    "azureaistudio_inference_id",
+    "service",
+    "service_settings"
+  ],
+  "$defs": {
+    "InferenceAzureAiStudioTaskType": {
+      "type": "string",
+      "enum": [
+        "completion",
+        "rerank",
+        "text_embedding"
+      ]
+    },
+    "Id": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "integer": {
+      "type": "number"
+    },
+    "InferenceInferenceChunkingSettings": {
+      "type": "object",
+      "properties": {
+        "max_chunk_size": {
+          "description": "The maximum size of a chunk in words. This value cannot be lower than `20` (for `sentence` strategy) or `10` (for `word` strategy). This value should not exceed the window size for the associated model.",
+          "$ref": "#/$defs/integer"
+        },
+        "overlap": {
+          "description": "The number of overlapping words for chunks. It is applicable only to a `word` chunking strategy. This value cannot be higher than half the `max_chunk_size` value.",
+          "$ref": "#/$defs/integer"
+        },
+        "sentence_overlap": {
+          "description": "The number of overlapping sentences for chunks. It is applicable only for a `sentence` chunking strategy. It can be either `1` or `0`.",
+          "$ref": "#/$defs/integer"
+        },
+        "separator_group": {
+          "type": "string",
+          "description": "Only applicable to the `recursive` strategy and required when using it. Sets a predefined list of separators in the saved chunking settings based on the selected text type. Values can be `markdown` or `plaintext`. Using this parameter is an alternative to manually specifying a custom `separators` list."
+        },
+        "separators": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Only applicable to the `recursive` strategy and required when using it. A list of strings used as possible split points when chunking text. Each string can be a plain string or a regular expression (regex) pattern. The system tries each separator in order to split the text, starting from the first item in the list. After splitting, it attempts to recombine smaller pieces into larger chunks that stay within the `max_chunk_size` limit, to reduce the total number of chunks generated."
+        },
+        "strategy": {
+          "type": "string",
+          "description": "The chunking strategy: `sentence`, `word`, `none` or `recursive`.  * If `strategy` is set to `recursive`, you must also specify: - `max_chunk_size` - either `separators` or`separator_group` Learn more about different chunking strategies in the linked documentation."
+        }
+      }
+    },
+    "InferenceAzureAiStudioServiceType": {
+      "type": "string",
+      "enum": [
+        "azureaistudio"
+      ]
+    },
+    "InferenceRateLimitSetting": {
+      "type": "object",
+      "properties": {
+        "requests_per_minute": {
+          "description": "The number of requests allowed per minute. By default, the number of requests allowed per minute is set by each service as follows: * `alibabacloud-ai-search` service: `1000` * `amazonbedrock` service: `240` * `anthropic` service: `50` * `azureaistudio` service: `240` * `azureopenai` service and task type `text_embedding`: `1440` * `azureopenai` service and task types `completion` or `chat_completion`: `120` * `cohere` service: `10000` * `contextualai` service: `1000` * `elastic` service and task type `chat_completion`: `240` * `fireworksai` service: `6000` * `googleaistudio` service: `360` * `googlevertexai` service: `30000` * `hugging_face` service: `3000` * `jinaai` service: `2000` * `llama` service: `3000` * `mistral` service: `240` * `openai` service and task type `text_embedding`: `3000` * `openai` service and task type `completion`: `500` * `openshift_ai` service: `3000` * `voyageai` service: `2000` * `watsonxai` service: `120`",
+          "$ref": "#/$defs/integer"
+        }
+      }
+    },
+    "InferenceAzureAiStudioServiceSettings": {
+      "type": "object",
+      "properties": {
+        "api_key": {
+          "type": "string",
+          "description": "A valid API key of your Azure AI Studio model deployment. This key can be found on the overview page for your deployment in the management section of your Azure AI Studio account. IMPORTANT: You need to provide the API key only once, during the inference model creation. The get inference endpoint API does not retrieve your API key."
+        },
+        "endpoint_type": {
+          "type": "string",
+          "description": "The type of endpoint that is available for deployment through Azure AI Studio: `token` or `realtime`. The `token` endpoint type is for \"pay as you go\" endpoints that are billed per token. The `realtime` endpoint type is for \"real-time\" endpoints that are billed per hour of usage."
+        },
+        "target": {
+          "type": "string",
+          "description": "The target URL of your Azure AI Studio model deployment. This can be found on the overview page for your deployment in the management section of your Azure AI Studio account."
+        },
+        "provider": {
+          "type": "string",
+          "description": "The model provider for your deployment. Note that some providers may support only certain task types. Supported providers include: * `cohere` - available for `text_embedding`, `rerank` and `completion` task types * `databricks` - available for `completion` task type only * `meta` - available for `completion` task type only * `microsoft_phi` - available for `completion` task type only * `mistral` - available for `completion` task type only * `openai` - available for `text_embedding` and `completion` task types"
+        },
+        "rate_limit": {
+          "description": "This setting helps to minimize the number of rate limit errors returned from Azure AI Studio. By default, the `azureaistudio` service sets the number of requests allowed per minute to 240.",
+          "$ref": "#/$defs/InferenceRateLimitSetting"
+        }
+      },
+      "required": [
+        "api_key",
+        "endpoint_type",
+        "target",
+        "provider"
+      ]
+    },
+    "float": {
+      "type": "number"
+    },
+    "InferenceAzureAiStudioTaskSettings": {
+      "type": "object",
+      "properties": {
+        "do_sample": {
+          "description": "For a `completion` task, instruct the inference process to perform sampling. It has no effect unless `temperature` or `top_p` is specified.",
+          "$ref": "#/$defs/float"
+        },
+        "max_new_tokens": {
+          "description": "For a `completion` task, provide a hint for the maximum number of output tokens to be generated.",
+          "$ref": "#/$defs/integer"
+        },
+        "temperature": {
+          "description": "For a `completion` task, control the apparent creativity of generated completions with a sampling temperature. It must be a number in the range of 0.0 to 2.0. It should not be used if `top_p` is specified.",
+          "$ref": "#/$defs/float"
+        },
+        "top_p": {
+          "description": "For a `completion` task, make the model consider the results of the tokens with nucleus sampling probability. It is an alternative value to `temperature` and must be a number in the range of 0.0 to 2.0. It should not be used if `temperature` is specified.",
+          "$ref": "#/$defs/float"
+        },
+        "user": {
+          "type": "string",
+          "description": "For a `text_embedding` task, specify the user issuing the request. This information can be used for abuse detection."
+        },
+        "return_documents": {
+          "type": "boolean",
+          "description": "For a `rerank` task, return doc text within the results."
+        },
+        "top_n": {
+          "description": "For a `rerank` task, the number of most relevant documents to return. It defaults to the number of the documents.",
+          "$ref": "#/$defs/integer"
+        }
+      }
+    }
+  }
+}

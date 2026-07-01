@@ -1,0 +1,52 @@
+{
+  "type": "object",
+  "properties": {
+    "model_id": {
+      "type": "string",
+      "description": "The unique identifier of the trained model.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "part": {
+      "type": "number",
+      "description": "The definition part number. When the definition is loaded for inference the definition parts are streamed in the order of their part number. The first part must be `0` and the final part must be `total_parts - 1`.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "path"
+    },
+    "definition": {
+      "type": "string",
+      "description": "The definition part for the model. Must be a base64 encoded string.",
+      "x-found-in": "body"
+    },
+    "total_definition_length": {
+      "type": "number",
+      "description": "The total uncompressed definition length in bytes. Not base64 encoded.",
+      "$ref": "#/$defs/long",
+      "x-found-in": "body"
+    },
+    "total_parts": {
+      "type": "number",
+      "description": "The total number of parts that will be uploaded. Must be greater than 0.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "model_id",
+    "part",
+    "definition",
+    "total_definition_length",
+    "total_parts"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "integer": {
+      "type": "number"
+    },
+    "long": {
+      "type": "number"
+    }
+  }
+}

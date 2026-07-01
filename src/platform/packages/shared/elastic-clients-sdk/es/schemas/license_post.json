@@ -1,0 +1,118 @@
+{
+  "type": "object",
+  "properties": {
+    "acknowledge": {
+      "type": "boolean",
+      "description": "To update a license, you must accept the acknowledge messages and set this parameter to `true`. In particular, if you are upgrading or downgrading a license, you must acknowlege the feature changes.",
+      "x-found-in": "query"
+    },
+    "master_timeout": {
+      "description": "The period to wait for a connection to the master node.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "timeout": {
+      "description": "The period to wait for a response. If no response is received before the timeout expires, the request fails and returns an error.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "license": {
+      "$ref": "#/$defs/LicenseLicense",
+      "x-found-in": "body"
+    },
+    "licenses": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/LicenseLicense"
+      },
+      "description": "A sequence of one or more JSON documents containing the license information.",
+      "x-found-in": "body"
+    }
+  },
+  "$defs": {
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "LicenseLicense": {
+      "type": "object",
+      "properties": {
+        "expiry_date_in_millis": {
+          "$ref": "#/$defs/EpochTime"
+        },
+        "issue_date_in_millis": {
+          "$ref": "#/$defs/EpochTime"
+        },
+        "start_date_in_millis": {
+          "$ref": "#/$defs/EpochTime"
+        },
+        "issued_to": {
+          "type": "string"
+        },
+        "issuer": {
+          "type": "string"
+        },
+        "max_nodes": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/long"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "max_resource_units": {
+          "$ref": "#/$defs/long"
+        },
+        "signature": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/LicenseLicenseType"
+        },
+        "uid": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "expiry_date_in_millis",
+        "issue_date_in_millis",
+        "issued_to",
+        "issuer",
+        "signature",
+        "type",
+        "uid"
+      ]
+    },
+    "EpochTime": {},
+    "long": {
+      "type": "number"
+    },
+    "LicenseLicenseType": {
+      "type": "string",
+      "enum": [
+        "missing",
+        "trial",
+        "basic",
+        "standard",
+        "dev",
+        "silver",
+        "gold",
+        "platinum",
+        "enterprise"
+      ]
+    }
+  }
+}

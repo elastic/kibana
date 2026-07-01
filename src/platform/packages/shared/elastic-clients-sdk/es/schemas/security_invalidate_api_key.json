@@ -1,0 +1,48 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/Id",
+      "x-found-in": "body"
+    },
+    "ids": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Id"
+      },
+      "description": "A list of API key ids. This parameter cannot be used with any of `name`, `realm_name`, or `username`.",
+      "x-found-in": "body"
+    },
+    "name": {
+      "description": "An API key name. This parameter cannot be used with any of `ids`, `realm_name` or `username`.",
+      "$ref": "#/$defs/Name",
+      "x-found-in": "body"
+    },
+    "owner": {
+      "type": "boolean",
+      "description": "Query API keys owned by the currently authenticated user. The `realm_name` or `username` parameters cannot be specified when this parameter is set to `true` as they are assumed to be the currently authenticated ones. NOTE: At least one of `ids`, `name`, `username`, and `realm_name` must be specified if `owner` is `false`.",
+      "x-found-in": "body"
+    },
+    "realm_name": {
+      "type": "string",
+      "description": "The name of an authentication realm. This parameter cannot be used with either `ids` or `name`, or when `owner` flag is set to `true`.",
+      "x-found-in": "body"
+    },
+    "username": {
+      "description": "The username of a user. This parameter cannot be used with either `ids` or `name` or when `owner` flag is set to `true`.",
+      "$ref": "#/$defs/Username",
+      "x-found-in": "body"
+    }
+  },
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Name": {
+      "type": "string"
+    },
+    "Username": {
+      "type": "string"
+    }
+  }
+}

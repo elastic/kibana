@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "description": "Identifier for an anomaly detection job. It can be a job identifier, a group name, or a wildcard expression.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "requests_per_second": {
+      "description": "The desired requests per second for the deletion processes. The default behavior is no throttling.",
+      "$ref": "#/$defs/float",
+      "x-found-in": "body"
+    },
+    "timeout": {
+      "description": "How long can the underlying delete processes run until they are canceled.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "body"
+    }
+  },
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "float": {
+      "type": "number"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

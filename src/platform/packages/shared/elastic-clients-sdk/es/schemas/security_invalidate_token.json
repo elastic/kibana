@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "properties": {
+    "token": {
+      "type": "string",
+      "description": "An access token. This parameter cannot be used if any of `refresh_token`, `realm_name`, or `username` are used.",
+      "x-found-in": "body"
+    },
+    "refresh_token": {
+      "type": "string",
+      "description": "A refresh token. This parameter cannot be used if any of `refresh_token`, `realm_name`, or `username` are used.",
+      "x-found-in": "body"
+    },
+    "realm_name": {
+      "description": "The name of an authentication realm. This parameter cannot be used with either `refresh_token` or `token`.",
+      "$ref": "#/$defs/Name",
+      "x-found-in": "body"
+    },
+    "username": {
+      "description": "The username of a user. This parameter cannot be used with either `refresh_token` or `token`.",
+      "$ref": "#/$defs/Username",
+      "x-found-in": "body"
+    }
+  },
+  "$defs": {
+    "Name": {
+      "type": "string"
+    },
+    "Username": {
+      "type": "string"
+    }
+  }
+}

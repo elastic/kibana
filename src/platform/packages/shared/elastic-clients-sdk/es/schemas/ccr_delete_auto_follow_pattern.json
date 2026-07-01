@@ -1,0 +1,39 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The auto-follow pattern collection to delete.",
+      "$ref": "#/$defs/Name",
+      "x-found-in": "path"
+    },
+    "master_timeout": {
+      "description": "The period to wait for a connection to the master node. If the master node is not available before the timeout expires, the request fails and returns an error. It can also be set to `-1` to indicate that the request should never timeout.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "$defs": {
+    "Name": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

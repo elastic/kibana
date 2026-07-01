@@ -1,0 +1,68 @@
+{
+  "type": "object",
+  "properties": {
+    "connector_id": {
+      "type": "string",
+      "description": "The unique identifier of the connector to be updated.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "features": {
+      "$ref": "#/$defs/ConnectorConnectorFeatures",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "connector_id",
+    "features"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "ConnectorFeatureEnabled": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "ConnectorSyncRulesFeature": {
+      "type": "object",
+      "properties": {
+        "advanced": {
+          "description": "Indicates whether advanced sync rules are enabled.",
+          "$ref": "#/$defs/ConnectorFeatureEnabled"
+        },
+        "basic": {
+          "description": "Indicates whether basic sync rules are enabled.",
+          "$ref": "#/$defs/ConnectorFeatureEnabled"
+        }
+      }
+    },
+    "ConnectorConnectorFeatures": {
+      "type": "object",
+      "properties": {
+        "document_level_security": {
+          "description": "Indicates whether document-level security is enabled.",
+          "$ref": "#/$defs/ConnectorFeatureEnabled"
+        },
+        "incremental_sync": {
+          "description": "Indicates whether incremental syncs are enabled.",
+          "$ref": "#/$defs/ConnectorFeatureEnabled"
+        },
+        "native_connector_api_keys": {
+          "description": "Indicates whether managed connector API keys are enabled.",
+          "$ref": "#/$defs/ConnectorFeatureEnabled"
+        },
+        "sync_rules": {
+          "$ref": "#/$defs/ConnectorSyncRulesFeature"
+        }
+      }
+    }
+  }
+}

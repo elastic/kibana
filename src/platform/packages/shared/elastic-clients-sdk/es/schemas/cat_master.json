@@ -1,0 +1,89 @@
+{
+  "type": "object",
+  "properties": {
+    "h": {
+      "description": "A comma-separated list of columns names to display. It supports simple wildcards.",
+      "$ref": "#/$defs/CatCatMasterColumns",
+      "x-found-in": "query"
+    },
+    "s": {
+      "description": "List of columns that determine how the table should be sorted. Sorting defaults to ascending and can be changed by setting `:asc` or `:desc` as a suffix to the column name.",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "query"
+    },
+    "local": {
+      "type": "boolean",
+      "description": "If `true`, the request computes the list of selected nodes from the local cluster state. If `false` the list of selected nodes are computed from the cluster state of the master node. In both cases the coordinating node will send requests for further information to each selected node.",
+      "x-found-in": "query"
+    },
+    "master_timeout": {
+      "description": "Period to wait for a connection to the master node.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "CatCatMasterColumn": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "id",
+            "host",
+            "h",
+            "ip",
+            "node",
+            "n"
+          ]
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "CatCatMasterColumns": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CatCatMasterColumn"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CatCatMasterColumn"
+          }
+        }
+      ]
+    },
+    "Name": {
+      "type": "string"
+    },
+    "Names": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ]
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

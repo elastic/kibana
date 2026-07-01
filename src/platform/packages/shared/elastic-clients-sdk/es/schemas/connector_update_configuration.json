@@ -1,0 +1,296 @@
+{
+  "type": "object",
+  "properties": {
+    "connector_id": {
+      "type": "string",
+      "description": "The unique identifier of the connector to be updated",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "configuration": {
+      "$ref": "#/$defs/ConnectorConnectorConfiguration",
+      "x-found-in": "body"
+    },
+    "values": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {},
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "connector_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "ConnectorConnectorConfiguration": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/ConnectorConnectorConfigProperties"
+      }
+    },
+    "ConnectorConnectorConfigProperties": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "default_value": {
+          "$ref": "#/$defs/ScalarValue"
+        },
+        "depends_on": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConnectorDependency"
+          }
+        },
+        "display": {
+          "$ref": "#/$defs/ConnectorDisplayType"
+        },
+        "label": {
+          "type": "string"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConnectorSelectOption"
+          }
+        },
+        "order": {
+          "$ref": "#/$defs/integer"
+        },
+        "placeholder": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "sensitive": {
+          "type": "boolean"
+        },
+        "tooltip": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "$ref": "#/$defs/ConnectorConnectorFieldType"
+        },
+        "ui_restrictions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "validations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConnectorValidation"
+          }
+        },
+        "value": {}
+      },
+      "required": [
+        "default_value",
+        "depends_on",
+        "display",
+        "label",
+        "options",
+        "required",
+        "sensitive",
+        "value"
+      ]
+    },
+    "ScalarValue": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/long"
+        },
+        {
+          "$ref": "#/$defs/double"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "long": {
+      "type": "number"
+    },
+    "double": {
+      "type": "number"
+    },
+    "ConnectorDependency": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/ScalarValue"
+        }
+      },
+      "required": [
+        "field",
+        "value"
+      ]
+    },
+    "ConnectorDisplayType": {
+      "type": "string",
+      "enum": [
+        "textbox",
+        "textarea",
+        "numeric",
+        "toggle",
+        "dropdown"
+      ]
+    },
+    "ConnectorSelectOption": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/ScalarValue"
+        }
+      },
+      "required": [
+        "label",
+        "value"
+      ]
+    },
+    "integer": {
+      "type": "number"
+    },
+    "ConnectorConnectorFieldType": {
+      "type": "string",
+      "enum": [
+        "str",
+        "int",
+        "list",
+        "bool"
+      ]
+    },
+    "ConnectorValidation": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ConnectorLessThanValidation"
+        },
+        {
+          "$ref": "#/$defs/ConnectorGreaterThanValidation"
+        },
+        {
+          "$ref": "#/$defs/ConnectorListTypeValidation"
+        },
+        {
+          "$ref": "#/$defs/ConnectorIncludedInValidation"
+        },
+        {
+          "$ref": "#/$defs/ConnectorRegexValidation"
+        }
+      ]
+    },
+    "ConnectorLessThanValidation": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "less_than"
+        },
+        "constraint": {
+          "$ref": "#/$defs/double"
+        }
+      },
+      "required": [
+        "type",
+        "constraint"
+      ]
+    },
+    "ConnectorGreaterThanValidation": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "greater_than"
+        },
+        "constraint": {
+          "$ref": "#/$defs/double"
+        }
+      },
+      "required": [
+        "type",
+        "constraint"
+      ]
+    },
+    "ConnectorListTypeValidation": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "list_type"
+        },
+        "constraint": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "constraint"
+      ]
+    },
+    "ConnectorIncludedInValidation": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "included_in"
+        },
+        "constraint": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ScalarValue"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "constraint"
+      ]
+    },
+    "ConnectorRegexValidation": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "regex"
+        },
+        "constraint": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "constraint"
+      ]
+    }
+  }
+}

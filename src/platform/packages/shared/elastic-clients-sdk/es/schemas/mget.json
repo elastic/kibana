@@ -1,0 +1,206 @@
+{
+  "type": "object",
+  "properties": {
+    "index": {
+      "description": "Name of the index to retrieve documents from when `ids` are specified, or when a document in the `docs` array does not specify an index.",
+      "$ref": "#/$defs/IndexName",
+      "x-found-in": "path"
+    },
+    "preference": {
+      "type": "string",
+      "description": "Specifies the node or shard the operation should be performed on. Random by default.",
+      "x-found-in": "query"
+    },
+    "realtime": {
+      "type": "boolean",
+      "description": "If `true`, the request is real-time as opposed to near-real-time.",
+      "x-found-in": "query"
+    },
+    "refresh": {
+      "type": "boolean",
+      "description": "If `true`, the request refreshes relevant shards before retrieving documents.",
+      "x-found-in": "query"
+    },
+    "routing": {
+      "description": "Custom value used to route operations to a specific shard.",
+      "$ref": "#/$defs/Routing",
+      "x-found-in": "query"
+    },
+    "_source": {
+      "description": "True or false to return the `_source` field or not, or a list of fields to return.",
+      "$ref": "#/$defs/SearchSourceConfigParam",
+      "x-found-in": "query"
+    },
+    "_source_excludes": {
+      "description": "A comma-separated list of source fields to exclude from the response. You can also use this parameter to exclude fields from the subset specified in `_source_includes` query parameter.",
+      "$ref": "#/$defs/Fields",
+      "x-found-in": "query"
+    },
+    "_source_includes": {
+      "description": "A comma-separated list of source fields to include in the response. If this parameter is specified, only these source fields are returned. You can exclude fields from this subset using the `_source_excludes` query parameter. If the `_source` parameter is `false`, this parameter is ignored.",
+      "$ref": "#/$defs/Fields",
+      "x-found-in": "query"
+    },
+    "stored_fields": {
+      "description": "If `true`, retrieves the document fields stored in the index rather than the document `_source`.",
+      "$ref": "#/$defs/Fields",
+      "x-found-in": "query"
+    },
+    "docs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/MgetOperation"
+      },
+      "description": "The documents you want to retrieve. Required if no index is specified in the request URI.",
+      "x-found-in": "body"
+    },
+    "ids": {
+      "description": "The IDs of the documents you want to retrieve. Allowed when the index is specified in the request URI.",
+      "$ref": "#/$defs/Ids",
+      "x-found-in": "body"
+    }
+  },
+  "$defs": {
+    "IndexName": {
+      "type": "string"
+    },
+    "Routing": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "Fields": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Field"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Field"
+          }
+        }
+      ]
+    },
+    "Field": {
+      "type": "string"
+    },
+    "SearchSourceConfigParam": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "$ref": "#/$defs/Fields"
+        }
+      ]
+    },
+    "MgetOperation": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "description": "The unique document ID.",
+          "$ref": "#/$defs/Id"
+        },
+        "_index": {
+          "description": "The index that contains the document.",
+          "$ref": "#/$defs/IndexName"
+        },
+        "routing": {
+          "description": "The key for the primary shard the document resides on. Required if routing is used during indexing.",
+          "$ref": "#/$defs/Routing"
+        },
+        "_source": {
+          "description": "If `false`, excludes all _source fields.",
+          "$ref": "#/$defs/SearchSourceConfig"
+        },
+        "stored_fields": {
+          "description": "The stored fields you want to retrieve.",
+          "$ref": "#/$defs/Fields"
+        },
+        "version": {
+          "$ref": "#/$defs/VersionNumber"
+        },
+        "version_type": {
+          "$ref": "#/$defs/VersionType"
+        }
+      },
+      "required": [
+        "_id"
+      ]
+    },
+    "Id": {
+      "type": "string"
+    },
+    "SearchSourceFilter": {
+      "type": "object",
+      "properties": {
+        "exclude_vectors": {
+          "type": "boolean",
+          "description": "If `true`, vector fields are excluded from the returned source. This option takes precedence over `includes`: any vector field will remain excluded even if it matches an `includes` rule."
+        },
+        "excludes": {
+          "description": "A list of fields to exclude from the returned source.",
+          "$ref": "#/$defs/Fields"
+        },
+        "exclude": {
+          "description": "A list of fields to exclude from the returned source.",
+          "$ref": "#/$defs/Fields"
+        },
+        "includes": {
+          "description": "A list of fields to include in the returned source.",
+          "$ref": "#/$defs/Fields"
+        },
+        "include": {
+          "description": "A list of fields to include in the returned source.",
+          "$ref": "#/$defs/Fields"
+        }
+      }
+    },
+    "SearchSourceConfig": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "$ref": "#/$defs/SearchSourceFilter"
+        }
+      ]
+    },
+    "VersionNumber": {
+      "$ref": "#/$defs/long"
+    },
+    "long": {
+      "type": "number"
+    },
+    "VersionType": {
+      "type": "string",
+      "enum": [
+        "internal",
+        "external",
+        "external_gte"
+      ]
+    },
+    "Ids": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identifier for the search to delete. A search ID is provided in the EQL search API's response for an async search. A search ID is also provided if the request’s `keep_on_completion` parameter is `true`.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

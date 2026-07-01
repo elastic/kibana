@@ -1,0 +1,47 @@
+{
+  "type": "object",
+  "properties": {
+    "model_id": {
+      "type": "string",
+      "description": "The unique identifier of the trained model.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "vocabulary": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The model vocabulary, which must not be empty.",
+      "x-found-in": "body"
+    },
+    "merges": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The optional model merges if required by the tokenizer.",
+      "x-found-in": "body"
+    },
+    "scores": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/double"
+      },
+      "description": "The optional vocabulary value scores if required by the tokenizer.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "model_id",
+    "vocabulary"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "double": {
+      "type": "number"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "properties": {
+    "enabled": {
+      "type": "boolean",
+      "description": "When `true`, it enables `upgrade_mode` which temporarily halts all transform tasks and prohibits new transform tasks from starting.",
+      "x-found-in": "query"
+    },
+    "timeout": {
+      "description": "The time to wait for the request to be completed.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

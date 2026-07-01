@@ -1,0 +1,80 @@
+{
+  "type": "object",
+  "properties": {
+    "transform_id": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ],
+      "description": "Identifier for the transform. It can be a transform identifier or a wildcard expression. You can get information for all transforms by using `_all`, by specifying `*` as the `<transform_id>`, or by omitting the `<transform_id>`.",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "path"
+    },
+    "allow_no_match": {
+      "type": "boolean",
+      "description": "Specifies what to do when the request: 1. Contains wildcard expressions and there are no transforms that match. 2. Contains the _all string or no identifiers and there are no matches. 3. Contains wildcard expressions and there are only partial matches. If this parameter is false, the request returns a 404 status code when there are no matches or only partial matches.",
+      "x-found-in": "query"
+    },
+    "from": {
+      "description": "Skips the specified number of transforms.",
+      "$ref": "#/$defs/long",
+      "x-found-in": "query"
+    },
+    "size": {
+      "description": "Specifies the maximum number of transforms to obtain.",
+      "$ref": "#/$defs/long",
+      "x-found-in": "query"
+    },
+    "timeout": {
+      "description": "Controls the time to wait for the stats",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "transform_id"
+  ],
+  "$defs": {
+    "Name": {
+      "type": "string"
+    },
+    "Names": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ]
+    },
+    "long": {
+      "type": "number"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,226 @@
+{
+  "type": "object",
+  "properties": {
+    "index": {
+      "description": "The name of the index that contains the documents.",
+      "$ref": "#/$defs/IndexName",
+      "x-found-in": "path"
+    },
+    "fields": {
+      "description": "A comma-separated list or wildcard expressions of fields to include in the statistics. It is used as the default list unless a specific field list is provided in the `completion_fields` or `fielddata_fields` parameters.",
+      "$ref": "#/$defs/Fields",
+      "x-found-in": "query"
+    },
+    "field_statistics": {
+      "type": "boolean",
+      "description": "If `true`, the response includes the document count, sum of document frequencies, and sum of total term frequencies.",
+      "x-found-in": "query"
+    },
+    "offsets": {
+      "type": "boolean",
+      "description": "If `true`, the response includes term offsets.",
+      "x-found-in": "query"
+    },
+    "payloads": {
+      "type": "boolean",
+      "description": "If `true`, the response includes term payloads.",
+      "x-found-in": "query"
+    },
+    "positions": {
+      "type": "boolean",
+      "description": "If `true`, the response includes term positions.",
+      "x-found-in": "query"
+    },
+    "preference": {
+      "type": "string",
+      "description": "The node or shard the operation should be performed on. It is random by default.",
+      "x-found-in": "query"
+    },
+    "realtime": {
+      "type": "boolean",
+      "description": "If true, the request is real-time as opposed to near-real-time.",
+      "x-found-in": "query"
+    },
+    "routing": {
+      "description": "A custom value used to route operations to a specific shard.",
+      "$ref": "#/$defs/Routing",
+      "x-found-in": "query"
+    },
+    "term_statistics": {
+      "type": "boolean",
+      "description": "If true, the response includes term frequency and document frequency.",
+      "x-found-in": "query"
+    },
+    "version": {
+      "type": "number",
+      "description": "If `true`, returns the document version as part of a hit.",
+      "$ref": "#/$defs/VersionNumber",
+      "x-found-in": "query"
+    },
+    "version_type": {
+      "description": "The version type.",
+      "$ref": "#/$defs/VersionType",
+      "x-found-in": "query"
+    },
+    "docs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/MtermvectorsOperation"
+      },
+      "description": "An array of existing or artificial documents.",
+      "x-found-in": "body"
+    },
+    "ids": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Id"
+      },
+      "description": "A simplified syntax to specify documents by their ID if they're in the same index.",
+      "x-found-in": "body"
+    }
+  },
+  "$defs": {
+    "IndexName": {
+      "type": "string"
+    },
+    "Field": {
+      "type": "string"
+    },
+    "Fields": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Field"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Field"
+          }
+        }
+      ]
+    },
+    "Routing": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "VersionNumber": {
+      "$ref": "#/$defs/long"
+    },
+    "long": {
+      "type": "number"
+    },
+    "VersionType": {
+      "type": "string",
+      "enum": [
+        "internal",
+        "external",
+        "external_gte"
+      ]
+    },
+    "MtermvectorsOperation": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "description": "The ID of the document.",
+          "$ref": "#/$defs/Id"
+        },
+        "_index": {
+          "description": "The index of the document.",
+          "$ref": "#/$defs/IndexName"
+        },
+        "doc": {
+          "description": "An artificial document (a document not present in the index) for which you want to retrieve term vectors."
+        },
+        "fields": {
+          "description": "Comma-separated list or wildcard expressions of fields to include in the statistics. Used as the default list unless a specific field list is provided in the `completion_fields` or `fielddata_fields` parameters.",
+          "$ref": "#/$defs/Fields"
+        },
+        "field_statistics": {
+          "type": "boolean",
+          "description": "If `true`, the response includes the document count, sum of document frequencies, and sum of total term frequencies."
+        },
+        "filter": {
+          "description": "Filter terms based on their tf-idf scores.",
+          "$ref": "#/$defs/TermvectorsFilter"
+        },
+        "offsets": {
+          "type": "boolean",
+          "description": "If `true`, the response includes term offsets."
+        },
+        "payloads": {
+          "type": "boolean",
+          "description": "If `true`, the response includes term payloads."
+        },
+        "positions": {
+          "type": "boolean",
+          "description": "If `true`, the response includes term positions."
+        },
+        "routing": {
+          "description": "Custom value used to route operations to a specific shard.",
+          "$ref": "#/$defs/Routing"
+        },
+        "term_statistics": {
+          "type": "boolean",
+          "description": "If true, the response includes term frequency and document frequency."
+        },
+        "version": {
+          "type": "number",
+          "description": "If `true`, returns the document version as part of a hit.",
+          "$ref": "#/$defs/VersionNumber"
+        },
+        "version_type": {
+          "description": "Specific version type.",
+          "$ref": "#/$defs/VersionType"
+        }
+      }
+    },
+    "Id": {
+      "type": "string"
+    },
+    "integer": {
+      "type": "number"
+    },
+    "TermvectorsFilter": {
+      "type": "object",
+      "properties": {
+        "max_doc_freq": {
+          "description": "Ignore words which occur in more than this many docs. Defaults to unbounded.",
+          "$ref": "#/$defs/integer"
+        },
+        "max_num_terms": {
+          "description": "The maximum number of terms that must be returned per field.",
+          "$ref": "#/$defs/integer"
+        },
+        "max_term_freq": {
+          "description": "Ignore words with more than this frequency in the source doc. It defaults to unbounded.",
+          "$ref": "#/$defs/integer"
+        },
+        "max_word_length": {
+          "description": "The maximum word length above which words will be ignored. Defaults to unbounded.",
+          "$ref": "#/$defs/integer"
+        },
+        "min_doc_freq": {
+          "description": "Ignore terms which do not occur in at least this many docs.",
+          "$ref": "#/$defs/integer"
+        },
+        "min_term_freq": {
+          "description": "Ignore words with less than this frequency in the source doc.",
+          "$ref": "#/$defs/integer"
+        },
+        "min_word_length": {
+          "description": "The minimum word length below which words will be ignored.",
+          "$ref": "#/$defs/integer"
+        }
+      }
+    }
+  }
+}

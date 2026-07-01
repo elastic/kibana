@@ -1,0 +1,62 @@
+{
+  "type": "object",
+  "properties": {
+    "namespace": {
+      "type": "string",
+      "description": "The namespace, which is a top-level grouping of service accounts.",
+      "$ref": "#/$defs/Namespace",
+      "x-found-in": "path"
+    },
+    "service": {
+      "type": "string",
+      "description": "The name of the service, which must be unique within its namespace.",
+      "$ref": "#/$defs/Service",
+      "x-found-in": "path"
+    },
+    "name": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ],
+      "description": "A comma-separated list of token names to evict from the service account token caches. Use a wildcard (`*`) to evict all tokens that belong to a service account. It does not support other wildcard patterns.",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "namespace",
+    "service",
+    "name"
+  ],
+  "$defs": {
+    "Namespace": {
+      "type": "string"
+    },
+    "Service": {
+      "type": "string"
+    },
+    "Name": {
+      "type": "string"
+    },
+    "Names": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The synonyms set identifier to retrieve.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "from": {
+      "description": "The starting offset for query rules to retrieve.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "size": {
+      "description": "The max number of query rules to retrieve.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "integer": {
+      "type": "number"
+    }
+  }
+}

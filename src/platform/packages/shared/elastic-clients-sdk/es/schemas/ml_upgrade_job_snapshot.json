@@ -1,0 +1,51 @@
+{
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Identifier for the anomaly detection job.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "snapshot_id": {
+      "type": "string",
+      "description": "A numerical character string that uniquely identifies the model snapshot.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "wait_for_completion": {
+      "type": "boolean",
+      "description": "When true, the API won’t respond until the upgrade is complete. Otherwise, it responds as soon as the upgrade task is assigned to a node.",
+      "x-found-in": "query"
+    },
+    "timeout": {
+      "description": "Controls the time to wait for the request to complete.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "job_id",
+    "snapshot_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

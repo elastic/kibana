@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "properties": {
+    "token": {
+      "type": "string",
+      "description": "The access token to be invalidated.",
+      "x-found-in": "body"
+    },
+    "refresh_token": {
+      "type": "string",
+      "description": "The refresh token to be invalidated.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "token"
+  ]
+}

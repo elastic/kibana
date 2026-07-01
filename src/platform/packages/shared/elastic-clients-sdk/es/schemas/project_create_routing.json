@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of project routing expression",
+      "x-found-in": "path"
+    },
+    "expressions": {
+      "$ref": "#/$defs/ProjectProjectRoutingExpression",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "name",
+    "expressions"
+  ],
+  "$defs": {
+    "ProjectRoutingExpression": {
+      "type": "string"
+    },
+    "ProjectProjectRoutingExpression": {
+      "type": "object",
+      "properties": {
+        "expression": {
+          "$ref": "#/$defs/ProjectRoutingExpression"
+        }
+      },
+      "required": [
+        "expression"
+      ]
+    }
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the component template. It accepts wildcard expressions. If it is omitted, all component templates are returned.",
+      "x-found-in": "path"
+    },
+    "h": {
+      "description": "A comma-separated list of columns names to display. It supports simple wildcards.",
+      "$ref": "#/$defs/CatCatComponentColumns",
+      "x-found-in": "query"
+    },
+    "s": {
+      "description": "List of columns that determine how the table should be sorted. Sorting defaults to ascending and can be changed by setting `:asc` or `:desc` as a suffix to the column name.",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "query"
+    },
+    "local": {
+      "type": "boolean",
+      "description": "If `true`, the request computes the list of selected nodes from the local cluster state. If `false` the list of selected nodes are computed from the cluster state of the master node. In both cases the coordinating node will send requests for further information to each selected node.",
+      "x-found-in": "query"
+    },
+    "master_timeout": {
+      "description": "The period to wait for a connection to the master node.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "CatCatComponentColumn": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "name",
+            "n",
+            "version",
+            "v",
+            "alias_count",
+            "a",
+            "mapping_count",
+            "m",
+            "settings_count",
+            "s",
+            "metadata_count",
+            "me",
+            "included_in",
+            "i"
+          ]
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "CatCatComponentColumns": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CatCatComponentColumn"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CatCatComponentColumn"
+          }
+        }
+      ]
+    },
+    "Name": {
+      "type": "string"
+    },
+    "Names": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ]
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The id of the associated connector",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "body"
+    },
+    "job_type": {
+      "$ref": "#/$defs/ConnectorSyncJobType",
+      "x-found-in": "body"
+    },
+    "trigger_method": {
+      "$ref": "#/$defs/ConnectorSyncJobTriggerMethod",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "ConnectorSyncJobType": {
+      "type": "string",
+      "enum": [
+        "full",
+        "incremental",
+        "access_control"
+      ]
+    },
+    "ConnectorSyncJobTriggerMethod": {
+      "type": "string",
+      "enum": [
+        "on_demand",
+        "scheduled"
+      ]
+    }
+  }
+}

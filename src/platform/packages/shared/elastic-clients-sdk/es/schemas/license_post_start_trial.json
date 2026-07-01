@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "properties": {
+    "acknowledge": {
+      "type": "boolean",
+      "description": "To start a trial, you must accept the acknowledge messages and set this parameter to `true`.",
+      "x-found-in": "query"
+    },
+    "type": {
+      "type": "string",
+      "description": "The type of trial license to generate",
+      "x-found-in": "query"
+    },
+    "master_timeout": {
+      "description": "Period to wait for a connection to the master node.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "A comma-separated list of pipeline identifiers.",
+      "$ref": "#/$defs/Ids",
+      "x-found-in": "path"
+    }
+  },
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Ids": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        }
+      ]
+    }
+  }
+}

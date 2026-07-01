@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ],
+      "description": "A comma-separated list of roles to evict from the role cache. To evict all roles, use an asterisk (`*`). It does not support other wildcard patterns.",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "$defs": {
+    "Name": {
+      "type": "string"
+    },
+    "Names": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ]
+    }
+  }
+}

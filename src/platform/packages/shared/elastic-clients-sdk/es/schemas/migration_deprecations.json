@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "properties": {
+    "index": {
+      "description": "Comma-separate list of data streams or indices to check. Wildcard (*) expressions are supported.",
+      "$ref": "#/$defs/IndexName",
+      "x-found-in": "path"
+    }
+  },
+  "$defs": {
+    "IndexName": {
+      "type": "string"
+    }
+  }
+}

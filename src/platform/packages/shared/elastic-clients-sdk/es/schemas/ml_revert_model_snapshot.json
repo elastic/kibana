@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Identifier for the anomaly detection job.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "snapshot_id": {
+      "type": "string",
+      "description": "You can specify `empty` as the <snapshot_id>. Reverting to the empty snapshot means the anomaly detection job starts learning a new model from scratch when it is started.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "delete_intervening_results": {
+      "type": "boolean",
+      "description": "Refer to the description for the `delete_intervening_results` query parameter.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "job_id",
+    "snapshot_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

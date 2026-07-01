@@ -1,0 +1,30 @@
+{
+  "type": "object",
+  "properties": {
+    "username": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Username"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Username"
+          }
+        }
+      ],
+      "description": "An identifier for the user. You can specify multiple usernames as a comma-separated list. If you omit this parameter, the API retrieves information about all users.",
+      "x-found-in": "path"
+    },
+    "with_profile_uid": {
+      "type": "boolean",
+      "description": "Determines whether to retrieve the user profile UID, if it exists, for the users.",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "Username": {
+      "type": "string"
+    }
+  }
+}

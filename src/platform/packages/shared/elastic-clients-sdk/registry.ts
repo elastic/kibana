@@ -12,18 +12,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { z } from '@kbn/zod/v4';
-import { apiManifest, loadEsApi } from './es/apis';
-import { kbApiManifest, loadKbApi } from './kb/apis';
+import type { JsonSchemaObject } from './lib/json_schema';
 import type { KbApiDefinition } from './kb/types';
-import type { FoundIn } from './lib/schema-args';
-import { extractSchemaArgs } from './lib/schema-args';
-import { buildRequestParams as buildEsRequestParams } from './es/request-builder';
+import type { FoundIn } from './lib/schema_args';
+import { extractSchemaArgs } from './lib/schema_args';
+import { buildRequestParams as buildEsRequestParams } from './es/request_builder';
 import { buildKibanaRequestParams } from './kb/request-builder';
-
-const resolveInput = (
-  input: z.ZodObject<z.ZodRawShape> | (() => z.ZodObject<z.ZodRawShape>)
-): z.ZodObject<z.ZodRawShape> => (typeof input === 'function' ? input() : input);
+import { apiManifest, loadEsApi } from './es/apis';
+import type { EsApiMeta } from './es/apis';
+import { kbApiManifest, loadKbApi } from './kb/apis';
 
 /** HTTP methods accepted across both the Elasticsearch and Kibana API surfaces. */
 export type ApiHttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD';
@@ -33,7 +30,7 @@ export type ApiHttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD'
  *
  * Every entry in {@link ApiRegistry.manifest} is one of these. It is intentionally
  * lightweight so callers can list/search the full API surface without paying the
- * cost of loading per-endpoint Zod schemas. Pass an entry back to
+ * cost of loading per-endpoint schemas. Pass an entry back to
  * {@link ApiRegistry.loadApi} to resolve its full definition on demand.
  */
 export interface ApiRegistryMeta {
@@ -48,15 +45,17 @@ export interface ApiRegistryMeta {
 }
 
 /**
- * A fully-resolved API definition, including the unified Zod `input` schema (when the
+ * A fully-resolved API definition, including the JSON Schema `input` (when the
  * operation accepts parameters).
  *
- * Every field of `input` carries `.meta({ found_in: "path" | "query" | "body" })` routing
- * metadata, used by {@link api_manual} to describe each parameter.
+ * Every property under `input.properties` carries an `x-found-in` routing
+ * annotation (`"path"`, `"query"`, or `"body"`), used by {@link api_manual} to
+ * describe each parameter and by {@link api_execute} to route it correctly.
  *
- * Note: the `input` schema keys reflect the display representation. For ES they are the
- * wire/schema keys; for Kibana they are the `cliFlag ?? name` keys. Do not use `input`
- * to build HTTP requests — use {@link LoadedApi.buildRequest} instead.
+ * Note: the `input` schema keys reflect the display representation. For ES they
+ * are the wire/schema keys; for Kibana they are the `cliFlag ?? name` keys. Do
+ * not use `input` to build HTTP requests — use {@link LoadedApi.buildRequest}
+ * instead.
  */
 export interface ApiRegistryDefinition {
   readonly name: string;
@@ -64,8 +63,8 @@ export interface ApiRegistryDefinition {
   readonly description: string;
   readonly method: ApiHttpMethod;
   readonly path: string;
-  /** Unified Zod object schema (or a no-arg factory returning one); absent when the API takes no params. */
-  readonly input?: z.ZodObject<z.ZodRawShape> | (() => z.ZodObject<z.ZodRawShape>);
+  /** JSON Schema object describing accepted parameters; absent when the API takes no params. */
+  readonly input?: JsonSchemaObject;
   /** How to serialize the request body; defaults to `"json"`. */
   readonly bodyFormat?: 'json' | 'ndjson';
   /** How to handle the response body; defaults to `"json"`. */
@@ -127,11 +126,11 @@ export interface ApiRegistry {
 export const esApiRegistry: ApiRegistry = {
   manifest: apiManifest,
   loadApi: async (meta) => {
-    const def = await loadEsApi(meta);
+    const def = await loadEsApi(meta as EsApiMeta);
     return {
-      definition: def,
+      definition: def as ApiRegistryDefinition,
       buildRequest: (input): ApiRequest => {
-        const schemaArgs = def.input != null ? extractSchemaArgs(resolveInput(def.input)) : [];
+        const schemaArgs = def.input != null ? extractSchemaArgs(def.input) : [];
         const p = buildEsRequestParams(def, input, schemaArgs);
         const req: {
           method: string;
@@ -189,53 +188,66 @@ function toRegistryDefinition(def: KbApiDefinition): ApiRegistryDefinition {
   };
 }
 
-/** Attaches a description and `found_in` routing hint to a field, marking it optional unless required. */
-function annotate(
-  base: z.ZodType,
-  required: boolean,
-  description: string,
-  foundIn: FoundIn
-): z.ZodType {
-  const field = required ? base : base.optional();
-  return field.meta({ description, found_in: foundIn });
-}
-
 /**
- * Temporarily build a simple zod schema, until the full kibana schemas are available
+ * Builds a JSON Schema object for a Kibana API definition.
+ *
+ * Each path, query, and body parameter becomes a property in the schema with
+ * the appropriate `x-found-in` annotation and a JSON Schema type.
+ *
+ * This is a temporary shim until the Kibana API generator emits JSON Schema
+ * directly (analogous to what the ES client generator now does).
  */
-function buildKbRegistryInput(def: KbApiDefinition): z.ZodObject<z.ZodRawShape> {
-  const shape: Record<string, z.ZodType> = {};
+function buildKbRegistryInput(def: KbApiDefinition): JsonSchemaObject | undefined {
+  const properties: Record<string, Record<string, unknown>> = {};
+  const required: string[] = [];
+
+  const addParam = (
+    key: string,
+    kbType: string | undefined,
+    description: string,
+    foundIn: FoundIn,
+    isRequired: boolean
+  ) => {
+    let jsonType: string;
+    switch (kbType) {
+      case 'boolean':
+        jsonType = 'boolean';
+        break;
+      case 'number':
+        jsonType = 'number';
+        break;
+      case 'array':
+        jsonType = 'array';
+        break;
+      case 'object':
+        jsonType = 'object';
+        break;
+      default:
+        jsonType = 'string';
+    }
+    properties[key] = {
+      type: jsonType,
+      description,
+      'x-found-in': foundIn,
+    };
+    if (isRequired) required.push(key);
+  };
 
   for (const p of def.pathParams ?? []) {
-    shape[p.name] = annotate(z.string(), p.required, p.description, 'path');
+    addParam(p.name, 'string', p.description, 'path', p.required);
   }
 
   for (const q of def.queryParams ?? []) {
-    const base = q.type === 'boolean' ? z.boolean() : q.type === 'number' ? z.number() : z.string();
-    shape[q.cliFlag ?? q.name] = annotate(base, q.required === true, q.description, 'query');
+    addParam(q.cliFlag ?? q.name, q.type, q.description, 'query', q.required === true);
   }
 
   for (const b of def.bodyParams ?? []) {
-    let base: z.ZodType;
-    switch (b.type) {
-      case 'boolean':
-        base = z.boolean();
-        break;
-      case 'number':
-        base = z.number();
-        break;
-      case 'array':
-        base = z.array(z.unknown());
-        break;
-      case 'object':
-        base = z.record(z.string(), z.unknown());
-        break;
-      default:
-        base = z.string();
-        break;
-    }
-    shape[b.cliFlag ?? b.name] = annotate(base, b.required === true, b.description, 'body');
+    addParam(b.cliFlag ?? b.name, b.type, b.description, 'body', b.required === true);
   }
 
-  return z.looseObject(shape);
+  if (Object.keys(properties).length === 0) return undefined;
+
+  const schema: JsonSchemaObject = { type: 'object', properties };
+  if (required.length > 0) schema.required = required;
+  return schema;
 }

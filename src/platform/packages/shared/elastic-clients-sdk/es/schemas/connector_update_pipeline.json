@@ -1,0 +1,47 @@
+{
+  "type": "object",
+  "properties": {
+    "connector_id": {
+      "type": "string",
+      "description": "The unique identifier of the connector to be updated",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "pipeline": {
+      "$ref": "#/$defs/ConnectorIngestPipelineParams",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "connector_id",
+    "pipeline"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "ConnectorIngestPipelineParams": {
+      "type": "object",
+      "properties": {
+        "extract_binary_content": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "reduce_whitespace": {
+          "type": "boolean"
+        },
+        "run_ml_inference": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "extract_binary_content",
+        "name",
+        "reduce_whitespace",
+        "run_ml_inference"
+      ]
+    }
+  }
+}

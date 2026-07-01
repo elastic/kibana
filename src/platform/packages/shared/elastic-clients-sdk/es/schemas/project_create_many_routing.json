@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "properties": {
+    "expressions": {
+      "$ref": "#/$defs/ProjectNamedProjectRoutingExpressions",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "expressions"
+  ],
+  "$defs": {
+    "ProjectProjectRoutingExpression": {
+      "type": "object",
+      "properties": {
+        "expression": {
+          "$ref": "#/$defs/ProjectRoutingExpression"
+        }
+      },
+      "required": [
+        "expression"
+      ]
+    },
+    "ProjectRoutingExpression": {
+      "type": "string"
+    },
+    "ProjectNamedProjectRoutingExpressions": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/ProjectProjectRoutingExpression"
+      }
+    }
+  }
+}

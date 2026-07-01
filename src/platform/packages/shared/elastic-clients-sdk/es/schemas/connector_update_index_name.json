@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "properties": {
+    "connector_id": {
+      "type": "string",
+      "description": "The unique identifier of the connector to be updated",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "index_name": {
+      "$ref": "#/$defs/SpecUtilsWithNullValue",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "connector_id",
+    "index_name"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "SpecUtilsNullValue": {
+      "type": "null"
+    },
+    "SpecUtilsWithNullValue": {
+      "anyOf": [
+        {},
+        {
+          "$ref": "#/$defs/SpecUtilsNullValue"
+        }
+      ]
+    }
+  }
+}

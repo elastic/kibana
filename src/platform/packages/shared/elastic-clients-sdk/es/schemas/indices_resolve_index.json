@@ -1,0 +1,104 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ],
+      "description": "Comma-separated name(s) or index pattern(s) of the indices, aliases, and data streams to resolve. Resources on remote clusters can be specified using the `<cluster>`:`<name>` syntax.",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "path"
+    },
+    "expand_wildcards": {
+      "description": "Type of index that wildcard patterns can match. If the request can target data streams, this argument determines whether wildcard expressions match hidden data streams. Supports comma-separated values, such as `open,hidden`.",
+      "$ref": "#/$defs/ExpandWildcards",
+      "x-found-in": "query"
+    },
+    "ignore_unavailable": {
+      "type": "boolean",
+      "description": "If `false`, the request returns an error if it targets a concrete (non-wildcarded) index, alias, or data stream that is missing, closed, or otherwise unavailable. If `true`, unavailable concrete targets are silently ignored.",
+      "x-found-in": "query"
+    },
+    "allow_no_indices": {
+      "type": "boolean",
+      "description": "A setting that does two separate checks on the index expression. If `false`, the request returns an error (1) if any wildcard expression (including `_all` and `*`) resolves to zero matching indices or (2) if the complete set of resolved indices, aliases or data streams is empty after all expressions are evaluated. If `true`, index expressions that resolve to no indices are allowed and the request returns an empty result.",
+      "x-found-in": "query"
+    },
+    "mode": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IndicesIndexMode"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IndicesIndexMode"
+          }
+        }
+      ],
+      "description": "Filter indices by index mode - standard, lookup, time_series, etc. Comma-separated list of IndexMode. Empty means no filter.",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "$defs": {
+    "Name": {
+      "type": "string"
+    },
+    "Names": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ]
+    },
+    "ExpandWildcard": {
+      "type": "string",
+      "enum": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ]
+    },
+    "ExpandWildcards": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExpandWildcard"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExpandWildcard"
+          }
+        }
+      ]
+    },
+    "IndicesIndexMode": {
+      "type": "string",
+      "enum": [
+        "standard",
+        "time_series",
+        "logsdb",
+        "lookup"
+      ]
+    }
+  }
+}

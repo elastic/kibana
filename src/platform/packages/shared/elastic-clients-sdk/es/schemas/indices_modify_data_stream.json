@@ -1,0 +1,67 @@
+{
+  "type": "object",
+  "properties": {
+    "actions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/IndicesModifyDataStreamAction"
+      },
+      "description": "Actions to perform.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "actions"
+  ],
+  "$defs": {
+    "IndicesModifyDataStreamAction": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "add_backing_index": {
+              "$ref": "#/$defs/IndicesModifyDataStreamIndexAndDataStreamAction"
+            }
+          },
+          "required": [
+            "add_backing_index"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "remove_backing_index": {
+              "$ref": "#/$defs/IndicesModifyDataStreamIndexAndDataStreamAction"
+            }
+          },
+          "required": [
+            "remove_backing_index"
+          ]
+        }
+      ]
+    },
+    "IndicesModifyDataStreamIndexAndDataStreamAction": {
+      "type": "object",
+      "properties": {
+        "data_stream": {
+          "description": "Data stream targeted by the action.",
+          "$ref": "#/$defs/DataStreamName"
+        },
+        "index": {
+          "description": "Index for the action.",
+          "$ref": "#/$defs/IndexName"
+        }
+      },
+      "required": [
+        "data_stream",
+        "index"
+      ]
+    },
+    "DataStreamName": {
+      "type": "string"
+    },
+    "IndexName": {
+      "type": "string"
+    }
+  }
+}

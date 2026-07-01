@@ -1,0 +1,95 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DataStreamName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DataStreamName"
+          }
+        }
+      ],
+      "description": "A comma-separated list of data streams of which the data stream lifecycle will be deleted. Use `*` to get all data streams",
+      "$ref": "#/$defs/DataStreamNames",
+      "x-found-in": "path"
+    },
+    "expand_wildcards": {
+      "description": "Whether wildcard expressions should get expanded to open or closed indices (default: open)",
+      "$ref": "#/$defs/ExpandWildcards",
+      "x-found-in": "query"
+    },
+    "master_timeout": {
+      "description": "The period to wait for a connection to the master node.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "timeout": {
+      "description": "The period to wait for a response.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "$defs": {
+    "DataStreamName": {
+      "type": "string"
+    },
+    "DataStreamNames": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DataStreamName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DataStreamName"
+          }
+        }
+      ]
+    },
+    "ExpandWildcard": {
+      "type": "string",
+      "enum": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ]
+    },
+    "ExpandWildcards": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExpandWildcard"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExpandWildcard"
+          }
+        }
+      ]
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

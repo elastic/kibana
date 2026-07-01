@@ -1,0 +1,183 @@
+{
+  "type": "object",
+  "properties": {
+    "index": {
+      "description": "A comma-separated list of data streams, indices, and index aliases that limit the request. Wildcard expressions (`*`) are supported. To target all data streams and indices in a cluster, omit this parameter or use _all or `*`.",
+      "$ref": "#/$defs/Indices",
+      "x-found-in": "path"
+    },
+    "expand_wildcards": {
+      "description": "Expand wildcard expression to concrete indices that are open, closed or both.",
+      "$ref": "#/$defs/ExpandWildcards",
+      "x-found-in": "query"
+    },
+    "level": {
+      "description": "Return health information at a specific level of detail.",
+      "$ref": "#/$defs/Level",
+      "x-found-in": "query"
+    },
+    "local": {
+      "type": "boolean",
+      "description": "If true, retrieve information from the local node only. If false, retrieve information from the master node.",
+      "x-found-in": "query"
+    },
+    "master_timeout": {
+      "description": "The period to wait for a connection to the master node. If no response is received before the timeout expires, the request fails and returns an error.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "timeout": {
+      "description": "The period to wait for a response. If no response is received before the timeout expires, the request fails and returns an error.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "wait_for_active_shards": {
+      "description": "Wait for the specified number of active shards. Use `all` to wait for all shards in the cluster to be active. Use `0` to not wait.",
+      "$ref": "#/$defs/WaitForActiveShards",
+      "x-found-in": "query"
+    },
+    "wait_for_events": {
+      "description": "Wait until all currently queued events with the given priority are processed.",
+      "$ref": "#/$defs/WaitForEvents",
+      "x-found-in": "query"
+    },
+    "wait_for_nodes": {
+      "description": "Wait until the specified number (N) of nodes is available. It also accepts `>=N`, `<=N`, `>N` and `<N`. Alternatively, use the notations `ge(N)`, `le(N)`, `gt(N)`, and `lt(N)`.",
+      "$ref": "#/$defs/ClusterHealthWaitForNodes",
+      "x-found-in": "query"
+    },
+    "wait_for_no_initializing_shards": {
+      "type": "boolean",
+      "description": "Wait (until the timeout expires) for the cluster to have no shard initializations. If false, the request does not wait for initializing shards.",
+      "x-found-in": "query"
+    },
+    "wait_for_no_relocating_shards": {
+      "type": "boolean",
+      "description": "Wait (until the timeout expires) for the cluster to have no shard relocations. If false, the request not wait for relocating shards.",
+      "x-found-in": "query"
+    },
+    "wait_for_status": {
+      "description": "Wait (until the timeout expires) for the cluster to reach a specific health status (or a better status). A green status is better than yellow and yellow is better than red. By default, the request does not wait for a particular status.",
+      "$ref": "#/$defs/HealthStatus",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "IndexName": {
+      "type": "string"
+    },
+    "Indices": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IndexName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IndexName"
+          }
+        }
+      ]
+    },
+    "ExpandWildcard": {
+      "type": "string",
+      "enum": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ]
+    },
+    "ExpandWildcards": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExpandWildcard"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExpandWildcard"
+          }
+        }
+      ]
+    },
+    "Level": {
+      "type": "string",
+      "enum": [
+        "cluster",
+        "indices",
+        "shards"
+      ]
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "integer": {
+      "type": "number"
+    },
+    "WaitForActiveShardOptions": {
+      "type": "string",
+      "enum": [
+        "all",
+        "index-setting"
+      ]
+    },
+    "WaitForActiveShards": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/integer"
+        },
+        {
+          "$ref": "#/$defs/WaitForActiveShardOptions"
+        }
+      ]
+    },
+    "WaitForEvents": {
+      "type": "string",
+      "enum": [
+        "immediate",
+        "urgent",
+        "high",
+        "normal",
+        "low",
+        "languid"
+      ]
+    },
+    "ClusterHealthWaitForNodes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/integer"
+        }
+      ]
+    },
+    "HealthStatus": {
+      "type": "string",
+      "enum": [
+        "green",
+        "GREEN",
+        "yellow",
+        "YELLOW",
+        "red",
+        "RED",
+        "unknown",
+        "unavailable"
+      ]
+    }
+  }
+}

@@ -1,0 +1,451 @@
+{
+  "type": "object",
+  "properties": {
+    "index": {
+      "description": "Comma-separated list of data streams, indices, and aliases used to limit the request. Supports wildcards (`*`). To target all data streams and indices, omit this parameter or use `*` or `_all`.",
+      "$ref": "#/$defs/Indices",
+      "x-found-in": "path"
+    },
+    "expand_wildcards": {
+      "description": "The type of index that wildcard patterns can match.",
+      "$ref": "#/$defs/ExpandWildcards",
+      "x-found-in": "query"
+    },
+    "health": {
+      "description": "The health status used to limit returned indices. By default, the response includes indices of any health status.",
+      "$ref": "#/$defs/HealthStatus",
+      "x-found-in": "query"
+    },
+    "include_unloaded_segments": {
+      "type": "boolean",
+      "description": "If true, the response includes information from segments that are not loaded into memory.",
+      "x-found-in": "query"
+    },
+    "pri": {
+      "type": "boolean",
+      "description": "If true, the response only includes information from primary shards.",
+      "x-found-in": "query"
+    },
+    "master_timeout": {
+      "description": "Period to wait for a connection to the master node.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "h": {
+      "description": "A comma-separated list of columns names to display. It supports simple wildcards.",
+      "$ref": "#/$defs/CatCatIndicesColumns",
+      "x-found-in": "query"
+    },
+    "s": {
+      "description": "List of columns that determine how the table should be sorted. Sorting defaults to ascending and can be changed by setting `:asc` or `:desc` as a suffix to the column name.",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "IndexName": {
+      "type": "string"
+    },
+    "Indices": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IndexName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IndexName"
+          }
+        }
+      ]
+    },
+    "ExpandWildcard": {
+      "type": "string",
+      "enum": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ]
+    },
+    "ExpandWildcards": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExpandWildcard"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExpandWildcard"
+          }
+        }
+      ]
+    },
+    "HealthStatus": {
+      "type": "string",
+      "enum": [
+        "green",
+        "GREEN",
+        "yellow",
+        "YELLOW",
+        "red",
+        "RED",
+        "unknown",
+        "unavailable"
+      ]
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "CatCatIndicesColumn": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "health",
+            "h",
+            "status",
+            "s",
+            "index",
+            "i",
+            "idx",
+            "uuid",
+            "id",
+            "pri",
+            "p",
+            "shards.primary",
+            "shardsPrimary",
+            "rep",
+            "r",
+            "shards.replica",
+            "shardsReplica",
+            "docs.count",
+            "dc",
+            "docsCount",
+            "docs.deleted",
+            "dd",
+            "docsDeleted",
+            "creation.date",
+            "cd",
+            "creation.date.string",
+            "cds",
+            "store.size",
+            "ss",
+            "storeSize",
+            "pri.store.size",
+            "dataset.size",
+            "completion.size",
+            "cs",
+            "completionSize",
+            "pri.completion.size",
+            "fielddata.memory_size",
+            "fm",
+            "fielddataMemory",
+            "pri.fielddata.memory_size",
+            "fielddata.evictions",
+            "fe",
+            "fielddataEvictions",
+            "pri.fielddata.evictions",
+            "query_cache.memory_size",
+            "qcm",
+            "queryCacheMemory",
+            "pri.query_cache.memory_size",
+            "query_cache.evictions",
+            "qce",
+            "queryCacheEvictions",
+            "pri.query_cache.evictions",
+            "request_cache.memory_size",
+            "rcm",
+            "requestCacheMemory",
+            "pri.request_cache.memory_size",
+            "request_cache.evictions",
+            "rce",
+            "requestCacheEvictions",
+            "pri.request_cache.evictions",
+            "request_cache.hit_count",
+            "rchc",
+            "requestCacheHitCount",
+            "pri.request_cache.hit_count",
+            "request_cache.miss_count",
+            "rcmc",
+            "requestCacheMissCount",
+            "pri.request_cache.miss_count",
+            "flush.total",
+            "ft",
+            "flushTotal",
+            "pri.flush.total",
+            "flush.total_time",
+            "ftt",
+            "flushTotalTime",
+            "pri.flush.total_time",
+            "get.current",
+            "gc",
+            "getCurrent",
+            "pri.get.current",
+            "get.time",
+            "gti",
+            "getTime",
+            "pri.get.time",
+            "get.total",
+            "gto",
+            "getTotal",
+            "pri.get.total",
+            "get.exists_time",
+            "geti",
+            "getExistsTime",
+            "pri.get.exists_time",
+            "get.exists_total",
+            "geto",
+            "getExistsTotal",
+            "pri.get.exists_total",
+            "get.missing_time",
+            "gmti",
+            "getMissingTime",
+            "pri.get.missing_time",
+            "get.missing_total",
+            "gmto",
+            "getMissingTotal",
+            "pri.get.missing_total",
+            "indexing.delete_current",
+            "idc",
+            "indexingDeleteCurrent",
+            "pri.indexing.delete_current",
+            "indexing.delete_time",
+            "idti",
+            "indexingDeleteTime",
+            "pri.indexing.delete_time",
+            "indexing.delete_total",
+            "idto",
+            "indexingDeleteTotal",
+            "pri.indexing.delete_total",
+            "indexing.index_current",
+            "iic",
+            "indexingIndexCurrent",
+            "pri.indexing.index_current",
+            "indexing.index_time",
+            "iiti",
+            "indexingIndexTime",
+            "pri.indexing.index_time",
+            "indexing.index_total",
+            "iito",
+            "indexingIndexTotal",
+            "pri.indexing.index_total",
+            "indexing.index_failed",
+            "iif",
+            "indexingIndexFailed",
+            "pri.indexing.index_failed",
+            "indexing.index_failed_due_to_version_conflict",
+            "iifvc",
+            "indexingIndexFailedDueToVersionConflict",
+            "pri.indexing.index_failed_due_to_version_conflict",
+            "merges.current",
+            "mc",
+            "mergesCurrent",
+            "pri.merges.current",
+            "merges.current_docs",
+            "mcd",
+            "mergesCurrentDocs",
+            "pri.merges.current_docs",
+            "merges.current_size",
+            "mcs",
+            "mergesCurrentSize",
+            "pri.merges.current_size",
+            "merges.total",
+            "mt",
+            "mergesTotal",
+            "pri.merges.total",
+            "merges.total_docs",
+            "mtd",
+            "mergesTotalDocs",
+            "pri.merges.total_docs",
+            "merges.total_size",
+            "mts",
+            "mergesTotalSize",
+            "pri.merges.total_size",
+            "merges.total_time",
+            "mtt",
+            "mergesTotalTime",
+            "pri.merges.total_time",
+            "refresh.total",
+            "rto",
+            "refreshTotal",
+            "pri.refresh.total",
+            "refresh.time",
+            "rti",
+            "refreshTime",
+            "pri.refresh.time",
+            "refresh.external_total",
+            "pri.refresh.external_total",
+            "refresh.external_time",
+            "pri.refresh.external_time",
+            "refresh.listeners",
+            "rli",
+            "refreshListeners",
+            "pri.refresh.listeners",
+            "search.fetch_current",
+            "sfc",
+            "searchFetchCurrent",
+            "pri.search.fetch_current",
+            "search.fetch_time",
+            "sfti",
+            "searchFetchTime",
+            "pri.search.fetch_time",
+            "search.fetch_total",
+            "sfto",
+            "searchFetchTotal",
+            "pri.search.fetch_total",
+            "search.open_contexts",
+            "so",
+            "searchOpenContexts",
+            "pri.search.open_contexts",
+            "search.query_current",
+            "sqc",
+            "searchQueryCurrent",
+            "pri.search.query_current",
+            "search.query_time",
+            "sqti",
+            "searchQueryTime",
+            "pri.search.query_time",
+            "search.query_total",
+            "sqto",
+            "searchQueryTotal",
+            "pri.search.query_total",
+            "search.scroll_current",
+            "scc",
+            "searchScrollCurrent",
+            "pri.search.scroll_current",
+            "search.scroll_time",
+            "scti",
+            "searchScrollTime",
+            "pri.search.scroll_time",
+            "search.scroll_total",
+            "scto",
+            "searchScrollTotal",
+            "pri.search.scroll_total",
+            "segments.count",
+            "sc",
+            "segmentsCount",
+            "pri.segments.count",
+            "segments.memory",
+            "sm",
+            "segmentsMemory",
+            "pri.segments.memory",
+            "segments.index_writer_memory",
+            "siwm",
+            "segmentsIndexWriterMemory",
+            "pri.segments.index_writer_memory",
+            "segments.version_map_memory",
+            "svmm",
+            "segmentsVersionMapMemory",
+            "pri.segments.version_map_memory",
+            "segments.fixed_bitset_memory",
+            "sfbm",
+            "fixedBitsetMemory",
+            "pri.segments.fixed_bitset_memory",
+            "warmer.current",
+            "wc",
+            "warmerCurrent",
+            "pri.warmer.current",
+            "warmer.total",
+            "wto",
+            "warmerTotal",
+            "pri.warmer.total",
+            "warmer.total_time",
+            "wtt",
+            "warmerTotalTime",
+            "pri.warmer.total_time",
+            "suggest.current",
+            "suc",
+            "suggestCurrent",
+            "pri.suggest.current",
+            "suggest.time",
+            "suti",
+            "suggestTime",
+            "pri.suggest.time",
+            "suggest.total",
+            "suto",
+            "suggestTotal",
+            "pri.suggest.total",
+            "memory.total",
+            "tm",
+            "memoryTotal",
+            "pri.memory.total",
+            "bulk.total_operations",
+            "bto",
+            "bulkTotalOperation",
+            "pri.bulk.total_operations",
+            "bulk.total_time",
+            "btti",
+            "bulkTotalTime",
+            "pri.bulk.total_time",
+            "bulk.total_size_in_bytes",
+            "btsi",
+            "bulkTotalSizeInBytes",
+            "pri.bulk.total_size_in_bytes",
+            "bulk.avg_time",
+            "bati",
+            "bulkAvgTime",
+            "pri.bulk.avg_time",
+            "bulk.avg_size_in_bytes",
+            "basi",
+            "bulkAvgSizeInBytes",
+            "pri.bulk.avg_size_in_bytes",
+            "dense_vector.value_count",
+            "dvc",
+            "denseVectorCount",
+            "pri.dense_vector.value_count",
+            "sparse_vector.value_count",
+            "svc",
+            "sparseVectorCount",
+            "pri.sparse_vector.value_count"
+          ]
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "CatCatIndicesColumns": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CatCatIndicesColumn"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CatCatIndicesColumn"
+          }
+        }
+      ]
+    },
+    "Name": {
+      "type": "string"
+    },
+    "Names": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ]
+    }
+  }
+}

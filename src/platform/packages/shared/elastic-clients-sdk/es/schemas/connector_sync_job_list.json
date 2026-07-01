@@ -1,0 +1,68 @@
+{
+  "type": "object",
+  "properties": {
+    "from": {
+      "description": "Starting offset",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "size": {
+      "description": "Specifies a max number of results to get",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "status": {
+      "description": "A sync job status to fetch connector sync jobs for",
+      "$ref": "#/$defs/ConnectorSyncStatus",
+      "x-found-in": "query"
+    },
+    "connector_id": {
+      "description": "A connector id to fetch connector sync jobs for",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "query"
+    },
+    "job_type": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ConnectorSyncJobType"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConnectorSyncJobType"
+          }
+        }
+      ],
+      "description": "A comma-separated list of job types to fetch the sync jobs for",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "integer": {
+      "type": "number"
+    },
+    "ConnectorSyncStatus": {
+      "type": "string",
+      "enum": [
+        "canceling",
+        "canceled",
+        "completed",
+        "error",
+        "in_progress",
+        "pending",
+        "suspended"
+      ]
+    },
+    "Id": {
+      "type": "string"
+    },
+    "ConnectorSyncJobType": {
+      "type": "string",
+      "enum": [
+        "full",
+        "incremental",
+        "access_control"
+      ]
+    }
+  }
+}

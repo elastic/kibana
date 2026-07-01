@@ -12,16 +12,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { z } from '@kbn/zod/v4';
+export type { JsonSchemaObject } from './lib/json_schema';
 
-export function resolveInput(
-  input: z.ZodObject<z.ZodRawShape> | (() => z.ZodObject<z.ZodRawShape>)
-): z.ZodObject<z.ZodRawShape> {
-  return typeof input === 'function' ? input() : input;
-}
-
-export { extractSchemaArgs } from './lib/schema-args';
-export type { SchemaArgDefinition, FoundIn } from './lib/schema-args';
+export { extractSchemaArgs } from './lib/schema_args';
+export type { SchemaArgDefinition, FoundIn } from './lib/schema_args';
 
 export { esApiRegistry, kbApiRegistry } from './registry';
 export type {

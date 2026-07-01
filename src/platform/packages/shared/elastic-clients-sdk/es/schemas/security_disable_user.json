@@ -1,0 +1,39 @@
+{
+  "type": "object",
+  "properties": {
+    "username": {
+      "type": "string",
+      "description": "An identifier for the user.",
+      "$ref": "#/$defs/Username",
+      "x-found-in": "path"
+    },
+    "refresh": {
+      "description": "If `true` (the default) then refresh the affected shards to make this operation visible to search, if `wait_for` then wait for a refresh to make this operation visible to search, if `false` then do nothing with refreshes.",
+      "$ref": "#/$defs/Refresh",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "username"
+  ],
+  "$defs": {
+    "Username": {
+      "type": "string"
+    },
+    "Refresh": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string",
+          "enum": [
+            "true",
+            "false",
+            "wait_for"
+          ]
+        }
+      ]
+    }
+  }
+}

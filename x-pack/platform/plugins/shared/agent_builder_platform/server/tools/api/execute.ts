@@ -6,13 +6,14 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import Ajv2020 from 'ajv/dist/2020';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { TransportRequestParams } from '@elastic/transport';
-import type { ApiRequest } from '@kbn/elastic-clients-sdk';
+import type { ApiRequest, JsonSchemaObject } from '@kbn/elastic-clients-sdk';
 import { API_REGISTRIES, findApi, targetSchema } from './registries';
 
 /**
@@ -41,9 +42,37 @@ const executeSchema = z.object({
     .describe(
       'Flat map of parameter values. Keys must match the field names from the api_manual schema. ' +
         'Path, query, and body parameters are all provided here; routing is handled automatically ' +
-        'based on the found_in metadata in the API schema.'
+        'based on the x-found-in metadata in the API schema.'
     ),
 });
+
+/**
+ * Shared ajv instance configured to:
+ * - Support draft 2020-12 schemas (uses $defs and $ref)
+ * - Allow unknown keywords (x-found-in, description on $ref siblings, etc.)
+ * - Skip strict checks so custom annotations don't cause compile failures
+ */
+const ajv = new Ajv2020({ strict: false, allErrors: true });
+
+/** Cache of compiled validators keyed by api id (target + "." + api). */
+const validatorCache = new Map<string, ReturnType<typeof ajv.compile>>();
+
+/**
+ * Compiles and caches a JSON Schema validator for the given api input schema.
+ * Returns `null` when compilation fails (so execution can proceed without validation).
+ */
+function getValidator(cacheKey: string, schema: JsonSchemaObject) {
+  const cached = validatorCache.get(cacheKey);
+  if (cached != null) return cached;
+
+  try {
+    const validate = ajv.compile(schema);
+    validatorCache.set(cacheKey, validate);
+    return validate;
+  } catch {
+    return null;
+  }
+}
 
 export const apiExecuteTool = (): BuiltinToolDefinition<typeof executeSchema> => {
   return {
@@ -85,6 +114,24 @@ The response is the raw API response body.`,
             }),
           ],
         };
+      }
+
+      // Validate params against the JSON Schema if one is present
+      if (loaded.definition.input != null) {
+        const cacheKey = `${target}:${api}`;
+        const validate = getValidator(cacheKey, loaded.definition.input);
+        if (validate != null && !validate(params)) {
+          const errors = (validate.errors ?? [])
+            .map((e) => `${e.instancePath || '(root)'}: ${e.message}`)
+            .join('; ');
+          return {
+            results: [
+              createErrorResult({
+                message: `Invalid params for "${api}": ${errors}`,
+              }),
+            ],
+          };
+        }
       }
 
       const apiRequest = loaded.buildRequest(params);

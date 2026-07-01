@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "properties": {
+    "calendar_id": {
+      "type": "string",
+      "description": "A string that uniquely identifies a calendar.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "job_ids": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Id"
+      },
+      "description": "An array of anomaly detection job identifiers.",
+      "x-found-in": "body"
+    },
+    "description": {
+      "type": "string",
+      "description": "A description of the calendar.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "calendar_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

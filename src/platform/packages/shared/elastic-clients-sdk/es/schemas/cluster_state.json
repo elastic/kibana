@@ -1,0 +1,145 @@
+{
+  "type": "object",
+  "properties": {
+    "metric": {
+      "description": "Limit the information returned to the specified metrics.",
+      "$ref": "#/$defs/ClusterStateClusterStateMetrics",
+      "x-found-in": "path"
+    },
+    "index": {
+      "description": "A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices",
+      "$ref": "#/$defs/Indices",
+      "x-found-in": "path"
+    },
+    "allow_no_indices": {
+      "type": "boolean",
+      "description": "A setting that does two separate checks on the index expression. If `false`, the request returns an error (1) if any wildcard expression (including `_all` and `*`) resolves to zero matching indices or (2) if the complete set of resolved indices, aliases or data streams is empty after all expressions are evaluated. If `true`, index expressions that resolve to no indices are allowed and the request returns an empty result.",
+      "x-found-in": "query"
+    },
+    "expand_wildcards": {
+      "description": "Whether to expand wildcard expression to concrete indices that are open, closed or both",
+      "$ref": "#/$defs/ExpandWildcards",
+      "x-found-in": "query"
+    },
+    "flat_settings": {
+      "type": "boolean",
+      "description": "Return settings in flat format",
+      "x-found-in": "query"
+    },
+    "ignore_unavailable": {
+      "type": "boolean",
+      "description": "If `false`, the request returns an error if it targets a concrete (non-wildcarded) index, alias, or data stream that is missing, closed, or otherwise unavailable. If `true`, unavailable concrete targets are silently ignored.",
+      "x-found-in": "query"
+    },
+    "local": {
+      "type": "boolean",
+      "description": "Return local information, do not retrieve the state from master node",
+      "x-found-in": "query"
+    },
+    "master_timeout": {
+      "description": "Timeout for waiting for new cluster state in case it is blocked",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "wait_for_metadata_version": {
+      "type": "number",
+      "description": "Wait for the metadata version to be equal or greater than the specified metadata version",
+      "$ref": "#/$defs/VersionNumber",
+      "x-found-in": "query"
+    },
+    "wait_for_timeout": {
+      "description": "The maximum time to wait for wait_for_metadata_version before timing out",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "ClusterStateClusterStateMetric": {
+      "type": "string",
+      "enum": [
+        "_all",
+        "version",
+        "master_node",
+        "blocks",
+        "nodes",
+        "metadata",
+        "routing_table",
+        "routing_nodes",
+        "customs"
+      ]
+    },
+    "ClusterStateClusterStateMetrics": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ClusterStateClusterStateMetric"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ClusterStateClusterStateMetric"
+          }
+        }
+      ]
+    },
+    "IndexName": {
+      "type": "string"
+    },
+    "Indices": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IndexName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IndexName"
+          }
+        }
+      ]
+    },
+    "ExpandWildcard": {
+      "type": "string",
+      "enum": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ]
+    },
+    "ExpandWildcards": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExpandWildcard"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExpandWildcard"
+          }
+        }
+      ]
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "VersionNumber": {
+      "$ref": "#/$defs/long"
+    },
+    "long": {
+      "type": "number"
+    }
+  }
+}

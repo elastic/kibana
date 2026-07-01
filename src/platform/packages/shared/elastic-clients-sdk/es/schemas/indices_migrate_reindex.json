@@ -1,0 +1,51 @@
+{
+  "type": "object",
+  "properties": {
+    "reindex": {
+      "$ref": "#/$defs/IndicesMigrateReindexMigrateReindex",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "reindex"
+  ],
+  "$defs": {
+    "IndicesMigrateReindexModeEnum": {
+      "type": "string",
+      "enum": [
+        "upgrade"
+      ]
+    },
+    "IndexName": {
+      "type": "string"
+    },
+    "IndicesMigrateReindexSourceIndex": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "$ref": "#/$defs/IndexName"
+        }
+      },
+      "required": [
+        "index"
+      ]
+    },
+    "IndicesMigrateReindexMigrateReindex": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "description": "Reindex mode. Currently only 'upgrade' is supported.",
+          "$ref": "#/$defs/IndicesMigrateReindexModeEnum"
+        },
+        "source": {
+          "description": "The source index or data stream (only data streams are currently supported).",
+          "$ref": "#/$defs/IndicesMigrateReindexSourceIndex"
+        }
+      },
+      "required": [
+        "mode",
+        "source"
+      ]
+    }
+  }
+}

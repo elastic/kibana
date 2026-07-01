@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Identifier for the anomaly detection job.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "snapshot_id": {
+      "type": "string",
+      "description": "Identifier for the model snapshot.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "description": {
+      "type": "string",
+      "description": "A description of the model snapshot.",
+      "x-found-in": "body"
+    },
+    "retain": {
+      "type": "boolean",
+      "description": "If `true`, this snapshot will not be deleted during automatic cleanup of snapshots older than `model_snapshot_retention_days`. However, this snapshot will be deleted when the job is deleted.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "job_id",
+    "snapshot_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

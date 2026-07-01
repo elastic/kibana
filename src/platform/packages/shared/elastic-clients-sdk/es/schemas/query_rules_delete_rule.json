@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "properties": {
+    "ruleset_id": {
+      "type": "string",
+      "description": "The unique identifier of the query ruleset containing the rule to delete",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "rule_id": {
+      "type": "string",
+      "description": "The unique identifier of the query rule within the specified ruleset to delete",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "ruleset_id",
+    "rule_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

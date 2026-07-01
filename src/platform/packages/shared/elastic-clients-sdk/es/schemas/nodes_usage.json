@@ -1,0 +1,74 @@
+{
+  "type": "object",
+  "properties": {
+    "node_id": {
+      "description": "A comma-separated list of node IDs or names to limit the returned information. Use `_local` to return information from the node you're connecting to, leave empty to get information from all nodes.",
+      "$ref": "#/$defs/NodeIds",
+      "x-found-in": "path"
+    },
+    "metric": {
+      "description": "Limits the information returned to the specific metrics. A comma-separated list of the following options: `_all`, `rest_actions`, `aggregations`.",
+      "$ref": "#/$defs/NodesUsageNodesUsageMetrics",
+      "x-found-in": "path"
+    },
+    "timeout": {
+      "description": "Period to wait for a response. If no response is received before the timeout expires, the request fails and returns an error.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "NodeId": {
+      "type": "string"
+    },
+    "NodeIds": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/NodeId"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NodeId"
+          }
+        }
+      ]
+    },
+    "NodesUsageNodesUsageMetric": {
+      "type": "string",
+      "enum": [
+        "_all",
+        "rest_actions",
+        "aggregations"
+      ]
+    },
+    "NodesUsageNodesUsageMetrics": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/NodesUsageNodesUsageMetric"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NodesUsageNodesUsageMetric"
+          }
+        }
+      ]
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

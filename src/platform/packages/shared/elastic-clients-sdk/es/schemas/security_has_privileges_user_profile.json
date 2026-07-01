@@ -1,0 +1,254 @@
+{
+  "type": "object",
+  "properties": {
+    "uids": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/SecurityUserProfileId"
+      },
+      "description": "A list of profile IDs. The privileges are checked for associated users of the profiles.",
+      "x-found-in": "body"
+    },
+    "privileges": {
+      "type": "object",
+      "properties": {
+        "application": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SecurityHasPrivilegesApplicationPrivilegesCheck"
+          }
+        },
+        "cluster": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SecurityClusterPrivilege"
+          },
+          "description": "A list of the cluster privileges that you want to check."
+        },
+        "index": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SecurityHasPrivilegesIndexPrivilegesCheck"
+          }
+        }
+      },
+      "description": "An object containing all the privileges to be checked.",
+      "$ref": "#/$defs/SecurityHasPrivilegesUserProfilePrivilegesCheck",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "uids",
+    "privileges"
+  ],
+  "$defs": {
+    "SecurityUserProfileId": {
+      "type": "string"
+    },
+    "SecurityHasPrivilegesApplicationPrivilegesCheck": {
+      "type": "object",
+      "properties": {
+        "application": {
+          "type": "string",
+          "description": "The name of the application."
+        },
+        "privileges": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "A list of the privileges that you want to check for the specified resources. It may be either application privilege names or the names of actions that are granted by those privileges"
+        },
+        "resources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "A list of resource names against which the privileges should be checked."
+        }
+      },
+      "required": [
+        "application",
+        "privileges",
+        "resources"
+      ]
+    },
+    "SecurityClusterPrivilege": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "all",
+            "cancel_task",
+            "create_snapshot",
+            "cross_cluster_replication",
+            "cross_cluster_search",
+            "delegate_pki",
+            "grant_api_key",
+            "manage",
+            "manage_api_key",
+            "manage_autoscaling",
+            "manage_behavioral_analytics",
+            "manage_ccr",
+            "manage_data_frame_transforms",
+            "manage_data_stream_global_retention",
+            "manage_enrich",
+            "manage_esql",
+            "manage_ilm",
+            "manage_index_templates",
+            "manage_inference",
+            "manage_ingest_pipelines",
+            "manage_logstash_pipelines",
+            "manage_ml",
+            "manage_oidc",
+            "manage_own_api_key",
+            "manage_pipeline",
+            "manage_rollup",
+            "manage_saml",
+            "manage_search_application",
+            "manage_search_query_rules",
+            "manage_search_synonyms",
+            "manage_security",
+            "manage_service_account",
+            "manage_slm",
+            "manage_token",
+            "manage_transform",
+            "manage_user_profile",
+            "manage_watcher",
+            "monitor",
+            "monitor_data_frame_transforms",
+            "monitor_data_stream_global_retention",
+            "monitor_enrich",
+            "monitor_esql",
+            "monitor_inference",
+            "monitor_ml",
+            "monitor_rollup",
+            "monitor_snapshot",
+            "monitor_stats",
+            "monitor_text_structure",
+            "monitor_transform",
+            "monitor_watcher",
+            "none",
+            "post_behavioral_analytics_event",
+            "read_ccr",
+            "read_fleet_secrets",
+            "read_ilm",
+            "read_pipeline",
+            "read_security",
+            "read_slm",
+            "transport_client",
+            "write_connector_secrets",
+            "write_fleet_secrets",
+            "read_project_routing",
+            "manage_project_routing"
+          ]
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "SecurityHasPrivilegesIndexPrivilegesCheck": {
+      "type": "object",
+      "properties": {
+        "names": {
+          "description": "A list of indices.",
+          "$ref": "#/$defs/Indices"
+        },
+        "privileges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SecurityIndexPrivilege"
+          },
+          "description": "A list of the privileges that you want to check for the specified indices."
+        },
+        "allow_restricted_indices": {
+          "type": "boolean",
+          "description": "This needs to be set to `true` (default is `false`) if using wildcards or regexps for patterns that cover restricted indices. Implicitly, restricted indices do not match index patterns because restricted indices usually have limited privileges and including them in pattern tests would render most such tests false. If restricted indices are explicitly included in the names list, privileges will be checked against them regardless of the value of `allow_restricted_indices`."
+        }
+      },
+      "required": [
+        "names",
+        "privileges"
+      ]
+    },
+    "IndexName": {
+      "type": "string"
+    },
+    "Indices": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IndexName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IndexName"
+          }
+        }
+      ]
+    },
+    "SecurityIndexPrivilege": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "all",
+            "auto_configure",
+            "create",
+            "create_doc",
+            "create_index",
+            "create_view",
+            "cross_cluster_replication",
+            "cross_cluster_replication_internal",
+            "delete",
+            "delete_index",
+            "delete_view",
+            "index",
+            "maintenance",
+            "manage",
+            "manage_data_stream_lifecycle",
+            "manage_follow_index",
+            "manage_ilm",
+            "manage_leader_index",
+            "manage_view",
+            "monitor",
+            "none",
+            "read",
+            "read_cross_cluster",
+            "read_view_metadata",
+            "view_index_metadata",
+            "write"
+          ]
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "SecurityHasPrivilegesUserProfilePrivilegesCheck": {
+      "type": "object",
+      "properties": {
+        "application": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SecurityHasPrivilegesApplicationPrivilegesCheck"
+          }
+        },
+        "cluster": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SecurityClusterPrivilege"
+          },
+          "description": "A list of the cluster privileges that you want to check."
+        },
+        "index": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SecurityHasPrivilegesIndexPrivilegesCheck"
+          }
+        }
+      }
+    }
+  }
+}

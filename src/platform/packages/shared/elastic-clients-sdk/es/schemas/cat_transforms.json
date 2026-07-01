@@ -1,0 +1,132 @@
+{
+  "type": "object",
+  "properties": {
+    "transform_id": {
+      "description": "A transform identifier or a wildcard expression. If you do not specify one of these options, the API returns information for all transforms.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "allow_no_match": {
+      "type": "boolean",
+      "description": "Specifies what to do when the request: contains wildcard expressions and there are no transforms that match; contains the `_all` string or no identifiers and there are no matches; contains wildcard expressions and there are only partial matches. If `true`, it returns an empty transforms array when there are no matches and the subset of results when there are partial matches. If `false`, the request returns a 404 status code when there are no matches or only partial matches.",
+      "x-found-in": "query"
+    },
+    "from": {
+      "description": "Skips the specified number of transforms.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "h": {
+      "description": "Comma-separated list of column names to display.",
+      "$ref": "#/$defs/CatCatTransformColumns",
+      "x-found-in": "query"
+    },
+    "s": {
+      "description": "Comma-separated list of column names or column aliases used to sort the response.",
+      "$ref": "#/$defs/CatCatTransformColumns",
+      "x-found-in": "query"
+    },
+    "size": {
+      "description": "The maximum number of transforms to obtain.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "integer": {
+      "type": "number"
+    },
+    "CatCatTransformColumn": {
+      "type": "string",
+      "enum": [
+        "changes_last_detection_time",
+        "cldt",
+        "checkpoint",
+        "cp",
+        "checkpoint_duration_time_exp_avg",
+        "cdtea",
+        "checkpointTimeExpAvg",
+        "checkpoint_progress",
+        "c",
+        "checkpointProgress",
+        "create_time",
+        "ct",
+        "createTime",
+        "delete_time",
+        "dtime",
+        "description",
+        "d",
+        "dest_index",
+        "di",
+        "destIndex",
+        "documents_deleted",
+        "docd",
+        "documents_indexed",
+        "doci",
+        "docs_per_second",
+        "dps",
+        "documents_processed",
+        "docp",
+        "frequency",
+        "f",
+        "id",
+        "index_failure",
+        "if",
+        "index_time",
+        "itime",
+        "index_total",
+        "it",
+        "indexed_documents_exp_avg",
+        "idea",
+        "last_search_time",
+        "lst",
+        "lastSearchTime",
+        "max_page_search_size",
+        "mpsz",
+        "pages_processed",
+        "pp",
+        "pipeline",
+        "p",
+        "processed_documents_exp_avg",
+        "pdea",
+        "processing_time",
+        "pt",
+        "reason",
+        "r",
+        "search_failure",
+        "sf",
+        "search_time",
+        "stime",
+        "search_total",
+        "st",
+        "source_index",
+        "si",
+        "sourceIndex",
+        "state",
+        "s",
+        "transform_type",
+        "tt",
+        "trigger_count",
+        "tc",
+        "version",
+        "v"
+      ]
+    },
+    "CatCatTransformColumns": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CatCatTransformColumn"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CatCatTransformColumn"
+          }
+        }
+      ]
+    }
+  }
+}

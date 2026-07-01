@@ -11,7 +11,6 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { resolveInput } from '@kbn/elastic-clients-sdk';
 import { API_REGISTRIES, findApi, targetSchema } from './registries';
 
 const manualSchema = z.object({
@@ -23,17 +22,6 @@ const manualSchema = z.object({
         '(e.g. "indices.create", "bulk", "cluster.health").'
     ),
 });
-
-/**
- * Attempt to convert a Zod schema to JSONSchema with graceful fallback.
- */
-const zodToJsonSchema = (schema: z.ZodType): Record<string, unknown> => {
-  try {
-    return z.toJSONSchema(schema, { io: 'input' }) as Record<string, unknown>;
-  } catch {
-    return { type: 'object', description: 'Schema could not be fully represented' };
-  }
-};
 
 export const apiManualTool = (): BuiltinToolDefinition<typeof manualSchema> => {
   return {
@@ -86,28 +74,11 @@ Then call \`${platformCoreTools.apiExecute}\` with the same \`target\`, \`api\`,
       if (definition.input == null) {
         paramsYaml = '# This API has no parameters\n';
       } else {
-        const schema = resolveInput(definition.input);
-        const jsonSchema = zodToJsonSchema(schema);
-
-        if (jsonSchema.properties != null && typeof jsonSchema.properties === 'object') {
-          const shape = schema.shape as Record<string, z.ZodType>;
-          const props = jsonSchema.properties as Record<string, Record<string, unknown>>;
-          for (const [key, fieldSchema] of Object.entries(shape)) {
-            const outerMeta = (fieldSchema as z.ZodType).meta() as
-              | Record<string, unknown>
-              | undefined;
-            const foundIn = outerMeta?.found_in;
-            if (foundIn != null && props[key] != null) {
-              props[key]['x-found-in'] = foundIn;
-            }
-          }
-        }
-
         try {
-          paramsYaml = yaml.dump(jsonSchema, { indent: 2, lineWidth: 120 });
+          paramsYaml = yaml.dump(definition.input, { indent: 2, lineWidth: 120 });
         } catch (err) {
           logger.warn(`api_manual: yaml.dump failed for "${api}": ${err}`);
-          paramsYaml = JSON.stringify(jsonSchema, null, 2);
+          paramsYaml = JSON.stringify(definition.input, null, 2);
         }
       }
 

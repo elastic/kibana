@@ -1,0 +1,129 @@
+{
+  "type": "object",
+  "properties": {
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "completion",
+        "chat_completion"
+      ],
+      "description": "The type of the inference task that the model will perform.",
+      "$ref": "#/$defs/InferenceAi21TaskType",
+      "x-found-in": "path"
+    },
+    "ai21_inference_id": {
+      "type": "string",
+      "description": "The unique identifier of the inference endpoint.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "timeout": {
+      "description": "Specifies the amount of time to wait for the inference endpoint to be created.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "service": {
+      "type": "string",
+      "enum": [
+        "ai21"
+      ],
+      "description": "The type of service supported for the specified task type. In this case, `ai21`.",
+      "$ref": "#/$defs/InferenceAi21ServiceType",
+      "x-found-in": "body"
+    },
+    "service_settings": {
+      "type": "object",
+      "properties": {
+        "model_id": {
+          "type": "string",
+          "description": "The name of the model to use for the inference task. Refer to the AI21 models documentation for the list of supported models and versions. Service has been tested and confirmed to be working for `completion` and `chat_completion` tasks with the following models: * `jamba-mini` * `jamba-large`"
+        },
+        "api_key": {
+          "type": "string",
+          "description": "A valid API key for accessing AI21 API. IMPORTANT: You need to provide the API key only once, during the inference model creation. The get inference endpoint API does not retrieve your API key."
+        },
+        "rate_limit": {
+          "description": "This setting helps to minimize the number of rate limit errors returned from the AI21 API. By default, the `ai21` service sets the number of requests allowed per minute to 200. Please refer to AI21 documentation for more details.",
+          "$ref": "#/$defs/InferenceRateLimitSetting"
+        }
+      },
+      "required": [
+        "model_id"
+      ],
+      "description": "Settings used to install the inference model. These settings are specific to the `ai21` service.",
+      "$ref": "#/$defs/InferenceAi21ServiceSettings",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "task_type",
+    "ai21_inference_id",
+    "service",
+    "service_settings"
+  ],
+  "$defs": {
+    "InferenceAi21TaskType": {
+      "type": "string",
+      "enum": [
+        "completion",
+        "chat_completion"
+      ]
+    },
+    "Id": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "InferenceAi21ServiceType": {
+      "type": "string",
+      "enum": [
+        "ai21"
+      ]
+    },
+    "integer": {
+      "type": "number"
+    },
+    "InferenceRateLimitSetting": {
+      "type": "object",
+      "properties": {
+        "requests_per_minute": {
+          "description": "The number of requests allowed per minute. By default, the number of requests allowed per minute is set by each service as follows: * `alibabacloud-ai-search` service: `1000` * `amazonbedrock` service: `240` * `anthropic` service: `50` * `azureaistudio` service: `240` * `azureopenai` service and task type `text_embedding`: `1440` * `azureopenai` service and task types `completion` or `chat_completion`: `120` * `cohere` service: `10000` * `contextualai` service: `1000` * `elastic` service and task type `chat_completion`: `240` * `fireworksai` service: `6000` * `googleaistudio` service: `360` * `googlevertexai` service: `30000` * `hugging_face` service: `3000` * `jinaai` service: `2000` * `llama` service: `3000` * `mistral` service: `240` * `openai` service and task type `text_embedding`: `3000` * `openai` service and task type `completion`: `500` * `openshift_ai` service: `3000` * `voyageai` service: `2000` * `watsonxai` service: `120`",
+          "$ref": "#/$defs/integer"
+        }
+      }
+    },
+    "InferenceAi21ServiceSettings": {
+      "type": "object",
+      "properties": {
+        "model_id": {
+          "type": "string",
+          "description": "The name of the model to use for the inference task. Refer to the AI21 models documentation for the list of supported models and versions. Service has been tested and confirmed to be working for `completion` and `chat_completion` tasks with the following models: * `jamba-mini` * `jamba-large`"
+        },
+        "api_key": {
+          "type": "string",
+          "description": "A valid API key for accessing AI21 API. IMPORTANT: You need to provide the API key only once, during the inference model creation. The get inference endpoint API does not retrieve your API key."
+        },
+        "rate_limit": {
+          "description": "This setting helps to minimize the number of rate limit errors returned from the AI21 API. By default, the `ai21` service sets the number of requests allowed per minute to 200. Please refer to AI21 documentation for more details.",
+          "$ref": "#/$defs/InferenceRateLimitSetting"
+        }
+      },
+      "required": [
+        "model_id"
+      ]
+    }
+  }
+}

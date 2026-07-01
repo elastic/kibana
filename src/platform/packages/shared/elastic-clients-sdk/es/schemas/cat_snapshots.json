@@ -1,0 +1,119 @@
+{
+  "type": "object",
+  "properties": {
+    "repository": {
+      "description": "A comma-separated list of snapshot repositories used to limit the request. Accepts wildcard expressions. `_all` returns all repositories. If any repository fails during the request, Elasticsearch returns an error.",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "path"
+    },
+    "ignore_unavailable": {
+      "type": "boolean",
+      "description": "If `true`, the response does not include information from unavailable snapshots.",
+      "x-found-in": "query"
+    },
+    "h": {
+      "description": "A comma-separated list of columns names to display. It supports simple wildcards.",
+      "$ref": "#/$defs/CatCatSnapshotsColumns",
+      "x-found-in": "query"
+    },
+    "s": {
+      "description": "List of columns that determine how the table should be sorted. Sorting defaults to ascending and can be changed by setting `:asc` or `:desc` as a suffix to the column name.",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "query"
+    },
+    "master_timeout": {
+      "description": "Period to wait for a connection to the master node.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "Name": {
+      "type": "string"
+    },
+    "Names": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ]
+    },
+    "CatCatSnapshotsColumn": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "id",
+            "snapshot",
+            "repository",
+            "re",
+            "repo",
+            "status",
+            "s",
+            "start_epoch",
+            "ste",
+            "startEpoch",
+            "start_time",
+            "sti",
+            "startTime",
+            "end_epoch",
+            "ete",
+            "endEpoch",
+            "end_time",
+            "eti",
+            "endTime",
+            "duration",
+            "dur",
+            "indices",
+            "i",
+            "successful_shards",
+            "ss",
+            "failed_shards",
+            "fs",
+            "total_shards",
+            "ts",
+            "reason",
+            "r"
+          ]
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "CatCatSnapshotsColumns": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CatCatSnapshotsColumn"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CatCatSnapshotsColumn"
+          }
+        }
+      ]
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

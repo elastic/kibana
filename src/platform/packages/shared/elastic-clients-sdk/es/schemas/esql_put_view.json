@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The view name to create or update.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "query": {
+      "type": "string",
+      "description": "The ES|QL query string from which to create a view.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "name",
+    "query"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

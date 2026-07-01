@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "description": "The comma-separated view names to retrieve.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    }
+  },
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "connector_id": {
+      "type": "string",
+      "description": "The unique identifier of the connector",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "include_deleted": {
+      "type": "boolean",
+      "description": "A flag to indicate if the desired connector should be fetched, even if it was soft-deleted.",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "connector_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

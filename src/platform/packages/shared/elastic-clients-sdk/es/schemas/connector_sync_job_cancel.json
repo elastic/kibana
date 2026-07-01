@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "connector_sync_job_id": {
+      "type": "string",
+      "description": "The unique identifier of the connector sync job",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "connector_sync_job_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

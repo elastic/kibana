@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "Identifier for the rollup job. If it is `_all` or omitted, the API returns all rollup jobs.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    }
+  },
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

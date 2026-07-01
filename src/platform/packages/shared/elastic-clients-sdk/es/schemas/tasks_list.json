@@ -1,0 +1,94 @@
+{
+  "type": "object",
+  "properties": {
+    "actions": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ],
+      "description": "A comma-separated list or wildcard expression of actions used to limit the request. For example, you can use `cluser:*` to retrieve all cluster-related tasks.",
+      "x-found-in": "query"
+    },
+    "detailed": {
+      "type": "boolean",
+      "description": "If `true`, the response includes detailed information about the running tasks. This information is useful to distinguish tasks from each other but is more costly to run.",
+      "x-found-in": "query"
+    },
+    "group_by": {
+      "description": "A key that is used to group tasks in the response. The task lists can be grouped either by nodes or by parent tasks.",
+      "$ref": "#/$defs/TasksGroupBy",
+      "x-found-in": "query"
+    },
+    "nodes": {
+      "description": "A comma-separated list of node IDs or names that is used to limit the returned information.",
+      "$ref": "#/$defs/NodeIds",
+      "x-found-in": "query"
+    },
+    "parent_task_id": {
+      "description": "A parent task identifier that is used to limit returned information. To return all tasks, omit this parameter or use a value of `-1`. If the parent task is not found, the API does not return a 404 response code.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "query"
+    },
+    "timeout": {
+      "description": "The period to wait for each node to respond. If a node does not respond before its timeout expires, the response does not include its information. However, timed out nodes are included in the `node_failures` property.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "wait_for_completion": {
+      "type": "boolean",
+      "description": "If `true`, the request blocks until the operation is complete.",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "TasksGroupBy": {
+      "type": "string",
+      "enum": [
+        "nodes",
+        "parents",
+        "none"
+      ]
+    },
+    "NodeId": {
+      "type": "string"
+    },
+    "NodeIds": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/NodeId"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NodeId"
+          }
+        }
+      ]
+    },
+    "Id": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

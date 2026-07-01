@@ -1,0 +1,174 @@
+{
+  "type": "object",
+  "properties": {
+    "index": {
+      "description": "A comma-separated list of data streams, indices, and aliases used to limit the request. Supports wildcards (`*`). To target all data streams and indices, omit this parameter or use `*` or `_all`.",
+      "$ref": "#/$defs/Indices",
+      "x-found-in": "path"
+    },
+    "h": {
+      "description": "A comma-separated list of columns names to display. It supports simple wildcards.",
+      "$ref": "#/$defs/CatCatSegmentsColumns",
+      "x-found-in": "query"
+    },
+    "s": {
+      "description": "A comma-separated list of column names or aliases that determines the sort order. Sorting defaults to ascending and can be changed by setting `:asc` or `:desc` as a suffix to the column name.",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "query"
+    },
+    "local": {
+      "type": "boolean",
+      "description": "If `true`, the request computes the list of selected nodes from the local cluster state. If `false` the list of selected nodes are computed from the cluster state of the master node. In both cases the coordinating node will send requests for further information to each selected node.",
+      "x-found-in": "query"
+    },
+    "master_timeout": {
+      "description": "Period to wait for a connection to the master node.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "expand_wildcards": {
+      "description": "Type of index that wildcard expressions can match. If the request can target data streams, this argument determines whether wildcard expressions match hidden data streams. Supports comma-separated values, such as open,hidden.",
+      "$ref": "#/$defs/ExpandWildcards",
+      "x-found-in": "query"
+    },
+    "allow_no_indices": {
+      "type": "boolean",
+      "description": "A setting that does two separate checks on the index expression. If `false`, the request returns an error (1) if any wildcard expression (including `_all` and `*`) resolves to zero matching indices or (2) if the complete set of resolved indices, aliases or data streams is empty after all expressions are evaluated. If `true`, index expressions that resolve to no indices are allowed and the request returns an empty result.",
+      "x-found-in": "query"
+    },
+    "ignore_throttled": {
+      "type": "boolean",
+      "description": "If true, concrete, expanded or aliased indices are ignored when frozen.",
+      "x-found-in": "query"
+    },
+    "ignore_unavailable": {
+      "type": "boolean",
+      "description": "If `false`, the request returns an error if it targets a concrete (non-wildcarded) index, alias, or data stream that is missing, closed, or otherwise unavailable. If `true`, unavailable concrete targets are silently ignored.",
+      "x-found-in": "query"
+    },
+    "allow_closed": {
+      "type": "boolean",
+      "description": "If true, allow closed indices to be returned in the response otherwise if false, keep the legacy behaviour of throwing an exception if index pattern matches closed indices",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "IndexName": {
+      "type": "string"
+    },
+    "Indices": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IndexName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IndexName"
+          }
+        }
+      ]
+    },
+    "CatCatSegmentsColumn": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "index",
+            "i",
+            "idx",
+            "shard",
+            "s",
+            "sh",
+            "prirep",
+            "p",
+            "pr",
+            "primaryOrReplica",
+            "ip",
+            "segment",
+            "generation",
+            "docs.count",
+            "docs.deleted",
+            "size",
+            "size.memory",
+            "committed",
+            "searchable",
+            "version",
+            "compound",
+            "id"
+          ]
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "CatCatSegmentsColumns": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CatCatSegmentsColumn"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CatCatSegmentsColumn"
+          }
+        }
+      ]
+    },
+    "Name": {
+      "type": "string"
+    },
+    "Names": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ]
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "ExpandWildcard": {
+      "type": "string",
+      "enum": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ]
+    },
+    "ExpandWildcards": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExpandWildcard"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExpandWildcard"
+          }
+        }
+      ]
+    }
+  }
+}

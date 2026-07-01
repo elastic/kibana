@@ -1,0 +1,55 @@
+{
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Identifier for the anomaly detection job.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "advance_time": {
+      "description": "Refer to the description for the `advance_time` query parameter.",
+      "$ref": "#/$defs/DateTime",
+      "x-found-in": "body"
+    },
+    "calc_interim": {
+      "type": "boolean",
+      "description": "Refer to the description for the `calc_interim` query parameter.",
+      "x-found-in": "body"
+    },
+    "end": {
+      "description": "Refer to the description for the `end` query parameter.",
+      "$ref": "#/$defs/DateTime",
+      "x-found-in": "body"
+    },
+    "skip_time": {
+      "description": "Refer to the description for the `skip_time` query parameter.",
+      "$ref": "#/$defs/DateTime",
+      "x-found-in": "body"
+    },
+    "start": {
+      "description": "Refer to the description for the `start` query parameter.",
+      "$ref": "#/$defs/DateTime",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "job_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "EpochTime": {},
+    "DateTime": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/EpochTime"
+        }
+      ]
+    }
+  }
+}

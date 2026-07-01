@@ -1,0 +1,83 @@
+{
+  "type": "object",
+  "properties": {
+    "connector_sync_job_id": {
+      "type": "string",
+      "description": "The unique identifier of the connector sync job.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "deleted_document_count": {
+      "type": "number",
+      "description": "The number of documents the sync job deleted.",
+      "$ref": "#/$defs/long",
+      "x-found-in": "body"
+    },
+    "indexed_document_count": {
+      "type": "number",
+      "description": "The number of documents the sync job indexed.",
+      "$ref": "#/$defs/long",
+      "x-found-in": "body"
+    },
+    "indexed_document_volume": {
+      "type": "number",
+      "description": "The total size of the data (in MiB) the sync job indexed.",
+      "$ref": "#/$defs/long",
+      "x-found-in": "body"
+    },
+    "last_seen": {
+      "description": "The timestamp to use in the `last_seen` property for the connector sync job.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "body"
+    },
+    "metadata": {
+      "description": "The connector-specific metadata.",
+      "$ref": "#/$defs/Metadata",
+      "x-found-in": "body"
+    },
+    "total_document_count": {
+      "description": "The total number of documents in the target index after the sync job finished.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "connector_sync_job_id",
+    "deleted_document_count",
+    "indexed_document_count",
+    "indexed_document_volume"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "long": {
+      "type": "number"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "Metadata": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {}
+    },
+    "integer": {
+      "type": "number"
+    }
+  }
+}

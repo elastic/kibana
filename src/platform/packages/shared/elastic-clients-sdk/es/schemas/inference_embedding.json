@@ -1,0 +1,148 @@
+{
+  "type": "object",
+  "properties": {
+    "inference_id": {
+      "type": "string",
+      "description": "The inference Id",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "timeout": {
+      "description": "Specifies the amount of time to wait for the inference request to complete.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "embedding": {
+      "$ref": "#/$defs/InferenceRequestEmbedding",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "inference_id",
+    "embedding"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "InferenceEmbeddingStringInput": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "InferenceEmbeddingContentInput": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/InferenceEmbeddingContentObject"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/InferenceEmbeddingContentObject"
+          }
+        }
+      ]
+    },
+    "InferenceEmbeddingContentObject": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "description": "An object containing the input data for the model to embed",
+          "$ref": "#/$defs/InferenceEmbeddingContentObjectContents"
+        }
+      },
+      "required": [
+        "content"
+      ]
+    },
+    "InferenceEmbeddingContentType": {
+      "type": "string",
+      "enum": [
+        "text",
+        "image"
+      ]
+    },
+    "InferenceEmbeddingContentFormat": {
+      "type": "string",
+      "enum": [
+        "text",
+        "base64"
+      ]
+    },
+    "InferenceEmbeddingContentObjectContents": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "The type of input to embed.",
+          "$ref": "#/$defs/InferenceEmbeddingContentType"
+        },
+        "format": {
+          "description": "The format of the input. For the `text` type this must be `text`. For the `image` type, this must be `base64`. If not specified, this will default to `text` for the `text` type and `base64` for the `image` type.",
+          "$ref": "#/$defs/InferenceEmbeddingContentFormat"
+        },
+        "value": {
+          "type": "string",
+          "description": "The value of the input to embed. For images, this must be a base64-encoded data URI, i.e. \"data:content/type;base64,...\""
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    "InferenceEmbeddingInput": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/InferenceEmbeddingStringInput"
+        },
+        {
+          "$ref": "#/$defs/InferenceEmbeddingContentInput"
+        }
+      ]
+    },
+    "InferenceTaskSettings": {},
+    "InferenceRequestEmbedding": {
+      "type": "object",
+      "properties": {
+        "input": {
+          "description": "Inference input. Either a string, an array of strings, a `content` object, or an array of `content` objects. string example: ``` \"input\": \"Some text\" ``` string array example: ``` \"input\": [\"Some text\", \"Some more text\"] ``` `content` object example: ``` \"input\": {     \"content\": {       \"type\": \"image\",       \"format\": \"base64\",       \"value\": \"data:image/jpeg;base64,...\"     }   } ``` `content` object array example: ``` \"input\": [   {     \"content\": {       \"type\": \"text\",       \"format\": \"text\",       \"value\": \"Some text to generate an embedding\"     }   },   {     \"content\": {       \"type\": \"image\",       \"format\": \"base64\",       \"value\": \"data:image/jpeg;base64,...\"     }   } ] ```",
+          "$ref": "#/$defs/InferenceEmbeddingInput"
+        },
+        "input_type": {
+          "type": "string",
+          "description": "The input data type for the embedding model. Possible values include: * `SEARCH` * `INGEST` * `CLASSIFICATION` * `CLUSTERING` Not all models support all values. Unsupported values will trigger a validation exception. Accepted values depend on the configured inference service, refer to the relevant service-specific documentation for more info. > info > The `input_type` parameter specified on the root level of the request body will take precedence over the `input_type` parameter specified in `task_settings`."
+        },
+        "task_settings": {
+          "description": "Task settings for the individual inference request. These settings are specific to the <task_type> you specified and override the task settings specified when initializing the service.",
+          "$ref": "#/$defs/InferenceTaskSettings"
+        }
+      },
+      "required": [
+        "input"
+      ]
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "type": "object",
+  "properties": {
+    "rest_total_hits_as_int": {
+      "type": "boolean",
+      "description": "If true, the API response’s hit.total property is returned as an integer. If false, the API response’s hit.total property is returned as an object.",
+      "x-found-in": "query"
+    },
+    "scroll": {
+      "description": "The period to retain the search context for scrolling.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "body"
+    },
+    "scroll_id": {
+      "type": "string",
+      "description": "The scroll ID of the search.",
+      "$ref": "#/$defs/ScrollId",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "scroll_id"
+  ],
+  "$defs": {
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "ScrollId": {
+      "type": "string"
+    }
+  }
+}

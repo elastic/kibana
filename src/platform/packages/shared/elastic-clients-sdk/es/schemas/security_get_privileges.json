@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "properties": {
+    "application": {
+      "description": "The name of the application. Application privileges are always associated with exactly one application. If you do not specify this parameter, the API returns information about all privileges for all applications.",
+      "$ref": "#/$defs/Name",
+      "x-found-in": "path"
+    },
+    "name": {
+      "description": "The name of the privilege. If you do not specify this parameter, the API returns information about all privileges for the requested application.",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "path"
+    }
+  },
+  "$defs": {
+    "Name": {
+      "type": "string"
+    },
+    "Names": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ]
+    }
+  }
+}

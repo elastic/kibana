@@ -1,0 +1,90 @@
+{
+  "type": "object",
+  "properties": {
+    "index": {
+      "description": "A comma-separated list of data streams, indices, and aliases used to limit the request. It supports wildcards (`*`). To target all data streams and indices, omit this parameter or use `*` or `_all`.",
+      "$ref": "#/$defs/Indices",
+      "x-found-in": "path"
+    },
+    "h": {
+      "description": "A comma-separated list of columns names to display. It supports simple wildcards.",
+      "$ref": "#/$defs/CatCatCountColumns",
+      "x-found-in": "query"
+    },
+    "s": {
+      "description": "List of columns that determine how the table should be sorted. Sorting defaults to ascending and can be changed by setting `:asc` or `:desc` as a suffix to the column name.",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "IndexName": {
+      "type": "string"
+    },
+    "Indices": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IndexName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IndexName"
+          }
+        }
+      ]
+    },
+    "CatCatCountColumn": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "epoch",
+            "t",
+            "time",
+            "timestamp",
+            "ts",
+            "hms",
+            "hhmmss",
+            "count",
+            "dc",
+            "docs.count",
+            "docsCount"
+          ]
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "CatCatCountColumns": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CatCatCountColumn"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CatCatCountColumn"
+          }
+        }
+      ]
+    },
+    "Name": {
+      "type": "string"
+    },
+    "Names": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ]
+    }
+  }
+}

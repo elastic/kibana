@@ -1,0 +1,101 @@
+{
+  "type": "object",
+  "properties": {
+    "username": {
+      "type": "string",
+      "description": "An identifier for the user. NOTE: Usernames must be at least 1 and no more than 507 characters. They can contain alphanumeric characters (a-z, A-Z, 0-9), spaces, punctuation, and printable symbols in the Basic Latin (ASCII) block. Leading or trailing whitespace is not allowed.",
+      "$ref": "#/$defs/Username",
+      "x-found-in": "path"
+    },
+    "refresh": {
+      "description": "Valid values are `true`, `false`, and `wait_for`. These values have the same meaning as in the index API, but the default value for this API is true.",
+      "$ref": "#/$defs/Refresh",
+      "x-found-in": "query"
+    },
+    "email": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The email of the user.",
+      "x-found-in": "body"
+    },
+    "full_name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The full name of the user.",
+      "x-found-in": "body"
+    },
+    "metadata": {
+      "description": "Arbitrary metadata that you want to associate with the user.",
+      "$ref": "#/$defs/Metadata",
+      "x-found-in": "body"
+    },
+    "password": {
+      "description": "The user's password. Passwords must be at least 6 characters long. When adding a user, one of `password` or `password_hash` is required. When updating an existing user, the password is optional, so that other fields on the user (such as their roles) may be updated without modifying the user's password",
+      "$ref": "#/$defs/Password",
+      "x-found-in": "body"
+    },
+    "password_hash": {
+      "type": "string",
+      "description": "A hash of the user's password. This must be produced using the same hashing algorithm as has been configured for password storage. For more details, see the explanation of the `xpack.security.authc.password_hashing.algorithm` setting in the user cache and password hash algorithm documentation. Using this parameter allows the client to pre-hash the password for performance and/or confidentiality reasons. The `password` parameter and the `password_hash` parameter cannot be used in the same request.",
+      "x-found-in": "body"
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "A set of roles the user has. The roles determine the user's access permissions. To create a user without any roles, specify an empty list (`[]`).",
+      "x-found-in": "body"
+    },
+    "enabled": {
+      "type": "boolean",
+      "description": "Specifies whether the user is enabled.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "username"
+  ],
+  "$defs": {
+    "Username": {
+      "type": "string"
+    },
+    "Refresh": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string",
+          "enum": [
+            "true",
+            "false",
+            "wait_for"
+          ]
+        }
+      ]
+    },
+    "Metadata": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {}
+    },
+    "Password": {
+      "type": "string"
+    }
+  }
+}

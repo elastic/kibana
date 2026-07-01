@@ -1,0 +1,54 @@
+{
+  "type": "object",
+  "properties": {
+    "datafeed_id": {
+      "type": "string",
+      "description": "Identifier for the datafeed. You can stop multiple datafeeds in a single API request by using a comma-separated list of datafeeds or a wildcard expression. You can close all datafeeds by using `_all` or by specifying `*` as the identifier.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "allow_no_match": {
+      "type": "boolean",
+      "description": "Refer to the description for the `allow_no_match` query parameter.",
+      "x-found-in": "body"
+    },
+    "force": {
+      "type": "boolean",
+      "description": "Refer to the description for the `force` query parameter.",
+      "x-found-in": "body"
+    },
+    "timeout": {
+      "description": "Refer to the description for the `timeout` query parameter.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "body"
+    },
+    "close_job": {
+      "type": "boolean",
+      "description": "Refer to the description for the `close_job` query parameter.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "datafeed_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

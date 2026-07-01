@@ -1,0 +1,165 @@
+{
+  "type": "object",
+  "properties": {
+    "ruleset_id": {
+      "type": "string",
+      "description": "The unique identifier of the query ruleset containing the rule to be created or updated.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "rule_id": {
+      "type": "string",
+      "description": "The unique identifier of the query rule within the specified ruleset to be created or updated.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "pinned",
+        "exclude"
+      ],
+      "description": "The type of rule.",
+      "$ref": "#/$defs/QueryRulesQueryRuleType",
+      "x-found-in": "body"
+    },
+    "criteria": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/QueryRulesQueryRuleCriteria"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/QueryRulesQueryRuleCriteria"
+          }
+        }
+      ],
+      "description": "The criteria that must be met for the rule to be applied. If multiple criteria are specified for a rule, all criteria must be met for the rule to be applied.",
+      "x-found-in": "body"
+    },
+    "actions": {
+      "type": "object",
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          },
+          "description": "The unique document IDs of the documents to apply the rule to. Only one of `ids` or `docs` may be specified and at least one must be specified."
+        },
+        "docs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/QueryDslPinnedDoc"
+          },
+          "description": "The documents to apply the rule to. Only one of `ids` or `docs` may be specified and at least one must be specified. There is a maximum value of 100 documents in a rule. You can specify the following attributes for each document: * `_index`: The index of the document to pin. * `_id`: The unique document ID."
+        }
+      },
+      "description": "The actions to take when the rule is matched. The format of this action depends on the rule type.",
+      "$ref": "#/$defs/QueryRulesQueryRuleActions",
+      "x-found-in": "body"
+    },
+    "priority": {
+      "$ref": "#/$defs/integer",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "ruleset_id",
+    "rule_id",
+    "type",
+    "criteria",
+    "actions"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "QueryRulesQueryRuleType": {
+      "type": "string",
+      "enum": [
+        "pinned",
+        "exclude"
+      ]
+    },
+    "QueryRulesQueryRuleCriteria": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "The type of criteria. The following criteria types are supported: * `always`: Matches all queries, regardless of input. * `contains`: Matches that contain this value anywhere in the field meet the criteria defined by the rule. Only applicable for string values. * `exact`: Only exact matches meet the criteria defined by the rule. Applicable for string or numerical values. * `fuzzy`: Exact matches or matches within the allowed Levenshtein Edit Distance meet the criteria defined by the rule. Only applicable for string values. * `gt`: Matches with a value greater than this value meet the criteria defined by the rule. Only applicable for numerical values. * `gte`: Matches with a value greater than or equal to this value meet the criteria defined by the rule. Only applicable for numerical values. * `lt`: Matches with a value less than this value meet the criteria defined by the rule. Only applicable for numerical values. * `lte`: Matches with a value less than or equal to this value meet the criteria defined by the rule. Only applicable for numerical values. * `prefix`: Matches that start with this value meet the criteria defined by the rule. Only applicable for string values. * `suffix`: Matches that end with this value meet the criteria defined by the rule. Only applicable for string values.",
+          "$ref": "#/$defs/QueryRulesQueryRuleCriteriaType"
+        },
+        "metadata": {
+          "type": "string",
+          "description": "The metadata field to match against. This metadata will be used to match against `match_criteria` sent in the rule. It is required for all criteria types except `always`."
+        },
+        "values": {
+          "type": "array",
+          "items": {},
+          "description": "The values to match against the `metadata` field. Only one value must match for the criteria to be met. It is required for all criteria types except `always`."
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "QueryRulesQueryRuleCriteriaType": {
+      "type": "string",
+      "enum": [
+        "global",
+        "exact",
+        "fuzzy",
+        "prefix",
+        "suffix",
+        "contains",
+        "lt",
+        "lte",
+        "gt",
+        "gte",
+        "always"
+      ]
+    },
+    "QueryDslPinnedDoc": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "description": "The unique document ID.",
+          "$ref": "#/$defs/Id"
+        },
+        "_index": {
+          "description": "The index that contains the document.",
+          "$ref": "#/$defs/IndexName"
+        }
+      },
+      "required": [
+        "_id"
+      ]
+    },
+    "IndexName": {
+      "type": "string"
+    },
+    "QueryRulesQueryRuleActions": {
+      "type": "object",
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          },
+          "description": "The unique document IDs of the documents to apply the rule to. Only one of `ids` or `docs` may be specified and at least one must be specified."
+        },
+        "docs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/QueryDslPinnedDoc"
+          },
+          "description": "The documents to apply the rule to. Only one of `ids` or `docs` may be specified and at least one must be specified. There is a maximum value of 100 documents in a rule. You can specify the following attributes for each document: * `_index`: The index of the document to pin. * `_id`: The unique document ID."
+        }
+      }
+    },
+    "integer": {
+      "type": "number"
+    }
+  }
+}

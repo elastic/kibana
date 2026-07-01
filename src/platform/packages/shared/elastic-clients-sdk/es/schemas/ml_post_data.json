@@ -1,0 +1,46 @@
+{
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Identifier for the anomaly detection job. The job must have a state of open to receive and process the data.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "reset_end": {
+      "description": "Specifies the end of the bucket resetting range.",
+      "$ref": "#/$defs/DateTime",
+      "x-found-in": "query"
+    },
+    "reset_start": {
+      "description": "Specifies the start of the bucket resetting range.",
+      "$ref": "#/$defs/DateTime",
+      "x-found-in": "query"
+    },
+    "data": {
+      "type": "array",
+      "items": {},
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "job_id",
+    "data"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "EpochTime": {},
+    "DateTime": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/EpochTime"
+        }
+      ]
+    }
+  }
+}

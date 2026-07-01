@@ -1,0 +1,54 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "A unique identifier for the async search.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "keep_alive": {
+      "description": "The length of time that the async search should be available in the cluster. When not specified, the `keep_alive` set with the corresponding submit async request will be used. Otherwise, it is possible to override the value and extend the validity of the request. When this period expires, the search, if still running, is cancelled. If the search is completed, its saved results are deleted.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "typed_keys": {
+      "type": "boolean",
+      "description": "Specify whether aggregation and suggester names should be prefixed by their respective types in the response",
+      "x-found-in": "query"
+    },
+    "wait_for_completion_timeout": {
+      "description": "Specifies to wait for the search to be completed up until the provided timeout. Final results will be returned if available before the timeout expires, otherwise the currently available results will be returned once the timeout expires. By default no timeout is set meaning that the currently available results will be returned without any additional wait.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "return_intermediate_results": {
+      "type": "boolean",
+      "description": "Specifies whether the response should contain intermediate results if the query is still running when the wait_for_completion_timeout expires or if no wait_for_completion_timeout is specified. If true and the search is still running, the search response will include any hits and partial aggregations that are available. If false and the search is still running, the search response will not include any hits (but possibly include total hits) nor will include any partial aggregations. When not specified, the intermediate results are returned for running queries.",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

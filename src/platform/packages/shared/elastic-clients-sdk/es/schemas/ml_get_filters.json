@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "properties": {
+    "filter_id": {
+      "description": "A string that uniquely identifies a filter.",
+      "$ref": "#/$defs/Ids",
+      "x-found-in": "path"
+    },
+    "from": {
+      "description": "Skips the specified number of filters.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "size": {
+      "description": "Specifies the maximum number of filters to obtain.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Ids": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        }
+      ]
+    },
+    "integer": {
+      "type": "number"
+    }
+  }
+}

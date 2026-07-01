@@ -1,0 +1,89 @@
+{
+  "type": "object",
+  "properties": {
+    "index": {
+      "description": "A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices",
+      "$ref": "#/$defs/Indices",
+      "x-found-in": "path"
+    },
+    "allow_no_indices": {
+      "type": "boolean",
+      "description": "A setting that does two separate checks on the index expression. If `false`, the request returns an error (1) if any wildcard expression (including `_all` and `*`) resolves to zero matching indices or (2) if the complete set of resolved indices, aliases or data streams is empty after all expressions are evaluated. If `true`, index expressions that resolve to no indices are allowed and the request returns an empty result.",
+      "x-found-in": "query"
+    },
+    "expand_wildcards": {
+      "description": "Whether to expand wildcard expression to concrete indices that are open, closed or both.",
+      "$ref": "#/$defs/ExpandWildcards",
+      "x-found-in": "query"
+    },
+    "flush": {
+      "type": "boolean",
+      "description": "Specify whether the index should be flushed after performing the operation",
+      "x-found-in": "query"
+    },
+    "ignore_unavailable": {
+      "type": "boolean",
+      "description": "If `false`, the request returns an error if it targets a concrete (non-wildcarded) index, alias, or data stream that is missing, closed, or otherwise unavailable. If `true`, unavailable concrete targets are silently ignored.",
+      "x-found-in": "query"
+    },
+    "max_num_segments": {
+      "description": "The number of segments the index should be merged into (default: dynamic)",
+      "$ref": "#/$defs/long",
+      "x-found-in": "query"
+    },
+    "only_expunge_deletes": {
+      "type": "boolean",
+      "description": "Specify whether the operation should only expunge deleted documents",
+      "x-found-in": "query"
+    },
+    "wait_for_completion": {
+      "type": "boolean",
+      "description": "Should the request wait until the force merge is completed",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "IndexName": {
+      "type": "string"
+    },
+    "Indices": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IndexName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IndexName"
+          }
+        }
+      ]
+    },
+    "ExpandWildcard": {
+      "type": "string",
+      "enum": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ]
+    },
+    "ExpandWildcards": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExpandWildcard"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExpandWildcard"
+          }
+        }
+      ]
+    },
+    "long": {
+      "type": "number"
+    }
+  }
+}

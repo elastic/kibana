@@ -1,0 +1,49 @@
+{
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Identifier for the anomaly detection job.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "forecast_id": {
+      "description": "A comma-separated list of forecast identifiers. If you do not specify this optional parameter or if you specify `_all` or `*` the API deletes all forecasts from the job.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "allow_no_forecasts": {
+      "type": "boolean",
+      "description": "Specifies whether an error occurs when there are no forecasts. In particular, if this parameter is set to `false` and there are no forecasts associated with the job, attempts to delete all forecasts return an error.",
+      "x-found-in": "query"
+    },
+    "timeout": {
+      "description": "Specifies the period of time to wait for the completion of the delete operation. When this period of time elapses, the API fails and returns an error.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "job_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

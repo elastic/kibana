@@ -1,0 +1,61 @@
+{
+  "type": "object",
+  "properties": {
+    "inference_id": {
+      "type": "string",
+      "description": "The inference Id",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "timeout": {
+      "description": "Specifies the amount of time to wait for the inference request to complete.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "input": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ],
+      "description": "Inference input. Either a string or an array of strings.",
+      "x-found-in": "body"
+    },
+    "task_settings": {
+      "description": "Task settings for the individual inference request. These settings are specific to the <task_type> you specified and override the task settings specified when initializing the service.",
+      "$ref": "#/$defs/InferenceTaskSettings",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "inference_id",
+    "input"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "InferenceTaskSettings": {}
+  }
+}

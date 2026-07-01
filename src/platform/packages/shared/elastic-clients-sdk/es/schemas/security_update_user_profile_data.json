@@ -1,0 +1,74 @@
+{
+  "type": "object",
+  "properties": {
+    "uid": {
+      "type": "string",
+      "description": "A unique identifier for the user profile.",
+      "$ref": "#/$defs/SecurityUserProfileId",
+      "x-found-in": "path"
+    },
+    "if_seq_no": {
+      "type": "number",
+      "description": "Only perform the operation if the document has this sequence number.",
+      "$ref": "#/$defs/SequenceNumber",
+      "x-found-in": "query"
+    },
+    "if_primary_term": {
+      "description": "Only perform the operation if the document has this primary term.",
+      "$ref": "#/$defs/long",
+      "x-found-in": "query"
+    },
+    "refresh": {
+      "description": "If 'true', Elasticsearch refreshes the affected shards to make this operation visible to search. If 'wait_for', it waits for a refresh to make this operation visible to search. If 'false', nothing is done with refreshes.",
+      "$ref": "#/$defs/Refresh",
+      "x-found-in": "query"
+    },
+    "labels": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {},
+      "description": "Searchable data that you want to associate with the user profile. This field supports a nested data structure. Within the labels object, top-level keys cannot begin with an underscore (`_`) or contain a period (`.`).",
+      "x-found-in": "body"
+    },
+    "data": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {},
+      "description": "Non-searchable data that you want to associate with the user profile. This field supports a nested data structure. Within the `data` object, top-level keys cannot begin with an underscore (`_`) or contain a period (`.`). The data object is not searchable, but can be retrieved with the get user profile API.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "uid"
+  ],
+  "$defs": {
+    "SecurityUserProfileId": {
+      "type": "string"
+    },
+    "SequenceNumber": {
+      "$ref": "#/$defs/long"
+    },
+    "long": {
+      "type": "number"
+    },
+    "Refresh": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string",
+          "enum": [
+            "true",
+            "false",
+            "wait_for"
+          ]
+        }
+      ]
+    }
+  }
+}

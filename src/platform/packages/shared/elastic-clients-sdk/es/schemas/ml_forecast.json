@@ -1,0 +1,49 @@
+{
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Identifier for the anomaly detection job. The job must be open when you create a forecast; otherwise, an error occurs.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "duration": {
+      "description": "Refer to the description for the `duration` query parameter.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "body"
+    },
+    "expires_in": {
+      "description": "Refer to the description for the `expires_in` query parameter.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "body"
+    },
+    "max_model_memory": {
+      "type": "string",
+      "description": "Refer to the description for the `max_model_memory` query parameter.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "job_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

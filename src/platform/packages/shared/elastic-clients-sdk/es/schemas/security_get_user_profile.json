@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "properties": {
+    "uid": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SecurityUserProfileId"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SecurityUserProfileId"
+          }
+        }
+      ],
+      "description": "A unique identifier for the user profile.",
+      "x-found-in": "path"
+    },
+    "data": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ],
+      "description": "A comma-separated list of filters for the `data` field of the profile document. To return all content use `data=*`. To return a subset of content use `data=<key>` to retrieve content nested under the specified `<key>`. By default returns no `data` content.",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "uid"
+  ],
+  "$defs": {
+    "SecurityUserProfileId": {
+      "type": "string"
+    }
+  }
+}

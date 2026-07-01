@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "calendar_id": {
+      "type": "string",
+      "description": "A string that uniquely identifies a calendar.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "calendar_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "connector_sync_job_id": {
+      "type": "string",
+      "description": "The unique identifier of the connector sync job.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "sync_cursor": {
+      "description": "The cursor object from the last incremental sync job. This should reference the `sync_cursor` field in the connector state for which the job runs.",
+      "x-found-in": "body"
+    },
+    "worker_hostname": {
+      "type": "string",
+      "description": "The host name of the current system that will run the job.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "connector_sync_job_id",
+    "worker_hostname"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

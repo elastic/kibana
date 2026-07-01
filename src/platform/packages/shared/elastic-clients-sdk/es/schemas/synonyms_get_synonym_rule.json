@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "properties": {
+    "set_id": {
+      "type": "string",
+      "description": "The ID of the synonym set to retrieve the synonym rule from.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "rule_id": {
+      "type": "string",
+      "description": "The ID of the synonym rule to retrieve.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "set_id",
+    "rule_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

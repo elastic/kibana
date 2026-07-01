@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the search application to be searched.",
+      "$ref": "#/$defs/Name",
+      "x-found-in": "path"
+    },
+    "typed_keys": {
+      "type": "boolean",
+      "description": "Determines whether aggregation names are prefixed by their respective types in the response.",
+      "x-found-in": "query"
+    },
+    "params": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {},
+      "description": "Query parameters specific to this request, which will override any defaults specified in the template.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "$defs": {
+    "Name": {
+      "type": "string"
+    }
+  }
+}

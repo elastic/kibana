@@ -1,0 +1,125 @@
+{
+  "type": "object",
+  "properties": {
+    "model_id": {
+      "type": "string",
+      "description": "The unique identifier of the trained model. Currently, only PyTorch models are supported.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "cache_size": {
+      "description": "The inference cache size (in memory outside the JVM heap) per node for the model. The default value is the same size as the `model_size_bytes`. To disable the cache, `0b` can be provided.",
+      "$ref": "#/$defs/ByteSize",
+      "x-found-in": "query"
+    },
+    "number_of_allocations": {
+      "description": "The number of model allocations on each node where the model is deployed. All allocations on a node share the same copy of the model in memory but use a separate set of threads to evaluate the model. Increasing this value generally increases the throughput. If this setting is greater than the number of hardware threads it will automatically be changed to a value less than the number of hardware threads. If adaptive_allocations is enabled, do not set this value, because it’s automatically set.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "priority": {
+      "description": "The deployment priority",
+      "$ref": "#/$defs/MlTrainingPriority",
+      "x-found-in": "query"
+    },
+    "queue_capacity": {
+      "description": "Specifies the number of inference requests that are allowed in the queue. After the number of requests exceeds this value, new requests are rejected with a 429 error.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "threads_per_allocation": {
+      "description": "Sets the number of threads used by each model allocation during inference. This generally increases the inference speed. The inference process is a compute-bound process; any number greater than the number of available hardware threads on the machine does not increase the inference speed. If this setting is greater than the number of hardware threads it will automatically be changed to a value less than the number of hardware threads.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "timeout": {
+      "description": "Specifies the amount of time to wait for the model to deploy.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "wait_for": {
+      "description": "Specifies the allocation status to wait for before returning.",
+      "$ref": "#/$defs/MlDeploymentAllocationState",
+      "x-found-in": "query"
+    },
+    "adaptive_allocations": {
+      "description": "Adaptive allocations configuration. When enabled, the number of allocations is set based on the current load. If adaptive_allocations is enabled, do not set the number of allocations manually.",
+      "$ref": "#/$defs/MlAdaptiveAllocationsSettings",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "model_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "long": {
+      "type": "number"
+    },
+    "ByteSize": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/long"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "integer": {
+      "type": "number"
+    },
+    "MlTrainingPriority": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "low"
+      ]
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "MlDeploymentAllocationState": {
+      "type": "string",
+      "enum": [
+        "started",
+        "starting",
+        "fully_allocated"
+      ]
+    },
+    "MlAdaptiveAllocationsSettings": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "If true, adaptive_allocations is enabled"
+        },
+        "min_number_of_allocations": {
+          "description": "Specifies the minimum number of allocations to scale to. If set, it must be greater than or equal to 0. If not defined, the deployment scales to 0.",
+          "$ref": "#/$defs/integer"
+        },
+        "max_number_of_allocations": {
+          "description": "Specifies the maximum number of allocations to scale to. If set, it must be greater than or equal to min_number_of_allocations.",
+          "$ref": "#/$defs/integer"
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    }
+  }
+}

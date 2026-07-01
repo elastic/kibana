@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "scroll_id": {
+      "description": "The scroll IDs to clear. To clear all scroll IDs, use `_all`.",
+      "$ref": "#/$defs/ScrollIds",
+      "x-found-in": "body"
+    }
+  },
+  "$defs": {
+    "ScrollId": {
+      "type": "string"
+    },
+    "ScrollIds": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ScrollId"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ScrollId"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "properties": {
+    "ecs_compatibility": {
+      "type": "string",
+      "description": "The mode of compatibility with ECS compliant Grok patterns. Use this parameter to specify whether to use ECS Grok patterns instead of legacy ones when the structure finder creates a Grok pattern. Valid values are `disabled` and `v1`.",
+      "x-found-in": "query"
+    },
+    "grok_pattern": {
+      "type": "string",
+      "description": "The Grok pattern to run on the text.",
+      "$ref": "#/$defs/GrokPattern",
+      "x-found-in": "body"
+    },
+    "text": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The lines of text to run the Grok pattern on.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "grok_pattern",
+    "text"
+  ],
+  "$defs": {
+    "GrokPattern": {
+      "type": "string"
+    }
+  }
+}

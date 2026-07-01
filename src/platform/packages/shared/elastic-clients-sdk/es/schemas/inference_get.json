@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "properties": {
+    "task_type": {
+      "description": "The task type of the endpoint to return",
+      "$ref": "#/$defs/InferenceTaskType",
+      "x-found-in": "path"
+    },
+    "inference_id": {
+      "description": "The inference Id of the endpoint to return. Using `_all` or `*` will return all endpoints with the specified `task_type` if one is specified, or all endpoints for all task types if no `task_type` is specified",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    }
+  },
+  "$defs": {
+    "InferenceTaskType": {
+      "type": "string",
+      "enum": [
+        "sparse_embedding",
+        "text_embedding",
+        "rerank",
+        "completion",
+        "chat_completion",
+        "embedding"
+      ]
+    },
+    "Id": {
+      "type": "string"
+    }
+  }
+}

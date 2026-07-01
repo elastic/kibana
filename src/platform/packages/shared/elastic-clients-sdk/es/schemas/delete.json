@@ -1,0 +1,151 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "A unique identifier for the document.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "index": {
+      "type": "string",
+      "description": "The name of the target index.",
+      "$ref": "#/$defs/IndexName",
+      "x-found-in": "path"
+    },
+    "if_primary_term": {
+      "description": "Only perform the operation if the document has this primary term.",
+      "$ref": "#/$defs/long",
+      "x-found-in": "query"
+    },
+    "if_seq_no": {
+      "type": "number",
+      "description": "Only perform the operation if the document has this sequence number.",
+      "$ref": "#/$defs/SequenceNumber",
+      "x-found-in": "query"
+    },
+    "refresh": {
+      "description": "If `true`, Elasticsearch refreshes the affected shards to make this operation visible to search. If `wait_for`, it waits for a refresh to make this operation visible to search. If `false`, it does nothing with refreshes.",
+      "$ref": "#/$defs/Refresh",
+      "x-found-in": "query"
+    },
+    "routing": {
+      "description": "A custom value used to route operations to a specific shard.",
+      "$ref": "#/$defs/Routing",
+      "x-found-in": "query"
+    },
+    "timeout": {
+      "description": "The period to wait for active shards. This parameter is useful for situations where the primary shard assigned to perform the delete operation might not be available when the delete operation runs. Some reasons for this might be that the primary shard is currently recovering from a store or undergoing relocation. By default, the delete operation will wait on the primary shard to become available for up to 1 minute before failing and responding with an error.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "version": {
+      "type": "number",
+      "description": "An explicit version number for concurrency control. It must match the current version of the document for the request to succeed.",
+      "$ref": "#/$defs/VersionNumber",
+      "x-found-in": "query"
+    },
+    "version_type": {
+      "description": "The version type.",
+      "$ref": "#/$defs/VersionType",
+      "x-found-in": "query"
+    },
+    "wait_for_active_shards": {
+      "description": "The minimum number of shard copies that must be active before proceeding with the operation. You can set it to `all` or any positive integer up to the total number of shards in the index (`number_of_replicas+1`). The default value of `1` means it waits for each primary shard to be active.",
+      "$ref": "#/$defs/WaitForActiveShards",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "id",
+    "index"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "IndexName": {
+      "type": "string"
+    },
+    "long": {
+      "type": "number"
+    },
+    "SequenceNumber": {
+      "$ref": "#/$defs/long"
+    },
+    "Refresh": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string",
+          "enum": [
+            "true",
+            "false",
+            "wait_for"
+          ]
+        }
+      ]
+    },
+    "Routing": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "VersionNumber": {
+      "$ref": "#/$defs/long"
+    },
+    "VersionType": {
+      "type": "string",
+      "enum": [
+        "internal",
+        "external",
+        "external_gte"
+      ]
+    },
+    "integer": {
+      "type": "number"
+    },
+    "WaitForActiveShardOptions": {
+      "type": "string",
+      "enum": [
+        "all",
+        "index-setting"
+      ]
+    },
+    "WaitForActiveShards": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/integer"
+        },
+        {
+          "$ref": "#/$defs/WaitForActiveShardOptions"
+        }
+      ]
+    }
+  }
+}

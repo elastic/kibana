@@ -1,0 +1,44 @@
+{
+  "type": "object",
+  "properties": {
+    "transform_id": {
+      "type": "string",
+      "description": "Identifier for the transform.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "timeout": {
+      "description": "Controls the time to wait for the scheduling to take place",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "defer": {
+      "type": "boolean",
+      "description": "When true, defers the scheduling by the transform's configured sync delay instead of triggering immediately. The transform will process new data after the delay elapses rather than right away.",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "transform_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

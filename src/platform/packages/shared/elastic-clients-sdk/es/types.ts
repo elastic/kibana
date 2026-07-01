@@ -12,7 +12,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { z } from '@kbn/zod/v4';
+import type { JsonSchemaObject } from '../lib/json_schema';
 
 /**
  * Valid HTTP methods for Elasticsearch API requests.
@@ -22,10 +22,9 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD';
 /**
  * Declarative description of a single Elasticsearch API endpoint.
  *
- * Each definition specifies the HTTP method, path template, and an optional unified
- * `input` schema where every field carries `.meta({found_in: "path"|"query"|"body"})`
- * routing metadata. The generic handler derives its routing behavior entirely from
- * that metadata at runtime.
+ * Each definition specifies the HTTP method, path template, and an optional
+ * JSON Schema `input` where every top-level property carries an `x-found-in`
+ * annotation (`"path"`, `"query"`, or `"body"`) that determines routing.
  *
  * Definitions with a `namespace` are grouped into per-namespace arrays (e.g. `catApis`) and
  * collected by the barrel module (`src/es/apis.ts`).
@@ -39,11 +38,15 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD';
  *   description: 'Creates an index',
  *   method: 'PUT',
  *   path: '/{index}',
- *   input: z.looseObject({
- *     index:    z.string().describe('Target index').meta({ found_in: 'path' }),
- *     pretty:   z.boolean().optional().meta({ found_in: 'query' }),
- *     settings: z.record(z.string(), z.unknown()).optional().meta({ found_in: 'body' }),
- *   }),
+ *   input: {
+ *     type: 'object',
+ *     properties: {
+ *       index:    { type: 'string', description: 'Target index', 'x-found-in': 'path' },
+ *       pretty:   { type: 'boolean', 'x-found-in': 'query' },
+ *       settings: { type: 'object', 'x-found-in': 'body' },
+ *     },
+ *     required: ['index'],
+ *   },
  * }
  *
  * // namespace-less: registers as `elastic stack es search`
@@ -70,20 +73,13 @@ export interface EsApiDefinition {
   /** URL path template; path parameters use `{param}` syntax */
   path: string;
   /**
-   * Unified Zod object schema (or a no-arg factory that returns one).
-   * Every top-level field represents one parameter.
-   * Fields with `.meta({found_in: "path"})` are interpolated into the URL path.
-   * Fields with `.meta({found_in: "query"})` are sent as querystring params.
-   * Fields with `.meta({found_in: "body"})` (or no `found_in`) are sent in the body.
-   *
-   * Use `z.looseObject()` when body fields may include underscore-prefixed keys
-   * that cannot be valid CLI flags and must be supplied via `--file`/stdin.
-   *
-   * Use the factory form (`() => SomeRequest`) when the schema is imported from a
-   * file that participates in circular module dependencies -- this defers schema
-   * resolution to call time (after all modules have initialised) and avoids TDZ errors.
+   * JSON Schema object describing all accepted parameters.
+   * Every top-level property under `properties` must carry an `x-found-in` annotation:
+   * - `"path"` → interpolated into the URL path template
+   * - `"query"` → sent as a URL querystring parameter
+   * - `"body"` → included in the request body (default when absent)
    */
-  input?: z.ZodObject<z.ZodRawShape> | (() => z.ZodObject<z.ZodRawShape>);
+  input?: JsonSchemaObject;
   /** how to handle the response body; defaults to `"json"` */
   responseType?: 'json' | 'text';
   /** how to serialize the request body; defaults to `"json"` */

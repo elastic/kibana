@@ -1,0 +1,83 @@
+{
+  "type": "object",
+  "properties": {
+    "calendar_id": {
+      "type": "string",
+      "description": "A string that uniquely identifies a calendar.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/MlCalendarEvent"
+      },
+      "description": "A list of one of more scheduled events. The event’s start and end times can be specified as integer milliseconds since the epoch or as a string in ISO 8601 format.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "calendar_id",
+    "events"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "MlCalendarEvent": {
+      "type": "object",
+      "properties": {
+        "calendar_id": {
+          "description": "A string that uniquely identifies a calendar.",
+          "$ref": "#/$defs/Id"
+        },
+        "event_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the scheduled event."
+        },
+        "end_time": {
+          "description": "The timestamp for the end of the scheduled event in milliseconds since the epoch or ISO 8601 format.",
+          "$ref": "#/$defs/DateTime"
+        },
+        "start_time": {
+          "description": "The timestamp for the beginning of the scheduled event in milliseconds since the epoch or ISO 8601 format.",
+          "$ref": "#/$defs/DateTime"
+        },
+        "skip_result": {
+          "type": "boolean",
+          "description": "When true the model will not create results for this calendar period."
+        },
+        "skip_model_update": {
+          "type": "boolean",
+          "description": "When true the model will not be updated for this calendar period."
+        },
+        "force_time_shift": {
+          "description": "Shift time by this many seconds. For example adjust time for daylight savings changes",
+          "$ref": "#/$defs/integer"
+        }
+      },
+      "required": [
+        "description",
+        "end_time",
+        "start_time"
+      ]
+    },
+    "EpochTime": {},
+    "DateTime": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/EpochTime"
+        }
+      ]
+    },
+    "integer": {
+      "type": "number"
+    }
+  }
+}

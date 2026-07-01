@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "description": "The ID for the task.",
+      "$ref": "#/$defs/TaskId",
+      "x-found-in": "path"
+    },
+    "requests_per_second": {
+      "type": "number",
+      "description": "The throttle for this request in sub-requests per second. To disable throttling, set it to `-1`.",
+      "$ref": "#/$defs/float",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "task_id",
+    "requests_per_second"
+  ],
+  "$defs": {
+    "TaskId": {
+      "type": "string"
+    },
+    "float": {
+      "type": "number"
+    }
+  }
+}

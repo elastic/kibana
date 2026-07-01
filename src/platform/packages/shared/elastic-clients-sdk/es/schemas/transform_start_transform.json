@@ -1,0 +1,44 @@
+{
+  "type": "object",
+  "properties": {
+    "transform_id": {
+      "type": "string",
+      "description": "Identifier for the transform.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "timeout": {
+      "description": "Period to wait for a response. If no response is received before the timeout expires, the request fails and returns an error.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "from": {
+      "type": "string",
+      "description": "Restricts the set of transformed entities to those changed after this time. Relative times like now-30d are supported. Only applicable for continuous transforms.",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "transform_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

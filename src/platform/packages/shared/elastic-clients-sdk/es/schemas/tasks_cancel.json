@@ -1,0 +1,48 @@
+{
+  "type": "object",
+  "properties": {
+    "task_id": {
+      "description": "The task identifier.",
+      "$ref": "#/$defs/TaskId",
+      "x-found-in": "path"
+    },
+    "actions": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ],
+      "description": "A comma-separated list or wildcard expression of actions that is used to limit the request.",
+      "x-found-in": "query"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "A comma-separated list of node IDs or names that is used to limit the request.",
+      "x-found-in": "query"
+    },
+    "parent_task_id": {
+      "type": "string",
+      "description": "A parent task ID that is used to limit the tasks.",
+      "x-found-in": "query"
+    },
+    "wait_for_completion": {
+      "type": "boolean",
+      "description": "If true, the request blocks until all found tasks are complete.",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "TaskId": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,202 @@
+{
+  "type": "object",
+  "properties": {
+    "node_id": {
+      "description": "Comma-separated list of node IDs or names used to limit returned information.",
+      "$ref": "#/$defs/NodeIds",
+      "x-found-in": "path"
+    },
+    "metric": {
+      "description": "Limits the information returned to the specific metrics.",
+      "$ref": "#/$defs/NodesStatsNodeStatsMetrics",
+      "x-found-in": "path"
+    },
+    "index_metric": {
+      "description": "Limit the information returned for indices metric to the specific index metrics. It can be used only if indices (or all) metric is specified.",
+      "$ref": "#/$defs/CommonStatsFlags",
+      "x-found-in": "path"
+    },
+    "completion_fields": {
+      "description": "Comma-separated list or wildcard expressions of fields to include in fielddata and suggest statistics.",
+      "$ref": "#/$defs/Fields",
+      "x-found-in": "query"
+    },
+    "fielddata_fields": {
+      "description": "Comma-separated list or wildcard expressions of fields to include in fielddata statistics.",
+      "$ref": "#/$defs/Fields",
+      "x-found-in": "query"
+    },
+    "fields": {
+      "description": "Comma-separated list or wildcard expressions of fields to include in the statistics.",
+      "$ref": "#/$defs/Fields",
+      "x-found-in": "query"
+    },
+    "groups": {
+      "type": "boolean",
+      "description": "Comma-separated list of search groups to include in the search statistics.",
+      "x-found-in": "query"
+    },
+    "include_segment_file_sizes": {
+      "type": "boolean",
+      "description": "If true, the call reports the aggregated disk usage of each one of the Lucene index files (only applies if segment stats are requested).",
+      "x-found-in": "query"
+    },
+    "level": {
+      "description": "Indicates whether statistics are aggregated at the node, indices, or shards level.",
+      "$ref": "#/$defs/NodeStatsLevel",
+      "x-found-in": "query"
+    },
+    "timeout": {
+      "description": "Period to wait for a response. If no response is received before the timeout expires, the request fails and returns an error.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "A comma-separated list of document types for the indexing index metric.",
+      "x-found-in": "query"
+    },
+    "include_unloaded_segments": {
+      "type": "boolean",
+      "description": "If `true`, the response includes information from segments that are not loaded into memory.",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "NodeId": {
+      "type": "string"
+    },
+    "NodeIds": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/NodeId"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NodeId"
+          }
+        }
+      ]
+    },
+    "NodesStatsNodeStatsMetric": {
+      "type": "string",
+      "enum": [
+        "_all",
+        "_none",
+        "indices",
+        "os",
+        "process",
+        "jvm",
+        "thread_pool",
+        "fs",
+        "transport",
+        "http",
+        "breaker",
+        "script",
+        "discovery",
+        "ingest",
+        "adaptive_selection",
+        "script_cache",
+        "indexing_pressure",
+        "repositories",
+        "allocations"
+      ]
+    },
+    "NodesStatsNodeStatsMetrics": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/NodesStatsNodeStatsMetric"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NodesStatsNodeStatsMetric"
+          }
+        }
+      ]
+    },
+    "CommonStatsFlag": {
+      "type": "string",
+      "enum": [
+        "_all",
+        "store",
+        "indexing",
+        "get",
+        "search",
+        "merge",
+        "flush",
+        "refresh",
+        "query_cache",
+        "fielddata",
+        "docs",
+        "warmer",
+        "completion",
+        "segments",
+        "translog",
+        "request_cache",
+        "recovery",
+        "bulk",
+        "shard_stats",
+        "mappings",
+        "dense_vector",
+        "sparse_vector"
+      ]
+    },
+    "CommonStatsFlags": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CommonStatsFlag"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CommonStatsFlag"
+          }
+        }
+      ]
+    },
+    "Field": {
+      "type": "string"
+    },
+    "Fields": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Field"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Field"
+          }
+        }
+      ]
+    },
+    "NodeStatsLevel": {
+      "type": "string",
+      "enum": [
+        "node",
+        "indices",
+        "shards"
+      ]
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

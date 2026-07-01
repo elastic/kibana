@@ -1,0 +1,198 @@
+{
+  "type": "object",
+  "properties": {
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "chat_completion",
+        "completion",
+        "rerank",
+        "text_embedding"
+      ],
+      "description": "The type of the inference task that the model will perform.",
+      "$ref": "#/$defs/InferenceHuggingFaceTaskType",
+      "x-found-in": "path"
+    },
+    "huggingface_inference_id": {
+      "type": "string",
+      "description": "The unique identifier of the inference endpoint.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "timeout": {
+      "description": "Specifies the amount of time to wait for the inference endpoint to be created.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "chunking_settings": {
+      "description": "The chunking configuration object. Applies only to the `text_embedding` task type. Not applicable to the `rerank`, `completion`, or `chat_completion` task types.",
+      "$ref": "#/$defs/InferenceInferenceChunkingSettings",
+      "x-found-in": "body"
+    },
+    "service": {
+      "type": "string",
+      "enum": [
+        "hugging_face"
+      ],
+      "description": "The type of service supported for the specified task type. In this case, `hugging_face`.",
+      "$ref": "#/$defs/InferenceHuggingFaceServiceType",
+      "x-found-in": "body"
+    },
+    "service_settings": {
+      "type": "object",
+      "properties": {
+        "api_key": {
+          "type": "string",
+          "description": "A valid access token for your HuggingFace account. You can create or find your access tokens on the HuggingFace settings page. IMPORTANT: You need to provide the API key only once, during the inference model creation. The get inference endpoint API does not retrieve your API key."
+        },
+        "rate_limit": {
+          "description": "This setting helps to minimize the number of rate limit errors returned from Hugging Face. By default, the `hugging_face` service sets the number of requests allowed per minute to 3000 for all supported tasks. Hugging Face does not publish a universal rate limit — actual limits may vary. It is recommended to adjust this value based on the capacity and limits of your specific deployment environment.",
+          "$ref": "#/$defs/InferenceRateLimitSetting"
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL endpoint to use for the requests. For `completion` and `chat_completion` tasks, the deployed model must be compatible with the Hugging Face Chat Completion interface (see the linked external documentation for details). The endpoint URL for the request must include `/v1/chat/completions`. If the model supports the OpenAI Chat Completion schema, a toggle should appear in the interface. Enabling this toggle doesn't change any model behavior, it reveals the full endpoint URL needed (which should include `/v1/chat/completions`) when configuring the inference endpoint in Elasticsearch. If the model doesn't support this schema, the toggle may not be shown."
+        },
+        "model_id": {
+          "type": "string",
+          "description": "The name of the HuggingFace model to use for the inference task. For `completion` and `chat_completion` tasks, this field is optional but may be required for certain models — particularly when using serverless inference endpoints. For the `text_embedding` task, this field should not be included. Otherwise, the request will fail."
+        }
+      },
+      "required": [
+        "api_key",
+        "url"
+      ],
+      "description": "Settings used to install the inference model. These settings are specific to the `hugging_face` service.",
+      "$ref": "#/$defs/InferenceHuggingFaceServiceSettings",
+      "x-found-in": "body"
+    },
+    "task_settings": {
+      "description": "Settings to configure the inference task. These settings are specific to the task type you specified.",
+      "$ref": "#/$defs/InferenceHuggingFaceTaskSettings",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "task_type",
+    "huggingface_inference_id",
+    "service",
+    "service_settings"
+  ],
+  "$defs": {
+    "InferenceHuggingFaceTaskType": {
+      "type": "string",
+      "enum": [
+        "chat_completion",
+        "completion",
+        "rerank",
+        "text_embedding"
+      ]
+    },
+    "Id": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "integer": {
+      "type": "number"
+    },
+    "InferenceInferenceChunkingSettings": {
+      "type": "object",
+      "properties": {
+        "max_chunk_size": {
+          "description": "The maximum size of a chunk in words. This value cannot be lower than `20` (for `sentence` strategy) or `10` (for `word` strategy). This value should not exceed the window size for the associated model.",
+          "$ref": "#/$defs/integer"
+        },
+        "overlap": {
+          "description": "The number of overlapping words for chunks. It is applicable only to a `word` chunking strategy. This value cannot be higher than half the `max_chunk_size` value.",
+          "$ref": "#/$defs/integer"
+        },
+        "sentence_overlap": {
+          "description": "The number of overlapping sentences for chunks. It is applicable only for a `sentence` chunking strategy. It can be either `1` or `0`.",
+          "$ref": "#/$defs/integer"
+        },
+        "separator_group": {
+          "type": "string",
+          "description": "Only applicable to the `recursive` strategy and required when using it. Sets a predefined list of separators in the saved chunking settings based on the selected text type. Values can be `markdown` or `plaintext`. Using this parameter is an alternative to manually specifying a custom `separators` list."
+        },
+        "separators": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Only applicable to the `recursive` strategy and required when using it. A list of strings used as possible split points when chunking text. Each string can be a plain string or a regular expression (regex) pattern. The system tries each separator in order to split the text, starting from the first item in the list. After splitting, it attempts to recombine smaller pieces into larger chunks that stay within the `max_chunk_size` limit, to reduce the total number of chunks generated."
+        },
+        "strategy": {
+          "type": "string",
+          "description": "The chunking strategy: `sentence`, `word`, `none` or `recursive`.  * If `strategy` is set to `recursive`, you must also specify: - `max_chunk_size` - either `separators` or`separator_group` Learn more about different chunking strategies in the linked documentation."
+        }
+      }
+    },
+    "InferenceHuggingFaceServiceType": {
+      "type": "string",
+      "enum": [
+        "hugging_face"
+      ]
+    },
+    "InferenceRateLimitSetting": {
+      "type": "object",
+      "properties": {
+        "requests_per_minute": {
+          "description": "The number of requests allowed per minute. By default, the number of requests allowed per minute is set by each service as follows: * `alibabacloud-ai-search` service: `1000` * `amazonbedrock` service: `240` * `anthropic` service: `50` * `azureaistudio` service: `240` * `azureopenai` service and task type `text_embedding`: `1440` * `azureopenai` service and task types `completion` or `chat_completion`: `120` * `cohere` service: `10000` * `contextualai` service: `1000` * `elastic` service and task type `chat_completion`: `240` * `fireworksai` service: `6000` * `googleaistudio` service: `360` * `googlevertexai` service: `30000` * `hugging_face` service: `3000` * `jinaai` service: `2000` * `llama` service: `3000` * `mistral` service: `240` * `openai` service and task type `text_embedding`: `3000` * `openai` service and task type `completion`: `500` * `openshift_ai` service: `3000` * `voyageai` service: `2000` * `watsonxai` service: `120`",
+          "$ref": "#/$defs/integer"
+        }
+      }
+    },
+    "InferenceHuggingFaceServiceSettings": {
+      "type": "object",
+      "properties": {
+        "api_key": {
+          "type": "string",
+          "description": "A valid access token for your HuggingFace account. You can create or find your access tokens on the HuggingFace settings page. IMPORTANT: You need to provide the API key only once, during the inference model creation. The get inference endpoint API does not retrieve your API key."
+        },
+        "rate_limit": {
+          "description": "This setting helps to minimize the number of rate limit errors returned from Hugging Face. By default, the `hugging_face` service sets the number of requests allowed per minute to 3000 for all supported tasks. Hugging Face does not publish a universal rate limit — actual limits may vary. It is recommended to adjust this value based on the capacity and limits of your specific deployment environment.",
+          "$ref": "#/$defs/InferenceRateLimitSetting"
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL endpoint to use for the requests. For `completion` and `chat_completion` tasks, the deployed model must be compatible with the Hugging Face Chat Completion interface (see the linked external documentation for details). The endpoint URL for the request must include `/v1/chat/completions`. If the model supports the OpenAI Chat Completion schema, a toggle should appear in the interface. Enabling this toggle doesn't change any model behavior, it reveals the full endpoint URL needed (which should include `/v1/chat/completions`) when configuring the inference endpoint in Elasticsearch. If the model doesn't support this schema, the toggle may not be shown."
+        },
+        "model_id": {
+          "type": "string",
+          "description": "The name of the HuggingFace model to use for the inference task. For `completion` and `chat_completion` tasks, this field is optional but may be required for certain models — particularly when using serverless inference endpoints. For the `text_embedding` task, this field should not be included. Otherwise, the request will fail."
+        }
+      },
+      "required": [
+        "api_key",
+        "url"
+      ]
+    },
+    "InferenceHuggingFaceTaskSettings": {
+      "type": "object",
+      "properties": {
+        "return_documents": {
+          "type": "boolean",
+          "description": "For a `rerank` task, return doc text within the results."
+        },
+        "top_n": {
+          "description": "For a `rerank` task, the number of most relevant documents to return. It defaults to the number of the documents.",
+          "$ref": "#/$defs/integer"
+        }
+      }
+    }
+  }
+}

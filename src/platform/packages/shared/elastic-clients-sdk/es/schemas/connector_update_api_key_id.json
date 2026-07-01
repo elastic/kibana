@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "properties": {
+    "connector_id": {
+      "type": "string",
+      "description": "The unique identifier of the connector to be updated",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "api_key_id": {
+      "type": "string",
+      "x-found-in": "body"
+    },
+    "api_key_secret_id": {
+      "type": "string",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "connector_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

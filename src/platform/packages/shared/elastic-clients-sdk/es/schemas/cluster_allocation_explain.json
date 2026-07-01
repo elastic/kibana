@@ -1,0 +1,66 @@
+{
+  "type": "object",
+  "properties": {
+    "include_disk_info": {
+      "type": "boolean",
+      "description": "If true, returns information about disk usage and shard sizes.",
+      "x-found-in": "query"
+    },
+    "include_yes_decisions": {
+      "type": "boolean",
+      "description": "If true, returns YES decisions in explanation.",
+      "x-found-in": "query"
+    },
+    "master_timeout": {
+      "description": "Period to wait for a connection to the master node.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "index": {
+      "description": "The name of the index that you would like an explanation for.",
+      "$ref": "#/$defs/IndexName",
+      "x-found-in": "body"
+    },
+    "shard": {
+      "description": "An identifier for the shard that you would like an explanation for.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "body"
+    },
+    "primary": {
+      "type": "boolean",
+      "description": "If true, returns an explanation for the primary shard for the specified shard ID.",
+      "x-found-in": "body"
+    },
+    "current_node": {
+      "description": "Explain a shard only if it is currently located on the specified node name or node ID.",
+      "$ref": "#/$defs/NodeId",
+      "x-found-in": "body"
+    }
+  },
+  "$defs": {
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "IndexName": {
+      "type": "string"
+    },
+    "integer": {
+      "type": "number"
+    },
+    "NodeId": {
+      "type": "string"
+    }
+  }
+}

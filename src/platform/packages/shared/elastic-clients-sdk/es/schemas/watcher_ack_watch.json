@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "properties": {
+    "watch_id": {
+      "type": "string",
+      "description": "The watch identifier.",
+      "$ref": "#/$defs/Name",
+      "x-found-in": "path"
+    },
+    "action_id": {
+      "description": "A comma-separated list of the action identifiers to acknowledge. If you omit this parameter, all of the actions of the watch are acknowledged.",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "watch_id"
+  ],
+  "$defs": {
+    "Name": {
+      "type": "string"
+    },
+    "Names": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "acs": {
+      "type": "string",
+      "description": "The Assertion Consumer Service URL that matches the one of the SAML realms in Elasticsearch. The realm is used to generate the authentication request. You must specify either this parameter or the `realm` parameter.",
+      "x-found-in": "body"
+    },
+    "realm": {
+      "type": "string",
+      "description": "The name of the SAML realm in Elasticsearch for which the configuration is used to generate the authentication request. You must specify either this parameter or the `acs` parameter.",
+      "x-found-in": "body"
+    },
+    "relay_state": {
+      "type": "string",
+      "description": "A string that will be included in the redirect URL that this API returns as the `RelayState` query parameter. If the Authentication Request is signed, this value is used as part of the signature computation.",
+      "x-found-in": "body"
+    }
+  }
+}

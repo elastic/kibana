@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "properties": {
+    "connector_id": {
+      "type": "string",
+      "description": "The unique identifier of the connector to be updated",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "status": {
+      "$ref": "#/$defs/ConnectorConnectorStatus",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "connector_id",
+    "status"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "ConnectorConnectorStatus": {
+      "type": "string",
+      "enum": [
+        "created",
+        "needs_configuration",
+        "configured",
+        "connected",
+        "error"
+      ]
+    }
+  }
+}

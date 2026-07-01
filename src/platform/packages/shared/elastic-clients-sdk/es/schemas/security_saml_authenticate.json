@@ -1,0 +1,53 @@
+{
+  "type": "object",
+  "properties": {
+    "content": {
+      "type": "string",
+      "description": "The SAML response as it was sent by the user's browser, usually a Base64 encoded XML document.",
+      "x-found-in": "body"
+    },
+    "ids": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        }
+      ],
+      "description": "A JSON array with all the valid SAML Request Ids that the caller of the API has for the current user.",
+      "$ref": "#/$defs/Ids",
+      "x-found-in": "body"
+    },
+    "realm": {
+      "type": "string",
+      "description": "The name of the realm that should authenticate the SAML response. Useful in cases where many SAML realms are defined.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "content",
+    "ids"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Ids": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        }
+      ]
+    }
+  }
+}

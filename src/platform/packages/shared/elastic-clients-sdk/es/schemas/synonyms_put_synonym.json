@@ -1,0 +1,54 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The ID of the synonyms set to be created or updated.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "synonyms_set": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SynonymsSynonymRule"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SynonymsSynonymRule"
+          }
+        }
+      ],
+      "description": "The synonym rules definitions for the synonyms set.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "id",
+    "synonyms_set"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "SynonymsSynonymRule": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The identifier for the synonym rule. If you do not specify a synonym rule ID when you create a rule, an identifier is created automatically by Elasticsearch.",
+          "$ref": "#/$defs/Id"
+        },
+        "synonyms": {
+          "description": "The synonyms that conform the synonym rule in Solr format.",
+          "$ref": "#/$defs/SynonymsSynonymString"
+        }
+      },
+      "required": [
+        "synonyms"
+      ]
+    },
+    "SynonymsSynonymString": {
+      "type": "string"
+    }
+  }
+}

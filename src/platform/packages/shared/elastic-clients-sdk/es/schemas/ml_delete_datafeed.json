@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "datafeed_id": {
+      "type": "string",
+      "description": "A numerical character string that uniquely identifies the datafeed. This identifier can contain lowercase alphanumeric characters (a-z and 0-9), hyphens, and underscores. It must start and end with alphanumeric characters.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "force": {
+      "type": "boolean",
+      "description": "Use to forcefully delete a started datafeed; this method is quicker than stopping and deleting the datafeed.",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "datafeed_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

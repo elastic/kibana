@@ -1,0 +1,89 @@
+{
+  "type": "object",
+  "properties": {
+    "fields": {
+      "description": "Comma-separated list of fields used to limit returned information. To retrieve all fields, omit this parameter.",
+      "$ref": "#/$defs/Fields",
+      "x-found-in": "path"
+    },
+    "h": {
+      "description": "A comma-separated list of columns names to display. It supports simple wildcards.",
+      "$ref": "#/$defs/CatCatFieldDataColumns",
+      "x-found-in": "query"
+    },
+    "s": {
+      "description": "List of columns that determine how the table should be sorted. Sorting defaults to ascending and can be changed by setting `:asc` or `:desc` as a suffix to the column name.",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "Field": {
+      "type": "string"
+    },
+    "Fields": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Field"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Field"
+          }
+        }
+      ]
+    },
+    "CatCatFieldDataColumn": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "id",
+            "host",
+            "h",
+            "ip",
+            "node",
+            "n",
+            "field",
+            "f",
+            "size",
+            "s"
+          ]
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "CatCatFieldDataColumns": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CatCatFieldDataColumn"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CatCatFieldDataColumn"
+          }
+        }
+      ]
+    },
+    "Name": {
+      "type": "string"
+    },
+    "Names": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "type": "object",
+  "properties": {
+    "filter_id": {
+      "type": "string",
+      "description": "A string that uniquely identifies a filter.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "add_items": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The items to add to the filter.",
+      "x-found-in": "body"
+    },
+    "description": {
+      "type": "string",
+      "description": "A description for the filter.",
+      "x-found-in": "body"
+    },
+    "remove_items": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The items to remove from the filter.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "filter_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "type": "object",
+  "properties": {
+    "refresh": {
+      "description": "If `true` (the default) then refresh the affected shards to make this operation visible to search, if `wait_for` then wait for a refresh to make this operation visible to search, if `false` then do nothing with refreshes.",
+      "$ref": "#/$defs/Refresh",
+      "x-found-in": "query"
+    },
+    "privileges": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string"
+        },
+        "additionalProperties": {
+          "$ref": "#/$defs/SecurityPutPrivilegesActions"
+        }
+      },
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "privileges"
+  ],
+  "$defs": {
+    "Refresh": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string",
+          "enum": [
+            "true",
+            "false",
+            "wait_for"
+          ]
+        }
+      ]
+    },
+    "SecurityPutPrivilegesActions": {
+      "type": "object",
+      "properties": {
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "application": {
+          "type": "string"
+        },
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "metadata": {
+          "$ref": "#/$defs/Metadata"
+        }
+      },
+      "required": [
+        "actions"
+      ]
+    },
+    "Name": {
+      "type": "string"
+    },
+    "Metadata": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {}
+    }
+  }
+}

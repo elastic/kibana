@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "The ID of the job to reset.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "wait_for_completion": {
+      "type": "boolean",
+      "description": "Should this request wait until the operation has completed before returning.",
+      "x-found-in": "query"
+    },
+    "delete_user_annotations": {
+      "type": "boolean",
+      "description": "Specifies whether annotations that have been added by the user should be deleted along with any auto-generated annotations when the job is reset.",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "job_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "type": "object",
+  "properties": {
+    "uid": {
+      "type": "string",
+      "description": "A unique identifier for the user profile.",
+      "$ref": "#/$defs/SecurityUserProfileId",
+      "x-found-in": "path"
+    },
+    "refresh": {
+      "description": "If 'true', Elasticsearch refreshes the affected shards to make this operation visible to search. If 'wait_for', it waits for a refresh to make this operation visible to search. If 'false', nothing is done with refreshes.",
+      "$ref": "#/$defs/Refresh",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "uid"
+  ],
+  "$defs": {
+    "SecurityUserProfileId": {
+      "type": "string"
+    },
+    "Refresh": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string",
+          "enum": [
+            "true",
+            "false",
+            "wait_for"
+          ]
+        }
+      ]
+    }
+  }
+}

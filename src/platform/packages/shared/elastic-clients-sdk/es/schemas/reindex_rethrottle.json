@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "description": "The task identifier, which can be found by using the tasks API.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "requests_per_second": {
+      "type": "number",
+      "description": "The throttle for this request in sub-requests per second. It can be either `-1` to turn off throttling or any decimal number like `1.7` or `12` to throttle to that level.",
+      "$ref": "#/$defs/float",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "task_id",
+    "requests_per_second"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "float": {
+      "type": "number"
+    }
+  }
+}

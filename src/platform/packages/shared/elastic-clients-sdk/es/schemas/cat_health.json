@@ -1,0 +1,113 @@
+{
+  "type": "object",
+  "properties": {
+    "ts": {
+      "type": "boolean",
+      "description": "If true, returns `HH:MM:SS` and Unix epoch timestamps.",
+      "x-found-in": "query"
+    },
+    "h": {
+      "description": "A comma-separated list of columns names to display. It supports simple wildcards.",
+      "$ref": "#/$defs/CatCatHealthColumns",
+      "x-found-in": "query"
+    },
+    "s": {
+      "description": "List of columns that determine how the table should be sorted. Sorting defaults to ascending and can be changed by setting `:asc` or `:desc` as a suffix to the column name.",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "CatCatHealthColumn": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "epoch",
+            "t",
+            "time",
+            "timestamp",
+            "ts",
+            "hms",
+            "hhmmss",
+            "cluster",
+            "cl",
+            "status",
+            "st",
+            "node.total",
+            "nt",
+            "nodeTotal",
+            "node.data",
+            "nd",
+            "nodeData",
+            "shards",
+            "sh",
+            "shards.total",
+            "shardsTotal",
+            "pri",
+            "p",
+            "shards.primary",
+            "shardsPrimary",
+            "relo",
+            "r",
+            "shards.relocating",
+            "shardsRelocating",
+            "init",
+            "i",
+            "shards.initializing",
+            "shardsInitializing",
+            "unassign",
+            "u",
+            "shards.unassigned",
+            "shardsUnassigned",
+            "unassign.pri",
+            "up",
+            "shards.unassigned.primary",
+            "shardsUnassignedPrimary",
+            "pending_tasks",
+            "pt",
+            "pendingTasks",
+            "max_task_wait_time",
+            "mtwt",
+            "maxTaskWaitTime",
+            "active_shards_percent",
+            "asp",
+            "activeShardsPercent"
+          ]
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "CatCatHealthColumns": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CatCatHealthColumn"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CatCatHealthColumn"
+          }
+        }
+      ]
+    },
+    "Name": {
+      "type": "string"
+    },
+    "Names": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ]
+    }
+  }
+}

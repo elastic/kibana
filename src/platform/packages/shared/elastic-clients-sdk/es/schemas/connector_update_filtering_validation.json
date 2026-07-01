@@ -1,0 +1,71 @@
+{
+  "type": "object",
+  "properties": {
+    "connector_id": {
+      "type": "string",
+      "description": "The unique identifier of the connector to be updated",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "validation": {
+      "$ref": "#/$defs/ConnectorFilteringRulesValidation",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "connector_id",
+    "validation"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "ConnectorFilteringValidation": {
+      "type": "object",
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "ids",
+        "messages"
+      ]
+    },
+    "ConnectorFilteringValidationState": {
+      "type": "string",
+      "enum": [
+        "edited",
+        "invalid",
+        "valid"
+      ]
+    },
+    "ConnectorFilteringRulesValidation": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConnectorFilteringValidation"
+          }
+        },
+        "state": {
+          "$ref": "#/$defs/ConnectorFilteringValidationState"
+        }
+      },
+      "required": [
+        "errors",
+        "state"
+      ]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "properties": {
+    "calendar_id": {
+      "type": "string",
+      "description": "A string that uniquely identifies a calendar.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "event_id": {
+      "type": "string",
+      "description": "Identifier for the scheduled event. You can obtain this identifier by using the get calendar events API.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "calendar_id",
+    "event_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

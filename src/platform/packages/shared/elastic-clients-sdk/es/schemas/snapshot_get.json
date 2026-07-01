@@ -1,0 +1,176 @@
+{
+  "type": "object",
+  "properties": {
+    "repository": {
+      "type": "string",
+      "description": "A comma-separated list of snapshot repository names used to limit the request. Wildcard (`*`) expressions are supported.",
+      "$ref": "#/$defs/Name",
+      "x-found-in": "path"
+    },
+    "snapshot": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ],
+      "description": "A comma-separated list of snapshot names to retrieve Wildcards (`*`) are supported. * To get information about all snapshots in a registered repository, use a wildcard (`*`) or `_all`. * To get information about any snapshots that are currently running, use `_current`.",
+      "$ref": "#/$defs/Names",
+      "x-found-in": "path"
+    },
+    "after": {
+      "type": "string",
+      "description": "An offset identifier to start pagination from as returned by the next field in the response body.",
+      "x-found-in": "query"
+    },
+    "from_sort_value": {
+      "type": "string",
+      "description": "The value of the current sort column at which to start retrieval. It can be a string `snapshot-` or a repository name when sorting by snapshot or repository name. It can be a millisecond time value or a number when sorting by `index-` or shard count.",
+      "x-found-in": "query"
+    },
+    "ignore_unavailable": {
+      "type": "boolean",
+      "description": "If `false`, the request returns an error for any snapshots that are unavailable.",
+      "x-found-in": "query"
+    },
+    "index_details": {
+      "type": "boolean",
+      "description": "If `true`, the response includes additional information about each index in the snapshot comprising the number of shards in the index, the total size of the index in bytes, and the maximum number of segments per shard in the index. The default is `false`, meaning that this information is omitted.",
+      "x-found-in": "query"
+    },
+    "index_names": {
+      "type": "boolean",
+      "description": "If `true`, the response includes the name of each index in each snapshot.",
+      "x-found-in": "query"
+    },
+    "include_repository": {
+      "type": "boolean",
+      "description": "If `true`, the response includes the repository name in each snapshot.",
+      "x-found-in": "query"
+    },
+    "master_timeout": {
+      "description": "The period to wait for a connection to the master node. If no response is received before the timeout expires, the request fails and returns an error.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "order": {
+      "description": "The sort order. Valid values are `asc` for ascending and `desc` for descending order. The default behavior is ascending order.",
+      "$ref": "#/$defs/SortOrder",
+      "x-found-in": "query"
+    },
+    "offset": {
+      "description": "Numeric offset to start pagination from based on the snapshots matching this request. Using a non-zero value for this parameter is mutually exclusive with using the after parameter. Defaults to 0.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "size": {
+      "description": "The maximum number of snapshots to return. The default is -1, which means to return all that match the request without limit.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "slm_policy_filter": {
+      "description": "Filter snapshots by a comma-separated list of snapshot lifecycle management (SLM) policy names that snapshots belong to. You can use wildcards (`*`) and combinations of wildcards followed by exclude patterns starting with `-`. For example, the pattern `*,-policy-a-*` will return all snapshots except for those that were created by an SLM policy with a name starting with `policy-a-`. Note that the wildcard pattern `*` matches all snapshots created by an SLM policy but not those snapshots that were not created by an SLM policy. To include snapshots that were not created by an SLM policy, you can use the special pattern `_none` that will match all snapshots without an SLM policy.",
+      "$ref": "#/$defs/Name",
+      "x-found-in": "query"
+    },
+    "sort": {
+      "description": "The sort order for the result. The default behavior is sorting by snapshot start time stamp.",
+      "$ref": "#/$defs/SnapshotSnapshotSort",
+      "x-found-in": "query"
+    },
+    "state": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SnapshotSnapshotState"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SnapshotSnapshotState"
+          }
+        }
+      ],
+      "description": "Only return snapshots with a state found in the given comma-separated list of snapshot states. The default is all snapshot states.",
+      "x-found-in": "query"
+    },
+    "verbose": {
+      "type": "boolean",
+      "description": "If `true`, returns additional information about each snapshot such as the version of Elasticsearch which took the snapshot, the start and end times of the snapshot, and the number of shards snapshotted. NOTE: The parameters `size`, `order`, `after`, `from_sort_value`, `offset`, `slm_policy_filter`, and `sort` are not supported when you set `verbose=false` and the sort order for requests with `verbose=false` is undefined.",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "repository",
+    "snapshot"
+  ],
+  "$defs": {
+    "Name": {
+      "type": "string"
+    },
+    "Names": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Name"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      ]
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "SortOrder": {
+      "type": "string",
+      "enum": [
+        "asc",
+        "desc"
+      ]
+    },
+    "integer": {
+      "type": "number"
+    },
+    "SnapshotSnapshotSort": {
+      "type": "string",
+      "enum": [
+        "start_time",
+        "duration",
+        "name",
+        "index_count",
+        "repository",
+        "shard_count",
+        "failed_shard_count"
+      ]
+    },
+    "SnapshotSnapshotState": {
+      "type": "string",
+      "enum": [
+        "IN_PROGRESS",
+        "SUCCESS",
+        "FAILED",
+        "PARTIAL",
+        "INCOMPATIBLE"
+      ]
+    }
+  }
+}

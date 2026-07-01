@@ -1,0 +1,84 @@
+{
+  "type": "object",
+  "properties": {
+    "index": {
+      "type": "string",
+      "description": "The name of the index whose lifecycle step is to change",
+      "$ref": "#/$defs/IndexName",
+      "x-found-in": "path"
+    },
+    "current_step": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "description": "The optional action to which the index will be moved."
+        },
+        "name": {
+          "type": "string",
+          "description": "The optional step name to which the index will be moved."
+        },
+        "phase": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "phase"
+      ],
+      "description": "The step that the index is expected to be in.",
+      "$ref": "#/$defs/IlmMoveToStepStepKey",
+      "x-found-in": "body"
+    },
+    "next_step": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "description": "The optional action to which the index will be moved."
+        },
+        "name": {
+          "type": "string",
+          "description": "The optional step name to which the index will be moved."
+        },
+        "phase": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "phase"
+      ],
+      "description": "The step that you want to run.",
+      "$ref": "#/$defs/IlmMoveToStepStepKey",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "index",
+    "current_step",
+    "next_step"
+  ],
+  "$defs": {
+    "IndexName": {
+      "type": "string"
+    },
+    "IlmMoveToStepStepKey": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "description": "The optional action to which the index will be moved."
+        },
+        "name": {
+          "type": "string",
+          "description": "The optional step name to which the index will be moved."
+        },
+        "phase": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "phase"
+      ]
+    }
+  }
+}

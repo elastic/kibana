@@ -1,0 +1,75 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "A query string used to match name-related fields in user profile documents. Name-related fields are the user's `username`, `full_name`, and `email`.",
+      "x-found-in": "body"
+    },
+    "size": {
+      "description": "The number of profiles to return.",
+      "$ref": "#/$defs/long",
+      "x-found-in": "body"
+    },
+    "data": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ],
+      "description": "A comma-separated list of filters for the `data` field of the profile document. To return all content use `data=*`. To return a subset of content, use `data=<key>` to retrieve content nested under the specified `<key>`. By default, the API returns no `data` content. It is an error to specify `data` as both the query parameter and the request body field.",
+      "x-found-in": "body"
+    },
+    "hint": {
+      "description": "Extra search criteria to improve relevance of the suggestion result. Profiles matching the spcified hint are ranked higher in the response. Profiles not matching the hint aren't excluded from the response as long as the profile matches the `name` field query.",
+      "$ref": "#/$defs/SecuritySuggestUserProfilesHint",
+      "x-found-in": "body"
+    }
+  },
+  "$defs": {
+    "long": {
+      "type": "number"
+    },
+    "SecurityUserProfileId": {
+      "type": "string"
+    },
+    "SecuritySuggestUserProfilesHint": {
+      "type": "object",
+      "properties": {
+        "uids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SecurityUserProfileId"
+          },
+          "description": "A list of profile UIDs to match against."
+        },
+        "labels": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "description": "A single key-value pair to match against the labels section of a profile. A profile is considered matching if it matches at least one of the strings."
+        }
+      }
+    }
+  }
+}

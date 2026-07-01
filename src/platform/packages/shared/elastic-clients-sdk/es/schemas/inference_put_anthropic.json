@@ -1,0 +1,161 @@
+{
+  "type": "object",
+  "properties": {
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "completion"
+      ],
+      "description": "The task type. The only valid task type for the model to perform is `completion`.",
+      "$ref": "#/$defs/InferenceAnthropicTaskType",
+      "x-found-in": "path"
+    },
+    "anthropic_inference_id": {
+      "type": "string",
+      "description": "The unique identifier of the inference endpoint.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "timeout": {
+      "description": "Specifies the amount of time to wait for the inference endpoint to be created.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "service": {
+      "type": "string",
+      "enum": [
+        "anthropic"
+      ],
+      "description": "The type of service supported for the specified task type. In this case, `anthropic`.",
+      "$ref": "#/$defs/InferenceAnthropicServiceType",
+      "x-found-in": "body"
+    },
+    "service_settings": {
+      "type": "object",
+      "properties": {
+        "api_key": {
+          "type": "string",
+          "description": "A valid API key for the Anthropic API."
+        },
+        "model_id": {
+          "type": "string",
+          "description": "The name of the model to use for the inference task. Refer to the Anthropic documentation for the list of supported models."
+        },
+        "rate_limit": {
+          "description": "This setting helps to minimize the number of rate limit errors returned from Anthropic. By default, the `anthropic` service sets the number of requests allowed per minute to 50.",
+          "$ref": "#/$defs/InferenceRateLimitSetting"
+        }
+      },
+      "required": [
+        "api_key",
+        "model_id"
+      ],
+      "description": "Settings used to install the inference model. These settings are specific to the `anthropic` service.",
+      "$ref": "#/$defs/InferenceAnthropicServiceSettings",
+      "x-found-in": "body"
+    },
+    "task_settings": {
+      "description": "Settings to configure the inference task. These settings are specific to the task type you specified.",
+      "$ref": "#/$defs/InferenceAnthropicTaskSettings",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "task_type",
+    "anthropic_inference_id",
+    "service",
+    "service_settings"
+  ],
+  "$defs": {
+    "InferenceAnthropicTaskType": {
+      "type": "string",
+      "enum": [
+        "completion"
+      ]
+    },
+    "Id": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "InferenceAnthropicServiceType": {
+      "type": "string",
+      "enum": [
+        "anthropic"
+      ]
+    },
+    "integer": {
+      "type": "number"
+    },
+    "InferenceRateLimitSetting": {
+      "type": "object",
+      "properties": {
+        "requests_per_minute": {
+          "description": "The number of requests allowed per minute. By default, the number of requests allowed per minute is set by each service as follows: * `alibabacloud-ai-search` service: `1000` * `amazonbedrock` service: `240` * `anthropic` service: `50` * `azureaistudio` service: `240` * `azureopenai` service and task type `text_embedding`: `1440` * `azureopenai` service and task types `completion` or `chat_completion`: `120` * `cohere` service: `10000` * `contextualai` service: `1000` * `elastic` service and task type `chat_completion`: `240` * `fireworksai` service: `6000` * `googleaistudio` service: `360` * `googlevertexai` service: `30000` * `hugging_face` service: `3000` * `jinaai` service: `2000` * `llama` service: `3000` * `mistral` service: `240` * `openai` service and task type `text_embedding`: `3000` * `openai` service and task type `completion`: `500` * `openshift_ai` service: `3000` * `voyageai` service: `2000` * `watsonxai` service: `120`",
+          "$ref": "#/$defs/integer"
+        }
+      }
+    },
+    "InferenceAnthropicServiceSettings": {
+      "type": "object",
+      "properties": {
+        "api_key": {
+          "type": "string",
+          "description": "A valid API key for the Anthropic API."
+        },
+        "model_id": {
+          "type": "string",
+          "description": "The name of the model to use for the inference task. Refer to the Anthropic documentation for the list of supported models."
+        },
+        "rate_limit": {
+          "description": "This setting helps to minimize the number of rate limit errors returned from Anthropic. By default, the `anthropic` service sets the number of requests allowed per minute to 50.",
+          "$ref": "#/$defs/InferenceRateLimitSetting"
+        }
+      },
+      "required": [
+        "api_key",
+        "model_id"
+      ]
+    },
+    "float": {
+      "type": "number"
+    },
+    "InferenceAnthropicTaskSettings": {
+      "type": "object",
+      "properties": {
+        "max_tokens": {
+          "description": "For a `completion` task, it is the maximum number of tokens to generate before stopping.",
+          "$ref": "#/$defs/integer"
+        },
+        "temperature": {
+          "description": "For a `completion` task, it is the amount of randomness injected into the response. For more details about the supported range, refer to Anthropic documentation.",
+          "$ref": "#/$defs/float"
+        },
+        "top_k": {
+          "description": "For a `completion` task, it specifies to only sample from the top K options for each subsequent token. It is recommended for advanced use cases only. You usually only need to use `temperature`.",
+          "$ref": "#/$defs/integer"
+        },
+        "top_p": {
+          "description": "For a `completion` task, it specifies to use Anthropic's nucleus sampling. In nucleus sampling, Anthropic computes the cumulative distribution over all the options for each subsequent token in decreasing probability order and cuts it off once it reaches the specified probability. You should either alter `temperature` or `top_p`, but not both. It is recommended for advanced use cases only. You usually only need to use `temperature`.",
+          "$ref": "#/$defs/float"
+        }
+      },
+      "required": [
+        "max_tokens"
+      ]
+    }
+  }
+}

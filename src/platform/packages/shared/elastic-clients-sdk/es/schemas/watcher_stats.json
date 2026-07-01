@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "properties": {
+    "metric": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/WatcherStatsWatcherMetric"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WatcherStatsWatcherMetric"
+          }
+        }
+      ],
+      "description": "Defines which additional metrics are included in the response.",
+      "x-found-in": "path"
+    },
+    "emit_stacktraces": {
+      "type": "boolean",
+      "description": "Defines whether stack traces are generated for each watch that is running.",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "WatcherStatsWatcherMetric": {
+      "type": "string",
+      "enum": [
+        "_all",
+        "all",
+        "queued_watches",
+        "current_watches",
+        "pending_watches"
+      ]
+    }
+  }
+}

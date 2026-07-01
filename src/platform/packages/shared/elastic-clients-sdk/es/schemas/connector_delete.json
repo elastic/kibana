@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "connector_id": {
+      "type": "string",
+      "description": "The unique identifier of the connector to be deleted",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "delete_sync_jobs": {
+      "type": "boolean",
+      "description": "A flag indicating if associated sync jobs should be also removed.",
+      "x-found-in": "query"
+    },
+    "hard": {
+      "type": "boolean",
+      "description": "A flag indicating if the connector should be hard deleted.",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "connector_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

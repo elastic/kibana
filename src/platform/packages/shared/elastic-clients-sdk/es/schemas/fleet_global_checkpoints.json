@@ -1,0 +1,72 @@
+{
+  "type": "object",
+  "properties": {
+    "index": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IndexName"
+        },
+        {
+          "$ref": "#/$defs/IndexAlias"
+        }
+      ],
+      "description": "A single index or index alias that resolves to a single index.",
+      "x-found-in": "path"
+    },
+    "wait_for_advance": {
+      "type": "boolean",
+      "description": "A boolean value which controls whether to wait (until the timeout) for the global checkpoints to advance past the provided `checkpoints`.",
+      "x-found-in": "query"
+    },
+    "wait_for_index": {
+      "type": "boolean",
+      "description": "A boolean value which controls whether to wait (until the timeout) for the target index to exist and all primary shards be active. Can only be true when `wait_for_advance` is true.",
+      "x-found-in": "query"
+    },
+    "checkpoints": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/FleetCheckpoint"
+      },
+      "description": "A comma separated list of previous global checkpoints. When used in combination with `wait_for_advance`, the API will only return once the global checkpoints advances past the checkpoints. Providing an empty list will cause Elasticsearch to immediately return the current global checkpoints.",
+      "x-found-in": "query"
+    },
+    "timeout": {
+      "description": "Period to wait for a global checkpoints to advance past `checkpoints`.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "index"
+  ],
+  "$defs": {
+    "IndexName": {
+      "type": "string"
+    },
+    "IndexAlias": {
+      "type": "string"
+    },
+    "FleetCheckpoint": {
+      "$ref": "#/$defs/long"
+    },
+    "long": {
+      "type": "number"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

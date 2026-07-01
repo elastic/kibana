@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "properties": {
+    "task_type": {
+      "description": "The task type",
+      "$ref": "#/$defs/InferenceTaskType",
+      "x-found-in": "path"
+    },
+    "inference_id": {
+      "type": "string",
+      "description": "The inference identifier.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "dry_run": {
+      "type": "boolean",
+      "description": "When true, checks the semantic_text fields and inference processors that reference the endpoint and returns them in a list, but does not delete the endpoint.",
+      "x-found-in": "query"
+    },
+    "force": {
+      "type": "boolean",
+      "description": "When true, the inference endpoint is forcefully deleted even if it is still being used by ingest processors or semantic text fields.",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "inference_id"
+  ],
+  "$defs": {
+    "InferenceTaskType": {
+      "type": "string",
+      "enum": [
+        "sparse_embedding",
+        "text_embedding",
+        "rerank",
+        "completion",
+        "chat_completion",
+        "embedding"
+      ]
+    },
+    "Id": {
+      "type": "string"
+    }
+  }
+}

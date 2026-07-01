@@ -1,0 +1,52 @@
+{
+  "type": "object",
+  "properties": {
+    "grant_type": {
+      "description": "The type of grant. Supported grant types are: `password`, `_kerberos`, `client_credentials`, and `refresh_token`.",
+      "$ref": "#/$defs/SecurityGetTokenAccessTokenGrantType",
+      "x-found-in": "body"
+    },
+    "scope": {
+      "type": "string",
+      "description": "The scope of the token. Currently tokens are only issued for a scope of FULL regardless of the value sent with the request.",
+      "x-found-in": "body"
+    },
+    "password": {
+      "description": "The user's password. If you specify the `password` grant type, this parameter is required. This parameter is not valid with any other supported grant type.",
+      "$ref": "#/$defs/Password",
+      "x-found-in": "body"
+    },
+    "kerberos_ticket": {
+      "type": "string",
+      "description": "The base64 encoded kerberos ticket. If you specify the `_kerberos` grant type, this parameter is required. This parameter is not valid with any other supported grant type.",
+      "x-found-in": "body"
+    },
+    "refresh_token": {
+      "type": "string",
+      "description": "The string that was returned when you created the token, which enables you to extend its life. If you specify the `refresh_token` grant type, this parameter is required. This parameter is not valid with any other supported grant type.",
+      "x-found-in": "body"
+    },
+    "username": {
+      "description": "The username that identifies the user. If you specify the `password` grant type, this parameter is required. This parameter is not valid with any other supported grant type.",
+      "$ref": "#/$defs/Username",
+      "x-found-in": "body"
+    }
+  },
+  "$defs": {
+    "SecurityGetTokenAccessTokenGrantType": {
+      "type": "string",
+      "enum": [
+        "password",
+        "client_credentials",
+        "_kerberos",
+        "refresh_token"
+      ]
+    },
+    "Password": {
+      "type": "string"
+    },
+    "Username": {
+      "type": "string"
+    }
+  }
+}

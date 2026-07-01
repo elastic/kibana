@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "properties": {
+    "model_alias": {
+      "type": "string",
+      "description": "The alias to create or update. This value cannot end in numbers.",
+      "$ref": "#/$defs/Name",
+      "x-found-in": "path"
+    },
+    "model_id": {
+      "type": "string",
+      "description": "The identifier for the trained model that the alias refers to.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "reassign": {
+      "type": "boolean",
+      "description": "Specifies whether the alias gets reassigned to the specified trained model if it is already assigned to a different model. If the alias is already assigned and this parameter is false, the API returns an error.",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "model_alias",
+    "model_id"
+  ],
+  "$defs": {
+    "Name": {
+      "type": "string"
+    },
+    "Id": {
+      "type": "string"
+    }
+  }
+}

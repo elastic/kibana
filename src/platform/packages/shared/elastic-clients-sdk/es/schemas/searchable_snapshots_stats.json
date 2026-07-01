@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "properties": {
+    "index": {
+      "description": "A comma-separated list of data streams and indices to retrieve statistics for.",
+      "$ref": "#/$defs/Indices",
+      "x-found-in": "path"
+    },
+    "level": {
+      "description": "Return stats aggregated at cluster, index or shard level",
+      "$ref": "#/$defs/SearchableSnapshotsStatsLevel",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "IndexName": {
+      "type": "string"
+    },
+    "Indices": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IndexName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IndexName"
+          }
+        }
+      ]
+    },
+    "SearchableSnapshotsStatsLevel": {
+      "type": "string",
+      "enum": [
+        "cluster",
+        "indices",
+        "shards"
+      ]
+    }
+  }
+}

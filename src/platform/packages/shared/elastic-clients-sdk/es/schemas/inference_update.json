@@ -1,0 +1,102 @@
+{
+  "type": "object",
+  "properties": {
+    "inference_id": {
+      "type": "string",
+      "description": "The unique identifier of the inference endpoint.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "task_type": {
+      "description": "The type of inference task that the model performs.",
+      "$ref": "#/$defs/InferenceTaskType",
+      "x-found-in": "path"
+    },
+    "inference_config": {
+      "$ref": "#/$defs/InferenceInferenceEndpoint",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "inference_id",
+    "inference_config"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "InferenceTaskType": {
+      "type": "string",
+      "enum": [
+        "sparse_embedding",
+        "text_embedding",
+        "rerank",
+        "completion",
+        "chat_completion",
+        "embedding"
+      ]
+    },
+    "integer": {
+      "type": "number"
+    },
+    "InferenceInferenceChunkingSettings": {
+      "type": "object",
+      "properties": {
+        "max_chunk_size": {
+          "description": "The maximum size of a chunk in words. This value cannot be lower than `20` (for `sentence` strategy) or `10` (for `word` strategy). This value should not exceed the window size for the associated model.",
+          "$ref": "#/$defs/integer"
+        },
+        "overlap": {
+          "description": "The number of overlapping words for chunks. It is applicable only to a `word` chunking strategy. This value cannot be higher than half the `max_chunk_size` value.",
+          "$ref": "#/$defs/integer"
+        },
+        "sentence_overlap": {
+          "description": "The number of overlapping sentences for chunks. It is applicable only for a `sentence` chunking strategy. It can be either `1` or `0`.",
+          "$ref": "#/$defs/integer"
+        },
+        "separator_group": {
+          "type": "string",
+          "description": "Only applicable to the `recursive` strategy and required when using it. Sets a predefined list of separators in the saved chunking settings based on the selected text type. Values can be `markdown` or `plaintext`. Using this parameter is an alternative to manually specifying a custom `separators` list."
+        },
+        "separators": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Only applicable to the `recursive` strategy and required when using it. A list of strings used as possible split points when chunking text. Each string can be a plain string or a regular expression (regex) pattern. The system tries each separator in order to split the text, starting from the first item in the list. After splitting, it attempts to recombine smaller pieces into larger chunks that stay within the `max_chunk_size` limit, to reduce the total number of chunks generated."
+        },
+        "strategy": {
+          "type": "string",
+          "description": "The chunking strategy: `sentence`, `word`, `none` or `recursive`.  * If `strategy` is set to `recursive`, you must also specify: - `max_chunk_size` - either `separators` or`separator_group` Learn more about different chunking strategies in the linked documentation."
+        }
+      }
+    },
+    "InferenceServiceSettings": {},
+    "InferenceTaskSettings": {},
+    "InferenceInferenceEndpoint": {
+      "type": "object",
+      "properties": {
+        "chunking_settings": {
+          "description": "The chunking configuration object. Applies only to the `embedding`, `sparse_embedding` and `text_embedding` task types. Not applicable to the `rerank`, `completion`, or `chat_completion` task types.",
+          "$ref": "#/$defs/InferenceInferenceChunkingSettings"
+        },
+        "service": {
+          "type": "string",
+          "description": "The service type"
+        },
+        "service_settings": {
+          "description": "Settings specific to the service",
+          "$ref": "#/$defs/InferenceServiceSettings"
+        },
+        "task_settings": {
+          "description": "Task settings specific to the service and task type",
+          "$ref": "#/$defs/InferenceTaskSettings"
+        }
+      },
+      "required": [
+        "service",
+        "service_settings"
+      ]
+    }
+  }
+}

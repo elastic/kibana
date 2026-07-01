@@ -1,0 +1,73 @@
+{
+  "type": "object",
+  "properties": {
+    "inference_id": {
+      "type": "string",
+      "description": "The unique identifier for the inference endpoint.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "timeout": {
+      "description": "The amount of time to wait for the inference request to complete.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "query": {
+      "type": "string",
+      "description": "Query input.",
+      "x-found-in": "body"
+    },
+    "input": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The documents to rank.",
+      "x-found-in": "body"
+    },
+    "return_documents": {
+      "type": "boolean",
+      "description": "Include the document text in the response.",
+      "x-found-in": "body"
+    },
+    "top_n": {
+      "description": "Limit the response to the top N documents.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "body"
+    },
+    "task_settings": {
+      "description": "Task settings for the individual inference request. These settings are specific to the task type you specified and override the task settings specified when initializing the service.",
+      "$ref": "#/$defs/InferenceTaskSettings",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "inference_id",
+    "query",
+    "input"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "integer": {
+      "type": "number"
+    },
+    "InferenceTaskSettings": {}
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Identifier for the anomaly detection job.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "snapshot_id": {
+      "description": "A numerical character string that uniquely identifies the model snapshot. You can get information for multiple snapshots by using a comma-separated list or a wildcard expression. You can get all snapshots by using `_all`, by specifying `*` as the snapshot ID, or by omitting the snapshot ID.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "from": {
+      "description": "Skips the specified number of snapshots.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "size": {
+      "description": "Specifies the maximum number of snapshots to obtain.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "desc": {
+      "type": "boolean",
+      "description": "Refer to the description for the `desc` query parameter.",
+      "x-found-in": "body"
+    },
+    "end": {
+      "description": "Refer to the description for the `end` query parameter.",
+      "$ref": "#/$defs/DateTime",
+      "x-found-in": "body"
+    },
+    "page": {
+      "$ref": "#/$defs/MlPage",
+      "x-found-in": "body"
+    },
+    "sort": {
+      "description": "Refer to the description for the `sort` query parameter.",
+      "$ref": "#/$defs/Field",
+      "x-found-in": "body"
+    },
+    "start": {
+      "description": "Refer to the description for the `start` query parameter.",
+      "$ref": "#/$defs/DateTime",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "job_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "integer": {
+      "type": "number"
+    },
+    "EpochTime": {},
+    "DateTime": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/EpochTime"
+        }
+      ]
+    },
+    "MlPage": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "description": "Skips the specified number of items.",
+          "$ref": "#/$defs/integer"
+        },
+        "size": {
+          "description": "Specifies the maximum number of items to obtain.",
+          "$ref": "#/$defs/integer"
+        }
+      }
+    },
+    "Field": {
+      "type": "string"
+    }
+  }
+}

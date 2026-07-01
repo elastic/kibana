@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "properties": {
+    "categories": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/XpackInfoXPackCategory"
+      },
+      "description": "A comma-separated list of the information categories to include in the response. For example, `build,license,features`.",
+      "x-found-in": "query"
+    },
+    "accept_enterprise": {
+      "type": "boolean",
+      "description": "If used, this otherwise ignored parameter must be set to true",
+      "x-found-in": "query"
+    },
+    "human": {
+      "type": "boolean",
+      "description": "Defines whether additional human-readable information is included in the response. In particular, it adds descriptions and a tag line.",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "XpackInfoXPackCategory": {
+      "type": "string",
+      "enum": [
+        "build",
+        "features",
+        "license"
+      ]
+    }
+  }
+}

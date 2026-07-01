@@ -1,0 +1,191 @@
+{
+  "type": "object",
+  "properties": {
+    "dry_run": {
+      "type": "boolean",
+      "description": "If true, then the request simulates the operation. It will calculate the result of applying the commands to the current cluster state and return the resulting cluster state after the commands (and rebalancing) have been applied; it will not actually perform the requested changes.",
+      "x-found-in": "query"
+    },
+    "explain": {
+      "type": "boolean",
+      "description": "If true, then the response contains an explanation of why the commands can or cannot run.",
+      "x-found-in": "query"
+    },
+    "metric": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ],
+      "description": "Limits the information returned to the specified metrics.",
+      "x-found-in": "query"
+    },
+    "retry_failed": {
+      "type": "boolean",
+      "description": "If true, then retries allocation of shards that are blocked due to too many subsequent allocation failures.",
+      "x-found-in": "query"
+    },
+    "master_timeout": {
+      "description": "Period to wait for a connection to the master node. If no response is received before the timeout expires, the request fails and returns an error.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "timeout": {
+      "description": "Period to wait for a response. If no response is received before the timeout expires, the request fails and returns an error.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ClusterRerouteCommand"
+      },
+      "description": "Defines the commands to perform.",
+      "x-found-in": "body"
+    }
+  },
+  "$defs": {
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "ClusterRerouteCommand": {
+      "type": "object",
+      "properties": {
+        "cancel": {
+          "description": "Cancel allocation of a shard (or recovery). Accepts index and shard for index name and shard number, and node for the node to cancel the shard allocation on. This can be used to force resynchronization of existing replicas from the primary shard by cancelling them and allowing them to be reinitialized through the standard recovery process. By default only replica shard allocations can be cancelled. If it is necessary to cancel the allocation of a primary shard then the allow_primary flag must also be included in the request.",
+          "$ref": "#/$defs/ClusterRerouteCommandCancelAction"
+        },
+        "move": {
+          "description": "Move a started shard from one node to another node. Accepts index and shard for index name and shard number, from_node for the node to move the shard from, and to_node for the node to move the shard to.",
+          "$ref": "#/$defs/ClusterRerouteCommandMoveAction"
+        },
+        "allocate_replica": {
+          "description": "Allocate an unassigned replica shard to a node. Accepts index and shard for index name and shard number, and node to allocate the shard to. Takes allocation deciders into account.",
+          "$ref": "#/$defs/ClusterRerouteCommandAllocateReplicaAction"
+        },
+        "allocate_stale_primary": {
+          "description": "Allocate a primary shard to a node that holds a stale copy. Accepts the index and shard for index name and shard number, and node to allocate the shard to. Using this command may lead to data loss for the provided shard id. If a node which has the good copy of the data rejoins the cluster later on, that data will be deleted or overwritten with the data of the stale copy that was forcefully allocated with this command. To ensure that these implications are well-understood, this command requires the flag accept_data_loss to be explicitly set to true.",
+          "$ref": "#/$defs/ClusterRerouteCommandAllocatePrimaryAction"
+        },
+        "allocate_empty_primary": {
+          "description": "Allocate an empty primary shard to a node. Accepts the index and shard for index name and shard number, and node to allocate the shard to. Using this command leads to a complete loss of all data that was indexed into this shard, if it was previously started. If a node which has a copy of the data rejoins the cluster later on, that data will be deleted. To ensure that these implications are well-understood, this command requires the flag accept_data_loss to be explicitly set to true.",
+          "$ref": "#/$defs/ClusterRerouteCommandAllocatePrimaryAction"
+        }
+      }
+    },
+    "IndexName": {
+      "type": "string"
+    },
+    "integer": {
+      "type": "number"
+    },
+    "ClusterRerouteCommandCancelAction": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "$ref": "#/$defs/IndexName"
+        },
+        "shard": {
+          "$ref": "#/$defs/integer"
+        },
+        "node": {
+          "type": "string"
+        },
+        "allow_primary": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "index",
+        "shard",
+        "node"
+      ]
+    },
+    "ClusterRerouteCommandMoveAction": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "$ref": "#/$defs/IndexName"
+        },
+        "shard": {
+          "$ref": "#/$defs/integer"
+        },
+        "from_node": {
+          "type": "string",
+          "description": "The node to move the shard from"
+        },
+        "to_node": {
+          "type": "string",
+          "description": "The node to move the shard to"
+        }
+      },
+      "required": [
+        "index",
+        "shard",
+        "from_node",
+        "to_node"
+      ]
+    },
+    "ClusterRerouteCommandAllocateReplicaAction": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "$ref": "#/$defs/IndexName"
+        },
+        "shard": {
+          "$ref": "#/$defs/integer"
+        },
+        "node": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "index",
+        "shard",
+        "node"
+      ]
+    },
+    "ClusterRerouteCommandAllocatePrimaryAction": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "$ref": "#/$defs/IndexName"
+        },
+        "shard": {
+          "$ref": "#/$defs/integer"
+        },
+        "node": {
+          "type": "string"
+        },
+        "accept_data_loss": {
+          "type": "boolean",
+          "description": "If a node which has a copy of the data rejoins the cluster later on, that data will be deleted. To ensure that these implications are well-understood, this command requires the flag accept_data_loss to be explicitly set to true"
+        }
+      },
+      "required": [
+        "index",
+        "shard",
+        "node",
+        "accept_data_loss"
+      ]
+    }
+  }
+}

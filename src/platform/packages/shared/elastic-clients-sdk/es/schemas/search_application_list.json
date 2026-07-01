@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "q": {
+      "type": "string",
+      "description": "Query in the Lucene query string syntax.",
+      "x-found-in": "query"
+    },
+    "from": {
+      "description": "Starting offset.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    },
+    "size": {
+      "description": "Specifies a max number of results to get.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "integer": {
+      "type": "number"
+    }
+  }
+}

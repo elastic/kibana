@@ -1,0 +1,212 @@
+{
+  "type": "object",
+  "properties": {
+    "connector_id": {
+      "type": "string",
+      "description": "The unique identifier of the connector to be updated",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "filtering": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ConnectorFilteringConfig"
+      },
+      "x-found-in": "body"
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ConnectorFilteringRule"
+      },
+      "x-found-in": "body"
+    },
+    "advanced_snippet": {
+      "$ref": "#/$defs/ConnectorFilteringAdvancedSnippet",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "connector_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "ConnectorFilteringConfig": {
+      "type": "object",
+      "properties": {
+        "active": {
+          "$ref": "#/$defs/ConnectorFilteringRules"
+        },
+        "domain": {
+          "type": "string"
+        },
+        "draft": {
+          "$ref": "#/$defs/ConnectorFilteringRules"
+        }
+      },
+      "required": [
+        "active",
+        "draft"
+      ]
+    },
+    "ConnectorFilteringRules": {
+      "type": "object",
+      "properties": {
+        "advanced_snippet": {
+          "$ref": "#/$defs/ConnectorFilteringAdvancedSnippet"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConnectorFilteringRule"
+          }
+        },
+        "validation": {
+          "$ref": "#/$defs/ConnectorFilteringRulesValidation"
+        }
+      },
+      "required": [
+        "advanced_snippet",
+        "rules",
+        "validation"
+      ]
+    },
+    "ConnectorFilteringAdvancedSnippet": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "$ref": "#/$defs/DateTime"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/DateTime"
+        },
+        "value": {}
+      },
+      "required": [
+        "value"
+      ]
+    },
+    "DateTime": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/EpochTime"
+        }
+      ]
+    },
+    "EpochTime": {},
+    "ConnectorFilteringRule": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "$ref": "#/$defs/DateTime"
+        },
+        "field": {
+          "$ref": "#/$defs/Field"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "order": {
+          "$ref": "#/$defs/integer"
+        },
+        "policy": {
+          "$ref": "#/$defs/ConnectorFilteringPolicy"
+        },
+        "rule": {
+          "$ref": "#/$defs/ConnectorFilteringRuleRule"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/DateTime"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "id",
+        "order",
+        "policy",
+        "rule",
+        "value"
+      ]
+    },
+    "Field": {
+      "type": "string"
+    },
+    "integer": {
+      "type": "number"
+    },
+    "ConnectorFilteringPolicy": {
+      "type": "string",
+      "enum": [
+        "exclude",
+        "include"
+      ]
+    },
+    "ConnectorFilteringRuleRule": {
+      "type": "string",
+      "enum": [
+        "contains",
+        "ends_with",
+        "equals",
+        "regex",
+        "starts_with",
+        ">",
+        "<"
+      ]
+    },
+    "ConnectorFilteringRulesValidation": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConnectorFilteringValidation"
+          }
+        },
+        "state": {
+          "$ref": "#/$defs/ConnectorFilteringValidationState"
+        }
+      },
+      "required": [
+        "errors",
+        "state"
+      ]
+    },
+    "ConnectorFilteringValidation": {
+      "type": "object",
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "ids",
+        "messages"
+      ]
+    },
+    "ConnectorFilteringValidationState": {
+      "type": "string",
+      "enum": [
+        "edited",
+        "invalid",
+        "valid"
+      ]
+    }
+  }
+}

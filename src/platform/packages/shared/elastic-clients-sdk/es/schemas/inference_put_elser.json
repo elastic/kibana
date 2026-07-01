@@ -1,0 +1,174 @@
+{
+  "type": "object",
+  "properties": {
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "sparse_embedding"
+      ],
+      "description": "The type of the inference task that the model will perform.",
+      "$ref": "#/$defs/InferenceElserTaskType",
+      "x-found-in": "path"
+    },
+    "elser_inference_id": {
+      "type": "string",
+      "description": "The unique identifier of the inference endpoint.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "timeout": {
+      "description": "Specifies the amount of time to wait for the inference endpoint to be created.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "chunking_settings": {
+      "description": "The chunking configuration object. Note that for ELSER endpoints, the max_chunk_size may not exceed `300`.",
+      "$ref": "#/$defs/InferenceInferenceChunkingSettings",
+      "x-found-in": "body"
+    },
+    "service": {
+      "type": "string",
+      "enum": [
+        "elser"
+      ],
+      "description": "The type of service supported for the specified task type. In this case, `elser`.",
+      "$ref": "#/$defs/InferenceElserServiceType",
+      "x-found-in": "body"
+    },
+    "service_settings": {
+      "type": "object",
+      "properties": {
+        "adaptive_allocations": {
+          "description": "Adaptive allocations configuration details. If `enabled` is true, the number of allocations of the model is set based on the current load the process gets. When the load is high, a new model allocation is automatically created, respecting the value of `max_number_of_allocations` if it's set. When the load is low, a model allocation is automatically removed, respecting the value of `min_number_of_allocations` if it's set. If `enabled` is true, do not set the number of allocations manually.",
+          "$ref": "#/$defs/InferenceAdaptiveAllocations"
+        },
+        "num_allocations": {
+          "description": "The total number of allocations this model is assigned across machine learning nodes. Increasing this value generally increases the throughput. If adaptive allocations is enabled, do not set this value because it's automatically set.",
+          "$ref": "#/$defs/integer"
+        },
+        "num_threads": {
+          "description": "The number of threads used by each model allocation during inference. Increasing this value generally increases the speed per inference request. The inference process is a compute-bound process; `threads_per_allocations` must not exceed the number of available allocated processors per node. The value must be a power of 2. The maximum value is 32. > info > If you want to optimize your ELSER endpoint for ingest, set the number of threads to 1. If you want to optimize your ELSER endpoint for search, set the number of threads to greater than 1.",
+          "$ref": "#/$defs/integer"
+        }
+      },
+      "required": [
+        "num_allocations",
+        "num_threads"
+      ],
+      "description": "Settings used to install the inference model. These settings are specific to the `elser` service.",
+      "$ref": "#/$defs/InferenceElserServiceSettings",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "task_type",
+    "elser_inference_id",
+    "service",
+    "service_settings"
+  ],
+  "$defs": {
+    "InferenceElserTaskType": {
+      "type": "string",
+      "enum": [
+        "sparse_embedding"
+      ]
+    },
+    "Id": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "integer": {
+      "type": "number"
+    },
+    "InferenceInferenceChunkingSettings": {
+      "type": "object",
+      "properties": {
+        "max_chunk_size": {
+          "description": "The maximum size of a chunk in words. This value cannot be lower than `20` (for `sentence` strategy) or `10` (for `word` strategy). This value should not exceed the window size for the associated model.",
+          "$ref": "#/$defs/integer"
+        },
+        "overlap": {
+          "description": "The number of overlapping words for chunks. It is applicable only to a `word` chunking strategy. This value cannot be higher than half the `max_chunk_size` value.",
+          "$ref": "#/$defs/integer"
+        },
+        "sentence_overlap": {
+          "description": "The number of overlapping sentences for chunks. It is applicable only for a `sentence` chunking strategy. It can be either `1` or `0`.",
+          "$ref": "#/$defs/integer"
+        },
+        "separator_group": {
+          "type": "string",
+          "description": "Only applicable to the `recursive` strategy and required when using it. Sets a predefined list of separators in the saved chunking settings based on the selected text type. Values can be `markdown` or `plaintext`. Using this parameter is an alternative to manually specifying a custom `separators` list."
+        },
+        "separators": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Only applicable to the `recursive` strategy and required when using it. A list of strings used as possible split points when chunking text. Each string can be a plain string or a regular expression (regex) pattern. The system tries each separator in order to split the text, starting from the first item in the list. After splitting, it attempts to recombine smaller pieces into larger chunks that stay within the `max_chunk_size` limit, to reduce the total number of chunks generated."
+        },
+        "strategy": {
+          "type": "string",
+          "description": "The chunking strategy: `sentence`, `word`, `none` or `recursive`.  * If `strategy` is set to `recursive`, you must also specify: - `max_chunk_size` - either `separators` or`separator_group` Learn more about different chunking strategies in the linked documentation."
+        }
+      }
+    },
+    "InferenceElserServiceType": {
+      "type": "string",
+      "enum": [
+        "elser"
+      ]
+    },
+    "InferenceAdaptiveAllocations": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Turn on `adaptive_allocations`."
+        },
+        "max_number_of_allocations": {
+          "description": "The maximum number of allocations to scale to. If set, it must be greater than or equal to `min_number_of_allocations`.",
+          "$ref": "#/$defs/integer"
+        },
+        "min_number_of_allocations": {
+          "description": "The minimum number of allocations to scale to. If set, it must be greater than or equal to 0. If not defined, the deployment scales to 0.",
+          "$ref": "#/$defs/integer"
+        }
+      }
+    },
+    "InferenceElserServiceSettings": {
+      "type": "object",
+      "properties": {
+        "adaptive_allocations": {
+          "description": "Adaptive allocations configuration details. If `enabled` is true, the number of allocations of the model is set based on the current load the process gets. When the load is high, a new model allocation is automatically created, respecting the value of `max_number_of_allocations` if it's set. When the load is low, a model allocation is automatically removed, respecting the value of `min_number_of_allocations` if it's set. If `enabled` is true, do not set the number of allocations manually.",
+          "$ref": "#/$defs/InferenceAdaptiveAllocations"
+        },
+        "num_allocations": {
+          "description": "The total number of allocations this model is assigned across machine learning nodes. Increasing this value generally increases the throughput. If adaptive allocations is enabled, do not set this value because it's automatically set.",
+          "$ref": "#/$defs/integer"
+        },
+        "num_threads": {
+          "description": "The number of threads used by each model allocation during inference. Increasing this value generally increases the speed per inference request. The inference process is a compute-bound process; `threads_per_allocations` must not exceed the number of available allocated processors per node. The value must be a power of 2. The maximum value is 32. > info > If you want to optimize your ELSER endpoint for ingest, set the number of threads to 1. If you want to optimize your ELSER endpoint for search, set the number of threads to greater than 1.",
+          "$ref": "#/$defs/integer"
+        }
+      },
+      "required": [
+        "num_allocations",
+        "num_threads"
+      ]
+    }
+  }
+}

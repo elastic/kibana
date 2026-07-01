@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string",
+      "x-found-in": "body"
+    },
+    "index_name": {
+      "$ref": "#/$defs/IndexName",
+      "x-found-in": "body"
+    },
+    "is_native": {
+      "type": "boolean",
+      "x-found-in": "body"
+    },
+    "language": {
+      "type": "string",
+      "x-found-in": "body"
+    },
+    "name": {
+      "type": "string",
+      "x-found-in": "body"
+    },
+    "service_type": {
+      "type": "string",
+      "x-found-in": "body"
+    }
+  },
+  "$defs": {
+    "IndexName": {
+      "type": "string"
+    }
+  }
+}

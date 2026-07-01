@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "properties": {
+    "ids": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        }
+      ],
+      "description": "Comma-separated list of API key IDs to evict from the API key cache. To evict all API keys, use `*`. Does not support other wildcard patterns.",
+      "$ref": "#/$defs/Ids",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "ids"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Ids": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        }
+      ]
+    }
+  }
+}

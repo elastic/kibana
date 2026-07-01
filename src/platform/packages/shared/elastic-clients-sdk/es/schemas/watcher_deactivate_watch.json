@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "watch_id": {
+      "type": "string",
+      "description": "The watch identifier.",
+      "$ref": "#/$defs/Name",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "watch_id"
+  ],
+  "$defs": {
+    "Name": {
+      "type": "string"
+    }
+  }
+}

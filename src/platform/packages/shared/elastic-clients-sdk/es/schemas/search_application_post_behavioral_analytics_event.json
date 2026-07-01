@@ -1,0 +1,48 @@
+{
+  "type": "object",
+  "properties": {
+    "collection_name": {
+      "type": "string",
+      "description": "The name of the behavioral analytics collection.",
+      "$ref": "#/$defs/Name",
+      "x-found-in": "path"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "page_view",
+        "search",
+        "search_click"
+      ],
+      "description": "The analytics event type.",
+      "$ref": "#/$defs/SearchApplicationEventType",
+      "x-found-in": "path"
+    },
+    "debug": {
+      "type": "boolean",
+      "description": "Whether the response type has to include more details",
+      "x-found-in": "query"
+    },
+    "payload": {
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "collection_name",
+    "event_type",
+    "payload"
+  ],
+  "$defs": {
+    "Name": {
+      "type": "string"
+    },
+    "SearchApplicationEventType": {
+      "type": "string",
+      "enum": [
+        "page_view",
+        "search",
+        "search_click"
+      ]
+    }
+  }
+}

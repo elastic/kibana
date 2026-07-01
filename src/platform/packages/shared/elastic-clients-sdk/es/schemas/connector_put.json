@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "properties": {
+    "connector_id": {
+      "description": "The unique identifier of the connector to be created or updated. ID is auto-generated if not provided.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "description": {
+      "type": "string",
+      "x-found-in": "body"
+    },
+    "index_name": {
+      "$ref": "#/$defs/IndexName",
+      "x-found-in": "body"
+    },
+    "is_native": {
+      "type": "boolean",
+      "x-found-in": "body"
+    },
+    "language": {
+      "type": "string",
+      "x-found-in": "body"
+    },
+    "name": {
+      "type": "string",
+      "x-found-in": "body"
+    },
+    "service_type": {
+      "type": "string",
+      "x-found-in": "body"
+    }
+  },
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "IndexName": {
+      "type": "string"
+    }
+  }
+}

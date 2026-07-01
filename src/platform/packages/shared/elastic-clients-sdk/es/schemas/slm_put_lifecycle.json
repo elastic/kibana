@@ -1,0 +1,152 @@
+{
+  "type": "object",
+  "properties": {
+    "policy_id": {
+      "type": "string",
+      "description": "The identifier for the snapshot lifecycle policy you want to create or update.",
+      "$ref": "#/$defs/Name",
+      "x-found-in": "path"
+    },
+    "master_timeout": {
+      "description": "The period to wait for a connection to the master node. If no response is received before the timeout expires, the request fails and returns an error. To indicate that the request should never timeout, set it to `-1`.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "timeout": {
+      "description": "The period to wait for a response. If no response is received before the timeout expires, the request fails and returns an error. To indicate that the request should never timeout, set it to `-1`.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "config": {
+      "description": "Configuration for each snapshot created by the policy.",
+      "$ref": "#/$defs/SlmConfiguration",
+      "x-found-in": "body"
+    },
+    "name": {
+      "description": "Name automatically assigned to each snapshot created by the policy. Date math is supported. To prevent conflicting snapshot names, a UUID is automatically appended to each snapshot name.",
+      "$ref": "#/$defs/Name",
+      "x-found-in": "body"
+    },
+    "repository": {
+      "type": "string",
+      "description": "Repository used to store snapshots created by this policy. This repository must exist prior to the policy’s creation. You can create a repository using the snapshot repository API.",
+      "x-found-in": "body"
+    },
+    "retention": {
+      "description": "Retention rules used to retain and delete snapshots created by the policy.",
+      "$ref": "#/$defs/SlmRetention",
+      "x-found-in": "body"
+    },
+    "schedule": {
+      "description": "Periodic or absolute schedule at which the policy creates snapshots. SLM applies schedule changes immediately.",
+      "$ref": "#/$defs/WatcherCronExpression",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "policy_id"
+  ],
+  "$defs": {
+    "Name": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "IndexName": {
+      "type": "string"
+    },
+    "Indices": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IndexName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IndexName"
+          }
+        }
+      ]
+    },
+    "Metadata": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {}
+    },
+    "SlmConfiguration": {
+      "type": "object",
+      "properties": {
+        "ignore_unavailable": {
+          "type": "boolean",
+          "description": "If false, the snapshot fails if any data stream or index in indices is missing or closed. If true, the snapshot ignores missing or closed data streams and indices."
+        },
+        "indices": {
+          "description": "A comma-separated list of data streams and indices to include in the snapshot. Multi-index syntax is supported. By default, a snapshot includes all data streams and indices in the cluster. If this argument is provided, the snapshot only includes the specified data streams and clusters.",
+          "$ref": "#/$defs/Indices"
+        },
+        "include_global_state": {
+          "type": "boolean",
+          "description": "If true, the current global state is included in the snapshot."
+        },
+        "feature_states": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "A list of feature states to be included in this snapshot. A list of features available for inclusion in the snapshot and their descriptions be can be retrieved using the get features API. Each feature state includes one or more system indices containing data necessary for the function of that feature. Providing an empty array will include no feature states in the snapshot, regardless of the value of include_global_state. By default, all available feature states will be included in the snapshot if include_global_state is true, or no feature states if include_global_state is false."
+        },
+        "metadata": {
+          "description": "Attaches arbitrary metadata to the snapshot, such as a record of who took the snapshot, why it was taken, or any other useful data. Metadata must be less than 1024 bytes.",
+          "$ref": "#/$defs/Metadata"
+        },
+        "partial": {
+          "type": "boolean",
+          "description": "If false, the entire snapshot will fail if one or more indices included in the snapshot do not have all primary shards available."
+        }
+      }
+    },
+    "integer": {
+      "type": "number"
+    },
+    "SlmRetention": {
+      "type": "object",
+      "properties": {
+        "expire_after": {
+          "description": "Time period after which a snapshot is considered expired and eligible for deletion. SLM deletes expired snapshots based on the slm.retention_schedule.",
+          "$ref": "#/$defs/Duration"
+        },
+        "max_count": {
+          "description": "Maximum number of snapshots to retain, even if the snapshots have not yet expired. If the number of snapshots in the repository exceeds this limit, the policy retains the most recent snapshots and deletes older snapshots.",
+          "$ref": "#/$defs/integer"
+        },
+        "min_count": {
+          "description": "Minimum number of snapshots to retain, even if the snapshots have expired.",
+          "$ref": "#/$defs/integer"
+        }
+      },
+      "required": [
+        "expire_after",
+        "max_count",
+        "min_count"
+      ]
+    },
+    "WatcherCronExpression": {
+      "type": "string"
+    }
+  }
+}

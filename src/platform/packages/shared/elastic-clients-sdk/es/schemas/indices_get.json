@@ -1,0 +1,141 @@
+{
+  "type": "object",
+  "properties": {
+    "index": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IndexName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IndexName"
+          }
+        }
+      ],
+      "description": "Comma-separated list of data streams, indices, and index aliases used to limit the request. Wildcard expressions (*) are supported.",
+      "$ref": "#/$defs/Indices",
+      "x-found-in": "path"
+    },
+    "allow_no_indices": {
+      "type": "boolean",
+      "description": "A setting that does two separate checks on the index expression. If `false`, the request returns an error (1) if any wildcard expression (including `_all` and `*`) resolves to zero matching indices or (2) if the complete set of resolved indices, aliases or data streams is empty after all expressions are evaluated. If `true`, index expressions that resolve to no indices are allowed and the request returns an empty result.",
+      "x-found-in": "query"
+    },
+    "expand_wildcards": {
+      "description": "Type of index that wildcard expressions can match. If the request can target data streams, this argument determines whether wildcard expressions match hidden data streams. Supports comma-separated values, such as open,hidden.",
+      "$ref": "#/$defs/ExpandWildcards",
+      "x-found-in": "query"
+    },
+    "flat_settings": {
+      "type": "boolean",
+      "description": "If true, returns settings in flat format.",
+      "x-found-in": "query"
+    },
+    "ignore_unavailable": {
+      "type": "boolean",
+      "description": "If `false`, the request returns an error if it targets a concrete (non-wildcarded) index, alias, or data stream that is missing, closed, or otherwise unavailable. If `true`, unavailable concrete targets are silently ignored.",
+      "x-found-in": "query"
+    },
+    "include_defaults": {
+      "type": "boolean",
+      "description": "If true, return all default settings in the response.",
+      "x-found-in": "query"
+    },
+    "local": {
+      "type": "boolean",
+      "description": "If true, the request retrieves information from the local node only. Defaults to false, which means information is retrieved from the master node.",
+      "x-found-in": "query"
+    },
+    "master_timeout": {
+      "description": "Period to wait for a connection to the master node. If no response is received before the timeout expires, the request fails and returns an error.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "features": {
+      "description": "Return only information on specified index features",
+      "$ref": "#/$defs/IndicesGetFeatures",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "index"
+  ],
+  "$defs": {
+    "IndexName": {
+      "type": "string"
+    },
+    "Indices": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IndexName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IndexName"
+          }
+        }
+      ]
+    },
+    "ExpandWildcard": {
+      "type": "string",
+      "enum": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ]
+    },
+    "ExpandWildcards": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExpandWildcard"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExpandWildcard"
+          }
+        }
+      ]
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "IndicesGetFeature": {
+      "type": "string",
+      "enum": [
+        "aliases",
+        "mappings",
+        "settings"
+      ]
+    },
+    "IndicesGetFeatures": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IndicesGetFeature"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IndicesGetFeature"
+          }
+        }
+      ]
+    }
+  }
+}

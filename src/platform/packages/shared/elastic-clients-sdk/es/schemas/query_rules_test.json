@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "ruleset_id": {
+      "type": "string",
+      "description": "The unique identifier of the query ruleset to be created or updated",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "match_criteria": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {},
+      "description": "The match criteria to apply to rules in the given query ruleset. Match criteria should match the keys defined in the `criteria.metadata` field of the rule.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "ruleset_id",
+    "match_criteria"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

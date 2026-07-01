@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "connector_id": {
+      "type": "string",
+      "description": "The unique identifier of the connector to be updated",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "is_native": {
+      "type": "boolean",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "connector_id",
+    "is_native"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}

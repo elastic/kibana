@@ -1,0 +1,57 @@
+{
+  "type": "object",
+  "properties": {
+    "index": {
+      "type": "string",
+      "description": "Name of the time series index to downsample.",
+      "$ref": "#/$defs/IndexName",
+      "x-found-in": "path"
+    },
+    "target_index": {
+      "type": "string",
+      "description": "Name of the index to create.",
+      "$ref": "#/$defs/IndexName",
+      "x-found-in": "path"
+    },
+    "config": {
+      "$ref": "#/$defs/IndicesDownsampleConfig",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "index",
+    "target_index",
+    "config"
+  ],
+  "$defs": {
+    "IndexName": {
+      "type": "string"
+    },
+    "DurationLarge": {
+      "type": "string"
+    },
+    "IndicesSamplingMethod": {
+      "type": "string",
+      "enum": [
+        "aggregate",
+        "last_value"
+      ]
+    },
+    "IndicesDownsampleConfig": {
+      "type": "object",
+      "properties": {
+        "fixed_interval": {
+          "description": "The interval at which to aggregate the original time series index.",
+          "$ref": "#/$defs/DurationLarge"
+        },
+        "sampling_method": {
+          "description": "The sampling method used to reduce the documents; it can be either `aggregate` or `last_value`. Defaults to `aggregate`.",
+          "$ref": "#/$defs/IndicesSamplingMethod"
+        }
+      },
+      "required": [
+        "fixed_interval"
+      ]
+    }
+  }
+}

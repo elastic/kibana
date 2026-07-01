@@ -1,0 +1,86 @@
+{
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Identifier for the anomaly detection job. It can be a job identifier, a group name, a comma-separated list of jobs or groups, or a wildcard expression. You can summarize the bucket results for all anomaly detection jobs by using `_all` or by specifying `*` as the `<job_id>`.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "allow_no_match": {
+      "type": "boolean",
+      "description": "Refer to the description for the `allow_no_match` query parameter.",
+      "x-found-in": "body"
+    },
+    "bucket_span": {
+      "description": "Refer to the description for the `bucket_span` query parameter.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "body"
+    },
+    "end": {
+      "description": "Refer to the description for the `end` query parameter.",
+      "$ref": "#/$defs/DateTime",
+      "x-found-in": "body"
+    },
+    "exclude_interim": {
+      "type": "boolean",
+      "description": "Refer to the description for the `exclude_interim` query parameter.",
+      "x-found-in": "body"
+    },
+    "overall_score": {
+      "description": "Refer to the description for the `overall_score` query parameter.",
+      "$ref": "#/$defs/double",
+      "x-found-in": "body"
+    },
+    "start": {
+      "description": "Refer to the description for the `start` query parameter.",
+      "$ref": "#/$defs/DateTime",
+      "x-found-in": "body"
+    },
+    "top_n": {
+      "description": "Refer to the description for the `top_n` query parameter.",
+      "$ref": "#/$defs/integer",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "job_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    },
+    "EpochTime": {},
+    "DateTime": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/EpochTime"
+        }
+      ]
+    },
+    "double": {
+      "type": "number"
+    },
+    "integer": {
+      "type": "number"
+    }
+  }
+}

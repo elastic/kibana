@@ -1,0 +1,44 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identifier for the search.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "keep_alive": {
+      "description": "Period for which the search and its results are stored on the cluster. Defaults to the keep_alive value set by the search’s EQL search API request.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    },
+    "wait_for_completion_timeout": {
+      "description": "Timeout duration to wait for the request to finish. Defaults to no timeout, meaning the request waits for complete search results.",
+      "$ref": "#/$defs/Duration",
+      "x-found-in": "query"
+    }
+  },
+  "required": [
+    "id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    },
+    "Duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number",
+          "const": -1
+        },
+        {
+          "type": "number",
+          "const": 0
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Name"
+      },
+      "description": "A list of analytics collections to limit the returned information",
+      "x-found-in": "path"
+    }
+  },
+  "$defs": {
+    "Name": {
+      "type": "string"
+    }
+  }
+}

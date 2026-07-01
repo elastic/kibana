@@ -1,0 +1,175 @@
+{
+  "type": "object",
+  "properties": {
+    "metric": {
+      "description": "Comma-separated list of metrics used to limit the request.",
+      "$ref": "#/$defs/CommonStatsFlags",
+      "x-found-in": "path"
+    },
+    "index": {
+      "description": "A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices",
+      "$ref": "#/$defs/Indices",
+      "x-found-in": "path"
+    },
+    "completion_fields": {
+      "description": "Comma-separated list or wildcard expressions of fields to include in fielddata and suggest statistics.",
+      "$ref": "#/$defs/Fields",
+      "x-found-in": "query"
+    },
+    "expand_wildcards": {
+      "description": "Type of index that wildcard patterns can match. If the request can target data streams, this argument determines whether wildcard expressions match hidden data streams. Supports comma-separated values, such as `open,hidden`.",
+      "$ref": "#/$defs/ExpandWildcards",
+      "x-found-in": "query"
+    },
+    "fielddata_fields": {
+      "description": "Comma-separated list or wildcard expressions of fields to include in fielddata statistics.",
+      "$ref": "#/$defs/Fields",
+      "x-found-in": "query"
+    },
+    "fields": {
+      "description": "Comma-separated list or wildcard expressions of fields to include in the statistics.",
+      "$ref": "#/$defs/Fields",
+      "x-found-in": "query"
+    },
+    "forbid_closed_indices": {
+      "type": "boolean",
+      "description": "If true, statistics are not collected from closed indices.",
+      "x-found-in": "query"
+    },
+    "groups": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ],
+      "description": "Comma-separated list of search groups to include in the search statistics.",
+      "x-found-in": "query"
+    },
+    "include_segment_file_sizes": {
+      "type": "boolean",
+      "description": "If true, the call reports the aggregated disk usage of each one of the Lucene index files (only applies if segment stats are requested).",
+      "x-found-in": "query"
+    },
+    "include_unloaded_segments": {
+      "type": "boolean",
+      "description": "If true, the response includes information from segments that are not loaded into memory.",
+      "x-found-in": "query"
+    },
+    "level": {
+      "description": "Indicates whether statistics are aggregated at the cluster, indices, or shards level.",
+      "$ref": "#/$defs/Level",
+      "x-found-in": "query"
+    }
+  },
+  "$defs": {
+    "CommonStatsFlag": {
+      "type": "string",
+      "enum": [
+        "_all",
+        "store",
+        "indexing",
+        "get",
+        "search",
+        "merge",
+        "flush",
+        "refresh",
+        "query_cache",
+        "fielddata",
+        "docs",
+        "warmer",
+        "completion",
+        "segments",
+        "translog",
+        "request_cache",
+        "recovery",
+        "bulk",
+        "shard_stats",
+        "mappings",
+        "dense_vector",
+        "sparse_vector"
+      ]
+    },
+    "CommonStatsFlags": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CommonStatsFlag"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CommonStatsFlag"
+          }
+        }
+      ]
+    },
+    "IndexName": {
+      "type": "string"
+    },
+    "Indices": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IndexName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IndexName"
+          }
+        }
+      ]
+    },
+    "Field": {
+      "type": "string"
+    },
+    "Fields": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Field"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Field"
+          }
+        }
+      ]
+    },
+    "ExpandWildcard": {
+      "type": "string",
+      "enum": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ]
+    },
+    "ExpandWildcards": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExpandWildcard"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExpandWildcard"
+          }
+        }
+      ]
+    },
+    "Level": {
+      "type": "string",
+      "enum": [
+        "cluster",
+        "indices",
+        "shards"
+      ]
+    }
+  }
+}

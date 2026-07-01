@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of project routing expression",
+      "x-found-in": "path"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

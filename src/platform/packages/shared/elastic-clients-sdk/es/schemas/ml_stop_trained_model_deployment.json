@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "properties": {
+    "model_id": {
+      "type": "string",
+      "description": "The unique identifier of the trained model.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "path"
+    },
+    "id": {
+      "description": "If provided, must be the same identifier as in the path.",
+      "$ref": "#/$defs/Id",
+      "x-found-in": "body"
+    },
+    "allow_no_match": {
+      "type": "boolean",
+      "description": "Specifies what to do when the request: contains wildcard expressions and there are no deployments that match; contains the  `_all` string or no identifiers and there are no matches; or contains wildcard expressions and there are only partial matches. By default, it returns an empty array when there are no matches and the subset of results when there are partial matches. If `false`, the request returns a 404 status code when there are no matches or only partial matches.",
+      "x-found-in": "body"
+    },
+    "force": {
+      "type": "boolean",
+      "description": "Forcefully stops the deployment, even if it is used by ingest pipelines. You can't use these pipelines until you restart the model deployment.",
+      "x-found-in": "body"
+    }
+  },
+  "required": [
+    "model_id"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string"
+    }
+  }
+}
