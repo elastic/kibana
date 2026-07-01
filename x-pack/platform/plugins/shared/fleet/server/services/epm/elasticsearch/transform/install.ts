@@ -755,10 +755,19 @@ interface TransformEsAssetReference extends EsAssetReference {
 /**
  * Whether an index expression targets a remote cluster (`<cluster>:<index>`, e.g.
  * `*:metrics-endpoint.metadata_current_default*`). Mirrors ES
- * `RemoteClusterAware#isRemoteIndexName`:
- * - date math (`<...>` / `-<...>`) is never remote — it can legitimately carry a `:` in a
- *   timezone (e.g. `<logs-{now/d{|+12:00}}>`), which must not be read as a cluster separator;
- * - `::` is the data-stream selector separator (e.g. `logs::failures`), not a cluster one.
+ * `RemoteClusterAware#isRemoteIndexName`.
+ *
+ * Index *names* cannot contain `:` (ES rejects it at index creation — see
+ * `MetadataCreateIndexService#validateIndexOrAliasName`). So the only places a `:` can appear
+ * in a valid index expression are:
+ *   1. the remote-cluster separator: `<cluster>:<index>` (what we're detecting);
+ *   2. the `::` data-stream selector separator (e.g. `logs::failures`);
+ *   3. a timezone inside date-math, e.g. `<logs-{now/d{yyyy.MM.dd|+12:00}}>` — and date math is
+ *      always wrapped in `<...>` (or `-<...>`), never bare.
+ *
+ * Hence: exclude anything starting with `<`/`-<` (date math, never remote), then treat the
+ * FIRST `:` as the cluster separator unless it's a `::` selector. A trailing timezone colon
+ * can't reach a non-date-math expression, so it never needs special handling here.
  */
 export const isRemoteIndexExpression = (indexExpression: string): boolean => {
   if (
