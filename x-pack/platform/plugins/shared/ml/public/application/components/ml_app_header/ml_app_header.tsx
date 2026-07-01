@@ -62,7 +62,7 @@ export const MlAppHeader: FC<MlAppHeaderProps> = ({
       />
       {showDatePicker ? (
         <>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
           <MlDatePickerBar />
         </>
       ) : null}
