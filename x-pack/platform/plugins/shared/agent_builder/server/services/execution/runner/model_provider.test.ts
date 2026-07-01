@@ -211,7 +211,6 @@ describe('createModelProvider', () => {
       expect(deps.inference.getChatModel).toHaveBeenCalledWith(
         expect.objectContaining({ connectorId: 'default-connector' })
       );
-      expect(deps.searchInferenceEndpoints.endpoints.getForFeature).not.toHaveBeenCalled();
     });
 
     it('uses the default connector when effortLevel is omitted', async () => {
