@@ -46,6 +46,7 @@
     "@kbn/custom-integrations-plugin",
 
     // packages
+    "@kbn/deeplinks-management",
     "@kbn/core-application-common",
     "@kbn/core-capabilities-common",
     "@kbn/i18n",
@@ -127,6 +128,7 @@
     "@kbn/setup-node-env",
     "@kbn/react-query",
     "@kbn/fs",
-    "@kbn/doc-links"
+    "@kbn/doc-links",
+    "@kbn/yaml-loader"
   ]
 }
