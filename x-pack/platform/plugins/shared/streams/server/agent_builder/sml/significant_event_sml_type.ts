@@ -6,11 +6,11 @@
  */
 
 import type { SmlData, SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
-import type { SigEvent } from '@kbn/streams-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE, SIGNIFICANT_EVENT_SML_TYPE } from '../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
-import { EventService } from '../../lib/sig_events/events/event_service';
+import { EventService } from '../../lib/significant_events/events/event_service';
 import type { GetScopedClients } from '../../routes/types';
 
 interface CreateSignificantEventSmlTypeOptions {
@@ -19,7 +19,7 @@ interface CreateSignificantEventSmlTypeOptions {
 
 const PAGE_SIZE = 100;
 
-const eventToSmlContent = (event: SigEvent): string => {
+const eventToSmlContent = (event: SignificantEvent): string => {
   return [
     event.title,
     event.summary,
@@ -98,10 +98,6 @@ export const createSignificantEventSmlType = ({
               type: SIGNIFICANT_EVENT_SML_TYPE,
               title: event.title,
               content: eventToSmlContent(event),
-              permissions: {
-                kibana: { privileges: [{ name: `api:${STREAMS_API_PRIVILEGES.read}` }] },
-                elasticsearch: { indices: [] },
-              },
             },
           ],
         };
@@ -112,6 +108,15 @@ export const createSignificantEventSmlType = ({
         return undefined;
       }
     },
+
+    /**
+     * Significant events are gated by the Streams read API privilege — the
+     * same gate the Streams API checks before surfacing event data.
+     */
+    getPermissions: () => ({
+      kibana: { privileges: [{ name: `api:${STREAMS_API_PRIVILEGES.read}` }] },
+      elasticsearch: { indices: [] },
+    }),
 
     toAttachment: async (item, context) => {
       if (!item.origin_id) {

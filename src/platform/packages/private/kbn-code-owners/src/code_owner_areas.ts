@@ -56,7 +56,7 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
   search: ['elastic/jinastic', 'elastic/search-design', 'elastic/search-kibana'],
   observability: [
     'elastic/actionable-obs-team',
-    'elastic/obs-ai-team',
+    'elastic/nightshift-context-and-research-team',
     'elastic/obs-cloudnative-monitoring',
     'elastic/obs-docs',
     'elastic/obs-exploration-team',
@@ -81,6 +81,7 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/security-defend-workflows',
     'elastic/security-design',
     'elastic/security-detection-engine',
+    'elastic/security-detection-engineering',
     'elastic/security-detection-platform',
     'elastic/security-detection-rule-management',
     'elastic/security-engineering-productivity',
