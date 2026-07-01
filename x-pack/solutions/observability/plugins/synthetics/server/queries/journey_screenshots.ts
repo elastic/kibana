@@ -27,11 +27,13 @@ export const journeyScreenshotHandler = async ({
   syntheticsEsClient,
 }: RouteContext | UptimeRouteContext): Promise<IKibanaResponse<ClientContract>> => {
   const { checkGroup, stepIndex } = request.params;
+  const { timestamp } = request.query as { timestamp?: string };
 
   const result: ScreenshotReturnTypesUnion | null = await getJourneyScreenshot({
     syntheticsEsClient,
     checkGroup,
     stepIndex,
+    timestamp,
   });
 
   if (result === null) {
