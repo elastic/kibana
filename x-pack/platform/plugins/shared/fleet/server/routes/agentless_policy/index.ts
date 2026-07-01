@@ -325,7 +325,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: AGENTLESS_POLICIES_ROUTES.UPGRADE_PATTERN,
       summary: 'Bulk upgrade agentless policies',
       description:
-        "Upgrade multiple agentless policies to their installed package version, migrating each package policy's config onto the new schema. On success, returns a per-policy result array; the first per-policy failure (for example a missing or non-agentless id) is returned as a top-level HTTP error. A successful result means the policy's saved object was upgraded, while the agentless deployment is reconciled asynchronously in the background. Note: agent-policy-level agentless settings (resources, ownership tags) are not re-derived from the new package version — use the update (PUT) endpoint for those.",
+        "Upgrade multiple agentless policies to their installed package version, migrating each package policy's config onto the new schema. Always returns 200 with a per-policy result array; a missing or non-agentless id is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch, so valid ids are still upgraded. A successful result means the policy's saved object was upgraded, while the agentless deployment is reconciled asynchronously in the background. Note: agent-policy-level agentless settings (resources, ownership tags) are not re-derived from the new package version — use the update (PUT) endpoint for those.",
       options: {
         tags: ['oas-tag:Fleet agentless policies'],
         availability: {
