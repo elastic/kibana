@@ -42,9 +42,7 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
       );
 
       // transformOut drops query/filters, so read them from the raw state.
-      const { query, filters } = attachmentState as Partial<
-        Pick<AnomalySwimLaneAttachmentState, 'query' | 'filters'>
-      >;
+      const { query, filters } = attachmentState as AnomalySwimLaneAttachmentState;
 
       const parentApi = useMemo(
         () => ({
