@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { ChangeHistoryBadgeRenderFn } from '../types/change_history_badge';
+import type { ChangeHistoryChangesSummaryRenderFn } from '../types/change_history_changes_summary';
 import type {
   ChangeHistoryFeatures,
   ChangeHistoryPermissions,
@@ -27,6 +28,7 @@ export interface ChangeHistoryProviderProps {
   objectId: string;
   adapter: ChangeHistoryAdapter;
   renderPreview: ChangeHistoryPreviewRenderFn;
+  renderChangesSummary?: ChangeHistoryChangesSummaryRenderFn;
   renderBadge?: ChangeHistoryBadgeRenderFn;
   labels: ChangeHistoryLabels;
   features?: ChangeHistoryFeatures;
@@ -41,6 +43,7 @@ export const ChangeHistoryProvider = ({
   objectId,
   adapter,
   renderPreview,
+  renderChangesSummary,
   renderBadge,
   labels,
   features,
@@ -91,6 +94,7 @@ export const ChangeHistoryProvider = ({
       objectId,
       adapter,
       renderPreview,
+      renderChangesSummary,
       renderBadge,
       labels: {
         previewBackLabel: labels.previewBackLabel ?? i18n.BACK_TO_HOST,
@@ -108,6 +112,7 @@ export const ChangeHistoryProvider = ({
       listPageSize,
       objectId,
       renderBadge,
+      renderChangesSummary,
       renderPreview,
       scope,
       supports,

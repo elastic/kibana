@@ -15,6 +15,8 @@ import { useChangeHistoryAutoSelection } from '../../hooks/use_change_history_au
 import { useChangeHistoryList } from '../../hooks/use_change_history_list';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
 import { useChangeHistoryModal } from '../../provider/use_change_history_modal';
+import { ChangeHistoryModalSelectionContext } from '../../provider/change_history_modal_selection_context';
+import type { ChangeHistoryCompareRowOverride } from '../../types/change_history_compare_override';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
 import type { ChangeHistorySelectionSource } from '../../telemetry/types';
 import { findCurrentChangeHistoryListItem } from '../../utils/build_change_history_restore_telemetry';
@@ -24,6 +26,7 @@ import { ChangeHistoryPreviewPanel } from './change_history_preview_panel';
 import { ChangeHistoryPreviewShell } from './change_history_preview_shell';
 import { ChangeHistorySidebarPanel } from './change_history_sidebar_panel';
 import { ChangeHistoryDefaultPreviewHeaderActions } from './change_history_default_preview_header_actions';
+import { ChangeHistoryRestoreConfirmModal } from './change_history_restore_confirm_modal';
 
 const getHistoryStartedAt = (timestamps: string[]): Date | undefined => {
   if (timestamps.length === 0) {
@@ -40,6 +43,10 @@ export function ChangeHistoryModal(): JSX.Element | null {
   const { isOpen, closeModal } = useChangeHistoryModal();
 
   const [selectedChangeId, setSelectedChangeId] = useState<string | undefined>();
+  const [compareOverride, setCompareOverride] = useState<
+    ChangeHistoryCompareRowOverride | undefined
+  >();
+  const [restoreConfirmChangeId, setRestoreConfirmChangeId] = useState<string | undefined>();
   const lastReportedChangeIdBySourceRef = useRef<
     Partial<Record<ChangeHistorySelectionSource, string>>
   >({});
@@ -78,6 +85,8 @@ export function ChangeHistoryModal(): JSX.Element | null {
   useEffect(() => {
     if (!isOpen) {
       setSelectedChangeId(undefined);
+      setCompareOverride(undefined);
+      setRestoreConfirmChangeId(undefined);
       lastReportedChangeIdBySourceRef.current = {};
       unlockSelectionDecision();
     }
@@ -86,13 +95,66 @@ export function ChangeHistoryModal(): JSX.Element | null {
   const handleSelectItem = useCallback(
     (item: ChangeHistoryListItem) => {
       lockSelectionDecision();
+      setCompareOverride(undefined);
       setSelectedChangeId(item.id);
       reportChangeSelected(item, 'user_click');
     },
     [lockSelectionDecision, reportChangeSelected]
   );
 
+  const requestCompareToVersion = useCallback(
+    (rowChangeId: string) => {
+      if (!supports.compare) {
+        return;
+      }
+
+      if (!selectedChangeId || rowChangeId === selectedChangeId) {
+        return;
+      }
+
+      const rowItem = items.find((listItem) => listItem.id === rowChangeId);
+      if (!rowItem || rowItem.isCurrent) {
+        return;
+      }
+
+      lockSelectionDecision();
+      setCompareOverride({ type: 'vs_row', rowChangeId });
+    },
+    [items, lockSelectionDecision, selectedChangeId, supports.compare]
+  );
+
+  const requestRestoreVersion = useCallback(
+    (changeId: string) => {
+      if (!supports.restore) {
+        return;
+      }
+
+      const item = items.find((listItem) => listItem.id === changeId);
+      if (!item || item.isCurrent) {
+        return;
+      }
+
+      setRestoreConfirmChangeId(changeId);
+    },
+    [items, supports.restore]
+  );
+
+  const modalSelectionValue = useMemo(
+    () => ({
+      ...(supports.compare ? { requestCompareToVersion } : {}),
+      ...(supports.restore ? { requestRestoreVersion } : {}),
+    }),
+    [requestCompareToVersion, requestRestoreVersion, supports.compare, supports.restore]
+  );
+
   const currentChange = useMemo(() => findCurrentChangeHistoryListItem(items), [items]);
+  const restoreConfirmChange = useMemo(
+    () =>
+      restoreConfirmChangeId
+        ? items.find((listItem) => listItem.id === restoreConfirmChangeId)
+        : undefined,
+    [items, restoreConfirmChangeId]
+  );
 
   const styles = useMemo(
     () => ({
@@ -223,28 +285,43 @@ export function ChangeHistoryModal(): JSX.Element | null {
   }
 
   return (
-    <EuiModal
-      onClose={closeModal}
-      maxWidth={false}
-      css={styles.modal}
-      data-test-subj="changeHistoryModal"
-    >
-      <EuiModalBody css={styles.modalBody}>
-        <div css={styles.splitLayout}>
-          <ChangeHistoryPreviewShell
-            backLabel={labels.previewBackLabel}
-            title={labels.previewTitle}
-            onBack={closeModal}
-            headerActions={previewHeaderActions}
-          >
-            <ChangeHistoryPreviewPanel selectedChangeId={selectedChangeId} listItems={items} />
-          </ChangeHistoryPreviewShell>
+    <ChangeHistoryModalSelectionContext.Provider value={modalSelectionValue}>
+      <EuiModal
+        onClose={closeModal}
+        maxWidth={false}
+        css={styles.modal}
+        data-test-subj="changeHistoryModal"
+      >
+        <EuiModalBody css={styles.modalBody}>
+          <div css={styles.splitLayout}>
+            <ChangeHistoryPreviewShell
+              backLabel={labels.previewBackLabel}
+              title={labels.previewTitle}
+              onBack={closeModal}
+              headerActions={previewHeaderActions}
+            >
+              <ChangeHistoryPreviewPanel
+                selectedChangeId={selectedChangeId}
+                listItems={items}
+                compareOverride={compareOverride}
+              />
+            </ChangeHistoryPreviewShell>
 
-          <ChangeHistorySidebarPanel title={i18n.TIMELINE_PANEL_TITLE} onClose={closeModal}>
-            {renderSidebarContent()}
-          </ChangeHistorySidebarPanel>
-        </div>
-      </EuiModalBody>
-    </EuiModal>
+            <ChangeHistorySidebarPanel title={i18n.TIMELINE_PANEL_TITLE} onClose={closeModal}>
+              {renderSidebarContent()}
+            </ChangeHistorySidebarPanel>
+          </div>
+        </EuiModalBody>
+      </EuiModal>
+
+      {restoreConfirmChange ? (
+        <ChangeHistoryRestoreConfirmModal
+          change={restoreConfirmChange}
+          currentChange={currentChange}
+          onClose={() => setRestoreConfirmChangeId(undefined)}
+          onRestored={unlockSelectionDecision}
+        />
+      ) : null}
+    </ChangeHistoryModalSelectionContext.Provider>
   );
 }

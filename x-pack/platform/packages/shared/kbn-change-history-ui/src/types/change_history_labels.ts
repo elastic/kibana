@@ -7,7 +7,7 @@
 
 /** Host-supplied copy for the change history modal shell. */
 export interface ChangeHistoryLabels {
-  /** Primary title shown above the preview panel (e.g. workflow name). */
+  /** Primary title shown above the preview panel (e.g. object display name). */
   previewTitle: string;
   /** Back control label in the preview panel header. Defaults to `"Back"`. */
   previewBackLabel?: string;

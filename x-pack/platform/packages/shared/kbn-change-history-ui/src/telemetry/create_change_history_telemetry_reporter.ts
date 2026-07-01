@@ -11,6 +11,7 @@ import {
   ChangeHistoryTelemetryEventTypes,
   type ChangeHistoryScope,
   type ChangeHistoryTelemetryChangeSelectedParams,
+  type ChangeHistoryTelemetryDiffChangeNavigatedParams,
   type ChangeHistoryTelemetryDiffViewedParams,
   type ChangeHistoryTelemetryFilterAppliedParams,
   type ChangeHistoryTelemetryOpenedParams,
@@ -34,6 +35,7 @@ const noopChangeHistoryTelemetryReporter: ChangeHistoryTelemetryReporter = {
   reportChangeSelected: () => {},
   reportFilterApplied: () => {},
   reportDiffViewed: () => {},
+  reportDiffChangeNavigated: () => {},
   reportRestoreConfirmed: () => {},
   reportRestoreCompleted: () => {},
   reportRestoreFailed: () => {},
@@ -83,6 +85,9 @@ export const createChangeHistoryTelemetryReporter = ({
     },
     reportDiffViewed: (params: ChangeHistoryTelemetryDiffViewedParams) => {
       report(ChangeHistoryTelemetryEventTypes.DiffViewed, params);
+    },
+    reportDiffChangeNavigated: (params: ChangeHistoryTelemetryDiffChangeNavigatedParams) => {
+      report(ChangeHistoryTelemetryEventTypes.DiffChangeNavigated, params);
     },
     reportRestoreConfirmed: (params: ChangeHistoryTelemetryRestoreConfirmedParams = {}) => {
       report(ChangeHistoryTelemetryEventTypes.RestoreConfirmed, params);

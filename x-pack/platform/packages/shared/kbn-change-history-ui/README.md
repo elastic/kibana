@@ -7,9 +7,47 @@ The host app must provide **`QueryClientProvider`** (`@kbn/react-query`). This p
 ## Integration
 
 1. Implement **`ChangeHistoryAdapter`** — `listChanges`, `getChange`, optional `restoreChange`.
-2. Wrap with **`ChangeHistoryProvider`** — adapter, `renderPreview`, `labels.previewTitle`, **`scope`**, optional `renderBadge`, `features`, `permissions`, optional `listPageSize` (defaults to `DEFAULT_CHANGE_HISTORY_PAGE_SIZE`, currently 20), and optional `analytics`.
+2. Wrap with **`ChangeHistoryProvider`** — adapter, `renderPreview`, `labels.previewTitle`, **`scope`**, optional `renderBadge`, optional `renderChangesSummary`, `features`, `permissions`, optional `listPageSize` (defaults to `DEFAULT_CHANGE_HISTORY_PAGE_SIZE`, currently 20), and optional `analytics`.
    Enable restore with **both** `features={{ restore: true }}` and `permissions={{ canRestore: true }}`.
+   Disable compare with `features={{ compare: false }}` (enabled by default).
 3. Render **`ChangeHistoryTrigger`** and **`ChangeHistoryModal`**.
+
+### Minimal (domain-neutral)
+
+```tsx
+import { QueryClientProvider } from '@kbn/react-query';
+import {
+  ChangeHistoryProvider,
+  ChangeHistoryModal,
+  ChangeHistoryTrigger,
+} from '@kbn/change-history-ui';
+
+<QueryClientProvider client={queryClient}>
+  <ChangeHistoryProvider
+    objectId={documentId}
+    adapter={documentChangeHistoryAdapter}
+    renderPreview={({ change, compareSpec, diffTelemetry }) => (
+      <pre>{JSON.stringify(compareSpec?.target.snapshot ?? change.snapshot, null, 2)}</pre>
+    )}
+    labels={{ previewTitle: documentTitle }}
+    scope={{
+      module: 'stack',
+      dataset: 'documents',
+      objectType: 'document',
+    }}
+    analytics={{ reportEvent: core.analytics.reportEvent }}
+  >
+    <ChangeHistoryTrigger />
+    <ChangeHistoryModal />
+  </ChangeHistoryProvider>
+</QueryClientProvider>
+```
+
+Implement `ChangeHistoryAdapter.listChanges` / `getChange` against your domain API. Snapshots are opaque (`unknown`); map your entity shape in the adapter. Call `diffTelemetry?.reportDiffViewed()` from `renderPreview` when your diff UI shows a non-empty comparison.
+
+**Compare:** When compare is enabled, `getChange` supplies baseline/target snapshot detail as needed. Implementations should resolve any requested `changeId`. List rows must stay newest-first.
+
+### Workflows (YAML preview + change summaries)
 
 ```tsx
 import { QueryClientProvider } from '@kbn/react-query';
@@ -25,6 +63,7 @@ import {
     adapter={workflowChangeHistoryAdapter}
     renderPreview={renderWorkflowYamlPreview}
     renderBadge={renderWorkflowBadge}
+    renderChangesSummary={renderWorkflowChangeHistoryChangesSummary}
     labels={{ previewTitle: workflowName }}
     scope={{
       module: 'stack',
@@ -40,6 +79,8 @@ import {
 ```
 
 **`scope`** — `{ module, dataset, objectType }`, aligned with `@kbn/change-history` server clients and telemetry payloads. **`objectId`** must be unique within that scope when multiple domains share one `QueryClient`.
+
+In `renderPreview`, call `diffTelemetry?.reportDiffViewed()` when your consumer shows a non-empty diff. Use `diffTelemetry.reportDiffChangeNavigated(source)` for in-diff navigation (e.g. hunk prev/next).
 
 ## HTTP adapter
 
@@ -76,7 +117,8 @@ Every payload includes `eventName`, `module`, `dataset`, and `objectType` (from 
 | `change_history_opened` | Change history opened | Each time the modal is opened (closed → open) | — |
 | `change_history_change_selected` | Change history change selected | User selects a timeline row or auto-selects latest | `selectionSource` (`user_click` \| `auto_latest`), `hasSequence`, optional `eventAction` |
 | `change_history_filter_applied` | Change history filter applied | Filter UI applies a change *(not wired yet)* | `filterType` (`timeRange` \| `actor`), optional `hasActiveTimeRange`, `activeActorCount` |
-| `change_history_diff_viewed` | Change history diff viewed | User views a diff *(not wired yet)* | `comparisonType` (`vs_current` \| `vs_previous`), optional `versionDistance`, `compareMode`, `hasSemanticSummary` |
+| `change_history_diff_viewed` | Change history diff viewed | Preview consumer calls `diffTelemetry.reportDiffViewed()` when a non-empty diff is shown | `comparisonType` (`vs_previous` \| `vs_row`), optional `versionDistance` (from `metadata.version` when both rows include it), `compareMode`, `hasChangesSummaryTooltip` |
+| `change_history_diff_change_navigated` | Change history diff change navigated | Preview consumer reports diff navigation (e.g. hunk prev/next) | `navigationSource` (consumer-defined keyword) |
 | `change_history_restore_confirmed` | Change history restore confirmed | User confirms restore in the dialog | optional `restoredFromSequence`, `currentSequence`, `rollbackDistance` |
 | `change_history_restore_completed` | Change history restore completed | Restore API succeeds | same sequence fields + optional `durationMs` (confirm → API success) |
 | `change_history_restore_failed` | Change history restore failed | Restore API fails | optional sequence fields + optional `errorCode` (e.g. `RESTORE_CONFLICT`) |

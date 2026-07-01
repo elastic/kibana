@@ -17,7 +17,9 @@ import {
 import { css } from '@emotion/react';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
 import { useChangeHistoryDetail } from '../../hooks/use_change_history_detail';
-import { useChangeHistoryPreviewCompare } from '../../hooks/use_change_history_preview_compare';
+import { useChangeHistoryCompare } from '../../hooks/use_change_history_compare';
+import { useChangeHistoryDiffTelemetry } from '../../hooks/use_change_history_diff_telemetry';
+import type { ChangeHistoryCompareRowOverride } from '../../types/change_history_compare_override';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
 import { getChangeHistoryErrorMessage } from '../../utils/get_change_history_error_message';
 import * as i18n from '../timeline/translations';
@@ -85,14 +87,16 @@ const PreviewPanelState = ({
 export interface ChangeHistoryPreviewPanelProps {
   selectedChangeId?: string;
   listItems?: ChangeHistoryListItem[];
+  compareOverride?: ChangeHistoryCompareRowOverride;
 }
 
 export const ChangeHistoryPreviewPanel: FC<ChangeHistoryPreviewPanelProps> = ({
   selectedChangeId,
   listItems = [],
+  compareOverride,
 }) => {
   const previewFrameCss = usePreviewFrameStyles();
-  const { adapter, objectId, renderPreview } = useChangeHistoryConfig();
+  const { adapter, objectId, renderPreview, supports } = useChangeHistoryConfig();
   const { change, isLoading, error } = useChangeHistoryDetail({
     adapter,
     objectId,
@@ -100,15 +104,20 @@ export const ChangeHistoryPreviewPanel: FC<ChangeHistoryPreviewPanelProps> = ({
     enabled: Boolean(selectedChangeId),
   });
 
-  const { currentChange, previousChange, isLoadingCompareContext } = useChangeHistoryPreviewCompare(
-    {
-      adapter,
-      objectId,
-      listItems,
-      selectedChange: change,
-      selectedChangeId,
-    }
-  );
+  const { compareSpec, isLoadingCompareContext } = useChangeHistoryCompare({
+    adapter,
+    objectId,
+    listItems,
+    selectedChange: change,
+    selectedChangeId,
+    compareOverride: supports.compare ? compareOverride : undefined,
+    enabled: supports.compare,
+  });
+
+  const diffTelemetry = useChangeHistoryDiffTelemetry({
+    compareSpec,
+    isLoadingCompareContext,
+  });
 
   if (!selectedChangeId) {
     return (
@@ -175,9 +184,9 @@ export const ChangeHistoryPreviewPanel: FC<ChangeHistoryPreviewPanelProps> = ({
           {renderPreview({
             change,
             objectId,
-            currentChange,
-            previousChange,
+            compareSpec,
             isLoadingCompareContext,
+            diffTelemetry,
           })}
         </div>
       </EuiFlexItem>

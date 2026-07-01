@@ -58,6 +58,9 @@ jest.mock('@kbn/code-editor', () => ({
   },
 }));
 
+const mockCreateEditor = monaco.editor.create as jest.Mock;
+const mockCreateDiffEditor = monaco.editor.createDiffEditor as jest.Mock;
+
 const makeDetail = (yaml: string) => ({
   id: 'evt-3',
   timestamp: '2026-06-16T12:00:00.000Z',
@@ -74,6 +77,10 @@ const renderPreview = (props: Parameters<typeof renderWorkflowChangeHistoryPrevi
   );
 
 describe('workflow change history preview', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders the selected version yaml in the monaco preview', () => {
     renderPreview({
       objectId: 'workflow-1',
@@ -98,5 +105,43 @@ describe('workflow change history preview', () => {
 
     expect(screen.getByTestId('workflowChangeHistoryMonacoPreview')).toBeInTheDocument();
     expect(monaco.editor.createModel).toHaveBeenCalledWith('', 'yaml');
+  });
+
+  it('renders compare diff with baseline as original and target as modified', () => {
+    renderPreview({
+      objectId: 'workflow-1',
+      change: makeDetail('name: historical\n'),
+      compareSpec: {
+        comparisonType: 'vs_previous',
+        baseline: { ...makeDetail('name: historical\n'), metadata: { version: 1 } },
+        target: { ...makeDetail('name: current\n'), metadata: { version: 6 }, isCurrent: true },
+      },
+    });
+
+    expect(mockCreateDiffEditor).toHaveBeenCalled();
+    expect(monaco.editor.createModel).toHaveBeenNthCalledWith(1, 'name: historical\n', 'yaml');
+    expect(monaco.editor.createModel).toHaveBeenNthCalledWith(2, 'name: current\n', 'yaml');
+    expect(screen.getByTestId('workflowChangeHistoryCompareIndicator')).toBeInTheDocument();
+    expect(screen.getByText('Comparing with:')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowChangeHistoryCompareIndicatorBadge')).toHaveTextContent(
+      'v1'
+    );
+  });
+
+  it('shows target yaml while compare context is loading', () => {
+    renderPreview({
+      objectId: 'workflow-1',
+      change: makeDetail('name: historical\n'),
+      compareSpec: {
+        comparisonType: 'vs_previous',
+        baseline: makeDetail('name: historical\n'),
+        target: makeDetail('name: current\n'),
+      },
+      isLoadingCompareContext: true,
+    });
+
+    expect(mockCreateEditor).toHaveBeenCalled();
+    expect(mockCreateDiffEditor).not.toHaveBeenCalled();
+    expect(monaco.editor.createModel).toHaveBeenCalledWith('name: current\n', 'yaml');
   });
 });

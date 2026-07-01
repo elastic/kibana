@@ -10,10 +10,16 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ChangeHistoryPreviewPanel } from './change_history_preview_panel';
 import { useChangeHistoryDetail } from '../../hooks/use_change_history_detail';
-import { useChangeHistoryPreviewCompare } from '../../hooks/use_change_history_preview_compare';
+import { useChangeHistoryCompare } from '../../hooks/use_change_history_compare';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
+import type { ChangeHistoryCompareSpec } from '../../types/change_history_compare';
 import type { ChangeHistoryDetail } from '../../types/change_history_detail';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
+import {
+  TEST_OBJECT_ID,
+  TEST_SNAPSHOT,
+  TEST_SNAPSHOT_OLD,
+} from '../../test_utils/change_history_test_fixtures';
 
 jest.mock('../../provider/use_change_history_config', () => ({
   useChangeHistoryConfig: jest.fn(),
@@ -23,13 +29,13 @@ jest.mock('../../hooks/use_change_history_detail', () => ({
   useChangeHistoryDetail: jest.fn(),
 }));
 
-jest.mock('../../hooks/use_change_history_preview_compare', () => ({
-  useChangeHistoryPreviewCompare: jest.fn(),
+jest.mock('../../hooks/use_change_history_compare', () => ({
+  useChangeHistoryCompare: jest.fn(),
 }));
 
 const mockUseChangeHistoryConfig = useChangeHistoryConfig as jest.Mock;
 const mockUseChangeHistoryDetail = useChangeHistoryDetail as jest.Mock;
-const mockUseChangeHistoryPreviewCompare = useChangeHistoryPreviewCompare as jest.Mock;
+const mockUseChangeHistoryCompare = useChangeHistoryCompare as jest.Mock;
 
 const listItems: ChangeHistoryListItem[] = [
   {
@@ -37,6 +43,7 @@ const listItems: ChangeHistoryListItem[] = [
     timestamp: '2026-06-16T12:00:00.000Z',
     actor: { name: 'Alice' },
     action: 'Updated',
+    isCurrent: true,
   },
   {
     id: 'evt-previous',
@@ -51,7 +58,7 @@ const currentChange: ChangeHistoryDetail = {
   timestamp: '2026-06-16T12:00:00.000Z',
   actor: { name: 'Alice' },
   action: 'Updated',
-  snapshot: { workflow: { yaml: 'name: current\n' } },
+  snapshot: TEST_SNAPSHOT,
 };
 
 const previousChange: ChangeHistoryDetail = {
@@ -59,31 +66,45 @@ const previousChange: ChangeHistoryDetail = {
   timestamp: '2026-06-15T12:00:00.000Z',
   actor: { name: 'System' },
   action: 'Created',
-  snapshot: { workflow: { yaml: 'name: original\n' } },
+  snapshot: TEST_SNAPSHOT_OLD,
+};
+
+const vsPreviousCompareSpec: ChangeHistoryCompareSpec = {
+  comparisonType: 'vs_previous',
+  baseline: previousChange,
+  target: currentChange,
+};
+
+const vsPreviousFromMiddleRowCompareSpec: ChangeHistoryCompareSpec = {
+  comparisonType: 'vs_previous',
+  baseline: previousChange,
+  target: { ...previousChange, id: 'evt-middle' },
 };
 
 describe('ChangeHistoryPreviewPanel', () => {
   beforeEach(() => {
     mockUseChangeHistoryConfig.mockReturnValue({
       adapter: {},
-      objectId: 'workflow-1',
-      renderPreview: jest.fn(({ previousChange: compareChange }) => (
-        <div data-test-subj="previewRender">
-          {compareChange ? 'with-compare' : 'without-compare'}
-        </div>
+      objectId: TEST_OBJECT_ID,
+      supports: { compare: true, restore: false },
+      telemetry: {
+        reportDiffViewed: jest.fn(),
+        reportDiffChangeNavigated: jest.fn(),
+      },
+      renderPreview: jest.fn(({ compareSpec }) => (
+        <div data-test-subj="previewRender">{compareSpec ? 'with-compare' : 'without-compare'}</div>
       )),
     });
   });
 
-  it('passes the chronologically previous change to renderPreview', () => {
+  it('passes compareSpec to renderPreview when the current row is selected', () => {
     mockUseChangeHistoryDetail.mockReturnValue({
       change: currentChange,
       isLoading: false,
       error: undefined,
     });
-    mockUseChangeHistoryPreviewCompare.mockReturnValue({
-      currentChange,
-      previousChange,
+    mockUseChangeHistoryCompare.mockReturnValue({
+      compareSpec: vsPreviousCompareSpec,
       isLoadingCompareContext: false,
     });
 
@@ -94,33 +115,58 @@ describe('ChangeHistoryPreviewPanel', () => {
     expect(mockUseChangeHistoryConfig().renderPreview).toHaveBeenCalledWith(
       expect.objectContaining({
         change: currentChange,
-        previousChange,
-        objectId: 'workflow-1',
+        compareSpec: vsPreviousCompareSpec,
+        objectId: TEST_OBJECT_ID,
         isLoadingCompareContext: false,
       })
     );
   });
 
-  it('does not pass compare change for the oldest loaded list item', () => {
+  it('passes vs_previous compareSpec for a non-current selection', () => {
     mockUseChangeHistoryDetail.mockReturnValue({
       change: previousChange,
       isLoading: false,
       error: undefined,
     });
-    mockUseChangeHistoryPreviewCompare.mockReturnValue({
-      currentChange,
-      previousChange: undefined,
+    mockUseChangeHistoryCompare.mockReturnValue({
+      compareSpec: vsPreviousFromMiddleRowCompareSpec,
       isLoadingCompareContext: false,
     });
 
     render(<ChangeHistoryPreviewPanel selectedChangeId="evt-previous" listItems={listItems} />);
 
-    expect(screen.getByTestId('previewRender')).toHaveTextContent('without-compare');
+    expect(screen.getByTestId('previewRender')).toHaveTextContent('with-compare');
     expect(mockUseChangeHistoryConfig().renderPreview).toHaveBeenCalledWith(
       expect.objectContaining({
         change: previousChange,
-        previousChange: undefined,
-        objectId: 'workflow-1',
+        compareSpec: vsPreviousFromMiddleRowCompareSpec,
+        objectId: TEST_OBJECT_ID,
+      })
+    );
+  });
+
+  it('forwards compareOverride to useChangeHistoryCompare', () => {
+    mockUseChangeHistoryDetail.mockReturnValue({
+      change: previousChange,
+      isLoading: false,
+      error: undefined,
+    });
+    mockUseChangeHistoryCompare.mockReturnValue({
+      compareSpec: vsPreviousFromMiddleRowCompareSpec,
+      isLoadingCompareContext: false,
+    });
+
+    render(
+      <ChangeHistoryPreviewPanel
+        selectedChangeId="evt-previous"
+        listItems={listItems}
+        compareOverride={{ type: 'vs_row', rowChangeId: 'evt-current' }}
+      />
+    );
+
+    expect(mockUseChangeHistoryCompare).toHaveBeenCalledWith(
+      expect.objectContaining({
+        compareOverride: { type: 'vs_row', rowChangeId: 'evt-current' },
       })
     );
   });

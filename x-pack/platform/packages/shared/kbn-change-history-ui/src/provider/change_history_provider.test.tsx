@@ -16,6 +16,7 @@ import { ChangeHistoryProvider } from './change_history_provider';
 import { useChangeHistoryConfig } from './use_change_history_config';
 import { useChangeHistoryModal } from './use_change_history_modal';
 import {
+  TEST_CHANGE_HISTORY_SCOPE,
   TEST_OBJECT_ID_A,
   TEST_OBJECT_ID_B,
   TEST_OBJECT_TITLE,
@@ -25,11 +26,7 @@ import { ChangeHistoryTelemetryEventTypes } from '../telemetry/types';
 
 const { wrapper: QueryClientWrapper } = createQueryClientWrapper();
 
-const testScope = {
-  module: 'stack',
-  dataset: 'workflows',
-  objectType: 'workflow',
-};
+const testScope = TEST_CHANGE_HISTORY_SCOPE;
 
 const adapter: ChangeHistoryAdapter = {
   listChanges: jest.fn().mockResolvedValue({ items: [], total: 0 }),

@@ -78,8 +78,76 @@ describe('createWorkflowChangeHistoryAdapter', () => {
       id: 'evt-current',
       isCurrent: true,
       metadata: { version: 3 },
+      changes: { count: 1 },
     });
     expect(result.items[1]?.isCurrent).toBeUndefined();
+    expect(result.items[1]?.changes).toBeUndefined();
+  });
+
+  it('omits changes for a page tail until the next page is loaded', async () => {
+    const http = createHttpMock(
+      jest.fn().mockResolvedValue({
+        page: 1,
+        perPage: 1,
+        total: 3,
+        items: [currentHistoryItem],
+      })
+    );
+
+    const adapter = createWorkflowChangeHistoryAdapter(http as HttpSetup);
+
+    const result = await adapter.listChanges({
+      objectId: SAMPLE_WORKFLOW_ID,
+      page: { index: 0, size: 1 },
+    });
+
+    expect(http.get).toHaveBeenCalledTimes(1);
+    expect(result.items[0]?.id).toBe('evt-current');
+    expect(result.items[0]?.changes).toBeUndefined();
+  });
+
+  it('patches the previous page tail when the next page loads', async () => {
+    const http = createHttpMock(
+      jest.fn().mockImplementation((_url, options) => {
+        const apiPage = options?.query?.page;
+
+        if (apiPage === 1) {
+          return Promise.resolve({
+            page: 1,
+            perPage: 1,
+            total: 3,
+            items: [currentHistoryItem],
+          });
+        }
+
+        return Promise.resolve({
+          page: 2,
+          perPage: 1,
+          total: 3,
+          items: [previousHistoryItem],
+        });
+      })
+    );
+
+    const adapter = createWorkflowChangeHistoryAdapter(http as HttpSetup);
+
+    await adapter.listChanges({
+      objectId: SAMPLE_WORKFLOW_ID,
+      page: { index: 0, size: 1 },
+    });
+
+    const pageTwoResult = await adapter.listChanges({
+      objectId: SAMPLE_WORKFLOW_ID,
+      page: { index: 1, size: 1 },
+    });
+
+    expect(http.get).toHaveBeenCalledTimes(2);
+    expect(pageTwoResult.updatedItems).toEqual([
+      expect.objectContaining({
+        id: 'evt-current',
+        changes: { count: 1 },
+      }),
+    ]);
   });
 
   it('does not mark isCurrent on page 2 and appends to cache without clearing', async () => {

@@ -20,6 +20,11 @@ export interface ListChangeHistoryResult {
   /** Newest-first; see {@link ChangeHistoryAdapter.listChanges}. */
   items: ChangeHistoryListItem[];
   total: number;
+  /**
+   * Rows from earlier pages whose `changes` were updated now that a neighboring page loaded
+   * (e.g. previous page tail vs this page head).
+   */
+  updatedItems?: ChangeHistoryListItem[];
 }
 
 export interface GetChangeParams {

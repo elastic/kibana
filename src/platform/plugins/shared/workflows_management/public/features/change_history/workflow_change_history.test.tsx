@@ -10,7 +10,7 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
-import { ChangeHistoryTelemetryEventTypes } from '@kbn/change-history-ui/src/telemetry/types';
+import { ChangeHistoryTelemetryEventTypes } from '@kbn/change-history-ui';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import {
   WorkflowChangeHistoryListItem,

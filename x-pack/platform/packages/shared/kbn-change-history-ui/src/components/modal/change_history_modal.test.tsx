@@ -65,7 +65,7 @@ const renderModal = ({
           labels={{ previewTitle: TEST_OBJECT_TITLE }}
           scope={testScope}
           renderPreview={({ change }) => (
-            <pre data-test-subj="previewYaml">{JSON.stringify(change.snapshot)}</pre>
+            <pre data-test-subj="previewSnapshot">{JSON.stringify(change.snapshot)}</pre>
           )}
           {...providerProps}
         >
@@ -92,7 +92,7 @@ describe('ChangeHistoryModal', () => {
 
     expect(screen.getByTestId('changeHistoryItem-evt-1')).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByTestId('previewYaml')).toHaveTextContent('name: test');
+      expect(screen.getByTestId('previewSnapshot')).toHaveTextContent('name: test');
     });
   });
 
@@ -161,7 +161,7 @@ describe('ChangeHistoryModal', () => {
     fireEvent.click(screen.getByTestId('changeHistoryItem-evt-2'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('previewYaml')).toHaveTextContent('name: older');
+      expect(screen.getByTestId('previewSnapshot')).toHaveTextContent('name: older');
     });
   });
 
@@ -171,7 +171,7 @@ describe('ChangeHistoryModal', () => {
     openModal();
 
     await waitFor(() => {
-      expect(screen.getByTestId('previewYaml')).toHaveTextContent('name: test');
+      expect(screen.getByTestId('previewSnapshot')).toHaveTextContent('name: test');
     });
 
     expect(reportEvent).toHaveBeenCalledWith(ChangeHistoryTelemetryEventTypes.ChangeSelected, {

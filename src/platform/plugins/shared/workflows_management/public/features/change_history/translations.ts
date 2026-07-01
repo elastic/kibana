@@ -31,3 +31,64 @@ export const VERSION_BADGE = (version: number): string =>
     defaultMessage: 'v{version}',
     values: { version },
   });
+
+export const VERSION_BADGE_FALLBACK = i18n.translate(
+  'workflows.changeHistory.versionBadgeFallback',
+  {
+    defaultMessage: 'Selected version',
+  }
+);
+
+export const COMPARING_WITH_LABEL = i18n.translate('workflows.changeHistory.comparingWithLabel', {
+  defaultMessage: 'Comparing with:',
+});
+
+export const PREVIOUS_VERSION_LABEL = i18n.translate(
+  'workflows.changeHistory.previousVersionLabel',
+  {
+    defaultMessage: 'Previous version:',
+  }
+);
+
+export const CURRENT_VERSION_LABEL = i18n.translate('workflows.changeHistory.currentVersionLabel', {
+  defaultMessage: 'Current version:',
+});
+
+export const CHANGES_SUMMARY_STEPS = i18n.translate(
+  'workflows.changeHistory.changesSummary.steps',
+  {
+    defaultMessage: 'Steps:',
+  }
+);
+
+export const CHANGES_SUMMARY_TRIGGERS = i18n.translate(
+  'workflows.changeHistory.changesSummary.triggers',
+  {
+    defaultMessage: 'Triggers:',
+  }
+);
+
+export const CHANGES_SUMMARY_SETTINGS = i18n.translate(
+  'workflows.changeHistory.changesSummary.settings',
+  {
+    defaultMessage: 'Settings:',
+  }
+);
+
+export const CHANGES_ADDED = (count: number): string =>
+  i18n.translate('workflows.changeHistory.changesSummary.added', {
+    defaultMessage: '{count, plural, one {# added} other {# added}}',
+    values: { count },
+  });
+
+export const CHANGES_REMOVED = (count: number): string =>
+  i18n.translate('workflows.changeHistory.changesSummary.removed', {
+    defaultMessage: '{count, plural, one {# removed} other {# removed}}',
+    values: { count },
+  });
+
+export const CHANGES_UPDATED = (count: number): string =>
+  i18n.translate('workflows.changeHistory.changesSummary.updated', {
+    defaultMessage: '{count, plural, one {# updated} other {# updated}}',
+    values: { count },
+  });
