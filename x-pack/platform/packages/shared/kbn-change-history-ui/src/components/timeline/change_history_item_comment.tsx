@@ -35,12 +35,11 @@ export const ChangeHistoryItemComment = memo(function ChangeHistoryItemComment({
 
   const handleToggle = useCallback(
     (event: React.MouseEvent | React.KeyboardEvent) => {
-      event.stopPropagation();
-
       if (!isExpandable) {
         return;
       }
 
+      event.stopPropagation();
       setExpanded((value) => !value);
     },
     [isExpandable]
@@ -79,7 +78,12 @@ export const ChangeHistoryItemComment = memo(function ChangeHistoryItemComment({
     >
       {isExpandable && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type={expanded ? 'arrowDown' : 'arrowRight'} size="s" color="subdued" />
+          <EuiIcon
+            type={expanded ? 'arrowDown' : 'arrowRight'}
+            size="s"
+            color="subdued"
+            aria-hidden={true}
+          />
         </EuiFlexItem>
       )}
       <EuiFlexItem

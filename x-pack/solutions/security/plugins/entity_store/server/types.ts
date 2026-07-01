@@ -35,8 +35,10 @@ import type { LogsExtractionClient } from './domain/logs_extraction';
 import type { RemoteLogsExtractionClient } from './domain/logs_extraction/remote';
 import type { HistorySnapshotClient } from './domain/history_snapshot';
 import type { CRUDClient } from './domain/crud';
+import type { EntityMetadataClient } from './domain/entity_metadata';
 import type { ResolutionClient } from './domain/resolution';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
+import type { TelemetryReporter } from './telemetry/events';
 
 export interface EntityStoreSetupPlugins {
   taskManager: TaskManagerSetupContract;
@@ -59,6 +61,7 @@ export interface EntityStoreApiRequestHandlerContext {
   assetManagerClient: AssetManagerClient;
   entityMaintainersClient: EntityMaintainersClient;
   crudClient: CRUDClient;
+  entityMetadataClient: EntityMetadataClient;
   resolutionClient: ResolutionClient;
   remoteLogsExtractionClient: RemoteLogsExtractionClient;
   featureFlags: FeatureFlags;
@@ -66,6 +69,7 @@ export interface EntityStoreApiRequestHandlerContext {
   historySnapshotClient: HistorySnapshotClient;
   security: SecurityPluginStart;
   namespace: string;
+  analytics: TelemetryReporter;
 }
 
 export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{
@@ -81,6 +85,10 @@ export type EntityStoreCRUDClient = Omit<CRUDClient, 'createEntity'>;
 
 export interface EntityStoreStartContract {
   createCRUDClient: (esClient: ElasticsearchClient, namespace: string) => EntityStoreCRUDClient;
+  createEntityMetadataClient: (
+    esClient: ElasticsearchClient,
+    namespace: string
+  ) => EntityMetadataClient;
   createResolutionClient: (esClient: ElasticsearchClient, namespace: string) => ResolutionClient;
 }
 

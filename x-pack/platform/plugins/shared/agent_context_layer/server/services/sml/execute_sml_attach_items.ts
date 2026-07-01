@@ -88,11 +88,16 @@ export const resolveSmlAttachItems = async ({
 
       const typeDefinition = sml.getTypeDefinition(smlDoc.type);
       if (!typeDefinition) {
+        // Unregistered type (e.g. workflow ad-hoc namespace): fall back to plain text attachment.
         return {
-          success: false,
+          success: true,
           chunk_id: chunkId,
-          attachment_type: smlDoc.type,
-          message: `SML type '${smlDoc.type}' does not support conversion to attachment`,
+          attachment: {
+            type: 'text',
+            data: { title: smlDoc.title, content: smlDoc.content },
+            origin: smlDoc.origin.uri,
+            description: `${smlDoc.type}/${smlDoc.title}`,
+          },
         };
       }
 

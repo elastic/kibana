@@ -194,6 +194,7 @@ export async function updateDataStreamsLifecycle({
         name: names,
         data_retention: lifecycle.dsl.data_retention,
         ...(dslDownsampling?.length ? { downsampling: dslDownsampling } : {}),
+        ...(lifecycle.dsl.frozen_after ? { frozen_after: lifecycle.dsl.frozen_after } : {}),
       };
       await retryTransientEsErrors(() => esClient.indices.putDataLifecycle(request), { logger });
 
@@ -234,6 +235,9 @@ export async function updateDataStreamsLifecycle({
               name,
               data_retention: templateLifecycle.dsl.data_retention,
               ...(templateDownsampling?.length ? { downsampling: templateDownsampling } : {}),
+              ...(templateLifecycle.dsl.frozen_after
+                ? { frozen_after: templateLifecycle.dsl.frozen_after }
+                : {}),
             };
             await retryTransientEsErrors(() => esClient.indices.putDataLifecycle(request), {
               logger,
@@ -365,13 +369,15 @@ export async function updateDataStreamsFailureStore({
 
     // Handle { inherit: {} }
     if (isInheritFailureStore(failureStore)) {
-      const response = await retryTransientEsErrors(
-        () => esClient.indices.simulateIndexTemplate({ name: stream.name }),
-        { logger }
-      );
+      const template = await simulateClassicStreamTemplate({ esClient, name: stream.name, logger });
+      if (!template) {
+        throw new StatusError(
+          `Cannot determine template failure store for ${stream.name} — the data stream may be replicated and managed by a remote cluster`,
+          400
+        );
+      }
       // If not template, disable the failure store. Empty object would cause Elasticsearch error.
-      // @ts-expect-error index simulate response is not well typed
-      failureStoreConfig = response.template?.data_stream_options?.failure_store ?? {
+      failureStoreConfig = template?.data_stream_options?.failure_store ?? {
         enabled: false,
       };
     } else {
@@ -413,21 +419,42 @@ export async function simulateClassicStreamTemplate({
     logger,
   })
     .then((response) => response.data_streams?.[0])
-    .catch(() => undefined);
+    .catch((err) => {
+      logger.debug(
+        `simulateClassicStreamTemplate: could not get data stream "${name}": ${
+          parseError(err).message
+        }`
+      );
+      return undefined;
+    });
 
   const templateName = dataStream?.template;
   if (!templateName) {
     const simulation = await retryTransientEsErrors(
       () => esClient.indices.simulateIndexTemplate({ name: dataStream?.name ?? name }),
       { logger }
-    ).catch(() => undefined);
+    ).catch((err) => {
+      logger.warn(
+        `simulateClassicStreamTemplate: index template simulation failed for "${
+          dataStream?.name ?? name
+        }": ${parseError(err).message}`
+      );
+      return undefined;
+    });
     return simulation?.template;
   }
 
   const simulation = await retryTransientEsErrors(
     () => esClient.indices.simulateTemplate({ name: templateName }),
     { logger }
-  ).catch(() => undefined);
+  ).catch((err) => {
+    logger.warn(
+      `simulateClassicStreamTemplate: template simulation failed for "${templateName}": ${
+        parseError(err).message
+      }`
+    );
+    return undefined;
+  });
 
   return simulation?.template;
 }
@@ -465,10 +492,16 @@ export function getTemplateLifecycle(
         })
       : undefined;
 
+    const frozenAfter =
+      typeof template.lifecycle?.frozen_after === 'string'
+        ? template.lifecycle.frozen_after
+        : undefined;
+
     return {
       dsl: {
         data_retention: dataRetention,
         ...(downsample?.length ? { downsample } : {}),
+        ...(frozenAfter ? { frozen_after: frozenAfter } : {}),
       },
     };
   }
