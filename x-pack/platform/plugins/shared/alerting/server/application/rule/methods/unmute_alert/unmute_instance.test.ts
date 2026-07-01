@@ -198,7 +198,6 @@ describe('unmuteInstance()', () => {
       const rulesClient = new RulesClient(rulesClientParams);
       await rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
 
-      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'execute' });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
         consumer: 'myApp',

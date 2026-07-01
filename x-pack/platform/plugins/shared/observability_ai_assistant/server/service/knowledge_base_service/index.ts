@@ -12,6 +12,7 @@ import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import { isLockAcquisitionError } from '@kbn/lock-manager';
 import type { DocumentationManagerAPI } from '@kbn/product-doc-base-plugin/server/services/doc_manager';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { resourceNames } from '..';
 import type {
   Instruction,
@@ -75,7 +76,7 @@ export class KnowledgeBaseService {
   }: {
     queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
-    namespace: string;
+    namespace: SpaceId;
     user?: { name: string };
   }): Promise<RecalledEntry[]> {
     const response = await this.dependencies.esClient.asInternalUser.search<
@@ -188,7 +189,7 @@ export class KnowledgeBaseService {
     queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
     user?: { name: string };
-    namespace: string;
+    namespace: SpaceId;
     esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
     uiSettingsClient: IUiSettingsClient;
     limit?: { tokens?: number; size?: number };
@@ -277,7 +278,7 @@ export class KnowledgeBaseService {
   };
 
   getUserInstructions = async (
-    namespace: string,
+    namespace: SpaceId,
     user?: { name: string }
   ): Promise<Array<Instruction & { public?: boolean }>> => {
     if (!this.dependencies.config.enableKnowledgeBase) {
@@ -330,7 +331,7 @@ export class KnowledgeBaseService {
     query?: string;
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
-    namespace: string;
+    namespace: SpaceId;
   }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
     if (!this.dependencies.config.enableKnowledgeBase) {
       return { entries: [] };
@@ -478,7 +479,7 @@ export class KnowledgeBaseService {
   }: {
     entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
     user?: { name: string; id?: string };
-    namespace: string;
+    namespace: SpaceId;
   }): Promise<void> => {
     if (!this.dependencies.config.enableKnowledgeBase) {
       return;
@@ -538,7 +539,7 @@ export class KnowledgeBaseService {
   }: {
     entries: Array<Omit<KnowledgeBaseEntry, '@timestamp'>>;
     user?: { name: string; id?: string };
-    namespace: string;
+    namespace: SpaceId;
   }): Promise<void> => {
     if (!this.dependencies.config.enableKnowledgeBase) {
       return;

@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IconType } from '@elastic/eui';
+import type { EuiContextMenuItemIcon } from '@elastic/eui';
 
 export type OnActionComplete = () => void;
 export type OnActionDismiss = () => void;
 
 export interface IClickActionDescriptor {
   label: React.ReactNode;
-  iconType: IconType;
+  icon: EuiContextMenuItemIcon;
   onClick: () => Promise<void> | void;
 }

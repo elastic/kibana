@@ -13,7 +13,7 @@ import type { IntegrationCardItem } from '../../home/card_utils';
 
 import { useBrowseIntegrationHook } from '.';
 import { useUrlFilters } from './url_filters';
-import { useUrlCategories, useSetUrlCategory } from './url_categories';
+import { useUrlCategories, useUrlDefaultCategories, useSetUrlCategory } from './url_categories';
 
 jest.mock('../../home/hooks/use_available_packages');
 jest.mock('./url_filters');
@@ -32,6 +32,7 @@ describe('useBrowseIntegrationHook', () => {
       category: '',
       subCategory: undefined,
     });
+    (useUrlDefaultCategories as jest.Mock).mockReturnValue([]);
     (useSetUrlCategory as jest.Mock).mockReturnValue(mockSetUrlCategory);
   });
 
@@ -431,6 +432,150 @@ describe('useBrowseIntegrationHook', () => {
         'Apache HTTP Server',
         'Nginx Web Server',
       ]);
+    });
+  });
+
+  describe('Content pack filter', () => {
+    it('hides content packs by default (showContent falsy)', () => {
+      const cards = [
+        { id: '1', name: 'nginx', title: 'Nginx', type: 'integration', categories: ['web'] },
+        {
+          id: '2',
+          name: 'nginx-content',
+          title: 'Nginx Content',
+          type: 'content',
+          categories: ['web'],
+        },
+        { id: '3', name: 'redis', title: 'Redis', type: 'integration', categories: ['database'] },
+        {
+          id: '4',
+          name: 'redis-content',
+          title: 'Redis Content',
+          type: 'content',
+          categories: ['database'],
+        },
+      ];
+
+      mockUseAvailablePackages(cards as IntegrationCardItem[]);
+      (useUrlFilters as jest.Mock).mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+        showContent: undefined,
+      });
+
+      const { result } = renderHook(() =>
+        useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+      );
+
+      expect(result.current.filteredCards).toHaveLength(2);
+      expect(result.current.filteredCards.map((c) => c.name)).toEqual(['nginx', 'redis']);
+    });
+
+    it('shows content packs when showContent is true', () => {
+      const cards = [
+        { id: '1', name: 'nginx', title: 'Nginx', type: 'integration', categories: ['web'] },
+        {
+          id: '2',
+          name: 'nginx-content',
+          title: 'Nginx Content',
+          type: 'content',
+          categories: ['web'],
+        },
+        { id: '3', name: 'redis', title: 'Redis', type: 'integration', categories: ['database'] },
+        {
+          id: '4',
+          name: 'redis-content',
+          title: 'Redis Content',
+          type: 'content',
+          categories: ['database'],
+        },
+      ];
+
+      mockUseAvailablePackages(cards as IntegrationCardItem[]);
+      (useUrlFilters as jest.Mock).mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+        showContent: true,
+      });
+
+      const { result } = renderHook(() =>
+        useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+      );
+
+      expect(result.current.filteredCards).toHaveLength(4);
+      expect(result.current.filteredCards.map((c) => c.name)).toEqual([
+        'nginx',
+        'nginx-content',
+        'redis',
+        'redis-content',
+      ]);
+    });
+
+    it('updates category counts to exclude content packs when showContent is false', () => {
+      const cards = [
+        { id: '1', name: 'nginx', title: 'Nginx', type: 'integration', categories: ['web'] },
+        {
+          id: '2',
+          name: 'nginx-content',
+          title: 'Nginx Content',
+          type: 'content',
+          categories: ['web'],
+        },
+      ];
+
+      const allCategories = [
+        { id: '', title: 'All categories', count: 2 },
+        { id: 'web', title: 'Web', count: 2 },
+      ];
+
+      mockUseAvailablePackages(cards as IntegrationCardItem[], { allCategories });
+      (useUrlFilters as jest.Mock).mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+        showContent: undefined,
+      });
+
+      const { result } = renderHook(() =>
+        useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+      );
+
+      // Content pack hidden → counts drop by 1
+      expect(result.current.mainCategories).toEqual([
+        { id: '', title: 'All categories', count: 1 },
+        { id: 'web', title: 'Web', count: 1 },
+      ]);
+    });
+
+    it('keeps non-content packages (input type) visible when showContent is false', () => {
+      const cards = [
+        { id: '1', name: 'nginx', title: 'Nginx', type: 'integration', categories: ['web'] },
+        { id: '2', name: 'custom', title: 'Custom Input', type: 'input', categories: ['web'] },
+        {
+          id: '3',
+          name: 'nginx-content',
+          title: 'Nginx Content',
+          type: 'content',
+          categories: ['web'],
+        },
+      ];
+
+      mockUseAvailablePackages(cards as IntegrationCardItem[]);
+      (useUrlFilters as jest.Mock).mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+        showContent: undefined,
+      });
+
+      const { result } = renderHook(() =>
+        useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+      );
+
+      expect(result.current.filteredCards).toHaveLength(2);
+      expect(result.current.filteredCards.map((c) => c.type)).toEqual(['integration', 'input']);
     });
   });
 });

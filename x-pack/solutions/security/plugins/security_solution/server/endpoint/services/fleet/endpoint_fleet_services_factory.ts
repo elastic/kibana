@@ -23,7 +23,7 @@ import {
   AgentPolicyNotFoundError,
   PackagePolicyNotFoundError,
 } from '@kbn/fleet-plugin/server/errors';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { catchAndWrapError } from '../../utils';
 import { stringify } from '../../utils/stringify';

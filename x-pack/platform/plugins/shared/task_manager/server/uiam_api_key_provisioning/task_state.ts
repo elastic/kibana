@@ -24,9 +24,33 @@ export const stateSchemaByVersion = {
       runs: schema.number(),
     }),
   },
+  2: {
+    up: (state: Record<string, unknown>) => ({
+      runs: (state.runs as number) ?? 0,
+      // Latch for the (now-removed) one-time repair of `task` docs whose `uiamApiKey` was persisted
+      // unencrypted by the pre-fix provisioning run. Retained only to preserve the historical v2
+      // schema; the field is dropped in v3. Do not modify this version.
+      plaintextUiamKeysRepaired: (state.plaintextUiamKeysRepaired as boolean) ?? false,
+    }),
+    schema: schema.object({
+      runs: schema.number(),
+      plaintextUiamKeysRepaired: schema.boolean(),
+    }),
+  },
+  3: {
+    // The one-time plaintext-UIAM-key remediation was removed (all environments are repaired and
+    // the encryption fix prevents new plaintext writes), so the v2 `plaintextUiamKeysRepaired`
+    // latch is dropped from the persisted state.
+    up: (state: Record<string, unknown>) => ({
+      runs: (state.runs as number) ?? 0,
+    }),
+    schema: schema.object({
+      runs: schema.number(),
+    }),
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[1].schema;
+const latestTaskStateSchema = stateSchemaByVersion[3].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {

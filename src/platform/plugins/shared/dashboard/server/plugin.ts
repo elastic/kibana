@@ -148,7 +148,7 @@ export class DashboardPlugin
   public start(core: CoreStart, plugins: StartDeps) {
     this.logger.debug('dashboard: Started');
 
-    setKibanaServices(plugins, this.logger);
+    setKibanaServices(core, plugins, this.logger);
 
     if (plugins.share) {
       plugins.share.url.locators.create(
@@ -174,14 +174,18 @@ export class DashboardPlugin
     }
 
     // Do not call getDashboardStateSchema when registering plugin.
-    // Plugin is registered during setup and before all plugins have reigistered embeddable schemas.
+    // Plugin is registered during setup and before all plugins have registered embeddable schemas.
     // Instead, use once to only call getDashboardStateSchema the first time client is executed.
     const getCachedDashboardStateSchema = once(() => {
       return getDashboardStateSchema(false);
     });
 
     return {
-      scanDashboards,
+      scanDashboards: (
+        savedObjectsClient: SavedObjectsClientContract,
+        page: number,
+        perPage: number
+      ) => scanDashboards(savedObjectsClient, page, perPage, getCachedDashboardStateSchema()),
       client: {
         read: async (savedObjectsClient: SavedObjectsClientContract, id: string) =>
           (await read(savedObjectsClient, getCachedDashboardStateSchema(), id)).body,

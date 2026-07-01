@@ -6,7 +6,6 @@
  */
 
 import apm from 'elastic-apm-node';
-import { v4 as uuidv4 } from 'uuid';
 import type { ISavedObjectsRepository, KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
@@ -54,10 +53,11 @@ import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 import { ActionScheduler } from './action_scheduler';
 import { transformAdHocRunToAdHocRunData } from '../application/backfill/transforms/transform_ad_hoc_run_to_backfill_result';
 
-interface ConstructorParams {
+export interface AdHocTaskRunnerConstructorParams {
   context: TaskRunnerContext;
   internalSavedObjectsRepository: ISavedObjectsRepository;
   taskInstance: ConcreteTaskInstance;
+  executionUuid: string;
 }
 
 interface RunParams {
@@ -103,9 +103,14 @@ export class AdHocTaskRunner implements CancellableTask {
   private timer: TaskRunnerTimer;
   private apiKeyToUse: string | null = null;
 
-  constructor({ context, internalSavedObjectsRepository, taskInstance }: ConstructorParams) {
+  constructor({
+    context,
+    internalSavedObjectsRepository,
+    taskInstance,
+    executionUuid,
+  }: AdHocTaskRunnerConstructorParams) {
     this.context = context;
-    this.executionId = uuidv4();
+    this.executionId = executionUuid;
     this.internalSavedObjectsRepository = internalSavedObjectsRepository;
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.taskInstance = taskInstance;
@@ -366,7 +371,6 @@ export class AdHocTaskRunner implements CancellableTask {
           adHocRunSO,
           isSystemAction: (connectorId: string) =>
             this.context.actionsPlugin.isSystemActionConnector(connectorId),
-          omitGeneratedActionValues: false,
         });
       } catch (err) {
         const errorSource = SavedObjectsErrorHelpers.isNotFoundError(err)
@@ -470,7 +474,9 @@ export class AdHocTaskRunner implements CancellableTask {
       }
 
       // Generate fake request with API key
-      const fakeRequest = getFakeKibanaRequest(this.context, spaceId, apiKeyToUse);
+      const { fakeRequest } = getFakeKibanaRequest(this.context, spaceId, apiKeyToUse, {
+        ruleId: rule.id,
+      });
 
       return {
         adHocRunData,
@@ -694,10 +700,11 @@ export class AdHocTaskRunner implements CancellableTask {
   private async updateGapsAfterBackfillComplete() {
     if (this.scheduleToRunIndex < 0 || !this.adHocRange) return null;
 
-    const fakeRequest = getFakeKibanaRequest(
+    const { fakeRequest } = getFakeKibanaRequest(
       this.context,
       this.taskInstance.params.spaceId,
-      this.apiKeyToUse
+      this.apiKeyToUse,
+      { ruleId: this.ruleId }
     );
 
     const eventLogClient = await this.context.getEventLogClient(fakeRequest);

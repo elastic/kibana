@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { useRule } from './rule_context';
 
@@ -90,16 +90,23 @@ export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsM
         defaultMessage: 'Rule actions',
       })}
       button={
-        <EuiButtonIcon
-          data-test-subj="ruleDetailsActionsButton"
-          iconType="boxesHorizontal"
-          color="text"
-          size="m"
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-          aria-label={i18n.translate('xpack.alertingV2.ruleDetails.actionsMenuAriaLabel', {
+        <EuiToolTip
+          content={i18n.translate('xpack.alertingV2.ruleDetails.actionsMenuAriaLabel', {
             defaultMessage: 'Actions',
           })}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="ruleDetailsActionsButton"
+            iconType="boxesHorizontal"
+            color="text"
+            size="m"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            aria-label={i18n.translate('xpack.alertingV2.ruleDetails.actionsMenuAriaLabel', {
+              defaultMessage: 'Actions',
+            })}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}

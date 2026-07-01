@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -50,11 +51,13 @@ import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 export interface CreateRuleOptions {
   id?: string;
+  initialRevision?: number;
 }
 
 export interface CreateRuleParams<Params extends RuleParams = never> {
   data: CreateRuleData<Params>;
   options?: CreateRuleOptions;
+  changeTracking?: RuleChangeTracking;
   allowMissingConnectorSecrets?: boolean;
 }
 
@@ -63,7 +66,7 @@ export async function createRule<Params extends RuleParams = never>(
   createParams: CreateRuleParams<Params>
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 ): Promise<SanitizedRule<Params>> {
-  const { data: initialData, options, allowMissingConnectorSecrets } = createParams;
+  const { data: initialData, options, changeTracking, allowMissingConnectorSecrets } = createParams;
 
   const actionsClient = await context.getActionsClient();
 
@@ -227,7 +230,7 @@ export async function createRule<Params extends RuleParams = never>(
       throttle,
       executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
       monitoring: getDefaultMonitoringRuleDomainProperties(lastRunTimestamp.toISOString()),
-      revision: 0,
+      revision: options?.initialRevision ?? 0,
       running: false,
     },
     params: {
@@ -255,10 +258,15 @@ export async function createRule<Params extends RuleParams = never>(
 
   await logRuleChanges({
     ruleSOs: [createdRuleSavedObject],
+    encryptedFieldsMap: new Map([
+      [id, { apiKey: ruleAttributes.apiKey, uiamApiKey: ruleAttributes.uiamApiKey ?? null }],
+    ]),
     rulesClientContext: context,
     changesContext: {
-      action: RuleChangeTrackingAction.ruleCreate,
+      action: changeTracking?.action ?? RuleChangeTrackingAction.ruleCreate,
       timestamp: createTime,
+      metadata: changeTracking?.metadata,
+      refresh: changeTracking?.refresh,
     },
   });
 
@@ -282,7 +290,7 @@ export async function createRule<Params extends RuleParams = never>(
   }
 
   // Convert domain rule to rule (Remove certain properties)
-  const rule = transformRuleDomainToRule<Params>(ruleDomain, { isPublic: true });
+  const rule = transformRuleDomainToRule<Params>(ruleDomain);
 
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types

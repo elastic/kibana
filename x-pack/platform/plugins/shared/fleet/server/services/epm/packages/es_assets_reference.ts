@@ -108,7 +108,7 @@ export const optimisticallyAddEsAssetReferences = async (
     const installedEs = so.attributes.installed_es ?? [];
 
     const deduplicatedAssets = uniqBy(
-      [...installedEs, ...assetsToAdd],
+      [...assetsToAdd, ...installedEs],
       ({ type, id }) => `${type}-${id}`
     );
 

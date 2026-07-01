@@ -27,8 +27,7 @@ export function registerA2ARoutes({
   const wrapHandler = getHandlerWrapper({ logger });
 
   const getBaseUrl = async (request: KibanaRequest) => {
-    const [, startDeps] = await coreSetup.getStartServices();
-    return getKibanaUrl(coreSetup, pluginsSetup.cloud, request, startDeps.spaces);
+    return getKibanaUrl(coreSetup, pluginsSetup.cloud, request);
   };
 
   const a2aAdapter = new KibanaA2AAdapter(logger, getInternalServices, getBaseUrl);

@@ -9,6 +9,8 @@ owners:
   defaultOwner: '@elastic/kibana-esql'
 toolchains:
   default: node
+  javascript:
+    rootPackageDependenciesOnly: false
 language: typescript
 project:
   title: '@kbn/esql-scripts'
@@ -16,11 +18,15 @@ project:
   channel: ''
   owner: '@elastic/kibana-esql'
   sourceRoot: src/platform/packages/private/kbn-esql-scripts
-dependsOn: []
+dependsOn:
+  - '@kbn/repo-info'
+  - '@kbn/esql-language'
+  - '@kbn/language-documentation'
+  - '@kbn/i18n'
 tags:
   - shared-common
   - package
-  - prod
+  - dev
   - group-platform
   - private
   - jest-unit-tests

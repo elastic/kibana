@@ -11,6 +11,8 @@ export enum TestSuiteType {
   FTR = 'ftr-suite',
   SCOUT = 'scout-suite',
   CYPRESS = 'cypress-suite',
+  /** Buildkite step key prefix for `type: "command"` config entries (not the JSON `type` field). */
+  COMMAND = 'command-suite',
 }
 
 export const TEST_SUITE_TYPES = Object.values(TestSuiteType);

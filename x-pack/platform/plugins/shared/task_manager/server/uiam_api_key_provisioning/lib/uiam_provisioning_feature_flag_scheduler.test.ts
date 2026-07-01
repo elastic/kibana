@@ -20,6 +20,8 @@ const makeLogger = (): jest.Mocked<Logger> =>
     debug: jest.fn(),
   } as unknown as jest.Mocked<Logger>);
 
+const flushPromises = () => new Promise<void>((resolve) => setImmediate(resolve));
+
 describe('UiamProvisioningFeatureFlagScheduler', () => {
   const logger = makeLogger();
 
@@ -52,7 +54,7 @@ describe('UiamProvisioningFeatureFlagScheduler', () => {
     flag$.next(true);
     flag$.next(false);
     flag$.next(false);
-    await Promise.resolve();
+    await flushPromises();
 
     expect(taskScheduling.ensureScheduled).toHaveBeenCalledTimes(1);
     expect(removeIfExists).toHaveBeenCalledTimes(1);
@@ -72,7 +74,7 @@ describe('UiamProvisioningFeatureFlagScheduler', () => {
       schedule: { interval: '1d' },
     });
 
-    await new Promise<void>((resolve) => setImmediate(resolve));
+    await flushPromises();
 
     expect(taskScheduling.ensureScheduled).not.toHaveBeenCalled();
     expect(removeIfExists).not.toHaveBeenCalled();
@@ -96,12 +98,34 @@ describe('UiamProvisioningFeatureFlagScheduler', () => {
     });
 
     flag$.next(true);
-    await Promise.resolve();
+    await flushPromises();
     flag$.next(false);
-    await Promise.resolve();
+    await flushPromises();
 
     expect(taskScheduling.ensureScheduled).toHaveBeenCalledTimes(1);
     expect(removeIfExists).toHaveBeenCalledTimes(1);
     expect(logger.info).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not throw and logs an error when scheduling fails', async () => {
+    const flag$ = new Subject<boolean>();
+    const scheduler = new UiamProvisioningFeatureFlagScheduler(logger);
+    const taskScheduling = {
+      ensureScheduled: jest.fn().mockRejectedValue(new Error('boom')),
+    } as unknown as TaskScheduling;
+    const removeIfExists = jest.fn().mockResolvedValue(undefined);
+
+    scheduler.start({
+      core: makeCore(flag$),
+      taskScheduling,
+      removeIfExists,
+      schedule: { interval: '1d' },
+    });
+
+    flag$.next(true);
+    await flushPromises();
+
+    expect(taskScheduling.ensureScheduled).toHaveBeenCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledTimes(1);
   });
 });

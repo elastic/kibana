@@ -4,9 +4,11 @@
 
 This section provides a complete guide for contributors who want to add event-driven triggers so workflows can subscribe and run when events occur. Triggers are registered from **your plugin**, not from inside `workflows_extensions` (same ownership rule as [custom steps](STEPS.md#contributing-custom-step-types)).
 
+**Agent skill:** Cursor and Claude agents should use the [`workflows-custom-triggers`](../.claude/skills/workflows-custom-triggers/SKILL.md) skill for plugin discovery, file layout conventions, and review checklists. This doc remains the canonical source for implementation steps and code templates.
+
 **Quick checklist:**
 
-1. Define common trigger (id + eventSchema) in your plugin
+1. Define common trigger (id, eventSchema, title, description; optional documentation and snippets) in your plugin
 2. Register on server and public in plugin `setup()`
 3. Emit events via request context or direct `emitEvent`
 4. Add to approved list and get workflows-eng approval
@@ -20,11 +22,12 @@ Trigger IDs use the following convention:
 - ⚠️ Allowed: Inherited forms from OpenAPI/connectors/platform-owned contracts
 - ❌ Bad: `"my_trigger"` (no namespace), `"custom_trigger"` (event not camelCase)
 
-### Step 1: Define common trigger (id + eventSchema)
+### Step 1: Define common trigger (id, eventSchema, title, description; optional documentation and snippets)
 
-Create a shared definition (e.g. `common/triggers/my_trigger.ts`) in your plugin:
+Create a shared definition (e.g. `common/triggers/my_trigger.ts`) in your plugin. **title** and **description** are required. **documentation** (details + YAML examples) and **snippets** (e.g. a default `on.condition`) are optional but strongly recommended so the YAML editor, hover docs, and agent tools can guide users (aligned with custom steps):
 
 ```typescript
+import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
@@ -42,15 +45,28 @@ export type MyTriggerEvent = z.infer<typeof myTriggerEventSchema>;
 export const commonMyTriggerDefinition: CommonTriggerDefinition = {
   id: MY_TRIGGER_ID,
   eventSchema: myTriggerEventSchema,
+  title: i18n.translate('myPlugin.myTrigger.title', { defaultMessage: 'My trigger' }),
+  description: i18n.translate('myPlugin.myTrigger.description', {
+    defaultMessage: 'Emitted when something happens.',
+  }),
+  documentation: {
+    details: 'Filter when this workflow runs using KQL on event properties (e.g. event.category, event.message).',
+    examples: [
+      `## Match by category\n\`\`\`yaml\ntriggers:\n  - type: ${MY_TRIGGER_ID}\n    on:\n      condition: 'event.category: "alerts"'\n\`\`\``,
+    ],
+  },
+  snippets: { condition: 'event.category: "alerts"' },
 };
 ```
 
 - Use `.describe()` on schema fields so the UI and docs show helpful text.
 - `eventSchema` must be a Zod object schema; payloads are validated at emit time.
+- When you provide `documentation.examples`, each example must only reference fields present on `eventSchema` (agents pattern-match YAML examples).
+- When you provide `snippets.condition`, it must be valid KQL using only `event.*` fields from `eventSchema` (validated at registration).
 
 ### Step 2: Register on server
 
-In your plugin's server `setup()`, register the common definition (id + eventSchema only):
+In your plugin's server `setup()`, register the **same** common definition:
 
 ```typescript
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
@@ -68,30 +84,18 @@ Reference: `examples/workflows_extensions_example/server/triggers/index.ts`.
 
 ### Step 3: Register on public
 
-Create a public definition with UI metadata and register it in your plugin's public `setup()`:
+Spread the common definition and add **icon** only (browser-only UI):
 
 ```typescript
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { MY_TRIGGER_ID, commonMyTriggerDefinition } from '../common/triggers/my_trigger';
+import { commonMyTriggerDefinition } from '../common/triggers/my_trigger';
 
 export const myTriggerPublicDefinition: PublicTriggerDefinition = {
   ...commonMyTriggerDefinition,
-  title: i18n.translate('myPlugin.myTrigger.title', { defaultMessage: 'My trigger' }),
-  description: i18n.translate('myPlugin.myTrigger.description', {
-    defaultMessage: 'Emitted when something happens. Use in workflow triggers to run on this event.',
-  }),
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/star').then(({ icon }) => ({ default: icon }))
   ),
-  documentation: {
-    details: 'Filter when this workflow runs using KQL on event properties (e.g. event.category, event.message).',
-    examples: [
-      `## Match by category\n\`\`\`yaml\ntriggers:\n  - type: ${MY_TRIGGER_ID}\n    on:\n      condition: 'event.category: "alerts"'\n\`\`\``,
-    ],
-  },
-  snippets: { condition: 'event.category: "alerts"' },
 };
 
 // In public plugin setup():

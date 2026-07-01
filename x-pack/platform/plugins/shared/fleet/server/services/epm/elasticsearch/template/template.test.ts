@@ -2540,6 +2540,86 @@ describe('EPM template', () => {
 
       expect(esClient.indices.rollover).not.toHaveBeenCalled();
     });
+    it('should not rollover on total_fields limit error and should throw', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.simulateTemplate.mockImplementation(() => {
+        throw new errors.ResponseError({
+          statusCode: 400,
+          body: {
+            error: {
+              type: 'illegal_argument_exception',
+              reason: 'Limit of total fields [2500] has been exceeded',
+            },
+          },
+        } as any);
+      });
+      const logger = loggerMock.create();
+      await expect(
+        updateCurrentWriteIndices(esClient, logger, [
+          {
+            templateName: 'test',
+            indexTemplate: {
+              index_patterns: ['test.*-*'],
+              template: {
+                settings: { index: {} },
+                mappings: { properties: {} },
+              },
+            } as any,
+          },
+        ])
+      ).rejects.toThrow();
+
+      // Rollover must NOT be triggered for total_fields errors — it cannot fix them.
+      expect(esClient.transport.request).not.toHaveBeenCalledWith(
+        expect.objectContaining({ path: '/test.prefix1-default/_rollover' })
+      );
+    });
+
+    it('should not rollover on total_fields limit error and should not throw when ignoreMappingUpdateErrors is set', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.simulateTemplate.mockImplementation(() => {
+        throw new errors.ResponseError({
+          statusCode: 400,
+          body: {
+            error: {
+              type: 'illegal_argument_exception',
+              reason: 'Limit of total fields [2500] has been exceeded',
+            },
+          },
+        } as any);
+      });
+      const logger = loggerMock.create();
+      await expect(
+        updateCurrentWriteIndices(
+          esClient,
+          logger,
+          [
+            {
+              templateName: 'test',
+              indexTemplate: {
+                index_patterns: ['test.*-*'],
+                template: {
+                  settings: { index: {} },
+                  mappings: { properties: {} },
+                },
+              } as any,
+            },
+          ],
+          { ignoreMappingUpdateErrors: true }
+        )
+      ).resolves.not.toThrow();
+
+      expect(esClient.transport.request).not.toHaveBeenCalledWith(
+        expect.objectContaining({ path: '/test.prefix1-default/_rollover' })
+      );
+    });
+
     it('should not rollover on unexpected error', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
@@ -2746,6 +2826,75 @@ describe('EPM template', () => {
           },
         })
       );
+    });
+
+    it('should complete successfully when packageInstallation.maxConcurrentDatastreamOperations is set in config', async () => {
+      appContextService.start(
+        createAppContextStartContractMock({
+          packageInstallation: { maxConcurrentDatastreamOperations: 5 },
+        })
+      );
+
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'logs.prefix1-default' }],
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: { properties: {} },
+        },
+      } as any);
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'logs.prefix1',
+          indexTemplate: {
+            index_patterns: ['logs.prefix1-*'],
+            template: {
+              settings: { index: {} },
+              mappings: { properties: {} },
+            },
+          } as any,
+        },
+      ]);
+
+      const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
+      expect(putMappingsCall).toHaveLength(1);
+      expect(putMappingsCall[0]).toBe('logs.prefix1-default');
+    });
+
+    it('should complete successfully when packageInstallation config is absent (falls back to constant)', async () => {
+      appContextService.start(createAppContextStartContractMock());
+
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'logs.prefix1-default' }],
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: { properties: {} },
+        },
+      } as any);
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'logs.prefix1',
+          indexTemplate: {
+            index_patterns: ['logs.prefix1-*'],
+            template: {
+              settings: { index: {} },
+              mappings: { properties: {} },
+            },
+          } as any,
+        },
+      ]);
+
+      const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
+      expect(putMappingsCall).toHaveLength(1);
     });
   });
 

@@ -7,7 +7,6 @@
 
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type {
   GetStateType,
   LensInternalApi,
@@ -50,7 +49,13 @@ import {
   updateAttributesWithAnnotation,
 } from './helper';
 import { addLog } from './logger';
-import { apiHasLensComponentCallbacks, apiHasUserMessages } from './type_guards';
+import {
+  apiHasLensComponentCallbacks,
+  apiHasUserMessages,
+  hasTablesAdapter,
+  isPartialInspectorAdapters,
+  type OnDataCallback,
+} from './type_guards';
 import type { LensEmbeddableStartServices } from './types';
 import { buildUserMessagesHelpers } from './user_messages/api';
 
@@ -181,7 +186,10 @@ export function loadEmbeddableData(
           type: 'lens',
           name: lastState.attributes.visualizationType ?? '',
           id: uuid || 'new',
-          description: lastState.attributes.title || lastState.title || '',
+          // Prefer the panel-level title when it is set, falling back to the
+          // chart's own title. With the `lens.apiFormat` path the chart title is
+          // stripped from the wire format, so the panel title is the source of truth.
+          description: lastState.title ?? lastState.attributes.title ?? '',
           url: `${services.coreStart.application.getUrlForApp('lens')}${getEditPath(
             lastState.ref_id
           )}`,
@@ -196,16 +204,22 @@ export function loadEmbeddableData(
       }
     };
 
-    const onDataCallback = (adapters: Partial<DefaultInspectorAdapters> | undefined) => {
+    // _data (expression result) is unused — Lens only needs the inspector adapters.
+    // The signature OnDataCallback is used for consistency with the expressions plugin.
+    const onDataCallback: OnDataCallback = (_data, adapters) => {
       internalApi.updateVisualizationContext({
-        activeData: adapters?.tables?.tables,
+        activeData: hasTablesAdapter(adapters) ? adapters.tables?.tables : undefined,
       });
 
       // data has loaded
       internalApi.updateDataLoading(false);
       // The third argument here is an observable to let the
       // consumer to be notified on data change
-      onLoad?.(false, adapters, api.dataLoading$);
+      onLoad?.(
+        false,
+        isPartialInspectorAdapters(adapters) ? adapters : undefined,
+        api.dataLoading$
+      );
 
       api.loadViewUnderlyingData();
 

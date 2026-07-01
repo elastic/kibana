@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { createWorkflowSmlType } from './workflow';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { workflowIndexName } from '@kbn/workflows-management-plugin/server/storage/workflow_storage';
 
@@ -41,11 +42,16 @@ const createSmlDocument = (overrides: Partial<SmlDocument> = {}): SmlDocument =>
   type: 'workflow',
   title: 'My Workflow',
   origin_id: 'workflow-abc',
+  origin: { uri: 'workflow://workflow-abc' },
   content: 'My Workflow\nA test workflow',
   created_at: '2025-01-01T00:00:00.000Z',
   updated_at: '2025-01-01T00:00:00.000Z',
   spaces: ['default'],
-  permissions: [],
+  permissions: {
+    kibana: { privileges: [] },
+    elasticsearch: { indices: [] },
+  },
+  ingestion_method: 'crawled',
   ...overrides,
 });
 
@@ -280,10 +286,10 @@ describe('workflowSmlType', () => {
             type: 'workflow',
             title: 'Alert Triage',
             content: expect.any(String),
-            permissions: ['api:workflowsManagement:read'],
           },
         ],
       });
+      expect(result!.chunks[0]).not.toHaveProperty('permissions');
 
       const { content } = result!.chunks[0];
       expect(content).toContain('Alert Triage');
@@ -359,7 +365,6 @@ describe('workflowSmlType', () => {
             type: 'workflow',
             title: 'Minimal Workflow',
             content: 'Minimal Workflow\nenabled: false',
-            permissions: ['api:workflowsManagement:read'],
           },
         ],
       });
@@ -432,6 +437,21 @@ describe('workflowSmlType', () => {
       expect(content).not.toContain('tags:');
       expect(content).not.toContain('triggers:');
       expect(content).toBe('Empty Arrays\nTest workflow\nenabled: true');
+    });
+  });
+
+  describe('getPermissions', () => {
+    it('returns the api:workflowsManagement:read privilege', () => {
+      const smlType = createWorkflowSmlType(createMockApi());
+      const permissions = smlType.getPermissions!('workflow-abc', {
+        esClient: createMockEsClient(),
+        savedObjectsClient: {} as never,
+        logger: createMockLogger(),
+      });
+      expect(permissions).toEqual({
+        kibana: { privileges: [{ name: `api:${WorkflowsManagementApiActions.read}` }] },
+        elasticsearch: { indices: [] },
+      });
     });
   });
 

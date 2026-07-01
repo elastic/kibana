@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup, CoreSetup } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, CoreSetup, CoreStart } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ConvertUiamAPIKeysResponse } from '@kbn/core-security-server';
 import type { TaskManagerPluginsStart, TaskManagerStartContract } from '../plugin';
@@ -44,6 +44,10 @@ const writeTaskUiamProvisioningObservabilityStatusMock =
 const markApiKeysForInvalidationMock = markApiKeysForInvalidation as jest.MockedFunction<
   typeof markApiKeysForInvalidation
 >;
+
+const coreStartMock = {
+  elasticsearch: { client: { asInternalUser: {} } },
+} as unknown as CoreStart;
 
 const uiamSuccess = (id: string, key: string) => ({
   status: 'success' as const,
@@ -122,9 +126,10 @@ describe('UiamApiKeyProvisioningTask', () => {
     });
 
     createProvisioningRunContextMock.mockResolvedValue({
-      coreStart: {} as never,
+      coreStart: coreStartMock,
       taskManager: {} as never,
-      savedObjectsClient: { bulkUpdate } as never,
+      savedObjectsClient: {} as never,
+      unsafeSavedObjectsClient: { bulkUpdate } as never,
       uiamConvert,
     });
     fetchFirstBatchOfTasksToConvertMock.mockResolvedValue({
@@ -160,9 +165,10 @@ describe('UiamApiKeyProvisioningTask', () => {
     } as ConvertUiamAPIKeysResponse);
     const bulkUpdate = jest.fn().mockResolvedValue({ saved_objects: [{ id: 't1' }] });
     createProvisioningRunContextMock.mockResolvedValue({
-      coreStart: {} as never,
+      coreStart: coreStartMock,
       taskManager: {} as never,
-      savedObjectsClient: { bulkUpdate } as never,
+      savedObjectsClient: {} as never,
+      unsafeSavedObjectsClient: { bulkUpdate } as never,
       uiamConvert,
     });
     fetchFirstBatchOfTasksToConvertMock.mockResolvedValue({
@@ -186,9 +192,10 @@ describe('UiamApiKeyProvisioningTask', () => {
       apiKey: undefined,
     } as unknown as ConcreteTaskInstance;
     createProvisioningRunContextMock.mockResolvedValue({
-      coreStart: {} as never,
+      coreStart: coreStartMock,
       taskManager: {} as never,
-      savedObjectsClient: { bulkUpdate } as never,
+      savedObjectsClient: {} as never,
+      unsafeSavedObjectsClient: { bulkUpdate } as never,
       uiamConvert,
     });
     fetchFirstBatchOfTasksToConvertMock.mockResolvedValue({ tasks: [skippedTask], hasMore: false });
@@ -209,9 +216,10 @@ describe('UiamApiKeyProvisioningTask', () => {
     const uiamConvert = jest.fn().mockResolvedValue(null);
     const bulkUpdate = jest.fn();
     createProvisioningRunContextMock.mockResolvedValue({
-      coreStart: {} as never,
+      coreStart: coreStartMock,
       taskManager: {} as never,
-      savedObjectsClient: { bulkUpdate } as never,
+      savedObjectsClient: {} as never,
+      unsafeSavedObjectsClient: { bulkUpdate } as never,
       uiamConvert,
     });
     fetchFirstBatchOfTasksToConvertMock.mockResolvedValue({
@@ -231,9 +239,10 @@ describe('UiamApiKeyProvisioningTask', () => {
     } as ConvertUiamAPIKeysResponse);
     const bulkUpdate = jest.fn().mockRejectedValue(new Error('es unavailable'));
     createProvisioningRunContextMock.mockResolvedValue({
-      coreStart: {} as never,
+      coreStart: coreStartMock,
       taskManager: {} as never,
-      savedObjectsClient: { bulkUpdate } as never,
+      savedObjectsClient: {} as never,
+      unsafeSavedObjectsClient: { bulkUpdate } as never,
       uiamConvert,
     });
     fetchFirstBatchOfTasksToConvertMock.mockResolvedValue({
@@ -255,9 +264,10 @@ describe('UiamApiKeyProvisioningTask', () => {
       saved_objects: [{ id: 't1', error: { message: 'version conflict' } }],
     });
     createProvisioningRunContextMock.mockResolvedValue({
-      coreStart: {} as never,
+      coreStart: coreStartMock,
       taskManager: {} as never,
-      savedObjectsClient: { bulkUpdate } as never,
+      savedObjectsClient: {} as never,
+      unsafeSavedObjectsClient: { bulkUpdate } as never,
       uiamConvert,
     });
     fetchFirstBatchOfTasksToConvertMock.mockResolvedValue({
@@ -281,9 +291,10 @@ describe('UiamApiKeyProvisioningTask', () => {
   it('rethrows and logs when getApiKeysToConvert fails', async () => {
     getExcludeTasksFilterMock.mockRejectedValue(new Error('so down'));
     createProvisioningRunContextMock.mockResolvedValue({
-      coreStart: {} as never,
+      coreStart: coreStartMock,
       taskManager: {} as never,
-      savedObjectsClient: { bulkUpdate: jest.fn() } as never,
+      savedObjectsClient: {} as never,
+      unsafeSavedObjectsClient: { bulkUpdate: jest.fn() } as never,
       uiamConvert: jest.fn(),
     });
 

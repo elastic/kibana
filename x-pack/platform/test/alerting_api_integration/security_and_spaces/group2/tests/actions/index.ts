@@ -33,6 +33,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/jira'));
     loadTestFile(require.resolve('./connector_types/jira_service_management'));
     loadTestFile(require.resolve('./connector_types/oauth_access_token'));
+    loadTestFile(require.resolve('./connector_types/oauth_client_credentials_private_key_jwt'));
     loadTestFile(require.resolve('./connector_types/oauth_start_flow'));
     loadTestFile(require.resolve('./connector_types/oauth_callback'));
     loadTestFile(require.resolve('./connector_types/oauth_full_flow'));

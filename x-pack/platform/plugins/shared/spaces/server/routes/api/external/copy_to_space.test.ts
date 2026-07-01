@@ -64,9 +64,7 @@ describe('copy to space', () => {
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
 
     const service = new SpacesService();
-    service.setup({
-      basePath: httpService.basePath,
-    });
+    service.setup();
 
     const usageStatsClient = usageStatsClientMock.create();
     const usageStatsServicePromise = Promise.resolve(
@@ -80,7 +78,6 @@ describe('copy to space', () => {
     );
 
     const spacesServiceStart = service.start({
-      basePath: coreStart.http.basePath,
       spacesClientService: clientServiceStart,
     });
 

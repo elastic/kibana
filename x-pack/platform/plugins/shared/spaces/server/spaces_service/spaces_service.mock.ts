@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+
 import type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
-import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { namespaceToSpaceId, spaceIdToNamespace } from '../lib/utils/namespace';
 import { spacesClientMock } from '../spaces_client/spaces_client.mock';
 

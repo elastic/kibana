@@ -35,8 +35,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
   const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
   const entityFlyout = pageObjects.entityFlyout;
 
-  // Failing: See https://github.com/elastic/kibana/issues/261460
-  describe.skip('Security Network Page - Entity Preview flyout', function () {
+  describe('Security Network Page - Entity Preview flyout', function () {
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
@@ -122,7 +121,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           logger,
           retry,
           entitiesIndex: getEntitiesLatestIndexName(),
-          expectedCount: 36,
+          expectedCount: 41,
         });
       });
 
@@ -229,14 +228,16 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
         // Click on the entity node to show grouped entities
-        await expandedFlyoutGraph.showEntityDetails('9da97a47da11862817d60dcc1cfbaaef');
+        await expandedFlyoutGraph.showEntityDetails(
+          '081f21718bb4b854bda72b01719d0febe88b10520dede17fc2640260002ea339'
+        );
 
         // Verify grouped entities preview panel is open
         await entityFlyout.clickOnEntity('host:host-instance-1');
 
         // Verify entity preview panel is open
         await entityFlyout.assertEntityPanelIsOpen('host');
-        await entityFlyout.assertEntityPanelHeader('host', 'host-instance-1');
+        await entityFlyout.assertEntityPanelHeader('host', 'HostInstance1');
       });
     });
   });

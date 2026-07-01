@@ -16,7 +16,8 @@ import type {
   TinymathVariable,
 } from '@kbn/tinymath';
 import { luceneStringToDsl, toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
-import { tinymathFunctions, getTypeI18n } from '@kbn/lens-formula-docs';
+import { tinymathFunctions, getTypeLabel, isFormulaArgType } from '@kbn/lens-formula-docs';
+import type { FormulaArgType } from '@kbn/lens-formula-docs';
 import type { Query } from '@kbn/es-query';
 import {
   isAbsoluteTimeShift,
@@ -50,15 +51,22 @@ export type ErrorWrapper = ValidationErrors & {
   severity?: 'error' | 'warning';
 };
 
-const DEFAULT_RETURN_TYPE = getTypeI18n('number');
+const DEFAULT_RETURN_TYPE: FormulaArgType = 'number';
 
 function getNodeLocation(node: TinymathFunction): TinymathLocation[] {
   return [node.location].filter(nonNullable);
 }
 
-function getArgumentType(arg: TinymathAST, operations: Record<string, GenericOperationDefinition>) {
+function getArgumentType(
+  arg: TinymathAST,
+  operations: Record<string, GenericOperationDefinition>
+): FormulaArgType | undefined {
   if (!isObject(arg)) {
-    return getTypeI18n(typeof arg);
+    const t = typeof arg;
+    if (t === 'number' || t === 'boolean' || t === 'string') {
+      return t;
+    }
+    return undefined;
   }
   if (arg.type === 'function') {
     if (tinymathFunctions[arg.name]) {
@@ -274,8 +282,10 @@ function getMessageFromId(
           values: {
             operation: meta.operation,
             name: meta.name,
-            type: meta.type,
-            expectedType: meta.expectedType,
+            type: isFormulaArgType(meta.type) ? getTypeLabel(meta.type) : meta.type,
+            expectedType: isFormulaArgType(meta.expectedType)
+              ? getTypeLabel(meta.expectedType)
+              : meta.expectedType,
           },
         }),
       };

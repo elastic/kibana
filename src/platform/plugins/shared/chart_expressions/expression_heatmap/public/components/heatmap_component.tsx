@@ -23,22 +23,27 @@ import type {
   SettingsProps,
   SeriesIdentifier,
   TooltipValue,
+  PointerValue,
 } from '@elastic/charts';
 import { Chart, Heatmap, ScaleType, Settings, TooltipType, Tooltip } from '@elastic/charts';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
 import { LegendToggle, EmptyPlaceholder, useActiveCursor } from '@kbn/charts-plugin/public';
-import { getAccessorByDimension, getFormatByAccessor } from '@kbn/chart-expressions-common';
-import { i18n } from '@kbn/i18n';
-import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { IconChartHeatmap } from '@kbn/chart-icons';
 import {
+  ChartTooltipFooterMessage,
+  getAccessorByDimension,
+  getFormatByAccessor,
+  getComputedColumnWarningForColumns,
   getOverridesFor,
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
 } from '@kbn/chart-expressions-common';
+import { i18n } from '@kbn/i18n';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import { IconChartHeatmap } from '@kbn/chart-icons';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { CoreSetup } from '@kbn/core/public';
+
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {
   applyPaletteParams,
@@ -454,6 +459,24 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
 
     const hasTooltipActions = interactive && !isEsqlMode;
 
+    // Compute warning message for ES|QL computed columns that cannot be filtered.
+    const warningMessage = useMemo(
+      () =>
+        isEsqlMode ? getComputedColumnWarningForColumns([xAxisColumn, yAxisColumn]) : undefined,
+      [isEsqlMode, xAxisColumn, yAxisColumn]
+    );
+
+    const TooltipFooter = useMemo<
+      | React.ComponentType<{
+          items: Array<TooltipValue<Record<string, string | number>, SeriesIdentifier>>;
+          header: PointerValue<Record<string, string | number>> | null;
+        }>
+      | 'default'
+    >(() => {
+      if (!warningMessage) return 'default';
+      return () => <ChartTooltipFooterMessage message={warningMessage} />;
+    }, [warningMessage]);
+
     const onElementClick = useCallback(
       (e: HeatmapElementEvent[]) => {
         const cell = e[0][0];
@@ -465,7 +488,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               if (!xAxisColumn) return false;
               if (formattedTable.formattedColumns[xAxisColumn.id]) {
                 // stringify the value to compare with the chart value
-                return xValuesFormatter.convert(r[xAxisColumn.id]) === x;
+                return xValuesFormatter.convertToText(r[xAxisColumn.id]) === x;
               }
               return r[xAxisColumn.id] === x;
             }),
@@ -479,7 +502,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                   row: table.rows.findIndex((r) => {
                     if (formattedTable.formattedColumns[yAxisColumn.id]) {
                       // stringify the value to compare with the chart value
-                      return yValuesFormatter.convert(r[yAxisColumn.id]) === y;
+                      return yValuesFormatter.convertToText(r[yAxisColumn.id]) === y;
                     }
                     return r[yAxisColumn.id] === y;
                   }),
@@ -554,7 +577,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                 row: table.rows.findIndex((r) => {
                   if (formattedTable.formattedColumns[yAxisColumn.id]) {
                     // stringify the value to compare with the chart value
-                    return yValuesFormatter.convert(r[yAxisColumn.id]) === v;
+                    return yValuesFormatter.convertToText(r[yAxisColumn.id]) === v;
                   }
                   return r[yAxisColumn.id] === v;
                 }),
@@ -569,7 +592,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                 row: table.rows.findIndex((r) => {
                   if (formattedTable.formattedColumns[xAxisColumn.id]) {
                     // stringify the value to compare with the chart value
-                    return xValuesFormatter.convert(r[xAxisColumn.id]) === v;
+                    return xValuesFormatter.convertToText(r[xAxisColumn.id]) === v;
                   }
                   return r[xAxisColumn.id] === v;
                 }),
@@ -640,7 +663,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         const percentageNumber = (Math.abs(value - min) / (max - min)) * 100;
         value = parseInt(percentageNumber.toString(), 10) / 100;
       }
-      return `${metricFormatter.convert(value) ?? ''}`;
+      return `${metricFormatter.convertToText(value) ?? ''}`;
     };
 
     const { colors, ranges } = computeColorRanges(
@@ -780,7 +803,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                   if (!xAxisColumn) return false;
                   if (formattedTable.formattedColumns[xAxisColumn.id]) {
                     // stringify the value to compare with the chart value
-                    return xValuesFormatter.convert(r[xAxisColumn.id]) === x;
+                    return xValuesFormatter.convertToText(r[xAxisColumn.id]) === x;
                   }
                   return r[xAxisColumn.id] === x;
                 }),
@@ -794,7 +817,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                 row: table.rows.findIndex((r) => {
                   if (formattedTable.formattedColumns[yAxisColumn.id]) {
                     // stringify the value to compare with the chart value
-                    return yValuesFormatter.convert(r[yAxisColumn.id]) === y;
+                    return yValuesFormatter.convertToText(r[yAxisColumn.id]) === y;
                   }
                   return r[yAxisColumn.id] === y;
                 }),
@@ -860,6 +883,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                   : undefined
               }
               type={args.showTooltip ? TooltipType.Follow : TooltipType.None}
+              footer={TooltipFooter}
             />
             <Settings
               onRenderChange={onRenderChange}
@@ -929,7 +953,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                 `${
                   xAccessor && formattedTable.formattedColumns[xAccessor]
                     ? v
-                    : xValuesFormatter.convert(v)
+                    : xValuesFormatter.convertToText(v)
                 }`
               }
               yAxisLabelFormatter={
@@ -938,7 +962,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                       `${
                         yAccessor && formattedTable.formattedColumns[yAccessor]
                           ? v
-                          : yValuesFormatter.convert(v) ?? ''
+                          : yValuesFormatter.convertToText(v) ?? ''
                       }`
                   : undefined
               }

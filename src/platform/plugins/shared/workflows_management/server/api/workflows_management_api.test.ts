@@ -9,12 +9,17 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { type WorkflowDetailDto } from '@kbn/workflows';
+import { type WorkflowDetailDto, WorkflowsManagementApiActions } from '@kbn/workflows';
 import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
-import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
+import {
+  WorkflowExecutionInvalidStatusError,
+  WorkflowNotFoundError,
+} from '@kbn/workflows/common/errors';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 import { z } from '@kbn/zod/v4';
+import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
+import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
 import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
 
@@ -37,19 +42,24 @@ describe('WorkflowsManagementApi', () => {
 
     mockWorkflowsService = {
       getWorkflow: jest.fn(),
+      getWorkflowsByIds: jest.fn(),
       getWorkflowZodSchema: jest.fn(),
       createWorkflow: jest.fn(),
       updateWorkflow: jest.fn(),
+      restoreWorkflowVersion: jest.fn(),
       deleteWorkflows: jest.fn(),
       bulkCreateWorkflows: jest.fn(),
       validateWorkflow: jest.fn(),
       getWorkflowExecution: jest.fn(),
+      markStepAsResponded: jest.fn(),
+      getWaitingStepExecutionId: jest.fn(),
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
     } as any;
 
     api = new WorkflowsManagementApi(mockWorkflowsService, true);
     const mockZodSchema = createMockZodSchema();
     mockWorkflowsService.getWorkflowZodSchema.mockResolvedValue(mockZodSchema);
+    mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([]);
 
     mockRequest = httpServerMock.createKibanaRequest();
   });
@@ -864,6 +874,212 @@ steps:
     });
   });
 
+  describe('updateWorkflow', () => {
+    const createWorkflowDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
+      id: 'wf-1',
+      name: 'Test Workflow',
+      enabled: true,
+      yaml: 'name: Test Workflow',
+      valid: true,
+      createdAt: '2025-01-01T00:00:00.000Z',
+      createdBy: 'user',
+      lastUpdatedAt: '2025-01-01T00:00:00.000Z',
+      lastUpdatedBy: 'user',
+      definition: null,
+      ...overrides,
+    });
+
+    it('allows enablement-only updates for managed workflows', async () => {
+      const updateResult = { enabled: false } as any;
+      mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
+      mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
+
+      const result = await api.updateWorkflow('wf-1', { enabled: false }, 'default', mockRequest);
+
+      expect(result).toBe(updateResult);
+      expect(mockWorkflowsService.updateWorkflow).toHaveBeenCalledWith(
+        'wf-1',
+        { enabled: false },
+        'default',
+        mockRequest
+      );
+    });
+
+    it('rejects managed workflow updates with fields other than enabled', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
+
+      await expect(
+        api.updateWorkflow(
+          'wf-1',
+          { enabled: false, name: 'Updated Workflow' },
+          'default',
+          mockRequest
+        )
+      ).rejects.toBeInstanceOf(ManagedWorkflowUpdateForbiddenError);
+
+      expect(mockWorkflowsService.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('allows managed workflow route option to edit managed workflows', async () => {
+      const updateResult = { name: 'Updated Workflow' } as any;
+      mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
+      mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
+
+      await expect(
+        api.updateWorkflow('wf-1', { name: 'Updated Workflow' }, 'default', mockRequest, {
+          allowManagedWorkflowMutation: true,
+        })
+      ).resolves.toBe(updateResult);
+
+      expect(mockWorkflowsService.updateWorkflow).toHaveBeenCalledWith(
+        'wf-1',
+        { name: 'Updated Workflow' },
+        'default',
+        mockRequest
+      );
+    });
+
+    it('keeps unmanaged workflow updates unchanged', async () => {
+      const updateResult = { name: 'Updated Workflow' } as any;
+      mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: false }));
+      mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
+
+      await expect(
+        api.updateWorkflow('wf-1', { name: 'Updated Workflow' }, 'default', mockRequest)
+      ).resolves.toBe(updateResult);
+
+      expect(mockWorkflowsService.updateWorkflow).toHaveBeenCalled();
+    });
+  });
+
+  describe('restoreWorkflowVersion', () => {
+    const createWorkflowDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
+      id: 'wf-1',
+      name: 'Test Workflow',
+      enabled: true,
+      yaml: 'name: Test Workflow',
+      valid: true,
+      createdAt: '2025-01-01T00:00:00.000Z',
+      createdBy: 'user',
+      lastUpdatedAt: '2025-01-01T00:00:00.000Z',
+      lastUpdatedBy: 'user',
+      definition: null,
+      ...overrides,
+    });
+
+    it('restores a historical workflow version for unmanaged workflows', async () => {
+      const existingWorkflow = createWorkflowDto({ managed: false });
+      const restoreResult = {
+        id: 'wf-1',
+        version: 8,
+        lastUpdatedAt: '2026-01-02T00:00:00.000Z',
+        lastUpdatedBy: 'alice',
+        enabled: true,
+        valid: true,
+        validationErrors: [],
+      };
+
+      mockWorkflowsService.getWorkflow.mockResolvedValue(existingWorkflow);
+      mockWorkflowsService.restoreWorkflowVersion.mockResolvedValue(restoreResult);
+
+      const result = await api.restoreWorkflowVersion('wf-1', 'event-v3', 'default', mockRequest);
+
+      expect(result).toBe(restoreResult);
+      expect(mockWorkflowsService.restoreWorkflowVersion).toHaveBeenCalledWith(
+        'wf-1',
+        'event-v3',
+        'default',
+        mockRequest
+      );
+    });
+
+    it('throws when the workflow is not found', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue(null);
+
+      await expect(
+        api.restoreWorkflowVersion('missing', 'event-v3', 'default', mockRequest)
+      ).rejects.toBeInstanceOf(WorkflowNotFoundError);
+
+      expect(mockWorkflowsService.restoreWorkflowVersion).not.toHaveBeenCalled();
+    });
+
+    it('rejects restore for managed workflows', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
+
+      await expect(
+        api.restoreWorkflowVersion('wf-1', 'event-v3', 'default', mockRequest)
+      ).rejects.toBeInstanceOf(ManagedWorkflowUpdateForbiddenError);
+
+      expect(mockWorkflowsService.restoreWorkflowVersion).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteWorkflows', () => {
+    const createWorkflowDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
+      id: 'wf-1',
+      name: 'Test Workflow',
+      enabled: true,
+      yaml: 'name: Test Workflow',
+      valid: true,
+      createdAt: '2025-01-01T00:00:00.000Z',
+      createdBy: 'user',
+      lastUpdatedAt: '2025-01-01T00:00:00.000Z',
+      lastUpdatedBy: 'user',
+      definition: null,
+      ...overrides,
+    });
+
+    it('rejects deleting managed workflows', async () => {
+      mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
+        createWorkflowDto({ id: 'system-workflow', managed: true }),
+      ]);
+
+      await expect(
+        api.deleteWorkflows(['system-workflow'], 'default', mockRequest)
+      ).rejects.toBeInstanceOf(ManagedWorkflowDeleteForbiddenError);
+
+      expect(mockWorkflowsService.deleteWorkflows).not.toHaveBeenCalled();
+    });
+
+    it('rejects deleting managed workflows even with managed workflow update privilege', async () => {
+      mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
+        createWorkflowDto({ id: 'system-workflow', managed: true }),
+      ]);
+      (mockRequest as any).authzResult = {
+        [WorkflowsManagementApiActions.updateManaged]: true,
+      };
+
+      await expect(
+        api.deleteWorkflows(['system-workflow'], 'default', mockRequest)
+      ).rejects.toBeInstanceOf(ManagedWorkflowDeleteForbiddenError);
+
+      expect(mockWorkflowsService.deleteWorkflows).not.toHaveBeenCalled();
+    });
+
+    it('keeps unmanaged workflow deletes unchanged', async () => {
+      const deleteResult = {
+        total: 1,
+        deleted: 1,
+        failures: [],
+        successfulIds: ['wf-1'],
+      };
+      mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
+        createWorkflowDto({ id: 'wf-1', managed: false }),
+      ]);
+      mockWorkflowsService.deleteWorkflows.mockResolvedValue(deleteResult);
+
+      await expect(api.deleteWorkflows(['wf-1'], 'default', mockRequest)).resolves.toBe(
+        deleteResult
+      );
+
+      expect(mockWorkflowsService.deleteWorkflows).toHaveBeenCalledWith(
+        ['wf-1'],
+        'default',
+        undefined
+      );
+    });
+  });
+
   describe('SML notifications', () => {
     let mockSmlIndex: jest.MockedFunction<SmlIndexAttachmentFn>;
     let mockSmlLogger: jest.Mocked<Logger>;
@@ -928,6 +1144,9 @@ steps:
     it('notifies SML with "update" action on updateWorkflow', async () => {
       mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ id: 'wf-upd' }));
       mockWorkflowsService.updateWorkflow.mockResolvedValue({} as any);
+      (mockRequest as any).authzResult = {
+        [WorkflowsManagementApiActions.update]: true,
+      };
 
       await api.updateWorkflow('wf-upd', { name: 'Updated' }, 'default', mockRequest);
 
@@ -1213,6 +1432,82 @@ steps:
       );
 
       expect(result).toBe(engineResults);
+    });
+  });
+
+  describe('resumeWorkflowExecution (consolidated HITL claim)', () => {
+    beforeEach(() => {
+      mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockResolvedValue({ resumedBy: 'user' });
+      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValue(true);
+    });
+
+    it('claims the caller-supplied step before resuming and forwards the channel', async () => {
+      const result = await api.resumeWorkflowExecution(
+        'run-1',
+        'default',
+        { approved: true },
+        mockRequest,
+        { channel: 'agent_builder', stepExecutionId: 'step-exec-1' }
+      );
+
+      expect(mockWorkflowsService.getWaitingStepExecutionId).not.toHaveBeenCalled();
+      expect(mockWorkflowsService.markStepAsResponded).toHaveBeenCalledWith(
+        'step-exec-1',
+        mockRequest,
+        'agent_builder',
+        'default'
+      );
+      const claimOrder = (mockWorkflowsService.markStepAsResponded as jest.Mock).mock
+        .invocationCallOrder[0];
+      const resumeOrder = (mockWorkflowsExecutionEngine.resumeWorkflowExecution as jest.Mock).mock
+        .invocationCallOrder[0];
+      expect(claimOrder).toBeLessThan(resumeOrder);
+      expect(result).toEqual({ resumedBy: 'user' });
+    });
+
+    it('resolves the waiting step and defaults the channel to "inbox" when none is supplied', async () => {
+      (mockWorkflowsService.getWaitingStepExecutionId as jest.Mock).mockResolvedValue(
+        'step-exec-9'
+      );
+
+      await api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest);
+
+      expect(mockWorkflowsService.getWaitingStepExecutionId).toHaveBeenCalledWith(
+        'run-1',
+        'default'
+      );
+      expect(mockWorkflowsService.markStepAsResponded).toHaveBeenCalledWith(
+        'step-exec-9',
+        mockRequest,
+        'inbox',
+        'default'
+      );
+    });
+
+    it('throws a conflict and never resumes when the first-writer-wins claim is lost', async () => {
+      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValue(false);
+
+      await expect(
+        api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest, {
+          stepExecutionId: 'step-exec-1',
+        })
+      ).rejects.toThrow(WorkflowExecutionInvalidStatusError);
+
+      expect(mockWorkflowsExecutionEngine.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('resumes without stamping when no waiting step can be resolved (non-HITL wait)', async () => {
+      (mockWorkflowsService.getWaitingStepExecutionId as jest.Mock).mockResolvedValue(null);
+
+      await api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest);
+
+      expect(mockWorkflowsService.markStepAsResponded).not.toHaveBeenCalled();
+      expect(mockWorkflowsExecutionEngine.resumeWorkflowExecution).toHaveBeenCalledWith(
+        'run-1',
+        'default',
+        { approved: true },
+        mockRequest
+      );
     });
   });
 });

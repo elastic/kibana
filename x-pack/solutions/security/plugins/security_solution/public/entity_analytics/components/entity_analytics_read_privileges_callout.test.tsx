@@ -29,24 +29,32 @@ const ENTITY_ENGINE_PRIVILEGE = 'entities-store-index-pattern';
 const CALLOUT_TITLE = 'Insufficient privileges';
 
 const makeEntityEnginePrivileges = (
-  indexPrivileges: Record<string, Record<string, boolean>>
+  indexPrivileges: Record<string, Record<string, boolean>>,
+  kibanaPrivileges?: Record<string, boolean>
 ): EntityAnalyticsPrivileges => ({
   has_all_required: true,
   has_read_permissions: true,
   privileges: {
     elasticsearch: { index: indexPrivileges },
+    kibana: kibanaPrivileges,
   },
 });
 
+const ML_KIBANA_READ_ACTION = 'ui:ml/canGetJobs';
+
 const renderCallout = (
   riskEngineReadPrivileges: RiskEngineMissingPrivilegesResponse,
-  entityEnginePrivileges: EntityAnalyticsPrivileges | undefined
+  entityEnginePrivileges: EntityAnalyticsPrivileges | undefined,
+  leadGenerationPrivileges?: EntityAnalyticsPrivileges,
+  anomalyPrivileges?: EntityAnalyticsPrivileges
 ) =>
   render(
     <TestProviders>
       <EntityAnalyticsReadPrivilegesCallout
         riskEngineReadPrivileges={riskEngineReadPrivileges}
         entityEnginePrivileges={entityEnginePrivileges}
+        leadGenerationPrivileges={leadGenerationPrivileges}
+        anomalyPrivileges={anomalyPrivileges}
       />
     </TestProviders>
   );
@@ -141,5 +149,130 @@ describe('EntityAnalyticsReadPrivilegesCallout', () => {
     renderCallout(missingPrivileges, makeEntityEnginePrivileges({}));
 
     expect(screen.queryByText(CALLOUT_TITLE)).not.toBeInTheDocument();
+  });
+
+  it('shows callout when lead generation index is missing read privilege', () => {
+    const leadsIndex = '.entity_analytics.entity-leads-*';
+    const leadPrivileges = makeEntityEnginePrivileges({
+      [leadsIndex]: { read: false, view_index_metadata: true },
+    });
+
+    renderCallout(ALL_PRIVILEGES_GRANTED, makeEntityEnginePrivileges({}), leadPrivileges);
+
+    expect(screen.getByText(CALLOUT_TITLE)).toBeInTheDocument();
+    expect(screen.getByText(leadsIndex)).toBeInTheDocument();
+  });
+
+  it('combines missing privileges from risk engine, entity store, and lead generation', () => {
+    const leadsIndex = '.entity_analytics.entity-leads-*';
+    const missingRiskPrivileges: RiskEngineMissingPrivilegesResponse = {
+      isLoading: false,
+      hasAllRequiredPrivileges: false,
+      missingPrivileges: {
+        indexPrivileges: [[RISK_ENGINE_PRIVILEGE, ['read']]],
+        clusterPrivileges: { enable: [], run: [] },
+      },
+    };
+    const entityPrivileges = makeEntityEnginePrivileges({
+      [ENTITY_ENGINE_PRIVILEGE]: { read: false, view_index_metadata: false },
+    });
+    const leadPrivileges = makeEntityEnginePrivileges({
+      [leadsIndex]: { read: false, view_index_metadata: true },
+    });
+
+    renderCallout(missingRiskPrivileges, entityPrivileges, leadPrivileges);
+
+    expect(screen.getByText(CALLOUT_TITLE)).toBeInTheDocument();
+    expect(screen.getByText(RISK_ENGINE_PRIVILEGE)).toBeInTheDocument();
+    expect(screen.getByText(ENTITY_ENGINE_PRIVILEGE)).toBeInTheDocument();
+    expect(screen.getByText(leadsIndex)).toBeInTheDocument();
+  });
+
+  it('renders nothing when lead generation privileges are undefined', () => {
+    renderCallout(ALL_PRIVILEGES_GRANTED, makeEntityEnginePrivileges({}), undefined);
+
+    expect(screen.queryByText(CALLOUT_TITLE)).not.toBeInTheDocument();
+  });
+
+  it('renders nothing when anomaly privileges are undefined', () => {
+    renderCallout(ALL_PRIVILEGES_GRANTED, makeEntityEnginePrivileges({}), undefined, undefined);
+
+    expect(screen.queryByText(CALLOUT_TITLE)).not.toBeInTheDocument();
+  });
+
+  it('shows callout when anomaly ML kibana privilege is missing', () => {
+    const anomalyPrivileges = makeEntityEnginePrivileges({}, { [ML_KIBANA_READ_ACTION]: false });
+
+    renderCallout(
+      ALL_PRIVILEGES_GRANTED,
+      makeEntityEnginePrivileges({}),
+      undefined,
+      anomalyPrivileges
+    );
+
+    expect(screen.getByText(CALLOUT_TITLE)).toBeInTheDocument();
+    expect(screen.getByText('Machine Learning')).toBeInTheDocument();
+  });
+
+  it('renders nothing when anomaly ML kibana privilege is granted', () => {
+    const anomalyPrivileges = makeEntityEnginePrivileges({}, { [ML_KIBANA_READ_ACTION]: true });
+
+    renderCallout(
+      ALL_PRIVILEGES_GRANTED,
+      makeEntityEnginePrivileges({}),
+      undefined,
+      anomalyPrivileges
+    );
+
+    expect(screen.queryByText(CALLOUT_TITLE)).not.toBeInTheDocument();
+  });
+
+  it('shows callout when anomaly index is missing read privilege', () => {
+    const anomalyIndex = '.ml-anomalies-*';
+    const anomalyPrivileges = makeEntityEnginePrivileges({
+      [anomalyIndex]: { read: false, view_index_metadata: true },
+    });
+
+    renderCallout(
+      ALL_PRIVILEGES_GRANTED,
+      makeEntityEnginePrivileges({}),
+      undefined,
+      anomalyPrivileges
+    );
+
+    expect(screen.getByText(CALLOUT_TITLE)).toBeInTheDocument();
+    expect(screen.getByText(anomalyIndex)).toBeInTheDocument();
+  });
+
+  it('combines missing privileges from all sources including anomaly', () => {
+    const leadsIndex = '.entity_analytics.entity-leads-*';
+    const anomalyIndex = '.ml-anomalies-*';
+    const missingRiskPrivileges: RiskEngineMissingPrivilegesResponse = {
+      isLoading: false,
+      hasAllRequiredPrivileges: false,
+      missingPrivileges: {
+        indexPrivileges: [[RISK_ENGINE_PRIVILEGE, ['read']]],
+        clusterPrivileges: { enable: [], run: [] },
+      },
+    };
+    const entityPrivileges = makeEntityEnginePrivileges({
+      [ENTITY_ENGINE_PRIVILEGE]: { read: false, view_index_metadata: false },
+    });
+    const leadPrivileges = makeEntityEnginePrivileges({
+      [leadsIndex]: { read: false, view_index_metadata: true },
+    });
+    const anomalyPrivileges = makeEntityEnginePrivileges(
+      { [anomalyIndex]: { read: false, view_index_metadata: true } },
+      { [ML_KIBANA_READ_ACTION]: false }
+    );
+
+    renderCallout(missingRiskPrivileges, entityPrivileges, leadPrivileges, anomalyPrivileges);
+
+    expect(screen.getByText(CALLOUT_TITLE)).toBeInTheDocument();
+    expect(screen.getByText(RISK_ENGINE_PRIVILEGE)).toBeInTheDocument();
+    expect(screen.getByText(ENTITY_ENGINE_PRIVILEGE)).toBeInTheDocument();
+    expect(screen.getByText(leadsIndex)).toBeInTheDocument();
+    expect(screen.getByText(anomalyIndex)).toBeInTheDocument();
+    expect(screen.getByText('Machine Learning')).toBeInTheDocument();
   });
 });

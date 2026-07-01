@@ -7,39 +7,27 @@
 
 import { EuiCodeBlock, EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { formatDuration } from '@kbn/alerting-plugin/common';
+import { getBreachEsqlQuery, getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ItemValueRuleSummary } from '../item_value_rule_summary';
-import { RecoveryPolicy } from '../recovery_policy';
 import { useRule } from '../rule_context';
 import { EMPTY_VALUE, formatAlertDelay, formatRecoveryDelay } from '../utils';
 
 const MODE_LABELS: Record<string, string> = {
   signal: i18n.translate('xpack.alertingV2.ruleDetails.modeSignal', {
-    defaultMessage: 'Detect only',
+    defaultMessage: 'Signal',
   }),
   alert: i18n.translate('xpack.alertingV2.ruleDetails.modeAlert', {
-    defaultMessage: 'Alerting',
-  }),
-};
-
-const NO_DATA_BEHAVIOR_LABELS: Record<string, string> = {
-  no_data: i18n.translate('xpack.alertingV2.ruleDetails.noDataBehaviorNoData', {
-    defaultMessage: 'No data',
-  }),
-  last_status: i18n.translate('xpack.alertingV2.ruleDetails.noDataBehaviorLastStatus', {
-    defaultMessage: 'Keep last status',
-  }),
-  recover: i18n.translate('xpack.alertingV2.ruleDetails.noDataBehaviorRecover', {
-    defaultMessage: 'Recover',
+    defaultMessage: 'Alert',
   }),
 };
 
 export interface RuleConditionsProps {
   /**
    * `'full'` (default) shows all condition fields, matching the details page.
-   * `'summary'` hides Recovery, Alert delay, Recovery delay, and No data config — used by the rule summary flyout.
+   * `'summary'` hides Alert delay and Recovery delay — used by the rule summary flyout.
    */
   variant?: 'full' | 'summary';
 }
@@ -50,7 +38,7 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
   const rule = useRule();
   const isAlertMode = rule.kind === 'alert';
   const isSummary = variant === 'summary';
-  const dataSource = getIndexPatternFromESQLQuery(rule.evaluation?.query?.base) || EMPTY_VALUE;
+  const dataSource = getIndexPatternFromESQLQuery(getRootEsqlQuery(rule.query)) || EMPTY_VALUE;
 
   const conditionItems = [
     {
@@ -122,16 +110,6 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
         />
       ),
     },
-    ...(isSummary
-      ? []
-      : [
-          {
-            title: i18n.translate('xpack.alertingV2.ruleDetails.recovery', {
-              defaultMessage: 'Recovery',
-            }),
-            description: <RecoveryPolicy recoveryPolicy={rule.recovery_policy} />,
-          },
-        ]),
     ...(isAlertMode && !isSummary
       ? [
           {
@@ -158,25 +136,6 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
           },
         ]
       : []),
-    ...(isSummary
-      ? []
-      : [
-          {
-            title: i18n.translate('xpack.alertingV2.ruleDetails.noDataConfig', {
-              defaultMessage: 'No data config',
-            }),
-            description: (
-              <ItemValueRuleSummary
-                data-test-subj="alertingV2RuleDetailsNoDataConfig"
-                itemValue={
-                  rule.no_data?.behavior
-                    ? NO_DATA_BEHAVIOR_LABELS[rule.no_data.behavior] ?? rule.no_data.behavior
-                    : EMPTY_VALUE
-                }
-              />
-            ),
-          },
-        ]),
   ];
 
   return (
@@ -208,7 +167,7 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
         paddingSize="m"
         data-test-subj="alertingV2RuleDetailsBaseQuery"
       >
-        {rule.evaluation?.query?.base || EMPTY_VALUE}
+        {getBreachEsqlQuery(rule.query) || EMPTY_VALUE}
       </EuiCodeBlock>
 
       <EuiSpacer size="l" />

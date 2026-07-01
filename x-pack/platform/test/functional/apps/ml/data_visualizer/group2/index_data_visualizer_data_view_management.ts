@@ -26,8 +26,8 @@ interface TestData {
 }
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const testSubjects = getService('testSubjects');
 
   const originalTestData: TestData = {
     suiteTitle: 'original data view',
@@ -176,8 +176,6 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['ml']);
     const indexPatternTitle = 'ft_farequote';
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
-
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
     });
@@ -200,6 +198,11 @@ export default function ({ getService }: FtrProviderContext) {
           newField.type
         );
       }
+
+      await ml.testExecution.logTestStep('refreshes the data visualizer table');
+      await ml.commonUI.waitForDatePickerIndicatorLoaded();
+      await testSubjects.click('superDatePickerApplyTimeButton');
+      await ml.commonUI.waitForDatePickerIndicatorLoaded();
 
       await ml.testExecution.logTestStep('displays details for added runtime metric fields');
       for (const fieldRow of addDeleteFieldTestData.expected.metricFields as Array<
@@ -246,6 +249,12 @@ export default function ({ getService }: FtrProviderContext) {
           newField.type
         );
       }
+
+      await ml.testExecution.logTestStep('refreshes the data visualizer table');
+      await ml.commonUI.waitForDatePickerIndicatorLoaded();
+      await testSubjects.click('superDatePickerApplyTimeButton');
+      await ml.commonUI.waitForDatePickerIndicatorLoaded();
+
       await ml.testExecution.logTestStep('deletes newly added runtime fields');
       for (const fieldToDelete of addDeleteFieldTestData.newFields!) {
         await ml.dataVisualizerIndexPatternManagement.deleteField(fieldToDelete.fieldName);

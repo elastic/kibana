@@ -496,6 +496,29 @@ const CODES = Object.freeze({
     'xpack.securitySolution.endpointActionResponseCodes.runscript.diskQuota',
     { defaultMessage: 'Too many actions' }
   ),
+
+  // -----------------------------------------------------------------
+  // CANCEL CODES
+  // -----------------------------------------------------------------
+  ra_cancel_success_done: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.cancel.success',
+    { defaultMessage: 'Action was successfully canceled' }
+  ),
+  ra_cancel_success_forced: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.cancel.forcedSuccess',
+    { defaultMessage: 'Action was successfully canceled' }
+  ),
+  'ra_cancel_error_not-found': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.cancel.notFound',
+    { defaultMessage: 'Action to be canceled was not found (it may no longer be pending)' }
+  ),
+  ra_cancel_success_canceling: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.cancel.canceling',
+    {
+      defaultMessage:
+        "The action is being cancelled - the remaining processing will terminate at the next safe point. Use '--force' to terminate it abruptly.",
+    }
+  ),
 });
 
 /**

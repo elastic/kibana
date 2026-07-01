@@ -45,7 +45,7 @@ export interface GetOnePackagePolicyResponse {
 }
 
 export interface CreatePackagePolicyRequest {
-  body: NewPackagePolicy & { force?: boolean };
+  body: NewPackagePolicy & { force?: boolean; create_dataset_templates?: boolean };
   query: {
     format?: typeof inputsFormat.Simplified | typeof inputsFormat.Legacy;
   };

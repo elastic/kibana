@@ -10,8 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { RiskSeverity } from '../../../../common/search_strategy';
-import { EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
+import { RiskSeverity, EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { RiskScoreDonutChart } from '../risk_score_donut_chart';
 import { ENTITY_RISK_LEVEL_FIELD, RiskLevelBreakdownTable } from './risk_level_breakdown_table';
@@ -83,18 +82,40 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
 
   const handlePartitionClick = useCallback(
     (level: RiskSeverity) => {
-      filterManager.addFilters([
-        {
-          meta: {
-            alias: null,
-            disabled: false,
-            negate: false,
-          },
-          query: { match_phrase: { [ENTITY_RISK_LEVEL_FIELD]: level } },
-        },
-      ]);
+      const filter =
+        level === RiskSeverity.Unknown
+          ? {
+              meta: {
+                alias: i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.dynamicRiskLevel.unknownFilterAlias',
+                  { defaultMessage: 'Risk level: Unknown' }
+                ),
+                index: entityDataView?.id,
+                key: ENTITY_RISK_LEVEL_FIELD,
+                disabled: false,
+                negate: false,
+              },
+              query: {
+                bool: {
+                  should: [
+                    { match_phrase: { [ENTITY_RISK_LEVEL_FIELD]: level } },
+                    { bool: { must_not: { exists: { field: ENTITY_RISK_LEVEL_FIELD } } } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            }
+          : {
+              meta: {
+                alias: null,
+                disabled: false,
+                negate: false,
+              },
+              query: { match_phrase: { [ENTITY_RISK_LEVEL_FIELD]: level } },
+            };
+      filterManager.addFilters([filter]);
     },
-    [filterManager]
+    [filterManager, entityDataView?.id]
   );
 
   const title = i18n.translate(

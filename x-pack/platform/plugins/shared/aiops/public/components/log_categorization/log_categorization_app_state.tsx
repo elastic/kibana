@@ -6,6 +6,7 @@
  */
 import type { FC } from 'react';
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { pick } from 'lodash';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -23,6 +24,7 @@ import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { LogCategorizationPage } from './log_categorization_page';
 import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
+import { AiopsDataSourcePicker } from '../data_source_picker';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -31,7 +33,7 @@ const localStorage = new Storage(window.localStorage);
  */
 export interface LogCategorizationAppStateProps {
   /** The data view to analyze. */
-  dataView: DataView;
+  dataView: DataView | undefined;
   /** The saved search to analyze. */
   savedSearch: SavedSearch | null;
   /** App context value */
@@ -46,12 +48,22 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
   appContextValue,
   showFrozenDataTierChoice = true,
 }) => {
-  if (!dataView) return null;
+  if (!dataView) {
+    return null;
+  }
 
   const warning = timeSeriesDataViewWarning(dataView, 'log_categorization');
 
   if (warning !== null) {
-    return <>{warning}</>;
+    return (
+      <AiopsAppContext.Provider value={appContextValue}>
+        <UrlStateProvider>
+          <AiopsDataSourcePicker currentDataView={dataView} />
+          <EuiSpacer size="m" />
+          {warning}
+        </UrlStateProvider>
+      </AiopsAppContext.Provider>
+    );
   }
 
   const datePickerDeps: DatePickerDependencies = {
@@ -76,7 +88,7 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
     <AiopsAppContext.Provider value={appContextValue}>
       <CasesContext owner={[]} permissions={casesPermissions!}>
         <UrlStateProvider>
-          <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+          <DataSourceContext.Provider key={dataView.id} value={{ dataView, savedSearch }}>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
                 <LogCategorizationPage />

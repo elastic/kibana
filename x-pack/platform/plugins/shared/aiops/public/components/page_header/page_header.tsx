@@ -9,7 +9,7 @@ import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useUrlState } from '@kbn/ml-url-state';
 import { useStorage } from '@kbn/ml-local-storage';
@@ -28,6 +28,7 @@ import {
   type AiOpsKey,
   type AiOpsStorageMapped,
 } from '../../types/storage';
+import { AiopsDataSourcePicker } from '../data_source_picker';
 
 const maxInlineSizeStyles = css`
   max-inline-size: 100%;
@@ -72,9 +73,11 @@ export const PageHeader: FC = () => {
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s" wrap={true}>
       <EuiFlexItem grow={false}>
-        <EuiTitle size="l">
-          <h2>{dataView.getName()}</h2>
-        </EuiTitle>
+        <EuiFlexGroup responsive={false} wrap alignItems="center" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <AiopsDataSourcePicker currentDataView={dataView} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={maxInlineSizeStyles}>
         <EuiFlexGroup

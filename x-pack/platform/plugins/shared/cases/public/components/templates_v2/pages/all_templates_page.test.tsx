@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 
 import { AllTemplatesPage } from './all_templates_page';
 import { renderWithTestingProviders, createTestQueryClient } from '../../../common/mock';
+import { KibanaServices } from '../../../common/lib/kibana';
 import * as api from '../api/api';
 
 jest.mock('../api/api');
@@ -90,6 +91,11 @@ describe('AllTemplatesPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     apiMock.getTemplates.mockResolvedValue(mockTemplatesResponse);
+    jest
+      .spyOn(KibanaServices, 'getConfig')
+      .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+        typeof KibanaServices.getConfig
+      >);
   });
 
   it('renders the page correctly', async () => {

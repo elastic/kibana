@@ -1,0 +1,535 @@
+{
+  "sha1": "fc4a39c5ee2d1fb22dd44fb7970d2887e04933ea",
+  "tests": [
+    {
+      "id": "2d983a450230de2-481578a854c377f",
+      "title": "Observability alert details context when logs are annotated with service.name returns no service summary and the service + container log categories when no params are specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_with_service_name.spec.ts",
+        "line": 107,
+        "column": 16
+      }
+    },
+    {
+      "id": "2d983a450230de2-5207f806f1a5d66",
+      "title": "Observability alert details context when logs are annotated with service.name returns Backend log categories when service.name is specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_with_service_name.spec.ts",
+        "line": 120,
+        "column": 78
+      }
+    },
+    {
+      "id": "2d983a450230de2-74e43c3ec43089d",
+      "title": "Observability alert details context when logs are annotated with service.name returns Backend log categories when container.id is specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_with_service_name.spec.ts",
+        "line": 134,
+        "column": 78
+      }
+    },
+    {
+      "id": "2d983a450230de2-6708b2b7a291eb0",
+      "title": "Observability alert details context when logs are annotated with service.name returns an empty service summary and container log categories for a non-existing service.name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_with_service_name.spec.ts",
+        "line": 148,
+        "column": 27
+      }
+    },
+    {
+      "id": "5a65f566151c014-6f483bd5ee07fc0",
+      "title": "Observability alert details context when logs are not annotated with service.name returns a single log category when no params are specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_without_service_name.spec.ts",
+        "line": 77,
+        "column": 14
+      }
+    },
+    {
+      "id": "5a65f566151c014-253b4ddf1bb1572",
+      "title": "Observability alert details context when logs are not annotated with service.name returns service summary, downstream dependencies and log categories when service.name is specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_without_service_name.spec.ts",
+        "line": 87,
+        "column": 78
+      }
+    },
+    {
+      "id": "5a65f566151c014-ca981ba41f1e032",
+      "title": "Observability alert details context when logs are not annotated with service.name returns service summary, downstream dependencies and log categories when container.id is specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_without_service_name.spec.ts",
+        "line": 132,
+        "column": 78
+      }
+    },
+    {
+      "id": "5a65f566151c014-8258847c7aa83fa",
+      "title": "Observability alert details context when logs are not annotated with service.name returns nothing for a non-existing container id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_without_service_name.spec.ts",
+        "line": 175,
+        "column": 25
+      }
+    },
+    {
+      "id": "5a65f566151c014-988cc7ef1a98699",
+      "title": "Observability alert details context when logs are not annotated with service.name returns an empty service summary and log categories for a non-existing service.name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_without_service_name.spec.ts",
+        "line": 183,
+        "column": 27
+      }
+    },
+    {
+      "id": "4a2194ab3f1a1a5-d6a613f7a1cfec4",
+      "title": "Observability alert details context for AI assistant contextual insights returns nothing when no traces or logs are available",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context.spec.ts",
+        "line": 32,
+        "column": 15
+      }
+    },
+    {
+      "id": "4a2194ab3f1a1a5-c773b7ac6f07826",
+      "title": "Observability alert details context for AI assistant contextual insights is not available to unauthorized users",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    },
+    {
+      "id": "8eddb0a11552f22-9678d1e9e354c69",
+      "title": "Observability annotations API fails with a 400 bad request if data is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/annotations.spec.ts",
+        "line": 52,
+        "column": 12
+      }
+    },
+    {
+      "id": "8eddb0a11552f22-18b9f3feb5b2063",
+      "title": "Observability annotations API fails with a 400 bad request if data is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/annotations.spec.ts",
+        "line": 61,
+        "column": 12
+      }
+    },
+    {
+      "id": "8eddb0a11552f22-1d2036675e628c5",
+      "title": "Observability annotations API completes with a 200 and the created annotation if data is complete and valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/annotations.spec.ts",
+        "line": 86,
+        "column": 12
+      }
+    },
+    {
+      "id": "8eddb0a11552f22-24af486a2a2d68e",
+      "title": "Observability annotations API indexes the annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/annotations.spec.ts",
+        "line": 126,
+        "column": 12
+      }
+    },
+    {
+      "id": "8eddb0a11552f22-4e260a7b319d5a4",
+      "title": "Observability annotations API returns the annotation by id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/annotations.spec.ts",
+        "line": 151,
+        "column": 12
+      }
+    },
+    {
+      "id": "8eddb0a11552f22-a2219be4bdb47e3",
+      "title": "Observability annotations API deletes the annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/annotations.spec.ts",
+        "line": 185,
+        "column": 12
+      }
+    },
+    {
+      "id": "edad46751593082-f1df5a4d8ec8b23",
+      "title": "Custom Threshold rule data view create a threshold rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
+        "line": 185,
+        "column": 10
+      }
+    },
+    {
+      "id": "edad46751593082-ff2f45beda0f6fa",
+      "title": "Custom Threshold rule data view should persist the full custom-threshold form payload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
+        "line": 196,
+        "column": 10
+      }
+    },
+    {
+      "id": "edad46751593082-6f3dc658bc970b8",
+      "title": "Custom Threshold rule data view should have correct data view reference before and after edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
+        "line": 228,
+        "column": 10
+      }
+    },
+    {
+      "id": "edad46751593082-d7cfe0f3be09dbb",
+      "title": "Custom Threshold rule data view should create rule with noDataBehavior: recover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
+        "line": 260,
+        "column": 10
+      }
+    },
+    {
+      "id": "edad46751593082-76381e43384ef1a",
+      "title": "Custom Threshold rule data view should create rule with noDataBehavior: alertOnNoData",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
+        "line": 274,
+        "column": 10
+      }
+    },
+    {
+      "id": "edad46751593082-cbc2d3e7f437631",
+      "title": "Custom Threshold rule data view should create rule with noDataBehavior: remainActive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
+        "line": 288,
+        "column": 10
+      }
+    },
+    {
+      "id": "edad46751593082-6413d655d1215e7",
+      "title": "Custom Threshold rule data view should update existing rule to add noDataBehavior parameter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
+        "line": 302,
+        "column": 10
+      }
+    },
+    {
+      "id": "ef845a732ce78f1-e6e73e62752d2ba",
+      "title": "Observability find annotations API can find annotations filtered by slo id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/find_annotations.spec.ts",
+        "line": 95,
+        "column": 17
+      }
+    },
+    {
+      "id": "ef845a732ce78f1-0a60c3a091550ac",
+      "title": "Observability find annotations API can find annotations filtered by slo instance id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/find_annotations.spec.ts",
+        "line": 104,
+        "column": 74
+      }
+    },
+    {
+      "id": "ef845a732ce78f1-71c7a2efa9cb9c4",
+      "title": "Observability find annotations API can find annotations filtered by slo instance id and slo id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/find_annotations.spec.ts",
+        "line": 113,
+        "column": 26
+      }
+    },
+    {
+      "id": "a78c90a55d9044b-2601ab533468352",
+      "title": "Metric threshold rule rule should be active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
+        "line": 207,
+        "column": 10
+      }
+    },
+    {
+      "id": "a78c90a55d9044b-8bd05469abfee33",
+      "title": "Metric threshold rule should set correct information in the alert document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
+        "line": 220,
+        "column": 10
+      }
+    },
+    {
+      "id": "a78c90a55d9044b-df47c0a865f6ca5",
+      "title": "Metric threshold rule should set correct action parameter: ruleType",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
+        "line": 269,
+        "column": 10
+      }
+    },
+    {
+      "id": "a78c90a55d9044b-a5c035bfdf9d2c2",
+      "title": "Metric threshold rule should create rule with noDataBehavior: recover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
+        "line": 297,
+        "column": 10
+      }
+    },
+    {
+      "id": "a78c90a55d9044b-020e88e8c6993ac",
+      "title": "Metric threshold rule should create rule with noDataBehavior: alertOnNoData",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
+        "line": 311,
+        "column": 10
+      }
+    },
+    {
+      "id": "a78c90a55d9044b-aff0e7200841edd",
+      "title": "Metric threshold rule should create rule with noDataBehavior: remainActive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
+        "line": 325,
+        "column": 10
+      }
+    },
+    {
+      "id": "a78c90a55d9044b-0a4902db6ac40fb",
+      "title": "Metric threshold rule should update existing rule to add noDataBehavior parameter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
+        "line": 339,
+        "column": 10
+      }
+    },
+    {
+      "id": "c11a73171e746a7-9200dc75fb8f9b4",
+      "title": "Observability related dashboards suggests the dashboard matching a fired alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/related_dashboards.spec.ts",
+        "line": 192,
+        "column": 12
+      }
+    }
+  ]
+}

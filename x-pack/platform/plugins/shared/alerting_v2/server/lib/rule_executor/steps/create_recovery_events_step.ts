@@ -6,8 +6,10 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { stableStringify } from '@kbn/std';
-import { recoveryPolicyType } from '@kbn/alerting-v2-schemas';
+import { getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { isEsqlUserError } from '../../errors/esql_user_error';
 import type { PipelineStateStream, RuleExecutionStep, RulePipelineState } from '../types';
 import { buildRecoveryAlertEvents, buildQueryRecoveryAlertEvents } from '../build_alert_events';
 import { getQueryPayload } from '../get_query_payload';
@@ -17,7 +19,7 @@ import {
 } from '../../services/logger_service/logger_service';
 import {
   QueryServiceInternalToken,
-  QueryServiceScopedToken,
+  QueryServiceScopedSpaceRoutingToken,
 } from '../../services/query_service/tokens';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { getActiveAlertGroupHashesQuery, type ActiveAlertGroupHash } from '../queries';
@@ -33,7 +35,8 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(QueryServiceInternalToken) private readonly internalQueryService: QueryServiceContract,
-    @inject(QueryServiceScopedToken) private readonly scopedQueryService: QueryServiceContract
+    @inject(QueryServiceScopedSpaceRoutingToken)
+    private readonly scopedQueryService: QueryServiceContract
   ) {}
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
@@ -50,9 +53,10 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         return;
       }
 
-      if (!rule.recovery_policy) {
+      // recovery_strategy of 'none' (or null) disables recovery entirely.
+      if (rule.recovery_strategy == null || rule.recovery_strategy === 'none') {
         step.logger.debug({
-          message: `[${step.name}] Skipping recovery for rule ${input.ruleId} (no recovery_policy configured)`,
+          message: `[${step.name}] Recovery disabled for rule ${input.ruleId}`,
         });
         yield { type: 'continue', state };
         return;
@@ -71,22 +75,20 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         return;
       }
 
-      const recoveryType = rule.recovery_policy.type;
-
-      const recoveryEvents =
-        recoveryType === recoveryPolicyType.query
-          ? await step.buildQueryRecovery({ rule, input, activeGroupHashes })
-          : buildRecoveryAlertEvents({
-              ruleId: rule.id,
-              ruleVersion: 1,
-              spaceId: input.spaceId,
-              activeGroupHashes,
-              breachedGroupHashes: new Set(alertEventsBatch.map((e) => e.group_hash)),
-              scheduledTimestamp: input.scheduledAt,
-            });
+      const effectiveQuery = getRecoverEsqlQuery(rule.query, rule.recovery_strategy);
+      const recoveryEvents = effectiveQuery
+        ? await step.executeRecoveryQuery({ rule, effectiveQuery, input, activeGroupHashes })
+        : buildRecoveryAlertEvents({
+            ruleId: rule.id,
+            ruleVersion: 1,
+            spaceId: input.spaceId,
+            activeGroupHashes,
+            breachedGroupHashes: new Set(alertEventsBatch.map((e) => e.group_hash)),
+            scheduledTimestamp: input.scheduledAt,
+          });
 
       step.logger.debug({
-        message: `[${step.name}] Created ${recoveryEvents.length} recovery events (${recoveryType}) for rule ${input.ruleId}`,
+        message: `[${step.name}] Created ${recoveryEvents.length} recovery events for rule ${input.ruleId}`,
       });
 
       yield {
@@ -99,16 +101,17 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
     });
   }
 
-  private async buildQueryRecovery({
+  private async executeRecoveryQuery({
     rule,
+    effectiveQuery,
     input,
     activeGroupHashes,
   }: {
     rule: RuleResponse;
+    effectiveQuery: string;
     input: RulePipelineState['input'];
     activeGroupHashes: ActiveAlertGroupHash[];
   }): Promise<AlertEvent[]> {
-    const effectiveQuery = rule.recovery_policy!.query!.base!.trimEnd();
     const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
 
     const queryPayload = getQueryPayload({
@@ -126,22 +129,29 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         })}`,
     });
 
-    const esqlResponse = await this.scopedQueryService.executeQuery({
-      query: effectiveQuery,
-      filter: queryPayload.filter,
-      params: queryPayload.params,
-      abortSignal: input.executionContext.signal,
-    });
+    try {
+      const esqlResponse = await this.scopedQueryService.executeQuery({
+        query: effectiveQuery,
+        filter: queryPayload.filter,
+        params: queryPayload.params,
+        abortSignal: input.executionContext.signal,
+      });
 
-    return buildQueryRecoveryAlertEvents({
-      ruleId: rule.id,
-      ruleVersion: 1,
-      spaceId: input.spaceId,
-      ruleAttributes: rule,
-      activeGroupHashes,
-      esqlResponse,
-      scheduledTimestamp: input.scheduledAt,
-    });
+      return buildQueryRecoveryAlertEvents({
+        ruleId: rule.id,
+        ruleVersion: 1,
+        spaceId: input.spaceId,
+        ruleAttributes: rule,
+        activeGroupHashes,
+        esqlResponse,
+        scheduledTimestamp: input.scheduledAt,
+      });
+    } catch (error) {
+      if (isEsqlUserError(error)) {
+        throw createTaskRunError(error as Error, TaskErrorSource.USER);
+      }
+      throw error;
+    }
   }
 
   private async fetchActiveAlertGroupHashes(

@@ -242,9 +242,13 @@ describe('updateGlobalPacksCreateCallback', () => {
       mockOsqueryContext
     );
 
+    // `default_space_id` is emitted at the pack level, and `space_id` is set on
+    // each query — osquerybeat stamps scheduled responses from the per-query
+    // value, so it must be present (see https://github.com/elastic/kibana/issues/272253).
     expect(result.inputs[0].config?.osquery?.value?.packs?.['default--embedded-pack']).toEqual({
       shard: 100,
       pack_id: 'pack-so-id-4',
+      default_space_id: 'default',
       queries: {
         query1: {
           name: 'test-query',

@@ -26,6 +26,7 @@ import type {
 export type SkillsDirectoryStructure = Directory<{
   skills: Directory<{
     platform: FileDirectory<{
+      'agent-builder': FileDirectory;
       alerting: FileDirectory;
       dashboard: FileDirectory;
       discover: FileDirectory;
@@ -95,6 +96,12 @@ export interface SkillDefinition<
    * Defaults to false.
    */
   experimental?: boolean;
+  /**
+   * Required UI setting to enable a skill.
+   * To enable a skill when a boolean UiSetting is true, pass the key as a string.
+   * To enable a skill when a specific value is set for a UiSetting, pass an object with key and value.
+   */
+  uiSettingRequired?: string | { key: string; value: unknown };
   /**
    * Content of the skill.
    */

@@ -12,7 +12,6 @@ import {
   getBuiltInStepStability,
   isBuiltInStepProperty,
   isBuiltInStepType,
-  isCancelableStatus,
   isDangerousStatus,
   isDynamicConnector,
   isElasticsearchStep,
@@ -127,27 +126,11 @@ describe('types/utils', () => {
       });
     });
 
-    describe('isCancelableStatus', () => {
-      const cancelable = new Set([
-        ExecutionStatus.RUNNING,
-        ExecutionStatus.WAITING,
-        ExecutionStatus.WAITING_FOR_INPUT,
-        ExecutionStatus.WAITING_FOR_CHILD,
-        ExecutionStatus.PENDING,
-      ]);
-
-      it.each(allStatuses)('returns %s for status "%s"', (status) => {
-        expect(isCancelableStatus(status)).toBe(cancelable.has(status));
-      });
-    });
-
-    it('TIMED_OUT is terminal but NOT cancelable', () => {
+    it('TIMED_OUT is terminal', () => {
       expect(isTerminalStatus(ExecutionStatus.TIMED_OUT)).toBe(true);
-      expect(isCancelableStatus(ExecutionStatus.TIMED_OUT)).toBe(false);
     });
 
-    it('WAITING_FOR_INPUT is cancelable but NOT terminal', () => {
-      expect(isCancelableStatus(ExecutionStatus.WAITING_FOR_INPUT)).toBe(true);
+    it('WAITING_FOR_INPUT is not terminal', () => {
       expect(isTerminalStatus(ExecutionStatus.WAITING_FOR_INPUT)).toBe(false);
     });
   });
@@ -267,6 +250,7 @@ describe('types/utils', () => {
       summary: 'HTTP',
       description: 'HTTP connector',
       actionTypeId: '.http',
+      displayName: 'HTTP',
       instances: [],
     };
 

@@ -39,6 +39,10 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       if (isRunningInCcsMode) {
         loadTestFile(require.resolve('./smoke_test'));
       } else {
+        // Note: most of the Canvas FTR suite was migrated to Scout
+        // (x-pack/platform/plugins/private/canvas/test/scout). The specs kept here still run in
+        // the Firefox cross-browser config (tagged `includeFirefox`); `smoke_test` also runs in
+        // the CCS config above.
         loadTestFile(require.resolve('./smoke_test'));
         loadTestFile(require.resolve('./expression'));
         loadTestFile(require.resolve('./filters'));
@@ -46,17 +50,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
         loadTestFile(require.resolve('./datasource'));
         loadTestFile(require.resolve('./feature_controls/canvas_security'));
         loadTestFile(require.resolve('./feature_controls/canvas_spaces'));
-        loadTestFile(require.resolve('./embeddables/lens'));
-        loadTestFile(require.resolve('./embeddables/maps'));
-        loadTestFile(require.resolve('./embeddables/saved_search'));
-        loadTestFile(require.resolve('./embeddables/visualization'));
-        loadTestFile(require.resolve('./reports'));
         loadTestFile(require.resolve('./saved_object_resolve'));
-      }
-    });
-    describe('Canvas management', () => {
-      if (!isRunningInCcsMode) {
-        loadTestFile(require.resolve('./migrations_smoke_test'));
       }
     });
   });

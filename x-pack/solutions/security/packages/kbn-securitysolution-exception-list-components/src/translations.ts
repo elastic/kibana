@@ -186,3 +186,10 @@ export const AFFECTED_RULES_ARIA_LABEL = i18n.translate(
     defaultMessage: 'Affected rules',
   }
 );
+
+export const TEXT_WITH_EDIT_ARIA_LABEL = i18n.translate(
+  'exceptionList-components.text_with_edit_aria_label',
+  {
+    defaultMessage: 'Edit text',
+  }
+);

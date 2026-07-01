@@ -81,6 +81,28 @@ jest.mock('@kbn/response-ops-alerts-table/components/alerts_table', () => ({
   default: mockAlertsTable,
 }));
 
+// Mock the rule-details alert search bar to immediately signal control readiness so the
+// rule details alerts table renders during these tests (the real search bar's readiness
+// depends on the control group initializing asynchronously, which doesn't happen in jsdom).
+jest.mock('./rule_alert_search_bar', () => {
+  const ReactLib = jest.requireActual('react');
+  return {
+    RuleAlertSearchBar: ({
+      onFilterControlsChange,
+      onControlApiAvailable,
+    }: {
+      onFilterControlsChange?: (filters: unknown[]) => void;
+      onControlApiAvailable?: (api: unknown) => void;
+    }) => {
+      ReactLib.useEffect(() => {
+        onControlApiAvailable?.({});
+        onFilterControlsChange?.([]);
+      }, [onControlApiAvailable, onFilterControlsChange]);
+      return ReactLib.createElement('div', { 'data-test-subj': 'ruleAlertSearchBar' });
+    },
+  };
+});
+
 const { loadExecutionLogAggregations } = jest.requireMock(
   '../../../lib/rule_api/load_execution_log_aggregations'
 );

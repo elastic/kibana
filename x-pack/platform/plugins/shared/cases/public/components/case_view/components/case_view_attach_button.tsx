@@ -8,22 +8,35 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
+import type { CaseUI } from '../../../../common/ui/types';
 import { UploadFileModal } from '../../attachments/file/upload_file_modal';
+import { AttachSavedObjectModalLazy } from '../../attachments/common/saved_object/attach_saved_object_modal_lazy';
 import { useCasesContext } from '../../cases_context/use_cases_context';
+import { useTimelineContext } from '../../timeline_context/use_timeline_context';
+import { useCasesConfig, KibanaServices } from '../../../common/lib/kibana';
+import { useCreateAttachments } from '../../../containers/use_create_attachments';
+import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
 import * as i18n from './translations';
 
 export interface CaseViewAttachButtonProps {
-  caseId: string;
+  caseData: CaseUI;
   fill?: boolean;
 }
 
-type ActiveModal = 'file' | null;
+type ActiveModal = 'file' | 'timeline' | 'savedObject' | null;
 
 const CaseViewAttachButtonComponent: React.FC<CaseViewAttachButtonProps> = ({
-  caseId,
+  caseData,
   fill = false,
 }) => {
-  const { permissions } = useCasesContext();
+  const { permissions, owner } = useCasesContext();
+  const timelineContext = useTimelineContext();
+  const SelectTimelineModal = timelineContext?.components?.SelectTimelineModal;
+  const { attachmentsEnabled } = useCasesConfig();
+  const { mutate: createAttachments } = useCreateAttachments();
+  const refreshCaseViewPage = useRefreshCaseViewPage();
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
 
@@ -36,6 +49,42 @@ const CaseViewAttachButtonComponent: React.FC<CaseViewAttachButtonProps> = ({
     setActiveModal('file');
   }, [closePopover]);
 
+  const openTimeline = useCallback(() => {
+    closePopover();
+    setActiveModal('timeline');
+  }, [closePopover]);
+
+  // Gated by feature flag AND presence of the timeline integration
+  const showTimeline = attachmentsEnabled && Boolean(SelectTimelineModal);
+
+  const onSelectTimeline = useCallback(
+    ({ savedObjectId, title }: { savedObjectId: string; title: string }) => {
+      closeModal();
+      createAttachments(
+        {
+          caseId: caseData.id,
+          caseOwner: owner[0],
+          attachments: [
+            {
+              type: SECURITY_TIMELINE_ATTACHMENT_TYPE,
+              attachmentId: savedObjectId,
+              metadata: { title },
+            },
+          ],
+        },
+        { onSuccess: refreshCaseViewPage }
+      );
+    },
+    [caseData.id, closeModal, createAttachments, owner, refreshCaseViewPage]
+  );
+
+  const openSavedObject = useCallback(() => {
+    closePopover();
+    setActiveModal('savedObject');
+  }, [closePopover]);
+
+  const attachmentsFlagEnabled = KibanaServices.getConfig()?.attachments?.enabled === true;
+
   const panels = useMemo<EuiContextMenuPanelDescriptor[]>(
     () => [
       {
@@ -46,13 +95,33 @@ const CaseViewAttachButtonComponent: React.FC<CaseViewAttachButtonProps> = ({
             onClick: openFile,
             'data-test-subj': 'case-view-attach-menu-file',
           },
+          ...(showTimeline
+            ? [
+                {
+                  name: i18n.ATTACH_MENU_TIMELINE,
+                  onClick: openTimeline,
+                  'data-test-subj': 'case-view-attach-menu-timeline',
+                },
+              ]
+            : []),
+          ...(attachmentsFlagEnabled
+            ? [
+                {
+                  name: i18n.ATTACH_MENU_SAVED_OBJECT,
+                  onClick: openSavedObject,
+                  'data-test-subj': 'case-view-attach-menu-saved-object',
+                },
+              ]
+            : []),
         ],
       },
     ],
-    [openFile]
+    [openFile, openTimeline, showTimeline, openSavedObject, attachmentsFlagEnabled]
   );
 
-  if (!permissions.createComment) return null;
+  if (!permissions.createComment) {
+    return null;
+  }
 
   const button = (
     <EuiButton
@@ -79,7 +148,13 @@ const CaseViewAttachButtonComponent: React.FC<CaseViewAttachButtonProps> = ({
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>
-      {activeModal === 'file' && <UploadFileModal caseId={caseId} onClose={closeModal} />}
+      {activeModal === 'file' && <UploadFileModal caseId={caseData.id} onClose={closeModal} />}
+      {activeModal === 'timeline' && SelectTimelineModal && (
+        <SelectTimelineModal onSelect={onSelectTimeline} onClose={closeModal} />
+      )}
+      {activeModal === 'savedObject' && (
+        <AttachSavedObjectModalLazy caseData={caseData} onClose={closeModal} />
+      )}
     </>
   );
 };

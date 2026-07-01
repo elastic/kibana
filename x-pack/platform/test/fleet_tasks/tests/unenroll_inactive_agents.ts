@@ -12,6 +12,9 @@ import type { FtrProviderContextWithServices } from '../ftr_provider_context';
 import { cleanupAgentDocs, createAgentDoc } from '../helpers';
 
 const TASK_INTERVAL_MS = 11000; // Slightly longer than config to allow task to run
+// Unenrollment now uses two phases (schedule then execute), each on a separate tick.
+// With gracePeriodMs=1000 in tests the execute tick immediately follows the schedule tick.
+const TWO_TASK_INTERVALS_MS = TASK_INTERVAL_MS * 2;
 
 export default function (providerContext: FtrProviderContextWithServices) {
   const { getService } = providerContext;
@@ -54,7 +57,10 @@ export default function (providerContext: FtrProviderContextWithServices) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      await apiClient.deleteAgentPolicy(policyIdSpace1, TEST_SPACE_1);
+      if (policyIdSpace1) {
+        await apiClient.deleteAgentPolicy(policyIdSpace1, TEST_SPACE_1);
+        await spaces.delete(TEST_SPACE_1);
+      }
     });
 
     afterEach(async () => {
@@ -71,6 +77,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
       await es.deleteByQuery({
         index: '.fleet-actions',
         ignore_unavailable: true,
+        refresh: true,
         query: {
           match_all: {},
         },
@@ -93,9 +100,9 @@ export default function (providerContext: FtrProviderContextWithServices) {
         last_checkin: new Date(Date.now() - INACTIVITY_TIMEOUT_MS).toISOString(),
       });
 
-      await waitForTask();
+      await new Promise((resolve) => setTimeout(resolve, TWO_TASK_INTERVALS_MS));
 
-      await retry.tryForTime(15000, async () => {
+      await retry.tryForTime(60000, async () => {
         const agentRes = await es.search({
           index: '.fleet-agents',
           ignore_unavailable: true,
@@ -115,6 +122,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
 
     it('should unenroll inactive agents when policy has unenroll_timeout set in non-default space', async () => {
       TEST_SPACE_1 = spaces.getDefaultTestSpace();
+      await spaces.createTestSpace(TEST_SPACE_1);
       const spaceResp = await apiClient.createAgentPolicy(TEST_SPACE_1, {
         name: 'Test policy for unenroll inactive in space1',
         namespace: 'default',
@@ -135,9 +143,9 @@ export default function (providerContext: FtrProviderContextWithServices) {
         }
       );
 
-      await waitForTask();
+      await new Promise((resolve) => setTimeout(resolve, TWO_TASK_INTERVALS_MS));
 
-      await retry.tryForTime(15000, async () => {
+      await retry.tryForTime(30000, async () => {
         const agentRes = await es.search({
           index: '.fleet-agents',
           ignore_unavailable: true,

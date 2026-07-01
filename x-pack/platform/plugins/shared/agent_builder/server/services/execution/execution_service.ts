@@ -132,14 +132,18 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const execution = await executionClient.get(executionId);
 
     if (!execution) {
-      throw new Error(`Execution ${executionId} not found`);
+      this.logger.warn(`Ignoring abort for unknown execution ${executionId}`);
+      return;
     }
 
     if (
       execution.status !== ExecutionStatus.scheduled &&
       execution.status !== ExecutionStatus.running
     ) {
-      throw new Error(`Cannot abort execution ${executionId} with status ${execution.status}`);
+      this.logger.debug(
+        `Ignoring abort for execution ${executionId} with terminal status ${execution.status}`
+      );
+      return;
     }
 
     await executionClient.updateStatus(executionId, ExecutionStatus.aborted);
@@ -339,18 +343,27 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   private async validateAttachmentsIfProvided(
     attachments: AttachmentInput[] | undefined,
     request: KibanaRequest
-  ): Promise<Attachment[] | undefined> {
+  ): Promise<AttachmentInput[] | undefined> {
     if (!attachments || attachments.length === 0) {
       return undefined;
     }
 
-    const validated: Attachment[] = [];
+    const validated: AttachmentInput[] = [];
     for (const attachment of attachments) {
       const result = await this.deps.attachmentsService.validate(attachment, request);
       if (!result.valid) {
         throw createBadRequestError(`Attachment validation failed: ${result.error}`);
       }
-      validated.push(result.attachment as Attachment);
+      const a = result.attachment as Attachment;
+      validated.push({
+        id: a.id,
+        type: a.type,
+        data: a.data,
+        ...(a.description !== undefined ? { description: a.description } : {}),
+        ...(a.hidden !== undefined ? { hidden: a.hidden } : {}),
+        ...(a.origin !== undefined ? { origin: a.origin } : {}),
+        ...(a.groupId !== undefined ? { group_id: a.groupId } : {}),
+      });
     }
 
     return validated;

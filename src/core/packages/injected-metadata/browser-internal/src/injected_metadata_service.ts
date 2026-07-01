@@ -44,6 +44,10 @@ export class InjectedMetadataService {
         return this.state.serverBasePath;
       },
 
+      getSpaceId: () => {
+        return this.state.spaceId;
+      },
+
       getPublicBaseUrl: () => {
         return this.state.publicBaseUrl;
       },

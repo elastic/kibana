@@ -9,6 +9,8 @@ import {
   EXPAND_ROW_BUTTON,
   dataGridRowCellByColumn,
 } from '../../screens/entity_analytics/entity_analytics_home';
+import { GLOBAL_KQL_INPUT, GLOBAL_SEARCH_BAR_SUBMIT_BUTTON } from '../../screens/search_bar';
+import { fillKqlQueryBar } from '../search_bar';
 import {
   ADD_ENTITIES_ACCORDION,
   ADD_ENTITIES_SEARCH,
@@ -51,11 +53,32 @@ export const interceptResolutionMutations = () => {
 };
 
 /**
+ * Filter the home entities grid to a single entity by typing an exact
+ * `entity.name` match into the global KQL search bar. This narrows the
+ * server-side result so the target row is always rendered on the first page,
+ * independent of the table's default sort order or how many entities exist.
+ */
+export const filterHomeEntitiesByName = (entityName: string) => {
+  cy.get(GLOBAL_KQL_INPUT).clear();
+  fillKqlQueryBar(`entity.name: "${entityName}"`);
+  cy.get(GLOBAL_SEARCH_BAR_SUBMIT_BUTTON).click();
+};
+
+/**
  * Click the row-expand button on the entity-analytics flat data grid for the
- * row whose `entity.name` cell matches `entityName`. Targets the row via
- * a non-positional selector chain: name cell → containing role=row → expand button.
+ * row whose `entity.name` cell matches `entityName`. Filters the grid to that
+ * entity first so the lookup does not depend on default sort or virtualization,
+ * then targets the row via a non-positional selector chain: name cell →
+ * containing role=row → expand button.
  */
 export const openEntityFlyoutFromHomeByName = (entityName: string) => {
+  filterHomeEntitiesByName(entityName);
+  // Wait for the filtered refetch to render the matching row before acting on
+  // it. The assertion retries the `cy.contains` query, so it also re-resolves
+  // the subject if the grid re-renders, avoiding a detached-element click.
+  cy.contains(dataGridRowCellByColumn('entity.name'), entityName, { timeout: 20000 }).should(
+    'be.visible'
+  );
   cy.contains(dataGridRowCellByColumn('entity.name'), entityName)
     .parents('[role="row"]')
     .find(EXPAND_ROW_BUTTON)

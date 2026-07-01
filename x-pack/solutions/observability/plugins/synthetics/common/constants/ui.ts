@@ -23,6 +23,7 @@ export const MONITOR_MANAGEMENT_ROUTE = '/manage-monitors';
 export const OVERVIEW_ROUTE = '/';
 
 export const MONITORS_ROUTE = '/monitors';
+export const ERRORS_ROUTE = '/errors';
 
 export const GETTING_STARTED_ROUTE = '/monitors/getting-started';
 
@@ -55,6 +56,12 @@ export const paths = {
       ':monitorId?',
       encodeURIComponent(configId)
     )}`,
+  monitorEdit: (configId: string) =>
+    `${SYNTHETICS_APP_BASE_PATH}${MONITOR_EDIT_ROUTE.replace(
+      ':monitorId',
+      encodeURIComponent(configId)
+    )}`,
+  monitorAdd: `${SYNTHETICS_APP_BASE_PATH}${MONITOR_ADD_ROUTE}`,
 };
 
 export enum STATUS {

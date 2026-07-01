@@ -8,22 +8,40 @@
 import type React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
-import type { ComposeFormValues } from './compose_form_types';
+import type { FormValues } from '../../form/types';
+import type { BuilderState } from './rule_builder/types';
 
 export type ComposeDiscoverMode = 'create' | 'edit' | 'clone';
 
-export type RecoveryType = 'default' | 'custom' | 'none';
+export type RecoveryType = 'default' | 'custom';
 
 export type QueryTab = 'base' | 'alert' | 'recovery';
 
-export type StepId = 'alertCondition' | 'recoveryCondition' | 'details' | 'notifications';
+export type StepId =
+  | 'alertCondition'
+  | 'builderCondition'
+  | 'recoveryCondition'
+  | 'details'
+  | 'notifications';
+
+export const isAlertConditionStepId = (id: StepId): boolean =>
+  id === 'alertCondition' || id === 'builderCondition';
+
+export const isBuilderConditionStepId = (id: StepId): boolean => id === 'builderCondition';
+
+export interface CustomRecoveryRenderProps {
+  state: ComposeDiscoverState;
+  dispatch: React.Dispatch<ComposeDiscoverAction>;
+}
 
 export interface StepRenderProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
-  onKindChange: (kind: 'signal' | 'alert') => void;
+  isEditing: boolean;
+  ruleId?: string;
+  renderCustomRecovery?: (props: CustomRecoveryRenderProps) => React.ReactNode;
 }
 
 export interface StepDefinition {
@@ -31,8 +49,10 @@ export interface StepDefinition {
   title: string;
   render: (props: StepRenderProps) => React.ReactNode;
   validate?: (
-    methods: UseFormReturn<ComposeFormValues>,
-    state: ComposeDiscoverState
+    methods: UseFormReturn<FormValues>,
+    state: ComposeDiscoverState,
+    services?: RuleFormServices,
+    builderState?: BuilderState
   ) => Promise<boolean> | boolean;
 }
 
@@ -59,14 +79,15 @@ export interface ComposeDiscoverState {
 }
 
 export type ComposeDiscoverAction =
-  | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType }
+  | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType; isBuilderMode?: boolean }
   | { type: 'KIND_CHANGE'; kind: 'signal' | 'alert' }
   | { type: 'SET_TAB'; tab: QueryTab }
   | { type: 'SET_STEP'; step: number }
-  | { type: 'GO_NEXT'; isAlert: boolean }
-  | { type: 'GO_BACK' }
+  | { type: 'GO_NEXT'; isAlert: boolean; isBuilderMode?: boolean }
+  | { type: 'GO_BACK'; isBuilderMode?: boolean }
   | { type: 'OPEN_CHILD'; isAlert: boolean }
   | { type: 'OPEN_CHILD_FOR_STEP'; step: number; isAlert: boolean }
   | { type: 'CLOSE_CHILD' }
   | { type: 'COMMIT_QUERY' }
+  | { type: 'INVALIDATE_QUERY' }
   | { type: 'SET_YAML_MODE'; enabled: boolean };

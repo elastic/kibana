@@ -284,9 +284,9 @@ describe('EndpointActionsClient', () => {
         {
           type: 'security.endpoint',
           attachmentId: expect.any(String),
+          data: { content: 'test comment' },
           metadata: {
             command: 'isolate',
-            comment: 'test comment',
             targets: [
               {
                 agentType: 'endpoint',
@@ -312,10 +312,12 @@ describe('EndpointActionsClient', () => {
         {
           type: 'security.endpoint',
           attachmentId: expect.any(String),
+          data: {
+            content:
+              'test comment. (WARNING: The following agent ids are not valid: ["invalid-id"] and will not be included in action request)',
+          },
           metadata: {
             command: 'isolate',
-            comment:
-              'test comment. (WARNING: The following agent ids are not valid: ["invalid-id"] and will not be included in action request)',
             targets: [
               {
                 agentType: 'endpoint',
@@ -397,6 +399,7 @@ describe('EndpointActionsClient', () => {
         'startedAt',
         'isCompleted',
         'completedAt',
+        'wasCanceled',
         'wasSuccessful',
         'errors',
         'isExpired',
@@ -450,7 +453,10 @@ describe('EndpointActionsClient', () => {
 
     runscript: endpointActionClientMock.createRunScriptOptions(getCommonResponseActionOptions()),
 
-    cancel: responseActionsClientMock.createCancelActionOptions(getCommonResponseActionOptions()),
+    cancel: responseActionsClientMock.createCancelActionOptions({
+      ...getCommonResponseActionOptions(),
+      parameters: { id: 'test-action-id-123', force: true },
+    }),
   };
 
   it.each(Object.keys(responseActionMethods) as ResponseActionsMethodsOnly[])(
@@ -462,6 +468,7 @@ describe('EndpointActionsClient', () => {
             agents: ['1-2-3'],
             isCompleted: false,
             command: 'memory-dump',
+            agentState: { '1-2-3': { isCompleted: false } },
           })
         );
       }
@@ -501,6 +508,13 @@ describe('EndpointActionsClient', () => {
             timeout: 60000,
           };
           expectedComment = `(Script name: script one / File name: my_script.sh) ${expectedComment}`;
+          break;
+
+        case 'cancel':
+          expectedParams = {
+            id: 'test-action-id-123',
+            force: true,
+          };
           break;
       }
 
@@ -675,6 +689,7 @@ describe('EndpointActionsClient', () => {
         agentType: 'endpoint',
         isCompleted: false,
         command: 'memory-dump',
+        agentState: { '1-2-3': { isCompleted: false } },
       });
 
       getActionDetailsByIdMock.mockResolvedValue(actionToBeCanceledDetails);
@@ -701,7 +716,16 @@ describe('EndpointActionsClient', () => {
     });
 
     it('should throw error if action is already complete', async () => {
-      actionToBeCanceledDetails.isCompleted = true;
+      actionToBeCanceledDetails.isCompleted = false;
+      actionToBeCanceledDetails.agentState = {
+        '1-2-3': {
+          isCompleted: true,
+          wasSuccessful: false,
+          wasCanceled: false,
+          errors: undefined,
+          completedAt: undefined,
+        },
+      };
 
       await expect(
         endpointActionsClient.cancel(
@@ -710,7 +734,9 @@ describe('EndpointActionsClient', () => {
             parameters: { id: 'action-123' },
           })
         )
-      ).rejects.toThrow('Action [action-123] is already completed and cannot be canceled.');
+      ).rejects.toThrow(
+        'Action [action-123] is already completed for agent [1-2-3] and cannot be canceled.'
+      );
     });
 
     it('should throw error if action to cancel does not have an agentType of endpoint', async () => {
@@ -954,12 +980,15 @@ describe('EndpointActionsClient', () => {
         ).mockImplementation(async () => {
           throw new AgentNotFoundError('Agent some-id not found');
         });
-        getActionDetailsByIdMock.mockResolvedValue({
-          isCompleted: false,
-          agentType: 'endpoint',
-          command: 'runscript',
-          agents: ['1-2-3'],
-        });
+        getActionDetailsByIdMock.mockResolvedValue(
+          new EndpointActionGenerator('seed').generateActionDetails({
+            agents: ['1-2-3'],
+            isCompleted: false,
+            agentType: 'endpoint',
+            command: 'runscript',
+            agentState: { '1-2-3': { isCompleted: false } },
+          })
+        );
         const options = responseActionsClientMock.getOptionsForResponseActionMethod(methodName);
 
         // @ts-expect-error `options` type is too broad because we're getting it from a helper

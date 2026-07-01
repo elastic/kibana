@@ -283,14 +283,15 @@ export function buildFormBasedXYLayer(layer: unknown, i: number) {
   if (isAPIDataLayer(layer)) {
     // convert metrics in buckets, do not flat yet
     const yColumnsConverted = layer.y.map((col) => fromMetricAPItoLensState(col));
-    const yColumnsWithIds = processMetricColumnsWithReferences(
+    const { metricColumns, referencesColumns } = processMetricColumnsWithReferences(
       yColumnsConverted,
       (index) => getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index),
       (index) => getAccessorNameForXY(layer, `${METRIC_ACCESSOR_PREFIX}_ref`, index)
     );
-    const xColumns = layer.x ? fromBucketLensApiToLensState(layer.x, yColumnsWithIds) : undefined;
+    // fromBucketLensApiToLensState resolves rank_by.metric_index against visible metrics only.
+    const xColumns = layer.x ? fromBucketLensApiToLensState(layer.x, metricColumns) : undefined;
     const breakdownColumns = layer.breakdown_by
-      ? fromBucketLensApiToLensState(layer.breakdown_by, yColumnsWithIds)
+      ? fromBucketLensApiToLensState(layer.breakdown_by, metricColumns)
       : undefined;
 
     // Add bucketed coluns first
@@ -309,7 +310,10 @@ export function buildFormBasedXYLayer(layer: unknown, i: number) {
     }
 
     // then metric ones
-    for (const { id, column } of yColumnsWithIds) {
+    for (const { id, column } of metricColumns) {
+      addLayerColumn(newLayer, id, column);
+    }
+    for (const { id, column } of referencesColumns) {
       addLayerColumn(newLayer, id, column);
     }
   }

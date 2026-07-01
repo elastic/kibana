@@ -34,7 +34,14 @@ export interface AlertingTaskDefinition<TRunner extends AlertingTaskRunner = Ale
   taskType: string;
   title: string;
   timeout: string;
-  paramsSchema: ObjectType;
+  paramsSchema?: ObjectType;
+  stateSchemaByVersion?: Record<
+    number,
+    {
+      schema: ObjectType;
+      up: (state: Record<string, unknown>) => Record<string, unknown>;
+    }
+  >;
   maxAttempts?: number;
   taskRunnerClass: TaskRunnerConstructor<TRunner>;
   /**

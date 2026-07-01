@@ -19,9 +19,9 @@ import { ExecutionStatus, WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { IUiSettingsClient } from '@kbn/core/server';
+import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import type { InternalStartServices } from '../../services/types';
 import { getCurrentSpaceId } from '../../utils/spaces';
-import { executeWorkflow } from '../../services/workflow/execute_workflow';
 import type { BeforeAgentWorkflowOutput } from './types';
 import type { AgentsServiceStart } from '../../services/agents';
 import {

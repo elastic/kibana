@@ -19,6 +19,7 @@
   "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/content-list-common",
     "@kbn/dashboard-plugin",
     "@kbn/expressions-plugin",
     "@kbn/saved-objects-management-plugin",
@@ -64,7 +65,6 @@
     "@kbn/core-deprecations-common",
     "@kbn/data-grid-in-table-search",
     "@kbn/scout-info",
-    "@kbn/esql-utils",
     "@kbn/synthtrace-client",
     "@kbn/synthtrace",
     "@kbn/controls-constants",
@@ -73,8 +73,9 @@
     "@kbn/ai-assistant-management-plugin",
     "@kbn/setup-node-env",
     "@kbn/visualizations-common",
-    "@kbn/unified-data-table",
     "@kbn/session-notifications-plugin",
-    "@kbn/ui-actions-plugin"
+    "@kbn/ui-actions-plugin",
+    "@kbn/deeplinks-analytics",
+    "@kbn/unified-tabs"
   ]
 }

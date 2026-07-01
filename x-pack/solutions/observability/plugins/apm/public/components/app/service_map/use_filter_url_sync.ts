@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -31,13 +31,24 @@ interface AppFilterState {
   controlSelections?: ControlSelections;
 }
 
+function getRestoredAppFilters(initialState: AppFilterState | null): Filter[] {
+  if (!initialState?.filters || initialState.filters.length === 0) {
+    return [];
+  }
+
+  return initialState.filters.map((f) => ({
+    ...f,
+    $state: { store: FilterStateStore.APP_STATE },
+  }));
+}
+
 /**
  * Reads `_a` from the raw browser URL on initial load.
  * This is needed because the APM typed router strips unknown query params
  * (via deepExactRt) before React components mount — so kbnUrlStateStorage
  * won't find `_a` in history.location.search.
  */
-function readInitialAppStateFromRawUrl(): AppFilterState | null {
+export function readInitialAppStateFromRawUrl(): AppFilterState | null {
   try {
     const raw = window.location.href;
     const match = raw.match(/[?&]_a=([^&#]+)/);
@@ -79,23 +90,17 @@ export function useFilterUrlSync() {
     })
   );
 
+  const [initialState] = useState<AppFilterState | null>(() => {
+    const state = storage.get<AppFilterState>(APP_STATE_KEY);
+    return state ?? readInitialAppStateFromRawUrl();
+  });
+
+  const initialAppFilters = useMemo(() => getRestoredAppFilters(initialState), [initialState]);
+
   useEffect(() => {
     const kbnUrlStateStorage = storage;
 
-    // Try kbnUrlStateStorage first, fall back to raw URL parsing
-    // (the typed router strips `_a` from history.location.search).
-    let initialState = kbnUrlStateStorage.get<AppFilterState>(APP_STATE_KEY);
-    if (!initialState) {
-      initialState = readInitialAppStateFromRawUrl();
-    }
-
-    if (initialState?.filters && initialState.filters.length > 0) {
-      const restoredFilters = initialState.filters.map((f) => ({
-        ...f,
-        $state: { store: FilterStateStore.APP_STATE },
-      }));
-      filterManager.setAppFilters(restoredFilters);
-    }
+    filterManager.setAppFilters(initialAppFilters);
 
     // Subscribe to filterManager changes and write back to URL
     const sub = filterManager.getUpdates$().subscribe(() => {
@@ -115,7 +120,7 @@ export function useFilterUrlSync() {
     return () => {
       sub.unsubscribe();
     };
-  }, [filterManager, storage, toasts]);
+  }, [filterManager, initialAppFilters, storage]);
 
   const persistControlSelections = useCallback(
     (selections: ControlSelections) => {
@@ -138,12 +143,8 @@ export function useFilterUrlSync() {
   );
 
   const getRestoredControlSelections = useCallback((): ControlSelections | undefined => {
-    let state = storage.get<AppFilterState>(APP_STATE_KEY);
-    if (!state) {
-      state = readInitialAppStateFromRawUrl();
-    }
-    return state?.controlSelections ?? undefined;
-  }, [storage]);
+    return initialState?.controlSelections ?? undefined;
+  }, [initialState]);
 
-  return { persistControlSelections, getRestoredControlSelections };
+  return { initialAppFilters, persistControlSelections, getRestoredControlSelections };
 }

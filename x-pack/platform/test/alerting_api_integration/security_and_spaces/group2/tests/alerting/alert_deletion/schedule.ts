@@ -11,21 +11,6 @@ import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import {
-  DOCUMENT_SOURCE,
-  createEsDocument,
-} from '../../../../../spaces_only/tests/alerting/create_test_data';
-import type { Space } from '../../../../../common/types';
-import type { Scenario } from '../../../../scenarios';
-import {
-  Space1,
-  Space2,
-  SuperuserAtSpace1,
-  Space1AllAtSpace1,
-  UserAtSpaceScenarios,
-} from '../../../../scenarios';
-import { getUrlPrefix, getEventLog, ObjectRemover } from '../../../../../common/lib';
-import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import {
   activeO11yAlertsOlderThan90,
   activeO11yAlertsNewerThan90,
   activeSecurityAlertsOlderThan90,
@@ -41,7 +26,22 @@ import {
   getTestAlertDocs,
   getRecoveredAlert,
   getActiveAlert,
-} from './alert_deletion_test_utils';
+} from '@kbn/alerting-api-integration-helpers';
+import {
+  DOCUMENT_SOURCE,
+  createEsDocument,
+} from '../../../../../spaces_only/tests/alerting/create_test_data';
+import type { Space } from '../../../../../common/types';
+import type { Scenario } from '../../../../scenarios';
+import {
+  Space1,
+  Space2,
+  SuperuserAtSpace1,
+  Space1AllAtSpace1,
+  UserAtSpaceScenarios,
+} from '../../../../scenarios';
+import { getUrlPrefix, getEventLog, ObjectRemover } from '../../../../../common/lib';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 export default function alertDeletionTests({ getService }: FtrProviderContext) {
   const retry = getService('retry');

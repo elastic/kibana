@@ -15,7 +15,7 @@ import type {
   IRuleTypeAlerts,
 } from '@kbn/alerting-plugin/server';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';

@@ -46,6 +46,7 @@ export interface ComponentTemplateListItem {
   hasSettings: boolean;
   isManaged: boolean;
   isDeprecated?: boolean;
+  hasFrozenOrDeletePhase?: boolean;
 }
 
 export interface ComponentTemplateDatastreams {

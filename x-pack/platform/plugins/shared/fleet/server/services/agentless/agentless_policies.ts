@@ -6,28 +6,44 @@
  */
 
 import {
+  type AuthenticatedUser,
   type ElasticsearchClient,
   type KibanaRequest,
   type Logger,
   type RequestHandlerContext,
   type SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import type { TypeOf } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
-import type { AgentlessPolicy, CreateAgentlessPolicyRequestSchema } from '../../../common/types';
+import type {
+  NewAgentlessPolicy,
+  AgentlessPolicy,
+  AgentlessAgentPolicyConfig,
+  PackagePolicy,
+  ListWithKuery,
+  ListResult,
+} from '../../../common/types';
 
-import { AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT } from '../../../common/constants';
+import {
+  AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../common/constants';
 
-import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
+import {
+  formatInputs,
+  formatVars,
+  simplifiedPackagePolicytoNewPackagePolicy,
+} from '../../../common/services/simplified_package_policy_helper';
 
 import type { PackagePolicyClient } from '../package_policy_service';
 
 import { agentPolicyService } from '../agent_policy';
 import { getPackageInfo } from '../epm/packages';
 import { appContextService, cloudConnectorService } from '..';
+import { FleetNotFoundError } from '../../errors';
 
 import type { PackageInfo } from '../../types';
 import {
@@ -37,12 +53,26 @@ import {
 import { agentlessAgentService } from '../agents/agentless_agent';
 import { createAndIntegrateCloudConnector } from '../cloud_connectors';
 
+import { prefixKueryFieldsWithSavedObjectType } from './kuery_utils';
+
+/**
+ * Options accepted by {@link AgentlessPoliciesService.listAgentlessPolicies}.
+ *
+ * Built from {@link ListWithKuery} but narrowed to the fields the agentless LIST
+ * endpoint actually supports — `fields` and the `HttpFetchQuery` index signature
+ * are intentionally excluded.
+ */
+export type ListAgentlessPoliciesOptions = Pick<
+  ListWithKuery,
+  'page' | 'perPage' | 'sortField' | 'sortOrder' | 'kuery'
+>;
+
 export interface AgentlessPoliciesService {
   createAgentlessPolicy: (
-    data: TypeOf<typeof CreateAgentlessPolicyRequestSchema.body>,
+    data: NewAgentlessPolicy,
     context?: RequestHandlerContext,
     request?: KibanaRequest
-  ) => Promise<any>;
+  ) => Promise<AgentlessPolicy>;
 
   deleteAgentlessPolicy: (
     policyId: string,
@@ -50,9 +80,17 @@ export interface AgentlessPoliciesService {
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ) => Promise<void>;
+
+  getAgentlessPolicy: (policyId: string) => Promise<AgentlessPolicy | null>;
+
+  listAgentlessPolicies: (
+    options?: ListAgentlessPoliciesOptions
+  ) => Promise<ListResult<AgentlessPolicy>>;
 }
 
-const getAgentlessPolicy = (packageInfo?: PackageInfo): AgentlessPolicy | undefined => {
+const getAgentlessAgentPolicyConfig = (
+  packageInfo?: PackageInfo
+): AgentlessAgentPolicyConfig | undefined => {
   if (
     !packageInfo?.policy_templates &&
     !packageInfo?.policy_templates?.some((policy) => policy.deployment_modes)
@@ -75,6 +113,38 @@ const getAgentlessPolicy = (packageInfo?: PackageInfo): AgentlessPolicy | undefi
   };
 };
 
+export const packagePolicyToAgentlessPolicy = (packagePolicy: PackagePolicy): AgentlessPolicy => {
+  // PackagePolicy.package is always set for agentless policies created through this service but optional in the general type
+  if (!packagePolicy.package) {
+    throw new Error(`Agentless policy ${packagePolicy.id} is missing a package reference`);
+  }
+
+  const supportsAgentless = true;
+  return {
+    id: packagePolicy.id,
+    name: packagePolicy.name,
+    description: packagePolicy.description,
+    namespace: packagePolicy.namespace,
+    package: {
+      name: packagePolicy.package.name,
+      title: packagePolicy.package.title,
+      version: packagePolicy.package.version,
+    },
+    inputs: formatInputs(packagePolicy.inputs, supportsAgentless) ?? {},
+    vars: formatVars(packagePolicy.vars),
+    var_group_selections: packagePolicy.var_group_selections,
+    additional_datastreams_permissions: packagePolicy.additional_datastreams_permissions,
+    global_data_tags: packagePolicy.global_data_tags,
+    cloud_connector: packagePolicy.cloud_connector_id
+      ? { enabled: true, cloud_connector_id: packagePolicy.cloud_connector_id }
+      : null,
+    created_at: packagePolicy.created_at,
+    created_by: packagePolicy.created_by,
+    updated_at: packagePolicy.updated_at,
+    updated_by: packagePolicy.updated_by,
+  };
+};
+
 export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
   constructor(
     private readonly packagePolicyService: PackagePolicyClient,
@@ -84,7 +154,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
   ) {}
 
   async createAgentlessPolicy(
-    data: TypeOf<typeof CreateAgentlessPolicyRequestSchema.body>,
+    data: NewAgentlessPolicy,
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ) {
@@ -121,7 +191,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       const agentPolicyName = getAgentlessAgentPolicyNameFromPackagePolicyName(data.name);
 
       // Get base agentless config from package info
-      const baseAgentlessConfig = getAgentlessPolicy(pkgInfo);
+      const baseAgentlessConfig = getAgentlessAgentPolicyConfig(pkgInfo);
 
       // Build agentless config with cloud connectors if provided
       let agentlessConfig = baseAgentlessConfig;
@@ -214,6 +284,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           bumpRevision: false,
           spaceId,
           user,
+          createDatasetTemplates: data.create_dataset_templates,
         },
         context,
         request
@@ -224,7 +295,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         throwOnAgentlessError: true,
       });
 
-      return packagePolicy;
+      return packagePolicyToAgentlessPolicy(packagePolicy);
     } catch (err) {
       // Handle cloud connector rollback
       if (createdCloudConnectorId) {
@@ -274,7 +345,18 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       ? appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined
       : undefined;
 
-    const agentPolicy = await agentPolicyService.get(this.soClient, policyId);
+    let agentPolicy;
+    try {
+      agentPolicy = await agentPolicyService.get(this.soClient, policyId);
+    } catch (e) {
+      if (e instanceof FleetNotFoundError || SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        this.logger.warn(`Agent policy ${policyId} not found, cleaning up orphaned resources`);
+        await this.deleteOrphanedAgentlessResources(policyId, user);
+        return;
+      }
+      throw e;
+    }
+
     if (!agentPolicy?.supports_agentless) {
       throw new Error(`Policy ${policyId} is not an agentless policy`);
     }
@@ -284,5 +366,92 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       force: options?.force,
       user,
     });
+  }
+
+  async getAgentlessPolicy(policyId: string): Promise<AgentlessPolicy | null> {
+    this.logger.debug(`Getting agentless policy ${policyId}`);
+
+    let packagePolicy: PackagePolicy | null;
+    try {
+      packagePolicy = await this.packagePolicyService.get(this.soClient, policyId);
+    } catch (error) {
+      // packagePolicyService.get throws (rather than returning null) when the underlying
+      // package policy is missing. Collapse a not-found into a null result so the handler
+      // can return a clean 404 instead of leaking the underlying saved-object error.
+      if (error instanceof FleetNotFoundError || SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        return null;
+      }
+      throw error;
+    }
+
+    // Treat a regular (non-agentless) package policy as not found so this API never
+    // exposes standard Fleet package policies through the agentless contract.
+    if (!packagePolicy || packagePolicy.supports_agentless !== true) {
+      return null;
+    }
+
+    return packagePolicyToAgentlessPolicy(packagePolicy);
+  }
+
+  async listAgentlessPolicies(
+    options: ListAgentlessPoliciesOptions = {}
+  ): Promise<ListResult<AgentlessPolicy>> {
+    // Pin the agentless LIST defaults to our API contract rather than inheriting
+    // whatever packagePolicyService.list happens to default to.
+    const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
+
+    // Always scope the result set to agentless package policies. This filter is applied
+    // server-side (and `supports_agentless` is excluded from the allowed kuery fields) so
+    // callers can neither widen the scope to regular package policies nor override it.
+    const agentlessFilter = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`;
+    const normalizedKuery = kuery
+      ? prefixKueryFieldsWithSavedObjectType(kuery, PACKAGE_POLICY_SAVED_OBJECT_TYPE)
+      : undefined;
+    const combinedKuery = normalizedKuery
+      ? `(${agentlessFilter}) AND (${normalizedKuery})`
+      : agentlessFilter;
+
+    this.logger.debug(`Listing agentless policies with kuery [${combinedKuery}]`);
+
+    const result = await this.packagePolicyService.list(this.soClient, {
+      page,
+      perPage,
+      sortField,
+      sortOrder,
+      kuery: combinedKuery,
+    });
+
+    this.logger.debug(`Listed ${result.total} agentless policies`);
+
+    return {
+      items: result.items.map(packagePolicyToAgentlessPolicy),
+      total: result.total,
+      page: result.page,
+      perPage: result.perPage,
+    };
+  }
+
+  private async deleteOrphanedAgentlessResources(policyId: string, user?: AuthenticatedUser) {
+    const packagePolicies = await this.packagePolicyService.findAllForAgentPolicy(
+      this.soClient,
+      policyId
+    );
+
+    if (packagePolicies.length > 0) {
+      await this.packagePolicyService.delete(
+        this.soClient,
+        this.esClient,
+        packagePolicies.map((pp) => pp.id),
+        { force: true, user: user ?? undefined, skipUnassignFromAgentPolicies: true }
+      );
+    }
+
+    try {
+      await agentlessAgentService.deleteAgentlessAgent(policyId);
+    } catch (e) {
+      this.logger.warn(
+        `Failed to delete agentless deployment for orphaned policy ${policyId}: ${e.message}`
+      );
+    }
   }
 }

@@ -26,6 +26,7 @@ import type {
   ThemeServiceStart,
   UserProfileService,
 } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import type {
   FilterManager,
   TimefilterContract,
@@ -70,7 +71,7 @@ import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
-import type { ProfilesManager } from './context_awareness';
+import { type ProfilesManager, ProfileStateRegistry } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
@@ -157,11 +158,13 @@ export interface DiscoverServices {
   noDataPage?: NoDataPagePluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   profilesManager: ProfilesManager;
+  profileStateRegistry: ProfileStateRegistry;
   ebtManager: DiscoverEBTManager;
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
   cps?: CPSPluginStart;
   embeddableEditor: EmbeddableEditorService;
+  logger: Logger;
 }
 
 export const buildServices = ({
@@ -263,6 +266,7 @@ export const buildServices = ({
     noDataPage: plugins.noDataPage,
     observabilityAIAssistant: plugins.observabilityAIAssistant,
     profilesManager,
+    profileStateRegistry: new ProfileStateRegistry(),
     ebtManager,
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
@@ -271,5 +275,6 @@ export const buildServices = ({
       plugins.embeddable.getStateTransfer(),
       core.application
     ),
+    logger: context.logger.get(),
   };
 };

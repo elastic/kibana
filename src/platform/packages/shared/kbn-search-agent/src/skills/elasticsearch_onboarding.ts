@@ -30,13 +30,13 @@ This playbook is the main onboarding thread. Keep the user in the **conversation
 
 When the user needs **deep, pattern-specific implementation guidance**, invoke the matching skill:
 
-| User intent / signal                                                             | Skill to invoke          |
-| -------------------------------------------------------------------------------- | ------------------------ |
-| "What can I build?", exploring Elastic use cases                                 | \`/use-case-library\`      |
-| Keyword / full-text search, filters, facets, autocomplete                        | \`/keyword-search\`        |
-| Vectors, hybrid BM25+kNN, semantic retrieval, Elasticsearch as a vector database | \`/vector-hybrid-search\`  |
-| RAG, Q&A, chatbots over documents                                                | \`/rag-chatbot\`           |
-| Product / catalog / e-commerce search                                            | \`/catalog-ecommerce\`     |
+| User intent / signal                                                             | Skill to invoke         |
+| -------------------------------------------------------------------------------- | ----------------------- |
+| "What can I build?", exploring Elastic use cases                                 | \`/use-case-library\`     |
+| Keyword / full-text search, filters, facets, autocomplete                        | \`/keyword-search\`       |
+| Vectors, hybrid BM25+kNN, semantic retrieval, Elasticsearch as a vector database | \`/vector-hybrid-search\` |
+| RAG, Q&A, chatbots over documents                                                | \`/rag-chatbot\`          |
+| Product / catalog / e-commerce search                                            | \`/catalog-ecommerce\`    |
 
 Prefer **one supplementary skill at a time** when depth is needed; stay anchored to this playbook for sequencing, cluster read access limits, and the Dev Tools API-snippet workflow.
 

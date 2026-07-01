@@ -70,7 +70,6 @@
       "kibanaReact",
       "kibanaUtils",
       "stackAlerts",
-      "spaces",
       "observabilityAgentBuilder"
     ],
     "extraPublicDirs": ["common"]

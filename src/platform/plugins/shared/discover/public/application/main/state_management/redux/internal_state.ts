@@ -35,11 +35,13 @@ import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
+import type { ContextAwarenessToolkit } from '../../../../context_awareness/toolkit';
 import {
   type RuntimeStateManager,
   selectTabRuntimeInternalState,
   selectTabRuntimeState,
 } from './runtime_state';
+import { createContextAwarenessToolkit } from './context_awareness_toolkit';
 import {
   DEFAULT_PROFILE_STATE_FIELDS,
   TabsBarVisibility,
@@ -334,6 +336,11 @@ export const internalStateSlice = createSlice({
     ) =>
       withTab(state, action.payload, (tab) => {
         syncProfileStateSnapshot(tab, action.payload.profileId, action.payload.appState);
+      }),
+
+    setProfileState: (state, action: TabAction<{ key: string; profileState: object }>) =>
+      withTab(state, action.payload, (tab) => {
+        tab.profileState[action.payload.key] = action.payload.profileState;
       }),
 
     /**
@@ -723,6 +730,7 @@ export interface InternalStateDependencies {
   tabsStorageManager: TabsStorageManager;
   searchSessionManager: DiscoverSearchSessionManager;
   getInternalState$: () => Observable<DiscoverInternalState>;
+  getContextAwarenessToolkit: (tabId: string) => ContextAwarenessToolkit;
   getCascadedDocumentsStateManager: (tabId: string) => CascadedDocumentsStateManager;
 }
 
@@ -744,11 +752,21 @@ const serializableCheckOptions: SerializableStateInvariantMiddlewareOptions = {
 };
 
 export const createInternalStateStore = (
-  options: Omit<InternalStateDependencies, 'getInternalState$' | 'getCascadedDocumentsStateManager'>
+  options: Omit<
+    InternalStateDependencies,
+    'getInternalState$' | 'getContextAwarenessToolkit' | 'getCascadedDocumentsStateManager'
+  >
 ) => {
   const optionsWithStore: InternalStateDependencies = {
     ...options,
     getInternalState$: () => from(internalState),
+    getContextAwarenessToolkit: (tabId: string) => {
+      return createContextAwarenessToolkit({
+        internalState,
+        profileStateRegistry: options.services.profileStateRegistry,
+        tabId,
+      });
+    },
     getCascadedDocumentsStateManager: (tabId) => {
       return createCascadedDocumentsStateManager({
         internalState,

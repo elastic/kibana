@@ -8,12 +8,19 @@
  */
 
 import type { Observable } from 'rxjs';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { ApiVersion } from '@kbn/core-http-common';
 
 /** @public */
 export interface HttpSetup {
+  /**
+   * The active space ID for this page. Always populated — defaults to `'default'`.
+   * Static for the page lifetime; space changes trigger a full page navigation.
+   */
+  readonly spaceId: SpaceId;
+
   /**
    * APIs for manipulating the basePath on URL segments.
    * See {@link IBasePath}

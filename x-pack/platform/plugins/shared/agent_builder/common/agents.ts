@@ -6,21 +6,28 @@
  */
 
 import type {
-  AgentDefinition,
+  AgentAccessControl,
   AgentConfiguration,
-  AgentVisibility,
+  AgentDefinition,
 } from '@kbn/agent-builder-common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentListOptions {}
 
-export type AgentCreateRequest = Omit<AgentDefinition, 'type' | 'readonly' | 'created_by'>;
+export type AgentCreateRequest = Omit<
+  AgentDefinition,
+  'type' | 'readonly' | 'created_by' | 'access_control'
+> & {
+  access_control?: Pick<AgentAccessControl, 'access_mode'>;
+};
 
 export type AgentUpdateRequest = Partial<
   Pick<AgentDefinition, 'name' | 'description' | 'labels' | 'avatar_color' | 'avatar_symbol'>
 > & {
-  visibility?: AgentVisibility;
+  access_control?: Pick<AgentAccessControl, 'access_mode'>;
   configuration?: Partial<AgentConfiguration>;
 };
 
 export type AgentDeleteRequest = Pick<AgentDefinition, 'id'>;
+
+export type AgentAccessControlUpdateRequest = Pick<AgentAccessControl, 'entries'>;

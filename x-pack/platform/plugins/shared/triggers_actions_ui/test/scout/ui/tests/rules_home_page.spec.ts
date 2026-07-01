@@ -88,10 +88,11 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     await page.gotoApp(RULES_APP);
     await page.testSubj.click(RULES_TAB_SUBJ);
 
-    expect(page.url()).toContain('/rules');
     await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
     await expect(
-      page.testSubj.locator(RULES_LIST_SUBJ).locator(`[title="${ruleName}"]`)
+      page.testSubj
+        .locator(RULES_LIST_SUBJ)
+        .locator(`[data-test-subj="rulesListTableRowName-${ruleName}"]`)
     ).toBeVisible();
   });
 
@@ -111,7 +112,10 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     await page.gotoApp(RULES_APP);
     await page.testSubj.click(RULES_TAB_SUBJ);
 
-    await page.testSubj.locator(RULES_LIST_SUBJ).locator(`[title="${ruleName}"]`).click();
+    await page.testSubj
+      .locator(RULES_LIST_SUBJ)
+      .locator(`[data-test-subj="rulesListTableRowName-${ruleName}"]`)
+      .click();
 
     await page.waitForURL(new RegExp(`/rule/${ruleId}(\\b|$)`));
     expect(page.url()).toContain(`/rule/${ruleId}`);

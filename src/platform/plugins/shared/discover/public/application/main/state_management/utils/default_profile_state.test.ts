@@ -10,17 +10,14 @@
 import { fieldList } from '@kbn/data-views-plugin/common';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../context_awareness/toolkit';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import {
   DEFAULT_PROFILE_STATE_FIELDS,
   type DefaultProfileStateField,
   type DefaultProfileStateFields,
 } from '../redux';
-import {
-  getDefaultProfileState,
-  getFieldsToReset,
-  getProfileStateSnapshot,
-} from './default_profile_state';
+import { getDefaultProfileState, getFieldsToReset } from './default_profile_state';
 
 const emptyDataView = buildDataViewMock({
   name: 'emptyDataView',
@@ -29,6 +26,7 @@ const emptyDataView = buildDataViewMock({
 const { profilesManagerMock, scopedEbtManagerMock } = createContextAwarenessMocks();
 const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager({
   scopedEbtManager: scopedEbtManagerMock,
+  toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
 });
 
 scopedProfilesManager.resolveDataSourceProfile({});
@@ -178,30 +176,6 @@ describe('getDefaultProfileState', () => {
         esqlQueryColumns: undefined,
       });
       expect(appState).toBeUndefined();
-    });
-  });
-});
-
-describe('getProfileStateSnapshot', () => {
-  const appState = {
-    columns: ['message'],
-    rowHeight: 3,
-    breakdownField: 'extension',
-    hideChart: true,
-  };
-
-  it('should return undefined for none', () => {
-    expect(getProfileStateSnapshot(appState, 'none')).toBeUndefined();
-  });
-
-  it('should return all tracked fields for all', () => {
-    expect(getProfileStateSnapshot(appState, 'all')).toEqual(appState);
-  });
-
-  it('should return only requested fields', () => {
-    expect(getProfileStateSnapshot(appState, ['columns', 'hideChart'])).toEqual({
-      columns: ['message'],
-      hideChart: true,
     });
   });
 });

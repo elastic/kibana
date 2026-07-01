@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { OperatorFunction } from 'rxjs';
-import { map, merge, share, toArray } from 'rxjs';
+import { map, merge, shareReplay, toArray } from 'rxjs';
 import type {
   RoundCompleteEvent,
   RoundInput,
@@ -24,9 +24,11 @@ import type {
   BackgroundAgentCompleteEvent,
   BackgroundAgentCompleteStep,
   TodosStep,
+  UserQuestionAskedEvent,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
 import {
@@ -46,6 +48,10 @@ import {
   carriedOverTodos,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,
+  isUserQuestionAskedEvent,
+  isUserQuestionAnsweredEvent,
+  isAskUserQuestionStep,
+  createAskUserQuestionStep,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationInternalState,
@@ -64,10 +70,19 @@ import type { CompactedConversation } from './conversation_compactor';
 
 type SourceEvents = ConvertedEvents;
 
-type StepEvents = ReasoningEvent | ToolCallEvent | BackgroundAgentCompleteEvent;
+type StepEvents =
+  | ReasoningEvent
+  | ToolCallEvent
+  | BackgroundAgentCompleteEvent
+  | UserQuestionAskedEvent;
 
 const isStepEvent = (event: SourceEvents): event is StepEvents => {
-  return isReasoningEvent(event) || isToolCallEvent(event) || isBackgroundAgentCompleteEvent(event);
+  return (
+    isReasoningEvent(event) ||
+    isToolCallEvent(event) ||
+    isBackgroundAgentCompleteEvent(event) ||
+    isUserQuestionAskedEvent(event)
+  );
 };
 
 export const addRoundCompleteEvent = ({
@@ -83,6 +98,7 @@ export const addRoundCompleteEvent = ({
   compactionResult,
   roundId: providedRoundId,
   initialTodos,
+  getWorkspaceId,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -99,9 +115,11 @@ export const addRoundCompleteEvent = ({
   roundId?: string;
   /** Todo list at round start; used as fallback when the agent never called todoWrite this round */
   initialTodos?: TodoItem[];
+  /** Returns the workspace_id used in this round, if any */
+  getWorkspaceId?: () => string | undefined;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
-    const shared$ = events$.pipe(share());
+    const shared$ = events$.pipe(shareReplay());
     return merge(
       shared$,
       shared$.pipe(
@@ -135,6 +153,7 @@ export const addRoundCompleteEvent = ({
 
           round.state = buildRoundState({ round, events, stateManager });
 
+          const workspaceId = getWorkspaceId?.();
           const event: RoundCompleteEvent = {
             type: ChatEventType.roundComplete,
             data: {
@@ -142,6 +161,7 @@ export const addRoundCompleteEvent = ({
               resumed: pendingRound !== undefined,
               conversation_state: getConversationState(),
               attachments: attachmentStateManager.getAll(),
+              ...(workspaceId ? { workspace_id: workspaceId } : {}),
             },
           };
 
@@ -189,6 +209,20 @@ const resumeRound = ({
 
     step.results = toolResults.flatMap(({ data }) => data.results);
     step.progression = [...(step.progression ?? []), ...toolProgressions.map(({ data }) => data)];
+  }
+
+  // Back-fill pending ask_user_question steps from answered events (matched by prompt_id)
+  const pendingAskUserQuestionSteps = pendingRound.steps
+    .filter(isAskUserQuestionStep)
+    .filter((step) => step.answers === undefined);
+
+  for (const step of pendingAskUserQuestionSteps) {
+    const answeredEvent = events
+      .filter(isUserQuestionAnsweredEvent)
+      .find((e) => e.data.prompt_id === step.prompt_id);
+    if (answeredEvent) {
+      step.answers = answeredEvent.data.answers;
+    }
   }
 
   const followUp = createRound({
@@ -333,6 +367,15 @@ const createRound = ({
     if (isBackgroundAgentCompleteEvent(event)) {
       return [createBackgroundAgentStep(event)];
     }
+    if (isUserQuestionAskedEvent(event)) {
+      return [
+        createAskUserQuestionStep({
+          prompt_id: event.data.prompt_id,
+          questions: event.data.questions,
+          // answers remain undefined; back-filled at resume by userQuestionAnsweredEvent
+        }),
+      ];
+    }
     throw new Error(`Unknown event type: ${(event as any).type}`);
   };
 
@@ -440,6 +483,7 @@ const createToolCallStep = ({
     results: toolResult?.data.results ?? [],
     tool_call_group_id: toolCall.data.tool_call_group_id,
     tool_origin: toolCall.data.tool_origin,
+    tool_type: toolCall.data.tool_type,
   };
 };
 
@@ -478,7 +522,12 @@ const buildRoundState = ({
     return undefined;
   }
 
-  const nodes = promptRequestEvents.map((promptRequest) => {
+  // ask_user_question prompts don't need a node-state snapshot as they are stored as steps.
+  const toolCallPromptRequests = promptRequestEvents.filter(
+    (event) => !isAskUserQuestionPrompt(event.prompt)
+  );
+
+  const nodes = toolCallPromptRequests.map((promptRequest) => {
     const toolCallId = promptRequest.source.tool_call_id;
     const toolCall = round.steps
       .filter(isToolCallStep)

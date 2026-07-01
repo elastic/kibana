@@ -2,6 +2,13 @@
 
 set -euo pipefail
 
+# This step only runs Node scripts and `playwright --list` (manifest generation,
+# selective-testing scope resolution, config discovery, run-order planning); it
+# never serves the Kibana UI. The dev-mode shared webpack bundles (monaco,
+# ui-shared-deps) are therefore never used, so skip building them during
+# bootstrap (this also skips the moon-cache download attempt).
+export KBN_BOOTSTRAP_NO_PREBUILT=true
+
 source .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/setup_es_snapshot_cache.sh
 

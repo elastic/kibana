@@ -57,7 +57,7 @@ export const ConversationsPopoverView: React.FC<ConversationsPopoverViewProps> =
   const [searchValue, setSearchValue] = useState('');
 
   const { euiTheme } = useEuiTheme();
-  const { setConversationId } = useConversationContext();
+  const { setConversationId, resetAttachments } = useConversationContext();
   const { removeAllErrors } = useStreamingContext();
   const { agents } = useAgentBuilderAgents();
   const agentId = useAgentId();
@@ -67,6 +67,7 @@ export const ConversationsPopoverView: React.FC<ConversationsPopoverViewProps> =
   const handleNewChat = () => {
     removeAllErrors();
     setConversationId?.(undefined);
+    resetAttachments?.();
     onClose();
   };
 

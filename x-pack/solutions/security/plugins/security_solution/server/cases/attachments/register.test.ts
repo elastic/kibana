@@ -9,10 +9,22 @@ import {
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
   INDICATOR_ATTACHMENT_TYPE,
+  SECURITY_TIMELINE_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
 
 import { registerCaseAttachments } from './register';
 import { EndpointAttachmentPayloadSchema } from '../../../common/cases/attachments/endpoint';
+import { TimelineAttachmentPayloadSchema } from '../../../common/cases/attachments/timeline';
+import { SecurityEventAttachmentPayloadSchema } from '../../../common/cases/attachments/event';
+
+// Reproduces the path:message summary that `parseUnifiedAttachmentWithSchema`
+// in `@kbn/cases-plugin` builds at the write boundary. Keeping this assertion
+// here proves the security.* schemas surface structured (badRequest-ready)
+// errors instead of leaking raw ZodErrors as 500s.
+const formatZodIssues = (issues: Array<{ path: PropertyKey[]; message: string }>) =>
+  issues
+    .map(({ path, message }) => `${path.length > 0 ? path.join('.') : '(root)'}: ${message}`)
+    .join('; ');
 
 describe('registerCaseAttachments', () => {
   const buildFramework = () => ({
@@ -32,17 +44,18 @@ describe('registerCaseAttachments', () => {
     });
   });
 
-  it('registers the unified security.event attachment type', () => {
+  it('registers the unified security.event attachment with the zod payload schema', () => {
     const framework = buildFramework();
 
     registerCaseAttachments(framework);
 
-    expect(framework.registerUnified).toHaveBeenCalledWith(
-      expect.objectContaining({ id: SECURITY_EVENT_ATTACHMENT_TYPE })
-    );
+    expect(framework.registerUnified).toHaveBeenCalledWith({
+      id: SECURITY_EVENT_ATTACHMENT_TYPE,
+      schema: SecurityEventAttachmentPayloadSchema,
+    });
   });
 
-  it('registers the unified indicator attachment type with the zod schema', () => {
+  it('registers the unified security.indicator attachment type with the zod schema', () => {
     const framework = buildFramework();
 
     registerCaseAttachments(framework);
@@ -53,6 +66,17 @@ describe('registerCaseAttachments', () => {
         schema: expect.anything(),
       })
     );
+  });
+
+  it('registers the unified security.timeline attachment with the zod payload schema', () => {
+    const framework = buildFramework();
+
+    registerCaseAttachments(framework);
+
+    expect(framework.registerUnified).toHaveBeenCalledWith({
+      id: SECURITY_TIMELINE_ATTACHMENT_TYPE,
+      schema: TimelineAttachmentPayloadSchema,
+    });
   });
 
   // The cases-plugin routes inbound `externalReferenceAttachmentTypeId: 'endpoint'`
@@ -75,11 +99,29 @@ describe('registerCaseAttachments', () => {
     expect(framework.registerPersistableState).not.toHaveBeenCalled();
   });
 
-  it('registers exactly the three expected unified attachment types', () => {
-    const framework = buildFramework();
+  describe('invalid payload surfacing', () => {
+    it('reports `path: message` zod issues for an invalid security.event payload', () => {
+      const result = SecurityEventAttachmentPayloadSchema.safeParse({
+        type: SECURITY_EVENT_ATTACHMENT_TYPE,
+        owner: 'securitySolution',
+        attachmentId: 'event-1',
+        metadata: { index: 123 },
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(formatZodIssues(result.error.issues)).toContain('metadata.index');
+      }
+    });
 
-    registerCaseAttachments(framework);
-
-    expect(framework.registerUnified).toHaveBeenCalledTimes(3);
+    it('reports `path: message` zod issues for an invalid security.endpoint payload', () => {
+      const result = EndpointAttachmentPayloadSchema.safeParse({
+        type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+        owner: 'securitySolution',
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(formatZodIssues(result.error.issues)).not.toHaveLength(0);
+      }
+    });
   });
 });

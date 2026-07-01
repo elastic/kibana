@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/observability-get-padded-alert-time-range-util'
   - '@kbn/share-plugin'
   - '@kbn/data-plugin'
+  - '@kbn/data-forge'
   - '@kbn/alerting-comparators'
   - '@kbn/rison'
   - '@kbn/kibana-utils-plugin'
@@ -150,6 +151,7 @@ dependsOn:
   - '@kbn/fleet-plugin'
   - '@kbn/ai-assistant-common'
   - '@kbn/management-settings-ids'
+  - '@kbn/alerting-v2-utils'
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/kql'
   - '@kbn/shared-ux-utility'
@@ -159,7 +161,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/expressions-plugin'
   - '@kbn/ingest-hub-plugin'
-  - '@kbn/zod'
+  - '@kbn/core-spaces-common'
   - '@kbn/nightshift'
 tags:
   - plugin

@@ -12,7 +12,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
 import { toElasticsearchQuery, escapeQuotes } from '@kbn/es-query';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ESSearchResponse as SearchResponse } from '@kbn/es-types';
 
 import { ALL_SPACES_ID } from '../../../common/constants';

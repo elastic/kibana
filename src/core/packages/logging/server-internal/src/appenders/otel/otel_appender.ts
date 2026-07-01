@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createSecureContext } from 'tls';
+import { isNil } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import type { Ecs } from '@elastic/ecs';
 import type { OTLPLogExporter as OTLPLogExporterHTTP } from '@opentelemetry/exporter-logs-otlp-http';
 import type { OTLPLogExporter as OTLPLogExporterGRPC } from '@opentelemetry/exporter-logs-otlp-grpc';
 import type { OTLPLogExporter as OTLPLogExporterPROTO } from '@opentelemetry/exporter-logs-otlp-proto';
@@ -28,6 +32,7 @@ import type { OtelAppenderConfig, LayoutConfigType } from '@kbn/core-logging-ser
 import { buildOtelResources } from '@kbn/telemetry';
 import { getFlattenedObject } from '@kbn/std';
 import { Layouts } from '../../layouts/layouts';
+import { JsonLayout } from '../../layouts/json_layout';
 import {
   buildGrpcVerifyOptions,
   buildHttpsAgentTlsOptions,
@@ -78,22 +83,6 @@ const toTraceContext = (record: LogRecord): Context | undefined => {
     traceFlags: TraceFlags.NONE,
   });
 };
-
-/**
- * Builds a sanitised copy of a `LogRecord` for use as `body.structured`.
- *
- * The raw record is stripped of:
- * - `level`: a Kibana-internal `LogLevel` object that is redundant given the
- *   top-level `severity_number` / `severity_text` OTLP fields.
- * - Fields with `null` or `undefined` values (e.g. `spanId`/`traceId` when no
- *   trace context is present) to avoid noisy empty entries in Elasticsearch.
- */
-const toStructuredBody = (record: LogRecord): AnyValueMap =>
-  Object.fromEntries(
-    Object.entries(record as unknown as Record<string, unknown>).filter(
-      ([key, v]) => key !== 'level' && v != null
-    )
-  ) as AnyValueMap;
 
 /**
  * Resolves the effective layout config for the OTel appender.
@@ -167,15 +156,15 @@ const toAttributes = (record: LogRecord, includeLogMeta: boolean): Attributes =>
     if (id !== undefined) attrs['service.id'] = id;
     // Flatten anything that we don't know about into the service object (ideally, nothing).
     Object.entries(getFlattenedObject(serviceRest)).forEach(([key, value]) => {
-      attrs[key] = value;
+      attrs[`service.${key}`] = value;
     });
 
-    // Flatten non-service meta into individual OTel attributes prefixed with
-    // kibana.log.meta. so they are discoverable as flat fields in backends.
+    // Flatten non-service meta into individual OTel attributes so they are
+    // discoverable as flat fields in backends.
     // Only included for pattern layout: with JSON layout the meta is part of
     // the structured body and repeating it here would be redundant.
     Object.entries(getFlattenedObject(metaRest)).forEach(([key, value]) => {
-      attrs[`kibana.log.meta.${key}`] = value as AttributeValue;
+      attrs[key] = value as AttributeValue;
     });
   }
 
@@ -221,6 +210,7 @@ export class OtelAppender implements DisposableAppender {
             [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
             { defaultValue: 'full' }
           ),
+          allowPartialTrustChain: schema.boolean({ defaultValue: true }),
         },
         {
           validate: (raw) => {
@@ -277,13 +267,15 @@ export class OtelAppender implements DisposableAppender {
       timestamp: record.timestamp,
       severityNumber,
       severityText: record.level.id.toUpperCase(),
-      // JSON layout: send a sanitised LogRecord as a structured object.
-      // Elastic's OTel ingest indexes this as body.structured. Note that the ECS
-      // `message` field will be empty because it aliases body.text, not body.structured.
+      // JSON layout: send a ECS record as a structured object.
+      // Elastic's OTel ingest indexes this as body.structured.
       //
       // Pattern layout (default): format the record to a human-readable string.
       // Elastic indexes this as body.text, aliased to the ECS `message` field.
-      body: this.useStructuredBody ? toStructuredBody(record) : this.layout.format(record),
+      body:
+        this.layout instanceof JsonLayout
+          ? omitDeepNilValues(JsonLayout.ecsRecord(record))
+          : this.layout.format(record),
       context: toTraceContext(record),
       // log.meta is omitted from attributes when using JSON layout because it
       // is already part of the structured body.
@@ -303,6 +295,14 @@ export class OtelAppender implements DisposableAppender {
     ]);
   }
 }
+
+const omitDeepNilValues = (obj: Ecs) => {
+  const result: AnyValueMap = {};
+  Object.entries(getFlattenedObject(obj))
+    .filter(([_, value]) => !isNil(value))
+    .forEach(([key, value]) => set(result, key, value));
+  return result;
+};
 
 const createExporter = (
   config: OtelAppenderConfig
@@ -346,10 +346,14 @@ const createExporter = (
         metadata,
         ...(tls
           ? {
-              credentials: credentials.createSsl(
-                toGrpcRootCerts(tls),
-                tls.key ?? null,
-                tls.cert ?? null,
+              // Using createFromSecureContext instead of createSsl because createSsl does not support allowPartialTrustChain.
+              credentials: credentials.createFromSecureContext(
+                createSecureContext({
+                  ca: toGrpcRootCerts(tls),
+                  key: tls.key,
+                  cert: tls.cert,
+                  allowPartialTrustChain: tls.allowPartialTrustChain,
+                }),
                 buildGrpcVerifyOptions(tls)
               ),
             }

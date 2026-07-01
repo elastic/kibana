@@ -5,49 +5,9 @@
  * 2.0.
  */
 
-import type { KibanaRole } from '@kbn/scout-security';
-import { spaceTest, tags } from '@kbn/scout-security';
+import { spaceTest, tags, CUSTOM_QUERY_RULE } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/detection_rules';
-
-/**
- * A role combining the security alert index privileges of platform_engineer with
- * full Kibana access (including workflowsManagement) required to see and use the
- * "Run workflow" alert action.
- */
-const WORKFLOW_ENABLED_ROLE: KibanaRole = {
-  elasticsearch: {
-    cluster: ['manage'],
-    indices: [
-      {
-        names: [
-          '.alerts-security*',
-          '.internal.alerts-security*',
-          '.siem-signals-*',
-          'apm-*-transaction*',
-          'traces-apm*',
-          'auditbeat-*',
-          'endgame-*',
-          'filebeat-*',
-          'logs-*',
-          'packetbeat-*',
-          'winlogbeat-*',
-          'logstash-*',
-          '.lists*',
-          '.items*',
-        ],
-        privileges: ['read', 'write'],
-      },
-    ],
-  },
-  kibana: [
-    {
-      base: ['all'],
-      feature: {},
-      spaces: ['*'],
-    },
-  ],
-};
+import { FULL_KIBANA_SECURITY_ROLE } from '../../common/roles';
 
 // Failing: See https://github.com/elastic/kibana/issues/261392
 spaceTest.describe.skip('Run workflow alert action', { tag: [...tags.stateful.classic] }, () => {
@@ -66,7 +26,7 @@ spaceTest.describe.skip('Run workflow alert action', { tag: [...tags.stateful.cl
     });
     // Use a custom role that includes workflowsManagement privileges (canExecuteWorkflow)
     // in addition to the security index privileges needed to view alerts
-    await browserAuth.loginWithCustomRole(WORKFLOW_ENABLED_ROLE);
+    await browserAuth.loginWithCustomRole(FULL_KIBANA_SECURITY_ROLE);
   });
 
   spaceTest.afterEach(async ({ apiServices }) => {

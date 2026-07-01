@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { layoutVar, SIDE_PANEL_CONTENT_GAP } from '@kbn/core-chrome-layout-constants';
+import { layoutVar, SIDE_PANEL_CONTENT_GAP } from '@kbn/ui-chrome-layout-constants';
 
 import type { MenuItem } from '../../../types';
 import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
@@ -104,7 +104,7 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
             defaultMessage:
               'You are in the {label} secondary menu side panel. Use Up and Down arrow keys to navigate the menu.',
             values: {
-              label: openerNode.label,
+              label: openerNode.secondaryMenuTitle ?? openerNode.label,
             },
           })}
         </p>
@@ -113,7 +113,7 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
         aria-label={i18n.translate('kbnUI.sideNavigation.sidePanelAriaLabel', {
           defaultMessage: `Side panel for {label}`,
           values: {
-            label: openerNode.label,
+            label: openerNode.secondaryMenuTitle ?? openerNode.label,
           },
         })}
         aria-describedby={secondaryNavigationInstructionsId}

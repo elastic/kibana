@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import { conditionToESQL } from '@kbn/streamlang';
+import { entityStoreConditionToESQL as conditionToESQL } from '../../esql/condition_to_esql';
+import { castField } from '../../esql/cast';
 import type {
   EntityDefinitionWithoutId,
+  EuidRankingBranch,
   FieldEvaluation,
   EntityType,
   EuidAttribute,
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty } from '../../esql/strings';
+import {
+  esqlIsNotNullOrEmpty,
+  esqlIsNullOrEmpty,
+  esqlPresentColumnName,
+  esqlPresentOrNullColumnName,
+} from '../../esql/strings';
 import {
   applyWhenConditionTrueSetFields,
   documentPassesCalculatedIdentityPipelineGate,
@@ -29,34 +36,28 @@ import {
 } from './commons';
 import {
   applyFieldEvaluations,
-  getFieldEvaluationsFromDefinition,
   getSourceMatchSpec,
   type SourceMatchSpec,
 } from './field_evaluations';
 
-/**
- * Constructs an ESQL filter for the provided entity type and document.
- *
- * It supports both flattened and nested document shapes.
- * If a document contains `_source` property, it will be unwrapped before processing.
- *
- * Example usage:
- * ```ts
- * import { getEuidEsqlFilterBasedOnDocument } from './esql';
- *
- * const doc = { host: { name: 'server1', domain: 'example.com' } };
- * const filter = getEuidEsqlFilterBasedOnDocument('host', doc);
- * // filter may look like:
- * // '((host.name == "server1") AND (host.domain == "example.com") AND (host.entity.id IS NULL OR host.entity.id == ""))'
- * ```
- *
- * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
- * @param doc - The document to derive entity filter fields from. May be a flattened or nested shape.
- * @returns An ESQL filter string, or `undefined` if the document does not contain enough identifying
- *   information, or if it would not pass the entity's `documentsFilter` ∧ `postAggFilter` (same gate
- *   as logs extraction) after field evaluations, `whenConditionTrueSetFieldsPreAgg`, and single-doc
- *   simulation of `whenConditionTrueSetFieldsAfterStats`.
- */
+/** Collects unique identity fields across all ranking branches that need `_present` columns. */
+export function collectRankingFields(branches: EuidRankingBranch[]): Set<string> {
+  const fields = new Set<string>();
+  for (const { ranking } of branches) {
+    if (ranking.length === 1 && ranking[0].length === 1 && isEuidField(ranking[0][0])) {
+      continue;
+    }
+    for (const composedField of ranking) {
+      for (const attr of composedField) {
+        if (isEuidField(attr)) {
+          fields.add(attr.field);
+        }
+      }
+    }
+  }
+  return fields;
+}
+
 export function getEuidEsqlFilterBasedOnDocument(
   entityType: EntityType,
   doc: any
@@ -129,49 +130,141 @@ export function getEuidEsqlFilterBasedOnDocument(
 
 function sourceToEsqlExpression(source: FieldEvaluation['sources'][number]): string {
   if ('field' in source) {
-    return `MV_FIRST(${source.field})`;
+    return `MV_FIRST(${castField(source.field)})`;
   }
-  return `MV_FIRST(SPLIT(MV_FIRST(${source.firstChunkOfField}), "${escapeEsqlString(
+  return `MV_FIRST(SPLIT(MV_FIRST(${castField(source.firstChunkOfField)}), "${escapeEsqlString(
     source.splitBy
   )}"))`;
 }
 
 /**
- * Builds the ESQL EVAL expression for a single field evaluation (e.g. mapping event.module / data_stream.dataset to entity.namespace).
+ * Returns the entity-id expression for a ranking definition, referencing
+ * pre-computed `<field>_present_or_null` columns.
  *
- * - Source values: each source is read with MV_FIRST so multi-value fields are supported; firstChunkOfField sources use SPLIT then MV_FIRST.
- * - Multiple sources: each is assigned to a variable (_src_<dest>0, _src_<dest>1, ...), then an effective source is the first non-null, non-empty variable (CASE).
- * - Destination: one CASE over `whenClauses` in order (sourceMatch arms, then condition arms), then null/empty → fallbackValue, else effective source.
- *
- * Returns a comma-separated list of EVAL assignments (one or more lines).
+ * Output shape: a bare column ref (single field), `CONCAT(...)` (composed field),
+ * or `COALESCE(arm1, arm2, …)` (multiple ranked arms).
  */
-function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
+export function buildRankingCaseEsql(
+  ranking: EuidAttribute[][],
+  presentOrNullAliases: ReadonlyMap<string, string>
+): string {
+  if (ranking.length === 0) {
+    throw new Error('No euid fields found, invalid euid logic definition');
+  }
+
+  if (ranking.length === 1) {
+    const comp = ranking[0];
+    const firstAttr = comp[0];
+    if (isEuidSeparator(firstAttr)) {
+      throw new Error('Separator found in single field, invalid euid logic definition');
+    }
+    if (comp.length === 1 && isEuidField(firstAttr)) {
+      // Single ranking, single field: bare _present_or_null ref (no COALESCE needed)
+      return presentOrNullAliases.get(firstAttr.field) ?? `TO_STRING(${firstAttr.field})`;
+    }
+  }
+
+  const arms = ranking.map((composedField) => {
+    if (composedField.length === 1 && isEuidSeparator(composedField[0])) {
+      throw new Error('Separator found in single field, invalid euid logic definition');
+    }
+    if (isEuidSeparator(composedField[0])) {
+      throw new Error('The first field of a composed field cannot be a separator');
+    }
+
+    if (composedField.length === 1) {
+      const f = composedField[0] as { field: string };
+      return presentOrNullAliases.get(f.field) ?? `TO_STRING(${f.field})`;
+    }
+
+    // Composed arm: CONCAT over _present_or_null refs — NULL when any component is absent.
+    const parts = composedField
+      .map((attr) =>
+        isEuidField(attr)
+          ? presentOrNullAliases.get(attr.field) ?? `TO_STRING(${attr.field})`
+          : `"${escapeEsqlString(attr.sep)}"`
+      )
+      .join(', ');
+    return `CONCAT(${parts})`;
+  });
+
+  return arms.length === 1 ? arms[0] : `COALESCE(${arms.join(', ')})`;
+}
+
+/** Returns a COALESCE expression that picks the first non-null/non-empty source variable. */
+export function buildSourcePickerEsql(sourceVariablesBaseName: string, count: number): string {
+  if (count < 1) {
+    throw new Error('buildSourcePickerEsql requires at least one source variable');
+  }
+  const arms = Array.from({ length: count }, (_, i) => {
+    const v = `${sourceVariablesBaseName}${i}`;
+    return `CASE(${v} IS NOT NULL AND ${v} != "", ${v})`;
+  });
+  return `COALESCE(${arms.join(', ')})`;
+}
+
+/**
+ * Returns the destination field assignment expression and any boolean precompute columns it needs.
+ *
+ * Without `whenClauses`: a simple fallback/pass-through CASE.
+ * With `whenClauses`: a COALESCE of mapped arms (sourceMatchesAny or condition-based),
+ * a fallback arm, and a bare pass-through.
+ */
+export function buildDestinationFieldEsql(
+  effectiveSourceName: string,
+  destBase: string,
+  fallbackExpression: string,
+  whenClauses: FieldEvaluation['whenClauses']
+): { expression: string; conditionPrecomputes: Array<{ colName: string; esql: string }> } {
+  const conditionPrecomputes: Array<{ colName: string; esql: string }> = [];
+
+  if (whenClauses.length === 0) {
+    return {
+      expression: `CASE(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == "", ${fallbackExpression}, ${effectiveSourceName})`,
+      conditionPrecomputes,
+    };
+  }
+
+  const coalesceArms: string[] = [];
+  for (const [i, clause] of whenClauses.entries()) {
+    let condition: string;
+    if ('sourceMatchesAny' in clause) {
+      const inList = clause.sourceMatchesAny.map((v) => `"${escapeEsqlString(v)}"`).join(', ');
+      condition = `COALESCE(${effectiveSourceName} IN (${inList}), FALSE)`;
+    } else {
+      const colName = `${destBase}_arm${i}`;
+      conditionPrecomputes.push({ colName, esql: conditionToESQL(clause.condition) });
+      condition = `COALESCE(${colName}, FALSE)`;
+    }
+    coalesceArms.push(`CASE(${condition}, "${escapeEsqlString(clause.then)}")`);
+  }
+  coalesceArms.push(
+    `CASE(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == "", ${fallbackExpression})`
+  );
+  coalesceArms.push(effectiveSourceName);
+
+  return { expression: `COALESCE(${coalesceArms.join(', ')})`, conditionPrecomputes };
+}
+
+/**
+ * Returns comma-separated EVAL assignments for a single field evaluation
+ * (e.g. `entity.namespace` derived from `event.module`).
+ * May include intermediate source-picker and condition columns.
+ */
+export function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
   const { destination, sources, fallbackValue, whenClauses } = evaluation;
-  const sourceExpressions = sources.map(sourceToEsqlExpression);
+  const sourceExpressions = sources.map((s) => sourceToEsqlExpression(s));
   const sourceVariablesBaseName = `_src_${destination.replace(/\./g, '_')}`;
   const effectiveSourceName = sourceVariablesBaseName;
   const fallbackExpression =
     fallbackValue === null ? 'NULL' : `"${escapeEsqlString(fallbackValue)}"`;
+  const destBase = `_eval_${destination.replace(/\./g, '_')}`;
 
-  const destinationCaseParts: string[] = [];
-  for (const clause of whenClauses) {
-    if ('sourceMatchesAny' in clause) {
-      const conditions = clause.sourceMatchesAny
-        .map((v) => `${effectiveSourceName} == "${escapeEsqlString(v)}"`)
-        .join(' OR ');
-      destinationCaseParts.push(`(${conditions}), "${escapeEsqlString(clause.then)}"`);
-    } else {
-      destinationCaseParts.push(
-        `(${conditionToESQL(clause.condition)}), "${escapeEsqlString(clause.then)}"`
-      );
-    }
+  if (sourceExpressions.length === 0) {
+    throw new Error(
+      `buildOneFieldEvaluationEsql: field evaluation "${destination}" has no sources`
+    );
   }
-  destinationCaseParts.push(
-    `(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == ""), ${fallbackExpression}`
-  );
-  destinationCaseParts.push(effectiveSourceName);
-
-  const destinationCaseExpr = `CASE(${destinationCaseParts.join(', ')})`;
 
   const assignments: string[] = [];
 
@@ -181,15 +274,24 @@ function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
     for (let i = 0; i < sourceExpressions.length; i++) {
       assignments.push(`${sourceVariablesBaseName}${i} = ${sourceExpressions[i]}`);
     }
-    const sourceVarCaseParts = sourceExpressions.flatMap((_, i) => {
-      const v = `${sourceVariablesBaseName}${i}`;
-      return [`(${v} IS NOT NULL AND ${v} != "")`, v];
-    });
-    sourceVarCaseParts.push('NULL');
-    assignments.push(`${effectiveSourceName} = CASE(${sourceVarCaseParts.join(', ')})`);
+    assignments.push(
+      `${effectiveSourceName} = ${buildSourcePickerEsql(
+        sourceVariablesBaseName,
+        sourceExpressions.length
+      )}`
+    );
   }
 
-  assignments.push(`${destination} = ${destinationCaseExpr}`);
+  const { expression: destinationExpr, conditionPrecomputes } = buildDestinationFieldEsql(
+    effectiveSourceName,
+    destBase,
+    fallbackExpression,
+    whenClauses
+  );
+  for (const { colName, esql } of conditionPrecomputes) {
+    assignments.push(`${colName} = (${esql})`);
+  }
+  assignments.push(`${destination} = ${destinationExpr}`);
 
   return assignments.join(',\n ');
 }
@@ -228,15 +330,17 @@ export function getFieldEvaluationsEsql(entityType: EntityType): string | undefi
  * Returns an ESQL EVAL fragment for all field evaluations of the given entity type.
  * Use in a pipeline as | EVAL <result>. Returns undefined when there are no field evaluations.
  */
-export function getFieldEvaluationsEsqlFromDefinition({
-  fieldEvaluations,
-  identityField,
-}: EntityDefinitionWithoutId): string | undefined {
-  const evaluations = getFieldEvaluationsFromDefinition({ fieldEvaluations, identityField });
-  if (!evaluations || evaluations.length === 0) {
+export function getFieldEvaluationsEsqlFromDefinition(
+  definition: EntityDefinitionWithoutId
+): string | undefined {
+  // Use only top-level shared evaluations (e.g. entity.source).
+  // Identity-specific evaluations (e.g. entity.namespace) are emitted by
+  // getEuidEsqlEvaluation directly, co-located with the EUID expression.
+  const evaluations = definition.fieldEvaluations ?? [];
+  if (evaluations.length === 0) {
     return undefined;
   }
-  return evaluations.map(buildOneFieldEvaluationEsql).join(',\n ');
+  return evaluations.map((e) => buildOneFieldEvaluationEsql(e)).join(',\n ');
 }
 
 /**
@@ -268,105 +372,88 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
 }
 
 /**
- * Constructs an ESQL evaluation for the provided entity type to generate the entity id.
+ * Returns a comma-separated ES|QL EVAL assignments fragment that computes the entity id
+ * for the given entity type and assigns it to `outputColumn`.
  *
- * You will need to prepend the result with a `| EVAL` clause, or just add to your existing EVAL clause.
+ * For multi-field identities the fragment also emits intermediate columns (`_present`,
+ * `_present_or_null`, field-evaluation columns) as sequential assignments in the same
+ * `| EVAL` stage so later assignments can reference them by name.
  *
- * Example usage:
+ * Wrap the returned string with `| EVAL`:
  * ```ts
- * import { getEuidEsqlEvaluation } from './esql';
- *
- * const evaluation = getEuidEsqlEvaluation('host');
- * // evaluation may look like:
- * // 'CONCAT("host:", CASE((host.entity.id IS NOT NULL AND host.entity.id != ""), host.entity.id,
- * //                      (host.id IS NOT NULL AND host.id != ""), host.id,
- * //                      (host.name IS NOT NULL AND host.name != "" AND host.domain IS NOT NULL AND host.domain != ""), CONCAT(host.name, ".", host.domain),
- * //                      (host.hostname IS NOT NULL AND host.hostname != "" AND host.domain IS NOT NULL AND host.domain != ""), CONCAT(host.hostname, ".", host.domain),
- * //                      (host.name IS NOT NULL AND host.name != ""), host.name,
- * //                      (host.hostname IS NOT NULL AND host.hostname != ""), host.hostname, NULL))'
+ * parts.push(`| EVAL ${getEuidEsqlEvaluation(type, 'entity.id')}`);
  * ```
- *
- * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
- * @param withTypeId - Whether to prepend the entity type to the evaluation. Defaults to true.
- * @returns An ESQL evaluation string that computes the entity id.
  */
-function buildRankingCaseEsql(ranking: EuidAttribute[][]): string {
-  if (ranking.length === 0) {
-    throw new Error('No euid fields found, invalid euid logic definition');
-  }
-
-  if (ranking.length === 1) {
-    const comp = ranking[0];
-    const firstAttr = comp[0];
-    if (isEuidSeparator(firstAttr)) {
-      throw new Error('Separator found in single field, invalid euid logic definition');
-    }
-    if (comp.length === 1 && isEuidField(firstAttr)) {
-      return (firstAttr as { field: string }).field;
-    }
-  }
-
-  const euidLogic = ranking.map((composedField) => {
-    if (composedField.length === 1 && isEuidSeparator(composedField[0])) {
-      throw new Error('Separator found in single field, invalid euid logic definition');
-    }
-
-    const compositionConditions = composedField
-      .filter(isEuidField)
-      .map((f) => `${esqlIsNotNullOrEmpty(f.field)}`)
-      .join(' AND ');
-
-    if (isEuidSeparator(composedField[0])) {
-      throw new Error('The first field of a composed field cannot be a separator');
-    }
-
-    if (composedField.length === 1) {
-      return `(${compositionConditions}), ${(composedField[0] as { field: string }).field}`;
-    }
-
-    const evaluations = composedField
-      .map((attr) => (isEuidField(attr) ? attr.field : `"${escapeEsqlString(attr.sep)}"`))
-      .join(', ');
-
-    const concatLogic = `CONCAT(${evaluations})`;
-
-    return `(${compositionConditions}), ${concatLogic}`;
-  });
-
-  return `CASE(${euidLogic.join(',\n')}, NULL)`;
-}
-
 export function getEuidEsqlEvaluation(
   entityType: EntityType,
+  outputColumn: string,
   { withTypeId = true }: { withTypeId?: boolean } = {}
-) {
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+): string {
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  const { identityField } = entityDefinition;
   const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
 
   if (isSingleFieldIdentity(identityField)) {
-    return appendTypeIdIfNeeded(entityType, identityField.singleField, mustPrependTypeId);
+    const expression = appendTypeIdIfNeeded(
+      entityType,
+      castField(identityField.singleField),
+      mustPrependTypeId
+    );
+    return `${outputColumn} = ${expression}`;
   }
 
   const { euidRanking } = identityField;
   const branches = euidRanking.branches;
+  const presentFields = collectRankingFields(branches);
+  const presentOrNullAliases = new Map(
+    [...presentFields].map((f) => [f, esqlPresentOrNullColumnName(f)])
+  );
+  const assignments: string[] = [];
+
+  // Identity-specific field evaluations (e.g. entity.namespace for user) must precede
+  // the _present columns that may reference their output.
+  for (const evaluation of identityField.fieldEvaluations ?? []) {
+    assignments.push(buildOneFieldEvaluationEsql(evaluation));
+  }
+  for (const f of presentFields) {
+    assignments.push(`${esqlPresentColumnName(f)} = ${esqlIsNotNullOrEmpty(f)}`);
+  }
+  // Nullable aliases: field value when present, NULL otherwise.
+  for (const f of presentFields) {
+    assignments.push(
+      `${esqlPresentOrNullColumnName(f)} = CASE(${esqlPresentColumnName(f)}, TO_STRING(${f}))`
+    );
+  }
+
   const hasConditionalBranch = branches.some((b) => b.when != null);
+  let idLogic: string;
   if (!hasConditionalBranch && branches.length === 1) {
-    const idLogic = buildRankingCaseEsql(branches[0].ranking);
-    return appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId);
-  }
-  const branchCaseParts: string[] = [];
-  for (const branch of branches) {
-    const rankingCase = buildRankingCaseEsql(branch.ranking);
-    if (branch.when) {
-      const whenCondition = conditionToESQL(branch.when);
-      branchCaseParts.push(`(${whenCondition}), ${rankingCase}`);
-    } else {
-      branchCaseParts.push(`true, ${rankingCase}`);
+    idLogic = buildRankingCaseEsql(branches[0].ranking, presentOrNullAliases);
+  } else {
+    // Pre-compute each branch's condition and formula as named columns, then combine
+    // with a single multi-arm CASE (not COALESCE) so a matched branch that evaluates
+    // to NULL does not fall through to the next branch.
+    const caseParts: string[] = [];
+    for (const [i, branch] of branches.entries()) {
+      const formulaVar = `_euid_branch_${i}_formula`;
+      assignments.push(
+        `${formulaVar} = ${buildRankingCaseEsql(branch.ranking, presentOrNullAliases)}`
+      );
+      if (branch.when) {
+        const condVar = `_euid_branch_${i}_cond`;
+        assignments.push(`${condVar} = (${conditionToESQL(branch.when)})`);
+        caseParts.push(`${condVar}, ${formulaVar}`);
+      } else {
+        caseParts.push(`TRUE, ${formulaVar}`);
+      }
     }
+    idLogic = `CASE(${caseParts.join(',\n')}, NULL)`;
   }
-  const idLogic =
-    branchCaseParts.length > 0 ? `CASE(${branchCaseParts.join(',\n')}, NULL)` : 'NULL';
-  return appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId);
+
+  assignments.push(
+    `${outputColumn} = ${appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId)}`
+  );
+  return assignments.join(',\n ');
 }
 
 function appendTypeIdIfNeeded(

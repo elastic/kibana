@@ -40,7 +40,7 @@ export const createMemoryListTool = ({
   schema: memoryListSchema,
   tags: ['memory'],
   handler: async ({ category, show_category_tree: showCategoryTree }, context) => {
-    const memoryService = getMemoryService();
+    const memoryService = getMemoryService(context.esClient.asCurrentUser);
 
     try {
       if (showCategoryTree) {

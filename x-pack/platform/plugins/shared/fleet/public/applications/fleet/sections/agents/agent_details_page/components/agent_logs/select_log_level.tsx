@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useState, useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -38,13 +38,34 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
       true
     );
 
-    const [agentLogLevel, setAgentLogLevel] = useState(
-      agent.local_metadata?.elastic?.agent?.log_level ?? agentPolicyLogLevel
-    );
+    const reportedLogLevel = agent.local_metadata?.elastic?.agent?.log_level ?? agentPolicyLogLevel;
+
+    const [agentLogLevel, setAgentLogLevel] = useState(reportedLogLevel);
     const [selectedLogLevel, setSelectedLogLevel] = useState(agentLogLevel);
+    const pendingLogLevelRef = useRef<string | null>(null);
+
+    // Sync dropdown to Fleet-reported log level when polling updates,
+    // don't overwrite during apply/reset or while awaiting agent metadata.
+    useEffect(() => {
+      if (isSetLevelLoading || isResetLevelLoading) {
+        return;
+      }
+      if (selectedLogLevel !== agentLogLevel) {
+        return;
+      }
+      if (pendingLogLevelRef.current !== null && reportedLogLevel !== pendingLogLevelRef.current) {
+        return;
+      }
+      if (pendingLogLevelRef.current !== null && reportedLogLevel === pendingLogLevelRef.current) {
+        pendingLogLevelRef.current = null;
+      }
+      setAgentLogLevel(reportedLogLevel);
+      setSelectedLogLevel(reportedLogLevel);
+    }, [reportedLogLevel, isSetLevelLoading, isResetLevelLoading, selectedLogLevel, agentLogLevel]);
 
     const resetLogLevel = useCallback(() => {
       setIsResetLevelLoading(true);
+      pendingLogLevelRef.current = agentPolicyLogLevel;
       async function send() {
         try {
           const res = await sendPostAgentAction(agent.id, {
@@ -69,6 +90,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
             })
           );
         } catch (error) {
+          pendingLogLevelRef.current = null;
           notifications.toasts.addError(error, {
             title: i18n.translate('xpack.fleet.agentLogs.resetLogLevel.errorTitleText', {
               defaultMessage: 'Error resetting agent logging level',
@@ -83,6 +105,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
 
     const onClickApply = useCallback(() => {
       setIsSetLevelLoading(true);
+      pendingLogLevelRef.current = selectedLogLevel;
       async function send() {
         try {
           const res = await sendPostAgentAction(agent.id, {
@@ -106,6 +129,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
             })
           );
         } catch (error) {
+          pendingLogLevelRef.current = null;
           notifications.toasts.addError(error, {
             title: i18n.translate('xpack.fleet.agentLogs.selectLogLevel.errorTitleText', {
               defaultMessage: 'Error updating agent logging level',

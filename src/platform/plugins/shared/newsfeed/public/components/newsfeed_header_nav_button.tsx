@@ -79,6 +79,7 @@ export const NewsfeedNavButton = ({ newsfeedApi, hasCustomBranding$, isServerles
         </EuiHeaderSectionItemButton>
         {flyoutVisible ? (
           <NewsfeedFlyout
+            newsfeedApi={newsfeedApi}
             isServerless={isServerless}
             focusTrapProps={{ shards: [buttonRef] }}
             showPlainSpinner={hasCustomBranding}

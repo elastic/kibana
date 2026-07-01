@@ -28,3 +28,33 @@ export const VIEWING_CASE = (caseId: string) =>
     defaultMessage: 'Viewing case: {caseId}. This page is under construction.',
     values: { caseId },
   });
+
+export const SHOW_METRICS = i18n.translate('xpack.cases.casesRedesign.details.showMetrics', {
+  defaultMessage: 'Show metrics',
+});
+
+export const REPORTED_BY = (name: string) =>
+  i18n.translate('xpack.cases.casesRedesign.details.reportedBy', {
+    defaultMessage: 'Reported by: {name}',
+    values: { name },
+  });
+
+export const CREATED_ON = (date: string) =>
+  i18n.translate('xpack.cases.casesRedesign.details.createdOn', {
+    defaultMessage: 'on: {date}',
+    values: { date },
+  });
+
+export const UNKNOWN_REPORTER = i18n.translate(
+  'xpack.cases.casesRedesign.details.unknownReporter',
+  {
+    defaultMessage: 'Unknown',
+  }
+);
+
+export const EDIT_CASE_NAME_ARIA = i18n.translate(
+  'xpack.cases.casesRedesign.details.editCaseNameAria',
+  {
+    defaultMessage: 'Edit case name',
+  }
+);

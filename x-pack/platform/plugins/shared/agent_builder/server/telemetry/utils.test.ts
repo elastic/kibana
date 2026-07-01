@@ -5,11 +5,47 @@
  * 2.0.
  */
 
+import { ToolType } from '@kbn/agent-builder-common/tools';
+import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import {
   classifySkill,
   normalizePluginIdForTelemetry,
   normalizeSkillIdForTelemetry,
+  normalizeToolIdForTelemetry,
 } from './utils';
+
+describe('normalizeToolIdForTelemetry', () => {
+  it('returns the original id for tools typed as builtin, regardless of allow-list', () => {
+    // A built-in tool registered by another plugin and NOT present in the
+    // AGENT_BUILDER_BUILTIN_TOOLS allow-list still keeps its real id.
+    expect(
+      normalizeToolIdForTelemetry('platform.dashboard.manage_dashboard', ToolType.builtin)
+    ).toBe('platform.dashboard.manage_dashboard');
+  });
+
+  it('returns the original id for allow-listed built-in tools when no type is provided', () => {
+    expect(normalizeToolIdForTelemetry(platformCoreTools.search)).toBe(platformCoreTools.search);
+  });
+
+  it('returns the original id for internal framework tools', () => {
+    expect(normalizeToolIdForTelemetry('load_skill')).toBe('load_skill');
+  });
+
+  it('hashes user-created tools as `custom-<hash>`', () => {
+    expect(normalizeToolIdForTelemetry('my-esql-tool', ToolType.esql)).toBe(
+      normalizeToolIdForTelemetry('my-esql-tool')
+    );
+    expect(normalizeToolIdForTelemetry('my-esql-tool', ToolType.esql)).toMatch(
+      /^custom-[0-9a-f]+$/
+    );
+  });
+
+  it('hashes unknown tool ids when no type is provided and not allow-listed', () => {
+    expect(normalizeToolIdForTelemetry('platform.dashboard.manage_dashboard')).toMatch(
+      /^custom-[0-9a-f]+$/
+    );
+  });
+});
 
 describe('normalizePluginIdForTelemetry', () => {
   it('returns undefined when no plugin id is provided', () => {

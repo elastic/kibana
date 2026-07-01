@@ -28,6 +28,8 @@ export type OnPreRoutingResult = OnPreRoutingResultNext | OnPreRoutingResultRewr
 /**
  * @public
  * A tool set defining an outcome of OnPreRouting interceptor for incoming request.
+ *
+ * @deprecated See {@link HttpServiceSetup.registerOnPreRouting}.
  */
 export interface OnPreRoutingToolkit {
   /** To pass request to the next handler */
@@ -39,6 +41,9 @@ export interface OnPreRoutingToolkit {
 /**
  * See {@link OnPreRoutingToolkit}.
  * @public
+ *
+ * @deprecated No remaining consumers in Kibana plugins. See
+ * {@link HttpServiceSetup.registerOnPreRouting} for the full deprecation note.
  */
 export type OnPreRoutingHandler = (
   request: KibanaRequest,

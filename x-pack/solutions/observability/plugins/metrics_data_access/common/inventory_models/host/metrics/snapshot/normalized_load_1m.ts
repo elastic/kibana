@@ -36,12 +36,14 @@ export const normalizedLoad1m: SchemaBasedAggregations = {
   semconv: {
     load_1m: {
       avg: {
-        field: 'system.cpu.load_average.1m',
+        // OTel lands these gauges under the `metrics.*` prefix; the unprefixed
+        // fields returned null and made the `bucket_script` ratio fall back to 0.
+        field: 'metrics.system.cpu.load_average.1m',
       },
     },
     max_cores: {
       max: {
-        field: 'system.cpu.logical.count',
+        field: 'metrics.system.cpu.logical.count',
       },
     },
     normalizedLoad1m: {

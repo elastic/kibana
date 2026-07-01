@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CasesClient } from '@kbn/cases-plugin/server/client';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { Case, AttachmentV2, RelatedCase } from '@kbn/cases-plugin/common/types/domain';
 import type { CasesFindRequest } from '@kbn/cases-plugin/common/types/api';
 import { getCurrentSpaceId } from '@kbn/agent-builder-plugin/server/utils/spaces';

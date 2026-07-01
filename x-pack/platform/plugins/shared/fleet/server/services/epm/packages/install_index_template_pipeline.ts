@@ -31,6 +31,8 @@ export async function installIndexTemplatesAndPipelines({
   esClient,
   logger,
   onlyForDataStreams,
+  customDataStreamOriginDataset,
+  customDataStreamOriginType,
 }: {
   installedPkg?: Installation;
   packageInstallContext: PackageInstallContext;
@@ -39,6 +41,8 @@ export async function installIndexTemplatesAndPipelines({
   esClient: ElasticsearchClient;
   logger: Logger;
   onlyForDataStreams?: RegistryDataStream[];
+  customDataStreamOriginDataset?: string;
+  customDataStreamOriginType?: string;
 }) {
   /**
    * In order to install assets in parallel, we need to split the preparation step from the installation step. This
@@ -99,10 +103,22 @@ export async function installIndexTemplatesAndPipelines({
     // if onlyForDataStreams is present that means we are in create package policy flow
     // not install flow, meaning we do not have a lock on the installation SO
     // so we need to use optimistic concurrency control
+    const assetsToAdd = [
+      ...preparedIngestPipelines.assetsToAdd,
+      ...preparedIndexTemplates.assetsToAdd,
+    ];
+    const annotatedAssets =
+      customDataStreamOriginDataset && customDataStreamOriginType
+        ? assetsToAdd.map((ref) =>
+            ref.type === 'index_template'
+              ? { ...ref, customDataStreamOriginDataset, customDataStreamOriginType }
+              : ref
+          )
+        : assetsToAdd;
     newEsReferences = await optimisticallyAddEsAssetReferences(
       savedObjectsClient,
       packageInstallContext.packageInfo.name,
-      [...preparedIngestPipelines.assetsToAdd, ...preparedIndexTemplates.assetsToAdd]
+      annotatedAssets
     );
   }
 

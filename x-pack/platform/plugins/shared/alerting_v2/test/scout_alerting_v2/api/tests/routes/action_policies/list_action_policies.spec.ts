@@ -8,17 +8,16 @@
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
-  ACTION_POLICY_CREATED_BY_MAX_LENGTH,
   ACTION_POLICY_PER_PAGE_MAX,
   ACTION_POLICY_SEARCH_MAX_LENGTH,
   ACTION_POLICY_TAG_MAX_LENGTH,
   ACTION_POLICY_TAGS_MAX_COUNT,
-  ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   apiTest,
   buildCreateActionPolicyData,
   getListActionPoliciesUrl,
   NO_ACCESS_ROLE,
-  READ_ROLE,
   testData,
   type AlertingApiServicesFixture,
 } from '../../../fixtures';
@@ -55,7 +54,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     const readerCredentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
-      READ_ROLE
+      ALERTING_V2_ACTION_POLICIES_READ_ROLE
     );
     readerHeaders = { ...readerCredentials.apiKeyHeader };
   });
@@ -104,8 +103,6 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
       const expectedShape = {
         description: 'Scout action policy',
         destinations: [{ type: 'workflow', id: 'scout-workflow-id' }],
-        type: 'global',
-        ruleId: null,
         enabled: true,
         matcher: null,
         groupBy: null,
@@ -178,17 +175,6 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(response.body.items[0].name).toBe('Beta Policy');
   });
 
-  apiTest('search: matches by destination id', async ({ apiClient, apiServices }) => {
-    await createActionPolicies(apiServices);
-
-    const response = await apiClient.get(getListActionPoliciesUrl({ search: 'wf-gamma' }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.total).toBe(1);
-    expect(response.body.items[0].name).toBe('Gamma Policy');
-  });
-
   apiTest(
     'search: returns multiple matching items for partial term',
     async ({ apiClient, apiServices }) => {
@@ -218,33 +204,6 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
       expect(response.body.items).toStrictEqual([]);
     }
   );
-
-  apiTest('filter: by destinationType=workflow', async ({ apiClient, apiServices }) => {
-    await createActionPolicies(apiServices);
-
-    const response = await apiClient.get(
-      getListActionPoliciesUrl({ destinationType: 'workflow' }),
-      {
-        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-      }
-    );
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.total).toBe(3);
-  });
-
-  apiTest('filter: by createdBy', async ({ apiClient, apiServices }) => {
-    const { alpha } = await createActionPolicies(apiServices);
-    expect(alpha.createdBy).toBeDefined();
-
-    const response = await apiClient.get(
-      getListActionPoliciesUrl({ createdBy: alpha.createdBy! }),
-      {
-        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-      }
-    );
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.total).toBe(3);
-  });
 
   apiTest('filter: by enabled=true and enabled=false', async ({ apiClient, apiServices }) => {
     const { alpha } = await createActionPolicies(apiServices);
@@ -450,21 +409,6 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(response).toHaveStatusCode(400);
   });
 
-  apiTest('validation: rejects unknown destinationType', async ({ apiClient }) => {
-    const response = await apiClient.get(getListActionPoliciesUrl({ destinationType: 'email' }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('validation: rejects createdBy over the maximum length', async ({ apiClient }) => {
-    const response = await apiClient.get(
-      getListActionPoliciesUrl({ createdBy: 'a'.repeat(ACTION_POLICY_CREATED_BY_MAX_LENGTH + 1) }),
-      { headers: { ...testData.COMMON_HEADERS, ...readerHeaders } }
-    );
-    expect(response).toHaveStatusCode(400);
-  });
-
   apiTest('validation: rejects unknown enabled value', async ({ apiClient }) => {
     const response = await apiClient.get(getListActionPoliciesUrl({ enabled: 'maybe' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
@@ -517,7 +461,9 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest(
     'authorization: 200 with full alerting_v2 privileges',
     async ({ apiClient, requestAuth }) => {
-      const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+      const writerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ACTION_POLICIES_ALL_ROLE
+      );
       const response = await apiClient.get(getListActionPoliciesUrl(), {
         headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
       });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getControlsGroupSchema } from './src/controls_group_schema';
+export { getControlsSchema, getControlsGroupSchema } from './src/controls_group_schema';
 
 export type {
   ControlsGroupState,
@@ -26,6 +26,7 @@ export type {
   PinnedControlState,
   RangeSliderControlState,
   RangeSliderValue,
+  StrictDataControlState,
   TimeSlice,
   TimeSliderControlState,
 } from './src/types';

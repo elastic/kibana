@@ -10,6 +10,7 @@ import React from 'react';
 import { FAILED_TESTS_LABEL } from './failed_tests';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
+import { useSyntheticsDataViewIndexPatterns } from '../hooks/use_synthetics_data_view_index_patterns';
 
 export const FailedTestsCount = ({ from, to, id }: { to: string; from: string; id: string }) => {
   const {
@@ -17,6 +18,8 @@ export const FailedTestsCount = ({ from, to, id }: { to: string; from: string; i
   } = useKibana<ClientPluginsStart>().services;
 
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
+
+  const dataTypesIndexPatterns = useSyntheticsDataViewIndexPatterns();
 
   if (!queryIdFilter) {
     return null;
@@ -26,6 +29,7 @@ export const FailedTestsCount = ({ from, to, id }: { to: string; from: string; i
     <ExploratoryViewEmbeddable
       id={id}
       reportType="single-metric"
+      dataTypesIndexPatterns={dataTypesIndexPatterns}
       attributes={[
         {
           time: { from, to },

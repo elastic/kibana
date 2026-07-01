@@ -32,13 +32,12 @@ export class WorkflowExecuteMonacoConnectorHandler extends BaseMonacoConnectorHa
     const isAsync = connectorType === 'workflow.executeAsync';
     const stability = getBuiltInStepStability(connectorType);
 
-    const content = [
+    const content = this.prependStabilityBadgeToContent(stability, [
       `**Step**: \`${connectorType}\``,
       '',
       isAsync
         ? 'Execute another workflow **asynchronously** — the current workflow continues without waiting for the child workflow to complete.'
         : 'Execute another workflow **synchronously** — the current workflow waits for the child workflow to complete before continuing.',
-      this.getStabilityNote(stability),
       '',
       '**Parameters:**',
       '- `workflow-id` _(required)_ — The ID of the workflow to execute',
@@ -54,7 +53,7 @@ export class WorkflowExecuteMonacoConnectorHandler extends BaseMonacoConnectorHa
       `    inputs:`,
       `      key: value`,
       '```',
-    ].join('\n');
+    ]);
 
     return this.createMarkdownContent(content);
   }

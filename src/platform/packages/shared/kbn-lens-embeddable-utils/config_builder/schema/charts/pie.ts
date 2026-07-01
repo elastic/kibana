@@ -16,6 +16,7 @@ import {
   collapseBySchema,
   dslOnlyPanelInfoSchema,
   layerSettingsSchema,
+  legendPositionSchema,
   legendTruncateAfterLinesSchema,
   sharedPanelInfoSchema,
 } from '../shared';
@@ -42,6 +43,7 @@ const pieStateSharedSchema = {
         truncate_after_lines: legendTruncateAfterLinesSchema,
         visibility: legendVisibilitySchemaWithAuto,
         size: legendSizeSchema,
+        position: legendPositionSchema,
       },
       {
         meta: {

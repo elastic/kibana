@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
 import type { EuiFilePickerProps } from '@elastic/eui/src/components/form/file_picker/file_picker';
@@ -129,20 +130,26 @@ export const ArgumentFileSelector = memo<
         closePopover={handleClosePopover}
         anchorPosition="upCenter"
         initialFocus={`[id="${filePickerUUID}"]`}
+        aria-label={i18n.translate(
+          'xpack.securitySolution.consoleArgumentSelectors.fileSelector.popover.ariaLabel',
+          { defaultMessage: 'Select file' }
+        )}
         button={
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>
-              <div className="eui-textTruncate" title={selectedFileTitleTooltip}>
-                {selectedFileDisplayText}
-              </div>
+              <EuiToolTip content={selectedFileTitleTooltip}>
+                <div className="eui-textTruncate">{selectedFileDisplayText}</div>
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="folderOpen"
-                size="xs"
-                onClick={handleOpenPopover}
-                aria-label={OPEN_FILE_PICKER_LABEL}
-              />
+              <EuiToolTip content={OPEN_FILE_PICKER_LABEL} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="folderOpen"
+                  size="xs"
+                  onClick={handleOpenPopover}
+                  aria-label={OPEN_FILE_PICKER_LABEL}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         }

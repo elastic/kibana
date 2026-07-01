@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const ENTITY_INDEX = 'entities-latest-*';
+// For telemetry we need to query the concrete entity-store index pattern, instead of the alias.
+export const ENTITY_INDEX = '.entities.v2.latest.security_*';
 
 export const getAggsQuery = (
   termsField: string,

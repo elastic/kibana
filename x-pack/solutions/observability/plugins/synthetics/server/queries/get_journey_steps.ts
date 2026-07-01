@@ -8,10 +8,14 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SyntheticsEsClient } from '../lib';
 import { asMutableArray } from '../../common/utils/as_mutable_array';
+import { getCheckGroupTimeRangeFilter } from '../../common/constants/client_defaults';
+import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
 import type { JourneyStep } from '../../common/runtime_types/ping/synthetics';
 
 export interface GetJourneyStepsParams {
   checkGroup: string;
+  remoteName?: string;
+  timestamp?: string;
 }
 
 type ResultType = JourneyStep & { '@timestamp': string };
@@ -19,10 +23,13 @@ type ResultType = JourneyStep & { '@timestamp': string };
 export const getJourneySteps = async ({
   syntheticsEsClient,
   checkGroup,
+  remoteName,
+  timestamp,
 }: GetJourneyStepsParams & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<JourneyStep[]> => {
   const params = {
+    index: getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices),
     query: {
       bool: {
         filter: [
@@ -42,7 +49,8 @@ export const getJourneySteps = async ({
               'monitor.check_group': checkGroup,
             },
           },
-        ] as QueryDslQueryContainer,
+          ...(timestamp ? [getCheckGroupTimeRangeFilter(timestamp)] : []),
+        ] as QueryDslQueryContainer[],
       },
     },
     sort: asMutableArray([

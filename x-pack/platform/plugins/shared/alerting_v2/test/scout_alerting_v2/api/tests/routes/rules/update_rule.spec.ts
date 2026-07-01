@@ -8,12 +8,12 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH, MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
-  ALL_ROLE,
+  ALERTING_V2_RULES_ALL_ROLE,
+  ALERTING_V2_RULES_READ_ROLE,
   apiTest,
   buildCreateRuleData,
-  NO_ACCESS_ROLE,
-  READ_ROLE,
   getRuleUrl,
+  NO_ACCESS_ROLE,
   testData,
 } from '../../../fixtures';
 
@@ -24,7 +24,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_ALL_ROLE);
     writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
   });
 
@@ -56,7 +56,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       // Non-touched top-level fields are preserved.
       expect(response.body.kind).toBe(created.kind);
       expect(response.body.schedule).toStrictEqual(created.schedule);
-      expect(response.body.evaluation).toStrictEqual(created.evaluation);
+      expect(response.body.query).toStrictEqual(created.query);
       // Audit fields: createdAt/createdBy preserved, updatedAt/updatedBy refreshed.
       expect(response.body.id).toBe(created.id);
       expect(response.body.createdAt).toBe(created.createdAt);
@@ -99,26 +99,179 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'update: should update only the evaluation query while preserving metadata and schedule',
+    'update: should update only the query while preserving metadata and schedule',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
-          metadata: { name: 'rule-eval-update', tags: ['cpu'] },
+          metadata: { name: 'rule-query-update', tags: ['cpu'] },
           schedule: { every: '5m', lookback: '10m' },
         })
       );
 
       const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: writerHeaders,
-        body: { evaluation: { query: { base: 'FROM new-index-* | LIMIT 100' } } },
+        body: {
+          query: { format: 'standalone', breach: { query: 'FROM new-index-* | LIMIT 100' } },
+        },
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.evaluation).toStrictEqual({
-        query: { base: 'FROM new-index-* | LIMIT 100' },
+      expect(response.body.query).toStrictEqual({
+        format: 'standalone',
+        breach: { query: 'FROM new-index-* | LIMIT 100' },
       });
       expect(response.body.metadata).toStrictEqual(created.metadata);
       expect(response.body.schedule).toStrictEqual(created.schedule);
+    }
+  );
+
+  apiTest(
+    'update: should update query to standalone format with a recovery query',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-add-recover' } })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: {
+          recovery_strategy: 'query',
+          query: {
+            format: 'standalone',
+            breach: {
+              query:
+                'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+            },
+            recovery: {
+              query:
+                'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+            },
+          },
+        },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.recovery_strategy).toBe('query');
+      expect(response.body.query).toStrictEqual({
+        format: 'standalone',
+        breach: {
+          query:
+            'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+        },
+        recovery: {
+          query:
+            'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+        },
+      });
+      expect(response.body.schedule).toStrictEqual(created.schedule);
+    }
+  );
+
+  apiTest(
+    'update: should add a no_data query to a standalone-format rule',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-add-no-data' } })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: {
+          no_data_strategy: 'emit',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 1' },
+            no_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0' },
+          },
+        },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.no_data_strategy).toBe('emit');
+      expect(response.body.query).toStrictEqual({
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | LIMIT 1' },
+        no_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0' },
+      });
+      expect(response.body.schedule).toStrictEqual(created.schedule);
+    }
+  );
+
+  apiTest('update: should update query to composed format', async ({ apiClient, apiServices }) => {
+    const created = await apiServices.alertingV2.rules.create(
+      buildCreateRuleData({ metadata: { name: 'rule-to-composed' } })
+    );
+
+    const response = await apiClient.patch(getRuleUrl(created.id), {
+      headers: writerHeaders,
+      body: {
+        query: {
+          format: 'composed',
+          base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+          breach: { segment: 'WHERE count >= 10' },
+        },
+      },
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.query).toStrictEqual({
+      format: 'composed',
+      base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+      breach: { segment: 'WHERE count >= 10' },
+    });
+    expect(response.body.schedule).toStrictEqual(created.schedule);
+  });
+
+  apiTest(
+    'update: should update query to composed format with a recovery segment',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-to-composed-recover' } })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: {
+          recovery_strategy: 'query',
+          query: {
+            format: 'composed',
+            base: 'FROM logs-* | STATS max_val = MAX(value) BY host.name',
+            breach: { segment: 'WHERE max_val >= 10' },
+            recovery: { segment: 'WHERE max_val < 5' },
+          },
+        },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.recovery_strategy).toBe('query');
+      expect(response.body.query).toStrictEqual({
+        format: 'composed',
+        base: 'FROM logs-* | STATS max_val = MAX(value) BY host.name',
+        breach: { segment: 'WHERE max_val >= 10' },
+        recovery: { segment: 'WHERE max_val < 5' },
+      });
+      expect(response.body.schedule).toStrictEqual(created.schedule);
+    }
+  );
+
+  apiTest(
+    'update: should return 409 when the request body version is stale',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-stale-version' } })
+      );
+      const firstUpdate = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { name: 'first-rename' } },
+      });
+      expect(firstUpdate).toHaveStatusCode(200);
+      expect(firstUpdate.body.version).not.toBe(created.version);
+
+      const staleUpdate = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { version: created.version, metadata: { name: 'second-rename' } },
+      });
+      expect(staleUpdate).toHaveStatusCode(409);
     }
   );
 
@@ -259,6 +412,11 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         buildCreateRuleData({
           kind: 'signal',
           state_transition: undefined,
+          recovery_strategy: undefined,
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+          },
           metadata: { name: 'signal-rule' },
         })
       );
@@ -291,7 +449,9 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'reader-cannot-update' } })
       );
-      const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_RULES_READ_ROLE
+      );
       const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: { metadata: { name: 'attempted-rename' } },

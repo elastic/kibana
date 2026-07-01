@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IUiSettingsClient } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
-
-const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
+import { AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
+import type { FastInferenceEndpointsProvider } from '../types';
 
 export const createScopedModel = async ({
   inference,
@@ -32,29 +30,33 @@ export const createScopedModel = async ({
 };
 
 export const resolveConnectorId = async ({
-  uiSettingsClient,
   inference,
   request,
+  searchInferenceEndpoints,
 }: {
-  uiSettingsClient: IUiSettingsClient;
   inference: InferenceServerStart;
   request: KibanaRequest;
+  searchInferenceEndpoints?: FastInferenceEndpointsProvider;
 }): Promise<string | undefined> => {
-  try {
-    const defaultSetting = await uiSettingsClient.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
-    if (defaultSetting && defaultSetting !== NO_DEFAULT_CONNECTOR) {
-      return defaultSetting;
+  if (searchInferenceEndpoints) {
+    try {
+      const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
+        AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
+        request
+      );
+      const recommended = endpoints.find((e) => e.isRecommended);
+      if (recommended) {
+        return recommended.connectorId;
+      }
+    } catch {
+      // fall through to default connector
     }
-  } catch {
-    // UI setting may not be registered, fall through
   }
 
   try {
     const connector = await inference.getDefaultConnector(request);
     return connector?.connectorId;
   } catch {
-    // no connectors available
+    return undefined;
   }
-
-  return undefined;
 };

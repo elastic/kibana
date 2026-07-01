@@ -55,6 +55,26 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       [FF_ENABLE_ENTITY_STORE_V2]: true,
     });
 
+    // Pre-create the `security-solution-default` data view. In API-only test
+    // environments the Security Solution sourcerer (which normally creates it
+    // from the browser flow) never runs, so the entity store's data-view
+    // lookup in `logs_extraction_client.ts#getAllIndexPatternsIncludingRemote`
+    // always misses and takes its `logs-*` fallback branch.
+    const dataViewResponse = await apiClient.post('/api/data_views/data_view', {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {
+        override: true,
+        data_view: {
+          id: 'security-solution-default',
+          name: 'security-solution-default',
+          title: 'logs-*',
+          timeFieldName: '@timestamp',
+        },
+      },
+    });
+    expect(dataViewResponse.statusCode).toBe(200);
+
     // Install the entity store
     const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
@@ -286,7 +306,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         namespace: 'okta',
         confidence: ENTITY_CONFIDENCE.High,
       },
-      user: { hash: ['hash-1', 'hash-2'] },
+      user: { hash: expect.arrayContaining(['hash-1', 'hash-2']) },
     });
 
     // Update sub_type in between documents with null values
@@ -360,7 +380,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         namespace: 'okta',
         confidence: ENTITY_CONFIDENCE.High,
       },
-      user: { hash: ['hash-1', 'hash-2', 'hash-3', 'hash-4', 'hash-5'] },
+      user: { hash: expect.arrayContaining(['hash-1', 'hash-2', 'hash-3', 'hash-4', 'hash-5']) },
     });
 
     // Make sure latest is not overwritten from the document if not changed
@@ -398,21 +418,27 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         confidence: ENTITY_CONFIDENCE.High,
       },
       user: {
-        hash: [
+        hash: expect.arrayContaining([
           'hash-1',
-          'hash-10',
-          'hash-11',
+          'hash-2',
           'hash-3',
           'hash-4',
           'hash-5',
           'hash-6',
           'hash-7',
           'hash-8',
-          'hash-2',
-        ],
+          'hash-9',
+          'hash-10',
+          'hash-11',
+        ]),
         domain: 'example.com',
       },
     });
+    // With cap=100 all 11 distinct hashes must be collected (exercises the raised cap).
+    const userHash = (
+      updatedLatestDomain.hits.hits[0]._source as Record<string, Record<string, unknown>>
+    ).user.hash;
+    expect(normalizeKeywordList(userHash)).toHaveLength(11);
   });
 
   apiTest(
@@ -1210,6 +1236,88 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const supervisesUser = supervisesRawIdentifiers!.user as Record<string, unknown> | undefined;
       expect(normalizeKeywordList(supervisesUser?.email)).toStrictEqual(['supervisee@example.com']);
       expect(normalizeKeywordList(supervisesUser?.name)).toStrictEqual(['supervisor_login']);
+    }
+  );
+
+  apiTest(
+    'Should succeed when a data stream matched by the data view has a closed backing index',
+    async ({ apiClient, esClient }) => {
+      const DATA_STREAM = 'logs-closed-smoke';
+      const FROM = '2026-06-24T09:59:00Z';
+      const TO = '2026-06-24T11:00:00Z';
+      const TS = '2026-06-24T10:00:00Z';
+
+      try {
+        // Create a composable index template so the data stream can be created.
+        await esClient.indices.putIndexTemplate({
+          name: 'logs-closed-smoke-template',
+          index_patterns: [`${DATA_STREAM}*`],
+          data_stream: {},
+          priority: 500,
+        });
+
+        // First ingest creates the data stream and its first (soon-to-be-closed) backing index.
+        await esClient.index({
+          index: DATA_STREAM,
+          refresh: 'wait_for',
+          body: { '@timestamp': TS, host: { name: 'closed-backing-host' } },
+        });
+
+        // Discover the first backing index name before rolling over.
+        const beforeRollover = await esClient.indices.resolveIndex({
+          name: DATA_STREAM,
+          expand_wildcards: ['open', 'closed', 'hidden'] as Array<'open' | 'closed' | 'hidden'>,
+        });
+        const firstBacking = ([] as string[]).concat(
+          beforeRollover.data_streams[0]?.backing_indices ?? []
+        )[0];
+
+        // Roll over to create a second (open) backing index.
+        await esClient.indices.rollover({ alias: DATA_STREAM });
+
+        // The entity we will assert on lands in the new open backing index.
+        await esClient.index({
+          index: DATA_STREAM,
+          refresh: 'wait_for',
+          body: { '@timestamp': TS, host: { name: 'open-smoke-host' } },
+        });
+
+        // Simulate the production scenario: close the older backing index.
+        await esClient.indices.close({ index: firstBacking });
+
+        // Extraction must not throw cluster_block_exception and must succeed.
+        const extractionResponse = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'host',
+          FROM,
+          TO
+        );
+        expect(extractionResponse.statusCode).toBe(200);
+        expect(extractionResponse.body).toMatchObject({ success: true });
+
+        // The entity from the open backing index must be extracted.
+        const hit = await searchDocById(esClient, 'host:open-smoke-host');
+        expect(hit.hits.hits).toHaveLength(1);
+      } finally {
+        // Re-open closed backing indices before deleting the data stream (ES rejects
+        // deleteDataStream when backing indices are closed).
+        const resolved = await esClient.indices.resolveIndex({
+          name: DATA_STREAM,
+          expand_wildcards: ['open', 'closed', 'hidden'] as Array<'open' | 'closed' | 'hidden'>,
+        });
+        if (resolved.data_streams.length > 0) {
+          const allBacking = resolved.data_streams.flatMap((ds) =>
+            ([] as string[]).concat(ds.backing_indices)
+          );
+          await esClient.indices.open({ index: allBacking, ignore_unavailable: true });
+        }
+        await esClient.indices.deleteDataStream({ name: DATA_STREAM }, { ignore: [404] });
+        await esClient.indices.deleteIndexTemplate(
+          { name: 'logs-closed-smoke-template' },
+          { ignore: [404] }
+        );
+      }
     }
   );
 });

@@ -12,7 +12,6 @@ import type {
   AnalyticsServiceStart,
   CoreSetup,
   DocLinksServiceSetup,
-  IBasePath,
   IClusterClient,
   KibanaRequest,
   Logger,
@@ -38,7 +37,7 @@ import type { ReportingConfigType } from '@kbn/reporting-server';
 import type { ExportType } from '@kbn/reporting-server';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -66,7 +65,6 @@ import { API_PRIVILEGES } from './features';
 
 export interface ReportingInternalSetup {
   actions: ActionsPluginSetupContract;
-  basePath: Pick<IBasePath, 'set'>;
   docLinks: DocLinksServiceSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   features: FeaturesPluginSetup;

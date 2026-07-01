@@ -6,6 +6,7 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
+import { kibanaSavedObjectPermissions } from '@kbn/agent-context-layer-plugin/server';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardStateToAttachmentData,
@@ -18,6 +19,7 @@ import type {
 } from '@kbn/dashboard-plugin/server';
 
 const DASHBOARD_SML_TYPE = 'dashboard';
+const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 
 interface CreateDashboardSmlTypeOptions {
   getDashboardClient: () => Promise<DashboardPluginStart['client']>;
@@ -100,7 +102,6 @@ export const createDashboardSmlType = ({
             type: DASHBOARD_SML_TYPE,
             title: dashboard.data.title ?? originId,
             content: toDashboardSearchContent(dashboard.data),
-            permissions: ['saved_object:dashboard/get'],
           },
         ],
       };
@@ -112,10 +113,16 @@ export const createDashboardSmlType = ({
     }
   },
 
+  getPermissions: () =>
+    kibanaSavedObjectPermissions({ savedObjectType: DASHBOARD_SAVED_OBJECT_TYPE }),
+
   toAttachment: async (item, context) => {
     try {
       const dashboardClient = await getDashboardClient();
-      const dashboard = await dashboardClient.read(context.savedObjectsClient, item.origin_id);
+      const dashboard = await dashboardClient.read(
+        context.savedObjectsClient,
+        item.origin_id ?? ''
+      );
 
       return {
         type: DASHBOARD_ATTACHMENT_TYPE,

@@ -74,7 +74,10 @@ export async function definitionToESQLQuery(
         Builder.expression.source.index(parentViewName),
         Builder.option({
           name: 'METADATA',
-          args: [Builder.expression.column({ args: [Builder.identifier({ name: '_source' })] })],
+          args: [
+            Builder.expression.column({ args: [Builder.identifier({ name: '_id' })] }),
+            Builder.expression.column({ args: [Builder.identifier({ name: '_source' })] }),
+          ],
         }),
       ],
     }),

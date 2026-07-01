@@ -13,7 +13,7 @@ import {
   createAlertEpisode,
   createDispatcherPipelineState,
   createRule,
-  createSingleRuleActionPolicy,
+  createRuleScopedActionPolicy,
 } from '../fixtures/test_utils';
 import type {
   AlertEpisode,
@@ -434,11 +434,68 @@ describe('EvaluateMatchersStep', () => {
     });
   });
 
-  describe('single_rule policy filtering', () => {
-    it('matches a single_rule policy when ruleId equals the episode rule', async () => {
+  describe('top-level severity matching', () => {
+    it('matches on top-level severity when episode severity equals the matcher value', async () => {
+      const episode = createAlertEpisode({ rule_id: 'r1', severity: 'critical' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: 'severity: "critical"',
+      });
+
+      const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(1);
+    });
+
+    it('does not match when episode severity differs from the matcher value', async () => {
+      const episode = createAlertEpisode({ rule_id: 'r1', severity: 'low' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: 'severity: "critical"',
+      });
+
+      const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+    });
+
+    it('does not match and does not throw when episode has no severity', async () => {
       const episode = createAlertEpisode({ rule_id: 'r1' });
       const rule = createRule({ id: 'r1' });
-      const policy = createSingleRuleActionPolicy('r1', { id: 'p1' });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: 'severity: "critical"',
+      });
+
+      const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+    });
+
+    it('matches combined severity and rule conditions', async () => {
+      const episodes = [
+        createAlertEpisode({ rule_id: 'r1', severity: 'high' }),
+        createAlertEpisode({ rule_id: 'r1', severity: 'low' }),
+      ];
+      const rule = createRule({ id: 'r1', tags: ['production'] });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: 'severity: "high" and rule.tags: "production"',
+      });
+
+      const matched = await runStep(episodes, new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(1);
+    });
+  });
+
+  describe('rule-scoped policy via matcher', () => {
+    it('matches a rule-scoped policy when rule.id equals the episode rule', async () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createRuleScopedActionPolicy('r1', { id: 'p1' });
 
       const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
 
@@ -446,10 +503,10 @@ describe('EvaluateMatchersStep', () => {
       expect(matched[0].policy).toBe(policy);
     });
 
-    it('skips a single_rule policy whose ruleId differs from the episode rule', async () => {
+    it('skips a rule-scoped policy whose rule.id differs from the episode rule', async () => {
       const episode = createAlertEpisode({ rule_id: 'r1' });
       const rule = createRule({ id: 'r1' });
-      const policy = createSingleRuleActionPolicy('r2', { id: 'p1' });
+      const policy = createRuleScopedActionPolicy('r2', { id: 'p1' });
 
       const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
 
@@ -457,47 +514,20 @@ describe('EvaluateMatchersStep', () => {
       expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 
-    it('short-circuits before matcher evaluation (no KQL parse-error log when ruleId mismatches)', async () => {
-      const episode = createAlertEpisode({ rule_id: 'r1' });
-      const rule = createRule({ id: 'r1' });
-      const policy = createSingleRuleActionPolicy('r2', {
-        id: 'p1',
-        matcher: 'invalid kql (((',
-      });
-
-      const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
-
-      expect(matched).toHaveLength(0);
-      expect(mockLogger.warn).not.toHaveBeenCalled();
-    });
-
-    it('still evaluates the matcher when single_rule and ruleId matches', async () => {
-      const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'active' });
-      const rule = createRule({ id: 'r1' });
-      const policy = createSingleRuleActionPolicy('r1', {
-        id: 'p1',
-        matcher: 'episode_status: inactive',
-      });
-
-      const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
-
-      expect(matched).toHaveLength(0);
-    });
-
-    it('mixes global and single_rule policies correctly', async () => {
+    it('mixes global and rule-scoped policies correctly', async () => {
       const episode = createAlertEpisode({ rule_id: 'r1' });
       const rule = createRule({ id: 'r1' });
       const globalPolicy = createActionPolicy({ id: 'g1' });
-      const single1 = createSingleRuleActionPolicy('r1', { id: 's1' });
-      const single2 = createSingleRuleActionPolicy('r2', { id: 's2' });
+      const scoped1 = createRuleScopedActionPolicy('r1', { id: 's1' });
+      const scoped2 = createRuleScopedActionPolicy('r2', { id: 's2' });
 
       const matched = await runStep(
         [episode],
         new Map([['r1', rule]]),
         new Map<ActionPolicyId, ActionPolicy>([
           ['g1', globalPolicy],
-          ['s1', single1],
-          ['s2', single2],
+          ['s1', scoped1],
+          ['s2', scoped2],
         ])
       );
 

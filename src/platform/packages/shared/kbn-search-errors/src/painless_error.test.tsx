@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { createEsError } from './create_es_error';
-import { renderSearchError } from './render_search_error';
-import { shallow } from 'enzyme';
+import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
+import { createEsError } from './create_es_error';
+import { screen } from '@testing-library/react';
+import { renderSearchError } from './render_search_error';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 const servicesMock = {
   application: coreMock.createStart().application,
@@ -27,9 +27,9 @@ const servicesMock = {
 };
 
 const dataViewMock = {
-  title: 'logs',
   id: '1234',
-} as unknown as DataView;
+  title: 'logs',
+} as AbstractDataView;
 
 describe('Painless error', () => {
   const painlessError = createEsError(
@@ -71,21 +71,29 @@ describe('Painless error', () => {
     dataViewMock
   );
 
-  test('should set error.message to painless reason', () => {
+  it('should set error.message to painless reason', () => {
     expect(painlessError.message).toEqual(
       'Error executing runtime field or scripted field on data view logs'
     );
   });
 
-  test('should render error message', () => {
+  it('should render error message', () => {
     const searchErrorDisplay = renderSearchError(painlessError);
     expect(searchErrorDisplay).not.toBeUndefined();
-    const wrapper = shallow(searchErrorDisplay?.body as ReactElement);
-    expect(wrapper).toMatchSnapshot();
+
+    renderWithKibanaRenderContext(searchErrorDisplay?.body);
+
+    expect(
+      screen.getByText('Error executing runtime field or scripted field on data view logs')
+    ).toBeVisible();
+    expect(screen.getByText('cannot resolve symbol [invalid]')).toBeVisible();
+    expect(screen.getByTestId('painlessStackTrace')).toHaveTextContent('invalid');
+    expect(screen.getByTestId('painlessStackTrace')).toHaveTextContent('^---- HERE');
   });
 
-  test('should return 2 actions', () => {
+  it('should return 2 actions', () => {
     const searchErrorDisplay = renderSearchError(painlessError);
+
     expect(searchErrorDisplay).not.toBeUndefined();
     expect(searchErrorDisplay?.actions?.length).toBe(2);
   });

@@ -15,11 +15,7 @@ import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
-import {
-  breadcrumbOnClickFactory,
-  DATA_DRIFT_BREADCRUMB,
-  getBreadcrumbWithUrlForApp,
-} from '../../breadcrumbs';
+import { DATA_DRIFT_BREADCRUMB, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { basicResolvers } from '../../resolvers';
 
 const DataDriftPage = dynamic(async () => ({
@@ -41,17 +37,6 @@ export const dataDriftRouteFactory = (
     getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
     {
       text: DATA_DRIFT_BREADCRUMB.text,
-      ...(navigateToPath
-        ? {
-            href: `${basePath}/app/ml${DATA_DRIFT_BREADCRUMB.href}`,
-            onClick: breadcrumbOnClickFactory(DATA_DRIFT_BREADCRUMB.href, navigateToPath),
-          }
-        : {}),
-    },
-    {
-      text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.dataDriftResultsLabel', {
-        defaultMessage: 'Results',
-      }),
     },
   ],
   'data-test-subj': 'mlPageDataDrift',

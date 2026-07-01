@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/core-http-browser-internal'
   - '@kbn/core-http-browser'
   - '@kbn/lazy-object'
+  - '@kbn/core-spaces-common'
 tags:
   - shared-browser
   - package

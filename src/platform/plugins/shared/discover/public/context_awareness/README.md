@@ -18,17 +18,17 @@ aspects of Discover.
 There are currently three context levels supported in Discover:
 
 - Root context:
-    - Based on the current solution type.
-    - Resolved at application initialization.
-    - Runs synchronously or asynchronously.
+  - Based on the current solution type.
+  - Resolved at application initialization.
+  - Runs synchronously or asynchronously.
 - Data source context:
-    - Based on the current ES|QL query or data view.
-    - Resolved on ES|QL query or data view change, before data fetching occurs.
-    - Runs synchronously or asynchronously.
+  - Based on the current ES|QL query or data view.
+  - Resolved on ES|QL query or data view change, before data fetching occurs.
+  - Runs synchronously or asynchronously.
 - Document context:
-    - Based on individual ES|QL records or ES documents.
-    - Resolved individually for each ES|QL record or ES document after data fetching runs.
-    - Runs synchronously only.
+  - Based on individual ES|QL records or ES documents.
+  - Resolved individually for each ES|QL record or ES document after data fetching runs.
+  - Runs synchronously only.
 
 ### Composable profiles
 
@@ -66,13 +66,18 @@ The following diagram illustrates the extension point merging process:
 ![image](./docs/merged_accessors.png)
 
 Additionally, extension point implementations are passed an `accessorParams` argument as the second argument after
-`prev`. This object contains additional parameters that may be useful to extension point implementations, primarily the
-current `context` object. This is most useful in situations where consumers want to [customize the
-`context` object](#custom-context-objects) with properties specific to their profile, such as state stores and
-asynchronously initialized services.
+`prev`, which includes:
+
+- `context`: the resolved `context` object for the current profile level. This is useful when consumers want to
+  [customize the `context` object](#custom-context-objects) with profile-specific properties such as asynchronously
+  initialized services.
+- `toolkit`: a host-provided object exposing optional host capabilities through `toolkit.actions` and shared profile
+  state through `toolkit.getStateAdapter`. Actions availability depends on the current host surface, such as the main
+  Discover app, the embeddable, or the surrounding documents page.
 
 Definitions for composable profiles and the merging routine are located in the [
-`composable_profile.ts`](./composable_profile.ts) file.
+`composable_profile.ts`](./composable_profile.ts) file. Toolkit definitions are located in the [
+`toolkit.ts`](./toolkit.ts) file.
 
 ### Supporting services
 
@@ -94,7 +99,7 @@ responsible for the following:
 - Deduplicating profile resolution attempts with identical parameters.
 - Error handling and fallback behaviour on profile resolution failure.
 
-`ProfileService` definitions and implementation are located in the [`profiles_service.ts`](./profile_service.ts) file.
+`ProfileService` definitions and implementation are located in the [`profile_service.ts`](./profile_service.ts) file.
 
 The `ProfilesManager` and `ScopedProfilesManager` implementations are located in the [
 `profiles_manager.ts`](./profiles_manager/profiles_manager.ts) and [
@@ -207,12 +212,7 @@ export const createExampleDataSourceProfileProvider = (
       // Extend the previous results with a cell renderer for the message field
       message: (props) => {
         const message = getFieldValue(props.row, 'message');
-        return <span>Custom
-        message
-        cell: {
-          message
-        }
-        </span>;
+        return <span>Custom message cell: {message}</span>;
       },
     }),
   },
@@ -296,6 +296,75 @@ const getCellRenderers = (prev) => (params) => {
 };
 ```
 
+### Profile state
+
+When state needs to be shared across multiple extension point implementations, or across multiple profiles, use profile
+state. Profile state is accessed through the host-provided toolkit and is scoped to the current host surface. In the
+main Discover app it is scoped to the current tab; in simplified hosts like the document route, surrounding documents
+page, and embeddables it is kept in memory for the lifetime of that host instance.
+
+Define a `ProfileStateDefinition<TState>` near the profile provider that uses it:
+
+```ts
+/**
+ * profile_providers/common/example_data_source_profile/profile_state.ts
+ */
+
+import type { ProfileStateDefinition, ProfileStateRegistry } from '../../profile_state';
+import { ProfileStateType } from '../../profile_state';
+
+// Define the state shape shared across profiles and extension point implementations
+interface ExampleProfileState {
+  timestampColor: string;
+}
+
+// Define a unique state key, field lifetime metadata, and the default typed state
+const EXAMPLE_PROFILE_STATE_DEF: ProfileStateDefinition<ExampleProfileState> = {
+  key: 'exampleProfileState',
+  descriptor: {
+    timestampColor: { type: ProfileStateType.Ui },
+  },
+  defaultState: {
+    timestampColor: 'hollow',
+  },
+};
+
+export const registerExampleProfileStateDefinitions = (registry: ProfileStateRegistry) => {
+  // Register the profile state definition to the shared registry
+  registry.registerDefinition(EXAMPLE_PROFILE_STATE_DEF);
+};
+```
+
+Register the definition from [`register_profile_state_definitions.ts`](./profile_providers/register_profile_state_definitions.ts)
+before using it in profile code. The `key` must be unique, the `descriptor` describes the intended lifetime of each
+field, and `defaultState` is returned until state has been written.
+
+Use `toolkit.getStateAdapter()` inside extension point implementations to read, observe, and update the state:
+
+```tsx
+const getCellRenderers = (prev, { toolkit }) => {
+  // Retrieve the state adapter from the host-provided toolkit
+  const stateAdapter = toolkit.getStateAdapter(EXAMPLE_PROFILE_STATE_DEF);
+  const profileState$ = stateAdapter.getState$();
+
+  return (params) => ({
+    ...prev(params),
+    '@timestamp': function TimestampCell(props) {
+      // Subscribe to state changes and use the typed default before state is written
+      const { timestampColor } = useObservable(profileState$, stateAdapter.getState());
+
+      // State from one profile extension point can affect another extension point result
+      return <EuiBadge color={timestampColor}>{props.row.raw._source['@timestamp']}</EuiBadge>;
+    },
+  });
+};
+```
+
+`ProfileStateAdapter<TState>` provides `getState()`, `getState$()`, `setState()`, and shallow `updateState()`. Treat the
+state as immutable: replace it with `setState()` or update it with `updateState()` rather than mutating returned objects
+in place. Host lifetime details should stay out of profile code; the adapter decides whether the state is tab-backed or
+in-memory for the current host.
+
 ### Custom `context` objects
 
 By default the `context` object returned from each profile provider's `resolve` method conforms to a standard interface
@@ -304,8 +373,7 @@ object with properties specific to their profile implementation. To support this
 strongly typed `context` interface that extends the default interface, and allows passing properties through to their
 profile's extension point implementations.
 
-This can be useful for cases such as async service initialization, creating profile-scoped services, or sharing profile
-state across extension point implementations:
+This can be useful for cases such as async service initialization or creating profile-scoped services:
 
 ```tsx
 // The profile provider interfaces accept a custom context object type param
@@ -316,10 +384,12 @@ export const createDataSourceProfileProvider = (
 ): MyDataSourceProfileProvider => ({
   profileId: 'my-data-source-profile',
   profile: {
-    getSomeExtensionPoint: (prev, { context }) => () => {
-      // The profile-scoped service is available in extension point implementations
-      const result = context.profileService.getResult();
-    },
+    getSomeExtensionPoint:
+      (prev, { context }) =>
+      () => {
+        // The profile-scoped service is available in extension point implementations
+        const result = context.profileService.getResult();
+      },
   },
   resolve: async (params) => {
     // Perform async service initialization within the `resolve` method
@@ -373,19 +443,19 @@ This is how an example implementation would work in code:
 
 // Create a solution specific root profile provider
 export const createSecurityRootProfileProvider = (): RootProfileProvider => ({
-    profileId: 'security-root-profile',
-    profile: {},
-    resolve: (params) => {
-      if (params.solutionNavId === SolutionType.Security) {
-        return {
-          isMatch: true,
-          context: { solutionType: SolutionType.Security },
-        };
-      }
+  profileId: 'security-root-profile',
+  profile: {},
+  resolve: (params) => {
+    if (params.solutionNavId === SolutionType.Security) {
+      return {
+        isMatch: true,
+        context: { solutionType: SolutionType.Security },
+      };
+    }
 
-      return { isMatch: false };
-    },
-  });
+    return { isMatch: false };
+  },
+});
 
 /**
  * profile_providers/security/security_logs_data_source_profile/profile.tsx

@@ -123,7 +123,7 @@ export class ObservabilityOnboardingPlugin
           },
         });
       },
-      visibleIn: ['globalSearch'],
+      visibleIn: ['globalSearch', 'projectSideNav'],
     });
 
     this.locators = {
@@ -149,6 +149,16 @@ export class ObservabilityOnboardingPlugin
       const { registerIngestFlows } = await import('./ingest_hub/register_ingest_flows');
       registerIngestFlows(core, plugins);
     }
+
+    const { getLazyElbLogsCloudForwarderExtension } = await import(
+      './fleet_extensions/elb_logs_cloud_forwarder'
+    );
+    plugins.fleet.registerExtension({
+      package: 'aws_cloudwatch_input_otel',
+      view: 'package-policy-create-bottom',
+      Component: getLazyElbLogsCloudForwarderExtension(core),
+    });
+
     return {
       locators: this.locators,
     };

@@ -33,6 +33,8 @@
     "created_by": "ml-module-security-auth",
     "security_app_display_name": "Spike in Failed Logon Events",
     "managed": true,
-    "job_revision": 4
+    "job_revision": 4,
+    "threat_tactics": ["TA0006"],
+    "threat_techniques": ["T1110", "T1110.001", "T1110.003"]
   }
 }

@@ -247,6 +247,48 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('sendRequestButton');
   }
 
+  public async clickPlayAndWaitForResults() {
+    await this.clickPlay();
+
+    // Try to catch the in-flight loading state. Fast requests (or identical repeated requests)
+    // may complete before we poll, so we tolerate never seeing the loading indicators — as long
+    // as output and a status badge are present when we check.
+    await this.retry
+      .tryForTime(5000, async () => {
+        const inFlight =
+          (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
+          (await this.testSubjects.exists('consoleRequestInProgressBadge'));
+        if (!inFlight) throw new Error('Waiting for request to start');
+      })
+      .catch(async () => {
+        // We didn't catch the in-progress state — verify that output is already available,
+        // which means the request completed before we could observe it loading.
+        if (
+          !(await this.testSubjects.exists('consoleMonacoOutput')) ||
+          !(await this.testSubjects.exists('consoleResponseStatusBadge'))
+        ) {
+          throw new Error('Console request did not start or produce output');
+        }
+      });
+
+    // Wait for loading indicators to clear and output to be present.
+    await this.waitForRequestToComplete();
+  }
+
+  public async waitForRequestToComplete() {
+    await this.retry.try(async () => {
+      const inProgress =
+        (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
+        (await this.testSubjects.exists('consoleRequestInProgressBadge'));
+      const outputReady = await this.testSubjects.exists('consoleMonacoOutput');
+      const statusReady = await this.testSubjects.exists('consoleResponseStatusBadge');
+
+      if (inProgress || !outputReady || !statusReady) {
+        throw new Error('Expected console request to finish and render output');
+      }
+    });
+  }
+
   public async isPlayButtonVisible() {
     return await this.testSubjects.exists('sendRequestButton');
   }
@@ -592,5 +634,35 @@ export class ConsolePageObject extends FtrService {
 
   public async isOutputPanelEmptyStateVisible() {
     return await this.testSubjects.exists('consoleOutputPanelEmptyState');
+  }
+
+  public async clickOutputFilterButton() {
+    await this.testSubjects.click('consoleOutputFilterButton');
+  }
+
+  public async isOutputFilterRowVisible() {
+    return (
+      (await this.testSubjects.exists('filterJq')) ||
+      (await this.testSubjects.exists('filterRegex'))
+    );
+  }
+
+  public async typeInFilterInput(text: string) {
+    const testSubj = (await this.testSubjects.exists('filterJq')) ? 'filterJq' : 'filterRegex';
+    const input = await this.testSubjects.find(testSubj);
+    await input.clearValueWithKeyboard();
+    await input.type(text);
+  }
+
+  public async submitFilter() {
+    await this.testSubjects.click('consoleOutputFilterApply');
+  }
+
+  public async isOutputFilterButtonActive() {
+    const button = await this.testSubjects.find('consoleOutputFilterButton');
+    const wrapper = await button.findByXpath('..');
+    // The dot indicator is a sibling span inside the wrapper div
+    const children = await wrapper.findAllByCssSelector('span[style*="border-radius"]');
+    return children.length > 0;
   }
 }

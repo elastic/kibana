@@ -7,66 +7,61 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
-import { mount } from 'enzyme';
 import type { ReactElement } from 'react';
 import React from 'react';
-import { ResizableLayoutDirection } from '../types';
 import { PanelsStatic } from './panels_static';
+import { render, screen } from '@testing-library/react';
+import { ResizableLayoutDirection } from '../types';
 
 describe('Panels static', () => {
-  const mountComponent = ({
+  const renderComponent = ({
     direction = ResizableLayoutDirection.Vertical,
+    fixedPanel = <div>Fixed panel</div>,
+    flexPanel = <div>Flex panel</div>,
     hideFixedPanel = false,
-    fixedPanel = <></>,
-    flexPanel = <></>,
   }: {
     direction?: ResizableLayoutDirection;
+    fixedPanel?: ReactElement;
+    flexPanel?: ReactElement;
     hideFixedPanel?: boolean;
-    fixedPanel: ReactElement;
-    flexPanel: ReactElement;
-  }) => {
-    return mount(
+  } = {}) => {
+    return render(
       <PanelsStatic
         direction={direction}
-        hideFixedPanel={hideFixedPanel}
         fixedPanel={fixedPanel}
         flexPanel={flexPanel}
+        hideFixedPanel={hideFixedPanel}
       />
     );
   };
 
   it('should render both panels when hideFixedPanel is false', () => {
-    const fixedPanel = <div data-test-subj="fixedPanel" />;
-    const flexPanel = <div data-test-subj="flexPanel" />;
-    const component = mountComponent({ fixedPanel, flexPanel });
-    expect(component.contains(fixedPanel)).toBe(true);
-    expect(component.contains(flexPanel)).toBe(true);
+    renderComponent();
+
+    expect(screen.getByText('Fixed panel')).toBeVisible();
+    expect(screen.getByText('Flex panel')).toBeVisible();
   });
 
   it('should render only flex panel when hideFixedPanel is true', () => {
-    const fixedPanel = <div data-test-subj="fixedPanel" />;
-    const flexPanel = <div data-test-subj="flexPanel" />;
-    const component = mountComponent({ hideFixedPanel: true, fixedPanel, flexPanel });
-    expect(component.contains(fixedPanel)).toBe(false);
-    expect(component.contains(flexPanel)).toBe(true);
+    renderComponent({ hideFixedPanel: true });
+
+    expect(screen.queryByText('Fixed panel')).not.toBeInTheDocument();
+    expect(screen.getByText('Flex panel')).toBeVisible();
   });
 
   it('should pass direction "column" to EuiFlexGroup when direction is ResizableLayoutDirection.Vertical', () => {
-    const component = mountComponent({
-      direction: ResizableLayoutDirection.Vertical,
-      fixedPanel: <></>,
-      flexPanel: <></>,
+    renderComponent({ direction: ResizableLayoutDirection.Vertical });
+
+    expect(screen.getByTestId('resizableLayoutStaticContainer')).toHaveStyle({
+      flexDirection: 'column',
     });
-    expect(component.find(EuiFlexGroup).prop('direction')).toBe('column');
   });
 
   it('should pass direction "row" to EuiFlexGroup when direction is ResizableLayoutDirection.Horizontal', () => {
-    const component = mountComponent({
-      direction: ResizableLayoutDirection.Horizontal,
-      fixedPanel: <></>,
-      flexPanel: <></>,
+    renderComponent({ direction: ResizableLayoutDirection.Horizontal });
+
+    expect(screen.getByTestId('resizableLayoutStaticContainer')).toHaveStyle({
+      flexDirection: 'row',
     });
-    expect(component.find(EuiFlexGroup).prop('direction')).toBe('row');
   });
 });

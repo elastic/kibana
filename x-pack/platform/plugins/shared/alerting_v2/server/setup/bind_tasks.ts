@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { PluginSetup } from '@kbn/core-di';
+import { OnSetup, PluginSetup } from '@kbn/core-di';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { DispatcherTaskDefinition } from '../lib/dispatcher/task_definition';
 import { ApiKeyInvalidationTaskDefinition } from '../lib/tasks/invalidate_pending_api_keys/task_definition';
 import { RuleExecutorTaskDefinition } from '../lib/rule_executor/task_definition';
+import { TelemetryTaskDefinition } from '../lib/usage/task_definition';
 import {
   TaskDefinition,
   TaskRunnerFactoryToken,
@@ -35,6 +36,7 @@ export function bindTasks({ bind, onActivation }: ContainerModuleLoadOptions) {
         title: definition.title,
         timeout: definition.timeout,
         paramsSchema: definition.paramsSchema,
+        stateSchemaByVersion: definition.stateSchemaByVersion,
         maxAttempts: definition.maxAttempts,
         createTaskRunner,
       },
@@ -47,4 +49,11 @@ export function bindTasks({ bind, onActivation }: ContainerModuleLoadOptions) {
   bind(TaskDefinition).toConstantValue(RuleExecutorTaskDefinition);
   bind(TaskDefinition).toConstantValue(DispatcherTaskDefinition);
   bind(TaskDefinition).toConstantValue(ApiKeyInvalidationTaskDefinition);
+  bind(TaskDefinition).toConstantValue(TelemetryTaskDefinition);
+
+  // Resolve every bound task definition during setup so the onActivation hook
+  // above runs once per task and registers it with Task Manager.
+  bind(OnSetup).toConstantValue((container) => {
+    container.getAll(TaskDefinition);
+  });
 }

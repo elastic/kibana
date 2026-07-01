@@ -36,7 +36,7 @@ import {
   ApmRuleType,
 } from '@kbn/rule-data-utils';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { transactionDurationParamsSchema } from '@kbn/response-ops-rule-params/transaction_duration';
 import { unflattenObject } from '@kbn/object-utils';
 import { getDurationFieldForTransactions } from '@kbn/apm-data-access-plugin/server/utils';

@@ -6,7 +6,7 @@
  */
 
 import { useReducer } from 'react';
-import type { RuleKind } from './compose_form_types';
+import type { RuleKind } from '../../form/types';
 import type {
   StepId,
   ComposeDiscoverState,
@@ -19,50 +19,76 @@ import type {
 export const getStepIds = (isAlert: boolean): StepId[] =>
   isAlert
     ? ['alertCondition', 'recoveryCondition', 'details', 'notifications']
-    : ['alertCondition', 'details', 'notifications'];
+    : ['alertCondition', 'details'];
+
+export const getBuilderStepIds = (isAlert: boolean): StepId[] =>
+  isAlert
+    ? ['builderCondition', 'recoveryCondition', 'details', 'notifications']
+    : ['builderCondition', 'details'];
 
 export interface InitialStateConfig {
   mode: ComposeDiscoverMode;
   initialKind?: RuleKind;
   initialRecoveryType?: RecoveryType;
+  /** When true, the query is already populated (e.g. from Discover) and the sandbox gate is skipped. */
+  isQueryPrePopulated?: boolean;
+  /** When true, the flyout opens directly in YAML mode with the sandbox open. */
+  forceYamlMode?: boolean;
 }
 
 export const createInitialState = ({
   mode,
-  initialKind = 'signal',
+  initialKind = 'alert',
   initialRecoveryType = 'default',
-}: InitialStateConfig): ComposeDiscoverState => ({
-  mode,
-  step: 0,
-  recoveryType: initialKind === 'alert' ? initialRecoveryType : 'default',
-  activeTab: 'alert',
-  childOpen: mode === 'create',
-  queryCommitted: mode === 'edit',
-  yamlMode: false,
-});
+  isQueryPrePopulated = false,
+  forceYamlMode = false,
+}: InitialStateConfig): ComposeDiscoverState => {
+  const recoveryType = initialKind === 'alert' ? initialRecoveryType : 'default';
+  return {
+    mode,
+    step: 0,
+    recoveryType,
+    activeTab: defaultTabForTabs(
+      getSandboxTabs(initialKind === 'alert', { step: 0, recoveryType, mode })
+    ),
+    childOpen: forceYamlMode || mode === 'create',
+    queryCommitted: mode === 'edit' || isQueryPrePopulated,
+    yamlMode: forceYamlMode,
+  };
+};
 
 /**
  * Returns the tabs to show in the Sandbox for the current step.
  *
- * isAlert + alertCondition     → ['base', 'alert']
+ * create + alertCondition               → undefined (single unified editor; split runs on Apply)
+ * edit   + alertCondition               → ['base', 'alert']
  * isAlert + recoveryCondition  + custom → ['recovery']
- * everything else              → undefined (single editor)
+ * everything else                       → undefined (single editor)
  */
 export function getSandboxTabs(
   isAlert: boolean,
-  state: Pick<ComposeDiscoverState, 'step' | 'recoveryType'>
+  state: Pick<ComposeDiscoverState, 'step' | 'recoveryType' | 'mode'>
 ): QueryTab[] | undefined {
   if (!isAlert) return undefined;
 
   const stepId = getStepIds(isAlert)[state.step];
 
-  if (stepId === 'alertCondition') return ['base', 'alert'];
+  if (stepId === 'alertCondition') {
+    // Create authors a single unified ES|QL query; the heuristic split runs on Apply.
+    if (state.mode === 'create') return undefined;
+    return ['base', 'alert'];
+  }
   if (stepId === 'recoveryCondition' && state.recoveryType === 'custom') return ['recovery'];
   return undefined;
 }
 
 function defaultTabForTabs(tabs: QueryTab[] | undefined): QueryTab {
   if (tabs?.includes('recovery')) return 'recovery';
+  /*
+   * When the split editor is open (base + alert), start on the base query —
+   * users build the base query first, then layer the alert condition on top.
+   */
+  if (tabs?.includes('base')) return 'base';
   return 'alert';
 }
 
@@ -75,26 +101,36 @@ export function reducer(
       return {
         ...state,
         recoveryType: action.recoveryType,
-        ...(action.recoveryType === 'custom'
+        ...(action.recoveryType === 'custom' && !action.isBuilderMode
           ? { childOpen: true, activeTab: 'recovery' as const }
           : {}),
       };
     case 'KIND_CHANGE':
       return action.kind === 'alert'
-        ? { ...state, step: 0, childOpen: true, activeTab: 'alert' }
+        ? { ...state, step: 0, childOpen: true, activeTab: 'base' }
         : { ...state, recoveryType: 'default', step: 0, activeTab: 'alert' };
     case 'SET_TAB':
       return { ...state, activeTab: action.tab };
     case 'SET_STEP':
       return { ...state, step: action.step };
     case 'GO_NEXT': {
-      const stepCount = getStepIds(action.isAlert).length;
+      const stepCount = (
+        action.isBuilderMode ? getBuilderStepIds(action.isAlert) : getStepIds(action.isAlert)
+      ).length;
       const nextStep = Math.min(state.step + 1, stepCount - 1);
-      return { ...state, step: nextStep, childOpen: false };
+      return {
+        ...state,
+        step: nextStep,
+        childOpen: action.isBuilderMode ? state.childOpen : false,
+      };
     }
     case 'GO_BACK': {
       const prevStep = Math.max(state.step - 1, 0);
-      return { ...state, step: prevStep, childOpen: false };
+      return {
+        ...state,
+        step: prevStep,
+        childOpen: action.isBuilderMode ? state.childOpen : false,
+      };
     }
     case 'OPEN_CHILD':
       return {
@@ -116,9 +152,10 @@ export function reducer(
     case 'COMMIT_QUERY':
       return {
         ...state,
-        childOpen: state.yamlMode ? state.childOpen : false,
         queryCommitted: true,
       };
+    case 'INVALIDATE_QUERY':
+      return { ...state, queryCommitted: false };
     case 'SET_YAML_MODE':
       return {
         ...state,

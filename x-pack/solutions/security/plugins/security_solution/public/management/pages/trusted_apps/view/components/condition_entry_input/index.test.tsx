@@ -97,9 +97,9 @@ describe('Condition entry input', () => {
   it('should not be able to call on remove for field input because disabled', async () => {
     props = { ...props, isRemoveDisabled: true };
     render();
-    expect(onRemoveMock).toHaveBeenCalledTimes(0);
     const removeButton = renderResult.getByTestId(`${formPrefix}-remove`) as HTMLButtonElement;
-    await userEvent.click(removeButton);
+
+    expect(removeButton).toBeDisabled();
     expect(onRemoveMock).toHaveBeenCalledTimes(0);
   });
 

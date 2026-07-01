@@ -20,11 +20,13 @@ const ManagedWorkflowSchema = WorkflowSchemaBase.extend({
 });
 
 type RegistryManagedWorkflowDefinition = (typeof managedWorkflowDefinitions)[number];
-type TemplateManagedWorkflowDefinition = RegistryManagedWorkflowDefinition extends {
+type TemplateManagedWorkflowDefinition<TDefinition> = TDefinition extends {
   yamlTemplate: (values: infer _TValues) => string;
 }
-  ? RegistryManagedWorkflowDefinition
+  ? TDefinition
   : never;
+type RegistryTemplateManagedWorkflowDefinition =
+  TemplateManagedWorkflowDefinition<RegistryManagedWorkflowDefinition>;
 type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
   yamlTemplate: (values: ManagedWorkflowTemplateValues) => string;
 };
@@ -42,9 +44,9 @@ const templateValuesLookup = templateRepresentativeValuesById as Record<
 
 const managedDefinitionsById: Array<[string, RegistryManagedWorkflowDefinition]> =
   managedWorkflowDefinitions.map((definition) => [definition.id, definition]);
-const managedTemplateDefinitionsById: Array<[string, TemplateManagedWorkflowDefinition]> =
+const managedTemplateDefinitionsById: Array<[string, RegistryTemplateManagedWorkflowDefinition]> =
   managedDefinitionsById.filter(
-    (definitionEntry): definitionEntry is [string, TemplateManagedWorkflowDefinition] =>
+    (definitionEntry): definitionEntry is [string, RegistryTemplateManagedWorkflowDefinition] =>
       hasYamlTemplate(definitionEntry[1])
   );
 
@@ -124,6 +126,10 @@ describe('managedWorkflowDefinitions', () => {
       expect(definition.version).toBeGreaterThanOrEqual(1);
     }
   );
+
+  it.each(managedDefinitionsById)('%s declares whether it is billable', (_id, definition) => {
+    expect(typeof definition.billable).toBe('boolean');
+  });
 
   it.each(managedDefinitionsById)(
     '%s defines exactly one source field: yaml xor yamlTemplate',

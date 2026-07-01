@@ -86,9 +86,10 @@ export const BulkGetPackagePoliciesRequestSchema = {
   }),
 };
 
-export const BulkGetPackagePoliciesResponseBodySchema = schema.object({
-  items: schema.arrayOf(PackagePolicyResponseSchema, { maxSize: 10000 }),
-});
+export const BulkGetPackagePoliciesResponseBodySchema = schema.object(
+  { items: schema.arrayOf(PackagePolicyResponseSchema, { maxSize: 10000 }) },
+  { meta: { id: 'bulk_get_package_policies_response' } }
+);
 
 export const GetOnePackagePolicyRequestSchema = {
   params: schema.object({
@@ -121,9 +122,10 @@ export const CreatePackagePolicyRequestSchema = {
   }),
 };
 
-export const CreatePackagePolicyResponseSchema = schema.object({
-  item: PackagePolicyResponseSchema,
-});
+export const CreatePackagePolicyResponseSchema = schema.object(
+  { item: PackagePolicyResponseSchema },
+  { meta: { id: 'create_package_policy_response' } }
+);
 
 export const UpdatePackagePolicyRequestSchema = {
   ...GetOnePackagePolicyRequestSchema,
@@ -141,29 +143,40 @@ export const UpdatePackagePolicyRequestSchema = {
 };
 
 export const DeletePackagePoliciesRequestSchema = {
-  body: schema.object({
-    packagePolicyIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
-    force: schema.maybe(schema.boolean()),
-  }),
+  body: schema.object(
+    {
+      packagePolicyIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+      force: schema.maybe(schema.boolean()),
+    },
+    { meta: { id: 'delete_package_policies_request' } }
+  ),
 };
 
 export const DeletePackagePoliciesResponseBodySchema = schema.arrayOf(
-  PackagePolicyStatusResponseSchema.extends({
-    policy_id: schema.maybe(
-      schema.oneOf([
-        schema.literal(null),
-        schema.string({
-          meta: {
-            description: 'Use `policy_ids` instead',
-            deprecated: true,
-          },
-        }),
-      ])
-    ),
-    policy_ids: schema.arrayOf(schema.string(), { maxSize: 10000 }),
-    output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-    package: PackagePolicyPackageSchema,
-  }),
+  PackagePolicyStatusResponseSchema.extends(
+    {
+      policy_id: schema.maybe(
+        schema.oneOf([
+          schema.literal(null),
+          schema.string({
+            meta: {
+              description: 'Use `policy_ids` instead',
+              deprecated: true,
+            },
+          }),
+        ])
+      ),
+      policy_ids: schema.arrayOf(schema.string(), { maxSize: 10000 }),
+      output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+      package: PackagePolicyPackageSchema,
+    },
+    // Distinct meta.id so this extension does not collide with the base
+    // `package_policy_status_response` component in the OAS shared schemas
+    // map. Without this, the OAS bundler's last-write-wins semantics on the
+    // shared schemas registry cause this extension's keys to be dropped when
+    // another route registers the bare base under the same id.
+    { meta: { id: 'delete_package_policies_response_item' } }
+  ),
   { maxSize: 10000 }
 );
 
@@ -180,14 +193,16 @@ export const DeleteOnePackagePolicyRequestSchema = {
   }),
 };
 
-export const DeleteOnePackagePolicyResponseSchema = schema.object({
-  id: schema.string(),
-});
+export const DeleteOnePackagePolicyResponseSchema = schema.object(
+  { id: schema.string() },
+  { meta: { id: 'delete_one_package_policy_response' } }
+);
 
 export const UpgradePackagePoliciesRequestSchema = {
-  body: schema.object({
-    packagePolicyIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
-  }),
+  body: schema.object(
+    { packagePolicyIds: schema.arrayOf(schema.string(), { maxSize: 1000 }) },
+    { meta: { id: 'upgrade_package_policies_request' } }
+  ),
 };
 
 export const UpgradePackagePoliciesResponseBodySchema = schema.arrayOf(
@@ -196,10 +211,13 @@ export const UpgradePackagePoliciesResponseBodySchema = schema.arrayOf(
 );
 
 export const DryRunPackagePoliciesRequestSchema = {
-  body: schema.object({
-    packagePolicyIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
-    packageVersion: schema.maybe(schema.string()),
-  }),
+  body: schema.object(
+    {
+      packagePolicyIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+      packageVersion: schema.maybe(schema.string()),
+    },
+    { meta: { id: 'dry_run_package_policies_request' } }
+  ),
 };
 
 export const DryRunPackagePoliciesResponseBodySchema = schema.arrayOf(

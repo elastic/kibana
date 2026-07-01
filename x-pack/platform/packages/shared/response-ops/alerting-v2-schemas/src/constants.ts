@@ -8,6 +8,8 @@
 /** Maximum number of consecutive breaches before transition */
 export const MAX_CONSECUTIVE_BREACHES = 1000;
 
+export const MAX_ESQL_QUERY_LENGTH = 10000;
+
 /** Maximum allowed duration for schedule and timeframe fields */
 export const MAX_DURATION = '365d';
 
@@ -45,7 +47,7 @@ export const MAX_DESCRIPTION_LENGTH = 1024;
 export const ACTION_POLICY_MAX_DESTINATIONS = 10;
 
 /**
- * Maximum length for the `version` field on action policy update bodies. Used
- * by the optimistic concurrency control check on `PATCH /{id}` and `PUT /{id}`.
+ * Maximum length for the `version` field. Used by the optimistic concurrency control check on `PATCH /{id}`
+ * and `PUT /{id}`.
  */
-export const ACTION_POLICY_VERSION_MAX_LENGTH = 256;
+export const VERSION_MAX_LENGTH = 256;

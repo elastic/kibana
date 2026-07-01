@@ -6,7 +6,8 @@
  */
 
 import { LogsExtractionClient } from './logs_extraction_client';
-import type { CcsLogsExtractionClient } from '.';
+import type { RemoteExtractionStrategy } from './remote/strategies';
+import type { RemoteLogsExtractionClient } from './remote';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
@@ -70,11 +71,19 @@ import {
 import { ENGINE_STATUS } from '../constants';
 import type { EntityType } from '../../../common/domain/definitions/entity_schema';
 
-function createMockCcsLogsExtractionClient(): jest.Mocked<
-  Pick<CcsLogsExtractionClient, 'extractToUpdates'>
-> {
+type MockRemoteLogsExtractionClient = jest.Mocked<
+  Pick<RemoteLogsExtractionClient, 'extractToUpdates'>
+> & {
+  strategy: Pick<RemoteExtractionStrategy, 'id' | 'buildPatterns'>;
+};
+
+function createMockRemoteLogsExtractionClient(): MockRemoteLogsExtractionClient {
   return {
     extractToUpdates: jest.fn().mockResolvedValue({ count: 0, pages: 0 }),
+    strategy: {
+      id: 'ccs',
+      buildPatterns: jest.fn(({ remoteIndexPatterns }) => remoteIndexPatterns),
+    },
   };
 }
 
@@ -147,7 +156,7 @@ describe('LogsExtractionClient', () => {
     Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
   >;
   let mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
-  let mockCcsLogsExtractionClient: ReturnType<typeof createMockCcsLogsExtractionClient>;
+  let mockRemoteLogsExtractionClient: ReturnType<typeof createMockRemoteLogsExtractionClient>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -158,7 +167,11 @@ describe('LogsExtractionClient', () => {
     mockIngestEntities.mockReset();
 
     mockLogger = loggerMock.create();
-    mockEsClient = {} as jest.Mocked<ElasticsearchClient>;
+    mockEsClient = {
+      indices: {
+        resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
+      },
+    } as unknown as jest.Mocked<ElasticsearchClient>;
     mockDataViewsService = {
       get: jest.fn(),
     } as unknown as jest.Mocked<DataViewsService>;
@@ -167,7 +180,7 @@ describe('LogsExtractionClient', () => {
       update: jest.fn().mockResolvedValue({}),
     };
     mockGlobalStateClient = createMockGlobalStateClient();
-    mockCcsLogsExtractionClient = createMockCcsLogsExtractionClient();
+    mockRemoteLogsExtractionClient = createMockRemoteLogsExtractionClient();
 
     client = new LogsExtractionClient({
       logger: mockLogger,
@@ -176,7 +189,8 @@ describe('LogsExtractionClient', () => {
       dataViewsService: mockDataViewsService,
       engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
       globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-      ccsLogsExtractionClient: mockCcsLogsExtractionClient as unknown as CcsLogsExtractionClient,
+      remoteLogsExtractionClient:
+        mockRemoteLogsExtractionClient as unknown as RemoteLogsExtractionClient,
     });
   });
 
@@ -240,6 +254,8 @@ describe('LogsExtractionClient', () => {
         targetIndex: expect.stringContaining('.entities.v2.latest.security_default'),
         logger: expect.any(Object),
         abortController: undefined,
+        refresh: true,
+        onDropped: expect.any(Function),
       });
 
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
@@ -269,7 +285,8 @@ describe('LogsExtractionClient', () => {
         dataViewsService: mockDataViewsService,
         engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
         globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-        ccsLogsExtractionClient: mockCcsLogsExtractionClient as unknown as CcsLogsExtractionClient,
+        remoteLogsExtractionClient:
+          mockRemoteLogsExtractionClient as unknown as RemoteLogsExtractionClient,
       });
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -735,7 +752,7 @@ describe('LogsExtractionClient', () => {
       });
     });
 
-    it('should filter out cross-cluster search (CCS) remote indices from main query and run CCS in parallel', async () => {
+    it('should filter remote index patterns from the main query and run remote extraction in parallel', async () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
@@ -763,14 +780,20 @@ describe('LogsExtractionClient', () => {
       const result = await client.extractLogs('user');
 
       expect(result.success).toBe(true);
-      // Main extraction uses local indices only; CCS client (injected) runs in parallel.
+      // Main path uses local patterns only; remote client runs in parallel via strategy.buildPatterns.
       expect(result.success && result.scannedIndices).toContain('logs-*');
       expect(result.success && result.scannedIndices).toContain('metrics-*');
       expect(result.success && result.scannedIndices).toContain('remote_cluster:logs-*');
       expect(result.success && result.scannedIndices).toContain('other:filebeat-*');
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
-      expect(mockCcsLogsExtractionClient.extractToUpdates).toHaveBeenCalledTimes(1);
-      expect(mockCcsLogsExtractionClient.extractToUpdates).toHaveBeenCalledWith(
+      expect(mockRemoteLogsExtractionClient.strategy.buildPatterns).toHaveBeenCalledWith(
+        expect.objectContaining({
+          localIndexPatterns: expect.arrayContaining(['logs-*', 'metrics-*']),
+          remoteIndexPatterns: ['remote_cluster:logs-*', 'other:filebeat-*'],
+        })
+      );
+      expect(mockRemoteLogsExtractionClient.extractToUpdates).toHaveBeenCalledTimes(1);
+      expect(mockRemoteLogsExtractionClient.extractToUpdates).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'user',
           remoteIndexPatterns: ['remote_cluster:logs-*', 'other:filebeat-*'],
@@ -778,7 +801,7 @@ describe('LogsExtractionClient', () => {
       );
     });
 
-    it('should store CCS errors in the saved object while main execution remains unchanged', async () => {
+    it('should store remote errors in the saved object while main execution remains unchanged', async () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
@@ -792,7 +815,7 @@ describe('LogsExtractionClient', () => {
         getIndexPattern: jest.fn().mockReturnValue('logs-*,remote_cluster:logs-*'),
       };
 
-      const ccsError = new Error('CCS connection failed');
+      const remoteError = new Error('remote connection failed');
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user') as Awaited<
           ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -801,10 +824,10 @@ describe('LogsExtractionClient', () => {
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExtractSuccessSequence(mockEsqlResponse);
       mockIngestEntities.mockResolvedValue(undefined);
-      mockCcsLogsExtractionClient.extractToUpdates.mockResolvedValue({
+      mockRemoteLogsExtractionClient.extractToUpdates.mockResolvedValue({
         count: 0,
         pages: 0,
-        error: ccsError,
+        error: remoteError,
       });
 
       const result = await client.extractLogs('user');
@@ -816,7 +839,7 @@ describe('LogsExtractionClient', () => {
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
       expect(mockIngestEntities).toHaveBeenCalledTimes(1);
 
-      // CCS error is stored in the saved object alongside the cleared log extraction state.
+      // Remote error is stored in the saved object alongside the cleared log extraction state.
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
         'user',
         expect.objectContaining({
@@ -825,7 +848,7 @@ describe('LogsExtractionClient', () => {
             paginationId: null,
             lastExecutionTimestamp: expect.any(String),
           }),
-          error: { message: ccsError.message, action: 'extractLogs' },
+          error: { message: remoteError.message, action: 'extractLogs' },
         })
       );
     });
@@ -1404,7 +1427,7 @@ describe('LogsExtractionClient', () => {
   });
 
   describe('getLocalAndRemoteIndexPatterns', () => {
-    it('should split local and CCS remote index patterns', async () => {
+    it('should split local and cluster-prefixed remote index patterns', async () => {
       const mockDataView = {
         getIndexPattern: jest
           .fn()
@@ -1498,7 +1521,7 @@ describe('LogsExtractionClient', () => {
       );
 
       expect(indexPatterns).toContain('-logs-proxy-*');
-      // CCS-prefixed exclude is routed to remote and not returned here
+      // Cluster-prefixed excludes are routed to remote and not returned here
       expect(indexPatterns).not.toContain('-remote_cluster:logs-debug-*');
       // remote includes are also not returned
       expect(indexPatterns).not.toContain('remote_cluster:logs-*');
@@ -1614,7 +1637,8 @@ describe('LogsExtractionClient', () => {
         dataViewsService: mockDataViewsService,
         engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
         globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-        ccsLogsExtractionClient: mockCcsLogsExtractionClient as unknown as CcsLogsExtractionClient,
+        remoteLogsExtractionClient:
+          mockRemoteLogsExtractionClient as unknown as RemoteLogsExtractionClient,
       });
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
