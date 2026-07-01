@@ -8,12 +8,13 @@
  */
 
 import MEMORY_CONSOLIDATION_YAML from './memory_consolidation.yaml';
-import type { ManagedWorkflowDefinition } from '../../types';
+import type { ManagedWorkflowDefinition } from '../../../types';
 
-export const STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID = 'system-streams-memory-consolidation';
+export const SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID =
+  'system-streams-memory-consolidation';
 
-export const STREAMS_MEMORY_CONSOLIDATION_WORKFLOW = {
-  id: STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+export const SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW = {
+  id: SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   pluginId: 'streams',
   version: 1,
   billable: false,

@@ -8,12 +8,12 @@
  */
 
 import MEMORY_SYNTHESIS_YAML from './memory_synthesis.yaml';
-import type { ManagedWorkflowDefinition } from '../../types';
+import type { ManagedWorkflowDefinition } from '../../../types';
 
-export const STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID = 'system-streams-memory-synthesis';
+export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID = 'system-streams-memory-synthesis';
 
-export const STREAMS_MEMORY_SYNTHESIS_WORKFLOW = {
-  id: STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
+export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW = {
+  id: SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
   pluginId: 'streams',
   version: 1,
   billable: false,

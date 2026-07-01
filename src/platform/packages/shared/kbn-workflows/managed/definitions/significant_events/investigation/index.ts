@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import GAP_DETECTION_YAML from './gap_detection.yaml';
-import type { ManagedWorkflowDefinition } from '../../types';
+import INVESTIGATION_WORKFLOW_YAML from './investigation_workflow.yaml';
+import type { ManagedWorkflowDefinition } from '../../../types';
 
-export const STREAMS_MEMORY_GAP_DETECTION_WORKFLOW_ID = 'system-streams-memory-gap-detection';
+export const SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID = 'system-streams-investigation';
 
-export const STREAMS_MEMORY_GAP_DETECTION_WORKFLOW = {
-  id: STREAMS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+export const SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW = {
+  id: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 1,
+  version: 2,
   billable: false,
-  yaml: GAP_DETECTION_YAML,
+  yaml: INVESTIGATION_WORKFLOW_YAML,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
