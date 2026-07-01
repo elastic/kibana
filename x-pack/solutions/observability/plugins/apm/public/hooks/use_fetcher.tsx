@@ -11,9 +11,11 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser'
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { AutoAbortedAPMClientV2 } from '@kbn/apm-api-shared';
 import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import type { AutoAbortedAPMClient } from '../services/rest/create_call_apm_api';
 import { callApmApi } from '../services/rest/create_call_apm_api';
+import { getApmInternalServices } from '../plugin';
 import { reportFetchError } from '../services/rest/report_fetch_error';
 import type { FetcherOperationId } from './fetcher_operation_ids';
 
@@ -81,27 +83,77 @@ const createAutoAbortedAPMClient = (
   }) as AutoAbortedAPMClient;
 };
 
+const createAutoAbortedAPMClientV2 = (
+  signal: AbortSignal,
+  addInspectorRequest: <Data>(result: FetcherResult<Data>) => void
+): AutoAbortedAPMClientV2 => {
+  return ((endpoint, options) => {
+    const { callApmApi: callApmApiV2 } = getApmInternalServices();
+    return callApmApiV2(endpoint, {
+      ...options,
+      signal,
+    } as any)
+      .catch((err) => {
+        addInspectorRequest({
+          status: FETCH_STATUS.FAILURE,
+          data: err.body?.attributes,
+        });
+        throw err;
+      })
+      .then((response) => {
+        addInspectorRequest({
+          data: response,
+          status: FETCH_STATUS.SUCCESS,
+        });
+        return response;
+      });
+  }) as AutoAbortedAPMClientV2;
+};
+
 // fetcher functions can return undefined OR a promise. Previously we had a more simple type
 // but it led to issues when using object destructuring with default values
 type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<infer TResponseType>
   ? TResponseType
   : unknown;
 
+export interface UseFetcherOptions {
+  preservePreviousData?: boolean;
+  showToastOnError?: boolean;
+  skipTimeRangeRefreshUpdate?: boolean;
+  /** When provided, non-aborted fetch failures are reported to APM RUM under this label. Register new values in `fetcher_operation_ids.ts`. */
+  operationId?: FetcherOperationId;
+}
+
+// Temporary: useLegacyCallApmApi overloads exist while migrating APIs from the APM plugin's
+// callApmApi to the shared @kbn/apm-api-shared client. Once all routes are migrated,
+// remove the useLegacyCallApmApi option, the legacy overload, and the legacy client creator.
+// After migration is complete, this hook could be moved to @kbn/apm-ui-shared.
 export function useFetcher<TReturn>(
   fn: (callApmApi: AutoAbortedAPMClient, signal: AbortSignal) => TReturn,
   fnDeps: any[],
-  options: {
-    preservePreviousData?: boolean;
-    showToastOnError?: boolean;
-    skipTimeRangeRefreshUpdate?: boolean;
-    /** When provided, non-aborted fetch failures are reported to APM RUM under this label. Register new values in `fetcher_operation_ids.ts`. */
-    operationId?: FetcherOperationId;
-  } = {}
+  options: UseFetcherOptions & { useLegacyCallApmApi: true }
+): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void };
+
+export function useFetcher<TReturn>(
+  fn: (callApmApi: AutoAbortedAPMClientV2, signal: AbortSignal) => TReturn,
+  fnDeps: any[],
+  options?: UseFetcherOptions & { useLegacyCallApmApi?: false }
+): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void };
+
+export function useFetcher<TReturn>(
+  fn: (callApmApi: any, signal: AbortSignal) => TReturn,
+  fnDeps: any[],
+  options: UseFetcherOptions & { useLegacyCallApmApi?: boolean } = {}
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
   const {
     services: { notifications, rendering },
   } = useKibana();
-  const { preservePreviousData = true, showToastOnError = true, operationId } = options;
+  const {
+    preservePreviousData = true,
+    showToastOnError = true,
+    useLegacyCallApmApi = false,
+    operationId,
+  } = options;
   const [result, setResult] = useState<FetcherResult<InferResponseType<TReturn>>>({
     data: undefined,
     status: FETCH_STATUS.NOT_INITIATED,
@@ -135,7 +187,11 @@ export function useFetcher<TReturn>(
 
       const signal = controller.signal;
 
-      const promise = fn(createAutoAbortedAPMClient(signal, addInspectorRequest), signal);
+      const client = useLegacyCallApmApi
+        ? createAutoAbortedAPMClient(signal, addInspectorRequest)
+        : createAutoAbortedAPMClientV2(signal, addInspectorRequest);
+
+      const promise = fn(client, signal);
       // if `fn` doesn't return a promise it is a signal that data fetching was not initiated.
       // This can happen if the data fetching is conditional (based on certain inputs).
       // In these cases it is not desirable to invoke the global loading spinner, or change the status to success

@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import type {
+  ServiceInstancesDetailedStat,
+  ServiceInstancesDetailedStatisticsResponse,
+} from '@kbn/apm-api-shared';
 import { keyBy } from 'lodash';
-import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
-import type { Coordinate } from '../../../../typings/timeseries';
 import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { joinByKey } from '../../../../common/utils/join_by_key';
+import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getServiceInstancesSystemMetricStatistics } from './get_service_instances_system_metric_statistics';
 import { getServiceInstancesTransactionStatistics } from './get_service_instances_transaction_statistics';
-import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface ServiceInstanceDetailedStatisticsParams {
   environment: string;
@@ -28,20 +31,6 @@ interface ServiceInstanceDetailedStatisticsParams {
   end: number;
   serviceNodeIds: string[];
   offset?: string;
-}
-
-interface ServiceInstancesDetailedStat {
-  serviceNodeName: string;
-  errorRate?: Coordinate[];
-  latency?: Coordinate[];
-  throughput?: Coordinate[];
-  cpuUsage?: Coordinate[];
-  memoryUsage?: Coordinate[];
-}
-
-export interface ServiceInstancesDetailedStatisticsResponse {
-  currentPeriod: Record<string, ServiceInstancesDetailedStat>;
-  previousPeriod: Record<string, ServiceInstancesDetailedStat>;
 }
 
 async function getServiceInstancesDetailedStatistics(

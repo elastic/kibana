@@ -15,6 +15,7 @@ import {
 } from 'react-router-dom-v5-compat';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
+import { createCallApmApiV2 } from '@kbn/apm-api-shared/src/create_call_apm_api';
 import type { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
 import { apmRouter } from '../components/routing/apm_route_config';
@@ -26,6 +27,7 @@ import { LicenseProvider } from '../context/license/license_context';
 import { TimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
 import { ApmIndexSettingsContextProvider } from '../context/apm_index_settings/apm_index_settings_context';
 import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
+import { setApmInternalServices } from '../plugin';
 
 /**
  * Resets the React Router v6 context so that nested `<Router>` components
@@ -121,6 +123,8 @@ export function ApmEmbeddableContext({
   } as ApmPluginContextValue;
 
   createCallApmApi(deps.coreStart);
+  const callApmApi = createCallApmApiV2(deps.coreStart, { cpsManager: undefined });
+  setApmInternalServices({ callApmApi });
 
   return (
     <I18nProvider>

@@ -10,7 +10,7 @@ pageLoadAssetSize:
   aiops: 15227
   alerting: 22371
   alertingVTwo: 56591
-  apm: 54371
+  apm: 57201
   apmSourcesAccess: 2278
   automaticImport: 18629
   banners: 4006
@@ -216,4 +216,3 @@ pageLoadAssetSize:
   workflowsExtensions: 43032
   workflowsManagement: 39968
   workplaceAIApp: 6234
-  

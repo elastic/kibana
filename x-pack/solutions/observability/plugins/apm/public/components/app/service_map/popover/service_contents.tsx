@@ -11,6 +11,7 @@ import { EuiButton, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
@@ -22,7 +23,6 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { AnomalyDetection } from './anomaly_detection';
 import { StatsList } from './stats_list';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 type ServiceNodeReturn = APIReturnType<'GET /internal/apm/service-map/service/{serviceName}'>;
 

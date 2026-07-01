@@ -5,21 +5,16 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import type { ServiceMixedIngestionResponse } from '@kbn/apm-api-shared';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   SERVICE_NAME,
-  TELEMETRY_SDK_NAME,
   TELEMETRY_SDK_LANGUAGE,
+  TELEMETRY_SDK_NAME,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import type { IngestionTimeRanges } from '../../../common/metrics_types';
-
-export interface ServiceMixedIngestionResponse {
-  hasMultipleAgentTypes: boolean;
-  ingestionTimeRanges?: IngestionTimeRanges;
-}
 
 export async function getServiceMixedIngestion({
   serviceName,

@@ -4,35 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
 import { omit } from 'lodash';
+import type { ApmTimeseries } from '@kbn/apm-types';
+import {
+  routeDefinitions,
+  type GetApmTimeseriesResponse,
+  type GetDownstreamDependenciesResponse,
+} from '@kbn/apm-api-shared';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-
-import {
-  downstreamDependenciesRouteRt,
-  getApmDownstreamDependencies,
-  type APMDownstreamDependency,
-} from './get_apm_downstream_dependencies';
-import { getApmTimeseries, getApmTimeseriesRt, type ApmTimeseries } from './get_apm_timeseries';
+import { getApmDownstreamDependencies } from './get_apm_downstream_dependencies';
+import { getApmTimeseries } from './get_apm_timeseries';
 
 const getApmTimeSeriesRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/assistant/get_apm_timeseries',
+  endpoint: routeDefinitions.assistantFunctions.getApmTimeseries.endpoint,
+  params: routeDefinitions.assistantFunctions.getApmTimeseries.params,
   security: {
     authz: {
       requiredPrivileges: ['apm', 'ai_assistant'],
     },
   },
-  params: t.type({
-    body: getApmTimeseriesRt,
-  }),
-  handler: async (
-    resources
-  ): Promise<{
-    content: Array<Omit<ApmTimeseries, 'data'>>;
-    data: ApmTimeseries[];
-  }> => {
+  handler: async (resources): Promise<GetApmTimeseriesResponse> => {
     const body = resources.params.body;
 
     const apmEventClient = await getApmEventClient(resources);
@@ -49,12 +42,10 @@ const getApmTimeSeriesRoute = createApmServerRoute({
   },
 });
 const getDownstreamDependenciesRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/assistant/get_downstream_dependencies',
-  params: t.type({
-    query: downstreamDependenciesRouteRt,
-  }),
+  endpoint: routeDefinitions.assistantFunctions.getDownstreamDependencies.endpoint,
+  params: routeDefinitions.assistantFunctions.getDownstreamDependencies.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ content: APMDownstreamDependency[] }> => {
+  handler: async (resources): Promise<GetDownstreamDependenciesResponse> => {
     const { params, request, core } = resources;
 
     const coreStart = await core.start();

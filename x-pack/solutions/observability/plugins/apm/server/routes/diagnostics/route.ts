@@ -15,23 +15,23 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
-import * as t from 'io-ts';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
+import * as t from 'io-ts';
+import type { ApmEvent } from '@kbn/apm-types';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import type { ServiceMapDiagnosticResponse } from '../../../common/service_map_diagnostic_types';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import type { ApmEvent } from './bundle/get_apm_events';
+import { rangeRt } from '../default_api_types';
+import { getTraceSampleIds } from '../service_map/get_trace_sample_ids';
 import { getDiagnosticsBundle } from './get_diagnostics_bundle';
 import { getFleetPackageInfo } from './get_fleet_package_info';
 import {
   getDestinationParentIds,
-  getSourceSpanIds,
   getExitSpans,
+  getSourceSpanIds,
 } from './service_map/get_exit_spans_from_samples';
 import { getTraceCorrelation } from './service_map/get_trace_correlation';
-import { rangeRt } from '../default_api_types';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import type { ServiceMapDiagnosticResponse } from '../../../common/service_map_diagnostic_types';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { getTraceSampleIds } from '../service_map/get_trace_sample_ids';
 export interface IndiciesItem {
   index: string;
   fieldMappings: {

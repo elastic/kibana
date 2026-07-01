@@ -7,8 +7,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
-import type { ServiceAnomaliesResponse } from '@kbn/apm-types';
 import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
+import type { ServiceAnomaliesResponse } from '@kbn/apm-types';
 import { rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { sortBy, uniqBy } from 'lodash';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
