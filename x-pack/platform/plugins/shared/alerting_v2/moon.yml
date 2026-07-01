@@ -127,6 +127,8 @@ dependsOn:
   - '@kbn/core-application-browser-mocks'
   - '@kbn/alerts-ui-shared'
   - '@kbn/es-types'
+  - '@kbn/app-header'
+  - '@kbn/core-chrome-browser-context-mocks'
 tags:
   - plugin
   - prod
