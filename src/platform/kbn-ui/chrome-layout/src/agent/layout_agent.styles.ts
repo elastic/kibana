@@ -14,7 +14,12 @@ import { getHighContrastBorder } from '@kbn/ui-chrome-layout-utils';
 import type { ChromeStyle } from '../layout.types';
 import type { EmotionFn } from '../types';
 
-const root = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
+export const AGENT_PANEL_WIDTH_CSS_VAR = '--agent-panel-width';
+
+const root = (
+  chromeStyle: ChromeStyle = 'classic',
+  animateWidth = false
+): EmotionFn => {
   const isProjectStyle = chromeStyle === 'project';
 
   return (useEuiTheme: UseEuiTheme) => {
@@ -23,9 +28,6 @@ const root = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
 
       height: calc(
         100% - ${layoutVar('application.marginTop')} - ${layoutVar('application.marginBottom')}
-      );
-      width: calc(
-        100% - ${layoutVar('application.marginRight')} - ${layoutVar('agent.marginLeft', '0px')}
       );
       margin-top: ${layoutVar('application.marginTop')};
       margin-bottom: ${layoutVar('application.marginBottom')};
@@ -39,6 +41,23 @@ const root = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
       flex-direction: column;
       min-height: 0;
       min-width: 0;
+
+      ${animateWidth
+        ? css`
+            width: var(${AGENT_PANEL_WIDTH_CSS_VAR});
+            transition: width 300ms ease-in-out;
+            overflow: hidden;
+
+            &.isCollapsed {
+              width: 0;
+            }
+          `
+        : css`
+            width: calc(
+              100% - ${layoutVar('application.marginRight')} -
+                ${layoutVar('agent.marginLeft', '0px')}
+            );
+          `}
 
       ${isProjectStyle &&
       css`
@@ -73,6 +92,13 @@ const content: EmotionFn = () => css`
   flex-direction: column;
   flex-grow: 1;
   min-height: 0;
+  min-width: 0;
+  width: 100%;
+`;
+
+export const contentHiddenStyles = css`
+  visibility: hidden;
+  pointer-events: none;
 `;
 
 export const styles = {

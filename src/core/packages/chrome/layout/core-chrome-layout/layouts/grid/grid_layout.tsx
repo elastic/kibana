@@ -8,9 +8,16 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
-import type { ChromeLayoutConfig } from '@kbn/ui-chrome-layout';
-import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/ui-chrome-layout';
+import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { ApplicationWorkspaceRect, ChromeLayoutConfig } from '@kbn/ui-chrome-layout';
+import {
+  ApplicationWorkspaceTransitionDecoy,
+  ChromeLayout,
+  ChromeLayoutConfigProvider,
+  domRectToApplicationWorkspaceRect,
+  setApplicationWorkspaceTransitionPhase,
+  syncApplicationWorkspaceTransitionPhase,
+} from '@kbn/ui-chrome-layout';
 import {
   ChromeComponentsProvider,
   ClassicHeader,
@@ -51,6 +58,7 @@ import {
 } from '@kbn/ui-chrome-layout';
 import {
   clampAgentWorkspaceWidth,
+  APP_MAIN_SCROLL_CONTAINER_ID,
   DEFAULT_AGENT_WIDTH,
 } from '@kbn/ui-chrome-layout-constants';
 import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
@@ -144,6 +152,132 @@ export class GridLayout implements LayoutService {
       const effectiveAgentWorkspaceOpen = showAgentWorkspace ? agentWorkspaceOpen : true;
 
       const [agentWorkspaceWidth, setAgentWorkspaceWidth] = useState(DEFAULT_AGENT_WIDTH);
+      const [decoy, setDecoy] = useState<{
+        phase: 'closing' | 'opening';
+        rect: ApplicationWorkspaceRect;
+      } | null>(null);
+      const [transitionRevision, setTransitionRevision] = useState(0);
+
+      const prevApplicationWorkspaceOpenRef = useRef(effectiveApplicationWorkspaceOpen);
+      const pendingClosingDecoyRef = useRef<{
+        phase: 'closing';
+        rect: ApplicationWorkspaceRect;
+      } | null>(null);
+      const openingDecoyStartedRef = useRef(false);
+
+      const canAnimateApplicationWorkspace =
+        showAgentWorkspace &&
+        effectiveAgentWorkspaceOpen &&
+        chromeStyle === 'project' &&
+        typeof window !== 'undefined' &&
+        !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const prevApplicationWorkspaceOpen = prevApplicationWorkspaceOpenRef.current;
+
+      const applicationWorkspaceTransitionPhase = syncApplicationWorkspaceTransitionPhase({
+        canAnimate: canAnimateApplicationWorkspace,
+        applicationWorkspaceOpen: effectiveApplicationWorkspaceOpen,
+        prevApplicationWorkspaceOpen,
+      });
+
+      if (
+        prevApplicationWorkspaceOpen &&
+        !effectiveApplicationWorkspaceOpen &&
+        canAnimateApplicationWorkspace &&
+        applicationWorkspaceTransitionPhase === 'closing' &&
+        pendingClosingDecoyRef.current === null &&
+        decoy === null
+      ) {
+        const applicationPanel = document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
+        if (applicationPanel) {
+          const domRect = applicationPanel.getBoundingClientRect();
+          if (domRect.width > 0 && domRect.height > 0) {
+            pendingClosingDecoyRef.current = {
+              phase: 'closing',
+              rect: domRectToApplicationWorkspaceRect(domRect),
+            };
+          }
+        }
+      }
+
+      prevApplicationWorkspaceOpenRef.current = effectiveApplicationWorkspaceOpen;
+
+      const handleDecoyComplete = useCallback(() => {
+        openingDecoyStartedRef.current = false;
+        setApplicationWorkspaceTransitionPhase('none');
+        setDecoy(null);
+        setTransitionRevision((revision) => revision + 1);
+      }, []);
+
+      const finishApplicationWorkspaceTransition = useCallback(() => {
+        setApplicationWorkspaceTransitionPhase('none');
+        setTransitionRevision((revision) => revision + 1);
+      }, []);
+
+      useLayoutEffect(() => {
+        if (pendingClosingDecoyRef.current) {
+          setDecoy(pendingClosingDecoyRef.current);
+          pendingClosingDecoyRef.current = null;
+          return;
+        }
+
+        if (
+          applicationWorkspaceTransitionPhase === 'closing' &&
+          !effectiveApplicationWorkspaceOpen &&
+          canAnimateApplicationWorkspace &&
+          decoy === null
+        ) {
+          finishApplicationWorkspaceTransition();
+        }
+      }, [
+        applicationWorkspaceTransitionPhase,
+        canAnimateApplicationWorkspace,
+        decoy,
+        effectiveApplicationWorkspaceOpen,
+        finishApplicationWorkspaceTransition,
+      ]);
+
+      useLayoutEffect(() => {
+        if (
+          !canAnimateApplicationWorkspace ||
+          applicationWorkspaceTransitionPhase !== 'opening' ||
+          !effectiveApplicationWorkspaceOpen ||
+          decoy !== null ||
+          openingDecoyStartedRef.current
+        ) {
+          return;
+        }
+
+        const applicationPanel = document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
+        if (!applicationPanel) {
+          finishApplicationWorkspaceTransition();
+          return;
+        }
+
+        const domRect = applicationPanel.getBoundingClientRect();
+        if (domRect.width <= 0 || domRect.height <= 0) {
+          finishApplicationWorkspaceTransition();
+          return;
+        }
+
+        openingDecoyStartedRef.current = true;
+        setDecoy({
+          phase: 'opening',
+          rect: domRectToApplicationWorkspaceRect(domRect),
+        });
+      }, [
+        applicationWorkspaceTransitionPhase,
+        canAnimateApplicationWorkspace,
+        decoy,
+        effectiveApplicationWorkspaceOpen,
+        finishApplicationWorkspaceTransition,
+      ]);
+
+      useLayoutEffect(() => {
+        if (applicationWorkspaceTransitionPhase !== 'opening') {
+          openingDecoyStartedRef.current = false;
+        }
+      }, [applicationWorkspaceTransitionPhase]);
 
       const setAgentWorkspaceWidthClamped = useCallback(
         (width: number) => {
@@ -200,16 +334,19 @@ export class GridLayout implements LayoutService {
             showAgentWorkspace && effectiveAgentWorkspaceOpen ? agentWorkspaceWidth : 0,
           applicationWorkspaceWidth: 0,
           applicationWorkspaceOpen: effectiveApplicationWorkspaceOpen,
+          applicationWorkspaceTransitionPhase,
           agentWorkspaceOpen: effectiveAgentWorkspaceOpen,
         }),
         [
           agentWorkspaceWidth,
+          applicationWorkspaceTransitionPhase,
           effectiveAgentWorkspaceOpen,
           effectiveApplicationWorkspaceOpen,
           layoutConfigKey,
           navigationWidth,
           showAgentWorkspace,
           sidebarWidth,
+          transitionRevision,
         ]
       );
 
@@ -286,6 +423,13 @@ export class GridLayout implements LayoutService {
               </>
             </ChromeLayout>
           </ChromeLayoutConfigProvider>
+          {decoy && (
+            <ApplicationWorkspaceTransitionDecoy
+              phase={decoy.phase}
+              rect={decoy.rect}
+              onComplete={handleDecoyComplete}
+            />
+          )}
         </>
       );
 

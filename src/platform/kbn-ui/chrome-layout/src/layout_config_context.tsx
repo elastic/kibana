@@ -8,7 +8,16 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+  useLayoutEffect,
+  useRef,
+} from 'react';
+import type { ApplicationWorkspaceTransitionPhase } from './application/application_workspace_transition_phase';
 import type { ChromeStyle } from './layout.types';
 import type { LayoutDimensions } from './layout.types';
 
@@ -35,6 +44,7 @@ export type LayoutConfig = Pick<
   | 'agentWorkspaceOpen'
 > & {
   chromeStyle?: ChromeStyle;
+  applicationWorkspaceTransitionPhase?: ApplicationWorkspaceTransitionPhase;
 };
 
 /** Update function type for layout config */
@@ -91,29 +101,23 @@ export const LayoutConfigProvider = ({
   value: initialValue,
   children,
 }: LayoutConfigProviderProps) => {
-  // Base config from props
-  const [baseConfig, setBaseConfig] = useState<LayoutConfig>(initialValue);
-
-  // Programmatic overrides from updateLayout()
   const [overrides, setOverrides] = useState<Partial<LayoutConfig>>({});
+  const prevInitialValueRef = useRef(initialValue);
 
-  // Update base config when props change
-  useEffect(() => {
-    setBaseConfig((prev) => {
-      // Only update changed fields
-      const changes = getChangedFields(prev, initialValue);
-      if (Object.keys(changes).length === 0) return prev;
+  useLayoutEffect(() => {
+    const changes = getChangedFields(prevInitialValueRef.current, initialValue);
+    prevInitialValueRef.current = initialValue;
 
-      // Clear overrides for fields that changed in props (props take precedence)
-      setOverrides((prevOverrides) => {
-        const newOverrides = { ...prevOverrides };
-        Object.keys(changes).forEach((key) => {
-          delete newOverrides[key as keyof LayoutConfig];
-        });
-        return newOverrides;
+    if (Object.keys(changes).length === 0) {
+      return;
+    }
+
+    setOverrides((prevOverrides) => {
+      const newOverrides = { ...prevOverrides };
+      Object.keys(changes).forEach((key) => {
+        delete newOverrides[key as keyof LayoutConfig];
       });
-
-      return { ...prev, ...changes };
+      return newOverrides;
     });
   }, [initialValue]);
 
@@ -125,8 +129,18 @@ export const LayoutConfigProvider = ({
     });
   }, []);
 
-  // Merge base and overrides to create final config
-  const config = { ...baseConfig, ...overrides };
+  const config = useMemo(() => {
+    const merged = { ...initialValue, ...overrides };
+    const activeTransition =
+      initialValue.applicationWorkspaceTransitionPhase === 'closing' ||
+      initialValue.applicationWorkspaceTransitionPhase === 'opening';
+
+    if (activeTransition) {
+      merged.applicationWorkspaceTransitionPhase = initialValue.applicationWorkspaceTransitionPhase;
+    }
+
+    return merged;
+  }, [initialValue, overrides]);
 
   return (
     <LayoutUpdateContext.Provider value={updateLayout}>

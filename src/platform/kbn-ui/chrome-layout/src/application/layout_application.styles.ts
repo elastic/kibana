@@ -24,7 +24,6 @@ const root = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
       height: calc(
         100% - ${layoutVar('application.marginTop')} - ${layoutVar('application.marginBottom')}
       );
-      width: calc(100% - ${layoutVar('application.marginRight')});
       margin-top: ${layoutVar('application.marginTop')};
       margin-bottom: ${layoutVar('application.marginBottom')};
       margin-right: ${layoutVar('application.marginRight')};
@@ -34,6 +33,8 @@ const root = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
       position: relative;
       display: flex;
       flex-direction: column;
+      min-width: 0;
+      width: calc(100% - ${layoutVar('application.marginRight')});
 
       // Only apply distinguished background styling for "project" chrome style
       ${isProjectStyle &&
@@ -73,6 +74,9 @@ const content: EmotionFn = () => css`
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
 `;
 
 const topBar: EmotionFn = ({ euiTheme }) => css`
@@ -89,6 +93,11 @@ const bottomBar: EmotionFn = ({ euiTheme }) => css`
   z-index: ${layoutLevels.applicationBottomBar};
   height: ${layoutVar('application.bottomBar.height')};
   flex-shrink: 0;
+`;
+
+export const contentHiddenStyles = css`
+  visibility: hidden;
+  pointer-events: none;
 `;
 
 export const styles = {
