@@ -60,9 +60,11 @@ export const useInstallEntityStoreV2 = (services: Services) => {
         if (!isEntityStoreV2Enabled) return;
 
         const space = await services.spaces.getActiveSpace();
-        const statusResponse = await services.http.get<{ status: EntityStoreStatus }>(
-          getStatusRequest
-        );
+        const statusResponse = await services.http.get<{
+          status: EntityStoreStatus;
+          preferences: { autoInstall: boolean };
+        }>(getStatusRequest);
+
         const isEntityStoreV2Installed = isEntityStoreInstalled(statusResponse.status);
         // In non-default spaces, only auto-install v2 where v1 existed. If v2 is already there,
         // skip the v1 check and still run (e.g. init entity maintainers for this space).
@@ -76,6 +78,7 @@ export const useInstallEntityStoreV2 = (services: Services) => {
           await services.http.post(initEntityMaintainersRequest);
           return;
         }
+        if (!statusResponse.preferences.autoInstall) return;
         // Entity store not installed → install entity store (init entity maintainers is already done by the install API).
         await services.http.post(installAllEntitiesRequest);
       } catch (e) {
