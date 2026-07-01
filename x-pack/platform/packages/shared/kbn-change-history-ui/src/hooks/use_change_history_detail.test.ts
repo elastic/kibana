@@ -10,7 +10,7 @@ import { useChangeHistoryDetail } from './use_change_history_detail';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryDetail } from '../types/change_history_detail';
 import { TEST_SNAPSHOT } from '../test_utils/change_history_test_fixtures';
-import { createQueryClientWrapper } from '../test_utils/create_query_client_wrapper';
+import { createChangeHistoryHookWrapper } from '../test_utils/create_change_history_hook_wrapper';
 
 describe('useChangeHistoryDetail', () => {
   it('does not show loading for synchronously resolved cache hits', async () => {
@@ -27,7 +27,7 @@ describe('useChangeHistoryDetail', () => {
       getChange: jest.fn().mockReturnValue(Promise.resolve(detail)),
     };
 
-    const { wrapper } = createQueryClientWrapper();
+    const { wrapper } = createChangeHistoryHookWrapper({ adapter });
 
     const { result } = renderHook(
       () =>
@@ -60,7 +60,7 @@ describe('useChangeHistoryDetail', () => {
       getChange: jest.fn().mockReturnValue(Promise.resolve(detail)),
     };
 
-    const { wrapper } = createQueryClientWrapper();
+    const { wrapper } = createChangeHistoryHookWrapper({ adapter });
 
     const { result, rerender } = renderHook(
       ({ enabled }) =>
