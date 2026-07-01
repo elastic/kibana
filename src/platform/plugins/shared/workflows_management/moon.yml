@@ -119,7 +119,6 @@ dependsOn:
   - '@kbn/controls-schemas'
   - '@kbn/app-header'
   - '@kbn/core-chrome-app-menu-components'
-  - '@kbn/ui-chrome-layout'
   - '@kbn/core-chrome-browser-context'
   - '@kbn/core-chrome-browser-mocks'
 tags:
