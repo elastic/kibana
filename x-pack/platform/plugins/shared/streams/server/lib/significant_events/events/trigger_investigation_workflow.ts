@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { STREAMS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -37,13 +37,13 @@ export const triggerInvestigationWorkflow = async ({
 
   const spaceId = spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
   const workflow = await workflowsManagement.management.getWorkflow(
-    STREAMS_INVESTIGATION_WORKFLOW_ID,
+    SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
     spaceId
   );
 
   if (!workflow || !workflow.definition) {
     logger.warn(
-      `Managed workflow "${STREAMS_INVESTIGATION_WORKFLOW_ID}" not found, skipping investigation trigger`
+      `Managed workflow "${SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID}" not found, skipping investigation trigger`
     );
     return undefined;
   }

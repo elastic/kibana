@@ -6,7 +6,7 @@
  */
 
 import type { FeatureFlagsStart } from '@kbn/core/server';
-import { STREAMS_SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG } from '../../../common/feature_flags';
+import { SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG } from '../../../common/feature_flags';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './is_significant_events_semantic_code_search_grounding_enabled';
 
 describe('isSignificantEventsSemanticCodeSearchGroundingEnabled', () => {
@@ -16,7 +16,7 @@ describe('isSignificantEventsSemanticCodeSearchGroundingEnabled', () => {
 
     expect(isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags)).toBe(false);
     expect(getBooleanValue).toHaveBeenCalledWith(
-      STREAMS_SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG,
+      SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG,
       false
     );
   });
