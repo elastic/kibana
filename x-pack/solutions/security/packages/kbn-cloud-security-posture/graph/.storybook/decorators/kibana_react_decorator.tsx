@@ -120,6 +120,15 @@ const uiSettings: Record<string, unknown> = {
 const services: Partial<KibanaServices> = {
   appName: 'test',
   application: applicationServiceMock.createStartContract(),
+  featureFlags: {
+    appendContext: () => Promise.resolve(),
+    getBooleanValue: (_flagName, fallback) => fallback,
+    getStringValue: (_flagName, fallback) => fallback,
+    getNumberValue: (_flagName, fallback) => fallback,
+    getBooleanValue$: (_flagName, fallback) => of(fallback),
+    getStringValue$: (_flagName, fallback) => of(fallback),
+    getNumberValue$: (_flagName, fallback) => of(fallback),
+  },
   kql: {
     autocomplete: {
       getQuerySuggestions: () => [],
