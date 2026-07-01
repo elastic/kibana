@@ -424,6 +424,7 @@ export interface DocLinks {
     createApiKeyMetadata: string;
     createApiKeyRoleDescriptors: string;
     createCrossClusterApiKey: string;
+    crossClusterApiKeyStrongVerification: string;
     createPipeline: string;
     createTransformRequest: string;
     cronExpressions: string;

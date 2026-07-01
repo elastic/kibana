@@ -9,10 +9,8 @@ import type { ExclusiveUnion } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiCallOut,
   EuiCheckableCard,
-  EuiCopy,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,6 +21,7 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiPanel,
   EuiSkeletonText,
@@ -177,61 +176,6 @@ const WRITE_ONLY_BOILERPLATE = `{
 const httpErrorText = i18n.translate('xpack.security.httpError', {
   defaultMessage: 'Could not initialize http client.',
 });
-
-/**
- * Renders a cross-cluster API key certificate identity in the details overview with the ability to
- * reveal/hide the value and copy it to the clipboard.
- */
-const CertificateIdentityValue: FunctionComponent<{ value: string }> = ({ value }) => {
-  const [isVisible, setIsVisible] = useState(false);
-
-  return (
-    <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="xs" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiText
-          size="xs"
-          data-test-subj="apiKeyCertificateIdentityValue"
-          style={{ wordBreak: 'break-all' }}
-        >
-          {isVisible ? value : '•'.repeat(Math.min(value.length, 24))}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType={isVisible ? 'eyeClosed' : 'eye'}
-          data-test-subj="apiKeyCertificateIdentityToggle"
-          aria-label={
-            isVisible
-              ? i18n.translate(
-                  'xpack.security.accountManagement.apiKeyFlyout.certificateIdentityHideLabel',
-                  { defaultMessage: 'Hide certificate identity' }
-                )
-              : i18n.translate(
-                  'xpack.security.accountManagement.apiKeyFlyout.certificateIdentityShowLabel',
-                  { defaultMessage: 'Show certificate identity' }
-                )
-          }
-          onClick={() => setIsVisible((visible) => !visible)}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiCopy textToCopy={value}>
-          {(copy) => (
-            <EuiButtonIcon
-              iconType="copyClipboard"
-              data-test-subj="apiKeyCertificateIdentityCopy"
-              aria-label={i18n.translate(
-                'xpack.security.accountManagement.apiKeyFlyout.certificateIdentityCopyLabel',
-                { defaultMessage: 'Copy certificate identity' }
-              )}
-              onClick={copy}
-            />
-          )}
-        </EuiCopy>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
 
 export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   onSuccess,
@@ -505,7 +449,23 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                         </EuiText>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <ApiKeyBadge type={apiKey.type} />
+                        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <ApiKeyBadge type={apiKey.type} />
+                          </EuiFlexItem>
+                          {apiKey.type === 'cross_cluster' && apiKey.certificate_identity && (
+                            <EuiFlexItem grow={false}>
+                              <EuiIconTip
+                                type="key"
+                                size="s"
+                                content={i18n.translate(
+                                  'xpack.security.accountManagement.apiKeyFlyout.strongVerificationTooltip',
+                                  { defaultMessage: 'Strong identity verification enabled' }
+                                )}
+                              />
+                            </EuiFlexItem>
+                          )}
+                        </EuiFlexGroup>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     <EuiHorizontalRule margin="s" />
@@ -542,26 +502,6 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                         <ApiKeyStatus expiration={apiKey.expiration} />
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                    {apiKey.type === 'cross_cluster' && apiKey.certificate_identity ? (
-                      <>
-                        <EuiHorizontalRule margin="s" />
-                        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                          <EuiFlexItem grow={false}>
-                            <EuiText size="xs">
-                              <strong>
-                                <FormattedMessage
-                                  id="xpack.security.accountManagement.apiKeyFlyout.certificateIdentityOverviewLabel"
-                                  defaultMessage="Identity verification"
-                                />
-                              </strong>
-                            </EuiText>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <CertificateIdentityValue value={apiKey.certificate_identity} />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </>
-                    ) : null}
                   </>
                 ) : (
                   <>
@@ -613,6 +553,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                           <EuiFlexItem>
                             <EuiCheckableCard
                               id="rest"
+                              css={{ height: '100%' }}
                               label={
                                 <>
                                   <EuiTitle size="xxs">
@@ -639,6 +580,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                           <EuiFlexItem>
                             <EuiCheckableCard
                               id="cross_cluster"
+                              css={{ height: '100%' }}
                               label={
                                 <>
                                   <EuiTitle size="xxs">
@@ -1115,7 +1057,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                               values={{
                                 learnMore: (
                                   <EuiLink
-                                    href={docLinks!.links.apis.createCrossClusterApiKey}
+                                    href={docLinks!.links.apis.crossClusterApiKeyStrongVerification}
                                     target="_blank"
                                     external
                                   >

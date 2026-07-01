@@ -318,7 +318,9 @@ describe('APIKeysGridPage', () => {
 
       // Initial load returns 0 REST keys → auto-select fires → second query with cross-cluster filter
       await waitFor(() => expect(coreStart.http.post).toHaveBeenCalledTimes(2));
-      const secondCallOptions = coreStart.http.post.mock.calls[1][1] as { body: string };
+      const secondCallOptions = (
+        coreStart.http.post.mock.calls[1] as unknown as [string, { body: string }]
+      )[1];
       expect(JSON.parse(secondCallOptions.body).filters.type).toBe('cross_cluster');
     });
 
@@ -357,7 +359,7 @@ describe('APIKeysGridPage', () => {
       coreStart.http.get.mockResolvedValue([]);
 
       // Intercept the create call; pass everything else through to the query mock from beforeEach
-      coreStart.http.post.mockImplementation(async (url: string) => {
+      (coreStart.http.post as jest.Mock).mockImplementation(async (url: string) => {
         if (url === '/internal/security/api_key') {
           return { id: 'new-id', name: 'my-new-key', api_key: 'test-key', encoded: 'dGVzdA==' };
         }
@@ -421,7 +423,7 @@ describe('APIKeysGridPage', () => {
 
       await waitFor(() => {
         const queryCalls = (
-          coreStart.http.post.mock.calls as Array<[string, { body: string }]>
+          coreStart.http.post.mock.calls as unknown as Array<[string, { body: string }]>
         ).filter(([url]) => url === '/internal/security/api_key/_query');
         expect(queryCalls.length).toBeGreaterThanOrEqual(2);
         const postCreateBody = JSON.parse(queryCalls.at(-1)![1].body);
