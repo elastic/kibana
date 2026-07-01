@@ -95,12 +95,16 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   // POC pattern: cache the last valid WorkflowYaml so the canvas can stay
   // up while the user fixes a YAML syntax error.
+  // Only cache when YAML is valid: partial parses produced during an error
+  // state must not overwrite the ref, otherwise the ref poisons the fallback
+  // when the fixed YAML passes syntax validation but the client parser still
+  // returns undefined for workflowDefinition.
   const lastValidRef = useRef<WorkflowYaml | undefined>(undefined);
   useEffect(() => {
-    if (definition) {
+    if (definition && isYamlValid) {
       lastValidRef.current = definition;
     }
-  }, [definition]);
+  }, [definition, isYamlValid]);
 
   // Focus the flyout panel when a step becomes selected so keyboard users
   // land inside the panel rather than remaining on the canvas node.
