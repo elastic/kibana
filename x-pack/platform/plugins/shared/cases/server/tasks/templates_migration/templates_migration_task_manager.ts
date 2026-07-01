@@ -19,14 +19,17 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
 } from '../../../common/constants';
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
+import type { CasePersistedAttributes } from '../../common/types/case';
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
 import type { Template } from '../../../common/types/domain/template/v1';
 import { toFieldNames, trimFieldDefaults } from '../../services/templates/utils';
 import { buildFieldDefinitionYaml } from './build_field_definition_yaml';
 import { buildTemplateYaml } from './build_template_yaml';
+import { buildExtendedFieldsBackfill } from './build_case_extended_fields';
 import {
   CASES_TEMPLATES_MIGRATION_TASK_TYPE,
   CASES_TEMPLATES_MIGRATION_TASK_ID,
@@ -37,11 +40,14 @@ const MAX_CONCURRENT_MIGRATIONS = 3;
 type LegacyCustomField = NonNullable<ConfigurationPersistedAttributes['customFields']>[number];
 type LegacyTemplate = NonNullable<ConfigurationPersistedAttributes['templates']>[number];
 
+const CASE_BACKFILL_PAGE_SIZE = 100;
+
 interface MigrationCounts {
   fieldDefsCreated: number;
   fieldDefsReused: number;
   templatesCreated: number;
   templatesReused: number;
+  casesBackfilled: number;
 }
 
 export class TemplatesMigrationTaskManager {
@@ -96,6 +102,7 @@ export class TemplatesMigrationTaskManager {
                 fieldDefsReused: 0,
                 templatesCreated: 0,
                 templatesReused: 0,
+                casesBackfilled: 0,
               };
 
               await pMap(
@@ -103,7 +110,8 @@ export class TemplatesMigrationTaskManager {
                 async (so) => {
                   if (
                     so.attributes.legacyTemplatesMigrated &&
-                    so.attributes.legacyCustomFieldsMigrated
+                    so.attributes.legacyCustomFieldsMigrated &&
+                    so.attributes.legacyCasesMigrated
                   ) {
                     log.debug(
                       `[${executionId}] Skipping already-migrated configure SO ${so.id} (owner: ${so.attributes.owner})`
@@ -123,6 +131,7 @@ export class TemplatesMigrationTaskManager {
                     totals.fieldDefsReused += counts.fieldDefsReused;
                     totals.templatesCreated += counts.templatesCreated;
                     totals.templatesReused += counts.templatesReused;
+                    totals.casesBackfilled += counts.casesBackfilled;
                     this.migrationUsageCounter?.incrementCounter({
                       counterName: 'configureMigrationSuccess',
                       incrementBy: 1,
@@ -149,7 +158,8 @@ export class TemplatesMigrationTaskManager {
                   `${configures.length} configure SOs inspected ` +
                   `(migrated=${totals.migrated}, skipped=${totals.skipped}, errored=${totals.errored}); ` +
                   `field definitions created=${totals.fieldDefsCreated}, reused=${totals.fieldDefsReused}; ` +
-                  `templates created=${totals.templatesCreated}, reused=${totals.templatesReused}`
+                  `templates created=${totals.templatesCreated}, reused=${totals.templatesReused}; ` +
+                  `cases backfilled=${totals.casesBackfilled}`
               );
             },
 
@@ -170,6 +180,7 @@ export class TemplatesMigrationTaskManager {
       CASE_CONFIGURE_SAVED_OBJECT,
       CASE_TEMPLATE_SAVED_OBJECT,
       CASE_FIELD_DEFINITION_SAVED_OBJECT,
+      CASE_SAVED_OBJECT,
     ]);
 
     // Remove any lingering task record so the migration re-runs on every Kibana startup.
@@ -399,6 +410,78 @@ export class TemplatesMigrationTaskManager {
     return { created, reused };
   }
 
+  /**
+   * Backfills existing cases' `extended_fields` from their legacy `customFields` so migrated global
+   * fields render with their real values instead of appearing empty. Paginates the owner's cases in
+   * the given namespace and bulk-updates only those with values missing from `extended_fields`.
+   *
+   * This is a system data backfill (internal repo, no user actions) — mirroring how field
+   * definitions and templates are created here. Emitting a user action per case would create
+   * millions of audit SOs on large deployments. Re-runs are idempotent: already-backfilled keys are
+   * skipped, so an interrupted run resumes safely on the next attempt.
+   */
+  private async migrateCases(
+    repo: ISavedObjectsRepository,
+    owner: string,
+    namespace: string,
+    nsOption: string | undefined,
+    executionId: string,
+    log: Logger
+  ): Promise<number> {
+    let backfilled = 0;
+    let page = 1;
+
+    while (true) {
+      const result = await repo.find<CasePersistedAttributes>({
+        type: CASE_SAVED_OBJECT,
+        namespaces: nsOption ? [nsOption] : ['default'],
+        perPage: CASE_BACKFILL_PAGE_SIZE,
+        page,
+        // Stable sort so page-by-page iteration doesn't skip or repeat cases while we update them.
+        sortField: 'created_at',
+        sortOrder: 'asc',
+        // owner is a controlled enum (cases/securitySolution/observability), not user input
+        filter: `${CASE_SAVED_OBJECT}.attributes.owner: "${owner}"`,
+      });
+
+      const updates = result.saved_objects.flatMap((so) => {
+        const additions = buildExtendedFieldsBackfill(
+          so.attributes.customFields,
+          so.attributes.extended_fields
+        );
+        if (Object.keys(additions).length === 0) {
+          return [];
+        }
+        return [
+          {
+            type: CASE_SAVED_OBJECT,
+            id: so.id,
+            attributes: {
+              extended_fields: { ...(so.attributes.extended_fields ?? {}), ...additions },
+            },
+            ...(nsOption ? { namespace: nsOption } : {}),
+          },
+        ];
+      });
+
+      if (updates.length > 0) {
+        await repo.bulkUpdate<CasePersistedAttributes>(updates, { refresh: false });
+        backfilled += updates.length;
+      }
+
+      if (result.saved_objects.length < CASE_BACKFILL_PAGE_SIZE) {
+        break;
+      }
+      page++;
+    }
+
+    log.debug(
+      `[${executionId}] Backfilled extended_fields on ${backfilled} cases (owner: ${owner}, namespace: ${namespace})`
+    );
+
+    return backfilled;
+  }
+
   private async migrateOneConfigure(
     repo: ISavedObjectsRepository,
     so: SavedObject<ConfigurationPersistedAttributes>,
@@ -463,11 +546,22 @@ export class TemplatesMigrationTaskManager {
       templatesReused = result.reused;
     }
 
+    // ── Existing-case backfill phase ─────────────────────────────────────────
+    // Copy legacy customFields values on this space's existing cases into their extended_fields so
+    // migrated global fields render with their real values. Gated by its own flag so a space marked
+    // migrated by an earlier release (which had no case backfill) is still handled here.
+    let casesBackfilled = 0;
+
+    if (!attributes.legacyCasesMigrated && legacyCustomFields.length > 0) {
+      casesBackfilled = await this.migrateCases(repo, owner, namespace, nsOption, executionId, log);
+    }
+
     // ── Write migration flags ────────────────────────────────────────────────
-    // Both flags are written together whenever the configure SO has any legacy data (custom fields
-    // or templates). Setting legacyTemplatesMigrated even when there are no templates at migration
-    // time prevents spurious re-runs on subsequent startups. Configure SOs with no legacy data at
-    // all (empty arrays) receive no flags — they are re-evaluated cheaply on each restart.
+    // legacyCustomFieldsMigrated / legacyTemplatesMigrated are written together whenever the
+    // configure SO has any legacy data. legacyCasesMigrated is tied to custom fields — only spaces
+    // that had custom-field configs can have cases with values to backfill. Setting each flag even
+    // when its array is empty at migration time prevents spurious re-runs. Configure SOs with no
+    // legacy data at all receive no flags and are re-evaluated cheaply on each restart.
     const flagsToWrite: Partial<ConfigurationPersistedAttributes> = {};
     if (legacyCustomFields.length > 0 || legacyTemplates.length > 0) {
       if (!attributes.legacyCustomFieldsMigrated) {
@@ -476,6 +570,9 @@ export class TemplatesMigrationTaskManager {
       if (!attributes.legacyTemplatesMigrated) {
         flagsToWrite.legacyTemplatesMigrated = true;
       }
+    }
+    if (legacyCustomFields.length > 0 && !attributes.legacyCasesMigrated) {
+      flagsToWrite.legacyCasesMigrated = true;
     }
 
     if (Object.keys(flagsToWrite).length > 0) {
@@ -492,9 +589,16 @@ export class TemplatesMigrationTaskManager {
     log.debug(
       `[${executionId}] Migrated configure SO ${configureId} (owner: ${owner}, namespace: ${namespace}): ` +
         `fieldDefsCreated=${fieldDefsCreated}, fieldDefsReused=${fieldDefsReused}, ` +
-        `templatesCreated=${templatesCreated}, templatesReused=${templatesReused}`
+        `templatesCreated=${templatesCreated}, templatesReused=${templatesReused}, ` +
+        `casesBackfilled=${casesBackfilled}`
     );
 
-    return { fieldDefsCreated, fieldDefsReused, templatesCreated, templatesReused };
+    return {
+      fieldDefsCreated,
+      fieldDefsReused,
+      templatesCreated,
+      templatesReused,
+      casesBackfilled,
+    };
   }
 }

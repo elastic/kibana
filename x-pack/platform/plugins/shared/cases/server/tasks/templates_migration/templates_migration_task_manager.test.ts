@@ -15,6 +15,7 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
 } from '../../../common/constants';
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
 import { TemplatesMigrationTaskManager } from './templates_migration_task_manager';
@@ -56,6 +57,7 @@ const buildConfigureSO = (
     templates: unknown[];
     legacyTemplatesMigrated: boolean;
     legacyCustomFieldsMigrated: boolean;
+    legacyCasesMigrated: boolean;
   }> = {}
 ) => ({
   id: overrides.id ?? 'config-1',
@@ -73,6 +75,7 @@ const buildConfigureSO = (
     templates: overrides.templates ?? [],
     legacyTemplatesMigrated: overrides.legacyTemplatesMigrated,
     legacyCustomFieldsMigrated: overrides.legacyCustomFieldsMigrated,
+    legacyCasesMigrated: overrides.legacyCasesMigrated,
   },
 });
 
@@ -153,12 +156,13 @@ describe('TemplatesMigrationTaskManager', () => {
   });
 
   describe('scheduleMigrationTask', () => {
-    it('creates an internal repository with the three SO types', async () => {
+    it('creates an internal repository with the required SO types', async () => {
       await buildAndSchedule();
       expect(core.savedObjects.createInternalRepository).toHaveBeenCalledWith([
         CASE_CONFIGURE_SAVED_OBJECT,
         CASE_TEMPLATE_SAVED_OBJECT,
         CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        CASE_SAVED_OBJECT,
       ]);
     });
 
@@ -178,10 +182,14 @@ describe('TemplatesMigrationTaskManager', () => {
   });
 
   describe('task runner run()', () => {
-    it('skips a configure SO when both flags are already set', async () => {
+    it('skips a configure SO when all migration flags are already set', async () => {
       repo.find.mockResolvedValueOnce({
         saved_objects: [
-          buildConfigureSO({ legacyTemplatesMigrated: true, legacyCustomFieldsMigrated: true }),
+          buildConfigureSO({
+            legacyTemplatesMigrated: true,
+            legacyCustomFieldsMigrated: true,
+            legacyCasesMigrated: true,
+          }),
         ],
         total: 1,
       });
@@ -190,7 +198,7 @@ describe('TemplatesMigrationTaskManager', () => {
       const runner = getTaskRunner(manager);
       await runner.run();
 
-      // Only the one find for configure SOs — no field-def or template lookups
+      // Only the one find for configure SOs — no field-def, template, or case lookups
       expect(repo.find).toHaveBeenCalledTimes(1);
       expect(repo.create).not.toHaveBeenCalled();
       expect(repo.update).not.toHaveBeenCalled();
@@ -241,7 +249,11 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         configSO.id,
-        { legacyTemplatesMigrated: true, legacyCustomFieldsMigrated: true },
+        {
+          legacyTemplatesMigrated: true,
+          legacyCustomFieldsMigrated: true,
+          legacyCasesMigrated: true,
+        },
         expect.anything()
       );
     });
@@ -564,7 +576,7 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         configSO.id,
-        { legacyCustomFieldsMigrated: true },
+        { legacyCustomFieldsMigrated: true, legacyCasesMigrated: true },
         expect.anything()
       );
       expect(repo.update.mock.calls[0][2]).not.toHaveProperty('legacyTemplatesMigrated');
@@ -647,6 +659,156 @@ describe('TemplatesMigrationTaskManager', () => {
     });
   });
 
+  describe('existing-case extended_fields backfill', () => {
+    const buildCaseSO = (
+      id: string,
+      customFields: unknown[],
+      extendedFields?: Record<string, unknown> | null
+    ) => ({
+      id,
+      type: CASE_SAVED_OBJECT,
+      references: [],
+      attributes: { owner: 'cases', customFields, extended_fields: extendedFields ?? null },
+    });
+
+    // Routes each find() to the right result by SO type, so the case-backfill find is deterministic
+    // regardless of the phase ordering.
+    const mockFindByType = (configSO: unknown, caseSOs: unknown[]) => {
+      repo.find.mockImplementation((opts: { type: string }) => {
+        if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [configSO], total: 1 });
+        }
+        if (opts.type === CASE_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: caseSOs, total: caseSOs.length });
+        }
+        return Promise.resolve({ saved_objects: [], total: 0 });
+      });
+    };
+
+    it('backfills extended_fields on existing cases from their legacy customFields', async () => {
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const caseSO = buildCaseSO('case-1', [
+        { key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' },
+        { key: 'cf_num', type: CustomFieldTypes.NUMBER, value: 5 },
+      ]);
+      mockFindByType(configSO, [caseSO]);
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      expect(repo.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(repo.bulkUpdate.mock.calls[0][0]).toEqual([
+        expect.objectContaining({
+          type: CASE_SAVED_OBJECT,
+          id: 'case-1',
+          attributes: { extended_fields: { cf_text_as_keyword: 'hello', cf_num_as_integer: '5' } },
+        }),
+      ]);
+    });
+
+    it('does not overwrite extended_fields values already set on a case', async () => {
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const caseSO = buildCaseSO(
+        'case-1',
+        [
+          { key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'from-legacy' },
+          { key: 'cf_num', type: CustomFieldTypes.NUMBER, value: 5 },
+        ],
+        { cf_text_as_keyword: 'already-set' }
+      );
+      mockFindByType(configSO, [caseSO]);
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      expect(repo.bulkUpdate.mock.calls[0][0]).toEqual([
+        expect.objectContaining({
+          id: 'case-1',
+          attributes: {
+            extended_fields: { cf_text_as_keyword: 'already-set', cf_num_as_integer: '5' },
+          },
+        }),
+      ]);
+    });
+
+    it('does not update cases that already have all their extended_fields', async () => {
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const caseSO = buildCaseSO(
+        'case-1',
+        [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'x' }],
+        { cf_text_as_keyword: 'x' }
+      );
+      mockFindByType(configSO, [caseSO]);
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      expect(repo.bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    it('scopes the case query to the configure SO owner and namespace', async () => {
+      const configSO = buildConfigureSO({
+        owner: 'securitySolution',
+        namespaces: ['my-space'],
+        customFields: [buildLegacyCustomField('cf_text')],
+      });
+      mockFindByType(configSO, []);
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      const caseFind = repo.find.mock.calls.find((c) => c[0]?.type === CASE_SAVED_OBJECT);
+      expect(caseFind?.[0]).toEqual(
+        expect.objectContaining({
+          type: CASE_SAVED_OBJECT,
+          namespaces: ['my-space'],
+          filter: `${CASE_SAVED_OBJECT}.attributes.owner: "securitySolution"`,
+        })
+      );
+    });
+
+    it('backfills cases for a space a prior release already marked field/template-migrated', async () => {
+      // legacyCasesMigrated is unset, so the space must NOT be skipped and cases must be backfilled.
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
+      const caseSO = buildCaseSO('case-1', [
+        { key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' },
+      ]);
+      mockFindByType(configSO, [caseSO]);
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      // No field-defs re-created (already migrated) but the case IS backfilled...
+      expect(repo.bulkUpdate).toHaveBeenCalledTimes(1);
+      // ...and the case flag is now recorded so the space is skipped next time.
+      expect(repo.update).toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configSO.id,
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
+    });
+
+    it('skips the case-backfill phase when the space has no custom fields', async () => {
+      const configSO = buildConfigureSO({
+        customFields: [],
+        templates: [buildLegacyTemplate('T')],
+      });
+      mockFindByType(configSO, [buildCaseSO('case-1', [])]);
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      const caseFind = repo.find.mock.calls.find((c) => c[0]?.type === CASE_SAVED_OBJECT);
+      expect(caseFind).toBeUndefined();
+      expect(repo.bulkUpdate).not.toHaveBeenCalled();
+    });
+  });
+
   describe('telemetry counters', () => {
     it('increments configureMigrationSuccess after a successful migration', async () => {
       const { usageCollection, counter } = createUsageCollectionMock();
@@ -686,11 +848,15 @@ describe('TemplatesMigrationTaskManager', () => {
       );
     });
 
-    it('increments configureMigrationSkipped when both flags are already set', async () => {
+    it('increments configureMigrationSkipped when all migration flags are already set', async () => {
       const { usageCollection, counter } = createUsageCollectionMock();
       repo.find.mockResolvedValueOnce({
         saved_objects: [
-          buildConfigureSO({ legacyTemplatesMigrated: true, legacyCustomFieldsMigrated: true }),
+          buildConfigureSO({
+            legacyTemplatesMigrated: true,
+            legacyCustomFieldsMigrated: true,
+            legacyCasesMigrated: true,
+          }),
         ],
         total: 1,
       });
