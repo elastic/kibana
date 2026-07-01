@@ -94,7 +94,6 @@ export const EntityAnalyticsHomePage = () => {
     useIsExperimentalFeatureEnabled('leadGenerationEnabled') && isEnterprise;
   const anomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
   const leadGenerationPrivilegesQuery = useLeadGenerationPrivileges(leadGenerationEnabled);
-  const anomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
   const anomalyPrivilegesQuery = useAnomalyPrivileges(anomalyDetailsEnabled);
 
   if (entityEnginePrivilegesQuery.isLoading || riskEngineReadPrivileges.isLoading) {
