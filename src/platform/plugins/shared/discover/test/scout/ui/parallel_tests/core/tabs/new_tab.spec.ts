@@ -16,8 +16,6 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../fixtures/common';
 
 spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-classic' }, () => {
-  spaceTest.use({ viewport: { width: 1920, height: 1080 } });
-
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
   });
