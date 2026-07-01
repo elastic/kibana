@@ -13,6 +13,8 @@ export interface ManagedWorkflowManagement {
   enablement: 'enforced' | 'restorable';
 }
 
+export type ManagedWorkflowSelector = 'rule_action';
+
 export interface ManagedWorkflowTemplateValues {
   [key: string]: unknown;
 }
@@ -34,5 +36,6 @@ export type ManagedWorkflowDefinition<
   pluginId: string;
   version: number;
   billable: boolean;
+  visibleInSelectors?: readonly ManagedWorkflowSelector[];
   management: ManagedWorkflowManagement;
 } & ManagedWorkflowDefinitionSource<TValues>;
