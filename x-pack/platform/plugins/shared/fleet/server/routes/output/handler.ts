@@ -6,13 +6,18 @@
  */
 
 import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import Boom from '@hapi/boom';
 
 import { isEqual } from 'lodash';
 
-import { SERVERLESS_DEFAULT_OUTPUT_ID, outputType } from '../../../common/constants';
+import {
+  SERVERLESS_DEFAULT_OUTPUT_ID,
+  SERVERLESS_PRIVATE_OUTPUT_ID,
+  outputType,
+} from '../../../common/constants';
 
 import type {
   DeleteOutputRequestSchema,
@@ -173,11 +178,29 @@ async function validateOutputServerless(
     originalOutput = await outputService.get(outputId);
   }
   const type = output.type || originalOutput?.type;
-  if (type === outputType.Elasticsearch && !isEqual(output.hosts, defaultOutput.hosts)) {
-    throw Boom.badRequest(
-      `Elasticsearch output host must have default URL in serverless: ${defaultOutput.hosts}`
-    );
+  if (type !== outputType.Elasticsearch) {
+    return;
   }
+
+  if (isEqual(output.hosts, defaultOutput.hosts)) {
+    return;
+  }
+
+  try {
+    const privateOutput = await outputService.get(SERVERLESS_PRIVATE_OUTPUT_ID);
+    if (isEqual(output.hosts, privateOutput.hosts)) {
+      return;
+    }
+  } catch (e) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      throw e;
+    }
+    appContextService.getLogger().debug(`Private ES output SO not found: ${e?.message ?? e}`);
+  }
+
+  throw Boom.badRequest(
+    `Elasticsearch output host must have default URL in serverless: ${defaultOutput.hosts}`
+  );
 }
 
 export const deleteOutputHandler: RequestHandler<
