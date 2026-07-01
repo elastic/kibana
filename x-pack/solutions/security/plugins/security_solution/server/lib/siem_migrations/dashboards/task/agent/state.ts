@@ -13,7 +13,7 @@ import type {
   ElasticDashboard,
   OriginalDashboard,
 } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
-import type { MigrationResources } from '../../../common/task/retrievers/resource_retriever';
+import type { EnrichedMigrationResources } from '../../../common/task/util/enrich_lookup_resources';
 import type { PanelDescriptions, ParsedOriginalDashboard, TranslatedPanels } from './types';
 
 export const migrateDashboardState = Annotation.Root({
@@ -29,7 +29,7 @@ export const migrateDashboardState = Annotation.Root({
   elastic_dashboard: Annotation<ElasticDashboard>({
     reducer: (current, value) => ({ ...current, ...value }),
   }),
-  resources: Annotation<MigrationResources>(),
+  resources: Annotation<EnrichedMigrationResources>(),
   translation_result: Annotation<MigrationTranslationResult>(),
   comments: Annotation<MigrationComments>({
     // Translation subgraph causes the original main graph comments to be concatenated again, we need to deduplicate them.
