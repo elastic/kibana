@@ -36,7 +36,7 @@ const YaraSignatureDataSchema = schema.object(
   {
     name: schema.string({ minLength: 1, maxLength: 256 }),
 
-    description: schema.maybe(schema.string({ minLength: 0, maxLength: 256, defaultValue: '' })),
+    description: schema.string({ minLength: 0, maxLength: 256, defaultValue: '' }),
 
     namespaceType: schema.literal('agnostic'),
 
