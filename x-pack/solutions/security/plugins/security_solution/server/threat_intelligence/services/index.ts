@@ -131,6 +131,9 @@ export {
 
 export { enrichTaxonomy, taxonomyOutputSchema } from './enrich_taxonomy';
 export type { EnrichTaxonomyParams, TaxonomyOutput } from './enrich_taxonomy';
+
+export { assessRelevance, relevanceOutputSchema } from './assess_relevance';
+export type { AssessRelevanceParams, RelevanceOutput } from './assess_relevance';
 export type {
   ExtractDiamondParams,
   ExtractDiamondResult,

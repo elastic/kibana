@@ -348,6 +348,18 @@ export const CORRELATION_RUN_STALE_MS = 5 * 60 * 1_000; // 5 min
 export const CORRELATION_RUNS_MAX_CONCURRENT = 3;
 
 /**
+ * Relevance/provenance gate — POST /api/threat_intelligence/assess_relevance.
+ * Given a report's URL + title + body text, classifies whether the article is
+ * real threat intelligence, its quality class (intel / marketing / rollup /
+ * thought_leadership), its provenance tier (primary / pointer / mixed), whether
+ * the page failed to render (needs_render), and any upstream primary sources
+ * the article points to. Uses DIAMOND_GATE_CONNECTOR_SETTING_KEY so the gate
+ * stays on a cheap model (Haiku) independently of the heavy extract_diamond step.
+ */
+export const ASSESS_RELEVANCE_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/assess_relevance` as const;
+
+/**
  * Stage-2 taxonomy enrichment route — POST /api/threat_intelligence/enrich_taxonomy.
  * Invoked by `nl_extraction_behavioral` for every pending report. Produces
  * categories / regions / relevance / detection_actionability / diamond_suitable.
