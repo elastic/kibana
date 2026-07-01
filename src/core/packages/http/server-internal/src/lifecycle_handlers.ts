@@ -30,8 +30,7 @@ const KIBANA_NAME_HEADER = 'kbn-name';
 
 export const createXsrfPostAuthHandler = (
   config: HttpConfig,
-  getAuthState: GetAuthState,
-  log: Logger
+  getAuthState: GetAuthState
 ): OnPostAuthHandler => {
   const { allowlist, disableProtection, allowedSchemes } = config.xsrf;
   // Set<string>, not Set<'apikey' | 'bearer'>: `scheme` below can be any auth scheme (e.g. `basic`).
@@ -49,21 +48,8 @@ export const createXsrfPostAuthHandler = (
     if (exemptSchemes.size > 0 && !isSafeMethod(request.route.method)) {
       const authState = getAuthState<AuthenticatedUser>(request);
       const scheme = authState.state?.http_authentication_scheme;
-      if (scheme != null) {
-        if (exemptSchemes.has(scheme)) {
-          return toolkit.next();
-        }
-        // Contract violation: AuthenticatedUser.http_authentication_scheme must always be
-        // lowercase (see its JSDoc). If we get here it means some writer other than
-        // HTTPAuthenticationProvider broke that contract. Log loudly rather than silently
-        // normalizing, since normalizing would hide the regression instead of surfacing it.
-        if (exemptSchemes.has(scheme.toLowerCase())) {
-          log.warn(
-            `http_authentication_scheme "${scheme}" is not lowercase as required; denying the ` +
-              `xsrf bypass it would otherwise qualify for. This indicates a bug in the auth ` +
-              `provider that set it.`
-          );
-        }
+      if (scheme != null && exemptSchemes.has(scheme)) {
+        return toolkit.next();
       }
     }
 
