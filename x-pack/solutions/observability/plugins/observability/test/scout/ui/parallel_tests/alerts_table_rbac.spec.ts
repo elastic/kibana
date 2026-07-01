@@ -188,6 +188,17 @@ test.describe(
     }) => {
       await browserAuth.loginWithCustomRole(ALERTS_ONLY_ROLE);
 
+      await test.step('shows the Alerts entry in the navigation sidebar', async () => {
+        await pageObjects.overviewPage.gotoWithAlerts();
+        const classicNavAlerts = page.testSubj.locator(
+          'observability-nav-observability-overview-alerts'
+        );
+        const projectNavAlerts = pageObjects.observabilityNavigation.navItemInSidenavByDeepLinkId(
+          'observability-overview:alerts'
+        );
+        await expect(classicNavAlerts.or(projectNavAlerts)).toBeVisible();
+      });
+
       await gotoAlertsForRule(pageObjects, logsRuleId);
 
       await test.step('hides the Manage rules button and rule stats', async () => {
