@@ -74,6 +74,12 @@ test.describe(
     let ruleId: string;
 
     test.beforeAll(async ({ esClient, apiServices, log }) => {
+      // The rule fires on a 1m schedule and can take a while to produce alerts
+      // (slower under serverless), and this hook waits up to 120s for the rule
+      // to activate plus 120s polling for alerts — well beyond Playwright's
+      // default 60s hook timeout.
+      test.setTimeout(300_000);
+
       await apiServices.alerting.cleanup.deleteAllRules();
 
       await esClient.indices.create({
