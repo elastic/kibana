@@ -20,6 +20,7 @@ import type {
   StaticValueIndexPatternColumn,
 } from '@kbn/lens-common';
 import { calculateAuto } from '@kbn/calculate-auto';
+import { AUTO_TARGET_NUMBER_OF_BUCKETS } from '@kbn/lens-common';
 import { isColumnOfType, isColumnFormatted } from './operations/definitions/helpers';
 import { convertToAbsoluteDateRange } from '../../utils';
 import type { OriginalColumn } from '../../../common/types';
@@ -28,12 +29,7 @@ import { resolveTimeShift } from './time_shift_utils';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 import { createEsAggsIdMapEntry } from './create_es_aggs_id_map_entry';
 import { defaultValue as defaultStaticValue } from './operations/definitions/static_value';
-import {
-  AUTO_INTERVAL,
-  AUTO_TARGET_NUMBER_OF_BUCKETS,
-  getTimeZoneAndInterval,
-  hasDateRange,
-} from './date_histogram_esql';
+import { AUTO_INTERVAL, getTimeZoneAndInterval, hasDateRange } from './date_histogram_esql';
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];

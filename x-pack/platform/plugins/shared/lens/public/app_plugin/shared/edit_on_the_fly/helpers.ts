@@ -11,7 +11,7 @@ import {
   formatESQLColumns,
   mapVariableToColumn,
 } from '@kbn/esql-utils';
-import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
+import { type AggregateQuery, buildEsQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -22,8 +22,16 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getTime } from '@kbn/data-plugin/common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { TypedLensSerializedState } from '@kbn/lens-common';
-import type { DatasourceMap, VisualizationMap } from '@kbn/lens-common';
+import type {
+  TypedLensSerializedState,
+  TextBasedPersistedState,
+  TextBasedLayerColumn,
+  MetricVisualizationState,
+  DatasourceMap,
+  VisualizationMap,
+} from '@kbn/lens-common';
+import { appendTimeBucketToEsqlQuery } from '@kbn/lens-common';
+
 import { suggestionsApi } from '../../../lens_suggestions_api';
 import { readUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
 
@@ -211,6 +219,14 @@ export const getSuggestions = async (
       },
       dataView,
     }) as TypedLensSerializedState['attributes'];
+
+    // Preserve the trendline layer when the query changes. The suggestion
+    // system only produces the main layer, so a pre-existing trendline layer
+    // would be dropped. We carry it over and update its query to match.
+    if (preferredVisAttributes && isOfAggregateQueryType(query)) {
+      preserveTrendlineLayer(attrs, preferredVisAttributes, query);
+    }
+
     return {
       ...attrs,
       state: {
@@ -222,4 +238,79 @@ export const getSuggestions = async (
     setErrors?.([e]);
   }
   return undefined;
+};
+
+/**
+ * When an ES|QL query changes, the suggestion system rebuilds all layers from
+ * scratch, which drops the trendline layer. This function carries over the
+ * trendline layer from the previous attributes and updates its query and
+ * metric columns to match the new main layer.
+ */
+type LensAttributes = TypedLensSerializedState['attributes'];
+type PartialMetricVis = Partial<MetricVisualizationState>;
+
+const getMetricVis = (attributes: LensAttributes): PartialMetricVis =>
+  attributes.state.visualization as PartialMetricVis;
+
+const getTextBasedDsState = (attributes: LensAttributes): TextBasedPersistedState | undefined =>
+  attributes.state.datasourceStates.textBased;
+
+const preserveTrendlineLayer = (
+  attrs: LensAttributes,
+  prevAttributes: LensAttributes,
+  query: AggregateQuery
+): void => {
+  const prevVis = getMetricVis(prevAttributes);
+  const { trendlineLayerId } = prevVis;
+  if (!trendlineLayerId) return;
+
+  const prevDsState = getTextBasedDsState(prevAttributes);
+  const prevTrendlineLayer = prevDsState?.layers[trendlineLayerId];
+  if (!prevTrendlineLayer) return;
+
+  const newDsState = getTextBasedDsState(attrs);
+  if (!newDsState) return;
+
+  const trendlineQuery = prevTrendlineLayer.timeField
+    ? { esql: appendTimeBucketToEsqlQuery(query.esql, prevTrendlineLayer.timeField) }
+    : prevTrendlineLayer.query;
+
+  // Sync trendline metric columns from the new main layer.
+  // The visualization state links main accessors to trendline accessors
+  // (e.g. metricAccessor → trendlineMetricAccessor). We update the
+  // trendline columns to reflect any field changes in the new query.
+  const newVis = getMetricVis(attrs);
+  const newMainLayer = newVis.layerId ? newDsState.layers[newVis.layerId] : undefined;
+
+  const accessorPairs = [
+    { from: newVis.metricAccessor, to: prevVis.trendlineMetricAccessor },
+    { from: newVis.secondaryMetricAccessor, to: prevVis.trendlineSecondaryMetricAccessor },
+    { from: newVis.breakdownByAccessor, to: prevVis.trendlineBreakdownByAccessor },
+  ];
+
+  let updatedColumns = prevTrendlineLayer.columns;
+  if (newMainLayer) {
+    for (const { from, to } of accessorPairs) {
+      if (!from || !to) continue;
+      const sourceCol = newMainLayer.columns.find((c) => c.columnId === from);
+      if (!sourceCol) continue;
+      const newCol: TextBasedLayerColumn = { ...sourceCol, columnId: to };
+      const exists = updatedColumns.some((c) => c.columnId === to);
+      updatedColumns = exists
+        ? updatedColumns.map((c) => (c.columnId === to ? newCol : c))
+        : [...updatedColumns, newCol];
+    }
+  }
+
+  attrs.state.datasourceStates.textBased = {
+    ...newDsState,
+    layers: {
+      ...newDsState.layers,
+      [trendlineLayerId]: {
+        ...prevTrendlineLayer,
+        query: trendlineQuery,
+        columns: updatedColumns,
+      },
+    },
+  };
 };
