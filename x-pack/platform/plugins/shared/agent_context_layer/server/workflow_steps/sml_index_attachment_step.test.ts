@@ -774,4 +774,119 @@ describe('createContextEngineAddEntryStepDefinition', () => {
       expect(parsed.success).toBe(true);
     });
   });
+
+  describe('input-schema permissions field', () => {
+    it('accepts a valid permissions object with elasticsearch.indices and kibana.privileges', () => {
+      const parsed = SmlIndexAttachmentInputSchema.safeParse({
+        originId: 'doc-1',
+        attachmentType: 'corpus_entry',
+        action: 'upsert',
+        chunks: [{ type: 'corpus_entry', title: 't', content: 'c' }],
+        permissions: {
+          elasticsearch: { indices: [{ name: 'my-index' }, { name: 'my-data-stream' }] },
+          kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+        },
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    it('accepts a permissions object with only elasticsearch.indices', () => {
+      const parsed = SmlIndexAttachmentInputSchema.safeParse({
+        originId: 'doc-1',
+        attachmentType: 'corpus_entry',
+        action: 'upsert',
+        chunks: [{ type: 'corpus_entry', title: 't', content: 'c' }],
+        permissions: {
+          elasticsearch: { indices: [{ name: 'my-index' }] },
+        },
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    it('accepts an empty permissions object', () => {
+      const parsed = SmlIndexAttachmentInputSchema.safeParse({
+        originId: 'doc-1',
+        attachmentType: 'corpus_entry',
+        action: 'upsert',
+        chunks: [{ type: 'corpus_entry', title: 't', content: 'c' }],
+        permissions: {},
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    it('accepts omitting permissions entirely (backward compatible)', () => {
+      const parsed = SmlIndexAttachmentInputSchema.safeParse({
+        originId: 'doc-1',
+        attachmentType: 'corpus_entry',
+        action: 'upsert',
+        chunks: [{ type: 'corpus_entry', title: 't', content: 'c' }],
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    it('rejects elasticsearch.indices entries that are bare strings instead of {name} objects', () => {
+      const parsed = SmlIndexAttachmentInputSchema.safeParse({
+        originId: 'doc-1',
+        attachmentType: 'corpus_entry',
+        action: 'upsert',
+        chunks: [{ type: 'corpus_entry', title: 't', content: 'c' }],
+        permissions: {
+          elasticsearch: { indices: ['my-index'] },
+        },
+      });
+
+      expect(parsed.success).toBe(false);
+    });
+
+    it('rejects unknown keys under permissions (schema is strict)', () => {
+      const parsed = SmlIndexAttachmentInputSchema.safeParse({
+        originId: 'doc-1',
+        attachmentType: 'corpus_entry',
+        action: 'upsert',
+        chunks: [{ type: 'corpus_entry', title: 't', content: 'c' }],
+        permissions: {
+          elasticsearch: { indices: [{ name: 'my-index' }] },
+          documents: ['doc-1'],
+        },
+      });
+
+      expect(parsed.success).toBe(false);
+      const issues = parsed.success ? [] : parsed.error.issues;
+      expect(JSON.stringify(issues)).toContain('documents');
+    });
+
+    it('rejects unknown keys under permissions.elasticsearch (schema is strict)', () => {
+      const parsed = SmlIndexAttachmentInputSchema.safeParse({
+        originId: 'doc-1',
+        attachmentType: 'corpus_entry',
+        action: 'upsert',
+        chunks: [{ type: 'corpus_entry', title: 't', content: 'c' }],
+        permissions: {
+          elasticsearch: { indices: [{ name: 'my-index' }], documents: ['doc-1'] },
+        },
+      });
+
+      expect(parsed.success).toBe(false);
+    });
+
+    it('ignores permissions on the delete action (delete branch has no permissions field)', () => {
+      const parsed = SmlIndexAttachmentInputSchema.safeParse({
+        originId: 'doc-1',
+        attachmentType: 'corpus_entry',
+        action: 'delete',
+        permissions: {
+          elasticsearch: { indices: [{ name: 'my-index' }] },
+        },
+      });
+
+      expect(parsed.success).toBe(true);
+      if (parsed.success) {
+        expect(parsed.data).not.toHaveProperty('permissions');
+      }
+    });
+  });
 });

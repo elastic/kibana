@@ -106,6 +106,45 @@ const AttachmentTypeSchema = z
     "Context Engine entry type id (chunk namespace). When the value matches a registered SmlTypeDefinition the chunk inherits that type's permissions; when it does not, the indexer stamps empty permissions and the chunk is readable to anyone in the caller's space."
   );
 
+/**
+ * Optional permissions to stamp on the written chunks, for `attachmentType`s
+ * whose registered `SmlTypeDefinition` has no `getPermissions` hook (e.g. the
+ * built-in `corpus_entry` type). Mirrors the shape of the server-side
+ * `SmlPermissions` type — `elasticsearch.indices` / `kibana.privileges` are
+ * arrays of `{ name }` objects (not bare strings) so a later revision can add
+ * sibling keys (e.g. document- or field-level grants) without a breaking
+ * shape change.
+ *
+ * Ignored (and rejected — see the indexer's `resolvePermissionsForOrigin`)
+ * when the registered type already derives permissions via `getPermissions`:
+ * that hook is always authoritative and cannot be overridden by a workflow
+ * author. Omit this field entirely to preserve prior behavior (hook wins if
+ * present, otherwise empty/public permissions).
+ */
+export const SmlPermissionsInputSchema = z
+  .object({
+    elasticsearch: z
+      .object({
+        indices: z
+          .array(z.object({ name: z.string().min(1).max(MAX_SML_IDENTIFIER_LENGTH) }).strict())
+          .optional(),
+      })
+      .strict()
+      .optional(),
+    kibana: z
+      .object({
+        privileges: z
+          .array(z.object({ name: z.string().min(1).max(MAX_SML_IDENTIFIER_LENGTH) }).strict())
+          .optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict()
+  .describe(
+    'Permissions to stamp on the written chunks when the attachmentType has no getPermissions hook. Rejected if the type derives permissions via getPermissions.'
+  );
+
 export const SmlIndexAttachmentInputSchema = z.discriminatedUnion('action', [
   z.object({
     originId: z
@@ -116,6 +155,7 @@ export const SmlIndexAttachmentInputSchema = z.discriminatedUnion('action', [
     attachmentType: AttachmentTypeSchema,
     action: z.literal('upsert'),
     chunks: z.array(ChunkSchema).min(1).max(100),
+    permissions: SmlPermissionsInputSchema.optional(),
   }),
   z.object({
     originId: z.string().min(1).max(MAX_SML_IDENTIFIER_LENGTH),
