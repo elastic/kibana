@@ -29,12 +29,6 @@ export interface ResolveLocaleArgs {
   configuredLocales: readonly string[];
   /** Map of locale id → translation hash for locales we can serve. */
   translationHashes: Record<string, string>;
-  /**
-   * When true, Accept-Language header is consulted as a fallback. Currently
-   * gated to serverless deployments — non-serverless deployments stay
-   * deterministic for existing users.
-   */
-  isServerless: boolean;
   /** Server-wide base path for the cookie's Path attribute. */
   serverBasePath: string;
   /**
@@ -58,7 +52,7 @@ export interface ResolveLocaleResult {
  * Resolves the effective locale for a render using the following priority chain:
  *   1. User profile setting (when value is in `translationHashes`)
  *   2. KBN_LOCALE cookie (only when `allowLocaleCookie` is `true` and value is in `translationHashes`)
- *   3. Accept-Language header (serverless only; strict match against `configuredLocales`)
+ *   3. Accept-Language header (strict match against `configuredLocales`)
  *   4. `configLocale`
  */
 export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
@@ -68,7 +62,6 @@ export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
     configLocale,
     configuredLocales,
     translationHashes,
-    isServerless,
     serverBasePath,
     allowLocaleCookie,
   } = args;
@@ -84,16 +77,14 @@ export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
     }
   }
 
-  if (isServerless) {
-    const headerLocale = pickFromAcceptLanguage(
-      getHeader(request, 'accept-language'),
-      configuredLocales
-    );
-    // Match the profile/cookie paths above: only return a header-derived
-    // locale if we can actually serve translations for it.
-    if (headerLocale && translationHashes[headerLocale]) {
-      return finalize(headerLocale, request, serverBasePath);
-    }
+  const headerLocale = pickFromAcceptLanguage(
+    getHeader(request, 'accept-language'),
+    configuredLocales
+  );
+  // Match the profile/cookie paths above: only return a header-derived
+  // locale if we can actually serve translations for it.
+  if (headerLocale && translationHashes[headerLocale]) {
+    return finalize(headerLocale, request, serverBasePath);
   }
 
   return finalize(configLocale, request, serverBasePath);
