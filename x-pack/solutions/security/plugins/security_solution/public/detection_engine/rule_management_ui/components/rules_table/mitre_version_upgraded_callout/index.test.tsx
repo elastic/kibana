@@ -10,6 +10,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { TestProviders } from '../../../../../common/mock';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../common/constants';
+import { MITRE_ATTACK_VERSION } from '../../../../../../common/detection_engine/mitre/mitre_version';
 import { MitreVersionUpgradedCallout } from '.';
 
 const DISMISSAL_STORAGE_KEY = NEW_FEATURES_TOUR_STORAGE_KEYS.MITRE_VERSION_UPGRADED_CALLOUT;
@@ -31,13 +32,24 @@ describe('MitreVersionUpgradedCallout', () => {
 
     expect(await screen.findByTestId('mitreVersionUpgradedCallout')).toBeInTheDocument();
     expect(screen.getByTestId('mitreVersionUpgradedCalloutLearnMoreLink')).toBeInTheDocument();
+    expect(screen.getByTestId('mitreVersionUpgradedCalloutCoverageLink')).toBeInTheDocument();
+  });
+
+  it('renders the inline coverage link with the expected label', async () => {
+    renderCallout();
+
+    const link = await screen.findByTestId('mitreVersionUpgradedCalloutCoverageLink');
+    expect(link).toHaveTextContent('MITRE ATT&CK® coverage page');
+    // The actual href is built via `useGetSecuritySolutionUrl(SecurityPageName.coverageOverview)`,
+    // which depends on deep-link plumbing not wired up in TestProviders. The URL itself is
+    // covered by the standard deep-link infrastructure shared with RuleGapsCallout.
   });
 
   it('mentions the currently bundled MITRE ATT&CK version in the title', async () => {
     renderCallout();
 
     const callout = await screen.findByTestId('mitreVersionUpgradedCallout');
-    expect(callout.textContent).toContain('MITRE ATT&CK® updated to v19.1');
+    expect(callout.textContent).toContain(`MITRE ATT&CK® updated to ${MITRE_ATTACK_VERSION}`);
   });
 
   it('does not render when the dismissal flag is already set', () => {

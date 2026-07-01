@@ -185,15 +185,12 @@ export const COVERAGE_OVERVIEW_FETCH_ERROR_TITLE = i18n.translate(
   }
 );
 
-export const INVALID_MITRE_RULES_CALLOUT_TITLE = (version: string) =>
-  i18n.translate(
-    'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.title',
-    {
-      values: { version },
-      defaultMessage:
-        'Some rules have outdated MITRE ATT&CK\u00AE mappings (currently supported: {version})',
-    }
-  );
+export const INVALID_MITRE_RULES_CALLOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.title',
+  {
+    defaultMessage: 'Some rules have outdated MITRE ATT&CK\u00AE mappings',
+  }
+);
 
 export const INVALID_MITRE_RULES_CALLOUT_DESCRIPTION_LEARN_MORE = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.descriptionLearnMore',

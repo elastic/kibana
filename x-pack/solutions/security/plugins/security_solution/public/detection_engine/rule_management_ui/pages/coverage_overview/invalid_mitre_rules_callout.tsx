@@ -122,7 +122,7 @@ const CoverageOverviewInvalidMitreRulesCalloutComponent = ({
       <EuiCallOut
         announceOnMount={false}
         data-test-subj="coverageOverviewInvalidMitreRulesCallout"
-        title={i18n.INVALID_MITRE_RULES_CALLOUT_TITLE(MITRE_ATTACK_VERSION)}
+        title={i18n.INVALID_MITRE_RULES_CALLOUT_TITLE}
         color="warning"
         iconType="warning"
       >
