@@ -238,7 +238,7 @@ export function registerPutDataStreamSettings({
 }: RouteDependencies) {
   const bodySchema = schema.object({
     dataStreams: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
-    settings: schema.recordOf(schema.string(), schema.any()),
+    settings: schema.recordOf(schema.string({ maxLength: 1000 }), schema.any()),
   });
 
   router.put(

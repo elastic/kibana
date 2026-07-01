@@ -46,8 +46,6 @@ export const buildFailedDataLifecycleApplyPayload = ({
     inheritLifecycle: false,
     failureStoreEnabled,
     ...(failureStoreEnabled && retentionDisabled === true ? { retentionDisabled: true } : {}),
-    ...(failureStoreEnabled && trimmedRetention !== undefined
-      ? { retention: trimmedRetention }
-      : {}),
+    ...(failureStoreEnabled && trimmedRetention ? { retention: trimmedRetention } : {}),
   };
 };
