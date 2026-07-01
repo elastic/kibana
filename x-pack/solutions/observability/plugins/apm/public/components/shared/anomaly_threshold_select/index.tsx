@@ -11,10 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
-import type { AnomalyThresholdDisabledReason } from '../../../../hooks/use_anomaly_threshold';
-import { useAnomalyThreshold } from '../../../../hooks/use_anomaly_threshold';
-import * as urlHelpers from '../../links/url_helpers';
+import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
+import type { AnomalyThresholdDisabledReason } from '../../../hooks/use_anomaly_threshold';
+import { useAnomalyThreshold } from '../../../hooks/use_anomaly_threshold';
+import * as urlHelpers from '../links/url_helpers';
 
 const options = [
   {

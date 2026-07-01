@@ -14,7 +14,7 @@ import { TimeComparison } from '../time_comparison';
 import { TransactionTypeSelect } from '../transaction_type_select';
 import { UnifiedSearchBar } from '../unified_search_bar';
 import { useSecondaryFiltersWidthStyle } from './use_secondary_filters_width_style';
-import { AnomalyThresholdSelect } from '../charts/latency_chart/anomaly_threshold_select';
+import { AnomalyThresholdSelect } from '../anomaly_threshold_select';
 
 interface Props {
   hidden?: boolean;

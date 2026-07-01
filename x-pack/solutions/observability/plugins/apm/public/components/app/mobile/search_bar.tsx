@@ -14,7 +14,7 @@ import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { TimeComparison } from '../../shared/time_comparison';
 import { MobileFilters } from './service_overview/filters';
 import { UnifiedSearchBar } from '../../shared/unified_search_bar';
-import { AnomalyThresholdSelect } from '../../shared/charts/latency_chart/anomaly_threshold_select';
+import { AnomalyThresholdSelect } from '../../shared/anomaly_threshold_select';
 
 interface Props {
   hidden?: boolean;
