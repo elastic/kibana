@@ -428,8 +428,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
 
     let createdCloudConnectorId: string | undefined;
     let cloudConnectorWasCreated = false;
-    let packagePolicyUpdated = false;
-    let agentPolicyUpdated = false;
+    let packagePolicyUpdateAttempted = false;
+    let agentPolicyUpdateAttempted = false;
 
     try {
       // Rebuild the agent policy's agentless config full-replace: config-derived fields are
@@ -504,7 +504,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       // update to bump the agent policy revision or fire its own deploy — the agent-policy update
       // below owns the single revision bump, and the explicit `deployPolicy` owns the reconcile.
       this.logger.debug(`Updating agentless package policy ${policyId}`);
-      packagePolicyUpdated = true; // needed for rollback
+      packagePolicyUpdateAttempted = true; //Flagging the attempt guarantees the rollback restores it
       const updatedPackagePolicy = await this.packagePolicyService.update(
         this.soClient,
         this.esClient,
@@ -522,7 +522,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       // `deployPolicy({ throwOnAgentlessError: true })` below is the authoritative, error-surfacing
       // reconcile (the event-handler deploy can't surface a failure since it doesn't throw).
       this.logger.debug(`Updating agentless agent policy ${policyId}`);
-      agentPolicyUpdated = true; // needed for rollback
+      agentPolicyUpdateAttempted = true; // set before await — same rollback-safety rationale as above
       await agentPolicyService.update(
         this.soClient,
         this.esClient,
@@ -561,8 +561,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         existingAgentPolicy,
         createdCloudConnectorId,
         cloudConnectorWasCreated,
-        packagePolicyUpdated,
-        agentPolicyUpdated,
+        packagePolicyUpdateAttempted,
+        agentPolicyUpdateAttempted,
         user,
         originalError: err,
       });
@@ -758,8 +758,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     existingAgentPolicy,
     createdCloudConnectorId,
     cloudConnectorWasCreated,
-    packagePolicyUpdated,
-    agentPolicyUpdated,
+    packagePolicyUpdateAttempted,
+    agentPolicyUpdateAttempted,
     user,
     originalError,
   }: {
@@ -768,8 +768,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     existingAgentPolicy: AgentPolicy;
     createdCloudConnectorId?: string;
     cloudConnectorWasCreated: boolean;
-    packagePolicyUpdated: boolean;
-    agentPolicyUpdated: boolean;
+    packagePolicyUpdateAttempted: boolean;
+    agentPolicyUpdateAttempted: boolean;
     user?: AuthenticatedUser;
     originalError: Error;
   }): Promise<void> {
@@ -784,7 +784,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     // default `bumpRevision: true`, which bumps the revision and fires the re-sync back to the prior
     // config via the `'updated'` event handler. That handler does not set `throwOnAgentlessError`,
     // so the re-sync is best-effort.
-    if (packagePolicyUpdated) {
+    if (packagePolicyUpdateAttempted) {
       attempted.push('package policy');
       this.logger.debug(`Rolling back: restoring package policy ${policyId}`);
       await this.packagePolicyService
@@ -804,7 +804,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         });
     }
 
-    if (agentPolicyUpdated) {
+    if (agentPolicyUpdateAttempted) {
       attempted.push('agent policy');
       this.logger.debug(`Rolling back: restoring agent policy ${policyId}`);
       await agentPolicyService
