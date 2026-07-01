@@ -69,32 +69,48 @@ if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]] && [[ "${EVALUATION_CONNECTOR_ID}" ==
   NEED_LITELLM_CONNECTORS="true"
 fi
 
+# Is LiteLLM *optional* for this run? When the request mixes EIS models with
+# LiteLLM/OSS model groups (the security matrix "OSS lane": EIS frontier models +
+# llm-gateway/* OSS models like DeepSeek/Kimi), the OSS connectors are additive.
+# If the LiteLLM proxy is unavailable (team budget exhausted, model group renamed),
+# we degrade to an EIS-only run instead of failing the whole weekly suite — the
+# EIS connectors still produce a complete-minus-OSS matrix column set. A run whose
+# judge or fanout project REQUIRES LiteLLM stays hard-fail (correctness > coverage).
+LITELLM_OPTIONAL="false"
+if [[ -n "${EVAL_MODEL_GROUPS:-}" ]] && [[ "${EVAL_MODEL_GROUPS}" == *"eis/"* ]]; then
+  if [[ "${EVALUATION_CONNECTOR_ID:-}" != litellm-* ]] && [[ "${EVAL_PROJECT:-}" != litellm-* ]]; then
+    LITELLM_OPTIONAL="true"
+  fi
+fi
+
 if [[ "$NEED_LITELLM_CONNECTORS" == "true" ]]; then
   echo "--- Generating LiteLLM connectors"
 
+  _litellm_args=(--base-url "$LITELLM_BASE_URL" --api-key "$LITELLM_VIRTUAL_KEY" --model-prefix "llm-gateway/")
   if [[ -n "${LITELLM_TEAM_ID:-}" ]]; then
-    KIBANA_TESTING_AI_CONNECTORS="$(
-      node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_litellm_connectors.js \
-        --base-url "$LITELLM_BASE_URL" \
-        --team-id "$LITELLM_TEAM_ID" \
-        --api-key "$LITELLM_VIRTUAL_KEY" \
-        --model-prefix "llm-gateway/"
-    )"
+    _litellm_args+=(--team-id "$LITELLM_TEAM_ID")
   else
-    KIBANA_TESTING_AI_CONNECTORS="$(
-      node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_litellm_connectors.js \
-        --base-url "$LITELLM_BASE_URL" \
-        --team-name "$LITELLM_TEAM_NAME" \
-        --api-key "$LITELLM_VIRTUAL_KEY" \
-        --model-prefix "llm-gateway/"
-    )"
+    _litellm_args+=(--team-name "$LITELLM_TEAM_NAME")
+  fi
+
+  set +e
+  KIBANA_TESTING_AI_CONNECTORS="$(
+    node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_litellm_connectors.js \
+      "${_litellm_args[@]}"
+  )"
+  _litellm_gen_rc=$?
+  set -e
+
+  if [[ $_litellm_gen_rc -ne 0 ]] || [[ -z "${KIBANA_TESTING_AI_CONNECTORS:-}" ]]; then
+    if [[ "$LITELLM_OPTIONAL" == "true" ]]; then
+      echo "WARN: LiteLLM connector generation failed (rc=${_litellm_gen_rc}); OSS models are additive to this EIS run, so continuing with EIS-only connectors (OSS models skipped this run)."
+      KIBANA_TESTING_AI_CONNECTORS="$(printf '{}' | base64)"
+    else
+      echo "ERROR: Failed to generate KIBANA_TESTING_AI_CONNECTORS (rc=${_litellm_gen_rc}, empty=$([[ -z "${KIBANA_TESTING_AI_CONNECTORS:-}" ]] && echo yes || echo no))."
+      exit 1
+    fi
   fi
   export KIBANA_TESTING_AI_CONNECTORS
-
-  if [[ -z "${KIBANA_TESTING_AI_CONNECTORS:-}" ]]; then
-    echo "ERROR: Failed to generate KIBANA_TESTING_AI_CONNECTORS (empty output)."
-    exit 1
-  fi
 
   if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]] && [[ "${EVALUATION_CONNECTOR_ID}" == litellm-* ]]; then
     if ! node -e "const b=process.env.KIBANA_TESTING_AI_CONNECTORS||'';const s=Buffer.from(b,'base64').toString('utf8');const o=JSON.parse(s);const id=process.env.EVALUATION_CONNECTOR_ID;process.exit(Object.prototype.hasOwnProperty.call(o,id)?0:1);" ; then
