@@ -41,10 +41,8 @@ import {
 } from '../../../utils/utils';
 import {
   RULE_MANAGEMENT_IMPORT_BATCH_SIZE,
-  RULE_MANAGEMENT_IMPORT_CONCURRENCY,
   RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS,
 } from '../../constants';
-import { routeLimitedConcurrencyTag } from '../../../../../../utils/route_limited_concurrency_tag';
 import { createPrebuiltRuleObjectsClient } from '../../../../prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 
 export const importRulesRoute = (
@@ -66,7 +64,6 @@ export const importRulesRoute = (
           maxBytes: config.maxRuleImportPayloadBytes,
           output: 'stream',
         },
-        tags: [routeLimitedConcurrencyTag(RULE_MANAGEMENT_IMPORT_CONCURRENCY)],
         timeout: {
           idleSocket: RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS,
         },

@@ -7,6 +7,7 @@
 
 import pMap from 'p-map';
 import { i18n } from '@kbn/i18n';
+import { escapeQuotes } from '@kbn/es-query';
 import { v4 as uuidv4 } from 'uuid';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
@@ -135,10 +136,12 @@ export const bulkImportRules = async ({
     return { responses };
   }
 
-  // Bulk lookup for `rule_id` conflicts: single parenthesized OR-list. Matches
-  // the raw-interpolation convention in `getRuleByRuleId`.
+  // Bulk lookup for `rule_id` conflicts: single parenthesized OR-list. `rule_id`
+  // is free-form, so escape it to keep one bad value from breaking the whole query.
   const ruleIds = prepared.map((p) => p.rule.rule_id);
-  const filter = `alert.attributes.params.ruleId: (${ruleIds.map((id) => `"${id}"`).join(' OR ')})`;
+  const filter = `alert.attributes.params.ruleId: (${ruleIds
+    .map((id) => `"${escapeQuotes(id)}"`)
+    .join(' OR ')})`;
   const found = await findRules({
     rulesClient,
     filter,
