@@ -28,6 +28,7 @@ import {
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  MAX_DOCS_PER_PAGE,
   OWNER_FIELD,
 } from '../../../common/constants';
 
@@ -206,7 +207,7 @@ export const push = async (
         id: caseId,
         options: {
           page: 1,
-          perPage: theCase?.totalComment ?? 0,
+          perPage: MAX_DOCS_PER_PAGE,
         },
       }),
     ]);

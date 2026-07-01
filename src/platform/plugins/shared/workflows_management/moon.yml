@@ -19,6 +19,9 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/eval-kql'
+  - '@kbn/esql-language'
+  - '@kbn/esql-types'
+  - '@kbn/esql-utils'
   - '@kbn/kibana-react-plugin'
   - '@kbn/i18n'
   - '@kbn/i18n-react'

@@ -8,7 +8,7 @@
 jest.mock('../epm/packages');
 jest.mock('../app_context');
 
-import { DATASET_VAR_NAME } from '../../../common/constants';
+import { DATA_STREAM_TYPE_VAR_NAME, DATASET_VAR_NAME } from '../../../common/constants';
 import type { PackagePolicy } from '../../types';
 import { PackagePolicyValidationError } from '../../errors';
 
@@ -389,6 +389,30 @@ packageInfoCache.set('elastic_connectors-1.0.0', {
   },
 });
 
+packageInfoCache.set('sql_input-1.0.0', {
+  format_version: '3.1.5',
+  name: 'sql_input',
+  title: 'SQL Input',
+  version: '1.0.0',
+  type: 'input',
+  release: 'ga',
+  policy_templates: [
+    {
+      name: 'mysql',
+      type: 'metrics',
+      title: 'MySQL',
+      description: 'Collect metrics from MySQL.',
+      input: 'sql/metrics',
+      template_path: 'input.yml.hbs',
+      vars: [],
+    },
+  ],
+  data_streams: [],
+  latestVersion: '1.0.0',
+  status: 'not_installed',
+  assets: { kibana: {}, elasticsearch: {} },
+});
+
 packageInfoCache.set('non_dynamic_pkg-1.0.0', {
   format_version: '2.7.0',
   name: 'non_dynamic_pkg',
@@ -751,7 +775,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       'package-policy-uuid-test-123': {
         indices: [
           {
-            names: ['profiling-*'],
+            names: ['profiling-*', 'profiles-*'],
             privileges: UNIVERSAL_PROFILING_PERMISSIONS,
           },
         ],
@@ -793,7 +817,56 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       'package-policy-uuid-test-123': {
         indices: [
           {
-            names: ['profiling-*'],
+            names: ['profiling-*', 'profiles-*'],
+            privileges: UNIVERSAL_PROFILING_PERMISSIONS,
+          },
+        ],
+      },
+    });
+  });
+
+  it('Returns Universal Profiling permissions for a non-dynamic OTel profiles input', async () => {
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-otel-profiles',
+        name: 'profiling-otel-policy',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [
+              {
+                id: 'otel-profiles',
+                enabled: true,
+                data_stream: { type: 'profiles', dataset: 'profilingreceiver' },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    // profiles is owned end-to-end by Universal Profiling, not managed as a profiles-<dataset> data stream.
+    expect(permissions).toMatchObject({
+      'package-policy-otel-profiles': {
+        indices: [
+          {
+            names: ['profiling-*', 'profiles-*'],
             privileges: UNIVERSAL_PROFILING_PERMISSIONS,
           },
         ],
@@ -2280,6 +2353,58 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         'logs-combined_inputs_pkg.app-default',
       ]);
     });
+
+    it('uses data_stream.type var value for permissions when it overrides stream.data_stream.type', () => {
+      // Simulates a sql_input policy where policyTemplate.type is 'metrics' but the user
+      // overrode data_stream.type to 'logs' via the simplified API. The saved stream retains
+      // data_stream.type = 'metrics' on the stream object; the override lives in the var.
+      const packagePolicies: PackagePolicy[] = [
+        {
+          id: 'sql-logs-override',
+          name: 'sql-logs-override-policy',
+          namespace: 'default',
+          enabled: true,
+          package: { name: 'sql_input', version: '1.0.0', title: 'SQL Input' },
+          inputs: [
+            {
+              type: 'sql/metrics',
+              enabled: true,
+              streams: [
+                {
+                  id: 'stream-1',
+                  enabled: true,
+                  data_stream: {
+                    type: 'metrics',
+                    dataset: 'sql_input.mysql',
+                    elasticsearch: { dynamic_dataset: true, dynamic_namespace: true },
+                  },
+                  vars: {
+                    [DATA_STREAM_TYPE_VAR_NAME]: { value: 'logs' },
+                  },
+                } as any,
+              ],
+            },
+          ],
+          created_at: '',
+          updated_at: '',
+          created_by: '',
+          updated_by: '',
+          revision: 1,
+          policy_id: '',
+          policy_ids: [''],
+        },
+      ];
+
+      const permissions = storedPackagePoliciesToAgentPermissions(
+        packageInfoCache,
+        'default',
+        packagePolicies
+      );
+
+      expect(permissions?.['sql-logs-override']?.indices).toHaveLength(1);
+      // Must use 'logs-*-*', not 'metrics-*-*'
+      expect(permissions?.['sql-logs-override']?.indices?.[0].names).toEqual(['logs-*-*']);
+    });
   });
 });
 
@@ -2394,6 +2519,34 @@ describe('getDataStreamPrivileges()', () => {
     expect(privileges).toMatchObject({
       names: ['logs-*-*'],
       privileges: ['auto_configure', 'create_doc'],
+    });
+  });
+
+  it('targets Universal Profiling index patterns for the profiles signal regardless of dataset/namespace', () => {
+    const dataStream = { type: 'profiles', dataset: 'profilingreceiver' } as DataStreamMeta;
+    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
+
+    // profiles is owned end-to-end by Universal Profiling; permissions cover both legacy
+    // profiling-* custom indices and future profiles-* data streams.
+    expect(privileges).toEqual({
+      names: ['profiling-*', 'profiles-*'],
+      privileges: UNIVERSAL_PROFILING_PERMISSIONS,
+    });
+  });
+
+  it('uses custom privileges for the profiles signal when present', () => {
+    const dataStream = {
+      type: 'profiles',
+      dataset: 'profilingreceiver',
+      elasticsearch: {
+        privileges: { indices: ['create_doc'] },
+      },
+    } as DataStreamMeta;
+    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
+
+    expect(privileges).toEqual({
+      names: ['profiling-*', 'profiles-*'],
+      privileges: ['create_doc'],
     });
   });
 });

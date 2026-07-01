@@ -2693,6 +2693,109 @@ steps:
       );
     });
 
+    it('refreshes scheduled task credentials when editing an enabled scheduled workflow', async () => {
+      const request = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+      const taskScheduler = {
+        updateWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+        unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+      };
+      const scheduledDefinition = {
+        name: 'Test Workflow',
+        enabled: true,
+        triggers: [{ type: 'scheduled', with: { every: '30s' } }],
+        steps: [],
+      };
+      const existingDoc = {
+        _id: 'test-workflow-id',
+        _source: {
+          ...mockWorkflowDocument._source,
+          enabled: true,
+          valid: true,
+          triggerTypes: ['scheduled'],
+          definition: scheduledDefinition,
+          yaml: [
+            'name: Test Workflow',
+            'enabled: true',
+            'triggers:',
+            '  - type: scheduled',
+            '    with:',
+            '      every: 30s',
+            'steps: []',
+          ].join('\n'),
+        },
+      };
+      const updatedDoc = {
+        ...existingDoc,
+        _source: {
+          ...existingDoc._source,
+          tags: ['new'],
+          lastUpdatedBy: 'test-user',
+        },
+      };
+
+      service.setTaskScheduler(taskScheduler as any);
+      mockEsClient.search
+        .mockResolvedValueOnce({ hits: { hits: [existingDoc] } } as any)
+        .mockResolvedValueOnce({ hits: { hits: [updatedDoc] } } as any);
+
+      await service.updateWorkflow('test-workflow-id', { tags: ['new'] }, 'default', request);
+
+      expect(taskScheduler.updateWorkflowTasks).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-workflow-id',
+          definition: scheduledDefinition,
+        }),
+        'default',
+        request
+      );
+      expect(taskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
+    });
+
+    it('warns when an enabled scheduled workflow needs scheduler sync but the scheduler is unavailable', async () => {
+      const request = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+      const scheduledDefinition = {
+        name: 'Test Workflow',
+        enabled: true,
+        triggers: [{ type: 'scheduled', with: { every: '30s' } }],
+        steps: [],
+      };
+      const existingDoc = {
+        _id: 'test-workflow-id',
+        _source: {
+          ...mockWorkflowDocument._source,
+          enabled: true,
+          valid: true,
+          triggerTypes: ['scheduled'],
+          definition: scheduledDefinition,
+          yaml: [
+            'name: Test Workflow',
+            'enabled: true',
+            'triggers:',
+            '  - type: scheduled',
+            '    with:',
+            '      every: 30s',
+            'steps: []',
+          ].join('\n'),
+        },
+      };
+
+      mockEsClient.search.mockResolvedValueOnce({ hits: { hits: [existingDoc] } } as any);
+
+      await service.updateWorkflow('test-workflow-id', { tags: ['new'] }, 'default', request);
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Skipping scheduler sync for workflow test-workflow-id in space default: task scheduler is unavailable'
+      );
+    });
+
     it('should throw error when workflow not found', async () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
 

@@ -35,6 +35,7 @@ interface ScoreResolutionEntitiesParams {
   now: string;
   calculationRunId: string;
   watchlistConfigs: Map<string, WatchlistObject>;
+  targetEntityIds?: string[];
 }
 
 interface ResolutionPageResult {
@@ -57,6 +58,7 @@ export const calculateResolutionEntityScores = async function* ({
   now,
   calculationRunId,
   watchlistConfigs,
+  targetEntityIds,
 }: ScoreResolutionEntitiesParams): AsyncGenerator<EntityRiskScoreRecord[], number> {
   let afterKey: Record<string, string> | undefined;
   let previousUpperBound: string | undefined;
@@ -69,6 +71,7 @@ export const calculateResolutionEntityScores = async function* ({
       lookupIndex,
       pageSize,
       afterKey,
+      targetEntityIds,
     });
     if (!pageResult) {
       break;
@@ -146,11 +149,13 @@ const fetchNextResolutionPage = async ({
   lookupIndex,
   pageSize,
   afterKey,
+  targetEntityIds,
 }: {
   esClient: ElasticsearchClient;
   lookupIndex: string;
   pageSize: number;
   afterKey: Record<string, string> | undefined;
+  targetEntityIds?: string[];
 }): Promise<ResolutionPageResult | null> => {
   interface CompositeAgg {
     buckets: Array<{ key: Record<string, string> }>;
@@ -158,7 +163,7 @@ const fetchNextResolutionPage = async ({
   }
 
   const compositeResponse = await esClient.search(
-    getResolutionCompositeQuery(lookupIndex, pageSize, afterKey)
+    getResolutionCompositeQuery(lookupIndex, pageSize, afterKey, targetEntityIds)
   );
   const compositeAgg = (
     compositeResponse.aggregations as { by_resolution_target?: CompositeAgg } | undefined

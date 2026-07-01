@@ -43,6 +43,7 @@ import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index'
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
+import { resolveClosedIndexAdjustments } from '../../infra/elasticsearch/resolve_closed_indices';
 import {
   getAlertsIndexName,
   getSecuritySolutionDataViewName,
@@ -751,6 +752,7 @@ export class LogsExtractionClient {
         logsPageCursorStart,
         logsPageCursorEnd,
       });
+
       recoveryIdForBounded = undefined;
 
       this.logger.debug(
@@ -885,6 +887,15 @@ export class LogsExtractionClient {
       }
     });
 
+    // Pre-flight: find data streams with closed backing indices and build adjustments.
+    // Open backing indices must be added as positives BEFORE any negations.
+    const { openBackingIndices, negations: closedNegations } = await resolveClosedIndexAdjustments(
+      this.esClient,
+      localIndexPatterns,
+      this.logger
+    );
+    localIndexPatterns.push(...openBackingIndices);
+
     // Append after includes: ES negation only subtracts from earlier entries in the same expression.
     // e.g. `logs-*,-logs-proxy-*` excludes proxy logs, but `-logs-proxy-*,logs-*` does not.
     excludedIndexPatterns.forEach((pattern) => {
@@ -894,6 +905,9 @@ export class LogsExtractionClient {
         localIndexPatterns.push(`-${pattern}`);
       }
     });
+
+    // Closed-index negations go last — after all positive includes and user exclusions.
+    localIndexPatterns.push(...closedNegations);
 
     return { localIndexPatterns, remoteIndexPatterns };
   }
