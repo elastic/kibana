@@ -79,8 +79,14 @@ const renderTestComponent = (
 // Failing: See https://github.com/elastic/kibana/issues/275681
 describe.skip('DashboardMigrationResultPanel', () => {
   beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-01-01T01:00:00Z')); // exactly 2 years after last_updated_at
     jest.clearAllMocks();
     mockGetMissingResources.mockReturnValue([]);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
   it('renders panel with title, badge, and button', async () => {
     renderTestComponent();

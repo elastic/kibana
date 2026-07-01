@@ -38,14 +38,27 @@ const euidSeparatorSchema = z.object({
   sep: z.string(),
 });
 
+const MAX_FIELD_EVALUATION_STRING_LENGTH = 1000;
+
 // Field evaluation: pre-evaluate a field before euid generation (first match wins; fallback to source value or fallbackValue).
 const fieldEvaluationWhenClauseSourceMatchSchema = z.object({
   sourceMatchesAny: z.array(z.string()),
   then: z.string(),
 });
+const fieldEvaluationWhenClauseFieldMappingThenSchema = z.object({
+  field: z.string().max(MAX_FIELD_EVALUATION_STRING_LENGTH),
+  mapping: z.record(
+    z.string().max(MAX_FIELD_EVALUATION_STRING_LENGTH),
+    z.string().max(MAX_FIELD_EVALUATION_STRING_LENGTH)
+  ),
+});
+
 const fieldEvaluationWhenClauseConditionSchema = z.object({
   condition: streamlangConditionSchema,
-  then: z.string(),
+  then: z.union([
+    z.string().max(MAX_FIELD_EVALUATION_STRING_LENGTH),
+    fieldEvaluationWhenClauseFieldMappingThenSchema,
+  ]),
 });
 const fieldEvaluationWhenClauseSchema = z.union([
   fieldEvaluationWhenClauseSourceMatchSchema,
@@ -171,6 +184,9 @@ export type EuidAttribute = EuidField | EuidSeparator;
 export type EuidRankingBranch = z.infer<typeof euidRankingBranchSchema>;
 export type EuidRanking = z.infer<typeof euidRankingSchema>;
 export type FieldEvaluationWhenClause = z.infer<typeof fieldEvaluationWhenClauseSchema>;
+export type FieldEvaluationWhenClauseFieldMappingThen = z.infer<
+  typeof fieldEvaluationWhenClauseFieldMappingThenSchema
+>;
 export type FieldEvaluationSource = z.infer<typeof fieldEvaluationSourceSchema>;
 export type FieldEvaluation = z.infer<typeof fieldEvaluationSchema>;
 

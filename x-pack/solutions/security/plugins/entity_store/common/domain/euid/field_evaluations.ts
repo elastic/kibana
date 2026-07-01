@@ -12,6 +12,7 @@ import type {
   FieldEvaluation,
   FieldEvaluationSource,
   FieldEvaluationWhenClause,
+  FieldEvaluationWhenClauseFieldMappingThen,
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { evaluateStreamlangCondition } from './commons';
@@ -30,8 +31,26 @@ function isSourceMatchClause(
 
 function isConditionClause(
   clause: FieldEvaluationWhenClause
-): clause is { condition: Condition; then: string } {
+): clause is { condition: Condition; then: string | FieldEvaluationWhenClauseFieldMappingThen } {
   return 'condition' in clause;
+}
+
+function isFieldMappingThen(
+  then: string | FieldEvaluationWhenClauseFieldMappingThen
+): then is FieldEvaluationWhenClauseFieldMappingThen {
+  return typeof then === 'object';
+}
+
+function resolveConditionThen(
+  then: string | FieldEvaluationWhenClauseFieldMappingThen,
+  doc: any
+): { value: string; matchedKey?: string } | undefined {
+  if (!isFieldMappingThen(then)) return { value: then };
+  const raw = getFieldValue(doc, then.field);
+  if (!raw) return undefined;
+  const mapped = then.mapping[raw];
+  if (mapped === undefined) return undefined;
+  return { value: mapped, matchedKey: raw };
 }
 
 export function getFieldValue(doc: any, field: string): string | undefined {
@@ -89,7 +108,14 @@ function matchFirstWhenClause(
         return { then: clause.then, matchedSourceValues: clause.sourceMatchesAny };
       }
     } else if (isConditionClause(clause) && evaluateStreamlangCondition(doc, clause.condition)) {
-      return { then: clause.then, winningCondition: clause.condition };
+      const resolved = resolveConditionThen(clause.then, doc);
+      if (resolved !== undefined) {
+        const fieldMappingMatch =
+          isFieldMappingThen(clause.then) && resolved.matchedKey !== undefined
+            ? { field: clause.then.field, matchedKey: resolved.matchedKey }
+            : undefined;
+        return { then: resolved.value, winningCondition: clause.condition, fieldMappingMatch };
+      }
     }
   }
   return undefined;
@@ -110,10 +136,28 @@ function resolveFinalFieldValue(
 /** Builds `SourceMatchSpec` for filter construction without re-evaluating the document. */
 function buildEvaluationSourceMatchSpec(
   rawValueFromSources: string | undefined,
-  whenMatch: { winningCondition?: Condition; matchedSourceValues?: string[] } | undefined
+  whenMatch:
+    | {
+        winningCondition?: Condition;
+        matchedSourceValues?: string[];
+        fieldMappingMatch?: { field: string; matchedKey: string };
+      }
+    | undefined
 ): SourceMatchSpec {
   if (whenMatch?.winningCondition !== undefined) {
-    return { type: 'condition', condition: whenMatch.winningCondition };
+    const condition: Condition =
+      whenMatch.fieldMappingMatch !== undefined
+        ? {
+            and: [
+              whenMatch.winningCondition,
+              {
+                field: whenMatch.fieldMappingMatch.field,
+                eq: whenMatch.fieldMappingMatch.matchedKey,
+              },
+            ],
+          }
+        : whenMatch.winningCondition;
+    return { type: 'condition', condition };
   }
   if (rawValueFromSources === undefined) {
     return { type: 'unknown' };
