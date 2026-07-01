@@ -40,7 +40,7 @@ const createExecutionContext = (): ExecutionContext =>
   } as unknown as ExecutionContext);
 
 const getMockSearchService = (
-  columns: Array<{ name: string; type: string }>,
+  columns: Array<{ name: string; type: string; _meta?: Record<string, unknown> }>,
   values: unknown[][] = [['v1']]
 ): MockTypedSearchService => {
   const mockTyped = {
@@ -158,6 +158,33 @@ describe('getEsqlFn', () => {
 
     expect(result?.columns?.[0]?.meta?.sourceParams?.sourceField).toBe('a');
     expect(result?.columns?.[0]?.name).toBe('c');
+  });
+
+  it('passes ES column _meta through to meta.esMeta', async () => {
+    const columnMeta = { approximation: { type: 'count_distinct', column: '@timestamp' } };
+    const mockSearchService = getMockSearchService([
+      { name: 'count', type: 'long', _meta: columnMeta },
+    ]);
+
+    const result = await createEsqlFn(mockSearchService).fn(
+      null,
+      { query: 'FROM index | STATS COUNT(DISTINCT @timestamp)' },
+      createExecutionContext()
+    );
+
+    expect(result?.columns?.[0]?.meta?.esMeta).toEqual(columnMeta);
+  });
+
+  it('omits meta.esMeta when ES column has no _meta', async () => {
+    const mockSearchService = getMockSearchService([{ name: 'host', type: 'keyword' }]);
+
+    const result = await createEsqlFn(mockSearchService).fn(
+      null,
+      { query: 'FROM index' },
+      createExecutionContext()
+    );
+
+    expect(result?.columns?.[0]?.meta?.esMeta).toBeUndefined();
   });
 
   it('resolves meta.sourceParams.sourceField for STATS BY alias = column', async () => {
