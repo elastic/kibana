@@ -8,7 +8,11 @@
  */
 
 import { stableStringify } from '@kbn/std';
-import { WorkflowSchemaForAutocomplete } from '@kbn/workflows';
+import {
+  stripNestedStepContentForComparison,
+  visitNestedSteps,
+  WorkflowSchemaForAutocomplete,
+} from '@kbn/workflows';
 import { parseWorkflowYamlForAutocomplete } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import { countWorkflowYamlLineChanges } from './count_workflow_yaml_line_changes';
@@ -34,6 +38,7 @@ interface WorkflowDefinitionChange {
 
 type ParsedWorkflowYaml = z.output<typeof WorkflowSchemaForAutocomplete>;
 type ParsedWorkflowStep = ParsedWorkflowYaml['steps'][number];
+type ParsedWorkflowTrigger = ParsedWorkflowYaml['triggers'][number];
 
 const WORKFLOW_SETTING_FIELDS = [
   'name',
@@ -61,96 +66,23 @@ const parseWorkflowYamlForSemanticDiff = (yamlString: string): ParsedWorkflowYam
   return schemaResult.success ? schemaResult.data : undefined;
 };
 
-const isValidStepName = (name: unknown): name is string =>
-  typeof name === 'string' && name.trim().length > 0;
-
-const isWorkflowStepArray = (value: unknown): value is ParsedWorkflowStep[] => {
-  if (!Array.isArray(value)) {
-    return false;
-  }
-
-  return value.every((entry) => typeof entry === 'object' && entry !== null);
-};
-
-const getBranchSteps = (branch: unknown): ParsedWorkflowStep[] | undefined => {
-  if (typeof branch !== 'object' || branch === null) {
-    return undefined;
-  }
-
-  const { steps } = branch as { steps?: unknown };
-  return isWorkflowStepArray(steps) ? steps : undefined;
-};
-
-const countSiblingStepNames = (steps: ParsedWorkflowYaml['steps']): Map<string, number> => {
-  const nameCounts = new Map<string, number>();
-
-  if (!steps) {
-    return nameCounts;
-  }
-
-  for (const step of steps) {
-    if (isValidStepName(step.name)) {
-      nameCounts.set(step.name, (nameCounts.get(step.name) ?? 0) + 1);
-    }
-  }
-
-  return nameCounts;
-};
-
-const stripBranchSteps = (branch: unknown): unknown => {
-  if (typeof branch !== 'object' || branch === null) {
-    return branch;
-  }
-
-  const { steps: _steps, ...branchWithoutSteps } = branch as { steps?: unknown };
-  return branchWithoutSteps;
-};
-
-/** Strip nested step trees so container entries compare only their own config fields. */
-const stripNestedStepContent = (step: ParsedWorkflowStep): ParsedWorkflowStep => {
-  const stripped = { ...step } as Record<string, unknown>;
-
-  if ('steps' in step && isWorkflowStepArray(step.steps)) {
-    delete stripped.steps;
-  }
-
-  if ('branches' in step && Array.isArray(step.branches)) {
-    stripped.branches = step.branches.map(stripBranchSteps);
-  }
-
-  return stripped as ParsedWorkflowStep;
-};
-
-const flattenSteps = (steps: ParsedWorkflowYaml['steps'], parentPath = ''): FlattenedStep[] => {
+const flattenSteps = (steps: ParsedWorkflowYaml['steps']): FlattenedStep[] => {
   if (!steps) {
     return [];
   }
 
-  const siblingNameCounts = countSiblingStepNames(steps);
   const flattened: FlattenedStep[] = [];
-
-  for (let index = 0; index < steps.length; index += 1) {
-    const step = steps[index];
-    if (isValidStepName(step.name)) {
-      const hasDuplicateSiblingName = (siblingNameCounts.get(step.name) ?? 0) > 1;
-      const pathSegment = hasDuplicateSiblingName ? `${step.name}[${index}]` : step.name;
-      const path = parentPath ? `${parentPath}.${pathSegment}` : pathSegment;
-      flattened.push({ path, name: step.name, step });
-
-      if ('steps' in step && isWorkflowStepArray(step.steps)) {
-        flattened.push(...flattenSteps(step.steps, path));
-      }
-
-      if ('branches' in step && Array.isArray(step.branches)) {
-        step.branches.forEach((branch, branchIndex) => {
-          const branchSteps = getBranchSteps(branch);
-          if (branchSteps) {
-            flattened.push(...flattenSteps(branchSteps, `${path}.branch[${branchIndex}]`));
-          }
-        });
-      }
-    }
-  }
+  visitNestedSteps(
+    steps,
+    (entry) => {
+      flattened.push({
+        path: entry.path,
+        name: entry.name,
+        step: entry.step,
+      });
+    },
+    { requireValidName: true }
+  );
 
   return flattened;
 };
@@ -176,35 +108,98 @@ const compareWorkflowSettings = (
   return changes;
 };
 
+interface TriggerMultisetEntry {
+  trigger: ParsedWorkflowTrigger;
+  count: number;
+}
+
+const buildTriggerMultiset = (
+  triggers: ParsedWorkflowYaml['triggers']
+): Map<string, TriggerMultisetEntry> => {
+  const multiset = new Map<string, TriggerMultisetEntry>();
+
+  for (const trigger of triggers) {
+    const key = stableStringify(trigger);
+    const existing = multiset.get(key);
+
+    if (existing) {
+      existing.count += 1;
+    } else {
+      multiset.set(key, { trigger, count: 1 });
+    }
+  }
+
+  return multiset;
+};
+
+const expandUnmatchedTriggers = (
+  multiset: Map<string, TriggerMultisetEntry>,
+  otherMultiset: Map<string, TriggerMultisetEntry>
+): ParsedWorkflowTrigger[] => {
+  const unmatched: ParsedWorkflowTrigger[] = [];
+
+  for (const [key, entry] of multiset) {
+    const otherCount = otherMultiset.get(key)?.count ?? 0;
+    const excessCount = entry.count - Math.min(entry.count, otherCount);
+
+    for (let index = 0; index < excessCount; index += 1) {
+      unmatched.push(entry.trigger);
+    }
+  }
+
+  return unmatched;
+};
+
+const groupTriggersByType = (
+  triggers: ParsedWorkflowTrigger[]
+): Map<string, ParsedWorkflowTrigger[]> => {
+  const groups = new Map<string, ParsedWorkflowTrigger[]>();
+
+  for (const trigger of triggers) {
+    const existing = groups.get(trigger.type) ?? [];
+    existing.push(trigger);
+    groups.set(trigger.type, existing);
+  }
+
+  return groups;
+};
+
 const compareTriggers = (
   baseline: ParsedWorkflowYaml['triggers'],
   target: ParsedWorkflowYaml['triggers']
 ): WorkflowDefinitionChange[] => {
   const changes: WorkflowDefinitionChange[] = [];
-  const maxLength = Math.max(baseline.length, target.length);
+  const baselineTriggers = buildTriggerMultiset(baseline);
+  const targetTriggers = buildTriggerMultiset(target);
+  const baselineUnmatched = expandUnmatchedTriggers(baselineTriggers, targetTriggers);
+  const targetUnmatched = expandUnmatchedTriggers(targetTriggers, baselineTriggers);
+  const baselineByType = groupTriggersByType(baselineUnmatched);
+  const targetByType = groupTriggersByType(targetUnmatched);
+  const triggerTypes = new Set([...baselineByType.keys(), ...targetByType.keys()]);
 
-  for (let index = 0; index < maxLength; index += 1) {
-    const baselineTrigger = baseline[index];
-    const targetTrigger = target[index];
+  for (const triggerType of triggerTypes) {
+    const baselineOfType = baselineByType.get(triggerType) ?? [];
+    const targetOfType = targetByType.get(triggerType) ?? [];
+    const modifiedCount = Math.min(baselineOfType.length, targetOfType.length);
 
-    if (!baselineTrigger && targetTrigger) {
-      changes.push({
-        kind: 'trigger_added',
-        label: targetTrigger.type,
-      });
-    } else if (baselineTrigger && !targetTrigger) {
-      changes.push({
-        kind: 'trigger_removed',
-        label: baselineTrigger.type,
-      });
-    } else if (
-      baselineTrigger &&
-      targetTrigger &&
-      stableStringify(baselineTrigger) !== stableStringify(targetTrigger)
-    ) {
+    for (let index = 0; index < modifiedCount; index += 1) {
       changes.push({
         kind: 'trigger_modified',
-        label: targetTrigger.type,
+        label: triggerType,
+      });
+    }
+
+    for (let index = modifiedCount; index < baselineOfType.length; index += 1) {
+      changes.push({
+        kind: 'trigger_removed',
+        label: triggerType,
+      });
+    }
+
+    for (let index = modifiedCount; index < targetOfType.length; index += 1) {
+      changes.push({
+        kind: 'trigger_added',
+        label: triggerType,
       });
     }
   }
@@ -229,8 +224,8 @@ const compareSteps = (
         label: baselineEntry.name,
       });
     } else if (
-      stableStringify(stripNestedStepContent(baselineEntry.step)) !==
-      stableStringify(stripNestedStepContent(targetEntry.step))
+      stableStringify(stripNestedStepContentForComparison(baselineEntry.step)) !==
+      stableStringify(stripNestedStepContentForComparison(targetEntry.step))
     ) {
       changes.push({
         kind: 'step_modified',

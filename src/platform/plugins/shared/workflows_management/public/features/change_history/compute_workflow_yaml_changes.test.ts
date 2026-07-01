@@ -125,15 +125,129 @@ describe('computeWorkflowYamlChanges', () => {
 
     const result = computeWorkflowYamlChanges(triggersOnly('manual'), triggersOnly('scheduled'));
 
-    expect(result.count).toBeGreaterThan(0);
+    expect(result.count).toBe(2);
     expect(result.summaryGroups).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           title: 'Triggers:',
-          lines: expect.arrayContaining([expect.stringMatching(/updated/)]),
+          lines: expect.arrayContaining([
+            expect.stringMatching(/removed/),
+            expect.stringMatching(/added/),
+          ]),
         }),
       ])
     );
+  });
+
+  it('does not count reordered triggers as modifications', () => {
+    const twoTriggers = [
+      'name: workflow',
+      'triggers:',
+      '  - type: manual',
+      '  - type: scheduled',
+    ].join('\n');
+
+    const reorderedTriggers = [
+      'name: workflow',
+      'triggers:',
+      '  - type: scheduled',
+      '  - type: manual',
+    ].join('\n');
+
+    expect(computeWorkflowYamlChanges(twoTriggers, reorderedTriggers)).toEqual({ count: 0 });
+  });
+
+  it('counts same-type trigger config changes as updated', () => {
+    const manualTrigger = (condition: string): string =>
+      [
+        'name: workflow',
+        'triggers:',
+        '  - type: manual',
+        '    on:',
+        `      condition: "${condition}"`,
+      ].join('\n');
+
+    const result = computeWorkflowYamlChanges(
+      manualTrigger('severity: low'),
+      manualTrigger('severity: high')
+    );
+
+    expect(result.count).toBe(1);
+    expect(result.summaryGroups).toEqual([
+      expect.objectContaining({
+        title: 'Triggers:',
+        lines: ['1 updated'],
+      }),
+    ]);
+  });
+
+  it('counts an added trigger when a new trigger type is introduced', () => {
+    const withManual = ['name: workflow', 'triggers:', '  - type: manual'].join('\n');
+    const withManualAndScheduled = [
+      'name: workflow',
+      'triggers:',
+      '  - type: manual',
+      '  - type: scheduled',
+    ].join('\n');
+
+    const result = computeWorkflowYamlChanges(withManual, withManualAndScheduled);
+
+    expect(result.count).toBe(1);
+    expect(result.summaryGroups).toEqual([
+      expect.objectContaining({
+        title: 'Triggers:',
+        lines: ['1 added'],
+      }),
+    ]);
+  });
+
+  it('counts a removed trigger when a trigger type is dropped', () => {
+    const withManualAndScheduled = [
+      'name: workflow',
+      'triggers:',
+      '  - type: manual',
+      '  - type: scheduled',
+    ].join('\n');
+    const withManual = ['name: workflow', 'triggers:', '  - type: manual'].join('\n');
+
+    const result = computeWorkflowYamlChanges(withManualAndScheduled, withManual);
+
+    expect(result.count).toBe(1);
+    expect(result.summaryGroups).toEqual([
+      expect.objectContaining({
+        title: 'Triggers:',
+        lines: ['1 removed'],
+      }),
+    ]);
+  });
+
+  it('counts updated, added, and removed triggers in the same diff', () => {
+    const baseline = [
+      'name: workflow',
+      'triggers:',
+      '  - type: manual',
+      '    on:',
+      '      condition: "severity: low"',
+      '  - type: scheduled',
+    ].join('\n');
+    const target = [
+      'name: workflow',
+      'triggers:',
+      '  - type: manual',
+      '    on:',
+      '      condition: "severity: high"',
+      '  - type: alert',
+    ].join('\n');
+
+    const result = computeWorkflowYamlChanges(baseline, target);
+
+    expect(result.count).toBe(3);
+    expect(result.summaryGroups).toEqual([
+      expect.objectContaining({
+        title: 'Triggers:',
+        lines: ['1 added', '1 removed', '1 updated'],
+      }),
+    ]);
   });
 
   it('counts changes for sibling steps that share the same name', () => {
@@ -255,5 +369,201 @@ describe('computeWorkflowYamlChanges', () => {
     ].join('\n');
 
     expect(computeWorkflowYamlChanges(nameFirstStep, typeFirstStep)).toEqual({ count: 0 });
+  });
+
+  it('counts nested else-branch step edits without flagging the if step', () => {
+    const ifElseWorkflow = (elseMessage: string): string =>
+      [
+        'name: workflow',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: check',
+        '    type: if',
+        '    condition: "true"',
+        '    steps:',
+        '      - name: then_step',
+        '        type: console',
+        '        with:',
+        '          message: then',
+        '    else:',
+        '      - name: else_step',
+        '        type: console',
+        '        with:',
+        `          message: ${elseMessage}`,
+      ].join('\n');
+
+    const result = computeWorkflowYamlChanges(ifElseWorkflow('hello'), ifElseWorkflow('world'));
+
+    expect(result.count).toBe(1);
+    expect(result.summaryGroups).toEqual([
+      expect.objectContaining({
+        title: 'Steps:',
+        lines: ['1 updated'],
+      }),
+    ]);
+  });
+
+  it('counts nested switch case step edits without flagging the switch step', () => {
+    const switchWorkflow = (caseMessage: string): string =>
+      [
+        'name: workflow',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: route',
+        '    type: switch',
+        '    expression: "{{ steps.prev.output.status }}"',
+        '    cases:',
+        '      - match: ok',
+        '        steps:',
+        '          - name: ok_step',
+        '            type: console',
+        '            with:',
+        `              message: ${caseMessage}`,
+      ].join('\n');
+
+    const result = computeWorkflowYamlChanges(switchWorkflow('hello'), switchWorkflow('world'));
+
+    expect(result.count).toBe(1);
+    expect(result.summaryGroups).toEqual([
+      expect.objectContaining({
+        title: 'Steps:',
+        lines: ['1 updated'],
+      }),
+    ]);
+  });
+
+  it('counts nested switch default step edits without flagging the switch step', () => {
+    const switchDefaultWorkflow = (defaultMessage: string): string =>
+      [
+        'name: workflow',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: route',
+        '    type: switch',
+        '    expression: "{{ steps.prev.output.status }}"',
+        '    cases:',
+        '      - match: ok',
+        '        steps:',
+        '          - name: ok_step',
+        '            type: console',
+        '            with:',
+        '              message: ok',
+        '    default:',
+        '      - name: default_step',
+        '        type: console',
+        '        with:',
+        `          message: ${defaultMessage}`,
+      ].join('\n');
+
+    const result = computeWorkflowYamlChanges(
+      switchDefaultWorkflow('hello'),
+      switchDefaultWorkflow('world')
+    );
+
+    expect(result.count).toBe(1);
+    expect(result.summaryGroups).toEqual([
+      expect.objectContaining({
+        title: 'Steps:',
+        lines: ['1 updated'],
+      }),
+    ]);
+  });
+
+  it('still flags if and switch container config changes separately from nested step edits', () => {
+    const ifWorkflow = (condition: string, elseMessage: string): string =>
+      [
+        'name: workflow',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: check',
+        '    type: if',
+        `    condition: "${condition}"`,
+        '    steps:',
+        '      - name: then_step',
+        '        type: console',
+        '        with:',
+        '          message: then',
+        '    else:',
+        '      - name: else_step',
+        '        type: console',
+        '        with:',
+        `          message: ${elseMessage}`,
+      ].join('\n');
+
+    const result = computeWorkflowYamlChanges(
+      ifWorkflow('true', 'hello'),
+      ifWorkflow('false', 'world')
+    );
+
+    expect(result.count).toBe(2);
+    expect(result.summaryGroups).toEqual([
+      expect.objectContaining({
+        title: 'Steps:',
+        lines: ['2 updated'],
+      }),
+    ]);
+  });
+
+  it('counts nested on-failure fallback step edits without flagging the parent step', () => {
+    const fallbackWorkflow = (fallbackMessage: string): string =>
+      [
+        'name: workflow',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: risky',
+        '    type: console',
+        '    with:',
+        '      message: hello',
+        '    on-failure:',
+        '      fallback:',
+        '        - name: fallback_step',
+        '          type: console',
+        '          with:',
+        `            message: ${fallbackMessage}`,
+      ].join('\n');
+
+    const result = computeWorkflowYamlChanges(fallbackWorkflow('hello'), fallbackWorkflow('world'));
+
+    expect(result.count).toBe(1);
+    expect(result.summaryGroups).toEqual([
+      expect.objectContaining({
+        title: 'Steps:',
+        lines: ['1 updated'],
+      }),
+    ]);
+  });
+
+  it('counts nested iteration-on-failure fallback step edits without flagging the parent step', () => {
+    const fallbackWorkflow = (fallbackMessage: string): string =>
+      [
+        'name: workflow',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: loop',
+        '    type: foreach',
+        "    foreach: '[1,2]'",
+        '    iteration-on-failure:',
+        '      fallback:',
+        '        - name: fallback_step',
+        '          type: console',
+        '          with:',
+        `            message: ${fallbackMessage}`,
+      ].join('\n');
+
+    const result = computeWorkflowYamlChanges(fallbackWorkflow('hello'), fallbackWorkflow('world'));
+
+    expect(result.count).toBe(1);
+    expect(result.summaryGroups).toEqual([
+      expect.objectContaining({
+        title: 'Steps:',
+        lines: ['1 updated'],
+      }),
+    ]);
   });
 });
