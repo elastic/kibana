@@ -249,6 +249,18 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
         });
 
+        it('should return 400 when kuery exceeds 10000 chars', async () => {
+          await readScriptsSuperTest
+            .get(SCRIPTS_LIBRARY_ROUTE)
+            .set('kbn-xsrf', 'true')
+            .set('Elastic-Api-Version', '2023-10-31')
+            .query({
+              kuery: 'a'.repeat(10001),
+            })
+            .on('error', createSupertestErrorLogger(log).ignoreCodes([400]))
+            .expect(400);
+        });
+
         it('should return list of scripts when user has WRITE privileges', async () => {
           await writeScriptsSuperTest
             .get(SCRIPTS_LIBRARY_ROUTE)

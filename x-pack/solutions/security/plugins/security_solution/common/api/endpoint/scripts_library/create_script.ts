@@ -24,9 +24,9 @@ export const CreateScriptRequestSchema = {
     file: ScriptFileSchema,
     fileType: ScriptFileTypeSchema,
     requiresInput: schema.maybe(ScriptRequiresInputSchema),
-    description: schema.maybe(schema.string()),
-    instructions: schema.maybe(schema.string()),
-    example: schema.maybe(schema.string()),
+    description: schema.maybe(schema.string({ maxLength: 10000 })),
+    instructions: schema.maybe(schema.string({ maxLength: 10000 })),
+    example: schema.maybe(schema.string({ maxLength: 10000 })),
     pathToExecutable: schema.conditional(
       schema.siblingRef('fileType'),
       'archive',

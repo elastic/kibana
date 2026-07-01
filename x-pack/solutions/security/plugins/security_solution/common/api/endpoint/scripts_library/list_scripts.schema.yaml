@@ -43,7 +43,8 @@ paths:
           schema:
             allOf:
               - $ref: '../model/schema/common.schema.yaml#/components/schemas/Kuery'
-              - example: "platform:windows"
+              - maxLength: 10000
+                example: "platform:windows"
 
       responses:
         '200':
