@@ -482,7 +482,7 @@ describe('update', () => {
         host_urls: ['https://attacker.example.com:443'],
       })
     ).rejects.toThrow(
-      'Preconfigured fleet server host private-fleet-server host_urls cannot be updated outside of kibana config file.'
+      'Preconfigured Fleet Server host private-fleet-server host_urls cannot be updated outside of the Kibana config file.'
     );
   });
 
@@ -495,7 +495,7 @@ describe('update', () => {
         allow_edit: ['host_urls', 'is_default'],
       } as any)
     ).rejects.toThrow(
-      'Preconfigured fleet server host private-fleet-server allow_edit cannot be updated outside of kibana config file.'
+      'Preconfigured Fleet Server host private-fleet-server allow_edit cannot be updated outside of the Kibana config file.'
     );
   });
 
@@ -513,7 +513,7 @@ describe('update', () => {
 
     // Should not be rejected with the preconfigured field auth error
     await expect(result).rejects.not.toThrow(
-      'Preconfigured fleet server host private-fleet-server is_default cannot be updated outside of kibana config file.'
+      'Preconfigured Fleet Server host private-fleet-server is_default cannot be updated outside of the Kibana config file.'
     );
   });
 });

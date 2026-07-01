@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+
 import { SERVERLESS_DEFAULT_OUTPUT_ID, SERVERLESS_PRIVATE_OUTPUT_ID } from '../../constants';
 import { agentPolicyService, appContextService, outputService } from '../../services';
 import { withDefaultErrorHandler } from '../../services/security/fleet_router';
@@ -29,7 +31,9 @@ describe('Outputs handler', () => {
   };
 
   beforeEach(() => {
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue({ error: jest.fn() } as any);
+    jest
+      .spyOn(appContextService, 'getLogger')
+      .mockReturnValue({ error: jest.fn(), debug: jest.fn() } as any);
     jest.spyOn(outputService, 'create').mockResolvedValue({ id: 'output1' } as any);
     jest.spyOn(outputService, 'update').mockResolvedValue({ id: 'output1' } as any);
     jest.spyOn(outputService, 'get').mockImplementation((id: string) => {
@@ -282,7 +286,10 @@ describe('Outputs handler', () => {
           return { hosts: ['http://elasticsearch:9200'] } as any;
         }
         if (id === SERVERLESS_PRIVATE_OUTPUT_ID) {
-          throw new Error('Not found');
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+            'output',
+            SERVERLESS_PRIVATE_OUTPUT_ID
+          );
         }
         return { id: 'output1' } as any;
       });

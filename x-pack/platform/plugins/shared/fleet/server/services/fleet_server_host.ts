@@ -356,7 +356,7 @@ class FleetServerHostService {
           !isEqual(originalItem[key], data[key])
         ) {
           throw new FleetServerHostUnauthorizedError(
-            `Preconfigured fleet server host ${id} ${key} cannot be updated outside of kibana config file.`
+            `Preconfigured Fleet Server host ${id} ${key} cannot be updated outside of the Kibana config file.`
           );
         }
       }

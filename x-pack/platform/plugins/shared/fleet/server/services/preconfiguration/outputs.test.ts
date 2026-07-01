@@ -1473,6 +1473,8 @@ describe('Outputs preconfiguration', () => {
 });
 
 describe('getPreconfiguredOutputFromConfig — PrivateLink allow_edit injection', () => {
+  beforeEach(() => jest.restoreAllMocks());
+
   const baseConfig = {
     agents: { elasticsearch: { hosts: undefined } },
   } as any;

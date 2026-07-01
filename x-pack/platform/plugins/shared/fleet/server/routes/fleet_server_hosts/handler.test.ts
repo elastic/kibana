@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+
 import {
   SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
   SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
@@ -34,7 +36,9 @@ describe('fleet server hosts handler', () => {
   };
 
   beforeEach(() => {
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue({ error: jest.fn() } as any);
+    jest
+      .spyOn(appContextService, 'getLogger')
+      .mockReturnValue({ error: jest.fn(), debug: jest.fn() } as any);
     jest.spyOn(fleetServerHostService, 'create').mockResolvedValue({ id: 'host1' } as any);
     jest.spyOn(fleetServerHostService, 'update').mockResolvedValue({ id: 'host1' } as any);
     jest.spyOn(fleetServerHostService, 'get').mockResolvedValue({
@@ -57,7 +61,8 @@ describe('fleet server hosts handler', () => {
 
     expect(res).toEqual({
       body: {
-        message: 'Fleet server host must have default URL in serverless: http://elasticsearch:9200',
+        message:
+          'Fleet Server host must have a default URL in Serverless: http://elasticsearch:9200',
       },
       statusCode: 403,
     });
@@ -172,7 +177,8 @@ describe('fleet server hosts handler', () => {
 
     expect(res).toEqual({
       body: {
-        message: 'Fleet server host must have default URL in serverless: http://elasticsearch:9200',
+        message:
+          'Fleet Server host must have a default URL in Serverless: http://elasticsearch:9200',
       },
       statusCode: 403,
     });
@@ -274,7 +280,7 @@ describe('fleet server hosts handler', () => {
       expect(res).toEqual({
         body: {
           message:
-            'Fleet server host must have default URL in serverless: http://elasticsearch:9200',
+            'Fleet Server host must have a default URL in Serverless: http://elasticsearch:9200',
         },
         statusCode: 403,
       });
@@ -286,7 +292,12 @@ describe('fleet server hosts handler', () => {
         .mockReturnValue({ isServerlessEnabled: true } as any);
       jest.spyOn(fleetServerHostService, 'get').mockImplementation((id: string) => {
         if (id === SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID) {
-          return Promise.reject(new Error('Not found'));
+          return Promise.reject(
+            SavedObjectsErrorHelpers.createGenericNotFoundError(
+              'fleet-server-host',
+              SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID
+            )
+          );
         }
         return Promise.resolve({
           id: SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
@@ -303,7 +314,7 @@ describe('fleet server hosts handler', () => {
       expect(res).toEqual({
         body: {
           message:
-            'Fleet server host must have default URL in serverless: http://elasticsearch:9200',
+            'Fleet Server host must have a default URL in Serverless: http://elasticsearch:9200',
         },
         statusCode: 403,
       });
