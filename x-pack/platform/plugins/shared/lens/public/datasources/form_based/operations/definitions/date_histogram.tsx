@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -105,6 +105,17 @@ function mapToEsqlInterval(interval: string) {
   }
   return interval;
 }
+
+const getIntervalParamValue = (
+  intervalValue: ReturnType<typeof parseInterval> | typeof AUTO_INTERVAL
+) => {
+  if (intervalValue === AUTO_INTERVAL) {
+    return AUTO_INTERVAL;
+  }
+
+  const isCalendarInterval = calendarOnlyIntervals.has(intervalValue.unit);
+  return `${isCalendarInterval ? '1' : intervalValue.value}${intervalValue.unit || 'd'}`;
+};
 
 export const dateHistogramOperation: OperationDefinition<
   DateHistogramIndexPatternColumn,
@@ -303,15 +314,17 @@ export const dateHistogramOperation: OperationDefinition<
       [columnId, paramEditorUpdater]
     );
 
-    const setInterval = useCallback(
-      (newInterval: typeof interval) => {
-        const isCalendarInterval =
-          newInterval !== AUTO_INTERVAL && calendarOnlyIntervals.has(newInterval.unit);
-        const value =
-          newInterval === AUTO_INTERVAL
-            ? AUTO_INTERVAL
-            : `${isCalendarInterval ? '1' : newInterval.value}${newInterval.unit || 'd'}`;
+    const previousColumnInterval = useRef(currentColumn.params.interval);
+    const hasExternalIntervalChange =
+      previousColumnInterval.current !== currentColumn.params.interval;
 
+    useEffect(() => {
+      previousColumnInterval.current = currentColumn.params.interval;
+    }, [currentColumn.params.interval]);
+
+    const commitInterval = useCallback(
+      (newInterval: typeof interval) => {
+        const value = getIntervalParamValue(newInterval);
         paramEditorUpdater((newLayer) =>
           updateColumnParam({ layer: newLayer, columnId, paramName: 'interval', value })
         );
@@ -345,10 +358,24 @@ export const dateHistogramOperation: OperationDefinition<
       : [{ label: intervalInput, key: intervalInput }];
 
     useEffect(() => {
-      if (isValid && intervalInput !== currentColumn.params.interval) {
-        setInterval(parseInterval(intervalInput));
+      if (hasExternalIntervalChange) {
+        setIntervalInput(currentColumn.params.interval);
+        return;
       }
-    }, [intervalInput, isValid, currentColumn.params.interval, setInterval]);
+
+      // Compare against the persisted interval string so shorthand saved values
+      // stay stable until the user explicitly edits the control.
+      if (isValid && intervalInput !== currentColumn.params.interval) {
+        commitInterval(interval);
+      }
+    }, [
+      interval,
+      hasExternalIntervalChange,
+      intervalInput,
+      isValid,
+      currentColumn.params.interval,
+      commitInterval,
+    ]);
 
     const bindToGlobalTimePickerValue =
       indexPattern.timeFieldName === field?.name || !currentColumn.params.ignoreTimeRange;
