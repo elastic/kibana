@@ -11,6 +11,10 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { MitreAttack } from './mitre_attack';
 import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
 
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
     id: '1',
