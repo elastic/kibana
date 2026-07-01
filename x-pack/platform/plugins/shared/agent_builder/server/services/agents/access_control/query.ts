@@ -83,18 +83,6 @@ export const buildReadAccessFilter = ({ user }: { user: CurrentUser }) => {
     },
   });
 
-  // Some legacy indices mapped `acl.entries` as a plain object rather than nested, so keep a
-  // non-nested fallback for those documents too.
-  shouldClauses.push({
-    bool: {
-      must_not: { exists: { field: 'access_control.access_mode' } },
-      filter: [
-        { term: { 'acl.entries.type': 'user' } },
-        { term: { 'acl.entries.name': user.username } },
-      ],
-    },
-  });
-
   return {
     bool: {
       should: shouldClauses,

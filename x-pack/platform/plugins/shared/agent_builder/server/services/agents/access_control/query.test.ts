@@ -66,15 +66,6 @@ describe('buildReadAccessFilter', () => {
               },
             },
           },
-          {
-            bool: {
-              must_not: { exists: { field: 'access_control.access_mode' } },
-              filter: [
-                { term: { 'acl.entries.type': 'user' } },
-                { term: { 'acl.entries.name': 'owner' } },
-              ],
-            },
-          },
         ],
         minimum_should_match: 1,
       },
@@ -83,7 +74,7 @@ describe('buildReadAccessFilter', () => {
 
   it('omits created_by_id clause when user.id is undefined but still adds user-ACL nested clause', () => {
     const filter = buildReadAccessFilter({ user: ownerByUsernameOnly });
-    expect(filter.bool.should).toHaveLength(6);
+    expect(filter.bool.should).toHaveLength(5);
     expect(filter.bool.should[0]).toEqual({
       bool: {
         must: { exists: { field: 'access_control.access_mode' } },
