@@ -55,10 +55,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(response.body.reset).to.eql(CASE_INDEX);
       expect(response.body.reset_task).to.have.property('id', 'cases-analyticsV2-reset');
-      expect(response.body.reset_task).to.have.property(
-        'task_type',
-        'cases.analyticsV2.fullReset'
-      );
+      expect(response.body.reset_task).to.have.property('task_type', 'cases.analyticsV2.fullReset');
       expect(response.body.reset_task).to.have.property('scheduled_at');
       expect(response.body.reset_task).to.have.property(
         'poll',
@@ -157,10 +154,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // gone depends on timing — what matters is that the field
       // exists and converges to `null` (success) within the
       // bootstrap timeout.
-      await supertest
-        .post('/internal/cases/_analyticsV2/reset')
-        .set(INTERNAL_HEADERS)
-        .expect(202);
+      await supertest.post('/internal/cases/_analyticsV2/reset').set(INTERNAL_HEADERS).expect(202);
 
       // After the task completes, Task Manager auto-removes the
       // SO and `/state.active_reset` returns null.

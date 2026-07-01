@@ -10,11 +10,8 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { CasesAnalyticsV2WriterContract } from '../writer';
 import type { CasesActivityV2WriterContract } from '../writer/activity';
 import { runReconciliation, type RunReconciliationResult } from './runner';
-import {
-  runActivityReconciliation,
-  type RunActivityReconciliationResult,
-} from './activity_runner';
-import { resetReconciliationTask } from './index';
+import { runActivityReconciliation, type RunActivityReconciliationResult } from './activity_runner';
+import { resetReconciliationTask } from '.';
 
 /** Inputs for `runFullReset`. */
 export interface RunFullResetDeps {

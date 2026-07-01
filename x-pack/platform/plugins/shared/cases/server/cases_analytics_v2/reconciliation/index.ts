@@ -93,10 +93,7 @@ export function registerReconciliationTask({
       createTaskRunner: ({ taskInstance }) => ({
         run: async () => {
           const previousState = (taskInstance.state ?? {}) as ReconciliationTaskState;
-          const casesLastRunAt = clampCursorToNotFuture(
-            previousState.cases_last_run_at,
-            logger
-          );
+          const casesLastRunAt = clampCursorToNotFuture(previousState.cases_last_run_at, logger);
           const activityLastRunAt = clampCursorToNotFuture(
             previousState.activity_last_run_at,
             logger
@@ -174,9 +171,7 @@ export function registerReconciliationTask({
                     `cases reconciliation failed (${
                       casesError instanceof Error ? casesError.message : String(casesError)
                     }) AND activity reconciliation failed (${
-                      activityError instanceof Error
-                        ? activityError.message
-                        : String(activityError)
+                      activityError instanceof Error ? activityError.message : String(activityError)
                     })`
                   )
                 : ((casesError ?? activityError) as Error);

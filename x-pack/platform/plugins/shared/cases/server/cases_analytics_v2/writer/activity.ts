@@ -57,9 +57,7 @@ export interface CasesActivityV2WriterContract {
   upsertAction: (so: SavedObject<UserActionPersistedAttributes>) => void;
   bulkUpsertActions: (sos: Array<SavedObject<UserActionPersistedAttributes>>) => void;
   bulkDeleteActionsByCaseIds: (caseIds: string[]) => void;
-  bulkUpsertActionsAwait: (
-    sos: Array<SavedObject<UserActionPersistedAttributes>>
-  ) => Promise<void>;
+  bulkUpsertActionsAwait: (sos: Array<SavedObject<UserActionPersistedAttributes>>) => Promise<void>;
 }
 
 export class CasesActivityV2Writer implements CasesActivityV2WriterContract {

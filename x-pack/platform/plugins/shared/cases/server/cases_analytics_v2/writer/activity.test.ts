@@ -116,7 +116,9 @@ describe('CasesActivityV2Writer', () => {
       const { writer, esClient } = buildWriterUnderTest();
       (esClient.bulk as unknown as jest.Mock).mockResolvedValue({ errors: false, items: [] });
 
-      await expect(writer.bulkUpsertActionsAwait([makeUserAction('ua-A')])).resolves.toBeUndefined();
+      await expect(
+        writer.bulkUpsertActionsAwait([makeUserAction('ua-A')])
+      ).resolves.toBeUndefined();
       expect(esClient.bulk).toHaveBeenCalledTimes(1);
     });
 
@@ -175,7 +177,9 @@ describe('CasesActivityV2Writer', () => {
         ],
       });
 
-      await expect(writer.bulkUpsertActionsAwait([makeUserAction('ua-A')])).resolves.toBeUndefined();
+      await expect(
+        writer.bulkUpsertActionsAwait([makeUserAction('ua-A')])
+      ).resolves.toBeUndefined();
       expect(childLogger.warn).toHaveBeenCalledWith(
         expect.stringMatching(/bulk-upsert item failed.*ua-A.*status=400.*retryable=false/)
       );

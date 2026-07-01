@@ -109,11 +109,7 @@ export async function runActivityReconciliation({
   // Single clause — see the function docstring for why `created_at` is
   // sufficient.
   const filter = lastRunAt
-    ? nodeBuilder.range(
-        `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.created_at`,
-        'gt',
-        lastRunAt
-      )
+    ? nodeBuilder.range(`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.created_at`, 'gt', lastRunAt)
     : undefined;
 
   // Open a PIT for consistent paging against a fixed snapshot.

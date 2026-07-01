@@ -239,10 +239,7 @@ export function registerResetTask({
               );
             }
           };
-          const throttledFlush = makeWallClockThrottle(
-            flushProgress,
-            PROGRESS_WRITE_INTERVAL_MS
-          );
+          const throttledFlush = makeWallClockThrottle(flushProgress, PROGRESS_WRITE_INTERVAL_MS);
 
           try {
             // Initial flush so `/state.active_reset.state` shows

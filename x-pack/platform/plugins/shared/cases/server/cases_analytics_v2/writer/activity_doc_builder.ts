@@ -212,7 +212,11 @@ function extractCuratedFields(
   if (type === 'assignees' && Array.isArray(payload.assignees)) {
     const uids: string[] = [];
     for (const entry of payload.assignees) {
-      if (entry && typeof entry === 'object' && typeof (entry as { uid?: unknown }).uid === 'string') {
+      if (
+        entry &&
+        typeof entry === 'object' &&
+        typeof (entry as { uid?: unknown }).uid === 'string'
+      ) {
         uids.push((entry as { uid: string }).uid);
       }
     }
