@@ -32,6 +32,8 @@ const createSavedObjectsRepositoryMock = () => ({
   delete: jest.fn(),
   bulkCreate: jest.fn(),
   bulkUpdate: jest.fn(),
+  openPointInTimeForType: jest.fn(),
+  closePointInTime: jest.fn(),
 });
 
 const createCoreMock = (repo: ReturnType<typeof createSavedObjectsRepositoryMock>) => ({
@@ -120,7 +122,25 @@ describe('TemplatesMigrationTaskManager', () => {
     repo.find.mockResolvedValue({ saved_objects: [], total: 0 });
     repo.create.mockResolvedValue({ id: 'new-id', attributes: {}, references: [], type: 'test' });
     repo.update.mockResolvedValue({ id: 'config-1', attributes: {}, references: [], type: 'test' });
+    repo.bulkUpdate.mockResolvedValue({ saved_objects: [] });
+    repo.openPointInTimeForType.mockResolvedValue({ id: 'pit-1' });
+    repo.closePointInTime.mockResolvedValue({});
   });
+
+  // The task runner now receives a RunContext ({ taskInstance, abortController }). Tests that need
+  // to seed resume state or inspect scheduling pass through here.
+  const runTask = async (
+    manager: TemplatesMigrationTaskManager,
+    { state }: { state?: Record<string, unknown> } = {}
+  ) => {
+    const call = taskManagerSetupMock.registerTaskDefinitions.mock.calls[0];
+    const taskDef = call[0][CASES_TEMPLATES_MIGRATION_TASK_TYPE];
+    const runner = taskDef.createTaskRunner({
+      taskInstance: { state: state ?? {} },
+      abortController: new AbortController(),
+    } as unknown as RunContext);
+    return runner.run();
+  };
 
   const getTaskRunner = (manager: TemplatesMigrationTaskManager) => {
     const call = taskManagerSetupMock.registerTaskDefinitions.mock.calls[0];
@@ -246,14 +266,18 @@ describe('TemplatesMigrationTaskManager', () => {
         isLatest: true,
       });
 
+      // The field/template phase writes those two flags together...
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         configSO.id,
-        {
-          legacyTemplatesMigrated: true,
-          legacyCustomFieldsMigrated: true,
-          legacyCasesMigrated: true,
-        },
+        { legacyTemplatesMigrated: true, legacyCustomFieldsMigrated: true },
+        expect.anything()
+      );
+      // ...and the (empty) case-backfill phase records its own completion flag separately.
+      expect(repo.update).toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configSO.id,
+        { legacyCasesMigrated: true },
         expect.anything()
       );
     });
@@ -314,7 +338,7 @@ describe('TemplatesMigrationTaskManager', () => {
 
       const infoMessages = logger.info.mock.calls.map((c) => String(c[0]));
       const summaryLines = infoMessages.filter((m) =>
-        m.includes('Cases templates v2 migration complete')
+        m.includes('Cases templates v2 migration run complete')
       );
       const perSoInfoLines = infoMessages.filter((m) => m.includes('Migrated configure SO'));
 
@@ -572,11 +596,18 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(repo.create.mock.calls[0][0]).toBe(CASE_FIELD_DEFINITION_SAVED_OBJECT);
       expect(repo.create.mock.calls[0][1]).toMatchObject({ name: 'cf_text', isGlobal: true });
 
-      // Only the custom fields flag is written; templates flag is already true
+      // Field/template phase writes only the custom fields flag (templates flag already true)...
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         configSO.id,
-        { legacyCustomFieldsMigrated: true, legacyCasesMigrated: true },
+        { legacyCustomFieldsMigrated: true },
+        expect.anything()
+      );
+      // ...and the case-backfill phase records its completion flag separately.
+      expect(repo.update).toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configSO.id,
+        { legacyCasesMigrated: true },
         expect.anything()
       );
       expect(repo.update.mock.calls[0][2]).not.toHaveProperty('legacyTemplatesMigrated');
@@ -757,12 +788,18 @@ describe('TemplatesMigrationTaskManager', () => {
       const manager = await buildAndSchedule();
       await getTaskRunner(manager).run();
 
+      // The PIT is opened scoped to the space's namespace...
+      expect(repo.openPointInTimeForType).toHaveBeenCalledWith(
+        CASE_SAVED_OBJECT,
+        expect.objectContaining({ namespaces: ['my-space'] })
+      );
+      // ...and the case scan filters by owner within that PIT.
       const caseFind = repo.find.mock.calls.find((c) => c[0]?.type === CASE_SAVED_OBJECT);
       expect(caseFind?.[0]).toEqual(
         expect.objectContaining({
           type: CASE_SAVED_OBJECT,
-          namespaces: ['my-space'],
           filter: `${CASE_SAVED_OBJECT}.attributes.owner: "securitySolution"`,
+          pit: expect.objectContaining({ id: 'pit-1' }),
         })
       );
     });
@@ -806,6 +843,217 @@ describe('TemplatesMigrationTaskManager', () => {
       const caseFind = repo.find.mock.calls.find((c) => c[0]?.type === CASE_SAVED_OBJECT);
       expect(caseFind).toBeUndefined();
       expect(repo.bulkUpdate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('existing-case backfill at scale (resumable)', () => {
+    const PAGE_SIZE = 1000;
+    const SCAN_BUDGET = 25000;
+
+    // A full page of trivial cases (no customFields → scanned but not updated), reused across finds.
+    const fullPage = (sortValue: number) => ({
+      saved_objects: Array.from({ length: PAGE_SIZE }, (_, i) => ({
+        id: `case-${sortValue}-${i}`,
+        type: CASE_SAVED_OBJECT,
+        references: [],
+        attributes: { owner: 'cases', customFields: [], extended_fields: null },
+        sort: [sortValue],
+      })),
+      total: PAGE_SIZE,
+      pit_id: `pit-${sortValue}`,
+    });
+
+    const routeConfigureAndCases = (configSO: unknown, casePages: unknown[]) => {
+      let caseCall = 0;
+      repo.find.mockImplementation((opts: { type: string }) => {
+        if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [configSO], total: 1 });
+        }
+        if (opts.type === CASE_SAVED_OBJECT) {
+          const pageResult = casePages[Math.min(caseCall, casePages.length - 1)];
+          caseCall++;
+          return Promise.resolve(pageResult);
+        }
+        return Promise.resolve({ saved_objects: [], total: 0 });
+      });
+    };
+
+    it('pages through cases with search_after and completes when the last page is partial', async () => {
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const page1 = fullPage(1);
+      const page2 = {
+        saved_objects: [
+          {
+            id: 'last-case',
+            type: CASE_SAVED_OBJECT,
+            references: [],
+            attributes: {
+              owner: 'cases',
+              customFields: [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'v' }],
+              extended_fields: null,
+            },
+            sort: [2],
+          },
+        ],
+        total: 1,
+        pit_id: 'pit-2',
+      };
+      routeConfigureAndCases(configSO, [page1, page2]);
+
+      const manager = await buildAndSchedule();
+      const result = await getTaskRunner(manager).run();
+
+      // Second case find resumes from the first page's last sort value.
+      const caseFinds = repo.find.mock.calls.filter((c) => c[0]?.type === CASE_SAVED_OBJECT);
+      expect(caseFinds).toHaveLength(2);
+      expect(caseFinds[1][0]).toEqual(expect.objectContaining({ searchAfter: [1] }));
+
+      // Exhausted → PIT closed, flag set, task deleted (no reschedule).
+      expect(repo.closePointInTime).toHaveBeenCalled();
+      expect(repo.update).toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configSO.id,
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+    });
+
+    it('reschedules with a resume cursor when the per-run scan budget is exhausted', async () => {
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      // Always return full pages so the scan never exhausts and the budget is what stops it.
+      routeConfigureAndCases(configSO, [fullPage(1)]);
+
+      const manager = await buildAndSchedule();
+      const result = await getTaskRunner(manager).run();
+
+      // 25000 budget / 1000 page size = 25 pages before the run yields.
+      const caseFinds = repo.find.mock.calls.filter((c) => c[0]?.type === CASE_SAVED_OBJECT);
+      expect(caseFinds).toHaveLength(SCAN_BUDGET / PAGE_SIZE);
+
+      // Not complete: reschedules with a persisted cursor, does NOT set the flag or delete the task.
+      expect(result).toEqual(
+        expect.objectContaining({
+          runAt: expect.any(Date),
+          state: { caseBackfill: expect.objectContaining({ configureId: configSO.id }) },
+        })
+      );
+      expect(repo.update).not.toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configSO.id,
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
+      expect(repo.closePointInTime).not.toHaveBeenCalled();
+    });
+
+    it('resumes from a persisted cursor without reopening a PIT', async () => {
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      // Partial page → exhausts immediately once resumed.
+      routeConfigureAndCases(configSO, [{ saved_objects: [], total: 0, pit_id: 'pit-resumed' }]);
+
+      const manager = await buildAndSchedule();
+      await runTask(manager, {
+        state: {
+          caseBackfill: {
+            configureId: configSO.id,
+            owner: 'cases',
+            namespace: 'default',
+            pitId: 'pit-resumed',
+            searchAfter: [42],
+          },
+        },
+      });
+
+      // Resumed → no new PIT opened, and the scan continues from the saved search_after.
+      expect(repo.openPointInTimeForType).not.toHaveBeenCalled();
+      const caseFind = repo.find.mock.calls.find((c) => c[0]?.type === CASE_SAVED_OBJECT);
+      expect(caseFind?.[0]).toEqual(
+        expect.objectContaining({
+          pit: expect.objectContaining({ id: 'pit-resumed' }),
+          searchAfter: [42],
+        })
+      );
+    });
+
+    it('does not mark a space complete when a bulkUpdate page reports item errors', async () => {
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      routeConfigureAndCases(configSO, [
+        {
+          saved_objects: [
+            {
+              id: 'case-err',
+              type: CASE_SAVED_OBJECT,
+              references: [],
+              attributes: {
+                owner: 'cases',
+                customFields: [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'v' }],
+                extended_fields: null,
+              },
+              sort: [1],
+            },
+          ],
+          total: 1,
+          pit_id: 'pit-1',
+        },
+      ]);
+      repo.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          { id: 'case-err', type: CASE_SAVED_OBJECT, error: { message: 'conflict' } },
+        ],
+      });
+
+      const manager = await buildAndSchedule();
+      const result = await getTaskRunner(manager).run();
+
+      // The failed page must NOT flag the space migrated; it reschedules to retry.
+      expect(repo.update).not.toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configSO.id,
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
+      expect(result).toEqual(expect.objectContaining({ runAt: expect.any(Date) }));
+    });
+
+    it('reopens the PIT and rescans the space if a resumed PIT is invalid', async () => {
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      let caseCall = 0;
+      repo.find.mockImplementation((opts: { type: string }) => {
+        if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [configSO], total: 1 });
+        }
+        if (opts.type === CASE_SAVED_OBJECT) {
+          caseCall++;
+          if (caseCall === 1) {
+            return Promise.reject(new Error('search_context_missing_exception'));
+          }
+          return Promise.resolve({ saved_objects: [], total: 0, pit_id: 'pit-fresh' });
+        }
+        return Promise.resolve({ saved_objects: [], total: 0 });
+      });
+
+      const manager = await buildAndSchedule();
+      await runTask(manager, {
+        state: {
+          caseBackfill: {
+            configureId: configSO.id,
+            owner: 'cases',
+            namespace: 'default',
+            pitId: 'pit-stale',
+            searchAfter: [10],
+          },
+        },
+      });
+
+      // Recovered: reopened a fresh PIT and completed the space.
+      expect(repo.openPointInTimeForType).toHaveBeenCalled();
+      expect(repo.update).toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configSO.id,
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
     });
   });
 
