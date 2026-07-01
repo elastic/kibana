@@ -9,16 +9,11 @@
 
 export {
   getFieldsSuggestions,
-  getFunctionsSuggestions,
-  getLiteralsSuggestions,
   getControlSuggestionIfSupported,
   getControlSuggestion,
   getSafeInsertText,
 } from './autocomplete/helpers';
-export {
-  suggestForExpression,
-  buildExpressionFunctionParameterContext,
-} from './autocomplete/expressions';
+export { suggestForExpression } from './autocomplete/expressions';
 export {
   buildColumnSuggestions as buildFieldsDefinitionsWithMetadata,
   getFunctionSignatures,
