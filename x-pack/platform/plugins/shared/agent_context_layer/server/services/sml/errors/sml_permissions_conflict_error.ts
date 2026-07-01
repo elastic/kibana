@@ -10,6 +10,6 @@ import { SmlError } from './sml_error';
 /**
  * Thrown when a content-mode write supplies a `permissions` value for an
  * `attachmentType` whose registered `SmlTypeDefinition` also defines
- * `getPermissions`. 
+ * `getPermissions`.
  */
 export class SmlPermissionsConflictError extends SmlError {}
