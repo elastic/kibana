@@ -176,8 +176,7 @@ export class LensApp {
   }
 
   async setPalette(paletteId: string, isLegacy: boolean) {
-    await this.page.testSubj.click('lns_colorEditing_trigger');
-    await expect(this.page.testSubj.locator('lns-palettePanelFlyout')).toBeVisible();
+    await this.openPalettePanel();
 
     const paletteModeToggle = this.page.testSubj.locator('lns_colorMappingOrLegacyPalette_switch');
     const targetValue = isLegacy ? 'true' : 'false';
@@ -193,14 +192,48 @@ export class LensApp {
       await this.page.testSubj.click(`kbnColoring_ColorMapping_Palette-${paletteId}`);
     }
 
-    await this.closePaletteEditor();
+    await this.closePalettePanel();
   }
 
-  private async closePaletteEditor() {
+  async openPalettePanel() {
+    await this.page.testSubj.click('lns_colorEditing_trigger');
+    await expect(this.page.testSubj.locator('lns-palettePanelFlyout')).toBeVisible();
+  }
+
+  async closePalettePanel() {
     await this.page.testSubj.click('lns-indexPattern-SettingWithSiblingFlyoutBack');
     await expect(
       this.page.testSubj.locator('lns-indexPattern-SettingWithSiblingFlyoutBack')
     ).toBeHidden();
+  }
+
+  /**
+   * Returns the color stops from the currently open palette panel.
+   * Must be called after opening the palette panel via `openPalettePanel()`.
+   *
+   * Each entry contains a `stop` value (string) and a `color` (computed background-color
+   * of the color swatch, or undefined if not present).
+   */
+  async getPaletteColorStops(): Promise<Array<{ stop: string; color: string | undefined }>> {
+    const stops = await this.page
+      .locator('[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]')
+      .all();
+    const colorSwatches = await this.page.testSubj.locator('euiColorPickerAnchor').all();
+
+    const result: Array<{ stop: string; color: string | undefined }> = [];
+
+    for (let i = 0; i < stops.length; i++) {
+      const stopValue = (await stops[i].getAttribute('value')) ?? '';
+      let color: string | undefined;
+      if (i < colorSwatches.length) {
+        color = await colorSwatches[i].evaluate((el) => {
+          return window.getComputedStyle(el).backgroundColor || undefined;
+        });
+      }
+      result.push({ stop: stopValue, color });
+    }
+
+    return result;
   }
 
   private async openDimensionEditor(dimension: string) {
