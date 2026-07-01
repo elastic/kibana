@@ -18,7 +18,7 @@ import {
   ensureMinikubeRunning,
 } from '@kbn/otel-demo';
 import type { DemoType, FailureScenario } from '@kbn/otel-demo';
-import { StreamsKIsOnboardingStep } from '@kbn/streams-schema';
+import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import {
   GCS_BUCKET,
   BASELINE_WAIT_MS,
@@ -111,8 +111,8 @@ run(
     );
 
     const onboardingSteps = [
-      StreamsKIsOnboardingStep.FeaturesIdentification,
-      ...(withDiscovery ? [StreamsKIsOnboardingStep.QueriesGeneration] : []),
+      KIsOnboardingStep.FeaturesIdentification,
+      ...(withDiscovery ? [KIsOnboardingStep.QueriesGeneration] : []),
     ];
 
     const failureScenarios = getDemoScenarios(demoType as DemoType);
@@ -280,7 +280,7 @@ async function processScenario(
   extractionTimeoutMs: number = KI_FEATURE_EXTRACTION_TIMEOUT_MS,
   withDiscovery: boolean = false,
   discoveryWaitMs: number = DISCOVERY_WAIT_MS,
-  onboardingSteps: StreamsKIsOnboardingStep[] = [StreamsKIsOnboardingStep.FeaturesIdentification]
+  onboardingSteps: KIsOnboardingStep[] = [KIsOnboardingStep.FeaturesIdentification]
 ): Promise<void> {
   const isFailure = isFailureScenario(scenario);
 
