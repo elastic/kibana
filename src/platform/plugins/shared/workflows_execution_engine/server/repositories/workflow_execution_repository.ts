@@ -11,14 +11,11 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import { resolveDocumentVersionsByIds } from './document_version';
+import { bulkUpdateDocuments } from './bulk_update_documents';
+import type { DocumentVersionsById, EsDocumentVersion } from './document_version';
 import { getDocumentsById } from './get_doc_by_id';
 import { resolveWriteIndex } from './resolve_write_index';
-import { bulkUpdateDocuments, isVersionConflictError } from './bulk_update_documents';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
-import { delayMs } from '@kbn/occ';
-
-const UPDATE_RETRY_ATTEMPTS = 3;
 
 export class WorkflowExecutionRepository {
   private dataStreamName = WORKFLOWS_EXECUTIONS_INDEX;
@@ -64,6 +61,37 @@ export class WorkflowExecutionRepository {
         return null;
       }
       return hits[0];
+    } catch (error: unknown) {
+      if (this.isNotFoundError(error)) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Like {@link getWorkflowExecutionById} but also returns the document's OCC
+   * version metadata. Used to seed the in-memory version cache on load so
+   * subsequent updates can skip the version lookup.
+   */
+  public async getWorkflowExecutionWithVersion(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<{ doc: EsWorkflowExecution; version: EsDocumentVersion } | null> {
+    try {
+      const writeIndex = await resolveWriteIndex({
+        esClient: this.esClient,
+        dataStreamName: this.dataStreamName,
+      });
+      const docs = await getDocumentsById<EsWorkflowExecution>({
+        esClient: this.esClient,
+        ids: [workflowExecutionId],
+        writeIndex,
+        dataStreamName: this.dataStreamName,
+        entityName: 'workflow execution',
+      });
+      const hit = docs.find(({ doc }) => doc.spaceId === spaceId);
+      return hit ? { doc: hit.doc, version: hit.version } : null;
     } catch (error: unknown) {
       if (this.isNotFoundError(error)) {
         return null;
@@ -169,15 +197,17 @@ export class WorkflowExecutionRepository {
    * @returns A promise that resolves when the update operation is complete.
    */
   public async updateWorkflowExecution(
-    workflowExecution: Partial<EsWorkflowExecution>
-  ): Promise<void> {
-    await bulkUpdateDocuments<Partial<EsWorkflowExecution>>({
+    workflowExecution: Partial<EsWorkflowExecution>,
+    providedVersions?: DocumentVersionsById
+  ): Promise<DocumentVersionsById> {
+    return bulkUpdateDocuments<Partial<EsWorkflowExecution>>({
       esClient: this.esClient,
       dataStreamName: this.dataStreamName,
       docs: [workflowExecution],
       entityName: 'workflow execution',
       refresh: true,
-      idRequiredMessage: 'Workflow execution ID is required for bulk update',
+      idRequiredMessage: 'Workflow execution ID is required for update',
+      providedVersions,
     });
   }
 
@@ -190,15 +220,17 @@ export class WorkflowExecutionRepository {
    * @returns A promise that resolves when all updates are complete.
    */
   public async bulkUpdateWorkflowExecutions(
-    writes: Array<Partial<EsWorkflowExecution>>
-  ): Promise<void> {
-    await bulkUpdateDocuments<Partial<EsWorkflowExecution>>({
+    writes: Array<Partial<EsWorkflowExecution>>,
+    providedVersions?: DocumentVersionsById
+  ): Promise<DocumentVersionsById> {
+    return bulkUpdateDocuments<Partial<EsWorkflowExecution>>({
       esClient: this.esClient,
       dataStreamName: this.dataStreamName,
       docs: writes,
       entityName: 'workflow execution',
       refresh: true,
       idRequiredMessage: 'Workflow execution ID is required for bulk update',
+      providedVersions,
     });
   }
 

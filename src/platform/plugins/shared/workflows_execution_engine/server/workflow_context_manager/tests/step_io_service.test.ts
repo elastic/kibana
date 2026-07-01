@@ -32,13 +32,31 @@ import { WorkflowExecutionState } from '../workflow_execution_state';
  */
 function buildHarness(opts: { evictionMinBytes?: number; logger?: Logger } = {}) {
   const workflowExecutionRepository = {
-    updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+    updateWorkflowExecution: jest.fn().mockResolvedValue({}),
   } as unknown as jest.Mocked<WorkflowExecutionRepository>;
 
   const stepExecutionRepository = {
-    bulkUpsert: jest.fn().mockResolvedValue(undefined),
+    bulkUpsert: jest.fn().mockResolvedValue({}),
     getStepExecutionsByIds: jest.fn().mockResolvedValue([]),
   } as unknown as jest.Mocked<StepExecutionRepository>;
+
+  // Resume reads step docs through the version-returning variant; delegate to
+  // `getStepExecutionsByIds` so existing per-test mocks keep driving load().
+  stepExecutionRepository.getStepExecutionsByIdsWithVersion = jest.fn(
+    async (ids: string[], sourceIncludes?: unknown, sourceExcludes?: unknown) => {
+      const docs =
+        (await (stepExecutionRepository.getStepExecutionsByIds as jest.Mock)(
+          ids,
+          sourceIncludes,
+          sourceExcludes
+        )) ?? [];
+      return (docs as EsWorkflowStepExecution[]).map((doc) => ({
+        id: doc.id,
+        doc,
+        version: { index: 'test-index', seqNo: 1, primaryTerm: 1 },
+      }));
+    }
+  ) as StepExecutionRepository['getStepExecutionsByIdsWithVersion'];
 
   const fakeWorkflowExecution = {
     id: 'test-workflow-execution-id',

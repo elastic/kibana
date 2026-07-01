@@ -284,10 +284,19 @@ describe('WorkflowExecutionRepository', () => {
           },
         ],
       });
-      esClient.update.mockResolvedValue({
-        _index: TEST_BACKING_INDEX,
-        _seq_no: 8,
-        _primary_term: 2,
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [
+          {
+            update: {
+              _id: 'exec-1',
+              _index: TEST_BACKING_INDEX,
+              _seq_no: 8,
+              _primary_term: 2,
+              status: 200,
+            },
+          },
+        ],
       });
       await repository.updateWorkflowExecution(workflowExecution);
       expect(esClient.mget).toHaveBeenCalledWith({
@@ -295,13 +304,19 @@ describe('WorkflowExecutionRepository', () => {
         ids: ['exec-1'],
         _source_includes: ['id'],
       });
-      expect(esClient.update).toHaveBeenCalledWith({
-        index: TEST_BACKING_INDEX,
-        id: 'exec-1',
-        refresh: false,
-        doc: workflowExecution,
-        if_seq_no: 7,
-        if_primary_term: 2,
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        refresh: true,
+        operations: [
+          {
+            update: {
+              _index: TEST_BACKING_INDEX,
+              _id: 'exec-1',
+              if_seq_no: 7,
+              if_primary_term: 2,
+            },
+          },
+          { doc: workflowExecution },
+        ],
       });
     });
 
@@ -332,34 +347,49 @@ describe('WorkflowExecutionRepository', () => {
             },
           ],
         });
-      esClient.update
-        .mockRejectedValueOnce({
-          meta: {
-            statusCode: 409,
-            body: {
-              error: {
-                type: 'version_conflict_engine_exception',
-                reason:
-                  '[exec-1]: version conflict, required seqNo [7], primary term [2]. current document has seqNo [8] and primary term [2]',
-                index: TEST_BACKING_INDEX,
+      esClient.bulk
+        .mockResolvedValueOnce({
+          errors: true,
+          items: [
+            {
+              update: {
+                _id: 'exec-1',
+                status: 409,
+                error: { type: 'version_conflict_engine_exception' },
               },
             },
-          },
+          ],
         })
         .mockResolvedValueOnce({
-          _index: TEST_BACKING_INDEX,
-          _seq_no: 9,
-          _primary_term: 2,
+          errors: false,
+          items: [
+            {
+              update: {
+                _id: 'exec-1',
+                _index: TEST_BACKING_INDEX,
+                _seq_no: 9,
+                _primary_term: 2,
+                status: 200,
+              },
+            },
+          ],
         });
 
       await repository.updateWorkflowExecution(workflowExecution);
 
-      expect(esClient.update).toHaveBeenCalledTimes(2);
-      expect(esClient.update).toHaveBeenNthCalledWith(
+      expect(esClient.bulk).toHaveBeenCalledTimes(2);
+      expect(esClient.bulk).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
-          if_seq_no: 8,
-          if_primary_term: 2,
+          operations: [
+            {
+              update: expect.objectContaining({
+                if_seq_no: 8,
+                if_primary_term: 2,
+              }),
+            },
+            { doc: workflowExecution },
+          ],
         })
       );
     });

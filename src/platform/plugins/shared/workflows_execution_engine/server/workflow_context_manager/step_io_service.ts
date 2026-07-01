@@ -21,6 +21,7 @@ import { EVICTION_EXEMPT_STEP_TYPES, LOOP_STEP_TYPES } from './step_io_pinned_ty
 import type { StepExecutionMetadata, StepIoStateAccessor } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { OutputSizeStats } from '../lib/telemetry/events/workflows_execution/types';
+import type { EsDocumentVersion } from '../repositories/document_version';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { formatBytes, safeOutputSize } from '../step/errors';
 import { buildStepExecutionId } from '../utils';
@@ -192,6 +193,14 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    */
   private transientlyRehydratedIds: string[] = [];
   private readonly persistedStepExecutionIds = new Set<string>();
+
+  /**
+   * Cached OCC versions of step-execution documents, keyed by step execution
+   * id. Seeded on `load` (resume) and from each create/update response so the
+   * next bulk upsert can skip the version lookup. A missing entry means the
+   * version is unknown and will be resolved fresh on the next write.
+   */
+  private readonly stepExecutionVersions = new Map<string, EsDocumentVersion>();
 
   /**
    * Per-execution `data.set` output, keyed by step execution id. Populated
@@ -455,14 +464,17 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       );
     }
 
-    const foundSteps = await this.stepRepository.getStepExecutionsByIds(
+    const foundVersioned = await this.stepRepository.getStepExecutionsByIdsWithVersion(
       stepExecutionIds,
       undefined,
       ['output']
     );
+    const foundSteps = foundVersioned.map(({ doc }) => doc);
     this.persistedStepExecutionIds.clear();
-    for (const step of foundSteps) {
-      this.persistedStepExecutionIds.add(step.id);
+    this.stepExecutionVersions.clear();
+    for (const { id, version } of foundVersioned) {
+      this.persistedStepExecutionIds.add(id);
+      this.stepExecutionVersions.set(id, version);
     }
 
     // Capture inputs and hand `output`-stripped metadata to state. The
@@ -899,12 +911,26 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     }
 
     const flushedIds = Array.from(merged.keys());
-    await this.stepRepository.bulkUpsert(
-      Array.from(merged.values()).map((doc) => {
-        const persisted = doc.id ? this.persistedStepExecutionIds.has(doc.id) : false;
-        return persisted ? { operation: 'update', doc } : { operation: 'create', doc };
-      })
-    );
+
+    // Attach the cached OCC version to each update so the upsert can skip the
+    // version lookup; creates and cache-miss updates resolve fresh in the repo.
+    const writes = Array.from(merged.values()).map((doc) => {
+      if (!doc.id) {
+        return { operation: 'create', doc } as const;
+      }
+
+      return {
+        operation: 'update',
+        doc,
+        version: this.stepExecutionVersions.get(doc.id),
+      } as const;
+    });
+
+    const versions = await this.stepRepository.bulkUpsert(writes);
+
+    for (const [id, version] of Object.entries(versions ?? {})) {
+      this.stepExecutionVersions.set(id, version);
+    }
     for (const id of flushedIds) {
       this.persistedStepExecutionIds.add(id);
     }

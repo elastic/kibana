@@ -9,7 +9,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { delayMs } from '@kbn/occ';
-import { resolveDocumentVersionsByIds } from './document_version';
+import type { DocumentVersionsById, EsDocumentVersion } from './document_version';
+import { extractVersionFromBulkItem, resolveDocumentVersionsByIds } from './document_version';
 import { resolveWriteIndex } from './resolve_write_index';
 
 const DEFAULT_RETRY_ATTEMPTS = 3;
@@ -17,6 +18,12 @@ const DEFAULT_RETRY_BASE_DELAY_MS = 100;
 
 export interface IdentifiedDocument {
   id?: string;
+}
+
+export interface DocumentWrite<TDocument extends IdentifiedDocument> {
+  doc: TDocument;
+  operation: 'update' | 'create';
+  version?: EsDocumentVersion;
 }
 
 /**
@@ -51,10 +58,81 @@ const isBulkVersionConflict = (item: {
 }): boolean =>
   item.update?.status === 409 || item.update?.error?.type === 'version_conflict_engine_exception';
 
+/**
+ * A `404` / `document_missing_exception` on a conditional update means the
+ * caller-provided version pointed at a doc/backing-index that no longer holds
+ * it (a stale cache entry). It is retriable: dropping the provided version and
+ * re-resolving fresh either finds the doc or surfaces a genuine not-found.
+ */
+const isBulkDocumentMissing = (item: {
+  update?: { status?: number; error?: { type?: string } };
+}): boolean =>
+  item.update?.status === 404 || item.update?.error?.type === 'document_missing_exception';
+
+/**
+ * Both version conflicts and stale-version misses are recoverable by
+ * re-resolving fresh versions and retrying the affected docs.
+ */
+const isRetriableBulkUpdate = (item: {
+  update?: { status?: number; error?: { type?: string } };
+}): boolean => isBulkVersionConflict(item) || isBulkDocumentMissing(item);
+
+const refreshVersions = async <TDocument extends IdentifiedDocument>({
+  esClient,
+  dataStreamName,
+  entityName,
+  writes,
+}: {
+  esClient: ElasticsearchClient;
+  dataStreamName: string;
+  entityName: string;
+  writes: DocumentWrite<TDocument>[];
+}): Promise<void> => {
+  const writeIndex = await resolveWriteIndex({ esClient, dataStreamName });
+  const versions = await resolveDocumentVersionsByIds<TDocument>({
+    esClient,
+    ids: writes.map(({ doc }) => doc.id as string),
+    writeIndex,
+    dataStreamName,
+    entityName,
+  });
+
+  writes.forEach((write) => {
+    if (write.version) {
+      write.version = versions[write.doc.id as string];
+    }
+  });
+};
+
+/**
+ * Uses caller-provided versions where available and resolves fresh versions
+ * only for the ids missing from the cache. Skips the `getDataStream` + `mget`
+ * round trips entirely when every id is already cached.
+ */
+const fillMissingVersions = async <TDocument extends IdentifiedDocument>({
+  esClient,
+  dataStreamName,
+  entityName,
+  writes: docs,
+}: {
+  esClient: ElasticsearchClient;
+  dataStreamName: string;
+  entityName: string;
+  writes: DocumentWrite<TDocument>[];
+}): Promise<void> => {
+  const withoutVersions = docs.filter(({ version }) => !version);
+  await refreshVersions({
+    esClient,
+    dataStreamName,
+    entityName,
+    writes: withoutVersions,
+  });
+};
+
 export const bulkUpdateDocuments = async <TDocument extends IdentifiedDocument>({
   esClient,
   dataStreamName,
-  docs,
+  writes,
   entityName,
   refresh,
   idRequiredMessage = `${entityName} ID is required for bulk update`,
@@ -64,40 +142,58 @@ export const bulkUpdateDocuments = async <TDocument extends IdentifiedDocument>(
 }: {
   esClient: ElasticsearchClient;
   dataStreamName: string;
-  docs: TDocument[];
+  writes: DocumentWrite<TDocument>[];
   entityName: string;
   refresh: boolean | 'wait_for';
   idRequiredMessage?: string;
   failureVerb?: string;
   retryAttempts?: number;
   retryBaseDelayMs?: number;
-}): Promise<void> => {
-  if (docs.length === 0) {
-    return;
+  /**
+   * Caller-supplied OCC versions keyed by document id. When present, the
+   * first attempt trusts these versions and skips the version lookup; a stale
+   * entry simply produces a conflict/missing that is re-resolved on retry.
+   */
+  providedVersions?: DocumentVersionsById;
+}): Promise<DocumentVersionsById> => {
+  const resultVersions: DocumentVersionsById = {};
+  if (writes.length === 0) {
+    return resultVersions;
   }
 
-  docs.forEach((doc) => {
+  writes.forEach(({ doc }) => {
     if (!doc.id) {
       throw new Error(idRequiredMessage);
     }
   });
 
-  let pendingDocs = docs;
+  let pendingWrites = writes;
+  await fillMissingVersions({
+    esClient,
+    dataStreamName,
+    entityName,
+    writes: pendingWrites,
+  });
   let lastConflictedDocuments: Array<{ id: string; error?: unknown; status?: number }> = [];
 
   for (let attempt = 1; attempt <= retryAttempts; attempt++) {
-    const writeIndex = await resolveWriteIndex({ esClient, dataStreamName });
-    const versions = await resolveDocumentVersionsByIds<TDocument>({
-      esClient,
-      ids: pendingDocs.map(({ id }) => id as string),
-      writeIndex,
-      dataStreamName,
-      entityName,
-    });
+    if (attempt === 0) {
+      await delayMs(getBackoffWithJitterMs(retryBaseDelayMs, attempt));
+      await refreshVersions({
+        esClient,
+        dataStreamName,
+        entityName,
+        writes: pendingWrites,
+      });
+    }
 
-    const operations = pendingDocs.flatMap((doc) => {
+    const operations = pendingWrites.flatMap(({ doc, version }) => {
+      if (!version) {
+        return [];
+      }
+
       const id = doc.id as string;
-      const version = versions[id];
+
       return [
         {
           update: {
@@ -116,28 +212,36 @@ export const bulkUpdateDocuments = async <TDocument extends IdentifiedDocument>(
       operations,
     });
 
-    if (!bulkResponse.errors) {
-      return;
+    const responseItems = bulkResponse.items ?? [];
+    for (const item of responseItems) {
+      const captured = extractVersionFromBulkItem(item.update);
+      if (captured) {
+        resultVersions[captured.id] = captured.version;
+      }
     }
 
-    const nonConflictErrors = bulkResponse.items
-      .filter((item) => item.update?.error && !isBulkVersionConflict(item))
+    if (!bulkResponse.errors) {
+      return resultVersions;
+    }
+
+    const fatalErrors = responseItems
+      .filter((item) => item.update?.error && !isRetriableBulkUpdate(item))
       .map((item) => ({
         id: item.update?._id,
         error: item.update?.error,
         status: item.update?.status,
       }));
 
-    if (nonConflictErrors.length > 0) {
+    if (fatalErrors.length > 0) {
       throw new Error(
-        `Failed to ${failureVerb} ${nonConflictErrors.length} ${entityName}s: ${JSON.stringify(
-          nonConflictErrors
+        `Failed to ${failureVerb} ${fatalErrors.length} ${entityName}s: ${JSON.stringify(
+          fatalErrors
         )}`
       );
     }
 
-    lastConflictedDocuments = bulkResponse.items
-      .filter((item) => item.update?.error && isBulkVersionConflict(item))
+    lastConflictedDocuments = responseItems
+      .filter((item) => item.update?.error && isRetriableBulkUpdate(item))
       .map((item) => ({
         id: item.update?._id as string,
         error: item.update?.error,
@@ -145,13 +249,10 @@ export const bulkUpdateDocuments = async <TDocument extends IdentifiedDocument>(
       }));
 
     const conflictedIds = new Set(lastConflictedDocuments.map(({ id }) => id));
-    pendingDocs = pendingDocs.filter(({ id }) => id && conflictedIds.has(id));
-    if (pendingDocs.length === 0) {
-      return;
-    }
+    pendingWrites = pendingWrites.filter(({ doc }) => doc.id && conflictedIds.has(doc.id));
 
-    if (attempt < retryAttempts) {
-      await delayMs(getBackoffWithJitterMs(retryBaseDelayMs, attempt));
+    if (pendingWrites.length === 0) {
+      return resultVersions;
     }
   }
 

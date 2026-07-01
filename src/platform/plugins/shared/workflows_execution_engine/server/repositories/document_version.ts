@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getDocumentsById } from './get_doc_by_id';
 
@@ -15,6 +16,32 @@ export interface EsDocumentVersion {
   seqNo: number;
   primaryTerm: number;
 }
+
+/**
+ * Extracts the OCC version (`index` / `seqNo` / `primaryTerm`) from a single
+ * bulk-response item (an `update` or `create` action result). Returns
+ * `undefined` when the item errored or did not include version metadata, so
+ * callers can safely skip failed items when refreshing a version cache.
+ */
+export const extractVersionFromBulkItem = (
+  op: estypes.BulkResponseItem | undefined
+): { id: string; version: EsDocumentVersion } | undefined => {
+  if (
+    !op ||
+    op.error ||
+    !op._id ||
+    op._seq_no === undefined ||
+    op._primary_term === undefined ||
+    !op._index
+  ) {
+    return undefined;
+  }
+
+  return {
+    id: op._id,
+    version: { index: op._index, seqNo: op._seq_no, primaryTerm: op._primary_term },
+  };
+};
 
 export interface DocumentCreate<TDocument> {
   doc: TDocument;

@@ -139,7 +139,7 @@ describe('StepExecutionRepository', () => {
     });
 
     it('returns without calling ES for empty writes', async () => {
-      await expect(underTest.bulkUpsert([])).resolves.toBeUndefined();
+      await expect(underTest.bulkUpsert([])).resolves.toEqual({});
       expect(esClient.bulk).not.toHaveBeenCalled();
     });
 

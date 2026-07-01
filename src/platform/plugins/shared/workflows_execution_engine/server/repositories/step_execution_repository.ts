@@ -10,9 +10,12 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import { bulkUpdateDocuments } from './bulk_update_documents';
+import type { DocumentVersionsById, EsDocumentVersion } from './document_version';
+import { extractVersionFromBulkItem } from './document_version';
+import type { VersionedDocument } from './get_doc_by_id';
 import { getDocumentsById } from './get_doc_by_id';
 import { resolveWriteIndex } from './resolve_write_index';
-import { bulkUpdateDocuments } from './bulk_update_documents';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 export type StepExecutionField = keyof EsWorkflowStepExecution;
@@ -22,6 +25,11 @@ export type StepExecutionWrite =
   | {
       operation: 'update';
       doc: Partial<EsWorkflowStepExecution>;
+      /**
+       * Cached OCC version for this document, if known. When present the
+       * upsert skips the version lookup; when absent it is resolved fresh.
+       */
+      version?: EsDocumentVersion;
     };
 
 export class StepExecutionRepository {
@@ -123,6 +131,27 @@ export class StepExecutionRepository {
   }
 
   /**
+   * Like {@link getStepExecutionsByIds} but returns each document together
+   * with its OCC version metadata. Used to seed the in-memory version cache
+   * on resume so subsequent step updates can skip the version lookup.
+   */
+  public async getStepExecutionsByIdsWithVersion(
+    stepExecutionIds: string[],
+    sourceIncludes?: StepExecutionField[],
+    sourceExcludes?: StepExecutionField[]
+  ): Promise<Array<VersionedDocument<EsWorkflowStepExecution>>> {
+    return getDocumentsById<EsWorkflowStepExecution>({
+      esClient: this.esClient,
+      ids: stepExecutionIds,
+      writeIndex: await this.resolveWriteIndex(),
+      dataStreamName: this.dataStreamName,
+      sourceIncludes,
+      sourceExcludes,
+      entityName: 'step execution',
+    });
+  }
+
+  /**
    * Marks non-terminal step executions for a workflow run as FAILED (e.g. after interrupt recovery).
    */
   public async markNonTerminalStepsFailed(
@@ -150,9 +179,9 @@ export class StepExecutionRepository {
     );
   }
 
-  public async bulkUpsert(writes: StepExecutionWrite[]): Promise<void> {
+  public async bulkUpsert(writes: StepExecutionWrite[]): Promise<DocumentVersionsById> {
     if (writes.length === 0) {
-      return;
+      return {};
     }
 
     writes.forEach(({ doc }) => {
@@ -162,8 +191,10 @@ export class StepExecutionRepository {
     });
 
     const updateDocs: Array<Partial<EsWorkflowStepExecution>> = [];
+    const providedVersions: DocumentVersionsById = {};
     const createOperations: object[] = [];
-    for (const { doc, operation } of writes) {
+    for (const write of writes) {
+      const { doc, operation } = write;
       const id = doc.id;
       const timestamp = doc.startedAt ?? new Date().toISOString();
       const document = {
@@ -173,6 +204,9 @@ export class StepExecutionRepository {
 
       if (operation === 'update') {
         updateDocs.push(document);
+        if (id && write.version) {
+          providedVersions[id] = write.version;
+        }
       } else {
         createOperations.push(
           {
@@ -186,7 +220,7 @@ export class StepExecutionRepository {
       }
     }
 
-    await bulkUpdateDocuments<Partial<EsWorkflowStepExecution>>({
+    const updateVersions = await bulkUpdateDocuments<Partial<EsWorkflowStepExecution>>({
       esClient: this.esClient,
       dataStreamName: this.dataStreamName,
       docs: updateDocs,
@@ -194,10 +228,11 @@ export class StepExecutionRepository {
       refresh: false,
       idRequiredMessage: 'Step execution ID is required for upsert',
       failureVerb: 'upsert',
+      providedVersions,
     });
 
     if (createOperations.length === 0) {
-      return;
+      return updateVersions;
     }
 
     const bulkResponse = await this.esClient.bulk({ refresh: false, operations: createOperations });
@@ -217,5 +252,15 @@ export class StepExecutionRepository {
         )}`
       );
     }
+
+    const createVersions: DocumentVersionsById = {};
+    for (const item of bulkResponse.items ?? []) {
+      const captured = extractVersionFromBulkItem(item.create);
+      if (captured) {
+        createVersions[captured.id] = captured.version;
+      }
+    }
+
+    return { ...updateVersions, ...createVersions };
   }
 }

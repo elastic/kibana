@@ -65,6 +65,16 @@ describe('setupDependencies', () => {
       getWorkflowExecutionById: jest.fn().mockResolvedValue(mockWorkflowExecution),
     } as unknown as jest.Mocked<WorkflowExecutionRepository>;
 
+    // `WorkflowExecutionState.load` reads through the version-returning variant;
+    // delegate to `getWorkflowExecutionById` so existing per-test overrides and
+    // call assertions keep working.
+    mockWorkflowExecutionRepository.getWorkflowExecutionWithVersion = jest.fn(
+      async (id: string, sid: string) => {
+        const doc = await mockWorkflowExecutionRepository.getWorkflowExecutionById(id, sid);
+        return doc ? { doc, version: { index: 'test-index', seqNo: 1, primaryTerm: 1 } } : null;
+      }
+    ) as jest.Mocked<WorkflowExecutionRepository>['getWorkflowExecutionWithVersion'];
+
     (WorkflowExecutionRepository as jest.Mock).mockImplementation(
       () => mockWorkflowExecutionRepository
     );
