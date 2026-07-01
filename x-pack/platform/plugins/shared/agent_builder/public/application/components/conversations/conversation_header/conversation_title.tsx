@@ -22,6 +22,8 @@ import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useConversationTitle, useHasPersistedConversation } from '../../../hooks/use_conversation';
 import { ActiveSpineRelationshipBadge } from '../../../../agent_first/conversation_spine/components/spine_relationship_badge';
+import { useSidebarPopoverContext } from '../../layout/unified_sidebar/sidebar_popover_context';
+import { SidebarPopoverTrigger } from '../../layout/unified_sidebar/sidebar_popover_trigger';
 import { DeleteConversationModal } from '../delete_conversation_modal';
 import { RenameConversationModal } from '../rename_conversation_modal';
 
@@ -48,6 +50,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
   const { title, isLoading: isLoadingTitle } = useConversationTitle();
   const hasPersistedConversation = useHasPersistedConversation();
   const { euiTheme } = useEuiTheme();
+  const sidebarPopoverContext = useSidebarPopoverContext();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
@@ -57,6 +60,11 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
 
   const titleWithBadge = (titleContent: React.ReactNode) => (
     <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+      {sidebarPopoverContext ? (
+        <EuiFlexItem grow={false}>
+          <SidebarPopoverTrigger onToggleCondensed={sidebarPopoverContext.onToggleCondensed} />
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem grow={false}>
         <ActiveSpineRelationshipBadge />
       </EuiFlexItem>

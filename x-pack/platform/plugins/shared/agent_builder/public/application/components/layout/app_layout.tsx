@@ -1,8 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0".
  */
 
 import React, { useCallback, useState } from 'react';
@@ -13,7 +13,8 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { isMac } from '@kbn/shared-ux-utility';
 
 import { UnifiedSidebar } from './unified_sidebar/unified_sidebar';
-import { useCondensedSidebarTransition } from './unified_sidebar/use_condensed_sidebar_transition';
+import { SidebarPopoverProvider } from './unified_sidebar/sidebar_popover_context';
+import { SIDEBAR_WIDTH } from './unified_sidebar/unified_sidebar.constants';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -23,55 +24,59 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { euiTheme } = useEuiTheme();
   const [isCondensed, setIsCondensed] = useState(true);
 
-  const {
-    sidebarMinWidth,
-    sidebarShellStyles,
-    onSidebarShellTransitionEnd,
-    ...sidebarTransitionState
-  } = useCondensedSidebarTransition(isCondensed);
+  const onToggleCondensed = useCallback(() => setIsCondensed((value) => !value), []);
 
   const onKeyDown = useCallback((event: KeyboardEvent) => {
     if ((event.code === 'Period' || event.key === '.') && (isMac ? event.metaKey : event.ctrlKey)) {
       event.preventDefault();
-      setIsCondensed((v) => !v);
+      setIsCondensed((value) => !value);
     }
   }, []);
 
   const sidebarStyles = css`
-    ${sidebarShellStyles}
     @media (max-width: ${euiTheme.breakpoint.m - 1}px) {
       display: none;
     }
   `;
 
-  const contentStyles = css`
+  const contentWrapperStyles = css`
+    position: relative;
+    height: 100%;
     overflow: auto;
     background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
 
+  const layout = (
+    <KibanaPageTemplate
+      paddingSize="none"
+      restrictWidth={false}
+      responsive={[]}
+      pageSideBar={
+        isCondensed ? undefined : <UnifiedSidebar onToggleCondensed={onToggleCondensed} />
+      }
+      pageSideBarProps={
+        isCondensed
+          ? undefined
+          : {
+              minWidth: SIDEBAR_WIDTH,
+              css: sidebarStyles,
+            }
+      }
+    >
+      <KibanaPageTemplate.Section paddingSize="none" grow={true} css={contentWrapperStyles}>
+        {children}
+      </KibanaPageTemplate.Section>
+    </KibanaPageTemplate>
+  );
+
   return (
     <>
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
-      <KibanaPageTemplate
-        paddingSize="none"
-        restrictWidth={false}
-        responsive={[]}
-        pageSideBar={
-          <UnifiedSidebar
-            onToggleCondensed={() => setIsCondensed((v) => !v)}
-            {...sidebarTransitionState}
-          />
-        }
-        pageSideBarProps={{
-          minWidth: sidebarMinWidth,
-          css: sidebarStyles,
-          onTransitionEnd: onSidebarShellTransitionEnd,
-        }}
-      >
-        <KibanaPageTemplate.Section paddingSize="none" grow={true} css={contentStyles}>
-          {children}
-        </KibanaPageTemplate.Section>
-      </KibanaPageTemplate>
+      {isCondensed ? (
+        <SidebarPopoverProvider onToggleCondensed={onToggleCondensed}>{layout}</SidebarPopoverProvider>
+      ) : (
+        layout
+      )}
     </>
   );
 };

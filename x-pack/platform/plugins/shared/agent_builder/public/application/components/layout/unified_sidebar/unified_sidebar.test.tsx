@@ -8,11 +8,8 @@
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { css } from '@emotion/react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
 
-import type { CondensedSidebarTransitionState } from './use_condensed_sidebar_transition';
-import { SIDEBAR_WIDTH } from './unified_sidebar.constants';
 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: {} }),
@@ -70,22 +67,10 @@ jest.mock('../../../context/streaming/streaming_context', () => ({
 
 import { UnifiedSidebar } from './unified_sidebar';
 
-const defaultSidebarTransitionState: CondensedSidebarTransitionState = {
-  shouldAnimate: false,
-  sidebarMinWidth: SIDEBAR_WIDTH,
-  showCondensedChrome: false,
-  showExpandedChrome: true,
-  expandedContentOpacity: 1,
-  isExpandedContentHidden: false,
-  sidebarShellStyles: css``,
-  expandedContentStyles: css``,
-  onSidebarShellTransitionEnd: () => {},
-};
-
 const renderSidebar = (path: string) =>
   render(
     <MemoryRouter initialEntries={[path]}>
-      <UnifiedSidebar onToggleCondensed={jest.fn()} {...defaultSidebarTransitionState} />
+      <UnifiedSidebar onToggleCondensed={jest.fn()} />
     </MemoryRouter>
   );
 
