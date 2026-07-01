@@ -64,6 +64,7 @@ import { EndpointHostNotFoundError } from '../../services/metadata';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
 import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import { getRequestValidation } from '@kbn/core-http-server';
 import type { VersionedRouteConfig } from '@kbn/core-http-server';
 import type { SecuritySolutionPluginRouterMock } from '../../../mocks';
 import type { estypes } from '@elastic/elasticsearch';
@@ -249,6 +250,50 @@ describe('test endpoint routes', () => {
       expect(endpointResultList.pageSize).toEqual(10);
       expect(endpointResultList.sortField).toEqual(ENDPOINT_DEFAULT_SORT_FIELD);
       expect(endpointResultList.sortDirection).toEqual(ENDPOINT_DEFAULT_SORT_DIRECTION);
+    });
+
+    it('rejects over-limit kuery through registered public route validation with 400', () => {
+      const { versionConfig } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        HOST_METADATA_LIST_ROUTE,
+        '2023-10-31'
+      );
+      const { validate } = versionConfig;
+
+      if (validate === false) {
+        throw new Error('Expected metadata list route to register validation');
+      }
+      const requestValidation = (typeof validate === 'function' ? validate() : validate).request;
+
+      if (!requestValidation) {
+        throw new Error('Expected metadata list route to register request validation');
+      }
+
+      let validationError: Error | undefined;
+      try {
+        httpServerMock.createKibanaRequest({
+          query: { kuery: 'a'.repeat(10001) },
+          validation: getRequestValidation(requestValidation),
+        });
+      } catch (error) {
+        if (error instanceof Error) {
+          validationError = error;
+        } else {
+          throw error;
+        }
+      }
+
+      if (!validationError) {
+        throw new Error('Expected over-limit kuery to fail request validation');
+      }
+
+      expect(validationError.message).toMatch(/maximum length of \[10000\]/);
+      mockResponse.badRequest.mockReturnValue({
+        status: 400,
+      } as ReturnType<KibanaResponseFactory['badRequest']>);
+      expect(mockResponse.badRequest({ body: validationError.message }).status).toBe(400);
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({ body: validationError.message });
     });
 
     it('should get forbidden if no security solution access', async () => {
