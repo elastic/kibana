@@ -7,17 +7,15 @@
 
 import React from 'react';
 import moment from 'moment';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   SignificantEvent,
   SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
+import { InvestigationOutput, useInvestigationState } from '@kbn/investigation-output';
 import { formatTimestamp } from '../../../../../util/formatters';
-import {
-  INVESTIGATION_STATUS_COLORS,
-  INVESTIGATION_STATUS_LABELS,
-} from '../shared/investigation_status';
+import { useKibana } from '../../../../../hooks/use_kibana';
 
 const SECTION_TITLE = i18n.translate(
   'xpack.streams.sigEventsTab.flyout.investigationsSectionTitle',
@@ -41,21 +39,28 @@ const formatDuration = (startedAt: string, completedAt?: string): string => {
 };
 
 const InvestigationRow = ({ investigation }: { investigation: SignificantEventInvestigation }) => {
-  const { status, started_at, completed_at } = investigation;
-  const duration = formatDuration(started_at, completed_at);
-  const isRunning = status === 'pending';
+  const {
+    core: { http },
+  } = useKibana();
+  const { started_at: startedAt, completed_at: completedAt, workflow_execution_id } = investigation;
+  const duration = formatDuration(startedAt, completedAt);
+  const isRunning = completedAt == null;
+
+  const { state, error } = useInvestigationState({
+    http,
+    executionId: workflow_execution_id,
+    isRunning,
+  });
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem grow={false}>
-        <EuiBadge color={INVESTIGATION_STATUS_COLORS[status]}>
-          {INVESTIGATION_STATUS_LABELS[status]}
-        </EuiBadge>
+        <InvestigationOutput isRunning={isRunning} state={state} error={error} />
       </EuiFlexItem>
-      <EuiFlexItem grow>
+      <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
-          {formatTimestamp(started_at)}
-          {isRunning ? ` · ${duration} (running)` : completed_at ? ` · ${duration}` : null}
+          {formatTimestamp(startedAt)}
+          {isRunning ? ` · ${duration} (running)` : completedAt ? ` · ${duration}` : null}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

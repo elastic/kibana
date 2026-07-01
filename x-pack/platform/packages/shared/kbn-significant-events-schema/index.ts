@@ -79,15 +79,20 @@ export {
   type SignificantEvent,
   type SignificantEventStatus,
   type SignificantEventInvestigation,
-  type SignificantEventInvestigationStatus,
+  type InvestigationHypothesis,
+  type InvestigationHypothesisStatus,
+  type InvestigationState,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
-  SIGNIFICANT_EVENT_INVESTIGATION_STATUS_OPTIONS,
+  INVESTIGATION_PROGRESS_UI_EVENT,
+  INVESTIGATION_HYPOTHESIS_STATUS_OPTIONS,
   detectionSchema,
   discoverySchema,
   significantEventSchema,
   significantEventStatusSchema,
   significantEventInvestigationSchema,
-  significantEventInvestigationStatusSchema,
+  investigationHypothesisStatusSchema,
+  investigationHypothesisSchema,
+  investigationStateSchema,
 } from './src/significant_events';
 
 export type {

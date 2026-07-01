@@ -74,6 +74,18 @@ export const InputSchema = z.object({
     .string()
     .optional()
     .describe('Optional existing conversation ID to continue a previous conversation.'),
+  /**
+   * Optional caller-provided id for the underlying agent execution. Lets a caller that already
+   * knows this id (e.g. the workflow execution id) follow the agent's live event stream
+   * (tool calls, reasoning, custom UI events) via the agent execution follow API while this
+   * step is still running, instead of waiting for the step to complete.
+   */
+  execution_id: z
+    .string()
+    .optional()
+    .describe(
+      'Optional caller-provided id for the underlying agent execution. Callers that know this id upfront can follow the agent execution live (e.g. via the execution follow API) while the step is still running.'
+    ),
 });
 
 /**
@@ -94,6 +106,12 @@ export const OutputSchema = z.object({
     .optional()
     .describe(
       'Conversation ID associated with this step execution. Present when create_conversation is enabled or conversation_id is provided.'
+    ),
+  execution_id: z
+    .string()
+    .optional()
+    .describe(
+      'Id of the underlying agent execution, whether caller-provided (via input.execution_id) or auto-generated. Can be used to follow the agent execution live. Absent if the step failed before the agent execution started.'
     ),
   metadata: z
     .object({
@@ -321,6 +339,20 @@ When a schema is provided, the agent's response will be available in \`output.st
         - sentiment
         - confidence
 \`\`\``,
+
+      `## Follow the agent execution live while the step is still running
+\`\`\`yaml
+- name: investigate
+  type: ${RunAgentStepTypeId}
+  agent-id: "my-custom-agent"
+  with:
+    execution_id: "{{ execution.id }}"
+    message: "Investigate the root cause of the issue."
+\`\`\`
+
+Pinning \`execution_id\` to a value the caller already knows (such as the workflow execution id)
+lets the caller follow the agent's live event stream — tool calls, reasoning, and custom UI
+events — before this step returns.`,
     ],
   },
   inputSchema: InputSchema,

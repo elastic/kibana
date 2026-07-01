@@ -14,11 +14,8 @@ export {
   significantEventStatusSchema,
   type SignificantEvent,
   type SignificantEventStatus,
-  SIGNIFICANT_EVENT_INVESTIGATION_STATUS_OPTIONS,
   significantEventInvestigationSchema,
-  significantEventInvestigationStatusSchema,
   type SignificantEventInvestigation,
-  type SignificantEventInvestigationStatus,
 } from './events';
 export {
   MAX_ID_LENGTH,
@@ -26,3 +23,13 @@ export {
   MAX_TITLE_LENGTH,
   MAX_TEXT_LENGTH,
 } from './constants';
+export {
+  INVESTIGATION_PROGRESS_UI_EVENT,
+  INVESTIGATION_HYPOTHESIS_STATUS_OPTIONS,
+  investigationHypothesisStatusSchema,
+  investigationHypothesisSchema,
+  investigationStateSchema,
+  type InvestigationHypothesis,
+  type InvestigationHypothesisStatus,
+  type InvestigationState,
+} from './investigation_state';

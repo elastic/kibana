@@ -31,7 +31,6 @@ const createInvestigation = (
   overrides: Partial<SignificantEventInvestigation> = {}
 ): SignificantEventInvestigation => ({
   workflow_execution_id: 'exec-1',
-  status: 'pending',
   started_at: '2026-01-01T01:00:00.000Z',
   ...overrides,
 });
@@ -91,12 +90,11 @@ describe('attachInvestigationToEvent', () => {
   });
 
   it('replaces a pending entry with a terminal one, preserving started_at', async () => {
-    const pending = createInvestigation({ status: 'pending' });
+    const pending = createInvestigation();
     const existing = createEvent({ event_id: 'event-1', investigations: [pending] });
     const { client, dataStreamClient } = createEventClient([existing]);
 
     const terminal = createInvestigation({
-      status: 'success',
       completed_at: '2026-01-01T02:00:00.000Z',
     });
     const result = await attachInvestigationToEvent({
@@ -112,7 +110,6 @@ describe('attachInvestigationToEvent', () => {
 
     // Only one entry — replaced, not duplicated
     expect(written.investigations).toHaveLength(1);
-    expect(written.investigations![0].status).toBe('success');
     expect(written.investigations![0].started_at).toBe(pending.started_at);
     expect(written.investigations![0].completed_at).toBe('2026-01-01T02:00:00.000Z');
   });
@@ -120,7 +117,6 @@ describe('attachInvestigationToEvent', () => {
   it('replaces by workflow_execution_id: different executions produce two entries', async () => {
     const first = createInvestigation({
       workflow_execution_id: 'exec-1',
-      status: 'success',
       completed_at: '2026-01-01T01:30:00.000Z',
     });
     const existing = createEvent({ event_id: 'event-1', investigations: [first] });
@@ -185,18 +181,19 @@ describe('attachInvestigationToEvent', () => {
     expect(result.event_id).not.toBe('event-3');
   });
 
-  it('reconciles orphaned pending entries from cancelled runs when a new execution attaches', async () => {
+  it('reconciles orphaned running entries from cancelled runs when a new execution attaches', async () => {
     /**
-     * Regression for cancel-in-progress orphan: R1 writes pending (exec-1); R2 is triggered,
-     * cancelling R1 via cancel-in-progress; R1 never reaches its terminal step so exec-1 stays
-     * `pending` in the array. When R2's pending attach arrives (exec-2), exec-1 must be resolved
-     * to `failed` so hasPendingInvestigation stops returning true and the UI stops polling.
+     * Regression for cancel-in-progress orphan: R1 writes a running entry (exec-1); R2 is
+     * triggered, cancelling R1 via cancel-in-progress; R1 never reaches its terminal step so
+     * exec-1 stays without a `completed_at` in the array. When R2's running attach arrives
+     * (exec-2), exec-1 must get a `completed_at` stamped so hasRunningInvestigation stops
+     * returning true for it and the UI stops polling.
      */
-    const orphaned = createInvestigation({ workflow_execution_id: 'exec-1', status: 'pending' });
+    const orphaned = createInvestigation({ workflow_execution_id: 'exec-1' });
     const existing = createEvent({ event_id: 'event-1', investigations: [orphaned] });
     const { client, dataStreamClient } = createEventClient([existing]);
 
-    const incoming = createInvestigation({ workflow_execution_id: 'exec-2', status: 'pending' });
+    const incoming = createInvestigation({ workflow_execution_id: 'exec-2' });
     const result = await attachInvestigationToEvent({
       eventClient: client,
       eventId: 'event-1',
@@ -210,20 +207,18 @@ describe('attachInvestigationToEvent', () => {
 
     expect(written.investigations).toHaveLength(2);
     expect(written.investigations![0].workflow_execution_id).toBe('exec-1');
-    expect(written.investigations![0].status).toBe('failed');
     expect(written.investigations![0].completed_at).toBeDefined();
     expect(written.investigations![1].workflow_execution_id).toBe('exec-2');
-    expect(written.investigations![1].status).toBe('pending');
+    expect(written.investigations![1].completed_at).toBeUndefined();
   });
 
-  it('reconciles orphaned pending entries when a terminal attach arrives for a new execution', async () => {
-    const orphaned = createInvestigation({ workflow_execution_id: 'exec-1', status: 'pending' });
+  it('reconciles orphaned running entries when a terminal attach arrives for a new execution', async () => {
+    const orphaned = createInvestigation({ workflow_execution_id: 'exec-1' });
     const existing = createEvent({ event_id: 'event-1', investigations: [orphaned] });
     const { client, dataStreamClient } = createEventClient([existing]);
 
     const terminal = createInvestigation({
       workflow_execution_id: 'exec-2',
-      status: 'success',
       completed_at: '2026-01-01T02:00:00.000Z',
     });
     const result = await attachInvestigationToEvent({
@@ -237,20 +232,18 @@ describe('attachInvestigationToEvent', () => {
     const [[callArg]] = dataStreamClient.create.mock.calls;
     const written: SignificantEvent = callArg.documents[0];
 
-    // Both entries present; orphaned run resolved to failed, no pending remains
+    // Both entries present; orphaned run resolved with a completed_at, none left running
     expect(written.investigations).toHaveLength(2);
     expect(written.investigations![0].workflow_execution_id).toBe('exec-1');
-    expect(written.investigations![0].status).toBe('failed');
     expect(written.investigations![0].completed_at).toBeDefined();
     expect(written.investigations![1].workflow_execution_id).toBe('exec-2');
-    expect(written.investigations![1].status).toBe('success');
+    expect(written.investigations![1].completed_at).toBe('2026-01-01T02:00:00.000Z');
   });
 
   it('does not exceed the 100-entry cap: ignores a new entry when already at 100 investigations', async () => {
     const fullInvestigations = Array.from({ length: 100 }, (_, i) =>
       createInvestigation({
         workflow_execution_id: `exec-${i}`,
-        status: 'success',
         completed_at: '2026-01-01T01:30:00.000Z',
       })
     );
@@ -276,7 +269,7 @@ describe('attachInvestigationToEvent', () => {
      * always returns E0, so the terminal write branches off E0 instead of chaining off the
      * pending-written E1 — producing siblings that lose prior investigation history.
      */
-    const pending = createInvestigation({ workflow_execution_id: 'exec-1', status: 'pending' });
+    const pending = createInvestigation({ workflow_execution_id: 'exec-1' });
     const e0 = createEvent({ event_id: 'event-0', discovery_slug: 'slug-1' });
     const e1 = createEvent({
       event_id: 'event-1',
@@ -290,7 +283,6 @@ describe('attachInvestigationToEvent', () => {
 
     const terminal = createInvestigation({
       workflow_execution_id: 'exec-1',
-      status: 'success',
       completed_at: '2026-01-01T02:00:00.000Z',
     });
     const result = await attachInvestigationToEvent({
@@ -308,7 +300,6 @@ describe('attachInvestigationToEvent', () => {
     expect(written.previous_event_id).toBe('event-1');
     // Replace-by-execution-id: pending entry replaced with terminal, not duplicated
     expect(written.investigations).toHaveLength(1);
-    expect(written.investigations![0].status).toBe('success');
     expect(written.investigations![0].started_at).toBe(pending.started_at);
     expect(written.investigations![0].completed_at).toBe('2026-01-01T02:00:00.000Z');
   });

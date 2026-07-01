@@ -32,9 +32,17 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
       // Accumulate token usage outside the try/catch so partial counts are
       // preserved even if the event stream errors mid-execution.
       const usage = { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
+      // Populated once executeAgent resolves, so it's available even if a later error is thrown.
+      let executionId: string | undefined;
 
       try {
-        const { schema, message, conversation_id: conversationId, attachments } = context.input;
+        const {
+          schema,
+          message,
+          conversation_id: conversationId,
+          attachments,
+          execution_id: callerExecutionId,
+        } = context.input;
 
         const {
           'agent-id': agentId,
@@ -68,10 +76,11 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           agentId: effectiveAgentId,
         });
 
-        const { events$ } = await executionService.executeAgent({
+        const executeAgentResult = await executionService.executeAgent({
           mode: AgentExecutionMode.conversation,
           request,
           abortSignal: context.abortSignal,
+          executionId: callerExecutionId,
           params: {
             agentId: effectiveAgentId,
             connectorId: effectiveConnectorId,
@@ -89,9 +98,10 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           // workflows already run as scheduled tasks
           useTaskManager: false,
         });
+        executionId = executeAgentResult.executionId;
 
         const events = await firstValueFrom(
-          events$.pipe(
+          executeAgentResult.events$.pipe(
             tap((event) => {
               if (isRoundCompleteEvent(event)) {
                 const { model_usage: modelUsage } = event.data.round;
@@ -132,6 +142,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             message: outputMessage,
             structured_output: round.response.structured_output,
             ...(outputConversationId && { conversation_id: outputConversationId }),
+            execution_id: executionId,
             metadata: { usage },
           },
         };
@@ -141,7 +152,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           error instanceof Error ? error : new Error(String(error))
         );
         return {
-          output: { message: '', metadata: { usage } },
+          output: { message: '', execution_id: executionId, metadata: { usage } },
           error: error instanceof Error ? error : new Error(String(error)),
         };
       }

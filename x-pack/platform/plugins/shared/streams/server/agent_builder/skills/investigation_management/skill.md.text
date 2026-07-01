@@ -141,22 +141,21 @@ Use `platform.core.get_workflow_execution_status` with the `executionId` from th
 
 ### Recording the investigation on a Significant Event
 
-When you trigger an investigation for a Significant Event, record it on the event using `platform.streams.sig_events.event_investigation_attach` — once immediately when the investigation starts (status `pending`), and again when it reaches a terminal state (status `success` or `failed`).
+When you trigger an investigation for a Significant Event, record it on the event using `platform.streams.sig_events.event_investigation_attach` — once immediately when the investigation starts, and again once it reaches a terminal state. The event only tracks that a run happened and when; it does not track status — the full investigation state (hypotheses, conclusion) lives on the workflow execution itself, which the UI fetches or follows using `workflow_execution_id`.
 
 **On start** (right after `execute_workflow` returns an execution id):
 - `event_id` — the `event_id` of the Significant Event.
 - `workflow_execution_id` — the `executionId` returned by `execute_workflow`.
-- `status` — `"pending"`.
 - `started_at` — the execution start time from the workflow execution object.
+- Omit `completed_at`.
 
-**On completion** (once the investigation has reached a terminal state):
+**On completion** (once the investigation has reached a terminal state, regardless of whether it succeeded or failed):
 - `event_id` — same as above.
 - `workflow_execution_id` — same as above.
-- `status` — `"success"` if the investigation completed without errors, `"failed"` otherwise.
-- `started_at` — same start time as the pending call.
+- `started_at` — same start time as the initial call.
 - `completed_at` — the current ISO-8601 datetime.
 
-This tool is idempotent (replace-by-`workflow_execution_id`): the investigation workflow also auto-records both the pending and terminal entries when it runs via the triage pipeline, so calling this tool for the same execution id is always safe.
+This tool is idempotent (replace-by-`workflow_execution_id`): the investigation workflow also auto-records both the start and terminal entries when it runs via the triage pipeline, so calling this tool for the same execution id is always safe.
 
 Only call this tool when a Significant Event was the context for the investigation (`event_id` is known). Skip it for free-form issues or alert investigations.
 

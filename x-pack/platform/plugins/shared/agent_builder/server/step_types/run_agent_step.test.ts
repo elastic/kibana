@@ -466,6 +466,55 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     });
   });
 
+  describe('execution_id', () => {
+    it('forwards input.execution_id as executionId to executeAgent', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager);
+
+      await step.handler(
+        createContext({
+          input: { message: 'hello', execution_id: 'caller-provided-id' },
+        })
+      );
+
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ executionId: 'caller-provided-id' })
+      );
+    });
+
+    it('returns the underlying agent execution id in the output', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager);
+
+      const res = await step.handler(createContext({ input: { message: 'hello' } }));
+
+      expect(res.output?.execution_id).toBe('exec-1');
+    });
+
+    it('returns the execution id even when the step fails after execution starts', async () => {
+      const execError = new Error('No LLM connector configured');
+      const events$ = throwError(() => execError);
+      const execution = createExecutionMock(events$);
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager);
+
+      const res = await step.handler(createContext({ input: { message: 'hello' } }));
+
+      expect(res.error).toBe(execError);
+      expect(res.output?.execution_id).toBe('exec-1');
+    });
+  });
+
   describe('token usage', () => {
     it('includes usage in output from a single round with model_usage', async () => {
       const events$ = of({

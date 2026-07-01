@@ -35,7 +35,7 @@ import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { SigEventDetails } from '../../../significant_event_details/sig_event_details';
 import { EventInvestigations } from './event_investigations';
-import { hasPendingInvestigation } from '../shared/investigation_status';
+import { hasRunningInvestigation } from '../shared/investigation_status';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 
 const LIFECYCLE_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.lifecycleTitle', {
@@ -87,7 +87,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   const triggerPollTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
-    if (hasPendingInvestigation(latestEvent) && isPollingAfterTrigger) {
+    if (hasRunningInvestigation(latestEvent) && isPollingAfterTrigger) {
       setIsPollingAfterTrigger(false);
       clearTimeout(triggerPollTimeoutRef.current);
     }
@@ -105,7 +105,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
 
   useInterval(
     refetchLifecycle,
-    isPollingAfterTrigger || hasPendingInvestigation(latestEvent) ? RUNNING_POLL_INTERVAL_MS : null
+    isPollingAfterTrigger || hasRunningInvestigation(latestEvent) ? RUNNING_POLL_INTERVAL_MS : null
   );
 
   useEffect(() => {

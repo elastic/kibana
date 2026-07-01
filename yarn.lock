@@ -7544,6 +7544,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/investigation-output@link:x-pack/platform/packages/shared/kbn-investigation-output":
+  version "0.0.0"
+  uid ""
+
 "@kbn/io-ts-utils@link:src/platform/packages/shared/kbn-io-ts-utils":
   version "0.0.0"
   uid ""

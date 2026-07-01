@@ -14,6 +14,7 @@ import {
   STREAMS_EVENT_STATUS_UPDATE_TOOL_ID,
   STREAMS_SEARCH_EVENTS_TOOL_ID,
   STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
+  STREAMS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
 } from './register_tools';
 import { createMockGetScopedClients } from '../utils/test_helpers';
 import type { StreamsServer } from '../../types';
@@ -56,6 +57,7 @@ describe('registerAgentBuilderTools', () => {
     expect(registeredIds).toContain(STREAMS_SEARCH_EVENTS_TOOL_ID);
     expect(registeredIds).toContain(STREAMS_CREATE_EVENT_TOOL_ID);
     expect(registeredIds).toContain(STREAMS_EVENT_STATUS_UPDATE_TOOL_ID);
+    expect(registeredIds).toContain(STREAMS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID);
   });
 
   it('registers tools with non-empty descriptions and schemas', () => {

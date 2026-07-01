@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SignificantEventInvestigationStatus } from '@kbn/significant-events-schema';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
 import type { EventClient } from '../../../lib/significant_events/events';
 
@@ -13,14 +12,12 @@ export const attachEventInvestigationToolHandler = async ({
   eventClient,
   eventId,
   workflowExecutionId,
-  status,
   startedAt,
   completedAt,
 }: {
   eventClient: EventClient;
   eventId: string;
   workflowExecutionId: string;
-  status: SignificantEventInvestigationStatus;
   startedAt: string;
   completedAt?: string;
 }): Promise<{ event_id: string; updated: number; ignored: number }> => {
@@ -29,7 +26,6 @@ export const attachEventInvestigationToolHandler = async ({
     eventId,
     investigation: {
       workflow_execution_id: workflowExecutionId,
-      status,
       started_at: startedAt,
       completed_at: completedAt,
     },
