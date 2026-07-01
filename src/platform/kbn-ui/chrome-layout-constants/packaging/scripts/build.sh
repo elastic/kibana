@@ -35,11 +35,11 @@ echo "==> Step 3: TypeScript declarations"
   --declaration --emitDeclarationOnly \
   --outDir "$TARGET_DIR" \
   --rootDir "$PACKAGING_DIR" \
-  --moduleResolution node \
+  --module preserve \
+  --moduleResolution bundler \
   --esModuleInterop \
   --skipLibCheck \
-  --ignoreConfig \
-  --ignoreDeprecations 6.0
+  --ignoreConfig
 mv "$TARGET_DIR/types.d.ts" "$TARGET_DIR/index.d.ts"
 echo "    Declarations OK"
 
