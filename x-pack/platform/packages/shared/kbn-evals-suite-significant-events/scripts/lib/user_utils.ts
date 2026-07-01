@@ -42,6 +42,29 @@ export async function withTempSuperuser<T>(
 ): Promise<T> {
   // Pre-flight: remove any stale user left by a previous crashed run.
   await deleteUser(esClient, log, TEMP_USER);
+  // Ensure the role exists — it is a built-in on Elastic Cloud but absent from
+  // self-managed ES. getRole returns 404 (throws ResponseError) when missing.
+  let roleExists = false;
+  try {
+    const existing = await esClient.security.getRole({ name: 'system_indices_superuser' });
+    roleExists = Boolean(existing.system_indices_superuser);
+  } catch (err) {
+    if (err instanceof errors.ResponseError && err.statusCode === 404) {
+      roleExists = false;
+    } else {
+      throw err;
+    }
+  }
+  if (!roleExists) {
+    await esClient.security.putRole({
+      name: 'system_indices_superuser',
+      cluster: ['all'],
+      indices: [{ names: ['*'], privileges: ['all'], allow_restricted_indices: true }],
+    });
+    log.info(
+      `withTempSuperuser: created role "system_indices_superuser" (not present in self-managed ES)`
+    );
+  }
   try {
     await esClient.security.putUser({
       username: TEMP_USER,
