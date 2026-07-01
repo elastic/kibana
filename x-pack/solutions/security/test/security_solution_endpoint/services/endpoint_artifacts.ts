@@ -31,6 +31,7 @@ import type TestAgent from 'supertest/lib/agent';
 import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isArtifactGlobal } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/endpoint_exceptions/constants';
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { FtrProviderContext } from '../configs/ftr_provider_context';
 import type { InternalUnifiedManifestSchemaResponseType } from '../apps/integrations/mocks';
 
@@ -80,15 +81,16 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
      * @param supertest
      */
     async deleteList(listId: string): Promise<void> {
-      const allExceptionListObjects = await kibanaServer.savedObjects.find({
-        type: 'exception-list-agnostic',
+      await esClient.deleteByQuery({
+        index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
+        conflicts: 'proceed',
+        refresh: true,
+        query: {
+          bool: {
+            filter: [{ term: { 'exception-list-agnostic.list_id': listId } }],
+          },
+        },
       });
-
-      const listObjectsToDelete = allExceptionListObjects.saved_objects.filter(
-        (obj) => obj.attributes.list_id === listId
-      );
-
-      await kibanaServer.savedObjects.bulkDelete({ objects: listObjectsToDelete });
     }
 
     async ensureListExists(
