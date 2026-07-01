@@ -16,6 +16,7 @@ import {
   sampleDocument,
 } from './test_helpers';
 import { registerUpsertRoute } from './upsert';
+import { SmlPermissionsConflictError } from '../services/sml/errors';
 
 const validBody = {
   title: 'Test Viz',
@@ -307,5 +308,61 @@ describe('registerUpsertRoute', () => {
       'write failed'
     );
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('write failed'));
+  });
+
+  describe('permissions field', () => {
+    it('forwards a caller-supplied permissions object to indexAttachment', async () => {
+      mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
+      mockSmlService.indexAttachment.mockResolvedValue(undefined);
+      mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
+
+      const bodyWithPermissions = {
+        ...validBody,
+        permissions: { elasticsearch: { indices: [{ name: 'my-index' }] } },
+      };
+
+      await callHandler({ params: validParams, body: bodyWithPermissions });
+
+      expect(mockSmlService.indexAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          permissions: {
+            kibana: { privileges: [] },
+            elasticsearch: { indices: [{ name: 'my-index' }] },
+          },
+        })
+      );
+    });
+
+    it('omits permissions from the indexAttachment call when the body does not supply it', async () => {
+      mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
+      mockSmlService.indexAttachment.mockResolvedValue(undefined);
+      mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
+
+      await callHandler({ params: validParams, body: validBody });
+
+      const [callArgs] = mockSmlService.indexAttachment.mock.calls;
+      expect(callArgs[0]).not.toHaveProperty('permissions');
+    });
+
+    it('maps SmlPermissionsConflictError to 409 without rethrowing', async () => {
+      mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
+      mockSmlService.indexAttachment.mockRejectedValue(
+        new SmlPermissionsConflictError(
+          "attachmentType 'lens' derives permissions via getPermissions()"
+        )
+      );
+
+      const bodyWithPermissions = {
+        ...validBody,
+        permissions: { elasticsearch: { indices: [{ name: 'spoofed' }] } },
+      };
+
+      const response = await callHandler({ params: validParams, body: bodyWithPermissions });
+
+      expect(response.conflict).toHaveBeenCalledWith({
+        body: { message: "attachmentType 'lens' derives permissions via getPermissions()" },
+      });
+      expect(response.ok).not.toHaveBeenCalled();
+    });
   });
 });
