@@ -434,6 +434,27 @@ describe('runWorkflow', () => {
         expect(result).toEqual({ shouldDeleteTask: true });
         expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
       });
+
+      it('reports metering once via handlePostExecutionLoop when queued run ends FAILED', async () => {
+        mockHandleQueuedWorkflowRunAtTaskStart.mockResolvedValueOnce(true);
+        const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+        const meteringService = { reportWorkflowExecution } as unknown as WorkflowsMeteringService;
+        const failedExecution = {
+          id: workflowRunId,
+          workflowId: 'wf',
+          spaceId,
+          status: ExecutionStatus.FAILED,
+        };
+        workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue(failedExecution);
+
+        await runWorkflowWithDefaults({ meteringService });
+
+        expect(reportWorkflowExecution).toHaveBeenCalledTimes(1);
+        expect(reportWorkflowExecution).toHaveBeenCalledWith(
+          failedExecution,
+          dependencies.cloudSetup
+        );
+      });
     });
   });
 

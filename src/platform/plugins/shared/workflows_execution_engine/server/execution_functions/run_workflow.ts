@@ -110,14 +110,6 @@ export async function runWorkflow({
       meteringService,
       cloudSetup: dependencies.cloudSetup,
     });
-    if (meteringService) {
-      const terminalExecution = await workflowExecutionRepository
-        .getWorkflowExecutionById(workflowRunId, spaceId)
-        .catch(() => null);
-      if (terminalExecution) {
-        void meteringService.reportWorkflowExecution(terminalExecution, dependencies.cloudSetup);
-      }
-    }
     return { shouldDeleteTask: true };
   }
 
