@@ -13,8 +13,7 @@ import type { ScoutPage } from '..';
 import { DataGrid } from './data_grid';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
-import { DataViewEditorPage } from './data_view_editor_page';
-import { resolveSelector } from '../utils/locator_helper';
+import { resolveSelector } from '../utils';
 
 const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
 
@@ -108,25 +107,35 @@ export class DiscoverApp {
   }
 
   private async fillAndSubmitDataViewEditor({ name, adHoc = false }: DataViewOptions) {
-    const editor = new DataViewEditorPage(this.page);
-    await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
+    // Minimal inline interaction with the data view editor flyout. The full
+    // `DataViewEditorPage` object lives in the `data_view_editor` plugin, but
+    // `kbn-scout` is a base package and must not depend on a plugin, so the few
+    // steps Discover needs are driven directly here.
+    const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
+    const form = this.page.testSubj.locator('indexPatternEditorForm');
+    const titleInput = this.page.testSubj.locator('createIndexPatternTitleInput');
+    const timestampField = this.page.testSubj.locator('timestampField');
+
+    await flyout.waitFor({ state: 'visible' });
 
     // FTR passes the base name and relies on the editor auto-appending `*` as the
     // user types. Scout sets the title verbatim (`fill`), so append the wildcard
     // here to preserve that contract (`name`, `* will be added automatically`).
-    await editor.setTitle(name.endsWith('*') ? name : `${name}*`);
+    await titleInput.fill(name.endsWith('*') ? name : `${name}*`);
+    // wait for async title validation to settle before continuing.
+    await form.and(this.page.locator('[data-validation-error="0"]')).waitFor({ state: 'visible' });
 
     // wait for timestamp options; default @timestamp applies.
-    await editor.timestampField
+    await timestampField
       .and(this.page.locator('[data-is-loading="0"]'))
       .waitFor({ state: 'visible', timeout: 30_000 });
 
     if (adHoc) {
       await this.page.testSubj.click('exploreIndexPatternButton');
-      await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'hidden' });
     } else {
-      await editor.save();
+      await this.page.testSubj.click('saveIndexPatternButton');
     }
+    await flyout.waitFor({ state: 'hidden' });
 
     await this.waitUntilTabIsLoaded();
   }
@@ -346,39 +355,14 @@ export class DiscoverApp {
     await canvas.click();
   }
 
-  async waitUntilSearchingHasFinished() {
-    await this.dataGrid.waitUntilSearchingHasFinished();
-  }
-
   // Waits for a Discover tab to finish loading.
   async waitUntilTabIsLoaded() {
     await this.waitForDiscoverPage();
     await this.waitUntilSearchingHasFinished();
   }
 
-  // Waits for the document table to be fully rendered and stable
-  async waitForDocTableRendered() {
-    await this.dataGrid.waitForDocTableRendered();
-  }
-
-  async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
-    await this.dataGrid.openDocumentDetails({ rowIndex });
-  }
-
-  async waitForDocViewerFlyoutOpen() {
-    await this.dataGrid.waitForDocViewerFlyoutOpen();
-  }
-
-  async openAndWaitForDocViewerFlyout({ rowIndex }: { rowIndex: number }) {
-    await this.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex });
-  }
-
-  /**
-   * Close the Discover document-viewer flyout and wait for it to disappear.
-   */
-  async closeDocViewerFlyout() {
-    await this.page.testSubj.click('euiFlyoutCloseButton');
-    await this.page.testSubj.waitForSelector('kbnDocViewer', { state: 'hidden' });
+  async waitUntilSearchingHasFinished() {
+    await this.dataGrid.waitForLoad();
   }
 
   async getDocTableIndex(index: number): Promise<string> {
@@ -468,10 +452,6 @@ export class DiscoverApp {
     return this.page.testSubj.locator('split-button-notification-indicator');
   }
 
-  getColumnHeader(name: string): Locator {
-    return this.dataGrid.getColumnHeader(name);
-  }
-
   public readonly controls = {
     getControlFrame: (controlId: string): Locator =>
       this.page.locator(`[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`),
@@ -480,7 +460,7 @@ export class DiscoverApp {
   };
 
   async clickFieldSort(field: string, sortOption: string) {
-    const header = this.getColumnHeader(field);
+    const header = this.dataGrid.getColumnHeader(field);
     await header.click();
     await this.page.testSubj.waitForSelector(`dataGridHeaderCellActionGroup-${field}`, {
       state: 'visible',
@@ -614,8 +594,7 @@ export class DiscoverApp {
   }
 
   async moveColumn(fieldName: string, direction: 'left' | 'right') {
-    await this.page.testSubj.hover(`dataGridHeaderCell-${fieldName}`);
-    await this.page.testSubj.click(`dataGridHeaderCellActionButton-${fieldName}`);
+    await this.dataGrid.openColumnMenuByField(fieldName);
     await this.page.getByText(`Move ${direction}`).click();
   }
 
