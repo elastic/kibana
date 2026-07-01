@@ -20,9 +20,8 @@ export interface IdentifiedDocument {
   id?: string;
 }
 
-export interface DocumentWrite<TDocument extends IdentifiedDocument> {
+export interface DocumentUpdate<TDocument extends IdentifiedDocument> {
   doc: TDocument;
-  operation: 'update' | 'create';
   version?: EsDocumentVersion;
 }
 
@@ -77,6 +76,11 @@ const isRetriableBulkUpdate = (item: {
   update?: { status?: number; error?: { type?: string } };
 }): boolean => isBulkVersionConflict(item) || isBulkDocumentMissing(item);
 
+/**
+ * Resolves fresh OCC versions from Elasticsearch for the given writes and
+ * returns them keyed by document id. Returns an empty map (no round trips)
+ * when there is nothing to resolve.
+ */
 const refreshVersions = async <TDocument extends IdentifiedDocument>({
   esClient,
   dataStreamName,
@@ -86,49 +90,51 @@ const refreshVersions = async <TDocument extends IdentifiedDocument>({
   esClient: ElasticsearchClient;
   dataStreamName: string;
   entityName: string;
-  writes: DocumentWrite<TDocument>[];
-}): Promise<void> => {
+  writes: DocumentUpdate<TDocument>[];
+}): Promise<DocumentVersionsById> => {
   if (writes.length === 0) {
-    return;
+    return {};
   }
 
   const writeIndex = await resolveWriteIndex({ esClient, dataStreamName });
-  const versions = await resolveDocumentVersionsByIds<TDocument>({
+  return resolveDocumentVersionsByIds<TDocument>({
     esClient,
     ids: writes.map(({ doc }) => doc.id as string),
     writeIndex,
     dataStreamName,
     entityName,
   });
-
-  writes.forEach((write) => {
-    write.version = versions[write.doc.id as string];
-  });
 };
 
 /**
- * Uses caller-provided versions where available and resolves fresh versions
- * only for the ids missing from the cache. Skips the `getDataStream` + `mget`
- * round trips entirely when every id is already cached.
+ * Builds the id -> version map for the given writes: uses each write's
+ * caller-supplied version where present and resolves fresh versions only for
+ * the ids missing one. Skips the `getDataStream` + `mget` round trips entirely
+ * when every write already carries a version.
  */
 const fillMissingVersions = async <TDocument extends IdentifiedDocument>({
   esClient,
   dataStreamName,
   entityName,
-  writes: docs,
+  writes,
 }: {
   esClient: ElasticsearchClient;
   dataStreamName: string;
   entityName: string;
-  writes: DocumentWrite<TDocument>[];
-}): Promise<void> => {
-  const withoutVersions = docs.filter(({ version }) => !version);
-  await refreshVersions({
-    esClient,
-    dataStreamName,
-    entityName,
-    writes: withoutVersions,
-  });
+  writes: DocumentUpdate<TDocument>[];
+}): Promise<DocumentVersionsById> => {
+  const provided: DocumentVersionsById = {};
+  const missing: Array<DocumentUpdate<TDocument>> = [];
+  for (const write of writes) {
+    if (write.version && write.doc.id) {
+      provided[write.doc.id] = write.version;
+    } else {
+      missing.push(write);
+    }
+  }
+
+  const resolved = await refreshVersions({ esClient, dataStreamName, entityName, writes: missing });
+  return { ...provided, ...resolved };
 };
 
 export const bulkUpdateDocuments = async <TDocument extends IdentifiedDocument>({
@@ -144,7 +150,7 @@ export const bulkUpdateDocuments = async <TDocument extends IdentifiedDocument>(
 }: {
   esClient: ElasticsearchClient;
   dataStreamName: string;
-  writes: DocumentWrite<TDocument>[];
+  writes: DocumentUpdate<TDocument>[];
   entityName: string;
   refresh: boolean | 'wait_for';
   idRequiredMessage?: string;
@@ -164,7 +170,7 @@ export const bulkUpdateDocuments = async <TDocument extends IdentifiedDocument>(
   });
 
   let pendingWrites = writes;
-  await fillMissingVersions({
+  let versionsById = await fillMissingVersions({
     esClient,
     dataStreamName,
     entityName,
@@ -173,11 +179,9 @@ export const bulkUpdateDocuments = async <TDocument extends IdentifiedDocument>(
   let lastConflictedDocuments: Array<{ id: string; error?: unknown; status?: number }> = [];
 
   for (let attempt = 1; attempt <= retryAttempts; attempt++) {
-    // On retries, back off and re-resolve fresh versions for the conflicted
-    // writes; attempt 1 already has versions from the pre-loop fill.
     if (attempt > 1) {
       await delayMs(getBackoffWithJitterMs(retryBaseDelayMs, attempt));
-      await refreshVersions({
+      versionsById = await refreshVersions({
         esClient,
         dataStreamName,
         entityName,
@@ -185,12 +189,12 @@ export const bulkUpdateDocuments = async <TDocument extends IdentifiedDocument>(
       });
     }
 
-    const operations = pendingWrites.flatMap(({ doc, version }) => {
+    const operations = pendingWrites.flatMap(({ doc }) => {
+      const id = doc.id as string;
+      const version = versionsById[id];
       if (!version) {
         return [];
       }
-
-      const id = doc.id as string;
 
       return [
         {

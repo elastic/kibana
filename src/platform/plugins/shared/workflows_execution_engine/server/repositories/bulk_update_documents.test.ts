@@ -8,7 +8,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { DocumentWrite } from './bulk_update_documents';
+import type { DocumentUpdate } from './bulk_update_documents';
 import { bulkUpdateDocuments } from './bulk_update_documents';
 import type { EsDocumentVersion } from './document_version';
 
@@ -32,7 +32,7 @@ const version = (seqNo: number, primaryTerm: number): EsDocumentVersion => ({
   primaryTerm,
 });
 
-const updateWrite = (id: string, occ?: EsDocumentVersion): DocumentWrite<TestDoc> => ({
+const updateWrite = (id: string, occ?: EsDocumentVersion): DocumentUpdate<TestDoc> => ({
   doc: { id, value: 1 },
   operation: 'update',
   version: occ,
@@ -72,7 +72,7 @@ const missingItem = (id: string) => ({
   update: { _id: id, status: 404, error: { type: 'document_missing_exception' } },
 });
 
-const run = (esClient: EsClientMock, writes: Array<DocumentWrite<TestDoc>>) =>
+const run = (esClient: EsClientMock, writes: Array<DocumentUpdate<TestDoc>>) =>
   bulkUpdateDocuments<TestDoc>({
     esClient: esClient as unknown as ElasticsearchClient,
     dataStreamName: DATA_STREAM,

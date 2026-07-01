@@ -10,7 +10,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
-import type { DocumentWrite } from './bulk_update_documents';
+import type { DocumentUpdate } from './bulk_update_documents';
 import { bulkUpdateDocuments } from './bulk_update_documents';
 import type { DocumentVersionsById, EsDocumentVersion } from './document_version';
 import { extractVersionFromBulkItem } from './document_version';
@@ -191,7 +191,7 @@ export class StepExecutionRepository {
       }
     });
 
-    const updateWrites: Array<DocumentWrite<Partial<EsWorkflowStepExecution>>> = [];
+    const updateWrites: Array<DocumentUpdate<Partial<EsWorkflowStepExecution>>> = [];
     const createOperations: object[] = [];
     for (const write of writes) {
       const { doc, operation } = write;
@@ -203,7 +203,7 @@ export class StepExecutionRepository {
       };
 
       if (operation === 'update') {
-        updateWrites.push({ doc: document, operation: 'update', version: write.version });
+        updateWrites.push({ doc: document, version: write.version });
       } else {
         createOperations.push(
           {
