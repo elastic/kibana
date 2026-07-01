@@ -14,9 +14,12 @@ import { getHighContrastBorder } from '@kbn/ui-chrome-layout-utils';
 import type { ChromeStyle } from '../layout.types';
 import type { EmotionFn } from '../types';
 
-const shell = (): EmotionFn => {
-  return () =>
-    css`
+/** Shell carries panel chrome so agent-first overrides and shadows apply to .kbnChromeLayoutAgent. */
+const shell = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
+  const isProjectStyle = chromeStyle === 'project';
+
+  return (useEuiTheme: UseEuiTheme) => {
+    return css`
       grid-area: agent;
 
       height: calc(
@@ -35,21 +38,6 @@ const shell = (): EmotionFn => {
       min-height: 0;
       min-width: 0;
       overflow: hidden;
-    `;
-};
-
-const panel = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
-  const isProjectStyle = chromeStyle === 'project';
-
-  return (useEuiTheme: UseEuiTheme) => {
-    return css`
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      min-height: 0;
-      min-width: 0;
-      width: 100%;
-      height: 100%;
 
       ${isProjectStyle &&
       css`
@@ -98,6 +86,5 @@ export const contentHiddenStyles = css`
 
 export const styles = {
   shell,
-  panel,
   content,
 };
