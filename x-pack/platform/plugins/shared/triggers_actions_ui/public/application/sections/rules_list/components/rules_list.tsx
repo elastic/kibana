@@ -667,7 +667,7 @@ export const RulesList = ({
       cloneRuleId.current = null;
       setIsCloningRule(false);
 
-      const parsedError = parseRuleCircuitBreakerErrorMessage(error.body?.message);
+      const parsedError = parseRuleCircuitBreakerErrorMessage(error.body?.message ?? '');
       if (!!parsedError.details) {
         toasts.addDanger({
           title: parsedError.summary,
