@@ -16,6 +16,7 @@ import { MonitorListHeader } from './monitor_list_header';
 import type { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
 import { DeleteMonitor } from './delete_monitor';
 import { ResetMonitorModal } from './reset_monitor_modal';
+import { BulkStatusUpdateModal } from './bulk_status_update_modal';
 import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
 import type { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import type { MonitorListPageState } from '../../../../state';
@@ -58,6 +59,10 @@ export const MonitorList = ({
   const [monitorPendingReset, setMonitorPendingReset] = useState<{
     resetIds: string[];
     skippedMonitors: Array<{ id: string; name: string }>;
+  } | null>(null);
+  const [monitorPendingStatusUpdate, setMonitorPendingStatusUpdate] = useState<{
+    ids: string[];
+    enabled: boolean;
   } | null>(null);
   const { resetMonitors, isFixableByReset } = useMonitorIntegrationHealth();
 
@@ -121,7 +126,7 @@ export const MonitorList = ({
 
   const selection: EuiTableSelectionType<MonitorListItem> = {
     onSelectionChange,
-    initialSelected: selectedItems,
+    selected: selectedItems,
   };
   const { spaces: spacesApi } = useKibana<ClientPluginsStart>().services;
 
@@ -144,6 +149,7 @@ export const MonitorList = ({
           selectedItems={selectedItems as EncryptedSyntheticsSavedMonitor[]}
           setMonitorPendingDeletion={setMonitorPendingDeletion}
           setMonitorPendingReset={setMonitorPendingReset}
+          setMonitorPendingStatusUpdate={setMonitorPendingStatusUpdate}
         />
         <EuiHorizontalRule margin="s" />
         <EuiBasicTable<MonitorListItem>
@@ -188,6 +194,19 @@ export const MonitorList = ({
               (mon) => mon[ConfigKey.CONFIG_ID] === monitorPendingDeletion[0]
             )?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT
           }
+          reloadPage={reloadPage}
+        />
+      )}
+      {monitorPendingStatusUpdate !== null && monitorPendingStatusUpdate.ids.length > 0 && (
+        <BulkStatusUpdateModal
+          monitors={items.filter((mon) =>
+            monitorPendingStatusUpdate.ids.includes(mon[ConfigKey.CONFIG_ID])
+          )}
+          enabled={monitorPendingStatusUpdate.enabled}
+          onClose={() => {
+            setMonitorPendingStatusUpdate(null);
+            setSelectedItems([]);
+          }}
           reloadPage={reloadPage}
         />
       )}
