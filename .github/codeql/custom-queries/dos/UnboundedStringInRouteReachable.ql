@@ -119,6 +119,17 @@ predicate schemaBuildStep(DataFlow::Node child, DataFlow::Node parent) {
     child = m.getReceiver()
   )
   or
+  // Schema composition: `Base.extends({ ...fields })` (config-schema), `Base.extend({...})` /
+  // `Base.merge(Other)` (Zod). The base receiver, the extension object's field values, and a
+  // merged schema argument all contribute fields to the composed schema.
+  exists(DataFlow::MethodCallNode m | m.getMethodName() = ["extends", "extend", "merge"] and parent = m |
+    child = m.getReceiver()
+    or
+    child = m.getArgument(0)
+    or
+    child = m.getArgument(0).getALocalSource().(DataFlow::ObjectLiteralNode).getAPropertyWrite().getRhs()
+  )
+  or
   // Route validation wrapper passthrough: `buildRouteValidationWithZod(schema)`.
   exists(DataFlow::CallNode c |
     c.getCalleeName().matches("buildRouteValidation%") and parent = c and child = c.getAnArgument()
