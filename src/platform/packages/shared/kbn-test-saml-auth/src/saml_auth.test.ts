@@ -227,6 +227,35 @@ describe('saml_auth', () => {
         `Failed to get location from SAML response data: ${JSON.stringify(data)}`
       );
     });
+
+    test('retries on transient network error and succeeds', async () => {
+      fetchMock
+        .mockRejectedValueOnce(new TypeError('fetch failed'))
+        .mockResolvedValueOnce(
+          responseWithSetCookie(
+            { location: 'https://cloud.test/saml?SAMLRequest=fVLLbtswEPwVgXe9K6%2F' },
+            [`sid=Fe26.2**1234567890; Secure; HttpOnly; Path=/`],
+            200
+          )
+        );
+
+      const response = await createSAMLRequest('https://kbn.test.co', '8.12.0', log);
+      expect(response).toStrictEqual({
+        location: 'https://cloud.test/saml?SAMLRequest=fVLLbtswEPwVgXe9K6%2F',
+        sid: 'Fe26.2**1234567890',
+      });
+      expect(fetchMock).toBeCalledTimes(2);
+    });
+
+    test('retries on transient network error and throws after max attempts', async () => {
+      const maxRetryCount = 2;
+      fetchMock.mockRejectedValue(new TypeError('fetch failed'));
+
+      await expect(
+        createSAMLRequest('https://kbn.test.co', '8.12.0', log, maxRetryCount)
+      ).rejects.toThrow('fetch failed');
+      expect(fetchMock).toBeCalledTimes(maxRetryCount + 1);
+    });
   });
 
   describe('createSAMLResponse', () => {
