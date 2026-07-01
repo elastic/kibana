@@ -22,6 +22,7 @@ import {
   EuiLoadingSpinner,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -51,6 +52,18 @@ const CLOSE_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.close', {
 const RUN_LABEL = i18n.translate('xpack.streams.sigEventsTab.runInvestigationButton.label', {
   defaultMessage: 'Run investigation',
 });
+const RESTART_LABEL = i18n.translate(
+  'xpack.streams.sigEventsTab.runInvestigationButton.restartLabel',
+  {
+    defaultMessage: 'Restart investigation',
+  }
+);
+const RESTART_INVESTIGATION_TOOLTIP = i18n.translate(
+  'xpack.streams.sigEventsTab.flyout.restartInvestigationTooltip',
+  {
+    defaultMessage: 'This will cancel the running investigation and start a new one.',
+  }
+);
 const CRITICALITY_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.criticalityLabel', {
   defaultMessage: 'Criticality',
 });
@@ -102,6 +115,8 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   }, []);
 
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation({ onTriggerSuccess });
+
+  const isInvestigationRunning = hasPendingInvestigation(latestEvent);
 
   useInterval(
     refetchLifecycle,
@@ -175,19 +190,23 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
             <EuiButtonEmpty onClick={onClose}>{CLOSE_LABEL}</EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="inspect"
-              onClick={() => {
-                if (!isTriggering) triggerInvestigation(latestEvent.event_id);
-              }}
-              isDisabled={isTriggering}
-              isLoading={isTriggering}
-              fill
-              size="s"
-              data-test-subj="sigEventRunInvestigationButton"
+            <EuiToolTip
+              content={isInvestigationRunning ? RESTART_INVESTIGATION_TOOLTIP : undefined}
             >
-              {RUN_LABEL}
-            </EuiButton>
+              <EuiButton
+                iconType="inspect"
+                onClick={() => {
+                  if (!isTriggering) triggerInvestigation(latestEvent.event_id);
+                }}
+                isDisabled={isTriggering}
+                isLoading={isTriggering}
+                fill
+                size="s"
+                data-test-subj="sigEventRunInvestigationButton"
+              >
+                {isInvestigationRunning ? RESTART_LABEL : RUN_LABEL}
+              </EuiButton>
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
