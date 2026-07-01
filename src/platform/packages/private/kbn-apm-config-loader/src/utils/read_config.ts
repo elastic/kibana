@@ -16,7 +16,7 @@ import { isPlainObject } from 'lodash';
 
 const readYaml = (path: string) => {
   try {
-    return parse(readFileSync(path, 'utf8'), { version: '1.1' });
+    return parse(readFileSync(path, 'utf8'));
   } catch (e) {
     /* tslint:disable:no-empty */
   }
