@@ -57,10 +57,15 @@ echo "
 while read -r config; do
   echo "--- $ node scripts/jest --config $config"
 
+  maxOldSpaceSize=12288
+  if [[ "$TEST_TYPE" == "unit" ]]; then
+    maxOldSpaceSize=18432
+  fi
+
   # --trace-warnings to debug
   # Node.js process-warning detected:
   # Warning: Closing file descriptor 24 on garbage collection
-  cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings"
+  cmd="NODE_OPTIONS=\"--max-old-space-size=$maxOldSpaceSize --trace-warnings"
 
   if should_enable_fips; then
     cmd=$cmd" --enable-fips --openssl-config=$HOME/nodejs.cnf"
