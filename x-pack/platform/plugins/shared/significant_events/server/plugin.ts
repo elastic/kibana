@@ -11,8 +11,8 @@ import type {
   SignificantEventsPluginStartDependencies,
 } from './types';
 
-export interface SignificantEventsPluginSetup {}
-export interface SignificantEventsPluginStart {}
+export type SignificantEventsPluginSetup = Record<string, never>;
+export type SignificantEventsPluginStart = Record<string, never>;
 
 export class SignificantEventsPlugin
   implements

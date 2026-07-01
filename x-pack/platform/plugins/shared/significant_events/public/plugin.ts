@@ -7,8 +7,8 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-export interface SignificantEventsPublicPluginSetup {}
-export interface SignificantEventsPublicPluginStart {}
+export type SignificantEventsPublicPluginSetup = Record<string, never>;
+export type SignificantEventsPublicPluginStart = Record<string, never>;
 
 export class SignificantEventsPublicPlugin
   implements Plugin<SignificantEventsPublicPluginSetup, SignificantEventsPublicPluginStart>

@@ -39,7 +39,6 @@
       "workflowsExtensions",
       "workflowsManagement"
     ],
-    "requiredBundles": [],
-    "extraPublicDirs": ["common"]
+    "requiredBundles": []
   }
 }
