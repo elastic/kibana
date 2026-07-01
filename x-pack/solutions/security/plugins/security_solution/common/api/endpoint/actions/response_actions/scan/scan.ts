@@ -16,6 +16,7 @@ export const ScanActionRequestSchema = {
     parameters: schema.object({
       path: schema.string({
         minLength: 1,
+        maxLength: 4096,
         validate: (value) => {
           if (!value.trim().length) {
             return 'path cannot be an empty string';

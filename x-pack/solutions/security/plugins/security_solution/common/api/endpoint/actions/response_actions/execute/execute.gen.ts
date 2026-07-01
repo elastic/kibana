@@ -28,7 +28,7 @@ export const ExecuteRouteRequestBody = lazySchema(() =>
         /**
          * The shell command to execute on the endpoint.
          */
-        command: z.string().min(1),
+        command: z.string().min(1).max(8192),
         /**
          * The maximum timeout value in seconds before the command is terminated.
          */

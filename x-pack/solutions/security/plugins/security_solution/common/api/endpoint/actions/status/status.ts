@@ -10,8 +10,8 @@ import { schema } from '@kbn/config-schema';
 export const ActionStatusRequestSchema = {
   query: schema.object({
     agent_ids: schema.oneOf([
-      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 50 }),
-      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), { minSize: 1, maxSize: 50 }),
+      schema.string({ minLength: 1, maxLength: 256 }),
     ]),
   }),
 };
