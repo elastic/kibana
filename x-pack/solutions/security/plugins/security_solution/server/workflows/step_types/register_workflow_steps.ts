@@ -7,11 +7,13 @@
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { CoreSetup } from '@kbn/core/server';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
 import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_status_step';
 import { setAlertTagsStepDefinition } from './set_alert_tags_step/set_alert_tags_step';
 import { assignAlertStepDefinition } from './assign_alert_step/assign_alert_step';
+import { assignAttackStepDefinition } from './assign_attack_step/assign_attack_step';
 import {
   REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
   REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
@@ -24,7 +26,8 @@ import {
  */
 export const registerWorkflowSteps = (
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
-  core: CoreSetup
+  core: CoreSetup,
+  experimentalFeatures: ExperimentalFeatures
 ): void => {
   const isEnabled = core
     .getStartServices()
@@ -48,4 +51,8 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(setAlertStatusStepDefinition);
   workflowsExtensions.registerStepDefinition(setAlertTagsStepDefinition);
   workflowsExtensions.registerStepDefinition(assignAlertStepDefinition);
+
+  if (experimentalFeatures.publicAttacksApiEnabled) {
+    workflowsExtensions.registerStepDefinition(assignAttackStepDefinition);
+  }
 };
