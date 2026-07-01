@@ -110,9 +110,10 @@ const saveWorkflow = async ({
 };
 
 const READONLY_EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
+  theme: WORKFLOWS_MONACO_EDITOR_THEME,
   minimap: { enabled: false },
   automaticLayout: true,
-  lineNumbers: 'on' as const,
+  lineNumbers: 'on',
   glyphMargin: true,
   scrollBeyondLastLine: false,
   folding: true,
@@ -121,38 +122,25 @@ const READONLY_EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOption
   lineNumbersMinChars: 2,
   insertSpaces: true,
   fontSize: 14,
-  lineHeight: 23, // default ~21px + 2px
+  lineHeight: 23,
   renderWhitespace: 'none',
   roundedSelection: false,
   guides: { indentation: true },
   wordWrap: 'on',
   wordWrapColumn: 80,
   wrappingIndent: 'indent',
-  theme: WORKFLOWS_MONACO_EDITOR_THEME,
   padding: {
     top: 24,
     bottom: 16,
   },
-  quickSuggestions: {
-    other: true,
-    comments: false,
-    strings: true,
-  },
-  suggest: {
-    snippetsPreventQuickSuggestions: false,
-    showSnippets: true,
-    filterGraceful: true, // Better filtering
-    localityBonus: true, // Prioritize matches near cursor
-  },
-  wordBasedSuggestions: false,
-  hover: {
-    enabled: true,
-    delay: 300,
-    sticky: true,
-    above: false, // Force hover below cursor to avoid clipping
-  },
-  formatOnType: true,
-  suggestLineHeight: 25, // default 21 + 4px for padding
+  readOnly: true,
+  domReadOnly: true,
+  contextmenu: false,
+  lightbulb: { enabled: false },
+  quickSuggestions: false,
+  suggestOnTriggerCharacters: false,
+  hover: { enabled: false },
+  parameterHints: { enabled: false },
 };
 
 const WorkflowYamlCanvasContent: React.FC<{
@@ -375,7 +363,7 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
         defaultMessage: 'Workflow',
       }),
 
-    getIcon: () => 'workflowsApp',
+    // getIcon: () => 'workflowsApp',
 
     getActionButtons: ({ attachment, isCanvas, openCanvas }) => {
       if (isCanvas) return [];
