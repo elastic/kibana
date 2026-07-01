@@ -40,6 +40,35 @@ function parseInputAsDuration(val: number, inputFormat: string, humanPrecise: bo
   return moment.duration(value, kind);
 }
 
+function durationInputToSeconds(val: number, inputFormat: string) {
+  const ratio = ratioToSeconds[inputFormat] || 1;
+  const kind = (
+    inputFormat in ratioToSeconds ? 'seconds' : inputFormat
+  ) as unitOfTime.DurationConstructor;
+  return moment.duration(val * ratio, kind).asSeconds();
+}
+
+/**
+ * Converts a numeric duration value from one duration input unit to another, e.g. a value of
+ * `1000` in `milliseconds` becomes `1` in `seconds`. Supports the sub-second units handled by
+ * the duration format (picoseconds, nanoseconds, microseconds). Returns the value unchanged
+ * when the units match.
+ */
+export function convertDurationValue(
+  value: number,
+  fromInputFormat: string,
+  toInputFormat: string
+): number {
+  if (fromInputFormat === toInputFormat) {
+    return value;
+  }
+  const oneTargetUnitInSeconds = durationInputToSeconds(1, toInputFormat);
+  if (!oneTargetUnitInSeconds) {
+    return value;
+  }
+  return durationInputToSeconds(value, fromInputFormat) / oneTargetUnitInSeconds;
+}
+
 export class DurationFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.DURATION;
   static title = i18n.translate('fieldFormats.duration.title', {
