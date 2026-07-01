@@ -41,9 +41,8 @@ export const monitorMetadataSchema = z.object({
   tags: z.array(z.string().min(1).max(128)).max(20).optional(),
 });
 
-// `id` and `enabled` are optional so the same schema covers both lifecycles
-// distinguished by `attachment.origin`: drafts (origin unset) and saved monitors
-// (origin = config_id). HTTP-only for the MVP.
+// `id` and `enabled` are optional so the same schema covers both lifecycles,
+// distinguished by `attachment.origin`: drafts (unset) vs saved monitors (config_id).
 export const monitorAttachmentDataSchema = z.object({
   id: z.string().optional(),
   type: z.literal('http'),

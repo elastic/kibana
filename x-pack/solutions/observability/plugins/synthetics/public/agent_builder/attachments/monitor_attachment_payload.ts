@@ -7,9 +7,8 @@
 
 import type { MonitorAttachmentData } from '../../../common/agent_builder/attachments/monitor_attachment_schema';
 
-// Subset of the Synthetics monitor POST/PUT body that we need for the
-// agent-builder save flow. The server normalises and fills in defaults for
-// every other ConfigKey, so we deliberately send a thin payload.
+// Thin payload — the Synthetics server normalises and fills defaults for
+// every other ConfigKey on the canonical MonitorFields shape.
 export interface MonitorRequestBody {
   type: 'http';
   name: string;
