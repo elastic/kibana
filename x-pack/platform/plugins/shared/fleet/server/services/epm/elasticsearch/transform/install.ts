@@ -753,12 +753,21 @@ interface TransformEsAssetReference extends EsAssetReference {
   version?: string;
 }
 /**
- * A cross-cluster search source pattern takes the form `<cluster>:<index>`
- * (e.g. `*:metrics-endpoint.metadata_current_default*`). The leading `::` guard
- * avoids misreading the data-stream selector separator (e.g. `logs::failures`)
- * as a remote-cluster separator.
+ * Whether an index expression targets a remote cluster (`<cluster>:<index>`, e.g.
+ * `*:metrics-endpoint.metadata_current_default*`). Mirrors ES
+ * `RemoteClusterAware#isRemoteIndexName`:
+ * - date math (`<...>` / `-<...>`) is never remote — it can legitimately carry a `:` in a
+ *   timezone (e.g. `<logs-{now/d{|+12:00}}>`), which must not be read as a cluster separator;
+ * - `::` is the data-stream selector separator (e.g. `logs::failures`), not a cluster one.
  */
 export const isRemoteIndexExpression = (indexExpression: string): boolean => {
+  if (
+    indexExpression.length === 0 ||
+    indexExpression.startsWith('<') ||
+    indexExpression.startsWith('-<')
+  ) {
+    return false;
+  }
   const separatorIndex = indexExpression.indexOf(':');
   return separatorIndex > 0 && !indexExpression.startsWith('::', separatorIndex);
 };

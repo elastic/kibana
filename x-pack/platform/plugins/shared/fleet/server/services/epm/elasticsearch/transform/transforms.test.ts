@@ -1372,6 +1372,9 @@ describe('isRemoteIndexExpression', () => {
     // `::` is the data-stream selector separator, not a remote-cluster separator
     ['logs-endpoint.events::failures', false],
     ['logs::data', false],
+    // date math is never remote — the ':' in a timezone must not be read as a cluster separator
+    ['<logs-{now/d{yyyy.MM.dd|+12:00}}>', false],
+    ['-<logs-{now/d}>', false],
     // a leading colon means the remote part is empty -> not a valid remote expression
     [':no-remote-name', false],
     ['', false],
