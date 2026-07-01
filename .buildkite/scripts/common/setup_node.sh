@@ -69,3 +69,11 @@ else
 fi
 
 export PATH="$NODE_BIN_DIR:$PATH"
+
+# Kibana installs with pnpm, pinned via package.json "packageManager". Make it
+# available through Corepack (bundled with Node). Non-interactive so CI never
+# prompts to download the pinned pnpm version.
+echo " -- enabling corepack-managed pnpm"
+export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+corepack enable pnpm
+echo " -- pnpm: version=$(pnpm --version)"

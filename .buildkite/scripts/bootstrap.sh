@@ -4,7 +4,7 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-echo "--- yarn install and bootstrap"
+echo "--- pnpm install and bootstrap"
 
 BOOTSTRAP_PARAMS=()
 if [[ "${BOOTSTRAP_ALWAYS_FORCE_INSTALL:-}" ]]; then
@@ -36,7 +36,7 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
 fi
 
 # TODO: revisit the double bootstrap per attempt after removing Bazel and changing package manager.
-if ! (yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}" || yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"); then
+if ! (pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}" || pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"); then
   echo "bootstrap failed, trying again in 15 seconds"
   sleep 15
 
@@ -44,10 +44,10 @@ if ! (yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}" || yarn kbn bootstrap "${BOOTS
   # So, we should just delete node_modules in between attempts
   rm -rf node_modules
 
-  echo "--- yarn install and bootstrap, attempt 2"
-  yarn kbn bootstrap --force-install || yarn kbn bootstrap
+  echo "--- pnpm install and bootstrap, attempt 2"
+  pnpm kbn bootstrap --force-install || pnpm kbn bootstrap
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
-  check_for_changed_files 'yarn kbn bootstrap'
+  check_for_changed_files 'pnpm kbn bootstrap'
 fi
