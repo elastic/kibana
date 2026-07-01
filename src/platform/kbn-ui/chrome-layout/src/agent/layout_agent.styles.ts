@@ -79,6 +79,9 @@ const panel = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
   };
 };
 
+/** Fade content out before width collapse so panel UI is not squished during the tween. */
+export const CONTENT_FADE_MS = 120;
+
 const content: EmotionFn = () => css`
   display: flex;
   flex-direction: column;

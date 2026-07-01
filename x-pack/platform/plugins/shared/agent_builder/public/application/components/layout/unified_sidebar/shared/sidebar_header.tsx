@@ -50,15 +50,23 @@ interface SidebarHeaderProps {
   sidebarView: 'conversation' | 'manage';
   agentId: string;
   getNavigationPath: (newAgentId: string) => string;
-  isCondensed: boolean;
+  showCondensedChrome: boolean;
+  showExpandedChrome: boolean;
+  expandedChromeStyles?: ReturnType<typeof css>;
   onToggleCondensed: () => void;
 }
+
+const headerLayerStyles = css`
+  flex-shrink: 0;
+`;
 
 export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   sidebarView,
   agentId,
   getNavigationPath,
-  isCondensed,
+  showCondensedChrome,
+  showExpandedChrome,
+  expandedChromeStyles,
   onToggleCondensed,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -74,91 +82,92 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
     width: 100%;
   `;
 
-  if (isCondensed) {
-    return (
-      <div css={condensedHeaderShellStyles}>
-        <div css={condensedRowStyles}>
-          <EuiToolTip content={labels.toggleSidebar} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="transitionLeftIn"
-              aria-label={labels.toggleSidebar}
-              aria-expanded={false}
-              color="text"
-              size="xs"
-              onClick={onToggleCondensed}
-            />
-          </EuiToolTip>
-          {sidebarView === 'conversation' && (
-            <EuiToolTip content={labels.newConversation} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="plus"
-                display="empty"
-                color="text"
-                size="xs"
-                aria-label={labels.newConversation}
-                onClick={() => {
-                  navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
-                }}
-                {...getEbtProps({
-                  element: AGENT_BUILDER_UI_EBT.element.sidebar,
-                  action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_START,
-                })}
-              />
-            </EuiToolTip>
-          )}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div css={headerShellStyles}>
-      <div css={headerRowStyles}>
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="spaceBetween"
-          gutterSize="s"
-          css={rowContentStyles}
-        >
-          {sidebarView === 'conversation' ? (
-            <EuiFlexItem grow={true}>
-              <AgentSelector agentId={agentId} getNavigationPath={getNavigationPath} />
-            </EuiFlexItem>
-          ) : (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="arrowLeft"
-                iconSide="left"
-                size="s"
-                flush="both"
-                color="text"
-                onClick={() => {
-                  navigate(appPaths.agent.root({ agentId: getLastAgentId() }));
-                }}
-                {...getEbtProps({
-                  element: AGENT_BUILDER_UI_EBT.element.sidebar,
-                  action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_LAYER_TRANSITION,
-                  detail: AGENT_BUILDER_UI_EBT.detail.layerTransition.BACK_CLICK,
-                })}
-              >
-                {labels.manageComponents}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
+    <>
+      {showCondensedChrome && (
+        <div css={[condensedHeaderShellStyles, headerLayerStyles]}>
+          <div css={condensedRowStyles}>
             <EuiToolTip content={labels.toggleSidebar} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="transitionLeftOut"
+                iconType="transitionLeftIn"
                 aria-label={labels.toggleSidebar}
-                aria-expanded={true}
+                aria-expanded={showExpandedChrome}
                 color="text"
                 size="xs"
                 onClick={onToggleCondensed}
               />
             </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-    </div>
+            {sidebarView === 'conversation' && (
+              <EuiToolTip content={labels.newConversation} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="plus"
+                  display="empty"
+                  color="text"
+                  size="xs"
+                  aria-label={labels.newConversation}
+                  onClick={() => {
+                    navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
+                  }}
+                  {...getEbtProps({
+                    element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                    action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_START,
+                  })}
+                />
+              </EuiToolTip>
+            )}
+          </div>
+        </div>
+      )}
+      {showExpandedChrome && (
+        <div css={[headerShellStyles, headerLayerStyles, expandedChromeStyles]}>
+          <div css={headerRowStyles}>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              gutterSize="s"
+              css={rowContentStyles}
+            >
+              {sidebarView === 'conversation' ? (
+                <EuiFlexItem grow={true}>
+                  <AgentSelector agentId={agentId} getNavigationPath={getNavigationPath} />
+                </EuiFlexItem>
+              ) : (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="arrowLeft"
+                    iconSide="left"
+                    size="s"
+                    flush="both"
+                    color="text"
+                    onClick={() => {
+                      navigate(appPaths.agent.root({ agentId: getLastAgentId() }));
+                    }}
+                    {...getEbtProps({
+                      element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                      action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_LAYER_TRANSITION,
+                      detail: AGENT_BUILDER_UI_EBT.detail.layerTransition.BACK_CLICK,
+                    })}
+                  >
+                    {labels.manageComponents}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={labels.toggleSidebar} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="transitionLeftOut"
+                    aria-label={labels.toggleSidebar}
+                    aria-expanded={showExpandedChrome}
+                    color="text"
+                    size="xs"
+                    onClick={onToggleCondensed}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        </div>
+      )}
+    </>
   );
 };

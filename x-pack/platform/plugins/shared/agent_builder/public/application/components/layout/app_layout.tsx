@@ -12,11 +12,8 @@ import { css } from '@emotion/react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { isMac } from '@kbn/shared-ux-utility';
 
-import {
-  CONDENSED_SIDEBAR_WIDTH,
-  SIDEBAR_WIDTH,
-  UnifiedSidebar,
-} from './unified_sidebar/unified_sidebar';
+import { UnifiedSidebar } from './unified_sidebar/unified_sidebar';
+import { useCondensedSidebarTransition } from './unified_sidebar/use_condensed_sidebar_transition';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -26,6 +23,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { euiTheme } = useEuiTheme();
   const [isCondensed, setIsCondensed] = useState(true);
 
+  const {
+    sidebarMinWidth,
+    sidebarShellStyles,
+    onSidebarShellTransitionEnd,
+    ...sidebarTransitionState
+  } = useCondensedSidebarTransition(isCondensed);
+
   const onKeyDown = useCallback((event: KeyboardEvent) => {
     if ((event.code === 'Period' || event.key === '.') && (isMac ? event.metaKey : event.ctrlKey)) {
       event.preventDefault();
@@ -34,6 +38,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   }, []);
 
   const sidebarStyles = css`
+    ${sidebarShellStyles}
     @media (max-width: ${euiTheme.breakpoint.m - 1}px) {
       display: none;
     }
@@ -53,13 +58,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         responsive={[]}
         pageSideBar={
           <UnifiedSidebar
-            isCondensed={isCondensed}
             onToggleCondensed={() => setIsCondensed((v) => !v)}
+            {...sidebarTransitionState}
           />
         }
         pageSideBarProps={{
-          minWidth: isCondensed ? CONDENSED_SIDEBAR_WIDTH : SIDEBAR_WIDTH,
+          minWidth: sidebarMinWidth,
           css: sidebarStyles,
+          onTransitionEnd: onSidebarShellTransitionEnd,
         }}
       >
         <KibanaPageTemplate.Section paddingSize="none" grow={true} css={contentStyles}>
