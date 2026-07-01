@@ -13,11 +13,13 @@ import type {
   AttachmentResolveContext,
   AttachmentTypeDefinition,
 } from '@kbn/agent-builder-server/attachments';
+import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import {
-  LensConfigBuilder,
-  type LensApiConfig,
-  type LensAttributes,
-} from '@kbn/lens-embeddable-utils';
+  withLensReferences,
+  toLensApiConfig,
+  toSupportedChartType,
+  extractEsqlFromLens,
+} from '../lens_reference';
 import { visualizationAttachmentDataSchema } from './visualization_schema';
 
 /**
@@ -60,7 +62,7 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
           return undefined;
         }
 
-        const lensAttributes = toLensAttributes(
+        const lensAttributes = withLensReferences(
           resolveResult.saved_object.attributes as LensAttributes,
           resolveResult.saved_object.references
         );
@@ -71,8 +73,8 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
           renderer: 'lens',
           query: origin,
           visualization: lensApiConfig as unknown as Record<string, unknown>,
-          chart_type: extractChartType(lensAttributes),
-          esql: extractEsql(lensAttributes),
+          chart_type: toSupportedChartType(lensApiConfig.type),
+          esql: extractEsqlFromLens(lensAttributes),
         };
       } catch {
         return undefined;
@@ -108,47 +110,4 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
 
     getTools: () => [],
   };
-};
-
-const toLensAttributes = (
-  attributes: LensAttributes,
-  references: LensAttributes['references'] | undefined
-): LensAttributes => ({
-  ...attributes,
-  references: references ?? attributes.references ?? [],
-});
-
-const toLensApiConfig = (attributes: LensAttributes): LensApiConfig =>
-  new LensConfigBuilder().toAPIFormat(attributes);
-
-const extractChartType = (attributes: LensAttributes): string => {
-  try {
-    const state = attributes.state;
-    if (state?.visualization && typeof state.visualization === 'object') {
-      const vizState = state.visualization as Record<string, unknown>;
-      if (typeof vizState.preferredSeriesType === 'string') {
-        return vizState.preferredSeriesType;
-      }
-    }
-    return attributes.visualizationType ?? 'unknown';
-  } catch {
-    return 'unknown';
-  }
-};
-
-const extractEsql = (attributes: LensAttributes): string => {
-  try {
-    const layers = (attributes.state?.datasourceStates as Record<string, unknown>)?.textBased as
-      | { layers?: Record<string, { query?: { esql?: string } }> }
-      | undefined;
-    if (layers?.layers) {
-      const firstLayer = Object.values(layers.layers)[0];
-      if (firstLayer?.query?.esql) {
-        return firstLayer.query.esql;
-      }
-    }
-    return '';
-  } catch {
-    return '';
-  }
 };

@@ -11,7 +11,7 @@ import { visualizationSmlType } from './visualization';
 
 jest.mock('@kbn/lens-embeddable-utils', () => ({
   LensConfigBuilder: jest.fn().mockImplementation(() => ({
-    toAPIFormat: jest.fn().mockReturnValue({ type: 'lnsXY', layers: [] }),
+    toAPIFormat: jest.fn().mockReturnValue({ type: 'xy', layers: [] }),
   })),
 }));
 
@@ -344,11 +344,37 @@ describe('visualizationSmlType', () => {
         type: 'visualization',
         data: {
           query: 'My Visualization',
-          visualization: { type: 'lnsXY', layers: [] },
-          chart_type: 'lnsXY',
+          visualization: { type: 'xy', layers: [] },
+          chart_type: 'xy',
           esql: 'FROM test',
         },
       });
+    });
+
+    it('omits chart_type when the Lens API type is outside the supported vocabulary', async () => {
+      const { LensConfigBuilder } = jest.requireMock('@kbn/lens-embeddable-utils');
+      (LensConfigBuilder as jest.Mock).mockImplementation(() => ({
+        // A raw Lens `visualizationType` (not the API vocabulary) must not leak
+        // through as chart_type.
+        toAPIFormat: jest.fn().mockReturnValue({ type: 'lnsXY', layers: [] }),
+      }));
+
+      mockSavedObjectsClient.resolve.mockResolvedValue({
+        saved_object: {
+          id: 'viz-1',
+          type: 'lens',
+          attributes: { title: 'My Visualization' },
+          references: [],
+        },
+        outcome: 'exactMatch',
+      });
+
+      const result = await visualizationSmlType.toAttachment!(
+        { origin_id: 'viz-1' } as never,
+        createContext() as never
+      );
+
+      expect((result!.data as Record<string, unknown>).chart_type).toBeUndefined();
     });
 
     it('returns undefined when resolve result has error', async () => {
@@ -383,7 +409,7 @@ describe('visualizationSmlType', () => {
     it('uses LensConfigBuilder to convert attributes', async () => {
       const { LensConfigBuilder } = jest.requireMock('@kbn/lens-embeddable-utils');
       const toAPIFormatMock = jest.fn().mockReturnValue({
-        type: 'lnsPie',
+        type: 'pie',
         layers: [{ id: 'layer1' }],
       });
       (LensConfigBuilder as jest.Mock).mockImplementation(() => ({
@@ -415,10 +441,10 @@ describe('visualizationSmlType', () => {
       expect(toAPIFormatMock).toHaveBeenCalled();
       const data = result!.data as Record<string, unknown>;
       expect(data.visualization).toEqual({
-        type: 'lnsPie',
+        type: 'pie',
         layers: [{ id: 'layer1' }],
       });
-      expect(data.chart_type).toBe('lnsPie');
+      expect(data.chart_type).toBe('pie');
     });
   });
 });

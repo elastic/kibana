@@ -7,46 +7,20 @@
 
 import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import { kibanaSavedObjectPermissions } from '@kbn/agent-context-layer-plugin/server';
+import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import {
-  LensConfigBuilder,
-  type LensApiConfig,
-  type LensAttributes,
-} from '@kbn/lens-embeddable-utils';
+  withLensReferences,
+  toLensApiConfig,
+  toSupportedChartType,
+  extractEsqlFromLens,
+} from '../lens_reference';
 
 const VISUALIZATION_SML_TYPE = 'visualization';
 const VISUALIZATION_SAVED_OBJECT_TYPE = 'lens';
 
-const extractEsql = (attributes: LensAttributes): string => {
-  try {
-    const layers = (attributes.state?.datasourceStates as Record<string, unknown>)?.textBased as
-      | { layers?: Record<string, { query?: { esql?: string } }> }
-      | undefined;
-    if (layers?.layers) {
-      const firstLayer = Object.values(layers.layers)[0];
-      if (firstLayer?.query?.esql) {
-        return firstLayer.query.esql;
-      }
-    }
-    return '';
-  } catch {
-    return '';
-  }
-};
-
 const getChartType = (attributes: LensAttributes): string => {
   return attributes.visualizationType ?? '';
 };
-
-const toLensAttributes = (
-  attributes: LensAttributes,
-  references: LensAttributes['references'] | undefined
-): LensAttributes => ({
-  ...attributes,
-  references: references ?? attributes.references ?? [],
-});
-
-const toLensApiConfig = (attributes: LensAttributes): LensApiConfig =>
-  new LensConfigBuilder().toAPIFormat(attributes);
 
 export const visualizationSmlType: SmlTypeDefinition = {
   id: VISUALIZATION_SML_TYPE,
@@ -78,7 +52,7 @@ export const visualizationSmlType: SmlTypeDefinition = {
       const so = await context.savedObjectsClient.get('lens', originId);
       const attrs = so.attributes as LensAttributes;
       const title = attrs.title ?? originId;
-      const esql = extractEsql(attrs);
+      const esql = extractEsqlFromLens(attrs);
       const chartType = getChartType(attrs);
       const description = (attrs as { description?: string }).description ?? '';
 
@@ -111,7 +85,7 @@ export const visualizationSmlType: SmlTypeDefinition = {
       return undefined;
     }
 
-    const lensAttributes = toLensAttributes(
+    const lensAttributes = withLensReferences(
       resolveResult.saved_object.attributes as LensAttributes,
       resolveResult.saved_object.references
     );
@@ -122,8 +96,8 @@ export const visualizationSmlType: SmlTypeDefinition = {
       data: {
         query: lensAttributes.title ?? item.origin_id,
         visualization: lensApiConfig as unknown as Record<string, unknown>,
-        chart_type: lensApiConfig.type,
-        esql: extractEsql(lensAttributes),
+        chart_type: toSupportedChartType(lensApiConfig.type),
+        esql: extractEsqlFromLens(lensAttributes),
       },
     };
   },
