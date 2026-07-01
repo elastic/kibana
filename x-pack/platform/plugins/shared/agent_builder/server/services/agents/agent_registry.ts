@@ -129,20 +129,19 @@ class AgentRegistryImpl implements AgentRegistry {
 
   async list(opts: AgentListOptions = {}): Promise<InternalAgentDefinition[]> {
     const allAgents: InternalAgentDefinition[] = [];
+
     for (const provider of this.orderedProviders) {
-      const providerAgents = await provider.list(opts);
-      for (const agent of providerAgents) {
-        if (await this.isAvailable(agent)) {
-          allAgents.push(agent);
-        }
-      }
+      allAgents.push(...(await this.getAvailableAgents(provider, opts)));
     }
+
     return allAgents;
   }
 
-  async getIds(opts?: AgentListOptions): Promise<string[]> {
-    const agents = await this.list(opts);
-    return agents.map(({ id }) => id);
+  async getIds(opts: AgentListOptions = {}): Promise<string[]> {
+    const builtinAgents = await this.getAvailableAgents(this.builtinProvider, opts);
+    const persistedAgentIds = await this.persistedProvider.getIds(opts);
+
+    return [...builtinAgents.map(({ id }) => id), ...persistedAgentIds];
   }
 
   async create(createRequest: AgentCreateRequest): Promise<InternalAgentDefinition> {
@@ -229,5 +228,21 @@ class AgentRegistryImpl implements AgentRegistry {
 
     const status = await agent.isAvailable(context);
     return status.status === 'available';
+  }
+
+  private async getAvailableAgents(
+    provider: ReadonlyAgentProvider | WritableAgentProvider,
+    opts: AgentListOptions
+  ): Promise<InternalAgentDefinition[]> {
+    const availableAgents: InternalAgentDefinition[] = [];
+    const providerAgents = await provider.list(opts);
+
+    for (const agent of providerAgents) {
+      if (await this.isAvailable(agent)) {
+        availableAgents.push(agent);
+      }
+    }
+
+    return availableAgents;
   }
 }

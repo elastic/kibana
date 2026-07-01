@@ -35,6 +35,7 @@ export interface ReadonlyAgentProvider {
 
 export interface WritableAgentProvider extends Omit<ReadonlyAgentProvider, 'readonly'> {
   readonly: false;
+  getIds(opts: AgentListOptions): MaybePromise<string[]>;
   create(createRequest: AgentCreateRequest): MaybePromise<InternalAgentDefinition>;
   update(agentId: string, update: AgentUpdateRequest): MaybePromise<InternalAgentDefinition>;
   delete(agentId: string): MaybePromise<boolean>;
