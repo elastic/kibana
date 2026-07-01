@@ -120,7 +120,7 @@ function mapResponseToDatatable(
     : null;
 
   const allColumns =
-    (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
+    (body.all_columns ?? body.columns)?.map(({ name, type, original_types, _meta }) => {
       const originalTypes = original_types ?? [];
       const hasConflict = type === 'unsupported' && originalTypes.length > 1;
       const kibanaFieldType = hasConflict
@@ -150,6 +150,7 @@ function mapResponseToDatatable(
           params: {
             id: kibanaFieldType,
           },
+          ...(_meta !== undefined && { esMeta: _meta }),
         },
         isNull: hasEmptyColumns ? !lookup.has(name) : false,
         isComputedColumn: isComputedColumn(name, querySummary),
@@ -355,6 +356,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             sessionId: getSearchSessionId(),
             executionContext: getExecutionContext(),
             projectRouting: input?.projectRouting,
+            approximation: input?.useApproximation,
             dropNullColumns: true,
             includeExecutionMetadata: true,
           }
