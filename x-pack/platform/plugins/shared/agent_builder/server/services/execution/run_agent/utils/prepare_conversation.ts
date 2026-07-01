@@ -7,6 +7,7 @@
 
 import type {
   CompactionSummary,
+  Conversation,
   ConversationAction,
   ConverseInput,
   TimelineEvent,
@@ -46,6 +47,11 @@ export interface ProcessedAttachmentType {
   type: string;
   description?: string;
 }
+
+export type ProcessedConversationMetadataContext = Pick<
+  Conversation,
+  'id' | 'title' | 'template_id' | 'template_snapshot' | 'chat_mode' | 'custom_fields'
+>;
 
 /**
  * A processed user message event with formatted attachments.
@@ -91,6 +97,8 @@ export interface ProcessedConversation {
   versionedAttachmentPresentation?: AttachmentPresentation;
   /** Compaction summary covering older events that were replaced by this summary */
   compactionSummary?: CompactionSummary;
+  /** Persisted conversation metadata that should be available as model context. */
+  conversationMetadata?: ProcessedConversationMetadataContext;
 }
 
 const createFormatContext = (agentContext: AgentHandlerContext): AttachmentFormatContext => {
@@ -225,11 +233,13 @@ export const prepareConversation = async ({
   nextInput,
   context,
   action,
+  conversationMetadata,
 }: {
   previousEvents: TimelineEvent[];
   nextInput: ConverseInput;
   context: AgentHandlerContext;
   action?: ConversationAction;
+  conversationMetadata?: ProcessedConversationMetadataContext;
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
   const formatContext = createFormatContext(context);
@@ -272,9 +282,7 @@ export const prepareConversation = async ({
     formatContext,
   });
 
-  const executionEvents = effectiveEvents.filter(
-    (event) => !isUserActionEvent(event)
-  );
+  const executionEvents = effectiveEvents.filter((event) => !isUserActionEvent(event));
 
   // Process each event: UserMessageEvent → ProcessedUserMessageEvent, AgentExecutionEvent → pass through
   const processedEvents: ProcessedTimelineEvent[] = await Promise.all(
@@ -369,6 +377,7 @@ export const prepareConversation = async ({
     attachments: allAttachments,
     attachmentStateManager,
     versionedAttachmentPresentation,
+    ...(conversationMetadata ? { conversationMetadata } : {}),
   };
 };
 

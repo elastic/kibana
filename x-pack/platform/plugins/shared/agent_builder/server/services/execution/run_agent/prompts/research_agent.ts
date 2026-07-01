@@ -17,6 +17,7 @@ import { formatDate } from './utils/helpers';
 import { getFileSystemInstructions } from './utils/filestore';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 import { renderVisualizationPrompt } from './utils/visualizations';
+import { getConversationMetadataSystemMessages } from './utils/conversation_metadata';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
 
@@ -37,6 +38,7 @@ export const getResearchAgentPrompt = async (
 
   return [
     ['system', await getAgentSystemMessage(params)],
+    ...getConversationMetadataSystemMessages(processedConversation.conversationMetadata),
     ...previousRoundsAsMessages,
     ...(await formatResearcherActionHistory({
       actions,

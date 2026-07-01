@@ -160,6 +160,24 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     previousEvents: timelineEvents,
     context,
     action,
+    ...(conversation
+      ? {
+          conversationMetadata: {
+            id: conversation.id,
+            title: conversation.title,
+            ...(conversation.template_id !== undefined && {
+              template_id: conversation.template_id,
+            }),
+            ...(conversation.template_snapshot !== undefined && {
+              template_snapshot: conversation.template_snapshot,
+            }),
+            ...(conversation.chat_mode !== undefined && { chat_mode: conversation.chat_mode }),
+            ...(conversation.custom_fields !== undefined && {
+              custom_fields: conversation.custom_fields,
+            }),
+          },
+        }
+      : {}),
   });
 
   const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
