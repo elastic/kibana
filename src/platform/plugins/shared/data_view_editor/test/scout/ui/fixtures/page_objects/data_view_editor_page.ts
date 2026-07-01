@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '..';
-import { expect } from '..';
+import type { ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 // Detail page URL after a data view is saved: /app/management/kibana/dataViews/dataView/<id>
 export const DATA_VIEW_DETAIL_URL_PATTERN = /\/management\/kibana\/dataViews\/.+/;

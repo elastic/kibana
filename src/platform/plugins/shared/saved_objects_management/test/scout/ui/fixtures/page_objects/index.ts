@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  parseRgbString,
-  shouldApplyColor,
-  needsLightText,
-  getLegacyMetricDataBounds,
-} from './palette';
-export { formatValueAsText, formatValueAsReactNode } from './format';
+export { SavedObjectsManagementPage } from './saved_objects_management_page';
+export { CopySavedObjectsToSpaceFlyout } from './copy_saved_objects_to_space_flyout';
+export type {
+  CopyToSpaceSetupOptions,
+  CopyToSpaceSummary,
+} from './copy_saved_objects_to_space_flyout';
