@@ -306,9 +306,10 @@ describe('getLegendAction', () => {
     expect(screen.getByTestId('legendFilterFooterMessage')).toBeInTheDocument();
   });
 
-  it('disables filter actions for a non-filterable computed date column, but hides the warning message', async () => {
-    // The warning text is suppressed for dates (product decision), but the column is still
-    // genuinely non-filterable, so the actions themselves must stay disabled and inert.
+  it('omits Filter for/out for a non-filterable computed date column, but keeps other cell actions', async () => {
+    // There's no warning message to show for a suppressed date column, so showing disabled
+    // Filter for/out buttons with nothing to explain them would be confusing — they're omitted
+    // even though the popover itself still renders for the other (unrelated) cell actions.
     const tableWithComputedDateColumn: Datatable = {
       ...table,
       meta: { type: ESQL_TABLE_TYPE },
@@ -332,11 +333,63 @@ describe('getLegendAction', () => {
     };
     const Component = buildComponent({ ...sampleLayer, table: tableWithComputedDateColumn });
     await renderAndOpen(Component, makeSeriesProps("Women's Accessories"));
-    await waitFor(() => {
-      expect(screen.getByRole('menuitem', { name: 'Filter for' })).toBeDisabled();
-      expect(screen.getByRole('menuitem', { name: 'Filter out' })).toBeDisabled();
-    });
+    expect(await screen.findByText('Action 1')).toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Filter for' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Filter out' })).not.toBeInTheDocument();
     expect(screen.queryByTestId('legendFilterFooterMessage')).not.toBeInTheDocument();
+  });
+
+  it('does not render an action button for a non-filterable computed date column with no other actions', () => {
+    const tableWithComputedDateColumn: Datatable = {
+      ...table,
+      meta: { type: ESQL_TABLE_TYPE },
+      columns: table.columns.map((col) =>
+        col.id === 'splitAccessorId'
+          ? {
+              ...col,
+              isComputedColumn: true,
+              meta: {
+                ...col.meta,
+                type: 'date',
+                sourceParams: {
+                  ...col.meta.sourceParams,
+                  sourceField: col.name,
+                  isSourceFieldFilterable: false,
+                },
+              },
+            }
+          : col
+      ),
+    };
+    const Component = getLegendAction(
+      [{ ...sampleLayer, table: tableWithComputedDateColumn }],
+      jest.fn(),
+      [[]],
+      {
+        first: {
+          splitSeriesAccessors: {
+            splitAccessorId: {
+              format: { id: 'string' },
+              formatter: {
+                convertToText(x: unknown) {
+                  return x;
+                },
+              } as FieldFormat,
+            },
+          },
+        } as unknown as LayerFieldFormats,
+      },
+      {
+        first: {
+          table: tableWithComputedDateColumn,
+          invertedRawValueMap,
+          formattedColumns: {},
+        },
+      },
+      {}
+    );
+    renderWithKibanaRenderContext(<Component {...makeSeriesProps("Women's Accessories")} />);
+    expect(screen.queryByRole('button', { name: /legend actions/i })).not.toBeInTheDocument();
   });
 
   it('does not disable filter actions for a renamed computed column', async () => {
