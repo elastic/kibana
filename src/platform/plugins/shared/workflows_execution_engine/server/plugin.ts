@@ -121,11 +121,6 @@ const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
 const BULK_CANCEL_PAGE_SIZE = 10;
 
-const ensureExecutionWriteDataStreamsReady = async (coreStart: CoreStart): Promise<void> => {
-  const esClient = coreStart.elasticsearch.client.asInternalUser;
-  await ensureExecutionDataStreamsReady(coreStart.dataStreams, esClient);
-};
-
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
 export class WorkflowsExecutionEnginePlugin
@@ -628,13 +623,6 @@ export class WorkflowsExecutionEnginePlugin
     }
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    void ensureExecutionDataStreamsReady(coreStart.dataStreams, esClient).catch((error) => {
-      this.logger.error(
-        `Failed to initialize workflow execution data streams on startup: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    });
     void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
 
     // Initialize ConcurrencyManager with dependencies
@@ -937,7 +925,7 @@ export class WorkflowsExecutionEnginePlugin
       }
       const prepared: PreparedItem[] = [];
 
-      await ensureExecutionWriteDataStreamsReady(coreStart);
+      await this.initialize(coreStart);
 
       for (let idx = 0; idx < items.length; idx++) {
         const item = items[idx];
@@ -1246,13 +1234,6 @@ export class WorkflowsExecutionEnginePlugin
       request
     ) => {
       if (context) {
-        const execution = await workflowExecutionRepository.getWorkflowExecutionById(
-          executionId,
-          spaceId
-        );
-        if (!execution) {
-          throw new WorkflowExecutionNotFoundError(executionId);
-        }
         await workflowExecutionRepository.updateWorkflowExecution({
           id: executionId,
           context,
