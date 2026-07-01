@@ -230,6 +230,8 @@ export const findCaseUserActions = async (
     sortOrder: 'asc' | 'desc';
     page: number;
     perPage: number;
+    search?: string;
+    author?: string;
   },
   signal?: AbortSignal
 ): Promise<InternalFindCaseUserActions> => {
@@ -238,6 +240,8 @@ export const findCaseUserActions = async (
     sortOrder: params.sortOrder,
     page: params.page,
     perPage: params.perPage,
+    ...(params.search ? { search: params.search } : {}),
+    ...(params.author ? { author: params.author } : {}),
   };
 
   const response = await KibanaServices.get().http.fetch<UserActionInternalFindResponse>(

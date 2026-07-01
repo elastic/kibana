@@ -82,8 +82,16 @@ const extractArrayField =
 
 const extractCommentContent: SearchableContentExtractor = (payload) => {
   const comment = payload.comment as Record<string, unknown> | undefined;
-  const text = asString(comment?.comment);
-  return text ? [text] : [];
+  const texts: string[] = [];
+
+  const legacyText = asString(comment?.comment);
+  if (legacyText) texts.push(legacyText);
+
+  const data = comment?.data as Record<string, unknown> | undefined;
+  const content = asString(data?.content);
+  if (content) texts.push(content);
+
+  return texts;
 };
 
 const extractCustomFields: SearchableContentExtractor = (payload) =>

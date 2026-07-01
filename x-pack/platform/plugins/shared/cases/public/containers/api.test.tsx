@@ -630,6 +630,53 @@ describe('Cases API', () => {
       const resp = await findCaseUserActions(basicCase.id, params, abortCtrl.signal);
       expect(resp).toEqual(findCaseUserActionsResponse);
     });
+
+    it('should include the search param in the query when provided', async () => {
+      await findCaseUserActions(
+        basicCase.id,
+        { ...params, search: 'hello world' },
+        abortCtrl.signal
+      );
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${basicCase.id}/user_actions/_find`,
+        {
+          method: 'GET',
+          signal: abortCtrl.signal,
+          query: {
+            types: [],
+            sortOrder: 'asc',
+            page: 1,
+            perPage: 10,
+            search: 'hello world',
+          },
+        }
+      );
+    });
+
+    it('should include the author param in the query when provided', async () => {
+      await findCaseUserActions(basicCase.id, { ...params, author: 'elastic' }, abortCtrl.signal);
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${basicCase.id}/user_actions/_find`,
+        {
+          method: 'GET',
+          signal: abortCtrl.signal,
+          query: {
+            types: [],
+            sortOrder: 'asc',
+            page: 1,
+            perPage: 10,
+            author: 'elastic',
+          },
+        }
+      );
+    });
+
+    it('should omit search and author from the query when not provided', async () => {
+      await findCaseUserActions(basicCase.id, params, abortCtrl.signal);
+      const [, options] = fetchMock.mock.calls[0];
+      expect(options.query).not.toHaveProperty('search');
+      expect(options.query).not.toHaveProperty('author');
+    });
   });
 
   describe('getCaseUserActionsStats', () => {

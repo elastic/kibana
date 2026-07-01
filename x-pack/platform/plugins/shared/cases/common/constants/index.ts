@@ -294,6 +294,7 @@ export const LOCAL_STORAGE_KEYS = {
   templatesYamlEditorCreateState: 'templates.yaml.editor.create',
   templatesYamlEditorEditState: 'templates.yaml.editor.edit',
   userActivitySortOrder: 'cases.userActivity.sortOrder',
+  userActivityFilters: 'cases.userActivity.redesign.filters',
   casesUtilityBarHideMaxLimitWarning: 'cases.utilityBar.hideMaxLimitWarning',
   caseViewSidebarOpen: 'cases.caseView.sidebarOpen',
 };

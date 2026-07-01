@@ -20,6 +20,8 @@ export const useFindCaseUserActions = (
     sortOrder: 'asc' | 'desc';
     page: number;
     perPage: number;
+    search?: string;
+    author?: string;
   },
   isEnabled: boolean
 ) => {

@@ -133,6 +133,28 @@ describe('findUserActions', () => {
       );
     });
 
+    it('matches comment content stored in the unified `data.content` shape', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          payload: {
+            comment: {
+              type: 'user',
+              data: { content: 'Unified schema comment' },
+              owner: 'securitySolution',
+            },
+          },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'unified schema' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(1);
+    });
+
     it('search is case-insensitive', async () => {
       const result = await find(
         { caseId: 'test-case', params: { search: 'hello' } },

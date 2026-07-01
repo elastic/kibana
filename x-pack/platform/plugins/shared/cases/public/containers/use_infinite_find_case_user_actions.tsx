@@ -19,11 +19,18 @@ export const useInfiniteFindCaseUserActions = (
     type: CaseUserActionTypeWithAll;
     sortOrder: 'asc' | 'desc';
     perPage: number;
+    search?: string;
+    author?: string;
   },
   isEnabled: boolean
 ) => {
   const { showErrorToast } = useCasesToast();
   const abortCtrlRef = new AbortController();
+
+  // When searching or filtering by author, `useLastPage` doesn't fetch a
+  // separate last page (its totals aren't reliable for filtered results), so
+  // the infinite query needs to fetch every page itself, including the last.
+  const shouldFetchAllPages = Boolean(params.search || params.author);
 
   return useInfiniteQuery<InternalFindCaseUserActions, ServerError>(
     casesQueriesKeys.caseUserActions(caseId, params),
@@ -38,7 +45,8 @@ export const useInfiniteFindCaseUserActions = (
       getNextPageParam: (lastPage, pages) => {
         const lastPageNumber = Math.ceil(lastPage.total / lastPage.perPage);
         // here last page fetching is skipped because last page is fetched separately using useQuery hook
-        if (lastPage.page < lastPageNumber - 1) {
+        const lastFetchablePage = shouldFetchAllPages ? lastPageNumber : lastPageNumber - 1;
+        if (lastPage.page < lastFetchablePage) {
           return lastPage.page + 1;
         }
         return undefined;
