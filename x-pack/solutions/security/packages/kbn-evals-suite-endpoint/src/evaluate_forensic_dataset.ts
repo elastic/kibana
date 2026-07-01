@@ -93,7 +93,9 @@ const wrapSkillInvocationFallback = (
       return {
         ...result,
         score: 0,
-        explanation: `${result.explanation ?? ''} No tool spans in trace after retries — scoring skill not invoked.`,
+        explanation: `${
+          result.explanation ?? ''
+        } No tool spans in trace after retries — scoring skill not invoked.`,
       };
     }
     return result;

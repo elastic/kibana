@@ -6,8 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
-import { platformCoreTools } from '@kbn/agent-builder-common';
+import { ToolType, ToolResultType, platformCoreTools } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { securityTool } from '../../tools/constants';
 
