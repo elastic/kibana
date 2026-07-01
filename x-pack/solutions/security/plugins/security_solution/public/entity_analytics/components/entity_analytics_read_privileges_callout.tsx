@@ -11,7 +11,10 @@ import type { CallOutMessage } from '../../common/components/callouts';
 import { CallOut, CallOutSwitcher } from '../../common/components/callouts';
 import { missingPrivilegesCallOutBody } from '../../common/components/missing_privileges';
 import { MISSING_PRIVILEGES_CALLOUT_TITLE } from '../../common/components/missing_privileges/translations';
-import type { MissingIndexPrivileges } from '../../common/hooks/use_missing_privileges';
+import type {
+  MissingFeaturePrivileges,
+  MissingIndexPrivileges,
+} from '../../common/hooks/use_missing_privileges';
 import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
 
@@ -19,6 +22,7 @@ interface EntityAnalyticsReadPrivilegesCalloutProps {
   riskEngineReadPrivileges: RiskEngineMissingPrivilegesResponse;
   entityEnginePrivileges: EntityAnalyticsPrivileges | undefined;
   leadGenerationPrivileges?: EntityAnalyticsPrivileges;
+  anomalyPrivileges?: EntityAnalyticsPrivileges;
   /**
    * Identifies the surface rendering the callout. Used as the dismissal storage
    * namespace and as the message id prefix, so ids stay unique and dismissals
@@ -46,6 +50,7 @@ export const EntityAnalyticsReadPrivilegesCallout = React.memo(
     riskEngineReadPrivileges,
     entityEnginePrivileges,
     leadGenerationPrivileges,
+    anomalyPrivileges,
     id,
     dismissible = true,
   }: EntityAnalyticsReadPrivilegesCalloutProps) => {
@@ -54,21 +59,32 @@ export const EntityAnalyticsReadPrivilegesCallout = React.memo(
         ...getRiskEngineMissingReadPrivileges(riskEngineReadPrivileges),
         ...getEntityStoreMissingReadPrivileges(entityEnginePrivileges),
         ...getEntityStoreMissingReadPrivileges(leadGenerationPrivileges),
+        ...getEntityStoreMissingReadPrivileges(anomalyPrivileges),
       ];
 
-      if (indexPrivileges.length === 0) return null;
+      const featurePrivileges: MissingFeaturePrivileges[] = [
+        ...getAnomalyMissingKibanaPrivileges(anomalyPrivileges),
+      ];
+
+      if (indexPrivileges.length === 0 && featurePrivileges.length === 0) return null;
 
       return {
         type: 'primary' as const,
-        id: `${id}-missing-privileges-${hash(indexPrivileges)}`,
+        id: `${id}-missing-privileges-${hash({ indexPrivileges, featurePrivileges })}`,
         title: MISSING_PRIVILEGES_CALLOUT_TITLE,
         description: missingPrivilegesCallOutBody({
           indexPrivileges,
-          featurePrivileges: [],
+          featurePrivileges,
           docs: [],
         }),
       };
-    }, [riskEngineReadPrivileges, entityEnginePrivileges, leadGenerationPrivileges, id]);
+    }, [
+      riskEngineReadPrivileges,
+      entityEnginePrivileges,
+      leadGenerationPrivileges,
+      anomalyPrivileges,
+      id,
+    ]);
 
     if (!message) return null;
 
@@ -98,6 +114,20 @@ const getEntityStoreMissingReadPrivileges = (
       ]
     )
     .filter(([, missingPrivs]) => missingPrivs.length > 0);
+};
+
+const ML_KIBANA_READ_ACTION = 'ui:ml/canGetJobs';
+
+const getAnomalyMissingKibanaPrivileges = (
+  privileges: EntityAnalyticsPrivileges | undefined
+): MissingFeaturePrivileges[] => {
+  if (!privileges) return [];
+
+  if (privileges.privileges.kibana?.[ML_KIBANA_READ_ACTION] === false) {
+    return [['Machine Learning', ['read']]];
+  }
+
+  return [];
 };
 
 const getRiskEngineMissingReadPrivileges = (
