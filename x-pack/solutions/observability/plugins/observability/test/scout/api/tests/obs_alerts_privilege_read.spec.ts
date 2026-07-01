@@ -60,6 +60,21 @@ apiTest.describe(
       expect(body.hits?.hits?.map((hit) => hit._id)).toContain(state.realAlertId);
     });
 
+    apiTest('can read muted alert state via _find_muted_alerts', async ({ apiClient }) => {
+      const response = await apiClient.post('internal/alerting/rules/_find_muted_alerts', {
+        headers: { ...KIBANA_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader },
+        body: { page: 1, per_page: 100 },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+
+      const body = response.body as {
+        data: Array<{ id: string; muted_alert_instance_ids: string[] }>;
+      };
+      const record = body.data.find((rule) => rule.id === state.enabledRuleId);
+      expect(record?.muted_alert_instance_ids).toContain(state.mutedAlertInstanceId);
+    });
+
     for (const spec of RULE_SPECS) {
       apiTest(`cannot mute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
         const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);

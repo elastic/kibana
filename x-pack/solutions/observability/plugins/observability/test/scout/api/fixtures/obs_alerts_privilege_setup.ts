@@ -142,6 +142,8 @@ export interface ObsAlertsPrivilegeState {
   enabledRuleId: string;
   realAlertId: string;
   realAlertIndex: string;
+  /** Instance id of the real, active alert that was muted during setup. */
+  mutedAlertInstanceId: string;
 }
 
 export const setupObsAlertsPrivilegeRules = async ({
@@ -217,6 +219,7 @@ export const setupObsAlertsPrivilegeRules = async ({
 
   let realAlertId: string | undefined;
   let realAlertIndex: string | undefined;
+  let mutedAlertInstanceId: string | undefined;
   await retryForSuccess(
     async () => {
       const findResponse = await apiClient.post('internal/rac/alerts/find', {
@@ -224,26 +227,52 @@ export const setupObsAlertsPrivilegeRules = async ({
         body: {
           rule_type_ids: ['.es-query'],
           consumers: [ES_QUERY_CONSUMER],
-          query: { match_all: {} },
+          query: {
+            bool: {
+              filter: [
+                { term: { 'kibana.alert.rule.uuid': enabledRuleId } },
+                { term: { 'kibana.alert.status': 'active' } },
+              ],
+            },
+          },
           size: 1,
         },
         responseType: 'json',
       });
       const findBody = findResponse.body as {
-        hits?: { hits?: Array<{ _id: string; _index: string }> };
+        hits?: {
+          hits?: Array<{ _id: string; _index: string; _source?: Record<string, unknown> }>;
+        };
       };
       const alertDoc = findBody?.hits?.hits?.[0];
       if (!alertDoc) {
-        throw new Error('No alert doc found yet');
+        throw new Error('No active alert doc found yet');
+      }
+      const instanceId = alertDoc._source?.['kibana.alert.instance.id'];
+      if (typeof instanceId !== 'string') {
+        throw new Error('Alert doc is missing kibana.alert.instance.id');
       }
       realAlertId = alertDoc._id;
       realAlertIndex = alertDoc._index;
+      mutedAlertInstanceId = instanceId;
     },
     { timeoutMs: 30_000, intervalMs: 2_000, label: 'wait for alert to appear in .alerts-*' }
   );
 
   expect(realAlertId).toBeDefined();
   expect(realAlertIndex).toBeDefined();
+  expect(mutedAlertInstanceId).toBeDefined();
+
+  // Mute the real, active alert instance so `_find_muted_alerts` returns muted
+  // state for the privilege tests to assert against. `validate_alerts_existence`
+  // stays on so we only mute an instance the rule has actually produced.
+  const muteResponse = await apiClient.post(
+    `api/alerting/rule/${enabledRuleId}/alert/${encodeURIComponent(
+      mutedAlertInstanceId!
+    )}/_mute?validate_alerts_existence=true`,
+    { headers: { ...KIBANA_HEADERS, ...adminCreds.apiKeyHeader } }
+  );
+  expect(muteResponse).toHaveStatusCode(204);
 
   return {
     adminCreds,
@@ -251,6 +280,7 @@ export const setupObsAlertsPrivilegeRules = async ({
     enabledRuleId: enabledRuleId!,
     realAlertId: realAlertId!,
     realAlertIndex: realAlertIndex!,
+    mutedAlertInstanceId: mutedAlertInstanceId!,
   };
 };
 

@@ -83,8 +83,17 @@ apiTest.describe(
         body: {
           status: 'acknowledged',
           ids: [state.realAlertId],
-          index: '.alerts-stack.alerts-default',
+          index: state.realAlertIndex,
         },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(403);
+    });
+
+    apiTest('cannot read muted alert state via _find_muted_alerts', async ({ apiClient }) => {
+      const response = await apiClient.post('internal/alerting/rules/_find_muted_alerts', {
+        headers: { ...KIBANA_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader },
+        body: { page: 1, per_page: 100 },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(403);
