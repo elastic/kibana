@@ -31,7 +31,10 @@ import { useDataSource } from '../../../../contexts/ml';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { LinkCard } from '../../../../components/link_card';
-import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
+import {
+  useCreateAndNavigateToMlLink,
+  useMlLink,
+} from '../../../../contexts/kibana/use_create_url';
 import { MlAppHeader } from '../../../../components/ml_app_header';
 import { CPSUnsupportedWarning } from '../../../../components/cps_unsupported_warning';
 
@@ -48,6 +51,9 @@ export const Page: FC = () => {
   const onSelectDifferentIndex = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX
   );
+  const selectDifferentIndexHref = useMlLink({
+    page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
+  });
 
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
 
@@ -302,7 +308,7 @@ export const Page: FC = () => {
               defaultMessage="Anomaly detection can only be run over indices which are time based."
             />
             <br />
-            <EuiLink onClick={onSelectDifferentIndex}>
+            <EuiLink href={selectDifferentIndexHref} onClick={onSelectDifferentIndex}>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.jobType.selectDifferentIndexLinkText"
                 defaultMessage="Select a different data view or saved Discover session"
