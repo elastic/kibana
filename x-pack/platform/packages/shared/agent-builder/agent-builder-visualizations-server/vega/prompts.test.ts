@@ -51,6 +51,14 @@ describe('createAuthorVegaSpecPrompt', () => {
     expect(text).toContain('do NOT set a "scheme", "range"');
   });
 
+  it('includes axis-readability guidance (labelLimit, time-axis, title:null)', () => {
+    const text = systemText('any chart');
+    expect(text).toContain('"labelLimit": 150');
+    expect(text).toContain('"labelAngle": 0');
+    expect(text).toContain('"tickCount": 8');
+    expect(text).toContain('"title": null');
+  });
+
   it('includes the chart-type hint only when one is provided', () => {
     expect(systemText('any chart')).not.toContain('Suggested chart style');
 

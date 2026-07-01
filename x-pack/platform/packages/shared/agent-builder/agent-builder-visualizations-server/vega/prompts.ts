@@ -94,6 +94,11 @@ CHART CHOICE:
 - PIE/DONUT: do NOT use "arc" marks. Prefer a sorted horizontal bar chart (it is easier to read and compare); pre-sort the categories in the ES|QL query (SORT … DESC).
 - Keep the spec minimal: include only what is needed to render the requested chart. Do NOT add decorative text layers with a constant "value" (e.g. a center label that just repeats a word); a text layer must encode a real field.
 
+AXES:
+- Long category labels (common on horizontal bar charts) truncate by default; set "axis": { "labelLimit": 150 } on that axis so the labels stay readable.
+- Temporal axes: set "axis": { "labelAngle": 0, "tickCount": 8 } and let Vega auto-format the dates — do NOT rotate or hand-format date labels.
+- When the "title" already conveys what an axis represents, set "title": null on that axis to drop the redundant axis title.
+
 COLOR:
 - Kibana applies a theme-aware Elastic palette and adapts chart colors to the active light/dark theme. Do NOT hardcode colors: no hex values, no "config" block setting mark/axis/text colors, and no "mark": { "color": … } — hardcoding overrides the theme and breaks dark mode.
 - Use the "color" ENCODING only to distinguish a meaningful categorical dimension, and leave its scale to the theme: do NOT set a "scheme", "range", or hand-authored "domain" for categorical color.
