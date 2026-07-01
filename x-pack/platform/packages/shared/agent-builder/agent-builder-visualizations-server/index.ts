@@ -8,6 +8,4 @@
 export { buildVisualizationConfig } from './lens/build_visualization_config';
 export { getChartTypeSelectionPromptContent } from './lens/chart_type_guidance';
 export type { VisualizationConfig } from './lens/types';
-export { decideVisualizationApproach } from './decide_visualization_approach';
-export type { VisualizationRenderer } from './decide_visualization_approach';
 export { buildVegaConfig } from './vega';

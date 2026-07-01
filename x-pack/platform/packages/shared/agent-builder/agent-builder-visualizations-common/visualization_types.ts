@@ -6,6 +6,12 @@
  */
 
 /**
+ * Which engine renders a generated visualization. Lens is the default for
+ * standard charts; Vega is used for requests Lens cannot express.
+ */
+export type VisualizationRenderer = 'lens' | 'vega';
+
+/**
  * Data for a visualization attachment, discriminated by `renderer`.
  *
  * This is the cross-runtime contract for the visualization attachment (consumed
@@ -14,7 +20,7 @@
  */
 export interface VisualizationAttachmentData {
   /** Renderer discriminator. Omitted defaults to Lens for legacy attachments. */
-  renderer?: 'lens' | 'vega';
+  renderer?: VisualizationRenderer;
   /** The display query */
   query: string;
   /** Visualization configuration payload. For Vega, includes a serialized spec. */

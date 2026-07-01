@@ -60,6 +60,7 @@ Do **not** use this skill when:
    - Provide:
      - \`query\` (required, specific and field-accurate)
      - \`index\` (recommended)
+     - \`renderer\` (\`lens\` or \`vega\`, optional — see "Choosing the Renderer"; omit to default to Lens)
      - \`chartType\` (optional, only if confident)
      - \`esql\` (optional, when you have a validated ES|QL)
      - \`attachment_id\` (optional, only when updating an existing visualization)
@@ -101,6 +102,18 @@ Poor prompt patterns:
 - "Display everything"
 
 Always reference real fields from the index mapping.
+
+## Choosing the Renderer
+
+${
+  platformCoreTools.createVisualization
+} renders with **Lens** (standard charts) or **Vega** (custom Vega-Lite). Decide and pass \`renderer\`:
+
+- Pass \`renderer: "vega"\` when:
+  - The user explicitly asks for a Vega or Vega-Lite visualization, OR
+  - No Lens chart type fits — e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings.
+- Otherwise pass \`renderer: "lens"\` (the default when omitted) with the best-fitting \`chartType\`.
+- When updating an existing attachment, \`renderer\` is ignored — edits keep the existing renderer.
 
 ## Chart Type Guidance
 

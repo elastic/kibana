@@ -13,14 +13,13 @@ import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
   VISUALIZATION_ATTACHMENT_TYPE,
   type VisualizationAttachmentData,
+  type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   buildVisualizationConfig,
   buildVegaConfig,
-  decideVisualizationApproach,
   type VisualizationConfig,
-  type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-server';
 
 /**
@@ -59,11 +58,17 @@ const createVisualizationSchema = z.object({
     .describe(
       '(optional) ID of an existing visualization attachment to update. If provided, the tool will read the existing configuration and modify it based on the query.'
     ),
+  renderer: z
+    .enum(['lens', 'vega'])
+    .optional()
+    .describe(
+      '(optional) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-Lite visualizations — small multiples/faceting, layered or combination charts, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Ignored when updating an existing attachment (edits keep the existing renderer).'
+    ),
   chartType: z
     .nativeEnum(SupportedChartType)
     .optional()
     .describe(
-      '(optional) Force a specific Lens chart type, e.g. when the user explicitly asks for one. Providing this always renders a Lens chart of that type. Omit it to let the tool choose the best Lens chart type or fall back to a custom Vega-Lite visualization when no Lens type fits.'
+      '(optional) Best-fitting chart type. For Lens it selects the chart type to build; for Vega it is a styling hint for the intended visual form. When "renderer" is omitted, providing chartType renders a Lens chart. Omit it if unsure.'
     ),
   esql: z
     .string()
@@ -81,22 +86,28 @@ export const createVisualizationTool = (): BuiltinToolDefinition<
     type: ToolType.builtin,
     description: `Create or update a visualization from a natural language description. Supports BOTH standard Lens charts AND custom Vega-Lite visualizations, so prefer this tool over telling the user a chart cannot be built — you do not author Vega specs by hand or ask the user to paste anything.
 
-The tool automatically chooses how to render the request:
-- A standard Lens chart (${Object.values(SupportedChartType).join(
-      ', '
-    )}) whenever one of those types fits.
-- A custom Vega-Lite specification when no Lens chart type can express the request, e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings.
+You choose how to render the request via the "renderer" parameter:
+- "lens" (the default when omitted) for a standard Lens chart (${Object.values(
+      SupportedChartType
+    ).join(', ')}).
+- "vega" for a custom Vega-Lite specification when no Lens chart type can express the request, e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings.
 
 This tool will:
 1. If attachment_id is provided, read the existing visualization from that attachment (edits keep the same renderer)
-2. Decide whether to render with Lens or Vega, and pick the best Lens chart type when applicable
-3. Generate an ES|QL query if not provided
-4. Generate and validate the visualization (Lens config or Vega-Lite spec)
-5. Store the result as an attachment (creating new or updating existing) for future modifications`,
+2. Generate an ES|QL query if not provided
+3. Generate and validate the visualization (Lens config or Vega-Lite spec) for the chosen renderer
+4. Store the result as an attachment (creating new or updating existing) for future modifications`,
     schema: createVisualizationSchema,
     tags: [],
     handler: async (
-      { query: nlQuery, index, chartType, esql, attachment_id: attachmentId },
+      {
+        query: nlQuery,
+        index,
+        renderer: requestedRenderer,
+        chartType,
+        esql,
+        attachment_id: attachmentId,
+      },
       { esClient, modelProvider, logger, events, attachments }
     ) => {
       try {
@@ -115,19 +126,14 @@ This tool will:
           }
         }
 
-        // Step 2: Decide the renderer. Keep an edited attachment on its current
-        // renderer; an explicit chartType always means Lens; otherwise let the
-        // model pick between Lens and Vega.
+        // Step 2: Resolve the renderer from the caller's choice. Edits keep the
+        // existing attachment's renderer; otherwise honor the explicit `renderer`
+        // param and default to Lens (the common case) when it is omitted.
         let renderer: VisualizationRenderer;
-        let decidedChartType: SupportedChartType | undefined;
         if (existingData) {
           renderer = existingData.renderer === 'vega' ? 'vega' : 'lens';
-        } else if (chartType) {
-          renderer = 'lens';
         } else {
-          const approach = await decideVisualizationApproach(modelProvider, nlQuery);
-          renderer = approach.renderer;
-          decidedChartType = approach.chartType;
+          renderer = requestedRenderer ?? 'lens';
         }
 
         // Step 3: Generate the spec/config for the chosen renderer and assemble
@@ -142,7 +148,7 @@ This tool will:
             index,
             esql,
             existingSpec,
-            chartType: chartType ?? decidedChartType,
+            chartType,
             modelProvider,
             logger,
             events,
@@ -163,7 +169,7 @@ This tool will:
             await buildVisualizationConfig({
               nlQuery,
               index,
-              chartType: chartType ?? decidedChartType,
+              chartType,
               esql,
               existingConfig,
               parsedExistingConfig,
@@ -241,7 +247,7 @@ This tool will:
               type: ToolResultType.error,
               data: {
                 message: `Failed to create visualization: ${error.message}`,
-                metadata: { nlQuery, esql, chartType },
+                metadata: { nlQuery, esql, renderer: requestedRenderer, chartType },
               },
             },
           ],

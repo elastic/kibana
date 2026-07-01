@@ -7,4 +7,4 @@
 
 export { VISUALIZATION_ATTACHMENT_TYPE } from './constants';
 
-export type { VisualizationAttachmentData } from './visualization_types';
+export type { VisualizationAttachmentData, VisualizationRenderer } from './visualization_types';
