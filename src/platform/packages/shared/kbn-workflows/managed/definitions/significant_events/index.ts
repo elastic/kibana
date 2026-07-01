@@ -12,6 +12,12 @@ import DISCOVERY_YAML from './discovery.yaml';
 import ORCHESTRATOR_YAML from './orchestrator.yaml';
 import TRIAGE_YAML from './triage.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
+export {
+  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW,
+  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW,
+  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+} from './scheduled';
 
 export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID = 'system-significant-events-detection';
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID = 'system-significant-events-discovery';
