@@ -55,7 +55,7 @@ export const userConnectorTokenModelVersions = (
         {
           type: 'mappings_addition',
           addedMappings: {
-            userCloudId: { type: 'keyword' },
+            userCloudId: { type: 'keyword', ignore_above: 1024 },
           },
         },
       ],

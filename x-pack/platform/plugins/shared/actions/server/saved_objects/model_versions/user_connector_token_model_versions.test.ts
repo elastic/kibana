@@ -81,7 +81,7 @@ describe('userConnectorTokenModelVersions', () => {
       expect(mappingsChange).toBeDefined();
       if (mappingsChange?.type === 'mappings_addition') {
         expect(mappingsChange.addedMappings).toEqual({
-          userCloudId: { type: 'keyword' },
+          userCloudId: { type: 'keyword', ignore_above: 1024 },
         });
       }
     });

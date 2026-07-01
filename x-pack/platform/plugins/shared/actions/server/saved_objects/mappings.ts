@@ -109,6 +109,7 @@ export const userConnectorTokenMappings: SavedObjectsTypeMappingDefinition = {
     },
     userCloudId: {
       type: 'keyword',
+      ignore_above: 1024,
     },
     connectorId: {
       type: 'keyword',
