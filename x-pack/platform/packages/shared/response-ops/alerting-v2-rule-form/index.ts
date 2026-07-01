@@ -59,8 +59,13 @@ export type {
   RuleKind,
 } from './form';
 
-export { buildInlineWorkflowYaml } from './actions_form';
-export type { ActionDraft } from './actions_form';
+export {
+  buildInlineWorkflowYaml,
+  buildRuleScopedMatcher,
+  selectRuleSimpleActionPolicies,
+} from './actions_form';
+export { getRuleNotificationDraftsQueryKey } from './flyout/compose_discover/compose_discover_form/use_rule_notification_drafts';
+export type { ActionDraft, ActionDraftOrigin, RuleScopedSimpleActionPolicy } from './actions_form';
 
 // Threshold rule-builder ES|QL parser + types — consumed by the episode trend chart
 export { parseThresholdEsql } from './flyout/compose_discover/rule_builder/threshold/parse_esql';
