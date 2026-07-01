@@ -479,21 +479,17 @@ class SmlIndexerImpl implements SmlIndexer {
     context: SmlContext;
     requestedPermissions?: SmlPermissions;
   }): Promise<SmlPermissions> {
-    const hasHook = Boolean(definition?.getPermissions);
+    if (definition && definition.getPermissions) {
+      if (requestedPermissions) {
+        throw new SmlPermissionsConflictError(
+          `attachmentType '${definition.id}' derives permissions via getPermissions() and does not accept a caller-supplied 'permissions' value for origin '${originId}'.`
+        );
+      }
 
-    if (hasHook && requestedPermissions) {
-      throw new SmlPermissionsConflictError(
-        `attachmentType '${
-          definition!.id
-        }' derives permissions via getPermissions() and does not accept a caller-supplied 'permissions' value for origin '${originId}'.`
-      );
-    }
-
-    if (hasHook) {
       // Intentionally NOT wrapped in try/catch — see fail-closed note in
       // the JSDoc. Logging here is the caller's job (so origin-mode and
       // content-mode can frame the failure with their own context).
-      const result = await definition!.getPermissions!(originId, context);
+      const result = await definition.getPermissions(originId, context);
       return {
         kibana: { privileges: result.kibana?.privileges ?? [] },
         elasticsearch: { indices: result.elasticsearch?.indices ?? [] },
