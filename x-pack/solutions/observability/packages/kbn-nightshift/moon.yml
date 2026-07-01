@@ -18,6 +18,8 @@ project:
   sourceRoot: x-pack/solutions/observability/packages/kbn-nightshift
 dependsOn:
   - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/connector-specs'
   - '@kbn/storybook'
   - '@kbn/kibana-react-plugin'
 tags:
