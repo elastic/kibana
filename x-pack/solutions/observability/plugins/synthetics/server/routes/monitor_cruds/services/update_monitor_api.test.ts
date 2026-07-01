@@ -367,6 +367,57 @@ describe('UpdateMonitorAPI', () => {
       });
     });
 
+    it('allows a batch that swaps names between two monitors', async () => {
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'mon-2',
+            attributes: { [ConfigKey.CONFIG_ID]: 'mon-2', [ConfigKey.NAME]: 'Beta' },
+          },
+        ],
+      });
+      mocks.findDecryptedMonitors.mockResolvedValue([
+        mockDecryptedMonitor({ id: 'mon-1' }),
+        mockDecryptedMonitor({ id: 'mon-2' }),
+      ]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({
+        updates: [
+          { id: 'mon-1', attributes: { [ConfigKey.NAME]: 'Beta' } },
+          { id: 'mon-2', attributes: { [ConfigKey.NAME]: 'Gamma' } },
+        ],
+      });
+
+      expect(result.perIdErrors).toEqual({});
+      expect(result.survivors).toHaveLength(2);
+    });
+
+    it('still rejects a name patch that collides with a monitor not renamed away in this batch', async () => {
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'mon-2',
+            attributes: { [ConfigKey.CONFIG_ID]: 'mon-2', [ConfigKey.NAME]: 'Beta' },
+          },
+        ],
+      });
+      mocks.findDecryptedMonitors.mockResolvedValue([mockDecryptedMonitor({ id: 'mon-1' })]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({
+        updates: updatesFor(['mon-1'], { [ConfigKey.NAME]: 'Beta' }),
+      });
+
+      expect(result.survivors).toHaveLength(0);
+      expect(result.perIdErrors['mon-1']).toMatchObject({
+        code: 'validation_failed',
+        message: expect.stringContaining('already exists'),
+      });
+    });
+
     it('checks existing monitor name conflicts in one SO query for many name patches', async () => {
       const { routeContext, mocks } = createMockRouteContext();
       const updates = Array.from({ length: 50 }, (_, i) => ({

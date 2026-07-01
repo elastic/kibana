@@ -243,9 +243,11 @@ export class UpdateMonitorAPI {
   private async validateNamePatches(updates: MonitorBulkUpdate[]): Promise<Map<string, string>> {
     const errors = new Map<string, string>();
     const idsByName = new Map<string, string[]>();
+    const patchedNameById = new Map<string, string>();
     for (const { id, attributes } of updates) {
       const nextName = attributes[ConfigKey.NAME];
       if (typeof nextName === 'string') {
+        patchedNameById.set(id, nextName);
         const ids = idsByName.get(nextName);
         if (ids) {
           ids.push(id);
@@ -280,6 +282,13 @@ export class UpdateMonitorAPI {
       const existingName = attributes[ConfigKey.NAME];
       const existingId = attributes[ConfigKey.CONFIG_ID] ?? monitor.id;
       if (typeof existingName !== 'string' || typeof existingId !== 'string') {
+        continue;
+      }
+
+      // Not a conflict if the monitor that has this name is also being
+      // renamed to something else in this same batch.
+      const existingIdNextName = patchedNameById.get(existingId);
+      if (existingIdNextName !== undefined && existingIdNextName !== existingName) {
         continue;
       }
 
