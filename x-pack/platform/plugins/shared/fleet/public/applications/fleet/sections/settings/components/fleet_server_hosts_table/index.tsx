@@ -20,11 +20,17 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { FleetServerHost } from '../../../../types';
 import { useAuthz, useLink } from '../../../../hooks';
 import { SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID } from '../../../../../../../common/constants';
+
+function getPrivateLinkProvider(urls: string[]): string {
+  const url = urls[0] ?? '';
+  if (url.includes('.azure.')) return 'Azure Private Link';
+  if (url.includes('.gcp.')) return 'GCP Private Service Connect';
+  return 'AWS PrivateLink';
+}
 
 export interface FleetServerHostsTableProps {
   fleetServerHosts: FleetServerHost[];
@@ -76,18 +82,19 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
             {fleetServerHost.id === SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID && (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
-                  content={
-                    <FormattedMessage
-                      id="xpack.fleet.settings.fleetServerHostsTable.privateLinkBadgeTooltip"
-                      defaultMessage="This Fleet Server host uses AWS PrivateLink for private network connectivity."
-                    />
-                  }
+                  content={i18n.translate(
+                    'xpack.fleet.settings.fleetServerHostsTable.privateLinkBadgeTooltip',
+                    {
+                      defaultMessage:
+                        'This Fleet Server host uses {provider} for private network connectivity.',
+                      values: {
+                        provider: getPrivateLinkProvider(fleetServerHost.host_urls),
+                      },
+                    }
+                  )}
                 >
-                  <EuiBadge color="subdued">
-                    <FormattedMessage
-                      id="xpack.fleet.settings.fleetServerHostsTable.privateLinkBadge"
-                      defaultMessage="PrivateLink"
-                    />
+                  <EuiBadge tabIndex={0}>
+                    {getPrivateLinkProvider(fleetServerHost.host_urls)}
                   </EuiBadge>
                 </EuiToolTip>
               </EuiFlexItem>

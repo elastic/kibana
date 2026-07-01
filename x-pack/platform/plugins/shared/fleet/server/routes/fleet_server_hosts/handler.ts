@@ -81,6 +81,9 @@ async function checkFleetServerHostsWriteAPIsAllowed(
       return;
     }
   } catch (e) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      throw e;
+    }
     appContextService
       .getLogger()
       .debug(`Could not fetch private Fleet Server host SO: ${e?.message ?? e}`);

@@ -25,8 +25,8 @@ import { Loading } from '../../components';
 import {
   SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
   SERVERLESS_DEFAULT_OUTPUT_ID,
-  SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID,
-  SERVERLESS_AGENTLESS_OUTPUT_ID,
+  SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+  SERVERLESS_PRIVATE_OUTPUT_ID,
 } from '../../../../../common/constants';
 
 import { FleetServerFlyout } from '../../components';
@@ -57,10 +57,10 @@ export const SettingsApp = withConfirmModalProvider(() => {
 
   const { outputs, fleetServerHosts, downloadSources, proxies } = useSettingsAppData();
   const outputItems = outputs.data?.items.filter(
-    (item) => item.id !== SERVERLESS_AGENTLESS_OUTPUT_ID
+    (item) => !item.is_internal || item.id === SERVERLESS_PRIVATE_OUTPUT_ID
   );
   const fleetServerHostsItems = fleetServerHosts.data?.items.filter(
-    (item) => item.id !== SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID
+    (item) => !item.is_internal || item.id === SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID
   );
 
   const { deleteOutput } = useDeleteOutput(outputs.resendRequest);

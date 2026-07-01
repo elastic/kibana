@@ -18,11 +18,17 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { licenseService, useAuthz, useLink, useStartServices } from '../../../../hooks';
 import type { Output } from '../../../../types';
 import { SERVERLESS_PRIVATE_OUTPUT_ID } from '../../../../../../../common/constants';
+
+function getPrivateLinkProvider(urls: string[]): string {
+  const url = urls[0] ?? '';
+  if (url.includes('.azure.')) return 'Azure Private Link';
+  if (url.includes('.gcp.')) return 'GCP Private Service Connect';
+  return 'AWS PrivateLink';
+}
 
 import { OutputHealth } from '../edit_output_flyout/output_health';
 
@@ -96,19 +102,16 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
             {output.id === SERVERLESS_PRIVATE_OUTPUT_ID && (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
-                  content={
-                    <FormattedMessage
-                      id="xpack.fleet.settings.outputsTable.privateLinkBadgeTooltip"
-                      defaultMessage="This output uses AWS PrivateLink for private network connectivity."
-                    />
-                  }
+                  content={i18n.translate(
+                    'xpack.fleet.settings.outputsTable.privateLinkBadgeTooltip',
+                    {
+                      defaultMessage:
+                        'This output uses {provider} for private network connectivity.',
+                      values: { provider: getPrivateLinkProvider(output.hosts ?? []) },
+                    }
+                  )}
                 >
-                  <EuiBadge color="subdued">
-                    <FormattedMessage
-                      id="xpack.fleet.settings.outputsTable.privateLinkBadge"
-                      defaultMessage="PrivateLink"
-                    />
-                  </EuiBadge>
+                  <EuiBadge tabIndex={0}>{getPrivateLinkProvider(output.hosts ?? [])}</EuiBadge>
                 </EuiToolTip>
               </EuiFlexItem>
             )}
