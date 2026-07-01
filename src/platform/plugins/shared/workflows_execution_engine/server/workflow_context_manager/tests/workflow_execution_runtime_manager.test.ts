@@ -132,7 +132,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
     } as unknown as StepIoService;
 
     underTest = new WorkflowExecutionRuntimeManager({
-      workflowExecution,
       workflowExecutionGraph,
       workflowLogger,
       workflowExecutionState,
@@ -312,9 +311,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
       expect(underTest.getWorkflowExecutionStatus()).not.toBe(ExecutionStatus.RUNNING);
     });
 
-    it('should load workflow execution state', async () => {
+    it('does not load step IO state during resume because setup owns loading', async () => {
       await underTest.resume();
-      expect(stepIoService.load).toHaveBeenCalled();
+      expect(stepIoService.load).not.toHaveBeenCalled();
     });
 
     it('should set current step to the node from execution', async () => {
@@ -355,7 +354,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
         await underTest.resume();
 
-        expect(callOrder).toEqual(['load', 'evict']);
+        expect(callOrder).toEqual(['evict']);
       });
     });
   });

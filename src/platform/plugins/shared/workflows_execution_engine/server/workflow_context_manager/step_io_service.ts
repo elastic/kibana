@@ -21,6 +21,7 @@ import { EVICTION_EXEMPT_STEP_TYPES, LOOP_STEP_TYPES } from './step_io_pinned_ty
 import type { StepExecutionMetadata, StepIoStateAccessor } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { OutputSizeStats } from '../lib/telemetry/events/workflows_execution/types';
+import type { EsDocumentVersion } from '../repositories/document_version';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { formatBytes, safeOutputSize } from '../step/errors';
 import { buildStepExecutionId } from '../utils';
@@ -217,6 +218,15 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * outputs they only briefly needed.
    */
   private transientlyRehydratedIds: string[] = [];
+  private readonly persistedStepExecutionIds = new Set<string>();
+
+  /**
+   * Cached OCC versions of step-execution documents, keyed by step execution
+   * id. Seeded on `load` (resume) and from each create/update response so the
+   * next bulk upsert can skip the version lookup. A missing entry means the
+   * version is unknown and will be resolved fresh on the next write.
+   */
+  private readonly stepExecutionVersions = new Map<string, EsDocumentVersion>();
 
   /**
    * Per-execution `data.set` output, keyed by step execution id. Populated
@@ -480,11 +490,18 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       );
     }
 
-    const foundSteps = await this.stepRepository.getStepExecutionsByIds(
+    const foundVersioned = await this.stepRepository.getStepExecutionsByIdsWithVersion(
       stepExecutionIds,
       undefined,
       ['output']
     );
+    const foundSteps = foundVersioned.map(({ doc }) => doc);
+    this.persistedStepExecutionIds.clear();
+    this.stepExecutionVersions.clear();
+    for (const { id, version } of foundVersioned) {
+      this.persistedStepExecutionIds.add(id);
+      this.stepExecutionVersions.set(id, version);
+    }
 
     // Capture inputs and hand `output`-stripped metadata to state. The
     // `output` sourceExclude above should already drop output from the
@@ -510,10 +527,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
     const pinnedIdsToFetch = this.markDeferredAfterLoad(foundSteps);
     if (pinnedIdsToFetch.length > 0) {
-      const pinnedDocs = await this.stepRepository.getStepExecutionsByIds(pinnedIdsToFetch, [
-        'id',
-        'output',
-      ]);
+      const pinnedDocs = await this.stepRepository.getStepExecutionsByIds(
+        pinnedIdsToFetch,
+        ['id', 'output'],
+        undefined
+      );
       for (const doc of pinnedDocs) {
         const output: JsonValue | null = doc.output ?? null;
         this.outputs.set(doc.id, output);
@@ -933,11 +951,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
     const startMs = performance.now();
     const expectedRunId = this.state.getWorkflowExecutionId();
-    const fetched = await this.stepRepository.getStepExecutionsByIds(idsToRehydrate, [
-      'id',
-      'output',
-      'workflowRunId',
-    ]);
+    const fetched = await this.stepRepository.getStepExecutionsByIds(
+      idsToRehydrate,
+      ['id', 'output', 'workflowRunId'],
+      undefined
+    );
     // Defensive cross-execution filter: mget targets documents by `_id` only,
     // and step execution IDs are constructed from the workflow execution ID,
     // so a collision is improbable but not impossible (e.g. someone running
@@ -1047,7 +1065,32 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     }
 
     const flushedIds = Array.from(merged.keys());
-    await this.stepRepository.bulkUpsert(Array.from(merged.values()));
+
+    // A step is created on its first flush and updated thereafter (tracked by
+    // `persistedStepExecutionIds`). Attach the cached OCC version to updates so
+    // the upsert can skip the version lookup; creates and cache-miss updates
+    // resolve fresh in the repo.
+    const writes = Array.from(merged.values()).map((doc) => {
+      const persisted = doc.id ? this.persistedStepExecutionIds.has(doc.id) : false;
+      if (!persisted) {
+        return { operation: 'create', doc } as const;
+      }
+
+      return {
+        operation: 'update',
+        doc,
+        version: doc.id ? this.stepExecutionVersions.get(doc.id) : undefined,
+      } as const;
+    });
+
+    const versions = await this.stepRepository.bulkUpsert(writes);
+
+    for (const [id, version] of Object.entries(versions ?? {})) {
+      this.stepExecutionVersions.set(id, version);
+    }
+    for (const id of flushedIds) {
+      this.persistedStepExecutionIds.add(id);
+    }
     return flushedIds;
   }
 

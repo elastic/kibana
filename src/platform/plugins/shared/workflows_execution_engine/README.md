@@ -727,7 +727,7 @@ workflowsExecutionEngine:
 ```
 workflows_execution_engine/
 ├── common/                         # Shared utilities
-│   ├── create_indexes.ts          # Index creation utilities
+│   ├── create_index.ts            # Index creation utilities
 │   └── mappings.ts                # Elasticsearch mappings
 ├── server/                         # Server-side code
 │   ├── plugin.ts                  # Main plugin class

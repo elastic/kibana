@@ -9,13 +9,23 @@
 
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import type { DocumentVersionsById } from '../../server/repositories/document_version';
+import type { VersionedDocument } from '../../server/repositories/get_doc_by_id';
 import type {
   StepExecutionField,
   StepExecutionRepository,
+  StepExecutionWrite,
 } from '../../server/repositories/step_execution_repository';
+
+const TEST_INDEX = '.ds-.workflows-step-executions-2026.06.22-000001';
 
 export class StepExecutionRepositoryMock implements Required<StepExecutionRepository> {
   public stepExecutions = new Map<string, EsWorkflowStepExecution>();
+
+  public resolveWriteIndex(): Promise<string> {
+    return Promise.resolve(TEST_INDEX);
+  }
+
   public searchStepExecutionsByExecutionId(
     executionId: string
   ): Promise<EsWorkflowStepExecution[]> {
@@ -27,7 +37,8 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
   public getStepExecutionsByIds(
     stepExecutionIds: string[],
     sourceIncludes?: StepExecutionField[],
-    sourceExcludes?: StepExecutionField[]
+    sourceExcludes?: StepExecutionField[],
+    _stepsExecutionIndex?: string
   ): Promise<EsWorkflowStepExecution[]> {
     const results = stepExecutionIds
       .map((id) => this.stepExecutions.get(id) || null)
@@ -47,6 +58,12 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
             delete (filtered as Record<string, unknown>)[field];
           }
         }
+        if (
+          sourceIncludes?.includes('output' as StepExecutionField) &&
+          filtered.output === undefined
+        ) {
+          filtered.output = null;
+        }
         return filtered;
       });
     return Promise.resolve(results);
@@ -59,9 +76,27 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
     return this.searchStepExecutionsByExecutionId(workflowExecutionId);
   }
 
+  public async getStepExecutionsByIdsWithVersion(
+    stepExecutionIds: string[],
+    sourceIncludes?: StepExecutionField[],
+    sourceExcludes?: StepExecutionField[]
+  ): Promise<Array<VersionedDocument<EsWorkflowStepExecution>>> {
+    const docs = await this.getStepExecutionsByIds(
+      stepExecutionIds,
+      sourceIncludes,
+      sourceExcludes
+    );
+    return docs.map((doc) => ({
+      id: doc.id,
+      doc,
+      version: { index: TEST_INDEX, seqNo: 1, primaryTerm: 1 },
+    }));
+  }
+
   public async markNonTerminalStepsFailed(
     workflowExecutionId: string,
-    error: SerializedError
+    error: SerializedError,
+    _stepsExecutionIndex?: string
   ): Promise<void> {
     const stepExecutions = await this.searchStepExecutionsByExecutionId(workflowExecutionId);
     const nonTerminalSteps = stepExecutions.filter((step) => !isTerminalStatus(step.status));
@@ -73,25 +108,28 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
     const finishedAt = new Date().toISOString();
     await this.bulkUpsert(
       nonTerminalSteps.map((step) => ({
-        id: step.id,
-        status: ExecutionStatus.FAILED,
-        error,
-        finishedAt,
+        operation: 'update',
+        doc: {
+          id: step.id,
+          status: ExecutionStatus.FAILED,
+          error,
+          finishedAt,
+        },
       }))
     );
   }
 
-  public bulkUpsert(stepExecutions: Partial<EsWorkflowStepExecution>[]): Promise<void> {
-    for (const stepExecution of stepExecutions) {
-      if (!stepExecution.id) {
+  public bulkUpsert(writes: StepExecutionWrite[]): Promise<DocumentVersionsById> {
+    for (const write of writes) {
+      if (!write.doc.id) {
         throw new Error('Step execution ID is required for upsert');
       }
 
-      this.stepExecutions.set(stepExecution.id, {
-        ...(this.stepExecutions.get(stepExecution.id) || {}),
-        ...(stepExecution as EsWorkflowStepExecution),
+      this.stepExecutions.set(write.doc.id, {
+        ...(this.stepExecutions.get(write.doc.id) || {}),
+        ...(write.doc as EsWorkflowStepExecution),
       });
     }
-    return Promise.resolve();
+    return Promise.resolve({});
   }
 }

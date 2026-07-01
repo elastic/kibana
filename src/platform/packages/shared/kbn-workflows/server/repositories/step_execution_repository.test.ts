@@ -13,7 +13,8 @@ import {
 } from './step_execution_repository';
 import type { EsWorkflowStepExecution } from '../../types/v1';
 
-const INDEX = '.workflows-step-executions';
+const INDEX = '.workflows-step-executions-000001';
+const INDEX_ALIAS = '.workflows-step-executions';
 
 const createStepExecution = (
   overrides: Partial<EsWorkflowStepExecution> = {}
@@ -128,6 +129,7 @@ describe('getStepExecutionsByWorkflowExecution', () => {
     const result = await getStepExecutionsByWorkflowExecution({
       esClient: esClient as any,
       stepsExecutionIndex: INDEX,
+      stepsExecutionIndexAlias: INDEX_ALIAS,
       workflowExecutionId: 'exec-1',
       stepExecutionIds: ['step-1'],
     });
@@ -143,6 +145,7 @@ describe('getStepExecutionsByWorkflowExecution', () => {
     await getStepExecutionsByWorkflowExecution({
       esClient: esClient as any,
       stepsExecutionIndex: INDEX,
+      stepsExecutionIndexAlias: INDEX_ALIAS,
       workflowExecutionId: 'exec-1',
       stepExecutionIds: ['step-1'],
       sourceExcludes: ['input'],
@@ -163,12 +166,13 @@ describe('getStepExecutionsByWorkflowExecution', () => {
     const result = await getStepExecutionsByWorkflowExecution({
       esClient: esClient as any,
       stepsExecutionIndex: INDEX,
+      stepsExecutionIndexAlias: INDEX_ALIAS,
       workflowExecutionId: 'exec-1',
     });
 
     expect(result).toEqual([step1]);
     expect(esClient.search).toHaveBeenCalledWith({
-      index: INDEX,
+      index: INDEX_ALIAS,
       query: { match: { workflowRunId: 'exec-1' } },
       sort: 'startedAt:desc',
       size: 10000,
@@ -182,6 +186,7 @@ describe('getStepExecutionsByWorkflowExecution', () => {
     await getStepExecutionsByWorkflowExecution({
       esClient: esClient as any,
       stepsExecutionIndex: INDEX,
+      stepsExecutionIndexAlias: INDEX_ALIAS,
       workflowExecutionId: 'exec-1',
       stepExecutionIds: [],
     });
@@ -196,6 +201,7 @@ describe('getStepExecutionsByWorkflowExecution', () => {
     await getStepExecutionsByWorkflowExecution({
       esClient: esClient as any,
       stepsExecutionIndex: INDEX,
+      stepsExecutionIndexAlias: INDEX_ALIAS,
       workflowExecutionId: 'exec-1',
       sourceExcludes: ['input', 'output'],
     });
@@ -213,6 +219,7 @@ describe('getStepExecutionsByWorkflowExecution', () => {
     await getStepExecutionsByWorkflowExecution({
       esClient: esClient as any,
       stepsExecutionIndex: INDEX,
+      stepsExecutionIndexAlias: INDEX_ALIAS,
       workflowExecutionId: 'exec-1',
       sourceExcludes: [],
     });

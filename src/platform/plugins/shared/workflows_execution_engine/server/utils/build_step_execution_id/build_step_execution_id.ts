@@ -12,16 +12,18 @@ import type { StackFrame } from '@kbn/workflows';
 
 /**
  * Generates a unique identifier for a step execution by combining execution ID, path, and step ID,
- * then hashing the result with SHA-256.
+ * then hashing the result with SHA-256 truncated to 128 bits (32 hex characters).
  * The ID is deterministic and predictable because it's derived from static
  * workflow state components (execution ID, path, step ID) rather than random values.
  * This ensures the same step in the same execution context will always generate
  * the same ID, enabling reliable step tracking and idempotent operations.
  *
+ * 128 bits provides the same collision resistance as UUID v4 (~10^-28 at 100k documents).
+ *
  * @param executionId - The unique identifier of the workflow execution
  * @param stepId - The unique identifier of the step within the workflow
  * @param stackFrames - An array of StackFrame objects representing the hierarchical path to the step
- * @returns A SHA-256 hash string representing the unique step execution identifier
+ * @returns A 32-character hex string (128-bit truncated SHA-256) representing the unique step execution identifier
  *
  * @example
  * ```typescript
@@ -31,7 +33,7 @@ import type { StackFrame } from '@kbn/workflows';
  *   'connector-send-email',
  *   stackFrames
  * );
- * // Returns: "7f8a9b2c3d4e5f6a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5"
+ * // Returns: "7f8a9b2c3d4e5f6a1b2c3d4e5f6a7b8c"
  * ```
  */
 export function buildStepExecutionId(
@@ -43,5 +45,15 @@ export function buildStepExecutionId(
     .map((frame) => [frame.stepId, ...frame.nestedScopes.map((s) => s.scopeId || '')])
     .flat();
   const generatedId = [executionId, ...stepPath, stepId].join('_');
-  return createSHA256Hash(generatedId);
+  // Truncate SHA-256 (256 bits) to 128 bits (32 hex chars).
+  //
+  // Why 128 bits:
+  // - Matches UUID v4 collision resistance, the industry standard for unique identifiers.
+  // - Birthday paradox collision probability at 100k docs per index: ~10^-28 (1 in 10^28).
+  //   Even at 10 million docs the probability is ~10^-24.
+  // - Full SHA-256 (64 hex chars) is overkill for our scale.
+  //
+  // The step execution ID is later combined with an index suffix and base64url-encoded
+  // to form the final Elasticsearch document _id.
+  return createSHA256Hash(generatedId).slice(0, 32);
 }

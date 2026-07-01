@@ -27,8 +27,11 @@ describe('ConcurrencyManager', () => {
 
     mockWorkflowExecutionRepository = {
       getRunningExecutionsByConcurrencyGroup: jest.fn(),
+      getWorkflowExecutionById: jest
+        .fn()
+        .mockImplementation((id: string, spaceId: string) => Promise.resolve({ id, spaceId })),
       bulkUpdateWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
-      updateWorkflowExecution: jest.fn(),
+      updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<WorkflowExecutionRepository>;
 
     concurrencyManager = new ConcurrencyManager(
@@ -664,7 +667,7 @@ describe('ConcurrencyManager', () => {
         mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
           'exec-1',
         ]);
-        mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions.mockResolvedValue(undefined);
+        mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions.mockResolvedValue({});
         // When cancelling exec-1, forceRunIdleTasks fails
         const taskManagerError = new Error('Task manager unavailable');
         mockWorkflowTaskManager.forceRunIdleTasks.mockRejectedValue(taskManagerError);
@@ -690,7 +693,7 @@ describe('ConcurrencyManager', () => {
           'exec-1',
           'exec-2',
         ]);
-        mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions.mockResolvedValue(undefined);
+        mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions.mockResolvedValue({});
         const taskManagerError = new Error('Task manager service down');
         // Promise.all will reject when any promise rejects
         // The map function creates promises for all executions

@@ -24,6 +24,8 @@ import { WorkflowExecutionRepository } from './repositories/workflow_execution_r
 import { WORKFLOW_SCHEDULED_TASK_TYPE } from './workflow_task_manager/types';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../common';
 
+const TEST_BACKING_INDEX = '.ds-.workflows-executions-2026.06.22-000001';
+
 describe('checkAndSkipIfExistingScheduledExecution', () => {
   let esClient: jest.Mocked<Client>;
   let workflowExecutionRepository: WorkflowExecutionRepository;
@@ -62,7 +64,21 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
     }
     esClient.indices.exists = jest.fn().mockResolvedValue(false) as any;
     esClient.indices.create = jest.fn().mockResolvedValue({}) as any;
-    esClient.update = jest.fn().mockResolvedValue({} as any);
+    esClient.create = jest.fn().mockResolvedValue({
+      _index: TEST_BACKING_INDEX,
+      _seq_no: 1,
+      _primary_term: 1,
+    } as any);
+    esClient.index = esClient.create as any;
+    esClient.update = jest.fn().mockResolvedValue({
+      _index: TEST_BACKING_INDEX,
+      _seq_no: 2,
+      _primary_term: 1,
+    } as any);
+    esClient.mget = jest.fn() as any;
+    esClient.indices.getDataStream = jest.fn().mockResolvedValue({
+      data_streams: [{ indices: [{ index_name: TEST_BACKING_INDEX }] }],
+    }) as any;
     workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
     stepExecutionRepository = new StepExecutionRepository(esClient);
     jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
@@ -154,7 +170,11 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      esClient.index.mockResolvedValue({} as any);
+      esClient.create.mockResolvedValue({
+        _index: TEST_BACKING_INDEX,
+        _seq_no: 1,
+        _primary_term: 1,
+      } as any);
       (esClient.indices?.exists as jest.Mock).mockResolvedValue(true);
 
       const result = await checkAndSkipIfExistingScheduledExecution(
@@ -229,7 +249,11 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
             total: { value: 1, relation: 'eq' },
           },
         } as any);
-        esClient.index.mockResolvedValue({} as any);
+        esClient.create.mockResolvedValue({
+          _index: TEST_BACKING_INDEX,
+          _seq_no: 1,
+          _primary_term: 1,
+        } as any);
         (esClient.indices?.exists as jest.Mock).mockResolvedValue(true);
 
         const result = await checkAndSkipIfExistingScheduledExecution(
@@ -351,7 +375,11 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      esClient.index.mockResolvedValue({} as any);
+      esClient.create.mockResolvedValue({
+        _index: TEST_BACKING_INDEX,
+        _seq_no: 1,
+        _primary_term: 1,
+      } as any);
       (esClient.indices?.exists as jest.Mock).mockResolvedValue(true);
 
       await checkAndSkipIfExistingScheduledExecution(
@@ -381,9 +409,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
   describe('taskRunAt comparison logic', () => {
     it('should mark execution as FAILED and proceed when taskRunAt matches AND attempts > 1 (stale execution from task recovery)', async () => {
       const matchingRunAt = baseRunAt.toISOString();
+      const encodedId = 'scheduled-exec-1';
       const existingExecution = {
         _source: {
-          id: 'existing-execution-id',
+          id: encodedId,
           workflowId: workflow.id,
           spaceId,
           status: ExecutionStatus.PENDING,
@@ -398,7 +427,22 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      esClient.update.mockResolvedValue({} as any);
+      esClient.mget.mockResolvedValue({
+        docs: [
+          {
+            found: true,
+            _index: TEST_BACKING_INDEX,
+            _seq_no: 1,
+            _primary_term: 1,
+            _source: existingExecution._source,
+          },
+        ],
+      } as any);
+      esClient.update.mockResolvedValue({
+        _index: TEST_BACKING_INDEX,
+        _seq_no: 2,
+        _primary_term: 1,
+      } as any);
       (esClient.indices?.exists as jest.Mock).mockResolvedValue(true);
 
       // Use attempts > 1 to indicate this is a retry/recovery
@@ -416,8 +460,8 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       expect(result).toBe(false); // Proceed with new execution
       expect(esClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: WORKFLOWS_EXECUTIONS_INDEX,
-          id: 'existing-execution-id',
+          index: TEST_BACKING_INDEX,
+          id: encodedId,
           doc: expect.objectContaining({
             status: ExecutionStatus.FAILED,
             error: {
@@ -487,7 +531,11 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      esClient.index.mockResolvedValue({} as any);
+      esClient.create.mockResolvedValue({
+        _index: TEST_BACKING_INDEX,
+        _seq_no: 1,
+        _primary_term: 1,
+      } as any);
       (esClient.indices?.exists as jest.Mock).mockResolvedValue(true);
 
       // Use attempts = 1 (first attempt)
@@ -532,7 +580,11 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      esClient.index.mockResolvedValue({} as any);
+      esClient.create.mockResolvedValue({
+        _index: TEST_BACKING_INDEX,
+        _seq_no: 1,
+        _primary_term: 1,
+      } as any);
       (esClient.indices?.exists as jest.Mock).mockResolvedValue(true);
 
       const result = await checkAndSkipIfExistingScheduledExecution(
@@ -577,7 +629,11 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      esClient.index.mockResolvedValue({} as any);
+      esClient.create.mockResolvedValue({
+        _index: TEST_BACKING_INDEX,
+        _seq_no: 1,
+        _primary_term: 1,
+      } as any);
       (esClient.indices?.exists as jest.Mock).mockResolvedValue(true);
 
       const result = await checkAndSkipIfExistingScheduledExecution(
@@ -618,7 +674,11 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      esClient.index.mockResolvedValue({} as any);
+      esClient.create.mockResolvedValue({
+        _index: TEST_BACKING_INDEX,
+        _seq_no: 1,
+        _primary_term: 1,
+      } as any);
       (esClient.indices?.exists as jest.Mock).mockResolvedValue(true);
 
       const taskInstanceWithoutRunAt = createMockTaskInstance({ runAt: undefined as any });
@@ -639,9 +699,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
 
     it('should handle RUNNING status execution with matching taskRunAt AND attempts > 1 (stale)', async () => {
       const matchingRunAt = baseRunAt.toISOString();
+      const encodedId = 'scheduled-exec-2';
       const existingExecution = {
         _source: {
-          id: 'existing-execution-id',
+          id: encodedId,
           workflowId: workflow.id,
           spaceId,
           status: ExecutionStatus.RUNNING,
@@ -656,7 +717,22 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      esClient.update.mockResolvedValue({} as any);
+      esClient.mget.mockResolvedValue({
+        docs: [
+          {
+            found: true,
+            _index: TEST_BACKING_INDEX,
+            _seq_no: 1,
+            _primary_term: 1,
+            _source: existingExecution._source,
+          },
+        ],
+      } as any);
+      esClient.update.mockResolvedValue({
+        _index: TEST_BACKING_INDEX,
+        _seq_no: 2,
+        _primary_term: 1,
+      } as any);
       (esClient.indices?.exists as jest.Mock).mockResolvedValue(true);
 
       // Use attempts > 1 to indicate this is a retry/recovery

@@ -12,6 +12,7 @@ import type {
   EsWorkflowStepExecution,
   WorkflowTokenUsage,
 } from '@kbn/workflows';
+import type { EsDocumentVersion } from '../repositories/document_version';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { sumTokenUsage } from '../utils';
 
@@ -57,6 +58,7 @@ export type StepIoStateAccessor = Pick<
   | 'getLatestStepExecution'
   | 'getAllStepExecutions'
   | 'getStepExecutionIdsByStepId'
+  | 'getWorkflowExecution'
   | 'getWorkflowExecutionStatus'
   | 'getWorkflowExecutionId'
   | 'getWorkflowExecutionScopeStack'
@@ -83,9 +85,18 @@ export type StepIoStateAccessor = Pick<
  */
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, StepExecutionMetadata> = new Map();
-  private workflowExecution: EsWorkflowExecution;
+  private workflowExecution!: EsWorkflowExecution;
+  private workflowExecutionRepository: WorkflowExecutionRepository;
   private workflowDocumentChanges: Partial<EsWorkflowExecution> | undefined = undefined;
   private stepDocumentsChanges: Map<string, Partial<StepExecutionMetadata>> = new Map();
+
+  /**
+   * Cached OCC version of the workflow execution document. Seeded on `load`
+   * and refreshed from every flush response so subsequent flushes skip the
+   * version lookup. `undefined` means "unknown" -> the next flush resolves
+   * fresh (the safe, pre-optimization path).
+   */
+  private workflowExecutionVersion: EsDocumentVersion | undefined = undefined;
 
   private lastFailedStepContext: FailedStepContext | undefined = undefined;
 
@@ -96,11 +107,36 @@ export class WorkflowExecutionState {
    */
   private stepIdExecutionIdIndex = new Map<string, string[]>();
 
+  constructor(workflowExecutionRepository: WorkflowExecutionRepository);
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
-    private workflowExecutionRepository: WorkflowExecutionRepository
+    workflowExecutionRepository: WorkflowExecutionRepository
+  );
+  constructor(
+    initialWorkflowExecutionOrRepository: EsWorkflowExecution | WorkflowExecutionRepository,
+    workflowExecutionRepository?: WorkflowExecutionRepository
   ) {
-    this.workflowExecution = initialWorkflowExecution;
+    if (workflowExecutionRepository) {
+      this.workflowExecution = initialWorkflowExecutionOrRepository as EsWorkflowExecution;
+      this.workflowExecutionRepository = workflowExecutionRepository;
+    } else {
+      this.workflowExecutionRepository =
+        initialWorkflowExecutionOrRepository as WorkflowExecutionRepository;
+    }
+  }
+
+  public async load(workflowExecutionId: string, spaceId: string): Promise<void> {
+    const loaded = await this.workflowExecutionRepository.getWorkflowExecutionWithVersion(
+      workflowExecutionId,
+      spaceId
+    );
+
+    if (!loaded) {
+      throw new Error(`Workflow execution with ID ${workflowExecutionId} not found`);
+    }
+
+    this.workflowExecution = loaded.doc;
+    this.workflowExecutionVersion = loaded.version;
   }
 
   public getWorkflowExecution(): EsWorkflowExecution {
@@ -259,10 +295,22 @@ export class WorkflowExecutionState {
     const changes = this.workflowDocumentChanges;
     this.workflowDocumentChanges = undefined;
 
-    await this.workflowExecutionRepository.updateWorkflowExecution({
-      ...changes,
-      id: this.workflowExecution.id,
-    });
+    const id = this.workflowExecution.id;
+
+    // Pass the cached version when we have one (undefined on the cold path);
+    // the repository resolves fresh when it is absent.
+    const providedVersions = this.workflowExecutionVersion
+      ? { [id]: this.workflowExecutionVersion }
+      : undefined;
+
+    const versions = await this.workflowExecutionRepository.updateWorkflowExecution(
+      { ...changes, id },
+      providedVersions
+    );
+
+    // Refresh the cache from the write response; keep the previous value if
+    // the response did not include it (should not happen on success).
+    this.workflowExecutionVersion = versions?.[id] ?? this.workflowExecutionVersion;
   }
 
   private createStep(step: CreateStepInput) {

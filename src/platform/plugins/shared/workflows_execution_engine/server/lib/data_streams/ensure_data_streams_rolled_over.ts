@@ -8,9 +8,13 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { WORKFLOWS_EXECUTIONS_INDEX } from '@kbn/workflows';
 import { rollDataStreamIfRequired } from './roll_data_stream_if_required';
+import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
 import { WORKFLOWS_EXECUTION_LOGS_DATA_STREAM } from '../../repositories/logs_repository/constants';
 import { WORKFLOWS_LOGS_MANAGED_INDEX_MAPPINGS_VERSION } from '../../repositories/logs_repository/data_stream';
+import { WORKFLOWS_STEP_EXECUTIONS_MANAGED_INDEX_MAPPINGS_VERSION } from '../../repositories/step_executions_data_stream';
+import { WORKFLOWS_EXECUTIONS_MANAGED_INDEX_MAPPINGS_VERSION } from '../../repositories/workflow_executions_data_stream';
 import { WORKFLOWS_EVENTS_DATA_STREAM } from '../../trigger_events/event_logs/constants';
 import { WORKFLOWS_EVENTS_MANAGED_INDEX_MAPPINGS_VERSION } from '../../trigger_events/event_logs/trigger_events_data_stream';
 
@@ -26,6 +30,14 @@ export async function ensureWorkflowsDataStreamsRolledOver(
     {
       dataStreamName: WORKFLOWS_EVENTS_DATA_STREAM,
       targetManagedIndexMappingsVersion: WORKFLOWS_EVENTS_MANAGED_INDEX_MAPPINGS_VERSION,
+    },
+    {
+      dataStreamName: WORKFLOWS_EXECUTIONS_INDEX,
+      targetManagedIndexMappingsVersion: WORKFLOWS_EXECUTIONS_MANAGED_INDEX_MAPPINGS_VERSION,
+    },
+    {
+      dataStreamName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      targetManagedIndexMappingsVersion: WORKFLOWS_STEP_EXECUTIONS_MANAGED_INDEX_MAPPINGS_VERSION,
     },
   ] as const;
 

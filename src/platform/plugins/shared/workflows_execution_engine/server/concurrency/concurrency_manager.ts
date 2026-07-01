@@ -118,6 +118,13 @@ export class ConcurrencyManager {
     // Handle 'drop' strategy: mark new execution as SKIPPED if limit is exceeded
     if (strategy === 'drop') {
       const skipTimestamp = new Date().toISOString();
+      const execution = await this.workflowExecutionRepository.getWorkflowExecutionById(
+        currentExecutionId,
+        spaceId
+      );
+      if (!execution) {
+        throw new Error(`Workflow execution ${currentExecutionId} not found for concurrency drop`);
+      }
       await this.workflowExecutionRepository.updateWorkflowExecution({
         id: currentExecutionId,
         status: ExecutionStatus.SKIPPED,
@@ -139,15 +146,26 @@ export class ConcurrencyManager {
 
       // Bulk update all executions to cancelled status in a single ES request
       const cancellationTimestamp = new Date().toISOString();
+      const executions = await Promise.all(
+        executionIdsToCancel.map((id) =>
+          this.workflowExecutionRepository.getWorkflowExecutionById(id, spaceId)
+        )
+      );
       await this.workflowExecutionRepository.bulkUpdateWorkflowExecutions(
-        executionIdsToCancel.map((id) => ({
-          id,
-          status: ExecutionStatus.CANCELLED,
-          cancelRequested: true,
-          cancellationReason: `Cancelled due to concurrency limit (max: ${maxConcurrency})`,
-          cancelledAt: cancellationTimestamp,
-          cancelledBy: 'system',
-        }))
+        executions.flatMap((execution, idx) => {
+          if (!execution) {
+            return [];
+          }
+          const id = executionIdsToCancel[idx];
+          return {
+            id,
+            status: ExecutionStatus.CANCELLED,
+            cancelRequested: true,
+            cancellationReason: `Cancelled due to concurrency limit (max: ${maxConcurrency})`,
+            cancelledAt: cancellationTimestamp,
+            cancelledBy: 'system',
+          };
+        })
       );
 
       // Propagate cancellation to running tasks (can be done in parallel)

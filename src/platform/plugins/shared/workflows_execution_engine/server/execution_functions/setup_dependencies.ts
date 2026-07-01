@@ -8,7 +8,6 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import type { EsWorkflowExecution } from '@kbn/workflows';
 import { WorkflowRepository } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsExecutionEngineConfig } from '../config';
@@ -59,21 +58,16 @@ export async function setupDependencies(
   // Wait for the workflows extensions registries to be ready
   await workflowsExtensions.isReady();
 
-  const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-    workflowRunId,
-    spaceId
-  );
-
-  if (!workflowExecution) {
-    throw new Error(`Workflow execution with ID ${workflowRunId} not found`);
-  }
-
   if (!fakeRequest) {
     logger.error('Cannot execute a workflow without Kibana Request');
     throw new Error(
       `Workflow execution id ${workflowRunId} cannot execute a workflow without Kibana Request`
     );
   }
+
+  const workflowExecutionState = new WorkflowExecutionState(workflowExecutionRepository);
+  await workflowExecutionState.load(workflowRunId, spaceId);
+  const workflowExecution = workflowExecutionState.getWorkflowExecution();
 
   const eventChainDepth = extractEventChainDepthFromExecution(workflowExecution) ?? -1;
   const baseVisited = extractEventChainVisitedWorkflowIdsFromExecution(
@@ -117,24 +111,21 @@ export async function setupDependencies(
     spaceId: workflowExecution.spaceId,
   });
 
-  const workflowExecutionState = new WorkflowExecutionState(
-    workflowExecution as EsWorkflowExecution,
-    workflowExecutionRepository
-  );
-
   const stepIoService = new StepIoService({
     stepRepository: stepExecutionRepository,
     state: workflowExecutionState,
     evictionMinBytes: config.eviction.minPayloadSize.getValueInBytes(),
     logger,
   });
+  if (workflowExecutionState.getWorkflowExecutionStepExecutionIds()) {
+    await stepIoService.load();
+  }
 
   // Create telemetry client
   const telemetryClient = new WorkflowExecutionTelemetryClient(coreStart.analytics, logger);
 
   // Create workflow runtime first (simpler, fewer dependencies)
   const workflowRuntime = new WorkflowExecutionRuntimeManager({
-    workflowExecution: workflowExecution as EsWorkflowExecution,
     workflowExecutionGraph,
     workflowLogger,
     workflowExecutionState,

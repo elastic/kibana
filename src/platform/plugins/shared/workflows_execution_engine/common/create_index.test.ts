@@ -14,6 +14,11 @@ const createEsClientMock = () => ({
     exists: jest.fn(),
     create: jest.fn(),
     putMapping: jest.fn(),
+    putIndexTemplate: jest.fn(),
+    existsAlias: jest.fn(),
+  },
+  ilm: {
+    putLifecycle: jest.fn(),
   },
 });
 

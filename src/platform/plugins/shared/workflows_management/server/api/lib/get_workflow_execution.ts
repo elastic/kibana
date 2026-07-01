@@ -16,6 +16,10 @@ import type {
 import { pickWorkflowDocumentVersion } from '@kbn/workflows';
 import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
+import {
+  getExecutionByIdFromDataStream,
+  getStepExecutionsByIdsFromDataStream,
+} from './execution_data_stream_reads';
 
 interface GetWorkflowExecutionParams {
   esClient: ElasticsearchClient;
@@ -39,29 +43,13 @@ export const getWorkflowExecution = async ({
   includeOutput = false,
 }: GetWorkflowExecutionParams): Promise<WorkflowExecutionDto | null> => {
   try {
-    // Use direct GET by _id for O(1) lookup performance instead of search
-    // This is critical for reducing ES CPU load from frequent UI polling
-    let response;
-    try {
-      response = await esClient.get<EsWorkflowExecution>({
-        index: workflowExecutionIndex,
-        id: workflowExecutionId,
-      });
-    } catch (error: unknown) {
-      // Handle 404 - document not found
-      if (
-        error instanceof Error &&
-        'meta' in error &&
-        (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
-      ) {
-        return null;
-      }
-      throw error;
-    }
+    const doc = await getExecutionByIdFromDataStream({
+      esClient,
+      dataStream: workflowExecutionIndex,
+      id: workflowExecutionId,
+      spaceId,
+    });
 
-    const doc = response._source;
-
-    // Verify spaceId matches for security/multi-tenancy
     if (!doc || doc.spaceId !== spaceId) {
       return null;
     }
@@ -70,13 +58,19 @@ export const getWorkflowExecution = async ({
     if (!includeInput) sourceExcludes.push('input');
     if (!includeOutput) sourceExcludes.push('output');
 
-    const stepExecutions = await getStepExecutionsByWorkflowExecution({
-      esClient,
-      stepsExecutionIndex,
-      workflowExecutionId,
-      stepExecutionIds: doc.stepExecutionIds,
-      sourceExcludes,
-    });
+    const stepExecutions = doc.stepExecutionIds?.length
+      ? await getStepExecutionsByIdsFromDataStream({
+          esClient,
+          dataStream: stepsExecutionIndex,
+          ids: doc.stepExecutionIds,
+          sourceExcludes,
+        })
+      : await getStepExecutionsByWorkflowExecution({
+          esClient,
+          stepsExecutionIndexAlias: stepsExecutionIndex,
+          workflowExecutionId,
+          sourceExcludes,
+        });
 
     return transformToWorkflowExecutionDetailDto(workflowExecutionId, doc, stepExecutions, logger);
   } catch (error) {
@@ -93,7 +87,6 @@ function transformToWorkflowExecutionDetailDto(
 ): WorkflowExecutionDto {
   const { billable: _billable, ...workflowExecutionDtoFields } = workflowExecution;
   let yaml = workflowExecution.yaml;
-  // backward compatibility for workflow executions created before yaml was added to the workflow execution object
   try {
     if (!yaml) {
       yaml = stringifyWorkflowDefinition(workflowExecution.workflowDefinition);

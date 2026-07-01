@@ -16,6 +16,11 @@ import type {
   WorkflowStepExecutionDto,
 } from '@kbn/workflows';
 import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server';
+import {
+  getExecutionByIdFromDataStream,
+  getStepExecutionsByIdsFromDataStream,
+} from './execution_data_stream_reads';
+
 interface GetChildWorkflowExecutionsParams {
   esClient: ElasticsearchClient;
   workflowExecutionIndex: string;
@@ -58,21 +63,57 @@ const fetchChildDocs = async (
   childIds: string[],
   spaceId: string
 ): Promise<Map<string, EsWorkflowExecution>> => {
-  const mgetResponse = await esClient.mget<EsWorkflowExecution>({
-    docs: childIds.map((id) => ({ _index: workflowExecutionIndex, _id: id })),
-    _source_includes: CHILD_SOURCE_INCLUDES,
-  });
-
   const result = new Map<string, EsWorkflowExecution>();
-  for (const d of mgetResponse.docs) {
-    if ('found' in d && d.found) {
-      const doc = d._source as EsWorkflowExecution;
-      if (doc.spaceId === spaceId) {
-        result.set(d._id, doc);
+  await Promise.all(
+    childIds.map(async (id) => {
+      const doc = await getExecutionByIdFromDataStream({
+        esClient,
+        dataStream: workflowExecutionIndex,
+        id,
+        spaceId,
+        sourceIncludes: CHILD_SOURCE_INCLUDES,
+      });
+      if (doc) {
+        result.set(id, doc);
       }
-    }
-  }
+    })
+  );
   return result;
+};
+
+const fetchChildStepExecutions = async ({
+  esClient,
+  stepsExecutionIndexAlias,
+  childDocMap,
+  sourceExcludes,
+}: {
+  esClient: ElasticsearchClient;
+  stepsExecutionIndexAlias: string;
+  childDocMap: Map<string, EsWorkflowExecution>;
+  sourceExcludes: string[];
+}): Promise<EsWorkflowStepExecution[]> => {
+  const childStepExecutions: EsWorkflowStepExecution[] = [];
+
+  for (const doc of childDocMap.values()) {
+    const stepExecutionIds = doc.stepExecutionIds ?? [];
+    const steps =
+      stepExecutionIds.length > 0
+        ? await getStepExecutionsByIdsFromDataStream({
+            esClient,
+            dataStream: stepsExecutionIndexAlias,
+            ids: stepExecutionIds,
+            sourceExcludes,
+          })
+        : await getStepExecutionsByWorkflowExecution({
+            esClient,
+            stepsExecutionIndexAlias,
+            workflowExecutionId: doc.id,
+            sourceExcludes,
+          });
+    childStepExecutions.push(...steps);
+  }
+
+  return childStepExecutions;
 };
 
 const groupStepsByWorkflowRunId = (
@@ -95,22 +136,22 @@ export const getChildWorkflowExecutions = async ({
   parentExecutionId,
   spaceId,
 }: GetChildWorkflowExecutionsParams): Promise<ChildWorkflowExecutionItem[]> => {
-  const response = await esClient.get<EsWorkflowExecution>({
-    index: workflowExecutionIndex,
+  const parentDoc = await getExecutionByIdFromDataStream({
+    esClient,
+    dataStream: workflowExecutionIndex,
     id: parentExecutionId,
-    _source_includes: PARENT_SOURCE_INCLUDES,
+    spaceId,
+    sourceIncludes: PARENT_SOURCE_INCLUDES,
   });
-  const parentDoc = response._source ?? undefined;
 
   if (!parentDoc || parentDoc.spaceId !== spaceId) {
     return [];
   }
 
-  const parentStepExecutions = await getStepExecutionsByWorkflowExecution({
+  const parentStepExecutions = await getStepExecutionsByIdsFromDataStream({
     esClient,
-    stepsExecutionIndex,
-    workflowExecutionId: parentExecutionId,
-    stepExecutionIds: parentDoc.stepExecutionIds,
+    dataStream: stepsExecutionIndex,
+    ids: parentDoc.stepExecutionIds ?? [],
     sourceExcludes: STEP_SOURCE_EXCLUDES,
   });
 
@@ -126,20 +167,12 @@ export const getChildWorkflowExecutions = async ({
     spaceId
   );
 
-  const allChildStepExecutionIds = Array.from(childDocMap.values()).flatMap(
-    (doc) => doc.stepExecutionIds ?? []
-  );
-
-  const childStepExecutions =
-    allChildStepExecutionIds.length > 0
-      ? await getStepExecutionsByWorkflowExecution({
-          esClient,
-          stepsExecutionIndex,
-          workflowExecutionId: '',
-          stepExecutionIds: allChildStepExecutionIds,
-          sourceExcludes: STEP_SOURCE_EXCLUDES,
-        })
-      : [];
+  const childStepExecutions = await fetchChildStepExecutions({
+    esClient,
+    stepsExecutionIndexAlias: stepsExecutionIndex,
+    childDocMap,
+    sourceExcludes: STEP_SOURCE_EXCLUDES,
+  });
 
   const stepsByRunId = groupStepsByWorkflowRunId(childStepExecutions);
 

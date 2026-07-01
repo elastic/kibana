@@ -32,13 +32,35 @@ import { WorkflowExecutionState } from '../workflow_execution_state';
  */
 function buildHarness(opts: { evictionMinBytes?: number; logger?: Logger } = {}) {
   const workflowExecutionRepository = {
-    updateWorkflowExecution: jest.fn(),
+    updateWorkflowExecution: jest.fn().mockResolvedValue({}),
   } as unknown as jest.Mocked<WorkflowExecutionRepository>;
 
   const stepExecutionRepository = {
-    bulkUpsert: jest.fn().mockResolvedValue(undefined),
+    bulkUpsert: jest.fn().mockResolvedValue({}),
     getStepExecutionsByIds: jest.fn().mockResolvedValue([]),
   } as unknown as jest.Mocked<StepExecutionRepository>;
+
+  // Resume reads step docs through the version-returning variant; delegate to
+  // `getStepExecutionsByIds` so existing per-test mocks keep driving load().
+  stepExecutionRepository.getStepExecutionsByIdsWithVersion = jest.fn(
+    async (
+      ids: string[],
+      sourceIncludes?: Array<keyof EsWorkflowStepExecution>,
+      sourceExcludes?: Array<keyof EsWorkflowStepExecution>
+    ) => {
+      const docs =
+        (await (stepExecutionRepository.getStepExecutionsByIds as jest.Mock)(
+          ids,
+          sourceIncludes,
+          sourceExcludes
+        )) ?? [];
+      return (docs as EsWorkflowStepExecution[]).map((doc) => ({
+        id: doc.id,
+        doc,
+        version: { index: 'test-index', seqNo: 1, primaryTerm: 1 },
+      }));
+    }
+  ) as unknown as jest.Mocked<StepExecutionRepository>['getStepExecutionsByIdsWithVersion'];
 
   const fakeWorkflowExecution = {
     id: 'test-workflow-execution-id',
@@ -715,7 +737,8 @@ describe('StepIoService', () => {
       expect(service.hasEvictedOutputs()).toBe(false);
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['step-1'],
-        ['id', 'output', 'workflowRunId']
+        ['id', 'output', 'workflowRunId'],
+        undefined
       );
     });
 
@@ -1405,7 +1428,8 @@ describe('StepIoService', () => {
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenNthCalledWith(
         2,
         ['11'],
-        ['id', 'output']
+        ['id', 'output'],
+        undefined
       );
     });
 
@@ -1569,7 +1593,8 @@ describe('StepIoService', () => {
       // Only step_b is referenced by step_c — exec-a should not be rehydrated.
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['exec-b'],
-        ['id', 'output', 'workflowRunId']
+        ['id', 'output', 'workflowRunId'],
+        undefined
       );
     });
 
@@ -1990,7 +2015,8 @@ describe('StepIoService', () => {
 
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['exec-alerts'],
-        ['id', 'output', 'workflowRunId']
+        ['id', 'output', 'workflowRunId'],
+        undefined
       );
     });
 
@@ -2032,7 +2058,8 @@ describe('StepIoService', () => {
 
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['exec-a'],
-        ['id', 'output', 'workflowRunId']
+        ['id', 'output', 'workflowRunId'],
+        undefined
       );
     });
 

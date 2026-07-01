@@ -27,6 +27,7 @@ import type {
   WorkflowExecutionEngineModel,
   WorkflowSettings,
 } from '@kbn/workflows';
+
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
@@ -43,6 +44,7 @@ import {
 import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
 import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
+import { ensureExecutionDataStreamsReady } from './lib/data_streams/ensure_execution_data_streams_ready';
 import { getAuthenticatedUser } from './lib/get_user';
 import {
   resolveExhaustedWorkflowRunTask,
@@ -54,7 +56,9 @@ import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
+import { initializeStepExecutionsDataStream } from './repositories/step_executions_data_stream';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import { initializeWorkflowExecutionsDataStream } from './repositories/workflow_executions_data_stream';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
 import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
@@ -93,7 +97,6 @@ import {
   WorkflowTaskManager,
 } from './workflow_task_manager/workflow_task_manager';
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
-import { createIndexes } from '../common';
 
 /**
  * Max Task Manager attempts for `workflow:run`.
@@ -138,7 +141,6 @@ export class WorkflowsExecutionEnginePlugin
     WorkflowsExecutionEnginePluginStart
   >;
   private meteringService?: WorkflowsMeteringService;
-  private initializePromise?: Promise<void>;
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
 
@@ -158,11 +160,12 @@ export class WorkflowsExecutionEnginePlugin
 
     const logger = this.logger;
     const config = this.config;
-
     this.coreSetup = core;
 
     initializeLogsRepositoryDataStream(core.dataStreams);
     initializeTriggerEventsDataStream(core.dataStreams);
+    initializeWorkflowExecutionsDataStream(core.dataStreams);
+    initializeStepExecutionsDataStream(core.dataStreams);
 
     const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
     this.setupDependencies = setupDependencies;
@@ -922,6 +925,8 @@ export class WorkflowsExecutionEnginePlugin
       }
       const prepared: PreparedItem[] = [];
 
+      await this.initialize(coreStart);
+
       for (let idx = 0; idx < items.length; idx++) {
         const item = items[idx];
         try {
@@ -1303,23 +1308,8 @@ export class WorkflowsExecutionEnginePlugin
   public stop() {}
 
   private async initialize(coreStart: CoreStart): Promise<void> {
-    if (!this.initializePromise) {
-      // Clear the cached promise on rejection so a transient failure (e.g. an ES
-      // circuit_breaking_exception) doesn't poison every subsequent call. In-flight
-      // callers still share the same attempt; only the *next* call after rejection
-      // gets a fresh `createIndexes` invocation.
-      const attempt = createIndexes({
-        esClient: coreStart.elasticsearch.client.asInternalUser,
-        logger: this.logger,
-      });
-      this.initializePromise = attempt;
-      attempt.catch(() => {
-        if (this.initializePromise === attempt) {
-          this.initializePromise = undefined;
-        }
-      });
-    }
-    await this.initializePromise;
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    await ensureExecutionDataStreamsReady(coreStart.dataStreams, esClient);
   }
 
   /**

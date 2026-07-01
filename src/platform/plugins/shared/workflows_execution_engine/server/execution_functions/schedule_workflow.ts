@@ -93,6 +93,16 @@ export async function checkAndSkipIfExistingScheduledExecution(
       logger.warn(
         `Found stale execution ${existingExecution.id} from current scheduled run (taskRunAt: ${executionTaskRunAt}, current taskRunAt: ${currentTaskRunAt}, attempts: ${currentTaskInstance.attempts}) - marking as failed and proceeding`
       );
+      const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+        existingExecution.id,
+        spaceId
+      );
+      if (!execution) {
+        logger.warn(
+          `Stale scheduled execution ${existingExecution.id} was not found during recovery reload; proceeding with new execution`
+        );
+        return false;
+      }
       await markExecutionFailedTaskRecovery(
         workflowExecutionRepository,
         stepExecutionRepository,

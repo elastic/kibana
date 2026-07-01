@@ -11,27 +11,44 @@ import { ExecutionStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
+const TEST_BACKING_INDEX = '.ds-.workflows-executions-2026.06.22-000001';
+
 describe('WorkflowExecutionRepository', () => {
   let repository: WorkflowExecutionRepository;
   let esClient: {
     index: jest.Mock;
+    create: jest.Mock;
     update: jest.Mock;
     search: jest.Mock;
     get: jest.Mock;
+    mget: jest.Mock;
     bulk: jest.Mock;
-    indices: { exists: jest.Mock; create: jest.Mock };
+    indices: { exists: jest.Mock; create: jest.Mock; getDataStream: jest.Mock };
   };
 
   beforeEach(() => {
     esClient = {
       index: jest.fn(),
+      create: jest.fn().mockResolvedValue({
+        _index: TEST_BACKING_INDEX,
+        _seq_no: 1,
+        _primary_term: 1,
+      }),
       update: jest.fn(),
       search: jest.fn(),
       get: jest.fn(),
+      mget: jest.fn(),
       bulk: jest.fn(),
       indices: {
         exists: jest.fn().mockResolvedValue(false),
         create: jest.fn().mockResolvedValue({}),
+        getDataStream: jest.fn().mockResolvedValue({
+          data_streams: [
+            {
+              indices: [{ index_name: TEST_BACKING_INDEX }],
+            },
+          ],
+        }),
       },
     };
     repository = new WorkflowExecutionRepository(esClient as any);
@@ -40,13 +57,21 @@ describe('WorkflowExecutionRepository', () => {
   describe('createWorkflowExecution', () => {
     it('should create a workflow execution', async () => {
       const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'default' };
-      await repository.createWorkflowExecution(workflowExecution);
-      expect(esClient.index).toHaveBeenCalledWith({
+      const result = await repository.createWorkflowExecution(workflowExecution);
+      expect(esClient.create).toHaveBeenCalledWith({
         index: WORKFLOWS_EXECUTIONS_INDEX,
         id: '1',
         refresh: false,
-        document: workflowExecution,
+        document: expect.objectContaining({
+          id: '1',
+          workflowId: 'test-workflow',
+          spaceId: 'default',
+          '@timestamp': expect.any(String),
+        }),
       });
+      expect(result).toEqual(
+        expect.objectContaining({ id: '1', '@timestamp': expect.any(String) })
+      );
     });
 
     it('should throw an error if ID is missing during creation', async () => {
@@ -66,7 +91,10 @@ describe('WorkflowExecutionRepository', () => {
     it('issues a single _bulk create call with provided docs and refresh option', async () => {
       esClient.bulk.mockResolvedValue({
         errors: false,
-        items: [{ create: { _id: 'e1', status: 201 } }, { create: { _id: 'e2', status: 201 } }],
+        items: [
+          { create: { _id: 'e1', _index: TEST_BACKING_INDEX, _seq_no: 1, _primary_term: 1 } },
+          { create: { _id: 'e2', _index: TEST_BACKING_INDEX, _seq_no: 2, _primary_term: 1 } },
+        ],
       });
 
       const executions = [
@@ -84,19 +112,30 @@ describe('WorkflowExecutionRepository', () => {
         index: WORKFLOWS_EXECUTIONS_INDEX,
         operations: [
           { create: { _id: 'e1' } },
-          executions[0],
+          expect.objectContaining({ ...executions[0], '@timestamp': expect.any(String) }),
           { create: { _id: 'e2' } },
-          executions[1],
+          expect.objectContaining({ ...executions[1], '@timestamp': expect.any(String) }),
         ],
       });
 
-      expect(result).toEqual([{ id: 'e1' }, { id: 'e2' }]);
+      expect(result).toEqual([
+        {
+          id: 'e1',
+          result: expect.objectContaining({ id: 'e1', '@timestamp': expect.any(String) }),
+        },
+        {
+          id: 'e2',
+          result: expect.objectContaining({ id: 'e2', '@timestamp': expect.any(String) }),
+        },
+      ]);
     });
 
     it('defaults refresh to false when not provided', async () => {
       esClient.bulk.mockResolvedValue({
         errors: false,
-        items: [{ create: { _id: 'e1', status: 201 } }],
+        items: [
+          { create: { _id: 'e1', _index: TEST_BACKING_INDEX, _seq_no: 1, _primary_term: 1 } },
+        ],
       });
 
       await repository.bulkCreateWorkflowExecutions([{ id: 'e1' }]);
@@ -108,7 +147,7 @@ describe('WorkflowExecutionRepository', () => {
       esClient.bulk.mockResolvedValue({
         errors: true,
         items: [
-          { create: { _id: 'e1', status: 201 } },
+          { create: { _id: 'e1', _index: TEST_BACKING_INDEX, _seq_no: 1, _primary_term: 1 } },
           {
             create: {
               _id: 'e2',
@@ -116,7 +155,7 @@ describe('WorkflowExecutionRepository', () => {
               error: { type: 'version_conflict_engine_exception', reason: 'doc already exists' },
             },
           },
-          { create: { _id: 'e3', status: 201 } },
+          { create: { _id: 'e3', _index: TEST_BACKING_INDEX, _seq_no: 3, _primary_term: 1 } },
         ],
       });
 
@@ -127,9 +166,15 @@ describe('WorkflowExecutionRepository', () => {
       ]);
 
       expect(result).toEqual([
-        { id: 'e1' },
+        {
+          id: 'e1',
+          result: expect.objectContaining({ id: 'e1' }),
+        },
         { id: 'e2', error: 'doc already exists' },
-        { id: 'e3' },
+        {
+          id: 'e3',
+          result: expect.objectContaining({ id: 'e3' }),
+        },
       ]);
     });
 
@@ -141,10 +186,10 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should respect space isolation when getting workflow execution by ID', async () => {
-      const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'space1' };
+      const workflowExecution = { id: 'exec-1', workflowId: 'test-workflow', spaceId: 'space1' };
       await repository.createWorkflowExecution(workflowExecution);
 
-      expect(esClient.index).toHaveBeenCalledWith(
+      expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.objectContaining({
             spaceId: 'space1',
@@ -152,52 +197,74 @@ describe('WorkflowExecutionRepository', () => {
         })
       );
 
-      // Mock get to return a document with different spaceId
-      esClient.get.mockResolvedValueOnce({
-        _source: { id: '1', workflowId: 'test-workflow', spaceId: 'space1' },
+      esClient.mget.mockResolvedValueOnce({
+        docs: [
+          {
+            found: true,
+            _id: 'exec-1',
+            _index: TEST_BACKING_INDEX,
+            _seq_no: 1,
+            _primary_term: 1,
+            _source: { id: 'exec-1', workflowId: 'test-workflow', spaceId: 'space1' },
+          },
+        ],
       });
+      esClient.search.mockResolvedValue({ hits: { hits: [] } });
 
       // Should return null when spaceId doesn't match
-      const result = await repository.getWorkflowExecutionById('1', 'space2');
+      const result = await repository.getWorkflowExecutionById('exec-1', 'space2');
 
-      expect(esClient.get).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        id: '1',
+      expect(esClient.mget).toHaveBeenCalledWith({
+        index: TEST_BACKING_INDEX,
+        ids: ['exec-1'],
       });
       expect(result).toBeNull();
     });
 
     it('should return document when spaceId matches', async () => {
-      const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'space1' };
-      esClient.get.mockResolvedValueOnce({
-        _source: workflowExecution,
+      const workflowExecution = { id: 'exec-1', workflowId: 'test-workflow', spaceId: 'space1' };
+      esClient.mget.mockResolvedValueOnce({
+        docs: [
+          {
+            found: true,
+            _id: 'exec-1',
+            _index: TEST_BACKING_INDEX,
+            _seq_no: 1,
+            _primary_term: 1,
+            _source: workflowExecution,
+          },
+        ],
       });
 
-      const result = await repository.getWorkflowExecutionById('1', 'space1');
+      const result = await repository.getWorkflowExecutionById('exec-1', 'space1');
 
-      expect(esClient.get).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        id: '1',
+      expect(esClient.mget).toHaveBeenCalledWith({
+        index: TEST_BACKING_INDEX,
+        ids: ['exec-1'],
       });
       expect(result).toEqual(workflowExecution);
     });
 
     it('should return null when document is not found', async () => {
-      const notFoundError = new Error('Not Found');
-      (notFoundError as any).meta = { statusCode: 404 };
-      esClient.get.mockRejectedValueOnce(notFoundError);
+      esClient.mget.mockResolvedValue({ docs: [{ found: false }] });
+      esClient.search.mockResolvedValue({ hits: { hits: [] } });
 
-      const result = await repository.getWorkflowExecutionById('non-existent', 'space1');
+      const result = await repository.getWorkflowExecutionById('exec-missing', 'space1');
 
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        seq_no_primary_term: true,
+        query: { ids: { values: ['exec-missing'] } },
+        size: 1,
+      });
       expect(result).toBeNull();
     });
 
     it('should throw error for non-404 errors', async () => {
       const serverError = new Error('Internal Server Error');
-      (serverError as any).meta = { statusCode: 500 };
-      esClient.get.mockRejectedValueOnce(serverError);
+      esClient.mget.mockRejectedValueOnce(serverError);
 
-      await expect(repository.getWorkflowExecutionById('1', 'space1')).rejects.toThrow(
+      await expect(repository.getWorkflowExecutionById('exec-1', 'space1')).rejects.toThrow(
         'Internal Server Error'
       );
     });
@@ -205,14 +272,127 @@ describe('WorkflowExecutionRepository', () => {
 
   describe('updateWorkflowExecution', () => {
     it('should update a workflow execution', async () => {
-      const workflowExecution = { id: '1', status: ExecutionStatus.RUNNING };
-      await repository.updateWorkflowExecution(workflowExecution);
-      expect(esClient.update).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        id: '1',
-        refresh: false,
-        doc: workflowExecution,
+      const workflowExecution = { id: 'exec-1', status: ExecutionStatus.RUNNING };
+      esClient.mget.mockResolvedValue({
+        docs: [
+          {
+            found: true,
+            _id: 'exec-1',
+            _index: TEST_BACKING_INDEX,
+            _seq_no: 7,
+            _primary_term: 2,
+            _source: workflowExecution,
+          },
+        ],
       });
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [
+          {
+            update: {
+              _id: 'exec-1',
+              _index: TEST_BACKING_INDEX,
+              _seq_no: 8,
+              _primary_term: 2,
+              status: 200,
+            },
+          },
+        ],
+      });
+      await repository.updateWorkflowExecution(workflowExecution);
+      expect(esClient.mget).toHaveBeenCalledWith({
+        index: TEST_BACKING_INDEX,
+        ids: ['exec-1'],
+        _source_includes: ['id'],
+      });
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        refresh: true,
+        operations: [
+          {
+            update: {
+              _index: TEST_BACKING_INDEX,
+              _id: 'exec-1',
+              if_seq_no: 7,
+              if_primary_term: 2,
+            },
+          },
+          { doc: workflowExecution },
+        ],
+      });
+    });
+
+    it('retries update after version conflict with a fresh document version', async () => {
+      const workflowExecution = { id: 'exec-1', status: ExecutionStatus.RUNNING };
+      esClient.mget
+        .mockResolvedValueOnce({
+          docs: [
+            {
+              found: true,
+              _id: 'exec-1',
+              _index: TEST_BACKING_INDEX,
+              _seq_no: 7,
+              _primary_term: 2,
+              _source: { id: 'exec-1' },
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          docs: [
+            {
+              found: true,
+              _id: 'exec-1',
+              _index: TEST_BACKING_INDEX,
+              _seq_no: 8,
+              _primary_term: 2,
+              _source: { id: 'exec-1' },
+            },
+          ],
+        });
+      esClient.bulk
+        .mockResolvedValueOnce({
+          errors: true,
+          items: [
+            {
+              update: {
+                _id: 'exec-1',
+                status: 409,
+                error: { type: 'version_conflict_engine_exception' },
+              },
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          errors: false,
+          items: [
+            {
+              update: {
+                _id: 'exec-1',
+                _index: TEST_BACKING_INDEX,
+                _seq_no: 9,
+                _primary_term: 2,
+                status: 200,
+              },
+            },
+          ],
+        });
+
+      await repository.updateWorkflowExecution(workflowExecution);
+
+      expect(esClient.bulk).toHaveBeenCalledTimes(2);
+      expect(esClient.bulk).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          operations: [
+            {
+              update: expect.objectContaining({
+                if_seq_no: 8,
+                if_primary_term: 2,
+              }),
+            },
+            { doc: workflowExecution },
+          ],
+        })
+      );
     });
 
     it('should throw an error if ID is missing during update', async () => {
@@ -696,12 +876,53 @@ describe('WorkflowExecutionRepository', () => {
   });
 
   describe('bulkUpdateWorkflowExecutions', () => {
-    it('should successfully bulk update multiple workflow executions', async () => {
+    it('should successfully bulk update multiple workflow executions across backing indexes', async () => {
+      const secondBackingIndex = '.ds-.workflows-executions-2026.06.22-000002';
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          {
+            indices: [{ index_name: TEST_BACKING_INDEX }, { index_name: secondBackingIndex }],
+          },
+        ],
+      });
+      esClient.mget.mockResolvedValue({
+        docs: [
+          { found: false, _id: 'exec-1', _index: secondBackingIndex },
+          {
+            found: true,
+            _id: 'exec-2',
+            _index: secondBackingIndex,
+            _seq_no: 11,
+            _primary_term: 3,
+            _source: { id: 'exec-2' },
+          },
+        ],
+      });
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'exec-1',
+              _index: TEST_BACKING_INDEX,
+              _seq_no: 10,
+              _primary_term: 2,
+              _source: { id: 'exec-1' },
+            },
+          ],
+        },
+      });
       esClient.bulk.mockResolvedValue({
         errors: false,
         items: [
-          { update: { _id: 'exec-1', status: 200 } },
-          { update: { _id: 'exec-2', status: 200 } },
+          { update: { _id: 'exec-1', _index: TEST_BACKING_INDEX, _seq_no: 3, _primary_term: 1 } },
+          {
+            update: {
+              _id: 'exec-2',
+              _index: '.ds-.workflows-executions-2026.06.22-000002',
+              _seq_no: 4,
+              _primary_term: 1,
+            },
+          },
         ],
       });
 
@@ -720,12 +941,114 @@ describe('WorkflowExecutionRepository', () => {
 
       expect(esClient.bulk).toHaveBeenCalledWith({
         refresh: true,
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        body: [
-          { update: { _id: 'exec-1' } },
-          { doc: { id: 'exec-1', status: ExecutionStatus.CANCELLED, cancelRequested: true } },
-          { update: { _id: 'exec-2' } },
-          { doc: { id: 'exec-2', status: ExecutionStatus.CANCELLED, cancelRequested: true } },
+        operations: [
+          {
+            update: {
+              _index: TEST_BACKING_INDEX,
+              _id: 'exec-1',
+              if_seq_no: 10,
+              if_primary_term: 2,
+            },
+          },
+          {
+            doc: {
+              id: 'exec-1',
+              status: ExecutionStatus.CANCELLED,
+              cancelRequested: true,
+            },
+          },
+          {
+            update: {
+              _index: secondBackingIndex,
+              _id: 'exec-2',
+              if_seq_no: 11,
+              if_primary_term: 3,
+            },
+          },
+          {
+            doc: {
+              id: 'exec-2',
+              status: ExecutionStatus.CANCELLED,
+              cancelRequested: true,
+            },
+          },
+        ],
+      });
+    });
+
+    it('retries conflicted bulk update items with fresh document versions', async () => {
+      const workflowExecution = {
+        id: 'exec-1',
+        status: ExecutionStatus.CANCELLED,
+        cancelRequested: true,
+      };
+      esClient.mget
+        .mockResolvedValueOnce({
+          docs: [
+            {
+              found: true,
+              _id: 'exec-1',
+              _index: TEST_BACKING_INDEX,
+              _seq_no: 10,
+              _primary_term: 2,
+              _source: { id: 'exec-1' },
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          docs: [
+            {
+              found: true,
+              _id: 'exec-1',
+              _index: TEST_BACKING_INDEX,
+              _seq_no: 11,
+              _primary_term: 2,
+              _source: { id: 'exec-1' },
+            },
+          ],
+        });
+      esClient.bulk
+        .mockResolvedValueOnce({
+          errors: true,
+          items: [
+            {
+              update: {
+                _id: 'exec-1',
+                error: { type: 'version_conflict_engine_exception', reason: 'version conflict' },
+                status: 409,
+              },
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          errors: false,
+          items: [
+            {
+              update: {
+                _id: 'exec-1',
+                _index: TEST_BACKING_INDEX,
+                _seq_no: 12,
+                _primary_term: 2,
+              },
+            },
+          ],
+        });
+
+      await repository.bulkUpdateWorkflowExecutions([workflowExecution]);
+
+      expect(esClient.bulk).toHaveBeenCalledTimes(2);
+      expect(esClient.bulk).toHaveBeenNthCalledWith(2, {
+        refresh: true,
+        operations: [
+          {
+            update: {
+              _index: TEST_BACKING_INDEX,
+              _id: 'exec-1',
+              if_seq_no: 11,
+              if_primary_term: 2,
+            },
+          },
+          { doc: workflowExecution },
         ],
       });
     });
@@ -750,6 +1073,26 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should throw error with details when bulk operation has errors', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          {
+            found: true,
+            _id: 'exec-1',
+            _index: TEST_BACKING_INDEX,
+            _seq_no: 1,
+            _primary_term: 1,
+            _source: { id: 'exec-1' },
+          },
+          {
+            found: true,
+            _id: 'exec-2',
+            _index: TEST_BACKING_INDEX,
+            _seq_no: 2,
+            _primary_term: 1,
+            _source: { id: 'exec-2' },
+          },
+        ],
+      });
       esClient.bulk.mockResolvedValue({
         errors: true,
         items: [

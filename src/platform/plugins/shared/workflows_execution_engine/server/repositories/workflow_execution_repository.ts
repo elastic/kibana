@@ -11,12 +11,24 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
+import { bulkUpdateDocuments } from './bulk_update_documents';
+import type { DocumentVersionsById, EsDocumentVersion } from './document_version';
+import { getDocumentsById } from './get_doc_by_id';
+import { resolveWriteIndex } from './resolve_write_index';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
 export class WorkflowExecutionRepository {
-  private indexName = WORKFLOWS_EXECUTIONS_INDEX;
+  private dataStreamName = WORKFLOWS_EXECUTIONS_INDEX;
 
   constructor(private esClient: ElasticsearchClient) {}
+
+  private isNotFoundError(error: unknown): boolean {
+    return (
+      error instanceof Error &&
+      'meta' in error &&
+      (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
+    );
+  }
 
   /**
    * Retrieves a workflow execution by its ID from Elasticsearch.
@@ -33,28 +45,69 @@ export class WorkflowExecutionRepository {
     spaceId: string
   ): Promise<EsWorkflowExecution | null> {
     try {
-      const response = await this.esClient.get<EsWorkflowExecution>({
-        index: this.indexName,
-        id: workflowExecutionId,
+      const writeIndex = await resolveWriteIndex({
+        esClient: this.esClient,
+        dataStreamName: this.dataStreamName,
       });
-
-      const doc = response._source;
-      // Verify spaceId matches for security/multi-tenancy
-      if (!doc || doc.spaceId !== spaceId) {
+      const docs = await getDocumentsById<EsWorkflowExecution>({
+        esClient: this.esClient,
+        ids: [workflowExecutionId],
+        writeIndex,
+        dataStreamName: this.dataStreamName,
+        entityName: 'workflow execution',
+      });
+      const hits = docs.map(({ doc }) => doc).filter((doc) => doc.spaceId === spaceId);
+      if (hits.length === 0) {
         return null;
       }
-      return doc;
+      return hits[0];
     } catch (error: unknown) {
-      // Handle 404 - document not found
-      if (
-        error instanceof Error &&
-        'meta' in error &&
-        (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
-      ) {
+      if (this.isNotFoundError(error)) {
         return null;
       }
       throw error;
     }
+  }
+
+  /**
+   * Like {@link getWorkflowExecutionById} but also returns the document's OCC
+   * version metadata. Used to seed the in-memory version cache on load so
+   * subsequent updates can skip the version lookup.
+   */
+  public async getWorkflowExecutionWithVersion(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<{ doc: EsWorkflowExecution; version: EsDocumentVersion } | null> {
+    try {
+      const writeIndex = await resolveWriteIndex({
+        esClient: this.esClient,
+        dataStreamName: this.dataStreamName,
+      });
+      const docs = await getDocumentsById<EsWorkflowExecution>({
+        esClient: this.esClient,
+        ids: [workflowExecutionId],
+        writeIndex,
+        dataStreamName: this.dataStreamName,
+        entityName: 'workflow execution',
+      });
+      const hit = docs.find(({ doc }) => doc.spaceId === spaceId);
+      return hit ? { doc: hit.doc, version: hit.version } : null;
+    } catch (error: unknown) {
+      if (this.isNotFoundError(error)) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  private withTimestamp(
+    workflowExecution: Partial<EsWorkflowExecution>
+  ): Partial<EsWorkflowExecution> {
+    const timestamp = workflowExecution.createdAt ?? new Date().toISOString();
+    return {
+      ...workflowExecution,
+      '@timestamp': timestamp,
+    };
   }
 
   /**
@@ -70,17 +123,20 @@ export class WorkflowExecutionRepository {
   public async createWorkflowExecution(
     workflowExecution: Partial<EsWorkflowExecution>,
     options: { refresh?: boolean | 'wait_for' } = {}
-  ): Promise<void> {
+  ): Promise<Partial<EsWorkflowExecution>> {
     if (!workflowExecution.id) {
       throw new Error('Workflow execution ID is required for creation');
     }
 
-    await this.esClient.index({
-      index: this.indexName,
+    const doc = this.withTimestamp(workflowExecution);
+    await this.esClient.create<Partial<EsWorkflowExecution>>({
+      index: this.dataStreamName,
       id: workflowExecution.id,
       refresh: options.refresh ?? false,
-      document: workflowExecution,
+      document: doc,
     });
+
+    return doc;
   }
 
   /**
@@ -95,7 +151,9 @@ export class WorkflowExecutionRepository {
   public async bulkCreateWorkflowExecutions(
     executions: Array<Partial<EsWorkflowExecution>>,
     options: { refresh?: boolean | 'wait_for' } = {}
-  ): Promise<Array<{ id: string } | { id: string; error: string }>> {
+  ): Promise<
+    Array<{ id: string; result: Partial<EsWorkflowExecution> } | { id: string; error: string }>
+  > {
     if (executions.length === 0) {
       return [];
     }
@@ -106,10 +164,11 @@ export class WorkflowExecutionRepository {
       }
     });
 
+    const docs = executions.map((execution) => this.withTimestamp(execution));
     const bulkResponse = await this.esClient.bulk({
       refresh: options.refresh ?? false,
-      index: this.indexName,
-      operations: executions.flatMap((execution) => [{ create: { _id: execution.id } }, execution]),
+      index: this.dataStreamName,
+      operations: docs.flatMap((doc) => [{ create: { _id: doc.id } }, doc]),
     });
 
     return bulkResponse.items.map((item, idx) => {
@@ -118,7 +177,10 @@ export class WorkflowExecutionRepository {
       if (op?.error) {
         return { id, error: op.error.reason ?? JSON.stringify(op.error) };
       }
-      return { id };
+      return {
+        id,
+        result: docs[idx],
+      };
     });
   }
 
@@ -135,17 +197,22 @@ export class WorkflowExecutionRepository {
    * @returns A promise that resolves when the update operation is complete.
    */
   public async updateWorkflowExecution(
-    workflowExecution: Partial<EsWorkflowExecution>
-  ): Promise<void> {
-    if (!workflowExecution.id) {
-      throw new Error('Workflow execution ID is required for update');
-    }
-
-    await this.esClient.update<Partial<EsWorkflowExecution>>({
-      index: this.indexName,
-      id: workflowExecution.id,
-      refresh: false,
-      doc: workflowExecution,
+    workflowExecution: Partial<EsWorkflowExecution>,
+    providedVersions?: DocumentVersionsById
+  ): Promise<DocumentVersionsById> {
+    const id = workflowExecution.id;
+    return bulkUpdateDocuments<Partial<EsWorkflowExecution>>({
+      esClient: this.esClient,
+      dataStreamName: this.dataStreamName,
+      writes: [
+        {
+          doc: workflowExecution,
+          version: id ? providedVersions?.[id] : undefined,
+        },
+      ],
+      entityName: 'workflow execution',
+      refresh: true,
+      idRequiredMessage: 'Workflow execution ID is required for update',
     });
   }
 
@@ -158,39 +225,20 @@ export class WorkflowExecutionRepository {
    * @returns A promise that resolves when all updates are complete.
    */
   public async bulkUpdateWorkflowExecutions(
-    updates: Array<Partial<EsWorkflowExecution>>
-  ): Promise<void> {
-    if (updates.length === 0) {
-      return;
-    }
-
-    updates.forEach((update) => {
-      if (!update.id) {
-        throw new Error('Workflow execution ID is required for bulk update');
-      }
-    });
-
-    const bulkResponse = await this.esClient.bulk({
+    executions: Array<Partial<EsWorkflowExecution>>,
+    providedVersions?: DocumentVersionsById
+  ): Promise<DocumentVersionsById> {
+    return bulkUpdateDocuments<Partial<EsWorkflowExecution>>({
+      esClient: this.esClient,
+      dataStreamName: this.dataStreamName,
+      writes: executions.map((doc) => ({
+        doc,
+        version: doc.id ? providedVersions?.[doc.id] : undefined,
+      })),
+      entityName: 'workflow execution',
       refresh: true,
-      index: this.indexName,
-      body: updates.flatMap((update) => [{ update: { _id: update.id } }, { doc: update }]),
+      idRequiredMessage: 'Workflow execution ID is required for bulk update',
     });
-
-    if (bulkResponse.errors) {
-      const erroredDocuments = bulkResponse.items
-        .filter((item) => item.update?.error)
-        .map((item) => ({
-          id: item.update?._id,
-          error: item.update?.error,
-          status: item.update?.status,
-        }));
-
-      throw new Error(
-        `Failed to update ${erroredDocuments.length} workflow executions: ${JSON.stringify(
-          erroredDocuments
-        )}`
-      );
-    }
   }
 
   /**
@@ -202,7 +250,7 @@ export class WorkflowExecutionRepository {
    */
   public async searchWorkflowExecutions(query: Record<string, unknown>, size: number = 10) {
     const response = await this.esClient.search<EsWorkflowExecution>({
-      index: this.indexName,
+      index: this.dataStreamName,
       query,
       size,
     });
@@ -233,7 +281,6 @@ export class WorkflowExecutionRepository {
     const filterClauses: Array<Record<string, unknown>> = [
       { term: { workflowId } },
       { term: { spaceId } },
-      // Direct match on in-progress statuses is faster than must_not on terminal statuses
       {
         terms: {
           status: NonTerminalExecutionStatuses,
@@ -246,14 +293,14 @@ export class WorkflowExecutionRepository {
     }
 
     const response = await this.esClient.search<EsWorkflowExecution>({
-      index: this.indexName,
-      size: 0, // Don't need the document, just checking existence
-      terminate_after: 1, // Stop after finding 1 match
+      index: this.dataStreamName,
+      size: 0,
+      terminate_after: 1,
       track_total_hits: true,
-      _source: false, // Don't fetch document content, only check existence
+      _source: false,
       query: {
         bool: {
-          filter: filterClauses, // Filter context = no scoring = faster
+          filter: filterClauses,
         },
       },
     });
@@ -283,7 +330,6 @@ export class WorkflowExecutionRepository {
     const filterClauses: Array<Record<string, unknown>> = [
       { term: { workflowId } },
       { term: { spaceId } },
-      // Direct match on in-progress statuses is faster than must_not on terminal statuses
       {
         terms: {
           status: NonTerminalExecutionStatuses,
@@ -296,12 +342,12 @@ export class WorkflowExecutionRepository {
     }
 
     const response = await this.esClient.search<EsWorkflowExecution>({
-      index: this.indexName,
+      index: this.dataStreamName,
       size: 1,
-      terminate_after: 1, // Stop after finding 1 match
+      terminate_after: 1,
       query: {
         bool: {
-          filter: filterClauses, // Filter context = no scoring = faster
+          filter: filterClauses,
         },
       },
     });
@@ -332,7 +378,6 @@ export class WorkflowExecutionRepository {
     const filterClauses: Array<Record<string, unknown>> = [
       { term: { concurrencyGroupKey } },
       { term: { spaceId } },
-      // Direct match on in-progress statuses is faster than must_not on terminal statuses
       {
         terms: {
           status: NonTerminalExecutionStatuses,
@@ -340,10 +385,6 @@ export class WorkflowExecutionRepository {
       },
     ];
 
-    // Add exclusion as a nested bool query in filter context.
-    // We nest must_not inside a bool query within the filter array (rather than using
-    // a top-level must_not) to keep all clauses in the same filter context for consistency
-    // and optimal performance. The nested must_not is still in filter context (no scoring).
     if (excludeExecutionId) {
       filterClauses.push({
         bool: {
@@ -353,15 +394,15 @@ export class WorkflowExecutionRepository {
     }
 
     const response = await this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
-      index: this.indexName,
+      index: this.dataStreamName,
       query: {
         bool: {
-          filter: filterClauses, // Filter context = no scoring = faster
+          filter: filterClauses,
         },
       },
-      _source: ['id'], // Only fetch ID field for efficiency
-      sort: [{ createdAt: { order: 'asc' } }], // Oldest first
-      size: Math.min(size, 10000), // Cap at ES default max_result_window for validation
+      _source: ['id'],
+      sort: [{ createdAt: { order: 'asc' } }],
+      size: Math.min(size, 10000),
     });
 
     return response.hits.hits
@@ -400,10 +441,10 @@ export class WorkflowExecutionRepository {
       },
     ];
 
-    const pageSize = Math.min(size, 10000); // Cap at ES default max_result_window
+    const pageSize = Math.min(size, 10000);
 
     const response = await this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
-      index: this.indexName,
+      index: this.dataStreamName,
       query: {
         bool: {
           filter: filterClauses,

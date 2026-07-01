@@ -32,7 +32,6 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
   stepIoService: StepIoService;
-  workflowExecution: EsWorkflowExecution;
   workflowExecutionGraph: WorkflowGraph;
   workflowLogger: IWorkflowEventLogger;
   coreStart?: CoreStart;
@@ -465,9 +464,8 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async resume(): Promise<void> {
-    await this.stepIoService.load();
     this.stepIoService.evictCompletedLoopsOnResume(this.workflowGraph);
-    this.nextNodeId = this.workflowExecution.currentNodeId;
+    this.nextNodeId = this.workflowExecutionState.getWorkflowExecution().currentNodeId;
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       status: ExecutionStatus.RUNNING,
     };

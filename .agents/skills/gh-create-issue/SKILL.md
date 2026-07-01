@@ -1,12 +1,20 @@
 ---
 name: gh-create-issue
-description: Create a new GitHub issue (feature request or bug report) by gathering an unstructured description from the user, classifying it, filling out the appropriate Kibana template, interviewing the user to improve any weak sections, and filing the issue via the GitHub CLI.
+description: Create a new GitHub issue (feature request or bug report) by gathering an unstructured description from the user, classifying it, filling out the appropriate template, interviewing the user to improve any weak sections, writing a draft metadata file for review, and filing the issue via the GitHub CLI after explicit confirmation.
 disable-model-invocation: true
 ---
 
 # Create GitHub Issue
 
 Guide the user through creating a well-structured GitHub issue from scratch.
+
+## Defaults
+
+- Create issues in `elastic/security-team` unless the user explicitly requests a different repository.
+- Add created issues to Elastic org project `@contextual-security-project` (`https://github.com/orgs/elastic/projects/705`, project number `705`).
+- Validate labels against the target repository, not against `elastic/kibana` unless `elastic/kibana` is the target repository.
+- If a `Team:One Workflow` label exists in the target repository, use it as the default team label for One Workflow issues. If it does not exist, do not invent it.
+- Before creating an issue, always write the final draft metadata to a temporary file and ask the user to confirm that exact draft.
 
 ## Step 1 — Gather the unstructured description
 
@@ -30,6 +38,8 @@ Read the template to know which fields to populate:
 
 - **Bug report**: read `.github/ISSUE_TEMPLATE/Bug_report.md`
 - **Feature request**: read `.github/ISSUE_TEMPLATE/Feature_request.yml`
+
+If the target repository does not contain equivalent templates, use the Kibana templates above as the issue body structure while still creating the issue in the target repository.
 
 ## Step 4 — Draft the issue from the description
 
@@ -70,12 +80,14 @@ For **feature requests**, also probe for these common gaps (even if the field is
 
 Ask the user for a **team label** (e.g. `Team:Visualizations`) and any **additional labels** (e.g. `accessibility`, `performance`). Accept "none" for either. The type label (`bug` or `enhancement`) is added automatically.
 
+For One Workflow issues, prefer `Team:One Workflow` only if it exists in the target repository.
+
 **End your response and wait for the user to reply before proceeding.**
 
 Once the user provides labels, validate **all of them in parallel** against the repository:
 
 ```bash
-gh label list --repo elastic/kibana --search "<label>" --limit 10 --json name,description --jq '.[] | "- `\(.name)` — \(.description // "no description")"'
+gh label list --repo "<TARGET_REPO>" --search "<label>" --limit 10 --json name,description --jq '.[] | "- `\(.name)` — \(.description // "no description")"'
 ```
 
 For each label:
@@ -86,25 +98,59 @@ For each label:
 
 If any labels need user input, **wait for the reply**, then re-validate any new labels. Repeat until all labels are resolved.
 
-## Step 8 — Show the draft and confirm
+## Step 8 — Write draft metadata file, show the draft, and confirm
+
+Before asking for confirmation, write the full issue draft metadata to a temporary JSON file. Prefer:
+
+```bash
+mkdir -p .cursor/tmp
+```
+
+Use a filename like `.cursor/tmp/gh_issue_draft_<slug_or_timestamp>.json`.
+
+The draft file must include all data needed to create the issue:
+
+```json
+{
+  "repo": "<TARGET_REPO>",
+  "title": "<TITLE>",
+  "labels": ["<label1>", "<label2>"],
+  "typeLabel": "bug|enhancement",
+  "project": {
+    "owner": "elastic",
+    "number": 705,
+    "title": "@contextual-security-project",
+    "url": "https://github.com/orgs/elastic/projects/705"
+  },
+  "body": "<formatted issue body>",
+  "sourceContext": {
+    "relatedLinks": []
+  }
+}
+```
 
 Display the complete issue preview using this format:
 
 > **Title:** `<title>`
+> **Repository:** `<TARGET_REPO>`
 > **Labels:** `<label1>`, `<label2>`, ...
+> **Project:** `@contextual-security-project` (`https://github.com/orgs/elastic/projects/705`)
+> **Draft file:** `<path-to-draft-json>`
 >
 > ---
 > \<issue body\>
 > ---
 
-Ask the user to confirm or request changes.
+Ask the user to confirm or request changes. If the user requests changes, update the draft metadata file and show the preview again.
 
 **End your response and wait for explicit confirmation before filing.**
 
 ## Step 9 — Create the issue
 
+After explicit confirmation, read the draft metadata file and create the issue from that exact data.
+
 ```bash
-gh issue create --repo elastic/kibana \
+gh issue create --repo "<TARGET_REPO>" \
   --title "<TITLE>" \
   --label "<label1>" --label "<label2>" --label "<labelN>" \
   --body "$(cat <<'EOF'
@@ -115,4 +161,14 @@ EOF
 
 Add one `--label` flag per label.
 
-Always include the type label (`bug` or `enhancement`) plus all validated labels. Report the new issue URL to the user when done.
+Always include the type label (`bug` or `enhancement`) plus all validated labels.
+
+## Step 10 — Add the issue to the project
+
+After the issue is created, add the created issue URL to the contextual security project:
+
+```bash
+gh project item-add 705 --owner elastic --url "<ISSUE_URL>"
+```
+
+Report the new issue URL, project URL, and draft metadata file path to the user when done.
