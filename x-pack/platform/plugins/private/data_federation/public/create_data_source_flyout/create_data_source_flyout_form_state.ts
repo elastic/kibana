@@ -12,8 +12,7 @@ export type CreateDataSourceFlyoutFormValues = Omit<DataSourceWithSecrets, 'type
 
 /**
  * In-memory form values for the create flyout, keyed by data source type.
- * Values are string where the domain type is optional or string; JDBC / Flight
- * include required string fields for validation before save.
+ * Values are string where the domain type is optional or string.
  */
 export interface CreateDataSourceFlyoutFormSettings {
   s3: {
@@ -48,24 +47,6 @@ export interface CreateDataSourceFlyoutFormSettings {
     tenant_id: string;
     client_id: string;
     jwt_audience: string;
-  };
-  iceberg: {
-    region: string;
-    endpoint: string;
-    access_key: string;
-    secret_key: string;
-  };
-  jdbc: {
-    host: string;
-    port: string;
-    database: string;
-    ssl: boolean;
-    username: string;
-    password: string;
-  };
-  flight: {
-    host: string;
-    port: string;
   };
 }
 
@@ -103,9 +84,6 @@ export const emptyCreateDataSourceFormSettings = (): CreateDataSourceFlyoutFormS
     client_id: '',
     jwt_audience: '',
   },
-  iceberg: { region: '', endpoint: '', access_key: '', secret_key: '' },
-  jdbc: { host: '', port: '', database: '', ssl: false, username: '', password: '' },
-  flight: { host: '', port: '' },
 });
 
 export const patchFormSettings = <T extends DataSourceType>(

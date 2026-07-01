@@ -7,14 +7,9 @@
 
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { i18n } from '@kbn/i18n';
 import type { SetupDependencies, StartDependencies, DataFederationPluginStart } from './types';
-import { PLUGIN_ID } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { buildFederatedIdentityClusterInfo } from './create_data_source_flyout/federated_identity_cluster_info';
-
-const PLUGIN_NAME = i18n.translate('xpack.dataFederation.pluginName', {
-  defaultMessage: 'ES|QL Data Federation',
-});
 
 const LIST_BREADCRUMB = [
   {

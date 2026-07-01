@@ -179,7 +179,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       });
   }, [enabledDataSourceTypes]);
 
-  // todo - is this needed for initial release?
   const [authenticationMode, setAuthenticationMode] = useState<CreateDataSourceAuthenticationMode>(
     () =>
       initialDataSource
@@ -206,8 +205,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
 
   const handleSave = (data: CreateDataSourceFlyoutFormValues) =>
     onSave(
-      // todo - might be able to remove this
-      applyAuthenticationModeToDataSource(
+        applyAuthenticationModeToDataSource(
         { ...data, type: dataSourceType } as DataSourceWithSecrets,
         authenticationMode
       )
