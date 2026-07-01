@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fetch, { FetchError } from 'node-fetch';
+import fetch from 'node-fetch';
 import { createHash } from 'node:crypto';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -48,6 +48,13 @@ const notModifiedResponse = () =>
     headers: { get: () => null },
     text: jest.fn().mockResolvedValue(''),
   } as unknown as Awaited<ReturnType<typeof fetch>>);
+
+// `node-fetch` is auto-mocked, so its `FetchError` no longer extends `Error`
+// (p-retry rejects a non-Error before our guards run). Build a real Error and
+// stamp `name`/`type` so it matches the fetcher's duck-typing guards
+// (`err.name === 'FetchError'` + `err.type`) exactly as a real FetchError would.
+const fetchError = (message: string, type: string) =>
+  Object.assign(new Error(message), { name: 'FetchError', type });
 
 const sampleManifest = {
   versions: [
@@ -395,28 +402,21 @@ describe('LibraryFetcher.listTemplates', () => {
   });
 
   it('translates a node-fetch system error into reason `connection`', async () => {
-    const sysErr = Object.assign(new FetchError('boom', 'system'), { type: 'system' });
-    mockedFetch.mockRejectedValue(sysErr);
+    mockedFetch.mockRejectedValue(fetchError('boom', 'system'));
     const fetcher = buildFetcher();
 
     await expect(fetcher.listTemplates()).rejects.toMatchObject({ reason: 'connection' });
   });
 
   it('translates a node-fetch request-timeout into reason `timeout`', async () => {
-    const timeoutErr = Object.assign(new FetchError('network timeout', 'request-timeout'), {
-      type: 'request-timeout',
-    });
-    mockedFetch.mockRejectedValue(timeoutErr);
+    mockedFetch.mockRejectedValue(fetchError('network timeout', 'request-timeout'));
     const fetcher = buildFetcher();
 
     await expect(fetcher.listTemplates()).rejects.toMatchObject({ reason: 'timeout' });
   });
 
   it('translates a node-fetch max-size error into reason `too-large`', async () => {
-    const tooLargeErr = Object.assign(new FetchError('content size over limit', 'max-size'), {
-      type: 'max-size',
-    });
-    mockedFetch.mockRejectedValue(tooLargeErr);
+    mockedFetch.mockRejectedValue(fetchError('content size over limit', 'max-size'));
     const fetcher = buildFetcher();
 
     await expect(fetcher.listTemplates()).rejects.toMatchObject({ reason: 'too-large' });
