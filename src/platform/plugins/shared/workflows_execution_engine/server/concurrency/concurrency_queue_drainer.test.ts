@@ -7,31 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   drainConcurrencyQueueSlots,
   maybeDrainConcurrencyQueueAfterTerminal,
 } from './concurrency_queue_drainer';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 describe('drainConcurrencyQueueSlots', () => {
-  const scheduleMock = jest.fn().mockResolvedValue(undefined);
+  const runSoonMock = jest.fn().mockResolvedValue(undefined);
+  const promoteQueuedRunTask = jest.fn().mockImplementation(async () => {
+    runSoonMock();
+  });
+  const workflowTaskManager = {
+    promoteQueuedRunTask,
+  } as unknown as WorkflowTaskManager;
+
   const baseParams = {
-    taskManager: { schedule: scheduleMock } as unknown as TaskManagerStartContract,
+    workflowTaskManager,
     logger: { debug: jest.fn(), warn: jest.fn() } as unknown as Logger,
     spaceId: 'default',
     concurrencyGroupKey: 'g1',
     concurrencySettings: { key: 'g1', strategy: 'queue' as const, max: 1 },
-    request: {} as unknown as KibanaRequest,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('schedules at most one promotion per drain when max is 1 and slot count reflects the new pending doc', async () => {
+  it('promotes at most one queued execution per drain when max is 1', async () => {
     const countMock = jest.fn().mockResolvedValueOnce(0).mockResolvedValue(1);
     const workflowExecutionRepository = {
       countExecutionsByConcurrencyGroupAndStatuses: countMock,
@@ -51,7 +57,11 @@ describe('drainConcurrencyQueueSlots', () => {
       workflowExecutionRepository,
     });
 
-    expect(scheduleMock).toHaveBeenCalledTimes(1);
+    expect(promoteQueuedRunTask).toHaveBeenCalledTimes(1);
+    expect(promoteQueuedRunTask).toHaveBeenCalledWith({
+      executionId: 'exec-queued-1',
+      triggeredBy: 'manual',
+    });
     expect(countMock).toHaveBeenCalledTimes(2);
   });
 
@@ -90,7 +100,7 @@ describe('drainConcurrencyQueueSlots', () => {
       concurrencySettings: { key: 'g1', strategy: 'queue', max: 2 },
     });
 
-    expect(scheduleMock).toHaveBeenCalledTimes(2);
+    expect(promoteQueuedRunTask).toHaveBeenCalledTimes(2);
   });
 
   it('marks corrupt promoted docs as skipped and continues draining', async () => {
@@ -140,14 +150,14 @@ describe('drainConcurrencyQueueSlots', () => {
       }),
       { refresh: 'wait_for' }
     );
-    expect(scheduleMock).toHaveBeenCalledTimes(1);
-    expect(scheduleMock).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'workflow:exec-valid:manual' }),
-      expect.any(Object)
-    );
+    expect(promoteQueuedRunTask).toHaveBeenCalledTimes(1);
+    expect(promoteQueuedRunTask).toHaveBeenCalledWith({
+      executionId: 'exec-valid',
+      triggeredBy: 'manual',
+    });
   });
 
-  it('defaults missing triggeredBy to manual when scheduling', async () => {
+  it('defaults missing triggeredBy to manual when promoting', async () => {
     const countMock = jest.fn().mockResolvedValueOnce(0).mockResolvedValue(1);
     const workflowExecutionRepository = {
       countExecutionsByConcurrencyGroupAndStatuses: countMock,
@@ -167,22 +177,24 @@ describe('drainConcurrencyQueueSlots', () => {
       workflowExecutionRepository,
     });
 
-    expect(scheduleMock).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'workflow:exec-queued-1:manual' }),
-      expect.any(Object)
-    );
+    expect(promoteQueuedRunTask).toHaveBeenCalledWith({
+      executionId: 'exec-queued-1',
+      triggeredBy: 'manual',
+    });
   });
 });
 
 describe('maybeDrainConcurrencyQueueAfterTerminal', () => {
-  const scheduleMock = jest.fn().mockResolvedValue(undefined);
+  const promoteQueuedRunTask = jest.fn().mockResolvedValue(undefined);
+  const workflowTaskManager = {
+    promoteQueuedRunTask,
+  } as unknown as WorkflowTaskManager;
   const debugMock = jest.fn();
   const baseParams = {
-    taskManager: { schedule: scheduleMock } as unknown as TaskManagerStartContract,
+    workflowTaskManager,
     logger: { debug: debugMock, warn: jest.fn() } as unknown as Logger,
     workflowRunId: 'exec-finished',
     spaceId: 'default',
-    fakeRequest: {} as unknown as KibanaRequest,
   };
 
   beforeEach(() => {
@@ -228,9 +240,9 @@ describe('maybeDrainConcurrencyQueueAfterTerminal', () => {
       workflowExecutionRepository,
     });
 
-    expect(scheduleMock).toHaveBeenCalledTimes(1);
+    expect(promoteQueuedRunTask).toHaveBeenCalledTimes(1);
     expect(debugMock).toHaveBeenCalledWith(
-      'Promoted queued execution exec-q1 to pending and scheduled workflow:run (group g1)'
+      'Promoted queued execution exec-q1 to pending and runSoon queued workflow:run (group g1)'
     );
   });
 
@@ -251,7 +263,7 @@ describe('maybeDrainConcurrencyQueueAfterTerminal', () => {
       workflowExecutionRepository,
     });
 
-    expect(scheduleMock).not.toHaveBeenCalled();
+    expect(promoteQueuedRunTask).not.toHaveBeenCalled();
     expect(debugMock).not.toHaveBeenCalled();
   });
 
@@ -272,7 +284,7 @@ describe('maybeDrainConcurrencyQueueAfterTerminal', () => {
       workflowExecutionRepository,
     });
 
-    expect(scheduleMock).not.toHaveBeenCalled();
+    expect(promoteQueuedRunTask).not.toHaveBeenCalled();
   });
 
   it('logs debug and swallows drain errors', async () => {

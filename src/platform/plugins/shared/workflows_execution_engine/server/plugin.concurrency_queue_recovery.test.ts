@@ -133,7 +133,6 @@ describe('concurrency queue recovery wiring', () => {
       expect.objectContaining({
         workflowRunId,
         spaceId,
-        fakeRequest,
       })
     );
   });

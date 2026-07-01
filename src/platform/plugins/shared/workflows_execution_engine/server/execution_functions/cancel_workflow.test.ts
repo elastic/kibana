@@ -9,7 +9,6 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import {
   ExecutionStatus,
@@ -39,8 +38,12 @@ const buildRepository = (
   updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
 });
 
-const buildTaskManager = (): jest.Mocked<Pick<WorkflowTaskManager, 'forceRunIdleTasks'>> => ({
+const buildTaskManager = (): jest.Mocked<
+  Pick<WorkflowTaskManager, 'forceRunIdleTasks' | 'removeQueuedRunTask' | 'promoteQueuedRunTask'>
+> => ({
   forceRunIdleTasks: jest.fn().mockResolvedValue(undefined),
+  removeQueuedRunTask: jest.fn().mockResolvedValue(undefined),
+  promoteQueuedRunTask: jest.fn().mockResolvedValue(undefined),
 });
 
 const buildCancelParams = ({
@@ -56,9 +59,6 @@ const buildCancelParams = ({
   workflowExecutionRepository:
     workflowExecutionRepository as unknown as WorkflowExecutionRepository,
   workflowTaskManager: workflowTaskManager as unknown as WorkflowTaskManager,
-  taskManager: {
-    schedule: jest.fn().mockResolvedValue(undefined),
-  } as unknown as TaskManagerStartContract,
   logger: loggingSystemMock.create().get() as Logger,
 });
 
@@ -196,6 +196,10 @@ describe('cancelWorkflow', () => {
 
     await cancelWorkflow(buildCancelParams({ workflowExecutionRepository, workflowTaskManager }));
 
+    expect(workflowTaskManager.removeQueuedRunTask).toHaveBeenCalledWith({
+      executionId: workflowExecutionId,
+      triggeredBy: undefined,
+    });
     expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
       expect.objectContaining({ id: workflowExecutionId, status: ExecutionStatus.CANCELLED }),
       { refresh: 'wait_for' }

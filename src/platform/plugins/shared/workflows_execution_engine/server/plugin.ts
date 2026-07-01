@@ -37,6 +37,7 @@ import {
   drainConcurrencyQueueSlots,
   maybeDrainConcurrencyQueueAfterTerminal,
 } from './concurrency/concurrency_queue_drainer';
+import { maybeScheduleDormantQueuedRunIfNeeded } from './concurrency/maybe_schedule_dormant_queued_run';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
   cancelWorkflow,
@@ -255,11 +256,10 @@ export class WorkflowsExecutionEnginePlugin
               if (interruptedOutcome === 'task_complete') {
                 await maybeDrainConcurrencyQueueAfterTerminal({
                   workflowExecutionRepository,
-                  taskManager: pluginsStart.taskManager,
+                  workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
                   logger,
                   workflowRunId,
                   spaceId,
-                  fakeRequest,
                 });
                 return;
               }
@@ -585,12 +585,11 @@ export class WorkflowsExecutionEnginePlugin
                 try {
                   await drainConcurrencyQueueSlots({
                     workflowExecutionRepository,
-                    taskManager: pluginsStart.taskManager,
+                    workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
                     logger,
                     spaceId: workflowExecution.spaceId,
                     concurrencyGroupKey: workflowExecution.concurrencyGroupKey,
                     concurrencySettings: scheduledConcurrency,
-                    request: fakeRequest,
                   });
                 } catch (drainErr) {
                   logger.debug(
@@ -610,7 +609,16 @@ export class WorkflowsExecutionEnginePlugin
               // Check concurrency limits and apply collision strategy if needed
               const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
               if (!canProceed) {
-                // Execution was dropped due to concurrency limit, skip running
+                if (workflowExecution.id && workflowExecution.spaceId) {
+                  await maybeScheduleDormantQueuedRunIfNeeded({
+                    workflowExecutionId: workflowExecution.id,
+                    spaceId: workflowExecution.spaceId,
+                    request: fakeRequest,
+                    workflowExecutionRepository,
+                    workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
+                    logger,
+                  });
+                }
                 return;
               }
 
@@ -759,12 +767,11 @@ export class WorkflowsExecutionEnginePlugin
         try {
           await drainConcurrencyQueueSlots({
             workflowExecutionRepository,
-            taskManager: plugins.taskManager,
+            workflowTaskManager,
             logger: this.logger,
             spaceId: workflowExecution.spaceId,
             concurrencyGroupKey: workflowExecution.concurrencyGroupKey,
             concurrencySettings: prePersistConcurrency,
-            request,
           });
         } catch (drainErr) {
           this.logger.debug(
@@ -862,7 +869,16 @@ export class WorkflowsExecutionEnginePlugin
       // Check concurrency limits and apply collision strategy if needed
       const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
       if (!canProceed) {
-        // Execution was dropped due to concurrency limit, return execution ID
+        if (workflowExecution.id && workflowExecution.spaceId) {
+          await maybeScheduleDormantQueuedRunIfNeeded({
+            workflowExecutionId: workflowExecution.id,
+            spaceId: workflowExecution.spaceId,
+            request,
+            workflowExecutionRepository,
+            workflowTaskManager,
+            logger: this.logger,
+          });
+        }
         return {
           workflowExecutionId: workflowExecution.id,
         };
@@ -921,7 +937,16 @@ export class WorkflowsExecutionEnginePlugin
       // Check concurrency limits and apply collision strategy if needed
       const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
       if (!canProceed) {
-        // Execution was dropped due to concurrency limit, skip scheduling
+        if (workflowExecution.id && workflowExecution.spaceId) {
+          await maybeScheduleDormantQueuedRunIfNeeded({
+            workflowExecutionId: workflowExecution.id,
+            spaceId: workflowExecution.spaceId,
+            request,
+            workflowExecutionRepository,
+            workflowTaskManager,
+            logger: this.logger,
+          });
+        }
         return {
           workflowExecutionId: workflowExecution.id as string,
         };
@@ -1078,7 +1103,17 @@ export class WorkflowsExecutionEnginePlugin
       const runCheck = async (p: PreparedItem) => {
         if (await this.checkConcurrencyIfNeeded(p.workflowExecution)) {
           passingIdx.add(p.idx);
+          return;
         }
+
+        await maybeScheduleDormantQueuedRunIfNeeded({
+          workflowExecutionId: p.workflowExecution.id as string,
+          spaceId: p.workflowExecution.spaceId ?? 'default',
+          request,
+          workflowExecutionRepository,
+          workflowTaskManager,
+          logger: this.logger,
+        });
       };
       await Promise.all([
         ...keylessItems.map(runCheck),
@@ -1093,12 +1128,11 @@ export class WorkflowsExecutionEnginePlugin
               try {
                 await drainConcurrencyQueueSlots({
                   workflowExecutionRepository,
-                  taskManager: plugins.taskManager,
+                  workflowTaskManager,
                   logger: this.logger,
                   spaceId: p.workflowExecution.spaceId,
                   concurrencyGroupKey: p.workflowExecution.concurrencyGroupKey,
                   concurrencySettings: bulkConc,
-                  request,
                 });
               } catch (drainErr) {
                 this.logger.debug(
@@ -1206,7 +1240,6 @@ export class WorkflowsExecutionEnginePlugin
         schedulingRequest,
         workflowExecutionRepository,
         workflowTaskManager,
-        taskManager: plugins.taskManager,
         logger: this.logger,
       });
     };

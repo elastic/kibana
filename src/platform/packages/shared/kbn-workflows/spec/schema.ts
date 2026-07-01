@@ -84,6 +84,7 @@ export const CollisionStrategySchema = z.enum(['cancel-in-progress', 'drop', 'qu
 export type CollisionStrategy = z.infer<typeof CollisionStrategySchema>;
 
 export const DEFAULT_CONCURRENCY_QUEUE_SIZE = 100;
+export const DEFAULT_CONCURRENCY_QUEUE_TTL = '24h';
 
 export const ConcurrencySettingsSchema = z.object({
   key: z.string().optional(), // Concurrency group identifier e.g., '{{ event.host.name }}'
@@ -91,6 +92,8 @@ export const ConcurrencySettingsSchema = z.object({
   max: z.number().int().min(1).optional(), // Max concurrent runs per concurrency group
   /** Max backlog when strategy is `queue` (default applied at runtime if omitted). */
   'queue-size': z.number().int().min(1).optional(),
+  /** Max time a run may remain in `queued` before it is skipped (default applied at runtime if omitted). */
+  'queue-ttl': DurationSchema.optional(),
 });
 export type ConcurrencySettings = z.infer<typeof ConcurrencySettingsSchema>;
 

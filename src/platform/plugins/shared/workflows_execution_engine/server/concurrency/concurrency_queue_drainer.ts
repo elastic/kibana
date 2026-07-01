@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { ConcurrencySettings, EsWorkflowExecution } from '@kbn/workflows';
+import type { Logger } from '@kbn/core/server';
+import type { ConcurrencySettings } from '@kbn/workflows';
 import {
   ConcurrencySlotOccupyingExecutionStatuses,
   ExecutionStatus,
@@ -17,31 +16,27 @@ import {
 } from '@kbn/workflows';
 
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import { generateExecutionTaskScope } from '../utils/generate_execution_task_scope';
-import { WORKFLOW_RUN_TASK_TYPE } from '../workflow_task_manager/types';
-import type { StartWorkflowExecutionParams } from '../workflow_task_manager/types';
+import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 /**
- * Moves oldest `queued` executions to `pending` and schedules `workflow:run` tasks while
- * slot occupancy is below `concurrency.max`.
+ * Moves oldest `queued` executions to `pending` and promotes their pre-scheduled
+ * `workflow:run` tasks via `runSoon` while slot occupancy is below `concurrency.max`.
  */
 export async function drainConcurrencyQueueSlots(params: {
   workflowExecutionRepository: WorkflowExecutionRepository;
-  taskManager: TaskManagerStartContract;
+  workflowTaskManager: WorkflowTaskManager;
   logger: Logger;
   spaceId: string;
   concurrencyGroupKey: string;
   concurrencySettings: ConcurrencySettings;
-  request: KibanaRequest;
 }): Promise<void> {
   const {
     workflowExecutionRepository,
-    taskManager,
+    workflowTaskManager,
     logger,
     spaceId,
     concurrencyGroupKey,
     concurrencySettings,
-    request,
   } = params;
 
   if (concurrencySettings.strategy !== 'queue') {
@@ -106,31 +101,17 @@ export async function drainConcurrencyQueueSlots(params: {
           const triggeredBy = execution.triggeredBy || 'manual';
 
           try {
-            await taskManager.schedule(
-              {
-                id: `workflow:${execution.id}:${triggeredBy}`,
-                taskType: WORKFLOW_RUN_TASK_TYPE,
-                params: {
-                  workflowRunId: execution.id,
-                  spaceId: execution.spaceId,
-                } satisfies StartWorkflowExecutionParams,
-                state: {
-                  lastRunAt: null,
-                  lastRunStatus: null,
-                  lastRunError: null,
-                },
-                scope: generateExecutionTaskScope(execution as EsWorkflowExecution),
-                enabled: true,
-              },
-              { request }
-            );
+            await workflowTaskManager.promoteQueuedRunTask({
+              executionId: execution.id,
+              triggeredBy,
+            });
             logger.debug(
-              `Promoted queued execution ${execution.id} to pending and scheduled workflow:run (group ${concurrencyGroupKey})`
+              `Promoted queued execution ${execution.id} to pending and runSoon queued workflow:run (group ${concurrencyGroupKey})`
             );
           } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
             logger.warn(
-              `Promoted queued workflow execution ${nextQueuedId} but failed to schedule workflow:run (${message}); reverting to queued`
+              `Promoted queued workflow execution ${nextQueuedId} but failed to runSoon workflow:run (${message}); reverting to queued`
             );
             await workflowExecutionRepository.updateWorkflowExecution(
               { id: nextQueuedId, status: ExecutionStatus.QUEUED },
@@ -146,13 +127,12 @@ export async function drainConcurrencyQueueSlots(params: {
 
 export async function maybeDrainConcurrencyQueueAfterTerminal(params: {
   workflowExecutionRepository: WorkflowExecutionRepository;
-  taskManager: TaskManagerStartContract;
+  workflowTaskManager: WorkflowTaskManager;
   logger: Logger;
   workflowRunId: string;
   spaceId: string;
-  fakeRequest: KibanaRequest;
 }): Promise<void> {
-  const { workflowExecutionRepository, taskManager, logger, workflowRunId, spaceId, fakeRequest } =
+  const { workflowExecutionRepository, workflowTaskManager, logger, workflowRunId, spaceId } =
     params;
 
   try {
@@ -168,12 +148,11 @@ export async function maybeDrainConcurrencyQueueAfterTerminal(params: {
 
     await drainConcurrencyQueueSlots({
       workflowExecutionRepository,
-      taskManager,
+      workflowTaskManager,
       logger,
       spaceId,
       concurrencyGroupKey: groupKey,
       concurrencySettings: concurrency,
-      request: fakeRequest,
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);

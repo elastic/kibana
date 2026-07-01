@@ -198,4 +198,27 @@ describe('buildOverviewStepExecutionFromContext', () => {
       message: 'Resume interrupted',
     });
   });
+
+  it('surfaces skipReason on Overview when execution was skipped before steps ran', () => {
+    const overview = buildOverviewStepExecutionFromContext({
+      ...baseOverviewExecution,
+      status: ExecutionStatus.SKIPPED,
+      error: null,
+      stepExecutions: [],
+      context: { spaceId: 'default' },
+      cancellationReason: 'Queue wait exceeded (queue-ttl: 1s)',
+    } as WorkflowExecutionDto & { cancellationReason: string });
+    const input = overview.input as Record<string, unknown>;
+    expect(input.skipReason).toBe('Queue wait exceeded (queue-ttl: 1s)');
+    expect(input.spaceId).toBe('default');
+  });
+
+  it('omits skipReason on Overview when status is not skipped', () => {
+    const overview = buildOverviewStepExecutionFromContext({
+      ...baseOverviewExecution,
+      cancellationReason: 'Cancelled by user',
+    } as WorkflowExecutionDto & { cancellationReason: string });
+    const input = overview.input as Record<string, unknown>;
+    expect(input.skipReason).toBeUndefined();
+  });
 });

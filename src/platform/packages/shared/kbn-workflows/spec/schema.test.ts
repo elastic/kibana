@@ -503,6 +503,27 @@ describe('ConcurrencySettingsSchema', () => {
     });
   });
 
+  describe('queue-ttl', () => {
+    it('should accept optional queue-ttl duration', () => {
+      const result = ConcurrencySettingsSchema.safeParse({
+        strategy: 'queue',
+        'queue-ttl': '24h',
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data['queue-ttl']).toBe('24h');
+      }
+    });
+
+    it('should reject invalid queue-ttl format', () => {
+      const result = ConcurrencySettingsSchema.safeParse({
+        strategy: 'queue',
+        'queue-ttl': 'not-a-duration',
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
   it('should export ConcurrencySettings type that matches schema inference', () => {
     // Verify the type can be used and matches the schema inference
     const testSettings: ConcurrencySettings = {

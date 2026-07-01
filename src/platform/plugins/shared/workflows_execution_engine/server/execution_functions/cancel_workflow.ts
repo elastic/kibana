@@ -8,7 +8,6 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 import { drainConcurrencyQueueSlots } from '../concurrency/concurrency_queue_drainer';
@@ -33,7 +32,6 @@ export const cancelWorkflow = async ({
   schedulingRequest,
   workflowExecutionRepository,
   workflowTaskManager,
-  taskManager,
   logger,
 }: {
   workflowExecutionId: string;
@@ -41,7 +39,6 @@ export const cancelWorkflow = async ({
   schedulingRequest: KibanaRequest;
   workflowExecutionRepository: WorkflowExecutionRepository;
   workflowTaskManager: WorkflowTaskManager;
-  taskManager: TaskManagerStartContract;
   logger: Logger;
 }): Promise<void> => {
   const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
@@ -57,6 +54,7 @@ export const cancelWorkflow = async ({
     return;
   }
 
+  const wasQueued = workflowExecution.status === ExecutionStatus.QUEUED;
   const freesConcurrencySlotImmediately =
     workflowExecution.status === ExecutionStatus.PENDING ||
     workflowExecution.status === ExecutionStatus.QUEUED;
@@ -67,6 +65,13 @@ export const cancelWorkflow = async ({
     freesConcurrencySlotImmediately &&
     concurrencySettings?.strategy === 'queue' &&
     concurrencyGroupKey;
+
+  if (wasQueued) {
+    await workflowTaskManager.removeQueuedRunTask({
+      executionId: workflowExecution.id,
+      triggeredBy: workflowExecution.triggeredBy,
+    });
+  }
 
   await workflowExecutionRepository.updateWorkflowExecution(
     {
@@ -89,12 +94,11 @@ export const cancelWorkflow = async ({
     try {
       await drainConcurrencyQueueSlots({
         workflowExecutionRepository,
-        taskManager,
+        workflowTaskManager,
         logger,
         spaceId: workflowExecution.spaceId,
         concurrencyGroupKey,
         concurrencySettings,
-        request: schedulingRequest,
       });
     } catch (drainErr) {
       logger.debug(

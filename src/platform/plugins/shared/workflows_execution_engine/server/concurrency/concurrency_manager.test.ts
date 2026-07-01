@@ -636,10 +636,13 @@ describe('ConcurrencyManager', () => {
         );
 
         expect(result).toBe(false);
-        expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith({
-          id: 'exec-new',
-          status: ExecutionStatus.QUEUED,
-        });
+        expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+          {
+            id: 'exec-new',
+            status: ExecutionStatus.QUEUED,
+          },
+          { refresh: 'wait_for' }
+        );
       });
 
       it('marks SKIPPED when queue backlog is full (explicit queue-size)', async () => {

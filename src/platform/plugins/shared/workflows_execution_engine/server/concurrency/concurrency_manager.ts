@@ -142,10 +142,13 @@ export class ConcurrencyManager {
         return false;
       }
 
-      await this.workflowExecutionRepository.updateWorkflowExecution({
-        id: currentExecutionId,
-        status: ExecutionStatus.QUEUED,
-      });
+      await this.workflowExecutionRepository.updateWorkflowExecution(
+        {
+          id: currentExecutionId,
+          status: ExecutionStatus.QUEUED,
+        },
+        { refresh: 'wait_for' }
+      );
       return false;
     }
 

@@ -16,6 +16,7 @@ import {
 } from '@kbn/workflows';
 import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
+import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued_workflow_run_at_task_start';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import type { WorkflowsMeteringService } from '../metering';
@@ -82,6 +83,36 @@ export async function runWorkflow({
     );
     if (meteringService) {
       void meteringService.reportWorkflowExecution(execution, dependencies.cloudSetup);
+    }
+    return;
+  }
+
+  const handledQueuedRun = await handleQueuedWorkflowRunAtTaskStart({
+    execution,
+    workflowRunId,
+    workflowExecutionRepository,
+    workflowTaskManager,
+    logger,
+  });
+  if (handledQueuedRun) {
+    await handlePostExecutionLoop({
+      workflowRunId,
+      spaceId,
+      logger,
+      fakeRequest,
+      workflowExecutionRepository,
+      internalResumeWorkflowExecution,
+      workflowTaskManager,
+      meteringService,
+      cloudSetup: dependencies.cloudSetup,
+    });
+    if (meteringService) {
+      const terminalExecution = await workflowExecutionRepository
+        .getWorkflowExecutionById(workflowRunId, spaceId)
+        .catch(() => null);
+      if (terminalExecution) {
+        void meteringService.reportWorkflowExecution(terminalExecution, dependencies.cloudSetup);
+      }
     }
     return;
   }
@@ -174,7 +205,6 @@ export async function runWorkflow({
     workflowExecutionRepository,
     internalResumeWorkflowExecution,
     workflowTaskManager,
-    taskManager: dependencies.taskManager,
     meteringService,
     cloudSetup: dependencies.cloudSetup,
   });

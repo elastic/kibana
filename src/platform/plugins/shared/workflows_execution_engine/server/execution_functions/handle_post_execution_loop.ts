@@ -9,7 +9,6 @@
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { isSyncParentInvocation, isTerminalStatus } from '@kbn/workflows';
 import { drainConcurrencyQueueSlots } from '../concurrency/concurrency_queue_drainer';
 import type { WorkflowsMeteringService } from '../metering';
@@ -25,7 +24,6 @@ export async function handlePostExecutionLoop({
   workflowExecutionRepository,
   internalResumeWorkflowExecution,
   workflowTaskManager,
-  taskManager,
   meteringService,
   cloudSetup,
 }: {
@@ -36,7 +34,6 @@ export async function handlePostExecutionLoop({
   workflowExecutionRepository: WorkflowExecutionRepository;
   internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
   workflowTaskManager?: WorkflowTaskManager;
-  taskManager: TaskManagerStartContract;
   meteringService?: WorkflowsMeteringService;
   cloudSetup?: CloudSetup;
 }): Promise<void> {
@@ -54,16 +51,15 @@ export async function handlePostExecutionLoop({
   if (finalExecution && isTerminalStatus(finalExecution.status)) {
     const concurrency = finalExecution.workflowDefinition?.settings?.concurrency;
     const groupKey = finalExecution.concurrencyGroupKey;
-    if (concurrency?.strategy === 'queue' && groupKey) {
+    if (concurrency?.strategy === 'queue' && groupKey && workflowTaskManager) {
       try {
         await drainConcurrencyQueueSlots({
           workflowExecutionRepository,
-          taskManager,
+          workflowTaskManager,
           logger,
           spaceId,
           concurrencyGroupKey: groupKey,
           concurrencySettings: concurrency,
-          request: fakeRequest,
         });
       } catch (drainErr) {
         logger.debug(

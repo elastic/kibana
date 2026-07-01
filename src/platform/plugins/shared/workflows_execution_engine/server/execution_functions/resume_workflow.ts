@@ -110,7 +110,6 @@ export async function resumeWorkflow({
     workflowExecutionRepository,
     internalResumeWorkflowExecution,
     workflowTaskManager,
-    taskManager: dependencies.taskManager,
     meteringService,
     cloudSetup: dependencies.cloudSetup,
   });
