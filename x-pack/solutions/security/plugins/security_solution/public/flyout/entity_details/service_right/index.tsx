@@ -25,6 +25,7 @@ import { FlyoutLoading } from '../../../flyout_v2/shared/components/flyout_loadi
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { ServicePanelContent } from './content';
 import { ServicePanelHeader } from './header';
+import { ServicePanelFooter } from './footer';
 import { useObservedService } from './hooks/use_observed_service';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { IdentityFields } from '../../document_details/shared/utils';
@@ -239,6 +240,14 @@ export const ServicePanel = memo(function ServicePanel({
           />
         )}
       </FlyoutBody>
+      {!isPreviewMode && (
+        <ServicePanelFooter
+          identityFields={documentEntityIdentifiers}
+          entity={
+            entityStoreV2Enabled ? entityFromStoreResult.entityRecord ?? undefined : undefined
+          }
+        />
+      )}
     </>
   );
 });

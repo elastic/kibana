@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import React, { memo, useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
@@ -41,7 +43,6 @@ import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
 } from '../shared/entity_store_risk_utils';
-import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import {
   mergeLegacyIdentityWhenStoreEntityMissing,
   type IdentityFields,
@@ -53,6 +54,7 @@ import { EntityPanelHeaderTabs } from '../shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../shared/components/entity_summary_grid';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../../entity_analytics/components/home/constants';
+import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 
 export { USER_PANEL_RISK_SCORE_QUERY_ID, USER_PANEL_OBSERVED_USER_QUERY_ID };
 
@@ -91,8 +93,8 @@ export const UserPanel = memo(function UserPanel({
 }: UserPanelProps) {
   const { uiSettings } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
-  const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
+  const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
 
   const safeContextID = contextID ?? scopeId ?? 'user-panel';
 
@@ -268,6 +270,12 @@ export const UserPanel = memo(function UserPanel({
     ? observedUser.entityRecord ?? undefined
     : undefined;
 
+  const headerRiskLevel = useMemo<RiskSeverity | undefined>(() => {
+    if (!entityFromStoreResult.entityRecord) return undefined;
+    return (getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
+      'Unknown') as RiskSeverity;
+  }, [entityFromStoreResult.entityRecord]);
+
   const entityStoreLookupRequested =
     Boolean(entityIdProp) ||
     Boolean(userStoreIdentityFields && Object.keys(userStoreIdentityFields).length > 0);
@@ -315,12 +323,7 @@ export const UserPanel = memo(function UserPanel({
         entityId={panelDisplayEntityId}
         identityFields={documentEntityIdentifiers}
         isEntityInStore={!!entityFromStoreResult.entityRecord}
-        riskLevel={
-          entityFromStoreResult.entityRecord
-            ? ((getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
-                'Unknown') as RiskSeverity)
-            : undefined
-        }
+        riskLevel={headerRiskLevel}
       />
       <FlyoutBody>
         {entityFromStoreResult.entityRecord && (
