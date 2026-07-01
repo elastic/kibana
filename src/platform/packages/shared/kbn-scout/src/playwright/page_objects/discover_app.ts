@@ -762,5 +762,4 @@ export class DiscoverApp {
     // Return the mode that is currently visible
     return (await esqlEditor.isVisible()) ? 'esql' : 'classic';
   }
-
 }
