@@ -1092,7 +1092,7 @@ describe('createSmlIndexer', () => {
           },
         },
         {
-          name: 'registered, no getPermissions hook + requestedPermissions omitted → stamps empty permissions (unchanged behavior)',
+          name: 'registered, no getPermissions hook + requestedPermissions omitted → stamps empty permissions',
           registered: true,
           expectedPermissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
         },

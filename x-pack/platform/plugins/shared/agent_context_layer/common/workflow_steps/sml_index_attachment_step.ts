@@ -129,6 +129,7 @@ export const SmlPermissionsInputSchema = z
       .object({
         indices: z
           .array(z.object({ name: z.string().min(1).max(MAX_SML_IDENTIFIER_LENGTH) }).strict())
+          .max(100)
           .optional(),
       })
       .strict()
@@ -137,6 +138,7 @@ export const SmlPermissionsInputSchema = z
       .object({
         privileges: z
           .array(z.object({ name: z.string().min(1).max(MAX_SML_IDENTIFIER_LENGTH) }).strict())
+          .max(100)
           .optional(),
       })
       .strict()
