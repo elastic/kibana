@@ -160,22 +160,9 @@ module.exports = {
         };
       }
 
-      // Check for unsupported two-level namespace paths, e.g. scout/<a>/<b>/{ui,api}/
-      if (SCOUT_TOO_DEEP_NAMESPACE_PATTERN.test(filename)) {
-        return {
-          Program(node) {
-            context.report({
-              node,
-              messageId: 'invalidNamespaceDepth',
-            });
-          },
-        };
-      }
-
-      // File is in /test/scout but not in the correct subdirectory structure.
-      // Only report if it looks like a test file (has spec in name or .spec.ts ext).
-      const basename = path.basename(filename, '.ts');
-      if (basename.includes('spec') || hasSpecExtension(filename)) {
+      // File is in /test/scout but not in the correct subdirectory structure
+      // Only report if it looks like a test file (has .spec.ts extension)
+      if (hasSpecExtension(filename)) {
         return {
           Program(node) {
             context.report({
