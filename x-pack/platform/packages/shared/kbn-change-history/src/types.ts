@@ -10,6 +10,16 @@ import type {
   Refresh,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
+
+export type {
+  ChangeHistoryAggregateField,
+  ChangeHistoryFieldBucket,
+  GetChangeHistoryFieldAggregationOptions,
+  GetChangeHistoryFieldAggregationResult,
+} from './field_aggregation';
+
+export { CHANGE_HISTORY_AGGREGATE_FIELDS } from './field_aggregation';
+
 /**
  * Represents a single document in the change history.
  */

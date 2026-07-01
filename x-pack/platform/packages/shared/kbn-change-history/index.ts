@@ -7,7 +7,8 @@
 
 export type * from './src/types';
 export * from './src/client';
-export { ILM_POLICY_NAME } from './src/constants';
+export { CHANGE_HISTORY_AGGREGATE_FIELDS } from './src/field_aggregation';
+export { ILM_POLICY_NAME, DEFAULT_FIELD_AGGREGATION_SIZE } from './src/constants';
 /**
  * @internal exported for test use only — do NOT use in production code,
  * this could cause the index to be created before the feature is ready for GA

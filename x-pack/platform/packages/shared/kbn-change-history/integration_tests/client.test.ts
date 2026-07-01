@@ -190,6 +190,13 @@ describe('ChangeHistoryClient', () => {
         'Change history data stream not initialized'
       );
     });
+
+    it('should throw when getHistoryFieldAggregation is called before initialize', async () => {
+      const client = new ChangeHistoryClient(defaultCostructorOpts);
+      await expect(() =>
+        client.getHistoryFieldAggregation(KIBANA_SPACE, 'rule', 'id-1', { field: 'user.name' })
+      ).rejects.toThrow('Change history data stream not initialized');
+    });
   });
 
   describe('log and getHistory', () => {
@@ -420,6 +427,129 @@ describe('ChangeHistoryClient', () => {
         },
         apiKey: sha256('masked-id' + 'sk-secret-key-12345').slice(-12),
       });
+    });
+  });
+
+  describe('getHistoryFieldAggregation', () => {
+    let client: ChangeHistoryClient;
+
+    beforeEach(async () => {
+      client = new ChangeHistoryClient(defaultCostructorOpts);
+      await client.initialize(esServer.getClient());
+    });
+
+    it('should bucket user.name scoped to the object', async () => {
+      await client.logBulk(
+        [
+          { objectType: 'rule', objectId: 'actor-rule', snapshot: { name: 'v1' } },
+          { objectType: 'rule', objectId: 'actor-rule', snapshot: { name: 'v2' } },
+          { objectType: 'rule', objectId: 'other-rule', snapshot: { name: 'other' } },
+        ],
+        { ...defaultLogOpts, username: 'alice', userProfileId: 'alice-profile', spaceId: 'default' }
+      );
+      await client.log(
+        { objectType: 'rule', objectId: 'actor-rule', snapshot: { name: 'v3' } },
+        { ...defaultLogOpts, username: 'bob', userProfileId: 'bob-profile', spaceId: 'default' }
+      );
+
+      const result = await client.getHistoryFieldAggregation(KIBANA_SPACE, 'rule', 'actor-rule', {
+        field: 'user.name',
+      });
+
+      expect(result.field).toBe('user.name');
+      expect(result.buckets).toEqual([
+        { key: 'alice', docCount: 2 },
+        { key: 'bob', docCount: 1 },
+      ]);
+      expect(result.sumOtherDocCount).toBe(0);
+    });
+
+    it('should bucket event.action values', async () => {
+      await client.log(
+        { objectType: 'rule', objectId: 'action-rule', snapshot: { name: 'v1' } },
+        { ...defaultLogOpts, action: 'rule_create', spaceId: 'default' }
+      );
+      await client.log(
+        { objectType: 'rule', objectId: 'action-rule', snapshot: { name: 'v2' } },
+        { ...defaultLogOpts, action: 'rule_update', spaceId: 'default' }
+      );
+
+      const result = await client.getHistoryFieldAggregation(KIBANA_SPACE, 'rule', 'action-rule', {
+        field: 'event.action',
+      });
+
+      expect(result.buckets).toEqual([
+        { key: 'rule_create', docCount: 1 },
+        { key: 'rule_update', docCount: 1 },
+      ]);
+      expect(result.sumOtherDocCount).toBe(0);
+    });
+
+    it('should return empty buckets for an object with no history', async () => {
+      const result = await client.getHistoryFieldAggregation(KIBANA_SPACE, 'rule', 'empty-rule', {
+        field: 'user.name',
+      });
+
+      expect(result).toEqual({
+        field: 'user.name',
+        buckets: [],
+        sumOtherDocCount: 0,
+      });
+    });
+
+    it('should expose sumOtherDocCount when bucket size is exceeded', async () => {
+      for (const username of ['user-a', 'user-b', 'user-c']) {
+        await client.log(
+          { objectType: 'rule', objectId: 'trunc-rule', snapshot: { name: username } },
+          { ...defaultLogOpts, username, spaceId: 'default' }
+        );
+      }
+
+      const result = await client.getHistoryFieldAggregation(KIBANA_SPACE, 'rule', 'trunc-rule', {
+        field: 'user.name',
+        size: 2,
+      });
+
+      expect(result.buckets).toHaveLength(2);
+      expect(result.sumOtherDocCount).toBe(1);
+    });
+
+    it('should honor additionalFilters in getHistoryFieldAggregation', async () => {
+      await client.log(
+        { objectType: 'rule', objectId: 'filtered-actors', snapshot: { name: 'old' } },
+        { ...defaultLogOpts, username: 'old-user', spaceId: 'default' }
+      );
+      await client.log(
+        { objectType: 'rule', objectId: 'filtered-actors', snapshot: { name: 'new' } },
+        { ...defaultLogOpts, username: 'recent-user', spaceId: 'default' }
+      );
+
+      const result = await client.getHistoryFieldAggregation(
+        KIBANA_SPACE,
+        'rule',
+        'filtered-actors',
+        {
+          field: 'user.name',
+          additionalFilters: [{ term: { 'user.name': 'recent-user' } }],
+        }
+      );
+
+      expect(result.buckets).toEqual([{ key: 'recent-user', docCount: 1 }]);
+      expect(result.sumOtherDocCount).toBe(0);
+    });
+
+    it('should reject aggregations on unaggregatable mapped fields', async () => {
+      await client.log(
+        { objectType: 'rule', objectId: 'bad-agg-rule', snapshot: { name: 'v1' } },
+        { ...defaultLogOpts, spaceId: 'default', data: { event: { reason: 'because' } } }
+      );
+
+      await expect(
+        client.getHistoryFieldAggregation(KIBANA_SPACE, 'rule', 'bad-agg-rule', {
+          // `event.reason` is mapped as `text`, not keyword — terms agg fails at search time.
+          field: 'event.reason' as 'user.name',
+        })
+      ).rejects.toThrow();
     });
   });
 });

@@ -23,13 +23,17 @@ import {
   SEPARATOR_CHAR,
   ECS_VERSION,
   DEFAULT_RESULT_SIZE,
+  DEFAULT_FIELD_AGGREGATION_SIZE,
 } from './constants';
 import { ensureIlmPolicy } from './ilm_policy';
+import { buildFieldTermsAggregation, parseFieldAggregationResult } from './field_aggregation';
 import type {
   ChangeHistoryDocument,
   GetHistoryResult,
   LogChangeHistoryOptions,
   GetChangeHistoryOptions,
+  GetChangeHistoryFieldAggregationOptions,
+  GetChangeHistoryFieldAggregationResult,
   ObjectChange,
 } from './types';
 import { sha256, sanitizeFields } from './utils';
@@ -52,6 +56,12 @@ export interface IChangeHistoryClient {
     objectId: string,
     opts?: GetChangeHistoryOptions
   ): Promise<GetHistoryResult>;
+  getHistoryFieldAggregation(
+    spaceId: string,
+    objectType: string,
+    objectId: string,
+    opts: GetChangeHistoryFieldAggregationOptions
+  ): Promise<GetChangeHistoryFieldAggregationResult>;
 }
 
 export class ChangeHistoryClient implements IChangeHistoryClient {
@@ -277,23 +287,8 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     objectId: string,
     opts?: GetChangeHistoryOptions
   ): Promise<GetHistoryResult> {
-    const client = this.client;
-    if (!client) {
-      const err = new Error(
-        `Change history data stream not initialized for: module [${this.module}] and dataset [${this.dataset}]`
-      );
-      this.logger.error(err);
-      throw err;
-    }
-    const filter: QueryDslQueryContainer[] = [
-      { term: { 'event.module': this.module } },
-      { term: { 'event.dataset': this.dataset } },
-      { term: { 'object.type': objectType } },
-      { term: { 'object.id': objectId } },
-    ];
-    if (opts?.additionalFilters) {
-      filter.push(...opts.additionalFilters);
-    }
+    const client = this.getInitializedClient();
+    const filter = this.buildHistoryFilters(objectType, objectId, opts?.additionalFilters);
     const defaultSort: SortCombinations[] = [
       { 'object.sequence': { order: 'desc', missing: 0 } }, // <-- If available, `sequence` ordering overrides timestamps.
       { '@timestamp': { order: 'desc' } },
@@ -310,5 +305,65 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       total: Number((history.hits.total as SearchTotalHits)?.value) || 0,
       items: history.hits.hits.map((h) => h._source).filter((i) => !!i),
     };
+  }
+
+  /**
+   * Bucket distinct values of a document field in an object's change history.
+   * Builds a terms aggregation (descending doc count) scoped like {@link getHistory}.
+   *
+   * Common facet fields: `user.name` (authors), `event.action` (change types), `event.type`.
+   */
+  async getHistoryFieldAggregation(
+    spaceId: string,
+    objectType: string,
+    objectId: string,
+    opts: GetChangeHistoryFieldAggregationOptions
+  ): Promise<GetChangeHistoryFieldAggregationResult> {
+    const client = this.getInitializedClient();
+    const bucketSize = opts.size ?? DEFAULT_FIELD_AGGREGATION_SIZE;
+    const filter = this.buildHistoryFilters(objectType, objectId, opts.additionalFilters);
+    const response = await client.search({
+      space: spaceId,
+      query: { bool: { filter } },
+      aggregations: buildFieldTermsAggregation({
+        field: opts.field,
+        size: bucketSize,
+      }),
+      size: 0,
+    });
+
+    return {
+      field: opts.field,
+      ...parseFieldAggregationResult(response.aggregations, { field: opts.field }),
+    };
+  }
+
+  private getInitializedClient(): ChangeHistoryDataStreamClient {
+    const client = this.client;
+    if (!client) {
+      const err = new Error(
+        `Change history data stream not initialized for: module [${this.module}] and dataset [${this.dataset}]`
+      );
+      this.logger.error(err);
+      throw err;
+    }
+    return client;
+  }
+
+  private buildHistoryFilters(
+    objectType: string,
+    objectId: string,
+    additionalFilters?: QueryDslQueryContainer[]
+  ): QueryDslQueryContainer[] {
+    const filter: QueryDslQueryContainer[] = [
+      { term: { 'event.module': this.module } },
+      { term: { 'event.dataset': this.dataset } },
+      { term: { 'object.type': objectType } },
+      { term: { 'object.id': objectId } },
+    ];
+    if (additionalFilters) {
+      filter.push(...additionalFilters);
+    }
+    return filter;
   }
 }

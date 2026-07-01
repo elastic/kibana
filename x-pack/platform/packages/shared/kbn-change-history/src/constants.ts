@@ -28,6 +28,10 @@ export const ECS_VERSION = '9.3.0';
  * The default size of results when getting history.
  */
 export const DEFAULT_RESULT_SIZE = 100;
+/**
+ * Default maximum number of buckets returned by {@link ChangeHistoryClient.getHistoryFieldAggregation}.
+ */
+export const DEFAULT_FIELD_AGGREGATION_SIZE = 100;
 
 /**
  * Acts like a feature flag for this package as it prevents initialization.
