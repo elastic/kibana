@@ -10,7 +10,6 @@ import { type AgentStatusRecords, HostStatus } from '../../../../../../common/en
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatusClient } from '../lib/base_agent_status_client';
 import { getPendingActionsSummary } from '../../../actions';
-import { hasConnectedRemoteClusters } from '../../../../utils/ccs_utils';
 
 export class EndpointAgentStatusClient extends AgentStatusClient {
   protected readonly agentType: ResponseActionAgentType = 'endpoint';
@@ -20,28 +19,16 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
     const metadataService = this.options.endpointService.getEndpointMetadataService(
       soClient.getCurrentNamespace()
     );
-    const ccsEnabled = await hasConnectedRemoteClusters(
-      this.options.esClient,
-      this.options.endpointService.experimentalFeatures.defendRemoteOutputCcs
-    );
 
     try {
       const agentIdsKql = agentIds.map((agentId) => `agent.id: ${agentId}`).join(' or ');
       const [{ data: hostInfoForAgents }, allPendingActions] = await Promise.all([
-        metadataService.getHostMetadataList(
-          {
-            page: 0,
-            pageSize: 1000,
-            kuery: agentIdsKql,
-          },
-          ccsEnabled
-        ),
-        getPendingActionsSummary(
-          this.options.endpointService,
-          this.options.spaceId,
-          agentIds,
-          ccsEnabled
-        ),
+        metadataService.getHostMetadataList({
+          page: 0,
+          pageSize: 1000,
+          kuery: agentIdsKql,
+        }),
+        getPendingActionsSummary(this.options.endpointService, this.options.spaceId, agentIds),
       ]).catch(catchAndWrapError);
 
       return agentIds.reduce<AgentStatusRecords>((acc, agentId) => {

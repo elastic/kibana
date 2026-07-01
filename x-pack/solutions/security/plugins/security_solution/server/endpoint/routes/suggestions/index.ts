@@ -35,7 +35,7 @@ import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
 import { buildIndexNameWithNamespace } from '../../../../common/endpoint/utils/index_name_utilities';
 import { buildBaseEndpointMetadataFilter } from '../../../../common/endpoint/utils/endpoint_metadata_filter';
-import { hasConnectedRemoteClusters, prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
+import { prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
 
 export function registerEndpointSuggestionsRoutes(
   router: SecuritySolutionPluginRouter,
@@ -102,10 +102,7 @@ export const getEndpointSuggestionsRequestHandler = (
     try {
       const config = await firstValueFrom(config$);
       const { savedObjects, elasticsearch } = await context.core;
-      const ccsEnabled = await hasConnectedRemoteClusters(
-        elasticsearch.client.asInternalUser,
-        endpointContext.experimentalFeatures.defendRemoteOutputCcs
-      );
+      const ccsEnabled = await endpointContext.service.isCcsEnabled();
       const securitySolutionContext = await context.securitySolution;
       const spaceId = securitySolutionContext.getSpaceId();
       let fullFilters: QueryDslQueryContainer[] = filters

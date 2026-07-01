@@ -35,7 +35,6 @@ import {
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
 import type { DeepMutable } from '../../../../../../common/endpoint/types/utility_types';
-import type { ExperimentalFeatures } from '../../../../../../common/experimental_features';
 import { set } from '@kbn/safer-lodash-set';
 import { responseActionsClientMock } from '../mocks';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
@@ -48,7 +47,6 @@ import {
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
 } from '../../../../../lib/telemetry/event_based/events';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { resetCcsCache } from '../../../../utils/ccs_utils';
 
 jest.mock('../../action_details_by_id', () => {
   const original = jest.requireActual('../../action_details_by_id');
@@ -85,7 +83,6 @@ describe('ResponseActionsClientImpl base class', () => {
   let logger: Logger;
 
   beforeEach(async () => {
-    resetCcsCache();
     constructorOptions = responseActionsClientMock.createConstructorOptions();
 
     esClient = constructorOptions.esClient;
@@ -293,27 +290,7 @@ describe('ResponseActionsClientImpl base class', () => {
         expect.anything(),
         expect.anything(),
         'one',
-        { bypassSpaceValidation: false, ccsEnabled: false }
-      );
-    });
-
-    it('should pass ccsEnabled=true when the feature flag is enabled and remote clusters are connected', async () => {
-      (
-        constructorOptions.endpointService.experimentalFeatures as DeepMutable<ExperimentalFeatures>
-      ).defendRemoteOutputCcs = true;
-      (constructorOptions.esClient.cluster.remoteInfo as unknown as jest.Mock).mockResolvedValue({
-        cluster_a: { connected: true },
-      });
-
-      await baseClassMock.fetchActionDetails('one').catch(() => {
-        // just ignoring error
-      });
-
-      expect(getActionDetailsByIdMock).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        'one',
-        { bypassSpaceValidation: false, ccsEnabled: true }
+        { bypassSpaceValidation: false }
       );
     });
   });

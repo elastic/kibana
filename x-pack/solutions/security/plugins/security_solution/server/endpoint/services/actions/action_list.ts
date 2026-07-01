@@ -64,12 +64,10 @@ export const getActionListByStatus = async ({
   unExpiredOnly = false,
   types,
   withOutputs,
-  ccsEnabled = false,
 }: OptionalFilterParams & {
   statuses: ResponseActionStatus[];
   spaceId: string;
   endpointService: EndpointAppContextService;
-  ccsEnabled?: boolean;
 }): Promise<ActionListApiResponse> => {
   const size = pageSize ?? ENDPOINT_DEFAULT_PAGE_SIZE;
   const page = _page ?? 1;
@@ -88,7 +86,6 @@ export const getActionListByStatus = async ({
     unExpiredOnly,
     types,
     withOutputs,
-    ccsEnabled,
   });
 
   // filter out search results based on status filter options
@@ -129,11 +126,9 @@ export const getActionList = async ({
   unExpiredOnly = false,
   withOutputs,
   types,
-  ccsEnabled = false,
 }: OptionalFilterParams & {
   spaceId: string;
   endpointService: EndpointAppContextService;
-  ccsEnabled?: boolean;
 }): Promise<ActionListApiResponse> => {
   const size = pageSize ?? ENDPOINT_DEFAULT_PAGE_SIZE;
   const page = _page ?? 1;
@@ -154,7 +149,6 @@ export const getActionList = async ({
     unExpiredOnly,
     withOutputs,
     types,
-    ccsEnabled,
   });
 
   return {
@@ -190,11 +184,9 @@ const getActionDetailsList = async ({
   unExpiredOnly,
   withOutputs,
   types,
-  ccsEnabled = false,
 }: GetActionDetailsListParam & {
   spaceId: string;
   endpointService: EndpointAppContextService;
-  ccsEnabled?: boolean;
 }): Promise<{
   actionDetails: ActionListApiResponse['data'];
   totalRecords: number;
@@ -254,8 +246,8 @@ const getActionDetailsList = async ({
     [actionResponses, agentsHostInfo] = await Promise.all([
       fetchActionResponses({
         esClient: endpointService.getInternalEsClient(),
+        endpointService,
         actionIds: actionReqIds,
-        ccsEnabled,
       }),
 
       // Get the host names for Elastic Endpoint agents

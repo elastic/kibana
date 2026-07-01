@@ -1044,7 +1044,7 @@ describe('EndpointActionsClient', () => {
         expect.anything(),
         expect.anything(),
         expect.anything(),
-        { bypassSpaceValidation: true, ccsEnabled: false }
+        { bypassSpaceValidation: true }
       );
     });
   });

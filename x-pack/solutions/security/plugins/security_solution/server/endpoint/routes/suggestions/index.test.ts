@@ -45,9 +45,6 @@ import {
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { buildIndexNameWithNamespace } from '../../../../common/endpoint/utils/index_name_utilities';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { resetCcsCache } from '../../utils/ccs_utils';
-import type { DeepMutable } from '../../../../common/endpoint/types/utility_types';
-import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 
 jest.mock('@kbn/kql/server/autocomplete/terms_enum', () => {
   return {
@@ -94,7 +91,6 @@ describe('when calling the Suggestions route handler', () => {
   let config$: Observable<ConfigSchema>;
 
   beforeEach(() => {
-    resetCcsCache();
     mockEndpointContext = createMockEndpointAppContext();
     (mockEndpointContext.service.getEndpointMetadataService as jest.Mock) = jest
       .fn()
@@ -888,14 +884,7 @@ describe('when calling the Suggestions route handler', () => {
 
     describe('when CCS is enabled', () => {
       beforeEach(() => {
-        (
-          mockEndpointContext.experimentalFeatures as DeepMutable<ExperimentalFeatures>
-        ).defendRemoteOutputCcs = true;
-        (
-          mockScopedEsClient.asInternalUser.cluster.remoteInfo as unknown as jest.Mock
-        ).mockResolvedValue({
-          cluster_a: { connected: true },
-        });
+        (mockEndpointContext.service.isCcsEnabled as jest.Mock).mockResolvedValue(true);
         suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
           config$,
           mockEndpointContext

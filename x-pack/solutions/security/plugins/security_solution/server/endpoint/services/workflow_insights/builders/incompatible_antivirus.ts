@@ -35,11 +35,7 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
   const { defendInsights, options, endpointMetadataService, esClient, ccsEnabled } = params;
   const { insightType, endpointIds, connectorId, model } = options;
 
-  const osEndpointIdsMap = await groupEndpointIdsByOS(
-    endpointIds,
-    endpointMetadataService,
-    ccsEnabled
-  );
+  const osEndpointIdsMap = await groupEndpointIdsByOS(endpointIds, endpointMetadataService);
 
   const insightsPromises = defendInsights.map(
     async (defendInsight: DefendInsight): Promise<SecurityWorkflowInsight[]> => {

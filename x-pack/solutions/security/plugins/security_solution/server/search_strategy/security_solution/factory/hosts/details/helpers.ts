@@ -26,7 +26,6 @@ import type {
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 import type { EndpointAppContext } from '../../../../../endpoint/types';
 import { getPendingActionsSummary } from '../../../../../endpoint/services';
-import { hasConnectedRemoteClusters } from '../../../../../endpoint/utils/ccs_utils';
 
 export const HOST_DETAILS_FIELDS = [
   '_id',
@@ -167,15 +166,11 @@ export const getHostEndpoint = async (
   const spaceId = (await endpointContext.service.getActiveSpace(request)).id;
 
   try {
-    const ccsEnabled = await hasConnectedRemoteClusters(
-      deps.esClient.asInternalUser,
-      endpointContext.service.experimentalFeatures.defendRemoteOutputCcs
-    );
     const endpointMetadataService = endpointContext.service.getEndpointMetadataService(spaceId);
-    const endpointData = await endpointMetadataService.getEnrichedHostMetadata(id, ccsEnabled);
+    const endpointData = await endpointMetadataService.getEnrichedHostMetadata(id);
     const fleetAgentId = endpointData.metadata.elastic.agent.id;
     const pendingActions = fleetAgentId
-      ? getPendingActionsSummary(endpointContext.service, spaceId, [fleetAgentId], ccsEnabled)
+      ? getPendingActionsSummary(endpointContext.service, spaceId, [fleetAgentId])
           .then((results) => {
             return results[0].pending_actions;
           })

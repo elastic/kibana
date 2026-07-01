@@ -140,8 +140,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
     expect(result).toEqual([buildExpectedInsight('windows')]);
     expect(groupEndpointIdsByOS).toHaveBeenCalledWith(
       ['endpoint-1'],
-      params.endpointMetadataService,
-      false
+      params.endpointMetadataService
     );
   });
 
@@ -180,8 +179,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
     ]);
     expect(groupEndpointIdsByOS).toHaveBeenCalledWith(
       ['endpoint-1'],
-      params.endpointMetadataService,
-      false
+      params.endpointMetadataService
     );
   });
 
@@ -218,8 +216,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
     ]);
     expect(groupEndpointIdsByOS).toHaveBeenCalledWith(
       ['endpoint-1'],
-      params.endpointMetadataService,
-      false
+      params.endpointMetadataService
     );
   });
 
@@ -315,8 +312,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
     expect(result).toEqual([buildExpectedInsight('macos', 'process.code_signature', 'test.com')]);
     expect(groupEndpointIdsByOS).toHaveBeenCalledWith(
       ['endpoint-1'],
-      params.endpointMetadataService,
-      false
+      params.endpointMetadataService
     );
   });
 

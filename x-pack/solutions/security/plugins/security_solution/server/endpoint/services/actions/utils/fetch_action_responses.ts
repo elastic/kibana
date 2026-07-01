@@ -17,6 +17,7 @@ import { ACTIONS_SEARCH_PAGE_SIZE } from '../constants';
 import { catchAndWrapError } from '../../../utils';
 import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../../common/endpoint/constants';
 import { prefixIndexPatternsWithCcs } from '../../../utils/ccs_utils';
+import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 
 /** @internal */
 const buildSearchQuery = (
@@ -38,11 +39,12 @@ const buildSearchQuery = (
 
 interface FetchActionResponsesOptions {
   esClient: ElasticsearchClient;
+  /** Used to derive whether Cross-Cluster Search should be applied to the response index reads */
+  endpointService: EndpointAppContextService;
   /** List of specific action ids to filter for */
   actionIds?: string[];
   /** List of specific agent ids to filter for */
   agentIds?: string[];
-  ccsEnabled?: boolean;
 }
 
 export interface FetchActionResponsesResult<
@@ -83,19 +85,17 @@ export const fetchEndpointActionResponses = async <
   TResponseMeta extends {} = {}
 >({
   esClient,
+  endpointService,
   actionIds,
   agentIds,
-  ccsEnabled,
 }: FetchActionResponsesOptions): Promise<
   Array<LogsEndpointActionResponse<TOutputContent, TResponseMeta>>
 > => {
+  const ccsEnabled = await endpointService.isCcsEnabled();
   const searchResponse = await esClient
     .search<LogsEndpointActionResponse<TOutputContent, TResponseMeta>>(
       {
-        index: prefixIndexPatternsWithCcs(
-          ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-          ccsEnabled ?? false
-        ),
+        index: prefixIndexPatternsWithCcs(ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN, ccsEnabled),
         size: ACTIONS_SEARCH_PAGE_SIZE,
         query: buildSearchQuery(actionIds, agentIds),
       },
@@ -117,14 +117,15 @@ export const fetchEndpointActionResponses = async <
  */
 export const fetchFleetActionResponses = async ({
   esClient,
+  endpointService,
   actionIds,
   agentIds,
-  ccsEnabled,
 }: FetchActionResponsesOptions): Promise<EndpointActionResponse[]> => {
+  const ccsEnabled = await endpointService.isCcsEnabled();
   const searchResponse = await esClient
     .search<EndpointActionResponse>(
       {
-        index: prefixIndexPatternsWithCcs(AGENT_ACTIONS_RESULTS_INDEX, ccsEnabled ?? false),
+        index: prefixIndexPatternsWithCcs(AGENT_ACTIONS_RESULTS_INDEX, ccsEnabled),
         size: ACTIONS_SEARCH_PAGE_SIZE,
         query: buildSearchQuery(actionIds, agentIds),
       },

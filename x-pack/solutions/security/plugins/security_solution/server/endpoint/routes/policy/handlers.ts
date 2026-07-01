@@ -13,7 +13,6 @@ import { errorHandler } from '../error_handler';
 import type { GetPolicyResponseSchema } from '../../../../common/api/endpoint';
 import { getPolicyResponseByAgentId } from './service';
 import { NotFoundError } from '../../errors';
-import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
 
 export const getHostPolicyResponseHandler = function (
   endpointAppContextServices: EndpointAppContextService
@@ -29,10 +28,7 @@ export const getHostPolicyResponseHandler = function (
     const spaceId = (await context.securitySolution).getSpaceId();
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const fleetServices = endpointAppContextServices.getInternalFleetServices(spaceId);
-    const ccsEnabled = await hasConnectedRemoteClusters(
-      esClient,
-      endpointAppContextServices.experimentalFeatures.defendRemoteOutputCcs
-    );
+    const ccsEnabled = await endpointAppContextServices.isCcsEnabled();
 
     try {
       const agentId = request.query.agentId;

@@ -18,7 +18,6 @@ import type {
 import type { EndpointAppContext } from '../../types';
 import { getPendingActionsSummary } from '../../services';
 import { withEndpointAuthz } from '../with_endpoint_authz';
-import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
 
 /**
  * Registers routes for checking status of actions
@@ -71,22 +70,11 @@ export const actionStatusRequestHandler = function (
       const agentIDs: string[] = Array.isArray(req.query.agent_ids)
         ? [...new Set(req.query.agent_ids)]
         : [req.query.agent_ids];
-      const esClient = (await context.core).elasticsearch.client.asInternalUser;
-      const ccsEnabled = await hasConnectedRemoteClusters(
-        esClient,
-        endpointContext.service.experimentalFeatures.defendRemoteOutputCcs
-      );
-
       await endpointContext.service
         .getInternalFleetServices(spaceId)
         .ensureInCurrentSpace({ agentIds: agentIDs });
 
-      const response = await getPendingActionsSummary(
-        endpointContext.service,
-        spaceId,
-        agentIDs,
-        ccsEnabled
-      );
+      const response = await getPendingActionsSummary(endpointContext.service, spaceId, agentIDs);
 
       return res.ok({
         body: {

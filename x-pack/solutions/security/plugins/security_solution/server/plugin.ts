@@ -744,8 +744,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
         const endpointFieldsStrategy = endpointFieldsProvider(
           this.endpointAppContextService,
-          depsStart.data.indexPatterns,
-          coreStart.elasticsearch.client
+          depsStart.data.indexPatterns
         );
         plugins.data.search.registerSearchStrategy(
           ENDPOINT_FIELDS_SEARCH_STRATEGY,
@@ -772,8 +771,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         );
         const endpointSearchStrategy = endpointSearchStrategyProvider(
           depsStart.data,
-          this.endpointContext,
-          coreStart.elasticsearch.client
+          this.endpointContext
         );
 
         plugins.data.search.registerSearchStrategy(

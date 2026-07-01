@@ -7,48 +7,19 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-const CCS_CACHE_TTL_MS = 60 * 1000;
-
-interface CcsCache {
-  promise: Promise<boolean>;
-  timestamp: number;
-}
-
-let ccsCache: CcsCache | null = null;
-
-export const resetCcsCache = (): void => {
-  ccsCache = null;
-};
-
-export const hasConnectedRemoteClusters = (
-  esClient: ElasticsearchClient,
-  ffEnabled: boolean = false
+/**
+ * Returns `true` when at least one remote cluster is currently connected.
+ *
+ * Pure Elasticsearch check: no caching and no feature-flag gating. Rejects if `remoteInfo()` fails
+ * so the caller can decide how to handle it — a transient failure must not be pinned as `false`,
+ * which would hide remote endpoints. Prefer `EndpointAppContextService#isCcsEnabled`, which layers
+ * the feature-flag gate and caching on top of this.
+ */
+export const checkConnectedRemoteClusters = async (
+  esClient: ElasticsearchClient
 ): Promise<boolean> => {
-  if (ffEnabled === false) {
-    return Promise.resolve(false);
-  }
-
-  const now = Date.now();
-
-  if (ccsCache !== null && now - ccsCache.timestamp < CCS_CACHE_TTL_MS) {
-    return ccsCache.promise;
-  }
-
-  const promise = esClient.cluster
-    .remoteInfo()
-    .then((response) => Object.values(response).some((r) => r.connected))
-    .catch(() => {
-      // Don't pin a transient remoteInfo() failure for the whole TTL — drop this cache entry
-      // so the next call retries instead of serving a stale `false` that hides remote endpoints.
-      if (ccsCache?.timestamp === now) {
-        ccsCache = null;
-      }
-      return false;
-    });
-
-  ccsCache = { promise, timestamp: now };
-
-  return promise;
+  const response = await esClient.cluster.remoteInfo();
+  return Object.values(response).some((remote) => remote.connected);
 };
 
 export const prefixIndexPatternsWithCcs = (indexPattern: string, ccsEnabled: boolean): string => {

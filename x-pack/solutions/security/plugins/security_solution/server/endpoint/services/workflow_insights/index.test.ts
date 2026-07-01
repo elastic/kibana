@@ -47,7 +47,6 @@ import {
 import { securityWorkflowInsightsService } from '.';
 import { DATA_STREAM_NAME } from './constants';
 import { buildWorkflowInsights } from './builders';
-import { resetCcsCache } from '../../utils/ccs_utils';
 
 jest.mock('./helpers', () => {
   const original = jest.requireActual('./helpers');
@@ -125,10 +124,8 @@ describe('SecurityWorkflowInsightsService', () => {
   let isInitializedSpy: jest.SpyInstance<Promise<[void, void]>, [], boolean>;
 
   beforeEach(() => {
-    resetCcsCache();
     logger = loggerMock.create();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    (esClient.cluster.remoteInfo as unknown as jest.Mock).mockResolvedValue({});
 
     mockEndpointAppContextService = createMockEndpointAppContext()
       .service as jest.Mocked<EndpointAppContextService>;

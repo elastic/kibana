@@ -280,7 +280,8 @@ describe('EndpointMetadataService', () => {
         testMockedContext.esClient,
         testMockedContext.fleetServices
       );
-      await metadataService.getMetadataForEndpoints([data.unitedMetadata.agent.id], true);
+      testMockedContext.endpointAppContextService.isCcsEnabled.mockResolvedValue(true);
+      await metadataService.getMetadataForEndpoints([data.unitedMetadata.agent.id]);
 
       const expectedQuery = getESQueryHostMetadataByIDs([data.unitedMetadata.agent.id], true);
       expect(esClient.search).toHaveBeenCalledWith(

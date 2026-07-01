@@ -7,7 +7,6 @@
 
 import { map, mergeMap, from, forkJoin } from 'rxjs';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
-import type { CoreStart } from '@kbn/core/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
 import type {
   EndpointStrategyParseResponseType,
@@ -19,12 +18,10 @@ import type { EndpointFactory } from './factory/types';
 
 import type { EndpointAppContext } from '../../endpoint/types';
 import { endpointFactory } from './factory';
-import { hasConnectedRemoteClusters } from '../../endpoint/utils/ccs_utils';
 
 export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTypes>(
   data: PluginStart,
-  endpointContext: EndpointAppContext,
-  esClient: CoreStart['elasticsearch']['client']
+  endpointContext: EndpointAppContext
 ): ISearchStrategy<EndpointStrategyRequestType<T>, EndpointStrategyResponseType<T>> => {
   const es = data.search.searchAsInternalUser as unknown as ISearchStrategy<
     EndpointStrategyRequestType<T>,
@@ -38,10 +35,7 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
       }
       return forkJoin({
         authz: from(endpointContext.service.getEndpointAuthz(deps.request)),
-        ccsEnabled: hasConnectedRemoteClusters(
-          esClient.asInternalUser,
-          endpointContext.service.experimentalFeatures.defendRemoteOutputCcs
-        ),
+        ccsEnabled: endpointContext.service.isCcsEnabled(),
       }).pipe(
         mergeMap(({ authz, ccsEnabled }) => {
           const queryFactory: EndpointFactory<T> = endpointFactory[request.factoryQueryType];

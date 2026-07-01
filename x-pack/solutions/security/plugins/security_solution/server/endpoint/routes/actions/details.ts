@@ -17,7 +17,6 @@ import { ACTION_DETAILS_ROUTE } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { getActionDetailsById } from '../../services';
 import { errorHandler } from '../error_handler';
-import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
 
 /**
  * Registers the route for handling retrieval of Action Details
@@ -65,19 +64,13 @@ export const getActionDetailsRequestHandler = (
   return async (context, req, res) => {
     try {
       const activeSpaceId = (await context.securitySolution).getSpaceId();
-      const esClient = (await context.core).elasticsearch.client.asInternalUser;
-      const ccsEnabled = await hasConnectedRemoteClusters(
-        esClient,
-        endpointContext.service.experimentalFeatures.defendRemoteOutputCcs
-      );
 
       return res.ok({
         body: {
           data: await getActionDetailsById(
             endpointContext.service,
             activeSpaceId,
-            req.params.action_id,
-            { ccsEnabled }
+            req.params.action_id
           ),
         },
       });

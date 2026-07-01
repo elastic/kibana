@@ -16,7 +16,6 @@ import type {
 } from '../../../../common/endpoint/types';
 import { errorHandler } from '../error_handler';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
-import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
 
 import type { EndpointAppContext } from '../../types';
 import type {
@@ -51,17 +50,9 @@ export function getMetadataListRequestHandler(
 
     const spaceId = (await context.securitySolution).getSpaceId();
     const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService(spaceId);
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
-    const ccsEnabled = await hasConnectedRemoteClusters(
-      esClient,
-      endpointAppContext.service.experimentalFeatures.defendRemoteOutputCcs
-    );
 
     try {
-      const { data, total } = await endpointMetadataService.getHostMetadataList(
-        request.query,
-        ccsEnabled
-      );
+      const { data, total } = await endpointMetadataService.getHostMetadataList(request.query);
 
       const body: MetadataListResponse = {
         data,
@@ -92,15 +83,10 @@ export const getMetadataRequestHandler = function (
   return async (context, request, response) => {
     const spaceId = (await context.securitySolution).getSpaceId();
     const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService(spaceId);
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
-    const ccsEnabled = await hasConnectedRemoteClusters(
-      esClient,
-      endpointAppContext.service.experimentalFeatures.defendRemoteOutputCcs
-    );
 
     try {
       return response.ok({
-        body: await endpointMetadataService.getEnrichedHostMetadata(request.params.id, ccsEnabled),
+        body: await endpointMetadataService.getEnrichedHostMetadata(request.params.id),
       });
     } catch (error) {
       return errorHandler(logger, response, error);

@@ -52,7 +52,6 @@ import type {
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getActionDetailsById } from '../../action_details_by_id';
-import { hasConnectedRemoteClusters } from '../../../../utils/ccs_utils';
 import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
@@ -470,14 +469,8 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
      */
     bypassSpaceValidation: boolean = false
   ): Promise<T> {
-    const ccsEnabled = await hasConnectedRemoteClusters(
-      this.options.esClient,
-      this.options.endpointService.experimentalFeatures.defendRemoteOutputCcs
-    );
-
     return getActionDetailsById(this.options.endpointService, this.options.spaceId, actionId, {
       bypassSpaceValidation,
-      ccsEnabled,
     });
   }
 
@@ -526,16 +519,11 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     /** Specific Agent IDs to retrieve. default is to retrieve all */
     agentIds?: string[]
   ): Promise<FetchActionResponseEsDocsResponse<TOutputContent, TMeta>> {
-    const ccsEnabled = await hasConnectedRemoteClusters(
-      this.options.esClient,
-      this.options.endpointService.experimentalFeatures.defendRemoteOutputCcs
-    );
-
     const responseDocs = await fetchEndpointActionResponses<TOutputContent, TMeta>({
       esClient: this.options.esClient,
+      endpointService: this.options.endpointService,
       actionIds: [actionId],
       agentIds,
-      ccsEnabled,
     });
 
     return responseDocs.reduce<FetchActionResponseEsDocsResponse<TOutputContent, TMeta>>(
@@ -850,10 +838,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   >(): AsyncIterable<
     Array<ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>>
   > {
-    const ccsEnabled = await hasConnectedRemoteClusters(
-      this.options.esClient,
-      this.options.endpointService.experimentalFeatures.defendRemoteOutputCcs
-    );
     const esClient = this.options.esClient;
     const query: QueryDslQueryContainer = getUnExpiredActionsEsQuery(this.agentType);
 
@@ -878,8 +862,8 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         if (actionRequests.length > 0) {
           const actionResults = await fetchActionResponses({
             esClient,
+            endpointService: this.options.endpointService,
             actionIds: actionRequests.map((action) => action.EndpointActions.action_id),
-            ccsEnabled,
           });
           const responsesByActionId = mapResponsesByActionId(actionResults);
 

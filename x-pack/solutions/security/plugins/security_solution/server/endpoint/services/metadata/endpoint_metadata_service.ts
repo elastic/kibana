@@ -46,6 +46,7 @@ import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/end
 import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import type { EndpointFleetServicesInterface } from '../fleet/endpoint_fleet_services_factory';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
@@ -62,6 +63,7 @@ export class EndpointMetadataService {
     private readonly esClient: ElasticsearchClient,
     private readonly soClient: SavedObjectsClientContract,
     private readonly fleetServices: EndpointFleetServicesInterface,
+    private readonly endpointContext: EndpointAppContextService,
     private readonly logger?: Logger
   ) {}
 
@@ -96,7 +98,8 @@ export class EndpointMetadataService {
    *
    * @throws
    */
-  async getHostMetadata(endpointId: string, ccsEnabled: boolean = false): Promise<HostMetadata> {
+  async getHostMetadata(endpointId: string): Promise<HostMetadata> {
+    const ccsEnabled = await this.endpointContext.isCcsEnabled();
     const query = getESQueryHostMetadataByID(endpointId, ccsEnabled);
     const queryResult = await this.esClient.search<HostMetadata>(query).catch(catchAndWrapError);
 
@@ -115,10 +118,8 @@ export class EndpointMetadataService {
    * Find a  list of Endpoint Host Metadata document associated with a given list of Fleet Agent Ids
    * @param fleetAgentIds
    */
-  async findHostMetadataForFleetAgents(
-    fleetAgentIds: string[],
-    ccsEnabled: boolean = false
-  ): Promise<HostMetadata[]> {
+  async findHostMetadataForFleetAgents(fleetAgentIds: string[]): Promise<HostMetadata[]> {
+    const ccsEnabled = await this.endpointContext.isCcsEnabled();
     const query = getESQueryHostMetadataByFleetAgentIds(fleetAgentIds, ccsEnabled);
 
     query.size = fleetAgentIds.length;
@@ -139,11 +140,8 @@ export class EndpointMetadataService {
    *
    * @throws
    */
-  async getEnrichedHostMetadata(
-    endpointId: string,
-    ccsEnabled: boolean = false
-  ): Promise<HostInfo> {
-    const endpointMetadata = await this.getHostMetadata(endpointId, ccsEnabled);
+  async getEnrichedHostMetadata(endpointId: string): Promise<HostInfo> {
+    const endpointMetadata = await this.getHostMetadata(endpointId);
 
     let fleetAgentId = endpointMetadata.elastic.agent.id;
     let fleetAgent: Agent | undefined;
@@ -351,9 +349,9 @@ export class EndpointMetadataService {
    * @throws
    */
   async getHostMetadataList(
-    queryOptions: GetMetadataListRequestQuery,
-    ccsEnabled: boolean = false
+    queryOptions: GetMetadataListRequestQuery
   ): Promise<Pick<MetadataListResponse, 'data' | 'total'>> {
+    const ccsEnabled = await this.endpointContext.isCcsEnabled();
     const endpointPolicies = await this.getAllEndpointPackagePolicies();
     const endpointPolicyIds = uniq(endpointPolicies.flatMap((policy) => policy.policy_ids));
     const unitedIndexQuery = await buildUnitedIndexQuery(
@@ -449,10 +447,8 @@ export class EndpointMetadataService {
     return getAllEndpointPackagePolicies(this.fleetServices.packagePolicy, this.soClient);
   }
 
-  async getMetadataForEndpoints(
-    endpointIDs: string[],
-    ccsEnabled: boolean = false
-  ): Promise<HostMetadata[]> {
+  async getMetadataForEndpoints(endpointIDs: string[]): Promise<HostMetadata[]> {
+    const ccsEnabled = await this.endpointContext.isCcsEnabled();
     const query = getESQueryHostMetadataByIDs(endpointIDs, ccsEnabled);
     const searchResult = await this.esClient.search<HostMetadata>(query).catch(catchAndWrapError);
 

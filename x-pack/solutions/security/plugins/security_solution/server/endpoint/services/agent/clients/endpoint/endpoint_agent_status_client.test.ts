@@ -13,9 +13,6 @@ import { getPendingActionsSummary as _getPendingActionsSummary } from '../../../
 import { createMockEndpointAppContextService } from '../../../../mocks';
 import { appContextService as fleetAppContextService } from '@kbn/fleet-plugin/server/services';
 import { createAppContextStartContractMock as fleetCreateAppContextStartContractMock } from '@kbn/fleet-plugin/server/mocks';
-import { resetCcsCache } from '../../../../utils/ccs_utils';
-import type { ExperimentalFeatures } from '../../../../../../common/experimental_features';
-import type { DeepMutable } from '../../../../../../common/endpoint/types/utility_types';
 
 jest.mock('../../../actions/pending_actions_summary', () => {
   const realModule = jest.requireActual('../../../actions/pending_actions_summary');
@@ -33,7 +30,6 @@ describe('EndpointAgentStatusClient', () => {
   let dataMocks: ApplyMetadataMocksResponse;
 
   beforeEach(() => {
-    resetCcsCache();
     const endpointAppContextServiceMock = createMockEndpointAppContextService();
     const metadataMocks = createEndpointMetadataServiceTestContextMock();
     const soClient = endpointAppContextServiceMock.savedObjects.createInternalScopedSoClient({
@@ -83,32 +79,12 @@ describe('EndpointAgentStatusClient', () => {
     await statusClient.getAgentStatuses(agentIds);
 
     expect(metadataClient.getHostMetadataList).toHaveBeenCalledWith(
-      expect.objectContaining({ kuery: 'agent.id: one or agent.id: two' }),
-      false
+      expect.objectContaining({ kuery: 'agent.id: one or agent.id: two' })
     );
     expect(getPendingActionsSummaryMock).toHaveBeenCalledWith(
       expect.anything(),
       'default',
-      agentIds,
-      false
-    );
-  });
-
-  it('should pass ccsEnabled=true to metadata service when remote clusters are connected', async () => {
-    const metadataClient = constructorOptions.endpointService.getEndpointMetadataService();
-    (
-      constructorOptions.endpointService.experimentalFeatures as DeepMutable<ExperimentalFeatures>
-    ).defendRemoteOutputCcs = true;
-    (constructorOptions.esClient.cluster.remoteInfo as jest.Mock).mockResolvedValue({
-      cluster_a: { connected: true },
-    });
-    jest.spyOn(metadataClient, 'getHostMetadataList');
-
-    await statusClient.getAgentStatuses(['one']);
-
-    expect(metadataClient.getHostMetadataList).toHaveBeenCalledWith(
-      expect.objectContaining({ kuery: 'agent.id: one' }),
-      true
+      agentIds
     );
   });
 

@@ -8,7 +8,6 @@
 import { from } from 'rxjs';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { ISearchStrategy, SearchStrategyDependencies } from '@kbn/data-plugin/server';
-import type { CoreStart } from '@kbn/core/server';
 
 import { requestIndexFieldSearch } from '@kbn/timelines-plugin/server/search_strategy/index_fields';
 
@@ -22,10 +21,7 @@ import type { EndpointAppContextService } from '../../endpoint/endpoint_app_cont
 import { EndpointAuthorizationError } from '../../endpoint/errors';
 import { parseRequest } from './parse_request';
 import { buildIndexNameWithNamespace } from '../../../common/endpoint/utils/index_name_utilities';
-import {
-  hasConnectedRemoteClusters,
-  prefixIndexPatternsWithCcs,
-} from '../../endpoint/utils/ccs_utils';
+import { prefixIndexPatternsWithCcs } from '../../endpoint/utils/ccs_utils';
 
 /**
  * EndpointFieldProvider mimics indexField provider from timeline plugin: x-pack/solutions/security/plugins/timelines/server/search_strategy/index_fields/index.ts
@@ -34,8 +30,7 @@ import {
  */
 export const endpointFieldsProvider = (
   context: EndpointAppContextService,
-  indexPatterns: DataViewsServerPluginStart,
-  esClient: CoreStart['elasticsearch']['client']
+  indexPatterns: DataViewsServerPluginStart
 ): ISearchStrategy<IndexFieldsStrategyRequest<'indices'>, IndexFieldsStrategyResponse> => {
   // require the fields once we actually need them, rather than ahead of time, and pass
   // them to createFieldItem to reduce the amount of work done as much as possible
@@ -45,9 +40,7 @@ export const endpointFieldsProvider = (
 
   return {
     search: (request, _, deps) =>
-      from(
-        requestEndpointFieldsSearch(context, request, deps, beatFields, indexPatterns, esClient)
-      ),
+      from(requestEndpointFieldsSearch(context, request, deps, beatFields, indexPatterns)),
   };
 };
 
@@ -56,14 +49,10 @@ export const requestEndpointFieldsSearch = async (
   request: IndexFieldsStrategyRequest<'indices'>,
   deps: SearchStrategyDependencies,
   beatFields: BeatFields,
-  indexPatterns: DataViewsServerPluginStart,
-  esClient: CoreStart['elasticsearch']['client']
+  indexPatterns: DataViewsServerPluginStart
 ): Promise<IndexFieldsStrategyResponse> => {
   const isTAAdvancedModeFeatureFlagEnabled = context.experimentalFeatures.trustedAppsAdvancedMode;
-  const ccsEnabled = await hasConnectedRemoteClusters(
-    esClient.asInternalUser,
-    context.experimentalFeatures.defendRemoteOutputCcs
-  );
+  const ccsEnabled = await context.isCcsEnabled();
   let parsedRequest = parseRequest(request);
 
   if (
