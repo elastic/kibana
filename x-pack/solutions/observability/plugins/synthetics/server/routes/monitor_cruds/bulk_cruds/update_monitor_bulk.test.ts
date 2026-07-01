@@ -95,16 +95,15 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       ).not.toThrow();
     });
 
-    it('allows unknown keys inside an update attributes (treated as Partial<Monitor>)', () => {
+    it('allows unknown keys inside attributes — schema uses unknowns: allow', () => {
       expect(() =>
         bodySchema.validate({
           updates: [
             {
               id: 'monitor-id-1',
               attributes: {
-                enabled: false,
-                tags: ['critical'],
-                schedule: { number: '5', unit: 'm' },
+                completely_made_up_key: 'value',
+                another_fake_field: 42,
               },
             },
           ],
@@ -151,7 +150,7 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       expect(value.updates[0].attributes).toEqual({});
     });
 
-    it('rejects more than 500 updates (matches the decrypt page size)', () => {
+    it('rejects more than 500 updates', () => {
       const updates = Array.from({ length: 501 }, (_, i) => ({
         id: `monitor-id-${i}`,
         attributes: { enabled: false },
@@ -278,7 +277,6 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
 
       const ctx = mockRouteContext();
       ctx.request.body = {
-        // Deliberately interleaved: tests both order preservation and routing.
         updates: updatesFor(['mon-bad', 'mon-ok', 'mon-missing', 'mon-fleet'], { enabled: false }),
       };
 
@@ -292,7 +290,7 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       ]);
     });
 
-    it('surfaces public sync errors as a top-level `errors` array', async () => {
+    it('surfaces Synthetics service sync errors as a top-level `errors` array', async () => {
       const survivor = (id: string) => ({
         normalizedMonitor: { id, locations: [], spaces: [] },
         monitorWithRevision: { id },
@@ -318,7 +316,7 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       ]);
     });
 
-    it('omits `errors` when sync reports no public location errors', async () => {
+    it('omits `errors` from the response when there are no sync errors', async () => {
       const survivor = (id: string) => ({
         normalizedMonitor: { id, locations: [], spaces: [] },
         monitorWithRevision: { id },
@@ -367,7 +365,7 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       ]);
     });
 
-    it('returns 500 with the original message when sync throws (post-rollback)', async () => {
+    it('returns 500 with the original message when sync throws', async () => {
       const survivor = (id: string) => ({
         normalizedMonitor: { id, locations: [], spaces: [] },
         monitorWithRevision: { id },

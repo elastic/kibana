@@ -497,12 +497,7 @@ describe('validateMonitor', () => {
     });
   });
 
-  /*
-   * The bulk/single update endpoints validate the *merged* monitor (previous
-   * attributes + partial patch), not the patch alone. These assert what that
-   * gate accepts and rejects, so callers can't smuggle arbitrary data through
-   * a partial update.
-   */
+  // Partial updates validate the *merged* monitor (previous + patch), not the patch alone.
   describe('merged partial-update gate', () => {
     const mergedWith = (patch: Record<string, unknown>) =>
       ({ ...testHTTPFields, ...patch } as unknown as MonitorFields);
