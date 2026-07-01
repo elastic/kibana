@@ -49,7 +49,6 @@ export class AnnotationListingPage {
   }
 
   async selectTag(tagName: string) {
-    await this.contentList.tagsFilterButton.click();
-    await this.page.testSubj.locator(`tag-searchbar-option-${tagName.replace(' ', '_')}`).click();
+    await this.contentList.selectTag(tagName);
   }
 }
