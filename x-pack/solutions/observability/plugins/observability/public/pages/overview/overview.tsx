@@ -84,8 +84,8 @@ export function OverviewPage() {
 
   const isAllRequestsComplete = useMemo(() => {
     return DATA_SECTIONS.every((app) => {
-      const section = hasData[app as DataSectionsApps];
-      return section?.status === FETCH_STATUS.SUCCESS;
+      const status = hasData[app as DataSectionsApps]?.status;
+      return status !== undefined && status !== FETCH_STATUS.LOADING;
     });
   }, [hasData]);
 
