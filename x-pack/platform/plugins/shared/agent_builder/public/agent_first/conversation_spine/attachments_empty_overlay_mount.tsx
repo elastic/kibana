@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { getApplicationWorkspaceMountElement } from '../../agent_workspace/agent_workspace_flyout_defaults';
 import { applicationWorkspaceFixedOverlayStyles } from '../../agent_workspace/application_workspace_fixed_overlay_styles';
 import { headerHeight } from '../../application/components/conversations/conversation.styles';
+import { ConversationTitle } from '../../application/components/conversations/conversation_header/conversation_title';
 import { useIsAgentWorkspaceMount } from '../../application/hooks/use_navigation';
 import { useOptionalConversationSpineContext } from './conversation_spine_context';
 import { useEscapeKeyHandler } from './hooks/use_escape_key_handler';
@@ -119,9 +120,16 @@ export const AttachmentsEmptyOverlayMount: React.FC = () => {
         <EuiFlexGroup
           responsive={false}
           alignItems="center"
-          justifyContent="flexEnd"
+          justifyContent="spaceBetween"
           style={{ minHeight: `calc(${headerHeight}px - ${euiTheme.border.width.thin})` }}
         >
+          <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+            <ConversationTitle
+              showBadge={false}
+              showSidebarTrigger={false}
+              showTitleMenu={false}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiToolTip content={labels.close} disableScreenReaderOutput>
               <EuiButtonIcon

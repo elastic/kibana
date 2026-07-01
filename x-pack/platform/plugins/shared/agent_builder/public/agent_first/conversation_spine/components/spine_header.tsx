@@ -10,6 +10,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } fro
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { headerHeight } from '../../../application/components/conversations/conversation.styles';
+import { ConversationTitle } from '../../../application/components/conversations/conversation_header/conversation_title';
 import { useConversationSpineContext } from '../conversation_spine_context';
 import type { SpineHeaderSlots } from '../types';
 import { SpineRelationshipBadge } from './spine_relationship_badge';
@@ -22,6 +23,9 @@ const labels = {
     defaultMessage: 'Toggle fullscreen',
   }),
 };
+
+/** POC: hide spine relationship badge in the application panel overlay header. */
+const SHOW_SPINE_RELATIONSHIP_BADGE_IN_OVERLAY_HEADER = false;
 
 interface SpineHeaderProps {
   onClose: () => void;
@@ -58,12 +62,12 @@ export const SpineHeader: React.FC<SpineHeaderProps> = ({
         gutterSize="s"
         style={{ minHeight: `calc(${headerHeight}px - ${euiTheme.border.width.thin})` }}
       >
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow css={{ minWidth: 0 }}>
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
             {headerSlots?.beforeTitle ? (
               <EuiFlexItem grow={false}>{headerSlots.beforeTitle}</EuiFlexItem>
             ) : null}
-            {spineState ? (
+            {SHOW_SPINE_RELATIONSHIP_BADGE_IN_OVERLAY_HEADER && spineState ? (
               <EuiFlexItem grow={false}>
                 {/* TODO: application panel badge may later navigate or show spine metadata */}
                 <SpineRelationshipBadge
@@ -74,8 +78,18 @@ export const SpineHeader: React.FC<SpineHeaderProps> = ({
               </EuiFlexItem>
             ) : null}
             {headerSlots?.afterTitle ? (
-              <EuiFlexItem grow={false}>{headerSlots.afterTitle}</EuiFlexItem>
-            ) : null}
+              <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+                {headerSlots.afterTitle}
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+                <ConversationTitle
+                  showBadge={false}
+                  showSidebarTrigger={false}
+                  showTitleMenu={false}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

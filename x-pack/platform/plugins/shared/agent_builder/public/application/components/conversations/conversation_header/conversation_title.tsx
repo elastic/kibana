@@ -44,9 +44,17 @@ const labels = {
 
 interface ConversationTitleProps {
   ariaLabelledBy?: string;
+  showBadge?: boolean;
+  showSidebarTrigger?: boolean;
+  showTitleMenu?: boolean;
 }
 
-export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabelledBy }) => {
+export const ConversationTitle: React.FC<ConversationTitleProps> = ({
+  ariaLabelledBy,
+  showBadge = true,
+  showSidebarTrigger = true,
+  showTitleMenu = true,
+}) => {
   const { title, isLoading: isLoadingTitle } = useConversationTitle();
   const hasPersistedConversation = useHasPersistedConversation();
   const { euiTheme } = useEuiTheme();
@@ -58,35 +66,43 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
 
   const displayedTitle = isLoadingTitle ? '' : title || labels.newConversation;
 
+  const plainTitleStyles = css`
+    font-weight: ${euiTheme.font.weight.semiBold};
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  `;
+
+  const plainTitle = (
+    <h4
+      id={ariaLabelledBy}
+      css={plainTitleStyles}
+      data-test-subj="agentBuilderConversationTitle"
+    >
+      {displayedTitle}
+    </h4>
+  );
+
   const titleWithBadge = (titleContent: React.ReactNode) => (
     <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-      {sidebarPopoverContext ? (
+      {showSidebarTrigger && sidebarPopoverContext ? (
         <EuiFlexItem grow={false}>
           <SidebarPopoverTrigger onToggleCondensed={sidebarPopoverContext.onToggleCondensed} />
         </EuiFlexItem>
       ) : null}
-      <EuiFlexItem grow={false}>
-        <ActiveSpineRelationshipBadge />
-      </EuiFlexItem>
+      {showBadge ? (
+        <EuiFlexItem grow={false}>
+          <ActiveSpineRelationshipBadge />
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
         {titleContent}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 
-  // No popover for unsaved conversations — just show the title
-  if (!hasPersistedConversation) {
-    return titleWithBadge(
-      <h4
-        id={ariaLabelledBy}
-        css={css`
-          font-weight: ${euiTheme.font.weight.semiBold};
-        `}
-        data-test-subj="agentBuilderConversationTitle"
-      >
-        {displayedTitle}
-      </h4>
-    );
+  if (!showTitleMenu || !hasPersistedConversation) {
+    return titleWithBadge(plainTitle);
   }
 
   const menuItems = [

@@ -98,11 +98,7 @@ const interactiveSolidBadgeStyles = (
   }
 `;
 
-const solidBadgeStyles = (
-  euiTheme: EuiThemeComputed<{}>,
-  background: string,
-  text: string
-) =>
+const solidBadgeStyles = (euiTheme: EuiThemeComputed<{}>, background: string, text: string) =>
   css`
     background-color: ${background};
     color: ${text};
@@ -123,12 +119,7 @@ const createSpineTypeConfig = (
   label,
   getGhostBadgeStyles: (euiTheme) => {
     const colors = getColors(euiTheme);
-    return mutedBadgeStyles(
-      euiTheme,
-      colors.ghostBackground,
-      colors.ghostText,
-      colors.ghostBorder
-    );
+    return mutedBadgeStyles(euiTheme, colors.ghostBackground, colors.ghostText, colors.ghostBorder);
   },
   getSolidBadgeStyles: (euiTheme) => {
     const colors = getColors(euiTheme);
@@ -151,51 +142,71 @@ export const SPINE_TYPE_ORDER: SpineType[] = ['chat', 'case', 'incident', 'threa
 export const PROMOTABLE_SPINE_TYPES: SpineType[] = ['case', 'incident', 'threat_hunt'];
 
 export const SPINE_TYPE_CONFIG: Record<SpineType, SpineTypeConfig> = {
-  chat: createSpineTypeConfig('comment', labels.chat, (euiTheme) => ({
-    ghostBackground: euiTheme.colors.backgroundBaseSubdued,
-    ghostText: euiTheme.colors.textSubdued,
-    ghostBorder: euiTheme.colors.borderBaseSubdued,
-    solidBackground: euiTheme.colors.backgroundFilledText,
-    solidText: euiTheme.colors.textInverse,
-    solidHoverBackground: euiTheme.colors.backgroundFilledText,
-  }), []),
-  case: createSpineTypeConfig('documents', labels.case, (euiTheme) => ({
-    ghostBackground: euiTheme.colors.backgroundBaseWarning,
-    ghostText: euiTheme.colors.textWarning,
-    ghostBorder: euiTheme.colors.borderBaseWarning,
-    solidBackground: euiTheme.colors.backgroundFilledWarning,
-    solidText: euiTheme.colors.textInverse,
-    solidHoverBackground: euiTheme.colors.backgroundFilledWarning,
-  }), [
-    { id: 'overview', name: labels.overview },
-    { id: 'evidence', name: labels.evidence },
-    { id: 'timeline', name: labels.timeline },
-    { id: 'actions', name: labels.actions },
-  ]),
-  incident: createSpineTypeConfig('alert', labels.incident, (euiTheme) => ({
-    ghostBackground: euiTheme.colors.backgroundBaseSuccess,
-    ghostText: euiTheme.colors.textSuccess,
-    ghostBorder: euiTheme.colors.borderBaseSuccess,
-    solidBackground: euiTheme.colors.backgroundFilledSuccess,
-    solidText: euiTheme.colors.textInverse,
-    solidHoverBackground: euiTheme.colors.backgroundFilledSuccess,
-  }), [
-    { id: 'overview', name: labels.overview },
-    { id: 'timeline', name: labels.timeline },
-    { id: 'actions', name: labels.actions },
-  ]),
-  threat_hunt: createSpineTypeConfig('search', labels.threatHunt, (euiTheme) => ({
-    ghostBackground: euiTheme.colors.backgroundLightPrimary,
-    ghostText: euiTheme.colors.textPrimary,
-    ghostBorder: euiTheme.colors.borderBasePrimary,
-    solidBackground: euiTheme.colors.backgroundFilledPrimary,
-    solidText: euiTheme.colors.textInverse,
-    solidHoverBackground: euiTheme.colors.backgroundFilledPrimary,
-  }), [
-    { id: 'overview', name: labels.overview },
-    { id: 'evidence', name: labels.evidence },
-    { id: 'actions', name: labels.actions },
-  ]),
+  chat: createSpineTypeConfig(
+    'comment',
+    labels.chat,
+    (euiTheme) => ({
+      ghostBackground: euiTheme.colors.backgroundBaseSubdued,
+      ghostText: euiTheme.colors.textSubdued,
+      ghostBorder: euiTheme.colors.borderBaseSubdued,
+      solidBackground: euiTheme.colors.backgroundBaseSubdued,
+      solidText: euiTheme.colors.textSubdued,
+      solidHoverBackground: euiTheme.colors.backgroundBaseSubdued,
+    }),
+    []
+  ),
+  case: createSpineTypeConfig(
+    'briefcase',
+    labels.case,
+    (euiTheme) => ({
+      ghostBackground: euiTheme.colors.backgroundBaseWarning,
+      ghostText: euiTheme.colors.textWarning,
+      ghostBorder: euiTheme.colors.borderBaseWarning,
+      solidBackground: euiTheme.colors.backgroundFilledWarning,
+      solidText: euiTheme.colors.textWarning,
+      solidHoverBackground: euiTheme.colors.backgroundFilledWarning,
+    }),
+    [
+      { id: 'overview', name: labels.overview },
+      { id: 'evidence', name: labels.evidence },
+      { id: 'timeline', name: labels.timeline },
+      { id: 'actions', name: labels.actions },
+    ]
+  ),
+  incident: createSpineTypeConfig(
+    'alert',
+    labels.incident,
+    (euiTheme) => ({
+      ghostBackground: euiTheme.colors.backgroundBaseSuccess,
+      ghostText: euiTheme.colors.textSuccess,
+      ghostBorder: euiTheme.colors.borderBaseSuccess,
+      solidBackground: euiTheme.colors.backgroundFilledSuccess,
+      solidText: euiTheme.colors.textInverse,
+      solidHoverBackground: euiTheme.colors.backgroundFilledSuccess,
+    }),
+    [
+      { id: 'overview', name: labels.overview },
+      { id: 'timeline', name: labels.timeline },
+      { id: 'actions', name: labels.actions },
+    ]
+  ),
+  threat_hunt: createSpineTypeConfig(
+    'search',
+    labels.threatHunt,
+    (euiTheme) => ({
+      ghostBackground: euiTheme.colors.backgroundLightPrimary,
+      ghostText: euiTheme.colors.textPrimary,
+      ghostBorder: euiTheme.colors.borderBasePrimary,
+      solidBackground: euiTheme.colors.backgroundFilledPrimary,
+      solidText: euiTheme.colors.textInverse,
+      solidHoverBackground: euiTheme.colors.backgroundFilledPrimary,
+    }),
+    [
+      { id: 'overview', name: labels.overview },
+      { id: 'evidence', name: labels.evidence },
+      { id: 'actions', name: labels.actions },
+    ]
+  ),
 };
 
 export const getSpineTypeConfig = (type: SpineType): SpineTypeConfig => SPINE_TYPE_CONFIG[type];
