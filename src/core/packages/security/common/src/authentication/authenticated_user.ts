@@ -97,7 +97,7 @@ export interface AuthenticatedUser extends User {
    * authentication provider (`HTTPAuthenticationProvider`). `null` when authentication does not
    * use an Authorization header (session-cookie, PKI, SAML, etc).
    *
-  * Must be lowercase; this is required for correct behavior.
+   * Must be lowercase; this is required for correct behavior.
    *
    * @example "apikey" | "bearer" | "basic"
    */
