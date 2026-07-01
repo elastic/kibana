@@ -152,6 +152,54 @@ describe('prioritizeAlerts', () => {
     });
   });
 
+  describe('entity clustering', () => {
+    it('collapses alerts sharing a host into one group with the expected alertCount and entityName', async () => {
+      const esClient = createEsClient({
+        alerts: [
+          alertHit('alert-a', {
+            'kibana.alert.risk_score': [80],
+            'host.name': ['SHARED-HOST'],
+          }),
+          alertHit('alert-b', {
+            'kibana.alert.risk_score': [60],
+            'host.name': ['SHARED-HOST'],
+          }),
+        ],
+      });
+      const result = await prioritizeAlerts({ ...defaultArgs, esClient });
+      expect(result.groups).toHaveLength(1);
+      expect(result.groups[0].alertCount).toBe(2);
+      expect(result.groups[0].entityName).toBe('SHARED-HOST');
+      expect(result.groups[0].sharedEntities).toEqual(['SHARED-HOST']);
+      expect(result.groups[0].topAlertId).toBe('alert-a');
+    });
+
+    it('merges transitive host/user links into a single group', async () => {
+      const esClient = createEsClient({
+        alerts: [
+          alertHit('alert-a', {
+            'kibana.alert.risk_score': [70],
+            'host.name': ['SHARED-HOST'],
+          }),
+          alertHit('alert-b', {
+            'kibana.alert.risk_score': [65],
+            'host.name': ['SHARED-HOST'],
+            'user.name': ['USER-LINK'],
+          }),
+          alertHit('alert-c', {
+            'kibana.alert.risk_score': [60],
+            'user.name': ['USER-LINK'],
+          }),
+        ],
+      });
+      const result = await prioritizeAlerts({ ...defaultArgs, esClient });
+      expect(result.groups).toHaveLength(1);
+      expect(result.groups[0].alertCount).toBe(3);
+      expect(result.groups[0].entityName).toBe('SHARED-HOST');
+      expect(result.groups[0].topAlertId).toBe('alert-a');
+    });
+  });
+
   describe('entity analytics enrichment', () => {
     it('returns the entity risk boost from the Risk Engine level', async () => {
       const esClient = createEsClient({
