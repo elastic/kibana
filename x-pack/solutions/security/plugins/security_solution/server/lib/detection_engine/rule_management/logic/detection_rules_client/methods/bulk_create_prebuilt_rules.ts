@@ -17,7 +17,6 @@ import type { RuleParams } from '../../../../rule_schema';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import { applyRuleDefaults } from '../mergers/apply_rule_defaults';
 import { validateMlAuth } from '../utils';
-import { PREBUILT_RULES_BULK_CREATE_BATCH_SIZE } from '../../../../prebuilt_rules/constants';
 import type {
   BulkCreatePrebuiltRulesArgs,
   BulkCreatePrebuiltRulesResult,
@@ -30,17 +29,14 @@ interface BulkCreatePrebuiltRulesOptions {
   args: BulkCreatePrebuiltRulesArgs;
 }
 
-export const bulkCreatePrebuiltRules = async ({
-  actionsClient,
-  rulesClient,
-  mlAuthz,
-  args,
-}: BulkCreatePrebuiltRulesOptions): Promise<BulkCreatePrebuiltRulesResult> => {
-  const { rules } = args;
-  const results: BulkCreatePrebuiltRulesResult['results'] = [];
+const validateRules = async (
+  rules: PrebuiltRuleAsset[],
+  mlAuthz: MlAuthz
+): Promise<{
+  validRules: PrebuiltRuleAsset[];
+  errors: BulkCreatePrebuiltRulesResult['errors'];
+}> => {
   const errors: BulkCreatePrebuiltRulesResult['errors'] = [];
-
-  if (rules.length === 0) return { results, errors };
 
   const checkedTypes = new Set<string>();
   const mlAuthErrorByType = new Map<string, Error>();
@@ -70,66 +66,83 @@ export const bulkCreatePrebuiltRules = async ({
     }
   }
 
-  for (let i = 0; i < validRules.length; i += PREBUILT_RULES_BULK_CREATE_BATCH_SIZE) {
-    const chunk = validRules.slice(i, i + PREBUILT_RULES_BULK_CREATE_BATCH_SIZE);
-    const itemById = new Map<string, PrebuiltRuleAsset>();
-    const bulkInputs: Array<{
-      data: ReturnType<typeof convertRuleResponseToAlertingRule> & {
-        alertTypeId: string;
-        consumer: string;
-        enabled: boolean;
-      };
-      options: { id: string };
-    }> = [];
+  return { validRules, errors };
+};
 
-    for (const rule of chunk) {
-      const id = uuidv4();
-      try {
-        const alertTypeId = ruleTypeMappings[rule.type as keyof typeof ruleTypeMappings];
-        const ruleWithDefaults = applyRuleDefaults({ ...rule, immutable: true });
-        const data = {
-          ...convertRuleResponseToAlertingRule(ruleWithDefaults, actionsClient),
-          alertTypeId,
-          consumer: SERVER_APP_ID,
-          enabled: rule.enabled ?? false,
-        };
-        itemById.set(id, rule);
-        bulkInputs.push({ data, options: { id } });
-      } catch (e) {
-        errors.push({ item: rule, error: e instanceof Error ? e : new Error(String(e)) });
+export const bulkCreatePrebuiltRules = async ({
+  actionsClient,
+  rulesClient,
+  mlAuthz,
+  args,
+}: BulkCreatePrebuiltRulesOptions): Promise<BulkCreatePrebuiltRulesResult> => {
+  const { rules } = args;
+  const results: BulkCreatePrebuiltRulesResult['results'] = [];
+  const errors: BulkCreatePrebuiltRulesResult['errors'] = [];
+
+  if (rules.length === 0) return { results, errors };
+
+  const { validRules, errors: validationErrors } = await validateRules(rules, mlAuthz);
+  errors.push(...validationErrors);
+
+  const itemById = new Map<string, PrebuiltRuleAsset>();
+  const bulkInputs: Array<{
+    data: ReturnType<typeof convertRuleResponseToAlertingRule> & {
+      alertTypeId: string;
+      consumer: string;
+      enabled: boolean;
+    };
+    options: { id: string };
+  }> = [];
+
+  for (const rule of validRules) {
+    const id = uuidv4();
+    try {
+      const alertTypeId = ruleTypeMappings[rule.type as keyof typeof ruleTypeMappings];
+      const ruleWithDefaults = applyRuleDefaults({ ...rule, immutable: true });
+      const data = {
+        ...convertRuleResponseToAlertingRule(ruleWithDefaults, actionsClient),
+        alertTypeId,
+        consumer: SERVER_APP_ID,
+        enabled: rule.enabled ?? false,
+      };
+      itemById.set(id, rule);
+      bulkInputs.push({ data, options: { id } });
+    } catch (e) {
+      errors.push({ item: rule, error: e instanceof Error ? e : new Error(String(e)) });
+    }
+  }
+
+  if (bulkInputs.length === 0) return { results, errors };
+
+  try {
+    const { successfulIds, errors: bulkErrors } = await rulesClient.bulkCreateRules<RuleParams>({
+      rules: bulkInputs,
+      changeTracking: {
+        action: SecurityRuleChangeTrackingAction.ruleInstall,
+        metadata: { bulkCount: rules.length },
+      },
+    });
+
+    for (const id of successfulIds) {
+      const asset = itemById.get(id);
+      if (asset) {
+        results.push({ id, rule_id: asset.rule_id, version: asset.version });
       }
     }
 
-    try {
-      const { successfulIds, errors: bulkErrors } = await rulesClient.bulkCreateRules<RuleParams>({
-        rules: bulkInputs,
-        changeTracking: {
-          action: SecurityRuleChangeTrackingAction.ruleInstall,
-          metadata: { bulkCount: rules.length },
-        },
-      });
-
-      for (const id of successfulIds) {
-        const asset = itemById.get(id);
-        if (asset) {
-          results.push({ id, rule_id: asset.rule_id, version: asset.version });
-        }
+    for (const err of bulkErrors) {
+      const item = itemById.get(err.rule.id);
+      if (item) {
+        errors.push({
+          item,
+          error: Object.assign(new Error(err.message), { statusCode: err.status }),
+        });
       }
-
-      for (const err of bulkErrors) {
-        const item = itemById.get(err.rule.id);
-        if (item) {
-          errors.push({
-            item,
-            error: Object.assign(new Error(err.message), { statusCode: err.status }),
-          });
-        }
-      }
-    } catch (err) {
-      const wrappedError = err instanceof Error ? err : new Error(String(err));
-      for (const asset of itemById.values()) {
-        errors.push({ item: asset, error: wrappedError });
-      }
+    }
+  } catch (err) {
+    const wrappedError = err instanceof Error ? err : new Error(String(err));
+    for (const asset of itemById.values()) {
+      errors.push({ item: asset, error: wrappedError });
     }
   }
 

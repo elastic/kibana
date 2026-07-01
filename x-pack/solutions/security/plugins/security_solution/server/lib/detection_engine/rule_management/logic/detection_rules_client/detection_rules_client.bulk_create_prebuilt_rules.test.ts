@@ -27,10 +27,6 @@ jest.mock('uuid', () => ({
 }));
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
-jest.mock('../../../prebuilt_rules/constants', () => ({
-  ...jest.requireActual('../../../prebuilt_rules/constants'),
-  PREBUILT_RULES_BULK_CREATE_BATCH_SIZE: 2,
-}));
 jest.mock('./converters/convert_rule_response_to_alerting_rule', () => ({
   ...jest.requireActual('./converters/convert_rule_response_to_alerting_rule'),
   convertRuleResponseToAlertingRule: jest.fn(
@@ -143,11 +139,10 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
       rules: [enabledRule, disabledRule, defaultRule],
     });
 
-    const firstBatch = rulesClient.bulkCreateRules.mock.calls[0][0];
-    const secondBatch = rulesClient.bulkCreateRules.mock.calls[1][0];
-    expect(firstBatch.rules[0].data.enabled).toBe(true);
-    expect(firstBatch.rules[1].data.enabled).toBe(false);
-    expect(secondBatch.rules[0].data.enabled).toBe(false);
+    const bulkCall = rulesClient.bulkCreateRules.mock.calls[0][0];
+    expect(bulkCall.rules[0].data.enabled).toBe(true);
+    expect(bulkCall.rules[1].data.enabled).toBe(false);
+    expect(bulkCall.rules[2].data.enabled).toBe(false);
   });
 
   it('maps successfulIds to result items with rule_id and version', async () => {
@@ -303,26 +298,6 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
     expect(result.errors[0].error.message).toBe('Unsupported rule type: not_a_real_type');
     expect(rulesClient.bulkCreateRules).toHaveBeenCalledTimes(1);
     expect(rulesClient.bulkCreateRules.mock.calls[0][0].rules).toHaveLength(1);
-  });
-
-  it('processes rules in chunks based on PREBUILT_RULES_BULK_CREATE_BATCH_SIZE', async () => {
-    const rules = [
-      { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-1' },
-      { ...getCreateRulesSchemaMock(), version: 2, rule_id: 'rule-2' },
-      { ...getCreateRulesSchemaMock(), version: 3, rule_id: 'rule-3' },
-    ];
-
-    rulesClient.bulkCreateRules.mockResolvedValue({
-      successfulIds: [],
-      errors: [],
-      total: 0,
-    });
-
-    await detectionRulesClient.bulkCreatePrebuiltRules({ rules });
-
-    expect(rulesClient.bulkCreateRules).toHaveBeenCalledTimes(2);
-    expect(rulesClient.bulkCreateRules.mock.calls[0][0].rules).toHaveLength(2);
-    expect(rulesClient.bulkCreateRules.mock.calls[1][0].rules).toHaveLength(1);
   });
 
   it('isolates per-rule conversion errors without failing the entire batch', async () => {
