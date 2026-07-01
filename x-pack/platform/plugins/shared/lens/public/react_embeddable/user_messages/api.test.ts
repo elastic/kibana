@@ -272,17 +272,17 @@ describe('User Messages API', () => {
     });
 
     it('should return deeper validation messages from both datasource and visualization', () => {
-      const vizGetUserMessages = jest.fn();
+      const visGetUserMessages = jest.fn();
       const datasourceGetUserMessages = jest.fn();
       const { userMessagesApi } = buildUserMessagesApi(undefined, {
-        visOverrides: { id: 'lnsXY', getUserMessages: vizGetUserMessages },
+        visOverrides: { id: 'lnsXY', getUserMessages: visGetUserMessages },
         dataOverrides: { id: 'formBased', getUserMessages: datasourceGetUserMessages },
       });
       // now add a message, then check that it has been called in both the visualization and datasource
       const userMessageVisualization = createUserMessage(['visualization']);
       userMessagesApi.addUserMessages([userMessageVisualization]);
       userMessagesApi.getUserMessages('visualization');
-      expect(vizGetUserMessages).toHaveBeenCalled();
+      expect(visGetUserMessages).toHaveBeenCalled();
       expect(datasourceGetUserMessages).toHaveBeenCalled();
     });
 

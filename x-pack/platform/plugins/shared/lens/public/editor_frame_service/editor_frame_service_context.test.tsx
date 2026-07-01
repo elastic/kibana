@@ -12,7 +12,7 @@ import type { DatasourceMap, VisualizationMap, Visualization, Datasource } from 
 
 describe('EditorFrameServiceContext', () => {
   const mockVisualizationMap: VisualizationMap = {
-    testViz: {} as Visualization,
+    testVis: {} as Visualization,
   };
 
   const mockDatasourceMap: DatasourceMap = {
