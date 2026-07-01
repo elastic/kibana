@@ -16,7 +16,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
-import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import type { KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,6 +28,7 @@ import { useHistory } from 'react-router-dom';
 
 import type { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
 import {
+  parseRuleCircuitBreakerErrorMessage,
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
@@ -663,14 +663,26 @@ export const RulesList = ({
       const RuleCloned = await cloneRule({ http, ruleId });
       cloneRuleId.current = RuleCloned.id;
       await loadRules();
-    } catch {
+    } catch (error) {
       cloneRuleId.current = null;
       setIsCloningRule(false);
-      toasts.addDanger(
-        i18n.translate('xpack.triggersActionsUI.sections.rulesList.cloneFailed', {
-          defaultMessage: 'Unable to clone rule',
-        })
-      );
+
+      const parsedError = parseRuleCircuitBreakerErrorMessage(error.body?.message ?? '');
+      if (!!parsedError.details) {
+        toasts.addDanger({
+          title: parsedError.summary,
+          text: toMountPoint(
+            <ToastWithCircuitBreakerContent>{parsedError.details}</ToastWithCircuitBreakerContent>,
+            startServices
+          ),
+        });
+      } else {
+        toasts.addDanger(
+          i18n.translate('xpack.triggersActionsUI.sections.rulesList.cloneFailed', {
+            defaultMessage: 'Unable to clone rule',
+          })
+        );
+      }
     }
   };
 

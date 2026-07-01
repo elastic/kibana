@@ -138,14 +138,17 @@ describe('cloneRuleRoute', () => {
     expect(await handler(context, req, res)).toEqual({ body: cloneResult });
 
     expect(rulesClient.clone).toHaveBeenCalledTimes(1);
-    expect(rulesClient.clone.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "1",
-          "newId": undefined,
+    expect(rulesClient.clone).toHaveBeenCalledWith({
+      id: '1',
+      newId: undefined,
+      data: {
+        enabled: true,
+        name: 'abc',
+        schedule: {
+          interval: '10s',
         },
-      ]
-    `);
+      },
+    });
 
     expect(res.ok).toHaveBeenCalled();
   });

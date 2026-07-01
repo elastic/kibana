@@ -10,4 +10,11 @@ import { schema } from '@kbn/config-schema';
 export const cloneRuleParamsSchema = schema.object({
   id: schema.string(),
   newId: schema.maybe(schema.string()),
+  data: schema.object({
+    name: schema.string(),
+    enabled: schema.boolean(),
+    schedule: schema.object({
+      interval: schema.string(),
+    }),
+  }),
 });
