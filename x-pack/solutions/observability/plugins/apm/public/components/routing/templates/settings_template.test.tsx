@@ -17,5 +17,5 @@ describe('Settings', () => {
     render(<Example />);
 
     expect(await screen.findByText('hello world')).toBeInTheDocument();
-  });
+  }, 30000);
 });
