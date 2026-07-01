@@ -84,6 +84,7 @@ import {
 import { ServiceFlyout } from '../../shared/service_flyout';
 import { SERVICE_FLYOUT_SOURCES } from '../../shared/service_flyout/constants';
 import type { ServiceFlyoutOptions } from '../../shared/service_flyout/types';
+import { ServiceMapDiagnosticButton } from './service_map_diagnostic_button';
 
 type ServiceMapServiceNode = Node<ServiceNodeData>;
 
@@ -903,6 +904,7 @@ function GraphInner({
               </Panel>
             )}
             {showControls && <ServiceMapMinimap />}
+            <ServiceMapDiagnosticButton selection={selectedServiceNodeForFlyout ?? undefined} />
           </ReactFlow>
           <MapPopover
             selectedNode={selectedNodeForPopover}
