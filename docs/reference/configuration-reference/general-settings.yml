@@ -1490,15 +1490,13 @@ groups:
       - setting: server.xsrf.allowedSchemes
         id: settings-xsrf-allowedschemes
         description: |
-          A list of `Authorization` header authentication schemes whose non-GET requests skip the `kbn-xsrf` header check. Supported values are `apikey` and `bearer`; `Basic` and every other scheme always require the header. For example, `['apikey', 'bearer']` lets both API key and Bearer token authenticated requests through without a `kbn-xsrf` header.
+          `Authorization` header schemes whose non-GET requests skip the `kbn-xsrf` check. Supported values are `apikey` and `bearer`; `basic` and all other schemes always require the header. Default is empty, which keeps the `kbn-xsrf` check for all requests.
 
-          Leave this empty (the default) to keep full Cross-Site Request Forgery protection for all requests. When the list is empty, every non-GET request must carry a `kbn-xsrf` header regardless of how it authenticated.
-
-          Enabling this drops CSRF protection for the listed schemes: any non-GET request that arrives with `Authorization: ApiKey` or `Authorization: Bearer` is accepted without a `kbn-xsrf` header. That is only safe if browser traffic can never reach {{kib}} carrying such a header. Do not enable it if {{kib}} sits behind an authenticating reverse proxy that injects an `Authorization` header onto browser requests, because the proxy would make ordinary browser requests look like credentialed API calls and defeat the protection. Enable it only when you control the clients that set the `Authorization` header and those clients cannot set a custom `kbn-xsrf` header on cross-origin requests.
+          Do not set this if {{kib}} sits behind an authenticating reverse proxy that adds an `Authorization` header to browser requests, since that would let ordinary browser requests bypass the check.
         note: |
           :applies_to: serverless: ga
           In Serverless environments, requests authenticated using `Authorization: ApiKey` or `Authorization: Bearer` headers bypass the `kbn-xsrf` check by default.
-        datatype: array of strings
+        datatype: string
         default: "[]"
         applies_to:
           stack: ga 9.5

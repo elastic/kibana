@@ -354,8 +354,6 @@ describe('core lifecycle handlers', () => {
 });
 
 describe('xsrf post-auth handler with allowedSchemes (Authorization bypass)', () => {
-  // Drives the real getAuthState wiring via registerAuth, scheme set per-request through the
-  // `x-test-auth-scheme` header, without booting the security plugin.
   const testPath = '/xsrf/allowed_schemes/test/route';
   const schemeHeader = 'x-test-auth-scheme';
 

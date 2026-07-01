@@ -283,34 +283,51 @@ test('throws if xsrf.allowlist element does not start with a slash', () => {
 describe('xsrf.allowedSchemes', () => {
   it('rejects schemes outside the apikey/bearer safe set', () => {
     const httpSchema = config.schema;
-    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['basic'] } })).toThrow(
-      /\[xsrf.allowedSchemes.0\]/
-    );
-    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['foo'] } })).toThrow(
-      /\[xsrf.allowedSchemes.0\]/
-    );
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['basic'] } }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[xsrf.allowedSchemes.0]: types that failed validation:
+      - [xsrf.allowedSchemes.0.0]: expected value to equal [apikey]
+      - [xsrf.allowedSchemes.0.1]: expected value to equal [bearer]"
+    `);
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['foo'] } }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[xsrf.allowedSchemes.0]: types that failed validation:
+      - [xsrf.allowedSchemes.0.0]: expected value to equal [apikey]
+      - [xsrf.allowedSchemes.0.1]: expected value to equal [bearer]"
+    `);
   });
 
   it('rejects mixed-case values — only the canonical lower-case literals are accepted', () => {
     const httpSchema = config.schema;
-    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['ApiKey'] } })).toThrow(
-      /\[xsrf.allowedSchemes.0\]/
-    );
-    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['BEARER'] } })).toThrow(
-      /\[xsrf.allowedSchemes.0\]/
-    );
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['ApiKey'] } }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[xsrf.allowedSchemes.0]: types that failed validation:
+      - [xsrf.allowedSchemes.0.0]: expected value to equal [apikey]
+      - [xsrf.allowedSchemes.0.1]: expected value to equal [bearer]"
+    `);
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['BEARER'] } }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[xsrf.allowedSchemes.0]: types that failed validation:
+      - [xsrf.allowedSchemes.0.0]: expected value to equal [apikey]
+      - [xsrf.allowedSchemes.0.1]: expected value to equal [bearer]"
+    `);
   });
 
   it('rejects values padded with whitespace — no trimming is applied', () => {
     const httpSchema = config.schema;
-    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: [' apikey'] } })).toThrow(
-      /\[xsrf.allowedSchemes.0\]/
-    );
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: [' apikey'] } }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[xsrf.allowedSchemes.0]: types that failed validation:
+      - [xsrf.allowedSchemes.0.0]: expected value to equal [apikey]
+      - [xsrf.allowedSchemes.0.1]: expected value to equal [bearer]"
+    `);
   });
 
   it('rejects a scalar string — allowedSchemes must be an array', () => {
-    expect(() => config.schema.validate({ xsrf: { allowedSchemes: 'apikey' as any } })).toThrow(
-      /\[xsrf.allowedSchemes\]/
+    expect(() =>
+      config.schema.validate({ xsrf: { allowedSchemes: 'apikey' as any } })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[xsrf.allowedSchemes]: could not parse array value from json input"`
     );
   });
 
@@ -319,7 +336,6 @@ describe('xsrf.allowedSchemes', () => {
     expect(
       httpSchema.validate({ xsrf: { allowedSchemes: ['apikey', 'bearer'] } }).xsrf.allowedSchemes
     ).toEqual(['apikey', 'bearer']);
-    // Values round-trip with no normalization applied at the class layer.
     expect(
       httpSchema.validate({ xsrf: { allowedSchemes: ['bearer'] } }).xsrf.allowedSchemes
     ).toEqual(['bearer']);
@@ -887,7 +903,6 @@ describe('HttpConfig', () => {
       ExternalUrlConfig.DEFAULT,
       rawPermissionsPolicyConfig
     );
-    // Order preserved, no normalization/dedupe applied at the class layer.
     expect(httpConfig.xsrf.allowedSchemes).toEqual(['bearer', 'apikey']);
   });
 });

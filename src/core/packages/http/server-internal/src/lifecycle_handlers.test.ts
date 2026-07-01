@@ -255,7 +255,7 @@ describe('xsrf post-auth handler', () => {
       xsrf: { allowlist: [], disableProtection: false, allowedSchemes: [] },
     });
 
-    it.each([
+    const acceptedRequestTestCases = [
       {
         label: 'apikey scheme, POST',
         config: apikeyBearerConfig,
@@ -293,21 +293,25 @@ describe('xsrf post-auth handler', () => {
         scheme: 'bearer',
         method: 'post' as RouteMethod,
       },
-    ])('accepts $label', ({ config, scheme, method, extraHeaders }) => {
-      const handler = createXsrfPostAuthHandler(
-        config,
-        createGetAuthState({ http_authentication_scheme: scheme })
-      );
-      const request = forgeRequest({ method, headers: extraHeaders ?? {} });
+    ];
+    it.each(acceptedRequestTestCases)(
+      'accepts $label',
+      ({ config, scheme, method, extraHeaders }) => {
+        const handler = createXsrfPostAuthHandler(
+          config,
+          createGetAuthState({ http_authentication_scheme: scheme })
+        );
+        const request = forgeRequest({ method, headers: extraHeaders ?? {} });
 
-      toolkit.next.mockReturnValue('next' as any);
+        toolkit.next.mockReturnValue('next' as any);
 
-      const result = handler(request, responseFactory, toolkit);
+        const result = handler(request, responseFactory, toolkit);
 
-      expect(responseFactory.badRequest).not.toHaveBeenCalled();
-      expect(toolkit.next).toHaveBeenCalledTimes(1);
-      expect(result).toEqual('next');
-    });
+        expect(responseFactory.badRequest).not.toHaveBeenCalled();
+        expect(toolkit.next).toHaveBeenCalledTimes(1);
+        expect(result).toEqual('next');
+      }
+    );
 
     it('exempts a safe (GET) request regardless of the authentication scheme', () => {
       const handler = createXsrfPostAuthHandler(
@@ -325,7 +329,7 @@ describe('xsrf post-auth handler', () => {
       expect(result).toEqual('next');
     });
 
-    it.each([
+    const rejectedRequestTestCases = [
       {
         label: 'basic scheme, apikey and bearer allowed',
         config: apikeyBearerConfig,
@@ -372,7 +376,8 @@ describe('xsrf post-auth handler', () => {
             state: { username: 'test' } as any,
           }),
       },
-    ])('rejects POST when $label', ({ config, getAuthState }) => {
+    ];
+    it.each(rejectedRequestTestCases)('rejects POST when $label', ({ config, getAuthState }) => {
       const handler = createXsrfPostAuthHandler(config, getAuthState());
       const request = forgeRequest({ method: 'post', headers: {} });
 

@@ -56,7 +56,7 @@ describe('registerCoreHandlers', () => {
     jest.clearAllMocks();
   });
 
-  it('will not register client version checking if disabled via config', () => {
+  it('registers client version checking only when strictClientVersionCheck is enabled', () => {
     const registrarMock = createRegistrarMock();
     const config = createConfigMock();
     const logger = loggerMock.create();
@@ -71,7 +71,7 @@ describe('registerCoreHandlers', () => {
     expect(createBuildNrMismatchLoggerPreResponseHandler).toHaveBeenCalledTimes(1); // logger registration should not be called again
   });
 
-  it('wires the xsrf post-auth handler with the auth-state accessor from the registrar', () => {
+  it('gives the xsrf post-auth handler the registrar auth accessor', () => {
     const authGet = jest.fn();
     const registrarMock = createRegistrarMock(authGet);
     const config = createConfigMock();

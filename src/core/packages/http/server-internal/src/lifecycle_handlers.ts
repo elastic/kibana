@@ -33,8 +33,6 @@ export const createXsrfPostAuthHandler = (
   getAuthState: GetAuthState
 ): OnPostAuthHandler => {
   const { allowlist, disableProtection, allowedSchemes } = config.xsrf;
-  // Both sides are already lower-case (schema validation, and the HTTP auth provider at
-  // .../authentication/providers/http.ts), so no normalization is needed here.
   // Set<string>, not Set<'apikey' | 'bearer'>: `scheme` below can be any auth scheme (e.g. `basic`).
   const exemptSchemes: Set<string> = new Set(allowedSchemes);
 
