@@ -24,6 +24,7 @@ export const UNIFIED_TABS_TEST_SUBJ = {
   tabsBarMenuButton: 'unifiedTabs_tabsBarMenuButton',
   tabsBarMenuPanel: 'unifiedTabs_tabsBarMenuPanel',
   duplicateMenuItem: 'unifiedTabs_tabMenuItem_duplicate',
+  inspectMenuItem: 'unifiedTabs_tabMenuItem_inspect',
   clearRecentlyClosed: 'unifiedTabs_tabsMenu_clearRecentlyClosed',
   restoreAllRecentlyClosedTabs: 'unifiedTabs_tabsMenu_restoreAllTabs',
   tabPreviewOuterPanelPrefix: 'unifiedTabs_tabPreview_outerPanel_',
@@ -409,6 +410,20 @@ export class UnifiedTabs {
     await this.page
       .locator(`[data-test-subj="${testSubj}"][aria-selected="true"]`)
       .waitFor({ state: 'visible' });
+  }
+
+  private async clickActiveTabMenuItem(menuItemTestSubj: string) {
+    const activeTabTestSubj = await this.getActiveTabTestSubj();
+    const tabId = activeTabTestSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
+
+    await this.page.testSubj.click(`${UNIFIED_TABS_TEST_SUBJ.tabMenuBtnPrefix}${tabId}`);
+    const menuItem = this.page.testSubj.locator(menuItemTestSubj);
+    await menuItem.waitFor({ state: 'visible' });
+    await menuItem.click();
+  }
+
+  async openInspectorForActiveTab() {
+    await this.clickActiveTabMenuItem(UNIFIED_TABS_TEST_SUBJ.inspectMenuItem);
   }
 
   /**
