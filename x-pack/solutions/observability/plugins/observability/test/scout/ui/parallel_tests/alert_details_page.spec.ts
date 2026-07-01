@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 import { GENERATED_METRICS } from '../fixtures/constants';
+import { ALERTS_ONLY_ROLE } from '../fixtures/roles';
 
 test.describe(
   'Alert Details Page',
@@ -153,19 +154,7 @@ test.describe(
 
       // Re-authenticate as a user that can read alerts but cannot read the rule
       // (the Observability Alerts privilege grants alert read only, no rule read).
-      await browserAuth.loginWithCustomRole({
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-        },
-        kibana: [
-          {
-            base: [],
-            feature: { observabilityAlerts: ['read'] },
-            spaces: ['*'],
-          },
-        ],
-      });
+      await browserAuth.loginWithCustomRole(ALERTS_ONLY_ROLE);
 
       await expect(async () => {
         await pageObjects.alertPage.goto(alertId);
