@@ -51,7 +51,6 @@ export const buildSourceReadingRuntimeField = (
           emit(v);
         }
       }
-      throw new IllegalArgumentException("dirty test");
     `,
     params: { fieldName },
   },
