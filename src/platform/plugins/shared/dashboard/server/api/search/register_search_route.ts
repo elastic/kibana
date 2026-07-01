@@ -18,7 +18,6 @@ import { schema } from '@kbn/config-schema';
 import { getRouteConfig } from '../get_route_config';
 import { logRequest } from '../log_request';
 import {
-  legacySearchRequestParamsSchema,
   legacySearchResponseBodySchema,
   searchRequestParamsSchema,
   searchResponseBodySchema,
