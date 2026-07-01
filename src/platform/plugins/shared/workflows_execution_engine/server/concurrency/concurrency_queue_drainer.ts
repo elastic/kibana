@@ -18,6 +18,29 @@ import {
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
+/** Covers the narrow window where QUEUED is visible before the dormant task exists. */
+const PROMOTE_QUEUED_RUN_RETRY_DELAY_MS = 250;
+const PROMOTE_QUEUED_RUN_MAX_ATTEMPTS = 4;
+
+const promoteQueuedRunTaskWithRetry = async (
+  workflowTaskManager: WorkflowTaskManager,
+  params: { executionId: string; triggeredBy: string }
+): Promise<void> => {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < PROMOTE_QUEUED_RUN_MAX_ATTEMPTS; attempt++) {
+    if (attempt > 0) {
+      await new Promise((resolve) => setTimeout(resolve, PROMOTE_QUEUED_RUN_RETRY_DELAY_MS));
+    }
+    try {
+      await workflowTaskManager.promoteQueuedRunTask(params);
+      return;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError;
+};
+
 /**
  * Moves oldest `queued` executions to `pending` and promotes their pre-scheduled
  * `workflow:run` tasks via `runSoon` while slot occupancy is below `concurrency.max`.
@@ -101,7 +124,7 @@ export async function drainConcurrencyQueueSlots(params: {
           const triggeredBy = execution.triggeredBy || 'manual';
 
           try {
-            await workflowTaskManager.promoteQueuedRunTask({
+            await promoteQueuedRunTaskWithRetry(workflowTaskManager, {
               executionId: execution.id,
               triggeredBy,
             });

@@ -104,7 +104,44 @@ describe('cancelWorkflow', () => {
     }
   );
 
-  it.each(NonTerminalExecutionStatuses)(
+  it('sets cancelRequested, flips to CANCELLED, and skips forceRunIdleTasks for queued', async () => {
+    const workflowExecutionRepository = buildRepository(
+      buildExecution({ status: ExecutionStatus.QUEUED })
+    );
+    const workflowTaskManager = buildTaskManager();
+
+    await cancelWorkflow(buildCancelParams({ workflowExecutionRepository, workflowTaskManager }));
+
+    expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ id: workflowExecutionId, status: ExecutionStatus.CANCELLED }),
+      {}
+    );
+    expect(workflowTaskManager.forceRunIdleTasks).not.toHaveBeenCalled();
+  });
+
+  it('sets cancelRequested, flips to CANCELLED, and wakes idle tasks for pending', async () => {
+    const workflowExecutionRepository = buildRepository(
+      buildExecution({ status: ExecutionStatus.PENDING })
+    );
+    const workflowTaskManager = buildTaskManager();
+
+    await cancelWorkflow(buildCancelParams({ workflowExecutionRepository, workflowTaskManager }));
+
+    expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ id: workflowExecutionId, status: ExecutionStatus.CANCELLED }),
+      {}
+    );
+    expect(workflowTaskManager.forceRunIdleTasks).toHaveBeenCalledWith(workflowExecutionId, {
+      spaceId,
+      fakeRequest: schedulingRequest,
+    });
+  });
+
+  it.each(
+    NonTerminalExecutionStatuses.filter(
+      (status) => status !== ExecutionStatus.PENDING && status !== ExecutionStatus.QUEUED
+    )
+  )(
     'sets cancelRequested and triggers forceRunIdleTasks for non-terminal status %s',
     async (status) => {
       const workflowExecutionRepository = buildRepository(buildExecution({ status }));
@@ -124,14 +161,7 @@ describe('cancelWorkflow', () => {
           cancelledBy: 'system',
         })
       );
-
-      // PENDING and QUEUED flip to CANCELLED synchronously; everything else lets the execution
-      // loop finalise the status via cancelWorkflowIfRequested.
-      if (status === ExecutionStatus.PENDING || status === ExecutionStatus.QUEUED) {
-        expect(updateArg.status).toBe(ExecutionStatus.CANCELLED);
-      } else {
-        expect(updateArg).not.toHaveProperty('status');
-      }
+      expect(updateArg).not.toHaveProperty('status');
 
       expect(workflowTaskManager.forceRunIdleTasks).toHaveBeenCalledTimes(1);
       expect(workflowTaskManager.forceRunIdleTasks).toHaveBeenCalledWith(workflowExecutionId, {
@@ -200,6 +230,7 @@ describe('cancelWorkflow', () => {
       executionId: workflowExecutionId,
       triggeredBy: undefined,
     });
+    expect(workflowTaskManager.forceRunIdleTasks).not.toHaveBeenCalled();
     expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
       expect.objectContaining({ id: workflowExecutionId, status: ExecutionStatus.CANCELLED }),
       { refresh: 'wait_for' }

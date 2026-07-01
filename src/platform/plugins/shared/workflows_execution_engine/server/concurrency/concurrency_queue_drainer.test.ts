@@ -103,6 +103,46 @@ describe('drainConcurrencyQueueSlots', () => {
     expect(promoteQueuedRunTask).toHaveBeenCalledTimes(2);
   });
 
+  it('retries runSoon after a short delay when the dormant task is not ready yet', async () => {
+    jest.useFakeTimers();
+    promoteQueuedRunTask
+      .mockRejectedValueOnce(new Error('task not found'))
+      .mockRejectedValueOnce(new Error('task not found'))
+      .mockResolvedValueOnce(undefined);
+
+    const updateMock = jest.fn().mockResolvedValue(undefined);
+    const workflowExecutionRepository = {
+      countExecutionsByConcurrencyGroupAndStatuses: jest
+        .fn()
+        .mockResolvedValueOnce(0)
+        .mockResolvedValue(1),
+      getOldestQueuedExecutionIdByConcurrencyGroup: jest.fn().mockResolvedValue('exec-queued-1'),
+      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
+      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+        id: 'exec-queued-1',
+        spaceId: 'default',
+        triggeredBy: 'manual',
+        status: ExecutionStatus.PENDING,
+      }),
+      updateWorkflowExecution: updateMock,
+    } as unknown as WorkflowExecutionRepository;
+
+    const drainPromise = drainConcurrencyQueueSlots({
+      ...baseParams,
+      workflowExecutionRepository,
+    });
+
+    await jest.advanceTimersByTimeAsync(500);
+    await drainPromise;
+
+    expect(promoteQueuedRunTask).toHaveBeenCalledTimes(3);
+    expect(updateMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ status: ExecutionStatus.QUEUED }),
+      expect.anything()
+    );
+    jest.useRealTimers();
+  });
+
   it('marks corrupt promoted docs as skipped and continues draining', async () => {
     const countMock = jest
       .fn()

@@ -85,10 +85,13 @@ export const cancelWorkflow = async ({
     shouldRefreshBeforeQueueDrain ? { refresh: 'wait_for' } : {}
   );
 
-  await workflowTaskManager.forceRunIdleTasks(workflowExecution.id, {
-    spaceId: workflowExecution.spaceId,
-    fakeRequest: schedulingRequest,
-  });
+  // QUEUED: dormant task was removed above — forceRunIdleTasks would runSoon that id and throw not-found.
+  if (!wasQueued) {
+    await workflowTaskManager.forceRunIdleTasks(workflowExecution.id, {
+      spaceId: workflowExecution.spaceId,
+      fakeRequest: schedulingRequest,
+    });
+  }
 
   if (shouldRefreshBeforeQueueDrain && concurrencySettings && concurrencyGroupKey) {
     try {

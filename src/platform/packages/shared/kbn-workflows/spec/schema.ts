@@ -93,6 +93,7 @@ export const DEFAULT_CONCURRENCY_QUEUE_TTL = '24h';
 export const ConcurrencySettingsSchema = z.object({
   key: z
     .string()
+    .max(512)
     .optional()
     .describe(
       'Liquid template that groups executions into a concurrency bucket (e.g. `{{ event.host.name }}`).'
