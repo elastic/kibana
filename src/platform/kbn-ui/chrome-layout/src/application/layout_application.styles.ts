@@ -14,47 +14,36 @@ import { getHighContrastBorder } from '@kbn/ui-chrome-layout-utils';
 import type { ChromeStyle } from '../layout.types';
 import type { EmotionFn } from '../types';
 
-const shell: EmotionFn = () =>
-  css`
-    grid-area: application;
-
-    height: calc(
-      100% - ${layoutVar('application.marginTop')} - ${layoutVar('application.marginBottom')}
-    );
-    margin-top: ${layoutVar('application.marginTop')};
-    margin-bottom: ${layoutVar('application.marginBottom')};
-    margin-right: ${layoutVar('application.marginRight')};
-
-    z-index: ${layoutLevels.content};
-
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    min-height: 0;
-    overflow: hidden;
-  `;
-
-const panel = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
+/** Shell carries panel chrome so agent-first overrides and shadows apply to .kbnChromeLayoutApplication. */
+const shell = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
   const isProjectStyle = chromeStyle === 'project';
 
   return (useEuiTheme: UseEuiTheme) => {
     return css`
+      grid-area: application;
+
+      height: calc(
+        100% - ${layoutVar('application.marginTop')} - ${layoutVar('application.marginBottom')}
+      );
+      margin-top: ${layoutVar('application.marginTop')};
+      margin-bottom: ${layoutVar('application.marginBottom')};
+      margin-right: ${layoutVar('application.marginRight')};
+      width: calc(100% - ${layoutVar('application.marginRight', '0px')});
+
+      z-index: ${layoutLevels.content};
+
+      position: relative;
       display: flex;
       flex-direction: column;
-      flex: 1;
       min-width: 0;
       min-height: 0;
-      width: 100%;
-      height: 100%;
+      overflow: hidden;
 
       ${isProjectStyle &&
       css`
         background-color: ${useEuiTheme.euiTheme.colors.backgroundBasePlain};
         border-radius: ${useEuiTheme.euiTheme.border.radius.medium};
-
         outline: ${getHighContrastBorder(useEuiTheme)};
-
         ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
       `}
       ${!isProjectStyle &&
@@ -87,7 +76,7 @@ const content: EmotionFn = () => css`
   width: 100%;
 `;
 
-const topBar: EmotionFn = ({ euiTheme }) => css`
+const topBar: EmotionFn = () => css`
   position: sticky;
   top: 0;
   z-index: ${layoutLevels.applicationTopBar};
@@ -95,7 +84,7 @@ const topBar: EmotionFn = ({ euiTheme }) => css`
   flex-shrink: 0;
 `;
 
-const bottomBar: EmotionFn = ({ euiTheme }) => css`
+const bottomBar: EmotionFn = () => css`
   position: sticky;
   bottom: 0;
   z-index: ${layoutLevels.applicationBottomBar};
@@ -110,7 +99,6 @@ export const contentHiddenStyles = css`
 
 export const styles = {
   shell,
-  panel,
   content,
   topBar,
   bottomBar,

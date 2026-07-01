@@ -172,7 +172,7 @@ export const LayoutAgent = ({ children }: LayoutAgentProps) => {
 
   return (
     <motion.div
-      css={styles.shell()}
+      css={styles.shell(chromeStyle)}
       className="kbnChromeLayoutAgent"
       initial={false}
       animate={{ width: targetWidth }}
@@ -183,20 +183,18 @@ export const LayoutAgent = ({ children }: LayoutAgentProps) => {
       data-agent-workspace-open={agentWorkspaceOpen}
       {...euiIncludeSelectorInFocusTrap.prop}
     >
-      <div css={styles.panel(chromeStyle)}>
-        <motion.div
-          css={[styles.content, isContentVisibilityHidden ? contentHiddenStyles : undefined]}
-          initial={false}
-          animate={{ opacity: contentOpacity }}
-          transition={{
-            duration: shouldAnimateWidth ? CONTENT_FADE_MS / 1000 : 0,
-            ease: 'easeInOut',
-          }}
-          onAnimationComplete={handleContentAnimationComplete}
-        >
-          {children}
-        </motion.div>
-      </div>
+      <motion.div
+        css={[styles.content, isContentVisibilityHidden ? contentHiddenStyles : undefined]}
+        initial={false}
+        animate={{ opacity: contentOpacity }}
+        transition={{
+          duration: shouldAnimateWidth ? CONTENT_FADE_MS / 1000 : 0,
+          ease: 'easeInOut',
+        }}
+        onAnimationComplete={handleContentAnimationComplete}
+      >
+        {children}
+      </motion.div>
     </motion.div>
   );
 };
