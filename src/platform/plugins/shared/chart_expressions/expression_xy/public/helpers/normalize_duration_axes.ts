@@ -131,9 +131,11 @@ export function normalizeSharedDurationAxes(
         : column;
     });
 
+    // `conversions` is constant per layer, so compute the entries once rather than per row.
+    const conversionEntries = Object.entries(conversions);
     const rows = layer.table.rows.map((row) => {
       let nextRow = row;
-      Object.entries(conversions).forEach(([columnId, { fromInputFormat, toInputFormat }]) => {
+      conversionEntries.forEach(([columnId, { fromInputFormat, toInputFormat }]) => {
         const value = row[columnId];
         if (typeof value === 'number') {
           if (nextRow === row) {

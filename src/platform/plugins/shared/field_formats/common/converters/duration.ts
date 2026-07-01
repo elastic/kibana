@@ -41,7 +41,7 @@ function parseInputAsDuration(val: number, inputFormat: string, humanPrecise: bo
 }
 
 function durationInputToSeconds(val: number, inputFormat: string) {
-  const ratio = ratioToSeconds[inputFormat] || 1;
+  const ratio = ratioToSeconds[inputFormat] ?? 1;
   const kind = (
     inputFormat in ratioToSeconds ? 'seconds' : inputFormat
   ) as unitOfTime.DurationConstructor;
@@ -52,7 +52,8 @@ function durationInputToSeconds(val: number, inputFormat: string) {
  * Converts a numeric duration value from one duration input unit to another, e.g. a value of
  * `1000` in `milliseconds` becomes `1` in `seconds`. Supports the sub-second units handled by
  * the duration format (picoseconds, nanoseconds, microseconds). Returns the value unchanged
- * when the units match.
+ * when the units match or when the conversion cannot be computed safely (e.g. an unrecognized
+ * input unit), so callers never end up with `NaN`/`Infinity`.
  */
 export function convertDurationValue(
   value: number,
@@ -62,11 +63,16 @@ export function convertDurationValue(
   if (fromInputFormat === toInputFormat) {
     return value;
   }
+  const fromSeconds = durationInputToSeconds(value, fromInputFormat);
   const oneTargetUnitInSeconds = durationInputToSeconds(1, toInputFormat);
-  if (!oneTargetUnitInSeconds) {
+  if (
+    !Number.isFinite(fromSeconds) ||
+    !Number.isFinite(oneTargetUnitInSeconds) ||
+    !oneTargetUnitInSeconds
+  ) {
     return value;
   }
-  return durationInputToSeconds(value, fromInputFormat) / oneTargetUnitInSeconds;
+  return fromSeconds / oneTargetUnitInSeconds;
 }
 
 export class DurationFormat extends FieldFormat {

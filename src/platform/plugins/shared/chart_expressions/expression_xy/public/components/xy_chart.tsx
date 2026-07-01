@@ -313,13 +313,12 @@ export function XYChart({
     [renderComplete]
   );
 
-  const rawDataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
-
   // When several duration metrics share an axis with different input units, normalize the
   // others into the topmost series' unit so the single axis formatter renders them correctly.
-  const dataLayers = useMemo(
-    () => normalizeSharedDurationAxes(rawDataLayers, yAxisConfigs),
-    [rawDataLayers, yAxisConfigs]
+  // This is a no-op (returns the same layers) unless such a mix is present.
+  const dataLayers: CommonXYDataLayerConfig[] = normalizeSharedDurationAxes(
+    filteredLayers.filter(isDataLayer),
+    yAxisConfigs
   );
 
   const isTimeViz = isTimeChart(dataLayers);
