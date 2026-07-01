@@ -12,7 +12,6 @@ import { ScoutLogger } from '../../common';
 import { ScoutTestConfig } from '../../types';
 import { CollapsibleNav } from './collapsible_nav';
 import { DashboardApp } from './dashboard_app';
-import { DashboardLinks } from './dashboard_links';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
 import { FilterBar } from './filter_bar';
@@ -20,7 +19,6 @@ import { MapsPage } from './maps_page';
 import { RenderablePage } from './renderable_page';
 import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
-import { Inspector } from './inspector';
 import { LensApp } from './lens_app';
 import { VisualizeApp } from './visualize_app';
 
@@ -34,13 +32,11 @@ export interface PageObjects {
   datePicker: DatePicker;
   discover: DiscoverApp;
   dashboard: DashboardApp;
-  dashboardLinks: DashboardLinks;
   filterBar: FilterBar;
   maps: MapsPage;
   renderable: RenderablePage;
   collapsibleNav: CollapsibleNav;
   toasts: Toasts;
-  inspector: Inspector;
   lens: LensApp;
   visualize: VisualizeApp;
 }
@@ -55,14 +51,12 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
   return {
     datePicker: createLazyPageObject(DatePicker, fixtures.page),
     dashboard: createLazyPageObject(DashboardApp, fixtures.page),
-    dashboardLinks: createLazyPageObject(DashboardLinks, fixtures.page),
     discover: createLazyPageObject(DiscoverApp, fixtures.page),
     filterBar: createLazyPageObject(FilterBar, fixtures.page),
     maps: createLazyPageObject(MapsPage, fixtures.page),
     renderable: createLazyPageObject(RenderablePage, fixtures.page),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
     toasts: createLazyPageObject(Toasts, fixtures.page),
-    inspector: createLazyPageObject(Inspector, fixtures.page),
     lens: createLazyPageObject(LensApp, fixtures.page),
     visualize: createLazyPageObject(VisualizeApp, fixtures.page),
   };
