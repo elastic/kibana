@@ -7,9 +7,11 @@
 
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
+import { addControlsOperation } from './add_controls';
 import { addPanelsOperation } from './add_panels';
 import { addSectionOperation } from './add_section';
 import { editPanelsOperation } from './edit_panels';
+import { removeControlsOperation } from './remove_controls';
 import { removePanelsOperation } from './remove_panels';
 import { removeSectionOperation } from './remove_section';
 import { setMetadataOperation } from './set_metadata';
@@ -25,6 +27,8 @@ const operationDefinitions = [
   addSectionOperation,
   removeSectionOperation,
   removePanelsOperation,
+  addControlsOperation,
+  removeControlsOperation,
 ] as const;
 
 const schemas = operationDefinitions.map((definition) => definition.schema);
