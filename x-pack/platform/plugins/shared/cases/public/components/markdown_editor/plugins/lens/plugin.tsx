@@ -27,7 +27,7 @@ import { useLocation } from 'react-router-dom';
 import { css } from '@emotion/react';
 
 import type { TypedLensByValueInput, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/common/constants';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
