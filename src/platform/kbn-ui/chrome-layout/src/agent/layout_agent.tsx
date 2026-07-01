@@ -8,13 +8,19 @@
  */
 
 import type { CSSProperties, ReactNode, TransitionEvent } from 'react';
-import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames';
 import { css } from '@emotion/react';
 import { euiIncludeSelectorInFocusTrap } from '@kbn/ui-chrome-layout-constants';
 
 import { useLayoutConfig } from '../layout_config_context';
-import { AGENT_PANEL_WIDTH_CSS_VAR, contentHiddenStyles, styles } from './layout_agent.styles';
+import {
+  AGENT_PANEL_WIDTH_CSS_VAR,
+  CONTENT_FADE_MS,
+  contentFadeStyles,
+  contentHiddenStyles,
+  styles,
+} from './layout_agent.styles';
 
 const hiddenStyles = css`
   display: none;
@@ -51,59 +57,171 @@ export const LayoutAgent = ({ children }: LayoutAgentProps) => {
     applicationWorkspaceTransitionPhase === 'none' &&
     !prefersReducedMotion();
   const useInstantHide = !useWidthTransition;
-  const isCollapsed = !agentWorkspaceOpen;
 
-  const [isContentHidden, setIsContentHidden] = useState(isCollapsed && useInstantHide);
+  const prevAgentWorkspaceOpenRef = useRef(agentWorkspaceOpen);
+  const lastExpandedPanelWidthRef = useRef(agentWidth);
+  const closeFadeFallbackTimeoutRef = useRef<number | undefined>(undefined);
+  const [isPanelCollapsed, setIsPanelCollapsed] = useState(!agentWorkspaceOpen);
+  const [contentOpacity, setContentOpacity] = useState(agentWorkspaceOpen ? 1 : 0);
+  const [isContentVisibilityHidden, setIsContentVisibilityHidden] = useState(
+    !agentWorkspaceOpen && useInstantHide
+  );
 
   useLayoutEffect(() => {
-    if (useWidthTransition && agentWorkspaceOpen) {
-      setIsContentHidden(false);
+    if (agentWidth > 0) {
+      lastExpandedPanelWidthRef.current = agentWidth;
+    }
+  }, [agentWidth]);
+
+  const beginPanelCollapse = useCallback(() => {
+    if (closeFadeFallbackTimeoutRef.current !== undefined) {
+      window.clearTimeout(closeFadeFallbackTimeoutRef.current);
+      closeFadeFallbackTimeoutRef.current = undefined;
     }
 
-    if (useInstantHide && !agentWorkspaceOpen) {
-      setIsContentHidden(true);
-    }
-  }, [agentWorkspaceOpen, useInstantHide, useWidthTransition]);
+    setIsContentVisibilityHidden(true);
+    setIsPanelCollapsed(true);
+  }, []);
 
-  const handleTransitionEnd = useCallback(
+  useLayoutEffect(() => {
+    if (useInstantHide) {
+      if (closeFadeFallbackTimeoutRef.current !== undefined) {
+        window.clearTimeout(closeFadeFallbackTimeoutRef.current);
+        closeFadeFallbackTimeoutRef.current = undefined;
+      }
+
+      setIsPanelCollapsed(!agentWorkspaceOpen);
+      setContentOpacity(agentWorkspaceOpen ? 1 : 0);
+      setIsContentVisibilityHidden(!agentWorkspaceOpen);
+      prevAgentWorkspaceOpenRef.current = agentWorkspaceOpen;
+      return;
+    }
+
+    if (
+      useWidthTransition &&
+      prevAgentWorkspaceOpenRef.current !== agentWorkspaceOpen
+    ) {
+      if (!agentWorkspaceOpen) {
+        setIsContentVisibilityHidden(false);
+        setContentOpacity(0);
+
+        closeFadeFallbackTimeoutRef.current = window.setTimeout(() => {
+          closeFadeFallbackTimeoutRef.current = undefined;
+          beginPanelCollapse();
+        }, CONTENT_FADE_MS + 50);
+      } else {
+        if (closeFadeFallbackTimeoutRef.current !== undefined) {
+          window.clearTimeout(closeFadeFallbackTimeoutRef.current);
+          closeFadeFallbackTimeoutRef.current = undefined;
+        }
+
+        setIsPanelCollapsed(false);
+        setIsContentVisibilityHidden(true);
+        setContentOpacity(0);
+      }
+    }
+
+    prevAgentWorkspaceOpenRef.current = agentWorkspaceOpen;
+  }, [agentWorkspaceOpen, beginPanelCollapse, useInstantHide, useWidthTransition]);
+
+  useLayoutEffect(
+    () => () => {
+      if (closeFadeFallbackTimeoutRef.current !== undefined) {
+        window.clearTimeout(closeFadeFallbackTimeoutRef.current);
+      }
+    },
+    []
+  );
+
+  const handleContentTransitionEnd = useCallback(
     (event: TransitionEvent<HTMLDivElement>) => {
-      if (!useWidthTransition || event.propertyName !== 'width') {
+      if (event.target !== event.currentTarget || event.propertyName !== 'opacity') {
+        return;
+      }
+
+      if (!useWidthTransition || agentWorkspaceOpen) {
+        return;
+      }
+
+      beginPanelCollapse();
+    },
+    [agentWorkspaceOpen, beginPanelCollapse, useWidthTransition]
+  );
+
+  const handlePanelTransitionEnd = useCallback(
+    (event: TransitionEvent<HTMLDivElement>) => {
+      if (
+        event.target !== event.currentTarget ||
+        !useWidthTransition ||
+        event.propertyName !== 'width'
+      ) {
         return;
       }
 
       if (!agentWorkspaceOpen) {
-        setIsContentHidden(true);
+        return;
       }
+
+      setIsContentVisibilityHidden(false);
+
+      requestAnimationFrame(() => {
+        setContentOpacity(1);
+      });
     },
     [agentWorkspaceOpen, useWidthTransition]
   );
 
   const panelStyle = useMemo((): CSSProperties | undefined => {
-    if (!useWidthTransition || agentWidth <= 0) {
+    if (!useWidthTransition) {
+      return undefined;
+    }
+
+    const panelWidth = agentWidth > 0 ? agentWidth : lastExpandedPanelWidthRef.current;
+    if (panelWidth <= 0) {
       return undefined;
     }
 
     return {
-      [AGENT_PANEL_WIDTH_CSS_VAR]: `${agentWidth}px`,
+      [AGENT_PANEL_WIDTH_CSS_VAR]: `${panelWidth}px`,
     } as CSSProperties;
   }, [agentWidth, useWidthTransition]);
+
+  const contentStyle = useMemo(
+    (): CSSProperties => ({
+      opacity: contentOpacity,
+      pointerEvents: contentOpacity === 0 ? 'none' : 'auto',
+    }),
+    [contentOpacity]
+  );
 
   return (
     <div
       css={[
         styles.root(chromeStyle, useWidthTransition),
-        useInstantHide && isCollapsed ? hiddenStyles : undefined,
+        useInstantHide && isPanelCollapsed ? hiddenStyles : undefined,
       ]}
       className={classNames('kbnChromeLayoutAgent', {
-        isCollapsed: useWidthTransition && isCollapsed,
+        isCollapsed: useWidthTransition && isPanelCollapsed,
+        isClosingShell:
+          useWidthTransition && isPanelCollapsed && !agentWorkspaceOpen,
       })}
       style={panelStyle}
       data-test-subj="kbnChromeLayoutAgent"
       data-agent-workspace-open={agentWorkspaceOpen}
-      onTransitionEnd={handleTransitionEnd}
+      onTransitionEnd={handlePanelTransitionEnd}
       {...euiIncludeSelectorInFocusTrap.prop}
     >
-      <div css={[styles.content, isContentHidden ? contentHiddenStyles : undefined]}>{children}</div>
+      <div
+        css={[
+          styles.content,
+          contentFadeStyles(useWidthTransition),
+          isContentVisibilityHidden ? contentHiddenStyles : undefined,
+        ]}
+        style={contentStyle}
+        onTransitionEnd={handleContentTransitionEnd}
+      >
+        {children}
+      </div>
     </div>
   );
 };
