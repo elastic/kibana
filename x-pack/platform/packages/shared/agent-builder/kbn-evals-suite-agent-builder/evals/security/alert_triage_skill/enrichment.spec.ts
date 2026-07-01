@@ -18,101 +18,102 @@
 
 import { tags } from '@kbn/scout';
 import { evaluate } from './evaluate_setup';
-import {
-  seedEnrichmentFixtures,
-  type SeededEnrichmentFixtures,
-} from './alert_triage_fixtures';
+import { seedEnrichmentFixtures, type SeededEnrichmentFixtures } from './alert_triage_fixtures';
 
-evaluate.describe('Alert Triage - entity enrichment', { tag: [...tags.serverless.security.complete] }, () => {
-  let fixtures: SeededEnrichmentFixtures | undefined;
-  let teardown: (() => Promise<void>) | undefined;
+evaluate.describe(
+  'Alert Triage - entity enrichment',
+  { tag: [...tags.serverless.security.complete] },
+  () => {
+    let fixtures: SeededEnrichmentFixtures | undefined;
+    let teardown: (() => Promise<void>) | undefined;
 
-  evaluate.beforeAll(async ({ esClient, log }) => {
-    const seeded = await seedEnrichmentFixtures({ esClient, log });
-    fixtures = seeded?.fixtures;
-    teardown = seeded?.cleanup;
-  });
+    evaluate.beforeAll(async ({ esClient, log }) => {
+      const seeded = await seedEnrichmentFixtures({ esClient, log });
+      fixtures = seeded?.fixtures;
+      teardown = seeded?.cleanup;
+    });
 
-  evaluate.afterAll(async () => {
-    await teardown?.();
-  });
+    evaluate.afterAll(async () => {
+      await teardown?.();
+    });
 
-  evaluate(
-    'entity risk re-ranks Critical host above higher base score',
-    async ({ evaluateDataset }) => {
-      const entityRisk = fixtures?.entityRisk;
-      await evaluateDataset({
-        dataset: {
-          name: 'agent builder: security-alert-triage-entity-risk-enrichment',
-          description:
-            'Validates that Entity Analytics entity risk enrichment re-ranks EVAL-RISK-HOST ' +
-            '(base risk 50 + Critical entity risk boost +25 = 75) above EVAL-RISK-PLAIN (base 65), ' +
-            'and that the response cites the Critical entity risk level.',
-          examples: [
-            {
-              input: {
-                question:
-                  'What alerts should I look at right now? Prioritize by entity risk where available.',
+    evaluate(
+      'entity risk re-ranks Critical host above higher base score',
+      async ({ evaluateDataset }) => {
+        const entityRisk = fixtures?.entityRisk;
+        await evaluateDataset({
+          dataset: {
+            name: 'agent builder: security-alert-triage-entity-risk-enrichment',
+            description:
+              'Validates that Entity Analytics entity risk enrichment re-ranks EVAL-RISK-HOST ' +
+              '(base risk 50 + Critical entity risk boost +25 = 75) above EVAL-RISK-PLAIN (base 65), ' +
+              'and that the response cites the Critical entity risk level.',
+            examples: [
+              {
+                input: {
+                  question:
+                    'What alerts should I look at right now? Prioritize by entity risk where available.',
+                },
+                output: {
+                  expected:
+                    'Top ranked group is host EVAL-RISK-HOST with Critical entity risk from Entity Analytics ' +
+                    '(+25 entityRiskBoost), re-ranking it above EVAL-RISK-PLAIN despite a lower base alert ' +
+                    'risk score. Response cites EVAL-RISK-HOST, Critical entity risk level, and top alert ID ' +
+                    `${entityRisk?.enrichedAlertId ?? '<enriched-id>'}. ` +
+                    'Presentation order of these facts does not affect correctness.',
+                },
+                metadata: {
+                  query_intent: 'Alert Triage - Entity Risk Enrichment',
+                  expectedSkill: 'alert-triage',
+                  expectedOnlyToolId: 'security.alert-triage.prioritize-alerts',
+                  requiredAlertIds: entityRisk ? [entityRisk.enrichedAlertId] : [],
+                  requiredTerms: entityRisk ? ['Critical', 'EVAL-RISK-HOST'] : [],
+                },
               },
-              output: {
-                expected:
-                  'Top ranked group is host EVAL-RISK-HOST with Critical entity risk from Entity Analytics ' +
-                  '(+25 entityRiskBoost), re-ranking it above EVAL-RISK-PLAIN despite a lower base alert ' +
-                  'risk score. Response cites EVAL-RISK-HOST, Critical entity risk level, and top alert ID ' +
-                  `${entityRisk?.enrichedAlertId ?? '<enriched-id>'}. ` +
-                  'Presentation order of these facts does not affect correctness.',
-              },
-              metadata: {
-                query_intent: 'Alert Triage - Entity Risk Enrichment',
-                expectedSkill: 'alert-triage',
-                expectedOnlyToolId: 'security.alert-triage.prioritize-alerts',
-                requiredAlertIds: entityRisk ? [entityRisk.enrichedAlertId] : [],
-                requiredTerms: entityRisk ? ['Critical', 'EVAL-RISK-HOST'] : [],
-              },
-            },
-          ],
-        },
-      });
-    }
-  );
+            ],
+          },
+        });
+      }
+    );
 
-  evaluate(
-    'asset criticality re-ranks watchlist host above higher base score',
-    async ({ evaluateDataset }) => {
-      const assetCriticality = fixtures?.assetCriticality;
-      await evaluateDataset({
-        dataset: {
-          name: 'agent builder: security-alert-triage-asset-criticality-enrichment',
-          description:
-            'Validates that asset criticality (watchlist signal) re-ranks EVAL-CRIT-HOST ' +
-            '(base risk 55 + extreme_impact criticality boost +20 = 75) above EVAL-CRIT-PLAIN (base 70), ' +
-            'and that the response cites the extreme_impact criticality level.',
-          examples: [
-            {
-              input: {
-                question:
-                  'Prioritize the alert queue. Call out any hosts with high asset criticality.',
+    evaluate(
+      'asset criticality re-ranks watchlist host above higher base score',
+      async ({ evaluateDataset }) => {
+        const assetCriticality = fixtures?.assetCriticality;
+        await evaluateDataset({
+          dataset: {
+            name: 'agent builder: security-alert-triage-asset-criticality-enrichment',
+            description:
+              'Validates that asset criticality (watchlist signal) re-ranks EVAL-CRIT-HOST ' +
+              '(base risk 55 + extreme_impact criticality boost +20 = 75) above EVAL-CRIT-PLAIN (base 70), ' +
+              'and that the response cites the extreme_impact criticality level.',
+            examples: [
+              {
+                input: {
+                  question:
+                    'Prioritize the alert queue. Call out any hosts with high asset criticality.',
+                },
+                output: {
+                  expected:
+                    'Top ranked group is host EVAL-CRIT-HOST with extreme_impact asset criticality ' +
+                    '(+20 assetCriticalityBoost), re-ranking it above EVAL-CRIT-PLAIN despite a lower base ' +
+                    'alert risk score. Response cites EVAL-CRIT-HOST, extreme_impact criticality level, ' +
+                    'and top alert ID ' +
+                    `${assetCriticality?.watchlistAlertId ?? '<watchlist-id>'}. ` +
+                    'Presentation order of these facts does not affect correctness.',
+                },
+                metadata: {
+                  query_intent: 'Alert Triage - Asset Criticality Enrichment',
+                  expectedSkill: 'alert-triage',
+                  expectedOnlyToolId: 'security.alert-triage.prioritize-alerts',
+                  requiredAlertIds: assetCriticality ? [assetCriticality.watchlistAlertId] : [],
+                  requiredTerms: assetCriticality ? ['extreme_impact', 'EVAL-CRIT-HOST'] : [],
+                },
               },
-              output: {
-                expected:
-                  'Top ranked group is host EVAL-CRIT-HOST with extreme_impact asset criticality ' +
-                  '(+20 assetCriticalityBoost), re-ranking it above EVAL-CRIT-PLAIN despite a lower base ' +
-                  'alert risk score. Response cites EVAL-CRIT-HOST, extreme_impact criticality level, ' +
-                  'and top alert ID ' +
-                  `${assetCriticality?.watchlistAlertId ?? '<watchlist-id>'}. ` +
-                  'Presentation order of these facts does not affect correctness.',
-              },
-              metadata: {
-                query_intent: 'Alert Triage - Asset Criticality Enrichment',
-                expectedSkill: 'alert-triage',
-                expectedOnlyToolId: 'security.alert-triage.prioritize-alerts',
-                requiredAlertIds: assetCriticality ? [assetCriticality.watchlistAlertId] : [],
-                requiredTerms: assetCriticality ? ['extreme_impact', 'EVAL-CRIT-HOST'] : [],
-              },
-            },
-          ],
-        },
-      });
-    }
-  );
-});
+            ],
+          },
+        });
+      }
+    );
+  }
+);
