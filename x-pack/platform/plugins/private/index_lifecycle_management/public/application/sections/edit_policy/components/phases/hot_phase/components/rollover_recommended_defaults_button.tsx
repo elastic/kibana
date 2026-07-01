@@ -88,7 +88,7 @@ export const RolloverRecommendedDefaultsButton: FunctionComponent = () => {
       content={i18n.translate(
         'xpack.indexLifecycleMgmt.hotPhase.recommendedRolloverDefaultsAppliedTooltip',
         {
-          defaultMessage: 'Recommended defaults are already applied',
+          defaultMessage: 'Recommended defaults are already applied.',
         }
       )}
     >

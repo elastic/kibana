@@ -109,6 +109,7 @@ describe('<EditPolicy /> rollover', () => {
     const restoreDefaultsButton = screen.getByTestId('rolloverRestoreRecommendedDefaults');
 
     expect(restoreDefaultsButton).toBeDisabled();
+    expect(screen.getByText('until')).toBeInTheDocument();
 
     await rolloverActions.rollover.setMinDocs('12');
 
@@ -120,6 +121,7 @@ describe('<EditPolicy /> rollover', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId('hot-selectedMinDocuments')).not.toBeInTheDocument();
+      expect(screen.getByText('until')).toBeInTheDocument();
       expect(restoreDefaultsButton).toBeDisabled();
     });
   });

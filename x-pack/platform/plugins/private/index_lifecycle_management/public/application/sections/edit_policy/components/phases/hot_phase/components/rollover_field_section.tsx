@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 
 import { useFormContext } from '../../../../../../../shared_imports';
 import { UseField } from '../../../../form';
@@ -40,6 +40,7 @@ export const RolloverFieldSection = <T extends RolloverField>({
   isTriggerSection = false,
 }: RolloverFieldSectionProps<T>) => {
   const { setFieldValue } = useFormContext();
+  const { euiTheme } = useEuiTheme();
 
   return (
     <UseField<T[]> path={activeFieldPath}>
@@ -82,7 +83,20 @@ export const RolloverFieldSection = <T extends RolloverField>({
                   gridTemplateColumns: '28px minmax(0, 1fr)',
                 }}
               >
-                <span />
+                {activeFields.length === 0 ? (
+                  <span
+                    style={{
+                      alignSelf: 'center',
+                      fontSize: euiTheme.size.m,
+                      fontWeight: euiTheme.font.weight.medium,
+                      textAlign: 'right',
+                    }}
+                  >
+                    {firstConditionLabel}
+                  </span>
+                ) : (
+                  <span />
+                )}
                 <div>
                   <RolloverAddRuleButton
                     activeFields={activeFields}

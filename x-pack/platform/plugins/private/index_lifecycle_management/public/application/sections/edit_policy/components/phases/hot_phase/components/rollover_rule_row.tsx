@@ -72,16 +72,7 @@ export const RolloverRuleRow = <T extends RolloverField>({
     </span>
   );
   const fieldNamePrefix = (
-    <span
-      style={{
-        alignItems: 'center',
-        display: 'inline-flex',
-        gap: 4,
-        fontSize: euiTheme.size.m,
-        fontWeight: euiTheme.font.weight.medium,
-        whiteSpace: 'nowrap',
-      }}
-    >
+    <span>
       {config.deprecationMessage && (
         <EuiIconTip
           type="warning"
@@ -90,6 +81,7 @@ export const RolloverRuleRow = <T extends RolloverField>({
           disableScreenReaderOutput
         />
       )}
+      {config.deprecationMessage && ' '}
       {config.menuLabel} &ge;
     </span>
   );
