@@ -239,6 +239,17 @@ export const allowedExperimentalValues = Object.freeze({
   pciComplianceAgentBuilder: true,
 
   /**
+   * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
+   * Ships dark by default; enable in kibana.dev.yml for local eval iteration.
+   *
+   * DEMO BRANCH ONLY: temporarily defaulted to `true` so the PR cloud deployment
+   * registers the skill without a per-environment override. Revert to `false`
+   * before this (or any derived) PR is marked ready-for-review — the skill must
+   * ship dark on serverless.
+   */
+  endpointForensicAnalysisSkill: true,
+
+  /**
    * Enables the find-security-rules Agent Builder skill.
    * Part of the DEX AI skills family (`dexAiSkill*`).
    */
