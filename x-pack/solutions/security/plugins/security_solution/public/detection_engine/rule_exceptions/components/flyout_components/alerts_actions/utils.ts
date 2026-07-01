@@ -110,13 +110,23 @@ export const mapDataViewFieldToRuntimeType = (field: DataViewFieldBase): Runtime
     case ES_FIELD_TYPES.MATCH_ONLY_TEXT:
     case ES_FIELD_TYPES.VERSION:
       return RuntimeFieldTypeEnum.keyword;
+    // ES `date` runtime fields expect `emit(long)` (epoch millis) but
+    // alert `_source` stores dates as ISO-8601 strings. Our source-reading
+    // `emit(v)` would silently fail via `on_script_error: 'continue'` and
+    // the close would report zero matches with no error surfaced. Fall
+    // back to `keyword` so exact-string equality still matches — the only
+    // operator the exception flyout produces for date fields anyway.
     case ES_FIELD_TYPES.DATE:
     case ES_FIELD_TYPES.DATE_NANOS:
-      return RuntimeFieldTypeEnum.date;
+      return RuntimeFieldTypeEnum.keyword;
     case ES_FIELD_TYPES.BOOLEAN:
       return RuntimeFieldTypeEnum.boolean;
+    // `geo_point` runtime fields expose only `emit(double lat, double lon)`
+    // — our single-arg `emit(v)` fails dispatch. Same reasoning as `date`
+    // above: fall back to `keyword` so the string representation of the
+    // point can still be matched by equality operators.
     case ES_FIELD_TYPES.GEO_POINT:
-      return RuntimeFieldTypeEnum.geo_point;
+      return RuntimeFieldTypeEnum.keyword;
     case ES_FIELD_TYPES.LONG:
     case ES_FIELD_TYPES.INTEGER:
     case ES_FIELD_TYPES.SHORT:
@@ -139,15 +149,15 @@ export const mapDataViewFieldToRuntimeType = (field: DataViewFieldBase): Runtime
   // Kibana surfaces some fields with only the broad `type` field set
   // ('string', 'number', etc.) and no `esTypes`. Fall back on that, then
   // `keyword`.
+  // `date` and `geo_point` intentionally fall through to the `default`
+  // (keyword) branch — see the same-named cases in the `esType` switch
+  // above for why (Painless emit-signature mismatch with what we'd read
+  // from `_source`).
   switch (field.type) {
     case KBN_FIELD_TYPES.IP:
       return RuntimeFieldTypeEnum.ip;
-    case KBN_FIELD_TYPES.DATE:
-      return RuntimeFieldTypeEnum.date;
     case KBN_FIELD_TYPES.BOOLEAN:
       return RuntimeFieldTypeEnum.boolean;
-    case KBN_FIELD_TYPES.GEO_POINT:
-      return RuntimeFieldTypeEnum.geo_point;
     case KBN_FIELD_TYPES.NUMBER:
       return RuntimeFieldTypeEnum.double;
     default:

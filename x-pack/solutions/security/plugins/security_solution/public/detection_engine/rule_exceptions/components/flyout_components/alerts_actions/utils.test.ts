@@ -167,10 +167,15 @@ describe('alerts_actions#utils', () => {
       [ES_FIELD_TYPES.TEXT, RuntimeFieldTypeEnum.keyword],
       [ES_FIELD_TYPES.MATCH_ONLY_TEXT, RuntimeFieldTypeEnum.keyword],
       [ES_FIELD_TYPES.VERSION, RuntimeFieldTypeEnum.keyword],
-      [ES_FIELD_TYPES.DATE, RuntimeFieldTypeEnum.date],
-      [ES_FIELD_TYPES.DATE_NANOS, RuntimeFieldTypeEnum.date],
+      // date + geo_point deliberately fall back to keyword — their Painless
+      // `emit()` signatures don't match what we'd read from `_source` (see
+      // mapDataViewFieldToRuntimeType comments), so any close would silently
+      // no-match. keyword preserves exact-string equality which is what the
+      // exception flyout produces anyway.
+      [ES_FIELD_TYPES.DATE, RuntimeFieldTypeEnum.keyword],
+      [ES_FIELD_TYPES.DATE_NANOS, RuntimeFieldTypeEnum.keyword],
       [ES_FIELD_TYPES.BOOLEAN, RuntimeFieldTypeEnum.boolean],
-      [ES_FIELD_TYPES.GEO_POINT, RuntimeFieldTypeEnum.geo_point],
+      [ES_FIELD_TYPES.GEO_POINT, RuntimeFieldTypeEnum.keyword],
       [ES_FIELD_TYPES.LONG, RuntimeFieldTypeEnum.long],
       [ES_FIELD_TYPES.INTEGER, RuntimeFieldTypeEnum.long],
       [ES_FIELD_TYPES.SHORT, RuntimeFieldTypeEnum.long],
@@ -201,11 +206,13 @@ describe('alerts_actions#utils', () => {
     });
 
     // Some fields surface with only the broad Kibana `type` populated.
+    // date and geo_point fall through to keyword for the same reason as
+    // their esType counterparts.
     it.each([
       [KBN_FIELD_TYPES.IP, RuntimeFieldTypeEnum.ip],
-      [KBN_FIELD_TYPES.DATE, RuntimeFieldTypeEnum.date],
+      [KBN_FIELD_TYPES.DATE, RuntimeFieldTypeEnum.keyword],
       [KBN_FIELD_TYPES.BOOLEAN, RuntimeFieldTypeEnum.boolean],
-      [KBN_FIELD_TYPES.GEO_POINT, RuntimeFieldTypeEnum.geo_point],
+      [KBN_FIELD_TYPES.GEO_POINT, RuntimeFieldTypeEnum.keyword],
       [KBN_FIELD_TYPES.NUMBER, RuntimeFieldTypeEnum.double],
     ])('falls back to Kibana type "%s" → runtime type "%s"', (kibanaType, expected) => {
       expect(mapDataViewFieldToRuntimeType(getField({ type: kibanaType }))).toBe(expected);
