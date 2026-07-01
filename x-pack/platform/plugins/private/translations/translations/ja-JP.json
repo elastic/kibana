@@ -12350,7 +12350,6 @@
     "xpack.apm.columns.euiButtonIcon.deleteLabel": "削除",
     "xpack.apm.columns.euiButtonIcon.editLabel": "編集",
     "xpack.apm.comparison.expectedBoundsTitle": "想定される境界",
-    "xpack.apm.comparison.mlExpectedBoundsDisabledText": "想定される境界（環境の異常検知が有効でなければなりません）",
     "xpack.apm.comparison.mlExpectedBoundsText": "想定される境界",
     "xpack.apm.componentWithDiagnoseButton.diagnosethisconnectionButton.ariaLabel": "この接続を診断",
     "xpack.apm.compositeSpanCallsLabel": "、{count}件の呼び出し、平均{duration}",

@@ -12349,7 +12349,6 @@
     "xpack.apm.columns.euiButtonIcon.deleteLabel": "删除",
     "xpack.apm.columns.euiButtonIcon.editLabel": "编辑",
     "xpack.apm.comparison.expectedBoundsTitle": "预期边界",
-    "xpack.apm.comparison.mlExpectedBoundsDisabledText": "预期边界（必须为环境启用异常检测）",
     "xpack.apm.comparison.mlExpectedBoundsText": "预期边界",
     "xpack.apm.componentWithDiagnoseButton.diagnosethisconnectionButton.ariaLabel": "诊断此连接",
     "xpack.apm.compositeSpanCallsLabel": "，{count} 个调用，平均 {duration}",
