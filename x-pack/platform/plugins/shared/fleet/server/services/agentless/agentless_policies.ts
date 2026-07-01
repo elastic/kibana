@@ -482,7 +482,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         policyTemplate,
       });
 
-      // Handle cloud-connector add / reuse / swap. Detaching or swapping only updates the reference; 
+      // Handle cloud-connector add / reuse / swap. Detaching or swapping only updates the reference;
       // Previous connector is left in place, as connectors are shareable and managed via their own API.
       const {
         packagePolicy: integratedPackagePolicy,
@@ -508,7 +508,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       // update to bump the agent policy revision or fire its own deploy — the agent-policy update
       // below owns the single revision bump, and the explicit `deployPolicy` owns the reconcile.
       this.logger.debug(`Updating agentless package policy ${policyId}`);
-      packagePolicyUpdateAttempted = true; //Flagging the attempt guarantees the rollback restores it
+      packagePolicyUpdateAttempted = true; // Flagging the attempt guarantees the rollback restores it
       const updatedPackagePolicy = await this.packagePolicyService.update(
         this.soClient,
         this.esClient,
