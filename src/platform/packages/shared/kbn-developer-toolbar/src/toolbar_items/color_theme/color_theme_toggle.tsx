@@ -9,13 +9,15 @@
 
 import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import useObservable from 'react-use/lib/useObservable';
+import type { LocalColorThemeController } from './local_color_theme';
 
 interface Props {
   isDarkMode: boolean;
   onToggle: () => void;
 }
 
-export const ColorThemeToggle = ({ isDarkMode, onToggle }: Props) => (
+const ColorThemeToggle = ({ isDarkMode, onToggle }: Props) => (
   <EuiToolTip content="Click to toggle color theme.">
     <EuiBadge
       color={isDarkMode ? '#1E293B' : '#FEF3C7'}
@@ -28,3 +30,14 @@ export const ColorThemeToggle = ({ isDarkMode, onToggle }: Props) => (
     </EuiBadge>
   </EuiToolTip>
 );
+
+/**
+ * Toolbar item that reflects and toggles the color theme override. It subscribes
+ * to the controller so the badge updates live when the theme flips. The
+ * controller (which installs the global override) is created eagerly by the
+ * plugin; only this presentational component is lazy-loaded.
+ */
+export const LiveColorThemeToggle = ({ controller }: { controller: LocalColorThemeController }) => {
+  const isDarkMode = useObservable(controller.isDark$, controller.isDark$.getValue());
+  return <ColorThemeToggle isDarkMode={isDarkMode} onToggle={controller.toggle} />;
+};

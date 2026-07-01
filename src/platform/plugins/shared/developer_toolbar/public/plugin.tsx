@@ -8,17 +8,14 @@
  */
 
 import React, { Suspense, lazy } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 
 import { BehaviorSubject } from 'rxjs';
 import {
-  ColorThemeToggle,
   installLocalColorThemeOverride,
   type DeveloperToolbarItemProps,
-  type LocalColorThemeController,
 } from '@kbn/developer-toolbar';
 
 import { NEXT_CHROME_FEATURE_FLAG_KEY } from '@kbn/core-chrome-feature-flags';
@@ -31,10 +28,11 @@ export interface DeveloperToolbarItemRegistry {
 export type DeveloperToolbarSetup = DeveloperToolbarItemRegistry;
 export type DeveloperToolbarStart = DeveloperToolbarItemRegistry;
 
-const LiveColorThemeToggle = ({ controller }: { controller: LocalColorThemeController }) => {
-  const isDarkMode = useObservable(controller.isDark$, controller.isDark$.getValue());
-  return <ColorThemeToggle isDarkMode={isDarkMode} onToggle={controller.toggle} />;
-};
+const LazyColorThemeToggle = lazy(() =>
+  import('@kbn/developer-toolbar').then(({ LiveColorThemeToggle }) => ({
+    default: LiveColorThemeToggle,
+  }))
+);
 
 const LazyMeasureButton = lazy(() =>
   import('@kbn/design-tools').then(({ MeasureButton }) => ({
@@ -69,11 +67,19 @@ export class DeveloperToolbarPlugin
       </Suspense>
     );
 
+    /**
+     * Install the override eagerly so it takes effect globally (before the app
+     * root subscribes to `core.theme.theme$`).
+     */
     const colorThemeController = installLocalColorThemeOverride(core.theme);
 
     this.registerItem({
       id: 'Color Theme',
-      children: <LiveColorThemeToggle controller={colorThemeController} />,
+      children: (
+        <Suspense fallback={null}>
+          <LazyColorThemeToggle controller={colorThemeController} />
+        </Suspense>
+      ),
     });
 
     this.registerItem({
