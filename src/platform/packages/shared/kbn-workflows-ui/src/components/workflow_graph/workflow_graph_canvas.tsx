@@ -527,6 +527,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
             }}
           >
             <EuiCallOut
+              data-test-subj="workflowGraphYamlErrorCallout"
               announceOnMount
               size="s"
               iconType="warning"
