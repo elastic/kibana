@@ -67,6 +67,7 @@ test.describe(
     });
 
     test('shows flyout when clicking on a service node', async ({
+      page,
       pageObjects: { serviceMapPage },
     }) => {
       await serviceMapPage.clickFitView();
@@ -77,6 +78,13 @@ test.describe(
       const flyoutTitle = await serviceMapPage.getFlyoutTitle();
       expect(flyoutTitle).toContain(SERVICE_OPBEANS_JAVA);
       await expect(serviceMapPage.serviceMapFlyoutContent).toBeVisible();
+
+      for (const id of ['latency', 'throughput', 'failedTransactionRate']) {
+        const chart = page.getByTestId(`serviceFlyoutLensChart-${id}`);
+        await expect(chart).toBeVisible();
+        await expect(chart.locator('[data-render-complete="true"]')).toBeVisible();
+        await expect(chart.locator('[data-test-subj="embeddable-lens-failure"]')).toBeHidden();
+      }
     });
 
     test('dismisses service flyout when clicking the close button', async ({
