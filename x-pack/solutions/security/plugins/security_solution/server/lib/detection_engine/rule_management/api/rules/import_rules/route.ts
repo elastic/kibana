@@ -192,7 +192,10 @@ export const importRulesRoute = (
             });
 
           const experimentalFeatures = ctx.securitySolution.getConfig().experimentalFeatures;
-          const ruleChunks = chunk(RULE_MANAGEMENT_IMPORT_BATCH_SIZE, validatedResponseActionsRules);
+          const ruleChunks = chunk(
+            RULE_MANAGEMENT_IMPORT_BATCH_SIZE,
+            validatedResponseActionsRules
+          );
 
           const importRuleResponse = await importRules({
             ruleChunks,
