@@ -80,7 +80,8 @@ export class AlertsTablePage {
   }
 
   async waitForDetectionsAlertsWrapper() {
-    return this.detectionsAlertsWrapper.waitFor({ state: 'visible', timeout: 60_000 });
+    // Increased timeout to 20 seconds because this page sometimes takes longer to load
+    return this.detectionsAlertsWrapper.waitFor({ state: 'visible', timeout: 20_000 });
   }
 
   /**
