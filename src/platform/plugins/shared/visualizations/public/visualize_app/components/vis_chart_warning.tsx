@@ -142,7 +142,7 @@ export const VisChartWarning: FC<Props> = ({ chartType, chartConfigToken, mode }
   const WarningMessage = warningMessages[chartType];
   return (
     <EuiCallOut
-      data-test-subj="vizChartWarning"
+      data-test-subj="visChartWarning"
       title={
         <WarningMessage
           advancedSettingsLink={advancedSettingsLink}

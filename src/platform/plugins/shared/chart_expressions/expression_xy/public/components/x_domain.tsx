@@ -45,7 +45,7 @@ export const getXDomain = (
   datatableUtilitites: DatatableUtilitiesService,
   layers: CommonXYDataLayerConfig[],
   minInterval: number | undefined,
-  isTimeVis,
+  isTimeVis: boolean,
   isHistogram: boolean,
   hasBars: boolean,
   timeZone: string,

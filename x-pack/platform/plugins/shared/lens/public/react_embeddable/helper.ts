@@ -359,7 +359,7 @@ export function updateAttributesWithAnnotation(
  * "linked with local changes" layers.
  */
 export async function saveUpdatedLinkedAnnotationsToLibrary(
-  visState,
+  visState: unknown,
   eventAnnotationService: EventAnnotationServiceType
 ): Promise<unknown> {
   const XYVisualizationState = visState as XYVisualizationState | undefined;

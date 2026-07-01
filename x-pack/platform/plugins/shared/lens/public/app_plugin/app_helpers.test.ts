@@ -59,7 +59,7 @@ describe('App helpers', () => {
       expect(result.current.shouldShowGoBackToVisEditorModal).toBe(true);
     });
 
-    it('navigateToVizEditor hides modal and navigates back to Viz editor', () => {
+    it('navigateToVisEditor hides modal and navigates back to Vis editor', () => {
       const props = getDefaultProps();
       const { result } = renderHook(() => useNavigateBackToApp(props));
 

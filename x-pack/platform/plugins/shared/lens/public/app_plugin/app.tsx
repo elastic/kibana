@@ -164,7 +164,7 @@ export function App({
       ? initialContext.originatingApp
       : undefined;
   const legacyEditorAppUrl =
-    initialContext && 'vizEditorOriginatingAppUrl' in initialContext
+    initialContext && 'visEditorOriginatingAppUrl' in initialContext
       ? initialContext.visEditorOriginatingAppUrl
       : undefined;
   const showNoDataPopover = useCallback(() => {

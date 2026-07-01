@@ -224,7 +224,7 @@ describe('Embeddable helpers', () => {
       expect(mockEventAnnotationService.updateAnnotationGroup).not.toHaveBeenCalled();
     });
 
-    it('should return updated viz state with synced __lastSaved', async () => {
+    it('should return updated vis state with synced __lastSaved', async () => {
       const byRefLayer = makeByRefLayer();
       const visState = makeVisState([byRefLayer]);
 
