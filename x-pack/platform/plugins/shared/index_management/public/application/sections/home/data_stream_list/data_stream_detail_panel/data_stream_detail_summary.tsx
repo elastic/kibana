@@ -339,8 +339,13 @@ export const DataStreamDetailSummary: React.FunctionComponent<DataStreamDetailSu
                   <EuiLink
                     data-test-subj="ilmPolicyLink"
                     href={ilmPolicyLink}
-                    onClick={(e) => {
-                      e.preventDefault();
+                    onClick={(event: React.MouseEvent) => {
+                      // Let the browser handle modified clicks (open in new tab, etc.) natively;
+                      // only intercept plain left clicks for in-app (SPA) navigation.
+                      if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) {
+                        return;
+                      }
+                      event.preventDefault();
                       navigateToUrl(ilmPolicyLink);
                     }}
                   >
