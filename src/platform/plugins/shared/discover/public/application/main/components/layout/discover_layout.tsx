@@ -294,6 +294,9 @@ export function DiscoverLayout() {
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
 
+  const skipInitialFetch = useCurrentTabSelector((state) => !!state.skipInitialFetch);
+  const isSidebarHidden = skipInitialFetch && resultState === 'uninitialized';
+
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
@@ -409,6 +412,7 @@ export function DiscoverLayout() {
           />
           <DiscoverResizableLayout
             sidebarToggleState$={sidebarToggleState$}
+            isSidebarHidden={isSidebarHidden}
             sidebarPanel={
               <SidebarMemoized
                 columns={currentColumns}

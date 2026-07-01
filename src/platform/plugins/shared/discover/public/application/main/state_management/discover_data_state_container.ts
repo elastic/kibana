@@ -187,6 +187,9 @@ export function getDataStateContainer({
    */
   const refetch$ = new Subject<DataRefetchMsg>();
   const getInitialFetchStatus = () => {
+    if (getCurrentTab().skipInitialFetch) {
+      return FetchStatus.UNINITIALIZED;
+    }
     const shouldSearchOnPageLoad =
       uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
       internalState.getState().persistedDiscoverSession?.id !== undefined ||
