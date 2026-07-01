@@ -91,7 +91,7 @@ describe('DashboardMigrationResultPanel', () => {
     expect(button).toBeInTheDocument();
     expect(button).toHaveAttribute('aria-label', 'Collapse dashboard migration');
     expect(screen.getByTestId('migrationPanelDescription')).toHaveTextContent(
-      /Export uploaded on December 31st 2022, 7:00:00 pm and translation finished 2 years ago./
+      /Export uploaded on December 31st 2022, 7:00:00 pm and translation finished .* ago\./
     );
   });
 
