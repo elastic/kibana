@@ -18,6 +18,16 @@ paths:
             schema:
               $ref: '#/components/schemas/CancelRouteRequestBody'
             examples:
+              ElasticDefend:
+                summary: Cancel a response action on a Microsoft Defender for Endpoint host
+                value:
+                  endpoint_ids:
+                    - 'ed518850-681a-4d60-bb98-e22640cae2a8'
+                  agent_type: 'endpoint'
+                  parameters:
+                    id: '7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d'
+                    force: true
+                  comment: 'Cancelling action due to change in requirements'
               MicrosoftDefenderEndpoint:
                 summary: Cancel a response action on a Microsoft Defender for Endpoint host
                 value:
@@ -70,12 +80,36 @@ components:
             - parameters
           properties:
             parameters:
-              required:
-                - id
-              type: object
-              properties:
-                id:
-                  type: string
-                  minLength: 1
-                  description: ID of the response action to cancel
-                  example: '7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d'
+              oneOf:
+                - $ref: '#/components/schemas/ElasticDefendCancelParameters'
+                - $ref: '#/components/schemas/MDECancelParameters'
+
+    ElasticDefendCancelParameters:
+      type: object
+      description: Elastic Defend agent type
+      title: ElasticDefendCancelParameters
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          minLength: 1
+          description: ID of the response action to cancel
+          example: '7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d'
+        force:
+          type: boolean
+          description: Forcefully cancel the response action even when it is already running
+          example: true
+
+    MDECancelParameters:
+      type: object
+      title: MDECancelParameters
+      description: Microsoft Defender for Endpoint agent type
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          minLength: 1
+          description: ID of the response action to cancel
+          example: '7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d'
