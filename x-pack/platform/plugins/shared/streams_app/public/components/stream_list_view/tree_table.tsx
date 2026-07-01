@@ -22,6 +22,10 @@ import {
   EuiToolTip,
   EuiFilterGroup,
   EuiFieldSearch,
+  EuiText,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPopover,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
@@ -50,6 +54,9 @@ import {
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { DataQualityColumn } from './data_quality_column';
+import { DestinationActionsIcon } from './destination_actions_icon';
+import { DestinationFlyout } from './destination_flyout';
+import { StreamsListTableTools } from './streams_list_table_tools';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import {
@@ -86,6 +93,10 @@ import {
   DATA_QUALITY_GOOD_LABEL,
   DATA_QUALITY_DEGRADED_LABEL,
   DATA_QUALITY_POOR_LABEL,
+  NEW_DESTINATION_BUTTON_LABEL,
+  INTERNAL_BADGE_LABEL,
+  EXTERNAL_BADGE_LABEL,
+  MANAGED_BADGE_LABEL,
 } from './translations';
 import {
   DeprecatedLogsBadge,
@@ -94,6 +105,125 @@ import {
   QueryStreamBadge,
   TechnicalPreviewBadge,
 } from '../stream_badges';
+import { getDestinationMockMetadata } from './destination_mock_metadata';
+
+const datePickerStyle = css`
+  .euiFormControlLayout,
+  .euiSuperDatePicker button,
+  .euiButton {
+    height: 40px;
+  }
+`;
+
+/**
+ * Prototype tags row shown under the destination name (internal/external,
+ * managed, plus mocked tags). Mirrors the design mockup.
+ */
+const TAG_BADGE_COLORS: Record<string, string> = {
+  tag1: 'accent',
+  tag2: 'neutral',
+};
+
+const DestinationTags = ({ streamName }: { streamName: string }) => {
+  const meta = getDestinationMockMetadata(streamName);
+  return (
+    <EuiFlexGroup
+      gutterSize="xs"
+      responsive={false}
+      wrap
+      alignItems="center"
+      className={css`
+        height: 20px;
+        padding-top: 4px;
+        padding-bottom: 4px;
+      `}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="hollow">
+          {meta.isInternal ? INTERNAL_BADGE_LABEL : EXTERNAL_BADGE_LABEL}
+        </EuiBadge>
+      </EuiFlexItem>
+      {meta.isManaged && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow" iconType="logoElastic">
+            {MANAGED_BADGE_LABEL}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
+      {meta.tags.map((tag) => (
+        <EuiFlexItem grow={false} key={tag}>
+          <EuiBadge color={TAG_BADGE_COLORS[tag] ?? 'default'}>{tag}</EuiBadge>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+};
+
+/**
+ * Row-level actions shown at the end of each destination row, matching the
+ * design mockup: the existing Discover action plus an overflow menu.
+ */
+const RowActions = ({
+  streamName,
+  manageHref,
+  discoverNode,
+}: {
+  streamName: string;
+  manageHref: string;
+  discoverNode: React.ReactNode;
+}) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  return (
+    <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center" justifyContent="flexEnd">
+      <EuiFlexItem grow={false}>{discoverNode}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          isOpen={isMenuOpen}
+          closePopover={() => setIsMenuOpen(false)}
+          anchorPosition="downRight"
+          panelPaddingSize="none"
+          button={
+            <EuiToolTip
+              position="top"
+              content={i18n.translate(
+                'xpack.streams.streamsTreeTable.rowActions.viewOnCanvasTooltip',
+                {
+                  defaultMessage: 'View on Streams Canvas',
+                }
+              )}
+            >
+              <EuiButtonIcon
+                iconType={DestinationActionsIcon}
+                color="primary"
+                onClick={() => setIsMenuOpen((open) => !open)}
+                data-test-subj={`destinationActionsButton-${streamName}`}
+                aria-label={i18n.translate('xpack.streams.streamsTreeTable.rowActionsAriaLabel', {
+                  defaultMessage: 'Actions for {name}',
+                  values: { name: streamName },
+                })}
+              />
+            </EuiToolTip>
+          }
+        >
+          <EuiContextMenuPanel
+            items={[
+              <EuiContextMenuItem
+                key="manage"
+                icon="gear"
+                href={manageHref}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {i18n.translate('xpack.streams.streamsTreeTable.rowActions.manage', {
+                  defaultMessage: 'Manage destination',
+                })}
+              </EuiContextMenuItem>,
+            ]}
+          />
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export function StreamsTreeTable({
   loading,
@@ -115,6 +245,7 @@ export function StreamsTreeTable({
   const { timeState } = useTimefilter();
   const { getStepPropsByStepId } = useStreamsTour();
 
+  const [selectedDestination, setSelectedDestination] = useState<string | undefined>();
   const [searchText, setSearchText] = useState('');
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
@@ -449,7 +580,12 @@ export function StreamsTreeTable({
             </EuiFilterGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <StreamsAppSearchBar showDatePicker />
+            <div className={datePickerStyle}>
+              <StreamsAppSearchBar showDatePicker />
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <StreamsListTableTools newButtonLabel={NEW_DESTINATION_BUTTON_LABEL} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -481,7 +617,6 @@ export function StreamsTreeTable({
                     responsive={false}
                     className={css`
                       margin-left: ${item.level * parseInt(euiTheme.size.xl, 10)}px;
-                      min-width: 0;
                     `}
                   >
                     {treeMode && item.children && hasChildren && (
@@ -531,71 +666,136 @@ export function StreamsTreeTable({
                       </EuiFlexItem>
                     )}
                     <EuiFlexGroup
-                      alignItems="center"
-                      gutterSize="s"
+                      direction="column"
+                      gutterSize="xs"
+                      responsive={false}
                       className={css`
                         min-width: 0;
                       `}
                     >
-                      {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
-                      {isDraftStream(item.stream) && <DraftStreamBadge />}
-                      <EuiLink
-                        data-test-subj={`streamsNameLink-${item.stream.name}`}
-                        href={router.link('/{key}', {
-                          path: { key: item.stream.name },
-                          query: { rangeFrom, rangeTo },
-                        })}
+                      <EuiFlexGroup
+                        alignItems="center"
+                        gutterSize="s"
+                        responsive={false}
+                        wrap={false}
+                        className={css`
+                          min-width: 0;
+                        `}
+                      >
+                        <EuiFlexItem
+                          grow={true}
+                          className={css`
+                            min-width: 0;
+                          `}
+                        >
+                          <EuiToolTip
+                            position="top"
+                            content={item.stream.name}
+                            anchorClassName={css`
+                              min-width: 0;
+                              display: block;
+                            `}
+                          >
+                            <EuiLink
+                              data-test-subj={`streamsNameLink-${item.stream.name}`}
+                              href={router.link('/{key}', {
+                                path: { key: item.stream.name },
+                                query: { rangeFrom, rangeTo },
+                              })}
+                              onClick={(e: React.MouseEvent) => {
+                                e.preventDefault();
+                                setSelectedDestination(item.stream.name);
+                              }}
+                              className={css`
+                                display: block;
+                                min-width: 0;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                                white-space: nowrap;
+                              `}
+                            >
+                              <EuiHighlight
+                                search={searchText}
+                                className={css`
+                                  overflow: hidden;
+                                  text-overflow: ellipsis;
+                                  white-space: nowrap;
+                                  display: block;
+                                `}
+                              >
+                                {item.stream.name}
+                              </EuiHighlight>
+                            </EuiLink>
+                          </EuiToolTip>
+                        </EuiFlexItem>
+                        {(ROOT_STREAM_NAMES.includes(item.stream.name as RootStreamName) ||
+                          Streams.QueryStream.Definition.is(item.stream) ||
+                          (Streams.WiredStream.Definition.is(item.stream) &&
+                            isDraftStream(item.stream))) && (
+                          <EuiFlexItem grow={false}>
+                            <TechnicalPreviewBadge />
+                          </EuiFlexItem>
+                        )}
+                        {Streams.QueryStream.Definition.is(item.stream) && (
+                          <EuiFlexItem grow={false}>
+                            <QueryStreamBadge />
+                          </EuiFlexItem>
+                        )}
+                        {isDraftStream(item.stream) && (
+                          <EuiFlexItem grow={false}>
+                            <DraftStreamBadge />
+                          </EuiFlexItem>
+                        )}
+                        {item.stream.name === LOGS_ROOT_STREAM_NAME &&
+                          !Streams.QueryStream.Definition.is(item.stream) && (
+                            <EuiFlexItem grow={false}>
+                              <DeprecatedLogsBadge
+                                openFlyout={openFlyout}
+                                hasNewStreams={
+                                  getLegacyLogsStatus(wiredStreamsStatus).hasNewStreams
+                                }
+                              />
+                            </EuiFlexItem>
+                          )}
+                        {isRoot(item.stream.name) &&
+                          item.stream.name !== LOGS_ROOT_STREAM_NAME &&
+                          !item.data_stream &&
+                          !Streams.QueryStream.Definition.is(item.stream) && (
+                            <EuiFlexItem grow={false}>
+                              <EuiToolTip
+                                position="right"
+                                content={i18n.translate(
+                                  'xpack.streams.streamsTable.pendingDataStream.tooltip',
+                                  {
+                                    defaultMessage:
+                                      'This stream is configured but has no backing data stream yet. Start sending data and the data stream will be created automatically on first ingest.',
+                                  }
+                                )}
+                              >
+                                <EuiBadge color="default">
+                                  {i18n.translate(
+                                    'xpack.streams.streamsTable.pendingDataStream.label',
+                                    {
+                                      defaultMessage: 'Pending',
+                                    }
+                                  )}
+                                </EuiBadge>
+                              </EuiToolTip>
+                            </EuiFlexItem>
+                          )}
+                      </EuiFlexGroup>
+                      <EuiText
+                        size="xs"
+                        color="subdued"
                         className={css`
                           overflow: hidden;
                           text-overflow: ellipsis;
                           white-space: nowrap;
-                          min-width: 0;
                         `}
-                        onClick={(e: React.MouseEvent) => {
-                          e.preventDefault();
-                          router.push('/{key}', {
-                            path: { key: item.stream.name },
-                            query: { rangeFrom, rangeTo },
-                          });
-                        }}
                       >
-                        <EuiHighlight search={searchText}>{item.stream.name}</EuiHighlight>
-                      </EuiLink>
-                      {(ROOT_STREAM_NAMES.includes(item.stream.name as RootStreamName) ||
-                        Streams.QueryStream.Definition.is(item.stream) ||
-                        (Streams.WiredStream.Definition.is(item.stream) &&
-                          isDraftStream(item.stream))) && <TechnicalPreviewBadge />}
-                      {item.stream.name === LOGS_ROOT_STREAM_NAME &&
-                        !Streams.QueryStream.Definition.is(item.stream) && (
-                          <DeprecatedLogsBadge
-                            openFlyout={openFlyout}
-                            hasNewStreams={getLegacyLogsStatus(wiredStreamsStatus).hasNewStreams}
-                          />
-                        )}
-                      {isRoot(item.stream.name) &&
-                        item.stream.name !== LOGS_ROOT_STREAM_NAME &&
-                        !item.data_stream &&
-                        !Streams.QueryStream.Definition.is(item.stream) && (
-                          <EuiToolTip
-                            position="right"
-                            content={i18n.translate(
-                              'xpack.streams.streamsTable.pendingDataStream.tooltip',
-                              {
-                                defaultMessage:
-                                  'This stream is configured but has no backing data stream yet. Start sending data and the data stream will be created automatically on first ingest.',
-                              }
-                            )}
-                          >
-                            <EuiBadge color="default">
-                              {i18n.translate(
-                                'xpack.streams.streamsTable.pendingDataStream.label',
-                                {
-                                  defaultMessage: 'Pending',
-                                }
-                              )}
-                            </EuiBadge>
-                          </EuiToolTip>
-                        )}
+                        {getDestinationMockMetadata(item.stream.name).description}
+                      </EuiText>
+                      <DestinationTags streamName={item.stream.name} />
                     </EuiFlexGroup>
                   </EuiFlexGroup>
                 );
@@ -748,22 +948,31 @@ export function StreamsTreeTable({
             },
             {
               field: 'definition',
-              name: 'Actions',
-              width: '60px',
-              align: 'left',
+              name: '',
+              width: '80px',
+              align: 'right',
               sortable: false,
               dataType: 'string',
               render: (_: unknown, item: TableRow) => {
                 const hasDataStream =
                   !!item.data_stream || Streams.QueryStream.Definition.is(item.stream);
-                if (Streams.QueryStream.Definition.is(item.stream)) {
-                  return <DiscoverBadgeButton hasDataStream={hasDataStream} stream={item.stream} />;
-                }
-                return (
+                const discoverNode = Streams.QueryStream.Definition.is(item.stream) ? (
+                  <DiscoverBadgeButton hasDataStream={hasDataStream} stream={item.stream} />
+                ) : (
                   <DiscoverBadgeButton
                     hasDataStream={hasDataStream}
                     indexMode={item.data_stream?.index_mode ?? 'standard'}
                     stream={item.stream}
+                  />
+                );
+                return (
+                  <RowActions
+                    streamName={item.stream.name}
+                    manageHref={router.link('/{key}', {
+                      path: { key: item.stream.name },
+                      query: { rangeFrom, rangeTo },
+                    })}
+                    discoverNode={discoverNode}
                   />
                 );
               },
@@ -783,6 +992,12 @@ export function StreamsTreeTable({
           tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
         />
       </EuiFlexItem>
+      {selectedDestination && (
+        <DestinationFlyout
+          destinationName={selectedDestination}
+          onClose={() => setSelectedDestination(undefined)}
+        />
+      )}
     </EuiFlexGroup>
   );
 }

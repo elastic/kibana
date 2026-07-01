@@ -80,7 +80,7 @@ export function RetentionColumn({
             whiteSpace: 'nowrap' as const,
             textOverflow: 'ellipsis',
             overflow: 'hidden',
-            maxWidth: '150px',
+            maxWidth: '80px',
           }}
           data-test-subj={dataTestSubj}
         >

@@ -8,7 +8,7 @@
 import React from 'react';
 import type { EuiPageSectionProps } from '@elastic/eui';
 import { EuiPageTemplate } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 
 export function StreamsAppPageTemplate({ children }: { children: React.ReactNode }) {
   return (
@@ -29,6 +29,7 @@ StreamsAppPageTemplate.Header = EuiPageTemplate.Header;
 StreamsAppPageTemplate.EmptyPrompt = EuiPageTemplate.EmptyPrompt;
 StreamsAppPageTemplate.Body = ({
   noPadding,
+  contentProps,
   ...props
 }: EuiPageSectionProps & { noPadding?: boolean }) => (
   <EuiPageTemplate.Section
@@ -37,14 +38,18 @@ StreamsAppPageTemplate.Body = ({
       overflow-y: auto;
       ${noPadding ? 'padding: 0px;' : ''}
     `}
-    contentProps={{
-      className: css`
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        ${noPadding ? 'padding: 0px;' : ''}
-      `,
-    }}
     {...props}
+    contentProps={{
+      ...contentProps,
+      className: cx(
+        css`
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          ${noPadding ? 'padding: 0px;' : ''}
+        `,
+        contentProps?.className
+      ),
+    }}
   />
 );

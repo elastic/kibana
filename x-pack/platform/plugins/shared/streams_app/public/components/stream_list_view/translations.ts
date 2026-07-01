@@ -98,6 +98,40 @@ export const INGESTION_COLUMN_HEADER = i18n.translate(
   { defaultMessage: 'Ingestion' }
 );
 
+export const STORAGE_SIZE_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.streamsTreeTable.storageSizeColumnName',
+  { defaultMessage: 'Storage size' }
+);
+
+export const NEW_DESTINATION_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.newDestinationButtonLabel',
+  { defaultMessage: 'New destination' }
+);
+
+export const YAML_BUTTON_LABEL = i18n.translate('xpack.streams.streamsTreeTable.yamlButtonLabel', {
+  defaultMessage: 'YAML',
+});
+
+export const FILTERS_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.filtersButtonLabel',
+  { defaultMessage: 'Filters' }
+);
+
+export const INTERNAL_BADGE_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.internalBadgeLabel',
+  { defaultMessage: 'internal' }
+);
+
+export const EXTERNAL_BADGE_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.externalBadgeLabel',
+  { defaultMessage: 'external' }
+);
+
+export const MANAGED_BADGE_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.managedBadgeLabel',
+  { defaultMessage: 'managed' }
+);
+
 export const STORAGE_COLUMN_HEADER = i18n.translate(
   'xpack.streams.streamsTreeTable.storageColumnName',
   { defaultMessage: 'Storage' }
