@@ -30,6 +30,55 @@ interface WorkflowChangeCounts {
   updated: number;
 }
 
+interface WorkflowDefinitionDiffCounts {
+  step: WorkflowChangeCounts;
+  trigger: WorkflowChangeCounts;
+  setting: WorkflowChangeCounts;
+}
+
+const emptyWorkflowChangeCounts = (): WorkflowChangeCounts => ({
+  added: 0,
+  removed: 0,
+  updated: 0,
+});
+
+const emptyWorkflowDefinitionDiffCounts = (): WorkflowDefinitionDiffCounts => ({
+  step: emptyWorkflowChangeCounts(),
+  trigger: emptyWorkflowChangeCounts(),
+  setting: emptyWorkflowChangeCounts(),
+});
+
+const incrementDiffCount = (
+  counts: WorkflowDefinitionDiffCounts,
+  change: WorkflowDefinitionChangeForSummary
+): WorkflowDefinitionDiffCounts => {
+  switch (change.kind) {
+    case 'step_added':
+      counts.step.added += 1;
+      break;
+    case 'step_removed':
+      counts.step.removed += 1;
+      break;
+    case 'step_modified':
+      counts.step.updated += 1;
+      break;
+    case 'trigger_added':
+      counts.trigger.added += 1;
+      break;
+    case 'trigger_removed':
+      counts.trigger.removed += 1;
+      break;
+    case 'trigger_modified':
+      counts.trigger.updated += 1;
+      break;
+    case 'setting_changed':
+      counts.setting.updated += 1;
+      break;
+  }
+
+  return counts;
+};
+
 const buildCountLines = ({ added, removed, updated }: WorkflowChangeCounts): string[] => {
   const lines: string[] = [];
 
@@ -64,29 +113,11 @@ const buildSummaryGroup = (
 export const summarizeWorkflowDefinitionDiff = (
   changes: WorkflowDefinitionChangeForSummary[]
 ): WorkflowChangeSummaryGroup[] => {
-  const stepAdded = changes.filter((change) => change.kind === 'step_added').length;
-  const stepRemoved = changes.filter((change) => change.kind === 'step_removed').length;
-  const stepModified = changes.filter((change) => change.kind === 'step_modified').length;
-  const triggerAdded = changes.filter((change) => change.kind === 'trigger_added').length;
-  const triggerRemoved = changes.filter((change) => change.kind === 'trigger_removed').length;
-  const triggerModified = changes.filter((change) => change.kind === 'trigger_modified').length;
-  const settingsUpdated = changes.filter((change) => change.kind === 'setting_changed').length;
+  const counts = changes.reduce(incrementDiffCount, emptyWorkflowDefinitionDiffCounts());
 
   return [
-    buildSummaryGroup(i18n.CHANGES_SUMMARY_STEPS, {
-      added: stepAdded,
-      removed: stepRemoved,
-      updated: stepModified,
-    }),
-    buildSummaryGroup(i18n.CHANGES_SUMMARY_TRIGGERS, {
-      added: triggerAdded,
-      removed: triggerRemoved,
-      updated: triggerModified,
-    }),
-    buildSummaryGroup(i18n.CHANGES_SUMMARY_SETTINGS, {
-      added: 0,
-      removed: 0,
-      updated: settingsUpdated,
-    }),
+    buildSummaryGroup(i18n.CHANGES_SUMMARY_STEPS, counts.step),
+    buildSummaryGroup(i18n.CHANGES_SUMMARY_TRIGGERS, counts.trigger),
+    buildSummaryGroup(i18n.CHANGES_SUMMARY_SETTINGS, counts.setting),
   ].filter((group): group is WorkflowChangeSummaryGroup => group != null);
 };

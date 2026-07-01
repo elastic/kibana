@@ -13,12 +13,6 @@ export const BACK_TO_WORKFLOW = i18n.translate('workflows.changeHistory.backToWo
   defaultMessage: 'Back to workflow',
 });
 
-export const CURRENT_VERSION_BADGE = (version: number): string =>
-  i18n.translate('workflows.changeHistory.currentVersionBadge', {
-    defaultMessage: 'Current version • v{version}',
-    values: { version },
-  });
-
 export const CURRENT_VERSION_ONLY_BADGE = i18n.translate(
   'workflows.changeHistory.currentVersionOnlyBadge',
   {
@@ -77,18 +71,18 @@ export const CHANGES_SUMMARY_SETTINGS = i18n.translate(
 
 export const CHANGES_ADDED = (count: number): string =>
   i18n.translate('workflows.changeHistory.changesSummary.added', {
-    defaultMessage: '{count, plural, one {# added} other {# added}}',
+    defaultMessage: '{count} added',
     values: { count },
   });
 
 export const CHANGES_REMOVED = (count: number): string =>
   i18n.translate('workflows.changeHistory.changesSummary.removed', {
-    defaultMessage: '{count, plural, one {# removed} other {# removed}}',
+    defaultMessage: '{count} removed',
     values: { count },
   });
 
 export const CHANGES_UPDATED = (count: number): string =>
   i18n.translate('workflows.changeHistory.changesSummary.updated', {
-    defaultMessage: '{count, plural, one {# updated} other {# updated}}',
+    defaultMessage: '{count} updated',
     values: { count },
   });

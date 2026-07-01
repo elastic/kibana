@@ -7,12 +7,6 @@
 
 import type { ChangeHistoryListItem } from '../types/change_history_list_item';
 
-/** Resolves the current-version row from a loaded history page (newest first). */
-export const findCurrentChangeId = (items: ChangeHistoryListItem[]): string | undefined => {
-  const currentItem = items.find((item) => item.isCurrent);
-  return currentItem?.id ?? items[0]?.id;
-};
-
 /** Resolves baseline (older) and target (newer) for two versions in a newest-first list. */
 export const resolveChronologicalComparePair = (
   items: ChangeHistoryListItem[],

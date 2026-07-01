@@ -6,7 +6,6 @@
  */
 
 import '@testing-library/jest-dom';
-import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ChangeHistoryProvider } from '../../provider/change_history_provider';
@@ -20,7 +19,7 @@ import {
   TEST_CHANGE_HISTORY_SCOPE,
   TEST_SNAPSHOT_OLD,
 } from '../../test_utils/change_history_test_fixtures';
-import { createQueryClientWrapper } from '../../test_utils/create_query_client_wrapper';
+import { TestProvider } from '../../test_utils/test_providers';
 import { ChangeHistoryTelemetryEventTypes } from '../../telemetry/types';
 
 const testScope = TEST_CHANGE_HISTORY_SCOPE;
@@ -62,25 +61,20 @@ const renderButton = ({
     restoreChange,
   };
 
-  const { wrapper: QueryClientWrapper } = createQueryClientWrapper();
-
   return render(
-    <I18nProvider>
-      <QueryClientWrapper>
-        <ChangeHistoryProvider
-          objectId={TEST_OBJECT_ID}
-          adapter={adapter}
-          labels={{ previewTitle: TEST_OBJECT_TITLE }}
-          features={features}
-          permissions={permissions}
-          renderPreview={() => null}
-          scope={testScope}
-          analytics={reportEvent ? { reportEvent } : undefined}
-        >
-          <ChangeHistoryRestoreButton change={change} currentChange={currentChange} />
-        </ChangeHistoryProvider>
-      </QueryClientWrapper>
-    </I18nProvider>
+    <ChangeHistoryProvider
+      objectId={TEST_OBJECT_ID}
+      adapter={adapter}
+      labels={{ previewTitle: TEST_OBJECT_TITLE }}
+      features={features}
+      permissions={permissions}
+      renderPreview={() => null}
+      scope={testScope}
+      analytics={reportEvent ? { reportEvent } : undefined}
+    >
+      <ChangeHistoryRestoreButton change={change} currentChange={currentChange} />
+    </ChangeHistoryProvider>,
+    { wrapper: TestProvider }
   );
 };
 

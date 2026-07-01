@@ -6,7 +6,6 @@
  */
 
 import '@testing-library/jest-dom';
-import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ChangeHistoryProvider } from '../../provider/change_history_provider';
@@ -21,7 +20,7 @@ import {
   TEST_SNAPSHOT,
   TEST_SNAPSHOT_OLDER,
 } from '../../test_utils/change_history_test_fixtures';
-import { createQueryClientWrapper } from '../../test_utils/create_query_client_wrapper';
+import { TestProvider } from '../../test_utils/test_providers';
 import { ChangeHistoryTelemetryEventTypes } from '../../telemetry/types';
 
 const testScope = TEST_CHANGE_HISTORY_SCOPE;
@@ -53,29 +52,23 @@ const renderModal = ({
   ...providerProps
 }: {
   adapter?: ChangeHistoryAdapter;
-} & Partial<React.ComponentProps<typeof ChangeHistoryProvider>> = {}) => {
-  const { wrapper: QueryClientWrapper } = createQueryClientWrapper();
-
-  return render(
-    <I18nProvider>
-      <QueryClientWrapper>
-        <ChangeHistoryProvider
-          objectId={TEST_OBJECT_ID}
-          adapter={adapter}
-          labels={{ previewTitle: TEST_OBJECT_TITLE }}
-          scope={testScope}
-          renderPreview={({ change }) => (
-            <pre data-test-subj="previewSnapshot">{JSON.stringify(change.snapshot)}</pre>
-          )}
-          {...providerProps}
-        >
-          <ChangeHistoryTrigger />
-          <ChangeHistoryModal />
-        </ChangeHistoryProvider>
-      </QueryClientWrapper>
-    </I18nProvider>
+} & Partial<React.ComponentProps<typeof ChangeHistoryProvider>> = {}) =>
+  render(
+    <ChangeHistoryProvider
+      objectId={TEST_OBJECT_ID}
+      adapter={adapter}
+      labels={{ previewTitle: TEST_OBJECT_TITLE }}
+      scope={testScope}
+      renderPreview={({ change }) => (
+        <pre data-test-subj="previewSnapshot">{JSON.stringify(change.snapshot)}</pre>
+      )}
+      {...providerProps}
+    >
+      <ChangeHistoryTrigger />
+      <ChangeHistoryModal />
+    </ChangeHistoryProvider>,
+    { wrapper: TestProvider }
   );
-};
 
 const openModal = () => {
   fireEvent.click(screen.getByTestId('changeHistoryTrigger'));

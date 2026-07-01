@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowYaml } from '@kbn/workflows';
+import { stableStringify } from '@kbn/std';
+import { WorkflowSchemaForAutocomplete } from '@kbn/workflows';
 import { parseWorkflowYamlForAutocomplete } from '@kbn/workflows-yaml';
+import type { z } from '@kbn/zod/v4';
 import { countWorkflowYamlLineChanges } from './count_workflow_yaml_line_changes';
 import { summarizeWorkflowDefinitionDiff } from './summarize_workflow_definition_diff';
 import type { WorkflowChangeSummaryGroup } from './workflow_change_history_item_changes_summary';
@@ -30,13 +32,8 @@ interface WorkflowDefinitionChange {
   label: string;
 }
 
-type WorkflowStep = WorkflowYaml['steps'][number];
-
-interface FlattenedStep {
-  path: string;
-  name: string;
-  step: WorkflowStep;
-}
+type ParsedWorkflowYaml = z.output<typeof WorkflowSchemaForAutocomplete>;
+type ParsedWorkflowStep = ParsedWorkflowYaml['steps'][number];
 
 const WORKFLOW_SETTING_FIELDS = [
   'name',
@@ -46,11 +43,45 @@ const WORKFLOW_SETTING_FIELDS = [
   'settings',
   'outputs',
   'consts',
-] as const satisfies ReadonlyArray<keyof WorkflowYaml>;
+] as const satisfies ReadonlyArray<keyof ParsedWorkflowYaml>;
 
-const stableSerialize = (value: unknown): string => JSON.stringify(value);
+interface FlattenedStep {
+  path: string;
+  name: string;
+  step: ParsedWorkflowStep;
+}
 
-const flattenSteps = (steps: WorkflowStep[] | undefined, parentPath = ''): FlattenedStep[] => {
+const parseWorkflowYamlForSemanticDiff = (yamlString: string): ParsedWorkflowYaml | undefined => {
+  const parseResult = parseWorkflowYamlForAutocomplete(yamlString);
+  if (!parseResult.success) {
+    return undefined;
+  }
+
+  const schemaResult = WorkflowSchemaForAutocomplete.safeParse(parseResult.data);
+  return schemaResult.success ? schemaResult.data : undefined;
+};
+
+const isValidStepName = (name: unknown): name is string =>
+  typeof name === 'string' && name.trim().length > 0;
+
+const isWorkflowStepArray = (value: unknown): value is ParsedWorkflowStep[] => {
+  if (!Array.isArray(value)) {
+    return false;
+  }
+
+  return value.every((entry) => typeof entry === 'object' && entry !== null);
+};
+
+const getBranchSteps = (branch: unknown): ParsedWorkflowStep[] | undefined => {
+  if (typeof branch !== 'object' || branch === null) {
+    return undefined;
+  }
+
+  const { steps } = branch as { steps?: unknown };
+  return isWorkflowStepArray(steps) ? steps : undefined;
+};
+
+const flattenSteps = (steps: ParsedWorkflowYaml['steps'], parentPath = ''): FlattenedStep[] => {
   if (!steps) {
     return [];
   }
@@ -58,19 +89,22 @@ const flattenSteps = (steps: WorkflowStep[] | undefined, parentPath = ''): Flatt
   const flattened: FlattenedStep[] = [];
 
   for (const step of steps) {
-    const path = parentPath ? `${parentPath}.${step.name}` : step.name;
-    flattened.push({ path, name: step.name, step });
+    if (isValidStepName(step.name)) {
+      const path = parentPath ? `${parentPath}.${step.name}` : step.name;
+      flattened.push({ path, name: step.name, step });
 
-    if ('steps' in step && Array.isArray(step.steps)) {
-      flattened.push(...flattenSteps(step.steps as WorkflowStep[], path));
-    }
+      if ('steps' in step && isWorkflowStepArray(step.steps)) {
+        flattened.push(...flattenSteps(step.steps, path));
+      }
 
-    if ('branches' in step && Array.isArray(step.branches)) {
-      step.branches.forEach((branch, branchIndex) => {
-        flattened.push(
-          ...flattenSteps(branch.steps as WorkflowStep[], `${path}.branch[${branchIndex}]`)
-        );
-      });
+      if ('branches' in step && Array.isArray(step.branches)) {
+        step.branches.forEach((branch, branchIndex) => {
+          const branchSteps = getBranchSteps(branch);
+          if (branchSteps) {
+            flattened.push(...flattenSteps(branchSteps, `${path}.branch[${branchIndex}]`));
+          }
+        });
+      }
     }
   }
 
@@ -78,8 +112,8 @@ const flattenSteps = (steps: WorkflowStep[] | undefined, parentPath = ''): Flatt
 };
 
 const compareWorkflowSettings = (
-  baseline: WorkflowYaml,
-  target: WorkflowYaml
+  baseline: ParsedWorkflowYaml,
+  target: ParsedWorkflowYaml
 ): WorkflowDefinitionChange[] => {
   const changes: WorkflowDefinitionChange[] = [];
 
@@ -87,7 +121,7 @@ const compareWorkflowSettings = (
     const baselineValue = baseline[field];
     const targetValue = target[field];
 
-    if (stableSerialize(baselineValue) !== stableSerialize(targetValue)) {
+    if (stableStringify(baselineValue) !== stableStringify(targetValue)) {
       changes.push({
         kind: 'setting_changed',
         label: field,
@@ -99,8 +133,8 @@ const compareWorkflowSettings = (
 };
 
 const compareTriggers = (
-  baseline: WorkflowYaml['triggers'],
-  target: WorkflowYaml['triggers']
+  baseline: ParsedWorkflowYaml['triggers'],
+  target: ParsedWorkflowYaml['triggers']
 ): WorkflowDefinitionChange[] => {
   const changes: WorkflowDefinitionChange[] = [];
   const maxLength = Math.max(baseline.length, target.length);
@@ -122,7 +156,7 @@ const compareTriggers = (
     } else if (
       baselineTrigger &&
       targetTrigger &&
-      stableSerialize(baselineTrigger) !== stableSerialize(targetTrigger)
+      stableStringify(baselineTrigger) !== stableStringify(targetTrigger)
     ) {
       changes.push({
         kind: 'trigger_modified',
@@ -135,8 +169,8 @@ const compareTriggers = (
 };
 
 const compareSteps = (
-  baseline: WorkflowYaml['steps'],
-  target: WorkflowYaml['steps']
+  baseline: ParsedWorkflowYaml['steps'],
+  target: ParsedWorkflowYaml['steps']
 ): WorkflowDefinitionChange[] => {
   const changes: WorkflowDefinitionChange[] = [];
   const baselineSteps = new Map(flattenSteps(baseline).map((entry) => [entry.path, entry]));
@@ -150,7 +184,7 @@ const compareSteps = (
         kind: 'step_removed',
         label: baselineEntry.name,
       });
-    } else if (stableSerialize(baselineEntry.step) !== stableSerialize(targetEntry.step)) {
+    } else if (stableStringify(baselineEntry.step) !== stableStringify(targetEntry.step)) {
       changes.push({
         kind: 'step_modified',
         label: targetEntry.name,
@@ -174,34 +208,17 @@ const computeSemanticWorkflowYamlChanges = (
   baselineYaml: string,
   targetYaml: string
 ): WorkflowYamlChanges | undefined => {
-  const baselineParse = parseWorkflowYamlForAutocomplete(baselineYaml);
-  const targetParse = parseWorkflowYamlForAutocomplete(targetYaml);
+  const baseline = parseWorkflowYamlForSemanticDiff(baselineYaml);
+  const target = parseWorkflowYamlForSemanticDiff(targetYaml);
 
-  if (!baselineParse.success || !targetParse.success) {
-    return undefined;
-  }
-
-  const baseline = baselineParse.data as WorkflowYaml;
-  const target = targetParse.data as WorkflowYaml;
-
-  const hasSemanticShape =
-    Array.isArray(baseline.steps) &&
-    baseline.steps.length > 0 &&
-    Array.isArray(target.steps) &&
-    target.steps.length > 0 &&
-    Array.isArray(baseline.triggers) &&
-    baseline.triggers.length > 0 &&
-    Array.isArray(target.triggers) &&
-    target.triggers.length > 0;
-
-  if (!hasSemanticShape) {
+  if (!baseline || !target) {
     return undefined;
   }
 
   const definitionChanges: WorkflowDefinitionChange[] = [
     ...compareWorkflowSettings(baseline, target),
-    ...compareTriggers(baseline.triggers ?? [], target.triggers ?? []),
-    ...compareSteps(baseline.steps ?? [], target.steps ?? []),
+    ...compareTriggers(baseline.triggers, target.triggers),
+    ...compareSteps(baseline.steps, target.steps),
   ];
 
   if (definitionChanges.length === 0) {

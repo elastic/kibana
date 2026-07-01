@@ -9,38 +9,36 @@
 
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
 import { renderWorkflowChangeHistoryChangesSummary } from './workflow_change_history_changes_summary';
+import { TestProvider } from '../../shared/mocks/test_providers';
 
 describe('renderWorkflowChangeHistoryChangesSummary', () => {
   it('renders workflow summary groups', () => {
     render(
-      <I18nProvider>
-        {renderWorkflowChangeHistoryChangesSummary({
-          item: {
-            id: 'evt-1',
-            timestamp: '2026-06-16T12:00:00.000Z',
-            actor: { name: 'Alice' },
-            action: 'Updated',
-          },
-          changes: {
-            count: 4,
-            summary: [
-              {
-                title: 'Steps:',
-                lines: ['1 added', '2 removed'],
-              },
-            ],
-          },
+      renderWorkflowChangeHistoryChangesSummary({
+        item: {
+          id: 'evt-1',
+          timestamp: '2026-06-16T12:00:00.000Z',
+          actor: { name: 'Alice' },
+          action: 'Updated',
+        },
+        changes: {
+          count: 4,
           summary: [
             {
               title: 'Steps:',
               lines: ['1 added', '2 removed'],
             },
           ],
-        })}
-      </I18nProvider>
+        },
+        summary: [
+          {
+            title: 'Steps:',
+            lines: ['1 added', '2 removed'],
+          },
+        ],
+      }),
+      { wrapper: TestProvider }
     );
 
     expect(screen.getByTestId('workflowChangeHistoryItemChangesSummary')).toBeInTheDocument();

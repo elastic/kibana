@@ -10,30 +10,29 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
 import { WorkflowChangeHistoryItemChangesSummary } from './workflow_change_history_item_changes_summary';
+import { TestProvider } from '../../shared/mocks/test_providers';
 
 describe('WorkflowChangeHistoryItemChangesSummary', () => {
   it('renders grouped counts per entity', () => {
     render(
-      <I18nProvider>
-        <WorkflowChangeHistoryItemChangesSummary
-          groups={[
-            {
-              title: 'Steps:',
-              lines: ['1 added', '2 removed', '3 updated'],
-            },
-            {
-              title: 'Triggers:',
-              lines: ['3 added', '2 removed', '1 updated'],
-            },
-            {
-              title: 'Settings:',
-              lines: ['1 updated'],
-            },
-          ]}
-        />
-      </I18nProvider>
+      <WorkflowChangeHistoryItemChangesSummary
+        groups={[
+          {
+            title: 'Steps:',
+            lines: ['1 added', '2 removed', '3 updated'],
+          },
+          {
+            title: 'Triggers:',
+            lines: ['3 added', '2 removed', '1 updated'],
+          },
+          {
+            title: 'Settings:',
+            lines: ['1 updated'],
+          },
+        ]}
+      />,
+      { wrapper: TestProvider }
     );
 
     expect(screen.getByTestId('workflowChangeHistoryItemChangesSummary')).toBeInTheDocument();

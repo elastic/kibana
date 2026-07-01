@@ -6,10 +6,9 @@
  */
 
 import '@testing-library/jest-dom';
-import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import React from 'react';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
+import { TestProvider } from '../../test_utils/test_providers';
 import { renderDefaultChangeHistoryRowActions } from './change_history_row_actions';
 
 const historicalItem: ChangeHistoryListItem = {
@@ -26,13 +25,12 @@ describe('renderDefaultChangeHistoryRowActions', () => {
     const requestRestoreVersion = jest.fn();
 
     render(
-      <I18nProvider>
-        {renderDefaultChangeHistoryRowActions({
-          item: historicalItem,
-          requestCompareToVersion,
-          requestRestoreVersion,
-        })}
-      </I18nProvider>
+      renderDefaultChangeHistoryRowActions({
+        item: historicalItem,
+        requestCompareToVersion,
+        requestRestoreVersion,
+      }),
+      { wrapper: TestProvider }
     );
 
     fireEvent.click(screen.getByTestId('changeHistoryRowActionsButton'));
@@ -46,12 +44,11 @@ describe('renderDefaultChangeHistoryRowActions', () => {
 
   it('omits restore when restore callback is not provided', () => {
     render(
-      <I18nProvider>
-        {renderDefaultChangeHistoryRowActions({
-          item: historicalItem,
-          requestCompareToVersion: jest.fn(),
-        })}
-      </I18nProvider>
+      renderDefaultChangeHistoryRowActions({
+        item: historicalItem,
+        requestCompareToVersion: jest.fn(),
+      }),
+      { wrapper: TestProvider }
     );
 
     fireEvent.click(screen.getByTestId('changeHistoryRowActionsButton'));
@@ -64,12 +61,11 @@ describe('renderDefaultChangeHistoryRowActions', () => {
     const requestRestoreVersion = jest.fn();
 
     render(
-      <I18nProvider>
-        {renderDefaultChangeHistoryRowActions({
-          item: historicalItem,
-          requestRestoreVersion,
-        })}
-      </I18nProvider>
+      renderDefaultChangeHistoryRowActions({
+        item: historicalItem,
+        requestRestoreVersion,
+      }),
+      { wrapper: TestProvider }
     );
 
     fireEvent.click(screen.getByTestId('changeHistoryRowActionsButton'));

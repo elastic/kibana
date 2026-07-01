@@ -6,7 +6,6 @@
  */
 
 import '@testing-library/jest-dom';
-import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
@@ -14,6 +13,7 @@ import { useChangeHistoryConfig } from '../../provider/use_change_history_config
 import { ChangeHistoryModalSelectionContext } from '../../provider/change_history_modal_selection_context';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
 import type { ChangeHistoryChangesSummaryRenderFn } from '../../types/change_history_changes_summary';
+import { TestProvider } from '../../test_utils/test_providers';
 import { ChangeHistoryItem } from './change_history_item';
 
 jest.mock('../../provider/use_change_history_config', () => ({
@@ -47,22 +47,21 @@ const renderItem = (
   }
 ) =>
   render(
-    <I18nProvider>
-      <ChangeHistoryModalSelectionContext.Provider
-        value={
-          options?.modalSelection ?? {
-            requestCompareToVersion: jest.fn(),
-            requestRestoreVersion: jest.fn(),
-          }
+    <ChangeHistoryModalSelectionContext.Provider
+      value={
+        options?.modalSelection ?? {
+          requestCompareToVersion: jest.fn(),
+          requestRestoreVersion: jest.fn(),
         }
-      >
-        <ChangeHistoryItem
-          item={{ ...baseItem, ...overrides }}
-          selected={options?.selected ?? false}
-          onClick={options?.onClick ?? jest.fn()}
-        />
-      </ChangeHistoryModalSelectionContext.Provider>
-    </I18nProvider>
+      }
+    >
+      <ChangeHistoryItem
+        item={{ ...baseItem, ...overrides }}
+        selected={options?.selected ?? false}
+        onClick={options?.onClick ?? jest.fn()}
+      />
+    </ChangeHistoryModalSelectionContext.Provider>,
+    { wrapper: TestProvider }
   );
 
 describe('ChangeHistoryItem', () => {

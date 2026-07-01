@@ -20,6 +20,7 @@ import {
   TEST_SNAPSHOT,
   TEST_SNAPSHOT_OLD,
 } from '../../test_utils/change_history_test_fixtures';
+import { TestProvider } from '../../test_utils/test_providers';
 
 jest.mock('../../provider/use_change_history_config', () => ({
   useChangeHistoryConfig: jest.fn(),
@@ -108,7 +109,9 @@ describe('ChangeHistoryPreviewPanel', () => {
       isLoadingCompareContext: false,
     });
 
-    render(<ChangeHistoryPreviewPanel selectedChangeId="evt-current" listItems={listItems} />);
+    render(<ChangeHistoryPreviewPanel selectedChangeId="evt-current" listItems={listItems} />, {
+      wrapper: TestProvider,
+    });
 
     expect(screen.getByTestId('changeHistoryPreviewFrame')).toBeInTheDocument();
     expect(screen.getByTestId('previewRender')).toHaveTextContent('with-compare');
@@ -133,7 +136,9 @@ describe('ChangeHistoryPreviewPanel', () => {
       isLoadingCompareContext: false,
     });
 
-    render(<ChangeHistoryPreviewPanel selectedChangeId="evt-previous" listItems={listItems} />);
+    render(<ChangeHistoryPreviewPanel selectedChangeId="evt-previous" listItems={listItems} />, {
+      wrapper: TestProvider,
+    });
 
     expect(screen.getByTestId('previewRender')).toHaveTextContent('with-compare');
     expect(mockUseChangeHistoryConfig().renderPreview).toHaveBeenCalledWith(
@@ -161,7 +166,8 @@ describe('ChangeHistoryPreviewPanel', () => {
         selectedChangeId="evt-previous"
         listItems={listItems}
         compareOverride={{ type: 'vs_row', rowChangeId: 'evt-current' }}
-      />
+      />,
+      { wrapper: TestProvider }
     );
 
     expect(mockUseChangeHistoryCompare).toHaveBeenCalledWith(
