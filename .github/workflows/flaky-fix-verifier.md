@@ -196,12 +196,10 @@ Only fetch data live when it is not in these files. In particular, the linked `f
 
 ## Modes
 
-You run in one of two modes depending on the trigger.
+You run in one of two modes, selected from the triggering event:
 
-- `kickoff`: the trigger is `pull_request_target` (a `flaky-test-fixer` PR was opened or labeled) or a manual `workflow_dispatch`. Resolve configs and trigger the first flaky test runner run.
-- `process_results`: the trigger is an `issue_comment` whose body contains `## Flaky Test Runner Stats`. Read the results, attribute them, and decide whether to finish or iterate.
-
-Determine the mode from the triggering event. For a manual dispatch, if the PR already has the `flaky-fix-check:started` label and flaky test runner result comments, behave as `process_results`; otherwise behave as `kickoff`.
+- `kickoff`: the trigger is `pull_request_target` (a `flaky-test-fixer` PR was opened or labeled), or a manual `workflow_dispatch` on a PR that does **not** yet have both the `flaky-fix-check:started` label and flaky test runner result comments. Resolve configs and trigger the first flaky test runner run.
+- `process_results`: the trigger is an `issue_comment` whose body contains `## Flaky Test Runner Stats`, or a manual `workflow_dispatch` on a PR that **already** has the `flaky-fix-check:started` label and flaky test runner result comments. Read the results, attribute them, and decide whether to finish or iterate.
 
 ## Number of runs
 
