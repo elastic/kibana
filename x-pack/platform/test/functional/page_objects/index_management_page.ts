@@ -69,6 +69,17 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
       await find.clickByLinkText(name);
     },
 
+    async searchAndClickDataStreamNameLink(name: string): Promise<void> {
+      await retry.try(async () => {
+        await testSubjects.setValue('dataStreamSearch', name);
+        if (!(await find.existsByLinkText(name))) {
+          await testSubjects.click('reloadButton');
+          throw new Error(`Data stream "${name}" is not visible yet`);
+        }
+      });
+      await find.clickByLinkText(name);
+    },
+
     async clickDeleteEnrichPolicyAt(indexOfRow: number): Promise<void> {
       const deleteButons = await testSubjects.findAll('deletePolicyButton');
       await deleteButons[indexOfRow].click();
