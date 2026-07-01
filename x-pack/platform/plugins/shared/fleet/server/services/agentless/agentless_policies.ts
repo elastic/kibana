@@ -460,7 +460,11 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       // "empty" value so omission actually clears it (mirrors the connector fields below).
       const cloudConnectorEnabled = Boolean(data.cloud_connector?.enabled);
       const newPolicy = {
-        ...omit(data, 'id', 'package', 'cloud_connector'),
+        // Strip the create-only fields the update contract accepts-but-ignores (see the PUT body
+        // schema comment): `id` (target comes from the path param) and `create_dataset_templates`
+        // (a create-time install flag with no update equivalent). `simplifiedPackagePolicytoNewPackagePolicy`
+        // is already an allow-list mapper that would drop them, so this is defensive/explicit, not a fix.
+        ...omit(data, 'id', 'package', 'cloud_connector', 'create_dataset_templates'),
         namespace: data.namespace || 'default',
         policy_ids: [policyId],
         supports_agentless: true,
