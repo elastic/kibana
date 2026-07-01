@@ -313,16 +313,15 @@ const agentFirstChromeStyles = (euiTheme: UseEuiTheme) => {
       ) !important;
     }
 
-    /* Agent column: no left gutter */
+    /* Agent column: no left gutter; width driven by layout_agent when app workspace is open */
     ${scope} .kbnChromeLayoutAgent {
       margin-top: ${layoutVar('application.marginTop')} !important;
       margin-left: 0 !important;
       height: calc(
         100% - ${layoutVar('application.marginTop')} - ${layoutVar('application.marginBottom')}
       ) !important;
-      width: calc(
-        100% - ${layoutVar('application.marginRight')} - ${layoutVar('agent.marginLeft', '0px')}
-      ) !important;
+      min-width: 0 !important;
+      overflow: hidden;
     }
 
     /* Agent Builder nav sidebar: square right edge against conversation column */
@@ -336,7 +335,8 @@ const agentFirstChromeStyles = (euiTheme: UseEuiTheme) => {
       height: calc(
         100% - ${layoutVar('application.marginTop')} - ${layoutVar('application.marginBottom')}
       ) !important;
-      width: calc(100% - ${layoutVar('application.marginRight')}) !important;
+      min-width: 0 !important;
+      overflow: hidden;
     }
 
     @media screen {

@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/ui-chrome-layout-constants';
 
-import { styles } from './layout_application.styles';
+import { contentHiddenStyles, styles } from './layout_application.styles';
 import { useLayoutConfig } from '../layout_config_context';
 
 const hiddenStyles = css`
@@ -35,19 +35,33 @@ export const LayoutApplication = ({
   topBar?: ReactNode;
   bottomBar?: ReactNode;
 }) => {
-  const { chromeStyle, applicationWorkspaceOpen = true } = useLayoutConfig();
+  const {
+    chromeStyle,
+    applicationWorkspaceOpen = true,
+    applicationWorkspaceTransitionPhase = 'none',
+  } = useLayoutConfig();
+
+  const parkContent = applicationWorkspaceTransitionPhase !== 'none';
+  const shouldHidePanel =
+    !applicationWorkspaceOpen && applicationWorkspaceTransitionPhase === 'none';
 
   return (
     <div
-      css={[styles.root(chromeStyle), !applicationWorkspaceOpen ? hiddenStyles : undefined]}
-      id={APP_MAIN_SCROLL_CONTAINER_ID}
+      css={[styles.root(chromeStyle), shouldHidePanel ? hiddenStyles : undefined]}
       className="kbnChromeLayoutApplication"
+      id={APP_MAIN_SCROLL_CONTAINER_ID}
       data-test-subj="kbnChromeLayoutApplication"
       data-application-workspace-open={applicationWorkspaceOpen}
     >
-      {topBar && <div css={styles.topBar}>{topBar}</div>}
-      <div css={[styles.content]}>{children}</div>
-      {bottomBar && <div css={styles.bottomBar}>{bottomBar}</div>}
+      {topBar && (
+        <div css={[styles.topBar, parkContent ? contentHiddenStyles : undefined]}>{topBar}</div>
+      )}
+      <div css={[styles.content, parkContent ? contentHiddenStyles : undefined]}>{children}</div>
+      {bottomBar && (
+        <div css={[styles.bottomBar, parkContent ? contentHiddenStyles : undefined]}>
+          {bottomBar}
+        </div>
+      )}
     </div>
   );
 };

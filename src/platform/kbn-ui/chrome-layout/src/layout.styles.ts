@@ -49,13 +49,14 @@ export const useLayoutStyles = (layoutState: LayoutState) => {
   let applicationColumn = '1fr';
 
   if (hasAgent) {
-    if (!agentWorkspaceOpen) {
+    if (applicationWorkspaceOpen) {
+      agentColumn = 'auto';
+      applicationColumn = '1fr';
+    } else if (!agentWorkspaceOpen) {
       agentColumn = '0px';
-    } else if (!applicationWorkspaceOpen) {
+      applicationColumn = '0px';
+    } else {
       agentColumn = `minmax(${MIN_AGENT_WIDTH}px, 1fr)`;
-    }
-
-    if (!applicationWorkspaceOpen) {
       applicationColumn = '0px';
     }
   }

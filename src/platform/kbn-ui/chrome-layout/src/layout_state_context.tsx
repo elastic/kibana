@@ -61,6 +61,8 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
     agentWidth: hasAgent ? layoutConfig.agentWidth ?? 0 : 0,
     applicationWorkspaceWidth: hasAgent ? layoutConfig.applicationWorkspaceWidth ?? 0 : 0,
     applicationWorkspaceOpen: layoutConfig.applicationWorkspaceOpen ?? true,
+    applicationWorkspaceTransitionPhase:
+      layoutConfig.applicationWorkspaceTransitionPhase ?? 'none',
     agentWorkspaceOpen: layoutConfig.agentWorkspaceOpen ?? true,
     hasApplicationWorkspace: hasAgent && (layoutConfig.applicationWorkspaceOpen ?? true),
     hasSidebar,
