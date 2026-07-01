@@ -55,7 +55,7 @@ function ServiceFlyoutLensChartComponent({
 
   const attributes = builtAttributes ?? lastAttributes.current;
 
-  const LensEmbeddableComponent = lens.EmbeddableComponent;
+  const LensEmbeddableComponent = lens?.EmbeddableComponent;
 
   return (
     <EuiPanel
@@ -87,7 +87,7 @@ function ServiceFlyoutLensChartComponent({
           height: ${CHART_HEIGHT}px;
         `}
       >
-        {attributes ? (
+        {attributes && LensEmbeddableComponent ? (
           <LensEmbeddableComponent
             id={`service-flyout-${id}`}
             attributes={attributes}
