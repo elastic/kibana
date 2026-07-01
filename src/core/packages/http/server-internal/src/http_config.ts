@@ -194,9 +194,11 @@ const configSchema = schema.object(
         schema.string({ validate: match(/^\//, 'must start with a slash') }),
         { defaultValue: [], maxSize: 100 }
       ),
-      // `as const` on the defaultValues keeps `TypeOf<>` inferring the literal union
-      // ('apikey' | 'bearer') instead of widening to `string` — without it, the plain
-      // array literal here out-infers the item schema's literal type.
+      // `as const` on the serverless defaultValue keeps `TypeOf<>` inferring the literal
+      // union ('apikey' | 'bearer') instead of widening to `string` — without it, the plain
+      // array literal here out-infers the item schema's literal type. (The traditional
+      // branch's empty-array default infers as `never[]` either way, so its `as const` is
+      // just for consistency, not load-bearing.)
       allowedSchemes: offeringBasedSchema({
         serverless: schema.arrayOf(xsrfSchemeSchema, {
           defaultValue: ['apikey', 'bearer'] as const,
