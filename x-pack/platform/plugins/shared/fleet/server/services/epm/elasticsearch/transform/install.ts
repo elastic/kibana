@@ -763,16 +763,21 @@ export const isRemoteIndexExpression = (indexExpression: string): boolean => {
   return separatorIndex > 0 && !indexExpression.startsWith('::', separatorIndex);
 };
 
+// The only transform that ships a cross-cluster (`*:`) source today is Elastic Defend's
+// `metadata_united`. The strip below is intentionally scoped to it by name to keep the
+// blast radius minimal — this is a temporary bridge until per-environment transform
+// variants land (a `_meta.environments`-gated install). The fragment matches both the v1
+// (`endpoint.metadata_united-…`) and v2 (`logs-endpoint.metadata_united-…`) transform ids.
+const DEFEND_METADATA_UNITED_TRANSFORM_ID_FRAGMENT = 'endpoint.metadata_united-';
+
 /**
  * Cross-cluster search (the `<remote>:<index>` source syntax) is a stateful-only
- * Elasticsearch feature. On Serverless, ES rejects ANY transform whose source
- * targets remote indices with `action_request_validation_exception`
- * ("Cross-project calls are not supported, but remote indices were requested"),
- * which aborts the whole package install. Since no transform can read a remote
- * source on Serverless, strip remote-cluster entries from the source there so the
- * transform installs and runs against its local indices. The rewrite only happens
- * for transforms that actually carry a remote entry (today: Elastic Defend's
- * `metadata_united`), and is a no-op on stateful, where remote patterns are valid
+ * Elasticsearch feature. On Serverless, ES rejects a transform whose source targets
+ * remote indices with `action_request_validation_exception` ("Cross-project calls are
+ * not supported, but remote indices were requested"), which aborts the whole package
+ * install. Strip the remote-cluster entries from the Defend `metadata_united` transform's
+ * source on Serverless so it installs and runs against its local indices. Scoped to that
+ * one transform by name (see above); a no-op on stateful, where remote patterns are valid
  * and resolve to empty when no remote is connected.
  */
 export const removeRemoteClusterSourceIndicesOnServerless = (
@@ -780,6 +785,9 @@ export const removeRemoteClusterSourceIndicesOnServerless = (
   logger: Logger
 ): void => {
   if (!appContextService.getCloud()?.isServerlessEnabled) {
+    return;
+  }
+  if (!transform.installationName?.includes(DEFEND_METADATA_UNITED_TRANSFORM_ID_FRAGMENT)) {
     return;
   }
   const sourceIndex = transform.content?.source?.index;

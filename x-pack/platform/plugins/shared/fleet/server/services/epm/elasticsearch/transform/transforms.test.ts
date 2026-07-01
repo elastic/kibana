@@ -1448,6 +1448,18 @@ describe('removeRemoteClusterSourceIndicesOnServerless', () => {
       expect(logger.info).not.toHaveBeenCalled();
     });
 
+    it('does not strip transforms other than the Defend metadata_united transform', () => {
+      const transform = {
+        installationName: 'some_package.some_other_transform-default-1.0.0',
+        content: { source: { index: ['metrics-foo-*', '*:metrics-foo-*'] } },
+      } as unknown as TransformArg;
+
+      removeRemoteClusterSourceIndicesOnServerless(transform, logger);
+
+      expect(transform.content.source.index).toEqual(['metrics-foo-*', '*:metrics-foo-*']);
+      expect(logger.info).not.toHaveBeenCalled();
+    });
+
     it('handles a single string source with no remote as a no-op', () => {
       const transform = buildTransform('metrics-endpoint.metadata_current_default*');
 
