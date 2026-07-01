@@ -1,5 +1,5 @@
 {
-  "sha1": "7f895cdf2bc6a1d65119ada88ddfca524b00b999",
+  "sha1": "06e4090f92a7e6579f8452e5e89520c48aaad83b",
   "tests": [
     {
       "id": "f8b956f17e7e029-39f26992a3def3c",
@@ -23,7 +23,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 135,
+        "line": 146,
         "column": 12
       }
     },
@@ -49,7 +49,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 146,
+        "line": 157,
         "column": 12
       }
     },
@@ -75,7 +75,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 157,
+        "line": 168,
         "column": 12
       }
     },
@@ -101,7 +101,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 171,
+        "line": 182,
         "column": 12
       }
     },
@@ -205,7 +205,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 247,
+        "line": 236,
         "column": 12
       }
     },
@@ -231,7 +231,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 277,
+        "line": 266,
         "column": 12
       }
     },
@@ -257,7 +257,85 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 297,
+        "line": 286,
+        "column": 12
+      }
+    },
+    {
+      "id": "f8b956f17e7e029-f6c5193351d08aa",
+      "title": "Per-alert mute/unmute without connector privilege restricted user (alerting all, no actions) can snooze an alert instance",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
+        "line": 327,
+        "column": 12
+      }
+    },
+    {
+      "id": "f8b956f17e7e029-11bf00a8ce30b35",
+      "title": "Per-alert mute/unmute without connector privilege restricted user (alerting all, no actions) can unsnooze an alert instance",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
+        "line": 342,
+        "column": 12
+      }
+    },
+    {
+      "id": "f8b956f17e7e029-4886048be850204",
+      "title": "Per-alert mute/unmute without connector privilege per-alert snooze/unsnooze by restricted user does not rotate the rule API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
+        "line": 353,
         "column": 12
       }
     },
@@ -327,7 +405,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/connector_action_with_uiam_key.spec.ts",
-        "line": 69,
+        "line": 71,
         "column": 12
       }
     },

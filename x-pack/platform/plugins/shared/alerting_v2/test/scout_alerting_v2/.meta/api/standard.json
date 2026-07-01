@@ -1,5 +1,5 @@
 {
-  "sha1": "29ad614758477d7c224be066385087005ae9bfde",
+  "sha1": "809697187ae84c99acfecc0ecb22cec2836cec00",
   "tests": [
     {
       "id": "9932666685095b3-d8099f4a61f66f4",
@@ -7207,7 +7207,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/telemetry.spec.ts",
-        "line": 103,
+        "line": 105,
         "column": 10
       }
     }
