@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { schema } from '@kbn/config-schema';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import type { Template } from '../../../../common/types/domain/template/v1';
 import { mockTemplates } from './mock_data';
@@ -899,6 +900,33 @@ describe('Template Routes', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Skipping invalid template')
       );
+    });
+  });
+
+  describe('GET /api/cases/templates (public) - query validation', () => {
+    const querySchema = getPublicTemplatesRoute.params!.query as ReturnType<typeof schema.object>;
+
+    it('applies default page=1 and perPage=20 when not provided', () => {
+      const result = querySchema.validate({});
+      expect(result.page).toBe(1);
+      expect(result.perPage).toBe(20);
+    });
+
+    it('rejects perPage greater than 100', () => {
+      expect(() => querySchema.validate({ perPage: 101 })).toThrow();
+    });
+
+    it('rejects perPage less than 1', () => {
+      expect(() => querySchema.validate({ perPage: 0 })).toThrow();
+    });
+
+    it('rejects page less than 1', () => {
+      expect(() => querySchema.validate({ page: 0 })).toThrow();
+    });
+
+    it('accepts perPage at the maximum of 100', () => {
+      const result = querySchema.validate({ perPage: 100 });
+      expect(result.perPage).toBe(100);
     });
   });
 

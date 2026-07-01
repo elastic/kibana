@@ -9,6 +9,7 @@ schema:
     - name
     - templateVersion
     - owner
+    - deletedAt
     - author
     - usageCount
     - fieldCount

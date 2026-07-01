@@ -13,6 +13,9 @@ get:
     - $ref: '../components/parameters/sort_order.yaml'
     - $ref: '../components/parameters/search.yaml'
     - $ref: '../components/parameters/owner_filter.yaml'
+    - $ref: '../components/parameters/template_tags.yaml'
+    - $ref: '../components/parameters/template_author.yaml'
+    - $ref: '../components/parameters/template_is_enabled.yaml'
   responses:
     '200':
       description: Indicates a successful call.

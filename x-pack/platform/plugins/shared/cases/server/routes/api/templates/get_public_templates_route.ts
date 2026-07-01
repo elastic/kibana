@@ -87,7 +87,7 @@ export const getPublicTemplatesRoute = createCasesRoute<{}, TemplatesFindRequest
         author: author ? castArray(author).filter(Boolean) : [],
         owner: owner ? castArray(owner).filter(Boolean) : [],
         isDeleted: false,
-        isEnabled: isEnabled !== undefined ? String(isEnabled) === 'true' : undefined,
+        isEnabled,
       });
 
       const parsedTemplates = templates

@@ -31,7 +31,7 @@ export const getPublicTemplateRoute = createCasesRoute({
       template_id: schema.string({ maxLength: 36 }),
     }),
     query: schema.object({
-      version: schema.maybe(schema.number()),
+      version: schema.maybe(schema.number({ min: 1 })),
     }),
   },
   handler: async ({ context, request, response }) => {
