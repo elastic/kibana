@@ -269,17 +269,18 @@ const StreamDetailGeneralDataInner = ({
       const retentionPeriod = next.deletePhaseEnabled ? next.dataRetention : undefined;
       const baseline = effectiveToIngestLifecycle(definition.effective_lifecycle);
       const downsampleSteps = 'dsl' in baseline ? baseline.dsl.downsample ?? null : null;
+      // Preserve the frozen phase from the baseline lifecycle — editing the delete phase must not
+      // drop it from the preview.
+      const frozenAfter = 'dsl' in baseline ? baseline.dsl.frozen_after : undefined;
       const model = buildDlmPreviewModel({
         isServerless,
         hotColor: isServerless ? euiTheme.colors.severity.success : ilmPhases.hot.color,
         hotDescription: ilmPhases.hot.description,
         deletePhaseColor: ilmPhases.delete.color,
         deletePhaseDescription: ilmPhases.delete.description,
-        stats: {
-          size: data.stats?.ds.stats?.size,
-          sizeBytes: data.stats?.ds.stats?.sizeBytes,
-          totalDocs: data.stats?.ds.stats?.totalDocs,
-        },
+        frozenAfter,
+        frozenColor: ilmPhases.frozen.color,
+        frozenDescription: ilmPhases.frozen.description,
         retentionPeriod,
         downsampleSteps,
         indexMode: definition.index_mode ?? 'standard',
@@ -293,14 +294,13 @@ const StreamDetailGeneralDataInner = ({
       setPreviewDownsampleStepsCount(model.downsampleStepsCount);
     },
     [
-      data.stats?.ds.stats?.size,
-      data.stats?.ds.stats?.sizeBytes,
-      data.stats?.ds.stats?.totalDocs,
       definition.effective_lifecycle,
       definition.index_mode,
       euiTheme.colors.severity.success,
       ilmPhases.delete.color,
       ilmPhases.delete.description,
+      ilmPhases.frozen.color,
+      ilmPhases.frozen.description,
       ilmPhases.hot.color,
       ilmPhases.hot.description,
       isServerless,
