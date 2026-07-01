@@ -18,7 +18,7 @@ describe('buildFederatedIdentityClusterInfo', () => {
     });
   });
 
-  it('builds correct values for an ESS deployment', () => {
+  it('uses the injected issuer URL when provided, ignoring cloud metadata', () => {
     const cloud = {
       organizationId: 'org-abc123',
       deploymentId: 'dep-xyz456',
@@ -27,16 +27,31 @@ describe('buildFederatedIdentityClusterInfo', () => {
       isServerlessEnabled: false,
       serverless: {},
     } as unknown as CloudSetup;
+    const injected = 'https://workload-identity-issuer.us-east-1.aws.svc.qa.elastic.cloud/orgs/org-abc123';
 
-    expect(buildFederatedIdentityClusterInfo(cloud)).toEqual({
-      jwtIssuer: 'https://workload-identity-issuer.us-east-1.aws.svc.elastic.cloud/orgs/org-abc123',
+    expect(buildFederatedIdentityClusterInfo(cloud, injected).jwtIssuer).toBe(injected);
+  });
+
+  it('builds correct values for an ESS deployment with injected issuer URL', () => {
+    const cloud = {
+      organizationId: 'org-abc123',
+      deploymentId: 'dep-xyz456',
+      region: 'us-east-1',
+      csp: 'aws',
+      isServerlessEnabled: false,
+      serverless: {},
+    } as unknown as CloudSetup;
+    const injected = 'https://workload-identity-issuer.us-east-1.aws.svc.elastic.cloud/orgs/org-abc123';
+
+    expect(buildFederatedIdentityClusterInfo(cloud, injected)).toEqual({
+      jwtIssuer: injected,
       cloudOrgId: 'org-abc123',
       deploymentId: 'deployment:dep-xyz456',
       isServerless: false,
     });
   });
 
-  it('builds correct values for a serverless project', () => {
+  it('builds correct values for a serverless project with injected issuer URL', () => {
     const cloud = {
       organizationId: 'org-abc123',
       deploymentId: undefined,
@@ -45,48 +60,22 @@ describe('buildFederatedIdentityClusterInfo', () => {
       isServerlessEnabled: true,
       serverless: { projectId: 'proj-789' },
     } as unknown as CloudSetup;
+    const injected = 'https://workload-identity-issuer.europe-west1.gcp.svc.elastic.cloud/orgs/org-abc123';
 
-    expect(buildFederatedIdentityClusterInfo(cloud)).toEqual({
-      jwtIssuer:
-        'https://workload-identity-issuer.europe-west1.gcp.svc.elastic.cloud/orgs/org-abc123',
+    expect(buildFederatedIdentityClusterInfo(cloud, injected)).toEqual({
+      jwtIssuer: injected,
       cloudOrgId: 'org-abc123',
       deploymentId: 'project:proj-789',
       isServerless: true,
     });
   });
 
-  it('returns empty issuer when orgId is missing', () => {
-    const cloud = {
-      organizationId: undefined,
-      deploymentId: 'dep-xyz456',
-      region: 'us-east-1',
-      csp: 'aws',
-      isServerlessEnabled: false,
-      serverless: {},
-    } as unknown as CloudSetup;
-
-    expect(buildFederatedIdentityClusterInfo(cloud).jwtIssuer).toBe('');
-  });
-
-  it('returns empty issuer when region is missing', () => {
-    const cloud = {
-      organizationId: 'org-abc123',
-      deploymentId: 'dep-xyz456',
-      region: undefined,
-      csp: 'aws',
-      isServerlessEnabled: false,
-      serverless: {},
-    } as unknown as CloudSetup;
-
-    expect(buildFederatedIdentityClusterInfo(cloud).jwtIssuer).toBe('');
-  });
-
-  it('returns empty issuer when csp is missing', () => {
+  it('returns empty issuer when no URL is injected', () => {
     const cloud = {
       organizationId: 'org-abc123',
       deploymentId: 'dep-xyz456',
       region: 'us-east-1',
-      csp: undefined,
+      csp: 'aws',
       isServerlessEnabled: false,
       serverless: {},
     } as unknown as CloudSetup;

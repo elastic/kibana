@@ -13,6 +13,7 @@ const configSchema = schema.object({
   enableFederatedIdentityAuth: schema.boolean({ defaultValue: false }),
   enableGoogleCloudStorageDataSourceType: schema.boolean({ defaultValue: false }),
   enableAzureDataSourceType: schema.boolean({ defaultValue: false }),
+  workloadIdentityIssuerUrl: schema.maybe(schema.string()),
 });
 
 export type DataFederationConfigType = TypeOf<typeof configSchema>;
@@ -22,6 +23,7 @@ export const config: PluginConfigDescriptor<DataFederationConfigType> = {
     enableFederatedIdentityAuth: true,
     enableGoogleCloudStorageDataSourceType: true,
     enableAzureDataSourceType: true,
+    workloadIdentityIssuerUrl: true,
   },
   schema: configSchema,
 };

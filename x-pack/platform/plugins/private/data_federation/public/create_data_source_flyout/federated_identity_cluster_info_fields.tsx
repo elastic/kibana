@@ -45,6 +45,8 @@ export function FederatedIdentityClusterInfoFields({
 }: {
   cloudInfo?: FederatedIdentityClusterInfo;
 }) {
+  if (!cloudInfo?.jwtIssuer) return null;
+
   return (
     <>
       <ReadOnlyFormRow

@@ -30,26 +30,31 @@ export class DataFederationPlugin
   private readonly enableGoogleCloudStorageDataSourceType: boolean;
   private readonly enableAzureDataSourceType: boolean;
 
+  private readonly workloadIdentityIssuerUrl: string | undefined;
+
   constructor(initializerContext: PluginInitializerContext) {
     const {
       enableFederatedIdentityAuth,
       enableGoogleCloudStorageDataSourceType,
       enableAzureDataSourceType,
+      workloadIdentityIssuerUrl,
     } = initializerContext.config.get<{
       enableFederatedIdentityAuth: boolean;
       enableGoogleCloudStorageDataSourceType: boolean;
       enableAzureDataSourceType: boolean;
+      workloadIdentityIssuerUrl?: string;
     }>();
     this.enableFederatedIdentityAuth = enableFederatedIdentityAuth;
     this.enableGoogleCloudStorageDataSourceType = enableGoogleCloudStorageDataSourceType;
     this.enableAzureDataSourceType = enableAzureDataSourceType;
+    this.workloadIdentityIssuerUrl = workloadIdentityIssuerUrl;
   }
 
   public setup(core: CoreSetup<StartDependencies>, { management, cloud }: SetupDependencies): void {
     const enableFederatedIdentityAuth = this.enableFederatedIdentityAuth;
     const enableGoogleCloudStorageDataSourceType = this.enableGoogleCloudStorageDataSourceType;
     const enableAzureDataSourceType = this.enableAzureDataSourceType;
-    const cloudInfo = buildFederatedIdentityClusterInfo(cloud);
+    const cloudInfo = buildFederatedIdentityClusterInfo(cloud, this.workloadIdentityIssuerUrl);
     const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
     void core.getStartServices().then(([coreStart]) => {
       const canManageFederatedData =

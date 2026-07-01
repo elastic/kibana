@@ -19,15 +19,17 @@ export interface FederatedIdentityClusterInfo {
 }
 
 /**
- * Derives the three read-only values shown in the federated identity auth section of the
+ * Builds the three read-only values shown in the federated identity auth section of the
  * data source creation flyout. These are presented to the user so they can configure the
  * CSP side of the OIDC trust (IAM role trust policy / workload identity binding).
  *
- * Values are sourced from CloudSetup (available at plugin setup time). Falls back to empty
- * strings when running outside Elastic Cloud so the fields render blank without crashing.
+ * When the controller injects `xpack.dataFederation.workloadIdentityIssuerUrl` into kibana.yml,
+ * that value is used directly as the JWT issuer. Otherwise it falls back to deriving the URL
+ * from cloud metadata (region, csp, organizationId).
  */
 export const buildFederatedIdentityClusterInfo = (
-  cloud?: CloudSetup
+  cloud?: CloudSetup,
+  injectedIssuerUrl?: string
 ): FederatedIdentityClusterInfo => {
   const cloudOrgId = cloud?.organizationId ?? '';
 
@@ -38,13 +40,7 @@ export const buildFederatedIdentityClusterInfo = (
       ? `deployment:${cloud.deploymentId}`
       : '';
 
-  // Per-org issuer: https://workload-identity-issuer.{region}.{csp}.svc.elastic.cloud/orgs/{orgID}
-  // The /orgs/{orgID} suffix adds a structural cross-customer security boundary at the `iss`
-  // level (workload-identity-issuer PR #98).
-  const jwtIssuer =
-    cloud?.region && cloud?.csp && cloudOrgId
-      ? `https://workload-identity-issuer.${cloud.region}.${cloud.csp}.svc.elastic.cloud/orgs/${cloudOrgId}`
-      : '';
+  const jwtIssuer = injectedIssuerUrl ?? '';
 
   const isServerless = Boolean(cloud?.isServerlessEnabled);
 
