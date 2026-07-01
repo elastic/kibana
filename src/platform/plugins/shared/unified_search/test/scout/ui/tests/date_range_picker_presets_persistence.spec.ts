@@ -15,15 +15,15 @@ spaceTest.describe('Date range picker presets persistence', { tag: testData.SQM_
     await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.SAVED_QUERY_BUNDLE);
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
-
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginWithCustomRole(testData.DISCOVER_ALL_SQM_ALL_ROLE);
     await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.discover.selectDataView('logstash-*');
     await pageObjects.discover.waitUntilSearchingHasFinished();
+  });
+
+  spaceTest.afterAll(async ({ scoutSpace }) => {
+    await scoutSpace.savedObjects.cleanStandardList();
   });
 
   spaceTest('persists save and delete across reloads', async ({ page, pageObjects }) => {
