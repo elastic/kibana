@@ -65,7 +65,9 @@ interface LoadedExtensions {
 const loadExtensions = async (): Promise<LoadedExtensions> => {
   const stepRegistry = new PublicStepRegistry(nullLogger);
   const triggerRegistry = new PublicTriggerRegistry();
-  registerInternalStepDefinitions(stepRegistry);
+  registerInternalStepDefinitions(stepRegistry, {
+    experimentalSteps: { javaScriptStep: true },
+  });
   registerInternalTriggerDefinitions(triggerRegistry);
   await Promise.all([stepRegistry.whenReady(), triggerRegistry.whenReady()]);
   return { stepDefs: stepRegistry.getAll(), triggerDefs: triggerRegistry.getAll() };

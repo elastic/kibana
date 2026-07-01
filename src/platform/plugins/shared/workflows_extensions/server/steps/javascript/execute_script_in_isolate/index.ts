@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data';
-export * from './javascript';
+export { executeScriptInIsolate } from './execute_script_in_isolate';
+export type { ExecuteScriptInIsolateParams } from './execute_script_in_isolate_params';
+export type { ScriptLogger } from './script_logger';
