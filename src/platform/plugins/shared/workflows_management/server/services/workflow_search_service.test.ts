@@ -164,6 +164,33 @@ describe('WorkflowSearchService', () => {
       expect(call.query.bool.must.length).toBeGreaterThanOrEqual(4);
     });
 
+    it('keeps unmanaged workflows and filters managed workflows by selector availability', async () => {
+      const { deps, storageClient } = makeDeps();
+      storageClient.search.mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } });
+
+      const service = new WorkflowSearchService(deps);
+      await service.getWorkflows(
+        {
+          size: 20,
+          page: 1,
+          managedFilter: 'all',
+          availableInSelector: 'rule_action',
+        },
+        'default'
+      );
+
+      const call = storageClient.search.mock.calls[0][0];
+      expect(call.query.bool.must).toContainEqual({
+        bool: {
+          should: [
+            { bool: { must_not: [{ term: { managed: true } }] } },
+            { term: { managedVisibleInSelectors: 'rule_action' } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
     it('skips execution-history fetch when there are no workflows on the page', async () => {
       const { deps, storageClient, esClient } = makeDeps();
       storageClient.search.mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } });

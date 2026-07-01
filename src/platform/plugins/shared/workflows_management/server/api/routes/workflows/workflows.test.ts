@@ -222,6 +222,30 @@ describe('Workflow routes', () => {
       });
     });
 
+    it('should pass selector availability to api.getWorkflows', async () => {
+      mockApi.getWorkflows.mockResolvedValue({ workflows: [], total: 0 });
+      const request = httpServerMock.createKibanaRequest({
+        query: { managed: 'all', availableInSelector: 'rule_action' },
+      });
+      (request as any).authzResult = {
+        [WorkflowsManagementApiActions.read]: true,
+        [WorkflowsManagementApiActions.readManaged]: true,
+      };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({
+          managedFilter: 'all',
+          availableInSelector: 'rule_action',
+        }),
+        'default-space',
+        { includeExecutionHistory: false, includeManagedExecutionHistory: false }
+      );
+    });
+
     it('should return forbidden when user lacks read privilege', async () => {
       const request = httpServerMock.createKibanaRequest({ query: {} });
       (request as any).authzResult = { [WorkflowsManagementApiActions.readExecution]: true };

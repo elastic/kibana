@@ -245,7 +245,13 @@ export class ManagedWorkflowsService {
       existing.definitionHash === definitionHash &&
       existing.managedVersion === definition.version
     ) {
-      if (this.areTemplateValuesEqual(existing.managedTemplateValues, managedTemplateValues)) {
+      if (
+        this.areTemplateValuesEqual(existing.managedTemplateValues, managedTemplateValues) &&
+        this.areVisibleSelectorsEqual(
+          existing.managedVisibleInSelectors,
+          definition.visibleInSelectors
+        )
+      ) {
         return;
       }
     }
@@ -681,6 +687,7 @@ export class ManagedWorkflowsService {
       managedTemplateValues: managedTemplateValues as Record<string, unknown> | null,
       originManagedWorkflowId: definition.id,
       lifecycle: definition.management.lifecycle,
+      managedVisibleInSelectors: [...(definition.visibleInSelectors ?? [])],
       managedVersion: definition.version,
     };
 
@@ -792,5 +799,14 @@ export class ManagedWorkflowsService {
     next: ManagedWorkflowTemplateValues | null
   ): boolean {
     return JSON.stringify(existing ?? null) === JSON.stringify(next ?? null);
+  }
+
+  private areVisibleSelectorsEqual(
+    existing: string[] | null | undefined,
+    next: readonly string[] | null | undefined
+  ): boolean {
+    return (
+      JSON.stringify([...(existing ?? [])].sort()) === JSON.stringify([...(next ?? [])].sort())
+    );
   }
 }

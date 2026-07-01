@@ -1,0 +1,14 @@
+version: "1"
+name: "Rule Action Selector Test"
+description: "A lightweight managed workflow for testing rule action workflow selection."
+enabled: true
+tags:
+  - test
+  - rule-action-selector
+triggers:
+  - type: manual
+steps:
+  - name: log_test_execution
+    type: console
+    with:
+      message: "Rule action selector managed workflow test executed."

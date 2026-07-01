@@ -10,12 +10,15 @@
 import DETECTION_YAML from './detection.yaml';
 import DISCOVERY_YAML from './discovery.yaml';
 import ORCHESTRATOR_YAML from './orchestrator.yaml';
+import RULE_ACTION_SELECTOR_TEST_YAML from './rule_action_selector_test.yaml';
 import TRIAGE_YAML from './triage.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID = 'system-significant-events-detection';
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID = 'system-significant-events-discovery';
 export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID = 'system-significant-events-orchestrator';
+export const SIGNIFICANT_EVENTS_RULE_ACTION_SELECTOR_TEST_WORKFLOW_ID =
+  'system-significant-events-rule-action-selector-test';
 export const SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID = 'system-significant-events-triage';
 
 // lifecycle: 'static' — instances are declared at startup; orphans are cleaned up on restart.
@@ -30,7 +33,7 @@ const SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT = {
 export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 3,
+  version: 4,
   billable: false,
   yaml: DETECTION_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
@@ -51,6 +54,16 @@ export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW = {
   version: 1,
   billable: false,
   yaml: ORCHESTRATOR_YAML,
+  management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition;
+
+export const SIGNIFICANT_EVENTS_RULE_ACTION_SELECTOR_TEST_WORKFLOW = {
+  id: SIGNIFICANT_EVENTS_RULE_ACTION_SELECTOR_TEST_WORKFLOW_ID,
+  pluginId: 'streams',
+  version: 1,
+  billable: false,
+  visibleInSelectors: ['rule_action'],
+  yaml: RULE_ACTION_SELECTOR_TEST_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 

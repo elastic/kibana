@@ -56,6 +56,14 @@ const querySchema = schema.object({
       meta: { description: 'Filter by managed status. Defaults to "unmanaged".' },
     })
   ),
+  availableInSelector: schema.maybe(
+    schema.oneOf([schema.literal('rule_action')], {
+      meta: {
+        description:
+          'When managed workflows are included, only return managed workflows available in this selector.',
+      },
+    })
+  ),
   sortField: schema.maybe(
     schema.oneOf([schema.literal('name'), schema.literal('enabled')], {
       meta: { description: 'Field to sort by.' },
@@ -120,6 +128,7 @@ function prepareParams({
   tags,
   query,
   managed,
+  availableInSelector,
   sortField,
   sortOrder,
 }: TypeOf<typeof querySchema>): GetWorkflowsParams {
@@ -131,6 +140,7 @@ function prepareParams({
     createdBy: createdBy != null && !Array.isArray(createdBy) ? [createdBy] : createdBy,
     tags: tags != null && !Array.isArray(tags) ? [tags] : tags,
     managedFilter: managed,
+    availableInSelector,
     sortField,
     sortOrder,
   };

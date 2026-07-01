@@ -80,6 +80,9 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     size: 1000,
     page: 1,
     query: '',
+    ...(finalConfig.availableInSelector
+      ? { managed: 'all' as const, availableInSelector: finalConfig.availableInSelector }
+      : {}),
   });
 
   // Process workflows using utility function

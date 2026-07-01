@@ -37,6 +37,33 @@ const ES_SORT_FIELDS: Record<WorkflowSortField, string> = {
   enabled: 'enabled',
 };
 
+const buildAvailableInSelectorFilter = (
+  managedFilter: GetWorkflowsParams['managedFilter'],
+  availableInSelector: GetWorkflowsParams['availableInSelector']
+): estypes.QueryDslQueryContainer | null => {
+  if (!availableInSelector) {
+    return null;
+  }
+
+  if (managedFilter === 'managed') {
+    return { term: { managedVisibleInSelectors: availableInSelector } };
+  }
+
+  if (managedFilter === 'all') {
+    return {
+      bool: {
+        should: [
+          { bool: { must_not: [{ term: { managed: true } }] } },
+          { term: { managedVisibleInSelectors: availableInSelector } },
+        ],
+        minimum_should_match: 1,
+      },
+    };
+  }
+
+  return null;
+};
+
 interface WorkflowAggBucket {
   key: string | number | boolean;
   key_as_string?: string;
@@ -140,15 +167,17 @@ export class WorkflowSearchService {
       tags,
       query,
       managedFilter,
+      availableInSelector,
       sortField,
       sortOrder = 'asc',
     } = params;
     const from = (page - 1) * size;
+    const resolvedManagedFilter = managedFilter ?? 'unmanaged';
 
     const { must, must_not } = buildWorkflowFilters({
       space: { id: spaceId, includeGlobal: true },
       deleted: 'not_deleted',
-      managed: managedFilter ?? 'unmanaged',
+      managed: resolvedManagedFilter,
     });
 
     must.push(
@@ -161,6 +190,13 @@ export class WorkflowSearchService {
 
     if (query) {
       must.push(buildWorkflowTextSearchClause(query));
+    }
+    const availableInSelectorFilter = buildAvailableInSelectorFilter(
+      resolvedManagedFilter,
+      availableInSelector
+    );
+    if (availableInSelectorFilter) {
+      must.push(availableInSelectorFilter);
     }
 
     const esSort = sortField
