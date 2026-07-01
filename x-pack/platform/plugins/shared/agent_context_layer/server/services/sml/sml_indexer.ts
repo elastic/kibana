@@ -397,10 +397,12 @@ class SmlIndexerImpl implements SmlIndexer {
         requestedPermissions,
       });
     } catch (error) {
+      const reason =
+        error instanceof SmlPermissionsConflictError
+          ? `caller-supplied permissions conflict with type '${definition?.id ?? attachmentType}'`
+          : `type '${definition?.id ?? attachmentType}' getPermissions threw`;
       this.logger.warn(
-        `SML indexer: type '${
-          definition?.id ?? attachmentType
-        }' getPermissions threw for origin '${originId}' — aborting content-mode write to avoid producing un-gated chunks: ${
+        `SML indexer: ${reason} for origin '${originId}' — aborting content-mode write to avoid producing un-gated chunks: ${
           (error as Error).message
         }`
       );
