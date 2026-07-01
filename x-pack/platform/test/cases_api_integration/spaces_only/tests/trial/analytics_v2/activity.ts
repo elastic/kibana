@@ -12,6 +12,7 @@ import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   createCase,
   updateCase,
+  deleteCases,
   deleteAllCaseItems,
   getAuthWithSuperUser,
 } from '../../../../common/lib/api';
@@ -61,7 +62,12 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(createDoc).to.be.an('object');
       expect(createDoc!.cases.id).to.eql(created.id);
       expect(createDoc!.action.verb).to.eql('create');
-      expect(createDoc!.space_id).to.eql('default');
+      // `getAuthWithSuperUser()` defaults to `space1` → the case (and its
+      // user actions) live in space1, so the real-time activity write
+      // inherits that namespace. Top-level singular `space_id` is the
+      // implicit-privileges DLS field, populated correctly for a
+      // non-default space at write time (not just after reconciliation).
+      expect(createDoc!.space_id).to.eql('space1');
       // payload_json contains the full create_case payload —
       // assert a known field (title) round-trips so analysts can
       // pivot via ES|QL `MV_FROM_JSON` on the column.
@@ -126,11 +132,13 @@ export default ({ getService }: FtrProviderContext): void => {
       });
       await waitForActivityForCase(es, created.id, 2);
 
-      await supertestWithoutAuth
-        .delete(`/api/cases?ids=${encodeURIComponent(JSON.stringify([created.id]))}`)
-        .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'kibana')
-        .expect(204);
+      // `deleteCases` threads `auth.space` through `getSpaceUrlPrefix` — a
+      // raw `/api/cases` DELETE would 404 (the case lives in space1).
+      await deleteCases({
+        supertest: supertestWithoutAuth,
+        caseIDs: [created.id],
+        auth,
+      });
 
       await waitForActivityAbsent(es, created.id);
     });

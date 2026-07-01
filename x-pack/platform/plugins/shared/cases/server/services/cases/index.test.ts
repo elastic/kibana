@@ -3714,7 +3714,7 @@ describe('CasesService', () => {
           ],
         });
 
-        const { svc, analyticsV2Writer } = makeServiceWithMockWriter();
+        const { svc, analyticsV2Writer, analyticsV2ActivityWriter } = makeServiceWithMockWriter();
         await svc.bulkDeleteCaseEntities({
           entities: [
             { type: CASE_SAVED_OBJECT, id: 'case-A' },
@@ -3727,6 +3727,15 @@ describe('CasesService', () => {
         expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledTimes(1);
         expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledWith(['case-A']);
         expect(analyticsV2Writer.deleteCase).not.toHaveBeenCalled();
+
+        // The activity surface cascades the same successful-case-id set:
+        // deleting a case cascades to its user-action SOs at the SO layer,
+        // and reconciliation can't see that gap, so the activity docs are
+        // dropped explicitly here.
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledTimes(1);
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledWith([
+          'case-A',
+        ]);
       });
 
       it('skips analytics writes for non-case entity types', async () => {
@@ -3739,7 +3748,7 @@ describe('CasesService', () => {
           ],
         });
 
-        const { svc, analyticsV2Writer } = makeServiceWithMockWriter();
+        const { svc, analyticsV2Writer, analyticsV2ActivityWriter } = makeServiceWithMockWriter();
         await svc.bulkDeleteCaseEntities({
           entities: [
             { type: CASE_COMMENT_SAVED_OBJECT, id: 'comment-1' },
@@ -3750,6 +3759,29 @@ describe('CasesService', () => {
         expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledTimes(1);
         expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledWith(['case-A']);
         expect(analyticsV2Writer.deleteCase).not.toHaveBeenCalled();
+
+        // Activity cascade is keyed by case id and likewise skips the
+        // non-case entity — only `case-A` is passed through.
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledWith([
+          'case-A',
+        ]);
+      });
+    });
+
+    describe('deleteCase', () => {
+      it('cascades the deleted case id to the activity surface', async () => {
+        unsecuredSavedObjectsClient.delete.mockResolvedValue({});
+
+        const { svc, analyticsV2Writer, analyticsV2ActivityWriter } = makeServiceWithMockWriter();
+        await svc.deleteCase({ id: 'case-A', refresh: false });
+
+        expect(analyticsV2Writer.deleteCase).toHaveBeenCalledWith('case-A');
+        // Deleting the case cascades to its user-action SOs at the SO
+        // layer; reconciliation can't detect that, so the activity docs
+        // are dropped explicitly by case id.
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledWith([
+          'case-A',
+        ]);
       });
     });
 

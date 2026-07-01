@@ -152,9 +152,10 @@ function toActor(user: UserActionPersistedAttributes['created_by'] | null): Acti
  * (cyclic refs, non-serializable values — not expected from persisted
  * SOs but defensive for forward-compat).
  *
- * The string is bounded by the mapping's `ignore_above: 32766`; ES
- * truncates instead of rejecting on overflow, so very large bulk-edit
- * payloads degrade gracefully.
+ * No length cap is applied here: the mapping stores this as a `wildcard`
+ * field, which has no per-value limit, so even very large bulk-edit
+ * payloads are indexed and remain queryable in ES|QL rather than being
+ * silently dropped (as a `keyword` past `ignore_above` would be).
  */
 function stringifyPayload(payload: Record<string, unknown> | null | undefined): string {
   if (payload == null) return '';

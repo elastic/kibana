@@ -106,6 +106,14 @@ export class CasesActivityV2Writer implements CasesActivityV2WriterContract {
    * doesn't know which user-action ids existed for the deleted cases,
    * and the SO service has already deleted the user-action SOs, so a
    * `terms` query on `cases.id` is the cheapest correct path.
+   *
+   * Known limitation: this is the ONLY path that drops cascade-orphaned
+   * activity docs. Reconciliation walks forward on `created_at` and
+   * never revisits a deleted case, so if this fire-and-forget delete
+   * exhausts its retry budget the affected docs are orphaned
+   * permanently — a `LOOKUP JOIN .cases` would surface activity for a
+   * case that no longer exists. There is no reconciliation backstop;
+   * `/reset` (which drops and rebuilds the index) is the only recovery.
    */
   public bulkDeleteActionsByCaseIds(caseIds: string[]): void {
     if (caseIds.length === 0) return;

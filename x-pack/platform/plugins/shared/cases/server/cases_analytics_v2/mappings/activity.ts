@@ -40,7 +40,7 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
  *   - `payload`: SO uses `dynamic: false` with a sparse set of indexed
  *     sub-fields. The analytics index strict-maps the curated extracts
  *     and also stringifies the full payload as `action.payload_json`
- *     (`keyword`, `ignore_above`). The string carries every payload
+ *     (`wildcard`, no length cap). The string carries every payload
  *     sub-field so analysts can reach into it via ES|QL
  *     (`MV_AVG(MV_FROM_JSON(payload_json, "status"))` and similar);
  *     the curated extracts give first-class faceting in Lens without
@@ -97,10 +97,18 @@ export const ACTIVITY_INDEX_MAPPING: MappingTypeMapping = {
         // Stringified `attributes.payload`. The payload union is wide
         // and evolves frequently; storing the raw JSON keeps every
         // field accessible via ES|QL without per-type mapping churn.
-        // `ignore_above: 32766` matches the `keyword` upper bound;
-        // payloads exceeding that (very large bulk attachment edits)
-        // get truncated rather than rejected.
-        payload_json: { type: 'keyword', ignore_above: 32766 },
+        // `wildcard` (not `keyword`) so there is no length cap: a
+        // `keyword` silently drops values over `ignore_above` from the
+        // index and doc values, which would make oversized payloads
+        // (large bulk-attachment edits) return `null` in ES|QL. The
+        // `wildcard` type stores the full value with no per-value limit
+        // and is purpose-built for large, opaque strings queried with
+        // grep-style predicates — exactly this field's access pattern.
+        // We never aggregate or sort on `payload_json` (the curated
+        // extracts below serve faceting), so `wildcard`'s slightly
+        // higher disk cost and slower exact-term ops carry no
+        // regression for how this field is actually queried.
+        payload_json: { type: 'wildcard' },
         // ----- Curated extracts -----
         // Populated only when the action `type` carries a matching
         // payload sub-field. See `activity_doc_builder.ts` for the
