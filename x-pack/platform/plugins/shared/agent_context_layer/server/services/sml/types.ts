@@ -425,6 +425,16 @@ export interface SmlIndexAttachmentContentMode {
    * indexer will stamp `now`.
    */
   createdAt?: string;
+  /**
+   * Caller-supplied permissions to stamp on the written chunks, used only
+   * when the resolved `attachmentType` has no `getPermissions` hook (or is
+   * unregistered). When the type has a `getPermissions` hook, supplying this
+   * field is a conflict — `SmlIndexer.resolvePermissionsForOrigin` throws
+   * {@link SmlPermissionsConflictError} rather than silently discarding it.
+   * Omit to preserve prior behavior (hook wins if present, otherwise empty
+   * `SmlPermissions`).
+   */
+  permissions?: SmlPermissions;
 }
 
 /**
