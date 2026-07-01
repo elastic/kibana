@@ -125,7 +125,7 @@ apiTest.describe(
             headers: readerHeaders,
           });
           const ids = new Set(
-            (response.body as ListPolicyExecutionHistoryResponse).items.map((it) => it.rule.id)
+            (response.body as ListPolicyExecutionHistoryResponse).items.flatMap((it) => it.rules.map((r) => r.id))
           );
           return ids.has(RULE_ID_KEPT) && ids.has(RULE_ID_DELETED);
         };
@@ -141,7 +141,7 @@ apiTest.describe(
 
         const body = response.body as ListPolicyExecutionHistoryResponse;
         const itemsByRule = (id: string): PolicyExecutionHistoryItem[] =>
-          body.items.filter((it) => it.rule.id === id);
+          body.items.filter((it) => it.rules.some((r) => r.id === id));
 
         const itemsOfRuleKept = itemsByRule(RULE_ID_KEPT);
         const itemsOfRuleDeleted = itemsByRule(RULE_ID_DELETED);
@@ -150,10 +150,10 @@ apiTest.describe(
         expect(itemsOfRuleDeleted.length).toBeGreaterThanOrEqual(1);
 
         for (const item of itemsOfRuleKept) {
-          expect(item.rule).toStrictEqual({ id: RULE_ID_KEPT, name: RULE_KEPT_NAME });
+          expect(item.rules).toStrictEqual([{ id: RULE_ID_KEPT, name: RULE_KEPT_NAME }]);
         }
         for (const item of itemsOfRuleDeleted) {
-          expect(item.rule).toStrictEqual({ id: RULE_ID_DELETED, name: null });
+          expect(item.rules).toStrictEqual([{ id: RULE_ID_DELETED, name: null }]);
         }
       }
     );
