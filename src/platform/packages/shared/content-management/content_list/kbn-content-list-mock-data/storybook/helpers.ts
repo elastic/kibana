@@ -138,6 +138,15 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
       items = items.filter((item) => matchesUserFilter(item, includeCreators));
     }
 
+    // Apply createdBy match-all (AND) filters. Each value must match individually, so
+    // multiple distinct creators yield nothing since an item has a single creator.
+    const includeAllCreators = createdByFilter?.includeAll;
+    if (includeAllCreators && includeAllCreators.length > 0) {
+      items = items.filter((item) =>
+        includeAllCreators.every((creator) => matchesUserFilter(item, [creator]))
+      );
+    }
+
     // Apply createdBy exclude filters.
     const excludeCreators = createdByFilter?.exclude;
     if (excludeCreators && excludeCreators.length > 0) {
@@ -520,6 +529,15 @@ export const createSimpleMockFindItems = (
     const includeCreators = createdByFilter?.include;
     if (includeCreators && includeCreators.length > 0) {
       items = items.filter((item) => matchesUserFilter(item, includeCreators));
+    }
+
+    // Apply createdBy match-all (AND) filters. Each value must match individually, so
+    // multiple distinct creators yield nothing since an item has a single creator.
+    const includeAllCreators = createdByFilter?.includeAll;
+    if (includeAllCreators && includeAllCreators.length > 0) {
+      items = items.filter((item) =>
+        includeAllCreators.every((creator) => matchesUserFilter(item, [creator]))
+      );
     }
 
     // Apply createdBy exclude filters.
