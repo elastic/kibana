@@ -882,6 +882,9 @@ paths:
         - $ref: '#/components/parameters/sort_order'
         - $ref: '#/components/parameters/search'
         - $ref: '#/components/parameters/owner_filter'
+        - $ref: '#/components/parameters/template_tags'
+        - $ref: '#/components/parameters/template_author'
+        - $ref: '#/components/parameters/template_is_enabled'
       responses:
         '200':
           description: Indicates a successful call.
@@ -1609,6 +1612,7 @@ components:
           - name
           - templateVersion
           - owner
+          - deletedAt
           - author
           - usageCount
           - fieldCount
@@ -1617,6 +1621,31 @@ components:
           - isLatest
         default: name
       example: name
+    template_tags:
+      in: query
+      name: tags
+      description: Filters the returned templates by tags.
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/string'
+          - $ref: '#/components/schemas/string_array'
+      example: tag-1
+    template_author:
+      in: query
+      name: author
+      description: Filters the returned templates by author username.
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/string'
+          - $ref: '#/components/schemas/string_array'
+      example: elastic
+    template_is_enabled:
+      in: query
+      name: isEnabled
+      description: Filters the returned templates by their enabled state.
+      schema:
+        type: boolean
+      example: true
     template_id:
       in: path
       name: template_id
