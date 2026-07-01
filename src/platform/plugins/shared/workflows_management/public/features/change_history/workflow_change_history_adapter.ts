@@ -74,6 +74,28 @@ const toListChanges = (
   };
 };
 
+const yieldToNextFrame = (signal?: AbortSignal): Promise<void> =>
+  new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(signal.reason ?? new DOMException('Aborted', 'AbortError'));
+      return;
+    }
+
+    const onAbort = (): void => {
+      if (rafId !== undefined) {
+        cancelAnimationFrame(rafId);
+      }
+      reject(signal?.reason ?? new DOMException('Aborted', 'AbortError'));
+    };
+
+    const rafId = requestAnimationFrame(() => {
+      signal?.removeEventListener('abort', onAbort);
+      resolve();
+    });
+
+    signal?.addEventListener('abort', onAbort, { once: true });
+  });
+
 export interface CreateWorkflowChangeHistoryAdapterOptions {
   onWorkflowRestored?: (objectId: string) => Promise<void>;
 }
@@ -105,7 +127,16 @@ export const createWorkflowChangeHistoryAdapter = (
         }
       );
 
-      const items = response.items.map((item, index) => {
+      signal?.throwIfAborted();
+
+      const items: ChangeHistoryListItem[] = [];
+
+      for (let index = 0; index < response.items.length; index += 1) {
+        if (index > 0) {
+          await yieldToNextFrame(signal);
+        }
+
+        const item = response.items[index];
         const isCurrent = page.index === 0 && index === 0;
         const previousVersion = response.items[index + 1];
         const changes = previousVersion
@@ -116,8 +147,8 @@ export const createWorkflowChangeHistoryAdapter = (
           toCacheKey(objectId, item.id),
           mapWorkflowHistoryItemToDetail(item, { isCurrent, changes })
         );
-        return listItem;
-      });
+        items.push(listItem);
+      }
 
       const pageTail = response.items[response.items.length - 1];
       if (pageTail) {
@@ -130,6 +161,7 @@ export const createWorkflowChangeHistoryAdapter = (
         const currentPageHead = response.items[0];
 
         if (previousPageTail && currentPageHead) {
+          await yieldToNextFrame(signal);
           const changes = toListChanges(
             currentPageHead.workflow.yaml,
             previousPageTail.workflow.yaml

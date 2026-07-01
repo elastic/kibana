@@ -70,10 +70,10 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
     return renderDefaultChangeHistoryRowActions({
       item,
       ...(hasCompare
-        ? { requestCompareToVersion: () => modalSelection.requestCompareToVersion!(item.id) }
+        ? { requestCompareToVersion: () => modalSelection.requestCompareToVersion?.(item.id) }
         : {}),
       ...(hasRestore
-        ? { requestRestoreVersion: () => modalSelection.requestRestoreVersion!(item.id) }
+        ? { requestRestoreVersion: () => modalSelection.requestRestoreVersion?.(item.id) }
         : {}),
     });
   }, [item, modalSelection, supports.compare]);

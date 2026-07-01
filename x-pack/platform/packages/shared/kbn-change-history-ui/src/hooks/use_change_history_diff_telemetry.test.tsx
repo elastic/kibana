@@ -121,6 +121,53 @@ describe('useChangeHistoryDiffTelemetry', () => {
     expect(mockReportDiffViewed).toHaveBeenCalledTimes(1);
   });
 
+  it('resets diff viewed dedupe when compareSpec key changes', () => {
+    const { result, rerender } = renderHook(
+      ({ spec }: { spec: ChangeHistoryCompareSpec }) =>
+        useChangeHistoryDiffTelemetry({ compareSpec: spec }),
+      { initialProps: { spec: compareSpec } }
+    );
+
+    result.current?.reportDiffViewed();
+    expect(mockReportDiffViewed).toHaveBeenCalledTimes(1);
+
+    rerender({
+      spec: {
+        ...compareSpec,
+        target: {
+          ...compareSpec.target,
+          id: 'evt-9',
+        },
+      },
+    });
+
+    result.current?.reportDiffViewed();
+    expect(mockReportDiffViewed).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not reset diff viewed dedupe when compareSpec identity changes but key is unchanged', () => {
+    const { result, rerender } = renderHook(
+      ({ spec }: { spec: ChangeHistoryCompareSpec }) =>
+        useChangeHistoryDiffTelemetry({ compareSpec: spec }),
+      { initialProps: { spec: compareSpec } }
+    );
+
+    result.current?.reportDiffViewed();
+
+    rerender({
+      spec: {
+        ...compareSpec,
+        target: {
+          ...compareSpec.target,
+          timestamp: '2026-06-17T12:00:00.000Z',
+        },
+      },
+    });
+
+    result.current?.reportDiffViewed();
+    expect(mockReportDiffViewed).toHaveBeenCalledTimes(1);
+  });
+
   it('reports diff viewed again when compare mode changes after display', () => {
     const { result } = renderHook(() =>
       useChangeHistoryDiffTelemetry({

@@ -11,6 +11,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import type { ChangeHistoryDiffTelemetry } from '@kbn/change-history-ui';
 import { monaco } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -145,6 +146,7 @@ export const WorkflowChangeHistoryMonacoPreview = ({
   const diffEditorRef = useRef<monaco.editor.IStandaloneDiffEditor | null>(null);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const validationDecorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+  const validationAbortControllerRef = useRef<AbortController | null>(null);
   const pendingDiffScrollIndexRef = useRef<number | null>(null);
   const [diffCurrentIndex, setDiffCurrentIndex] = useState(0);
   const [diffTotalChanges, setDiffTotalChanges] = useState(0);
@@ -270,58 +272,58 @@ export const WorkflowChangeHistoryMonacoPreview = ({
     configureDiffEditors(diffEditor, compareMode);
   }, [compareMode, useDiffEditor]);
 
-  useEffect(() => {
-    if (!isEditorMounted) {
-      return;
-    }
+  useEffect(
+    () => () => {
+      validationAbortControllerRef.current?.abort();
+    },
+    []
+  );
 
-    const abortController = new AbortController();
-    let validationRafId: number | undefined;
+  useDebounce(
+    () => {
+      if (!isEditorMounted) {
+        return;
+      }
 
-    const timeoutId = window.setTimeout(() => {
-      validationRafId = requestAnimationFrame(() => {
-        void (async () => {
-          const editor = getActiveEditor();
-          if (!editor || abortController.signal.aborted) {
+      validationAbortControllerRef.current?.abort();
+      const abortController = new AbortController();
+      validationAbortControllerRef.current = abortController;
+
+      void (async () => {
+        const editor = getActiveEditor();
+        if (!editor || abortController.signal.aborted) {
+          return;
+        }
+
+        try {
+          const { validationResults: nextValidationResults } =
+            await applyWorkflowYamlValidationToEditor(
+              editor,
+              validationYaml,
+              highlightValidationErrors,
+              validationDecorationsRef,
+              abortController.signal
+            );
+
+          if (!abortController.signal.aborted) {
+            setValidationResults(nextValidationResults);
+          }
+        } catch (validationError) {
+          if (abortController.signal.aborted) {
             return;
           }
 
-          try {
-            const { validationResults: nextValidationResults } =
-              await applyWorkflowYamlValidationToEditor(
-                editor,
-                validationYaml,
-                highlightValidationErrors,
-                validationDecorationsRef,
-                abortController.signal
-              );
-
-            if (!abortController.signal.aborted) {
-              setValidationResults(nextValidationResults);
-            }
-          } catch (validationError) {
-            if (abortController.signal.aborted) {
-              return;
-            }
-
-            if (validationError instanceof DOMException && validationError.name === 'AbortError') {
-              return;
-            }
-
-            setValidationResults([]);
+          if (validationError instanceof DOMException && validationError.name === 'AbortError') {
+            return;
           }
-        })();
-      });
-    }, VALIDATION_DEBOUNCE_MS);
 
-    return () => {
-      window.clearTimeout(timeoutId);
-      if (validationRafId !== undefined) {
-        cancelAnimationFrame(validationRafId);
-      }
-      abortController.abort();
-    };
-  }, [getActiveEditor, highlightValidationErrors, isEditorMounted, validationYaml]);
+          setValidationResults([]);
+        }
+      })();
+    },
+    VALIDATION_DEBOUNCE_MS,
+    [getActiveEditor, highlightValidationErrors, isEditorMounted, validationYaml]
+  );
 
   const handleValidationErrorClick = useCallback(
     (error: YamlValidationResult) => {

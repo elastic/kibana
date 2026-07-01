@@ -19,11 +19,13 @@ export interface UseChangeHistoryDiffTelemetryArgs {
   isLoadingCompareContext?: boolean;
 }
 
+const buildCompareSpecKey = (compareSpec: ChangeHistoryCompareSpec): string =>
+  `${compareSpec.comparisonType}:${compareSpec.baseline.id}:${compareSpec.target.id}`;
+
 const buildDiffViewedKey = (
   compareSpec: ChangeHistoryCompareSpec,
   compareMode: ChangeHistoryCompareMode
-): string =>
-  `${compareSpec.comparisonType}:${compareSpec.baseline.id}:${compareSpec.target.id}:${compareMode}`;
+): string => `${buildCompareSpecKey(compareSpec)}:${compareMode}`;
 
 export const useChangeHistoryDiffTelemetry = ({
   compareSpec,
@@ -33,11 +35,12 @@ export const useChangeHistoryDiffTelemetry = ({
   const [compareMode, setCompareModeState] = useState<ChangeHistoryCompareMode>('unified');
   const lastDiffViewedKeyRef = useRef<string | undefined>();
   const diffDisplayedRef = useRef(false);
+  const compareSpecKey = compareSpec ? buildCompareSpecKey(compareSpec) : undefined;
 
   useEffect(() => {
     diffDisplayedRef.current = false;
     lastDiffViewedKeyRef.current = undefined;
-  }, [compareSpec?.baseline.id, compareSpec?.comparisonType, compareSpec?.target.id]);
+  }, [compareSpecKey]);
 
   const emitDiffViewed = useCallback(
     (mode: ChangeHistoryCompareMode) => {

@@ -55,6 +55,24 @@ const createHttpMock = (
 });
 
 describe('createWorkflowChangeHistoryAdapter', () => {
+  it('yields to requestAnimationFrame between list rows when computing changes', async () => {
+    const rafSpy = jest.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      callback(0);
+      return 1;
+    });
+    const http = createHttpMock(jest.fn().mockResolvedValue(sampleWorkflowHistoryResponse));
+
+    const adapter = createWorkflowChangeHistoryAdapter(http as HttpSetup);
+
+    await adapter.listChanges({
+      objectId: SAMPLE_WORKFLOW_ID,
+      page: { index: 0, size: 20 },
+    });
+
+    expect(rafSpy).toHaveBeenCalledTimes(1);
+    rafSpy.mockRestore();
+  });
+
   it('fetches paginated history with 1-based API page numbers', async () => {
     const http = createHttpMock(jest.fn().mockResolvedValue(sampleWorkflowHistoryResponse));
 
