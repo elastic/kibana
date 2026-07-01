@@ -26,7 +26,7 @@ import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isTriggerType, WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID } from '@kbn/workflows';
-import { useWorkflowsMonacoTheme, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
+import { useWorkflowsMonacoTheme } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
 import {
