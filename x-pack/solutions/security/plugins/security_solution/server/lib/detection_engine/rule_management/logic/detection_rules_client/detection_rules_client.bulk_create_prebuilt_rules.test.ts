@@ -114,6 +114,42 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
     );
   });
 
+  it('respects enabled field from rule asset', async () => {
+    const enabledRule = {
+      ...getCreateRulesSchemaMock(),
+      version: 1,
+      rule_id: 'enabled-rule',
+      enabled: true,
+    };
+    const disabledRule = {
+      ...getCreateRulesSchemaMock(),
+      version: 1,
+      rule_id: 'disabled-rule',
+      enabled: false,
+    };
+    const defaultRule = {
+      ...getCreateRulesSchemaMock(),
+      version: 1,
+      rule_id: 'default-rule',
+    };
+
+    rulesClient.bulkCreateRules.mockResolvedValue({
+      successfulIds: [],
+      errors: [],
+      total: 3,
+    });
+
+    await detectionRulesClient.bulkCreatePrebuiltRules({
+      rules: [enabledRule, disabledRule, defaultRule],
+    });
+
+    const firstBatch = rulesClient.bulkCreateRules.mock.calls[0][0];
+    const secondBatch = rulesClient.bulkCreateRules.mock.calls[1][0];
+    expect(firstBatch.rules[0].data.enabled).toBe(true);
+    expect(firstBatch.rules[1].data.enabled).toBe(false);
+    expect(secondBatch.rules[0].data.enabled).toBe(false);
+  });
+
   it('maps successfulIds to result items with rule_id and version', async () => {
     const preAssignedId = 'test-uuid-123';
     (uuidv4 as jest.Mock).mockReturnValueOnce(preAssignedId);

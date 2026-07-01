@@ -91,7 +91,7 @@ export const bulkCreatePrebuiltRules = async ({
           ...convertRuleResponseToAlertingRule(ruleWithDefaults, actionsClient),
           alertTypeId,
           consumer: SERVER_APP_ID,
-          enabled: false,
+          enabled: rule.enabled ?? false,
         };
         itemById.set(id, rule);
         bulkInputs.push({ data, options: { id } });
