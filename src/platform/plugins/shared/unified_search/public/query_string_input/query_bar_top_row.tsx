@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import { EMPTY, delay, mergeMap, of } from 'rxjs';
+import { EMPTY, delay, distinctUntilChanged, mergeMap, of } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle, debounce } from 'lodash';
 
@@ -391,19 +391,42 @@ export const QueryBarTopRow = React.memo(
       http,
       dataViews,
       application,
+      featureFlags,
       userStorage,
       userProfile,
     } = kibana.services;
 
+    const isDateRangePickerFeatureFlagEnabled$ = useMemo(
+      () =>
+        enableDateRangePicker && featureFlags
+          ? featureFlags
+              .getBooleanValue$(DATE_RANGE_PICKER_FEATURE_FLAG, true)
+              .pipe(distinctUntilChanged())
+          : of(true),
+      [enableDateRangePicker, featureFlags]
+    );
+    const isDateRangePickerFeatureFlagEnabled = useObservable(
+      isDateRangePickerFeatureFlagEnabled$,
+      true
+    );
     const shouldUseLegacyTimePicker =
-      !enableDateRangePicker ||
-      !kibana.services.featureFlags?.getBooleanValue(DATE_RANGE_PICKER_FEATURE_FLAG, true);
+      !enableDateRangePicker || !isDateRangePickerFeatureFlagEnabled;
+
+    const isPresetsPersistenceFeatureFlagEnabled$ = useMemo(
+      () =>
+        featureFlags
+          ? featureFlags
+              .getBooleanValue$(DATE_RANGE_PICKER_PRESETS_PERSISTENCE_FEATURE_FLAG, true)
+              .pipe(distinctUntilChanged())
+          : of(true),
+      [featureFlags]
+    );
+    const isPresetsPersistenceFeatureFlagEnabled = useObservable(
+      isPresetsPersistenceFeatureFlagEnabled$,
+      true
+    );
     const shouldPersistDateRangePickerPresets =
-      !shouldUseLegacyTimePicker &&
-      kibana.services.featureFlags?.getBooleanValue(
-        DATE_RANGE_PICKER_PRESETS_PERSISTENCE_FEATURE_FLAG,
-        true
-      );
+      !shouldUseLegacyTimePicker && isPresetsPersistenceFeatureFlagEnabled;
     const dateRangePickerPresets = useDateRangePickerPresets({
       userStorage: shouldPersistDateRangePickerPresets ? userStorage ?? null : null,
       uiSettings,
