@@ -650,4 +650,4 @@ export const USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES: readonly UserScout
  * Keep in sync: archive user docs with defined EUID; this table lists archive-backed cases with EUID + cases without; ingested-only
  * case is excluded here.
  */
-export const USER_TS_ARCHIVE_EXPECTED_CONTAINS_ID_COUNT = 29;
+export const USER_TS_ARCHIVE_EXPECTED_CONTAINS_ID_COUNT = 33;
