@@ -19,10 +19,9 @@ import {
   type VisualizationServices,
 } from '@kbn/agent-builder-visualizations';
 
-const defaultVisualizationLabel = i18n.translate(
-  'xpack.agentBuilder.attachments.visualization.label',
-  { defaultMessage: 'Visualization' }
-);
+const defaultVisualizationLabel = i18n.translate('xpack.agentBuilder.visualization.label', {
+  defaultMessage: 'Visualization',
+});
 
 export type VisualizationAttachment = Attachment<
   typeof VISUALIZATION_ATTACHMENT_TYPE,

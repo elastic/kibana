@@ -52,7 +52,7 @@ export function VisualizeLens({
   if (error) {
     return (
       <EuiCallOut
-        title={i18n.translate('xpack.agentBuilder.visualizeLens.error.title', {
+        title={i18n.translate('xpack.agentBuilder.visualization.lens.errorTitle', {
           defaultMessage: 'Unable to render visualization',
         })}
         color="danger"

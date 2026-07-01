@@ -24,15 +24,12 @@ import {
 import { DEFAULT_VISUALIZATION_HEIGHT } from './get_visualization_dimensions';
 import { useVisPreviewUnifiedSearch } from './use_vis_preview_unified_search';
 
-const saveButtonLabel = i18n.translate(
-  'xpack.agentBuilder.conversation.visualization.saveToDashboard',
-  {
-    defaultMessage: 'Save to dashboard',
-  }
-);
+const saveButtonLabel = i18n.translate('xpack.agentBuilder.visualization.saveToDashboard', {
+  defaultMessage: 'Save to dashboard',
+});
 
 const dashboardWriteControlsDisabledReason = i18n.translate(
-  'xpack.agentBuilder.conversation.visualization.dashboardWriteControlsDisabledReason',
+  'xpack.agentBuilder.visualization.dashboardWriteControlsDisabledReason',
   {
     defaultMessage:
       'You need dashboard write permissions to edit visualizations or save them to a dashboard.',
@@ -40,7 +37,7 @@ const dashboardWriteControlsDisabledReason = i18n.translate(
 );
 
 const viewConfigurationLabel = i18n.translate(
-  'xpack.agentBuilder.conversation.visualization.edit',
+  'xpack.agentBuilder.visualization.viewConfiguration',
   {
     defaultMessage: 'View configuration',
   }

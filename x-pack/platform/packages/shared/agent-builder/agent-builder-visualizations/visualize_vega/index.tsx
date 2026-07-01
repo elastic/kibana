@@ -35,22 +35,20 @@ import { useVisPreviewUnifiedSearch } from '../shared/use_vis_preview_unified_se
 /** `savedVis.type` Kibana uses to render a Vega/Vega-Lite spec. */
 const VEGA_VIS_TYPE = 'vega';
 
-const saveButtonLabel = i18n.translate(
-  'xpack.agentBuilder.conversation.vegaVisualization.saveToDashboard',
-  { defaultMessage: 'Save to dashboard' }
-);
+const saveButtonLabel = i18n.translate('xpack.agentBuilder.visualization.vega.saveToDashboard', {
+  defaultMessage: 'Save to dashboard',
+});
 
 const dashboardWriteControlsDisabledReason = i18n.translate(
-  'xpack.agentBuilder.conversation.vegaVisualization.dashboardWriteControlsDisabledReason',
+  'xpack.agentBuilder.visualization.vega.dashboardWriteControlsDisabledReason',
   {
     defaultMessage: 'You need dashboard write permissions to save visualizations to a dashboard.',
   }
 );
 
-const saveModalObjectType = i18n.translate(
-  'xpack.agentBuilder.conversation.vegaVisualization.objectType',
-  { defaultMessage: 'Visualization' }
-);
+const saveModalObjectType = i18n.translate('xpack.agentBuilder.visualization.vega.objectType', {
+  defaultMessage: 'Visualization',
+});
 
 /**
  * Render a custom Vega/Vega-Lite spec inline as a by-value visualize

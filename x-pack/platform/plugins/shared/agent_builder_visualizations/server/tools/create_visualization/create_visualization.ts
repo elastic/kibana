@@ -232,13 +232,18 @@ This tool will:
           );
         }
 
+        // Build the tool result from the attachment data, minus the echoed
+        // natural-language `query` (the model already has it; the result type
+        // does not carry it).
+        const { query: _query, ...visualizationResult } = visualizationData;
+
         return {
           results: [
             {
               type: ToolResultType.visualization,
               tool_result_id: getToolResultId(),
               data: {
-                ...visualizationData,
+                ...visualizationResult,
                 ...(resultAttachmentId && { attachment_id: resultAttachmentId }),
                 ...(resultVersion !== undefined && { version: resultVersion }),
               },
