@@ -33,15 +33,9 @@ export const createXsrfPostAuthHandler = (
   getAuthState: GetAuthState
 ): OnPostAuthHandler => {
   const { allowlist, disableProtection, allowedSchemes } = config.xsrf;
-  // `allowedSchemes` only accepts the canonical lower-case literals `apikey`/`bearer` via config
-  // schema validation, so the values are canonical here. Core reads http_authentication_scheme from
-  // AuthenticatedUser (set by the security plugin's HTTP auth provider at
-  // x-pack/.../authentication/providers/http.ts, the sole writer, which lowercases the scheme), so
-  // both sides are guaranteed lower-case and need no runtime normalization here.
-  // Widened to `Set<string>`: `allowedSchemes` is the narrower `'apikey' | 'bearer'` literal
-  // union at the config layer, but `scheme` below comes from AuthenticatedUser and can be any
-  // auth scheme name (e.g. `basic`), not just the exemptable ones, so the membership check has
-  // to accept a general string.
+  // Both sides are already lower-case (schema validation, and the HTTP auth provider at
+  // .../authentication/providers/http.ts), so no normalization is needed here.
+  // Set<string>, not Set<'apikey' | 'bearer'>: `scheme` below can be any auth scheme (e.g. `basic`).
   const exemptSchemes: Set<string> = new Set(allowedSchemes);
 
   return (request, response, toolkit) => {
