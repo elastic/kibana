@@ -43,14 +43,18 @@ import {
   ENTITY_ANOMALY_TABLE_TACTIC_COLUMN,
   ENTITY_ANOMALY_TABLE_TIMESTAMP_COLUMN,
   ENTITY_ANOMALY_TABLE_TITLE,
+  ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN,
 } from './translations';
 import type { TableRow } from './table/types';
-import { AnomalyJobName } from './table/anomaly_job_name';
-import { AnomalyTacticBadges } from './table/anomaly_tactic_badges';
-import { mapSummaryToRow } from './table/map_summary_to_row';
-import { AnomalyTimestamp } from './table/anomaly_timestamp';
-import { AnomalyExpandedRow } from './table/anomaly_expanded_row';
-import { AnomalyScoreBadge } from './table/anomaly_score_badge';
+import {
+  AnomalyJobName,
+  AnomalyTacticBadges,
+  AnomalyTimestamp,
+  mapSummaryToRow,
+  AnomalyExpandedRow,
+  AnomalyScoreBadge,
+  AnomalyRowActionsMenu,
+} from './table';
 
 export interface TableChangeEvent {
   page?: { index: number; size: number };
@@ -149,7 +153,12 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
         field: 'jobDisplayName',
         sortable: true,
         render: (_: string, item: TableRow) => (
-          <AnomalyJobName jobId={item.jobId} jobName={item.jobDisplayName} timeRange={timeRange} />
+          <AnomalyJobName
+            jobId={item.jobId}
+            jobName={item.jobDisplayName}
+            recordId={item.recordId}
+            timeRange={timeRange}
+          />
         ),
       },
       // Tactic column
@@ -213,6 +222,13 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
         sortable: true,
         width: '136px',
         render: (anomalyScore: number) => <AnomalyScoreBadge score={anomalyScore} />,
+      },
+      // Actions column
+      {
+        name: ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN,
+        width: '64px',
+        align: 'right',
+        render: (item: TableRow) => <AnomalyRowActionsMenu row={item} timeRange={timeRange} />,
       },
     ],
     [expandedRowIds, timeRange, toggleRowExpanded]
