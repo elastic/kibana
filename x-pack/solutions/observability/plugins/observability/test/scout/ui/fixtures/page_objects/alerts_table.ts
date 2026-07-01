@@ -182,12 +182,11 @@ export class AlertsTablePage {
    * are no toasts.
    */
   async dismissToasts() {
-    const toastCloseButtons = this.page.locator('[data-test-subj="toastCloseButton"]');
-    for (let count = await toastCloseButtons.count(); count > 0; count--) {
-      await toastCloseButtons
-        .first()
-        .click({ timeout: 2_000 })
-        .catch(() => {});
+    const toastCloseButtons = await this.page
+      .locator('[data-test-subj="toastCloseButton"]')
+      .all();
+    for (const toastCloseButton of toastCloseButtons) {
+      await toastCloseButton.click({ timeout: 2_000 }).catch(() => {});
     }
   }
 

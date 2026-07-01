@@ -58,7 +58,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const mockUseGetRuleTypesPermissions = jest.fn(() => ({
-  authorizedToReadRuleType: () => true,
+  authorizedToReadRuleType: (): boolean => true,
 }));
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
   ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),

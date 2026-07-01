@@ -38,7 +38,7 @@ import type {
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const mockUseGetRuleTypesPermissions = jest.fn(() => ({
-  authorizedToReadRuleType: (_ruleTypeId: string, _consumer?: string) => true,
+  authorizedToReadRuleType: (_ruleTypeId: string, _consumer?: string): boolean => true,
   authorizedToCreateAnyRules: false,
 }));
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
