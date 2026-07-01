@@ -11,7 +11,10 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
-import { getBrokenGraphWorkflowYaml, getMultiStepGraphWorkflowYaml } from '../../fixtures/workflows';
+import {
+  getBrokenGraphWorkflowYaml,
+  getMultiStepGraphWorkflowYaml,
+} from '../../fixtures/workflows';
 
 const VISUAL_EDITOR_SETTING = 'workflows:ui:visualEditor:enabled';
 const WORKFLOW_NAME = 'Graph Recovery Test';
