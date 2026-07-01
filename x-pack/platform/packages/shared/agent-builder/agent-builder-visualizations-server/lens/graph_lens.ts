@@ -10,8 +10,8 @@ import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server'
 import type { Logger } from '@kbn/logging';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
+import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './chart_type_registry';
 import {
@@ -29,7 +29,6 @@ import {
   isValidateConfigAction,
 } from './actions_lens';
 import { createGenerateConfigPrompt } from './prompts';
-import { esqlAdditionalInstructions } from '../shared/esql_instructions';
 
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
@@ -127,29 +126,27 @@ export const createVisualizationGraph = async (
         }
       }
 
-      const generateEsqlResponse = await generateEsql({
+      const generated = await generateVisualizationEsql({
         nlQuery: nlQueryWithContext,
         index: state.index,
         modelProvider,
         events,
         logger,
-        esClient: esClient.asCurrentUser,
-        additionalInstructions: esqlAdditionalInstructions,
+        esClient,
       });
 
-      if (!generateEsqlResponse.query) {
+      if (!generated.query) {
         action = {
           type: 'generate_esql',
           success: false,
-          error: 'No queries generated',
+          error: generated.error ?? 'No queries generated',
         };
       } else {
-        const esqlQuery = generateEsqlResponse.query;
-        logger.debug(`Generated ES|QL query: ${esqlQuery}`);
+        logger.debug(`Generated ES|QL query: ${generated.query}`);
         action = {
           type: 'generate_esql',
           success: true,
-          query: esqlQuery,
+          query: generated.query,
         };
       }
     } catch (error) {

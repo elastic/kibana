@@ -11,10 +11,10 @@ import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server'
 import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { generateEsql, executeEsql } from '@kbn/agent-builder-genai-utils';
+import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import { buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
-import { esqlAdditionalInstructions } from '../shared/esql_instructions';
+import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
 import { normalizeVegaSpec } from './normalize_spec';
 import { createAuthorVegaSpecPrompt } from './prompts';
 import {
@@ -138,40 +138,37 @@ export const createVegaGraph = async (
       }
 
       // Generate a query when none was provided, or the provided one failed.
-      // generateEsql validates + executes candidates in a bounded retry loop, so
-      // it returns only a query that actually runs (or an error once the retry
-      // budget is spent) — this is the self-correction that keeps invalid ES|QL
-      // out of a stored spec.
+      // generateVisualizationEsql self-corrects in a bounded retry loop, so it
+      // yields only a query that actually runs (or an error once the budget is
+      // spent) — this keeps invalid ES|QL out of a stored spec.
       if (!query) {
         logger.debug('Generating ES|QL query for Vega visualization');
-        const response = await generateEsql({
+        const generated = await generateVisualizationEsql({
           nlQuery: state.nlQuery,
           index: state.index,
           modelProvider,
           events,
           logger,
-          esClient: esClient.asCurrentUser,
-          additionalInstructions: esqlAdditionalInstructions,
+          esClient,
+          timeRange: DEFAULT_VALIDATION_TIME_RANGE,
         });
-        if (!response.query || response.error) {
+        if (!generated.query) {
           return {
             esqlQuery: state.esqlQuery,
             actions: [
               {
                 type: 'generate_esql',
                 success: false,
-                error: response.error ?? 'No queries generated',
+                error: generated.error ?? 'No queries generated',
               },
             ],
           };
         }
-        query = response.query;
-        // generateEsql already executed the query; reuse its columns instead of
-        // running it a second time. Re-execute only if it ran without returning
-        // results.
-        if (response.results) {
-          ({ columns } = response.results);
-        } else {
+        query = generated.query;
+        // Reuse the columns from the validation run; execute only if the query
+        // was validated without returning rows, since spec authoring needs them.
+        columns = generated.columns;
+        if (!columns) {
           ({ columns } = await executeEsql({
             query,
             params: timeRangeParams,
