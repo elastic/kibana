@@ -35,12 +35,12 @@ import type { AgentContextLayerPluginStart } from '../types';
  *
  * Both branches are gated by two checks before the contract is invoked:
  *
- * 1. The `agentBuilder:enableExperimentalFeatures` UI setting (the same
- *    feature flag that gates every HTTP route via `withSmlFeatureFlag` and
- *    the SML crawler task). When disabled the step returns an error
- *    result without touching the indexer — keeping the workflow step in
- *    lockstep with the rest of the AGL surface so a deployment with the
- *    flag off cannot silently mutate the SML index via a workflow.
+ * 1. The `contextEngine:enabled` UI setting (the same feature flag that
+ *    gates every HTTP route via `withSmlFeatureFlag` and the SML crawler
+ *    task). When disabled the step returns an error result without
+ *    touching the indexer — keeping the workflow step in lockstep with the
+ *    rest of the AGL surface so a deployment with the flag off cannot
+ *    silently mutate the SML index via a workflow.
  * 2. The `agentContextLayer:write` Kibana privilege against the workflow's
  *    fake request. The HTTP upsert/delete routes already enforce the same
  *    privilege via route security; the workflow step is a second
@@ -50,12 +50,18 @@ import type { AgentContextLayerPluginStart } from '../types';
  *    dev/test with security disabled) we follow the standard "no security
  *    plugin → open access" convention used by the SML read path.
  *
- * The `getTypeDefinition` guard intentionally only fires on the `upsert`
- * branch: writes against an unregistered type are nonsensical (no
- * `getSmlData` hook to fall back to, no `toAttachment` for downstream
- * consumers), but `delete` must remain functional even after a plugin
- * that registered the type is disabled — otherwise stale chunks become
- * unreachable from the workflow surface.
+ * Unregistered-type handling lives in the indexer, not here. Content-mode
+ * writes (the only mode this step uses for `upsert`) accept any
+ * `attachmentType`: when the type is registered, `getPermissions` is
+ * stamped; when it is not, empty `SmlPermissions` is stamped and the
+ * indexer emits a once-per-process warn naming the namespace. This lets
+ * workflow authors write ad-hoc content without first registering an SML
+ * type, at the cost of those chunks being space-readable rather than
+ * gated by a privilege. `delete` calls `deleteAttachment` directly — the
+ * indexer's delete path is permissive about registration so cleanup
+ * keeps working even after the plugin that registered the type is
+ * disabled, otherwise stale chunks become unreachable from the workflow
+ * surface.
  *
  * The handler defers resolving the AGL start contract until execution
  * time so the step can be registered during plugin `setup()` and still
@@ -71,10 +77,10 @@ export const createContextEngineAddEntryStepDefinition = ({
   getSpaces: () => SpacesPluginStart | undefined;
   getSecurity: () => SecurityPluginStart | undefined;
   /**
-   * Resolves whether the AGL/SML experimental UI setting is enabled for
-   * the calling request's space. Mirrors the gate applied to every HTTP
-   * route via `withSmlFeatureFlag` and to the SML crawler task. The check
-   * is request-scoped so per-space overrides of the setting are honored.
+   * Resolves whether the Context Engine UI setting is enabled for the
+   * calling request's space. Mirrors the gate applied to every HTTP route
+   * via `withSmlFeatureFlag` and to the SML crawler task. The check is
+   * request-scoped so per-space overrides of the setting are honored.
    */
   isFeatureEnabled: (request: KibanaRequest) => Promise<boolean>;
 }) =>
@@ -90,7 +96,7 @@ export const createContextEngineAddEntryStepDefinition = ({
         if (!featureEnabled) {
           return {
             error: new Error(
-              `Agent Context Layer experimental features are disabled — cannot ${action} Context Engine entry '${originId}'.`
+              `Context Engine (experimental feature) is disabled — cannot ${action} Context Engine entry '${originId}'.`
             ),
           };
         }
@@ -134,12 +140,14 @@ export const createContextEngineAddEntryStepDefinition = ({
             ingestionMethod: 'all',
           });
         } else {
-          if (!startContract.getTypeDefinition(attachmentType)) {
-            return {
-              error: new Error(`Unknown Context Engine entry type: '${attachmentType}'`),
-            };
-          }
-
+          // Permissions are intentionally *not* passed through here. The
+          // indexer derives them from the registered type's `getPermissions`
+          // hook, which makes workflow-driven writes inherit the same gating
+          // as a crawler-driven write (and cannot be spoofed by a workflow
+          // author). If `attachmentType` is unregistered, the indexer
+          // stamps empty `SmlPermissions` (space-readable) and emits a
+          // once-per-process warn naming the namespace — see
+          // `SmlIndexer.indexManualChunks`.
           const chunks: SmlChunk[] = input.chunks.map((chunk) => ({
             type: chunk.type,
             title: chunk.title,
@@ -150,13 +158,6 @@ export const createContextEngineAddEntryStepDefinition = ({
             ...(chunk.references !== undefined
               ? { references: chunk.references.map((uri) => ({ uri })) }
               : {}),
-            // The workflow input carries flat Kibana privilege strings; map
-            // them into the nested permissions shape (no ES index gating is
-            // expressible via this step yet).
-            permissions: {
-              kibana: { privileges: (chunk.permissions ?? []).map((name) => ({ name })) },
-              elasticsearch: { indices: [] },
-            },
           }));
 
           await startContract.indexAttachment({
