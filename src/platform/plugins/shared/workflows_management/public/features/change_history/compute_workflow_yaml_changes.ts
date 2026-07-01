@@ -97,6 +97,30 @@ const countSiblingStepNames = (steps: ParsedWorkflowYaml['steps']): Map<string, 
   return nameCounts;
 };
 
+const stripBranchSteps = (branch: unknown): unknown => {
+  if (typeof branch !== 'object' || branch === null) {
+    return branch;
+  }
+
+  const { steps: _steps, ...branchWithoutSteps } = branch as { steps?: unknown };
+  return branchWithoutSteps;
+};
+
+/** Strip nested step trees so container entries compare only their own config fields. */
+const stripNestedStepContent = (step: ParsedWorkflowStep): ParsedWorkflowStep => {
+  const stripped = { ...step } as Record<string, unknown>;
+
+  if ('steps' in step && isWorkflowStepArray(step.steps)) {
+    delete stripped.steps;
+  }
+
+  if ('branches' in step && Array.isArray(step.branches)) {
+    stripped.branches = step.branches.map(stripBranchSteps);
+  }
+
+  return stripped as ParsedWorkflowStep;
+};
+
 const flattenSteps = (steps: ParsedWorkflowYaml['steps'], parentPath = ''): FlattenedStep[] => {
   if (!steps) {
     return [];
@@ -204,7 +228,10 @@ const compareSteps = (
         kind: 'step_removed',
         label: baselineEntry.name,
       });
-    } else if (stableStringify(baselineEntry.step) !== stableStringify(targetEntry.step)) {
+    } else if (
+      stableStringify(stripNestedStepContent(baselineEntry.step)) !==
+      stableStringify(stripNestedStepContent(targetEntry.step))
+    ) {
       changes.push({
         kind: 'step_modified',
         label: targetEntry.name,

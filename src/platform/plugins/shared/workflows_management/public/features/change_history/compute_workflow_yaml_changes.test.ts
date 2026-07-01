@@ -169,6 +169,68 @@ describe('computeWorkflowYamlChanges', () => {
     );
   });
 
+  it('counts nested step edits once without also flagging the container step', () => {
+    const nestedStepWorkflow = (innerMessage: string): string =>
+      [
+        'name: workflow',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: loop',
+        '    type: foreach',
+        "    foreach: '[1,2]'",
+        '    steps:',
+        '      - name: inner',
+        '        type: console',
+        '        with:',
+        `          message: ${innerMessage}`,
+      ].join('\n');
+
+    const result = computeWorkflowYamlChanges(
+      nestedStepWorkflow('hello'),
+      nestedStepWorkflow('world')
+    );
+
+    expect(result.count).toBe(1);
+    expect(result.summaryGroups).toEqual([
+      expect.objectContaining({
+        title: 'Steps:',
+        lines: ['1 updated'],
+      }),
+    ]);
+  });
+
+  it('still flags container step config changes separately from nested step edits', () => {
+    const foreachWorkflow = (foreachValue: string, innerMessage: string): string =>
+      [
+        'name: workflow',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: loop',
+        '    type: foreach',
+        `    foreach: '${foreachValue}'`,
+        '    steps:',
+        '      - name: inner',
+        '        type: console',
+        '        with:',
+        `          message: ${innerMessage}`,
+      ].join('\n');
+
+    const result = computeWorkflowYamlChanges(
+      foreachWorkflow('[1,2]', 'hello'),
+      foreachWorkflow('[1,2,3]', 'world')
+    );
+
+    expect(result.count).toBe(2);
+    expect(result.summaryGroups).toEqual([
+      expect.objectContaining({
+        title: 'Steps:',
+        lines: ['2 updated'],
+      }),
+    ]);
+  });
+
   it('does not treat reordered step keys as modifications', () => {
     const nameFirstStep = [
       'name: workflow',
