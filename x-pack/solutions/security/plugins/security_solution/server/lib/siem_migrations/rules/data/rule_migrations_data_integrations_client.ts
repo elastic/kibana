@@ -41,7 +41,7 @@ const EXCLUDED_INTEGRATIONS = [
 /* The minimum score required for a integration to be considered correct, might need to change this later */
 const MIN_SCORE = 7 as const;
 /* The number of integrations the RAG will return, sorted by score */
-const RETURNED_INTEGRATIONS = 5 as const;
+const RETURNED_INTEGRATIONS = 10 as const;
 const PACKAGE_METADATA_CONCURRENCY = 30 as const;
 
 export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBaseClient {
@@ -70,8 +70,7 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       }
     } catch (error) {
       this.logger.warn(
-        `Failed to fetch fields metadata for package ${pkg.name}: ${
-          error instanceof Error ? error.message : String(error)
+        `Failed to fetch fields metadata for package ${pkg.name}: ${error instanceof Error ? error.message : String(error)
         }`
       );
     }
@@ -144,8 +143,7 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       );
     } catch (error) {
       this.logger.warn(
-        `Failed to fetch package archive for ${pkg.name}: ${
-          error instanceof Error ? error.message : String(error)
+        `Failed to fetch package archive for ${pkg.name}: ${error instanceof Error ? error.message : String(error)
         }`
       );
     }

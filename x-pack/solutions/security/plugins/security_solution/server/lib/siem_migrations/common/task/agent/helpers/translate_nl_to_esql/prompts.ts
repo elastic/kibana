@@ -22,7 +22,7 @@ Try to translate to ESQL as much as possible. Keep in mind below when translatin
 - If not even 20% of the detection logic can be translated, you must:
   - Provide a summary of the reasons why it cannot be translated.
   - NOT provide any dummy/example or simple ESQL query.
-- Use LOOKUP JOIN to enrich data with lookup indices.
+- Must Use LOOKUP JOIN to enrich data with lookup indices NOT ENRICH
 - Never add quotes or backticks to index names. This also applied to lookup index names
 - Always use the provided index pattern in the output, do not use a different index pattern. This is very important.
 - Since you are creating ESQL query, try to use ESQL specific commands and syntax as much as possible, do not use KQL/lucene unless necessary. For example, use \`where\` command for filtering instead of KQL. Only use KQL for below use cases:

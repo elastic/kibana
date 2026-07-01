@@ -27,6 +27,9 @@ export const getResourcesContext = (resources: MigrationResources): ResourceCont
 
   // Process lookups
   if (resources.lookup?.length) {
+    // Keep lookup context intentionally compact. Lookup resources may carry translation-only
+    // enrichment such as runtime mapping fields, but the inlining prompt only needs the source
+    // lookup name to Elastic lookup index name mapping.
     const lookups = Object.fromEntries(
       resources.lookup.map(({ name, content }) => [name, content])
     );
