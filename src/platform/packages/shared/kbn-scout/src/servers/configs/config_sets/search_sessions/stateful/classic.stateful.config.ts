@@ -14,6 +14,11 @@ export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
-    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, '--data.search.sessions.enabled=true'],
+    serverArgs: [
+      ...defaultConfig.kbnTestServer.serverArgs,
+      '--data.search.sessions.enabled=true',
+      // enable automatic refresh for the sessions management screen (default is 0s = disabled).
+      '--data.search.sessions.management.refreshInterval=10s',
+    ],
   },
 };
