@@ -124,6 +124,39 @@ describe('timeRangeToDisplayText', () => {
       );
     });
   });
+
+  describe('locale generation', () => {
+    // Proves the core round-trip design: display text is generated FROM the
+    // active grammar's own templates (not hand-built English), so whatever
+    // is shown here is also what the corpus proves the parser re-accepts.
+    it('generates a German compact relative label (past)', () => {
+      expect(toDisplay('-1w', { locale: 'de-DE' })).toBe('Letzte 1 Woche');
+    });
+
+    it('generates a German compact relative label (future)', () => {
+      expect(toDisplay('now to +15m', { locale: 'de-DE' })).toBe('Nächste 15 Minuten');
+    });
+
+    it('generates German relative-to-relative instant phrasing', () => {
+      expect(toDisplay('-15m to -5m', { locale: 'de-DE' })).toBe('vor 15 Minuten → vor 5 Minuten');
+    });
+
+    it('generates a French compact relative label (past)', () => {
+      expect(toDisplay('-1w', { locale: 'fr-FR' })).toBe('Derniers 1 semaine');
+    });
+
+    it('generates French relative-to-relative instant phrasing', () => {
+      expect(toDisplay('-15m to -5m', { locale: 'fr-FR' })).toBe(
+        'il y a 15 minutes → il y a 5 minutes'
+      );
+    });
+
+    it('generates "jetzt" for bare now in German', () => {
+      expect(toDisplay('Feb 3 2016 to now', { locale: 'de-DE' })).toBe(
+        'Feb 3, 2016, 00:00:00 → jetzt'
+      );
+    });
+  });
 });
 
 describe('timeRangeToFullFormattedText', () => {

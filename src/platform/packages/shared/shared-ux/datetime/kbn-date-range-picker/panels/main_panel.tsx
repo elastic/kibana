@@ -52,16 +52,18 @@ interface OptionsListProps {
 
 /** Renders a list of time range options as selectable `PanelListItem` entries. */
 const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListProps) => {
-  const { applyRange, onPresetDelete, settings } = useDateRangePickerContext();
-  const timePrecision = settings.timePrecision ?? 's';
+  const { applyRange, onPresetDelete, transformOptions } = useDateRangePickerContext();
   const euiThemeContext = useEuiTheme();
   const styles = mainPanelStyles(euiThemeContext);
 
   const handleSelect = useCallback(
     (option: TimeRangeBoundsOption) => {
-      applyRange({ start: option.start, end: option.end }, getOptionInputText(option));
+      applyRange(
+        { start: option.start, end: option.end },
+        getOptionInputText(option, transformOptions)
+      );
     },
-    [applyRange]
+    [applyRange, transformOptions]
   );
 
   return (
@@ -71,7 +73,7 @@ const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListPr
           key={`${option.start}-${option.end}-${index}`}
           data-test-subj={toTestSubj(
             'dateRangePickerPresetItem',
-            getOptionDisplayLabel(option, { timePrecision })
+            getOptionDisplayLabel(option, transformOptions)
           )}
           onClick={() => handleSelect(option)}
           suffix={showShorthand ? getOptionShorthand(option) ?? undefined : undefined}
@@ -90,7 +92,7 @@ const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListPr
             ) : undefined
           }
         >
-          {getOptionDisplayLabel(option, { timePrecision })}
+          {getOptionDisplayLabel(option, transformOptions)}
         </PanelListItem>
       ))}
     </ul>

@@ -215,12 +215,12 @@ export function resolveInitialFocus(
  */
 export function getOptionDisplayLabel(
   option: TimeRangeBoundsOption,
-  options?: Pick<TimeRangeTransformOptions, 'timePrecision'>
+  options?: Pick<TimeRangeTransformOptions, 'timePrecision' | 'presets' | 'dateFormat' | 'locale'>
 ): string {
   if (option.label) return option.label;
 
   const text = `${option.start} ${DATE_RANGE_INPUT_DELIMITER} ${option.end}`;
-  const timeRange = textToTimeRange(text);
+  const timeRange = textToTimeRange(text, options);
   return timeRangeToDisplayText(timeRange, options);
 }
 
@@ -264,9 +264,12 @@ export function getOptionShorthand(option: TimeRangeBoundsOption): string | null
  * 2. Otherwise generates a user-friendly shorthand from the bounds, stripping
  *    the `now` prefix where possible (e.g. "-15m" instead of "now-15m").
  */
-export function getOptionInputText(option: TimeRangeBoundsOption): string {
+export function getOptionInputText(
+  option: TimeRangeBoundsOption,
+  options?: Pick<TimeRangeTransformOptions, 'locale'>
+): string {
   if (option.label) {
-    const parsed = textToTimeRange(option.label);
+    const parsed = textToTimeRange(option.label, options);
     if (!parsed.isInvalid) return option.label;
   }
 

@@ -75,7 +75,9 @@ export function DateRangePickerControl() {
     autoRefreshSecondsRemaining,
     toggleAutoRefresh,
     timeRange,
+    transformOptions,
   } = useDateRangePickerContext();
+  const { locale } = transformOptions;
   const { euiTheme } = useEuiTheme();
   const hintText = useInputHintText(text);
   const hintTextPrefix = inputControlTexts.hintTextPrefix;
@@ -99,8 +101,9 @@ export function DateRangePickerControl() {
     isActive: isEditing && !wasClearedRef.current,
     initialSelection: 'none',
     rangeType: timeRange.type,
+    locale,
     onModifyPart: ({ text: currentText, part, parts, action }) => {
-      const newText = applyPartModification(currentText, part, action, parts);
+      const newText = applyPartModification(currentText, part, action, parts, locale);
       if (newText === undefined) return undefined;
       setText(newText);
       onInputChange?.(newText);
@@ -125,8 +128,10 @@ export function DateRangePickerControl() {
 
     if (!clickedPart) return;
 
-    const inputParts = parseInputParts(text, timeRange.type).filter((part) => part.navigable);
-    const displayParts = parseDisplayParts(displayText);
+    const inputParts = parseInputParts(text, timeRange.type, locale).filter(
+      (part) => part.navigable
+    );
+    const displayParts = parseDisplayParts(displayText, locale);
     const target = findCorrespondingInputPart(inputParts, clickedPart, displayParts);
 
     if (target) {
@@ -139,7 +144,7 @@ export function DateRangePickerControl() {
       });
       return () => cancelAnimationFrame(requestId);
     }
-  }, [displayText, inputRef, isEditing, text, timeRange.type]);
+  }, [displayText, inputRef, isEditing, text, timeRange.type, locale]);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;
@@ -308,6 +313,7 @@ export function DateRangePickerControl() {
                   displayText={displayText}
                   onPartClick={handleDisplayPartClick}
                   disabled={disabled}
+                  locale={locale}
                 />
               )}
               {!hideBadge && (
