@@ -5,12 +5,12 @@
  * 2.0.
  */
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
-import type { StreamQuery } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/significant-events-schema';
+import { deriveQueryType } from '@kbn/streams-schema';
 import {
   bulkStreamQueryInputSchema,
   upsertStreamQueryRequestSchema,
-  deriveQueryType,
-} from '@kbn/streams-schema';
+} from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { QueryNotFoundError } from '../../../lib/streams/errors/query_not_found_error';
@@ -92,10 +92,8 @@ const listQueriesRoute = createServerRoute({
     },
   },
   async handler({ params, request, getScopedClients, server }): Promise<ListQueriesResponse> {
-    const { getKnowledgeIndicatorClient, streamsClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const scopedClients = await getScopedClients({ request });
+    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
@@ -103,7 +101,7 @@ const listQueriesRoute = createServerRoute({
       path: { name: streamName },
     } = params;
 
-    const kiClient = await getKnowledgeIndicatorClient();
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const { [streamName]: queryLinks } = await kiClient.getStreamToQueryLinksMap([streamName]);
 
     return {
@@ -160,10 +158,8 @@ const upsertQueryRoute = createServerRoute({
     body: upsertStreamQueryRequestSchema,
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<UpsertQueryResponse> => {
-    const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const scopedClients = await getScopedClients({ request });
+    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
     const {
       path: { name: streamName, queryId },
       body,
@@ -177,7 +173,7 @@ const upsertQueryRoute = createServerRoute({
       stream: definition,
     });
 
-    const kiClient = await getKnowledgeIndicatorClient();
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     await kiClient.upsertQuery(definition, {
       id: queryId,
       type: deriveQueryType(body.esql.query),
@@ -246,10 +242,8 @@ const deleteQueryRoute = createServerRoute({
     logger,
     server,
   }): Promise<DeleteQueryResponse> => {
-    const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const scopedClients = await getScopedClients({ request });
+    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
@@ -258,7 +252,7 @@ const deleteQueryRoute = createServerRoute({
 
     const definition = await streamsClient.getStream(streamName);
 
-    const kiClient = await getKnowledgeIndicatorClient();
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const queryLink = await kiClient.bulkGetQueriesByIds(streamName, [queryId]);
     if (queryLink.length === 0) {
       throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
@@ -338,10 +332,8 @@ const bulkQueriesRoute = createServerRoute({
     logger,
     server,
   }): Promise<BulkUpdateAssetsResponse> => {
-    const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const scopedClients = await getScopedClients({ request });
+    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
@@ -391,7 +383,7 @@ const bulkQueriesRoute = createServerRoute({
       });
     }
 
-    const kiClient = await getKnowledgeIndicatorClient();
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const deleteIds = new Set(typedOperations.flatMap((op) => (op.delete ? [op.delete.id] : [])));
     const indexQueriesById = new Map(
       typedOperations.flatMap((op) => (op.index ? [[op.index.id, op.index] as const] : []))
