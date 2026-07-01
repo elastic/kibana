@@ -1003,6 +1003,12 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
 });
 
 describe('cleanPreconfiguredFleetServerHosts', () => {
+  beforeEach(() => {
+    mockedAppContextService.getLogger.mockReturnValue(
+      new Proxy({} as any, { get: () => jest.fn() })
+    );
+  });
+
   afterEach(() => {
     jest.resetAllMocks();
   });
@@ -1059,15 +1065,6 @@ describe('cleanPreconfiguredFleetServerHosts', () => {
     // PrivateLink config entry removed — pass empty array
     await cleanPreconfiguredFleetServerHosts(soClient, esClient, []);
 
-    // Should un-preconfigure the private host
-    expect(mockedFleetServerHostService.update).toBeCalledWith(
-      expect.anything(),
-      expect.anything(),
-      SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
-      expect.objectContaining({ is_preconfigured: false }),
-      { fromPreconfiguration: true }
-    );
-
     // Should restore the public default
     expect(mockedFleetServerHostService.update).toBeCalledWith(
       expect.anything(),
@@ -1075,6 +1072,22 @@ describe('cleanPreconfiguredFleetServerHosts', () => {
       SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
       { is_default: true },
       { fromPreconfiguration: true }
+    );
+
+    // Should delete the private host entirely so it cannot be re-enabled by mistake
+    expect(mockedFleetServerHostService.delete).toBeCalledWith(
+      expect.anything(),
+      SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+      expect.anything()
+    );
+
+    // Should NOT un-preconfigure (no ghost SO left behind)
+    expect(mockedFleetServerHostService.update).not.toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+      expect.anything(),
+      expect.anything()
     );
   });
 

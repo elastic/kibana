@@ -278,20 +278,10 @@ export async function cleanPreconfiguredOutputs(
     }
 
     if (output.is_default || output.is_default_monitoring) {
-      logger.info(`Updating default preconfigured output ${output.id} is no longer preconfigured`);
-      await outputService.update(
-        soClient,
-        esClient,
-        output.id,
-        { is_preconfigured: false },
-        {
-          fromPreconfiguration: true,
-        }
-      );
-
       // When PrivateLink is disabled and the private output was the active default,
       // restore the public serverless default output so agents are not left pointing
-      // at an unreachable PrivateLink URL.
+      // at an unreachable PrivateLink URL, then delete the private output entirely
+      // so it cannot be re-enabled by mistake.
       if (output.id === SERVERLESS_PRIVATE_OUTPUT_ID) {
         logger.info(
           `PrivateLink output ${output.id} was the default; restoring ${SERVERLESS_DEFAULT_OUTPUT_ID} as default`
@@ -305,6 +295,19 @@ export async function cleanPreconfiguredOutputs(
             is_default_monitoring: output.is_default_monitoring ? true : undefined,
           },
           { fromPreconfiguration: true }
+        );
+        logger.info(`Deleting PrivateLink output ${output.id}`);
+        await outputService.delete(output.id, { fromPreconfiguration: true });
+      } else {
+        logger.info(`Updating default preconfigured output ${output.id} is no longer preconfigured`);
+        await outputService.update(
+          soClient,
+          esClient,
+          output.id,
+          { is_preconfigured: false },
+          {
+            fromPreconfiguration: true,
+          }
         );
       }
     } else {

@@ -1444,15 +1444,6 @@ describe('Outputs preconfiguration', () => {
 
         await cleanPreconfiguredOutputs(soClient, esClient, []);
 
-        // Should un-preconfigure the PrivateLink output
-        expect(mockedOutputService.update).toBeCalledWith(
-          expect.anything(),
-          expect.anything(),
-          SERVERLESS_PRIVATE_OUTPUT_ID,
-          expect.objectContaining({ is_preconfigured: false }),
-          { fromPreconfiguration: true }
-        );
-
         // Should restore the public default
         expect(mockedOutputService.update).toBeCalledWith(
           expect.anything(),
@@ -1460,6 +1451,21 @@ describe('Outputs preconfiguration', () => {
           SERVERLESS_DEFAULT_OUTPUT_ID,
           { is_default: true, is_default_monitoring: true },
           { fromPreconfiguration: true }
+        );
+
+        // Should delete the PrivateLink output entirely so it cannot be re-enabled by mistake
+        expect(mockedOutputService.delete).toBeCalledWith(
+          SERVERLESS_PRIVATE_OUTPUT_ID,
+          expect.anything()
+        );
+
+        // Should NOT un-preconfigure (no ghost SO left behind)
+        expect(mockedOutputService.update).not.toBeCalledWith(
+          expect.anything(),
+          expect.anything(),
+          SERVERLESS_PRIVATE_OUTPUT_ID,
+          expect.anything(),
+          expect.anything()
         );
       });
     });

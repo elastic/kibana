@@ -47,7 +47,9 @@ export function getCloudFleetServersHosts() {
   }
 }
 
-export function getPreconfiguredFleetServerHostFromConfig(config?: FleetConfigType) {
+export function getPreconfiguredFleetServerHostFromConfig(
+  config?: FleetConfigType
+): FleetServerHost[] {
   const { fleetServerHosts: fleetServerHostsFromConfig } = config;
 
   const legacyFleetServerHostsConfig = getConfigFleetServerHosts(config);
@@ -169,10 +171,7 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
       const isUpdateWithNewData =
         existingHost &&
         (!existingHost.is_preconfigured ||
-          (await isPreconfiguredFleetServerHostDifferentFromCurrent(
-            existingHost,
-            preconfiguredFleetServerHost
-          )));
+          (await isPreconfiguredFleetServerHostDifferentFromCurrent(existingHost, data)));
 
       if (isCreate) {
         toCreate.push({ ...data, is_preconfigured: true, id, secretHashes });
@@ -245,19 +244,10 @@ export async function cleanPreconfiguredFleetServerHosts(
     }
 
     if (existingFleetServerHost.is_default) {
-      await fleetServerHostService.update(
-        soClient,
-        esClient,
-        existingFleetServerHost.id,
-        { is_preconfigured: false },
-        {
-          fromPreconfiguration: true,
-        }
-      );
-
       // When PrivateLink is disabled and the private host was the active default,
       // restore the public serverless default host so agents are not left pointing
-      // at an unreachable PrivateLink URL.
+      // at an unreachable PrivateLink URL, then delete the private host entirely
+      // so it cannot be re-enabled by mistake.
       if (existingFleetServerHost.id === SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID) {
         const logger = appContextService.getLogger();
         logger.info(
@@ -269,6 +259,19 @@ export async function cleanPreconfiguredFleetServerHosts(
           SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
           { is_default: true },
           { fromPreconfiguration: true }
+        );
+        await fleetServerHostService.delete(esClient, existingFleetServerHost.id, {
+          fromPreconfiguration: true,
+        });
+      } else {
+        await fleetServerHostService.update(
+          soClient,
+          esClient,
+          existingFleetServerHost.id,
+          { is_preconfigured: false },
+          {
+            fromPreconfiguration: true,
+          }
         );
       }
     } else {
