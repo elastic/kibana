@@ -119,7 +119,7 @@ test.describe(
 
     test('navigates to Discover (traces)', async ({
       page,
-      pageObjects: { serviceMapPage, discover },
+      pageObjects: { serviceMapPage, discover, dataGrid },
     }) => {
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
@@ -130,13 +130,13 @@ test.describe(
       await serviceMapPage.clickServiceMapFlyoutAction('openTracesInDiscover');
 
       await expect(page).toHaveURL(new RegExp(`/app/discover`));
-      await discover.waitUntilSearchingHasFinished();
+      await dataGrid.waitForDocTableRendered();
       expect(await discover.getEsqlQueryValue()).toMatch(new RegExp('traces-'));
     });
 
     test('navigates to Discover (logs)', async ({
       page,
-      pageObjects: { serviceMapPage, discover },
+      pageObjects: { serviceMapPage, discover, dataGrid },
     }) => {
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
@@ -147,7 +147,7 @@ test.describe(
       await serviceMapPage.clickServiceMapFlyoutAction('openLogsInDiscover');
 
       await expect(page).toHaveURL(new RegExp(`/app/discover`));
-      await discover.waitUntilSearchingHasFinished();
+      await dataGrid.waitForDocTableRendered();
       expect(await discover.getEsqlQueryValue()).toMatch(new RegExp('logs-'));
     });
 
