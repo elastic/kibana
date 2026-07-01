@@ -1,0 +1,92 @@
+# TEMPORARY workflow (remove before merge). Builds a full CodeQL JS database and
+# runs the DoS queries via the CLI directly — bypassing code scanning, so results
+# are NOT capped at 5,000 and NOT diff-scoped — then retains the raw SARIF as an
+# artifact for offline analysis. Tracked in elastic/kibana-team#3660.
+name: "TEMP CodeQL DoS SARIF export"
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/zz-temp-codeql-dos-sarif.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dos-sarif:
+    name: Build DB and export DoS SARIF
+    runs-on: kibana
+    if: github.repository == 'elastic/kibana'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Locate CodeQL CLI
+        id: cli
+        run: |
+          set -euo pipefail
+          CODEQL_VERSION=$(ls "${{ runner.tool_cache }}/CodeQL" | grep -E '^[0-9]' | head -1)
+          echo "path=${{ runner.tool_cache }}/CodeQL/$CODEQL_VERSION/x64/codeql" >> "$GITHUB_OUTPUT"
+
+      - name: Build paths-only extraction config
+        run: |
+          set -euo pipefail
+          awk '/^paths-ignore:/{p=1} /^query-filters:|^packs:|^queries:/{p=0} p' \
+            .github/codeql/codeql-config.yml > "$RUNNER_TEMP/extract-config.yml"
+          echo "--- extraction config ---"; head -3 "$RUNNER_TEMP/extract-config.yml"
+
+      - name: Create database (mirrors CI extraction: SKIP_TYPES + paths-ignore)
+        env:
+          CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES: "true"
+        run: |
+          set -euo pipefail
+          export PATH="${{ steps.cli.outputs.path }}:$PATH"
+          codeql database create "$RUNNER_TEMP/db" \
+            --language=javascript \
+            --source-root=. \
+            --codescanning-config="$RUNNER_TEMP/extract-config.yml" \
+            --threads=0 \
+            --overwrite
+
+      - name: Analyze DoS queries -> SARIF (uncapped)
+        run: |
+          set -euo pipefail
+          export PATH="${{ steps.cli.outputs.path }}:$PATH"
+          codeql pack install .github/codeql/custom-queries
+          codeql database analyze "$RUNNER_TEMP/db" \
+            .github/codeql/custom-queries/dos/UnboundedStringInRoute.ql \
+            .github/codeql/custom-queries/dos/UnboundedStringInRouteReachable.ql \
+            .github/codeql/custom-queries/dos/UnboundedArrayInRoute.ql \
+            --format=sarifv2.1.0 \
+            --output="$RUNNER_TEMP/dos.sarif" \
+            --threads=0
+
+      - name: Per-rule count summary
+        run: |
+          set -euo pipefail
+          python3 - "$RUNNER_TEMP/dos.sarif" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, sys, collections
+          d = json.load(open(sys.argv[1]))
+          c = collections.Counter()
+          for run in d["runs"]:
+              for r in run.get("results", []):
+                  m = r["message"]["text"]
+                  api = "zod" if "z.string()" in m else ("cs" if "schema.string()" in m else "array")
+                  c[(r["ruleId"], api)] += 1
+          print("### DoS query results (uncapped)\n")
+          print("| rule | api | count |\n|---|---|---|")
+          for (rid, api), n in sorted(c.items()):
+              print(f"| {rid} | {api} | {n} |")
+          print(f"\n**total: {sum(c.values())}**")
+          PY
+
+      - name: Upload SARIF artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dos-sarif
+          path: ${{ runner.temp }}/dos.sarif
+          retention-days: 7
