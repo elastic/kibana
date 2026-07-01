@@ -7,7 +7,7 @@
 
 import type { RetrieverContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { Feature, KnowledgeIndicator, QueryLink } from '@kbn/streams-schema';
+import type { Feature, KnowledgeIndicator, QueryLink } from '@kbn/significant-events-schema';
 import {
   isStoredFeatureKnowledgeIndicator,
   isStoredQueryKnowledgeIndicator,
@@ -26,7 +26,7 @@ import {
 import { fromStoredFeature, fromStoredQuery } from './serializers';
 import { searchWithKeywordFallback } from '../../errors/search_with_keyword_fallback';
 import type { SearchMode } from '../../../../../common/queries';
-import type { SigEventsTuningConfig } from '../../../../../common/sig_events_tuning_config';
+import type { SignificantEventsTuningConfig } from '../../../../../common/significant_events_tuning_config';
 import type { RevisionReader } from './revision_reader';
 import type { RuleUnbackedFilter } from './types';
 
@@ -37,7 +37,7 @@ export class IndicatorSearcher {
     private readonly esClient: ElasticsearchClient,
     private readonly logger: Logger,
     private readonly config: Pick<
-      SigEventsTuningConfig,
+      SignificantEventsTuningConfig,
       'semantic_min_score' | 'rrf_rank_constant'
     >,
     private readonly revisionReader: RevisionReader
