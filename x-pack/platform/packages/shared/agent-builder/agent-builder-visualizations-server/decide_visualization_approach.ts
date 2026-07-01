@@ -30,7 +30,7 @@ const approachSchema = z
     renderer: z
       .enum(['lens', 'vega'])
       .describe(
-        'Pick "lens" whenever one of the available Lens chart types can express the request. Pick "vega" ONLY when none of them can.'
+        'Pick "lens" whenever one of the available Lens chart types can express the request. Pick "vega" ONLY when none of them can or user explicitly asks for a Vega or Vega-Lite visualization.'
       ),
     chartType: z
       .nativeEnum(SupportedChartType)
@@ -42,22 +42,14 @@ const approachSchema = z
 
 const buildSystemPrompt = (existingType?: string): string =>
   [
-    'You are a data visualization expert. Decide whether a request is best served by a standard Lens chart or by a custom Vega-Lite specification.',
-    '',
-    'You MUST call the "decide_visualization_approach" tool. Do NOT respond with plain text.',
-    '',
-    'Prefer Lens. Choose "lens" and the most appropriate chart type whenever one of the available Lens chart types can express the request:',
+    'Decide how to render a request: a standard Lens chart or a custom Vega-Lite specification. Call the "decide_visualization_approach" tool; do not reply with plain text.',
+    'Choose in order:',
+    '1. If the user explicitly asks for a Vega or Vega-Lite visualization, choose "vega".',
+    '2. Otherwise, if one of these Lens chart types fits, choose "lens" with the best-fitting one:',
     getChartTypeSelectionPromptContent(),
-    '',
-    'Vega here means Vega-Lite only (no raw Vega). Choose "vega" ONLY when no Lens chart type fits but Vega-Lite can express the request, for example:',
-    '- Small multiples / faceting (a grid of the same chart split by a category)',
-    '- Repeated or layered/combination charts (e.g. bars plus an overlaid line)',
-    '- Scatter / bubble plots with an encoded size dimension',
-    '',
-    'Do NOT choose "vega" for diagrams Vega-Lite cannot express — Sankey / flow / alluvial diagrams, network / node-link graphs, chord diagrams, or maps. For those, choose "lens" with the closest standard chart (e.g. a bar chart of the top source→destination combinations) so the user still gets a working visualization.',
-    '',
-    'When you choose "lens" you MUST also provide "chartType". When you choose "vega" omit "chartType".',
-    existingType ? `\nThe existing visualization currently uses: ${existingType}.` : '',
+    '3. Otherwise choose "vega" (e.g. small multiples/faceting, layered/combination charts, scatter/bubble with an encoded size).',
+    'Provide "chartType" only when you choose "lens".',
+    existingType ? `The existing visualization uses: ${existingType}.` : '',
   ]
     .filter(Boolean)
     .join('\n');
