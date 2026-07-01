@@ -61,34 +61,36 @@ export function MobileSearchBar({
           />
         </EuiFlexItem>
       )}
-      {hasSecondaryFilters && <EuiSpacer size="s" />}
       {hasSecondaryFilters && (
-        <EuiFlexGroup gutterSize="none" justifyContent="flexStart" responsive={false}>
-          <EuiFlexItem grow={false} style={secondaryFiltersWidthStyle}>
-            <EuiFlexGrid
-              columns={!isMedium ? 3 : 1}
-              gutterSize="s"
-              css={css`
-                width: 100%;
-                max-width: 100%;
-              `}
-            >
-              {showEnvironmentFilter && (
-                <EuiFlexItem>
-                  <ApmEnvironmentFilter compressed fullWidth />
-                </EuiFlexItem>
-              )}
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="none" justifyContent="flexStart" responsive={false}>
+            <EuiFlexItem grow={false} style={secondaryFiltersWidthStyle}>
+              <EuiFlexGrid
+                columns={!isMedium ? 3 : 1}
+                gutterSize="s"
+                css={css`
+                  width: 100%;
+                  max-width: 100%;
+                `}
+              >
+                {showEnvironmentFilter && (
+                  <EuiFlexItem>
+                    <ApmEnvironmentFilter compressed fullWidth />
+                  </EuiFlexItem>
+                )}
 
-              {showTimeComparison && (
-                <EuiFlexItem>
-                  <TimeComparison compressed fullWidth />
-                </EuiFlexItem>
-              )}
+                {showTimeComparison && (
+                  <EuiFlexItem>
+                    <TimeComparison compressed fullWidth />
+                  </EuiFlexItem>
+                )}
 
-              {showMobileFilters && <MobileFilters />}
-            </EuiFlexGrid>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+                {showMobileFilters && <MobileFilters />}
+              </EuiFlexGrid>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       )}
     </div>
   );
