@@ -9,10 +9,11 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { Client } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
+import { extractDataStreamName } from '@kbn/es-snapshot-loader';
 import type { ConnectionConfig } from '../lib/get_connection_config';
 import { getConnectionConfig } from '../lib/get_connection_config';
 import { createSnapshot, generateGcsBasePath, registerGcsRepository } from '../lib/gcs';
-import { GCS_BUCKET } from '../lib/constants';
+import { GCS_BUCKET, SIGNIFICANT_EVENTS_DATA_STREAMS } from '../lib/constants';
 import { resolvePatterns, parseCommonSnapshotFlags, toSnapshotName } from '../lib/snapshot_utils';
 import { withTempSuperuser } from '../lib/user_utils';
 
@@ -21,7 +22,10 @@ async function fetchMapping(
   indexName: string
 ): Promise<MappingTypeMapping | undefined> {
   const response = await esClient.indices.getMapping({ index: indexName });
-  return response[indexName]?.mappings;
+  // `getMapping` keys the response by concrete index name. For a data stream the
+  // keys are its backing indices (`.ds-…`), not the data-stream name, so fall back
+  // to the first entry when an exact-name match isn't present.
+  return response[indexName]?.mappings ?? Object.values(response)[0]?.mappings;
 }
 
 async function captureSystemIndex({
@@ -40,7 +44,13 @@ async function captureSystemIndex({
 
     const mappings = await fetchMapping(sysClient, sourceIndex);
     if (!mappings) {
-      throw new Error(`Could not fetch mapping for "${sourceIndex}"`);
+      const hint = SIGNIFICANT_EVENTS_DATA_STREAMS.includes(
+        sourceIndex as (typeof SIGNIFICANT_EVENTS_DATA_STREAMS)[number]
+      )
+        ? ' The Significant Events data stream has no backing indices — run the feature extraction / ' +
+          'discovery workflow before capturing.'
+        : '';
+      throw new Error(`Could not fetch mapping for "${sourceIndex}".${hint}`);
     }
 
     await sysClient.indices.delete({ index: snapshotIndex, ignore_unavailable: true });
@@ -98,7 +108,10 @@ export async function captureEnvSnapshot({
 
   log.info(`Snapshot: ${snapshotName} | Run: ${runId} | ES: ${config.esUrl}`);
 
-  const resolvedSystemIndices = await resolvePatterns(esClient, log, systemIndices);
+  const resolvedSystemIndices = await resolvePatterns(esClient, log, [
+    ...systemIndices,
+    ...SIGNIFICANT_EVENTS_DATA_STREAMS,
+  ]);
   const resolvedIndices = await resolvePatterns(esClient, log, [logsIndex, ...alertIndices]);
 
   const capturedSystemIndices: string[] = [];
@@ -111,9 +124,37 @@ export async function captureEnvSnapshot({
   const allSnapshotIndices = [...resolvedIndices, ...capturedSystemIndices].join(',');
 
   await registerGcsRepository(esClient, log, runId);
-  await createSnapshot({ esClient, log, snapshotName, runId, indices: allSnapshotIndices });
+  const actualIndices = await createSnapshot({
+    esClient,
+    log,
+    snapshotName,
+    runId,
+    indices: allSnapshotIndices,
+  });
 
-  log.info(`Snapshot created: sigevents-${runId}/${snapshotName} (${allSnapshotIndices})`);
+  // `ignore_unavailable: true` silently drops missing indices — report what was actually
+  // captured so a partial snapshot surfaces immediately rather than at restore time.
+  log.info(`Snapshot contains ${actualIndices.length} indices: ${actualIndices.join(', ')}`);
+  // `actualIndices` lists concrete indices — for a data stream these are its backing indices
+  // (`.ds-logs.otel-…`), not the data-stream name. Add the resolved data-stream name for each
+  // backing index so a requested data stream (e.g. `logs.otel`) isn't falsely flagged missing.
+  const capturedNames = new Set<string>();
+  for (const idx of actualIndices) {
+    capturedNames.add(idx);
+    const dataStream = extractDataStreamName(idx);
+    if (dataStream) {
+      capturedNames.add(dataStream);
+    }
+  }
+  // `requested` comes from `resolvePatterns` / `toSnapshotName`, so wildcards are already
+  // expanded — a plain membership check is enough.
+  const requested = allSnapshotIndices.split(',');
+  const missing = requested.filter((i) => !capturedNames.has(i));
+  if (missing.length > 0) {
+    log.warning(
+      `Requested indices NOT in snapshot (skipped — did not exist): ${missing.join(', ')}`
+    );
+  }
 
   log.info('');
   log.info('='.repeat(70));

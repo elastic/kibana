@@ -26,12 +26,12 @@ export async function addFilterWithoutStrictCheck(
   await page.testSubj.click('addFilter');
   await page.testSubj.waitForSelector('addFilterPopover');
   await page.testSubj.typeWithDelay('filterFieldSuggestionList > comboBoxSearchInput', field);
-  await page.locator(`.euiComboBoxOption[title="${field}"]`).click();
+  await page.testSubj.click(`filterFieldOption-${field}`);
   await expect(page.testSubj.locator('filterOperatorList')).not.toHaveClass(
     /euiComboBox-isDisabled/
   );
   await page.testSubj.typeWithDelay('filterOperatorList > comboBoxSearchInput', 'is');
-  await page.locator('.euiComboBoxOption[title="is"]').click();
+  await page.testSubj.click('filterOperatorOption-is');
   const filterParamsInput = page.locator('[data-test-subj="filterParams"] input');
   await expect(filterParamsInput).toBeEditable();
   await filterParamsInput.focus();
@@ -95,7 +95,7 @@ export const loginAndGoToDiscover = async ({
   await browserAuth.loginAsViewer();
   await pageObjects.discover.goto({ queryMode: 'classic' });
   await pageObjects.discover.waitUntilSearchingHasFinished();
-  await pageObjects.discover.waitForDocTableRendered();
+  await pageObjects.dataGrid.waitForDocTableRendered();
 };
 
 /**
@@ -105,7 +105,7 @@ export const loginAndGoToDiscover = async ({
 export const navigateToFirstDocContext = async (
   pageObjects: PageObjects & { contextPage: ContextPage }
 ) => {
-  await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
+  await pageObjects.dataGrid.openDocumentDetails({ rowIndex: 0 });
   await pageObjects.contextPage.clickRowAction(1);
   await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 };

@@ -6,13 +6,18 @@
  */
 
 /**
- * Thrown when a list query asks for a window larger than the index's
- * `index.max_result_window` setting. Routes translate this to HTTP 400 so
- * callers see a clean error instead of a 500.
+ * Re-export the SML error types.
+ *
+ * The concrete classes live one-per-file under `./errors/*` so the
+ * `max-classes-per-file` lint stays clean. Callers should keep
+ * importing from `./sml_errors` for stability — refactoring this
+ * barrel into individual leaf imports would touch every consumer for
+ * no behavioural benefit.
  */
-export class SmlResultWindowExceededError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'SmlResultWindowExceededError';
-  }
-}
+export {
+  SmlError,
+  SmlResultWindowExceededError,
+  SmlAuthzEnumerationIncompleteError,
+  SmlCorpusTooLargeError,
+  SmlUnregisteredTypeError,
+} from './errors';

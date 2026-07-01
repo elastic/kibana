@@ -108,6 +108,7 @@ describe('EbtTelemetryClient', () => {
     it('tracks significant events queries generated events', () => {
       client.trackSignificantEventsQueriesGenerated({
         count: 5,
+        connector_id: 'test-connector',
         input_tokens_used: 300,
         output_tokens_used: 150,
         cached_tokens_used: 20,
@@ -132,6 +133,7 @@ describe('EbtTelemetryClient', () => {
         STREAMS_SIGNIFICANT_EVENTS_QUERIES_GENERATED_EVENT_TYPE,
         {
           count: 5,
+          connector_id: 'test-connector',
           input_tokens_used: 300,
           output_tokens_used: 150,
           cached_tokens_used: 20,
