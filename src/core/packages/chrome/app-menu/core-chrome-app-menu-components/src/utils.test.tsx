@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isValidElement } from 'react';
+import { render } from '@testing-library/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   createReturnFocus,
@@ -439,6 +441,45 @@ describe('utils', () => {
 
       expect(result.toolTipContent).toBe('Content');
       expect(result.toolTipProps?.title).toBe('Title');
+    });
+
+    it('should disable the item when isLoading is true', () => {
+      const item = { ...baseItem, isLoading: true };
+      const result = mapAppMenuItemToPanelItem(item);
+
+      expect(result.disabled).toBe(true);
+    });
+
+    it('should disable the item when isLoading is true even if disableButton is false', () => {
+      const item = { ...baseItem, isLoading: true, disableButton: false };
+      const result = mapAppMenuItemToPanelItem(item);
+
+      expect(result.disabled).toBe(true);
+    });
+
+    it('should render a spinner icon instead of the iconType when isLoading is true', () => {
+      const item = { ...baseItem, iconType: 'gear' as const, isLoading: true, testId: 'my-item' };
+      const { icon } = mapAppMenuItemToPanelItem(item);
+
+      expect(icon).not.toBe('gear');
+      expect(isValidElement(icon)).toBe(true);
+
+      if (!isValidElement(icon)) {
+        throw new Error('Expected icon to be a React element');
+      }
+
+      const { getByTestId } = render(icon);
+      expect(getByTestId('my-item-loading')).toBeInTheDocument();
+    });
+
+    it('should set danger color when isDestructive is true', () => {
+      const result = mapAppMenuItemToPanelItem({ ...baseItem, isDestructive: true });
+      expect(result.color).toBe('danger');
+    });
+
+    it('should not set color when isDestructive is falsy', () => {
+      const result = mapAppMenuItemToPanelItem(baseItem);
+      expect(result.color).toBeUndefined();
     });
   });
 
