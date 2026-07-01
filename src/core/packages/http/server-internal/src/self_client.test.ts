@@ -112,9 +112,13 @@ describe('InternalHttpSelfScopedClient', () => {
     await expect(scoped.fetch('https://attacker.example/api/status')).rejects.toThrow(
       'Invalid self HTTP path'
     );
+    await expect(scoped.fetch('/\\attacker.example/api/status')).rejects.toThrow(
+      'Invalid self HTTP path'
+    );
     await expect(
       scoped.fetch('/api/status', { headers: { authorization: 'Bearer attacker' } })
     ).rejects.toThrow('protected headers are not allowed');
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 
   it('sets the internal origin header only when explicitly requested', async () => {

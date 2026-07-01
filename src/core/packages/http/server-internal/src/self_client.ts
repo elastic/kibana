@@ -114,6 +114,12 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     const pathname = options.prependBasePath === false ? path : `${this.request.basePath}${path}`;
     const url = new URL(pathname, baseUrl);
 
+    if (url.origin !== baseUrl.origin) {
+      throw new Error(
+        `Invalid self HTTP path "${path}". Resolved URL origin must match Kibana's origin.`
+      );
+    }
+
     if (options.query) {
       for (const [key, value] of Object.entries(options.query)) {
         if (value === undefined || value === null) {
@@ -228,7 +234,7 @@ const validateFetchArguments = <TRequestBody>(
   path: string,
   options: HttpSelfFetchOptions<TRequestBody>
 ) => {
-  if (!path.startsWith('/') || path.startsWith('//')) {
+  if (!path.startsWith('/') || path.startsWith('//') || path.startsWith('/\\')) {
     throw new Error(
       `Invalid self HTTP path "${path}". Use a Kibana-relative absolute path such as "/api/status".`
     );
