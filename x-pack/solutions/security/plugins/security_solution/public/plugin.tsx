@@ -307,9 +307,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // flag is disabled. The flag gates server-side writes; client-side rendering
     // must be unconditional to avoid "Attachment type is not registered" errors.
     // Lazily imported to keep the entity attachment module out of the page-load bundle.
-    void import('./cases/attachments/entity').then(({ getEntityAttachment }) => {
-      cases.attachmentFramework.registerUnified(getEntityAttachment());
-    });
+    import('./cases/attachments/entity')
+      .then(({ getEntityAttachment }) => {
+        cases.attachmentFramework.registerUnified(getEntityAttachment());
+      })
+      .catch((e) => {
+        this.logger.error('Failed to register entity attachment type', e);
+      });
 
     this.registerDiscoverSharedFeatures(core, plugins);
 

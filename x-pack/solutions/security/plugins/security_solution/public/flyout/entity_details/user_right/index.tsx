@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -41,7 +42,6 @@ import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
 } from '../shared/entity_store_risk_utils';
-import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import {
   mergeLegacyIdentityWhenStoreEntityMissing,
   type IdentityFields,
@@ -53,6 +53,7 @@ import { EntityPanelHeaderTabs } from '../shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../shared/components/entity_summary_grid';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../../entity_analytics/components/home/constants';
+import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 
 export { USER_PANEL_RISK_SCORE_QUERY_ID, USER_PANEL_OBSERVED_USER_QUERY_ID };
 
@@ -91,8 +92,8 @@ export const UserPanel = memo(function UserPanel({
 }: UserPanelProps) {
   const { uiSettings } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
-  const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
+  const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
 
   const safeContextID = contextID ?? scopeId ?? 'user-panel';
 
