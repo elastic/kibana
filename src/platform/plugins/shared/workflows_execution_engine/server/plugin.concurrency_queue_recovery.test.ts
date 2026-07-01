@@ -124,6 +124,7 @@ describe('concurrency queue recovery wiring', () => {
       taskInstance,
       fakeRequest,
       abortController: new AbortController(),
+      executionUuid: 'test-execution-uuid',
     });
 
     await runner.run();
