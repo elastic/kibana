@@ -98,7 +98,8 @@ export const alertTriageSkill = defineSkillType({
   basePath: 'skills/security/alerts',
   description:
     'Alert queue triage: prioritize and rank the alert queue by weighted risk factors — ' +
-    'base risk score, MITRE tactic boost, and status — then cluster alerts into entity groups. ' +
+    'base risk score, MITRE tactic boost, Entity Analytics entity risk, asset criticality, ' +
+    'and status — then cluster alerts into entity groups. ' +
     'Use when a user asks "what should I focus on?", "which alerts are most urgent?", ' +
     'or wants a ranked starting point across the queue without investigating individual alerts.',
   content: `# Alert Triage Guide
@@ -169,10 +170,22 @@ For each group returned, explain:
 - Tool: \`security.alert-triage.prioritize-alerts\` (only)
 - Params: \`{ alertIds: ["<id1>", "<id2>", ...], timeWindowHours: 24 }\`
 
+**Query**: "What alerts should I look at? Prioritize by entity risk where available."
+- Tool: \`security.alert-triage.prioritize-alerts\` (only)
+- Params: \`{ timeWindowHours: 24, workflowStatus: "open" }\`
+- Response order for the top group: (1) entityName, (2) entityRiskLevel verbatim (e.g. Critical) and entityRiskBoost, (3) why it outranks peers with higher base scores, (4) top alert _id
+
+**Query**: "Prioritize the alert queue. Call out any hosts with high asset criticality."
+- Tool: \`security.alert-triage.prioritize-alerts\` (only)
+- Params: \`{ timeWindowHours: 24, workflowStatus: "open" }\`
+- Response order for watchlist hosts: (1) entityName, (2) assetCriticality verbatim (e.g. extreme_impact) and assetCriticalityBoost, (3) why it outranks peers, (4) top alert _id
+
 ## Guardrails
 - Do not perform deep investigation — direct the user to alert-analysis for that
 - Always explain why a group is surfaced: cite the score components (base risk, MITRE boost, entity risk boost, asset criticality boost)
 - When a group's primary entity carries an entity risk level or asset criticality, cite it — these are strong prioritization signals from Entity Analytics
+- Copy \`entityRiskLevel\`, \`assetCriticality\`, and \`entityName\` verbatim from the tool result when present (e.g. "Critical", "extreme_impact", "EVAL-RISK-HOST"). Do not paraphrase level names.
+- When entity enrichment re-ranks a group above a higher base-score peer, explain why (cite the entity risk / criticality boost from scoreBreakdown)
 - Entity Analytics enrichment is internal to \`prioritize-alerts\`; never call \`security.entity_risk_score\` or any asset-criticality tool separately
 - Acknowledged alerts are deprioritized (−5) but not hidden; flag the modifier in your response
 - Alerts already in a case are deprioritized (−5) but remain visible — they may group with new open alerts

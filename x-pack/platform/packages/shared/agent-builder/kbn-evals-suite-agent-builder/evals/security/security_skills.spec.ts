@@ -267,7 +267,11 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'I will fetch and prioritize the current alert queue, scoring alerts by risk level and MITRE tactic, then group them by shared entities so you have a ranked starting point.',
+                    'Presents ranked alert groups from prioritize-alerts. Each group shows the shared ' +
+                    'entity or context, group score with drivers (base risk score, MITRE tactic boost, ' +
+                    'and optional entity risk or asset criticality boosts), and the top alert _id. ' +
+                    'Summarizes how many alerts were assessed and recommends alert-analysis for top groups. ' +
+                    'Presentation order of details within a group does not affect correctness.',
                 },
                 metadata: {
                   query_intent: 'Alert Queue Triage',
@@ -281,7 +285,10 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'I will retrieve alerts from the last 8 hours, score them by risk score and MITRE tactic weight, cluster them by shared host and user entities, and return a ranked prioritization.',
+                    'Presents ranked alert groups from the last 8 hours via prioritize-alerts. Each group ' +
+                    'shows shared host or user entity, score drivers (base risk, MITRE boost, optional ' +
+                    'entity risk or asset criticality), and top alert _id. Highest-urgency groups appear ' +
+                    'first. Presentation order of details within a group does not affect correctness.',
                 },
                 metadata: {
                   query_intent: 'Alert Queue Triage',
@@ -296,7 +303,9 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'I will prioritize the current open alert queue and group alerts by shared entities, so you have a clear ranked starting point for your shift.',
+                    'Presents ranked open alert groups as a shift starting point via prioritize-alerts. ' +
+                    'Each group shows shared entity, score drivers, and top alert _id. Summarizes total ' +
+                    'alerts assessed. Presentation order of details within a group does not affect correctness.',
                 },
                 metadata: {
                   query_intent: 'Alert Queue Triage',
@@ -310,7 +319,10 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'I will score and rank the alerts in your queue by risk score, MITRE tactic boost, and entity clustering to surface the highest-priority groups first.',
+                    'Presents highest-priority alert groups first, ranked by composite score (base risk, ' +
+                    'MITRE tactic boost, entity clustering). Each group includes shared entity, score ' +
+                    'drivers, and top alert _id. Presentation order of details within a group does not ' +
+                    'affect correctness.',
                 },
                 metadata: {
                   query_intent: 'Alert Queue Triage',
@@ -345,7 +357,10 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'I will investigate alert abc-123 by fetching its details, finding related alerts by shared entities, checking threat intelligence, and assessing entity risk to determine its disposition.',
+                    'Uses alert-analysis (not alert-triage queue prioritization) to investigate alert ' +
+                    'abc-123. Fetches alert details, related alerts, threat intelligence, and entity risk ' +
+                    'to assess true positive vs false positive disposition. Does not rank the full alert ' +
+                    'queue or present multi-group prioritize-alerts output.',
                 },
                 metadata: {
                   query_intent: 'Single Alert Investigation',

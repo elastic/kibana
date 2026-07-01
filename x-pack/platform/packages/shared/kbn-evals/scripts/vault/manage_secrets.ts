@@ -110,6 +110,7 @@ const configSchema = schema.object(
       )
     ),
     gcsDatasetAccessCredentials: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    selectedEvaluators: schema.maybe(schema.string({ minLength: 1 })),
   },
   { unknowns: 'allow' }
 );

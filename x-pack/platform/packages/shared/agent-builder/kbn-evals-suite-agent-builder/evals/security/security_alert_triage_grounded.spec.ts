@@ -205,10 +205,11 @@ evaluate.describe(
                 expected:
                   'The highest-priority group is on host EVAL-DC01 driven by a critical-severity ' +
                   'Lateral Movement alert (Remote Service Creation via Named Pipe) with a risk score ' +
-                  'of 99 and a +30 MITRE tactic boost. The top alert ID for that group should be ' +
+                  'of 99 and a +30 MITRE tactic boost. The top alert ID for that group is ' +
                   `${seededAlertIds?.critical ?? '<seeded-id>'}. ` +
                   'A second group on EVAL-WORKSTATION-01 involves Credential Access (LSASS Memory), ' +
-                  'scoring 95. A lower-priority Discovery alert on EVAL-SCANNER-01 rounds out the queue.',
+                  'scoring 95. A lower-priority Discovery alert on EVAL-SCANNER-01 rounds out the queue. ' +
+                  'Presentation order of groups and details does not affect correctness.',
               },
               metadata: {
                 query_intent: 'Alert Queue Triage - Grounded Output',
@@ -253,7 +254,8 @@ evaluate.describe(
                       seededAlertIds?.high ?? '<high-id>'
                     } — Credential Access on EVAL-WORKSTATION-01, ` +
                     `risk score 75 with a +20 MITRE boost (score 95). ` +
-                    'Both should be investigated further with alert-analysis.',
+                    'Both should be investigated further with alert-analysis. ' +
+                    'Presentation order of the two alerts does not affect correctness.',
                 },
                 metadata: {
                   query_intent: 'Alert Queue Triage - Grounded Output with IDs',

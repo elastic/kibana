@@ -49,6 +49,7 @@ interface VaultConfig {
   tracingEs?: { url?: string; apiKey?: string };
   tracingExporters?: unknown;
   gcsDatasetAccessCredentials?: unknown;
+  selectedEvaluators?: string;
 }
 
 const isNonEmptyString = (value: unknown): value is string =>
@@ -165,6 +166,10 @@ export const envFromExportProfile = (
     next.TRACING_EXPORTERS = JSON.stringify(cfg.tracingExporters);
   } else if (options?.defaultTracingExporters) {
     next.TRACING_EXPORTERS = JSON.stringify([{ http: { url: 'http://localhost:4318/v1/traces' } }]);
+  }
+
+  if (isNonEmptyString(cfg.selectedEvaluators) && !isPlaceholder(cfg.selectedEvaluators)) {
+    next.SELECTED_EVALUATORS = cfg.selectedEvaluators.trim();
   }
 
   maybeSetGcsCredentialsEnv(cfg, next);

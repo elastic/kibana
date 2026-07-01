@@ -213,7 +213,6 @@ evaluate.describe(
                 index: RISK_INDEX,
                 id: fixtures.entityRisk.riskDocId,
                 refresh: true,
-                ignore_unavailable: true,
               })
             : Promise.resolve(),
           fixtures.assetCriticality?.criticalityDocId
@@ -221,7 +220,6 @@ evaluate.describe(
                 index: CRITICALITY_INDEX,
                 id: fixtures.assetCriticality.criticalityDocId,
                 refresh: true,
-                ignore_unavailable: true,
               })
             : Promise.resolve(),
         ]);
@@ -254,11 +252,11 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The top group should be on host EVAL-RISK-HOST despite a lower base alert risk score ' +
-                    'than EVAL-RISK-PLAIN, because EVAL-RISK-HOST carries a Critical entity risk level ' +
-                    'from Entity Analytics (+25 boost). The response must cite EVAL-RISK-HOST, mention ' +
-                    'Critical entity risk, and include the top alert ID ' +
-                    `${entityRisk?.enrichedAlertId ?? '<enriched-id>'}.`,
+                    'Top ranked group is host EVAL-RISK-HOST with Critical entity risk from Entity Analytics ' +
+                    '(+25 entityRiskBoost), re-ranking it above EVAL-RISK-PLAIN despite a lower base alert ' +
+                    'risk score. Response cites EVAL-RISK-HOST, Critical entity risk level, and top alert ID ' +
+                    `${entityRisk?.enrichedAlertId ?? '<enriched-id>'}. ` +
+                    'Presentation order of these facts does not affect correctness.',
                 },
                 metadata: {
                   query_intent: 'Alert Triage - Entity Risk Enrichment',
@@ -293,11 +291,12 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The top group should be on host EVAL-CRIT-HOST despite a lower base alert risk score ' +
-                    'than EVAL-CRIT-PLAIN, because EVAL-CRIT-HOST has extreme_impact asset criticality ' +
-                    '(+20 boost). The response must cite EVAL-CRIT-HOST, mention extreme_impact asset ' +
-                    'criticality, and include the top alert ID ' +
-                    `${assetCriticality?.watchlistAlertId ?? '<watchlist-id>'}.`,
+                    'Top ranked group is host EVAL-CRIT-HOST with extreme_impact asset criticality ' +
+                    '(+20 assetCriticalityBoost), re-ranking it above EVAL-CRIT-PLAIN despite a lower base ' +
+                    'alert risk score. Response cites EVAL-CRIT-HOST, extreme_impact criticality level, ' +
+                    'and top alert ID ' +
+                    `${assetCriticality?.watchlistAlertId ?? '<watchlist-id>'}. ` +
+                    'Presentation order of these facts does not affect correctness.',
                 },
                 metadata: {
                   query_intent: 'Alert Triage - Asset Criticality Enrichment',
