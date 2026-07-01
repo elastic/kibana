@@ -116,6 +116,7 @@ import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterHoverCommands } from '../lib/use_register_hover_commands';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 import { navigateToErrorPosition } from '../lib/utils';
+import { WORKFLOW_MONACO_LAYOUT_OPTIONS } from '../lib/workflow_monaco_layout_options';
 import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_styles';
 import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
 import {
@@ -124,29 +125,7 @@ import {
 } from '../styles/use_workflow_editor_styles';
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
-  minimap: { enabled: false },
-  automaticLayout: true,
-  lineNumbers: 'on',
-  glyphMargin: true,
-  scrollBeyondLastLine: false,
-  folding: true,
-  showFoldingControls: 'mouseover',
-  tabSize: 2,
-  lineNumbersMinChars: 2,
-  insertSpaces: true,
-  fontSize: 14,
-  lineHeight: 23, // default ~21px + 2px
-  renderWhitespace: 'none',
-  roundedSelection: false,
-  guides: { indentation: true },
-  wordWrap: 'on',
-  wordWrapColumn: 80,
-  wrappingIndent: 'indent',
-  theme: WORKFLOWS_MONACO_EDITOR_THEME,
-  padding: {
-    top: 24,
-    bottom: 16,
-  },
+  ...WORKFLOW_MONACO_LAYOUT_OPTIONS,
   quickSuggestions: {
     other: true,
     comments: false,
@@ -257,7 +236,8 @@ export const WorkflowYAMLEditor = ({
   const originalValue = workflow?.yaml ?? '';
 
   // Refs
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  // EuiFlexGroup forwards this ref to its outer div for ActionsMenuPopover anchoring.
+  const containerRef = useRef<React.ElementRef<typeof EuiFlexGroup>>(null);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
   const stepExecutions = useSelector(selectStepExecutions);
@@ -884,13 +864,19 @@ export const WorkflowYAMLEditor = ({
   );
 
   return (
-    <div css={editorWrapperCss} ref={containerRef}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      responsive={false}
+      css={editorWrapperCss}
+      ref={containerRef}
+    >
       <GlobalWorkflowEditorStyles />
       <ActionsMenuPopover
         anchorPosition="upCenter"
         offset={32}
         button={actionsMenuPanelProps.Button}
-        container={containerRef.current ?? undefined}
+        container={containerRef.current instanceof HTMLElement ? containerRef.current : undefined}
         closePopover={closeActionsPopover}
         onActionSelected={onActionSelected}
         isOpen={actionsPopoverOpen}
@@ -998,7 +984,7 @@ export const WorkflowYAMLEditor = ({
           />
         </div>
       )}
-    </div>
+    </EuiFlexGroup>
   );
 };
 
