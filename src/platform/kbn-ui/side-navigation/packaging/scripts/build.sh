@@ -60,7 +60,9 @@ echo "==> Step 3: TypeScript declarations"
   --rootDir "$PACKAGING_DIR/react" \
   --moduleResolution node \
   --esModuleInterop \
-  --skipLibCheck
+  --skipLibCheck \
+  --ignoreConfig \
+  --ignoreDeprecations 6.0
 mv "$TARGET_DIR/types.d.ts" "$TARGET_DIR/index.d.ts"
 echo "    Declarations OK"
 
