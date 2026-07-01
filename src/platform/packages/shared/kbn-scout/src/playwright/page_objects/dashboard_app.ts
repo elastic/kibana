@@ -552,6 +552,8 @@ export class DashboardApp {
    * Uses the data-render-complete attribute to determine panel rendering completion.
    */
   async waitForRenderComplete() {
+    // Dashboard viewport can be slow to appear on cold CI runs (see https://github.com/elastic/kibana/pull/275767);
+    // the default 10s flakes on slower agents. Revisit once the root cause is fixed.
     await this.dashboardViewport.waitFor({ state: 'visible', timeout: 30_000 });
 
     await this.waitForControlsReady();
