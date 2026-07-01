@@ -169,6 +169,8 @@ describe('parseTestFlags', () => {
       esFrom: undefined,
       headed: false,
       ui: false,
+      uiHost: undefined,
+      uiPort: undefined,
       repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
@@ -199,6 +201,8 @@ describe('parseTestFlags', () => {
       esFrom: 'snapshot',
       headed: true,
       ui: false,
+      uiHost: undefined,
+      uiPort: undefined,
       repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
@@ -228,6 +232,8 @@ describe('parseTestFlags', () => {
       esFrom: undefined,
       headed: false,
       ui: false,
+      uiHost: undefined,
+      uiPort: undefined,
       repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
@@ -258,6 +264,8 @@ describe('parseTestFlags', () => {
       esFrom: 'snapshot',
       headed: true,
       ui: false,
+      uiHost: undefined,
+      uiPort: undefined,
       repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
@@ -288,6 +296,8 @@ describe('parseTestFlags', () => {
       esFrom: undefined,
       headed: false,
       ui: false,
+      uiHost: undefined,
+      uiPort: undefined,
       repeatEach: 5,
       installDir: undefined,
       logsDir: undefined,
@@ -317,6 +327,8 @@ describe('parseTestFlags', () => {
       esFrom: undefined,
       headed: false,
       ui: true,
+      uiHost: undefined,
+      uiPort: undefined,
       repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
@@ -360,6 +372,77 @@ describe('parseTestFlags', () => {
 
     await expect(parseTestFlags(flags)).rejects.toThrow(
       `'--repeatEach' cannot be combined with '--ui': UI mode is interactive, not a batch run`
+    );
+  });
+
+  it(`should parse with --ui, --uiHost and --uiPort flags`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      ui: true,
+      uiHost: '0.0.0.0',
+      uiPort: '8888',
+      serverConfigSet: 'default',
+    });
+    validatePlaywrightConfigMock.mockResolvedValueOnce();
+    const result = await parseTestFlags(flags);
+
+    expect(result).toEqual({
+      configPath: '/path/to/config',
+      esFrom: undefined,
+      headed: false,
+      ui: true,
+      uiHost: '0.0.0.0',
+      uiPort: 8888,
+      repeatEach: undefined,
+      installDir: undefined,
+      logsDir: undefined,
+      preserveEsData: false,
+      serverConfigSet: 'default',
+      testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
+    });
+  });
+
+  it(`should throw an error when '--uiHost' is used without '--ui'`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      ui: false,
+      uiHost: '0.0.0.0',
+      serverConfigSet: 'default',
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      `'--uiHost' and '--uiPort' can only be used together with '--ui'`
+    );
+  });
+
+  it(`should throw an error when '--uiPort' is out of range`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      ui: true,
+      uiPort: '70000',
+      serverConfigSet: 'default',
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      `'--uiPort' must be an integer between 0 and 65535, got '70000'`
     );
   });
 
@@ -457,6 +540,8 @@ describe('parseTestFlags', () => {
         esFrom: undefined,
         headed: false,
         ui: false,
+        uiHost: undefined,
+        uiPort: undefined,
         repeatEach: undefined,
         installDir: undefined,
         logsDir: undefined,
@@ -501,6 +586,8 @@ describe('parseTestFlags', () => {
         esFrom: undefined,
         headed: false,
         ui: false,
+        uiHost: undefined,
+        uiPort: undefined,
         repeatEach: undefined,
         installDir: undefined,
         logsDir: undefined,

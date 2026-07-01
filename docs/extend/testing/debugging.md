@@ -41,6 +41,18 @@ node scripts/scout run-tests \
 
 `--ui` cannot be combined with `--headed` (UI mode manages its own browser) or `--repeatEach` (UI mode is interactive, not a batch run).
 
+To make the UI reachable from another machine (for example, when servers run on a remote host), pass `--uiHost` and `--uiPort`:
+
+```bash
+node scripts/scout run-tests \
+  --arch stateful \
+  --domain classic \
+  --config <plugin-path>/test/scout/ui/playwright.config.ts \
+  --ui \
+  --uiHost 0.0.0.0 \
+  --uiPort 8888
+```
+
 #### Using Playwright directly [playwright-ui-mode-playwright]
 
 If servers are already running (for example, started once with `node scripts/scout start-server`), you can launch UI mode against them directly. This is handy when you want to keep servers up across many iterations.

@@ -56,6 +56,9 @@ export const runTestsCmd: Command<void> = {
 
     Interactive Playwright UI mode (starts servers, then opens the UI; servers stop when the UI is closed):
     node scripts/scout run-tests --arch stateful --domain classic --config <playwright_config_path> --ui
+
+    Interactive Playwright UI mode reachable from another machine:
+    node scripts/scout run-tests --arch stateful --domain classic --config <playwright_config_path> --ui --uiHost 0.0.0.0 --uiPort 8888
   `,
   flags: TEST_FLAG_OPTIONS,
   run: async ({ flagsReader, log }) => {

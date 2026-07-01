@@ -212,6 +212,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     ...(options.headed ? ['--headed'] : []),
     ...(options.repeatEach ? [`--repeat-each=${options.repeatEach}`] : []),
     ...(options.ui ? ['--ui'] : []),
+    ...(options.ui && options.uiHost ? [`--ui-host=${options.uiHost}`] : []),
+    ...(options.ui && options.uiPort !== undefined ? [`--ui-port=${options.uiPort}`] : []),
   ];
 
   await withProcRunner(log, async (procs) => {
@@ -238,10 +240,14 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       await runPlaywrightTest(procs, pwBinPath, pwCmdArgs, pwEnv);
     }
 
-    reportTime(runStartTime, 'ready', {
-      success: true,
-      ...options,
-    });
+    // UI mode is an interactive local session, not a batch run, so its wall-clock
+    // time is not a meaningful CI-stats signal.
+    if (!options.ui) {
+      reportTime(runStartTime, 'ready', {
+        success: true,
+        ...options,
+      });
+    }
   });
 }
 

@@ -21,6 +21,8 @@ export interface RunTestsOptions {
   configPath: string;
   headed: boolean;
   ui: boolean;
+  uiHost: string | undefined;
+  uiPort: number | undefined;
   repeatEach: number | undefined;
   testFiles?: string[];
   esFrom: 'serverless' | 'source' | 'snapshot' | undefined;
@@ -31,7 +33,14 @@ export interface RunTestsOptions {
 export const TEST_FLAG_OPTIONS: FlagOptions = {
   ...SERVER_FLAG_OPTIONS,
   boolean: [...(SERVER_FLAG_OPTIONS.boolean || []), 'headed', 'ui'],
-  string: [...(SERVER_FLAG_OPTIONS.string || []), 'config', 'testFiles', 'repeatEach'],
+  string: [
+    ...(SERVER_FLAG_OPTIONS.string || []),
+    'config',
+    'testFiles',
+    'repeatEach',
+    'uiHost',
+    'uiPort',
+  ],
   default: { ...SERVER_FLAG_OPTIONS.default, headed: false, ui: false },
   help: `
     ${SERVER_FLAG_OPTIONS.help}
@@ -39,6 +48,8 @@ export const TEST_FLAG_OPTIONS: FlagOptions = {
     --testFiles         Comma-separated list of test file paths or test directory path (required if --config not provided)
     --headed            Run Playwright with browser head
     --ui                Run Playwright in interactive UI mode. Servers are started first and kept running until the UI is closed
+    --uiHost            Host to serve the Playwright UI on (requires --ui, e.g. --uiHost 0.0.0.0 for remote access)
+    --uiPort            Port to serve the Playwright UI on (requires --ui)
     --repeatEach        Run each test N times for local flakiness validation (e.g. --repeatEach 5)
   `,
 };
@@ -60,6 +71,8 @@ export async function parseTestFlags(flags: FlagsReader) {
 
   const headed = flags.boolean('headed');
   const ui = flags.boolean('ui');
+  const uiHost = flags.string('uiHost');
+  const uiPort = flags.number('uiPort');
   const repeatEach = flags.number('repeatEach');
 
   if (repeatEach !== undefined && (repeatEach < 1 || !Number.isInteger(repeatEach))) {
@@ -76,6 +89,14 @@ export async function parseTestFlags(flags: FlagsReader) {
     throw createFlagError(
       `'--repeatEach' cannot be combined with '--ui': UI mode is interactive, not a batch run`
     );
+  }
+
+  if (!ui && (uiHost !== undefined || uiPort !== undefined)) {
+    throw createFlagError(`'--uiHost' and '--uiPort' can only be used together with '--ui'`);
+  }
+
+  if (uiPort !== undefined && (!Number.isInteger(uiPort) || uiPort < 0 || uiPort > 65535)) {
+    throw createFlagError(`'--uiPort' must be an integer between 0 and 65535, got '${uiPort}'`);
   }
 
   let scoutConfigPath: string;
@@ -101,6 +122,8 @@ export async function parseTestFlags(flags: FlagsReader) {
     configPath: scoutConfigPath,
     headed,
     ui,
+    uiHost,
+    uiPort,
     repeatEach,
     ...(testFiles.length > 0 && { testFiles }),
   };
