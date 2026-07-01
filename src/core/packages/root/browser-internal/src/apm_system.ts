@@ -234,9 +234,15 @@ export class ApmSystem {
   private addRouteChangeNormalization(apm: ApmBase) {
     apm.observe('transaction:end', (t) => {
       const executionContext = this.executionContext?.get();
-      if (executionContext && (t.type === 'route-change' || t.type === 'page-load')) {
-        const { name, page } = executionContext;
+      if (!executionContext) {
+        return;
+      }
+      const { name, page } = executionContext;
+      if (t.type === 'route-change') {
         t.name = `${name} ${page || 'unknown'}`;
+      } else if (t.type === 'page-load' && page) {
+        // Only override the /app/{appId} fallback when a parameterized page exists.
+        t.name = `${name} ${page}`;
       }
     });
   }
