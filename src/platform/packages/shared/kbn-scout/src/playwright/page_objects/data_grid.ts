@@ -375,6 +375,12 @@ export class DataGrid {
       .click();
   }
 
+  async openSingleDocument(rowIndex: number) {
+    await this.openAndWaitForDocViewerFlyout({ rowIndex });
+    await this.page.testSubj.locator('docViewerFlyout').getByLabel('View single document').click();
+    await this.page.testSubj.locator('doc-hit').waitFor({ state: 'visible' });
+  }
+
   async readJsonFromCodeEditor<T extends Record<string, unknown>>(): Promise<T> {
     const codeEditor = new KibanaCodeEditorWrapper(this.page);
     let parsed: T | undefined;
