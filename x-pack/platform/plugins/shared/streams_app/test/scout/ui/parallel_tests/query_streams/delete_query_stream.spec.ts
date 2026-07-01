@@ -57,6 +57,6 @@ test.describe.skip('Query streams - Delete query stream', { tag: tags.stateful.c
         method: 'GET',
         path: `/_query/view/${encodeURIComponent(ESQL_VIEW_NAME)}`,
       })
-    ).rejects.toThrow(/index_not_found_exception/);
+    ).rejects.toThrow(/resource_not_found_exception/);
   });
 });

@@ -13,6 +13,10 @@ import type {
 } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import { DataStreamClient } from '@kbn/data-streams';
+import {
+  DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+  type SignificantEventsTuningConfig,
+} from '@kbn/significant-events-schema';
 import type { StreamsPluginStartDependencies } from '../../../types';
 import {
   knowledgeIndicatorsDataStream,
@@ -23,10 +27,6 @@ import {
   KnowledgeIndicatorClient,
   type KnowledgeIndicatorDataStreamClient,
 } from './knowledge_indicator_client';
-import {
-  DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
-  type SignificantEventsTuningConfig,
-} from '../../../../common/significant_events_tuning_config';
 import type { SignificantEventsAlertingContext } from '../../significant_events/alerting/significant_events_alerting_context';
 
 export class KnowledgeIndicatorService {

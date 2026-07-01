@@ -44,8 +44,6 @@ export {
   extractMessagesFromField,
 } from './pattern_extraction_helpers';
 
-export type { SignificantEventsTuningConfig } from './significant_events_tuning_config';
-export { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from './significant_events_tuning_config';
 export {
   SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
   SIGNIFICANT_EVENT_SML_TYPE,
