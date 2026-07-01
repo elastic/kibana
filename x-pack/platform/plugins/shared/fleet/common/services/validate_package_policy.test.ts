@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 
 import { installationStatuses } from '../constants';
 import type {
@@ -385,13 +385,13 @@ describe('Fleet - validatePackagePolicy()', () => {
     };
 
     it('returns no errors for valid package policy', () => {
-      expect(validatePackagePolicy(validPackagePolicy, mockPackage, load)).toEqual(
+      expect(validatePackagePolicy(validPackagePolicy, mockPackage, parse)).toEqual(
         noErrorsValidationResults
       );
     });
 
     it('returns errors for invalid package policy', () => {
-      expect(validatePackagePolicy(invalidPackagePolicy, mockPackage, load)).toEqual({
+      expect(validatePackagePolicy(invalidPackagePolicy, mockPackage, parse)).toEqual({
         name: ['Name is required'],
         description: null,
         namespace: null,
@@ -438,7 +438,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         enabled: false,
       }));
       expect(
-        validatePackagePolicy({ ...validPackagePolicy, inputs: disabledInputs }, mockPackage, load)
+        validatePackagePolicy({ ...validPackagePolicy, inputs: disabledInputs }, mockPackage, parse)
       ).toEqual(noErrorsValidationResults);
     });
 
@@ -455,7 +455,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         validatePackagePolicy(
           { ...invalidPackagePolicy, inputs: inputsWithDisabledStreams },
           mockPackage,
-          load
+          parse
         )
       ).toEqual({
         name: ['Name is required'],
@@ -508,7 +508,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             ...mockPackage,
             policy_templates: undefined,
           },
-          load
+          parse
         )
       ).toEqual({
         name: null,
@@ -524,7 +524,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             ...mockPackage,
             policy_templates: [],
           },
-          load
+          parse
         )
       ).toEqual({
         name: null,
@@ -543,7 +543,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             ...mockPackage,
             policy_templates: [{} as RegistryPolicyTemplate],
           },
-          load
+          parse
         )
       ).toEqual({
         name: null,
@@ -559,7 +559,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             ...mockPackage,
             policy_templates: [{ inputs: [] } as unknown as RegistryPolicyTemplate],
           },
-          load
+          parse
         )
       ).toEqual({
         name: null,
@@ -596,7 +596,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             ],
           },
           mockPackage,
-          load
+          parse
         )
       ).toEqual({
         name: null,
@@ -726,7 +726,7 @@ describe('Fleet - validatePackagePolicy()', () => {
               },
             ],
           },
-          load
+          parse
         )
       ).toEqual({
         description: null,
@@ -757,7 +757,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         validatePackagePolicy(
           INVALID_AWS_POLICY as NewPackagePolicy,
           AWS_PACKAGE as unknown as PackageInfo,
-          load
+          parse
         )
       ).toMatchSnapshot();
     });
@@ -768,7 +768,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           validatePackagePolicy(
             VALID_AWS_POLICY as NewPackagePolicy,
             AWS_PACKAGE as unknown as PackageInfo,
-            load
+            parse
           )
         )
       ).toBe(false);
@@ -918,7 +918,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      load
+      parse
     );
 
     expect(validationResults).toEqual(
@@ -972,7 +972,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      load
+      parse
     );
 
     expect(validationResults).toEqual(
@@ -1026,7 +1026,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      load
+      parse
     );
 
     expect(validationResults).toEqual(
@@ -1080,7 +1080,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      load
+      parse
     );
 
     expect(validationResults).toEqual(
@@ -1219,7 +1219,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           required: true,
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toEqual(['myvariable is required']);
@@ -1238,7 +1238,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           required: true,
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toEqual(['myvariable is required']);
@@ -1257,7 +1257,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           required: true,
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toBeNull();
@@ -1276,7 +1276,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           type: 'integer',
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toEqual(['Invalid integer']);
@@ -1293,7 +1293,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           type: 'integer',
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toBeNull();
@@ -1311,7 +1311,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           multi: true,
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toEqual(['Invalid integer']);
@@ -1329,7 +1329,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           multi: true,
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toBeNull();
@@ -1352,7 +1352,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           ],
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toEqual(['Invalid value for select type']);
@@ -1373,7 +1373,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           ],
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toEqual(['Invalid value for select type']);
@@ -1394,7 +1394,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           ],
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toBeNull();
@@ -1415,7 +1415,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           ],
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toBeNull();
@@ -1431,7 +1431,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           secret: true,
         },
         'secret_variable',
-        load
+        parse
       );
 
       expect(res).toBeNull();
@@ -1447,7 +1447,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           secret: true,
         },
         'secret_variable',
-        load
+        parse
       );
 
       expect(res).toEqual(['Secret reference is invalid, id must be a string']);
@@ -1463,7 +1463,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           secret: true,
         },
         'secret_variable',
-        load
+        parse
       );
 
       expect(res).toEqual(['Secret reference is invalid, id must be a string']);
@@ -1484,7 +1484,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           type: 'text',
         },
         'data_stream.dataset',
-        load,
+        parse,
         'input'
       );
     };
@@ -1530,7 +1530,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           type: 'text',
         },
         'data_stream.dataset',
-        load,
+        parse,
         'input'
       );
 
@@ -1548,7 +1548,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           type: 'text',
         },
         'data_stream.dataset',
-        load,
+        parse,
         'integration'
       );
 
@@ -1566,7 +1566,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           type: 'text',
         },
         'test_field',
-        load,
+        parse,
         'input'
       );
 
@@ -1584,7 +1584,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           type: 'text',
         },
         'data_stream.dataset',
-        load,
+        parse,
         'input'
       );
 
@@ -1602,7 +1602,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           type: 'text',
         },
         'data_stream.dataset',
-        load,
+        parse,
         'input'
       );
 

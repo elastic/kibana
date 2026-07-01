@@ -14,3 +14,7 @@ export function isESClientError(error: unknown): error is errors.ResponseError {
 export function isElasticsearchVersionConflictError(error: Error): boolean {
   return isESClientError(error) && error.meta.statusCode === 409;
 }
+
+export function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { MsearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SyntheticsEsClient } from './lib';
+import type { MsearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { DataTier } from '@kbn/observability-shared-plugin/common';
+import { SyntheticsEsClient, applyExcludedDataTiersToQuery } from './lib';
 import { savedObjectsClientMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
@@ -184,6 +185,149 @@ describe('SyntheticsEsClient', () => {
 
       await expect(syntheticsEsClient.count(mockCountParams)).rejects.toThrow(mockError);
       expect(esClient.count).toHaveBeenCalledWith(mockCountParams, { meta: true });
+    });
+  });
+
+  describe('excluded data tiers', () => {
+    const matchAll = { match_all: {} };
+    const frozen: DataTier[] = ['data_frozen'];
+    const expectedFrozenFilter = { bool: { must_not: [{ terms: { _tier: frozen } }] } };
+
+    const createClientWithExcludedTiers = (tiers: DataTier[]) => {
+      const uiSettings = uiSettingsServiceMock.createClient();
+      uiSettings.get.mockResolvedValue(tiers);
+      const client = new SyntheticsEsClient(savedObjectsClient, esClient, {
+        uiSettingsClient: uiSettings,
+      });
+      return { client, uiSettings };
+    };
+
+    it('wraps the search query with a tier exclusion filter when configured', async () => {
+      const { client, uiSettings } = createClientWithExcludedTiers(frozen);
+
+      await client.search({ body: { query: matchAll } });
+
+      expect(uiSettings.get).toHaveBeenCalledWith('observability:searchExcludedDataTiers');
+      expect(esClient.search).toHaveBeenCalledWith(
+        {
+          index: 'synthetics-*',
+          ignore_unavailable: true,
+          body: { query: { bool: { filter: [matchAll, expectedFrozenFilter] } } },
+        },
+        { meta: true }
+      );
+    });
+
+    it('does not modify the search query when no tiers are excluded', async () => {
+      const { client } = createClientWithExcludedTiers([]);
+
+      await client.search({ body: { query: matchAll } });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        { index: 'synthetics-*', ignore_unavailable: true, body: { query: matchAll } },
+        { meta: true }
+      );
+    });
+
+    it('wraps each msearch request with a tier exclusion filter when configured', async () => {
+      esClient.msearch.mockResolvedValueOnce({
+        body: { responses: [{}] },
+      } as unknown as MsearchResponse);
+      const { client } = createClientWithExcludedTiers(frozen);
+
+      await client.msearch([{ query: matchAll }]);
+
+      expect(esClient.msearch).toHaveBeenCalledWith(
+        {
+          searches: [
+            { index: 'synthetics-*', ignore_unavailable: true },
+            { query: { bool: { filter: [matchAll, expectedFrozenFilter] } } },
+          ],
+        },
+        { meta: true }
+      );
+    });
+
+    it('does not modify msearch requests when no tiers are excluded', async () => {
+      esClient.msearch.mockResolvedValueOnce({
+        body: { responses: [{}] },
+      } as unknown as MsearchResponse);
+      const { client, uiSettings } = createClientWithExcludedTiers([]);
+
+      await client.msearch([{ query: matchAll }]);
+
+      expect(uiSettings.get).toHaveBeenCalledWith('observability:searchExcludedDataTiers');
+      expect(esClient.msearch).toHaveBeenCalledWith(
+        {
+          searches: [{ index: 'synthetics-*', ignore_unavailable: true }, { query: matchAll }],
+        },
+        { meta: true }
+      );
+    });
+
+    it('wraps the count query with a tier exclusion filter when configured', async () => {
+      const { client } = createClientWithExcludedTiers(frozen);
+
+      await client.count({ query: matchAll });
+
+      expect(esClient.count).toHaveBeenCalledWith(
+        {
+          index: 'synthetics-*',
+          ignore_unavailable: true,
+          query: { bool: { filter: [matchAll, expectedFrozenFilter] } },
+        },
+        { meta: true }
+      );
+    });
+
+    it('does not modify the count query when no tiers are excluded', async () => {
+      const { client, uiSettings } = createClientWithExcludedTiers([]);
+
+      await client.count({ query: matchAll });
+
+      expect(uiSettings.get).toHaveBeenCalledWith('observability:searchExcludedDataTiers');
+      expect(esClient.count).toHaveBeenCalledWith(
+        { index: 'synthetics-*', ignore_unavailable: true, query: matchAll },
+        { meta: true }
+      );
+    });
+
+    it('does not read ui settings when no client is provided', async () => {
+      await syntheticsEsClient.search({ body: { query: matchAll } });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        { index: 'synthetics-*', ignore_unavailable: true, body: { query: matchAll } },
+        { meta: true }
+      );
+    });
+  });
+
+  describe('applyExcludedDataTiersToQuery', () => {
+    it('returns the original query when no tiers are excluded', () => {
+      const query = { match_all: {} };
+
+      expect(applyExcludedDataTiersToQuery(query, [])).toBe(query);
+    });
+
+    it('wraps an existing query with a must_not _tier filter', () => {
+      const query = { term: { 'monitor.id': 'test-id' } };
+
+      expect(applyExcludedDataTiersToQuery(query, ['data_cold', 'data_frozen'])).toEqual({
+        bool: {
+          filter: [
+            query,
+            { bool: { must_not: [{ terms: { _tier: ['data_cold', 'data_frozen'] } }] } },
+          ],
+        },
+      });
+    });
+
+    it('builds a filter-only query when there is no original query', () => {
+      expect(applyExcludedDataTiersToQuery(undefined, ['data_frozen'])).toEqual({
+        bool: {
+          filter: [{ bool: { must_not: [{ terms: { _tier: ['data_frozen'] } }] } }],
+        },
+      });
     });
   });
 

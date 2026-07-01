@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
+import { createEsParams } from '@kbn/observability-shared-plugin/public';
+import { useSyntheticsEsSearch } from '../../../hooks/use_synthetics_es_search';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { MarkerItems } from './waterfall/context/waterfall_context';
 
@@ -20,7 +21,7 @@ export const BROWSER_TRACE_START = 'browser.relative_trace.start.us';
 export const NAVIGATION_START = 'navigationStart';
 
 export const useStepWaterfallMetrics = ({ checkGroup, hasNavigationRequest, stepIndex }: Props) => {
-  const { data, loading } = useEsSearch(
+  const { data, loading } = useSyntheticsEsSearch(
     hasNavigationRequest
       ? createEsParams({
           index: SYNTHETICS_INDEX_PATTERN,
