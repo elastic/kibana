@@ -119,6 +119,29 @@ const useFilteredEntityIds = (spaceId?: string): FilteredEntityIds => {
   };
 };
 
+interface MlAnomaliesIndexExists {
+  indexExists: boolean | undefined;
+  isLoading: boolean;
+}
+
+/**
+ * Checks whether the ML anomalies index actually exists. When no ML job has
+ * ever run, `ML_ANOMALIES_INDEX` resolves to zero concrete indices, which
+ * makes the downstream `LOOKUP JOIN` against the entity store report a
+ * misleading "resolves to multiple indices" error instead of an empty
+ * result. Short-circuiting here avoids issuing that query at all.
+ */
+const useMlAnomaliesIndexExists = (): MlAnomaliesIndexExists => {
+  const { dataViews } = useKibana().services.data;
+
+  const { data, isLoading } = useQuery(['recent-anomalies-ml-index-exists'], async () => {
+    const existingIndices = await dataViews.getExistingIndices([ML_ANOMALIES_INDEX]);
+    return existingIndices.length > 0;
+  });
+
+  return { indexExists: data, isLoading };
+};
+
 const useRecentAnomaliesTopRowsQuery = (params: {
   anomalyBands: AnomalyBand[];
   viewBy: ViewByMode;
@@ -133,6 +156,7 @@ const useRecentAnomaliesTopRowsQuery = (params: {
   const search = useKibana().services.data.search.search;
   const timeFilter = useRecentAnomaliesTimeFilter(params.timeRange);
   const { entityIds, isLoading: isEntityIdsLoading } = useFilteredEntityIds(params.spaceId);
+  const { indexExists: mlIndexExists, isLoading: isMlIndexLoading } = useMlAnomaliesIndexExists();
   const noFilterMatches = entityIds !== undefined && entityIds.length === 0;
   const rowField = params.viewBy === 'jobId' ? 'job_id' : 'entity_id';
 
@@ -143,9 +167,11 @@ const useRecentAnomaliesTopRowsQuery = (params: {
   });
 
   const { isLoading, data, isError } = useQuery(
-    [timeFilter, topRowsEsqlSource, entityIds],
+    [timeFilter, topRowsEsqlSource, entityIds, mlIndexExists],
     async ({ signal }) => {
-      if (!topRowsEsqlSource || noFilterMatches) return { records: [], rawResponse: undefined };
+      if (!topRowsEsqlSource || noFilterMatches || !mlIndexExists) {
+        return { records: [], rawResponse: undefined };
+      }
       const esqlResult = await getESQLResults({
         esqlQuery: topRowsEsqlSource,
         search,
@@ -157,7 +183,7 @@ const useRecentAnomaliesTopRowsQuery = (params: {
         rawResponse: esqlResult?.response,
       };
     },
-    { enabled: !!topRowsEsqlSource && !isEntityIdsLoading }
+    { enabled: !!topRowsEsqlSource && !isEntityIdsLoading && !isMlIndexLoading }
   );
 
   const records = data?.records;
@@ -175,7 +201,7 @@ const useRecentAnomaliesTopRowsQuery = (params: {
   );
 
   return {
-    isLoading: isLoading || isEntityIdsLoading,
+    isLoading: isLoading || isEntityIdsLoading || isMlIndexLoading,
     rowLabels: records?.map((each) => each[rowField]),
     entityMetadata,
     isError,
@@ -257,7 +283,6 @@ export const useRecentAnomaliesQuery = (params: {
       keepPreviousData: true,
     }
   );
-
   const inspect = useMemo(() => {
     // when there are no anomalies, rowLabels comes back empty from the top-rows query,
     // so the main query never actually runs. In that case, we use the top-rows query's esql source and raw response.
