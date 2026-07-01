@@ -571,7 +571,7 @@ const persistQueriesRoute = createServerRoute({
   },
 });
 
-export const internalQueriesRoutes = {
+export const internalSignificantEventsQueriesRoutes = {
   ...promoteUnbackedQueriesRoute,
   ...demoteBackedQueriesRoute,
   ...bulkDeleteQueriesRoute,

@@ -11,13 +11,13 @@ import {
   DESCRIPTION_GENERATION_TASK_TYPE,
   getDescriptionGenerationTaskId,
   type DescriptionGenerationTaskParams,
-} from '../../../../lib/tasks/task_definitions/description_generation';
-import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
-import { resolveConnectorId } from '../../../utils/resolve_connector_id';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { createServerRoute } from '../../../create_server_route';
-import { handleTaskAction } from '../../../utils/task_helpers';
+} from '../../../lib/tasks/task_definitions/description_generation';
+import { taskActionSchema } from '../../../lib/tasks/task_action_schema';
+import { resolveConnectorId } from '../../utils/resolve_connector_id';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { createServerRoute } from '../../create_server_route';
+import { handleTaskAction } from '../../utils/task_helpers';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 

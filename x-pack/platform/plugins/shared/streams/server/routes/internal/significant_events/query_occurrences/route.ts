@@ -228,7 +228,7 @@ const readQueryOccurrenceStatsRoute = createServerRoute({
   },
 });
 
-export const internalSignificantEventsRoutes = {
+export const internalSignificantEventsQueryOccurrencesRoutes = {
   ...significantEventsQueriesGenerationStatusRoute,
   ...significantEventsQueriesGenerationTaskRoute,
   ...readQueryOccurrenceStatsRoute,

@@ -214,7 +214,7 @@ export const onboardingBulkStatusRoute = createServerRoute({
   },
 });
 
-export const internalOnboardingRoutes = {
+export const internalSignificantEventsOnboardingRoutes = {
   ...onboardingExecuteRoute,
   ...onboardingStatusRoute,
   ...onboardingBulkStatusRoute,

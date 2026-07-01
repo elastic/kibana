@@ -16,9 +16,6 @@ import { queryStreamRoutes } from './streams/query/route';
 import { contentRoutes } from './content/route';
 import { internalCrudRoutes } from './internal/streams/crud/route';
 import { internalManagementRoutes } from './internal/streams/management/route';
-import { internalPromptsRoutes } from './internal/significant_events/prompts/route';
-import { internalSignificantEventsRoutes } from './internal/significant_events/query_occurrences/route';
-import { significantEventsRoutes } from './significant_events/streams/significant_events/route';
 import { queryRoutes } from './significant_events/queries/route';
 import { failureStoreRoutes } from './internal/streams/failure_store/route';
 import { internalIngestRoutes } from './internal/streams/ingest/route';
@@ -27,20 +24,23 @@ import { docCountsRoutes } from './streams/doc_counts/route';
 import { storageStatsRoutes } from './streams/storage_stats/route';
 import { attachmentRoutes } from './attachments/route';
 import { internalAttachmentRoutes } from './internal/attachments/route';
-import { internalDescriptionGenerationRoutes } from './internal/significant_events/description_generation/route';
-import { featureRoutes as internalFeatureRoutes } from './internal/significant_events/features/route';
-import { identifyFeaturesRoutes as internalIdentifyFeaturesRoutes } from './internal/significant_events/features/identify_route';
+import { internalDescriptionGenerationRoutes } from './internal/description_generation/route';
 import { internalTasksRoutes } from './internal/streams/tasks/route';
-import { internalOnboardingRoutes } from './internal/streams/onboarding/route';
-import { internalQueriesRoutes } from './internal/significant_events/queries/route';
-import { internalEligibleStreamsRoutes } from './internal/significant_events/extraction/eligible_streams_route';
-import { internalKiExtractionRoutes } from './internal/significant_events/knowledge_indicators/continuous_ki_extraction/route';
 import { timeSeriesRoutes } from './internal/streams/time_series/route';
 import { internalMemoryRoutes } from './internal/memory/route';
-import { internalSigEventsAvailabilityRoutes } from './internal/significant_events/availability/route';
-import { internalSigEventsDetectionsRoutes } from './internal/significant_events/detections/route';
-import { internalSigEventsDiscoveriesRoutes } from './internal/significant_events/discoveries/route';
-import { internalSigEventsEventsRoutes } from './internal/significant_events/events/route';
+import { significantEventsRoutes } from './significant_events/streams/significant_events/route';
+import { internalSignificantEventsAvailabilityRoutes } from './internal/significant_events/availability/route';
+import { internalSignificantEventsDetectionsRoutes } from './internal/significant_events/detections/route';
+import { internalSignificantEventsDiscoveriesRoutes } from './internal/significant_events/discoveries/route';
+import { internalSignificantEventsDiscoveryRoutes } from './internal/significant_events/discovery/route';
+import { internalSignificantEventsEligibleStreamsRoutes } from './internal/significant_events/extraction/eligible_streams_route';
+import { internalSignificantEventsFeatureRoutes } from './internal/significant_events/features/route';
+import { identifySignificantEventsFeaturesRoutes } from './internal/significant_events/features/identify_route';
+import { internalSignificantEventsEventsRoutes } from './internal/significant_events/events/route';
+import { internalSignificantEventsKiExtractionRoutes } from './internal/significant_events/knowledge_indicators/continuous_ki_extraction/route';
+import { internalSignificantEventsOnboardingRoutes } from './internal/significant_events/onboarding/route';
+import { internalSignificantEventsQueriesRoutes } from './internal/significant_events/queries/route';
+import { internalSignificantEventsQueryOccurrencesRoutes } from './internal/significant_events/query_occurrences/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -51,24 +51,24 @@ export const streamsRouteRepository = {
   ...internalProcessingRoutes,
   ...failureStoreRoutes,
   ...timeSeriesRoutes,
-  ...internalPromptsRoutes,
-  ...internalSignificantEventsRoutes,
   ...internalIngestRoutes,
   ...connectorRoutes,
   ...internalAttachmentRoutes,
   ...internalDescriptionGenerationRoutes,
-  ...internalFeatureRoutes,
-  ...internalIdentifyFeaturesRoutes,
   ...internalTasksRoutes,
-  ...internalOnboardingRoutes,
-  ...internalQueriesRoutes,
-  ...internalEligibleStreamsRoutes,
-  ...internalKiExtractionRoutes,
   ...internalMemoryRoutes,
-  ...internalSigEventsAvailabilityRoutes,
-  ...internalSigEventsDetectionsRoutes,
-  ...internalSigEventsDiscoveriesRoutes,
-  ...internalSigEventsEventsRoutes,
+  ...internalSignificantEventsAvailabilityRoutes,
+  ...internalSignificantEventsDetectionsRoutes,
+  ...internalSignificantEventsDiscoveryRoutes,
+  ...internalSignificantEventsDiscoveriesRoutes,
+  ...internalSignificantEventsFeatureRoutes,
+  ...internalSignificantEventsEligibleStreamsRoutes,
+  ...internalSignificantEventsEventsRoutes,
+  ...identifySignificantEventsFeaturesRoutes,
+  ...internalSignificantEventsKiExtractionRoutes,
+  ...internalSignificantEventsOnboardingRoutes,
+  ...internalSignificantEventsQueriesRoutes,
+  ...internalSignificantEventsQueryOccurrencesRoutes,
   ...storageStatsRoutes,
   // public APIs
   ...docCountsRoutes,
@@ -78,9 +78,9 @@ export const streamsRouteRepository = {
   ...ingestRoutes,
   ...queryStreamRoutes,
   ...contentRoutes,
-  ...significantEventsRoutes,
   ...queryRoutes,
   ...attachmentRoutes,
+  ...significantEventsRoutes,
 };
 
 export type StreamsRouteRepository = typeof streamsRouteRepository;

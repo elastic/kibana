@@ -115,6 +115,6 @@ export const putContinuousKiExtractionSettingsRoute = createServerRoute({
   },
 });
 
-export const internalKiExtractionRoutes = {
+export const internalSignificantEventsKiExtractionRoutes = {
   ...putContinuousKiExtractionSettingsRoute,
 };

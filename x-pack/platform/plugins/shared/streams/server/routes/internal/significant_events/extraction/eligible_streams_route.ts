@@ -190,6 +190,6 @@ const eligibleStreamsRoute = createServerRoute({
   },
 });
 
-export const internalEligibleStreamsRoutes = {
+export const internalSignificantEventsEligibleStreamsRoutes = {
   ...eligibleStreamsRoute,
 };

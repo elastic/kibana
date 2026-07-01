@@ -4,159 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  SignificantEventsWorkflowStatusResult,
-  SignificantEventsQueriesGenerationResult,
-  SignificantEventsQueriesGenerationTaskResult,
-} from '@kbn/significant-events-schema';
-import { TaskStatus, deriveQueryType } from '@kbn/streams-schema';
+import type { SignificantEventsWorkflowStatusResult } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import {
-  getSignificantEventsQueriesGenerationTaskId,
-  SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
-  type SignificantEventsQueriesGenerationTaskParams,
-} from '../../../../lib/significant_events/tasks/significant_events_queries_generation';
-import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { handleTaskAction } from '../../../utils/task_helpers';
-
-// Make sure strings are expected for input, but still converted to a
-// Date, without breaking the OpenAPI generator
-const dateFromString = z.string().transform((input) => new Date(input));
-
-/**
- * Guards against stale task results from a previous Kibana version that stored
- * queries with `kql`/`feature` but without the now-required `esql.query` field.
- * Returns a failed status instead of letting the malformed payload reach the client.
- */
-const sanitizeTaskResult = (
-  result: SignificantEventsQueriesGenerationTaskResult
-): SignificantEventsQueriesGenerationTaskResult => {
-  if ('queries' in result && result.queries.some((q) => q.esql?.query === undefined)) {
-    return { status: TaskStatus.Failed, error: 'Stale task result from a previous version.' };
-  }
-  if ('queries' in result) {
-    return {
-      ...result,
-      queries: result.queries.map((q) => ({
-        ...q,
-        type: deriveQueryType(q.esql.query),
-      })),
-    };
-  }
-  return result;
-};
-
-/** @deprecated Use GET /internal/streams/{name}/onboarding/_status instead. Will be removed in a follow-up. */
-const significantEventsQueriesGenerationStatusRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{name}/significant_events/_status',
-  params: z.object({
-    path: z.object({ name: z.string().describe('The name of the stream') }),
-  }),
-  options: {
-    access: 'internal',
-    summary: 'Check the status of significant events query generation',
-    description:
-      'Significant events query generation happens as a background task, this endpoint allows the user to check the status of this task.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<SignificantEventsQueriesGenerationTaskResult> => {
-    const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
-      request,
-    });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const { name } = params.path;
-
-    const result = await taskClient.getStatus<
-      SignificantEventsQueriesGenerationTaskParams,
-      SignificantEventsQueriesGenerationResult
-    >(getSignificantEventsQueriesGenerationTaskId(name));
-
-    return sanitizeTaskResult(result);
-  },
-});
-
-/** @deprecated Use POST /internal/streams/{name}/onboarding/_execute instead. Will be removed in a follow-up. */
-const significantEventsQueriesGenerationTaskRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/significant_events/_task',
-  params: z.object({
-    path: z.object({ name: z.string().describe('The name of the stream') }),
-    body: taskActionSchema({
-      from: dateFromString.describe('Start of the time range'),
-      to: dateFromString.describe('End of the time range'),
-    }),
-  }),
-  options: {
-    access: 'internal',
-    summary: 'Manage significant events query generation task',
-    description:
-      'Manage the lifecycle of the background task that generates significant events queries based on the stream data.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<SignificantEventsQueriesGenerationTaskResult> => {
-    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
-      request,
-    });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const { name } = params.path;
-    await streamsClient.getStream(name);
-    const { body } = params;
-    const taskId = getSignificantEventsQueriesGenerationTaskId(name);
-
-    const actionParams =
-      body.action === 'schedule'
-        ? ({
-            action: body.action,
-            scheduleConfig: {
-              taskType: SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
-              taskId,
-              params: {
-                start: body.from.getTime(),
-                end: body.to.getTime(),
-                streamName: name,
-              },
-              request,
-            },
-          } as const)
-        : ({ action: body.action } as const);
-
-    const result = await handleTaskAction<
-      SignificantEventsQueriesGenerationTaskParams,
-      SignificantEventsQueriesGenerationResult
-    >({
-      taskClient,
-      taskId,
-      ...actionParams,
-    });
-
-    return sanitizeTaskResult(result);
-  },
-});
 
 const significantEventsDiscoveryExecuteRoute = createServerRoute({
   endpoint: 'POST /internal/streams/significant_events/discovery/_execute',
@@ -253,7 +106,7 @@ const significantEventsDiscoveryStatusRoute = createServerRoute({
   },
 });
 
-export const internalSignificantEventsRoutes = {
+export const internalSignificantEventsDiscoveryRoutes = {
   ...significantEventsDiscoveryExecuteRoute,
   ...significantEventsDiscoveryStatusRoute,
 };

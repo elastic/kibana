@@ -102,7 +102,7 @@ const discoveriesBulkCreateRoute = createServerRoute({
   },
 });
 
-export const internalSigEventsDiscoveriesRoutes = {
+export const internalSignificantEventsDiscoveriesRoutes = {
   ...discoveriesSearchRoute,
   ...discoveriesHistoryRoute,
   ...discoveriesBulkCreateRoute,

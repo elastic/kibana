@@ -508,7 +508,7 @@ export const featuresTaskRoute = createServerRoute({
   },
 });
 
-export const featureRoutes = {
+export const internalSignificantEventsFeatureRoutes = {
   ...upsertFeatureRoute,
   ...deleteFeatureRoute,
   ...listFeaturesRoute,
