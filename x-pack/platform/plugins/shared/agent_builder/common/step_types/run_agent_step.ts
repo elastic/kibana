@@ -175,6 +175,14 @@ export const ConfigSchema = z
       .describe(
         "The parent feature id to group this step's LLM token usage under (connector telemetry aggregateBy)."
       ),
+    /**
+     * Maximum response size for this workflow step. Also used as the connector
+     * response content length limit for buffered LLM calls.
+     */
+    'max-step-size': z
+      .string()
+      .optional()
+      .describe('Maximum response size for this workflow step.'),
   })
   .superRefine((cfg, ctx) => {
     const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);
