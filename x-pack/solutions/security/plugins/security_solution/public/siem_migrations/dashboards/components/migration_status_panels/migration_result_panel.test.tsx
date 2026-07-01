@@ -133,7 +133,8 @@ describe.skip('DashboardMigrationResultPanel', () => {
     expect(screen.getByText(/Click Upload to continue translating/i)).toBeInTheDocument();
   });
 
-  describe('Total execution time', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/275681
+  describe.skip('Total execution time', () => {
     it('should display Total execution time when total_execution_time_ms is present', () => {
       renderTestComponent({
         migrationStats: {

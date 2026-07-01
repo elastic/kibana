@@ -29,6 +29,7 @@ import { IndicatorReader } from './indicator_reader';
 import { IndicatorSearcher } from './indicator_searcher';
 import { QueryRuleOrchestrator } from './query_rule_orchestrator';
 import { computeExpiresAt } from './serializers';
+import type { SignificantEventsAlertingContext } from '../../../significant_events/alerting/significant_events_alerting_context';
 
 export type {
   KIBulkOperation,
@@ -46,7 +47,8 @@ export class KnowledgeIndicatorClient {
 
   constructor(
     deps: KnowledgeIndicatorClientDeps,
-    isSignificantEventsEnabled = false,
+    isSignificantEventsEnabled: boolean,
+    alertingContext: SignificantEventsAlertingContext,
     config: Pick<
       SignificantEventsTuningConfig,
       'semantic_min_score' | 'rrf_rank_constant' | 'feature_ttl_days'
@@ -63,7 +65,7 @@ export class KnowledgeIndicatorClient {
     this.reader = new IndicatorReader(revisionReader);
     this.searcher = new IndicatorSearcher(deps.esClient, deps.logger, config, revisionReader);
     this.orchestrator = new QueryRuleOrchestrator(
-      deps.rulesManagementClient,
+      alertingContext.rulesClient,
       deps.logger,
       isSignificantEventsEnabled,
       this.writer,
@@ -133,6 +135,10 @@ export class KnowledgeIndicatorClient {
 
   getPromotableUnbackedQueries(filters?: { minSeverityScore?: number }): Promise<QueryLink[]> {
     return this.reader.getPromotableUnbackedQueries(filters);
+  }
+
+  getRuleBackedQueryLinks(): Promise<QueryLink[]> {
+    return this.reader.getRuleBackedQueryLinks();
   }
 
   findFeaturesByIds(ids: string[]): Promise<Array<{ id: string; stream_name: string }>> {
