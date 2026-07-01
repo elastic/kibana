@@ -133,9 +133,8 @@ export async function maybeDrainConcurrencyQueueBeforeEnqueue({
   logger,
   failureLogLabel,
 }: {
-  workflowExecution: Pick<
-    EsWorkflowExecution,
-    'spaceId' | 'concurrencyGroupKey' | 'workflowDefinition'
+  workflowExecution: Partial<
+    Pick<EsWorkflowExecution, 'spaceId' | 'concurrencyGroupKey' | 'workflowDefinition'>
   >;
   workflowExecutionRepository: WorkflowExecutionRepository;
   workflowTaskManager: WorkflowTaskManager;
