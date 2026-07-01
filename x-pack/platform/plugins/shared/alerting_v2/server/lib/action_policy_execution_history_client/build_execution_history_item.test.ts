@@ -166,60 +166,60 @@ describe('buildExecutionHistoryItem', () => {
     const event = buildEvent({
       event: { action: ACTION_POLICY_EVENT_ACTIONS.UNMATCHED, provider: 'alerting_v2' },
     });
-    expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS)).toEqual([]);
+    expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS)).toEqual(null);
   });
 
-  it('returns [] when @timestamp is missing', () => {
+  it('returns null when @timestamp is missing', () => {
     const event = buildEvent({ '@timestamp': undefined });
-    expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS)).toEqual([]);
+    expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS)).toEqual(null);
   });
 
-  it('returns [] when no policy ref exists', () => {
+  it('returns null when no policy ref exists', () => {
     const event = buildEvent({
       kibana: {
         saved_objects: [{ type: RULE_SAVED_OBJECT_TYPE, id: 'rule-1' }],
         alerting_v2: { dispatcher: {} },
       },
     });
-    expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS)).toEqual([]);
+    expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS)).toEqual(null);
   });
 
-  it('returns [] when policy has no rules referenced', () => {
+  it('returns null when policy has no rules referenced', () => {
     const event = buildEvent({
       kibana: {
         saved_objects: [{ type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' }],
         alerting_v2: { dispatcher: {} },
       },
     });
-    expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS)).toEqual([]);
+    expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS)).toEqual(null);
   });
 
-  it('emits one row per rule referenced', () => {
-    const event = buildEvent({
-      kibana: {
-        saved_objects: [
-          { type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' },
-          { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-a' },
-          { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-b' },
-        ],
-        alerting_v2: {
-          dispatcher: {
-            episode_count: 3,
-            action_group_count: 2,
-            workflow_ids: ['wf-1'],
-          },
-        },
-      },
-    });
+  // it('emits one row per rule referenced', () => {
+  //   const event = buildEvent({
+  //     kibana: {
+  //       saved_objects: [
+  //         { type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' },
+  //         { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-a' },
+  //         { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-b' },
+  //       ],
+  //       alerting_v2: {
+  //         dispatcher: {
+  //           episode_count: 3,
+  //           action_group_count: 2,
+  //           workflow_ids: ['wf-1'],
+  //         },
+  //       },
+  //     },
+  //   });
 
-    const rows = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
-    expect(rows).toHaveLength(2);
-    expect(rows[0].rule.id).toBe('rule-a');
-    expect(rows[1].rule.id).toBe('rule-b');
-    expect(rows.every((r) => r.policy.id === 'policy-1')).toBe(true);
-    expect(rows.every((r) => r.episode_count === 3)).toBe(true);
-    expect(rows.every((r) => r.action_group_count === 2)).toBe(true);
-  });
+  //   const rows = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
+  //   expect(rows).toHaveLength(2);
+  //   expect(rows[0].rule.id).toBe('rule-a');
+  //   expect(rows[1].rule.id).toBe('rule-b');
+  //   expect(rows.every((r) => r.policy.id === 'policy-1')).toBe(true);
+  //   expect(rows.every((r) => r.episode_count === 3)).toBe(true);
+  //   expect(rows.every((r) => r.action_group_count === 2)).toBe(true);
+  // });
 
   it('combines ref-based rule ids with spillover dispatcher.rule_ids', () => {
     const event = buildEvent({
@@ -232,8 +232,9 @@ describe('buildExecutionHistoryItem', () => {
       },
     });
 
-    const rows = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
-    expect(rows.map((r) => r.rule.id)).toEqual(['rule-a', 'rule-b', 'rule-c']);
+    const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
+    expect(historyItem).not.toBeNull();
+    expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-a', 'rule-b', 'rule-c']);
   });
 
   it('fills names from maps when present', () => {
@@ -247,15 +248,16 @@ describe('buildExecutionHistoryItem', () => {
       },
     });
 
-    const rows = buildExecutionHistoryItem(event, {
+    const historyItem = buildExecutionHistoryItem(event, {
       policyNames: new Map([['policy-1', 'My Policy']]),
       ruleNames: new Map([['rule-a', 'My Rule']]),
       workflowNames: new Map([['wf-1', 'My Workflow']]),
     });
 
-    expect(rows[0].policy).toEqual({ id: 'policy-1', name: 'My Policy' });
-    expect(rows[0].rule).toEqual({ id: 'rule-a', name: 'My Rule' });
-    expect(rows[0].workflows).toEqual([{ id: 'wf-1', name: 'My Workflow' }]);
+    expect(historyItem).not.toBeNull();
+    expect(historyItem?.policy).toEqual({ id: 'policy-1', name: 'My Policy' });
+    expect(historyItem?.rules).toEqual([{ id: 'rule-a', name: 'My Rule' }]);    
+    expect(historyItem?.workflows).toEqual([{ id: 'wf-1', name: 'My Workflow' }]);
   });
 
   it('falls back to null name when id missing from maps', () => {
@@ -269,14 +271,14 @@ describe('buildExecutionHistoryItem', () => {
       },
     });
 
-    const rows = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
-    expect(rows[0].policy.name).toBeNull();
-    expect(rows[0].rule.name).toBeNull();
-    expect(rows[0].workflows[0].name).toBeNull();
+    const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
+    expect(historyItem?.policy.name).toBeNull();
+    expect(historyItem?.rules[0]?.name).toBeNull();    
+    expect(historyItem?.workflows[0]?.name).toBeNull();
   });
 
   it('preserves the outcome verbatim', () => {
-    const dispatched = buildExecutionHistoryItem(
+    const dispatchedItem = buildExecutionHistoryItem(
       buildEvent({
         event: { action: ACTION_POLICY_EVENT_ACTIONS.DISPATCHED, provider: 'alerting_v2' },
         kibana: {
@@ -289,7 +291,7 @@ describe('buildExecutionHistoryItem', () => {
       }),
       EMPTY_NAME_MAPS
     );
-    const throttled = buildExecutionHistoryItem(
+    const throttledItem = buildExecutionHistoryItem(
       buildEvent({
         event: { action: ACTION_POLICY_EVENT_ACTIONS.THROTTLED, provider: 'alerting_v2' },
         kibana: {
@@ -303,8 +305,8 @@ describe('buildExecutionHistoryItem', () => {
       EMPTY_NAME_MAPS
     );
 
-    expect(dispatched[0].outcome).toBe('dispatched');
-    expect(throttled[0].outcome).toBe('throttled');
+    expect(dispatchedItem?.outcome).toBe('dispatched');
+    expect(throttledItem?.outcome).toBe('throttled');
   });
 
   it('coerces missing numeric counts to 0', () => {
@@ -317,10 +319,10 @@ describe('buildExecutionHistoryItem', () => {
         alerting_v2: { dispatcher: {} },
       },
     });
-    const rows = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
-    expect(rows[0].episode_count).toBe(0);
-    expect(rows[0].action_group_count).toBe(0);
-    expect(rows[0].workflows).toEqual([]);
+    const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
+    expect(historyItem?.episode_count).toBe(0);
+    expect(historyItem?.action_group_count).toBe(0);
+    expect(historyItem?.workflows).toEqual([]);
   });
 
   describe('when search is not active', () => {
@@ -335,13 +337,13 @@ describe('buildExecutionHistoryItem', () => {
           alerting_v2: { dispatcher: {} },
         },
       });
-      const rows = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, undefined);
-      expect(rows.map((r) => r.rule.id)).toEqual(['rule-a', 'rule-b']);
+      const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, undefined);
+      expect(historyItem?.rules.map((r) => r?.id)).toEqual(['rule-a', 'rule-b']);
     });
   });
 
   describe('when search is active', () => {
-    it('returns [] when search is active but there are no matches', () => {
+    it('returns null when search is active but there are no matches', () => {
       const event = buildEvent({
         kibana: {
           saved_objects: [
@@ -358,7 +360,7 @@ describe('buildExecutionHistoryItem', () => {
           hasMatches: false,
           matches: null,
         })
-      ).toEqual([]);
+      ).toBeNull();
     });
 
     it('returns all rule ids if policy is in search matches', () => {
@@ -372,13 +374,13 @@ describe('buildExecutionHistoryItem', () => {
           alerting_v2: { dispatcher: {} },
         },
       });
-      const rows = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, {
+      const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, {
         policyIds: ['policy-1'],
         ruleIds: [],
         hasMatches: true,
         matches: null,
       });
-      expect(rows.map((r) => r.rule.id)).toEqual(['rule-a', 'rule-b']);
+      expect(historyItem?.rules.map((r) => r?.id)).toEqual(['rule-a', 'rule-b']);
     });
 
     it('returns only matching rule ids if policy is not in search matches', () => {
@@ -393,13 +395,13 @@ describe('buildExecutionHistoryItem', () => {
           alerting_v2: { dispatcher: {} },
         },
       });
-      const rows = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, {
+      const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, {
         policyIds: ['policy-2'],
         ruleIds: ['rule-a', 'rule-c'],
         hasMatches: true,
         matches: null,
       });
-      expect(rows.map((r) => r.rule.id)).toEqual(['rule-a', 'rule-c']);
+      expect(historyItem?.rules.map((r) => r?.id)).toEqual(['rule-a', 'rule-c']);
     });
   });
 });
