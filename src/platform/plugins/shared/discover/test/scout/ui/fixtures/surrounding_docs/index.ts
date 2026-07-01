@@ -7,21 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  PageObjects,
-  ScoutParallelTestFixtures,
-  ScoutParallelWorkerFixtures,
-} from '@kbn/scout';
-import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
+import { createLazyPageObject } from '@kbn/scout';
+import type { DiscoverScoutTestFixtures, DiscoverWorkerFixtures } from '../common';
+import { spaceTest as spaceBaseTest } from '../common';
 import { ContextPage } from './page_objects';
 
-export interface ContextTestFixtures extends ScoutParallelTestFixtures {
-  pageObjects: PageObjects & {
+export interface ContextTestFixtures extends DiscoverScoutTestFixtures {
+  pageObjects: DiscoverScoutTestFixtures['pageObjects'] & {
     contextPage: ContextPage;
   };
 }
 
-export const spaceTest = spaceBaseTest.extend<ContextTestFixtures, ScoutParallelWorkerFixtures>({
+export const spaceTest = spaceBaseTest.extend<ContextTestFixtures, DiscoverWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,

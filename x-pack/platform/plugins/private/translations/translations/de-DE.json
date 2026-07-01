@@ -12310,7 +12310,6 @@
     "xpack.apm.columns.euiButtonIcon.deleteLabel": "Löschen",
     "xpack.apm.columns.euiButtonIcon.editLabel": "Bearbeiten",
     "xpack.apm.comparison.expectedBoundsTitle": "Erwartete Grenzen",
-    "xpack.apm.comparison.mlExpectedBoundsDisabledText": "Erwartete Grenzen (Anomalieerkennung muss für die .env aktiviert sein)",
     "xpack.apm.comparison.mlExpectedBoundsText": "Erwartete Grenzen",
     "xpack.apm.componentWithDiagnoseButton.diagnosethisconnectionButton.ariaLabel": "Diagnostizieren Sie diese Verbindung",
     "xpack.apm.compositeSpanCallsLabel": ", {count} Anrufe, im Durchschnitt {duration}",

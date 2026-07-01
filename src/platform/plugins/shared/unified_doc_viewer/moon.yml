@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/deeplinks-observability'
   - '@kbn/share-plugin'
   - '@kbn/router-utils'
+  - '@kbn/scout'
   - '@kbn/unified-field-list'
   - '@kbn/core-lifecycle-browser'
   - '@kbn/apm-types'
@@ -74,6 +75,7 @@ fileGroups:
     - .storybook/*
     - common/**/*
     - public/**/*
+    - test/**/*
     - server/**/*
     - public/**/*.json
     - '!target/**/*'

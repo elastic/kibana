@@ -8,6 +8,7 @@
  */
 
 import type { PageObjects, ScoutPage } from '@kbn/scout';
+import type { DocViewer } from '@kbn/unified-doc-viewer-plugin/test/scout/ui/fixtures/page_objects';
 import type { ApmPage } from './apm';
 import type { TracesFlyout } from './flyout';
 import type { TracesGrid } from './grid';
@@ -29,7 +30,7 @@ export class TracesExperiencePage {
   constructor(
     page: ScoutPage,
     private readonly dataGrid: PageObjects['dataGrid'],
-    private readonly docViewer: PageObjects['docViewer'],
+    private readonly docViewer: DocViewer,
     discover: PageObjects['discover']
   ) {
     this.apm = createApmPage(page);
