@@ -21,12 +21,6 @@ const describePayloadSchema = (renderer: RendererTypeDefinition): string => {
   }
 };
 
-/**
- * Exposes the registered renderers to the agent: the `<render>` directive, the
- * `/workspace/renders/{type}/{id}.json` file convention, the self-describing
- * `{ type, data }` envelope, and each type's `data` JSON schema.
- * Requires the bash tool to be enabled.
- */
 export const renderRenderersPrompt = (renderers: RendererTypeDefinition[]): string => {
   const { tagName, attributes } = renderElement;
 

@@ -18,9 +18,6 @@ import { createTagParser } from './utils';
  * Parser for <render> tags in markdown.
  * Converts HTML/text nodes containing render tags into structured AST nodes
  * carrying the workspace `path` and renderer `type`.
- *
- * The `type` attribute is mapped onto a `renderType` node field because a
- * unist/mdast node's `type` is its kind (here, `'render'`).
  */
 export const renderTagParser = createTagParser({
   tagName: renderElement.tagName,

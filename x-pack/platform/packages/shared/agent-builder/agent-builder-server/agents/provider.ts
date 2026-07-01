@@ -158,8 +158,7 @@ export interface AgentHandlerContext {
    */
   attachments: AttachmentsService;
   /**
-   * Renderer types registered in agentBuilder, used to advertise available
-   * renderers (and their payload schemas) to the agent in the prompt.
+   * Renderer types registered in agent builder.
    */
   renderers: RendererTypeDefinition[];
   /**
