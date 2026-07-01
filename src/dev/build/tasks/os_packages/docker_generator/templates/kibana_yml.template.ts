@@ -24,6 +24,10 @@ function generator({ imageFlavor }: TemplateContext) {
   server.shutdownTimeout: "5s"
   elasticsearch.hosts: [ "http://elasticsearch:9200" ]
   monitoring.ui.container.elasticsearch.enabled: true
+  xpack.actions.auth.ears.enabled: true
+  xpack.actions.auth.ears.enableExperimental: true
+  xpack.actions.auth.ears.ssl.certificate: "config/certs/ecp-client.crt"
+  xpack.actions.auth.ears.ssl.key: "config/certs/ecp-client.key"
   `);
 }
 
