@@ -44,14 +44,14 @@ export interface MisconfigurationInsightsProps {
   /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */
   entityId?: string;
   /** Opens the originating entity flyout as a child. */
-  onOpenEntity?: () => void;
+  onShowEntity?: () => void;
 }
 
 /**
  * Tool flyout displaying CSP misconfiguration findings for an entity.
  */
 export const MisconfigurationInsights = memo(
-  ({ entityType, value, entityId, onOpenEntity }: MisconfigurationInsightsProps) => {
+  ({ entityType, value, entityId, onShowEntity }: MisconfigurationInsightsProps) => {
     const { services } = useKibana();
     const { overlays } = services;
     const store = useStore();
@@ -80,7 +80,7 @@ export const MisconfigurationInsights = memo(
         <EuiFlyoutHeader hasBorder>
           <ToolsFlyoutHeader
             title={TITLE}
-            onTitleClick={onOpenEntity}
+            onTitleClick={onShowEntity}
             label={value}
             iconType={ICON_TYPE[entityType]}
           />

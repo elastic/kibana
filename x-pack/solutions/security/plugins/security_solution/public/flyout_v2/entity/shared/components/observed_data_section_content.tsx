@@ -44,6 +44,11 @@ export interface ObservedDataSectionProps {
   scopeId: string;
   /** Query id registered with the inspect button. */
   queryId: string;
+  /**
+   * When `true`, observed-attribute values link to the v2 system entity flyout via `OpenFlyoutLink`.
+   * Defaults to `false`, in which case the values fall back to the v1 `PreviewLink` (hover preview).
+   */
+  openEntityInFlyout?: boolean;
 }
 
 const resolveEntityAnomalyConfig = ({
@@ -88,7 +93,15 @@ const resolveEntityAnomalyConfig = ({
 };
 
 export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps) => {
-  const { entityType, observedData, identityFields, entityRecord, contextID, scopeId } = props;
+  const {
+    entityType,
+    observedData,
+    identityFields,
+    entityRecord,
+    contextID,
+    scopeId,
+    openEntityInFlyout,
+  } = props;
 
   const { to, from, isInitializing } = useGlobalTime();
 
@@ -159,7 +172,7 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
       contextID={contextID}
       scopeId={scopeId}
       observedFields={typedFields}
-      entityLink={renderFlyoutLink}
+      entityLink={openEntityInFlyout ? renderFlyoutLink : undefined}
     />
   );
 });

@@ -136,17 +136,17 @@ describe('<MisconfigurationInsights /> host', () => {
     expect(table).toHaveAttribute('data-entity-type', 'host');
   });
 
-  it('forwards onOpenEntity to the header click handler', () => {
-    const onOpenEntity = jest.fn();
+  it('forwards onShowEntity to the header click handler', () => {
+    const onShowEntity = jest.fn();
     const { getByTestId } = render(
       <MisconfigurationInsights
         entityType={EntityType.host}
         value="my-host"
-        onOpenEntity={onOpenEntity}
+        onShowEntity={onShowEntity}
       />
     );
     getByTestId('mockToolsFlyoutHeader').click();
-    expect(onOpenEntity).toHaveBeenCalledTimes(1);
+    expect(onShowEntity).toHaveBeenCalledTimes(1);
   });
 
   it('opens a child system flyout when a finding row is expanded', () => {

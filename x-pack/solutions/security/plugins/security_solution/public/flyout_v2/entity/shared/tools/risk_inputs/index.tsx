@@ -38,11 +38,11 @@ export interface RiskInputsProps {
   /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */
   entityId?: string;
   /** Opens the originating entity flyout as a child. */
-  onOpenEntity?: () => void;
+  onShowEntity?: () => void;
 }
 
 export const RiskInputs = memo(
-  ({ entityType, entityName, entityId, onOpenEntity }: RiskInputsProps) => {
+  ({ entityType, entityName, entityId, onShowEntity }: RiskInputsProps) => {
     const { services } = useKibana();
     const store = useStore();
     const history = useHistory();
@@ -81,7 +81,7 @@ export const RiskInputs = memo(
         <EuiFlyoutHeader hasBorder>
           <ToolsFlyoutHeader
             title={TITLE}
-            onTitleClick={onOpenEntity}
+            onTitleClick={onShowEntity}
             label={entityName}
             iconType={ICON_TYPE[entityType]}
           />
