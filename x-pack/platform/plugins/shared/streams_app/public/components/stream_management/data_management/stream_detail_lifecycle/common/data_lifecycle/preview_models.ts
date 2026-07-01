@@ -112,13 +112,17 @@ export const buildIlmPreviewPhases = ({
   });
 };
 
+// The preview timeline is hypothetical (the lifecycle hasn't been applied yet), so per-phase size
+// and document counts are intentionally omitted — only the phase structure is shown.
 export const buildDlmPreviewModel = ({
   isServerless,
   hotColor,
   hotDescription,
   deletePhaseColor,
   deletePhaseDescription,
-  stats,
+  frozenAfter,
+  frozenColor,
+  frozenDescription,
   retentionPeriod,
   downsampleSteps,
   indexMode,
@@ -128,7 +132,9 @@ export const buildDlmPreviewModel = ({
   hotDescription?: string;
   deletePhaseColor: string;
   deletePhaseDescription?: string;
-  stats?: { size?: string; sizeBytes?: number; totalDocs?: number };
+  frozenAfter?: string;
+  frozenColor?: string;
+  frozenDescription?: string;
   retentionPeriod?: string;
   downsampleSteps: DownsampleStep[] | null;
   indexMode: 'standard' | 'time_series' | string;
@@ -139,16 +145,28 @@ export const buildDlmPreviewModel = ({
       })
     : i18n.translate('xpack.streams.streamDetailLifecycle.hot', { defaultMessage: 'Hot' });
 
+  // The frozen phase is only meaningful on stateful (serverless has no tiers). When `frozenAfter` is
+  // configured we forward the frozen styling so the preview matches the applied lifecycle summary.
+  const frozenPhase =
+    !isServerless && frozenAfter !== undefined
+      ? {
+          frozenAfter,
+          frozenLabel: i18n.translate('xpack.streams.streamDetailLifecycle.frozen', {
+            defaultMessage: 'Frozen',
+          }),
+          frozenColor,
+          frozenDescription,
+        }
+      : {};
+
   const phases = buildLifecyclePhases({
     label,
     color: hotColor,
-    size: stats?.size,
     retentionPeriod,
     description: isServerless ? '' : hotDescription,
-    sizeInBytes: stats?.sizeBytes,
-    docsCount: stats?.totalDocs,
     deletePhaseDescription,
     deletePhaseColor,
+    ...frozenPhase,
   });
 
   return {

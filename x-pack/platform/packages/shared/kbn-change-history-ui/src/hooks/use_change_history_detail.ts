@@ -8,6 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryDetail } from '../types/change_history_detail';
+import { useChangeHistoryConfig } from '../provider/use_change_history_config';
 import { changeHistoryDetailQueryKey } from './change_history_list_query_key';
 
 export interface UseChangeHistoryDetailArgs {
@@ -29,10 +30,12 @@ export const useChangeHistoryDetail = ({
   changeId,
   enabled = true,
 }: UseChangeHistoryDetailArgs): UseChangeHistoryDetailResult => {
+  const { scope } = useChangeHistoryConfig();
   const { data, error, isLoading } = useQuery<ChangeHistoryDetail, Error>(
     changeHistoryDetailQueryKey({
       objectId,
       changeId: changeId ?? '__none__',
+      scope,
     }),
     ({ signal }) => {
       if (!changeId) {
