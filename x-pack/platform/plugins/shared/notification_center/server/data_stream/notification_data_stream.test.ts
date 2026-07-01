@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { expectAssignable } from 'tsd';
+import type { GetFieldsOf } from '@kbn/es-mappings';
 import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import type { Notification } from '../../common/types';
 import {
   registerNotificationDataStream,
+  getNotificationDataStreamClient,
   notificationDataStreamMappings,
   NOTIFICATION_DATA_STREAM_NAME,
   NOTIFICATION_DATA_RETENTION,
@@ -66,6 +70,20 @@ describe('registerNotificationDataStream', () => {
       expect(properties).not.toHaveProperty('title');
       expect(properties).not.toHaveProperty('description');
       expect(properties).not.toHaveProperty('cta');
+    });
+  });
+
+  describe('getNotificationDataStreamClient', () => {
+    it('initializes the client for the notification data stream', () => {
+      const dataStreams = dataStreamServiceMock.createStartContract();
+      getNotificationDataStreamClient(dataStreams);
+      expect(dataStreams.initializeClient).toHaveBeenCalledWith(NOTIFICATION_DATA_STREAM_NAME);
+    });
+
+    it('binds the canonical Notification type to the mapping contract', () => {
+      // Compile-time proof: the mapping's declared fields must be satisfied by the
+      // zod-inferred document type, or the write path in #14979 will not type-check.
+      expectAssignable<GetFieldsOf<typeof notificationDataStreamMappings>>({} as Notification);
     });
   });
 });

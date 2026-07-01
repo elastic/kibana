@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { DataStreamsSetup } from '@kbn/core-data-streams-server';
+import type {
+  DataStreamsSetup,
+  DataStreamsStart,
+  IDataStreamClient,
+} from '@kbn/core-data-streams-server';
 import { mappings, type MappingsDefinition } from '@kbn/es-mappings';
+import type { Notification } from '../../common/types';
 
 /** The append-only data stream backing the Notification Center. */
 export const NOTIFICATION_DATA_STREAM_NAME = '.kibana-notification-center' as const;
@@ -18,12 +23,12 @@ export const NOTIFICATION_DATA_STREAM_NAME = '.kibana-notification-center' as co
 export const NOTIFICATION_DATA_RETENTION = '180d' as const;
 
 /**
- * Mappings for the notification data stream. Only fields queried against in ES
- * are mapped; display-only fields (`title`, `description`, `cta`) ride along in
- * `_source`. `dynamic: false` keeps the stream forward-compatible with fields
- * added by newer nodes — bump `version` to make a new field queryable.
+ * Mappings for the notification data stream. Only fields being queried
+ * are mapped; display-only fields (`title`, `description`, `cta`) stay in
+ * `_source`.
  */
 export const notificationDataStreamMappings = {
+  // keep the stream forward-compatible
   dynamic: false,
   properties: {
     /** Ingest time; drives ordering and retention. */
@@ -48,6 +53,7 @@ export const notificationDataStreamMappings = {
 export const registerNotificationDataStream = (dataStreams: DataStreamsSetup) => {
   return dataStreams.registerDataStream({
     name: NOTIFICATION_DATA_STREAM_NAME,
+    // bump version to make a new field queryable.
     version: 1,
     hidden: true,
     template: {
@@ -59,3 +65,25 @@ export const registerNotificationDataStream = (dataStreams: DataStreamsSetup) =>
     },
   });
 };
+
+/**
+ * A data stream client whose document type is the canonical {@link Notification}
+ * (the zod schema is the source of truth). Binding the mappings and the schema
+ * type here forces `Notification` to satisfy the mapping's field contract at
+ * compile time — the write path in #14979 relies on this coupling.
+ */
+export type NotificationDataStreamClient = IDataStreamClient<
+  typeof notificationDataStreamMappings,
+  Notification
+>;
+
+/**
+ * Resolves the notification data stream client at start/request time. The write
+ * and read logic that uses it lands in #14979 / #14980.
+ */
+export const getNotificationDataStreamClient = (
+  dataStreams: DataStreamsStart
+): Promise<NotificationDataStreamClient> =>
+  dataStreams.initializeClient<typeof notificationDataStreamMappings, Notification>(
+    NOTIFICATION_DATA_STREAM_NAME
+  );
