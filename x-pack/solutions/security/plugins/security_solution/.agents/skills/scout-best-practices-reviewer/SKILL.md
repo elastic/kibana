@@ -8,11 +8,11 @@ description: >
 
 # Security Solution — Scout Best Practices Reviewer (Additive)
 
-**Additive checks for Security Solution Scout tests.** Apply these after the general Scout review.
+**Additive checks for Security Solution Scout tests.**
 
 ## Security-specific checklist
 
-Apply these checks **in addition to** the general skill's checklist. Use the same output format (blocker → major → minor → nit).
+Use the same output format (blocker → major → minor → nit).
 
 ### Page objects — Security-specific placement
 
@@ -40,7 +40,7 @@ Security Solution tests commonly create resources that require explicit cleanup 
 
 ### Auth and roles
 
-Use Security Solution-specific auth methods (the general skill requires minimal permissions — never use `loginAsAdmin()`):
+Use Security Solution-specific auth methods. Never use `loginAsAdmin()`:
 
 | Role | Method | When to use |
 |------|--------|-------------|
@@ -80,7 +80,7 @@ If a new API service is added, verify it:
 
 ## Migration parity (Security-specific additions)
 
-When reviewing a Cypress-to-Scout migration, check these in addition to the general migration parity analysis:
+When reviewing a Cypress-to-Scout migration, check these in addition to the migration parity analysis:
 
 - Cypress `{ force: true }` replaced with proper waits or `dispatchEvent('click')` (not silently removed)
 - `cy.task('esArchiverLoad')` for system indices replaced with `kbnClient` or `apiServices` (not `esArchiver`)
