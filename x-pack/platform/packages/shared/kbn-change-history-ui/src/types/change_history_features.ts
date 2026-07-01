@@ -9,6 +9,11 @@
 export interface ChangeHistoryFeatures {
   /** When true, restore is shown when the adapter implements `restoreChange`. */
   restore?: boolean;
+  /**
+   * Opt-out for EBT. Omitted or true: telemetry may fire when the host passes
+   * `analytics` and `scope`. Set false to force a no-op reporter.
+   */
+  telemetry?: boolean;
 }
 
 /** Optional privilege hints supplied by the host application. */

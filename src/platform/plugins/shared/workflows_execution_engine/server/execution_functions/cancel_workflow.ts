@@ -38,7 +38,7 @@ export const cancelWorkflow = async ({
 }: {
   workflowExecutionId: string;
   spaceId: string;
-  schedulingRequest?: KibanaRequest;
+  schedulingRequest: KibanaRequest;
   workflowExecutionRepository: WorkflowExecutionRepository;
   workflowTaskManager: WorkflowTaskManager;
   taskManager: TaskManagerStartContract;
@@ -66,8 +66,7 @@ export const cancelWorkflow = async ({
   const shouldRefreshBeforeQueueDrain =
     freesConcurrencySlotImmediately &&
     concurrencySettings?.strategy === 'queue' &&
-    concurrencyGroupKey &&
-    schedulingRequest;
+    concurrencyGroupKey;
 
   await workflowExecutionRepository.updateWorkflowExecution(
     {
