@@ -9,6 +9,7 @@
 
 import type { ChangeHistoryDocument } from '@kbn/change-history';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 
 import {
   assertWorkflowChangeHistoryEnabled,
@@ -33,7 +34,7 @@ const createHistoryDocument = (eventId: string, sequence: number): ChangeHistory
     type: 'workflow',
     hash: 'abc',
     sequence,
-    fields: { hashed: [] },
+    fields: { hashed: [], redacted: [] },
     snapshot: {
       name: 'My workflow',
       enabled: true,
@@ -58,6 +59,7 @@ describe('get_workflow_change_history', () => {
     definition: null,
     yaml: 'name: My workflow',
     valid: true,
+    spaceId: 'default',
   };
 
   const createDeps = ({
@@ -79,7 +81,7 @@ describe('get_workflow_change_history', () => {
     return {
       deps: {
         changeHistoryService,
-        getWorkflow: jest.fn().mockResolvedValue(workflowResult),
+        getWorkflowSource: jest.fn().mockResolvedValue(workflowResult),
         workflowVersioningEnabled: versioningEnabled,
       },
       changeHistoryService,
@@ -154,6 +156,29 @@ describe('get_workflow_change_history', () => {
         from: 0,
         size: 20,
       });
+    });
+
+    it('queries global history for a global workflow visible from the request space', async () => {
+      const { deps, changeHistoryService } = createDeps({
+        workflowResult: {
+          ...workflow,
+          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        },
+      });
+
+      await getHistoryForWorkflow(deps, {
+        workflowId: 'wf-1',
+        spaceId: 'default',
+      });
+
+      expect(changeHistoryService.getHistory).toHaveBeenCalledWith(
+        GLOBAL_WORKFLOW_SPACE_ID,
+        'wf-1',
+        {
+          from: 0,
+          size: 20,
+        }
+      );
     });
 
     it('throws WorkflowNotFoundError when workflow does not exist', async () => {
