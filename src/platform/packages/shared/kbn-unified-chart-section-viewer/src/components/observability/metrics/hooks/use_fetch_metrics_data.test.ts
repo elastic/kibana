@@ -18,7 +18,7 @@ const mockTrackRequest = jest.fn(
 const mockTrackMetricsInfo = jest.fn();
 
 // Mock ALL external heavy dependencies with factory functions to avoid loading
-// their transitive dependency trees (e.g., @kbn/data-plugin/public).
+// their transitive dependency trees (e.g., @kbn/data-plugin/public) .
 jest.mock('../utils/execute_esql_query', () => ({
   executeEsqlQuery: jest.fn(),
 }));
