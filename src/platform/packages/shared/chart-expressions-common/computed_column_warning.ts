@@ -48,40 +48,42 @@ const isNonFilterableComputedColumn = (column: DatatableColumn): boolean => {
   return column.meta?.sourceParams?.isSourceFieldFilterable !== true;
 };
 
-// Note: hide warning message when the type is a date because it can be misleading
-const showWarningForColumn = (column: DatatableColumn): boolean => {
-  const nonFilterable = isNonFilterableComputedColumn(column);
-  if (nonFilterable && column.meta.type === 'date') {
-    return false;
-  }
-  return nonFilterable;
+/**
+ * Returns false if any of the given columns can't be filtered or drilled down into. Unaffected
+ * by warning-message suppression rules (e.g. for dates, see `getFilterDrilldownWarningMessage`)
+ * — this is the fact that filter/drilldown actions should be gated on.
+ */
+export const isFilterableColumnSet = (columns: Array<DatatableColumn | undefined>): boolean => {
+  const defined = columns.filter((c): c is DatatableColumn => c != null);
+  return !defined.some((col) => isNonFilterableComputedColumn(col));
 };
 
 /**
- * Returns the warning message to show when filterable chart columns are computed ES|QL
- * fields that cannot be used for filtering. Returns `undefined` when there is nothing
- * to warn about.
+ * Returns the warning message to show when filterable chart columns are computed ES|QL fields
+ * that cannot be used for filtering. Returns `undefined` when there is nothing to warn about,
+ * including when every non-filterable column is a date — the "created at query time" message
+ * reads as misleading for dates (product decision), so those are left out of the text even
+ * though they're still non-filterable per `isFilterableColumnSet`.
  */
-export const getNonFilterableComputedColumnWarning = (
-  filterableColumns: Array<DatatableColumn | undefined>
+export const getFilterDrilldownWarningMessage = (
+  columns: Array<DatatableColumn | undefined>
 ): string | undefined => {
-  const defined = filterableColumns.filter((c): c is DatatableColumn => c != null);
+  const defined = columns.filter((c): c is DatatableColumn => c != null);
   if (defined.length === 0) {
     return undefined;
   }
 
-  const nonFilterableColumnNamesWithColumnWarning = defined
-    .filter((col) => showWarningForColumn(col))
+  const nonFilterableColumnNames = defined
+    .filter((col) => isNonFilterableComputedColumn(col) && col.meta.type !== 'date')
     .map((col) => col.name);
 
-  if (nonFilterableColumnNamesWithColumnWarning.length === 0) {
+  if (nonFilterableColumnNames.length === 0) {
     return undefined;
   }
 
-  const allColumnsNonFilterable =
-    nonFilterableColumnNamesWithColumnWarning.length === defined.length;
+  const allColumnsNonFilterable = nonFilterableColumnNames.length === defined.length;
   return getFilterDrilldownDisabledMessage({
-    nonFilterableColumnNames: nonFilterableColumnNamesWithColumnWarning,
+    nonFilterableColumnNames,
     allColumnsNonFilterable,
   });
 };

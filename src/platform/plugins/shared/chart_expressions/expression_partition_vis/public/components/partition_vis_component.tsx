@@ -30,7 +30,7 @@ import type { PersistedState } from '@kbn/visualizations-common';
 import {
   ChartTooltipFooterMessage,
   getColumnByAccessor,
-  getNonFilterableComputedColumnWarning,
+  getFilterDrilldownWarningMessage,
   getOverridesFor,
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
@@ -416,7 +416,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const warningMessage = useMemo(
     () =>
       isEsqlMode
-        ? getNonFilterableComputedColumnWarning(
+        ? getFilterDrilldownWarningMessage(
             bucketColumns.map((col) => visData.columns.find((c) => c.id === col.id))
           )
         : undefined,

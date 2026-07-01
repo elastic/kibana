@@ -287,7 +287,11 @@ describe('getLegendAction', () => {
               isComputedColumn: true,
               meta: {
                 ...col.meta,
-                sourceParams: { ...col.meta.sourceParams, sourceField: col.name },
+                sourceParams: {
+                  ...col.meta.sourceParams,
+                  sourceField: col.name,
+                  isSourceFieldFilterable: false,
+                },
               },
             }
           : col
@@ -302,8 +306,41 @@ describe('getLegendAction', () => {
     expect(screen.getByTestId('legendFilterFooterMessage')).toBeInTheDocument();
   });
 
+  it('disables filter actions for a non-filterable computed date column, but hides the warning message', async () => {
+    // The warning text is suppressed for dates (product decision), but the column is still
+    // genuinely non-filterable, so the actions themselves must stay disabled and inert.
+    const tableWithComputedDateColumn: Datatable = {
+      ...table,
+      meta: { type: ESQL_TABLE_TYPE },
+      columns: table.columns.map((col) =>
+        col.id === 'splitAccessorId'
+          ? {
+              ...col,
+              isComputedColumn: true,
+              meta: {
+                ...col.meta,
+                type: 'date',
+                sourceParams: {
+                  ...col.meta.sourceParams,
+                  sourceField: col.name,
+                  isSourceFieldFilterable: false,
+                },
+              },
+            }
+          : col
+      ),
+    };
+    const Component = buildComponent({ ...sampleLayer, table: tableWithComputedDateColumn });
+    await renderAndOpen(Component, makeSeriesProps("Women's Accessories"));
+    await waitFor(() => {
+      expect(screen.getByRole('menuitem', { name: 'Filter for' })).toBeDisabled();
+      expect(screen.getByRole('menuitem', { name: 'Filter out' })).toBeDisabled();
+    });
+    expect(screen.queryByTestId('legendFilterFooterMessage')).not.toBeInTheDocument();
+  });
+
   it('does not disable filter actions for a renamed computed column', async () => {
-    // A RENAME column has isComputedColumn=true but a different sourceField, meaning the
+    // A RENAME column has isComputedColumn=true, but isSourceFieldFilterable=true means the
     // underlying index field is still addressable — filtering should work normally.
     const tableWithRenamedComputedColumn: Datatable = {
       ...table,
@@ -315,8 +352,12 @@ describe('getLegendAction', () => {
               isComputedColumn: true,
               meta: {
                 ...col.meta,
-                // sourceField ('category.keyword') differs from col.name
-                sourceParams: { ...col.meta.sourceParams, sourceField: 'category.keyword' },
+                sourceParams: {
+                  ...col.meta.sourceParams,
+                  // sourceField ('category.keyword') differs from col.name
+                  sourceField: 'category.keyword',
+                  isSourceFieldFilterable: true,
+                },
               },
             }
           : col

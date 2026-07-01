@@ -9,7 +9,7 @@
 
 import {
   getAccessorByDimension,
-  getNonFilterableComputedColumnWarning,
+  getFilterDrilldownWarningMessage,
 } from '@kbn/chart-expressions-common';
 import type { CommonXYDataLayerConfig } from '../../../common';
 
@@ -34,5 +34,5 @@ export const getComputedColumnWarning = (
     })
   );
 
-  return getNonFilterableComputedColumnWarning([...filterableColumnsById.values()]);
+  return getFilterDrilldownWarningMessage([...filterableColumnsById.values()]);
 };
