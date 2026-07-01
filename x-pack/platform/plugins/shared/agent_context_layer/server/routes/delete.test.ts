@@ -13,8 +13,11 @@ import {
   createTestCoreSetupNoSpaces,
   httpServerMock,
   httpServiceMock,
+  sampleDocument,
 } from './test_helpers';
 import { registerDeleteRoute } from './delete';
+
+const validParams = { type: 'visualization', originId: 'viz-1' };
 
 describe('registerDeleteRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
@@ -45,41 +48,77 @@ describe('registerDeleteRoute', () => {
   };
 
   it('returns 404 when feature flag is disabled', async () => {
-    const response = await callHandler({ id: 'chunk-1' }, false);
+    const response = await callHandler(validParams, false);
     expect(response.notFound).toHaveBeenCalled();
-    expect(mockSmlService.deleteDocument).not.toHaveBeenCalled();
+    expect(mockSmlService.deleteAttachment).not.toHaveBeenCalled();
   });
 
-  it('returns 404 when access check denies the item', async () => {
-    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([['chunk-1', false]]));
-    const response = await callHandler({ id: 'chunk-1' });
+  it('returns 404 when origin has no chunks anywhere', async () => {
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
+    const response = await callHandler({ type: 'visualization', originId: 'missing' });
     expect(response.notFound).toHaveBeenCalledWith({
-      body: { message: "SML document 'chunk-1' not found" },
+      body: { message: "SML origin 'visualization/missing' not found" },
     });
-    expect(mockSmlService.deleteDocument).not.toHaveBeenCalled();
+    expect(mockSmlService.deleteAttachment).not.toHaveBeenCalled();
   });
 
-  it('returns 404 when no matching document exists', async () => {
-    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([['missing', true]]));
-    mockSmlService.deleteDocument.mockResolvedValue(false);
-    const response = await callHandler({ id: 'missing' });
-    expect(mockSmlService.deleteDocument).toHaveBeenCalledWith({
-      id: 'missing',
-      spaceId: 'test-space',
-      esClient: expect.any(Object),
-    });
+  it('returns 404 when origin is owned by another space', async () => {
+    const otherSpaceDoc = { ...sampleDocument, spaces: ['other-space'] };
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([otherSpaceDoc]);
+
+    const response = await callHandler(validParams);
+
     expect(response.notFound).toHaveBeenCalledWith({
-      body: { message: "SML document 'missing' not found" },
+      body: { message: "SML origin 'visualization/viz-1' not found" },
     });
+    expect(mockSmlService.deleteAttachment).not.toHaveBeenCalled();
   });
 
-  it('returns 200 with deleted=true when delete succeeds', async () => {
-    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
-    mockSmlService.deleteDocument.mockResolvedValue(true);
-    const response = await callHandler({ id: 'chunk-1' });
+  it('returns 404 when caller cannot access every chunk', async () => {
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([sampleDocument]);
+    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, false]]));
+
+    const response = await callHandler(validParams);
+
+    expect(response.notFound).toHaveBeenCalledWith({
+      body: { message: "SML origin 'visualization/viz-1' not found" },
+    });
+    expect(mockSmlService.deleteAttachment).not.toHaveBeenCalled();
+  });
+
+  it('deletes every chunk for the origin with ingestionMethod=all', async () => {
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([sampleDocument]);
+    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
+    mockSmlService.deleteAttachment.mockResolvedValue(undefined);
+
+    const response = await callHandler(validParams);
+
+    expect(mockSmlService.deleteAttachment).toHaveBeenCalledTimes(1);
+    expect(mockSmlService.deleteAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        originId: 'viz-1',
+        attachmentType: 'visualization',
+        spaces: ['test-space'],
+        ingestionMethod: 'all',
+      })
+    );
     expect(response.ok).toHaveBeenCalledWith({
-      body: { id: 'chunk-1', deleted: true },
+      body: { origin_id: 'viz-1', deleted: true },
     });
+  });
+
+  it('targets only the URL-pinned type even if chunks of other types share the bare id', async () => {
+    const vizChunk = { ...sampleDocument, id: 'chunk-1', type: 'visualization' };
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([vizChunk]);
+    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[vizChunk.id, true]]));
+    mockSmlService.deleteAttachment.mockResolvedValue(undefined);
+
+    await callHandler(validParams);
+
+    expect(mockSmlService.deleteAttachment).toHaveBeenCalledTimes(1);
+    expect(mockSmlService.deleteAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ attachmentType: 'visualization' })
+    );
   });
 
   it('falls back to default space when spaces plugin is unavailable', async () => {
@@ -92,21 +131,27 @@ describe('registerDeleteRoute', () => {
     });
 
     const [, localHandler] = localRouter.delete.mock.calls[0];
-    const request = httpServerMock.createKibanaRequest({ params: { id: 'chunk-1' } });
+    const request = httpServerMock.createKibanaRequest({ params: validParams });
     const response = httpServerMock.createResponseFactory();
 
-    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
-    mockSmlService.deleteDocument.mockResolvedValue(true);
+    const defaultSpaceDoc = { ...sampleDocument, spaces: ['default'] };
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([defaultSpaceDoc]);
+    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[defaultSpaceDoc.id, true]]));
+    mockSmlService.deleteAttachment.mockResolvedValue(undefined);
+
     await localHandler(buildMockContext(true), request, response);
-    expect(mockSmlService.deleteDocument).toHaveBeenCalledWith(
-      expect.objectContaining({ spaceId: 'default' })
+
+    expect(mockSmlService.deleteAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ spaces: ['default'] })
     );
   });
 
-  it('propagates errors from sml.deleteDocument', async () => {
-    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
-    mockSmlService.deleteDocument.mockRejectedValue(new Error('boom'));
-    await expect(callHandler({ id: 'chunk-1' })).rejects.toThrow('boom');
+  it('propagates errors from sml.deleteAttachment', async () => {
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([sampleDocument]);
+    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
+    mockSmlService.deleteAttachment.mockRejectedValue(new Error('boom'));
+
+    await expect(callHandler(validParams)).rejects.toThrow('boom');
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('boom'));
   });
 });
