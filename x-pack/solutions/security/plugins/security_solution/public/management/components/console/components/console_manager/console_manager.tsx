@@ -110,7 +110,7 @@ const consoleStore = {
 // that, each manager registers a token on mount and only the "primary" (first-registered) one renders
 // the overlay. When the primary unmounts, the next registered manager takes over.
 // -------------------------------------------------------------------------------------------------
-let primaryElectionTokens: object[] = [];
+let primaryElectionTokens: symbol[] = [];
 const primaryElectionListeners = new Set<() => void>();
 
 const emitPrimaryElectionChange = (): void => {
@@ -124,15 +124,15 @@ const rendererElection = {
       primaryElectionListeners.delete(listener);
     };
   },
-  register: (token: object): void => {
+  register: (token: symbol): void => {
     primaryElectionTokens = [...primaryElectionTokens, token];
     emitPrimaryElectionChange();
   },
-  unregister: (token: object): void => {
+  unregister: (token: symbol): void => {
     primaryElectionTokens = primaryElectionTokens.filter((current) => current !== token);
     emitPrimaryElectionChange();
   },
-  isPrimary: (token: object): boolean => primaryElectionTokens[0] === token,
+  isPrimary: (token: symbol): boolean => primaryElectionTokens[0] === token,
 };
 
 /**
@@ -162,9 +162,9 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
 
   // Renderer election: a stable per-instance token, registered on mount. Only the primary instance
   // renders the `ConsolePageOverlay` so we never render duplicate overlays from multiple managers.
-  const electionTokenRef = useRef<object>();
+  const electionTokenRef = useRef<symbol>();
   if (!electionTokenRef.current) {
-    electionTokenRef.current = {};
+    electionTokenRef.current = Symbol('consoleManagerRendererToken');
   }
   const electionToken = electionTokenRef.current;
 
