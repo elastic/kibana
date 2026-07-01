@@ -13,6 +13,12 @@ import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../common/constan
 import { MITRE_ATTACK_VERSION } from '../../../../../../common/detection_engine/mitre/mitre_version';
 import { MitreVersionUpgradedCallout } from '.';
 
+// The callout is gated behind the mitreAttackUpdatesUIEnabled feature flag,
+// which is off by default. Force it on for this test suite.
+jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+}));
+
 const DISMISSAL_STORAGE_KEY = NEW_FEATURES_TOUR_STORAGE_KEYS.MITRE_VERSION_UPGRADED_CALLOUT;
 
 const renderCallout = () =>

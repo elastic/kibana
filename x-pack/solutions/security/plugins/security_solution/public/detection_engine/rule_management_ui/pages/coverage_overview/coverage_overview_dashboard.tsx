@@ -15,6 +15,7 @@ import { CoverageOverviewMitreTechniquePanelPopover } from './technique_panel_po
 import { CoverageOverviewFiltersPanel } from './filters_panel';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import { CoverageOverviewInvalidMitreRulesCallout } from './invalid_mitre_rules_callout';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const CoverageOverviewHeaderComponent = () => (
   <HeaderPage
@@ -33,11 +34,14 @@ const CoverageOverviewDashboardComponent = () => {
   const {
     state: { data },
   } = useCoverageOverviewDashboardContext();
+  const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
+    'mitreAttackUpdatesUIEnabled'
+  );
 
   return (
     <>
       <CoverageOverviewHeader />
-      {data && (
+      {isMitreAttackUpdatesUIEnabled && data && (
         <CoverageOverviewInvalidMitreRulesCallout
           invalidlyMappedRules={data.invalidlyMappedRules}
         />

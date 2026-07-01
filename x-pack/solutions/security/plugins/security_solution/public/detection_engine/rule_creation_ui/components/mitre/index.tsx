@@ -27,6 +27,7 @@ import * as i18n from './translations';
 import { MitreAttackTechniqueFields } from './technique_fields';
 import type { MitreTactic } from '../../../../../common/detection_engine/mitre/types';
 import { createUnsupportedMitreOption } from './unsupported_mitre_option';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -52,6 +53,10 @@ interface AddItemProps {
 
 // eslint-disable-next-line react/display-name
 export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItemProps) => {
+  const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
+    'mitreAttackUpdatesUIEnabled'
+  );
+
   const removeTactic = useCallback(
     (index: number) => {
       const values = [...(field.value as Threats)];
@@ -120,20 +125,22 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
 
   const isUnsupportedTactic = useCallback(
     (threat: Threat) =>
+      isMitreAttackUpdatesUIEnabled &&
       tacticsOptions.length > 0 &&
       threat.tactic.name !== 'none' &&
       findCurrentTacticOption(threat) === undefined,
-    [findCurrentTacticOption, tacticsOptions]
+    [findCurrentTacticOption, isMitreAttackUpdatesUIEnabled, tacticsOptions]
   );
 
   const getRenamedFromName = useCallback(
     (threat: Threat) => {
+      if (!isMitreAttackUpdatesUIEnabled) return undefined;
       const matchedOption = findCurrentTacticOption(threat);
       return matchedOption && matchedOption.name !== threat.tactic.name
         ? threat.tactic.name
         : undefined;
     },
-    [findCurrentTacticOption]
+    [findCurrentTacticOption, isMitreAttackUpdatesUIEnabled]
   );
 
   const getSelectTactic = useCallback(

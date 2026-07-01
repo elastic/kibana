@@ -30,6 +30,7 @@ import type {
   MitreTechnique,
 } from '../../../../../common/detection_engine/mitre/types';
 import { createUnsupportedMitreOption } from './unsupported_mitre_option';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -70,6 +71,10 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
   threatIndex,
   onFieldChange,
 }): JSX.Element => {
+  const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
+    'mitreAttackUpdatesUIEnabled'
+  );
+
   const values = field.value as Threats;
 
   const [tacticsOptions, setTacticsOptions] = useState<MitreTactic[]>([]);
@@ -153,18 +158,20 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
 
   const isUnsupportedTechnique = useCallback(
     (technique: ThreatTechnique) =>
+      isMitreAttackUpdatesUIEnabled &&
       techniquesOptions.length > 0 &&
       technique.name !== 'none' &&
       findCurrentTechniqueOption(technique) === undefined,
-    [findCurrentTechniqueOption, techniquesOptions]
+    [findCurrentTechniqueOption, isMitreAttackUpdatesUIEnabled, techniquesOptions]
   );
 
   const getTechniqueRenamedFromName = useCallback(
     (technique: ThreatTechnique) => {
+      if (!isMitreAttackUpdatesUIEnabled) return undefined;
       const matchedOption = findCurrentTechniqueOption(technique);
       return matchedOption && matchedOption.name !== technique.name ? technique.name : undefined;
     },
-    [findCurrentTechniqueOption]
+    [findCurrentTechniqueOption, isMitreAttackUpdatesUIEnabled]
   );
 
   const getSelectTechnique = useCallback(
