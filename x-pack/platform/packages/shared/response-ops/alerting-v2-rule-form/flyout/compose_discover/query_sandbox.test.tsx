@@ -288,4 +288,18 @@ describe('QuerySandbox', () => {
       expect(onTabChange).toHaveBeenCalledWith('base');
     });
   });
+
+  describe('headerActions', () => {
+    it('renders headerActions in the query header row when provided', () => {
+      renderSandbox({
+        headerActions: <button data-test-subj="customHeaderAction">Split</button>,
+      });
+      expect(screen.getByTestId('customHeaderAction')).toBeInTheDocument();
+    });
+
+    it('does not render a headerActions slot when absent', () => {
+      renderSandbox({});
+      expect(screen.queryByTestId('customHeaderAction')).not.toBeInTheDocument();
+    });
+  });
 });

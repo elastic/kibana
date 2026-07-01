@@ -79,6 +79,7 @@ interface SandboxFlyoutMockProps {
   onQueryChange?: (query: RuleQuery) => void;
   onApply?: () => void;
   onClose: () => void;
+  headerActions?: React.ReactNode;
 }
 
 let sandboxFlyoutProps: SandboxFlyoutMockProps | undefined;
@@ -89,6 +90,7 @@ jest.mock('./query_sandbox_flyout', () => ({
     sandboxFlyoutProps = props;
     return (
       <div data-test-subj="composeDiscoverChildMock">
+        <div data-test-subj="mockSandboxHeaderActions">{props.headerActions}</div>
         {props.onApply ? (
           <button type="button" data-test-subj="mockSandboxApply" onClick={() => props.onApply?.()}>
             Apply
@@ -711,6 +713,108 @@ describe('ComposeDiscoverFlyout', () => {
         base: 'FROM metrics-*',
         breach: { segment: '| WHERE count > 50' },
       });
+    });
+
+    it('commits manual split base/alert verbatim without running the heuristic', () => {
+      renderFlyout({ mode: 'create' });
+
+      expect(sandboxFlyoutProps).toBeDefined();
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+
+      const manualSplitQuery: RuleQuery = {
+        format: 'composed',
+        base: 'FROM custom-base',
+        breach: { segment: '| WHERE custom > 1' },
+      };
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(manualSplitQuery);
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      expect(readCommittedQuery?.()).toEqual(manualSplitQuery);
+    });
+  });
+
+  describe('manual split mode', () => {
+    const getLatestFormProps = (): FormProps =>
+      mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+
+    it('passes onManualSplit only in create mode', () => {
+      renderFlyout({ mode: 'create' });
+      expect(getLatestFormProps().onManualSplit).toBeDefined();
+
+      mockComposeDiscoverForm.mockClear();
+      renderFlyout({ mode: 'edit' });
+      expect(getLatestFormProps().onManualSplit).toBeUndefined();
+    });
+
+    it('resets manual split when the sandbox is closed without Apply', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
+
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
+
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(false);
+    });
+
+    it('keeps manual split enabled after Apply in manual split mode', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+
+      const manualSplitQuery: RuleQuery = {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+      };
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(manualSplitQuery);
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
+    });
+
+    it('resets manual split when switching to YAML mode', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
+
+      clickEditMode('yaml');
+      clickEditMode('form');
+
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(false);
     });
   });
 
