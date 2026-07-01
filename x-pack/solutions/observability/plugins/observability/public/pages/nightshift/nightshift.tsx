@@ -10,6 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY } from '@kbn/management-settings-ids';
+import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '@kbn/streams-plugin/common';
 import { NightshiftApp } from '@kbn/nightshift';
 import type { GapsReport } from '@kbn/nightshift';
 import { useKibana } from '../../utils/kibana_react';
@@ -47,14 +48,15 @@ interface ActionConnectorResponseItem {
 }
 
 export function NightshiftPage() {
-  const { http, uiSettings, serverless, agentBuilder } = useKibana().services;
+  const { http, uiSettings, serverless, agentBuilder, featureFlags } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
 
-  const isEnabled = uiSettings.get<boolean>(
-    OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
-    false
-  );
+  // The Nightshift onboarding UI only makes sense when significant events discovery is on and the
+  // memory feature is enabled, since every action here reads from or writes to sigevents memory.
+  const isEnabled =
+    uiSettings.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY, false) &&
+    featureFlags.getBooleanValue(STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false);
 
   useBreadcrumbs(
     [
