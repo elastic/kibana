@@ -23,7 +23,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { type APMIndices, validateApmIndices } from '@kbn/apm-sources-access-plugin/public';
+import {
+  type APMIndices,
+  type ApmIndexValidationErrors,
+  type ApmIndexValidationIssue,
+  validateApmIndices,
+} from '@kbn/apm-sources-access-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmPluginStartDeps } from '../../../../plugin';
@@ -64,6 +69,25 @@ const APM_INDEX_LABELS: ReadonlyArray<{ configurationName: keyof APMIndices; lab
 // avoid infinite loop by initializing the state outside the component
 const INITIAL_STATE = { apmIndexSettings: [] };
 
+function getApmIndexValidationMessage(issue: ApmIndexValidationIssue) {
+  switch (issue.code) {
+    case 'maxLength':
+      return i18n.translate('xpack.apm.settings.apmIndices.validation.maxLength', {
+        defaultMessage: 'Must be {maxLength} characters or fewer',
+        values: { maxLength: issue.maxLength },
+      });
+  }
+}
+
+function getApmIndexValidationMessages(validationIssues: ApmIndexValidationErrors) {
+  return Object.fromEntries(
+    Object.entries(validationIssues).map(([setting, issue]) => [
+      setting,
+      getApmIndexValidationMessage(issue),
+    ])
+  ) as Partial<Record<keyof APMIndices, string>>;
+}
+
 export function ApmIndices() {
   const { core } = useApmPluginContext();
   const { services } = useKibana<ApmPluginStartDeps>();
@@ -98,8 +122,14 @@ export function ApmIndices() {
     );
   }, [data]);
 
-  const validationErrors = useMemo(() => validateApmIndices(apmIndices), [apmIndices]);
-  const hasInvalidChanges = Object.keys(validationErrors).length > 0;
+  const { validationErrors, hasInvalidChanges } = useMemo(() => {
+    const validationIssues = validateApmIndices(apmIndices);
+
+    return {
+      validationErrors: getApmIndexValidationMessages(validationIssues),
+      hasInvalidChanges: Object.keys(validationIssues).length > 0,
+    };
+  }, [apmIndices]);
 
   const handleApplyChangesEvent = async (
     event: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>

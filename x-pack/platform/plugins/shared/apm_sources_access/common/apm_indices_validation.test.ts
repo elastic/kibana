@@ -15,7 +15,10 @@ describe('validateApmIndexSetting', () => {
   it('returns a shared max-length error for overly long values', () => {
     expect(
       validateApmIndexSetting('transaction', 'a'.repeat(APM_INDEX_PATTERN_MAX_LENGTH + 1))
-    ).toBe(`Must be ${APM_INDEX_PATTERN_MAX_LENGTH} characters or fewer`);
+    ).toEqual({
+      code: 'maxLength',
+      maxLength: APM_INDEX_PATTERN_MAX_LENGTH,
+    });
   });
 
   it('accepts empty and valid values', () => {
@@ -32,7 +35,10 @@ describe('validateApmIndices', () => {
         metric: 'metrics-apm*',
       })
     ).toEqual({
-      error: `Must be ${APM_INDEX_PATTERN_MAX_LENGTH} characters or fewer`,
+      error: {
+        code: 'maxLength',
+        maxLength: APM_INDEX_PATTERN_MAX_LENGTH,
+      },
     });
   });
 });

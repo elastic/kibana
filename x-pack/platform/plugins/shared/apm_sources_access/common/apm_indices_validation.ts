@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
 // APM settings store comma-separated index-pattern expressions, so keep their bound
 // aligned with Kibana's broader index-pattern (index_management) `maxLength` adoption.
 export const APM_INDEX_PATTERN_MAX_LENGTH = 1000;
@@ -22,23 +20,27 @@ export const APM_INDEX_SETTING_KEYS = [
 
 export type ApmIndexSettingKey = (typeof APM_INDEX_SETTING_KEYS)[number];
 
-export type ApmIndexValidationErrors = Partial<Record<ApmIndexSettingKey, string>>;
-export type ApmIndexValidationValues = Partial<Record<ApmIndexSettingKey, string | undefined>>;
-
-function getApmIndexMaxLengthError() {
-  return i18n.translate('xpack.apmSourcesAccess.apmIndices.validation.maxLength', {
-    defaultMessage: 'Must be {maxLength} characters or fewer',
-    values: { maxLength: APM_INDEX_PATTERN_MAX_LENGTH },
-  });
+export interface ApmIndexValidationIssue {
+  code: 'maxLength';
+  maxLength: number;
 }
+
+export type ApmIndexValidationErrors = Partial<Record<ApmIndexSettingKey, ApmIndexValidationIssue>>;
+export type ApmIndexValidationValues = Partial<Record<ApmIndexSettingKey, string | undefined>>;
 
 function validateApmIndexPattern(value: string) {
   if (value.length > APM_INDEX_PATTERN_MAX_LENGTH) {
-    return getApmIndexMaxLengthError();
+    return {
+      code: 'maxLength',
+      maxLength: APM_INDEX_PATTERN_MAX_LENGTH,
+    } as const;
   }
 }
 
-const apmIndexValidators: Record<ApmIndexSettingKey, (value: string) => string | undefined> = {
+const apmIndexValidators: Record<
+  ApmIndexSettingKey,
+  (value: string) => ApmIndexValidationIssue | undefined
+> = {
   transaction: validateApmIndexPattern,
   span: validateApmIndexPattern,
   error: validateApmIndexPattern,
@@ -50,7 +52,7 @@ const apmIndexValidators: Record<ApmIndexSettingKey, (value: string) => string |
 export function validateApmIndexSetting(
   setting: ApmIndexSettingKey,
   value?: string
-): string | undefined {
+): ApmIndexValidationIssue | undefined {
   if (!value) {
     return;
   }
