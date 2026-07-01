@@ -73,12 +73,26 @@ export class DiscoverApp {
     return discoverVisible ? discoverSwitch : fallbackSwitch;
   }
 
+  private async hideTabPreview() {
+    await this.page.mouse.move(0, 0);
+    await this.page.testSubj.locator('unifiedTabs_tabPreview_contentPanel').waitFor({
+      state: 'hidden',
+    });
+  }
+
+  private async openDataViewSwitcher() {
+    const dataViewSwitch = await this.getVisibleDataViewSwitch();
+    await this.hideTabPreview();
+    await dataViewSwitch.click();
+  }
+
   async selectDataView(name: string) {
     const dataViewSwitch = await this.getVisibleDataViewSwitch();
     const currentValue = await dataViewSwitch.innerText();
     if (currentValue === name) {
       return;
     }
+    await this.hideTabPreview();
     await dataViewSwitch.click();
     await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeVisible();
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
@@ -133,10 +147,68 @@ export class DiscoverApp {
    * (classic mode only). The editor appends `*` to the title automatically.
    */
   async createDataViewFromSearchBar(options: DataViewOptions) {
-    const dataViewSwitch = await this.getVisibleDataViewSwitch();
-    await dataViewSwitch.click();
+    await this.openDataViewSwitcher();
     await this.page.testSubj.click('dataview-create-new');
     await this.fillAndSubmitDataViewEditor(options);
+  }
+
+  async getAvailableDataViewsFromSearchBar(): Promise<string[]> {
+    await this.openDataViewSwitcher();
+    const switcher = this.page.testSubj.locator('indexPattern-switcher');
+    await switcher.waitFor({ state: 'visible' });
+
+    const dataViews = await switcher
+      .locator('.euiSelectableListItem[data-test-subj^="dataView-"]')
+      .evaluateAll((items) =>
+        items
+          .map((item) => item.getAttribute('data-test-subj')?.slice('dataView-'.length))
+          .filter((name): name is string => Boolean(name))
+      );
+
+    await this.page.keyboard.press('Escape');
+    await switcher.waitFor({ state: 'hidden' });
+
+    return dataViews;
+  }
+
+  async editCurrentDataViewName(name: string) {
+    await this.openDataViewSwitcher();
+    await this.page.testSubj.click('indexPattern-manage-field');
+    await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
+
+    const editor = new DataViewEditorPage(this.page);
+    await editor.setName(name);
+    await editor.save();
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async createRuntimeField(fieldName: string, script: string) {
+    await this.openDataViewSwitcher();
+    await this.page.testSubj.click('indexPattern-add-field');
+    const fieldEditor = this.page.getByRole('dialog', { name: 'Create field' });
+    await fieldEditor.waitFor({ state: 'visible' });
+
+    await fieldEditor.getByRole('textbox', { name: 'Name field' }).fill(fieldName);
+    await fieldEditor.getByRole('switch', { name: 'Set value' }).click();
+    await fieldEditor
+      .getByRole('textbox', { name: /Editor content/ })
+      .waitFor({ state: 'visible' });
+    await this.codeEditor.setCodeEditorValue(script);
+    await fieldEditor.getByRole('button', { name: 'Save' }).click();
+    await fieldEditor.waitFor({ state: 'hidden' });
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async renameRuntimeField(newFieldName: string) {
+    const fieldEditor = this.page.getByRole('dialog', { name: /Edit .* field/ });
+    await fieldEditor.waitFor({ state: 'visible' });
+
+    await fieldEditor.getByRole('textbox', { name: 'Name field' }).fill(newFieldName);
+    await fieldEditor.getByRole('button', { name: 'Save' }).click();
+    await this.page.testSubj.fill('saveModalConfirmText', 'change');
+    await this.page.testSubj.click('confirmModalConfirmButton');
+    await fieldEditor.waitFor({ state: 'hidden' });
+    await this.waitUntilTabIsLoaded();
   }
 
   private async clickAppMenuItem(

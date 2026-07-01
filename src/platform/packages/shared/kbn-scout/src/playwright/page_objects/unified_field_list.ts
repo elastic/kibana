@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage } from '..';
+import { expect } from '..';
 
 type SidebarSectionName = 'meta' | 'empty' | 'available' | 'unmapped' | 'popular' | 'selected';
 
@@ -64,6 +65,7 @@ export class UnifiedFieldList {
    * Get field names in a specific sidebar section
    */
   async getSidebarSectionFieldNames(sectionName: SidebarSectionName): Promise<string[]> {
+    await this.waitUntilSidebarHasLoaded();
     const sectionSelector = this.getSidebarSectionSelector(sectionName);
     const section = this.page.testSubj.locator(sectionSelector);
 
@@ -79,6 +81,26 @@ export class UnifiedFieldList {
     }
 
     return names;
+  }
+
+  async waitUntilSidebarHasLoaded(): Promise<void> {
+    await this.page.testSubj.waitForSelector('fieldListGroupedAvailableFields-countLoading', {
+      state: 'hidden',
+    });
+  }
+
+  async searchField(name: string): Promise<void> {
+    await this.waitUntilSidebarHasLoaded();
+    const searchInput = this.page.testSubj.locator('fieldListFiltersFieldSearch');
+    await searchInput.fill(name);
+    await expect(searchInput).toHaveValue(name);
+    await this.waitUntilSidebarHasLoaded();
+  }
+
+  getAvailableField(field: string) {
+    return this.page.testSubj
+      .locator('fieldListGroupedAvailableFields')
+      .locator(`[data-test-subj="field-${field}"]`);
   }
 
   /**
@@ -124,5 +146,14 @@ export class UnifiedFieldList {
    */
   async clickFieldListItem(field: string): Promise<void> {
     await this.page.testSubj.click(`field-${field}`);
+  }
+
+  async openFieldEditor(field: string): Promise<void> {
+    await this.searchField(field);
+    await expect(this.getAvailableField(field)).toBeVisible();
+    await this.getAvailableField(field).click();
+    await this.page.locator('[data-popover-open="true"]').waitFor({ state: 'visible' });
+    await this.page.testSubj.locator(`discoverFieldListPanelEdit-${field}`).click();
+    await this.page.testSubj.locator('fieldEditor').waitFor({ state: 'visible' });
   }
 }
