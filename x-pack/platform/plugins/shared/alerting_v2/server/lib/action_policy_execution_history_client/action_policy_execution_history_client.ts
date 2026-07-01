@@ -50,6 +50,7 @@ export interface ListExecutionHistoryParams {
   page?: number;
   perPage?: number;
   search?: string;
+  ruleIds?: string[];
   outcome?: PolicyExecutionOutcomeFilter;
 }
 
@@ -65,6 +66,7 @@ export interface CountNewEventsSinceParams {
   request: KibanaRequest;
   since: string;
   search?: string;
+  ruleIds?: string[];
   outcome?: PolicyExecutionOutcomeFilter;
 }
 
@@ -90,6 +92,7 @@ export class ActionPolicyExecutionHistoryClient {
     page = DEFAULT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     search,
+    ruleIds,
     outcome = DEFAULT_OUTCOME_FILTER,
   }: ListExecutionHistoryParams): Promise<ListExecutionHistoryResult> {
     const startDate = new Date(Date.now() - TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
@@ -110,12 +113,18 @@ export class ActionPolicyExecutionHistoryClient {
       outcome: toOutcomeForService(outcome),
       policyIds: matchingSearchIds.policyIds,
       ruleIds: matchingSearchIds.ruleIds,
+      mandatoryRuleIds: ruleIds,
     });
 
     const nameMaps = await this.resolveNames(result.events, spaceId);
     const items = result.events
       .map((event) =>
-        buildExecutionHistoryItem(event, nameMaps, searchIsActive ? matchingSearchIds : undefined)
+        buildExecutionHistoryItem(
+          event,
+          nameMaps,
+          searchIsActive ? matchingSearchIds : undefined,
+          ruleIds
+        )
       )
       .filter((item): item is PolicyExecutionHistoryItem => item !== null);
 
@@ -132,6 +141,7 @@ export class ActionPolicyExecutionHistoryClient {
     request,
     since,
     search,
+    ruleIds,
     outcome = DEFAULT_OUTCOME_FILTER,
   }: CountNewEventsSinceParams): Promise<CountNewEventsSinceResult> {
     const spaceId = this.spaces.spacesService.getSpaceId(request);
@@ -147,6 +157,7 @@ export class ActionPolicyExecutionHistoryClient {
       outcome: toOutcomeForService(outcome),
       policyIds: searchIds.policyIds,
       ruleIds: searchIds.ruleIds,
+      mandatoryRuleIds: ruleIds,
     });
   }
 

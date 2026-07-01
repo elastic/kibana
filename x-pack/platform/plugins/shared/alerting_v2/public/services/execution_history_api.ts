@@ -37,6 +37,7 @@ export class ExecutionHistoryApi {
           page: params.page,
           perPage: params.perPage,
           search: params.search,
+          ruleIds: params.ruleIds,
           outcome: params.outcome,
         },
       }
@@ -47,7 +48,7 @@ export class ExecutionHistoryApi {
     return this.http.get<CountPolicyExecutionEventsResponse>(
       ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
       {
-        query: { since, search: params.search, outcome: params.outcome },
+        query: { since, search: params.search, ruleIds: params.ruleIds, outcome: params.outcome },
       }
     );
   }

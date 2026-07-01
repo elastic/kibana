@@ -94,7 +94,8 @@ export function getRelevantRuleIdsFromLogEvent(
 export function buildExecutionHistoryItem(
   event: IValidatedEvent,
   { policyNames, ruleNames, workflowNames }: NameMaps,
-  matchingSearchIds?: ResolvedSearchIds
+  matchingSearchIds?: ResolvedSearchIds,
+  mandatoryRuleIds?: string[]
 ): PolicyExecutionHistoryItem | null {
   if (!event || (matchingSearchIds && !matchingSearchIds.hasMatches)) {
     return null;
@@ -114,7 +115,15 @@ export function buildExecutionHistoryItem(
     .filter((so) => so.type === RULE_SAVED_OBJECT_TYPE)
     .map((so) => so.id);
   const allRuleIds = [...referencedRuleIds, ...(dispatcher.rule_ids ?? [])].filter(isString);
-  const relevantRuleIds = getRelevantRuleIdsFromLogEvent(policyId, allRuleIds, matchingSearchIds);
+  const searchScopedRuleIds = getRelevantRuleIdsFromLogEvent(
+    policyId,
+    allRuleIds,
+    matchingSearchIds
+  );
+  const relevantRuleIds =
+    mandatoryRuleIds && mandatoryRuleIds.length > 0
+      ? searchScopedRuleIds.filter((id) => mandatoryRuleIds.includes(id))
+      : searchScopedRuleIds;
   if (relevantRuleIds.length === 0) return null;
 
   const rules = relevantRuleIds.map((id) => ({ id, name: ruleNames.get(id) ?? null }));
