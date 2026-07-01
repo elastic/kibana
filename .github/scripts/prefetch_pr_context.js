@@ -253,11 +253,11 @@ const getPrMetadata = async ({ github, owner, repo, pullNumber }) => {
   return {
     author: author
       ? {
-          id: author.id,
-          is_bot: author.__typename === 'Bot',
-          login: author.login,
-          name: author.name ?? '',
-        }
+        id: author.id,
+        is_bot: author.__typename === 'Bot',
+        login: author.login,
+        name: author.name ?? '',
+      }
       : null,
     baseRefName: pullRequest.baseRefName,
     body: pullRequest.body,

@@ -18,6 +18,7 @@ snapshots.js
 !/.eslintrc.js
 !.storybook
 !.buildkite
+!.github
 
 # plugin overrides
 /src/platform/plugins/shared/data/common/es_query/kuery/ast/_generated_/**
