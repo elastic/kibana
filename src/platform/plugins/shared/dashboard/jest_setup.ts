@@ -16,6 +16,7 @@
  */
 import {
   mockDashboardBackupService,
+  mockDashboardRecentlyAccessedService,
   setStubKibanaServices,
   setStubLogger,
 } from './public/services/mocks';
@@ -33,10 +34,6 @@ jest.mock('./public/services/dashboard_api_services', () => {
 
 jest.mock('./public/services/dashboard_recently_accessed_service', () => {
   return {
-    getDashboardRecentlyAccessedService: () => ({
-      add: jest.fn(),
-      get: jest.fn(),
-      get$: jest.fn(),
-    }),
+    getDashboardRecentlyAccessedService: () => mockDashboardRecentlyAccessedService,
   };
 });

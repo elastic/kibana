@@ -9,9 +9,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { map, type Observable } from 'rxjs';
-import type { ChromeRecentlyAccessed, IBasePath } from '@kbn/core/public';
+import type { IBasePath } from '@kbn/core/public';
 import type { NavExtensionEntry } from '@kbn/core-chrome-browser';
 import type { DashboardNavExtension } from '../types';
+import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
 
 export interface RecentDashboardRow {
   id: string;
@@ -30,24 +31,20 @@ declare module '@kbn/core-chrome-browser' {
 const DEFAULT_MAX_RECENT_ITEMS = 5;
 
 export const createRecentItemsData$ = (
-  recentlyAccessed: Pick<ChromeRecentlyAccessed, 'get$'>,
   basePath: Pick<IBasePath, 'prepend'>,
   { max = DEFAULT_MAX_RECENT_ITEMS }: { max?: number } = {}
 ): Observable<RecentDashboardRow[]> => {
-  const filterPattern = new RegExp(String.raw`\/app\/dashboards`);
-
-  return recentlyAccessed.get$().pipe(
-    map((items) =>
-      items
-        .filter((item) => filterPattern.test(item.link))
-        .slice(0, max)
-        .map((item) => ({
+  return getDashboardRecentlyAccessedService()
+    .get$()
+    .pipe(
+      map((items) =>
+        items.slice(0, max).map((item) => ({
           id: `recent-${item.id}`,
           label: item.label,
           href: basePath.prepend(item.link),
         }))
-    )
-  );
+      )
+    );
 };
 
 export const recentlyAccessedExtension: DashboardNavExtension<
@@ -63,7 +60,7 @@ export const recentlyAccessedExtension: DashboardNavExtension<
       }),
     },
   },
-  createData$: (core) => createRecentItemsData$(core.chrome.recentlyAccessed, core.http.basePath),
+  createData$: (core) => createRecentItemsData$(core.http.basePath),
 };
 
 export const recentlyAccessedNavExtensionDefinition = recentlyAccessedExtension.definition;
