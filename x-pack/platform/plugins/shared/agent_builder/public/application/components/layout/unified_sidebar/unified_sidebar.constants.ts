@@ -7,3 +7,6 @@
 
 export const SIDEBAR_WIDTH = 300;
 export const CONDENSED_SIDEBAR_WIDTH = 48;
+
+/** Agent panel width below which the Agent Builder sidebar stays in popover mode. */
+export const AGENT_PANEL_SIDEBAR_COLLAPSE_AT_WIDTH = 640;

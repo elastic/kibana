@@ -70,7 +70,7 @@ export const BackButton = React.memo<BackButtonProps>(({ targets }) => {
 
   const buttonIcon = (
     <EuiButtonIcon
-      iconType="sortLeft"
+      iconType="listBullet"
       color="text"
       display="empty"
       size="xs"
