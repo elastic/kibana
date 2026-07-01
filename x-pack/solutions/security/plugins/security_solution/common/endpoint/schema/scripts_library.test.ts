@@ -13,7 +13,12 @@ import {
   DownloadScriptRequestSchema,
   PatchUpdateScriptRequestSchema,
   CreateScriptRequestSchema,
+  DeleteScriptRequestSchema,
 } from '../../api/endpoint/scripts_library';
+import {
+  ScriptNameSchema,
+  ScriptPathToExecutableSchema,
+} from '../../api/endpoint/scripts_library/common';
 import type { HapiReadableStream } from '../../../server/types';
 import { ListScriptsRequestSchema } from '../../api/endpoint/scripts_library/list_scripts';
 import type { SortableScriptLibraryFields } from '../types';
@@ -394,6 +399,143 @@ describe('Scripts library schemas', () => {
   describe('Get one API', () => {
     it('should accept a script_id URL param', () => {
       expect(GetOneScriptRequestSchema.params.validate({ script_id: 'foo' })).toBeTruthy();
+    });
+  });
+
+  describe('Bounds enforcement (maxLength)', () => {
+    const str = (len: number) => 'a'.repeat(len);
+
+    describe('ScriptNameSchema', () => {
+      it('should accept a name at the 256-char limit', () => {
+        expect(() => ScriptNameSchema.validate(str(256))).not.toThrow();
+      });
+
+      it('should reject a name exceeding 256 chars', () => {
+        expect(() => ScriptNameSchema.validate(str(257))).toThrow();
+      });
+    });
+
+    describe('ScriptPathToExecutableSchema', () => {
+      it('should accept a path at the 4096-char limit', () => {
+        expect(() => ScriptPathToExecutableSchema.validate(str(4096))).not.toThrow();
+      });
+
+      it('should reject a path exceeding 4096 chars', () => {
+        expect(() => ScriptPathToExecutableSchema.validate(str(4097))).toThrow();
+      });
+    });
+
+    describe('Create API free-text fields', () => {
+      it.each(['description', 'instructions', 'example'] as const)(
+        'should accept `%s` at the 10000-char limit',
+        (field) => {
+          expect(() =>
+            CreateScriptRequestSchema.body.validate({
+              name: 'foo',
+              platform: ['linux'],
+              file: createFileStream(),
+              fileType: 'script',
+              [field]: str(10000),
+            })
+          ).not.toThrow();
+        }
+      );
+
+      it.each(['description', 'instructions', 'example'] as const)(
+        'should reject `%s` exceeding 10000 chars',
+        (field) => {
+          expect(() =>
+            CreateScriptRequestSchema.body.validate({
+              name: 'foo',
+              platform: ['linux'],
+              file: createFileStream(),
+              fileType: 'script',
+              [field]: str(10001),
+            })
+          ).toThrow();
+        }
+      );
+    });
+
+    describe('Update API bounds', () => {
+      it('should accept `version` at the 256-char limit', () => {
+        expect(() =>
+          PatchUpdateScriptRequestSchema.body.validate({ version: str(256), description: 'x' })
+        ).not.toThrow();
+      });
+
+      it('should reject `version` exceeding 256 chars', () => {
+        expect(() =>
+          PatchUpdateScriptRequestSchema.body.validate({ version: str(257), description: 'x' })
+        ).toThrow();
+      });
+
+      it.each(['description', 'instructions', 'example'] as const)(
+        'should reject `%s` exceeding 10000 chars',
+        (field) => {
+          expect(() =>
+            PatchUpdateScriptRequestSchema.body.validate({ [field]: str(10001) })
+          ).toThrow();
+        }
+      );
+
+      it('should reject `script_id` param exceeding 256 chars', () => {
+        expect(() =>
+          PatchUpdateScriptRequestSchema.params.validate({ script_id: str(257) })
+        ).toThrow();
+      });
+
+      it('should accept `script_id` param at the 256-char limit', () => {
+        expect(() =>
+          PatchUpdateScriptRequestSchema.params.validate({ script_id: str(256) })
+        ).not.toThrow();
+      });
+    });
+
+    describe('script_id param bounds (get/delete/download)', () => {
+      it('should accept script_id at 256 chars for GetOne', () => {
+        expect(() =>
+          GetOneScriptRequestSchema.params.validate({ script_id: str(256) })
+        ).not.toThrow();
+      });
+
+      it('should reject script_id over 256 chars for GetOne', () => {
+        expect(() => GetOneScriptRequestSchema.params.validate({ script_id: str(257) })).toThrow();
+      });
+
+      it('should accept script_id at 256 chars for Delete', () => {
+        expect(() =>
+          DeleteScriptRequestSchema.params.validate({ script_id: str(256) })
+        ).not.toThrow();
+      });
+
+      it('should reject script_id over 256 chars for Delete', () => {
+        expect(() => DeleteScriptRequestSchema.params.validate({ script_id: str(257) })).toThrow();
+      });
+
+      it('should accept script_id at 256 chars for Download', () => {
+        expect(() =>
+          DownloadScriptRequestSchema.params.validate({ script_id: str(256) })
+        ).not.toThrow();
+      });
+
+      it('should reject script_id over 256 chars for Download', () => {
+        expect(() =>
+          DownloadScriptRequestSchema.params.validate({ script_id: str(257) })
+        ).toThrow();
+      });
+    });
+
+    describe('List API kuery bound', () => {
+      it('should accept a kuery at the 10000-char limit', () => {
+        expect(() =>
+          ListScriptsRequestSchema.query.validate({ kuery: `name:${'a'.repeat(9995)}` })
+        ).not.toThrow();
+      });
+
+      it('should reject a kuery exceeding 10000 chars', () => {
+        expect(() => ListScriptsRequestSchema.query.validate({ kuery: str(10001) })).toThrow();
+      });
     });
   });
 });

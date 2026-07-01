@@ -12,7 +12,10 @@ import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/se
 import { EndpointAuthorizationError } from '../../errors';
 import { registerListScriptsRoute } from './list_scripts';
 import { ScriptsLibraryMock } from '../../services/scripts_library/mocks';
-import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
+import {
+  ListScriptsRequestSchema,
+  type ListScriptsRequestQuery,
+} from '../../../../common/api/endpoint/scripts_library/list_scripts';
 
 describe('GET: fetch list of scripts', () => {
   let apiTestSetup: HttpApiTestSetupMock;
@@ -52,6 +55,20 @@ describe('GET: fetch list of scripts', () => {
     registerListScriptsRoute(apiTestSetup.routerMock, apiTestSetup.endpointAppContextMock);
   });
 
+  const getRegisteredRequestSchema = () => {
+    const registeredRoute = apiTestSetup.getRegisteredVersionedRoute(
+      'get',
+      SCRIPTS_LIBRARY_ROUTE,
+      '2023-10-31'
+    );
+    const { validate } = registeredRoute.versionConfig;
+    if (!validate || typeof validate === 'function') {
+      throw new Error('Expected route validation object');
+    }
+
+    return validate.request;
+  };
+
   describe('registerListScriptsRoute()', () => {
     it('should register the route', () => {
       const registeredRoute = apiTestSetup.getRegisteredVersionedRoute(
@@ -80,6 +97,20 @@ describe('GET: fetch list of scripts', () => {
       expect(httpResponseMock.forbidden).toHaveBeenCalledWith({
         body: expect.any(EndpointAuthorizationError),
       });
+    });
+  });
+
+  describe('route-level schema validation (bounds)', () => {
+    it('should reject a kuery param exceeding 10000 chars via route-registered schema', () => {
+      const requestSchema = getRegisteredRequestSchema();
+      expect(requestSchema).toBe(ListScriptsRequestSchema);
+      expect(() => ListScriptsRequestSchema.query.validate({ kuery: 'a'.repeat(10001) })).toThrow();
+    });
+
+    it('should accept a valid kuery param within 10000 chars via route-registered schema', () => {
+      const requestSchema = getRegisteredRequestSchema();
+      expect(requestSchema).toBe(ListScriptsRequestSchema);
+      expect(() => ListScriptsRequestSchema.query.validate({ kuery: 'name:foo' })).not.toThrow();
     });
   });
 
