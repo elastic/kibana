@@ -436,6 +436,7 @@ describe('api_key_utils', () => {
           apiKeyId: 'clonedApiKeyId',
           spaceId: 'default',
           apiKeyCreatedByUser: false,
+          userName: 'testUser',
         },
       });
     });
@@ -472,6 +473,7 @@ describe('api_key_utils', () => {
           apiKeyId: 'clonedApiKeyId',
           spaceId: 'default',
           apiKeyCreatedByUser: false,
+          userName: 'testUser',
         },
       });
     });

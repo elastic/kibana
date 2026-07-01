@@ -740,6 +740,30 @@ export default function ({ getService }: FtrProviderContext) {
       expect(result.userScope?.userName).to.eql(createdApiKey.username);
 
       await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
+
+      // Scheduling with an API key grants a Task-Manager-owned key that is queued for
+      // invalidation on task removal. Drain it here so the pending invalidation SO does
+      // not leak into the next test's global `api_key_to_invalidate` count assertions.
+      await delay(1000);
+      await supertest
+        .post('/api/invalidate_api_key_task/run_soon')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      await retry.try(async () => {
+        const invalidateResponse = await es.search({
+          index: '.kibana_task_manager',
+          size: 100,
+          query: {
+            term: {
+              type: 'api_key_to_invalidate',
+            },
+          },
+        });
+
+        expect(invalidateResponse.hits.hits.length).to.eql(0);
+      });
     });
 
     it('should schedule tasks with fake request if request is provided', async () => {
