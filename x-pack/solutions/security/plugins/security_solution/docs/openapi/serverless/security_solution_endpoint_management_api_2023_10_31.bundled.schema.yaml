@@ -1244,6 +1244,7 @@ paths:
           required: true
           schema:
             example: ed518850-681a-4d60-bb98-e22640cae2a8
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -1327,6 +1328,7 @@ paths:
           name: package_policy_id
           required: true
           schema:
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -1353,6 +1355,7 @@ paths:
           name: package_policy_id
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -1367,7 +1370,10 @@ paths:
               properties:
                 note:
                   description: The note content.
+                  maxLength: 10000
                   type: string
+              required:
+                - note
         required: true
       responses:
         '200':
@@ -1736,6 +1742,7 @@ components:
         - data
     AgentId:
       description: Agent ID
+      maxLength: 256
       type: string
     AgentIds:
       description: A list of agent IDs. Max of 250.
@@ -2681,6 +2688,7 @@ components:
     Kuery:
       description: A KQL string.
       example: "united.endpoint.host.os.name : 'Windows'"
+      maxLength: 10000
       type: string
     MDERunScriptParameters:
       description: Parameters for Run Script response action against Microsoft

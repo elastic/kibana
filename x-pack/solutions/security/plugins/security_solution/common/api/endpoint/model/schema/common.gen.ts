@@ -52,13 +52,13 @@ export type EndDate = z.infer<typeof EndDate>;
 /**
  * Agent ID
  */
-export const AgentId = lazySchema(() => z.string());
+export const AgentId = lazySchema(() => z.string().max(256));
 export type AgentId = z.infer<typeof AgentId>;
 
 /**
  * A KQL string.
  */
-export const Kuery = lazySchema(() => z.string());
+export const Kuery = lazySchema(() => z.string().max(10000));
 export type Kuery = z.infer<typeof Kuery>;
 
 /**

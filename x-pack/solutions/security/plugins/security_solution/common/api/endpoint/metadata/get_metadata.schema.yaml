@@ -114,6 +114,7 @@ paths:
           description: The agent ID of the endpoint.
           schema:
             type: string
+            maxLength: 256
             example: 'ed518850-681a-4d60-bb98-e22640cae2a8'
       responses:
         '200':
