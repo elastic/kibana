@@ -7,7 +7,7 @@
 const path = require('path');
 const fs = require('fs');
 const util = require('util');
-const yaml = require('js-yaml');
+const { parse } = require('yaml');
 const { exec: execCb } = require('child_process');
 const { reduce } = require('lodash');
 
@@ -30,7 +30,7 @@ async function generate() {
     );
   }
 
-  const flatYaml = await yaml.load(await readFile(ecsYamlFilename));
+  const flatYaml = await parse(await readFile(ecsYamlFilename, 'utf8'));
 
   const fields = reduce(
     flatYaml,
