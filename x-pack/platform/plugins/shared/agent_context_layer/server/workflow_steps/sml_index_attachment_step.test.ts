@@ -16,6 +16,7 @@ import { createContextEngineAddEntryStepDefinition } from './sml_index_attachmen
 import { createSmlIndexer } from '../services/sml/sml_indexer';
 import { createSmlTypeRegistry } from '../services/sml/sml_type_registry';
 import { kibanaSavedObjectPermissions } from '../services/sml/permissions/kibana_saved_object';
+import type { SmlTypeDefinition } from '../services/sml/types';
 // Imported as a namespace so we can spy on `createSmlStorage` without
 // adding a `__mock__` shim. `jest.spyOn(target, method)` needs a
 // concrete object reference, which is what the `* as` form gives us.
@@ -94,14 +95,25 @@ const buildHandlerContext = (input: StepInput, request = httpServerMock.createKi
 // `Pick` makes the partial-mock intent explicit so we don't cast to `any`.
 type MockedSpaces = Pick<SpacesPluginStart, 'spacesService'>;
 
+/**
+ * Builds a step definition with the "everything is allowed" defaults most
+ * tests want (no spaces service, authorized security check, feature flag
+ * on) — override just the piece under test.
+ */
+const buildDefinition = (
+  overrides: Partial<Parameters<typeof createContextEngineAddEntryStepDefinition>[0]> = {}
+) =>
+  createContextEngineAddEntryStepDefinition({
+    getStartContract: () => buildStartContract(),
+    getSpaces: () => undefined,
+    getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+    isFeatureEnabled: async () => true,
+    ...overrides,
+  });
+
 describe('createContextEngineAddEntryStepDefinition', () => {
   it('exposes the expected step type id, schemas, and tech-preview stability', () => {
-    const definition = createContextEngineAddEntryStepDefinition({
-      getStartContract: () => buildStartContract(),
-      getSpaces: () => undefined,
-      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
-      isFeatureEnabled: async () => true,
-    });
+    const definition = buildDefinition();
     expect(definition.id).toBe('contextEngine.addEntry');
     expect(definition.stability).toBe('tech_preview');
     expect(definition.inputSchema).toBeDefined();
@@ -114,11 +126,9 @@ describe('createContextEngineAddEntryStepDefinition', () => {
     const spaces: MockedSpaces = {
       spacesService: { getSpaceId: jest.fn().mockReturnValue('test-space') } as any,
     };
-    const definition = createContextEngineAddEntryStepDefinition({
+    const definition = buildDefinition({
       getStartContract: () => startContract,
       getSpaces: () => spaces as SpacesPluginStart,
-      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
-      isFeatureEnabled: async () => true,
     });
 
     const request = httpServerMock.createKibanaRequest();
@@ -149,9 +159,10 @@ describe('createContextEngineAddEntryStepDefinition', () => {
       // handler comment for why.
       action: 'create',
       // Workflow writes always go through content-mode → manual chunks.
-      // Permissions are NOT forwarded — the indexer derives them from the
-      // registered type's `getPermissions` hook so the workflow author
-      // cannot spoof them.
+      // No `permissions` key here because this input didn't supply one —
+      // see the dedicated 'forwards a caller-supplied permissions object'
+      // and 'omits permissions ... when not supplied' tests below for that
+      // behavior.
       content: [
         {
           type: 'custom',
@@ -175,12 +186,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
 
   it('strips optional chunk fields when not provided', async () => {
     const startContract = buildStartContract();
-    const definition = createContextEngineAddEntryStepDefinition({
-      getStartContract: () => startContract,
-      getSpaces: () => undefined,
-      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
-      isFeatureEnabled: async () => true,
-    });
+    const definition = buildDefinition({ getStartContract: () => startContract });
 
     const context = buildHandlerContext({
       originId: 'doc-1',
@@ -203,12 +209,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
 
   it('preserves optional chunk fields when provided (no permissions field — derived by indexer)', async () => {
     const startContract = buildStartContract();
-    const definition = createContextEngineAddEntryStepDefinition({
-      getStartContract: () => startContract,
-      getSpaces: () => undefined,
-      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
-      isFeatureEnabled: async () => true,
-    });
+    const definition = buildDefinition({ getStartContract: () => startContract });
 
     const context = buildHandlerContext({
       originId: 'doc-1',
@@ -245,12 +246,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
 
   it('forwards a caller-supplied permissions object to indexAttachment for upsert', async () => {
     const startContract = buildStartContract();
-    const definition = createContextEngineAddEntryStepDefinition({
-      getStartContract: () => startContract,
-      getSpaces: () => undefined,
-      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
-      isFeatureEnabled: async () => true,
-    });
+    const definition = buildDefinition({ getStartContract: () => startContract });
 
     const context = buildHandlerContext({
       originId: 'doc-1',
@@ -274,12 +270,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
 
   it('omits permissions from the indexAttachment call when the workflow author does not supply it', async () => {
     const startContract = buildStartContract();
-    const definition = createContextEngineAddEntryStepDefinition({
-      getStartContract: () => startContract,
-      getSpaces: () => undefined,
-      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
-      isFeatureEnabled: async () => true,
-    });
+    const definition = buildDefinition({ getStartContract: () => startContract });
 
     const context = buildHandlerContext({
       originId: 'doc-1',
@@ -301,12 +292,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
         "attachmentType 'lens' derives permissions via getPermissions() and does not accept a caller-supplied 'permissions' value for origin 'doc-1'."
       )
     );
-    const definition = createContextEngineAddEntryStepDefinition({
-      getStartContract: () => startContract,
-      getSpaces: () => undefined,
-      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
-      isFeatureEnabled: async () => true,
-    });
+    const definition = buildDefinition({ getStartContract: () => startContract });
 
     const context = buildHandlerContext({
       originId: 'doc-1',
@@ -327,12 +313,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
 
   it('handles delete by calling deleteAttachment with ingestionMethod="all" and reports requestedChunkCount = 0', async () => {
     const startContract = buildStartContract();
-    const definition = createContextEngineAddEntryStepDefinition({
-      getStartContract: () => startContract,
-      getSpaces: () => undefined,
-      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
-      isFeatureEnabled: async () => true,
-    });
+    const definition = buildDefinition({ getStartContract: () => startContract });
 
     const context = buildHandlerContext({
       originId: 'doc-1',
@@ -368,12 +349,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
   it('allows delete to proceed when the attachment type is not registered', async () => {
     const startContract = buildStartContract();
     startContract.getTypeDefinition.mockReturnValue(undefined);
-    const definition = createContextEngineAddEntryStepDefinition({
-      getStartContract: () => startContract,
-      getSpaces: () => undefined,
-      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
-      isFeatureEnabled: async () => true,
-    });
+    const definition = buildDefinition({ getStartContract: () => startContract });
 
     // Cleanup must remain functional after the plugin that registered the
     // type is disabled — otherwise stale chunks become unreachable from
@@ -407,12 +383,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
     // unregistered identifier intact and a success result is returned.
     const startContract = buildStartContract();
     startContract.indexAttachment.mockResolvedValueOnce(undefined);
-    const definition = createContextEngineAddEntryStepDefinition({
-      getStartContract: () => startContract,
-      getSpaces: () => undefined,
-      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
-      isFeatureEnabled: async () => true,
-    });
+    const definition = buildDefinition({ getStartContract: () => startContract });
 
     const context = buildHandlerContext({
       originId: 'doc-1',
@@ -439,12 +410,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
   it('returns an error result and logs when indexAttachment throws', async () => {
     const startContract = buildStartContract();
     startContract.indexAttachment.mockRejectedValueOnce(new Error('ES write failed'));
-    const definition = createContextEngineAddEntryStepDefinition({
-      getStartContract: () => startContract,
-      getSpaces: () => undefined,
-      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
-      isFeatureEnabled: async () => true,
-    });
+    const definition = buildDefinition({ getStartContract: () => startContract });
 
     const context = buildHandlerContext({
       originId: 'doc-1',
@@ -464,13 +430,10 @@ describe('createContextEngineAddEntryStepDefinition', () => {
   });
 
   it('returns an error when the start contract is not yet available', async () => {
-    const definition = createContextEngineAddEntryStepDefinition({
+    const definition = buildDefinition({
       getStartContract: () => {
         throw new Error('start contract not ready');
       },
-      getSpaces: () => undefined,
-      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
-      isFeatureEnabled: async () => true,
     });
 
     const context = buildHandlerContext({
@@ -487,12 +450,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
 
   it('falls back to "default" space when spaces service is unavailable', async () => {
     const startContract = buildStartContract();
-    const definition = createContextEngineAddEntryStepDefinition({
-      getStartContract: () => startContract,
-      getSpaces: () => undefined,
-      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
-      isFeatureEnabled: async () => true,
-    });
+    const definition = buildDefinition({ getStartContract: () => startContract });
 
     const context = buildHandlerContext({
       originId: 'doc-1',
@@ -509,11 +467,9 @@ describe('createContextEngineAddEntryStepDefinition', () => {
     it('checks the privilege against the workflow fake request and dispatches the write when authorized', async () => {
       const startContract = buildStartContract();
       const security = buildSecurity({ authorized: true });
-      const definition = createContextEngineAddEntryStepDefinition({
+      const definition = buildDefinition({
         getStartContract: () => startContract,
-        getSpaces: () => undefined,
         getSecurity: () => security as unknown as SecurityPluginStart,
-        isFeatureEnabled: async () => true,
       });
 
       const request = httpServerMock.createKibanaRequest();
@@ -548,11 +504,9 @@ describe('createContextEngineAddEntryStepDefinition', () => {
     it('rejects upsert with an error and never calls indexAttachment when the caller lacks the privilege', async () => {
       const startContract = buildStartContract();
       const security = buildSecurity({ authorized: false });
-      const definition = createContextEngineAddEntryStepDefinition({
+      const definition = buildDefinition({
         getStartContract: () => startContract,
-        getSpaces: () => undefined,
         getSecurity: () => security as unknown as SecurityPluginStart,
-        isFeatureEnabled: async () => true,
       });
 
       const context = buildHandlerContext({
@@ -577,11 +531,9 @@ describe('createContextEngineAddEntryStepDefinition', () => {
     it('rejects delete with an error and never calls deleteAttachment when the caller lacks the privilege', async () => {
       const startContract = buildStartContract();
       const security = buildSecurity({ authorized: false });
-      const definition = createContextEngineAddEntryStepDefinition({
+      const definition = buildDefinition({
         getStartContract: () => startContract,
-        getSpaces: () => undefined,
         getSecurity: () => security as unknown as SecurityPluginStart,
-        isFeatureEnabled: async () => true,
       });
 
       const context = buildHandlerContext({
@@ -601,11 +553,9 @@ describe('createContextEngineAddEntryStepDefinition', () => {
 
     it('skips the privilege check and proceeds when the security plugin is absent', async () => {
       const startContract = buildStartContract();
-      const definition = createContextEngineAddEntryStepDefinition({
+      const definition = buildDefinition({
         getStartContract: () => startContract,
-        getSpaces: () => undefined,
         getSecurity: () => undefined,
-        isFeatureEnabled: async () => true,
       });
 
       const context = buildHandlerContext({
@@ -629,10 +579,8 @@ describe('createContextEngineAddEntryStepDefinition', () => {
     it('calls isFeatureEnabled with the workflow fake request and proceeds when enabled', async () => {
       const startContract = buildStartContract();
       const isFeatureEnabled = jest.fn().mockResolvedValue(true);
-      const definition = createContextEngineAddEntryStepDefinition({
+      const definition = buildDefinition({
         getStartContract: () => startContract,
-        getSpaces: () => undefined,
-        getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
         isFeatureEnabled,
       });
 
@@ -657,9 +605,8 @@ describe('createContextEngineAddEntryStepDefinition', () => {
     it('rejects upsert with an error and never calls indexAttachment when the feature flag is disabled', async () => {
       const startContract = buildStartContract();
       const security = buildSecurity({ authorized: true });
-      const definition = createContextEngineAddEntryStepDefinition({
+      const definition = buildDefinition({
         getStartContract: () => startContract,
-        getSpaces: () => undefined,
         getSecurity: () => security as unknown as SecurityPluginStart,
         isFeatureEnabled: async () => false,
       });
@@ -691,9 +638,8 @@ describe('createContextEngineAddEntryStepDefinition', () => {
     it('rejects delete with an error and never calls deleteAttachment when the feature flag is disabled', async () => {
       const startContract = buildStartContract();
       const security = buildSecurity({ authorized: true });
-      const definition = createContextEngineAddEntryStepDefinition({
+      const definition = buildDefinition({
         getStartContract: () => startContract,
-        getSpaces: () => undefined,
         getSecurity: () => security as unknown as SecurityPluginStart,
         isFeatureEnabled: async () => false,
       });
@@ -718,34 +664,18 @@ describe('createContextEngineAddEntryStepDefinition', () => {
   });
 
   describe('end-to-end: real indexer derives permissions from getPermissions', () => {
-    // Wires a real `SmlIndexer` (with a registry holding a visualization-like
-    // type whose `getPermissions` uses the `kibanaSavedObjectPermissions`
-    // helper) behind the workflow step's start contract, then runs the
-    // handler. Asserts the indexed document carries `saved_object:lens/get`
-    // — proving the workflow author cannot bypass type-level gating in
-    // content mode even though they no longer have any chunk field with
-    // which to attempt it.
-
-    it('stamps `saved_object:lens/get` on content-mode chunks for a visualization-like type', async () => {
+    // Wires a real `SmlIndexer` (with a registry holding the given type)
+    // behind the workflow step's start contract, so these tests exercise
+    // the actual permission-resolution logic rather than a mocked stand-in.
+    const buildEndToEndHarness = (registeredType: SmlTypeDefinition) => {
       const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
       const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
       jest
         .spyOn(smlStorage, 'createSmlStorage')
         .mockReturnValue({ getClient: getClientMock } as any);
 
-      const visualizationType = {
-        id: 'lens',
-        list() {
-          // unused — workflow step writes via content mode
-          return (async function* () {})();
-        },
-        getSmlData: jest.fn(),
-        toAttachment: jest.fn(),
-        getPermissions: () => kibanaSavedObjectPermissions({ savedObjectType: 'lens' }),
-      };
-
       const registry = createSmlTypeRegistry();
-      registry.register(visualizationType);
+      registry.register(registeredType);
 
       const logger = {
         debug: jest.fn(),
@@ -779,15 +709,24 @@ describe('createContextEngineAddEntryStepDefinition', () => {
         });
       });
       // The handler still checks the registry to reject unknown types;
-      // since we registered 'lens' on the real registry, mirror that on
+      // since we registered the type on the real registry, mirror that on
       // the start-contract mock so the guard passes.
       startContract.getTypeDefinition.mockImplementation((id: string) => registry.get(id));
 
-      const definition = createContextEngineAddEntryStepDefinition({
-        getStartContract: () => startContract,
-        getSpaces: () => undefined,
-        getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
-        isFeatureEnabled: async () => true,
+      const definition = buildDefinition({ getStartContract: () => startContract });
+
+      return { definition, bulkMock, esClient };
+    };
+
+    const noopAsyncIterable = () => (async function* () {})();
+
+    it('stamps `saved_object:lens/get` on content-mode chunks for a visualization-like type', async () => {
+      const { definition, bulkMock } = buildEndToEndHarness({
+        id: 'lens',
+        list: noopAsyncIterable,
+        getSmlData: jest.fn(),
+        toAttachment: jest.fn(),
+        getPermissions: () => kibanaSavedObjectPermissions({ savedObjectType: 'lens' }),
       });
 
       const context = buildHandlerContext({
@@ -817,61 +756,12 @@ describe('createContextEngineAddEntryStepDefinition', () => {
     });
 
     it('end-to-end: no-hook type + workflow-supplied permissions are stamped on the indexed document', async () => {
-      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
-      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
-      jest
-        .spyOn(smlStorage, 'createSmlStorage')
-        .mockReturnValue({ getClient: getClientMock } as any);
-
-      const corpusEntryType = {
+      const { definition, bulkMock } = buildEndToEndHarness({
         id: 'corpus_entry',
-        list() {
-          return (async function* () {})();
-        },
+        list: noopAsyncIterable,
         getSmlData: jest.fn(),
         toAttachment: jest.fn(),
         // No getPermissions hook, matching the real corpus_entry type.
-      };
-
-      const registry = createSmlTypeRegistry();
-      registry.register(corpusEntryType);
-
-      const logger = {
-        debug: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
-        error: jest.fn(),
-        log: jest.fn(),
-        trace: jest.fn(),
-        fatal: jest.fn(),
-        get: jest.fn().mockReturnThis(),
-        isLevelEnabled: jest.fn().mockReturnValue(true),
-      };
-
-      const esClient = {
-        deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
-        count: jest.fn().mockResolvedValue({ count: 0 }),
-      };
-
-      const realIndexer = createSmlIndexer({ registry, logger });
-
-      const startContract = buildStartContract();
-      startContract.indexAttachment.mockImplementation(async (params: any) => {
-        await realIndexer.indexAttachment({
-          ...params,
-          spaces: ['default'],
-          esClient,
-          savedObjectsClient: {},
-          logger,
-        });
-      });
-      startContract.getTypeDefinition.mockImplementation((id: string) => registry.get(id));
-
-      const definition = createContextEngineAddEntryStepDefinition({
-        getStartContract: () => startContract,
-        getSpaces: () => undefined,
-        getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
-        isFeatureEnabled: async () => true,
       });
 
       const context = buildHandlerContext({
@@ -895,61 +785,12 @@ describe('createContextEngineAddEntryStepDefinition', () => {
     });
 
     it('end-to-end: hook-backed type + workflow-supplied permissions fails the step without writing to ES', async () => {
-      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
-      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
-      jest
-        .spyOn(smlStorage, 'createSmlStorage')
-        .mockReturnValue({ getClient: getClientMock } as any);
-
-      const visualizationType = {
+      const { definition, bulkMock, esClient } = buildEndToEndHarness({
         id: 'lens',
-        list() {
-          return (async function* () {})();
-        },
+        list: noopAsyncIterable,
         getSmlData: jest.fn(),
         toAttachment: jest.fn(),
         getPermissions: () => kibanaSavedObjectPermissions({ savedObjectType: 'lens' }),
-      };
-
-      const registry = createSmlTypeRegistry();
-      registry.register(visualizationType);
-
-      const logger = {
-        debug: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
-        error: jest.fn(),
-        log: jest.fn(),
-        trace: jest.fn(),
-        fatal: jest.fn(),
-        get: jest.fn().mockReturnThis(),
-        isLevelEnabled: jest.fn().mockReturnValue(true),
-      };
-
-      const esClient = {
-        deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
-        count: jest.fn().mockResolvedValue({ count: 0 }),
-      };
-
-      const realIndexer = createSmlIndexer({ registry, logger });
-
-      const startContract = buildStartContract();
-      startContract.indexAttachment.mockImplementation(async (params: any) => {
-        await realIndexer.indexAttachment({
-          ...params,
-          spaces: ['default'],
-          esClient,
-          savedObjectsClient: {},
-          logger,
-        });
-      });
-      startContract.getTypeDefinition.mockImplementation((id: string) => registry.get(id));
-
-      const definition = createContextEngineAddEntryStepDefinition({
-        getStartContract: () => startContract,
-        getSpaces: () => undefined,
-        getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
-        isFeatureEnabled: async () => true,
       });
 
       const context = buildHandlerContext({
