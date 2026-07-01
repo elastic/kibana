@@ -19,7 +19,6 @@ import type {
 import * as z from '@kbn/zod/v4';
 import type { CreateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/create';
 import type { UpdateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/update';
-import { RuleResponseAction } from '../../../../../common/api/detection_engine';
 import {
   AlertsIndex,
   AlertsIndexNamespace,
@@ -124,6 +123,89 @@ export const RuleSourceCamelCased = z.discriminatedUnion('type', [
   InternalRuleSourceCamelCased,
 ]);
 
+const StoredResponseActionEcsMapping = z.object({}).catchall(
+  z.object({
+    field: z.string().optional(),
+    value: z.union([z.string(), z.array(z.string())]).optional(),
+  })
+);
+
+const StoredOsqueryQuery = z.object({
+  id: z.string(),
+  query: z.string(),
+  ecs_mapping: StoredResponseActionEcsMapping.optional(),
+  version: z.string().optional(),
+  platform: z.string().optional(),
+  removed: z.boolean().optional(),
+  snapshot: z.boolean().optional(),
+});
+
+const StoredOsqueryParams = z.object({
+  query: z.string().optional(),
+  ecsMapping: StoredResponseActionEcsMapping.optional(),
+  queries: z.array(StoredOsqueryQuery).optional(),
+  packId: z.string().optional(),
+  savedQueryId: z.string().optional(),
+  timeout: z.number().optional(),
+});
+
+export type StoredRuleResponseOsqueryAction = z.infer<typeof StoredRuleResponseOsqueryAction>;
+export const StoredRuleResponseOsqueryAction = z.object({
+  actionTypeId: z.literal('.osquery'),
+  params: StoredOsqueryParams,
+});
+
+const StoredEndpointDefaultParams = z.object({
+  command: z.literal('isolate'),
+  comment: z.string().optional(),
+});
+
+const StoredEndpointRunScriptOsConfigValues = z.object({
+  scriptId: z.string().optional(),
+  scriptInput: z.string().optional(),
+  timeout: z.number().int().optional(),
+});
+
+const StoredEndpointRunscriptParams = z.object({
+  command: z.literal('runscript'),
+  comment: z.string().optional(),
+  config: z
+    .object({
+      linux: StoredEndpointRunScriptOsConfigValues.optional(),
+      macos: StoredEndpointRunScriptOsConfigValues.optional(),
+      windows: StoredEndpointRunScriptOsConfigValues.optional(),
+    })
+    .optional(),
+});
+
+const StoredEndpointProcessesParams = z.object({
+  command: z.enum(['kill-process', 'suspend-process']),
+  comment: z.string().optional(),
+  config: z.object({
+    field: z.string(),
+    overwrite: z.boolean().optional().default(true),
+  }),
+});
+
+export type StoredRuleResponseEndpointAction = z.infer<typeof StoredRuleResponseEndpointAction>;
+export const StoredRuleResponseEndpointAction = z.object({
+  actionTypeId: z.literal('.endpoint'),
+  params: z.union([
+    StoredEndpointDefaultParams,
+    StoredEndpointProcessesParams,
+    StoredEndpointRunscriptParams,
+  ]),
+});
+
+// API request schemas remain bounded. Stored rule params are intentionally more
+// permissive so execution-time validation does not reject rules saved before
+// nested response-action field limits existed.
+export type StoredRuleResponseAction = z.infer<typeof StoredRuleResponseAction>;
+export const StoredRuleResponseAction = z.discriminatedUnion('actionTypeId', [
+  StoredRuleResponseOsqueryAction,
+  StoredRuleResponseEndpointAction,
+]);
+
 // Conversion to an interface has to be disabled for the entire file; otherwise,
 // the resulting union would not be assignable to Alerting's RuleParams due to a
 // TypeScript bug: https://github.com/microsoft/TypeScript/issues/15300
@@ -162,7 +244,7 @@ export const BaseRuleParams = z.object({
   relatedIntegrations: RelatedIntegrationArray.optional(),
   requiredFields: RequiredFieldArray.optional(),
   setup: SetupGuide.optional(),
-  responseActions: z.array(RuleResponseAction).optional(),
+  responseActions: z.array(StoredRuleResponseAction).optional(),
 });
 
 export type EqlSpecificRuleParams = z.infer<typeof EqlSpecificRuleParams>;

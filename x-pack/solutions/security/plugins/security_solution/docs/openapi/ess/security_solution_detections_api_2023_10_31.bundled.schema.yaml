@@ -5490,6 +5490,7 @@ components:
             - isolate
           type: string
         comment:
+          maxLength: 10000
           type: string
       required:
         - command
@@ -5498,16 +5499,20 @@ components:
         type: object
         properties:
           field:
+            maxLength: 1024
             type: string
           value:
             oneOf:
-              - type: string
+              - maxLength: 1024
+                type: string
               - items:
+                  maxLength: 1024
                   type: string
+                maxItems: 100
                 type: array
       description: 'Map Osquery results columns or static values to Elastic Common
         Schema (ECS) fields. Example: "ecs_mapping": {"process.pid": {"field":
-        "pid"}}'
+        "pid"}}.'
       type: object
     EndpointResponseAction:
       type: object
@@ -7943,18 +7948,22 @@ components:
         pack_id:
           description: 'To specify a query pack, use the packId field. Example: "packId":
             "processes_elastic"'
+          maxLength: 256
           type: string
         queries:
           items:
             $ref: '#/components/schemas/OsqueryQuery'
+          maxItems: 100
           type: array
         query:
           description: 'To run a single query, use the query field and enter a SQL query.
             Example: "query": "SELECT * FROM processes;"'
+          maxLength: 10000
           type: string
         saved_query_id:
           description: 'To run a saved query, use the saved_query_id field and specify the
             saved query ID. Example: "saved_query_id": "processes_elastic"'
+          maxLength: 256
           type: string
         timeout:
           description: 'A timeout period, in seconds, after which the query will stop
@@ -7970,11 +7979,14 @@ components:
           $ref: '#/components/schemas/EcsMapping'
         id:
           description: Query ID
+          maxLength: 256
           type: string
         platform:
+          maxLength: 256
           type: string
         query:
           description: Query to run
+          maxLength: 10000
           type: string
         removed:
           type: boolean
@@ -7982,6 +7994,7 @@ components:
           type: boolean
         version:
           description: Query version
+          maxLength: 256
           type: string
       required:
         - id
@@ -8025,12 +8038,14 @@ components:
           description: 'Add a note that explains or describes the action. You can find
             your comment in the response actions history log. Example:
             "comment": "Check processes"'
+          maxLength: 10000
           type: string
         config:
           type: object
           properties:
             field:
               description: Field to use instead of process.pid
+              maxLength: 1024
               type: string
             overwrite:
               default: true
@@ -9388,9 +9403,11 @@ components:
       properties:
         scriptId:
           description: The ID of the script to run (from the Kibana Script library)
+          maxLength: 256
           type: string
         scriptInput:
           description: The arguments to pass to the script (if any)
+          maxLength: 8192
           type: string
         timeout:
           description: Specify the timeout in seconds for the script execution
@@ -9407,6 +9424,7 @@ components:
         comment:
           description: Add a note that explains or describes the action. You can find your
             comment in the response actions history log
+          maxLength: 10000
           type: string
         config:
           type: object
