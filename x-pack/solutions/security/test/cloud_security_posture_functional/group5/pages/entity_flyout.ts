@@ -231,11 +231,13 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         //   platform-admin-role → supervises → grouped[app-team-lead, db-team-lead]
         //
         // Phase 2 — open the grouped target preview and click "show entity relationships" on
-        //   the first member (which pins that target). Now security-admin-group is pulled in,
-        //   and because one target is pinned it can no longer be merged with its same-type peer:
-        //   - platform-admin-role (pinned actor) → grouped[app-team-lead, db-team-lead]
+        //   the first member (db-team-lead, which pins that target). Now security-admin-group is
+        //   pulled in. The relationships query only returns rows touching the requested entity IDs
+        //   (platform-admin-role and the pinned db-team-lead), so security-admin-group's edge to
+        //   app-team-lead is filtered out. The resulting graph is:
+        //   - platform-admin-role (pinned origin actor) → grouped[app-team-lead, db-team-lead]
         //     (the pinned origin's own targets stay grouped)
-        //   - security-admin-group → app-team-lead (solo) and db-team-lead (solo)
+        //   - security-admin-group → db-team-lead (solo pinned target)
 
         // Navigate directly to the entity analytics home page with the entity flyout open for
         // platform-admin-role (user type).
@@ -297,24 +299,24 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
         // Phase 2 assertions:
-        //   Entity nodes (5): platform-admin-role, merged target group (count=2, from the
+        //   Entity nodes (4): platform-admin-role, merged target group (count=2, from the
         //                     pinned origin actor — its targets stay grouped),
-        //                     security-admin-group, app-team-lead (solo, pinned),
-        //                     db-team-lead (solo)
+        //                     security-admin-group, db-team-lead (solo, pinned target)
         //   Relationship nodes (2): rel(platform-admin-role-supervises),
         //                           rel(security-admin-group-supervises)
-        await expandedFlyoutGraph.assertGraphNodesNumber(5 + 2);
+        await expandedFlyoutGraph.assertGraphNodesNumber(4 + 2);
 
         // platform-admin-role (pinned origin actor) still points at the grouped target node
         await expandedFlyoutGraph.assertNodeExists('user:platform-admin-role');
         await expandedFlyoutGraph.assertNodeExists(mergedTargetGroupNodeId);
         await expandedFlyoutGraph.assertNodeExists('rel(user:platform-admin-role-supervises)');
 
-        // security-admin-group supervises the two targets as SEPARATE nodes, because the
-        // pinned app-team-lead can no longer be merged with the same-type db-team-lead
+        // security-admin-group supervises the pinned db-team-lead as a SEPARATE solo node.
+        // Its edge to app-team-lead is filtered out because app-team-lead is not one of the
+        // requested entity IDs (only platform-admin-role and the pinned db-team-lead are), so
+        // app-team-lead stays merged inside platform-admin-role's grouped target node.
         await expandedFlyoutGraph.assertNodeExists('user:security-admin-group');
         await expandedFlyoutGraph.assertNodeExists('rel(user:security-admin-group-supervises)');
-        await expandedFlyoutGraph.assertNodeExists('user:app-team-lead');
         await expandedFlyoutGraph.assertNodeExists('user:db-team-lead');
 
         // --- Phase 3: hide entity relationships of the same target to unpin it ---
