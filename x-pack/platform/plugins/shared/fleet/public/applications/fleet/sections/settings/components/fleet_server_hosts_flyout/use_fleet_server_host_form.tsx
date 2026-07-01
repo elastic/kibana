@@ -161,12 +161,11 @@ export function useFleetServerHostsForm(
 
   // For an existing row always show that row's own URLs; only fall back to the default
   // host URLs when creating a new Fleet Server host in serverless (no fleetServerHost yet).
-  const hostUrlsDefaultValue =
-    fleetServerHost?.host_urls?.length
-      ? fleetServerHost.host_urls
-      : isServerless
-      ? defaultFleetServerHost?.host_urls || []
-      : [];
+  const hostUrlsDefaultValue = fleetServerHost?.host_urls?.length
+    ? fleetServerHost.host_urls
+    : isServerless
+    ? defaultFleetServerHost?.host_urls || []
+    : [];
 
   const hostUrlsDisabled = isEditDisabled || isServerless;
   const hostUrlsInput = useComboInput(

@@ -100,7 +100,10 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
   // outputs) so that the behaviour is consistent regardless of how the output was defined
   // (hardcoded above or passed in via config.outputs in the serverless YAML).
   const PRIVATELINK_ALLOW_EDIT = ['is_default', 'is_default_monitoring'];
-  const PRIVATELINK_OUTPUT_IDS = new Set([SERVERLESS_DEFAULT_OUTPUT_ID, SERVERLESS_PRIVATE_OUTPUT_ID]);
+  const PRIVATELINK_OUTPUT_IDS = new Set([
+    SERVERLESS_DEFAULT_OUTPUT_ID,
+    SERVERLESS_PRIVATE_OUTPUT_ID,
+  ]);
 
   const result = outputs.map((output) => {
     if (!PRIVATELINK_OUTPUT_IDS.has(output.id)) {
@@ -299,7 +302,9 @@ export async function cleanPreconfiguredOutputs(
         logger.info(`Deleting PrivateLink output ${output.id}`);
         await outputService.delete(output.id, { fromPreconfiguration: true });
       } else {
-        logger.info(`Updating default preconfigured output ${output.id} is no longer preconfigured`);
+        logger.info(
+          `Updating default preconfigured output ${output.id} is no longer preconfigured`
+        );
         await outputService.update(
           soClient,
           esClient,
