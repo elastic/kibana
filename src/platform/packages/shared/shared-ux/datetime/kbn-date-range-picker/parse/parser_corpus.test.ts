@@ -583,24 +583,26 @@ interface InputPartsRow {
   input: string;
   /** Start/end types used to assign a collapsed (single-sided) input to the correct side. */
   rangeType?: [DateType, DateType];
+  locale?: string;
   note: string;
   expected: PartProjection[];
 }
 
 const runInputParts = (rows: InputPartsRow[]) =>
   it.each(rows)('$input — $note', (row) => {
-    expect(project(parseInputParts(row.input, row.rangeType))).toEqual(row.expected);
+    expect(project(parseInputParts(row.input, row.rangeType, row.locale))).toEqual(row.expected);
   });
 
 interface DisplayPartsRow {
   display: string;
+  locale?: string;
   note: string;
   expected: PartProjection[];
 }
 
 const runDisplayParts = (rows: DisplayPartsRow[]) =>
   it.each(rows)('$display — $note', (row) => {
-    expect(project(parseDisplayParts(row.display))).toEqual(row.expected);
+    expect(project(parseDisplayParts(row.display, row.locale))).toEqual(row.expected);
   });
 
 interface ModifyRow {
@@ -609,6 +611,7 @@ interface ModifyRow {
   kind: RangePart['kind'];
   action: ModificationAction;
   rangeIndex?: RangePart['rangeIndex'];
+  locale?: string;
   note: string;
   /** New full input text, or `undefined` when the step is a no-op. */
   expected: string | undefined;
@@ -616,14 +619,14 @@ interface ModifyRow {
 
 const runModify = (rows: ModifyRow[]) =>
   it.each(rows)('$text [$kind $action] — $note', (row) => {
-    const parts = parseInputParts(row.text);
+    const parts = parseInputParts(row.text, undefined, row.locale);
     const part = parts.find(
       (candidate) =>
         candidate.kind === row.kind &&
         (row.rangeIndex === undefined || candidate.rangeIndex === row.rangeIndex)
     );
     if (!part) throw new Error(`no "${row.kind}" part found in "${row.text}"`);
-    expect(applyPartModification(row.text, part, row.action, parts)).toBe(row.expected);
+    expect(applyPartModification(row.text, part, row.action, parts, row.locale)).toBe(row.expected);
   });
 
 describe('parser corpus: part-level parser (English)', () => {
@@ -839,6 +842,312 @@ describe('parser corpus: part-level parser (English)', () => {
         action: MODIFICATION_DECREASE,
         note: 'absolute year steps back',
         expected: 'Jan 22, 2025',
+      },
+    ]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Locale corpus — proves the merge requirement: a selected locale's grammar
+// is recognized, AND English keeps parsing alongside it. Each locale block
+// covers named ranges, durations, instants, and the locale's delimiter; the
+// "merge" block proves English isn't lost when a locale is active.
+// ---------------------------------------------------------------------------
+
+describe('parser corpus: textToTimeRange (de-DE)', () => {
+  const locale = 'de-DE';
+
+  runCorpus([
+    {
+      input: 'heute',
+      options: { locale },
+      note: 'German named range "today"',
+      expected: {
+        start: 'now/d',
+        end: 'now/d',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_RELATIVE],
+        isNaturalLanguage: true,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'letzte 7 Minuten',
+      options: { locale },
+      note: 'German duration (past) — "last 7 minutes"',
+      expected: {
+        start: 'now-7m',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isNaturalLanguage: true,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'nächste 3 Tage',
+      options: { locale },
+      note: 'German duration (future) — "next 3 days"',
+      expected: {
+        start: 'now',
+        end: 'now+3d',
+        type: [DATE_TYPE_NOW, DATE_TYPE_RELATIVE],
+        isNaturalLanguage: true,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'vor 7 Minuten',
+      options: { locale },
+      note: 'German instant (past) — "7 minutes ago"; NL flag false like its English counterpart',
+      expected: {
+        start: 'now-7m',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isNaturalLanguage: false,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'in 7 Minuten',
+      options: { locale },
+      note: 'German instant (future) — "in 7 minutes"',
+      expected: {
+        start: 'now',
+        end: 'now+7m',
+        type: [DATE_TYPE_NOW, DATE_TYPE_RELATIVE],
+        isNaturalLanguage: false,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'vor 7 Minuten bis jetzt',
+      options: { locale },
+      note: 'German delimiter "bis" splits a range explicitly',
+      expected: {
+        start: 'now-7m',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isInvalid: false,
+      },
+    },
+  ]);
+
+  describe('merge requirement: English still parses with de-DE active', () => {
+    runCorpus([
+      {
+        input: 'last 7 minutes',
+        options: { locale },
+        note: 'English duration phrase recognized while German is the active locale',
+        expected: { start: 'now-7m', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: 'today',
+        options: { locale },
+        note: 'English named range recognized while German is the active locale',
+        expected: { start: 'now/d', end: 'now/d', isNaturalLanguage: true, isInvalid: false },
+      },
+    ]);
+  });
+});
+
+describe('parser corpus: textToTimeRange (fr-FR)', () => {
+  const locale = 'fr-FR';
+
+  runCorpus([
+    {
+      input: "aujourd'hui",
+      options: { locale },
+      note: 'French named range "today"',
+      expected: {
+        start: 'now/d',
+        end: 'now/d',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_RELATIVE],
+        isNaturalLanguage: true,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'derniers 7 minutes',
+      options: { locale },
+      note: 'French duration (past) — "last 7 minutes" (masculine agreement, flagged for review)',
+      expected: {
+        start: 'now-7m',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isNaturalLanguage: true,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'prochains 3 jours',
+      options: { locale },
+      note: 'French duration (future) — "next 3 days"',
+      expected: {
+        start: 'now',
+        end: 'now+3d',
+        type: [DATE_TYPE_NOW, DATE_TYPE_RELATIVE],
+        isNaturalLanguage: true,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'il y a 7 minutes',
+      options: { locale },
+      note: 'French instant (past) — "7 minutes ago"',
+      expected: {
+        start: 'now-7m',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isNaturalLanguage: false,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'dans 7 minutes',
+      options: { locale },
+      note: 'French instant (future) — "in 7 minutes"',
+      expected: {
+        start: 'now',
+        end: 'now+7m',
+        type: [DATE_TYPE_NOW, DATE_TYPE_RELATIVE],
+        isNaturalLanguage: false,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'now-7m à now',
+      options: { locale },
+      note: 'French delimiter "à" splits a range explicitly',
+      expected: {
+        start: 'now-7m',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isInvalid: false,
+      },
+    },
+  ]);
+
+  describe('merge requirement: English still parses with fr-FR active', () => {
+    runCorpus([
+      {
+        input: 'next 3 days',
+        options: { locale },
+        note: 'English duration phrase recognized while French is the active locale',
+        expected: { start: 'now', end: 'now+3d', isNaturalLanguage: true, isInvalid: false },
+      },
+    ]);
+  });
+});
+
+describe('parser corpus: prettifyValue (locales)', () => {
+  runPrettify([
+    {
+      input: 'now-7m bis now',
+      options: { locale: 'de-DE' },
+      note: 'German "bis" delimiter is recognized for splitting and collapsing to shorthand',
+      expected: '-7m',
+    },
+    {
+      input: 'now-7m à now',
+      options: { locale: 'fr-FR' },
+      note: 'French "à" delimiter is recognized for splitting and collapsing to shorthand',
+      expected: '-7m',
+    },
+  ]);
+});
+
+describe('parser corpus: part-level parser (locales)', () => {
+  describe('parseInputParts — German', () => {
+    runInputParts([
+      {
+        input: 'letzte 7 Tage',
+        locale: 'de-DE',
+        note: 'German duration → direction / value / unit',
+        expected: [
+          { text: 'letzte', kind: 'relative-direction', navigable: true, rangeIndex: 0 },
+          { text: '7', kind: 'relative-value', navigable: true, rangeIndex: 0 },
+          { text: 'Tage', kind: 'relative-unit', navigable: true, rangeIndex: 0 },
+        ],
+      },
+      {
+        input: 'vor 7 Tagen',
+        locale: 'de-DE',
+        note:
+          'German instant → direction-literal / value / unit ("vor" is a PREFIX template, ' +
+          'unlike English\'s suffix "ago"); dative plural alias "Tagen" recognized',
+        expected: [
+          { text: 'vor', kind: 'literal', navigable: false, rangeIndex: 0 },
+          { text: '7', kind: 'relative-value', navigable: true, rangeIndex: 0 },
+          { text: 'Tagen', kind: 'relative-unit', navigable: true, rangeIndex: 0 },
+        ],
+      },
+    ]);
+  });
+
+  describe('parseInputParts — French', () => {
+    runInputParts([
+      {
+        input: 'derniers 7 jours',
+        locale: 'fr-FR',
+        note: 'French duration → direction / value / unit',
+        expected: [
+          { text: 'derniers', kind: 'relative-direction', navigable: true, rangeIndex: 0 },
+          { text: '7', kind: 'relative-value', navigable: true, rangeIndex: 0 },
+          { text: 'jours', kind: 'relative-unit', navigable: true, rangeIndex: 0 },
+        ],
+      },
+    ]);
+  });
+
+  describe('parseDisplayParts — generated compact labels round-trip', () => {
+    runDisplayParts([
+      {
+        display: 'Letzte 7 Tage',
+        locale: 'de-DE',
+        note: 'capitalized German compact label (as generated by formatCompactRelativeTime) still parses',
+        expected: [
+          { text: 'Letzte', kind: 'relative-direction', navigable: true, rangeIndex: 0 },
+          { text: '7', kind: 'relative-value', navigable: true, rangeIndex: 0 },
+          { text: 'Tage', kind: 'relative-unit', navigable: true, rangeIndex: 0 },
+        ],
+      },
+    ]);
+  });
+
+  describe('applyPartModification — locale-aware stepping', () => {
+    runModify([
+      {
+        text: 'letzte 7 Tage',
+        kind: 'relative-unit',
+        action: MODIFICATION_INCREASE,
+        locale: 'de-DE',
+        note: 'German unit cycles up and re-pluralizes in German (Tage → Wochen)',
+        expected: 'letzte 7 Wochen',
+      },
+      {
+        text: 'letzte 7 Tage',
+        kind: 'relative-direction',
+        action: MODIFICATION_INCREASE,
+        locale: 'de-DE',
+        note: 'German direction flips within German (letzte → nächste)',
+        expected: 'nächste 7 Tage',
+      },
+      {
+        text: 'derniers 7 jours',
+        kind: 'relative-direction',
+        action: MODIFICATION_INCREASE,
+        locale: 'fr-FR',
+        note: 'French direction flips within French (derniers → prochains)',
+        expected: 'prochains 7 jours',
+      },
+      {
+        text: 'last 7 days',
+        kind: 'relative-direction',
+        action: MODIFICATION_INCREASE,
+        locale: 'de-DE',
+        note:
+          'an English part stepped while German is active stays English — the active locale ' +
+          'never silently translates text the user already typed',
+        expected: 'next 7 days',
       },
     ]);
   });
