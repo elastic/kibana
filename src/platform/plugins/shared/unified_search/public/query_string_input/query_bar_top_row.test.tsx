@@ -25,7 +25,7 @@ jest.mock('@kbn/date-range-picker-presets', () => ({
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { render, screen, waitFor, within } from '@testing-library/react';
-import { EMPTY } from 'rxjs';
+import { EMPTY, of } from 'rxjs';
 
 import { QueryBarTopRow, SharingMetaFields } from './query_bar_top_row';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -94,6 +94,16 @@ startMock.featureFlags.getBooleanValue.mockImplementation((key: string, fallback
     return usePresetPersistenceFlag;
   }
   return fallback;
+});
+
+startMock.featureFlags.getBooleanValue$.mockImplementation((key: string, fallback: boolean) => {
+  if (key === 'unifiedSearch.newDateRangePickerEnabled') {
+    return of(useNewDateRangePickerFlag);
+  }
+  if (key === 'unifiedSearch.dateRangePickerPresetsPersistenceEnabled') {
+    return of(usePresetPersistenceFlag);
+  }
+  return of(fallback);
 });
 
 const noop = () => {
