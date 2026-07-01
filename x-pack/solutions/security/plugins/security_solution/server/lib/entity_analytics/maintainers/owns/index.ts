@@ -19,7 +19,15 @@ export const ownsMaintainer: RegisterEntityMaintainerConfig = {
   interval: '1d',
   timeout: '1h',
   initialState: {},
-  run: async ({ esClient, logger, status, crudClient, abortController, telemetry }) => {
+  run: async ({
+    esClient,
+    logger,
+    status,
+    crudClient,
+    entityMetadataClient,
+    abortController,
+    telemetry,
+  }) => {
     const namespace = status.metadata.namespace;
     const lastProcessedTimestamp =
       typeof status.state.lastProcessedTimestamp === 'string'
@@ -42,6 +50,7 @@ export const ownsMaintainer: RegisterEntityMaintainerConfig = {
       logger,
       namespace,
       crudClient,
+      entityMetadataClient,
       integrations: buildOwnsConfigs(lastProcessedTimestamp),
       abortController,
       telemetryCollector: collector,
@@ -57,6 +66,7 @@ export const ownsMaintainer: RegisterEntityMaintainerConfig = {
         applied: result.totalWritten,
         droppedNotInStore: result.totalNotFound,
         failed: result.totalWriteErrors,
+        metadataDocsApplied: result.totalMetadataDocsApplied,
         // TODO: investigate whether to extend the telemetry funnel schema with a new field for
         // droppedTargets (result.totalDroppedTargets) or map it to an existing field before wiring.
       },
@@ -70,7 +80,7 @@ export const ownsMaintainer: RegisterEntityMaintainerConfig = {
     });
 
     logger.info(
-      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped`
+      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
     );
 
     // Do not advance the watermark if the run was aborted — the next run should
