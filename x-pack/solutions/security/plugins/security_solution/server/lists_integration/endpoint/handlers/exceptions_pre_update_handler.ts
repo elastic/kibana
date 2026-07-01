@@ -20,6 +20,7 @@ import {
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
   TrustedDeviceValidator,
+  CustomYaraSignaturesValidator,
 } from '../validators';
 import {
   hasArtifactOwnerSpaceId,
@@ -116,6 +117,23 @@ export const getExceptionsPreUpdateItemHandler = (
       blocklistValidator.notifyFeatureUsage(
         data as ExceptionItemLikeOptions,
         'BLOCKLIST_BY_POLICY'
+      );
+    }
+
+    // Validate YARA signatures
+    if (CustomYaraSignaturesValidator.isCustomYaraSignature({ listId })) {
+      isEndpointArtifact = true;
+      const customYaraSignaturesValidator = new CustomYaraSignaturesValidator(
+        endpointAppContextService,
+        request
+      );
+      validatedItem = await customYaraSignaturesValidator.validatePreUpdateItem(
+        data,
+        currentSavedItem
+      );
+      customYaraSignaturesValidator.notifyFeatureUsage(
+        data as ExceptionItemLikeOptions,
+        'CUSTOM_YARA_SIGNATURES'
       );
     }
 

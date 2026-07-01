@@ -25,11 +25,13 @@ import { EVENT_FILTER_LIST_DEFINITION } from '@kbn/security-solution-plugin/publ
 import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/host_isolation_exceptions/constants';
 import { BLOCKLISTS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/blocklist/constants';
 import { TRUSTED_DEVICES_EXCEPTION_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/trusted_devices/constants';
+import { CUSTOM_YARA_SIGNATURES_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/custom_yara_signatures/constants';
 import { ManifestConstants } from '@kbn/security-solution-plugin/server/endpoint/lib/artifacts';
 import type TestAgent from 'supertest/lib/agent';
 import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isArtifactGlobal } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/endpoint_exceptions/constants';
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { FtrProviderContext } from '../configs/ftr_provider_context';
 import type { InternalUnifiedManifestSchemaResponseType } from '../apps/integrations/mocks';
 
@@ -79,15 +81,16 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
      * @param supertest
      */
     async deleteList(listId: string): Promise<void> {
-      const allExceptionListObjects = await kibanaServer.savedObjects.find({
-        type: 'exception-list-agnostic',
+      await esClient.deleteByQuery({
+        index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
+        conflicts: 'proceed',
+        refresh: true,
+        query: {
+          bool: {
+            filter: [{ term: { 'exception-list-agnostic.list_id': listId } }],
+          },
+        },
       });
-
-      const listObjectsToDelete = allExceptionListObjects.saved_objects.filter(
-        (obj) => obj.attributes.list_id === listId
-      );
-
-      await kibanaServer.savedObjects.bulkDelete({ objects: listObjectsToDelete });
     }
 
     async ensureListExists(
@@ -238,6 +241,17 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
       return this.createExceptionItem(blocklist, options);
     }
 
+    async createCustomYaraSignature(
+      overrides: Partial<CreateExceptionListItemSchema> = {},
+      options?: ArtifactCreateOptions
+    ): Promise<ArtifactTestData> {
+      await this.ensureListExists(CUSTOM_YARA_SIGNATURES_LIST_DEFINITION, options);
+      const customYaraSignature =
+        this.exceptionsGenerator.generateCustomYaraSignatureForCreate(overrides);
+
+      return this.createExceptionItem(customYaraSignature, options);
+    }
+
     async createTrustedDevice(
       overrides: Partial<CreateExceptionListItemSchema> = {},
       options?: ArtifactCreateOptions
@@ -264,6 +278,9 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
         }
         case ENDPOINT_ARTIFACT_LISTS.blocklists.id: {
           return this.ensureListExists(BLOCKLISTS_LIST_DEFINITION, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id: {
+          return this.ensureListExists(CUSTOM_YARA_SIGNATURES_LIST_DEFINITION, options);
         }
         case ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id: {
           return this.ensureListExists(HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION, options);
@@ -293,6 +310,9 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
         }
         case ENDPOINT_ARTIFACT_LISTS.blocklists.id: {
           return this.createBlocklist(overrides, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id: {
+          return this.createCustomYaraSignature(overrides, options);
         }
         case ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id: {
           return this.createHostIsolationException(overrides, options);

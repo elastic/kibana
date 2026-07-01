@@ -18,7 +18,11 @@ import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import { LIST_ITEM_ENTRY_OPERATOR_TYPES } from './common/artifact_list_item_entry_values';
 import { BaseDataGenerator } from './base_data_generator';
-import { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from '../service/artifacts/constants';
+import {
+  BY_POLICY_ARTIFACT_TAG_PREFIX,
+  GLOBAL_ARTIFACT_TAG,
+  CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+} from '../service/artifacts/constants';
 import { ENDPOINT_EVENTS_LOG_INDEX_FIELDS } from './common/alerts_ecs_fields';
 
 /** Utility that removes null and undefined from a Type's property value */
@@ -416,6 +420,59 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     };
   }
 
+  generateCustomYaraSignature(
+    overrides: Partial<ExceptionListItemSchema> = {}
+  ): ExceptionListItemSchema {
+    const os = this.randomChoice(['windows', 'linux', 'macos'] as const);
+
+    return this.generate({
+      name: `YARA Signature ${this.randomString(5)}`,
+      list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+      item_id: `generator_endpoint_yara_signature_${this.seededUUIDv4()}`,
+      tags: [
+        this.randomChoice([
+          `${BY_POLICY_ARTIFACT_TAG_PREFIX}${this.seededUUIDv4()}`,
+          GLOBAL_ARTIFACT_TAG,
+        ]),
+      ],
+      os_types: [os],
+      entries: [
+        {
+          field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+          operator: 'included',
+          type: 'match',
+          value: `rule Generated_Yara_Rule_${this.randomString(5)} {
+  meta:
+    description = "Generated test YARA rule"
+  strings:
+    $a = "test_string"
+  condition:
+    $a
+}`,
+        },
+      ],
+      ...overrides,
+    });
+  }
+
+  generateCustomYaraSignatureForCreate(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): CreateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToCreateExceptionItem(this.generateCustomYaraSignature()),
+      ...overrides,
+    };
+  }
+
+  generateCustomYaraSignatureForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToUpdateExceptionItem(this.generateCustomYaraSignature()),
+      ...overrides,
+    };
+  }
+
   generateTrustedDevice(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
     // Use HOST field by default for compatibility with all OS types
     // USERNAME field can only be used with Windows-only OS
@@ -477,6 +534,9 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
 
       case ENDPOINT_ARTIFACT_LISTS.trustedDevices.id:
         return this.generateTrustedDevice(overrides);
+
+      case ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id:
+        return this.generateCustomYaraSignature(overrides);
 
       default:
         throw new Error(`Unknown listId: ${listId}. Unable to generate exception list item.`);
