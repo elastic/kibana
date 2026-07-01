@@ -7,7 +7,7 @@
 
 import { calculateAuto } from '@kbn/calculate-auto';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
-import type { QueryOccurrenceSeries, StreamQuery } from '@kbn/significant-events-schema';
+import type { QueryWithOccurrences, StreamQuery } from '@kbn/significant-events-schema';
 import moment from 'moment';
 import { useKibana } from '../use_kibana';
 import { useTimefilter } from '../use_timefilter';
@@ -17,7 +17,7 @@ export interface StreamQueryStats {
   query: StreamQuery;
   stream_name: string;
   occurrences: Array<{ x: number; y: number }>;
-  change_points: QueryOccurrenceSeries['change_points'];
+  change_points: QueryWithOccurrences['change_points'];
   rule_backed: boolean;
 }
 

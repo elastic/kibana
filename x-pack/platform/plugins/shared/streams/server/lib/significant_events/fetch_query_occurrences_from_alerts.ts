@@ -10,8 +10,8 @@ import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type {
-  QueryOccurrenceSeries,
-  QueryOccurrenceStatsResponse,
+  QueryWithOccurrences,
+  QueryOccurrencesResponse,
 } from '@kbn/significant-events-schema';
 import { MS_PER_UNIT } from '@kbn/streams-schema';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
@@ -318,7 +318,7 @@ export function toQueryOccurrenceSeries({
 }: {
   queryLink: QueryLink;
   queryOccurrences: QueryOccurrences;
-}): QueryOccurrenceSeries {
+}): QueryWithOccurrences {
   return {
     ...queryLink.query,
     stream_name: queryLink.stream_name,
@@ -331,7 +331,7 @@ export function toQueryOccurrenceSeries({
 export async function fetchQueryOccurrencesFromAlerts(
   params: SignificantEventsParams,
   dependencies: SignificantEventsDependencies
-): Promise<QueryOccurrenceStatsResponse> {
+): Promise<QueryOccurrencesResponse> {
   const queryOccurrences = await getQueryOccurrences(params, dependencies);
   return {
     queries: queryOccurrences.queryLinks.map((queryLink) =>

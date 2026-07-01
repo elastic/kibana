@@ -16,7 +16,7 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
-import type { QueryOccurrenceStatsResponse, StreamQuery } from '@kbn/significant-events-schema';
+import type { QueryOccurrencesResponse, StreamQuery } from '@kbn/significant-events-schema';
 
 // ---------------------------------------------------------------------------
 // PUT /api/streams/{name}  –  wired stream
@@ -368,7 +368,7 @@ export const listStreamQueriesResponse: { queries: StreamQuery[] } = {
 // GET /api/streams/{name}/significant_events  –  query occurrence stats response
 // ---------------------------------------------------------------------------
 
-export const getQueryOccurrenceStatsResponse: QueryOccurrenceStatsResponse = {
+export const getQueryOccurrenceStatsResponse: QueryOccurrencesResponse = {
   queries: [
     {
       id: 'error-count-by-host',

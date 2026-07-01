@@ -9,7 +9,7 @@ import { calculateAuto } from '@kbn/calculate-auto';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
 import type {
   QueriesGetResponse,
-  QueryOccurrenceSeries,
+  QueryWithOccurrences,
   StreamQuery,
 } from '@kbn/significant-events-schema';
 import type { QueryStatus } from '@kbn/streams-plugin/common';
@@ -22,7 +22,7 @@ export interface SignificantEventQueryRow {
   query: StreamQuery;
   stream_name: string;
   occurrences: Array<{ x: number; y: number }>;
-  change_points: QueryOccurrenceSeries['change_points'];
+  change_points: QueryWithOccurrences['change_points'];
   rule_backed: boolean;
 }
 
@@ -104,14 +104,14 @@ export const useFetchDiscoveryQueries = (
       page: response.page,
       perPage: response.perPage,
       total: response.total,
-      queries: response.queries.map((series: QueryOccurrenceSeries) => {
+      queries: response.queries.map((series: QueryWithOccurrences) => {
         const { occurrences, change_points, stream_name, rule_backed, ...rest } = series;
         return {
           query: rest,
           stream_name,
           change_points,
           occurrences: occurrences.map(
-            (occurrence: QueryOccurrenceSeries['occurrences'][number]) => ({
+            (occurrence: QueryWithOccurrences['occurrences'][number]) => ({
               x: new Date(occurrence.date).getTime(),
               y: occurrence.count,
             })

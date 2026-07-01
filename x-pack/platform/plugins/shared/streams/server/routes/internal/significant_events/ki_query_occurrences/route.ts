@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type {
-  QueryOccurrenceStatsResponse,
+  QueryOccurrencesResponse,
   SignificantEventsWorkflowStatusResult,
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
@@ -196,7 +196,7 @@ const readQueryOccurrenceStatsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-  }): Promise<QueryOccurrenceStatsResponse> => {
+  }): Promise<QueryOccurrencesResponse> => {
     const {
       getKnowledgeIndicatorClient,
       getAlertingV2RulesClient,

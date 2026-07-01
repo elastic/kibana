@@ -42,7 +42,7 @@ interface SignificantEventOccurrence {
   count: number;
 }
 
-type QueryOccurrenceSeries = StreamQuery & {
+type QueryWithOccurrences = StreamQuery & {
   stream_name: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {
@@ -51,8 +51,8 @@ type QueryOccurrenceSeries = StreamQuery & {
   rule_backed: boolean;
 };
 
-interface QueryOccurrenceStatsResponse {
-  queries: QueryOccurrenceSeries[];
+interface QueryOccurrencesResponse {
+  queries: QueryWithOccurrences[];
   aggregated_occurrences: SignificantEventOccurrence[];
 }
 
@@ -107,8 +107,8 @@ interface EventLifecycleResponse {
 }
 
 export type {
-  QueryOccurrenceSeries,
-  QueryOccurrenceStatsResponse,
+  QueryWithOccurrences,
+  QueryOccurrencesResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,

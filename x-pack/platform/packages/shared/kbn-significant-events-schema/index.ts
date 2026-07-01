@@ -28,8 +28,8 @@ export type {
   EventLifecycleResponse,
   GeneratedSignificantEventQuery,
   LifecycleDetection,
-  QueryOccurrenceSeries,
-  QueryOccurrenceStatsResponse,
+  QueryWithOccurrences,
+  QueryOccurrencesResponse,
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
 } from './src/api/significant_events';
