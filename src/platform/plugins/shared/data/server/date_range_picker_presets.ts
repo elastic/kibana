@@ -17,9 +17,9 @@ import {
 } from '@kbn/date-range-picker-presets-common';
 
 const presetItemSchema = z.object({
-  start: z.string(),
-  end: z.string(),
-  label: z.string().optional(),
+  start: z.string().max(200),
+  end: z.string().max(200),
+  label: z.string().max(255).optional(),
 });
 
 const storedPresetsSchema: ZodType<StoredPresets> = z.object({

@@ -44,4 +44,29 @@ describe('date range picker presets userStorage registration', () => {
 
     expect(dateRangePickerPresetsStorageDefinition.schema.safeParse(oversize).success).toBe(false);
   });
+
+  it('rejects preset items with oversized string fields', () => {
+    const oversizeStart = {
+      version: 1 as const,
+      presets: [{ start: 'a'.repeat(201), end: 'now' }],
+    };
+    const oversizeEnd = {
+      version: 1 as const,
+      presets: [{ start: 'now-15m', end: 'a'.repeat(201) }],
+    };
+    const oversizeLabel = {
+      version: 1 as const,
+      presets: [{ start: 'now-15m', end: 'now', label: 'a'.repeat(256) }],
+    };
+
+    expect(dateRangePickerPresetsStorageDefinition.schema.safeParse(oversizeStart).success).toBe(
+      false
+    );
+    expect(dateRangePickerPresetsStorageDefinition.schema.safeParse(oversizeEnd).success).toBe(
+      false
+    );
+    expect(dateRangePickerPresetsStorageDefinition.schema.safeParse(oversizeLabel).success).toBe(
+      false
+    );
+  });
 });
