@@ -9,6 +9,7 @@ export {
   buildVisualizationConfig,
   type BuildVisualizationConfigParams,
 } from './visualization/build_visualization_config';
+export { getEsqlDataSourceCarriers, type EsqlDataSourceCarrier } from './visualization/graph_lens';
 export { getChartTypeSelectionPromptContent } from './visualization/chart_type_guidance';
 export type { VisualizationConfig } from './visualization/types';
 export { getExecutionState, getWorkflowOutput, type WorkflowExecutionState } from './workflows';
