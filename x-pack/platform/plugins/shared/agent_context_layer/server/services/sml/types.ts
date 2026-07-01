@@ -425,6 +425,12 @@ export interface SmlIndexAttachmentContentMode {
    * indexer will stamp `now`.
    */
   createdAt?: string;
+  /**
+   * Caller-supplied permissions to stamp on the written chunks, used only
+   * when `attachmentType` has no `getPermissions` hook. Conflicts with a
+   * hook-backed type — see {@link SmlPermissionsConflictError}.
+   */
+  permissions?: SmlPermissions;
 }
 
 /**
