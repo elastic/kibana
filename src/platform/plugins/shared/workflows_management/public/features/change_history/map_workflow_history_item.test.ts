@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getWorkflowYamlFromSnapshot } from './get_workflow_yaml_from_snapshot';
 import {
-  getWorkflowYamlFromSnapshot,
   mapWorkflowHistoryItemToDetail,
   mapWorkflowHistoryItemToListItem,
   toWorkflowChangeHistorySnapshot,
