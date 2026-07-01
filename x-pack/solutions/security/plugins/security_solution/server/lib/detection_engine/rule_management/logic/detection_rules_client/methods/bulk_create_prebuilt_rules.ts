@@ -135,7 +135,10 @@ export const bulkCreatePrebuiltRules = async ({
       if (item) {
         errors.push({
           item,
-          error: Object.assign(new Error(err.message), { statusCode: err.status }),
+          error: Object.assign(
+            new Error(err.message),
+            err.status != null ? { statusCode: err.status } : {}
+          ),
         });
       }
     }

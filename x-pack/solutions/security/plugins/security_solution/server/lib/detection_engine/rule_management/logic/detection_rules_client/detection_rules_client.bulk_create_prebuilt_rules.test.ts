@@ -235,6 +235,29 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
     expect((result.errors[0].error as Error & { statusCode?: number }).statusCode).toBe(409);
   });
 
+  it('omits statusCode when BulkOperationError has no status', async () => {
+    const params = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-1' };
+    const preAssignedId = 'fail-uuid';
+    (uuidv4 as jest.Mock).mockReturnValueOnce(preAssignedId);
+
+    rulesClient.bulkCreateRules.mockResolvedValue({
+      successfulIds: [],
+      errors: [
+        {
+          message: 'Validation failed',
+          rule: { id: preAssignedId, name: params.name },
+        },
+      ],
+      total: 1,
+    });
+
+    const result = await detectionRulesClient.bulkCreatePrebuiltRules({ rules: [params] });
+
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0].error.message).toBe('Validation failed');
+    expect(result.errors[0].error).not.toHaveProperty('statusCode');
+  });
+
   it('skips bulkCreateRules when all rules fail ML auth', async () => {
     const mlRule = {
       ...getCreateRulesSchemaMock(),
