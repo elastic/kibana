@@ -97,6 +97,9 @@ export interface AuthenticatedUser extends User {
    * authentication provider (`HTTPAuthenticationProvider`) when it handles the request; `null`
    * for all other providers (session-cookie, PKI, SAML, etc.).
    *
+   * Contract: this is the only writer, and it always lowercases the scheme. Consumers may assume
+   * lowercase and skip normalizing; do not add a second writer that doesn't lowercase.
+   *
    * @example "apikey" | "bearer" | "basic"
    */
   http_authentication_scheme: string | null;
