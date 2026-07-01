@@ -105,7 +105,6 @@ enabled:
   - src/platform/test/functional/apps/discover/tabs4/config.ts
   - src/platform/test/functional/apps/discover/tabs/config.ts
   - src/platform/test/functional/apps/discover/tabs5/config.ts
-  - src/platform/test/functional/apps/discover/tabs6/config.ts
   - src/platform/test/functional/apps/discover/tabs8/config.ts
   - src/platform/test/functional/apps/discover/cascade_layout/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts

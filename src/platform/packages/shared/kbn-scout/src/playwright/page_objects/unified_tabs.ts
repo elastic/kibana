@@ -16,6 +16,7 @@ import { expect } from '..';
  */
 export const UNIFIED_TABS_TEST_SUBJ = {
   selectTabBtnPrefix: 'unifiedTabs_selectTabBtn_',
+  closeTabBtnPrefix: 'unifiedTabs_closeTabBtn_',
   tabMenuBtnPrefix: 'unifiedTabs_tabMenuBtn_',
   editTabLabelInputPrefix: 'unifiedTabs_editTabLabelInput_',
   newTabBtn: 'unifiedTabs_tabsBar_newTabBtn',
@@ -252,9 +253,23 @@ export class UnifiedTabs {
     return texts.map((text) => text.split('\n')[0]);
   }
 
+  private async getRecentlyClosedItemTexts(items: Locator): Promise<string[]> {
+    return items.evaluateAll((elements) =>
+      elements.map((element) => (element as HTMLElement).innerText.trim())
+    );
+  }
+
   async getRecentlyClosedTabLabels(): Promise<string[]> {
     await this.openTabsBarMenu();
     const labels = await this.getRecentlyClosedItemTitles(this.getRecentlyClosedTabs());
+    await this.closeTabsBarMenu();
+
+    return labels;
+  }
+
+  async getRecentlyClosedTabTexts(): Promise<string[]> {
+    await this.openTabsBarMenu();
+    const labels = await this.getRecentlyClosedItemTexts(this.getRecentlyClosedTabs());
     await this.closeTabsBarMenu();
 
     return labels;
@@ -295,6 +310,79 @@ export class UnifiedTabs {
     }
 
     await this.closeTabsBarMenu();
+  }
+
+  async closeTab(index: number) {
+    const tab = await this.getTab(index);
+    const tabTestSubj = await tab.getAttribute('data-test-subj');
+    if (!tabTestSubj) {
+      throw new Error(`Tab at index ${index} is missing a data-test-subj attribute`);
+    }
+
+    const tabId = tabTestSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
+    await tab.hover();
+    await this.page.testSubj.click(`${UNIFIED_TABS_TEST_SUBJ.closeTabBtnPrefix}${tabId}`);
+    await tab.waitFor({ state: 'hidden' });
+    await this.hideTabPreview();
+  }
+
+  async restoreRecentlyClosedTab(index: number) {
+    await this.openTabsBarMenu();
+    const tabs = await this.getRecentlyClosedTabs().all();
+    const tab = tabs[index];
+    if (!tab) {
+      throw new Error(`Recently closed tab index ${index} is out of bounds`);
+    }
+
+    await tab.click();
+    await this.page.testSubj
+      .locator(UNIFIED_TABS_TEST_SUBJ.tabsBarMenuPanel)
+      .waitFor({ state: 'hidden' });
+    await this.activeTabLocator.waitFor({ state: 'visible' });
+    await this.hideTabPreview();
+  }
+
+  async restoreRecentlyClosedTabFromGroup(groupIndex: number, tabIndex: number) {
+    await this.openTabsBarMenu();
+    const groups = await this.getRecentlyClosedGroups().all();
+    const group = groups[groupIndex];
+    if (!group) {
+      throw new Error(`Recently closed group index ${groupIndex} is out of bounds`);
+    }
+    await group.click();
+    await this.page.testSubj
+      .locator(UNIFIED_TABS_TEST_SUBJ.restoreAllRecentlyClosedTabs)
+      .waitFor({ state: 'visible' });
+
+    const tabs = await this.getRecentlyClosedGroupTabs().all();
+    const tab = tabs[tabIndex];
+    if (!tab) {
+      throw new Error(`Recently closed group tab index ${tabIndex} is out of bounds`);
+    }
+
+    await tab.click();
+    await this.page.testSubj
+      .locator(UNIFIED_TABS_TEST_SUBJ.tabsBarMenuPanel)
+      .waitFor({ state: 'hidden' });
+    await this.activeTabLocator.waitFor({ state: 'visible' });
+    await this.hideTabPreview();
+  }
+
+  async restoreAllRecentlyClosedTabsFromGroup(groupIndex: number) {
+    await this.openTabsBarMenu();
+    const groups = await this.getRecentlyClosedGroups().all();
+    const group = groups[groupIndex];
+    if (!group) {
+      throw new Error(`Recently closed group index ${groupIndex} is out of bounds`);
+    }
+    await group.click();
+
+    await this.page.testSubj.click(UNIFIED_TABS_TEST_SUBJ.restoreAllRecentlyClosedTabs);
+    await this.page.testSubj
+      .locator(UNIFIED_TABS_TEST_SUBJ.tabsBarMenuPanel)
+      .waitFor({ state: 'hidden' });
+    await this.activeTabLocator.waitFor({ state: 'visible' });
+    await this.hideTabPreview();
   }
 
   /**

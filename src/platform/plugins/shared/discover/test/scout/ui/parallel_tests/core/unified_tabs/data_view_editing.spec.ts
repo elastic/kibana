@@ -34,9 +34,6 @@ const dataViewCases = [
   },
 ] as const;
 
-const createName = (prefix: string, scoutSpaceId: string) =>
-  `${prefix}_${scoutSpaceId.replace(/-/g, '_')}`;
-
 const prepareDataView = async ({
   isAdHocDataView,
   pageObjects,
@@ -95,9 +92,9 @@ spaceTest.describe('Discover tabs - data view editing', { tag: '@local-stateful-
     newFieldStateInOriginalTab,
     editedFieldStateInOriginalTab,
   } of dataViewCases) {
-    spaceTest(`can edit ${type} data view name`, async ({ pageObjects, scoutSpace }) => {
+    spaceTest(`can edit ${type} data view name`, async ({ pageObjects }) => {
       const { discover, unifiedTabs } = pageObjects;
-      const editedName = createName('logstash-edited-name', scoutSpace.id);
+      const editedName = 'logstash edited name';
 
       await prepareDataView({
         isAdHocDataView,
@@ -125,7 +122,7 @@ spaceTest.describe('Discover tabs - data view editing', { tag: '@local-stateful-
 
     spaceTest(
       `can create runtime fields for the same ${type} data view in both tabs`,
-      async ({ pageObjects, scoutSpace }) => {
+      async ({ pageObjects }) => {
         const { discover, unifiedFieldList, unifiedTabs } = pageObjects;
 
         await prepareDataView({
@@ -135,8 +132,8 @@ spaceTest.describe('Discover tabs - data view editing', { tag: '@local-stateful-
         });
 
         const currentName = await discover.getSelectedDataViewName();
-        const newFieldName = createName('_test_new_field', scoutSpace.id);
-        const editedFieldName = createName('_test_new_field_edited', scoutSpace.id);
+        const newFieldName = '_test_new_field';
+        const editedFieldName = '_test_new_field_edited';
 
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
@@ -192,10 +189,10 @@ spaceTest.describe('Discover tabs - data view editing', { tag: '@local-stateful-
 
     spaceTest(
       `can create runtime fields for a different ${type} data view`,
-      async ({ pageObjects, scoutSpace }) => {
+      async ({ pageObjects }) => {
         const { discover, unifiedFieldList, unifiedTabs } = pageObjects;
         const firstTabName = await discover.getSelectedDataViewName();
-        const newFieldName = createName('_test_new_field2', scoutSpace.id);
+        const newFieldName = '_test_new_field2';
 
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();

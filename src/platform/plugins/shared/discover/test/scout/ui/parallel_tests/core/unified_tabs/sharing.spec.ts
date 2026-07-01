@@ -15,9 +15,6 @@ import { spaceTest } from '../../../fixtures/common';
 const testSubj = (id: string) => `[data-test-subj="${id}"]`;
 const testSubjStartsWith = (prefix: string) => `[data-test-subj^="${prefix}"]`;
 
-const createName = (prefix: string, scoutSpaceId: string) =>
-  `${prefix}_${scoutSpaceId.replace(/-/g, '_')}`;
-
 const waitUntilDiscoverLoaded = async (page: ScoutPage) => {
   await page.locator(testSubj('dscPage')).waitFor({ state: 'visible' });
 
@@ -256,9 +253,9 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
 
   spaceTest(
     'can share one persisted tab from a persisted session',
-    async ({ page, pageObjects, scoutSpace }) => {
+    async ({ page, pageObjects }) => {
       const { discover, unifiedTabs } = pageObjects;
-      const savedSearchName = createName('esql', scoutSpace.id);
+      const savedSearchName = 'esql';
       const queryEsql = 'FROM logstash-* | LIMIT 20';
       const queryEsqlModified = 'FROM logstash-* | LIMIT 22';
 
@@ -316,72 +313,69 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
     }
   );
 
-  spaceTest(
-    'can share one unsaved tab from a persisted session',
-    async ({ page, pageObjects, scoutSpace }) => {
-      const { discover, filterBar, queryBar, unifiedTabs } = pageObjects;
-      const savedSearchName = createName('kql', scoutSpace.id);
+  spaceTest('can share one unsaved tab from a persisted session', async ({ page, pageObjects }) => {
+    const { discover, filterBar, queryBar, unifiedTabs } = pageObjects;
+    const savedSearchName = 'kql';
 
-      await unifiedTabs.editTabLabel(0, 'saved');
-      await discover.saveSearch(savedSearchName);
-      await discover.waitUntilTabIsLoaded();
+    await unifiedTabs.editTabLabel(0, 'saved');
+    await discover.saveSearch(savedSearchName);
+    await discover.waitUntilTabIsLoaded();
 
-      await unifiedTabs.createNewTab();
-      await discover.waitUntilTabIsLoaded();
-      await discover.createDataViewFromSearchBar({ name: 'logs', adHoc: true });
-      await discover.waitUntilTabIsLoaded();
-      await unifiedTabs.editTabLabel(1, 'unsaved');
-      await filterBar.addFilter({ field: 'extension', operator: 'is', value: 'jpg' });
-      await discover.waitUntilTabIsLoaded();
-      expect(await discover.getHitCountInt()).toBe(9_109);
-      expect(await unifiedTabs.getTabLabels()).toStrictEqual(['saved', 'unsaved']);
+    await unifiedTabs.createNewTab();
+    await discover.waitUntilTabIsLoaded();
+    await discover.createDataViewFromSearchBar({ name: 'logs', adHoc: true });
+    await discover.waitUntilTabIsLoaded();
+    await unifiedTabs.editTabLabel(1, 'unsaved');
+    await filterBar.addFilter({ field: 'extension', operator: 'is', value: 'jpg' });
+    await discover.waitUntilTabIsLoaded();
+    expect(await discover.getHitCountInt()).toBe(9_109);
+    expect(await unifiedTabs.getTabLabels()).toStrictEqual(['saved', 'unsaved']);
 
-      const sharedUrl = await discover.getSharedUrl();
-      await discover.closeShareModal();
+    const sharedUrl = await discover.getSharedUrl();
+    await discover.closeShareModal();
 
-      await unifiedTabs.selectTab(0);
-      await discover.waitUntilTabIsLoaded();
-      await discover.clickNewSearch();
-      await discover.waitUntilTabIsLoaded();
+    await unifiedTabs.selectTab(0);
+    await discover.waitUntilTabIsLoaded();
+    await discover.clickNewSearch();
+    await discover.waitUntilTabIsLoaded();
 
-      const sharedPage = await openSharedPage(page, sharedUrl);
+    const sharedPage = await openSharedPage(page, sharedUrl);
 
-      expect(await getHitCount(sharedPage)).toBe('9,109');
-      expect(await hasFilter(sharedPage, 'extension', 'jpg')).toBe(true);
-      expect(await getSelectedTabLabel(sharedPage)).toBe('unsaved');
-      expect(await getTabLabels(sharedPage)).toStrictEqual(['saved', 'unsaved']);
-      expect(await getRecentlyClosedRootTitles(sharedPage)).toStrictEqual(['Untitled', '2 tabs']);
-      expect(await getRecentlyClosedGroupTabTitles(sharedPage, 0)).toStrictEqual([
-        'saved',
-        'unsaved',
-      ]);
-      expect(await getSavedSearchTitle(sharedPage)).toBe(savedSearchName);
-      expect(await isCurrentDataViewAdHoc(sharedPage)).toBe(true);
+    expect(await getHitCount(sharedPage)).toBe('9,109');
+    expect(await hasFilter(sharedPage, 'extension', 'jpg')).toBe(true);
+    expect(await getSelectedTabLabel(sharedPage)).toBe('unsaved');
+    expect(await getTabLabels(sharedPage)).toStrictEqual(['saved', 'unsaved']);
+    expect(await getRecentlyClosedRootTitles(sharedPage)).toStrictEqual(['Untitled', '2 tabs']);
+    expect(await getRecentlyClosedGroupTabTitles(sharedPage, 0)).toStrictEqual([
+      'saved',
+      'unsaved',
+    ]);
+    expect(await getSavedSearchTitle(sharedPage)).toBe(savedSearchName);
+    expect(await isCurrentDataViewAdHoc(sharedPage)).toBe(true);
 
-      await editTabLabel(sharedPage, 1, 'unsaved (modified)');
-      await writeAndSubmitKqlQuery(sharedPage, 'bytes > 1000');
-      expect(await getHitCount(sharedPage)).toBe('8,830');
+    await editTabLabel(sharedPage, 1, 'unsaved (modified)');
+    await writeAndSubmitKqlQuery(sharedPage, 'bytes > 1000');
+    expect(await getHitCount(sharedPage)).toBe('8,830');
 
-      await sharedPage.close();
-      await page.bringToFront();
-      await discover.loadSavedSearch(savedSearchName);
-      await discover.waitUntilTabIsLoaded();
+    await sharedPage.close();
+    await page.bringToFront();
+    await discover.loadSavedSearch(savedSearchName);
+    await discover.waitUntilTabIsLoaded();
 
-      expect(await discover.getHitCountInt()).toBe(14_004);
-      expect(await filterBar.getFilterCount()).toBe(0);
-      expect(await queryBar.getQuery()).toBe('');
-      expect(await unifiedTabs.getSelectedTabLabel()).toBe('saved');
-      expect(await unifiedTabs.getTabLabels()).toStrictEqual(['saved']);
-      const recentlyClosedRootTitles = await unifiedTabs.getRecentlyClosedRootTitles();
-      expect([...recentlyClosedRootTitles].sort()).toStrictEqual(
-        ['unsaved (modified)', 'Untitled', '2 tabs'].sort()
-      );
-      expect(await unifiedTabs.getRecentlyClosedGroupTabTitles(0)).toStrictEqual([
-        'saved',
-        'unsaved',
-      ]);
-      expect(await discover.getCurrentQueryName()).toBe(savedSearchName);
-      expect(await discover.isCurrentDataViewAdHoc()).toBe(false);
-    }
-  );
+    expect(await discover.getHitCountInt()).toBe(14_004);
+    expect(await filterBar.getFilterCount()).toBe(0);
+    expect(await queryBar.getQuery()).toBe('');
+    expect(await unifiedTabs.getSelectedTabLabel()).toBe('saved');
+    expect(await unifiedTabs.getTabLabels()).toStrictEqual(['saved']);
+    const recentlyClosedRootTitles = await unifiedTabs.getRecentlyClosedRootTitles();
+    expect([...recentlyClosedRootTitles].sort()).toStrictEqual(
+      ['unsaved (modified)', 'Untitled', '2 tabs'].sort()
+    );
+    expect(await unifiedTabs.getRecentlyClosedGroupTabTitles(0)).toStrictEqual([
+      'saved',
+      'unsaved',
+    ]);
+    expect(await discover.getCurrentQueryName()).toBe(savedSearchName);
+    expect(await discover.isCurrentDataViewAdHoc()).toBe(false);
+  });
 });
