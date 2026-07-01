@@ -22,7 +22,7 @@ import {
 } from '../utils/entry_generation';
 import { resolveBundlesDir, resolveEntryWrappersDir } from '../paths';
 import { loadDllManifest } from './dll_manifest';
-import { getExternals } from './externals';
+import { getExternals, isKeaReactReduxImport } from './externals';
 import {
   getSharedResolveConfig,
   getSharedResolveFallback,
@@ -224,7 +224,7 @@ export async function createSingleCompileConfig(
       // Function externals: skip externalizing react-redux when imported by kea
       // so the NormalModuleReplacementPlugin can redirect it to react-redux-v7.
       ({ context, request }: { context?: string; request?: string }, callback: Function) => {
-        if (context && request === 'react-redux' && /node_modules[\\/]kea/.test(context)) {
+        if (isKeaReactReduxImport(context, request)) {
           return callback();
         }
         if (request && request in sharedDepsExternals) {
@@ -368,7 +368,7 @@ export async function createSingleCompileConfig(
       // same React context as the <Provider> from react-redux-v7 used by
       // consumers like enterprise_search.
       new rspack.NormalModuleReplacementPlugin(/^react-redux$/, (resource: any) => {
-        if (resource.context && /node_modules[\\/]kea/.test(resource.context)) {
+        if (isKeaReactReduxImport(resource.context, resource.request)) {
           resource.request = 'react-redux-v7';
         }
       }),
