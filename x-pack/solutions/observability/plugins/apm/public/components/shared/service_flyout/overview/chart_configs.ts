@@ -42,6 +42,7 @@ type LensYAxis = LensSeriesLayer['yAxis'][number];
 
 const TIME_BUCKET_FIELD = 'timestamp';
 const TIME_BUCKET_BY = `${TIME_BUCKET_FIELD} = TBUCKET(100)`;
+const ESQL_NULLIFY_UNMAPPED_FIELDS = 'SET unmapped_fields="nullify";';
 
 // When no limit is specified in the container, docker allows the app as much memory / swap memory
 // as it wants. This number represents the max possible value for the limit field. Stored as a
@@ -124,7 +125,7 @@ function buildChartDefinition({
   const config: LensConfig = {
     chartType: 'xy',
     title,
-    dataset: { esql: printQuery(buildQuery(indexes)) },
+    dataset: { esql: `${ESQL_NULLIFY_UNMAPPED_FIELDS}\n${printQuery(buildQuery(indexes))}` },
     layers: [
       {
         type: 'series',
@@ -207,6 +208,7 @@ function getLatencyChart(
     }),
     titleAction,
     indexes,
+
     buildQuery: (idx) => {
       const query = createBaseServiceQuery({ indexes: idx, processorEvent: 'transaction', scope });
       query.pipe(`EVAL duration_ms = TO_DOUBLE(${TRANSACTION_DURATION}) / 1000`);
@@ -236,6 +238,7 @@ function getThroughputChart(
       defaultMessage: 'Throughput',
     }),
     indexes,
+
     buildQuery: (idx) => {
       const query = createBaseServiceQuery({ indexes: idx, processorEvent: 'transaction', scope });
       query.pipe(`STATS COUNT(*) BY ${TIME_BUCKET_BY}`);
@@ -267,6 +270,7 @@ function getFailedTransactionRateChart(
     id: 'failedTransactionRate',
     title,
     indexes,
+
     buildQuery: (idx) => {
       const query = createBaseServiceQuery({ indexes: idx, processorEvent: 'transaction', scope });
       query.pipe(
@@ -303,6 +307,7 @@ function getCpuUsageChart(
     id: 'cpuUsage',
     title,
     indexes,
+
     buildQuery: (idx) => {
       const query = createBaseServiceQuery({ indexes: idx, processorEvent: 'metric', scope });
       query.pipe(`WHERE TO_DOUBLE(${METRIC_SYSTEM_CPU_PERCENT}) IS NOT NULL`);
@@ -334,6 +339,7 @@ function getMemoryUsageChart(
     id: 'memoryUsage',
     title,
     indexes,
+
     buildQuery: (idx) => {
       const query = createBaseServiceQuery({ indexes: idx, processorEvent: 'metric', scope });
       query.pipe(`EVAL cgroup_usage = TO_DOUBLE(${METRIC_CGROUP_MEMORY_USAGE_BYTES})`);
