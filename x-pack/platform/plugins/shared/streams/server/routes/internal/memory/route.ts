@@ -604,15 +604,47 @@ const setMemoryWorkflowsEnabledRoute = createServerRoute({
     const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     const { enabled } = params.body;
 
+    // Toggle every workflow we can and collect per-workflow failures rather than
+    // throwing on the first one, so a partial installation doesn't leave the
+    // remaining workflows untouched. `updateWorkflow` does not throw when an
+    // enable is refused: enabling a workflow without a valid definition (the
+    // "Kibana may still be starting up" window) is silently ignored, so we guard
+    // that case and reconcile against the returned `enabled` state.
+    const failures: string[] = [];
+
     for (const managedWorkflowId of MEMORY_WORKFLOW_IDS) {
       const workflow = await wfMgmt.management.getWorkflow(managedWorkflowId, spaceId);
       if (!workflow) {
-        logger.warn(
-          `Memory workflow "${managedWorkflowId}" not found when toggling enabled state.`
-        );
+        failures.push(`"${managedWorkflowId}" was not found`);
         continue;
       }
-      await wfMgmt.management.updateWorkflow(workflow.id, { enabled }, spaceId, request);
+      if (enabled && !workflow.definition) {
+        failures.push(`"${managedWorkflowId}" is not fully installed yet`);
+        continue;
+      }
+
+      const result = await wfMgmt.management.updateWorkflow(
+        workflow.id,
+        { enabled },
+        spaceId,
+        request
+      );
+      if (result.enabled !== enabled) {
+        const detail = result.validationErrors.length
+          ? `: ${result.validationErrors.join('; ')}`
+          : '';
+        failures.push(
+          `"${managedWorkflowId}" could not be ${enabled ? 'enabled' : 'disabled'}${detail}`
+        );
+      }
+    }
+
+    if (failures.length > 0) {
+      const message = `Failed to ${
+        enabled ? 'enable' : 'disable'
+      } all memory workflows. Kibana may still be starting up. Details: ${failures.join(', ')}.`;
+      logger.warn(message);
+      throw serverUnavailable(message);
     }
 
     logger.info(`Memory workflows ${enabled ? 'enabled' : 'disabled'} for space "${spaceId}".`);
