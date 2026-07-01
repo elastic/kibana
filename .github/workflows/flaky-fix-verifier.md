@@ -16,6 +16,9 @@ on:
     - github-actions[bot]
     - kibanamachine
 
+resources:
+  - prefetch-pr-context.yml
+
 permissions:
   contents: read
   issues: read
@@ -59,6 +62,7 @@ concurrency:
 
 env:
   PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
+  PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
   # Lets the agent omit `-o elastic` on every `bk` invocation.
   BUILDKITE_ORGANIZATION_SLUG: elastic
 
@@ -96,7 +100,24 @@ network:
 sandbox:
   agent: awf
 
+jobs:
+  prefetch_pr_context:
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    uses: ./.github/workflows/prefetch-pr-context.yml
+    with:
+      pr_number: *pr_number
+      repo: ${{ github.repository }}
+      artifact_name: *pr_context_artifact_name
+
 steps:
+  - name: Download prefetched PR context
+    uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+    with:
+      name: ${{ env.PR_CONTEXT_ARTIFACT_NAME }}
+      path: /tmp/gh-aw/agent
   - name: Install Buildkite CLI and export BUILDKITE_API_TOKEN
     env:
       BK_VERSION: 3.44.0
@@ -161,6 +182,18 @@ You verify a flaky test fix PR by running the flaky test runner against it, revi
 - This flaky test PR was created by a separate workflow that looked at an investigation comment posted on a `failed-test` issue. Your goal is to ensure the fix is correct and final. You are allowed to make changes to ensure correctness.
 - The flaky test runner is an internal tool that you can trigger with the `/flaky` command (more info in this document). It runs both Scout and FTR test configs (our testing frameworks) on-demand. It then posts the results in the PR.
 
+## Prefetched PR context
+
+A prior job has already fetched this PR's data into `/tmp/gh-aw/agent/`. Prefer reading these files over live GitHub API/tool calls — they are the deterministic source of truth for this run:
+
+- `pr-metadata.json` — title, body, labels, head/base branch, and cross-referenced PRs/issues.
+- `pr-diff.txt` — unified diff of every changed file.
+- `pr-files.json` — changed-file metadata (paths, status).
+- `pr-issue-comments.json` — every PR comment, including prior `## Flaky Test Runner Stats` result comments and the `/flaky` comments this workflow posted.
+- `pr-review-comments.json`, `pr-reviews.json` — review threads and reviews.
+
+Only fetch data live when it is not in these files. In particular, the linked `failed-test` issue's investigator comment lives on a **different** issue (not this PR), so fetch it directly.
+
 ## Modes
 
 You run in one of two modes depending on the trigger.
@@ -172,15 +205,15 @@ Determine the mode from the triggering event. For a manual dispatch, if the PR a
 
 ## Number of runs
 
-Trigger the flaky test runner at most 3 times per PR; run a given config up to 50 times at most. To know how many runs you have already triggered, count the comments this workflow previously posted on the PR whose body starts with `/flaky ` (authored by `kibanamachine`). Never post a `/flaky` comment that would exceed 3 total.
+Trigger the flaky test runner at most 3 times per PR; run a given config up to 50 times at most. To know how many runs you have already triggered, count the comments in `pr-issue-comments.json` whose body starts with `/flaky ` (authored by `kibanamachine`). Never post a `/flaky` comment that would exceed 3 total.
 
 ## State
 
-Use the PR itself as the state store — there is no separate state file or hidden marker:
+Use the PR itself as the state store — there is no separate state file or hidden marker. Read it from the prefetched context (see above):
 
-- **Status**: the `flaky-fix-check:*` labels (see below).
-- **Run history**: the `## Flaky Test Runner Stats` comments (each carries its Buildkite build link and per-config pass counts) and the `/flaky` comments you posted (each records the configs that were run).
-- **Targeted tests**: re-derive from the PR diff and PR title and description.
+- **Status**: the `flaky-fix-check:*` labels (in `pr-metadata.json`; see below).
+- **Run history**: the `## Flaky Test Runner Stats` comments (each carries its Buildkite build link and per-config pass counts) and the `/flaky` comments you posted (each records the configs that were run) — both in `pr-issue-comments.json`.
+- **Targeted tests**: re-derive from `pr-diff.txt` and the PR title/body in `pr-metadata.json`.
 
 ## State labels
 
@@ -202,7 +235,7 @@ Exactly one of these should apply at a time. When you reach a terminal verdict (
 
 ## `kickoff` mode
 
-1. **Read the fixer PR.** Fetch PR #${{ env.PR_NUMBER }}: its diff (changed files), its body (it links the originating `failed-test` issue via `Fixes #<n>`), and the linked investigator comment on that issue. From these, identify:
+1. **Read the fixer PR.** From the prefetched context, read `pr-diff.txt` (changed files) and `pr-metadata.json` (the body links the originating `failed-test` issue via `Fixes #<n>`). Then fetch the linked investigator comment on that issue (not prefetched). From these, identify:
 
    - the **touched test file(s)** (the files the fix changes), and
    - the **originally-flaky test title(s)** the fix is meant to stabilize. Record these as `targetedTests`.
@@ -249,7 +282,7 @@ Exactly one of these should apply at a time. When you reach a terminal verdict (
 
    Record the per-config `N/M` and the Buildkite build URL.
 
-2. **Recover context from the PR.** Read the `flaky-fix-check:*` labels, the prior `## Flaky Test Runner Stats` comments (your run history and build links), and the `/flaky` comments you posted (the configs run and how many runs you have triggered). Re-derive `targetedTests` from the PR diff, title, and description. If you have already acted on this results comment (a later `/flaky` comment exists after it), do nothing.
+2. **Recover context from the PR.** From the prefetched context, read `pr-metadata.json` for the `flaky-fix-check:*` labels, and `pr-issue-comments.json` for the prior `## Flaky Test Runner Stats` comments (your run history and build links) and the `/flaky` comments you posted (the configs run and how many runs you have triggered). Re-derive `targetedTests` from `pr-diff.txt` and the title/body in `pr-metadata.json`. If you have already acted on this results comment (a later `/flaky` comment exists after it), do nothing.
 
 3. **Attribute failures (which test failed?).** If any config is not green, you must determine _which_ tests failed before deciding — do not act on the `N/M` count alone:
 
