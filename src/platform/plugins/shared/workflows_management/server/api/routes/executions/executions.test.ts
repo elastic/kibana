@@ -556,14 +556,18 @@ describe('Execution Routes', () => {
       expect(handler('POST', path)).toBeDefined();
     });
 
-    it('should call api.cancelAllActiveWorkflowExecutions with workflow id and space id', async () => {
+    it('should call api.cancelAllActiveWorkflowExecutions with workflow id, space id, and request', async () => {
       mockApi.cancelAllActiveWorkflowExecutions.mockResolvedValue(undefined);
       const h = handler('POST', path)!;
       const request = { params: { workflowId: 'wf-1' } };
 
       await h(mockContext, request as any, mockResponse as any);
 
-      expect(mockApi.cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith('wf-1', 'default');
+      expect(mockApi.cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith(
+        'wf-1',
+        'default',
+        expect.anything()
+      );
       expect(mockResponse.ok).toHaveBeenCalled();
     });
 
@@ -653,7 +657,8 @@ describe('Execution Routes', () => {
         'ex-1',
         'default',
         { resume: true },
-        request
+        request,
+        { channel: 'kibana_execution_view' }
       );
       expect(result).toMatchObject({
         type: 'ok',
