@@ -29,7 +29,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { getBaseConnectorType } from '../../../shared/ui/step_icons/get_base_connector_type';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { getFieldsFromZodSchema } from '../lib/get_step_preview_fields';
-import type { ActionOptionData, JumpToStepEntry } from '../types';
+import type { ActionOptionData, EditorCommand, JumpToStepEntry } from '../types';
 import {
   isActionConnectorGroup,
   isActionConnectorOption,
@@ -41,12 +41,14 @@ type TabId = 'inputs' | 'outputs' | 'yaml';
 
 interface ActionsMenuPreviewPanelProps {
   hoveredOption: ActionOptionData | null;
+  hoveredCommand?: EditorCommand | null;
   hoveredJumpEntry?: JumpToStepEntry | null;
   onStepSelected: (action: ActionOptionData) => void;
 }
 
 export function ActionsMenuPreviewPanel({
   hoveredOption,
+  hoveredCommand,
   hoveredJumpEntry,
   onStepSelected,
 }: ActionsMenuPreviewPanelProps) {
@@ -93,6 +95,9 @@ export function ActionsMenuPreviewPanel({
     );
   }, [stepDef]);
 
+  const docUrl =
+    (connectorDef as { documentation?: string | null } | undefined)?.documentation ?? undefined;
+
   const fields = activeTab === 'inputs' ? inputFields : outputFields;
 
   const yamlSnippet = useMemo(() => {
@@ -118,6 +123,9 @@ export function ActionsMenuPreviewPanel({
   }, [hoveredOption, isLeaf, inputFields]);
 
   if (!hoveredOption) {
+    if (hoveredCommand) {
+      return <CommandPreviewPanel command={hoveredCommand} styles={styles} />;
+    }
     if (hoveredJumpEntry) {
       return <JumpStepPanel entry={hoveredJumpEntry} />;
     }
@@ -144,6 +152,7 @@ export function ActionsMenuPreviewPanel({
       outputCount={outputFields.length}
       examples={examples}
       yamlSnippet={yamlSnippet}
+      docUrl={docUrl}
       styles={styles}
     />
   );
@@ -248,9 +257,8 @@ function JumpStepPanel({ entry }: { entry: JumpToStepEntry }) {
   return (
     <div css={styles.panel}>
       <div css={styles.titleBlock}>
-        <p css={styles.titleBlockText}>
-          {entry.id}
-          <br />
+        <p css={styles.titleBlockText}>{entry.id}</p>
+        <p css={styles.descriptionText}>
           <FormattedMessage
             id="workflows.actionsMenu.preview.jumpStep.subtitle"
             defaultMessage="Existing step in this workflow"
@@ -266,6 +274,27 @@ function JumpStepPanel({ entry }: { entry: JumpToStepEntry }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ── Command preview ── */
+
+function CommandPreviewPanel({
+  command,
+  styles,
+}: {
+  command: EditorCommand;
+  styles: ReturnType<typeof useMemoCss<typeof panelStyles>>;
+}) {
+  return (
+    <div css={styles.panel}>
+      <div css={styles.titleBlock}>
+        <p css={styles.titleBlockText}>{command.label}</p>
+        {command.description && (
+          <p css={styles.descriptionText}>{command.description}</p>
+        )}
+      </div>
     </div>
   );
 }
@@ -315,6 +344,7 @@ function StepDetailPanel({
   outputCount,
   examples,
   yamlSnippet,
+  docUrl,
   styles,
 }: {
   step: ActionOptionData;
@@ -325,6 +355,7 @@ function StepDetailPanel({
   outputCount: number;
   examples: string[];
   yamlSnippet: string;
+  docUrl?: string;
   styles: ReturnType<typeof useMemoCss<typeof panelStyles>>;
 }) {
   const displayTitle = step.label || step.id;
@@ -336,7 +367,14 @@ function StepDetailPanel({
   return (
     <div css={styles.panel}>
       <div css={styles.titleBlock}>
-        <p css={styles.titleBlockText}>{displayTitle}</p>
+        {docUrl ? (
+          <a href={docUrl} target="_blank" rel="noopener noreferrer" css={styles.titleLink}>
+            <span>{displayTitle}</span>
+            <EuiIcon type="popout" size="s" css={styles.titleLinkIcon} />
+          </a>
+        ) : (
+          <p css={styles.titleBlockText}>{displayTitle}</p>
+        )}
         {displayDescription && (
           <p css={styles.descriptionText}>{displayDescription}</p>
         )}
@@ -472,7 +510,7 @@ const panelStyles = {
       height: '100%',
       overflowY: 'auto',
       borderRadius: '4px',
-      padding: `${euiTheme.size.base} 24px 24px 24px`,
+      padding: `12px 16px 16px 16px`,
       gap: euiTheme.size.base,
     }),
   titleBlock: css({
@@ -489,6 +527,25 @@ const panelStyles = {
       lineHeight: '24px',
       color: euiTheme.colors.textParagraph,
       margin: 0,
+    }),
+  titleLink: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '4px',
+      fontSize: '14px',
+      fontWeight: 500,
+      lineHeight: '24px',
+      color: euiTheme.colors.primaryText,
+      textDecoration: 'none',
+      '&:hover': {
+        textDecoration: 'underline',
+      },
+    }),
+  titleLinkIcon: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.primaryText,
+      flexShrink: 0,
     }),
   descriptionText: ({ euiTheme }: UseEuiTheme) =>
     css({

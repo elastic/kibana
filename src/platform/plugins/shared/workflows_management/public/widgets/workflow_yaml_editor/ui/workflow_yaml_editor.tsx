@@ -624,6 +624,9 @@ export const WorkflowYAMLEditor = ({
         label: i18n.translate('workflows.yamlEditor.commands.collapseAll', {
           defaultMessage: 'Collapse all',
         }),
+        description: i18n.translate('workflows.yamlEditor.commands.collapseAllDescription', {
+          defaultMessage: 'Fold every block in the editor so only top-level keys are visible',
+        }),
         iconType: 'minusInCircle',
       },
       {
@@ -631,12 +634,18 @@ export const WorkflowYAMLEditor = ({
         label: i18n.translate('workflows.yamlEditor.commands.expandAll', {
           defaultMessage: 'Expand all',
         }),
+        description: i18n.translate('workflows.yamlEditor.commands.expandAllDescription', {
+          defaultMessage: 'Unfold all collapsed blocks and show the full workflow YAML',
+        }),
         iconType: 'plusInCircle',
       },
       {
         id: 'find',
         label: i18n.translate('workflows.yamlEditor.commands.findReplace', {
           defaultMessage: 'Find and Replace',
+        }),
+        description: i18n.translate('workflows.yamlEditor.commands.findReplaceDescription', {
+          defaultMessage: 'Search for text in the editor and optionally replace it',
         }),
         iconType: 'search',
       },

@@ -76,6 +76,7 @@ export function ActionsMenu({
   const [currentPath, setCurrentPath] = useState<Array<string>>([]);
   const [hoveredOption, setHoveredOption] = useState<ActionOptionData | null>(null);
   const [hoveredJumpEntry, setHoveredJumpEntry] = useState<JumpToStepEntry | null>(null);
+  const [hoveredCommand, setHoveredCommand] = useState<EditorCommand | null>(null);
 
   useEffect(() => {
     if (currentPath.length === 0) {
@@ -113,6 +114,19 @@ export function ActionsMenu({
         if (entry && entry.id !== hoveredJumpEntry?.id) {
           setHoveredJumpEntry(entry);
           setHoveredOption(null);
+          setHoveredCommand(null);
+        }
+        return;
+      }
+
+      const commandTarget = el.closest('[data-command-id]');
+      if (commandTarget) {
+        const commandId = commandTarget.getAttribute('data-command-id');
+        const command = commands?.find((c) => c.id === commandId);
+        if (command && command.id !== hoveredCommand?.id) {
+          setHoveredCommand(command);
+          setHoveredOption(null);
+          setHoveredJumpEntry(null);
         }
         return;
       }
@@ -125,14 +139,16 @@ export function ActionsMenu({
       if (found && found.id !== hoveredOption?.id) {
         setHoveredOption(found);
         setHoveredJumpEntry(null);
+        setHoveredCommand(null);
       }
     },
-    [flatOptions, hoveredOption, hoveredJumpEntry, jumpToStepEntries]
+    [flatOptions, hoveredOption, hoveredJumpEntry, hoveredCommand, jumpToStepEntries, commands]
   );
 
   const handleMouseLeave = useCallback(() => {
     setHoveredOption(null);
     setHoveredJumpEntry(null);
+    setHoveredCommand(null);
   }, []);
 
   const renderActionOption = (rawOption: EuiSelectableOption, searchValue: string) => {
@@ -145,7 +161,7 @@ export function ActionsMenu({
 
     if (itemData?.kind === 'command') {
       return (
-        <div css={styles.compactOptionWrapper}>
+        <div css={styles.compactOptionWrapper} data-command-id={itemData.command.id}>
           <EuiText size="s">
             <EuiHighlight search={effectiveSearch}>{rawOption.label}</EuiHighlight>
           </EuiText>
@@ -470,7 +486,6 @@ export function ActionsMenu({
                     onClick={handleBack}
                     iconType="chevronSingleLeft"
                     size="xs"
-                    flush="left"
                     aria-label={i18n.translate('workflows.actionsMenu.back', {
                       defaultMessage: 'Back',
                     })}
@@ -486,6 +501,7 @@ export function ActionsMenu({
             <EuiFlexItem css={styles.rightColumn}>
               <ActionsMenuPreviewPanel
                 hoveredOption={hoveredOption}
+                hoveredCommand={hoveredCommand}
                 hoveredJumpEntry={hoveredJumpEntry}
                 onStepSelected={handleStepOrGroupSelected}
               />
@@ -545,7 +561,7 @@ const componentStyles = {
   backRow: ({ euiTheme }: UseEuiTheme) =>
     css({
       flexShrink: 0,
-      padding: `6px 12px 6px 8px`,
+      padding: `6px 12px 6px 16px`,
       borderTop: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
       borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
     }),
@@ -683,6 +699,10 @@ const componentStyles = {
     css({
       lineHeight: euiFontSize(euiThemeContext, 's').lineHeight,
       fontSize: '12px',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      display: 'block',
     }),
   techPreviewBadge: css({
     marginBottom: '-4px',

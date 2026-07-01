@@ -18,6 +18,23 @@ import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionConnectorGroup, ActionGroup, ActionOptionData } from '../types';
 import { isActionGroup } from '../types';
 
+function stripHtml(text: string | undefined): string | undefined {
+  if (!text) return undefined;
+  const noTags = text.replace(/<[^>]*>/g, ' ');
+  const decoded = noTags
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+  const noMarkdown = decoded
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1');
+  return noMarkdown.replace(/\s+/g, ' ').trim() || undefined;
+}
+
 function firstSentence(text: string | undefined): string | undefined {
   if (!text) return undefined;
   const dot = text.indexOf('. ');
@@ -287,7 +304,7 @@ export function getActionOptions(
         elasticSearchGroup.options.push({
           id: connector.type,
           label: connector.summary || connector.description || connector.type,
-          description: firstSentence(connector.description) || connector.type,
+          description: firstSentence(stripHtml(connector.description)) || connector.type,
           iconType: 'logoElasticsearch',
           stability: connector.stability,
         });
@@ -295,7 +312,7 @@ export function getActionOptions(
         kibanaGroup.options.push({
           id: connector.type,
           label: connector.summary || connector.description || connector.type,
-          description: firstSentence(connector.description) || connector.type,
+          description: firstSentence(stripHtml(connector.description)) || connector.type,
           iconType: 'logoKibana',
           stability: connector.stability,
         });
@@ -331,7 +348,7 @@ export function getActionOptions(
           groupOption.options.push({
             id: connector.type,
             label: connector.summary || connector.description || connector.type,
-            description: firstSentence(connector.description) || connector.type,
+            description: firstSentence(stripHtml(connector.description)) || connector.type,
             connectorType: connector.type,
             instancesLabel: getInstancesLabel(connector.instances?.length),
             iconType,
