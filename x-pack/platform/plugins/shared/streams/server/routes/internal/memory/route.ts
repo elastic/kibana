@@ -13,6 +13,7 @@ import {
   STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
   STREAMS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+  STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
@@ -548,6 +549,109 @@ const detectGapsRoute = createWorkflowTriggerRoute(
   'Trigger gap detection for memory'
 );
 
+const MEMORY_WORKFLOW_IDS = [
+  STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+  STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+  STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
+  STREAMS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+] as const;
+
+const getMemoryWorkflowsEnabledRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/memory/_workflows/enabled',
+  options: { access: 'internal', summary: 'Get enabled state of all memory workflows' },
+  security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.read] } },
+  params: z.object({}),
+  handler: async ({ request, server, getScopedClients }): Promise<{ enabled: boolean }> => {
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+
+    const wfMgmt = server.workflowsManagement;
+    if (!wfMgmt) {
+      return { enabled: false };
+    }
+
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    const workflows = await Promise.all(
+      MEMORY_WORKFLOW_IDS.map((id) => wfMgmt.management.getWorkflow(id, spaceId))
+    );
+    const enabled = workflows.every((w) => w?.enabled === true);
+    return { enabled };
+  },
+});
+
+const setMemoryWorkflowsEnabledRoute = createServerRoute({
+  endpoint: 'PUT /internal/streams/memory/_workflows/enabled',
+  options: { access: 'internal', summary: 'Enable or disable all memory workflows' },
+  security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.manage] } },
+  params: z.object({ body: z.object({ enabled: z.boolean() }) }),
+  handler: async ({
+    params,
+    request,
+    server,
+    logger,
+    getScopedClients,
+  }): Promise<{ success: boolean }> => {
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+
+    const wfMgmt = server.workflowsManagement;
+    if (!wfMgmt) {
+      throw serverUnavailable(
+        'Workflows management plugin is not available. Cannot update memory workflows.'
+      );
+    }
+
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    const { enabled } = params.body;
+
+    // Toggle every workflow we can and collect per-workflow failures rather than
+    // throwing on the first one, so a partial installation doesn't leave the
+    // remaining workflows untouched. `updateWorkflow` does not throw when an
+    // enable is refused: enabling a workflow without a valid definition (the
+    // "Kibana may still be starting up" window) is silently ignored, so we guard
+    // that case and reconcile against the returned `enabled` state.
+    const failures: string[] = [];
+
+    for (const managedWorkflowId of MEMORY_WORKFLOW_IDS) {
+      const workflow = await wfMgmt.management.getWorkflow(managedWorkflowId, spaceId);
+      if (!workflow) {
+        failures.push(`"${managedWorkflowId}" was not found`);
+        continue;
+      }
+      if (enabled && !workflow.definition) {
+        failures.push(`"${managedWorkflowId}" is not fully installed yet`);
+        continue;
+      }
+
+      const result = await wfMgmt.management.updateWorkflow(
+        workflow.id,
+        { enabled },
+        spaceId,
+        request
+      );
+      if (result.enabled !== enabled) {
+        const detail = result.validationErrors.length
+          ? `: ${result.validationErrors.join('; ')}`
+          : '';
+        failures.push(
+          `"${managedWorkflowId}" could not be ${enabled ? 'enabled' : 'disabled'}${detail}`
+        );
+      }
+    }
+
+    if (failures.length > 0) {
+      const message = `Failed to ${
+        enabled ? 'enable' : 'disable'
+      } all memory workflows. Kibana may still be starting up. Details: ${failures.join(', ')}.`;
+      logger.warn(message);
+      throw serverUnavailable(message);
+    }
+
+    logger.info(`Memory workflows ${enabled ? 'enabled' : 'disabled'} for space "${spaceId}".`);
+    return { success: true };
+  },
+});
+
 export const internalMemoryRoutes = {
   ...createEntryRoute,
   ...getEntryRoute,
@@ -564,4 +668,6 @@ export const internalMemoryRoutes = {
   ...consolidateMemoryRoute,
   ...synthesizeMemoryRoute,
   ...detectGapsRoute,
+  ...getMemoryWorkflowsEnabledRoute,
+  ...setMemoryWorkflowsEnabledRoute,
 };
