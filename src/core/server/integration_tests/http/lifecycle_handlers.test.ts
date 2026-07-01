@@ -365,7 +365,7 @@ describe('xsrf post-auth handler with allowedSchemes (Authorization bypass)', ()
   let server: HttpService;
   let innerServer: HttpServerSetup['server'];
 
-  const bootServer = async (allowedSchemes: string[]) => {
+  const bootServer = async (allowedSchemes: Array<'apikey' | 'bearer'>) => {
     const configService = createConfigService({
       server: {
         ...testConfig.server,
