@@ -19,6 +19,7 @@ import type {
   AppHeaderMenu,
 } from '@kbn/app-header';
 import { MlPageControlsContext } from '../ml_page/ml_page';
+import { MlDatePickerBar } from './ml_date_picker_bar';
 
 export interface MlAppHeaderProps {
   title: AppHeaderTitle;
@@ -58,6 +59,7 @@ export const MlAppHeader: FC<MlAppHeaderProps> = ({
         padding={resolvedPadding}
         docLink={docLink}
         sticky={false}
+        titleAppend={showDatePicker ? <MlDatePickerBar /> : undefined}
       />
       <EuiSpacer size="m" />
     </>
