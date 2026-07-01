@@ -256,7 +256,7 @@ describe('DefaultAlertActions', () => {
         render(<TestComponent {...nonSecurityProps} />);
 
         expect(screen.queryByText('AcknowledgeAlertAction')).toBeInTheDocument();
-        expect(screen.queryByText('MuteAlertAction')).toBeInTheDocument();
+        expect(screen.queryByText('SnoozeAlertAction')).toBeInTheDocument();
         expect(screen.queryByText('MarkAsUntrackedAlertAction')).toBeInTheDocument();
         expect(screen.queryByText('EditTagsAction')).toBeInTheDocument();
       });
@@ -273,7 +273,7 @@ describe('DefaultAlertActions', () => {
         render(<TestComponent {...siemProps} />);
 
         expect(screen.queryByText('AcknowledgeAlertAction')).not.toBeInTheDocument();
-        expect(screen.queryByText('MuteAlertAction')).not.toBeInTheDocument();
+        expect(screen.queryByText('SnoozeAlertAction')).not.toBeInTheDocument();
         expect(screen.queryByText('MarkAsUntrackedAlertAction')).not.toBeInTheDocument();
         expect(screen.queryByText('EditTagsAction')).not.toBeInTheDocument();
       });
@@ -289,7 +289,7 @@ describe('DefaultAlertActions', () => {
 
         render(<TestComponent {...nonSecurityProps} />);
 
-        expect(screen.queryByText('MuteAlertAction')).not.toBeInTheDocument();
+        expect(screen.queryByText('SnoozeAlertAction')).not.toBeInTheDocument();
         expect(screen.queryByText('MarkAsUntrackedAlertAction')).not.toBeInTheDocument();
         expect(screen.queryByText('EditTagsAction')).not.toBeInTheDocument();
       });
