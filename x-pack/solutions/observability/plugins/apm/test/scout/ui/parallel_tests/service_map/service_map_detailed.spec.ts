@@ -130,7 +130,7 @@ test.describe(
       await serviceMapPage.clickServiceMapFlyoutAction('openTracesInDiscover');
 
       await expect(page).toHaveURL(new RegExp(`/app/discover`));
-      await discover.waitForDocTableRendered();
+      await discover.waitUntilSearchingHasFinished();
       expect(await discover.getEsqlQueryValue()).toMatch(new RegExp('traces-'));
     });
 
@@ -147,7 +147,7 @@ test.describe(
       await serviceMapPage.clickServiceMapFlyoutAction('openLogsInDiscover');
 
       await expect(page).toHaveURL(new RegExp(`/app/discover`));
-      await discover.waitForDocTableRendered();
+      await discover.waitUntilSearchingHasFinished();
       expect(await discover.getEsqlQueryValue()).toMatch(new RegExp('logs-'));
     });
 
