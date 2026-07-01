@@ -47,7 +47,7 @@ import type { CsvSearchModeParams } from '@kbn/reporting-public/share/shared/get
 import { getSearchCsvJobParams } from '@kbn/reporting-public/share/shared/get_search_csv_job_params';
 import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
 import type { LocatorParams } from '@kbn/reporting-common/types';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getI18nStrings } from './strings';
 
@@ -86,6 +86,11 @@ type GetCsvActionApi = HasType &
   CanAccessViewMode &
   HasTimeRange &
   PublishesTitle;
+
+const normalizeSearchSourceQuery = (
+  query: SerializedSearchSourceFields['query']
+): Query | AggregateQuery | undefined =>
+  typeof query === 'string' ? { query, language: 'lucene' } : query;
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is GetCsvActionApi => {
   return (
@@ -201,7 +206,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
 
     return {
       ...(savedObjectId ? { savedSearchId: savedObjectId } : {}),
-      query: searchSourceFields.query,
+      query: normalizeSearchSourceQuery(searchSourceFields.query),
       filters: searchSourceFields.parent?.filter, // time range filter
       columns,
     };

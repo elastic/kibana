@@ -48,6 +48,9 @@ import {
   SAVED_SEARCH_SAVED_OBJECT_REF_NAME,
 } from './constants';
 
+const normalizeStoredQuery = (query: SerializedSearchSourceFields['query']) =>
+  typeof query === 'string' ? { query, language: 'lucene' as const } : query;
+
 export function fromStoredSearchEmbeddable(
   storedState: SearchEmbeddableState | StoredSearchEmbeddableState,
   references: SavedObjectReference[] = []
@@ -206,7 +209,9 @@ export function fromStoredTab(
     density: density ?? DataGridDensity.COMPACT,
   };
   const searchSourceValues = parseSearchSourceJSON(searchSourceJSON);
-  const { index, query, filter } = injectReferences(searchSourceValues, references);
+  const { index, query: storedQuery, filter } = injectReferences(searchSourceValues, references);
+  const query = normalizeStoredQuery(storedQuery);
+
   return isOfAggregateQueryType(query)
     ? {
         ...apiTab,

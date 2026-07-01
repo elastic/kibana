@@ -32,6 +32,7 @@ import {
   createDataSource,
 } from '../../../../../common/data_sources';
 import { handleSourceColumnState } from '../../../../utils/state_helpers';
+import { migrateLegacyQuery } from '../../../../utils/migrate_legacy_query';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
 import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
 
@@ -112,7 +113,9 @@ function getDefaultQuery({
   hasGlobalState: boolean;
   defaultProfileEsqlQuery?: DefaultEsqlQueryConfig;
 }): Query | AggregateQuery | undefined {
-  if (persistedTab?.serializedSearchSource.query) return persistedTab.serializedSearchSource.query;
+  if (persistedTab?.serializedSearchSource.query) {
+    return migrateLegacyQuery(persistedTab.serializedSearchSource.query);
+  }
 
   // If there is global or app state (_g or _a) in the URL we should respect it and assume it's a classic query
   // This is also useful to reuse the query mode if we are opening a new tab from an existing one
