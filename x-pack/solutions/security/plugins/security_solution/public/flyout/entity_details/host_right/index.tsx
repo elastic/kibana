@@ -148,7 +148,7 @@ export const HostPanel = memo(function HostPanel({
     useEntityRiskScoreRecalculation({
       entityType: EntityType.host,
       identifier: hostName,
-      entityId: observedHost.entityRecord?.entity.id,
+      entityId: observedHost.entityRecord?.entity?.id,
       entityStoreV2Enabled: true,
       entityFromStoreResult,
       riskScoreState,

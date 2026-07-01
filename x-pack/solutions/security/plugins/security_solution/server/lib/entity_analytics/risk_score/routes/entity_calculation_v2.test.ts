@@ -65,6 +65,7 @@ describe('entity risk score V2 calculation route', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
   let logger: ReturnType<typeof loggerMock.create>;
   let getStartServicesMock: jest.Mock;
+  let mockCrudClient: jest.Mocked<EntityStoreCRUDClient>;
 
   const defaultBody = {
     identifier: 'test-host-name',
@@ -88,8 +89,10 @@ describe('entity risk score V2 calculation route', () => {
       configMock.withExperimentalFeature(clients.config, 'entityAnalyticsEntityStoreV2')
     );
 
-    (clients.entityStoreCrudClient as unknown as jest.Mocked<EntityStoreCRUDClient>).listEntities =
-      jest.fn().mockResolvedValue({ entities: [entityDocMock] });
+    mockCrudClient = {
+      listEntities: jest.fn().mockResolvedValue({ entities: [entityDocMock] }),
+    } as unknown as jest.Mocked<EntityStoreCRUDClient>;
+    context.securitySolution.getEntityStoreUpdateClient.mockReturnValue(mockCrudClient);
 
     (getConfiguration as jest.Mock).mockResolvedValue(defaultEngineConfig);
     (getRiskInputsIndex as jest.Mock).mockResolvedValue({ index: 'default-alerts-index' });
@@ -193,8 +196,7 @@ describe('entity risk score V2 calculation route', () => {
 
   it('runs resolution scoring against the entity itself when no resolved entity exists', async () => {
     // override default mock that returns an entity with a resolved_to
-    (clients.entityStoreCrudClient as unknown as jest.Mocked<EntityStoreCRUDClient>).listEntities =
-      jest.fn().mockResolvedValue({ entities: [{ entity: { id: entityId } }] });
+    mockCrudClient.listEntities = jest.fn().mockResolvedValue({ entities: [{ entity: { id: entityId } }] });
 
     await server.inject(buildRequest(), requestContextMock.convertContext(context));
 
@@ -229,8 +231,7 @@ describe('entity risk score V2 calculation route', () => {
   });
 
   it('returns 400 and skips scoring when entity is not found', async () => {
-    (clients.entityStoreCrudClient as unknown as jest.Mocked<EntityStoreCRUDClient>).listEntities =
-      jest.fn().mockResolvedValue({ entities: [] });
+    mockCrudClient.listEntities = jest.fn().mockResolvedValue({ entities: [] });
 
     const response = await server.inject(
       buildRequest(),

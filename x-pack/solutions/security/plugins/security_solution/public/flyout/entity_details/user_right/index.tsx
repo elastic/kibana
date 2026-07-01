@@ -148,11 +148,12 @@ export const UserPanel = memo(function UserPanel({
     (refetchEntitiesTable as Refetch | null)?.();
   }, [refetchEntitiesTable]);
 
+  const entityStoreV2Enabled = true;
   const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
     useEntityRiskScoreRecalculation({
       entityType: EntityType.user,
       identifier: userName,
-      entityId: entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : undefined,
+      entityId: observedUser.entityRecord?.entity?.id,
       entityStoreV2Enabled,
       entityFromStoreResult,
       riskScoreState,
