@@ -14,20 +14,14 @@ import { ExecutionStatus } from '@kbn/workflows';
 
 import { handleQueuedWorkflowRunAtTaskStart } from './handle_queued_workflow_run_at_task_start';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 describe('handleQueuedWorkflowRunAtTaskStart', () => {
   const logger = loggingSystemMock.create().get() as Logger;
   const updateMock = jest.fn().mockResolvedValue(undefined);
-  const removeQueuedRunTask = jest.fn().mockResolvedValue(undefined);
 
   const workflowExecutionRepository = {
     updateWorkflowExecution: updateMock,
   } as unknown as WorkflowExecutionRepository;
-
-  const workflowTaskManager = {
-    removeQueuedRunTask,
-  } as unknown as WorkflowTaskManager;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -49,12 +43,10 @@ describe('handleQueuedWorkflowRunAtTaskStart', () => {
       execution,
       workflowRunId: 'exec-1',
       workflowExecutionRepository,
-      workflowTaskManager,
       logger,
     });
 
     expect(handled).toBe(false);
-    expect(removeQueuedRunTask).not.toHaveBeenCalled();
   });
 
   it('marks SKIPPED when queue TTL has elapsed', async () => {
@@ -77,15 +69,10 @@ describe('handleQueuedWorkflowRunAtTaskStart', () => {
       execution,
       workflowRunId: 'exec-1',
       workflowExecutionRepository,
-      workflowTaskManager,
       logger,
     });
 
     expect(handled).toBe(true);
-    expect(removeQueuedRunTask).toHaveBeenCalledWith({
-      executionId: 'exec-1',
-      triggeredBy: 'manual',
-    });
     expect(updateMock).toHaveBeenCalledWith({
       id: 'exec-1',
       status: ExecutionStatus.SKIPPED,
@@ -116,7 +103,6 @@ describe('handleQueuedWorkflowRunAtTaskStart', () => {
       execution,
       workflowRunId: 'exec-1',
       workflowExecutionRepository,
-      workflowTaskManager,
       logger,
     });
 

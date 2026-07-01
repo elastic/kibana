@@ -27,6 +27,11 @@ import type {
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
+export interface RunWorkflowResult {
+  /** Dormant queued `workflow:run` tasks must be deleted by Task Manager after handling. */
+  shouldDeleteTask?: boolean;
+}
+
 export async function runWorkflow({
   workflowRunId,
   spaceId,
@@ -49,7 +54,7 @@ export async function runWorkflow({
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   meteringService?: WorkflowsMeteringService;
   internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
-}): Promise<void> {
+}): Promise<RunWorkflowResult | void> {
   // Span for setup/initialization phase
   const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
   const {
@@ -91,7 +96,6 @@ export async function runWorkflow({
     execution,
     workflowRunId,
     workflowExecutionRepository,
-    workflowTaskManager,
     logger,
   });
   if (handledQueuedRun) {
@@ -114,7 +118,7 @@ export async function runWorkflow({
         void meteringService.reportWorkflowExecution(terminalExecution, dependencies.cloudSetup);
       }
     }
-    return;
+    return { shouldDeleteTask: true };
   }
 
   const triggeredBy = execution.triggeredBy;

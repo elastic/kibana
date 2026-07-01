@@ -13,25 +13,24 @@ import { ExecutionStatus } from '@kbn/workflows';
 
 import { getQueueWaitDeadlineMs, resolveQueueTtlSetting } from './queue_concurrency_utils';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 export const QUEUE_RUN_INVARIANT_ERROR_TYPE = 'QueueRunInvariantError' as const;
 
 /**
  * Handles `workflow:run` when the execution is still `queued` at task start.
  * Returns true when the run was fully handled (terminal) and the caller should return early.
+ * The caller must return `{ shouldDeleteTask: true }` to Task Manager — do not remove the task
+ * mid-run via `removeIfExists` (that causes TM 404 errors on completion).
  */
 export async function handleQueuedWorkflowRunAtTaskStart({
   execution,
   workflowRunId,
   workflowExecutionRepository,
-  workflowTaskManager,
   logger,
 }: {
   execution: EsWorkflowExecution;
   workflowRunId: string;
   workflowExecutionRepository: WorkflowExecutionRepository;
-  workflowTaskManager: WorkflowTaskManager;
   logger: Logger;
 }): Promise<boolean> {
   if (execution.status !== ExecutionStatus.QUEUED) {
@@ -42,11 +41,6 @@ export async function handleQueuedWorkflowRunAtTaskStart({
   const ttlSetting = resolveQueueTtlSetting(concurrency);
   const deadlineMs = getQueueWaitDeadlineMs(execution, concurrency);
   const nowMs = Date.now();
-
-  await workflowTaskManager.removeQueuedRunTask({
-    executionId: workflowRunId,
-    triggeredBy: execution.triggeredBy,
-  });
 
   if (nowMs >= deadlineMs) {
     const cancelledAt = new Date().toISOString();

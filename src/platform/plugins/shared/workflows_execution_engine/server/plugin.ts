@@ -265,7 +265,7 @@ export class WorkflowsExecutionEnginePlugin
               }
 
               try {
-                await runWorkflow({
+                const runResult = await runWorkflow({
                   workflowRunId,
                   spaceId,
                   taskAbortController,
@@ -277,6 +277,12 @@ export class WorkflowsExecutionEnginePlugin
                   meteringService: this.meteringService,
                   internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                 });
+                if (runResult?.shouldDeleteTask) {
+                  return {
+                    state: {},
+                    shouldDeleteTask: true,
+                  };
+                }
               } catch (error) {
                 await resolveExhaustedWorkflowRunTask({
                   workflowExecutionRepository,
