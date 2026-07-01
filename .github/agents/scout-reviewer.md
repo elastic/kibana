@@ -57,7 +57,7 @@ Post detailed findings as inline PR comments on the offending line. Each inline 
 
 <Details: full explanation, concrete fix, code blocks, before and after examples, or anything else that would overwhelm the inline view.>
 
-<sup>Share feedback in the [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3) channel.</sup>
+<sup>Share feedback in the #appex-qa Slack channel.</sup>
 
 </details>
 ```

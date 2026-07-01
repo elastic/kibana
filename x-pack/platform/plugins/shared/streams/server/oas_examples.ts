@@ -15,7 +15,8 @@
  * it immediately without any additional tooling or CI step.
  */
 
-import type { SignificantEventsGetResponse, StreamQuery, Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import type { SignificantEventsGetResponse, StreamQuery } from '@kbn/significant-events-schema';
 
 // ---------------------------------------------------------------------------
 // PUT /api/streams/{name}  –  wired stream
@@ -48,7 +49,6 @@ export const createWiredStreamRequest: Streams.WiredStream.UpsertRequest = {
   },
   dashboards: [],
   rules: [],
-  queries: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -80,7 +80,6 @@ export const updateClassicStreamRequest: Streams.ClassicStream.UpsertRequest = {
   },
   dashboards: [],
   rules: [],
-  queries: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -98,7 +97,6 @@ export const createQueryStreamRequest: Streams.QueryStream.UpsertRequest = {
   },
   dashboards: [],
   rules: [],
-  queries: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -230,7 +228,6 @@ export const getWiredStreamResponse: Streams.WiredStream.GetResponse = {
   },
   dashboards: [],
   rules: [],
-  queries: [],
   data_stream_exists: true,
   inherited_fields: {
     '@timestamp': { type: 'date', from: 'logs' },

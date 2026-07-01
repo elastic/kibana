@@ -6,7 +6,8 @@
  */
 
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
-import type { SigEventStatus, StreamType } from '@kbn/streams-schema';
+import type { StreamType } from '@kbn/streams-schema';
+import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 
 interface StreamEndpointLatencyProps {
   name: string;
@@ -29,8 +30,10 @@ interface StreamsDescriptionGeneratedProps {
   stream_name: string;
   stream_type: StreamType;
 }
+
 interface StreamsSignificantEventsQueriesGeneratedProps {
   count: number;
+  connector_id: string;
   input_tokens_used: number;
   output_tokens_used: number;
   cached_tokens_used: number;
@@ -50,6 +53,7 @@ interface StreamsProcessingPipelineSuggestedProps {
 
 interface StreamsFeaturesIdentifiedProps {
   run_id: string;
+  connector_id: string;
   iteration: number;
   docs_count: number;
   features_new: number;
@@ -94,8 +98,23 @@ interface StreamsAgentToolEventCreateProps {
 interface StreamsAgentToolEventStatusUpdateProps {
   success: boolean;
   event_id: string;
-  status: SigEventStatus;
+  status: SignificantEventStatus;
   error_message?: string;
+}
+
+interface StreamsCodeAnalysisGroundingProps {
+  stream_name: string;
+  stream_type: string;
+  /**
+   * Outcome of the code_analysis computed feature: `feature` (a repository was
+   * selected and a feature emitted), `no_match` (candidates existed but none
+   * verified enough strings), `no_candidates`, `no_strings`, or `unavailable`
+   * (SCS / Agent Builder not installed).
+   */
+  status: string;
+  repository?: string;
+  candidate_count: number;
+  verified_count: number;
 }
 
 interface StreamsSignificantEventsDiscoveryTriggeredProps {
@@ -123,6 +142,7 @@ export {
   type StreamsAgentToolKiIdentificationStartedProps,
   type StreamsAgentToolEventCreateProps,
   type StreamsAgentToolEventStatusUpdateProps,
+  type StreamsCodeAnalysisGroundingProps,
   type StreamsSignificantEventsDiscoveryTriggeredProps,
   type StreamsOnboardingScheduledProps,
 };

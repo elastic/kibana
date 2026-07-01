@@ -9,6 +9,7 @@ import type { AfterToolCallHookContext } from '@kbn/agent-builder-server';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import { loadSkillTools } from '../../services/skills/load_skill_tools';
 import { isSkillFileEntry } from '../../services/execution/runner/store/volumes/skills/utils';
+import { MOUNT_POINTS } from '../../services/execution/filesystem/mount_points';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 
 export const createLoadSkillToolsAfterRead = ({
@@ -20,7 +21,7 @@ export const createLoadSkillToolsAfterRead = ({
       return;
     }
 
-    const { filestore, skills, toolProvider, toolManager, request, logger, runContext } =
+    const { skillsStore, skills, toolProvider, toolManager, request, logger, runContext } =
       context.toolHandlerContext;
 
     const path = context.toolParams.path as string | undefined;
@@ -28,7 +29,13 @@ export const createLoadSkillToolsAfterRead = ({
       return;
     }
 
-    const entry = await filestore.read(path);
+    const skillsMountPrefix = `${MOUNT_POINTS.skills}/`;
+    if (!path.startsWith(skillsMountPrefix)) {
+      return;
+    }
+    const relativePath = path.slice(MOUNT_POINTS.skills.length);
+
+    const entry = await skillsStore.getEntry(relativePath);
     if (!entry || !isSkillFileEntry(entry)) {
       return;
     }

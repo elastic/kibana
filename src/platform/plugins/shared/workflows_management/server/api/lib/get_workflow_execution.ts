@@ -13,6 +13,7 @@ import type {
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
 } from '@kbn/workflows';
+import { pickWorkflowDocumentVersion } from '@kbn/workflows';
 import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 import {
@@ -84,6 +85,7 @@ function transformToWorkflowExecutionDetailDto(
   stepExecutions: EsWorkflowStepExecution[],
   logger: Logger
 ): WorkflowExecutionDto {
+  const { billable: _billable, ...workflowExecutionDtoFields } = workflowExecution;
   let yaml = workflowExecution.yaml;
   try {
     if (!yaml) {
@@ -94,7 +96,7 @@ function transformToWorkflowExecutionDetailDto(
     yaml = '';
   }
   return {
-    ...workflowExecution,
+    ...workflowExecutionDtoFields,
     id,
     isTestRun: workflowExecution.isTestRun ?? false,
     stepId: workflowExecution.stepId,
@@ -105,5 +107,6 @@ function transformToWorkflowExecutionDetailDto(
     traceId: workflowExecution.traceId,
     entryTransactionId: workflowExecution.entryTransactionId,
     concurrencyGroupKey: workflowExecution.concurrencyGroupKey,
+    ...pickWorkflowDocumentVersion(workflowExecution),
   };
 }

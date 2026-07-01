@@ -6,14 +6,14 @@
  */
 
 import type { InternalSkillDefinition } from '../skills';
-import type { Volume } from './volume';
+import type { FileEntryAccessor } from './file_entry_accessor';
 
 /**
- * Store to access skills during execution
+ * Store to access skills during execution.
  */
-export interface SkillsStore {
+export interface SkillsStore extends FileEntryAccessor {
   has(skillId: string): boolean;
-  get(resultId: string): InternalSkillDefinition;
+  get(skillId: string): InternalSkillDefinition;
 }
 
 /**
@@ -23,6 +23,4 @@ export interface WritableSkillsStore extends SkillsStore {
   add(result: InternalSkillDefinition): void;
   delete(skillId: string): boolean;
   asReadonly(): SkillsStore;
-  /** Returns the underlying volume — used by the agent's filesystem layer. */
-  getVolume(): Volume;
 }

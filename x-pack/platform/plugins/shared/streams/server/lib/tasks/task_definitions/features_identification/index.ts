@@ -12,16 +12,16 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError, type InferenceConnector } from '@kbn/inference-common';
+import { getStreamSamplingSource, getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import {
   type IdentifyFeaturesResult,
   type IterationResult,
-  type Feature,
-  getStreamTypeFromDefinition,
-} from '@kbn/streams-schema';
+  type FeatureUpsert,
+} from '@kbn/significant-events-schema';
 import { v4 as uuid } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, LogMeta } from '@kbn/logging';
-import { STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
+import { SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
 import { parseError } from '../../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../../routes/utils/create_connector_sse_error';
 import { resolveConnectorForFeature } from '../../../../routes/utils/resolve_connector_for_feature';
@@ -35,7 +35,8 @@ import {
   deriveTotalTokensUsed,
   identifyInferredFeatures,
   identifyComputedFeatures,
-} from '../../../sig_events/features';
+} from '../../../significant_events/features';
+import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../../../semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 
 export interface FeaturesIdentificationTaskParams {
   start: number;
@@ -83,8 +84,36 @@ async function runFeaturesIdentification(
   const taskDurationMs = () => Date.now() - new Date(_task.created_at).getTime();
 
   const runId = uuid();
+
+  const scopedClients = await taskContext.getScopedClients({ request: fakeRequest });
+
+  const {
+    taskClient,
+    scopedClusterClient,
+    streamsClient,
+    inferenceClient,
+    soClient,
+    tuningConfig,
+  } = scopedClients;
+
+  const taskLogger = taskContext.logger.get('features_identification', streamName);
+
+  const [kiClient, connectorId] = await Promise.all([
+    scopedClients.getKnowledgeIndicatorClient(),
+    connectorIdOverride
+      ? Promise.resolve(connectorIdOverride)
+      : resolveConnectorForFeature({
+          searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+          featureId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+          featureName: 'knowledge indicator extraction',
+          request: fakeRequest,
+        }),
+  ]);
+  taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
+
   const emptyTelemetryCtx = {
     run_id: runId,
+    connector_id: connectorId,
     iteration: 0,
     stream_name: streamName,
     stream_type: 'unknown' as const,
@@ -100,34 +129,9 @@ async function runFeaturesIdentification(
     );
   };
 
-  const {
-    taskClient,
-    scopedClusterClient,
-    getKnowledgeIndicatorClient,
-    streamsClient,
-    inferenceClient,
-    soClient,
-    tuningConfig,
-  } = await taskContext.getScopedClients({ request: fakeRequest });
-
-  const taskLogger = taskContext.logger.get('features_identification', streamName);
-
-  const [kiClient, connectorId] = await Promise.all([
-    getKnowledgeIndicatorClient(),
-    connectorIdOverride
-      ? Promise.resolve(connectorIdOverride)
-      : resolveConnectorForFeature({
-          searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
-          featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-          featureName: 'knowledge indicator extraction',
-          request: fakeRequest,
-        }),
-  ]);
-  taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
-
   let hasTrackedIteration = false;
   const iterationResults: IterationResult[] = [];
-  let discoveredFeatures: Feature[] = [];
+  let discoveredFeatures: FeatureUpsert[] = [];
 
   try {
     const stream = await streamsClient.getStream(streamName);
@@ -157,6 +161,12 @@ async function runFeaturesIdentification(
     // inferred-features loop below throws before we reach the `await`. An
     // unhandled rejection on this promise (e.g. `index_not_found_exception`
     // when a wired stream has no backing data stream yet) crashes Kibana.
+    const codeGroundingEnabled =
+      Boolean(taskContext.server.agentBuilder?.tools) &&
+      (await isSignificantEventsSemanticCodeSearchGroundingEnabled(
+        taskContext.server.core.featureFlags
+      ));
+
     const computedFeaturesPromise = identifyComputedFeatures({
       stream,
       streamName: stream.name,
@@ -166,6 +176,13 @@ async function runFeaturesIdentification(
       kiClient,
       logger: taskLogger,
       runId,
+      ...(codeGroundingEnabled
+        ? {
+            agentBuilderTools: taskContext.server.agentBuilder?.tools,
+            request: fakeRequest,
+            telemetry: taskContext.telemetry,
+          }
+        : {}),
     }).catch((err) => {
       // Computed features generation is not expected to fail; surface it as
       // an error so it's actionable, but swallow the rejection so it cannot
@@ -195,9 +212,11 @@ async function runFeaturesIdentification(
         kiClient,
         soClient,
         inferenceClient: boundInferenceClient,
+        connectorId,
         logger: taskLogger,
         signal: runContext.abortController.signal,
         streamName: stream.name,
+        samplingSource: getStreamSamplingSource(stream),
         streamType,
         start,
         end,
