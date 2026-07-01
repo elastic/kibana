@@ -278,6 +278,8 @@ export interface AppMenuSwitch {
   checked: boolean;
   onChange: (checked: boolean) => void;
   disabled?: boolean;
+  tooltipContent?: string | (() => string | undefined);
+  tooltipTitle?: string | (() => string | undefined);
   'data-test-subj'?: string;
 }
 
