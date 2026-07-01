@@ -196,6 +196,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     );
   }
 
+  if (options.ui) {
+    log.info(
+      `scout: Launching Playwright UI mode. Test servers will be started first and kept running until the UI is closed.`
+    );
+  }
+
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
   const pwCmdArgs = [
     'test',
@@ -205,10 +211,15 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     `--project=${pwProject}`,
     ...(options.headed ? ['--headed'] : []),
     ...(options.repeatEach ? [`--repeat-each=${options.repeatEach}`] : []),
+    ...(options.ui ? ['--ui'] : []),
   ];
 
   await withProcRunner(log, async (procs) => {
-    const exitCode = await hasTestsInPlaywrightConfig(log, pwBinPath, pwCmdArgs, pwConfigPath);
+    // UI mode is interactive and long-running; the `--list` pre-check is incompatible
+    // with `--ui`, so we skip it and let the Playwright UI surface any config errors.
+    const exitCode = options.ui
+      ? 0
+      : await hasTestsInPlaywrightConfig(log, pwBinPath, pwCmdArgs, pwConfigPath);
     const pwEnv = {
       SCOUT_LOG_LEVEL: logsLevel,
       SCOUT_TARGET_LOCATION: options.testTarget.location,

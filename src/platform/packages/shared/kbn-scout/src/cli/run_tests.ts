@@ -53,6 +53,9 @@ export const runTestsCmd: Command<void> = {
 
     Local flakiness validation (run each test N times):
     node scripts/scout run-tests --arch stateful --domain classic --config <playwright_config_path> --repeatEach 5
+
+    Interactive Playwright UI mode (starts servers, then opens the UI; servers stop when the UI is closed):
+    node scripts/scout run-tests --arch stateful --domain classic --config <playwright_config_path> --ui
   `,
   flags: TEST_FLAG_OPTIONS,
   run: async ({ flagsReader, log }) => {

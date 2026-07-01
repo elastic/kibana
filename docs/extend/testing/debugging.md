@@ -27,6 +27,24 @@ node scripts/playwright show-report <plugin-path>/test/scout/ui/output/reports
 
 [UI Mode](https://playwright.dev/docs/test-ui-mode) lets you run and debug tests interactively.
 
+#### Using Scout `run-tests` [playwright-ui-mode-run-tests]
+
+The simplest way is to pass `--ui` to `run-tests`. Scout starts the test servers for you, resolves the correct `--project` and `--grep` tag from `--arch`/`--domain`, opens the Playwright UI, and keeps the servers running until you close the UI (then it tears them down automatically).
+
+```bash
+node scripts/scout run-tests \
+  --arch stateful \
+  --domain classic \
+  --config <plugin-path>/test/scout/ui/playwright.config.ts \
+  --ui
+```
+
+`--ui` cannot be combined with `--headed` (UI mode manages its own browser) or `--repeatEach` (UI mode is interactive, not a batch run).
+
+#### Using Playwright directly [playwright-ui-mode-playwright]
+
+If servers are already running (for example, started once with `node scripts/scout start-server`), you can launch UI mode against them directly. This is handy when you want to keep servers up across many iterations.
+
 ```bash
 node scripts/playwright test \
   --config <plugin-path>/test/scout/ui/playwright.config.ts \

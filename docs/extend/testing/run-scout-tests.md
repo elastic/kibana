@@ -55,6 +55,16 @@ node scripts/scout.js run-tests \
 
 When Scout starts Kibana and Elasticsearch locally, it saves the server configuration to `.scout/servers/local.json` and later reads it when running tests.
 
+Add `--ui` to open Playwright's [**UI mode**](./debugging.md#playwright-ui-mode) after the servers are started; the servers stay up until you close the UI:
+
+```bash
+node scripts/scout.js run-tests \
+  --arch <stateful|serverless> \
+  --domain <domain> \
+  --config <plugin-path>/test/scout/ui/playwright.config.ts \
+  --ui
+```
+
 ### Run a subset with `--testFiles` [scout-run-tests-testFiles]
 
 Directory:
