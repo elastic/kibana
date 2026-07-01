@@ -512,7 +512,7 @@ export function registerChatRoutes({
         });
 
         return response.ok({
-          headers: getSSEResponseHeaders(cloud?.isCloudEnabled ?? false),
+          headers: getSSEResponseHeaders(),
           body: observableIntoEventSourceStream(
             chatEvents$ as unknown as Observable<ServerSentEvent>,
             {

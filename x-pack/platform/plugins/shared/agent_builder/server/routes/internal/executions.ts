@@ -18,7 +18,6 @@ import { getSSEResponseHeaders } from '../utils';
 export function registerInternalExecutionRoutes({
   router,
   getInternalServices,
-  coreSetup,
   logger,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -42,8 +41,6 @@ export function registerInternalExecutionRoutes({
       },
     },
     wrapHandler(async (context, request, response) => {
-      const [, { cloud }] = await coreSetup.getStartServices();
-      const isCloud = cloud?.isCloudEnabled ?? false;
       const { execution: executionService } = getInternalServices();
       const { executionId } = request.params;
       const { since } = request.query;
@@ -55,7 +52,7 @@ export function registerInternalExecutionRoutes({
 
       const events$ = executionService.followExecution(executionId, { since });
       return response.ok({
-        headers: getSSEResponseHeaders(isCloud),
+        headers: getSSEResponseHeaders(),
         body: observableIntoEventSourceStream(events$ as unknown as Observable<ServerSentEvent>, {
           signal: abortController.signal,
           logger,
