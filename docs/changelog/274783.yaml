@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/274783
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-30
+title: Check for expected file kind in file blob download
+description: fixed an issue in the Files plugin blob download route, to ensure the kind of file that is returned matches the kind that was requested.

@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/274133
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-30
+title: Accept semver range-sets in related integrations version field
+description: Fixed an issue where the rule editing UI rejected valid semver range version constraints (e.g. `^8.2.0 || ^9.0.0`) on related integrations.

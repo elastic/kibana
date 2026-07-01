@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/270006
+issues:
+- https://github.com/elastic/security-team/issues/17303
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-06-30
+title: 1st party JSON Schema input types registry - initial seed

@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/274514
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-30
+title: Batch listing-page ingestion doc counts

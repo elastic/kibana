@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/274879
+issues:
+- https://github.com/elastic/kibana/issues/274831
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-30
+title: Hide service map controls for missing fields

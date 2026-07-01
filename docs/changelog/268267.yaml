@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/268267
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-06-30
+areas:
+- AI and machine Learning
+title: Migrate prebuilt packetbeat jobs to security_network module
