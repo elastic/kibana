@@ -29,6 +29,7 @@ export class TracesExperiencePage {
   constructor(
     page: ScoutPage,
     private readonly dataGrid: PageObjects['dataGrid'],
+    private readonly docViewer: PageObjects['docViewer'],
     discover: PageObjects['discover']
   ) {
     this.apm = createApmPage(page);
@@ -40,7 +41,7 @@ export class TracesExperiencePage {
 
   public async openDocumentFlyout(rowIndex = 0) {
     await this.dataGrid.waitForDocTableRendered();
-    await this.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex });
+    await this.docViewer.openAndWaitForFlyout({ rowIndex });
   }
 
   public async openOverviewTab(rowIndex = 0) {

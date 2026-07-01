@@ -41,6 +41,7 @@ export const spaceTest = spaceBaseTest.extend<
         TracesExperiencePage,
         page,
         pageObjects.dataGrid,
+        pageObjects.docViewer,
         pageObjects.discover
       ),
     };

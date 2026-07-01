@@ -134,7 +134,7 @@ spaceTest.describe(
           .catch(() => {});
 
         await expect(page).toHaveURL(/#\/doc/, { timeout: 30_000 });
-        expect(await pageObjects.discover.isShowingDocViewer()).toBe(true);
+        expect(await pageObjects.docViewer.isShowing()).toBe(true);
       }
     );
   }

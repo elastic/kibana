@@ -54,8 +54,8 @@ spaceTest.describe('Discover context - filters (basic)', { tag: tags.deploymentA
     'inclusive filter should be addable via expanded data grid rows',
     async ({ pageObjects }) => {
       await pageObjects.contextPage.openAnchorDocViewer();
-      await pageObjects.discover.findFieldByNameOrValueInDocViewer(TEST_ANCHOR_FILTER_FIELD);
-      await pageObjects.discover.clickFieldActionInFlyout(
+      await pageObjects.docViewer.findFieldByNameOrValue(TEST_ANCHOR_FILTER_FIELD);
+      await pageObjects.docViewer.clickFieldAction(
         TEST_ANCHOR_FILTER_FIELD,
         'addFilterForValueButton'
       );
@@ -69,7 +69,7 @@ spaceTest.describe('Discover context - filters (basic)', { tag: tags.deploymentA
         })
       ).toBe(true);
 
-      await pageObjects.dataGrid.closeDocViewerFlyout();
+      await pageObjects.docViewer.close();
 
       expect(
         await everyFieldMatches(pageObjects, (row) => row[2] === TEST_ANCHOR_FILTER_VALUE)

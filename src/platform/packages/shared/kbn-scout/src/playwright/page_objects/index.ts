@@ -16,6 +16,7 @@ import { DataGrid } from './data_grid';
 import { DataViewsManagementPage } from './data_views_management_page';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
+import { DocViewer } from './doc_viewer';
 import { FilterBar } from './filter_bar';
 import { MapsPage } from './maps_page';
 import { QueryBar } from './query_bar';
@@ -41,6 +42,7 @@ import type { KibanaUrl } from '../../common/services/kibana_url';
 export {
   ContentListWrapper,
   DataGrid,
+  DocViewer,
   DataViewsManagementPage,
   ListingTable,
   buildContentListSearch,
@@ -60,6 +62,7 @@ export interface PageObjects {
   dataGrid: DataGrid;
   dataViewsManagement: DataViewsManagementPage;
   discover: DiscoverApp;
+  docViewer: DocViewer;
   dashboard: DashboardApp;
   filterBar: FilterBar;
   listingTable: ListingTable;
@@ -90,6 +93,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     dataViewsManagement: createLazyPageObject(DataViewsManagementPage, fixtures.page),
     dashboard: createLazyPageObject(DashboardApp, fixtures.page),
     discover: createLazyPageObject(DiscoverApp, fixtures.page),
+    docViewer: createLazyPageObject(DocViewer, fixtures.page),
     filterBar: createLazyPageObject(FilterBar, fixtures.page),
     listingTable: createLazyPageObject(ListingTable, fixtures.page),
     home: createLazyPageObject(HomePage, fixtures.page),
