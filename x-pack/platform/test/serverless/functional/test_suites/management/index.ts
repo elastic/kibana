@@ -15,7 +15,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     loadTestFile(require.resolve('./transforms/search_bar_features'));
     loadTestFile(require.resolve('./transforms/transform_list'));
     loadTestFile(require.resolve('./advanced_settings'));
-    loadTestFile(require.resolve('./data_views'));
     loadTestFile(require.resolve('./disabled_uis'));
     loadTestFile(require.resolve('./landing_page.ts'));
   });

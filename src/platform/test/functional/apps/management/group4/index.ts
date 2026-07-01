@@ -26,9 +26,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./_kibana_settings'));
     loadTestFile(require.resolve('./_data_view_relationships'));
-    loadTestFile(require.resolve('./_edit_field'));
     loadTestFile(require.resolve('./_data_view_field_filters'));
-    loadTestFile(require.resolve('./_cache'));
     loadTestFile(require.resolve('./_managed_data_view'));
     loadTestFile(require.resolve('./_files'));
   });

@@ -9,8 +9,23 @@
 
 export const ES_ARCHIVE_LOGSTASH_FUNCTIONAL =
   'x-pack/platform/test/fixtures/es_archives/logstash_functional';
+export const ES_ARCHIVE_MAKELOGS = 'src/platform/test/functional/fixtures/es_archiver/makelogs';
+export const ES_ARCHIVE_FLIGHTS_DATA_VIEW =
+  'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern';
+export const KBN_ARCHIVE_FLIGHTS_DATA_VIEW =
+  'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern';
+export const KBN_ARCHIVE_DISCOVER = 'src/platform/test/functional/fixtures/kbn_archiver/discover';
+export const ES_ARCHIVE_BASIC_INDEX =
+  'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
 export const DATA_VIEWS_MANAGEMENT_PATH = '/app/management/kibana/dataViews';
+
+export const ADVANCED_SETTINGS_APP_PATH = 'management/kibana/settings';
+/** Search bar rendered on the advanced settings page; used as a "page loaded" anchor. */
+export const ADVANCED_SETTINGS_SEARCH_BAR_SUBJ = 'settingsSearchBar';
+/** The actual editable field for the `data_views:cache_max_age` advanced setting. */
+export const DATA_VIEWS_CACHE_MAX_AGE_SETTING_SUBJ =
+  'management-settings-editField-data_views:cache_max_age';
 
 export const FEATURE_CONTROLS_CUSTOM_SPACE = {
   id: 'dv_feature_controls_space',
