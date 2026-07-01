@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BaseFeature } from '@kbn/streams-schema';
+import type { BaseFeature } from '@kbn/significant-events-schema';
 import type { Logger } from '@kbn/core/server';
 import type { KnowledgeIndicatorClient } from '../../../lib/streams/ki';
 
@@ -13,11 +13,13 @@ export async function createFeatureKnowledgeIndicatorToolHandler({
   kiClient,
   streamName,
   featureInput,
+  expiresAt,
   logger,
 }: {
   kiClient: KnowledgeIndicatorClient;
   streamName: string;
   featureInput: Omit<BaseFeature, 'stream_name'>;
+  expiresAt?: string;
   logger: Logger;
 }): Promise<{ id: string }> {
   logger.debug(
@@ -27,6 +29,7 @@ export async function createFeatureKnowledgeIndicatorToolHandler({
   const feature = {
     ...featureInput,
     stream_name: streamName,
+    expires_at: expiresAt,
   };
 
   await kiClient.bulk(streamName, [{ index: { feature } }]);
