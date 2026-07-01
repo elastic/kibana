@@ -405,6 +405,10 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
       requestBody: esqlRequest,
       requestQueryParams: {
         drop_null_columns: true,
+        // This is an aggregating (STATS) query: a partial result from a failed shard can make a
+        // pre-existing term look new (missing older docs -> first_seen inside the interval).
+        // Fail the run instead of silently returning incomplete aggregation results.
+        allow_partial_results: false,
       },
       ruleExecutionLogger,
       shouldStopExecution: services.shouldStopExecution,

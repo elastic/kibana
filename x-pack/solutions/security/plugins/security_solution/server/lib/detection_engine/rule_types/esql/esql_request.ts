@@ -62,6 +62,7 @@ export const performEsqlRequest = async ({
   };
   requestQueryParams?: {
     drop_null_columns?: boolean;
+    allow_partial_results?: boolean;
   };
   shouldStopExecution: () => boolean;
   loggedRequests?: RulePreviewLoggedRequest[];
