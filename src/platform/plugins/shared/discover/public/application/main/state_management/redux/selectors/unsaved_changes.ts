@@ -173,7 +173,7 @@ const FILTER_COMPARE_OPTIONS: FilterCompareOptions = {
 
 // ad-hoc data view id can change, so we rather compare the ES|QL query itself here
 const getAdjustedDataViewId = (searchSource: SerializedSearchSourceFields) =>
-  isOfAggregateQueryType(searchSource.query)
+  typeof searchSource.query !== 'string' && isOfAggregateQueryType(searchSource.query)
     ? searchSource.query.esql
     : isObject(searchSource.index)
     ? searchSource.index.id

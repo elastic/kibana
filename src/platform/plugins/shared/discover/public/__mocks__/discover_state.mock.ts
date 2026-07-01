@@ -50,6 +50,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { isObject, omit } from 'lodash';
 import { getCurrentUrlState } from '../application/main/state_management/utils/cleanup_url_state';
 import { getInitialAppState } from '../application/main/state_management/utils/get_initial_app_state';
+import { migrateLegacyQuery } from '../utils/migrate_legacy_query';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SaveDiscoverSessionThunkParams } from '../application/main/state_management/redux/actions';
 import { filter, firstValueFrom, timeout } from 'rxjs';
@@ -184,13 +185,25 @@ export function getDiscoverInternalStateMock({
         );
       }
 
-      return createSearchSourceMock({ ...omit(fields, 'parent'), index: dataView });
+      const { query, ...searchSourceFields } = omit(fields, 'parent');
+
+      return createSearchSourceMock({
+        ...searchSourceFields,
+        ...(query ? { query: migrateLegacyQuery(query) } : {}),
+        index: dataView,
+      });
     }
 
     if (isObject(fields?.index) && fields.index.id) {
       // Handle ad hoc data view specs by creating a data view from the spec
       const adHocDataView = await services.dataViews.create(fields.index);
-      return createSearchSourceMock({ ...omit(fields, 'parent'), index: adHocDataView });
+      const { query, ...searchSourceFields } = omit(fields, 'parent');
+
+      return createSearchSourceMock({
+        ...searchSourceFields,
+        ...(query ? { query: migrateLegacyQuery(query) } : {}),
+        index: adHocDataView,
+      });
     }
 
     return originalSearchSourceCreate(fields);
