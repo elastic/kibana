@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-/** Alerts-as-data alias the streams plugin reads from (owned by the alerting system). */
-export const ALERTS_DATA_STREAM = '.alerts-streams.alerts-default';
+export { DashboardLinks } from './dashboard_links';
