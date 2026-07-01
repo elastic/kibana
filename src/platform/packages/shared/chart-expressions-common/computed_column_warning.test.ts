@@ -8,7 +8,7 @@
  */
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { getComputedColumnWarningForColumns } from './computed_column_warning';
+import { getNonFilterableComputedColumnWarning } from './computed_column_warning';
 
 function buildColumn(overrides: Partial<DatatableColumn> = {}): DatatableColumn {
   return {
@@ -19,7 +19,7 @@ function buildColumn(overrides: Partial<DatatableColumn> = {}): DatatableColumn 
   } as DatatableColumn;
 }
 
-describe('getComputedColumnWarningForColumns', () => {
+describe('getNonFilterableComputedColumnWarning', () => {
   it('warns for an EVAL-computed column with no custom label', () => {
     const column = buildColumn({
       isComputedColumn: true,
@@ -29,7 +29,7 @@ describe('getComputedColumnWarningForColumns', () => {
       },
     });
 
-    expect(getComputedColumnWarningForColumns([column])).toBeDefined();
+    expect(getNonFilterableComputedColumnWarning([column])).toBeDefined();
   });
 
   it('still warns after the dimension is given a custom label', () => {
@@ -45,7 +45,7 @@ describe('getComputedColumnWarningForColumns', () => {
       },
     });
 
-    expect(getComputedColumnWarningForColumns([column])).toBeDefined();
+    expect(getNonFilterableComputedColumnWarning([column])).toBeDefined();
   });
 
   it('does not warn for a RENAMEd column, even with a custom label', () => {
@@ -61,12 +61,12 @@ describe('getComputedColumnWarningForColumns', () => {
       },
     });
 
-    expect(getComputedColumnWarningForColumns([column])).toBeUndefined();
+    expect(getNonFilterableComputedColumnWarning([column])).toBeUndefined();
   });
 
   it('does not warn for non-computed columns', () => {
     const column = buildColumn({ isComputedColumn: false });
 
-    expect(getComputedColumnWarningForColumns([column])).toBeUndefined();
+    expect(getNonFilterableComputedColumnWarning([column])).toBeUndefined();
   });
 });

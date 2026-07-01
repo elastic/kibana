@@ -11,7 +11,7 @@ import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
 import {
   getAccessorByDimension,
-  getComputedColumnWarningForColumns,
+  getNonFilterableComputedColumnWarning,
 } from '@kbn/chart-expressions-common';
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
@@ -87,7 +87,7 @@ export const getLegendAction = (
     }
 
     const warningMessage = isEsqlMode
-      ? getComputedColumnWarningForColumns(
+      ? getNonFilterableComputedColumnWarning(
           filterActionData.map((data) => data.table.columns[data.column])
         )
       : undefined;

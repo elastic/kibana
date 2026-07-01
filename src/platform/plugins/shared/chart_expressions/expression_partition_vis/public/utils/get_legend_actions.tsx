@@ -20,7 +20,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import type { IInterpreterRenderEvent } from '@kbn/expressions-plugin/common';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
-import { getComputedColumnWarningForColumns } from '@kbn/chart-expressions-common';
+import { getNonFilterableComputedColumnWarning } from '@kbn/chart-expressions-common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { PartitionVisParams } from '../../common/types';
 import type { CellValueAction, ColumnCellValueActions, FilterEvent } from '../types';
@@ -88,7 +88,7 @@ export const getLegendActions = (
     // non-null for the rest of the component.
     const column = columnIndex !== -1 ? visData.columns[columnIndex] : undefined;
     const warningMessage: string | undefined =
-      isEsqlMode && column ? getComputedColumnWarningForColumns([column]) : undefined;
+      isEsqlMode && column ? getNonFilterableComputedColumnWarning([column]) : undefined;
 
     useEffect(() => {
       if (!canFilter || !filterData || warningMessage) {
