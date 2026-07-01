@@ -50,12 +50,18 @@ import type { AgentContextLayerPluginStart } from '../types';
  *    dev/test with security disabled) we follow the standard "no security
  *    plugin → open access" convention used by the SML read path.
  *
- * The `getTypeDefinition` guard intentionally only fires on the `upsert`
- * branch: writes against an unregistered type are nonsensical (no
- * `getSmlData` hook to fall back to, no `toAttachment` for downstream
- * consumers), but `delete` must remain functional even after a plugin
- * that registered the type is disabled — otherwise stale chunks become
- * unreachable from the workflow surface.
+ * Unregistered-type handling lives in the indexer, not here. Content-mode
+ * writes (the only mode this step uses for `upsert`) accept any
+ * `attachmentType`: when the type is registered, `getPermissions` is
+ * stamped; when it is not, empty `SmlPermissions` is stamped and the
+ * indexer emits a once-per-process warn naming the namespace. This lets
+ * workflow authors write ad-hoc content without first registering an SML
+ * type, at the cost of those chunks being space-readable rather than
+ * gated by a privilege. `delete` calls `deleteAttachment` directly — the
+ * indexer's delete path is permissive about registration so cleanup
+ * keeps working even after the plugin that registered the type is
+ * disabled, otherwise stale chunks become unreachable from the workflow
+ * surface.
  *
  * The handler defers resolving the AGL start contract until execution
  * time so the step can be registered during plugin `setup()` and still
@@ -134,12 +140,14 @@ export const createContextEngineAddEntryStepDefinition = ({
             ingestionMethod: 'all',
           });
         } else {
-          if (!startContract.getTypeDefinition(attachmentType)) {
-            return {
-              error: new Error(`Unknown Context Engine entry type: '${attachmentType}'`),
-            };
-          }
-
+          // Permissions are intentionally *not* passed through here. The
+          // indexer derives them from the registered type's `getPermissions`
+          // hook, which makes workflow-driven writes inherit the same gating
+          // as a crawler-driven write (and cannot be spoofed by a workflow
+          // author). If `attachmentType` is unregistered, the indexer
+          // stamps empty `SmlPermissions` (space-readable) and emits a
+          // once-per-process warn naming the namespace — see
+          // `SmlIndexer.indexManualChunks`.
           const chunks: SmlChunk[] = input.chunks.map((chunk) => ({
             type: chunk.type,
             title: chunk.title,
@@ -150,16 +158,6 @@ export const createContextEngineAddEntryStepDefinition = ({
             ...(chunk.references !== undefined
               ? { references: chunk.references.map((uri) => ({ uri })) }
               : {}),
-            // Map the workflow input's flat permission lists into the nested
-            // SML permissions shape: `permissions` -> Kibana privilege names,
-            // `elasticsearchIndices` -> ES index / alias / data-stream names
-            // that gate the chunk behind the viewer's ES `read` privilege.
-            permissions: {
-              kibana: { privileges: (chunk.permissions ?? []).map((name) => ({ name })) },
-              elasticsearch: {
-                indices: (chunk.elasticsearchIndices ?? []).map((name) => ({ name })),
-              },
-            },
           }));
 
           await startContract.indexAttachment({
