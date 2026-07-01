@@ -47,4 +47,6 @@ export {
 
 export { useApplicationWorkspaceTransition } from './src/application/use_application_workspace_transition';
 
+export { resolveAgentPanelTargetWidth } from './src/agent/resolve_agent_panel_target_width';
+
 export { CommonGlobalAppStyles } from './src/layouts/global_app_styles';

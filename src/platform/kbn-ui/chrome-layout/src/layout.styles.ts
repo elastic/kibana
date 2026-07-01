@@ -8,7 +8,6 @@
  */
 
 import { css } from '@emotion/react';
-import { MIN_AGENT_WIDTH } from '@kbn/ui-chrome-layout-constants';
 import type { LayoutState } from './layout.types';
 
 const cssProp = css`
@@ -40,26 +39,12 @@ export const useLayoutStyles = (layoutState: LayoutState) => {
     bannerHeight,
     headerHeight,
     footerHeight,
-    applicationWorkspaceOpen,
-    agentWorkspaceOpen,
     hasAgent,
   } = layoutState;
 
-  let agentColumn = `${agentWidth}px`;
-  let applicationColumn = '1fr';
-
-  if (hasAgent) {
-    if (applicationWorkspaceOpen) {
-      agentColumn = 'auto';
-      applicationColumn = '1fr';
-    } else if (!agentWorkspaceOpen) {
-      agentColumn = '0px';
-      applicationColumn = '0px';
-    } else {
-      agentColumn = `minmax(${MIN_AGENT_WIDTH}px, 1fr)`;
-      applicationColumn = '0px';
-    }
-  }
+  // Agent-first: fixed topology — motion child width drives the auto column; app always 1fr.
+  const agentColumn = hasAgent ? 'auto' : `${agentWidth}px`;
+  const applicationColumn = '1fr';
 
   const style = {
     gridTemplateColumns: `

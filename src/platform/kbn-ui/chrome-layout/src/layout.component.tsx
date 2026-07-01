@@ -76,7 +76,7 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
   );
 
   return (
-    <div css={styles.css} style={styles.style}>
+    <div className="kbnChromeLayout" css={styles.css} style={styles.style}>
       {banner}
       {header}
       {navigation}

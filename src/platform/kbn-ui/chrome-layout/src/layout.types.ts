@@ -20,6 +20,9 @@ export interface LayoutDimensions {
   footerHeight: number;
   headerHeight: number;
   navigationWidth: number;
+  /** User-resized / default agent column width when open (never zeroed on hide). */
+  agentPreferredWidth: number;
+  /** Current visible agent column width (animated; used for global CSS vars). */
   agentWidth: number;
   sidebarWidth: number;
   applicationTopBarHeight: number;

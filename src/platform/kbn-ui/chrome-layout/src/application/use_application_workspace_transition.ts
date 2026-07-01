@@ -18,6 +18,7 @@ import {
   domRectToApplicationWorkspaceRect,
   resolveApplicationWorkspaceTransitionPhase,
 } from './application_workspace_transition_phase';
+import { PANEL_LAYOUT_TRANSITION_MS } from '../panel_layout_transition';
 
 interface ApplicationWorkspaceDecoyState {
   phase: 'closing' | 'opening';
@@ -37,7 +38,6 @@ export const useApplicationWorkspaceTransition = ({
 
   const prevApplicationWorkspaceOpenRef = useRef(applicationWorkspaceOpen);
   const pendingClosingDecoyRef = useRef<ApplicationWorkspaceDecoyState | null>(null);
-  const openingDecoyStartedRef = useRef(false);
 
   const prevApplicationWorkspaceOpen = prevApplicationWorkspaceOpenRef.current;
 
@@ -71,7 +71,6 @@ export const useApplicationWorkspaceTransition = ({
   prevApplicationWorkspaceOpenRef.current = applicationWorkspaceOpen;
 
   const finishTransition = useCallback(() => {
-    openingDecoyStartedRef.current = false;
     setHeldTransitionPhase('none');
   }, []);
 
@@ -114,47 +113,20 @@ export const useApplicationWorkspaceTransition = ({
     finishTransition,
   ]);
 
+  // Opening uses real panel width animation (no decoy). Hold the phase for the tween duration.
   useLayoutEffect(() => {
-    if (
-      !canAnimate ||
-      applicationWorkspaceTransitionPhase !== 'opening' ||
-      !applicationWorkspaceOpen ||
-      decoy !== null ||
-      openingDecoyStartedRef.current
-    ) {
+    if (applicationWorkspaceTransitionPhase !== 'opening' || !canAnimate) {
       return;
     }
 
-    const applicationPanel = document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
-    if (!applicationPanel) {
+    const timeoutId = window.setTimeout(() => {
       finishTransition();
-      return;
-    }
+    }, PANEL_LAYOUT_TRANSITION_MS + 50);
 
-    const domRect = applicationPanel.getBoundingClientRect();
-    if (domRect.width <= 0 || domRect.height <= 0) {
-      finishTransition();
-      return;
-    }
-
-    openingDecoyStartedRef.current = true;
-    setDecoy({
-      phase: 'opening',
-      rect: domRectToApplicationWorkspaceRect(domRect),
-    });
-  }, [
-    applicationWorkspaceOpen,
-    applicationWorkspaceTransitionPhase,
-    canAnimate,
-    decoy,
-    finishTransition,
-  ]);
-
-  useLayoutEffect(() => {
-    if (applicationWorkspaceTransitionPhase !== 'opening') {
-      openingDecoyStartedRef.current = false;
-    }
-  }, [applicationWorkspaceTransitionPhase]);
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [applicationWorkspaceTransitionPhase, canAnimate, finishTransition]);
 
   return {
     applicationWorkspaceTransitionPhase,

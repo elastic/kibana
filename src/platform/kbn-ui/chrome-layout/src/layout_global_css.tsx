@@ -23,6 +23,7 @@ export const LayoutGlobalCSS = () => {
     footerHeight,
     headerHeight,
     navigationWidth,
+    /** Visible agent column width (synced from Motion during panel animations). */
     agentWidth,
     sidebarWidth,
     applicationTopBarHeight,

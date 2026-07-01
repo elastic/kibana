@@ -31,6 +31,7 @@ export type LayoutConfig = Pick<
   | 'headerHeight'
   | 'footerHeight'
   | 'navigationWidth'
+  | 'agentPreferredWidth'
   | 'agentWidth'
   | 'sidebarWidth'
   | 'applicationTopBarHeight'
