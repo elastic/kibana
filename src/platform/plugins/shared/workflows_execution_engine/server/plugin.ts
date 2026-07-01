@@ -1168,7 +1168,8 @@ export class WorkflowsExecutionEnginePlugin
       executionId,
       spaceId,
       input,
-      request
+      request,
+      options
     ) => {
       await checkLicense(plugins.licensing);
 
@@ -1204,17 +1205,18 @@ export class WorkflowsExecutionEnginePlugin
         );
       }
 
-      const resumedBy = await getAuthenticatedUser(
-        request,
-        coreStart.security,
-        coreStart.elasticsearch.client
-      );
+      const resumedBy =
+        options?.resumedBy ??
+        (request
+          ? await getAuthenticatedUser(request, coreStart.security, coreStart.elasticsearch.client)
+          : 'unknown');
+      const resumedAt = new Date().toISOString();
 
       const resumeContext = {
         ...workflowExecution.context,
         resumeInput: input,
         resumedBy,
-        resumedAt: new Date().toISOString(),
+        resumedAt,
       };
 
       await internalResumeWorkflowExecution(executionId, spaceId, resumeContext, request);
@@ -1235,6 +1237,14 @@ export class WorkflowsExecutionEnginePlugin
         });
       }
 
+      if (!request) {
+        // External resume: wake the idle-timeout task created when entering WAITING_FOR_INPUT.
+        // That task retains the workflow runner API key; ad-hoc tasks scheduled without a
+        // request cannot be executed by workflow:resume (no fakeRequest at run time).
+        await plugins.taskManager.runSoon(getWorkflowGlobalTimeoutResumeTaskId(executionId));
+        return;
+      }
+
       await workflowTaskManager.scheduleImmediateResume({
         executionId,
         spaceId,
@@ -1252,7 +1262,10 @@ export class WorkflowsExecutionEnginePlugin
         });
 
       // Same idea as cancel: nudge TM so the resume task runs as soon as possible
-      await workflowTaskManager.forceRunIdleTasks(executionId);
+      await workflowTaskManager.forceRunIdleTasks(executionId, {
+        spaceId,
+        fakeRequest: request,
+      });
     };
 
     this.internalResumeWorkflowExecutionHandler = internalResumeWorkflowExecution;
