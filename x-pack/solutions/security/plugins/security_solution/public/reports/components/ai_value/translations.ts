@@ -22,6 +22,13 @@ export const COST_SAVINGS_TREND = i18n.translate(
   }
 );
 
+export const COST_SAVINGS_TITLE = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.costSavingsTitle',
+  {
+    defaultMessage: 'Cost Savings',
+  }
+);
+
 export const INSIGHTS_ERROR = i18n.translate(
   'xpack.securitySolution.reports.aiValue.insightsError',
   {
@@ -65,13 +72,20 @@ export const ATTACK_DISCOVERY_COUNT = i18n.translate(
 );
 
 export const EXPORT_REPORT = i18n.translate('xpack.securitySolution.reports.aiValue.exportReport', {
-  defaultMessage: 'Export report',
+  defaultMessage: 'Export PDF',
 });
 
 export const FILTERING_RATE = i18n.translate(
   'xpack.securitySolution.reports.aiValue.filteringRate',
   {
     defaultMessage: 'Alert filtering rate',
+  }
+);
+
+export const FILTERING_RATE_INLINE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.filteringRateInlineDescription',
+  {
+    defaultMessage: 'alert filtering rate',
   }
 );
 
@@ -107,17 +121,17 @@ export const TIME_SAVED = i18n.translate('xpack.securitySolution.reports.aiValue
   defaultMessage: 'Analyst time saved',
 });
 
-export const TIME_SAVED_DESC = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.timeSavedTitle',
+export const TIME_SAVED_INLINE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.timeSavedInlineDescription',
   {
-    defaultMessage: 'Time saved in hours',
+    defaultMessage: 'time saved in hours',
   }
 );
 
-export const COST_SAVED_DESC = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.timeSavedTitle',
+export const COST_SAVED_INLINE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.costSavedInlineDescription',
   {
-    defaultMessage: 'Cost saved in dollars',
+    defaultMessage: 'cost saved in dollars',
   }
 );
 
@@ -335,5 +349,63 @@ export const TOTAL_ALERTS_PROCESSED = i18n.translate(
   'xpack.securitySolution.reports.aiValue.totalAlertsProcessed',
   {
     defaultMessage: 'Total alerts processed',
+  }
+);
+
+export const SAMPLE_DATA_BADGE = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.sampleDataBadge',
+  {
+    defaultMessage: 'Sample data',
+  }
+);
+
+export const SAMPLE_REPORT_DATE_PICKER_DISABLED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.sampleReportDatePickerDisabledTooltip',
+  {
+    defaultMessage: 'Disabled for sample report',
+  }
+);
+
+export const WHAT_REPORT_WILL_LOOK_LIKE_TEXT = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.whatReportWillLookLike',
+  {
+    defaultMessage: 'What your report will look like',
+  }
+);
+
+export const RUN_ATTACK_DISCOVERY_TEXT = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.runAttackDiscoveryText',
+  {
+    defaultMessage: 'Run Attack Discovery to unlock your report',
+  }
+);
+
+export const GET_STARTED_ATTACK_DISCOVERY_TEXT = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.getStartedAttackDiscoveryText',
+  {
+    defaultMessage:
+      "Value Reports show how much time and money Elastic's AI SOC saves your team. Run your first Attack Discovery to populate savings, time reclaimed, and threat findings.",
+  }
+);
+
+export const ATTACK_DISCOVERY_LINK = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.attackDiscoveryLink',
+  {
+    defaultMessage: 'Go to Attack discovery',
+  }
+);
+
+export const NO_RESULTS_TITLE = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.noResultsEmptyStateTitle',
+  {
+    defaultMessage: 'No results for the selected time range',
+  }
+);
+
+export const NO_RESULTS_BODY = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.noResultsEmptyStateBody',
+  {
+    defaultMessage:
+      'Adjust the time range in the top bar to see available results for the Value Report.',
   }
 );

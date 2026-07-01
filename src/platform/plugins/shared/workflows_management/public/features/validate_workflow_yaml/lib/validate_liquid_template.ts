@@ -8,24 +8,14 @@
  */
 
 import type { Document } from 'yaml';
-import { validateLiquidTemplate as validateLiquidTemplateCommon } from '@kbn/workflows-yaml';
+import { validateLiquidYamlScalars } from './validate_liquid_yaml_scalars';
 import type { YamlValidationResult } from '../model/types';
 
 export function validateLiquidTemplate(
   yamlString: string,
   yamlDocument: Document
 ): YamlValidationResult[] {
-  const errors = validateLiquidTemplateCommon(yamlString, yamlDocument);
-
-  return errors.map((error) => ({
-    id: `liquid-template-${error.startLine}-${error.startColumn}-${error.endLine}-${error.endColumn}`,
-    owner: 'liquid-template-validation' as const,
-    message: error.message,
-    startLineNumber: error.startLine,
-    startColumn: error.startColumn,
-    endLineNumber: error.endLine,
-    endColumn: error.endColumn,
-    severity: 'error' as const,
-    hoverMessage: error.message,
-  }));
+  return validateLiquidYamlScalars(yamlString, yamlDocument, null).filter(
+    (result) => result.owner === 'liquid-template-validation'
+  );
 }

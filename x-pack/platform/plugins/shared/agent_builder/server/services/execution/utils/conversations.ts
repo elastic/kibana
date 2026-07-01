@@ -10,9 +10,11 @@ import type { Observable } from 'rxjs';
 import { of, forkJoin, switchMap } from 'rxjs';
 import type {
   Conversation,
+  ConversationAccessControl,
   RoundCompleteEvent,
   ConversationAction,
 } from '@kbn/agent-builder-common';
+import { getDefaultConversationAccessControl } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 
@@ -20,15 +22,13 @@ import { createConversationUpdatedEvent, createConversationCreatedEvent } from '
  * Persist a new conversation and emit the corresponding event
  */
 export const createConversation$ = ({
-  agentId,
+  conversation,
   conversationClient,
-  conversationId,
   title$,
   roundCompletedEvents$,
 }: {
-  agentId: string;
+  conversation: Pick<Conversation, 'id' | 'agent_id' | 'access_control'>;
   conversationClient: ConversationClient;
-  conversationId?: string;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
 }) => {
@@ -38,15 +38,19 @@ export const createConversation$ = ({
   }).pipe(
     switchMap(({ title, roundCompletedEvent }) => {
       return conversationClient.create({
-        id: conversationId,
+        id: conversation.id,
         title,
-        agent_id: agentId,
+        agent_id: conversation.agent_id,
+        access_control: conversation.access_control,
         state: roundCompletedEvent.data.conversation_state,
         status: roundCompletedEvent.data.round.status,
         read: false,
         rounds: [roundCompletedEvent.data.round],
         ...(roundCompletedEvent.data.attachments
           ? { attachments: roundCompletedEvent.data.attachments }
+          : {}),
+        ...(roundCompletedEvent.data.workspace_id
+          ? { workspace_id: roundCompletedEvent.data.workspace_id }
           : {}),
       });
     }),
@@ -84,6 +88,12 @@ export const updateConversation$ = ({
         ? [...conversation.rounds.slice(0, -1), round]
         : [...conversation.rounds, round];
 
+      // Only set workspace_id if it's new (once set it should not change).
+      const newWorkspaceId =
+        roundCompletedEvent.data.workspace_id && !conversation.workspace_id
+          ? roundCompletedEvent.data.workspace_id
+          : undefined;
+
       return conversationClient.update({
         id: conversation.id,
         title,
@@ -94,6 +104,7 @@ export const updateConversation$ = ({
         ...(roundCompletedEvent.data.attachments !== undefined
           ? { attachments: roundCompletedEvent.data.attachments }
           : {}),
+        ...(newWorkspaceId ? { workspace_id: newWorkspaceId } : {}),
       });
     }),
     switchMap((updatedConversation) => {
@@ -129,16 +140,18 @@ export const getConversation = async ({
   conversationId,
   autoCreateConversationWithId = false,
   conversationClient,
+  accessControl,
 }: {
   agentId: string;
   conversationId: string | undefined;
   autoCreateConversationWithId?: boolean;
   conversationClient: ConversationClient;
+  accessControl?: ConversationAccessControl;
 }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
     return {
-      ...placeholderConversation({ agentId }),
+      ...placeholderConversation({ agentId, accessControl }),
       operation: 'CREATE',
     };
   }
@@ -160,7 +173,7 @@ export const getConversation = async ({
     };
   } else {
     return {
-      ...placeholderConversation({ conversationId, agentId }),
+      ...placeholderConversation({ conversationId, agentId, accessControl }),
       operation: 'CREATE',
     };
   }
@@ -169,14 +182,17 @@ export const getConversation = async ({
 export const placeholderConversation = ({
   agentId,
   conversationId,
+  accessControl,
 }: {
   agentId: string;
   conversationId?: string;
+  accessControl?: ConversationAccessControl;
 }): Conversation => {
   return {
     id: conversationId ?? uuidv4(),
     title: 'New conversation',
     agent_id: agentId,
+    access_control: accessControl ?? getDefaultConversationAccessControl(),
     rounds: [],
     updated_at: new Date().toISOString(),
     created_at: new Date().toISOString(),

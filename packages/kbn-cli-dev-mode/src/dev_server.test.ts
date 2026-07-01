@@ -143,7 +143,6 @@ describe('#run$', () => {
               "--inheritted",
               "--exec",
               "--argv",
-              "--disallow-code-generation-from-strings",
             ],
             "stdio": "pipe",
           },

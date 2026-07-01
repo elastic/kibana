@@ -15,6 +15,7 @@ import { useAttackTimestamps } from './use_attack_timestamps';
 import type { AttacksVolumeAgg, AttacksVolumeBucket } from './types';
 import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
 import { getAttacksVolumeAggregations } from './aggregations';
+import { buildAttacksOnlyFilter } from '../../table/filtering_configs';
 
 export interface UseAttacksVolumeDataProps {
   /** Optional array of filters to apply to the query */
@@ -40,13 +41,17 @@ export const useAttacksVolumeData = ({ filters, query }: UseAttacksVolumeDataPro
 
   const aggs = useMemo(() => getAttacksVolumeAggregations(), []);
 
+  const combinedFilters = useMemo(() => {
+    return [...(filters ?? []), ...buildAttacksOnlyFilter()];
+  }, [filters]);
+
   // Get the attack IDs
   const {
     data: aggData,
     loading: isAggLoading,
     refetch: refetchAgg,
   } = useAlertsAggregation<AttacksVolumeAgg>({
-    filters,
+    filters: combinedFilters,
     query,
     aggs,
     queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_IDS,

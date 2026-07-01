@@ -6,36 +6,39 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { PluginStart } from '@kbn/core-di';
-import type { KibanaRequest } from '@kbn/core/server';
-import { fromKueryExpression } from '@kbn/es-query';
+import { PluginSetup } from '@kbn/core-di';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   IEvent,
-  IEventLogClientService,
   IEventLogger,
+  IEventLogService,
   IValidatedEvent,
 } from '@kbn/event-log-plugin/server';
-import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import {
-  ACTION_POLICY_EVENT_ACTIONS,
-  ACTION_POLICY_EVENT_PROVIDER,
-} from '../../dispatcher/steps/constants';
-import type { AlertingServerStartDependencies } from '../../../types';
+import type { PolicyExecutionOutcome } from '@kbn/alerting-v2-schemas';
+import type { AlertingServerSetupDependencies } from '../../../types';
+import { EsServiceInternalToken } from '../es_service/tokens';
+import { LoggerServiceToken, type LoggerServiceContract } from '../logger_service/logger_service';
+import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
 import { EventLoggerToken } from './tokens';
+import {
+  buildCountActionPolicyEventsQuery,
+  buildFindActionPolicyEventsQuery,
+} from './queries/action_policy_events_query';
+import { buildRuleExecutionsQuery } from './queries/rule_executions_query';
+import { normalizeRuleExecution } from './normalizers/rule_execution_normalizer';
+import type { FindRuleExecutionsQuery, PaginatedResult, RuleExecution } from './types';
 
 const DEFAULT_PAGE_SIZE = 50;
 const DEFAULT_PAGE = 1;
 
-const EXECUTION_HISTORY_AUTH_FILTER = fromKueryExpression(
-  `event.provider: ${ACTION_POLICY_EVENT_PROVIDER} AND (event.action: ${ACTION_POLICY_EVENT_ACTIONS.DISPATCHED} OR event.action: ${ACTION_POLICY_EVENT_ACTIONS.THROTTLED})`
-);
-
 export interface FindActionPolicyExecutionEventsParams {
-  request: KibanaRequest;
   spaceId: string;
   startDate: string;
   page?: number;
   perPage?: number;
+  outcome?: PolicyExecutionOutcome;
+  policyIds?: string[];
+  ruleIds?: string[];
 }
 
 export interface FindActionPolicyExecutionEventsResult {
@@ -46,9 +49,11 @@ export interface FindActionPolicyExecutionEventsResult {
 }
 
 export interface CountActionPolicyExecutionEventsSinceParams {
-  request: KibanaRequest;
   spaceId: string;
   since: string;
+  outcome?: PolicyExecutionOutcome;
+  policyIds?: string[];
+  ruleIds?: string[];
 }
 
 export interface CountActionPolicyExecutionEventsSinceResult {
@@ -63,14 +68,17 @@ export interface EventLogServiceContract {
   countActionPolicyExecutionEventsSince(
     params: CountActionPolicyExecutionEventsSinceParams
   ): Promise<CountActionPolicyExecutionEventsSinceResult>;
+  findRuleExecutions(query: FindRuleExecutionsQuery): Promise<PaginatedResult<RuleExecution>>;
 }
 
 @injectable()
 export class EventLogService implements EventLogServiceContract {
   constructor(
     @inject(EventLoggerToken) private readonly eventLogger: IEventLogger,
-    @inject(PluginStart<AlertingServerStartDependencies['eventLog']>('eventLog'))
-    private readonly clientService: IEventLogClientService
+    @inject(PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog'))
+    private readonly eventLogService: IEventLogService,
+    @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient,
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
   public logEvent(event: IEvent, id?: string): void {
@@ -78,55 +86,119 @@ export class EventLogService implements EventLogServiceContract {
   }
 
   public async findActionPolicyExecutionEvents({
-    request,
     spaceId,
     startDate,
     page = DEFAULT_PAGE,
     perPage = DEFAULT_PAGE_SIZE,
+    outcome,
+    policyIds,
+    ruleIds,
   }: FindActionPolicyExecutionEventsParams): Promise<FindActionPolicyExecutionEventsResult> {
-    const client = this.clientService.getClient(request);
-
-    const result = await client.findEventsWithAuthFilter(
-      ACTION_POLICY_SAVED_OBJECT_TYPE,
-      [],
-      EXECUTION_HISTORY_AUTH_FILTER,
+    const body = buildFindActionPolicyEventsQuery({
       spaceId,
-      {
-        page,
-        per_page: perPage,
-        sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
-        start: startDate,
-      }
-    );
+      startDate,
+      outcome,
+      policyIds,
+      ruleIds,
+      page,
+      perPage,
+    });
+    const index = this.eventLogService.getIndexPattern();
+
+    const response = await this.esClient.search<IValidatedEvent>({ index, ...body });
+
+    const events = response.hits.hits.map((hit) => hit._source as IValidatedEvent);
 
     return {
-      events: result.data,
-      page: result.page,
-      perPage: result.per_page,
-      total: result.total,
+      events,
+      page,
+      perPage,
+      total: extractTotal(response.hits.total),
     };
   }
 
   public async countActionPolicyExecutionEventsSince({
-    request,
     spaceId,
     since,
+    outcome,
+    policyIds,
+    ruleIds,
   }: CountActionPolicyExecutionEventsSinceParams): Promise<CountActionPolicyExecutionEventsSinceResult> {
-    const client = this.clientService.getClient(request);
-
-    const result = await client.findEventsWithAuthFilter(
-      ACTION_POLICY_SAVED_OBJECT_TYPE,
-      [],
-      EXECUTION_HISTORY_AUTH_FILTER,
+    const body = buildCountActionPolicyEventsQuery({
       spaceId,
-      {
-        page: 1,
-        per_page: 0,
-        sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
-        start: since,
-      }
-    );
+      startDate: since,
+      outcome,
+      policyIds,
+      ruleIds,
+    });
+    const index = this.eventLogService.getIndexPattern();
 
-    return { count: result.total };
+    const response = await this.esClient.search<IValidatedEvent>({ index, ...body });
+
+    return { count: extractTotal(response.hits.total) };
+  }
+
+  /**
+   * Reads `task-run` events for alerting_v2 rule executor tasks from the
+   * event log service.
+   *
+   * Implementation goes directly against ES with the index pattern resolved
+   * from {@link IEventLogService.getIndexPattern} so we adapt to event-log
+   * index versioning automatically.
+   */
+  public async findRuleExecutions(
+    query: FindRuleExecutionsQuery
+  ): Promise<PaginatedResult<RuleExecution>> {
+    const index = this.eventLogService.getIndexPattern();
+    const body = buildRuleExecutionsQuery(query);
+
+    const response = await this.esClient.search<IValidatedEvent>({ index, ...body });
+
+    const items: RuleExecution[] = [];
+
+    for (const hit of response.hits.hits) {
+      const normalized = normalizeRuleExecution(hit._id, hit._source as IValidatedEvent);
+      if (normalized !== null) {
+        items.push(normalized);
+      }
+    }
+
+    const droppedCount = response.hits.hits.length - items.length;
+
+    if (droppedCount > 0) {
+      // Defense-in-depth signal — `buildRuleExecutionsQuery` filters out
+      // every shape the normalizer would reject (missing `event.start` /
+      // `event.end`, out-of-set `event.outcome`, wrong task-id prefix), so
+      // this branch should never run in steady state. Emission of the log
+      // code points at either upstream schema drift in Task Manager or a
+      // filter in the query that has fallen out of sync with the
+      // normalizer.
+      this.logger.error({
+        error: new Error(
+          `Dropped ${droppedCount} of ${response.hits.hits.length} task-run hit(s) on the rule executions read path. The normalizer rejected rows the ES query is supposed to have excluded. Investigate Task Manager schema drift or rule_executions_query filter coverage.`
+        ),
+        code: ALERTING_V2_LOG_CODES.EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS,
+      });
+    }
+
+    return {
+      items,
+      total: extractTotal(response.hits.total),
+      page: query.page,
+      perPage: query.perPage,
+    };
   }
 }
+
+/**
+ * Reads either the plain number (legacy clients) or the `{ value, relation }`
+ * object that ES returns under `hits.total`. When `track_total_hits` is left
+ * to its default, the relation may be `gte` with a capped value; we surface
+ * that capped number unchanged.
+ */
+const extractTotal = (
+  total: number | { value: number; relation?: 'eq' | 'gte' } | undefined
+): number => {
+  if (typeof total === 'number') return total;
+  return total?.value ?? 0;
+};

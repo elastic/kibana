@@ -10,6 +10,9 @@
 import type { ControlsLayout } from '@kbn/controls-renderer';
 import { ControlsRenderer } from '@kbn/controls-renderer';
 import React, { useEffect, useCallback, useState } from 'react';
+import { combineLatest, map, of, switchMap } from 'rxjs';
+import type { PublishesDataLoading } from '@kbn/presentation-publishing';
+import { apiPublishesDataLoading } from '@kbn/presentation-publishing';
 import type { DashboardLayout } from '../dashboard_api/layout_manager';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 
@@ -29,28 +32,59 @@ export const DashboardControlsRenderer = () => {
     controls: dashboardApi.layout$.getValue().pinnedPanels,
   });
   useEffect(() => {
-    const controlLayoutChangedSubscription = dashboardApi.layout$.subscribe(({ pinnedPanels }) => {
+    const subscription = dashboardApi.layout$.subscribe(({ pinnedPanels }) => {
       setControls({ controls: pinnedPanels });
     });
     return () => {
-      controlLayoutChangedSubscription.unsubscribe();
+      subscription.unsubscribe();
     };
   }, [dashboardApi.layout$]);
 
+  const [anyApiUnavailable, setAnyApiUnavailable] = useState(false);
   useEffect(() => {
-    const controlLayoutChangedSubscription = dashboardApi.layout$.subscribe(({ pinnedPanels }) => {
-      setControls({ controls: pinnedPanels });
-    });
+    const subscription = combineLatest([dashboardApi.layout$, dashboardApi.children$]).subscribe(
+      ([layout, children]) => {
+        const nextAnyApiUnavailable = Object.keys(layout.pinnedPanels).some(
+          (uuid) => !Boolean(children[uuid])
+        );
+        setAnyApiUnavailable(nextAnyApiUnavailable);
+      }
+    );
     return () => {
-      controlLayoutChangedSubscription.unsubscribe();
+      subscription.unsubscribe();
     };
-  }, [dashboardApi.layout$]);
+  }, [dashboardApi]);
+
+  const [anyControlLoading, setAnyControlLoading] = useState(false);
+  useEffect(() => {
+    const subscription = combineLatest([dashboardApi.layout$, dashboardApi.children$])
+      .pipe(
+        switchMap(([layout, children]) => {
+          const controlsThatPublishDataLoading = Object.keys(layout.pinnedPanels)
+            .map((uuid) => children[uuid])
+            .filter((api) => apiPublishesDataLoading(api)) as Array<PublishesDataLoading>;
+          return controlsThatPublishDataLoading.length === 0
+            ? of(false)
+            : combineLatest(controlsThatPublishDataLoading.map((child) => child.dataLoading$)).pipe(
+                map((values) => values.some((value) => value))
+              );
+        })
+      )
+      .subscribe((nextAnyControlLoading) => {
+        setAnyControlLoading(nextAnyControlLoading);
+      });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [dashboardApi]);
 
   return (
-    <ControlsRenderer
-      parentApi={dashboardApi}
-      controls={controls} // only controls can currently be pinned
-      onControlsChanged={onControlsLayoutChanged}
-    />
+    <span data-dashboard-controls-ready={!anyApiUnavailable && !anyControlLoading}>
+      <ControlsRenderer
+        parentApi={dashboardApi}
+        controls={controls} // only controls can currently be pinned
+        onControlsChanged={onControlsLayoutChanged}
+      />
+    </span>
   );
 };

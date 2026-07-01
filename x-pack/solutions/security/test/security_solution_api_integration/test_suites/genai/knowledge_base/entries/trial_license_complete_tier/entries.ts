@@ -15,6 +15,7 @@ import {
   deleteTinyElser,
   installTinyElser,
   setupKnowledgeBase,
+  waitForInferenceEndpoint,
 } from '../utils/helpers';
 import { removeServerGeneratedProperties } from '../utils/remove_server_generated_properties';
 import { documentEntry, indexEntry, globalDocumentEntry } from './mocks/entries';
@@ -34,11 +35,11 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const ml = getService('ml');
 
-  // Failing: See https://github.com/elastic/kibana/issues/218325
-  describe.skip('@ess Basic Security AI Assistant Knowledge Base Entries', () => {
+  describe('@ess Basic Security AI Assistant Knowledge Base Entries', () => {
     before(async () => {
       await installTinyElser({ es, ml, log });
       await setupKnowledgeBase(supertest, log);
+      await waitForInferenceEndpoint({ es, log });
     });
 
     after(async () => {
@@ -580,10 +581,10 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(response.attributes.summary.succeeded).toEqual(3);
           expect(response.attributes.summary.total).toEqual(3);
-          expect(response.attributes.results.created).toEqual(
+          expect(response.attributes.results.created.map(removeServerGeneratedProperties)).toEqual(
             expect.arrayContaining([expect.objectContaining(expectedCreatedIndexEntry)])
           );
-          expect(response.attributes.results.updated).toEqual(
+          expect(response.attributes.results.updated.map(removeServerGeneratedProperties)).toEqual(
             expect.arrayContaining([expect.objectContaining(expectedUpdatedDocumentEntry)])
           );
           expect(response.attributes.results.deleted).toEqual(expect.arrayContaining([entry1.id]));
@@ -605,7 +606,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(response.attributes.summary.succeeded).toEqual(1);
           expect(response.attributes.summary.total).toEqual(1);
-          expect(response.attributes.results.created).toEqual(
+          expect(response.attributes.results.created.map(removeServerGeneratedProperties)).toEqual(
             expect.arrayContaining([expect.objectContaining(expectedDocumentEntry)])
           );
         });
@@ -626,7 +627,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(response.attributes.summary.succeeded).toEqual(1);
           expect(response.attributes.summary.total).toEqual(1);
-          expect(response.attributes.results.created).toEqual(
+          expect(response.attributes.results.created.map(removeServerGeneratedProperties)).toEqual(
             expect.arrayContaining([expect.objectContaining(expectedIndexEntry)])
           );
         });
@@ -680,7 +681,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(response.attributes.summary.succeeded).toEqual(1);
           expect(response.attributes.summary.total).toEqual(1);
-          expect(response.attributes.results.created).toEqual(
+          expect(response.attributes.results.created.map(removeServerGeneratedProperties)).toEqual(
             expect.arrayContaining([expect.objectContaining(expectedDocumentEntry)])
           );
         });
@@ -722,7 +723,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(response.attributes.summary.succeeded).toEqual(1);
           expect(response.attributes.summary.total).toEqual(1);
-          expect(response.attributes.results.updated).toEqual(
+          expect(response.attributes.results.updated.map(removeServerGeneratedProperties)).toEqual(
             expect.arrayContaining([expect.objectContaining(expectedDocumentEntry)])
           );
         });
@@ -835,7 +836,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(response.attributes.summary.succeeded).toEqual(1);
           expect(response.attributes.summary.total).toEqual(1);
-          expect(response.attributes.results.updated).toEqual(
+          expect(response.attributes.results.updated.map(removeServerGeneratedProperties)).toEqual(
             expect.arrayContaining([expect.objectContaining(expectedDocumentEntry)])
           );
         });

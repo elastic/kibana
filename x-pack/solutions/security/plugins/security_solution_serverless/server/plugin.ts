@@ -13,9 +13,15 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+  AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOWS_UI_SETTING_ID,
+  WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
+} from '@kbn/workflows/common/constants';
 import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '@kbn/security-solution-navigation';
 import { ProductTier } from '../common/product';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
@@ -107,16 +113,19 @@ export class SecuritySolutionServerlessPlugin
       )
     ) {
       projectSettings.push(WORKFLOWS_UI_SETTING_ID);
+      projectSettings.push(WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID);
     }
 
     // Agent Builder is only enabled for Security projects in complete and EASE (search_ai_lake) tiers.
     // Allowlisting this setting for essentials causes a dev-mode startup failure because the setting is not registered.
     const aiTier = getSecurityAiSocProductTier(this.config, this.logger);
-    if (
-      (aiTier === ProductTier.complete || aiTier === ProductTier.searchAiLake) &&
-      !projectSettings.includes(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
-    ) {
-      projectSettings.push(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+    if (aiTier === ProductTier.complete || aiTier === ProductTier.searchAiLake) {
+      if (!projectSettings.includes(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)) {
+        projectSettings.push(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+      }
+      if (!projectSettings.includes(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID)) {
+        projectSettings.push(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID);
+      }
     }
 
     // Setup project uiSettings whitelisting

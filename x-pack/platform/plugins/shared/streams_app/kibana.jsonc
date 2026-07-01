@@ -38,6 +38,7 @@
       "evals"
     ],
     "requiredBundles": [
+      "agentBuilder",
       "discover",
       "esql",
       "kibanaReact",

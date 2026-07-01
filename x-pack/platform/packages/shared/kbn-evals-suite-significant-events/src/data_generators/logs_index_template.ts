@@ -26,13 +26,17 @@ const SIGEVENTS_INDEX_TEMPLATE = 'sigevents-otel-logs';
 export async function ensureLogsIndexTemplate(
   esClient: Client,
   log: ToolingLog,
-  streamName: string = DEFAULT_LOGS_INDEX
+  indexPatterns: string | string[] = DEFAULT_LOGS_INDEX
 ): Promise<void> {
-  log.debug(`Creating index template "${SIGEVENTS_INDEX_TEMPLATE}"`);
+  const patterns = Array.isArray(indexPatterns) ? indexPatterns : [indexPatterns];
+
+  log.debug(
+    `Creating index template "${SIGEVENTS_INDEX_TEMPLATE}" for patterns [${patterns.join(', ')}]`
+  );
 
   await esClient.indices.putIndexTemplate({
     name: SIGEVENTS_INDEX_TEMPLATE,
-    index_patterns: [streamName],
+    index_patterns: patterns,
     data_stream: {},
     template: {
       settings: {

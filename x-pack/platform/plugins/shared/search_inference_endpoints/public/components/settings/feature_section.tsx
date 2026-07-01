@@ -40,6 +40,7 @@ interface FeatureSectionProps {
   isTechPreview?: boolean;
   isBeta?: boolean;
   globalDefaultId: string | undefined;
+  canManage?: boolean;
 }
 
 export const FeatureSection: React.FC<FeatureSectionProps> = ({
@@ -52,6 +53,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
   isTechPreview = false,
   isBeta = false,
   globalDefaultId,
+  canManage = true,
 }) => {
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
@@ -124,6 +126,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
                         ? NO_DEFAULT_MODEL
                         : globalDefaultId ?? NO_DEFAULT_MODEL
                     }
+                    canManage={canManage}
                   />
                 </EuiFlexItem>
               )

@@ -9,7 +9,6 @@ import {
   getAncestors,
   getSegments,
   isDescendantOf,
-  isRootStreamDefinition,
   LOGS_ECS_STREAM_NAME,
   LOGS_OTEL_STREAM_NAME,
   Streams,
@@ -21,7 +20,7 @@ import type { Direction } from '@elastic/eui';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common/types';
 import { parseDurationInSeconds } from '../../util/parse_duration';
 
-const SORTABLE_FIELDS = ['nameSortKey', 'retentionMs'] as const;
+const SORTABLE_FIELDS = ['nameSortKey', 'retentionMs', 'ingestionRate', 'storageBytes'] as const;
 
 export type SortableField = (typeof SORTABLE_FIELDS)[number];
 
@@ -29,7 +28,9 @@ export interface EnrichedStream extends ListStreamDetail {
   nameSortKey: string;
   documentsCount: number;
   retentionMs: number;
-  type: 'wired' | 'root' | 'classic';
+  ingestionRate: number;
+  storageBytes: number;
+  type: 'wired' | 'classic' | 'query';
   children?: EnrichedStream[];
 }
 
@@ -173,6 +174,16 @@ export function asTrees(streams: ListStreamDetail[]): StreamTree[] {
   return trees;
 }
 
+const getStreamType = (stream: Streams.all.Definition): EnrichedStream['type'] => {
+  if (Streams.ClassicStream.Definition.is(stream)) {
+    return 'classic';
+  }
+  if (Streams.QueryStream.Definition.is(stream)) {
+    return 'query';
+  }
+  return 'wired';
+};
+
 export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStream => {
   let retentionMs = 0;
   const lc = node.effective_lifecycle!;
@@ -197,11 +208,9 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
     nameSortKey,
     documentsCount: 0,
     retentionMs,
-    type: Streams.ClassicStream.Definition.is(node.stream)
-      ? 'classic'
-      : isRootStreamDefinition(node.stream)
-      ? 'root'
-      : 'wired',
+    ingestionRate: 0,
+    storageBytes: 0,
+    type: getStreamType(node.stream),
     ...(children && { children }),
   };
 };

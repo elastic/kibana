@@ -160,6 +160,8 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
   actions: {
     invoke: {
       isTool: true,
+      description:
+        'Invoke a GCP Cloud Function or Cloud Run function by name using its HTTP trigger URL. Use this when you need to run a known function with an optional JSON payload and return the function response.',
       input: lazySchema(() =>
         z.object({
           functionName: z.string().min(1).describe('Cloud Function or Cloud Run service name'),
@@ -210,6 +212,8 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
 
     listFunctions: {
       isTool: true,
+      description:
+        'List GCP Cloud Functions and Cloud Run functions in the configured project and region. Use this to discover available function names before invoking or inspecting a function.',
       input: lazySchema(() =>
         z.object({
           pageSize: z
@@ -276,6 +280,8 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
 
     getFunction: {
       isTool: true,
+      description:
+        'Get details for a single GCP Cloud Function or Cloud Run function by name. Use this when you already know the function name and need its endpoint or deployment configuration before deciding what to invoke.',
       input: lazySchema(() =>
         z.object({
           functionName: z.string().min(1).describe('Cloud Function or Cloud Run service name'),

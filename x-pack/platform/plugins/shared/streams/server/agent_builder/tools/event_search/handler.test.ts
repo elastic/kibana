@@ -28,7 +28,7 @@ describe('searchEventsToolHandler', () => {
       perPage: undefined,
       search: 'timeout',
       stream: ['logs.checkout'],
-      verdict: ['promoted'],
+      status: ['promoted'],
     });
     expect(result).toEqual({ events: [{ event_id: 'e1' }], page: 2, per_page: 10, total: 17 });
   });
@@ -53,7 +53,7 @@ describe('searchEventsToolHandler', () => {
       perPage: undefined,
       search: 'latency',
       stream: undefined,
-      verdict: ['promoted'],
+      status: ['promoted'],
     });
   });
 });

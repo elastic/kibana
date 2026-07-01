@@ -69,6 +69,7 @@ const defaultProps: KPIsSectionProps = {
   pageFilters: [],
   assignees: [],
   selectedConnectorNames: [],
+  selectedTypes: [],
   dataView: {} as DataView,
 };
 

@@ -15,6 +15,7 @@ import {
   EuiNotificationBadge,
   EuiSpacer,
   EuiTablePagination,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -156,25 +157,33 @@ export const GroupGridItem = ({
         isLoading ? null : (
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem>
-              <EuiButtonIcon
-                data-test-subj="syntheticsGroupGridItemButton"
-                isDisabled={groupMonitors.length === 0}
-                className="fullScreenButton"
-                iconType="fullScreen"
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.synthetics.groupGridItem.euiButtonIcon.fullScreenLabel',
                   { defaultMessage: 'Full screen' }
                 )}
-                onClick={() => {
-                  if (fullScreenGroup) {
-                    setFullScreenGroup('');
-                    document.exitFullscreen();
-                  } else {
-                    document.documentElement.requestFullscreen();
-                    setFullScreenGroup(groupLabel);
-                  }
-                }}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="syntheticsGroupGridItemButton"
+                  isDisabled={groupMonitors.length === 0}
+                  className="fullScreenButton"
+                  iconType="fullScreen"
+                  aria-label={i18n.translate(
+                    'xpack.synthetics.groupGridItem.euiButtonIcon.fullScreenLabel',
+                    { defaultMessage: 'Full screen' }
+                  )}
+                  onClick={() => {
+                    if (fullScreenGroup) {
+                      setFullScreenGroup('');
+                      document.exitFullscreen();
+                    } else {
+                      document.documentElement.requestFullscreen();
+                      setFullScreenGroup(groupLabel);
+                    }
+                  }}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
 
             <EuiFlexItem>

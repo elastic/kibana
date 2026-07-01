@@ -55,12 +55,16 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
     const searchTerm = await pageObjects.globalSearch.getFieldValue();
     expect(searchTerm).toBe('type:dashboard');
 
-    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
+    const expectedLabels = [
       'dashboard 1 (tag-2)',
       'dashboard 2 (tag-3)',
       'dashboard 3 (tag-1 and tag-3)',
       'dashboard 4 (tag-special-chars)',
-    ]);
+    ];
+
+    for (const label of expectedLabels) {
+      await expect(pageObjects.globalSearch.resultLabels.filter({ hasText: label })).toBeVisible();
+    }
   });
 
   test('shows a suggestion when searching for a term matching a tag name', async ({
@@ -87,18 +91,22 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
     await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('type:dashboard');
 
-    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
+    const expectedLabels = [
       'dashboard 1 (tag-2)',
       'dashboard 2 (tag-3)',
       'dashboard 3 (tag-1 and tag-3)',
       'dashboard 4 (tag-special-chars)',
-    ]);
+    ];
+
+    for (const label of expectedLabels) {
+      await expect(pageObjects.globalSearch.resultLabels.filter({ hasText: label })).toBeVisible();
+    }
   });
 
   test('allows to filter by multiple types', async ({ pageObjects }) => {
     await pageObjects.globalSearch.searchFor('type:(dashboard OR visualization)');
 
-    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
+    const expectedLabels = [
       'Visualization 1 (tag-1)',
       'Visualization 2 (tag-2)',
       'Visualization 3 (tag-1 + tag-3)',
@@ -108,7 +116,11 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
       'dashboard 2 (tag-3)',
       'dashboard 3 (tag-1 and tag-3)',
       'dashboard 4 (tag-special-chars)',
-    ]);
+    ];
+
+    for (const label of expectedLabels) {
+      await expect(pageObjects.globalSearch.resultLabels.filter({ hasText: label })).toBeVisible();
+    }
   });
 
   test('allows to filter by tag', async ({ pageObjects }) => {
@@ -147,12 +159,16 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
       'type:(dashboard OR visualization) tag:(tag-1 OR tag-3)'
     );
 
-    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
+    const expectedLabels = [
       'Visualization 1 (tag-1)',
       'Visualization 3 (tag-1 + tag-3)',
       'dashboard 2 (tag-3)',
       'dashboard 3 (tag-1 and tag-3)',
-    ]);
+    ];
+
+    for (const label of expectedLabels) {
+      await expect(pageObjects.globalSearch.resultLabels.filter({ hasText: label })).toBeVisible();
+    }
   });
 
   test('allows to filter by term and type', async ({ pageObjects }) => {

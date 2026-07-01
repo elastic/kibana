@@ -109,6 +109,10 @@ export const EvaluatorStats = lazySchema(() =>
     dataset_id: z.string().max(1024),
     dataset_name: z.string().max(256),
     evaluator_name: z.string().max(256),
+    /**
+     * Number of unique examples evaluated in this dataset
+     */
+    example_count: z.number().int().min(0).optional().default(0),
     stats: z.object({
       mean: z.number(),
       median: z.number(),

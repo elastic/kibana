@@ -19,8 +19,11 @@ export type {
   AppHeaderMetadataItems,
   AppHeaderMetadataTextItem,
   AppHeaderTab,
+  AppHeaderTabBadge,
+  AppHeaderTabIconBadge,
   AppHeaderTitle,
   AppHeaderTitleSaveResult,
   ChromeNext,
 } from './chrome_next';
+export type { GlobalHeaderAiButton } from './ai_button';
 export type { GlobalSearchConfig } from './global_search';

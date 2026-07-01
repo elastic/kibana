@@ -6,12 +6,19 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiToolTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MonitorSearchableList } from './monitor_searchable_list';
 
 export const MonitorSelector = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const monitorSelectorPopoverTitleId = useGeneratedHtmlId();
 
   const onButtonClick = () => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -22,13 +29,15 @@ export const MonitorSelector = () => {
   };
 
   const button = (
-    <EuiButtonIcon
-      data-test-subj="syntheticsMonitorSelectorButton"
-      size="s"
-      iconType="chevronSingleDown"
-      onClick={onButtonClick}
-      aria-label={SELECT_MONITOR}
-    />
+    <EuiToolTip content={SELECT_MONITOR} disableScreenReaderOutput>
+      <EuiButtonIcon
+        data-test-subj="syntheticsMonitorSelectorButton"
+        size="s"
+        iconType="chevronSingleDown"
+        onClick={onButtonClick}
+        aria-label={SELECT_MONITOR}
+      />
+    </EuiToolTip>
   );
 
   return (
@@ -39,8 +48,11 @@ export const MonitorSelector = () => {
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
+        aria-labelledby={monitorSelectorPopoverTitleId}
       >
-        <EuiPopoverTitle paddingSize="s">{GO_TO_MONITOR}</EuiPopoverTitle>
+        <EuiPopoverTitle id={monitorSelectorPopoverTitleId} paddingSize="s">
+          {GO_TO_MONITOR}
+        </EuiPopoverTitle>
         <MonitorSearchableList closePopover={closePopover} />
       </EuiPopover>
     </Fragment>

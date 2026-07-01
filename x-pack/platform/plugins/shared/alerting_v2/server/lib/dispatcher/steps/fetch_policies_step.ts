@@ -27,10 +27,6 @@ export class FetchPoliciesStep implements DispatcherStep {
   ) {}
 
   public async execute(_state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    // TODO: future optimization: push the single_rule filter down to the SO query
-    // by passing the dispatchable rule ids as a filter on `ruleId` (keyword mapping
-    // already in place). This reduces decryption work for unrelated single_rule
-    // policies. For now, the matcher step filters by ruleId in-memory.
     const result = await this.actionPolicySavedObjectService.findAllDecrypted({
       filter: { enabled: true },
     });
@@ -42,8 +38,7 @@ export class FetchPoliciesStep implements DispatcherStep {
         continue;
       }
 
-      const { type, ruleId } = doc.attributes;
-      const base = {
+      policies.set(doc.id, {
         id: doc.id,
         spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),
         name: doc.attributes.name,
@@ -56,11 +51,7 @@ export class FetchPoliciesStep implements DispatcherStep {
         throttle: doc.attributes.throttle ?? undefined,
         snoozedUntil: doc.attributes.snoozedUntil ?? null,
         apiKey: doc.attributes.auth.apiKey,
-      };
-      policies.set(
-        doc.id,
-        type === 'single_rule' ? { ...base, type, ruleId: ruleId as string } : { ...base, type }
-      );
+      });
     }
 
     return { type: 'continue', data: { policies } };

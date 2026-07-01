@@ -20,20 +20,16 @@ export interface AlertingV2Usage {
   // rule stats
   count_total?: number;
   count_enabled?: number;
+  count_agent_builder_assisted?: number;
   count_by_kind?: { alert?: number; signal?: number };
   count_by_schedule?: NameValuePair[];
   count_by_lookback?: NameValuePair[];
-  count_with_recovery_policy?: number;
-  count_by_recovery_policy_type?: { query?: number; no_breach?: number };
   avg_pending_count?: number | null;
   avg_recovering_count?: number | null;
   count_by_pending_timeframe?: NameValuePair[];
   count_by_recovering_timeframe?: NameValuePair[];
   count_with_grouping?: number;
   avg_grouping_fields_count?: number | null;
-  count_with_no_data?: number;
-  count_by_no_data_behavior?: { no_data?: number; last_status?: number; recover?: number };
-  count_by_no_data_timeframe?: NameValuePair[];
   min_created_at?: string | null;
 
   // execution stats
@@ -49,6 +45,7 @@ export interface AlertingV2Usage {
   action_policies_count?: number;
   action_policies_unique_workflow_count?: number;
   action_policies_count_with_matcher?: number;
+  action_policies_count_agent_builder_assisted?: number;
   action_policies_count_with_group_by?: number;
   action_policies_avg_group_by_fields_count?: number | null;
   action_policies_count_by_throttle_interval?: NameValuePair[];

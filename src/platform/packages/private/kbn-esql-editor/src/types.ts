@@ -24,6 +24,7 @@ import type {
   ESQLCallbacks,
   ESQLTelemetryCallbacks,
   ESQLSourceResult,
+  EsqlView,
 } from '@kbn/esql-types';
 import type { ESQLDependencies } from '@kbn/code-editor';
 
@@ -107,6 +108,7 @@ export interface EsqlPluginStartBase {
   getLicense: () => Promise<ILicense | undefined>;
   isServerless: boolean;
   enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
+  enrichViews: (views: EsqlView[]) => Promise<EsqlView[]>;
 }
 
 export interface ESQLEditorDeps {

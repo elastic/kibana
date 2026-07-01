@@ -15,7 +15,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./engine_init'));
     loadTestFile(require.resolve('./engine_workflow'));
     loadTestFile(require.resolve('./engine_schedule'));
-    loadTestFile(require.resolve('./engine_plain_index_sync'));
     loadTestFile(require.resolve('./engine_integrations_sync'));
     loadTestFile(require.resolve('./engine_default_sources'));
     loadTestFile(require.resolve('./search_indices'));
@@ -23,6 +22,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./privileged_users/api'));
     loadTestFile(require.resolve('./privileged_users/task'));
     loadTestFile(require.resolve('./privileged_users/migrations'));
-    loadTestFile(require.resolve('./privileged_users/cross_source_sync'));
   });
 }

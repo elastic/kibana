@@ -15,10 +15,12 @@ import { useUsageTracker } from '../contexts/usage_tracker_context';
 import { EventType } from '../analytics/constants';
 
 interface ExternalInferenceEmptyPromptProps {
+  canManage: boolean;
   onFlyoutOpen: () => void;
 }
 
 export const ExternalInferenceEmptyPrompt: React.FC<ExternalInferenceEmptyPromptProps> = ({
+  canManage,
   onFlyoutOpen,
 }) => {
   const usageTracker = useUsageTracker();
@@ -45,11 +47,13 @@ export const ExternalInferenceEmptyPrompt: React.FC<ExternalInferenceEmptyPrompt
         </p>
       }
       actions={
-        <EuiButton fill onClick={onFlyoutOpen} data-test-subj="addEndpointButton">
-          {i18n.translate('xpack.searchInferenceEndpoints.addConnectorButtonLabel', {
-            defaultMessage: 'Add endpoint',
-          })}
-        </EuiButton>
+        canManage ? (
+          <EuiButton fill onClick={onFlyoutOpen} data-test-subj="addEndpointButton">
+            {i18n.translate('xpack.searchInferenceEndpoints.addConnectorButtonLabel', {
+              defaultMessage: 'Add endpoint',
+            })}
+          </EuiButton>
+        ) : undefined
       }
       footer={
         <EuiLink

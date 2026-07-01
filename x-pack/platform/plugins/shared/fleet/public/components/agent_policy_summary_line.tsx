@@ -171,7 +171,6 @@ export const AgentPolicySummaryLine = memo<{
                 <EuiLink
                   className="eui-textBreakWord"
                   href={getHref('policy_details', { policyId: id })}
-                  title={policyDisplayName}
                   data-test-subj="agentPolicyNameLink"
                 >
                   {policyDisplayName}
@@ -240,9 +239,11 @@ export const AgentPolicySummaryLine = memo<{
 
         {withDescription && description && (
           <EuiFlexItem>
-            <EuiText color="subdued" title={description} size="xs">
-              {description}
-            </EuiText>
+            <EuiToolTip content={description}>
+              <EuiText color="subdued" size="xs">
+                {description}
+              </EuiText>
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

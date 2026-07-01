@@ -11,11 +11,18 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { MainCategories } from '@kbn/siem-readiness';
-import { isRetentionNonCompliant, filterRetentionItemsByCategories } from '@kbn/siem-readiness';
+import {
+  isRetentionNonCompliant,
+  filterRetentionItemsByCategories,
+  enrichFindings,
+} from '@kbn/siem-readiness';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getRetention } from '../../../lib/siem_readiness/dimensions';
-import { fetchCategories } from '../../../lib/siem_readiness/fetchers';
+import {
+  getSiemReadinessSharedContext,
+  fetchSiemReadinessSharedContext,
+} from '../../../lib/siem_readiness/fetchers';
 import { SIEM_READINESS_RETENTION_TOOL_ID } from './tool_ids';
 
 const schema = z.object({});
@@ -28,7 +35,7 @@ export const getRetentionTool = (
   id: SIEM_READINESS_RETENTION_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Retrieves SIEM data retention health. Returns data streams and standalone indices with their retention configuration (ILM policy or DSL), retention period in days, and compliance status against the 365-day FedRAMP threshold — filtered to categorized SIEM indices. Includes an overall health status (healthy / actionsRequired / noData) and actionable findings for non-compliant indices.',
+    'Retrieves SIEM data retention health. Returns data streams and standalone indices with their retention configuration (ILM policy or DSL), retention period in days, and compliance status against the 365-day FedRAMP threshold — filtered to categorized SIEM indices. Includes an overall health status (healthy / actionsRequired / noData) and actionable findings for non-compliant indices. Each actionable finding includes blast radius data. When presenting any finding, always show these as explicit labeled fields: Affected Platform, Affected Rules, Affected Tactics.',
   schema,
   tags: ['security', 'siem-readiness', 'retention'],
   availability: {
@@ -37,12 +44,39 @@ export const getRetentionTool = (
       return getAgentBuilderResourceAvailability({ core, request, logger });
     },
   },
-  handler: async (_params, { esClient, logger: handlerLogger }) => {
+  handler: async (_params, { esClient, logger: handlerLogger, request }) => {
     try {
-      const [payload, categoriesResult] = await Promise.all([
-        getRetention({ esClient: esClient.asCurrentUser, isServerless, logger: handlerLogger }),
-        fetchCategories({ esClient: esClient.asCurrentUser, logger: handlerLogger }),
-      ]);
+      const [coreStart, startPlugins] = await core.getStartServices();
+
+      // Phase 1: shared context (rules reverse map + categories) — lazy per-request
+      const { reverseMapResult, categoriesResult, indexToPlatform } =
+        await getSiemReadinessSharedContext(request, async () => {
+          const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+          const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+            coreStart.savedObjects.getScopedClient(request),
+            esClient.asCurrentUser
+          );
+          return fetchSiemReadinessSharedContext({
+            rulesClient,
+            esClient: esClient.asCurrentUser,
+            dataViewsService,
+            logger: handlerLogger,
+          });
+        });
+
+      // Phase 2: dimension-specific data (ILM/DSL retention)
+      const payload = await getRetention({
+        esClient: esClient.asCurrentUser,
+        isServerless,
+        logger: handlerLogger,
+      });
+
+      // Phase 3: blast radius enrichment
+      const allEnrichedFindings = enrichFindings(payload.actionableFindings ?? [], {
+        ...reverseMapResult,
+        indexToPlatform,
+        dimension: 'retention',
+      });
 
       // Shared predicate — same function used by the UI retention tab
       const categorizedItems = filterRetentionItemsByCategories(payload.items, categoriesResult);
@@ -58,7 +92,7 @@ export const getRetentionTool = (
         }
       }
 
-      const enrichedFindings = (payload.actionableFindings ?? [])
+      const enrichedFindings = allEnrichedFindings
         .filter((finding) => resourceToCategoryMap.has(finding.resource))
         .map((finding) => {
           const category = resourceToCategoryMap.get(finding.resource);
@@ -98,6 +132,7 @@ export const getRetentionTool = (
       };
     } catch (error: unknown) {
       const e = error as { message?: string };
+      handlerLogger.error(`[get_retention_tool] Error: ${e.message ?? 'unknown error'}`);
       return {
         results: [
           {

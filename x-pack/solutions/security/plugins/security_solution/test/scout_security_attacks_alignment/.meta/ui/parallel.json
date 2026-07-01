@@ -1,5 +1,5 @@
 {
-  "sha1": "0b5daed328ba43f4a1abe43089a707b43100dea3",
+  "sha1": "3cf9437c9e5aa4e542ccaaa4b1886e8c67ce2766",
   "tests": [
     {
       "id": "343791488d016cc-1054e603e578b92",
@@ -24,7 +24,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
-        "line": 48,
+        "line": 52,
         "column": 14
       }
     },
@@ -40,13 +40,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
-        "line": 60,
+        "line": 64,
         "column": 14
       }
     },
     {
-      "id": "d8e9d8aa0b28c46-e974817e68b0832",
-      "title": "Attacks UI manual execution smoke successfully triggers generation via UI without error",
+      "id": "d8e9d8aa0b28c46-55ef49bdcbb0b9e",
+      "title": "Attacks UI manual execution smoke successfully triggers generation via UI without error from Attack Discovery page",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -57,6 +57,22 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_execution_ui.spec.ts",
         "line": 39,
+        "column": 14
+      }
+    },
+    {
+      "id": "d8e9d8aa0b28c46-f8faa754b641717",
+      "title": "Attacks UI manual execution smoke successfully triggers generation via UI without error from Attacks page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_execution_ui.spec.ts",
+        "line": 110,
         "column": 14
       }
     },
@@ -73,6 +89,22 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_filters.spec.ts",
         "line": 33,
+        "column": 14
+      }
+    },
+    {
+      "id": "97e35cdc4d140e2-47e4d3edab4532d",
+      "title": "Attacks page filters filters attacks by type and persists selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_filters.spec.ts",
+        "line": 56,
         "column": 14
       }
     },

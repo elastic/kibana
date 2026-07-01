@@ -8,7 +8,7 @@
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlAutocompleteResult } from '../services/sml/types';
 import { registerAutocompleteRoute } from './autocomplete';
 
@@ -25,7 +25,7 @@ const createMockSmlService = () => ({
 
 const createMockUiSettingsClient = (enabled = true) => ({
   get: jest.fn().mockImplementation(async (key: string) => {
-    if (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) return enabled;
+    if (key === CONTEXT_ENGINE_ENABLED_SETTING_ID) return enabled;
     return undefined;
   }),
 });
@@ -86,7 +86,7 @@ describe('registerAutocompleteRoute', () => {
         title: 'GitHub Connector',
         origin: { uri: 'gh-1' },
         spaces: ['test-space'],
-        permissions: [],
+        permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
         matched_discovery_labels: [
           { value: 'GitHub Connector', kind: 'title' },
           { value: 'github', kind: 'tagline' },
@@ -122,7 +122,7 @@ describe('registerAutocompleteRoute', () => {
         title: 'Sales Q3',
         origin: { uri: 'dash-1' },
         spaces: ['test-space'],
-        permissions: [],
+        permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
       },
     ];
     mockSmlService.autocomplete.mockResolvedValue({ results: mockResults });
@@ -141,7 +141,10 @@ describe('registerAutocompleteRoute', () => {
         title: 'V',
         origin: { uri: 'v-1' },
         spaces: ['test-space'],
-        permissions: ['saved_object:visualization/get'],
+        permissions: {
+          kibana: { privileges: [{ name: 'saved_object:visualization/get' }] },
+          elasticsearch: { indices: [] },
+        },
       },
     ];
     mockSmlService.autocomplete.mockResolvedValue({ results: mockResults });

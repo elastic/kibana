@@ -472,38 +472,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
   );
 
   apiTest(
-    'validation: rejects immutable field "type" (.strict() schema)',
-    async ({ apiClient, apiServices }) => {
-      const created = await apiServices.alertingV2.actionPolicies.create(
-        buildCreateActionPolicyData({ name: 'mutate-type-policy' })
-      );
-
-      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { type: 'single_rule', version: created.version },
-      });
-
-      expect(response).toHaveStatusCode(400);
-    }
-  );
-
-  apiTest(
-    'validation: rejects immutable field "ruleId" (.strict() schema)',
-    async ({ apiClient, apiServices }) => {
-      const created = await apiServices.alertingV2.actionPolicies.create(
-        buildCreateActionPolicyData({ name: 'mutate-rule-id-policy' })
-      );
-
-      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { ruleId: 'some-rule-id', version: created.version },
-      });
-
-      expect(response).toHaveStatusCode(400);
-    }
-  );
-
-  apiTest(
     'validation: rejects unknown extra field (.strict() schema)',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(

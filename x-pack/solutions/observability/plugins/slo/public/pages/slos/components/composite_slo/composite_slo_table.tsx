@@ -15,7 +15,6 @@ import {
   EuiHorizontalRule,
   EuiLink,
   EuiPopover,
-  EuiSkeletonText,
   EuiText,
   EuiToolTip,
   type CriteriaWithPagination,
@@ -25,7 +24,7 @@ import { sloListLocatorID, type SloListLocatorParams } from '@kbn/deeplinks-obse
 import { i18n } from '@kbn/i18n';
 import { observabilityAppId } from '@kbn/observability-plugin/common';
 import { encode } from '@kbn/rison';
-import type { CompositeSLODefinitionResponse } from '@kbn/slo-schema';
+import type { CompositeSLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useState } from 'react';
@@ -33,7 +32,6 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { displayStatus } from '../../../../components/slo/slo_badges/slo_status_badge';
 import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
 import { useFetchCompositeHistoricalSummary } from '../../../../hooks/use_fetch_composite_historical_summary';
-import { useFetchCompositeSloDetails } from '../../../../hooks/use_fetch_composite_slo_details';
 import type {
   CompositeSloSortBy,
   CompositeSloSortDirection,
@@ -48,7 +46,7 @@ import {
 import { SloSparkline } from '../slo_sparkline';
 import { CompositeSloMembersTable } from './composite_slo_members_table';
 
-type CompositeSLOItem = CompositeSLODefinitionResponse;
+type CompositeSLOItem = CompositeSLOWithSummaryResponse;
 
 const SORTABLE_FIELDS: Record<string, CompositeSloSortBy> = {
   name: 'name',
@@ -97,7 +95,7 @@ export function CompositeSloTable({
   const [openMemberHealthPopoverId, setOpenMemberHealthPopoverId] = useState<string | null>(null);
 
   const compositeIds = results.map((item) => item.id);
-  const { detailsById, isLoading: isDetailsLoading } = useFetchCompositeSloDetails(compositeIds);
+  const itemById = new Map(results.map((item) => [item.id, item]));
   const { historicalSummaryById, isLoading: isHistoricalLoading } =
     useFetchCompositeHistoricalSummary(compositeIds);
 
@@ -132,8 +130,8 @@ export function CompositeSloTable({
 
   const expandedRows: Record<string, React.ReactNode> = {};
   for (const id of expandedRowIds) {
-    const details = detailsById.get(id);
-    if (!details || !details.members?.length) {
+    const item = itemById.get(id);
+    if (!item || !item.members?.length) {
       expandedRows[id] = (
         <EuiText size="s" color="subdued" style={{ padding: 16 }}>
           {i18n.translate('xpack.slo.compositeSloList.noMembers', {
@@ -143,7 +141,7 @@ export function CompositeSloTable({
       );
     } else {
       expandedRows[id] = (
-        <CompositeSloMembersTable members={details.members} percentFormat={percentFormat} />
+        <CompositeSloMembersTable members={item.members} percentFormat={percentFormat} />
       );
     }
   }
@@ -196,11 +194,7 @@ export function CompositeSloTable({
       }),
       width: '100px',
       render: (_: unknown, item: CompositeSLOItem) => {
-        const details = detailsById.get(item.id);
-        if (!details) {
-          return <EuiSkeletonText lines={1} />;
-        }
-        const { status } = details.summary;
+        const { status } = item.summary;
         const statusInfo = displayStatus[status as keyof typeof displayStatus];
         return statusInfo ? (
           <EuiBadge color={statusInfo.badgeColor}>{statusInfo.displayText}</EuiBadge>
@@ -212,7 +206,6 @@ export function CompositeSloTable({
       name: i18n.translate('xpack.slo.compositeSloList.columns.name', {
         defaultMessage: 'Name',
       }),
-      width: '200px',
       truncateText: true,
       sortable: true,
     },
@@ -221,7 +214,6 @@ export function CompositeSloTable({
       name: i18n.translate('xpack.slo.compositeSloList.columns.tags', {
         defaultMessage: 'Tags',
       }),
-      width: '130px',
       render: (tags: string[]) => (
         <EuiFlexGroup gutterSize="xs" responsive={false} css={{ overflow: 'hidden' }}>
           {tags.map((tag) => (
@@ -238,12 +230,10 @@ export function CompositeSloTable({
       }),
       width: '130px',
       render: (item: CompositeSLOItem) => {
-        const details = detailsById.get(item.id);
-        if (!details) return <EuiSkeletonText lines={1} />;
-        if (details.summary.status === 'NO_DATA') return NOT_AVAILABLE_LABEL;
+        if (item.summary.status === 'NO_DATA') return NOT_AVAILABLE_LABEL;
 
-        const memberCount = details.members.length;
-        const healthyCount = details.members.filter((m) => m.status === 'HEALTHY').length;
+        const memberCount = item.members.length;
+        const healthyCount = item.members.filter((m) => m.status === 'HEALTHY').length;
         const allHealthy = healthyCount === memberCount;
         const isOpen = openMemberHealthPopoverId === item.id;
 
@@ -275,10 +265,10 @@ export function CompositeSloTable({
             anchorPosition="downLeft"
           >
             <EuiFlexGroup direction="column" gutterSize="xs" css={{ minWidth: 240 }}>
-              {details.members.map((m) => {
+              {item.members.map((m) => {
                 const statusInfo = displayStatus[m.status as keyof typeof displayStatus];
                 return (
-                  <EuiFlexItem key={m.id}>
+                  <EuiFlexItem key={m.sloId}>
                     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                       <EuiFlexItem grow={false}>
                         {statusInfo ? (
@@ -333,13 +323,9 @@ export function CompositeSloTable({
       }),
       width: '90px',
       render: (_: unknown, item: CompositeSLOItem) => {
-        const details = detailsById.get(item.id);
-        if (!details) {
-          return <EuiSkeletonText lines={1} />;
-        }
-        return details.summary.status === 'NO_DATA'
+        return item.summary.status === 'NO_DATA'
           ? NOT_AVAILABLE_LABEL
-          : numeral(details.summary.sliValue).format(percentFormat);
+          : numeral(item.summary.sliValue).format(percentFormat);
       },
     },
     {
@@ -349,9 +335,7 @@ export function CompositeSloTable({
       width: '80px',
       render: (item: CompositeSLOItem) => {
         const historicalData = historicalSummaryById.get(item.id);
-        const details = detailsById.get(item.id);
-        const isFailed =
-          details?.summary.status === 'VIOLATED' || details?.summary.status === 'DEGRADING';
+        const isFailed = item.summary.status === 'VIOLATED' || item.summary.status === 'DEGRADING';
         return (
           <SloSparkline
             chart="line"
@@ -370,13 +354,9 @@ export function CompositeSloTable({
       }),
       width: '130px',
       render: (_: unknown, item: CompositeSLOItem) => {
-        const details = detailsById.get(item.id);
-        if (!details) {
-          return <EuiSkeletonText lines={1} />;
-        }
-        return details.summary.status === 'NO_DATA'
+        return item.summary.status === 'NO_DATA'
           ? NOT_AVAILABLE_LABEL
-          : numeral(details.summary.errorBudget.remaining).format(percentFormat);
+          : numeral(item.summary.errorBudget.remaining).format(percentFormat);
       },
     },
     {
@@ -451,14 +431,10 @@ export function CompositeSloTable({
       ),
       width: '160px',
       render: (item: CompositeSLOItem) => {
-        const details = detailsById.get(item.id);
-        if (!details) {
-          return <EuiSkeletonText lines={1} />;
-        }
-        if (details.summary.status === 'NO_DATA') {
+        if (item.summary.status === 'NO_DATA') {
           return NOT_AVAILABLE_LABEL;
         }
-        const { fiveMinuteBurnRate, oneHourBurnRate, oneDayBurnRate } = details.summary;
+        const { fiveMinuteBurnRate, oneHourBurnRate, oneDayBurnRate } = item.summary;
         const windowValue = {
           '5m': fiveMinuteBurnRate,
           '1h': oneHourBurnRate,
@@ -531,7 +507,6 @@ export function CompositeSloTable({
       itemId="id"
       itemIdToExpandedRowMap={expandedRows}
       rowHeader="name"
-      loading={isDetailsLoading}
       sorting={{
         sort: {
           field: sort.field as keyof CompositeSLOItem,

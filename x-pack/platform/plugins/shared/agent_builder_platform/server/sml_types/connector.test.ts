@@ -92,10 +92,10 @@ describe('connectorSmlType', () => {
             type: 'connector',
             title: 'My MCP Connector',
             content: 'My MCP Connector\nMCP\nModel Context Protocol connector',
-            permissions: ['action:execute'],
           },
         ],
       });
+      expect(result!.chunks[0]).not.toHaveProperty('permissions');
     });
 
     it('returns undefined on error and logs warning', async () => {
@@ -189,7 +189,19 @@ describe('connectorSmlType', () => {
         type: 'connector',
         title: 'Basic Connector',
         content: 'Basic Connector\n.unknown',
-        permissions: ['action:execute'],
+      });
+    });
+  });
+
+  describe('getPermissions', () => {
+    it('returns the saved_object:action/get Kibana privilege', () => {
+      // The actions plugin gates connector reads on saved-object read access for the `action`
+      // type — `saved_object:action/get` is the correct privilege string. Pinning it here
+      // so a regression to a non-existent privilege name fails loudly.
+      const permissions = connectorSmlType.getPermissions!('conn-1', createContext() as never);
+      expect(permissions).toEqual({
+        kibana: { privileges: [{ name: 'saved_object:action/get' }] },
+        elasticsearch: { indices: [] },
       });
     });
   });

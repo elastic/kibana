@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/269683
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+areas:
+- Kibana platform
+title: Add external links to Security solution classic navigation

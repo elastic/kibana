@@ -32,6 +32,7 @@ import type {
   NetworkDirectionProcessor,
   JsonExtractProcessor,
   EnrichProcessor,
+  UserAgentProcessor,
   RegisteredDomainProcessor,
 } from '.';
 import type { Condition } from '../conditions';
@@ -184,6 +185,12 @@ export type IngestPipelineEnrichProcessor = RenameFieldsAndRemoveAction<
   { to: 'target_field'; where: 'if' }
 >;
 
+// User Agent
+export type IngestPipelineUserAgentProcessor = RenameFieldsAndRemoveAction<
+  UserAgentProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
 // Registered Domain
 export type IngestPipelineRegisteredDomainProcessor = RenameFieldsAndRemoveAction<
   RegisteredDomainProcessor,
@@ -221,5 +228,6 @@ export type IngestPipelineProcessor =
   | IngestPipelineNetworkDirectionProcessor
   | IngestPipelineJsonExtractProcessor
   | IngestPipelineEnrichProcessor
+  | IngestPipelineUserAgentProcessor
   | IngestPipelineRegisteredDomainProcessor
   | IngestPipelineManualIngestPipelineProcessor;

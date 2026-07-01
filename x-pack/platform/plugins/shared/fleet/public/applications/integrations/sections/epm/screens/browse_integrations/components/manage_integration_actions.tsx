@@ -7,14 +7,15 @@
 
 import React, { useCallback, useState } from 'react';
 import {
-  EuiButtonIcon,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiConfirmModal,
-  EuiIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiIcon,
   EuiPopover,
   EuiTextColor,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -207,17 +208,25 @@ export const ManageIntegrationActions: React.FC<{
           anchorPosition="downRight"
           panelPaddingSize="none"
           button={
-            <EuiButtonIcon
-              iconType="boxesVertical"
-              color="text"
-              style={{ color: euiTheme.colors.textSubdued }}
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.fleet.epmList.manageIntegrations.actions.openMenuLabel',
                 { defaultMessage: 'Open actions menu' }
               )}
-              onClick={togglePopover}
-              data-test-subj="manageIntegrationActionsBtn"
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="boxesVertical"
+                color="text"
+                style={{ color: euiTheme.colors.textSubdued }}
+                aria-label={i18n.translate(
+                  'xpack.fleet.epmList.manageIntegrations.actions.openMenuLabel',
+                  { defaultMessage: 'Open actions menu' }
+                )}
+                onClick={togglePopover}
+                data-test-subj="manageIntegrationActionsBtn"
+              />
+            </EuiToolTip>
           }
           isOpen={isPopoverOpen}
           closePopover={closePopover}

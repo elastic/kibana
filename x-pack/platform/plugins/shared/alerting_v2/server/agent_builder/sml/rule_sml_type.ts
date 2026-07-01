@@ -11,6 +11,7 @@ import {
   RULE_ATTACHMENT_TYPE,
   RULE_SML_TYPE,
   ruleAttachmentDataSchema,
+  getBreachEsqlQuery,
 } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -61,7 +62,7 @@ export const createRuleSmlType = ({
       const description = attrs?.metadata?.description ?? '';
       const tags = attrs?.metadata?.tags?.join(', ') ?? '';
       const kind = attrs?.kind ?? '';
-      const query = attrs?.evaluation?.query?.base ?? '';
+      const query = attrs?.query ? getBreachEsqlQuery(attrs.query) : '';
 
       const contentParts = [name, description, kind, tags, query].filter(Boolean);
 
@@ -71,7 +72,6 @@ export const createRuleSmlType = ({
             type: RULE_SML_TYPE,
             title: name,
             content: contentParts.join('\n'),
-            permissions: [`api:${ALERTING_V2_API_PRIVILEGES.rules.read}`],
           },
         ],
       };
@@ -82,6 +82,15 @@ export const createRuleSmlType = ({
       return undefined;
     }
   },
+
+  /**
+   * Rules are gated by the Alerting v2 rules read API privilege — the same
+   * gate the rules API checks before surfacing rule data.
+   */
+  getPermissions: () => ({
+    kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
+    elasticsearch: { indices: [] },
+  }),
 
   toAttachment: async (item, context) => {
     try {

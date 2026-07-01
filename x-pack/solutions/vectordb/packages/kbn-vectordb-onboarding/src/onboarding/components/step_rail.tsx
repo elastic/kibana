@@ -41,10 +41,10 @@ const STEPS: StepConfig[] = [
     label: i18n.translate('vectordbOnboarding.wizard.steps.search', { defaultMessage: 'Search' }),
     description: {
       'generate-vectors': i18n.translate('vectordbOnboarding.wizard.steps.search.generate', {
-        defaultMessage: 'Run kNN queries for similarity matching.',
+        defaultMessage: 'Search across your data using vectors',
       }),
       'have-vectors': i18n.translate('vectordbOnboarding.wizard.steps.search.have', {
-        defaultMessage: 'Run kNN queries for similarity matching.',
+        defaultMessage: 'Search across your data using vectors',
       }),
     },
   },
