@@ -61,6 +61,14 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
     return item.listId === ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id;
   }
 
+  private async validateCustomYaraSignaturesFeatureEnabled(): Promise<void> {
+    if (!this.endpointAppContext.experimentalFeatures.customYaraSignaturesEnabled) {
+      throw new EndpointArtifactExceptionValidationError(
+        'Custom YARA signatures feature is not released yet'
+      );
+    }
+  }
+
   protected async validateHasWritePrivilege(): Promise<void> {
     return this.validateHasPrivilege('canWriteCustomYaraSignatures');
   }
@@ -70,6 +78,8 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
   }
 
   async validatePreImport(items: PromiseFromStreams): Promise<void> {
+    await this.validateCustomYaraSignaturesFeatureEnabled();
+
     await this.validateHasWritePrivilege();
 
     await this.validatePreImportItems(items, async (item) => {
@@ -87,6 +97,8 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
   async validatePreCreateItem(
     item: CreateExceptionListItemOptions
   ): Promise<CreateExceptionListItemOptions> {
+    await this.validateCustomYaraSignaturesFeatureEnabled();
+
     await this.validateHasWritePrivilege();
     await this.validateCustomYaraSignatureData(item);
     await this.validateCanCreateByPolicyArtifacts(item);
@@ -101,6 +113,8 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
     _updatedItem: UpdateExceptionListItemOptions,
     currentItem: ExceptionListItemSchema
   ): Promise<UpdateExceptionListItemOptions> {
+    await this.validateCustomYaraSignaturesFeatureEnabled();
+
     const updatedItem = _updatedItem as ExceptionItemLikeOptions;
 
     await this.validateHasWritePrivilege();
@@ -125,28 +139,40 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
   }
 
   async validatePreDeleteItem(currentItem: ExceptionListItemSchema): Promise<void> {
+    await this.validateCustomYaraSignaturesFeatureEnabled();
+
     await this.validateHasWritePrivilege();
     await this.validateCanDeleteItemInActiveSpace(currentItem);
   }
 
   async validatePreGetOneItem(currentItem: ExceptionListItemSchema): Promise<void> {
+    await this.validateCustomYaraSignaturesFeatureEnabled();
+
     await this.validateHasReadPrivilege();
     await this.validateCanReadItemInActiveSpace(currentItem);
   }
 
   async validatePreMultiListFind(): Promise<void> {
+    await this.validateCustomYaraSignaturesFeatureEnabled();
+
     await this.validateHasReadPrivilege();
   }
 
   async validatePreExport(): Promise<void> {
+    await this.validateCustomYaraSignaturesFeatureEnabled();
+
     await this.validateHasReadPrivilege();
   }
 
   async validatePreSingleListFind(): Promise<void> {
+    await this.validateCustomYaraSignaturesFeatureEnabled();
+
     await this.validateHasReadPrivilege();
   }
 
   async validatePreGetListSummary(): Promise<void> {
+    await this.validateCustomYaraSignaturesFeatureEnabled();
+
     await this.validateHasReadPrivilege();
   }
 
