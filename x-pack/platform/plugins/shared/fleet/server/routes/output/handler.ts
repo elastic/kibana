@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import Boom from '@hapi/boom';
@@ -191,7 +192,10 @@ async function validateOutputServerless(
       return;
     }
   } catch (e) {
-    // Private endpoint SO not present — PrivateLink not enabled for this project.
+    if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      throw e;
+    }
+    appContextService.getLogger().debug(`Private ES output SO not found: ${e?.message ?? e}`);
   }
 
   throw Boom.badRequest(

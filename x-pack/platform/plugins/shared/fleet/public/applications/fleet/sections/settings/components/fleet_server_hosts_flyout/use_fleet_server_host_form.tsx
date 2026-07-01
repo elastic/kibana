@@ -176,7 +176,6 @@ export function useFleetServerHostsForm(
   );
 
   const proxyIdInput = useInput(fleetServerHost?.proxy_id ?? '', () => undefined, isEditDisabled);
-
   const sslCertificateAuthoritiesInput = useComboInput(
     'sslCertificateAuthoritiesComboxBox',
     fleetServerHost?.ssl?.certificate_authorities ?? [],

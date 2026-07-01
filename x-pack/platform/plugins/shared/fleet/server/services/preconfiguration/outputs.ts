@@ -38,9 +38,15 @@ import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
 import { isAgentlessEnabled } from '../utils/agentless';
 
-import { isDifferent } from './utils';
+import { applyAllowEditOverrides, isDifferent } from './utils';
 
 export const MAX_CONCURRENT_OUTPUTS_OPERATIONS = 50;
+
+const PRIVATELINK_ALLOW_EDIT = ['is_default', 'is_default_monitoring'];
+const PRIVATELINK_OUTPUT_IDS = new Set([
+  SERVERLESS_DEFAULT_OUTPUT_ID,
+  SERVERLESS_PRIVATE_OUTPUT_ID,
+]);
 
 export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
   const { outputs: outputsOrUndefined } = config;
@@ -99,13 +105,7 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
   // We set allow_edit here (rather than requiring it in every config that defines these
   // outputs) so that the behaviour is consistent regardless of how the output was defined
   // (hardcoded above or passed in via config.outputs in the serverless YAML).
-  const PRIVATELINK_ALLOW_EDIT = ['is_default', 'is_default_monitoring'];
-  const PRIVATELINK_OUTPUT_IDS = new Set([
-    SERVERLESS_DEFAULT_OUTPUT_ID,
-    SERVERLESS_PRIVATE_OUTPUT_ID,
-  ]);
-
-  const result = outputs.map((output) => {
+  return outputs.map((output) => {
     if (!PRIVATELINK_OUTPUT_IDS.has(output.id)) {
       return output;
     }
@@ -113,8 +113,6 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
     const merged = Array.from(new Set([...existingAllowEdit, ...PRIVATELINK_ALLOW_EDIT]));
     return { ...output, allow_edit: merged };
   });
-
-  return result;
 }
 
 export async function ensurePreconfiguredOutputs(
@@ -167,10 +165,11 @@ export async function createOrUpdatePreconfiguredOutputs(
 
     // field in allow edit are not updated through preconfiguration
     if (!isCreate && output.allow_edit) {
-      for (const key of output.allow_edit) {
-        // @ts-expect-error
-        data[key] = existingOutput[key];
-      }
+      applyAllowEditOverrides(
+        data as unknown as Record<string, unknown>,
+        existingOutput as unknown as Record<string, unknown>,
+        output.allow_edit
+      );
     }
 
     const isUpdateWithNewData =

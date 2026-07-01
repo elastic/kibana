@@ -25,8 +25,13 @@ import { isAgentlessEnabled } from '../utils/agentless';
 
 import { agentPolicyService } from '../agent_policy';
 
-import { isDifferent } from './utils';
+import { applyAllowEditOverrides, isDifferent } from './utils';
 import { hashSecret, isSecretDifferent } from './outputs';
+
+const PRIVATELINK_HOST_IDS = new Set([
+  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+  SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+]);
 
 export function getCloudFleetServersHosts() {
   const cloudSetup = appContextService.getCloud();
@@ -100,11 +105,6 @@ export function getPreconfiguredFleetServerHostFromConfig(
   // is_default field to be changed at runtime (via the PrivateLink toggle in Fleet Settings).
   // Without this, the preconfig sync would revert a runtime is_default change on every restart
   // because isPreconfiguredFleetServerHostDifferentFromCurrent diffs is_default.
-  const PRIVATELINK_HOST_IDS = new Set([
-    SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
-    SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
-  ]);
-
   return fleetServerHosts.map((host) => {
     if (!PRIVATELINK_HOST_IDS.has(host.id)) {
       return host;
@@ -161,10 +161,11 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
       // overwritten by the preconfigured value — matching the same pattern in outputs.ts.
       // This allows the PrivateLink toggle to flip is_default at runtime and survive restarts.
       if (existingHost && preconfiguredFleetServerHost.allow_edit) {
-        for (const key of preconfiguredFleetServerHost.allow_edit) {
-          // @ts-expect-error dynamic key access
-          data[key] = existingHost[key];
-        }
+        applyAllowEditOverrides(
+          data as unknown as Record<string, unknown>,
+          existingHost as unknown as Record<string, unknown>,
+          preconfiguredFleetServerHost.allow_edit
+        );
       }
 
       const isCreate = !existingHost;

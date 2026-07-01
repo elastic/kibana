@@ -81,7 +81,9 @@ async function checkFleetServerHostsWriteAPIsAllowed(
       return;
     }
   } catch (e) {
-    // Private endpoint SO not present — PrivateLink not enabled for this project.
+    appContextService
+      .getLogger()
+      .debug(`Could not fetch private Fleet Server host SO: ${e?.message ?? e}`);
   }
 
   throw new FleetServerHostUnauthorizedError(
