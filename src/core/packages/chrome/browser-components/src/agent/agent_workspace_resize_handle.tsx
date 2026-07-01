@@ -8,11 +8,12 @@
  */
 
 import type { FC, KeyboardEvent, MouseEvent, TouchEvent } from 'react';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { EuiResizableButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { clampAgentWorkspaceWidth } from '@kbn/ui-chrome-layout-constants';
+import { useLayoutUpdate } from '@kbn/ui-chrome-layout';
 
 const resizeButtonStyles = css`
   flex-shrink: 0;
@@ -41,8 +42,27 @@ export const AgentWorkspaceResizeHandle: FC<AgentWorkspaceResizeHandleProps> = (
   agentWorkspaceOpen,
   onWidthChange,
 }) => {
+  const updateLayout = useLayoutUpdate();
   const startXRef = useRef<number>(0);
   const startWidthRef = useRef<number>(0);
+  const isResizingRef = useRef(false);
+
+  const setAgentPanelResizing = useCallback(
+    (agentPanelResizing: boolean) => {
+      isResizingRef.current = agentPanelResizing;
+      updateLayout({ agentPanelResizing });
+    },
+    [updateLayout]
+  );
+
+  useEffect(
+    () => () => {
+      if (isResizingRef.current) {
+        updateLayout({ agentPanelResizing: false });
+      }
+    },
+    [updateLayout]
+  );
 
   const setWidth = useCallback(
     (nextWidth: number) => {
@@ -63,6 +83,7 @@ export const AgentWorkspaceResizeHandle: FC<AgentWorkspaceResizeHandleProps> = (
     (e: MouseEvent) => {
       startXRef.current = e.clientX;
       startWidthRef.current = width;
+      setAgentPanelResizing(true);
 
       const handleMouseMove = (moveEvent: globalThis.MouseEvent) => {
         const delta = moveEvent.clientX - startXRef.current;
@@ -72,12 +93,13 @@ export const AgentWorkspaceResizeHandle: FC<AgentWorkspaceResizeHandleProps> = (
       const handleMouseUp = () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
+        setAgentPanelResizing(false);
       };
 
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     },
-    [setWidth, width]
+    [setAgentPanelResizing, setWidth, width]
   );
 
   const handleTouchStart = useCallback(
@@ -85,6 +107,7 @@ export const AgentWorkspaceResizeHandle: FC<AgentWorkspaceResizeHandleProps> = (
       const touch = e.touches[0];
       startXRef.current = touch.clientX;
       startWidthRef.current = width;
+      setAgentPanelResizing(true);
 
       const handleTouchMove = (moveEvent: globalThis.TouchEvent) => {
         const moveTouch = moveEvent.touches[0];
@@ -95,12 +118,13 @@ export const AgentWorkspaceResizeHandle: FC<AgentWorkspaceResizeHandleProps> = (
       const handleTouchEnd = () => {
         document.removeEventListener('touchmove', handleTouchMove);
         document.removeEventListener('touchend', handleTouchEnd);
+        setAgentPanelResizing(false);
       };
 
       document.addEventListener('touchmove', handleTouchMove);
       document.addEventListener('touchend', handleTouchEnd);
     },
-    [setWidth, width]
+    [setAgentPanelResizing, setWidth, width]
   );
 
   const handleKeyDown = useCallback(
@@ -114,10 +138,14 @@ export const AgentWorkspaceResizeHandle: FC<AgentWorkspaceResizeHandleProps> = (
 
       if (delta !== 0) {
         e.preventDefault();
+        setAgentPanelResizing(true);
         setWidth(width + delta);
+        requestAnimationFrame(() => {
+          setAgentPanelResizing(false);
+        });
       }
     },
-    [setWidth, width]
+    [setAgentPanelResizing, setWidth, width]
   );
 
   if (!applicationWorkspaceOpen || !agentWorkspaceOpen) {
