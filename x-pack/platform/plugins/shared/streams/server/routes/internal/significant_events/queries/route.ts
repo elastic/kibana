@@ -24,7 +24,7 @@ import {
   computeOccurrences,
   fetchQueryLinks,
   getQueryOccurrences,
-  toSignificantEventResponse,
+  toQueryOccurrenceSeries,
   type QueryOccurrences,
 } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
 import { searchModeSchema } from '../../../utils/search_mode';
@@ -351,7 +351,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
     );
     const queryOccurrences: QueryOccurrences = { queryLinks: pageLinks, ...occurrences };
     const queriesPage = pageLinks.map((queryLink) =>
-      toSignificantEventResponse({ queryLink, queryOccurrences })
+      toQueryOccurrenceSeries({ queryLink, queryOccurrences })
     );
 
     return { queries: queriesPage, page, perPage, total };
@@ -545,7 +545,7 @@ const persistQueriesRoute = createServerRoute({
   },
 });
 
-export const internalQueriesRoutes = {
+export const internalSignificantEventsQueriesRoutes = {
   ...promoteUnbackedQueriesRoute,
   ...demoteBackedQueriesRoute,
   ...bulkDeleteQueriesRoute,

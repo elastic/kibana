@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SignificantEventsGetResponse } from '@kbn/significant-events-schema';
+import type { QueryOccurrencesResponse } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/significant_events/helpers/fill_bucket_gaps';
 import { fetchQueryOccurrencesFromAlerts } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
-import { getSignificantEventsResponse } from '../../../../oas_examples';
+import { getQueryOccurrenceStatsResponse } from '../../../../oas_examples';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { searchModeSchema } from '../../../utils/search_mode';
@@ -23,7 +23,7 @@ const makeDateFromString = (description: string) =>
     .describe(description)
     .transform((input) => new Date(input));
 
-const readStreamSignificantEventsRoute = createServerRoute({
+const readStreamQueryOccurrenceStatsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events 2023-10-31',
   params: z.object({
     path: z.object({ name: z.string().describe('The name of the stream.') }),
@@ -72,7 +72,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
           content: {
             'application/json': {
               examples: {
-                significantEvents: { value: getSignificantEventsResponse },
+                queryOccurrenceStats: { value: getQueryOccurrenceStatsResponse },
               },
             },
           },
@@ -90,7 +90,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-  }): Promise<SignificantEventsGetResponse> => {
+  }): Promise<QueryOccurrencesResponse> => {
     const scopedClients = await getScopedClients({ request });
     const { streamsClient, scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
@@ -119,5 +119,5 @@ const readStreamSignificantEventsRoute = createServerRoute({
 });
 
 export const significantEventsRoutes = {
-  ...readStreamSignificantEventsRoute,
+  ...readStreamQueryOccurrenceStatsRoute,
 };

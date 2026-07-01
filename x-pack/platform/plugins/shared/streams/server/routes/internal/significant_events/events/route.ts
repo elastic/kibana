@@ -307,7 +307,7 @@ const eventsTriggerInvestigationRoute = createServerRoute({
   },
 });
 
-export const internalSigEventsEventsRoutes = {
+export const internalSignificantEventsEventsRoutes = {
   ...eventsSearchRoute,
   ...eventsHistoryRoute,
   ...eventsLifecycleRoute,

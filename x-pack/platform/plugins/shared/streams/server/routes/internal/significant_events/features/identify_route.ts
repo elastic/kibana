@@ -307,7 +307,7 @@ const shouldIdentifyRoute = createServerRoute({
 // Exports
 // ---------------------------------------------------------------------------
 
-export const identifyFeaturesRoutes = {
+export const identifySignificantEventsFeaturesRoutes = {
   ...identifyInferredFeaturesRoute,
   ...identifyComputedFeaturesRoute,
   ...shouldIdentifyRoute,

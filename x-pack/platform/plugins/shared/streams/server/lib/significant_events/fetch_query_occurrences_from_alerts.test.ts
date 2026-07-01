@@ -102,7 +102,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
       { kiClient, scopedClusterClient }
     );
 
-    expect(result).toEqual({ significant_events: [], aggregated_occurrences: [] });
+    expect(result).toEqual({ queries: [], aggregated_occurrences: [] });
     expect(esqlQuery).not.toHaveBeenCalled();
   });
 
@@ -124,10 +124,8 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
       { kiClient, scopedClusterClient }
     );
 
-    const ruleA = result.significant_events.find(
-      (e) => e.stream_name === 'logs.test' && e.id === 'qa'
-    )!;
-    const ruleB = result.significant_events.find((e) => e.id === 'qb')!;
+    const ruleA = result.queries.find((e) => e.stream_name === 'logs.test' && e.id === 'qa')!;
+    const ruleB = result.queries.find((e) => e.id === 'qb')!;
 
     // 6 buckets at 1m across [00:00, 00:05] inclusive
     expect(ruleA.occurrences).toHaveLength(6);
@@ -150,8 +148,8 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
       { kiClient, scopedClusterClient }
     );
 
-    const ruleA = result.significant_events.find((e) => e.id === 'qa')!;
-    const ruleB = result.significant_events.find((e) => e.id === 'qb')!;
+    const ruleA = result.queries.find((e) => e.id === 'qa')!;
+    const ruleB = result.queries.find((e) => e.id === 'qb')!;
 
     expect(ruleA.occurrences).toHaveLength(6);
     expect(ruleB.occurrences).toEqual([]);
@@ -191,8 +189,8 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
       { kiClient, scopedClusterClient }
     );
 
-    expect(result.significant_events).toHaveLength(1);
-    expect(result.significant_events[0].occurrences).toEqual([]);
+    expect(result.queries).toHaveLength(1);
+    expect(result.queries[0].occurrences).toEqual([]);
     expect(result.aggregated_occurrences).toEqual([]);
   });
 
@@ -263,8 +261,8 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
       { kiClient, scopedClusterClient }
     );
 
-    expect(result.significant_events).toHaveLength(1);
-    expect(result.significant_events[0].occurrences).toEqual([]);
+    expect(result.queries).toHaveLength(1);
+    expect(result.queries[0].occurrences).toEqual([]);
     expect(result.aggregated_occurrences).toEqual([]);
   });
 
@@ -431,10 +429,8 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
         scopedClusterClient,
       });
 
-      const ruleA = result.significant_events.find(
-        (e) => e.stream_name === 'logs.test' && e.id === 'qa'
-      )!;
-      const ruleB = result.significant_events.find((e) => e.id === 'qb')!;
+      const ruleA = result.queries.find((e) => e.stream_name === 'logs.test' && e.id === 'qa')!;
+      const ruleB = result.queries.find((e) => e.id === 'qb')!;
 
       expect(ruleA.occurrences).toHaveLength(6);
       expect(ruleA.occurrences.map((o) => o.count)).toEqual([2, 0, 1, 0, 0, 0]);
@@ -455,8 +451,8 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
         scopedClusterClient,
       });
 
-      expect(result.significant_events).toHaveLength(1);
-      expect(result.significant_events[0].occurrences).toEqual([]);
+      expect(result.queries).toHaveLength(1);
+      expect(result.queries[0].occurrences).toEqual([]);
       expect(result.aggregated_occurrences).toEqual([]);
     });
 
