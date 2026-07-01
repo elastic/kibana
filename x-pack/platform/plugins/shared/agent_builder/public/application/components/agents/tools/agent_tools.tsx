@@ -305,20 +305,7 @@ export const AgentTools: React.FC = () => {
                         <EuiContextMenuPanel
                           items={[
                             <EuiContextMenuItem
-                              key="createNewTool"
-                              icon="plusInCircle"
-                              onClick={handleCreateNewTool}
-                              {...getEbtProps({
-                                element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                                action:
-                                  AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_CREATE_NEW,
-                                detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
-                              })}
-                            >
-                              {labels.agentTools.createNewToolMenuItem}
-                            </EuiContextMenuItem>,
-                            <EuiContextMenuItem
-                              key="fromLibrary"
+                              key="importFromLibrary"
                               icon="importAction"
                               onClick={handleAddFromLibrary}
                               {...getEbtProps({
@@ -329,7 +316,20 @@ export const AgentTools: React.FC = () => {
                                 detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
                               })}
                             >
-                              {labels.agentTools.fromLibraryMenuItem}
+                              {labels.agentTools.importFromLibraryMenuItem}
+                            </EuiContextMenuItem>,
+                            <EuiContextMenuItem
+                              key="createTool"
+                              icon="pencil"
+                              onClick={handleCreateNewTool}
+                              {...getEbtProps({
+                                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                                action:
+                                  AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_CREATE_NEW,
+                                detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+                              })}
+                            >
+                              {labels.agentTools.createToolMenuItem}
                             </EuiContextMenuItem>,
                           ]}
                         />

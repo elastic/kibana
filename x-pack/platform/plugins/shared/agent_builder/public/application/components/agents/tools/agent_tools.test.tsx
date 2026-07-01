@@ -125,8 +125,8 @@ describe('AgentTools', () => {
 
     await user.click(screen.getByTestId('agentBuilderAddToolButton'));
 
-    expect(screen.getByText('Create new tool')).toBeInTheDocument();
-    expect(screen.getByText('From library')).toBeInTheDocument();
+    expect(screen.getByText('Import from tool library')).toBeInTheDocument();
+    expect(screen.getByText('Create a tool')).toBeInTheDocument();
   });
 
   it('opens library flyout when "Add from library" is clicked', async () => {
@@ -137,21 +137,21 @@ describe('AgentTools', () => {
     renderComponent();
 
     await user.click(screen.getByTestId('agentBuilderAddToolButton'));
-    await user.click(screen.getByText('From library'));
+    await user.click(screen.getByText('Import from tool library'));
 
     expect(openFlyout).toHaveBeenCalledTimes(1);
   });
 
-  it('closes dropdown when "Create new tool" is clicked (no-op stub)', async () => {
+  it('closes dropdown when "Create a tool" is clicked (no-op stub)', async () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
     renderComponent();
 
     await user.click(screen.getByTestId('agentBuilderAddToolButton'));
-    expect(screen.getByText('Create new tool')).toBeInTheDocument();
+    expect(screen.getByText('Create a tool')).toBeInTheDocument();
 
-    await user.click(screen.getByText('Create new tool'));
+    await user.click(screen.getByText('Create a tool'));
 
-    expect(screen.queryByText('Create new tool')).not.toBeInTheDocument();
+    expect(screen.queryByText('Create a tool')).not.toBeInTheDocument();
   });
 
   it('hides the Add tool button when canEditAgent is false', () => {
