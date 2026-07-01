@@ -76,4 +76,3 @@ Prefer 3-5 total gaps. Do not repeat all 11 dimensions unless that is necessary 
 - **Do not fabricate**: only report what is actually in memory or discoverable via tools.
 - **Always overwrite**: use `platform_streams_memory_write` (not patch) to replace the entire `_gaps/overview` page each run.
 - **Categories**: assign the page to categories `['_system/gaps']`.
-- **Actionable gaps only**: the `_gaps/overview` page must only contain gaps that represent missing data or access that can reasonably be provided — structural deficiencies that can be fixed. Do NOT include incident-specific observations (e.g. "during outage X the pod had no logs", "the service crashed and produced no telemetry") — those are incident facts, not actionable gaps. Every gap entry should read as something that can be acted on: "No traces for service Y", "Infrastructure metrics not flowing for host Z", "No code access configured for service W".

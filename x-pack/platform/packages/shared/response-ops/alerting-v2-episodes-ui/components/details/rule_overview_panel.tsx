@@ -108,7 +108,7 @@ export const AlertEpisodeRuleOverviewPanel = ({
   );
 
   return (
-    <>
+    <div>
       <EuiFlexGroup
         alignItems="center"
         justifyContent="spaceBetween"
@@ -126,6 +126,6 @@ export const AlertEpisodeRuleOverviewPanel = ({
       >
         {bodyInner}
       </EuiPanel>
-    </>
+    </div>
   );
 };
