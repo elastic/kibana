@@ -1053,6 +1053,265 @@ describe('AgentlessPoliciesService', () => {
     });
   });
 
+  describe('bulkUpgradeAgentlessPolicies', () => {
+    let packagePolicyService: ReturnType<typeof createPackagePolicyServiceMock>;
+
+    const createService = () =>
+      new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        savedObjectsClientMock.create(),
+        elasticsearchServiceMock.createClusterClient().asInternalUser,
+        loggingSystemMock.createLogger()
+      );
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+      packagePolicyService = createPackagePolicyServiceMock();
+    });
+
+    it('should upgrade each agentless policy and let the engine schedule the deploy', async () => {
+      packagePolicyService.getByIDs.mockResolvedValue([
+        buildAgentlessPackagePolicy({ id: 'a' }),
+        buildAgentlessPackagePolicy({ id: 'b' }),
+      ]);
+      packagePolicyService.bulkUpgrade.mockResolvedValue([
+        { id: 'a', name: 'A', success: true },
+        { id: 'b', name: 'B', success: true },
+      ]);
+
+      const result = await createService().bulkUpgradeAgentlessPolicies(['a', 'b']);
+
+      // Only the (guarded) agentless ids are forwarded to the package-policy engine.
+      expect(packagePolicyService.bulkUpgrade).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        ['a', 'b'],
+        expect.objectContaining({})
+      );
+      // The deploy is scheduled asynchronously by the engine (mirrors package-policy),
+      // so this path does not deploy synchronously itself.
+      expect(jest.mocked(agentPolicyService.deployPolicy)).not.toHaveBeenCalled();
+      expect(result).toEqual([
+        { id: 'a', name: 'A', success: true },
+        { id: 'b', name: 'B', success: true },
+      ]);
+    });
+
+    it('should collect missing and non-agentless ids as per-policy 404 failures without failing the batch', async () => {
+      // 'a' is agentless, 'b' is a regular package policy, 'c' is missing.
+      packagePolicyService.getByIDs.mockResolvedValue([
+        buildAgentlessPackagePolicy({ id: 'a' }),
+        buildAgentlessPackagePolicy({ id: 'b', supports_agentless: false }),
+      ]);
+      packagePolicyService.bulkUpgrade.mockResolvedValue([{ id: 'a', name: 'A', success: true }]);
+
+      const result = await createService().bulkUpgradeAgentlessPolicies(['a', 'b', 'c']);
+
+      expect(packagePolicyService.bulkUpgrade).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        ['a'],
+        expect.objectContaining({})
+      );
+      // Results are returned in the requested id order, not grouped by guard failures.
+      expect(result).toEqual([
+        { id: 'a', name: 'A', success: true },
+        {
+          id: 'b',
+          success: false,
+          statusCode: 404,
+          body: { message: 'Agentless policy b not found' },
+        },
+        {
+          id: 'c',
+          success: false,
+          statusCode: 404,
+          body: { message: 'Agentless policy c not found' },
+        },
+      ]);
+    });
+
+    it('should return results in the requested id order when guard failures are interleaved', async () => {
+      // 'missing' fails the guard; 'a' and 'b' are agentless and upgrade successfully.
+      packagePolicyService.getByIDs.mockResolvedValue([
+        buildAgentlessPackagePolicy({ id: 'a' }),
+        buildAgentlessPackagePolicy({ id: 'b' }),
+      ]);
+      packagePolicyService.bulkUpgrade.mockResolvedValue([
+        { id: 'a', name: 'A', success: true },
+        { id: 'b', name: 'B', success: true },
+      ]);
+
+      const result = await createService().bulkUpgradeAgentlessPolicies(['a', 'missing', 'b']);
+
+      expect(result.map((item) => item.id)).toEqual(['a', 'missing', 'b']);
+    });
+
+    it('should pass through a bulkUpgrade per-policy failure without rolling back the saved object', async () => {
+      packagePolicyService.getByIDs.mockResolvedValue([buildAgentlessPackagePolicy({ id: 'a' })]);
+      packagePolicyService.bulkUpgrade.mockResolvedValue([
+        { id: 'a', name: 'A', success: false, statusCode: 400, body: { message: 'ineligible' } },
+      ]);
+
+      const result = await createService().bulkUpgradeAgentlessPolicies(['a']);
+
+      // The engine owns the deploy; no synchronous deploy or SO rollback happens here
+      // (matches package-policy bulk upgrade).
+      expect(jest.mocked(agentPolicyService.deployPolicy)).not.toHaveBeenCalled();
+      expect(packagePolicyService.update).not.toHaveBeenCalled();
+      expect(result).toEqual([
+        { id: 'a', name: 'A', success: false, statusCode: 400, body: { message: 'ineligible' } },
+      ]);
+    });
+
+    it('should not call bulkUpgrade when every id fails the agentless guard', async () => {
+      packagePolicyService.getByIDs.mockResolvedValue([]);
+
+      const result = await createService().bulkUpgradeAgentlessPolicies(['x']);
+
+      expect(packagePolicyService.bulkUpgrade).not.toHaveBeenCalled();
+      expect(result).toEqual([
+        {
+          id: 'x',
+          success: false,
+          statusCode: 404,
+          body: { message: 'Agentless policy x not found' },
+        },
+      ]);
+    });
+  });
+
+  describe('getAgentlessPolicyUpgradeDryRunDiff', () => {
+    let packagePolicyService: ReturnType<typeof createPackagePolicyServiceMock>;
+
+    const createService = () =>
+      new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        savedObjectsClientMock.create(),
+        elasticsearchServiceMock.createClusterClient().asInternalUser,
+        loggingSystemMock.createLogger()
+      );
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+      packagePolicyService = createPackagePolicyServiceMock();
+    });
+
+    it('should project the diff into a clean, PUT-consumable agentless policy', async () => {
+      packagePolicyService.getByIDs.mockResolvedValue([buildAgentlessPackagePolicy({ id: 'a' })]);
+      packagePolicyService.getUpgradeDryRunDiff.mockResolvedValue({
+        name: 'Test Agentless Policy',
+        hasErrors: false,
+        diff: [
+          buildAgentlessPackagePolicy({ id: 'a' }),
+          {
+            name: 'Test Agentless Policy',
+            namespace: 'default',
+            package: { name: 'test_agentless', title: 'Test Agentless', version: '2.0.0' },
+            inputs: [],
+            vars: {},
+          },
+        ],
+      } as any);
+
+      const result = await createService().getAgentlessPolicyUpgradeDryRunDiff(['a']);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          id: 'a',
+          name: 'Test Agentless Policy',
+          hasErrors: false,
+          currentVersion: '1.0.0',
+          proposedVersion: '2.0.0',
+          proposedPolicy: expect.objectContaining({
+            id: 'a',
+            package: expect.objectContaining({ version: '2.0.0' }),
+          }),
+        })
+      );
+      // The proposed policy must be the clean agentless shape, never Fleet internals.
+      expect(result[0].proposedPolicy).not.toHaveProperty('supports_agentless');
+      expect(result[0].proposedPolicy).not.toHaveProperty('policy_ids');
+      expect(result[0].proposedPolicy).not.toHaveProperty('revision');
+    });
+
+    it('should surface migration errors and mark the item as having errors', async () => {
+      packagePolicyService.getByIDs.mockResolvedValue([buildAgentlessPackagePolicy({ id: 'a' })]);
+      packagePolicyService.getUpgradeDryRunDiff.mockResolvedValue({
+        name: 'Test Agentless Policy',
+        hasErrors: true,
+        diff: [
+          buildAgentlessPackagePolicy({ id: 'a' }),
+          {
+            name: 'Test Agentless Policy',
+            namespace: 'default',
+            package: { name: 'test_agentless', title: 'Test Agentless', version: '2.0.0' },
+            inputs: [],
+            vars: {},
+            errors: [{ key: 'some.input', message: 'bad var' }],
+          },
+        ],
+      } as any);
+
+      const result = await createService().getAgentlessPolicyUpgradeDryRunDiff(['a']);
+
+      expect(result[0].hasErrors).toBe(true);
+      // Only the human-readable message is exposed (the internal input key is dropped).
+      expect(result[0].errors).toEqual([{ message: 'bad var' }]);
+    });
+
+    it('should surface a non-throwing fatal dry-run item statusCode and message', async () => {
+      packagePolicyService.getByIDs.mockResolvedValue([buildAgentlessPackagePolicy({ id: 'a' })]);
+      // getUpgradeDryRunDiff reports a per-policy fatal error without throwing and without a
+      // `diff` pair (e.g. package not installed / ineligible upgrade).
+      packagePolicyService.getUpgradeDryRunDiff.mockResolvedValue({
+        hasErrors: true,
+        statusCode: 400,
+        body: { message: 'Package test_agentless is not installed' },
+      } as any);
+
+      const result = await createService().getAgentlessPolicyUpgradeDryRunDiff(['a']);
+
+      expect(result).toEqual([
+        {
+          id: 'a',
+          name: undefined,
+          hasErrors: true,
+          statusCode: 400,
+          body: { message: 'Package test_agentless is not installed' },
+        },
+      ]);
+    });
+
+    it('should surface guard failures as dry-run items without calling getUpgradeDryRunDiff', async () => {
+      packagePolicyService.getByIDs.mockResolvedValue([]);
+
+      const result = await createService().getAgentlessPolicyUpgradeDryRunDiff(['x']);
+
+      expect(packagePolicyService.getUpgradeDryRunDiff).not.toHaveBeenCalled();
+      expect(result).toEqual([
+        {
+          id: 'x',
+          hasErrors: true,
+          statusCode: 404,
+          body: { message: 'Agentless policy x not found' },
+        },
+      ]);
+    });
+
+    it('should demote a dry-run error to a per-policy failure', async () => {
+      packagePolicyService.getByIDs.mockResolvedValue([buildAgentlessPackagePolicy({ id: 'a' })]);
+      packagePolicyService.getUpgradeDryRunDiff.mockRejectedValueOnce(new Error('boom'));
+
+      const result = await createService().getAgentlessPolicyUpgradeDryRunDiff(['a']);
+
+      expect(result).toEqual([
+        { id: 'a', hasErrors: true, statusCode: 500, body: { message: 'boom' } },
+      ]);
+    });
+  });
+
   describe('createAgentlessPolicy with cloud connectors', () => {
     let packagePolicyService: ReturnType<typeof createPackagePolicyServiceMock>;
 

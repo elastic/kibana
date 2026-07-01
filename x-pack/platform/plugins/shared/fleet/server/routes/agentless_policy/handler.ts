@@ -7,12 +7,14 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import pMap from 'p-map';
+import { uniq } from 'lodash';
 
 import type { CreateAgentlessPolicyRequestSchema } from '../../../common/types';
 import { appContextService, packagePolicyService } from '../../services';
 import type { FleetRequestHandler, ListAgentlessPoliciesRequestSchema } from '../../types';
 import { AgentlessPoliciesServiceImpl } from '../../services/agentless/agentless_policies';
 import type {
+  BulkUpgradeAgentlessPoliciesRequestSchema,
   DeleteAgentlessPolicyRequestSchema,
   GetBulkAgentlessPolicyThroughputRequestSchema,
   GetAgentlessPolicyRequestSchema,
@@ -115,6 +117,81 @@ export const updateAgentlessPolicyHandler: FleetRequestHandler<
       item,
     },
   });
+};
+
+export const bulkUpgradeAgentlessPoliciesHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof BulkUpgradeAgentlessPoliciesRequestSchema.body>
+> = async (context, request, response) => {
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  const logger = appContextService.getLogger().get('agentless');
+
+  const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+    fleetContext.packagePolicyService.asCurrentUser,
+    soClient,
+    esClient,
+    logger
+  );
+
+  const policyIds = uniq(request.body.policyIds);
+  const body = await agentlessPoliciesService.bulkUpgradeAgentlessPolicies(policyIds, request);
+
+  // Mirror the package-policy bulk upgrade handler: promote the first per-policy fatal
+  // error (a 404 guard failure or an ineligible-upgrade error) to a top-level HTTP error
+  // so consumers and error-rate monitoring see a non-2xx. Note this returns a message-only
+  // body: the per-policy array is only returned on the 200 path, so any ids that upgraded
+  // successfully in the same batch are persisted but not reported back to the caller here.
+  const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
+  if (firstFatalError?.statusCode) {
+    return response.customError({
+      statusCode: firstFatalError.statusCode,
+      body: { message: firstFatalError.body?.message ?? 'Bulk upgrade failed' },
+    });
+  }
+
+  return response.ok({ body });
+};
+
+export const upgradeAgentlessPoliciesDryRunHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof BulkUpgradeAgentlessPoliciesRequestSchema.body>
+> = async (context, request, response) => {
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  const logger = appContextService.getLogger().get('agentless');
+
+  const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+    fleetContext.packagePolicyService.asCurrentUser,
+    soClient,
+    esClient,
+    logger
+  );
+
+  const policyIds = uniq(request.body.policyIds);
+  const body = await agentlessPoliciesService.getAgentlessPolicyUpgradeDryRunDiff(policyIds);
+
+  // Mirror the package-policy dry-run handler: a per-policy hard failure (guard 404 or a
+  // fatal dry-run error) is promoted to a top-level HTTP error with a message-only body,
+  // so the per-policy previews are only returned on the 200 path. Soft migration errors
+  // (which carry `errors`/`proposedPolicy` but no `statusCode`) keep the batch at 200.
+  const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
+  if (firstFatalError?.statusCode) {
+    return response.customError({
+      statusCode: firstFatalError.statusCode,
+      body: { message: firstFatalError.body?.message ?? 'Upgrade dry-run failed' },
+    });
+  }
+
+  return response.ok({ body });
 };
 
 export const getAgentlessPolicyHandler: FleetRequestHandler<
