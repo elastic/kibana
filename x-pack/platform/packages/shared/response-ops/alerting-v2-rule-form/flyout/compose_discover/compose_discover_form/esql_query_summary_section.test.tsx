@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { RuleQuery } from '../compose_form_types';
+import type { RuleQuery } from '../../../form/types';
 import {
   EsqlQuerySummarySection,
   getEsqlSummaryState,

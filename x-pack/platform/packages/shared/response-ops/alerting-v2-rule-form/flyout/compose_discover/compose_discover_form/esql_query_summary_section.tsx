@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RuleQuery } from '../compose_form_types';
+import type { RuleQuery } from '../../../form/types';
 import { QuerySummary } from '../query_summary';
 
 /**

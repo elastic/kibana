@@ -19,12 +19,11 @@ import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
-import type { FormValues } from '../../form/types';
+import type { FormValues, RuleQuery } from '../../form/types';
 import { createTestQueryClient } from '../../test_utils';
 import { ComposeDiscoverFlyout } from './compose_discover_flyout';
 import type { ComposeDiscoverFlyoutProps } from './compose_discover_flyout';
 import type { ComposeDiscoverForm } from './compose_discover_form';
-import type { RuleQuery } from './compose_form_types';
 
 type FormProps = React.ComponentProps<typeof ComposeDiscoverForm>;
 
@@ -549,6 +548,82 @@ describe('ComposeDiscoverFlyout', () => {
       );
 
       expect(screen.queryByTestId('ruleV2FlyoutValidationErrors')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('initialQuery in builder mode', () => {
+    it('seeds the form query when the Discover query is a parseable loose query', () => {
+      renderFlyout({
+        builderType: 'threshold',
+        initialQuery: 'FROM logs-* | WHERE status >= 500',
+      });
+
+      const committed = readCommittedQuery?.();
+      expect(committed?.format).toBe('composed');
+      if (committed?.format !== 'composed') {
+        throw new Error('expected composed query');
+      }
+      expect(committed.base).toContain('FROM logs-*');
+      expect(committed.breach.segment).toContain('WHERE');
+    });
+
+    it('seeds the form query when the Discover query is a full threshold query', () => {
+      renderFlyout({
+        builderType: 'threshold',
+        initialQuery: 'FROM logs-* | STATS count = COUNT(*) | WHERE count > 100',
+      });
+
+      const committed = readCommittedQuery?.();
+      expect(committed?.format).toBe('composed');
+      if (committed?.format !== 'composed') {
+        throw new Error('expected composed query');
+      }
+      expect(committed.base).toContain('FROM logs-*');
+      expect(committed.breach.segment).toContain('WHERE');
+    });
+
+    it('keeps the form query empty when the Discover query is unparseable', () => {
+      renderFlyout({
+        builderType: 'threshold',
+        initialQuery: 'ROW x = 1',
+      });
+
+      const committed = readCommittedQuery?.();
+      expect(committed?.format).toBe('composed');
+      if (committed?.format !== 'composed') {
+        throw new Error('expected composed query');
+      }
+      expect(committed.base).toBe('');
+      expect(committed.breach.segment).toBe('');
+    });
+
+    it('keeps the form query empty when the Discover query has syntax errors', () => {
+      renderFlyout({
+        builderType: 'threshold',
+        initialQuery: 'FROM logs-* | WERE status >= 500',
+      });
+
+      const committed = readCommittedQuery?.();
+      expect(committed?.format).toBe('composed');
+      if (committed?.format !== 'composed') {
+        throw new Error('expected composed query');
+      }
+      expect(committed.base).toBe('');
+      expect(committed.breach.segment).toBe('');
+    });
+
+    it('still seeds the form query for ES|QL mode (no builderType) with any valid query', () => {
+      renderFlyout({
+        initialQuery: 'FROM logs-* | WHERE status >= 500',
+      });
+
+      const committed = readCommittedQuery?.();
+      expect(committed?.format).toBe('composed');
+      if (committed?.format !== 'composed') {
+        throw new Error('expected composed query');
+      }
+      expect(committed.base).toContain('FROM logs-*');
+      expect(committed.breach.segment).toContain('WHERE');
     });
   });
 

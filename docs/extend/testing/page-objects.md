@@ -23,7 +23,7 @@ import { test } from '../fixtures';
 test.describe('My suite', { tag: tags.deploymentAgnostic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
-    await pageObjects.discover.goto();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
   });
 });
 ```

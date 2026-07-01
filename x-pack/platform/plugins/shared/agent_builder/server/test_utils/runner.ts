@@ -102,10 +102,10 @@ export const createToolResultStoreMock = (): ToolResultStoreMock => {
     has: jest.fn(),
     get: jest.fn(),
     add: jest.fn(),
-    delete: jest.fn(),
     asReadonly: jest.fn(),
     getVolume: jest.fn().mockReturnValue(createEmptyVolumeMock()),
     getEntry: jest.fn().mockResolvedValue(undefined),
+    getEntryByResultId: jest.fn().mockResolvedValue(undefined),
     listEntries: jest.fn().mockResolvedValue([]),
     entryExists: jest.fn().mockResolvedValue(false),
   } as unknown as ToolResultStoreMock;
