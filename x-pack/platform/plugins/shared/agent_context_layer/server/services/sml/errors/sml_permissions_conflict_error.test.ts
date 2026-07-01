@@ -10,13 +10,13 @@ import { SmlPermissionsConflictError } from './sml_permissions_conflict_error';
 
 describe('SmlPermissionsConflictError', () => {
   it('is an SmlError with the given message and its own name', () => {
-    const error = new SmlPermissionsConflictError('attachmentType "lens" derives permissions via getPermissions()');
+    const error = new SmlPermissionsConflictError(
+      'attachmentType "lens" derives permissions via getPermissions()'
+    );
 
     expect(error).toBeInstanceOf(SmlError);
     expect(error).toBeInstanceOf(Error);
-    expect(error.message).toBe(
-      'attachmentType "lens" derives permissions via getPermissions()'
-    );
+    expect(error.message).toBe('attachmentType "lens" derives permissions via getPermissions()');
     expect(error.name).toBe('SmlPermissionsConflictError');
   });
 });
