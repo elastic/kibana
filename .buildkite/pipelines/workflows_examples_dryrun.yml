@@ -1,0 +1,12 @@
+steps:
+  - command: .buildkite/scripts/steps/workflows/validate_examples.sh
+    label: Validate elastic/workflows examples against the current Kibana schema
+    timeout_in_minutes: 20
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: true
+    artifact_paths:
+      - target/workflow-examples-junit.xml

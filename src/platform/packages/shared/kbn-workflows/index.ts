@@ -13,6 +13,15 @@ export * from './spec/lib/generate_yaml_schema_from_connectors';
 export * from './spec/lib/get_workflow_json_schema';
 export { getElasticsearchConnectors } from './spec/elasticsearch';
 export { getKibanaConnectors } from './spec/kibana';
+export {
+  getAllStaticConnectors,
+  staticConnectors,
+  ConnectorInputSchemas,
+  ConnectorActionInputSchemas,
+  ConnectorSpecsInputSchemas,
+  ConnectorOutputSchemas,
+  ConnectorActionOutputSchemas,
+} from './spec/connectors';
 export { resolveKibanaStepTypeAlias } from './spec/kibana/aliases';
 export * from './spec/schema';
 export { builtInStepDefinitions, getBuiltInStepDefinition } from './spec/builtin_step_definitions';
