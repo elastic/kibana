@@ -54,7 +54,7 @@ process_version() {
     # Bootstrap Kibana dependencies
     echo "Bootstrapping Kibana dependencies for version $version..."
     if [ -f ".buildkite/scripts/bootstrap.sh" ]; then
-      yarn install || echo "yarn install failed..."
+      pnpm install || echo "pnpm install failed..."
     fi
 
     # Create temporary destination directory for generated definitions

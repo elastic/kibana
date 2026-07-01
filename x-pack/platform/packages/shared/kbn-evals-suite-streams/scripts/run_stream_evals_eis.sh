@@ -10,7 +10,7 @@ usage() {
   cat <<'EOF'
 Run the Streams eval suite against an EIS-backed connector (Scout + CCM + Playwright).
 
-Prerequisites: vault CLI logged in (OIDC), repo bootstrapped (yarn kbn bootstrap).
+Prerequisites: vault CLI logged in (OIDC), repo bootstrapped (pnpm kbn bootstrap).
 
 Usage:
   run_stream_evals_eis.sh <evaluation-connector-id> [--grep <pattern>] [--workers <n>]

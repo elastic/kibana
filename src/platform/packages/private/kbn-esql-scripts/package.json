@@ -6,10 +6,10 @@
   "sideEffects": false,
   "scripts": {
     "make:defs": "./definitions/make_defs.sh",
-    "postmake:defs": "yarn run lint:fix:definitions",
+    "postmake:defs": "pnpm run lint:fix:definitions",
     "lint:fix:definitions": "cd ../../../../.. && node ./scripts/eslint --fix ./src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated",
     "make:docs": "./documentation/make_docs.sh",
-    "postmake:docs": "yarn run lint:fix:docs",
+    "postmake:docs": "pnpm run lint:fix:docs",
     "lint:fix:docs": "cd ../../../../.. && node ./scripts/eslint --fix ./src/platform/packages/private/kbn-language-documentation/src/sections/generated"
   },
   "devDependencies": {

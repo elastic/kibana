@@ -12,7 +12,7 @@ echo "--- Fleet Cypress tests (Chrome)"
 cd x-pack/platform/plugins/shared/fleet
 
 set +e
-yarn cypress:ci:run; status=$?; yarn cypress_space_awareness:ci:run; space_status=$?; yarn junit:merge || :
+pnpm cypress:ci:run; status=$?; pnpm cypress_space_awareness:ci:run; space_status=$?; pnpm junit:merge || :
 
 # Scout reporter
 upload_scout_cypress_events "Fleet Cypress tests"

@@ -161,7 +161,7 @@ echo "Node.js version: $(node --version)"
 
 # Install dependencies
 echo "--- Install dependencies"
-yarn install
+pnpm install
 
 # Export variables for test execution script
 export SECURITY_DOCS_GEN_DIR

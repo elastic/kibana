@@ -48,7 +48,7 @@
     "es": "node scripts/es",
     "preinstall": "node ./preinstall_check",
     "kbn": "node scripts/kbn",
-    "lint": "yarn run lint:es && yarn run lint:style",
+    "lint": "pnpm run lint:es && pnpm run lint:style",
     "lint:es": "node scripts/eslint_all_files",
     "lint:oxc": "node scripts/lint",
     "lint:style": "node scripts/stylelint",

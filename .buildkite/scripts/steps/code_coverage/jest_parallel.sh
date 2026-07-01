@@ -78,7 +78,7 @@ echo "--- Normalize file paths prefix before final stage"
 replacePaths "$KIBANA_DIR/target/kibana-coverage/jest" "$KIBANA_DIR" "CC_REPLACEMENT_ANCHOR"
 
 echo "--- Merging code coverage for a thread"
-yarn nyc report --nycrc-path src/dev/code_coverage/nyc_config/nyc.jest.config.js --reporter json
+pnpm exec nyc report --nycrc-path src/dev/code_coverage/nyc_config/nyc.jest.config.js --reporter json
 rm -rf target/kibana-coverage/jest/*
 mv target/kibana-coverage/jest-combined/coverage-final.json \
   "target/kibana-coverage/jest/jest-$TEST_TYPE-merged-coverage-$(date +%s%3N).json"

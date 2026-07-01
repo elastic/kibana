@@ -8,7 +8,7 @@ source .buildkite/scripts/common/setup_node.sh
 
 export FORCE_BOOTSTRAP_REMOTE_CACHE=true
 
-yarn kbn bootstrap
+pnpm kbn bootstrap
 
 cd .buildkite && npm ci && cd ..
 

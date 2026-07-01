@@ -4,7 +4,7 @@
   "license": "Elastic License 2.0",
   "private": true,
   "scripts": {
-    "build": "yarn plugin-helpers build",
+    "build": "pnpm exec plugin-helpers build",
     "plugin-helpers": "node ../../../../../scripts/plugin_helpers",
     "kbn": "node ../../../../../scripts/kbn"
   }

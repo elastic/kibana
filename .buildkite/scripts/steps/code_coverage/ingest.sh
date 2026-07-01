@@ -75,7 +75,7 @@ mergeAll() {
     if [ "$x" == "jest" ]; then
       echo "--- [$x]: Reset file paths prefix, merge coverage files, and generate the final combined report"
       replacePaths "$KIBANA_DIR/target/kibana-coverage/jest" "CC_REPLACEMENT_ANCHOR" "$KIBANA_DIR"
-      yarn nyc report --nycrc-path src/dev/code_coverage/nyc_config/nyc.jest.config.js
+      pnpm exec nyc report --nycrc-path src/dev/code_coverage/nyc_config/nyc.jest.config.js
     elif [ "$x" == "functional" ]; then
       echo "--- Code coverage for functional tests is not collected"
     fi
