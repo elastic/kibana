@@ -32,6 +32,14 @@ import type {
   SearchAttacksRequestBodyInput,
   SearchAttacksResponse,
 } from './detection_engine/attacks/search/search_route.gen';
+import type {
+  SetAttacksAssigneesRequestBodyInput,
+  SetAttacksAssigneesResponse,
+} from './detection_engine/attacks/set_assignees/set_assignees_route.gen';
+import type {
+  SetAttacksStatusRequestBodyInput,
+  SetAttacksStatusResponse,
+} from './detection_engine/attacks/set_workflow_status/set_workflow_status_route.gen';
 import type { CreateAlertsIndexResponse } from './detection_engine/index_management/create_index/create_index.gen';
 import type { DeleteAlertsIndexResponse } from './detection_engine/index_management/delete_index/delete_index.gen';
 import type { ReadAlertsIndexResponse } from './detection_engine/index_management/read_index/read_index.gen';
@@ -84,6 +92,11 @@ import type {
   ImportRulesResponse,
 } from './detection_engine/rule_management/import_rules/import_rules_route.gen';
 import type { ReadTagsResponse } from './detection_engine/rule_management/read_tags/read_tags_route.gen';
+import type {
+  RestoreRuleFromHistoryRequestParamsInput,
+  RestoreRuleFromHistoryRequestBodyInput,
+  RestoreRuleFromHistoryResponse,
+} from './detection_engine/rule_management/restore_rule_from_history/restore_rule_from_history_route.gen';
 import type {
   RuleChangesHistoryRequestQueryInput,
   RuleChangesHistoryRequestParamsInput,
@@ -2914,6 +2927,26 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Restore a detection rule to a specific historical snapshot.
+
+    */
+  async restoreRuleFromHistory(props: RestoreRuleFromHistoryProps) {
+    this.log.info(`${new Date().toISOString()} Calling API RestoreRuleFromHistory`);
+    return this.kbnClient
+      .request<RestoreRuleFromHistoryResponse>({
+        path: replaceParams(
+          '/internal/detection_engine/rules/{ruleId}/history/{changeId}/_restore',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Lists prebuilt detection rules that can be installed
    */
   async reviewRuleInstallation(props: ReviewRuleInstallationProps) {
@@ -3202,6 +3235,42 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
     return this.kbnClient
       .request<SetAlertTagsResponse>({
         path: '/api/detection_engine/signals/tags',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Assign users to attack discovery alerts, and unassign them from alerts.
+Optionally cascade the change to related detection alerts via `kibana.alert.attack_discovery.alert_ids`.
+> info
+> You cannot add and remove the same assignee in the same request.
+
+    */
+  async setAttacksAssignees(props: SetAttacksAssigneesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SetAttacksAssignees`);
+    return this.kbnClient
+      .request<SetAttacksAssigneesResponse>({
+        path: '/api/detection_engine/attacks/assignees',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Set the workflow status of one or more attack discovery alerts by IDs, optionally cascading the status to their related detection alerts.
+   */
+  async setAttacksStatus(props: SetAttacksStatusProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SetAttacksStatus`);
+    return this.kbnClient
+      .request<SetAttacksStatusResponse>({
+        path: '/api/detection_engine/attacks/status',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -3966,6 +4035,10 @@ export interface ReadRuleExecutionResultsProps {
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
 }
+export interface RestoreRuleFromHistoryProps {
+  params: RestoreRuleFromHistoryRequestParamsInput;
+  body: RestoreRuleFromHistoryRequestBodyInput;
+}
 export interface ReviewRuleInstallationProps {
   body: ReviewRuleInstallationRequestBodyInput;
 }
@@ -4013,6 +4086,12 @@ export interface SetAlertsStatusProps {
 }
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
+}
+export interface SetAttacksAssigneesProps {
+  body: SetAttacksAssigneesRequestBodyInput;
+}
+export interface SetAttacksStatusProps {
+  body: SetAttacksStatusRequestBodyInput;
 }
 export interface SetUnifiedAlertsAssigneesProps {
   body: SetUnifiedAlertsAssigneesRequestBodyInput;

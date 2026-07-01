@@ -6,21 +6,53 @@
  */
 
 import { useCallback } from 'react';
-
+import { useMutation } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
 import type { EntityType } from '../../../../common/entity_analytics/types';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { useEntityAnalyticsRoutes } from '../api';
 
-// Manual entity risk score recalculation is a no-op while we wait for the v2
-// equivalent — see https://github.com/elastic/security-team/issues/16756
-export const useCalculateEntityRiskScore = (
-  _identifierType: EntityType,
-  _identifier: string,
-  _options: { onSuccess: () => void }
-) => {
-  const calculateEntityRiskScoreCb = useCallback(async () => {}, []);
+export const useCalculateEntityRiskScore = ({
+  identifierType,
+  identifier,
+  entityId,
+  onSuccess,
+}: {
+  identifierType: EntityType;
+  identifier: string;
+  entityId?: string;
+  onSuccess: () => void;
+}) => {
+  const { addError } = useAppToasts();
+  const { calculateEntityRiskScoreV2 } = useEntityAnalyticsRoutes();
+
+  const onError = useCallback(
+    (error: unknown) => {
+      addError(error, {
+        title: i18n.translate('xpack.securitySolution.entityDetails.userPanel.error', {
+          defaultMessage: 'There was a problem calculating the {entity} risk score',
+          values: { entity: `${identifierType}'s` },
+        }),
+      });
+    },
+    [addError, identifierType]
+  );
+
+  const { mutate: mutateV2, isLoading } = useMutation(calculateEntityRiskScoreV2, {
+    onSuccess,
+    onError,
+  });
+
+  const calculateEntityRiskScoreCb = useCallback(async () => {
+    mutateV2({
+      identifier_type: identifierType,
+      identifier,
+      entity_id: entityId,
+    });
+  }, [mutateV2, identifierType, identifier, entityId]);
 
   return {
-    isLoading: false,
+    isLoading,
     calculateEntityRiskScore: calculateEntityRiskScoreCb,
-    data: undefined,
   };
 };
