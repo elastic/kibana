@@ -72,14 +72,26 @@ const ruleTypesInSecurityProjects: string[] = [
 ];
 
 /**
- * Recursively replaces lazySchema Proxy wrappers with real Zod schema instances
- * so that z.toJSONSchema() works correctly.
+ * Replaces lazySchema Proxy wrappers with real Zod schema instances so that
+ * z.toJSONSchema() works correctly.
  *
  * lazySchema() wraps schemas in a Proxy (target: empty `{}`). z.toJSONSchema()
  * keys its internal seen-map by object identity: it stores the proxy, but the
  * processJSONSchema closure captures the real materialized instance — so the
  * lookup fails and throws. Converting proxies to real instances before calling
  * z.toJSONSchema() avoids the mismatch.
+ *
+ * Assumption: only the top-level schema is proxy-wrapped, and its materialized
+ * children are already real (non-proxy) instances. That holds for all current
+ * rule-type params schemas — which is why the proxy branch below rebuilds the
+ * top node from its def without descending into children.
+ *
+ * If a future rule type nests a lazySchema-wrapped schema inside its params,
+ * z.toJSONSchema() could throw again with the same seen-map identity mismatch.
+ * Naive recursion is not a safe fix here: Zod schemas can be self-referential
+ * and this helper has no cycle guard, so it would need one before recursing
+ * through proxies. The object/intersection branches below only fire for a real
+ * (non-proxy) top-level schema and are retained for defensive completeness.
  */
 function resolveSchemaProxies(schema: z.ZodType): z.ZodType {
   if (!schema || typeof schema !== 'object') return schema;
@@ -92,6 +104,7 @@ function resolveSchemaProxies(schema: z.ZodType): z.ZodType {
   if (!zod?.def) return schema;
 
   if (Object.getPrototypeOf(schema) === Object.prototype) {
+    // Proxy branch: rebuild the top node only.
     return new zod.constr!(zod.def);
   }
 
