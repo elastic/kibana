@@ -32,7 +32,7 @@ export const clearStoredQueryMode = async (page: ScoutPage): Promise<void> => {
 };
 
 export const getStoredQueryMode = async (page: ScoutPage): Promise<'classic' | 'esql' | null> => {
-  return await page.evaluate((storageKey) => {
+  return page.evaluate((storageKey) => {
     const storedValue = window.localStorage.getItem(storageKey);
 
     if (!storedValue) {
@@ -41,14 +41,9 @@ export const getStoredQueryMode = async (page: ScoutPage): Promise<'classic' | '
 
     try {
       const parsedValue = JSON.parse(storedValue);
-
-      if (parsedValue === 'classic' || parsedValue === 'esql') {
-        return parsedValue;
-      }
+      return parsedValue === 'classic' || parsedValue === 'esql' ? parsedValue : null;
     } catch {
       return null;
     }
-
-    return null;
   }, DISCOVER_QUERY_MODE_KEY);
 };

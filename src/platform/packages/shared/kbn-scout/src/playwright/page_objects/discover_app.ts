@@ -779,34 +779,12 @@ export class DiscoverApp {
   async getCurrentQueryMode(): Promise<DiscoverQueryMode> {
     const esqlEditor = this.page.testSubj.locator('ESQLEditor');
     const classicQueryInput = this.page.testSubj.locator('queryInput');
-    const classicDiscoverDataViewSwitch = this.page.testSubj.locator(
-      'discover-dataView-switch-link'
-    );
-    const classicFallbackDataViewSwitch = this.page.testSubj.locator('dataView-switch-link');
-    const classicModeButton = this.page.testSubj.locator('select-text-based-language-btn');
 
-    // Wait until one of the mode-specific anchors is rendered.
-    // In classic mode the query input can appear later than the surrounding UI,
-    // so also accept the data view switch or the app-menu mode switch button.
-    await expect
-      .poll(async () => {
-        const isEsqlVisible = await esqlEditor.isVisible().catch(() => false);
-        if (isEsqlVisible) {
-          return 'esql';
-        }
+    // Wait until one of the two mode-specific anchors is rendered
+    await expect(esqlEditor.or(classicQueryInput)).toBeVisible();
 
-        const isClassicVisible = await Promise.all([
-          classicQueryInput.isVisible().catch(() => false),
-          classicDiscoverDataViewSwitch.isVisible().catch(() => false),
-          classicFallbackDataViewSwitch.isVisible().catch(() => false),
-          classicModeButton.isVisible().catch(() => false),
-        ]).then((results) => results.some(Boolean));
-
-        return isClassicVisible ? 'classic' : 'loading';
-      })
-      .not.toBe('loading');
-
-    return (await esqlEditor.isVisible().catch(() => false)) ? 'esql' : 'classic';
+    // Return the mode that is currently visible
+    return (await esqlEditor.isVisible()) ? 'esql' : 'classic';
   }
 
   async isShowingDocViewer(): Promise<boolean> {

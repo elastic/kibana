@@ -44,30 +44,20 @@ const switchToMode = async (pageObjects: ScoutTestFixtures['pageObjects'], mode:
     await pageObjects.discover.selectClassicMode();
   }
 };
+const ensureTransitionInto = async (
+  pageObjects: ScoutTestFixtures['pageObjects'],
+  defaultMode: QueryMode,
+  targetMode: QueryMode
+) => {
+  if (defaultMode === targetMode) {
+    const otherMode = targetMode === 'esql' ? 'classic' : 'esql';
+    await switchToMode(pageObjects, otherMode);
+  }
+};
 
-// The two states of the `discover.isEsqlDefault` feature flag to run the suite for.
-const FLAG_SETTINGS = [false, true];
-
-for (const isEsqlDefault of FLAG_SETTINGS) {
-  // The mode Discover is expected to open in for this flag value.
-  const defaultMode: QueryMode = isEsqlDefault ? 'esql' : 'classic';
-
-  // Persistence is only triggered by an actual mode *change*. If Discover already
-  // opens in `targetMode`, selecting it again would be a no-op and nothing would
-  // be stored, so we first switch away to the other mode. When the default is the
-  // other mode this is a no-op and the test switches straight into `targetMode`.
-  const ensureTransitionInto = async (
-    pageObjects: ScoutTestFixtures['pageObjects'],
-    targetMode: QueryMode
-  ) => {
-    if (defaultMode === targetMode) {
-      const otherMode = targetMode === 'esql' ? 'classic' : 'esql';
-      await switchToMode(pageObjects, otherMode);
-    }
-  };
-
+for (const defaultMode of QUERY_MODES) {
   spaceTest.describe.serial(
-    `Discover query mode (discover.isEsqlDefault: ${isEsqlDefault})`,
+    `Discover query mode (default: ${defaultMode})`,
     { tag: '@local-stateful-classic' },
     () => {
       // Apply this iteration's feature flag value and set up the Discover data
@@ -75,7 +65,7 @@ for (const isEsqlDefault of FLAG_SETTINGS) {
       spaceTest.beforeAll(async ({ apiServices, discoverScoutSpace }) => {
         await apiServices.core.settings({
           'feature_flags.overrides': {
-            'discover.isEsqlDefault': isEsqlDefault,
+            'discover.isEsqlDefault': defaultMode === 'esql',
           },
         });
         await discoverScoutSpace.setupDiscoverDefaults();
@@ -124,7 +114,7 @@ for (const isEsqlDefault of FLAG_SETTINGS) {
             await pageObjects.discover.waitUntilTabIsLoaded();
 
             // Guarantee a real switch into `targetMode`, then verify it was stored.
-            await ensureTransitionInto(pageObjects, targetMode);
+            await ensureTransitionInto(pageObjects, defaultMode, targetMode);
             await switchToMode(pageObjects, targetMode);
             expect(await getStoredQueryMode(page)).toBe(targetMode);
 
