@@ -101,34 +101,26 @@ export const bulkImportRules = async ({
     }
     if (!ruleToImportHasVersion(rule)) {
       responses.push(missingVersionError(rule.rule_id));
-      continue;
-    }
+    } else {
+      try {
+        await validateMlAuth(mlAuthz, rule.type);
 
-    try {
-      await validateMlAuth(mlAuthz, rule.type);
-    } catch (e) {
-      responses.push(
-        createRuleImportErrorObject({
-          ruleId: rule.rule_id,
-          message: e instanceof Error ? e.message : String(e),
-        })
-      );
-      continue;
-    }
+        const [exceptionErrors, exceptionsList] = checkRuleExceptionReferences({
+          rule,
+          existingLists,
+        });
+        responses.push(...exceptionErrors);
 
-    const [exceptionErrors, exceptionsList] = checkRuleExceptionReferences({ rule, existingLists });
-    responses.push(...exceptionErrors);
-
-    try {
-      const { immutable, ruleSource } = ruleSourceImporter.calculateRuleSource(rule);
-      prepared.push({ rule, immutable, ruleSource, exceptionsList });
-    } catch (e) {
-      responses.push(
-        createRuleImportErrorObject({
-          ruleId: rule.rule_id,
-          message: e instanceof Error ? e.message : String(e),
-        })
-      );
+        const { immutable, ruleSource } = ruleSourceImporter.calculateRuleSource(rule);
+        prepared.push({ rule, immutable, ruleSource, exceptionsList });
+      } catch (e) {
+        responses.push(
+          createRuleImportErrorObject({
+            ruleId: rule.rule_id,
+            message: e instanceof Error ? e.message : String(e),
+          })
+        );
+      }
     }
   }
 
