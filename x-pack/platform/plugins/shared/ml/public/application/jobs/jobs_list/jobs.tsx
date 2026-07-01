@@ -85,6 +85,7 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh, r
           defaultMessage: 'Anomaly Detection Jobs',
         })}
         menu={menu}
+        docLink={helpLink}
       />
       <EuiSpacer size="m" />
       <JobsListView

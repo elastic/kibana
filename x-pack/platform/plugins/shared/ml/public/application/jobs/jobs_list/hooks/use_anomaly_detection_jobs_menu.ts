@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useCreateAndNavigateToManagementMlLink } from '../../../contexts/kibana/use_create_url';
-import { useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
+import { useMlLocator } from '../../../contexts/kibana';
 import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { useEnabledFeatures } from '../../../contexts/ml';
@@ -42,18 +42,7 @@ export const useAnomalyDetectionJobsMenu = ({
     'ad_settings'
   );
   const mlLocator = useMlLocator();
-  const navigateToPath = useNavigateToPath();
   const { isADEnabled, isDFAEnabled } = useEnabledFeatures();
-
-  const navigateToSettings = useCallback(async () => {
-    if (!mlLocator) {
-      return;
-    }
-    const path = await mlLocator.getUrl({
-      page: ML_PAGES.SETTINGS,
-    });
-    navigateToPath(path);
-  }, [mlLocator, navigateToPath]);
 
   const navigateToCreateJob = useCallback(async () => {
     if (!mlLocator || !canCreateJob) {
@@ -83,16 +72,20 @@ export const useAnomalyDetectionJobsMenu = ({
           }
         : undefined,
       items: [
-        {
-          id: 'suppliedConfigurations',
-          order: 100,
-          label: i18n.translate('xpack.ml.suppliedConfigurationsManagementLabel', {
-            defaultMessage: 'Supplied configurations',
-          }),
-          iconType: 'plusInCircle' as const,
-          run: redirectToSuppliedConfigurationsPage,
-          testId: 'mlSuppliedConfigurationsButton',
-        },
+        ...(canSync
+          ? [
+              {
+                id: 'syncSavedObjects',
+                order: 100,
+                label: i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
+                  defaultMessage: 'Synchronize saved objects',
+                }),
+                iconType: 'inputOutput' as const,
+                run: onOpenSyncFlyout,
+                testId: 'mlStackMgmtSyncButton',
+              },
+            ]
+          : []),
         {
           id: 'anomalyDetectionSettings',
           order: 200,
@@ -103,64 +96,46 @@ export const useAnomalyDetectionJobsMenu = ({
           run: redirectToAnomalyDetectionSettingsPage,
           testId: 'mlAnomalyDetectionSettingsButton',
         },
-        {
-          id: 'mlSettings',
-          order: 250,
-          label: i18n.translate('xpack.ml.navMenu.settingsTabLinkText', {
-            defaultMessage: 'Settings',
-          }),
-          iconType: 'gear' as const,
-          run: navigateToSettings,
-          testId: 'mlNavMenuSettingsTabLink',
-          overflow: true,
-        },
-        ...(canSync
-          ? [
-              {
-                id: 'syncSavedObjects',
-                order: 300,
-                label: i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
-                  defaultMessage: 'Synchronize saved objects',
-                }),
-                iconType: 'inputOutput' as const,
-                run: onOpenSyncFlyout,
-                testId: 'mlStackMgmtSyncButton',
-              },
-            ]
-          : []),
         ...(showImportExport
           ? [
               {
                 id: 'exportJobs',
-                order: 400,
+                order: 300,
                 label: i18n.translate('xpack.ml.importExport.exportButton', {
                   defaultMessage: 'Export jobs',
                 }),
                 iconType: 'exportAction' as const,
                 run: onOpenExportFlyout,
                 testId: 'mlJobsExportButton',
-                overflow: true,
               },
               {
                 id: 'importJobs',
-                order: 500,
+                order: 400,
                 label: i18n.translate('xpack.ml.importExport.importButton', {
                   defaultMessage: 'Import jobs',
                 }),
                 iconType: 'importAction' as const,
                 run: onOpenImportFlyout,
                 testId: 'mlJobsImportButton',
-                overflow: true,
               },
             ]
           : []),
+        {
+          id: 'suppliedConfigurations',
+          order: 500,
+          label: i18n.translate('xpack.ml.suppliedConfigurationsManagementLabel', {
+            defaultMessage: 'Supplied configurations',
+          }),
+          iconType: 'plusInCircle' as const,
+          run: redirectToSuppliedConfigurationsPage,
+          testId: 'mlSuppliedConfigurationsButton',
+        },
       ],
     }),
     [
       canCreate,
       canSync,
       navigateToCreateJob,
-      navigateToSettings,
       onOpenExportFlyout,
       onOpenImportFlyout,
       onOpenSyncFlyout,

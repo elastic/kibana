@@ -114,8 +114,8 @@ export const FileDataVisualizerPage: FC = () => {
     <>
       <>
         <MlAppHeader
-          title={i18n.translate('xpack.ml.dataVisualizer.pageHeader', {
-            defaultMessage: 'Data Visualizer',
+          title={i18n.translate('xpack.ml.dataVisualizer.fileBasedLabel', {
+            defaultMessage: 'File upload',
           })}
         />
         <FileDataVisualizerWrapper
