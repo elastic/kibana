@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { ObservedEntity } from '.';
 import { TestProviders } from '../../../../../common/mock';
-import { mockObservedHostData } from '../../../mocks';
+import { mockObservedHostData } from '../../../../../flyout/entity_details/mocks';
 
 describe('ObservedEntity', () => {
   const mockProps = {

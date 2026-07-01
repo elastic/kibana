@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
-import type { UserItem } from '../../../../../common/search_strategy';
-import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { getAnomaliesFields } from '../../shared/common';
-import * as i18n from './translations';
-import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
-import type { EntityTableRows } from '../../shared/components/entity_table/types';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import React from 'react';
 
-const basicUserFields: EntityTableRows<ObservedEntityData<UserItem>> = [
+import { getEmptyTagValue } from '../../../../../common/components/empty_value';
+import type { UserItem } from '../../../../../../common/search_strategy';
+import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
+import * as i18n from './translations';
+import type { ObservedEntityData } from '../../../shared/components/observed_entity/types';
+import type { EntityTableRows } from '../../../../../flyout/entity_details/shared/components/entity_table/types';
+
+export const basicUserFields: EntityTableRows<ObservedEntityData<UserItem>> = [
   {
     label: i18n.USER_ID,
     getValues: (userData: ObservedEntityData<UserItem>) => userData.details.user?.id,
     field: 'user.id',
   },
   {
-    label: 'Domain',
+    label: i18n.DOMAIN,
     getValues: (userData: ObservedEntityData<UserItem>) => userData.details.user?.domain,
     field: 'user.domain',
   },
@@ -60,20 +59,3 @@ const basicUserFields: EntityTableRows<ObservedEntityData<UserItem>> = [
     field: 'host.ip',
   },
 ];
-
-export const useObservedUserItems = (
-  userData: ObservedEntityData<UserItem>
-): EntityTableRows<ObservedEntityData<UserItem>> => {
-  const mlCapabilities = useMlCapabilities();
-
-  const fields: EntityTableRows<ObservedEntityData<UserItem>> = useMemo(
-    () => [...basicUserFields, ...getAnomaliesFields(mlCapabilities)],
-    [mlCapabilities]
-  );
-
-  if (!userData.details) {
-    return [];
-  }
-
-  return fields;
-};

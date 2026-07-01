@@ -22,7 +22,7 @@ import type {
   EntityFromStoreResult,
   EntityStoreRecord,
 } from '../../shared/hooks/use_entity_from_store';
-import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
+import type { ObservedEntityData } from '../../../../flyout_v2/entity/shared/components/observed_entity/types';
 import { USER_PANEL_OBSERVED_USER_QUERY_ID, USER_PANEL_RISK_SCORE_QUERY_ID } from '..';
 
 export type ObservedUserResult = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
