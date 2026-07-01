@@ -442,6 +442,7 @@ module.exports = {
     '@kbn/eslint/no_conditional_saved_object_type_registration': 'error',
     '@kbn/eslint/no_unsafe_console': 'error',
     '@kbn/eslint/no_unsafe_hash': 'error',
+    '@kbn/eslint/require_di_token_naming': 'warn',
     '@kbn/imports/no_unresolvable_imports': 'error',
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',
