@@ -9,7 +9,6 @@
 
 import { isValidElement } from 'react';
 import { render } from '@testing-library/react';
-import type { EuiThemeComputed } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import { EuiSwitch, EuiToolTip, type EuiThemeComputed } from '@elastic/eui';
 import {
