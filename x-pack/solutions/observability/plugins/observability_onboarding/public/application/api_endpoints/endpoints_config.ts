@@ -74,6 +74,11 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
       defaultMessage: 'Elasticsearch',
     }),
     euiIconType: 'logoElasticsearch',
-    getUrl: ({ elasticsearchUrl }) => elasticsearchUrl,
+    getUrl: ({ isServerless, managedOtlpServiceUrl, elasticsearchUrl }) => {
+      if (isServerless && managedOtlpServiceUrl) {
+        return `${trimTrailingSlashes(managedOtlpServiceUrl)}/_es`;
+      }
+      return elasticsearchUrl;
+    },
   },
 ];
