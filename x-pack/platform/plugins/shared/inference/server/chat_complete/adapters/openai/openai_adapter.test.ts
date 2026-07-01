@@ -108,6 +108,10 @@ describe('openAIAdapter', () => {
     return { stream: params.stream, body: JSON.parse(params.body) };
   }
 
+  function getSubActionParams() {
+    return executorMock.invoke.mock.calls[0][0].subActionParams as Record<string, unknown>;
+  }
+
   describe('when creating the request', () => {
     it('correctly formats messages ', () => {
       openAIAdapter
@@ -149,6 +153,41 @@ describe('openAIAdapter', () => {
           role: 'user',
         },
       ]);
+    });
+
+    it('passes maxContentLength for buffered requests', () => {
+      openAIAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: false,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(getSubActionParams()).toEqual(
+        expect.objectContaining({
+          stream: false,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+      );
+    });
+
+    it('does not pass maxContentLength for streaming requests', () => {
+      openAIAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: true,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(getSubActionParams()).toEqual(
+        expect.not.objectContaining({
+          maxContentLength: expect.any(Number),
+        })
+      );
     });
 
     it('correctly formats messages with content parts', () => {

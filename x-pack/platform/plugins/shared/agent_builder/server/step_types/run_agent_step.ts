@@ -21,6 +21,21 @@ import {
 } from '../../common/resolve_connector_or_inference_id';
 import { runAgentStepCommonDefinition } from '../../common/step_types/run_agent_step';
 
+const parseMaxStepSize = (value: string): number | undefined => {
+  const match = value
+    .trim()
+    .toLowerCase()
+    .match(/^(\d+(?:\.\d+)?)\s*(b|kb|mb|gb)$/);
+  if (!match) {
+    return undefined;
+  }
+
+  const amount = Number(match[1]);
+  const unit = match[2];
+  const multipliers = { b: 1, kb: 1024, mb: 1024 ** 2, gb: 1024 ** 3 };
+  return Math.floor(amount * multipliers[unit as keyof typeof multipliers]);
+};
+
 /**
  * Server step definition for the "ai.agent" step.
  * This step executes an agentBuilder agent using the execution service.
@@ -43,7 +58,10 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           'create-conversation': createConversation,
           'plugin-id': pluginId,
           'aggregate-by': aggregateBy,
+          'max-step-size': maxStepSize,
         } = context.config;
+        const maxContentLength =
+          typeof maxStepSize === 'string' ? parseMaxStepSize(maxStepSize) : undefined;
 
         context.logger.debug('ai.agent step started');
         const request = context.contextManager.getFakeRequest();
@@ -84,6 +102,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
               message,
               attachments,
             },
+            ...(maxContentLength !== undefined ? { maxContentLength } : {}),
             ...(pluginId ? { telemetryMetadata: { pluginId, aggregateBy } } : {}),
           },
           // workflows already run as scheduled tasks
