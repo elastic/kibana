@@ -16,6 +16,7 @@ import {
   type EuiContextMenuPanelItemDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiSwitch,
 } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
@@ -86,7 +87,11 @@ export const getAppMenuItems = ({
 }: {
   config?: AppMenuConfig;
   hasStaticItems?: boolean;
-}) => {
+}): {
+  displayedItems: AppMenuItemType[];
+  overflowItems: AppMenuItemType[];
+  shouldOverflow: boolean;
+} => {
   if (!config || !config.items) {
     return {
       displayedItems: [],
@@ -178,8 +183,10 @@ export const mapAppMenuItemToPanelItem = (
     tooltipTitle: item?.tooltipTitle,
   });
 
+  const loading = Boolean(item.isLoading);
+
   const handleClick = (event: MouseEvent) => {
-    if (isDisabled(item?.disableButton)) {
+    if (isDisabled(item?.disableButton) || loading) {
       return;
     }
 
@@ -219,17 +226,22 @@ export const mapAppMenuItemToPanelItem = (
   return {
     key: item.id,
     name: itemName,
-    icon: item?.iconType,
+    icon: loading ? (
+      <EuiLoadingSpinner size="m" data-test-subj={`${itemTestSubj}-loading`} />
+    ) : (
+      item?.iconType
+    ),
     ...routerLinkProps,
     href: item?.href,
     target: item?.href ? item?.target : undefined,
-    disabled: isDisabled(item?.disableButton),
+    disabled: isDisabled(item?.disableButton) || loading,
     'data-test-subj': itemTestSubj,
     toolTipContent: content,
     toolTipProps: {
       title,
     },
     ...(childPanelId !== undefined && { panel: childPanelId }),
+    ...(item?.isDestructive && { color: 'danger' }),
   };
 };
 
