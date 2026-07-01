@@ -19,7 +19,7 @@ paths:
               $ref: '#/components/schemas/CancelRouteRequestBody'
             examples:
               ElasticDefend:
-                summary: Cancel a response action on a Microsoft Defender for Endpoint host
+                summary: Cancel a response action on an Elastic Defend host
                 value:
                   endpoint_ids:
                     - 'ed518850-681a-4d60-bb98-e22640cae2a8'
