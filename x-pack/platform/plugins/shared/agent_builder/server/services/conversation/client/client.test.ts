@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { createAgentNotFoundError, createAgentUnavailableError } from '@kbn/agent-builder-common';
-import { ConversationAccessControlMode } from '@kbn/agent-builder-common/chat/access_control/types';
+import { ConversationAccessControlMode } from '@kbn/agent-builder-common/chat/access_control';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';

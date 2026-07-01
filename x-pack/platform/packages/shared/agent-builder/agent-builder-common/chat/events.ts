@@ -21,7 +21,7 @@ import type {
   AskUserQuestionAnswer,
 } from '../agents/prompts';
 import type { VersionedAttachment } from '../attachments';
-import type { ConversationAccessControl } from './access_control/types';
+import type { ConversationAccessControl } from './access_control';
 
 export enum ChatEventType {
   toolCall = 'tool_call',

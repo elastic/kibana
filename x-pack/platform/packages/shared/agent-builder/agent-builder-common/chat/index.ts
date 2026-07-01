@@ -9,7 +9,7 @@ export {
   ConversationAccessControlMode,
   getDefaultConversationAccessControl,
   type ConversationAccessControl,
-} from './access_control/types';
+} from './access_control';
 export {
   ConversationRoundStatus,
   ConversationDisplayStatus,
