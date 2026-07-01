@@ -57,6 +57,7 @@ export interface UsageStats {
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
   'agentBuilder:bashSupport': boolean;
+  'contextEngine:enabled': boolean;
   'agentBuilder:uiamOAuthClientManagement': boolean;
   'agentBuilder:tracing:enabled': boolean;
   'agentBuilder:tracing:includeLlmResponses': boolean;

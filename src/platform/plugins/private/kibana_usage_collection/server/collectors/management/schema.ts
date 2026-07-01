@@ -553,6 +553,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'contextEngine:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Whether the Context Engine is enabled.' },
+  },
   'agentBuilder:uiamOAuthClientManagement': {
     type: 'boolean',
     _meta: {
