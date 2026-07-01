@@ -20,18 +20,12 @@ export function registerCasesSteps(
   }
 
   // Attachment types are registered during `start` (and by other solutions'
-  // setup), so the registry is empty here at `setup`. The loaders read it lazily
-  // and resolve to `undefined` when no authorable type exists, which the step
-  // registry treats as a skipped registration.
+  // setup), so the registry is empty here at `setup`. The loader reads it
+  // lazily and resolves to `undefined` when no authorable type exists, which
+  // the step registry treats as a skipped registration.
   if (isCasesAttachmentsEnabled) {
     workflowsExtensions.registerStepDefinition(() =>
-      import('./add_attachment').then((m) =>
-        m.getAddAttachmentStepDefinition(unifiedAttachmentTypeRegistry)
-      )
-    );
-
-    workflowsExtensions.registerStepDefinition(() =>
-      import('./add_attachment').then((m) =>
+      import('./add_attachments').then((m) =>
         m.getAddAttachmentsStepDefinition(unifiedAttachmentTypeRegistry)
       )
     );

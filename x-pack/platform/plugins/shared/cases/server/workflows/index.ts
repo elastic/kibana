@@ -21,9 +21,6 @@ import { deleteCasesStepDefinition } from './steps/delete_cases';
 import { unassignCaseStepDefinition } from './steps/unassign_case';
 import { addAlertsStepDefinition } from './steps/add_alerts';
 import { addEventsStepDefinition } from './steps/add_events';
-import { addAttachmentStepDefinition } from './steps/add_attachment';
-import { addAttachmentsStepDefinition } from './steps/add_attachments';
-import { selectAuthorableAttachmentSchemas } from './steps/unified_attachment_schemas';
 import { findSimilarCasesStepDefinition } from './steps/find_similar_cases';
 import { addObservablesStepDefinition } from './steps/add_observables';
 import { addTagsStepDefinition } from './steps/add_tags';
@@ -71,18 +68,17 @@ export function registerCaseWorkflowSteps(
   workflowsExtensions.registerStepDefinition(unassignCaseStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(addAlertsStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(addEventsStepDefinition(getCasesClient));
-  // Skip the generic attachment steps when no attachment type exposes an
-  // authorable schema — the discriminated union cannot be composed from zero
-  // members and would throw during synchronous registration.
-  if (
-    isCasesAttachmentsEnabled &&
-    selectAuthorableAttachmentSchemas(unifiedAttachmentTypeRegistry).length > 0
-  ) {
-    workflowsExtensions.registerStepDefinition(
-      addAttachmentStepDefinition(unifiedAttachmentTypeRegistry, getCasesClient)
-    );
-    workflowsExtensions.registerStepDefinition(
-      addAttachmentsStepDefinition(unifiedAttachmentTypeRegistry, getCasesClient)
+  // The unified attachment registry is populated during cases `setup` (built-in
+  // types) and by other solutions' `setup` (which runs after cases's since they
+  // depend on it). We register the step through an async loader so the union is
+  // composed after all `setup` phases have resolved — matching the public side
+  // and letting the loader resolve to `undefined` (a silently-skipped step)
+  // when no authorable type ends up registered.
+  if (isCasesAttachmentsEnabled) {
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./steps/add_attachments').then((m) =>
+        m.addAttachmentsStepDefinition(unifiedAttachmentTypeRegistry, getCasesClient)
+      )
     );
   }
   workflowsExtensions.registerStepDefinition(findSimilarCasesStepDefinition(getCasesClient));
