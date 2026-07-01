@@ -59,7 +59,11 @@ export class DiscoverApp {
 
     // There should be exactly one visible data view switch.
     // If both are visible (bug), fail explicitly instead of picking one
-    await expect(discoverSwitch.or(fallbackSwitch)).toBeVisible();
+    await this.page
+      .locator(
+        '[data-test-subj="discover-dataView-switch-link"], [data-test-subj="dataView-switch-link"]'
+      )
+      .waitFor({ state: 'visible' });
 
     const discoverVisible = await discoverSwitch.isVisible();
     const fallbackVisible = await fallbackSwitch.isVisible();
@@ -73,24 +77,37 @@ export class DiscoverApp {
     return discoverVisible ? discoverSwitch : fallbackSwitch;
   }
 
+  private async hideTabPreview() {
+    await this.page.mouse.move(0, 0);
+    await this.page.testSubj.locator('unifiedTabs_tabPreview_contentPanel').waitFor({
+      state: 'hidden',
+    });
+  }
+
+  private async openDataViewSwitcher() {
+    const dataViewSwitch = await this.getVisibleDataViewSwitch();
+    await this.hideTabPreview();
+    await dataViewSwitch.click();
+  }
+
   async selectDataView(name: string) {
     const dataViewSwitch = await this.getVisibleDataViewSwitch();
     const currentValue = await dataViewSwitch.innerText();
     if (currentValue === name) {
       return;
     }
+    await this.hideTabPreview();
     await dataViewSwitch.click();
-    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeVisible();
+    const switcher = this.page.testSubj.locator('indexPattern-switcher');
+    await switcher.waitFor({ state: 'visible' });
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
-    const matchingDataViewLocator = this.page.testSubj
-      .locator('indexPattern-switcher')
-      .locator(`[data-test-subj="dataView-${name}"]`);
+    const matchingDataViewLocator = switcher.locator(`[data-test-subj="dataView-${name}"]`);
     if (await matchingDataViewLocator.isVisible()) {
       await matchingDataViewLocator.click();
     } else {
       await this.page.testSubj.locator('explore-matching-indices-button').click();
     }
-    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeHidden();
+    await switcher.waitFor({ state: 'hidden' });
     await this.waitUntilFieldListHasCountOfFields();
   }
 
@@ -111,10 +128,7 @@ export class DiscoverApp {
     const editor = new DataViewEditorPage(this.page);
     await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
 
-    // FTR passes the base name and relies on the editor auto-appending `*` as the
-    // user types. Scout sets the title verbatim (`fill`), so append the wildcard
-    // here to preserve that contract (`name`, `* will be added automatically`).
-    await editor.setTitle(name.endsWith('*') ? name : `${name}*`);
+    await editor.setTitleWithAutoWildcard(name);
 
     // wait for timestamp options; default @timestamp applies.
     await editor.timestampField
@@ -136,10 +150,86 @@ export class DiscoverApp {
    * (classic mode only). The editor appends `*` to the title automatically.
    */
   async createDataViewFromSearchBar(options: DataViewOptions) {
-    const dataViewSwitch = await this.getVisibleDataViewSwitch();
-    await dataViewSwitch.click();
+    await this.openDataViewSwitcher();
     await this.page.testSubj.click('dataview-create-new');
     await this.fillAndSubmitDataViewEditor(options);
+  }
+
+  async getAvailableDataViewsFromSearchBar(): Promise<string[]> {
+    await this.openDataViewSwitcher();
+    const switcher = this.page.testSubj.locator('indexPattern-switcher');
+    await switcher.waitFor({ state: 'visible' });
+
+    const dataViews = await switcher
+      .locator('.euiSelectableListItem[data-test-subj^="dataView-"]')
+      .evaluateAll((items) =>
+        items
+          .map((item) => item.getAttribute('data-test-subj')?.slice('dataView-'.length))
+          .filter((name): name is string => Boolean(name))
+      );
+
+    await this.page.keyboard.press('Escape');
+    await switcher.waitFor({ state: 'hidden' });
+
+    return dataViews;
+  }
+
+  async isCurrentDataViewAdHoc(): Promise<boolean> {
+    const dataViewSwitch = await this.getVisibleDataViewSwitch();
+    const dataViewTitle = await dataViewSwitch.getAttribute('title');
+
+    if (!dataViewTitle) {
+      throw new Error('Current data view switch is missing a title attribute');
+    }
+
+    await this.openDataViewSwitcher();
+    const isAdHoc = await this.page.testSubj
+      .locator(`dataViewItemTempBadge-${dataViewTitle}`)
+      .isVisible();
+    await this.page.keyboard.press('Escape');
+    await this.page.testSubj.locator('indexPattern-switcher').waitFor({ state: 'hidden' });
+
+    return isAdHoc;
+  }
+
+  async editCurrentDataViewName(name: string) {
+    await this.openDataViewSwitcher();
+    await this.page.testSubj.click('indexPattern-manage-field');
+    await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
+
+    const editor = new DataViewEditorPage(this.page);
+    await editor.setName(name);
+    await editor.save();
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async createRuntimeField(fieldName: string, script: string) {
+    await this.openDataViewSwitcher();
+    await this.page.testSubj.click('indexPattern-add-field');
+    const fieldEditor = this.page.getByRole('dialog', { name: 'Create field' });
+    await fieldEditor.waitFor({ state: 'visible' });
+
+    await fieldEditor.getByRole('textbox', { name: 'Name field' }).fill(fieldName);
+    await fieldEditor.getByRole('switch', { name: 'Set value' }).click();
+    await fieldEditor
+      .getByRole('textbox', { name: /Editor content/ })
+      .waitFor({ state: 'visible' });
+    await this.codeEditor.setCodeEditorValue(script);
+    await fieldEditor.getByRole('button', { name: 'Save' }).click();
+    await fieldEditor.waitFor({ state: 'hidden' });
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async renameRuntimeField(newFieldName: string) {
+    const fieldEditor = this.page.getByRole('dialog', { name: /Edit .* field/ });
+    await fieldEditor.waitFor({ state: 'visible' });
+
+    await fieldEditor.getByRole('textbox', { name: 'Name field' }).fill(newFieldName);
+    await fieldEditor.getByRole('button', { name: 'Save' }).click();
+    await this.page.testSubj.fill('saveModalConfirmText', 'change');
+    await this.page.testSubj.click('confirmModalConfirmButton');
+    await fieldEditor.waitFor({ state: 'hidden' });
+    await this.waitUntilTabIsLoaded();
   }
 
   private async clickAppMenuItem(
@@ -179,16 +269,27 @@ export class DiscoverApp {
     await menuItem.click();
   }
 
-  async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
-    await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
-    await this.page.testSubj.hover('dscHideSidebarButton'); // cancel tooltips
-    await this.waitForDiscoverPage();
-    await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
+  private async dismissHoverOverlays() {
+    await this.page.mouse.move(0, 0);
   }
 
-  async saveSearch(name: string) {
+  async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
+    await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
+    await this.dismissHoverOverlays();
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async saveSearch(name: string, { storeTimeRange }: { storeTimeRange?: boolean } = {}) {
     await this.page.testSubj.click('discoverSaveButton');
     await this.page.testSubj.fill('savedObjectTitle', name);
+    if (storeTimeRange !== undefined) {
+      const switchControl = this.page.testSubj.locator('storeTimeWithSearch');
+      await switchControl.waitFor({ state: 'visible' });
+      const isChecked = (await switchControl.getAttribute('aria-checked')) === 'true';
+      if (isChecked !== storeTimeRange) {
+        await switchControl.click();
+      }
+    }
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
   }
@@ -210,6 +311,37 @@ export class DiscoverApp {
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
     await this.waitUntilSearchingHasFinished();
+  }
+
+  async getSharedUrl(): Promise<string> {
+    await this.clickAppMenuItem('shareTopNavButton');
+
+    const copyButton = this.page.testSubj.locator('copyShareUrlButton');
+    const sharePanel = this.page.testSubj.locator('sharePanel-Permalinks');
+
+    if (!(await copyButton.isVisible()) && (await sharePanel.isVisible())) {
+      await sharePanel.click();
+    }
+
+    await copyButton.waitFor({ state: 'visible' });
+    await copyButton.click();
+
+    const sharedUrl = await this.page.waitForFunction(() => {
+      return document
+        .querySelector('[data-test-subj="copyShareUrlButton"]')
+        ?.getAttribute('data-share-url');
+    });
+
+    return sharedUrl.jsonValue();
+  }
+
+  async closeShareModal() {
+    const shareModal = this.page.testSubj.locator('shareContextModal');
+
+    if (await shareModal.isVisible()) {
+      await shareModal.getByLabel(/Close/).click();
+      await shareModal.waitFor({ state: 'hidden' });
+    }
   }
 
   /**
@@ -522,6 +654,15 @@ export class DiscoverApp {
 
   async navigateToLensEditor() {
     await this.page.testSubj.click('unifiedHistogramEditVisualization');
+  }
+
+  async openLensEditFlyout() {
+    await this.page.testSubj.locator('unifiedHistogramEditFlyoutVisualization').click();
+    await this.getLensEditFlyout().waitFor({ state: 'visible' });
+  }
+
+  getLensEditFlyout(): Locator {
+    return this.page.testSubj.locator('lnsChartSwitchPopover');
   }
 
   async getTheColumnFromGrid(): Promise<string[]> {

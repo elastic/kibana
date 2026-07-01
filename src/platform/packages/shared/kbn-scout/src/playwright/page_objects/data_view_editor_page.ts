@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage } from '..';
+import { expect } from '..';
 
 // Detail page URL after a data view is saved: /app/management/kibana/dataViews/dataView/<id>
 export const DATA_VIEW_DETAIL_URL_PATTERN = /\/management\/kibana\/dataViews\/.+/;
@@ -20,6 +21,7 @@ export const DATA_VIEW_DETAIL_URL_PATTERN = /\/management\/kibana\/dataViews\/.+
 export class DataViewEditorPage {
   private readonly flyout;
   private readonly form;
+  readonly nameInput;
   readonly titleInput;
   readonly timestampField;
   readonly saveButton;
@@ -29,6 +31,7 @@ export class DataViewEditorPage {
   constructor(private readonly page: ScoutPage) {
     this.flyout = page.testSubj.locator('indexPatternEditorFlyout');
     this.form = page.testSubj.locator('indexPatternEditorForm');
+    this.nameInput = page.testSubj.locator('createIndexPatternNameInput');
     this.titleInput = page.testSubj.locator('createIndexPatternTitleInput');
     this.timestampField = page.testSubj.locator('timestampField');
     this.saveButton = page.testSubj.locator('saveIndexPatternButton');
@@ -38,9 +41,28 @@ export class DataViewEditorPage {
   // Fills the title field and waits for async validation to settle.
   async setTitle(title: string): Promise<void> {
     await this.titleInput.fill(title);
-    await this.form
-      .and(this.page.locator('[data-validation-error="0"]'))
-      .waitFor({ state: 'visible' });
+    await this.waitForValidTitle(title);
+  }
+
+  async setTitleWithAutoWildcard(title: string): Promise<void> {
+    const titleWithoutWildcard = title.endsWith('*') ? title.slice(0, -1) : title;
+    const expectedTitle = `${titleWithoutWildcard}*`;
+
+    await this.titleInput.click();
+    await this.titleInput.pressSequentially(titleWithoutWildcard, { delay: 50 });
+    await this.waitForValidTitle(expectedTitle);
+  }
+
+  async setName(name: string): Promise<void> {
+    await this.nameInput.fill(name);
+    await expect(this.nameInput).toHaveValue(name);
+  }
+
+  private async waitForValidTitle(title: string): Promise<void> {
+    await expect(this.titleInput).toHaveValue(title);
+    await expect(this.titleInput).toHaveAttribute('data-is-validating', '0', { timeout: 30_000 });
+    await expect(this.titleInput).not.toHaveAttribute('aria-invalid', 'true');
+    await expect(this.form).toHaveAttribute('data-validation-error', '0', { timeout: 30_000 });
   }
 
   // Returns the timestamp field combo box value after the field finishes loading.
@@ -53,7 +75,12 @@ export class DataViewEditorPage {
   }
 
   async save(): Promise<void> {
+    await this.saveButton.waitFor({ state: 'visible', timeout: 30_000 });
     await this.saveButton.click();
+    const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+    if (await confirmButton.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await confirmButton.click();
+    }
     await this.flyout.waitFor({ state: 'hidden' });
   }
 }

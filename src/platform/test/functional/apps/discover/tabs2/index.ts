@@ -45,6 +45,5 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     });
 
     loadTestFile(require.resolve('./_filters'));
-    loadTestFile(require.resolve('./_navigation'));
   });
 }

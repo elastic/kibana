@@ -31,12 +31,25 @@ export class DataGrid {
   }
 
   private async readFieldTokenLabels(scope: Locator, limit: number): Promise<string[]> {
-    return scope
-      .locator('.kbnFieldIcon svg')
-      .evaluateAll(
-        (icons, max) => icons.slice(0, max).map((icon) => icon.getAttribute('aria-label') ?? ''),
-        limit
-      );
+    const fieldIcons = scope.locator('.kbnFieldIcon svg');
+    await fieldIcons.waitFor({ state: 'visible' });
+
+    return fieldIcons.evaluateAll(
+      (icons, max) => icons.slice(0, max).map((icon) => icon.getAttribute('aria-label') ?? ''),
+      limit
+    );
+  }
+
+  private async readHeaderLabels(scope: Locator, limit: number): Promise<string[]> {
+    const headerCellContent = scope.locator(
+      '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
+    );
+
+    const labels = await headerCellContent.allInnerTexts();
+    return labels
+      .map((label) => label.trim())
+      .filter(Boolean)
+      .slice(0, limit);
   }
 
   private async resizeColumn(
@@ -214,10 +227,12 @@ export class DataGrid {
   }
 
   async getDataGridHeaderFieldTokens(limit = 10): Promise<string[]> {
+    await this.waitForDocTableRendered();
     const header = this.page.testSubj
       .locator('euiDataGridBody')
       .locator('[data-test-subj="dataGridHeader"]');
-    return this.readFieldTokenLabels(header, limit);
+    await header.waitFor({ state: 'visible' });
+    return this.readHeaderLabels(header, limit);
   }
 
   async getDocTableRowCount(): Promise<number> {
@@ -328,6 +343,14 @@ export class DataGrid {
     await this.page.testSubj.click(`docViewerTab-${tabId}`);
   }
 
+  getDocViewer(): Locator {
+    return this.page.testSubj.locator('kbnDocViewer');
+  }
+
+  getDocViewerTab(tabId: string): Locator {
+    return this.page.testSubj.locator(`docViewerTab-${tabId}`);
+  }
+
   async openGridDisplaySettings() {
     await this.page.testSubj.click('dataGridDisplaySelectorButton');
   }
@@ -350,6 +373,12 @@ export class DataGrid {
       .locator('docViewerFlyout')
       .getByLabel('View surrounding documents')
       .click();
+  }
+
+  async openSingleDocument(rowIndex: number) {
+    await this.openAndWaitForDocViewerFlyout({ rowIndex });
+    await this.page.testSubj.locator('docViewerFlyout').getByLabel('View single document').click();
+    await this.page.testSubj.locator('doc-hit').waitFor({ state: 'visible' });
   }
 
   async readJsonFromCodeEditor<T extends Record<string, unknown>>(): Promise<T> {
@@ -478,8 +507,7 @@ export class DataGrid {
   }
 
   async waitForDocViewerFlyoutOpen() {
-    const docViewer = this.page.testSubj.locator('kbnDocViewer');
-    await docViewer.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.getDocViewer().waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async waitForLoad() {
