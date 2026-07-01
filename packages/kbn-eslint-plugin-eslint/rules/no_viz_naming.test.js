@@ -26,6 +26,9 @@ ruleTester.run('@kbn/eslint/no_viz_naming', rule, {
     { code: 'const visualization = true;' },
     // filename without viz is fine
     { code: 'const x = 1;', filename: 'vis_editor.ts' },
+    // string literals without viz are fine
+    { code: "const key = 'visEditor';" },
+    { code: 'if ("visOriginatingApp" in ctx) {}' },
   ],
   invalid: [
     {
@@ -57,6 +60,28 @@ ruleTester.run('@kbn/eslint/no_viz_naming', rule, {
       code: 'const myViz_config = {};',
       errors: [{ messageId: 'noViz' }],
       output: 'const myVis_config = {};',
+    },
+    // must preserve type annotations on parameters
+    {
+      code: 'function foo(isTimeViz: boolean) {}',
+      errors: [{ messageId: 'noViz' }],
+      output: 'function foo(isTimeVis: boolean) {}',
+    },
+    {
+      code: 'const fn = (vizState: SomeType) => vizState;',
+      errors: [{ messageId: 'noViz' }, { messageId: 'noViz' }],
+      output: 'const fn = (visState: SomeType) => visState;',
+    },
+    // string literal violations
+    {
+      code: "if ('vizEditorOriginatingAppUrl' in ctx) {}",
+      errors: [{ messageId: 'noVizLiteral' }],
+      output: "if ('visEditorOriginatingAppUrl' in ctx) {}",
+    },
+    {
+      code: 'const key = "vizState";',
+      errors: [{ messageId: 'noVizLiteral' }],
+      output: 'const key = "visState";',
     },
     // filename violations
     {

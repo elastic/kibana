@@ -494,6 +494,8 @@ module.exports = {
         'x-pack/platform/plugins/shared/lens/**/*',
         'x-pack/platform/plugins/private/graph/**/*',
         'src/platform/packages/private/kbn-lens-formula-docs/**/*',
+        'src/platform/packages/shared/kbn-lens-common/**/*',
+        'src/platform/packages/shared/kbn-lens-common-2/**/*',
         'src/platform/packages/shared/kbn-coloring/**/*',
         'src/platform/packages/shared/kbn-chart-icons/**/*',
         'src/platform/packages/shared/kbn-event-annotation-common/**/*',

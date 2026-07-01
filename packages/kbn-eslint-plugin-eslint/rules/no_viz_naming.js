@@ -30,6 +30,7 @@ module.exports = {
     schema: [],
     messages: {
       noViz: 'Use "vis" instead of "viz" in identifier "{{name}}". Preferred: "{{fixed}}".',
+      noVizLiteral: 'Use "vis" instead of "viz" in string "{{name}}". Preferred: "{{fixed}}".',
       noVizFile: 'Use "vis" instead of "viz" in filename "{{name}}". Rename to "{{fixed}}".',
     },
   },
@@ -46,6 +47,22 @@ module.exports = {
         });
       }
     },
+    Literal(node) {
+      if (typeof node.value !== 'string' || !VIZ_PATTERN.test(node.value)) {
+        return;
+      }
+
+      const fixed = fixName(node.value);
+      const raw = context.getSourceCode().getText(node);
+      const quote = raw[0];
+
+      context.report({
+        node,
+        messageId: 'noVizLiteral',
+        data: { name: node.value, fixed },
+        fix: (fixer) => fixer.replaceText(node, quote + fixed + quote),
+      });
+    },
     Identifier(node) {
       const { name } = node;
       if (!VIZ_PATTERN.test(name)) {
@@ -58,7 +75,7 @@ module.exports = {
         node,
         messageId: 'noViz',
         data: { name, fixed },
-        fix: (fixer) => fixer.replaceText(node, fixed),
+        fix: (fixer) => fixer.replaceTextRange([node.range[0], node.range[0] + name.length], fixed),
       });
     },
   }),
