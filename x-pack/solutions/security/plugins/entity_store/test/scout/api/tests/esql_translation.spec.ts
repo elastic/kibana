@@ -256,6 +256,12 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
           ?.name;
         expect(expectedUserName).toBeDefined();
         expect(values[0][userNameIdx]).toBe(expectedUserName);
+
+        await esClient.deleteByQuery({
+          index: UPDATES_INDEX,
+          refresh: true,
+          query: scenario.query as object,
+        });
       }
     );
   }

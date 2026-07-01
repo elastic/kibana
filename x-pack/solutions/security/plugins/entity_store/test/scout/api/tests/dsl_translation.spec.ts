@@ -234,6 +234,12 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
           confidence: expectedMeta.confidence,
           entityName: expectedMeta.entityName,
         });
+
+        await esClient.deleteByQuery({
+          index: UPDATES_INDEX,
+          refresh: true,
+          query: scenario.query as object,
+        });
       }
     );
   }
