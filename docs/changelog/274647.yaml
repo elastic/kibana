@@ -6,5 +6,4 @@ products:
   target: 2026-06-30
 areas:
 - Search and data
-title: Ensure api keys for apm policy updates
-description: '* Adds defensive check to ensure APM integration policy updates have API keys in its configuration'
+title: Ensure APM integration policies retain API keys on update

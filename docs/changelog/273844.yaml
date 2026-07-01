@@ -8,4 +8,4 @@ products:
   target: 2026-06-30
 areas:
 - Dashboards and visualizations
-title: Fix field variable suggestions
+title: Fix field variable suggestions in Dashboards and Discover.
