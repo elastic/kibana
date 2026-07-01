@@ -17,6 +17,7 @@ import {
   getElasticRiskScoreFromOriginalRule,
   getElasticSeverityFromOriginalRule,
 } from './severity';
+import type { EnrichedLookupResource } from '../../../../../../../common/task/util/enrich_lookup_resources';
 
 export const getTranslateRuleNode = (params: GetTranslateSplToEsqlParams): GraphNode => {
   const nlToESQLQuery = getNLToESQLQuery(params);
@@ -28,7 +29,10 @@ export const getTranslateRuleNode = (params: GetTranslateSplToEsqlParams): Graph
       state.integration?.data_streams?.map((dataStream) => dataStream.index_pattern).join(',') ||
       'logs-*';
 
-    const knowledgeBase = state.integration?.knowledge_base ?? '';
+    const lookupResourcesContext = formatLookupResourcesContext(state.resources.lookup ?? []);
+    const knowledgeBase = [state.integration?.knowledge_base ?? '', lookupResourcesContext]
+      .filter((value) => value.trim() !== '')
+      .join('\n\n');
 
     let esqlQuery: string | undefined;
     let comments: MigrationComments = [];
@@ -72,3 +76,49 @@ export const getTranslateRuleNode = (params: GetTranslateSplToEsqlParams): Graph
     };
   };
 };
+
+const formatLookupResourcesContext = (lookups: EnrichedLookupResource[]): string => {
+  const resourceBlocks = lookups
+    .filter((lookup) => lookup.content && lookup.fields?.length)
+    .map((lookup) => {
+      const fields = (lookup.fields ?? [])
+        .map(
+          (field) =>
+            `<field name="${escapeXmlAttribute(field.path)}" type="${escapeXmlAttribute(
+              field.type
+            )}" />`
+        )
+        .join('\n');
+
+      return `<lookup_resource source_name="${escapeXmlAttribute(
+        lookup.name
+      )}" index="${escapeXmlAttribute(lookup.content)}">
+<fields>
+${fields}
+</fields>
+</lookup_resource>`;
+    });
+
+  if (!resourceBlocks.length) {
+    return '';
+  }
+
+  return `<lookup_join_rules>
+<rule>Use LOOKUP JOIN for lookup indices. Do not use ENRICH.</rule>
+<rule>Lookup fields are declared as field elements; field @name is the lookup-side ES|QL field name and field @type is its datatype.</rule>
+<rule>When source and lookup field names differ, use LOOKUP JOIN lookup_index ON source_field == lookup_field.</rule>
+<rule>When source and lookup field names are the same, use LOOKUP JOIN lookup_index ON field_name.</rule>
+<rule>If source and lookup field types differ, create a source-side EVAL field with the matching type before LOOKUP JOIN.</rule>
+</lookup_join_rules>
+
+<lookup_resources>
+${resourceBlocks.join('\n')}
+</lookup_resources>`;
+};
+
+const escapeXmlAttribute = (value: string): string =>
+  value
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
