@@ -9,6 +9,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { IndexPatternAdapter, IndexAdapter } from '@kbn/index-adapter';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { Subject } from 'rxjs';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import type { RuleMigrationIndexNameProviders } from '../types';
@@ -38,6 +39,8 @@ const MockedIndexAdapter = IndexAdapter as unknown as jest.MockedClass<typeof In
 
 const dependencies = {} as SiemMigrationsClientDependencies;
 const esClient = elasticsearchServiceMock.createStart().client.asInternalUser;
+const getComponentTemplate = (adapter: IndexAdapter) =>
+  (adapter.setComponentTemplate as jest.Mock).mock.calls[0][0];
 
 describe('SiemRuleMigrationsDataService', () => {
   const kibanaVersion = '8.16.0';
@@ -69,6 +72,59 @@ describe('SiemRuleMigrationsDataService', () => {
       );
       expect(prebuiltRulesAdapter.setComponentTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ name: `${INDEX_PATTERN}-prebuiltrules` })
+      );
+    });
+
+    it('should create ELSER component templates with the default ELSER inference endpoint', () => {
+      new RuleMigrationsDataService(logger, kibanaVersion);
+      const [integrationsAdapter, prebuiltRulesAdapter] = MockedIndexAdapter.mock.instances;
+
+      expect(getComponentTemplate(integrationsAdapter)).toEqual(
+        expect.objectContaining({
+          fieldMap: expect.objectContaining({
+            elser_embedding: expect.objectContaining({
+              type: 'semantic_text',
+              inference_id: defaultInferenceEndpoints.ELSER,
+            }),
+          }),
+        })
+      );
+      expect(getComponentTemplate(prebuiltRulesAdapter)).toEqual(
+        expect.objectContaining({
+          fieldMap: expect.objectContaining({
+            elser_embedding: expect.objectContaining({
+              type: 'semantic_text',
+              inference_id: defaultInferenceEndpoints.ELSER,
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should create ELSER component templates with the configured ELSER inference endpoint', () => {
+      const elserInferenceId = 'pt_tiny_elser_elasticsearch';
+      new RuleMigrationsDataService(logger, kibanaVersion, elserInferenceId);
+      const [integrationsAdapter, prebuiltRulesAdapter] = MockedIndexAdapter.mock.instances;
+
+      expect(getComponentTemplate(integrationsAdapter)).toEqual(
+        expect.objectContaining({
+          fieldMap: expect.objectContaining({
+            elser_embedding: expect.objectContaining({
+              type: 'semantic_text',
+              inference_id: elserInferenceId,
+            }),
+          }),
+        })
+      );
+      expect(getComponentTemplate(prebuiltRulesAdapter)).toEqual(
+        expect.objectContaining({
+          fieldMap: expect.objectContaining({
+            elser_embedding: expect.objectContaining({
+              type: 'semantic_text',
+              inference_id: elserInferenceId,
+            }),
+          }),
+        })
       );
     });
 
