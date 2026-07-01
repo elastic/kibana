@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import type { GenerateDescriptionResult, TaskResult } from '@kbn/streams-schema';
 import {
   DESCRIPTION_GENERATION_TASK_TYPE,
@@ -19,7 +20,10 @@ import { assertSignificantEventsAccess } from '../../utils/assert_significant_ev
 import { createServerRoute } from '../../create_server_route';
 import { handleTaskAction } from '../../utils/task_helpers';
 
-const dateFromString = z.string().transform((input) => new Date(input));
+const dateFromString = z
+  .string()
+  .max(100)
+  .transform((input) => new Date(input));
 
 export type DescriptionGenerationTaskResult = TaskResult<GenerateDescriptionResult>;
 
@@ -37,7 +41,7 @@ export const descriptionGenerationStatusRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   }),
   handler: async ({
     params,
@@ -77,12 +81,13 @@ export const descriptionGenerationTaskRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
     body: taskActionSchema({
       from: dateFromString,
       to: dateFromString,
       connectorId: z
         .string()
+        .max(512)
         .optional()
         .describe(
           'Optional connector ID. If not provided, the default AI connector from settings will be used.'
