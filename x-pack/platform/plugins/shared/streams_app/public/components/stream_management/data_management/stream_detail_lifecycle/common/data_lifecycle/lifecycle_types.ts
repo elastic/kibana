@@ -43,6 +43,13 @@ export function buildLifecyclePhases({
   color,
   deletePhaseColor,
   deletePhaseDescription,
+  frozenAfter,
+  frozenLabel,
+  frozenColor,
+  frozenDescription,
+  frozenSize,
+  frozenSizeInBytes,
+  frozenDocsCount,
   description,
   isReadOnly,
   retentionPeriod,
@@ -53,6 +60,13 @@ export function buildLifecyclePhases({
   docsCount?: number;
   deletePhaseColor: string;
   deletePhaseDescription?: string;
+  frozenAfter?: string;
+  frozenLabel?: string;
+  frozenColor?: string;
+  frozenDescription?: string;
+  frozenSize?: string;
+  frozenSizeInBytes?: number;
+  frozenDocsCount?: number;
   description?: string;
   isReadOnly?: boolean;
   label: string;
@@ -78,6 +92,22 @@ export function buildLifecyclePhases({
       isReadOnly,
     },
   ];
+
+  // A configured frozen phase (including `0d`, i.e. "freeze immediately") is shown; an unconfigured
+  // one is signalled by `frozenAfter === undefined`.
+  if (frozenAfter !== undefined && frozenLabel !== undefined && frozenColor !== undefined) {
+    phases.push({
+      name: frozenLabel,
+      color: frozenColor,
+      label: frozenLabel,
+      grow: true,
+      min_age: frozenAfter,
+      description: frozenDescription,
+      size: frozenSize,
+      sizeInBytes: frozenSizeInBytes,
+      docsCount: frozenDocsCount,
+    });
+  }
 
   // Only add delete phase if retention is not infinite
   if (retentionPeriod !== undefined) {

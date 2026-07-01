@@ -147,7 +147,10 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
                 onClick={onClickSave}
                 data-test-subj="saveButton"
                 fill
-                disabled={(isSubmitted && !form.isValid) || hasNoChanges()}
+                // Stay disabled through the debounced validation window.
+                disabled={
+                  (isSubmitted && !form.isValid) || hasNoChanges() || form.getIsChangingValue()
+                }
                 isLoading={isSubmitting}
               >
                 {i18nTexts.saveButtonLabel}
