@@ -18,16 +18,16 @@ Evaluate the memory knowledge base against each of these dimensions:
 
 ## Workflow
 
-1. Call `platform_streams_memory_list` to enumerate all existing memory pages and their categories.
+1. Call `platform_sig_events_memory_list` to enumerate all existing memory pages and their categories.
 2. Call `platform_sig_events_ki_search` (no filters) to review all available knowledge indicators.
 3. Call `platform.streams.inspect_streams` to get the list of streams — this reveals what data sources are connected to Elastic and what is likely missing.
 4. Call `platform.workflows.get_connectors` to see which connectors are configured — use this to assess dimension 11 (access points and connectors).
-5. Read relevant memory pages using `platform_streams_memory_read` or `platform_streams_memory_search` to understand what is already known.
+5. Read relevant memory pages using `platform_sig_events_memory_read` or `platform_sig_events_memory_search` to understand what is already known.
 6. For each of the 11 dimensions above, assess:
    - **Known**: what the memory clearly documents about this dimension
    - **Partial**: what is mentioned but incomplete, ambiguous, or contradictory
    - **Missing**: what is entirely absent or not documented at all
-7. Write or update the gaps page at name `_gaps/overview` using `platform_streams_memory_write`. Always overwrite this page completely — it is a point-in-time snapshot, not an append-only log.
+7. Write or update the gaps page at name `_gaps/overview` using `platform_sig_events_memory_write`. Always overwrite this page completely — it is a point-in-time snapshot, not an append-only log.
 
 ## Output format for the gaps page
 
@@ -66,5 +66,5 @@ Concrete actions to fill the most critical gaps (e.g. "Ask the team to document 
 - **Be specific**: name services, streams, connectors, and dashboards by their actual names where known.
 - **Be honest about uncertainty**: if you can only infer something from partial evidence, say so.
 - **Do not fabricate**: only report what is actually in memory or discoverable via tools.
-- **Always overwrite**: use `platform_streams_memory_write` (not patch) to replace the entire `_gaps/overview` page each run.
+- **Always overwrite**: use `platform_sig_events_memory_write` (not patch) to replace the entire `_gaps/overview` page each run.
 - **Categories**: assign the page to categories `['_system/gaps']`.

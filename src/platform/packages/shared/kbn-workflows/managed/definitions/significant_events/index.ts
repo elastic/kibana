@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import DETECTION_YAML from './pipeline/detection.yaml';
-import DISCOVERY_YAML from './pipeline/discovery.yaml';
-import ORCHESTRATOR_YAML from './pipeline/orchestrator.yaml';
-import TRIAGE_YAML from './pipeline/triage.yaml';
+import DETECTION_YAML from './significant_events/detection.yaml';
+import DISCOVERY_YAML from './significant_events/discovery.yaml';
+import ORCHESTRATOR_YAML from './significant_events/orchestrator.yaml';
+import TRIAGE_YAML from './significant_events/triage.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID = 'system-significant-events-detection';

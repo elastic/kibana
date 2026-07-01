@@ -23,10 +23,10 @@ export const createGapDetectionSkill = (options: MemoryToolsOptions) =>
     content,
     getInlineTools: () => {
       const allowedMemoryToolIds = [
-        'platform_streams_memory_list',
-        'platform_streams_memory_read',
-        'platform_streams_memory_search',
-        'platform_streams_memory_write',
+        'platform_sig_events_memory_list',
+        'platform_sig_events_memory_read',
+        'platform_sig_events_memory_search',
+        'platform_sig_events_memory_write',
       ];
       const memoryTools = createMemoryTools(options)
         .map(({ tags, id, ...rest }) => ({

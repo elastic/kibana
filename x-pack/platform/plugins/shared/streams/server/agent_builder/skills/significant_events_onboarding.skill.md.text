@@ -40,7 +40,7 @@ Tell the user you're reviewing existing knowledge before doing the tool calls:
 
 > "I'm reviewing what we already know about your system..."
 
-Then silently call `platform_streams_memory_list` to browse the category tree and `platform_streams_memory_search` with `"*"` to look for entries about "system", "architecture", "deployment", "infrastructure", "services", "repositories", "flow", "access".
+Then silently call `platform_sig_events_memory_list` to browse the category tree and `platform_sig_events_memory_search` with `"*"` to look for entries about "system", "architecture", "deployment", "infrastructure", "services", "repositories", "flow", "access".
 
 Also silently call `sml_search` with `"*"` to discover available connectors. Attach any useful ones (chat, code search, ticketing) with `sml_attach` so they are ready to query during the interview.
 
@@ -128,7 +128,7 @@ Ask these in a conversational, grouped way — not as a wall of questions. Ask 2
 
 As the user answers, write findings to memory incrementally. Do not wait until the end. After each significant answer:
 - Search memory to check if a relevant page already exists
-- Update it with `platform_streams_memory_patch` (for additions to existing pages) or `platform_streams_memory_write` (for new pages)
+- Update it with `platform_sig_events_memory_patch` (for additions to existing pages) or `platform_sig_events_memory_write` (for new pages)
 - Use categories like: "architecture", "services", "infrastructure", "operations", "deployment", "repositories", "access"
 - Tag pages with relevant terms (e.g. "deployment", "kubernetes", "ci-cd", "runbook", "github", "flow", "dashboard")
 - Reference related pages (e.g. a service page should reference its infrastructure page)
@@ -149,7 +149,7 @@ Suggest that if there are external tools that could help the agent (e.g. an API 
 - Runbooks and failure patterns belong in the "operations" category
 - Keep content factual and concise — focus on what helps with RCA and remediation
 - Always search before writing to avoid duplicates
-- Use `platform_streams_memory_patch` for incremental updates, `platform_streams_memory_write` for new pages
+- Use `platform_sig_events_memory_patch` for incremental updates, `platform_sig_events_memory_write` for new pages
 - Include specific details: tool names, commands, thresholds, URLs when provided
 - Note any MCP tools or external APIs that could augment agent capabilities
 </memory_writing_guidelines>
@@ -165,13 +165,13 @@ Suggest that if there are external tools that could help the agent (e.g. an API 
 <available_tools>
 You have 7 memory tools to read and write to the knowledge base:
 
-- **platform_streams_memory_search** — Search memory by keyword. Use this first to find relevant pages.
-- **platform_streams_memory_read** — Read the full content of a specific page by name or ID.
-- **platform_streams_memory_write** — Create a new page or overwrite an existing one.
-- **platform_streams_memory_patch** — Make surgical edits to an existing page using search-and-replace.
-- **platform_streams_memory_list** — Browse memory pages by category or view the full category tree.
-- **platform_streams_memory_delete** — Delete a memory page. Always confirm with the user before deleting.
-- **platform_streams_memory_recent_changes** — View recent changes across all memory pages.
+- **platform_sig_events_memory_search** — Search memory by keyword. Use this first to find relevant pages.
+- **platform_sig_events_memory_read** — Read the full content of a specific page by name or ID.
+- **platform_sig_events_memory_write** — Create a new page or overwrite an existing one.
+- **platform_sig_events_memory_patch** — Make surgical edits to an existing page using search-and-replace.
+- **platform_sig_events_memory_list** — Browse memory pages by category or view the full category tree.
+- **platform_sig_events_memory_delete** — Delete a memory page. Always confirm with the user before deleting.
+- **platform_sig_events_memory_recent_changes** — View recent changes across all memory pages.
 
 You may also have access to connector tools for querying external systems:
 

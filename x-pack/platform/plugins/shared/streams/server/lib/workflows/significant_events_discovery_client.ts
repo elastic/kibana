@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { SIGEVENTS_ORCHESTRATOR_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -29,7 +29,7 @@ export class SignificantEventsDiscoveryClient {
   constructor({ managementApi }: { managementApi: WorkflowsServerPluginSetup['management'] }) {
     this.workflowExecutionService = new WorkflowExecutionService({
       managementApi,
-      workflowId: SIGEVENTS_ORCHESTRATOR_WORKFLOW_ID,
+      workflowId: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
       workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
   }

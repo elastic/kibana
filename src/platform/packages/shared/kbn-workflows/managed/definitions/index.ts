@@ -25,7 +25,7 @@ import {
   SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW,
   SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW,
   SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW,
-} from './significant_events/streams_memory';
+} from './significant_events/memory';
 import { EXAMPLE_MANAGED_WORKFLOW } from './workflows_extensions_example';
 
 export { EXAMPLE_MANAGED_WORKFLOW_ID } from './workflows_extensions_example';
@@ -40,14 +40,14 @@ export {
   SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
-} from './significant_events/streams_memory';
+} from './significant_events/memory';
 export {
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID,
 } from './significant_events';
-export { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID as STREAMS_INVESTIGATION_WORKFLOW_ID } from './significant_events/investigation';
+export { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from './significant_events/investigation';
 
 export const managedWorkflowDefinitions = [
   EXAMPLE_MANAGED_WORKFLOW,
