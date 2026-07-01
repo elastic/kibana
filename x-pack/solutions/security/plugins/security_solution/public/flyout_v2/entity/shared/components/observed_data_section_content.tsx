@@ -24,6 +24,7 @@ import type { IdentityFields } from '../../../../flyout/document_details/shared/
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { UsersType } from '../../../../explore/users/store/model';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export type ObservedData<T> = Omit<ObservedEntityData<T>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
@@ -44,11 +45,6 @@ export interface ObservedDataSectionProps {
   scopeId: string;
   /** Query id registered with the inspect button. */
   queryId: string;
-  /**
-   * When `true`, observed-attribute values link to the v2 system entity flyout via `OpenFlyoutLink`.
-   * Defaults to `false`, in which case the values fall back to the v1 `PreviewLink` (hover preview).
-   */
-  openEntityInFlyout?: boolean;
 }
 
 const resolveEntityAnomalyConfig = ({
@@ -100,8 +96,9 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
     entityRecord,
     contextID,
     scopeId,
-    openEntityInFlyout,
   } = props;
+
+  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
 
   const { to, from, isInitializing } = useGlobalTime();
 
@@ -172,7 +169,7 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
       contextID={contextID}
       scopeId={scopeId}
       observedFields={typedFields}
-      entityLink={openEntityInFlyout ? renderFlyoutLink : undefined}
+      entityLink={newFlyoutSystemEnabled ? renderFlyoutLink : undefined}
     />
   );
 });

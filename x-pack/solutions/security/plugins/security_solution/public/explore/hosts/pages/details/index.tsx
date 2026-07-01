@@ -412,7 +412,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                     contextID={PageScope.explore}
                     scopeId={PageScope.explore}
                     queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
-                    openEntityInFlyout
                   />
                   <EuiHorizontalRule />
                   <EuiSpacer />

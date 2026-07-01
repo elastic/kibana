@@ -189,7 +189,6 @@ export const Content = ({
         entityRecord={entityRecord}
         scopeId={scopeId}
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
-        openEntityInFlyout
       />
     </>
   );
