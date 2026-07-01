@@ -60,15 +60,16 @@ const callHandler = ({
   return route.handler(handlerParams);
 };
 
-// Frozen searchable-snapshot indices report `size_in_bytes: 0`; their real size is in `total_data_set_size_in_bytes`.
+// Frozen searchable-snapshot indices report `size_in_bytes: 0`; their real size is in
+// `total_data_set_size_in_bytes`. The route reads `total` (primaries + replicas), so populate that.
 const frozenStats = (totalDataSetSize: number): IndicesStatsIndicesStats =>
   ({
-    primaries: { store: { size_in_bytes: 0, total_data_set_size_in_bytes: totalDataSetSize } },
+    total: { store: { size_in_bytes: 0, total_data_set_size_in_bytes: totalDataSetSize } },
   } as IndicesStatsIndicesStats);
 
 const hotStats = (size: number): IndicesStatsIndicesStats =>
   ({
-    primaries: { store: { size_in_bytes: size, total_data_set_size_in_bytes: size } },
+    total: { store: { size_in_bytes: size, total_data_set_size_in_bytes: size } },
   } as IndicesStatsIndicesStats);
 
 describe('storage_stats route (stateful)', () => {

@@ -73,10 +73,19 @@ export const DataLifecycleTimeline = ({
             const isFirstPhase = index === 0;
             const isLastPhase = index === segments.length - 1;
             const showInfinite = isRetentionInfinite && isLastPhase;
+            // When phases and segments line up 1:1 (ILM, or DSL without downsample steps) map the
+            // invalid phase by index/name. Otherwise (DSL downsample steps add extra columns) match
+            // by segment identity: delete and frozen are the only phases that can be invalid, and
+            // both are tagged, so this also works when a frozen value is invalid/clamped to 0d.
             const isPhaseAligned = phases.length === segments.length;
             const phaseNameAtIndex = isPhaseAligned ? phases[index]?.name : undefined;
-            const isInvalidPhasePoint =
-              phaseNameAtIndex !== undefined && invalidPhasesSet.has(phaseNameAtIndex);
+            const isInvalidPhasePoint = isPhaseAligned
+              ? phaseNameAtIndex !== undefined && invalidPhasesSet.has(phaseNameAtIndex)
+              : segment.isDelete
+              ? invalidPhasesSet.has('delete')
+              : segment.isFrozen
+              ? invalidPhasesSet.has('frozen')
+              : false;
             const isInvalidStepPoint =
               segment.stepIndex !== undefined && invalidStepIndicesSet.has(segment.stepIndex);
 
