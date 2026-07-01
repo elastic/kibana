@@ -31,7 +31,7 @@ A custom workflow trigger is owned and registered by a **plugin other than `work
 
 A trigger lives in three layers:
 
-- **Common** — `id`, `eventSchema`, `title`, `description`, optional `documentation` / `snippets`. Imported by both server and public to keep them in sync.
+- **Common** — `id`, `eventSchema`, `title`, `description`, `stability`, optional `documentation` / `snippets`. Imported by both server and public to keep them in sync. Set `stability` to `'tech_preview'`, `'beta'`, or `'stable'` based on the trigger's maturity.
 - **Server** — registers the **same** common definition via `registerTriggerDefinition`; emits events with `emitEvent`.
 - **Public** — spreads the common definition and adds **icon** only (browser-only UI).
 

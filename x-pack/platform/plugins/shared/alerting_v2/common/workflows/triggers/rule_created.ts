@@ -15,6 +15,7 @@ export const ruleCreatedTriggerCommonDefinition: CommonTriggerDefinition<
   typeof ruleLifecycleEventSchema
 > = {
   id: RuleCreatedTriggerId,
+  stability: 'tech_preview',
   eventSchema: ruleLifecycleEventSchema,
   title: i18n.translate('xpack.alertingV2.workflowTriggers.ruleCreated.title', {
     defaultMessage: 'Alerting - Rule created',

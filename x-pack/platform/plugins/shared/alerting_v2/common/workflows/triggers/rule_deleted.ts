@@ -15,6 +15,7 @@ export const ruleDeletedTriggerCommonDefinition: CommonTriggerDefinition<
   typeof ruleLifecycleEventSchema
 > = {
   id: RuleDeletedTriggerId,
+  stability: 'tech_preview',
   eventSchema: ruleLifecycleEventSchema,
   title: i18n.translate('xpack.alertingV2.workflowTriggers.ruleDeleted.title', {
     defaultMessage: 'Alerting - Rule deleted',
