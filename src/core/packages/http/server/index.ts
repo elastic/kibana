@@ -171,6 +171,12 @@ export type {
   HttpServicePreboot,
   HttpServiceSetup,
   HttpServiceStart,
+  HttpSelfFetchHeaders,
+  HttpSelfFetchOptions,
+  HttpSelfFetchQuery,
+  HttpSelfResponse,
+  HttpSelfScopedClient,
+  HttpSelfService,
   HttpProtocol,
 } from './src/http_contract';
 
