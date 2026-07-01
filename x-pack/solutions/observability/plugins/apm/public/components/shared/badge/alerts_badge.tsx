@@ -115,17 +115,9 @@ export function AlertsBadge({
 
   const tooltipContent = onClick ? getClickableTooltip(count) : getDisplayTooltip(count);
 
-  if (onClick) {
-    return (
-      <EuiToolTip position="bottom" content={tooltipContent}>
-        {badge}
-      </EuiToolTip>
-    );
-  }
-
   return (
     <EuiToolTip position="bottom" content={tooltipContent}>
-      <span tabIndex={0}>{badge}</span>
+      {onClick ? badge : <span tabIndex={0}>{badge}</span>}
     </EuiToolTip>
   );
 }
