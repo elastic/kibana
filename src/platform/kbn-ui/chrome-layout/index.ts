@@ -32,8 +32,7 @@ export {
 } from './src/agent_first/agent_first_chrome_styles';
 
 export {
-  syncApplicationWorkspaceTransitionPhase,
-  setApplicationWorkspaceTransitionPhase,
+  resolveApplicationWorkspaceTransitionPhase,
   domRectToApplicationWorkspaceRect,
 } from './src/application/application_workspace_transition_phase';
 export type {
@@ -45,5 +44,7 @@ export {
   ApplicationWorkspaceTransitionDecoy,
   type ApplicationWorkspaceTransitionDecoyProps,
 } from './src/application/application_workspace_transition_decoy';
+
+export { useApplicationWorkspaceTransition } from './src/application/use_application_workspace_transition';
 
 export { CommonGlobalAppStyles } from './src/layouts/global_app_styles';

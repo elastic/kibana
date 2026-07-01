@@ -8,7 +8,6 @@
  */
 
 import type React from 'react';
-import type { ApplicationWorkspaceTransitionPhase } from './application/application_workspace_transition_phase';
 
 /**
  * Dimensions for each layout section in the Chrome UI.
@@ -22,7 +21,6 @@ export interface LayoutDimensions {
   headerHeight: number;
   navigationWidth: number;
   agentWidth: number;
-  applicationWorkspaceWidth: number;
   sidebarWidth: number;
   applicationTopBarHeight: number;
   applicationBottomBarHeight: number;
@@ -47,7 +45,6 @@ export interface LayoutState extends LayoutDimensions {
   hasApplicationWorkspace: boolean;
   hasApplicationTopBar: boolean;
   hasApplicationBottomBar: boolean;
-  applicationWorkspaceTransitionPhase: ApplicationWorkspaceTransitionPhase;
 }
 
 /**

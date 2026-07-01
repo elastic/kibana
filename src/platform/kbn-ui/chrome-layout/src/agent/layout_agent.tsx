@@ -44,14 +44,13 @@ export const LayoutAgent = ({ children }: LayoutAgentProps) => {
     agentWidth = 0,
   } = useLayoutConfig();
 
-  const appTransitioning = applicationWorkspaceTransitionPhase !== 'none';
-
+  // Keep agent width transitions off while the application decoy is animating.
   const useWidthTransition =
     chromeStyle === 'project' &&
     applicationWorkspaceOpen &&
     applicationWorkspaceTransitionPhase === 'none' &&
     !prefersReducedMotion();
-  const useInstantHide = !useWidthTransition && !appTransitioning;
+  const useInstantHide = !useWidthTransition;
   const isCollapsed = !agentWorkspaceOpen;
 
   const [isContentHidden, setIsContentHidden] = useState(isCollapsed && useInstantHide);

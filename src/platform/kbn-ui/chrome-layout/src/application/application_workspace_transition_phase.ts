@@ -25,43 +25,40 @@ export const domRectToApplicationWorkspaceRect = (
   height: domRect.height,
 });
 
-let transitionPhase: ApplicationWorkspaceTransitionPhase = 'none';
-
-export const getApplicationWorkspaceTransitionPhase = (): ApplicationWorkspaceTransitionPhase =>
-  transitionPhase;
-
-export const setApplicationWorkspaceTransitionPhase = (
-  phase: ApplicationWorkspaceTransitionPhase
-): void => {
-  transitionPhase = phase;
-};
-
-export const syncApplicationWorkspaceTransitionPhase = ({
+/**
+ * Derives the active application-workspace transition phase for the current render.
+ * `heldPhase` keeps opening/closing sticky after `prevOpen` updates until the decoy completes.
+ */
+export const resolveApplicationWorkspaceTransitionPhase = ({
   canAnimate,
   applicationWorkspaceOpen,
   prevApplicationWorkspaceOpen,
+  heldPhase,
 }: {
   canAnimate: boolean;
   applicationWorkspaceOpen: boolean;
   prevApplicationWorkspaceOpen: boolean;
+  heldPhase: ApplicationWorkspaceTransitionPhase;
 }): ApplicationWorkspaceTransitionPhase => {
   if (!canAnimate) {
-    transitionPhase = 'none';
-    return transitionPhase;
+    return 'none';
   }
 
-  if (
-    prevApplicationWorkspaceOpen &&
-    !applicationWorkspaceOpen
-  ) {
-    transitionPhase = 'closing';
-  } else if (
-    !prevApplicationWorkspaceOpen &&
-    applicationWorkspaceOpen &&
-    transitionPhase === 'none'
-  ) {
-    transitionPhase = 'opening';
+  if (prevApplicationWorkspaceOpen && !applicationWorkspaceOpen) {
+    return 'closing';
   }
 
-  return transitionPhase;
+  if (!prevApplicationWorkspaceOpen && applicationWorkspaceOpen && heldPhase === 'none') {
+    return 'opening';
+  }
+
+  if (heldPhase === 'opening' && applicationWorkspaceOpen) {
+    return 'opening';
+  }
+
+  if (heldPhase === 'closing' && !applicationWorkspaceOpen) {
+    return 'closing';
+  }
+
+  return heldPhase;
 };

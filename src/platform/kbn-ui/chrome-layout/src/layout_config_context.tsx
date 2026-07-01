@@ -32,7 +32,6 @@ export type LayoutConfig = Pick<
   | 'footerHeight'
   | 'navigationWidth'
   | 'agentWidth'
-  | 'applicationWorkspaceWidth'
   | 'sidebarWidth'
   | 'applicationTopBarHeight'
   | 'applicationBottomBarHeight'
@@ -129,18 +128,7 @@ export const LayoutConfigProvider = ({
     });
   }, []);
 
-  const config = useMemo(() => {
-    const merged = { ...initialValue, ...overrides };
-    const activeTransition =
-      initialValue.applicationWorkspaceTransitionPhase === 'closing' ||
-      initialValue.applicationWorkspaceTransitionPhase === 'opening';
-
-    if (activeTransition) {
-      merged.applicationWorkspaceTransitionPhase = initialValue.applicationWorkspaceTransitionPhase;
-    }
-
-    return merged;
-  }, [initialValue, overrides]);
+  const config = useMemo(() => ({ ...initialValue, ...overrides }), [initialValue, overrides]);
 
   return (
     <LayoutUpdateContext.Provider value={updateLayout}>
