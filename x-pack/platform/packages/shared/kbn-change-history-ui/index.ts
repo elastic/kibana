@@ -39,11 +39,10 @@ export {
   useInvalidateChangeHistory,
   useChangeHistoryAutoSelection,
   CHANGE_HISTORY_QUERY_KEY,
-  CHANGE_HISTORY_LIST_QUERY_KEY,
   changeHistoryObjectQueryKeyPrefix,
   changeHistoryListQueryKey,
   changeHistoryDetailQueryKey,
-  changeHistoryListQueryKeyPrefix,
+  changeHistoryScopeQueryKeyPrefix,
 } from './src/hooks';
 export {
   getChangeHistoryErrorCode,
@@ -60,3 +59,31 @@ export type {
   UseChangeHistoryAutoSelectionArgs,
   UseChangeHistoryAutoSelectionResult,
 } from './src/hooks';
+export {
+  changeHistoryTelemetryEvents,
+  changeHistoryTelemetryEventNames,
+  changeHistoryTelemetryEventSchemas,
+  ChangeHistoryTelemetryEventTypes,
+  createChangeHistoryTelemetryReporter,
+  registerChangeHistoryTelemetryEvents,
+} from './src/telemetry';
+export type {
+  ChangeHistoryCompareMode,
+  ChangeHistoryComparisonType,
+  ChangeHistoryFilterType,
+  ChangeHistoryScope,
+  ChangeHistorySelectionSource,
+  ChangeHistoryTelemetryEvent,
+  ChangeHistoryTelemetryEventType,
+  ChangeHistoryTelemetryEventsMap,
+  ChangeHistoryTelemetryReporter,
+  ChangeHistoryTelemetryScopeFields,
+  CreateChangeHistoryTelemetryReporterOptions,
+  ReportChangeHistoryChangeSelectedActionParams,
+  ReportChangeHistoryDiffViewedActionParams,
+  ReportChangeHistoryFilterAppliedActionParams,
+  ReportChangeHistoryOpenedActionParams,
+  ReportChangeHistoryRestoreCompletedActionParams,
+  ReportChangeHistoryRestoreConfirmedActionParams,
+  ReportChangeHistoryRestoreFailedActionParams,
+} from './src/telemetry';
