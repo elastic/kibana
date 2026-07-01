@@ -317,14 +317,18 @@ export function useFleetServerHostsForm(
             client_auth: sslClientAuthInput.value as ValueOf<ClientAuth>,
           }),
         },
-        ...(((!sslKeyInput.value && sslKeySecretInput.value) ||
-          (!sslESKeyInput.value && sslESKeySecretInput.value) ||
-          (!sslAgentKeyInput.value && sslAgentKeySecretInput.value)) && {
+        ...((sslKeySecretInput.hasChanged ||
+          sslESKeySecretInput.hasChanged ||
+          sslAgentKeySecretInput.hasChanged) && {
           secrets: {
             ssl: {
-              key: sslKeySecretInput.value || undefined,
-              es_key: sslESKeySecretInput.value || undefined,
-              agent_key: sslAgentKeySecretInput.value || undefined,
+              ...(sslKeySecretInput.hasChanged && { key: sslKeySecretInput.value || null }),
+              ...(sslESKeySecretInput.hasChanged && {
+                es_key: sslESKeySecretInput.value || null,
+              }),
+              ...(sslAgentKeySecretInput.hasChanged && {
+                agent_key: sslAgentKeySecretInput.value || null,
+              }),
             },
           },
         }),

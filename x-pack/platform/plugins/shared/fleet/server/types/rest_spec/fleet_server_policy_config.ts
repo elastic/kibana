@@ -26,9 +26,9 @@ export const FleetServerHostBaseSchema = schema.object({
     schema.object({
       ssl: schema.maybe(
         schema.object({
-          key: schema.maybe(secretRefSchema),
-          es_key: schema.maybe(secretRefSchema),
-          agent_key: schema.maybe(secretRefSchema),
+          key: schema.maybe(schema.nullable(secretRefSchema)),
+          es_key: schema.maybe(schema.nullable(secretRefSchema)),
+          agent_key: schema.maybe(schema.nullable(secretRefSchema)),
         })
       ),
     })
