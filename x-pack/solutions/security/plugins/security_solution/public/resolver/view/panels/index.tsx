@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { CellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
 import * as selectors from '../../store/selectors';
 import { type NodeEventOnClick, NodeEventsInCategory } from './node_events_of_type';

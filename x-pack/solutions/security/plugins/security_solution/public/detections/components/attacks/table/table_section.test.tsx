@@ -89,8 +89,8 @@ jest.mock('../../../../flyout_v2/attack/main/attack_flyout_wrapper', () => ({
     <div data-test-subj="attack-flyout-wrapper">{JSON.stringify(props)}</div>
   ),
 }));
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useStore: () => ({ getState: jest.fn(), dispatch: jest.fn(), subscribe: jest.fn() }),
 }));
 jest.mock('react-router-dom', () => ({

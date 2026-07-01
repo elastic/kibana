@@ -36,8 +36,8 @@ import { defaultUdtHeaders } from '../timeline/body/column_headers/default_heade
 
 jest.mock('../../../common/hooks/use_experimental_features');
 
-jest.mock('react-redux', () => {
-  const actual = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const actual = jest.requireActual('react-redux-v7');
   return {
     ...actual,
     useDispatch: () => jest.fn(),

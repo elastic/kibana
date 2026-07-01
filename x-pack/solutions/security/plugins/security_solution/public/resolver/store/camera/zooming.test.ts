@@ -6,8 +6,8 @@
  */
 
 import { cameraReducer } from './reducer';
-import type { Store, AnyAction, Reducer } from 'redux';
-import { createStore } from 'redux';
+import type { Store, AnyAction, Reducer } from 'redux-v4';
+import { createStore } from 'redux-v4';
 import type { AnalyzerById, CameraState, AABB } from '../../types';
 import { viewableBoundingBox, inverseProjectionMatrix, scalingFactor } from './selectors';
 import { expectVectorsToBeClose } from './test_helpers';

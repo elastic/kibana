@@ -18,8 +18,8 @@ import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/
 
 jest.mock('../../../../common/components/discover_in_timeline/use_discover_in_timeline_context');
 jest.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
 
   return {
     ...original,

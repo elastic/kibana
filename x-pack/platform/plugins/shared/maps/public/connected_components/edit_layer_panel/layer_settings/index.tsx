@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AnyAction, Dispatch } from 'redux';
-import { connect } from 'react-redux';
+import type { AnyAction, Dispatch } from 'redux-v4';
+import { connect } from 'react-redux-v7';
 import { LayerSettings } from './layer_settings';
 import {
   clearLayerAttribution,

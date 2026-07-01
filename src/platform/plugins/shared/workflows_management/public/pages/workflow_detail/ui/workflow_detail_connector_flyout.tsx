@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { monaco } from '@kbn/monaco';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { useFetchConnector } from '../../../entities/connectors/model/use_available_connectors';

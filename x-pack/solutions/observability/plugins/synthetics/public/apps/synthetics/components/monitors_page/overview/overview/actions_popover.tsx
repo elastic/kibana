@@ -18,7 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FETCH_STATUS, useEsSearch } from '@kbn/observability-shared-plugin/public';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import styled from 'styled-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../../../common/embeddables/monitors_overview/constants';

@@ -1,0 +1,63 @@
+---
+id: kibReduxToolkitMigration
+slug: /kibana-dev-docs/redux-toolkit-v1-v2-migration
+title: Redux Toolkit v1/v2 dual-version support
+description: How Kibana supports both RTK v1 and v2 during the migration period
+date: 2025-06-25
+tags: ['contributor', 'dev', 'kibana', 'redux', 'migration']
+---
+
+## Overview
+
+Kibana supports both Redux Toolkit (RTK) v1 and v2 simultaneously to allow teams to migrate gradually. The root `package.json` dependencies point to the **new** versions, while the old versions are available under **versioned aliases**.
+
+## Package aliases
+
+| New (default)        | Version | Legacy alias        | Version |
+|----------------------|---------|---------------------|---------|
+| `@reduxjs/toolkit`   | 2.x     | `redux-toolkit-v1`  | 1.9.7   |
+| `redux`              | 5.x     | `redux-v4`          | 4.2.1   |
+| `react-redux`        | 9.x     | `react-redux-v7`    | 7.2.8   |
+| `reselect`           | 5.x     | `reselect-v4`       | 4.1.8   |
+| `immer`              | 11.x    | `immer-v9`          | 9.0.21  |
+| `redux-thunk`        | 3.x     | `redux-thunk-v2`    | 2.4.2   |
+
+## Import patterns
+
+**RTK v2 (new — use for new code):**
+
+```ts
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { useSelector, useDispatch, Provider } from 'react-redux';
+import { produce } from 'immer';
+```
+
+**RTK v1 (legacy — for code not yet migrated):**
+
+```ts
+import { createSlice } from 'redux-toolkit-v1';
+import type { PayloadAction } from 'redux-toolkit-v1';
+import { useSelector, useDispatch, Provider } from 'react-redux-v7';
+import { produce } from 'immer-v9';
+```
+
+## How it works under the hood
+
+- **npm aliases** in `package.json` (e.g. `"redux-toolkit-v1": "npm:@reduxjs/toolkit@1.9.7"`) install both versions side by side.
+- **`kbn-ui-shared-deps-npm`** bundles both the new packages and the v1 aliases as shared externals so both are available at runtime.
+- **`@elastic/charts`** still depends on RTK v1 internally. Yarn resolutions pin its nested copies to v1-era versions, and a `NormalModuleReplacementPlugin` in the shared deps webpack config redirects resolution for imports originating from `@elastic/charts` to its nested `node_modules`.
+- **`kea`** depends on `react-redux` v7. The webpack and rspack optimizer configs use function-based externals combined with `NormalModuleReplacementPlugin` to rewrite kea's `react-redux` import to `react-redux-v7`.
+
+## ESLint enforcement
+
+The custom rule `@kbn/imports/no_redux_toolkit_v2_imports` flags any import of v2 default packages and auto-fixes them to v1 aliases. It is enabled per-path in `.eslintrc.js` for all plugins and packages that currently use RTK v1.
+
+When your plugin migrates to v2, remove its entry from the override list in `.eslintrc.js` to lift the restriction for that code path.
+
+## Migrating your plugin
+
+1. Update imports from aliased names (e.g. `redux-toolkit-v1`) to the default packages (e.g. `@reduxjs/toolkit`).
+2. Address any breaking API changes per the [RTK v2 migration guide](https://redux-toolkit.js.org/migrations/migrating-2.0).
+3. Update Jest mocks that reference `react-redux-v7` back to `react-redux`.
+4. Test thoroughly — v2 changes include stricter type checking and removed APIs like `enableES5()` from immer.

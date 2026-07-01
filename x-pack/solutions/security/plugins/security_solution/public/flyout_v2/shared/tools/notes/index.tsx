@@ -10,7 +10,7 @@ import React, { memo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { DocumentToolsFlyoutHeader } from '../../components/document_tools_flyout_header';
 import { useTimelineConfig } from './hooks/use_timeline_config';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';

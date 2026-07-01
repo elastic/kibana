@@ -22,7 +22,7 @@ import {
 } from '../utils/entry_generation';
 import { resolveBundlesDir, resolveEntryWrappersDir } from '../paths';
 import { loadDllManifest } from './dll_manifest';
-import { getExternals } from './externals';
+import { getExternals, isKeaReactReduxImport } from './externals';
 import {
   getSharedResolveConfig,
   getSharedResolveFallback,
@@ -220,7 +220,19 @@ export async function createSingleCompileConfig(
     // Only externalize shared deps (npm packages), NOT cross-plugin imports
     // In single compilation mode, cross-plugin imports are bundled together
     // This ensures proper module deduplication and service initialization order
-    externals: sharedDepsExternals,
+    externals: [
+      // Function externals: skip externalizing react-redux when imported by kea
+      // so the NormalModuleReplacementPlugin can redirect it to react-redux-v7.
+      ({ context, request }: { context?: string; request?: string }, callback: Function) => {
+        if (isKeaReactReduxImport(context, request)) {
+          return callback();
+        }
+        if (request && request in sharedDepsExternals) {
+          return callback(null, sharedDepsExternals[request]);
+        }
+        return callback();
+      },
+    ],
 
     // Use shared resolve config (same as external plugins)
     resolve: {
@@ -351,6 +363,15 @@ export async function createSingleCompileConfig(
     plugins: [
       // Node.js browser polyfills (same as kbn-optimizer)
       new NodeLibsBrowserPlugin() as any,
+
+      // Redirect kea's react-redux import to react-redux-v7 so it shares the
+      // same React context as the <Provider> from react-redux-v7 used by
+      // consumers like enterprise_search.
+      new rspack.NormalModuleReplacementPlugin(/^react-redux$/, (resource: any) => {
+        if (isKeaReactReduxImport(resource.context, resource.request)) {
+          resource.request = 'react-redux-v7';
+        }
+      }),
 
       // Reference the pre-built @kbn/ui-shared-deps-npm DLL so that transitive
       // dependencies (babel helpers, core-js polyfills, internal sub-modules of

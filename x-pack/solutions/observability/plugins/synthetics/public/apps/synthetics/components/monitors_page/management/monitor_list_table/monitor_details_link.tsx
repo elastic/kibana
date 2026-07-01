@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { selectSelectedLocationId } from '../../../../state';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../../common/runtime_types';

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { networkActions, networkModel, networkSelectors } from '../../store';
 import type { NetworkHttpEdges } from '../../../../../common/search_strategy';

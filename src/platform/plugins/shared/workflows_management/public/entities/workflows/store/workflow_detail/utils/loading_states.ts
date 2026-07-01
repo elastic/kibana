@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionReducerMapBuilder, AsyncThunk } from '@reduxjs/toolkit';
+import type { ActionReducerMapBuilder, AsyncThunk } from 'redux-toolkit-v1';
 import type { RootState } from '../../types';
 import { saveYamlThunk } from '../thunks/save_yaml_thunk';
 import type { WorkflowDetailState } from '../types';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shallowEqual, useSelector } from 'react-redux';
+import { shallowEqual, useSelector } from 'react-redux-v7';
 
 export type TypedUseSelectorHook = <TSelected, TState>(
   selector: (state: TState) => TSelected,

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import deepEqual from 'react-fast-compare';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 // @ts-expect-error unconverted component
 import { elementLayer } from '../../state/actions/elements';
 import { getSelectedPage, getNodes, getSelectedToplevelNodes } from '../../state/selectors/workpad';

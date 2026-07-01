@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import type { HostEcs, OsEcs } from '@kbn/securitysolution-ecs';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';

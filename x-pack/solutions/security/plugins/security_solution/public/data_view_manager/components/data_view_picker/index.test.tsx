@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { DataViewPicker } from '.';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
@@ -27,9 +27,9 @@ jest.mock('../../hooks/use_select_data_view', () => ({
   useSelectDataView: jest.fn().mockReturnValue(jest.fn()),
 }));
 
-jest.mock('react-redux', () => {
+jest.mock('react-redux-v7', () => {
   return {
-    ...jest.requireActual('react-redux'),
+    ...jest.requireActual('react-redux-v7'),
     useDispatch: jest.fn(),
   };
 });

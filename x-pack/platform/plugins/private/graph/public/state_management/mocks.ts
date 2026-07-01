@@ -8,8 +8,8 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import type { NotificationsStart, HttpStart, OverlayStart } from '@kbn/core/public';
 import createSagaMiddleware from 'redux-saga';
-import type { AnyAction } from 'redux';
-import { createStore, applyMiddleware } from 'redux';
+import type { AnyAction } from 'redux-v4';
+import { createStore, applyMiddleware } from 'redux-v4';
 import type { ChromeStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import React, { useCallback } from 'react';
 import { AnomalyEntity } from '../../../common/components/ml/anomaly/use_anomalies_search';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';

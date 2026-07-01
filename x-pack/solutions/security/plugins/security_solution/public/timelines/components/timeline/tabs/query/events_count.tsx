@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { DataLoadingState } from '@kbn/unified-data-table';

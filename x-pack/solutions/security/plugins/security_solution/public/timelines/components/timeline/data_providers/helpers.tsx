@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash/fp';
 import type { DraggableLocation } from '@hello-pangea/dnd';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 
 import { updateProviders } from '../../../store/actions';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';

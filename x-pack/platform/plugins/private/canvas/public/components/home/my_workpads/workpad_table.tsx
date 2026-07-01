@@ -6,7 +6,7 @@
  */
 
 import React, { useContext } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 
 import type { State } from '../../../../types';
 import { canUserWrite as canUserWriteSelector } from '../../../state/selectors/app';

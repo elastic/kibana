@@ -30,7 +30,7 @@ import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mo
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';

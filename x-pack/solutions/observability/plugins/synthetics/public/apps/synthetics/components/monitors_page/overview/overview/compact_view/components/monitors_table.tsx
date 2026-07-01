@@ -9,7 +9,7 @@ import type { CSSProperties } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import type { Criteria, EuiBasicTableProps, EuiTableRowProps } from '@elastic/eui';
 import { EuiBasicTable, EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 import { useOverviewStatusState } from '../../../../hooks/use_overview_status';
 import { selectOverviewFlyoutConfig, selectOverviewPageState } from '../../../../../../state';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAction } from '@reduxjs/toolkit';
+import { createAction } from 'redux-toolkit-v1';
 
 import type { PageScope } from '../constants';
 import { SLICE_PREFIX } from '../constants';

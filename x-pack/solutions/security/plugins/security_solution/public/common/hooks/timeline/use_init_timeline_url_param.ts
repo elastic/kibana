@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect } from 'react';
 import { safeDecode } from '@kbn/rison';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 
 import type { State } from '../../store';
 import { TimelineId } from '../../../../common/types';

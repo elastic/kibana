@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionReducerMapBuilder } from '@reduxjs/toolkit';
+import type { ActionReducerMapBuilder } from 'redux-toolkit-v1';
 import { addLoadingStateReducers, initialLoadingState } from './loading_states';
 import type { WorkflowDetailState } from '../types';
 

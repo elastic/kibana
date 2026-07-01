@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { selectServiceLocationsState } from '../../../state';
 import { selectOverviewStatus } from '../../../state/overview_status';

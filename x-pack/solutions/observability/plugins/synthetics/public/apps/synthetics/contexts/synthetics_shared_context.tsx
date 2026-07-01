@@ -8,10 +8,10 @@
 import React, { useMemo } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { Provider as ReduxProvider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux-v7';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { Subject } from 'rxjs';
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { SyntheticsRefreshContextProvider } from './synthetics_refresh_context';

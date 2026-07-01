@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import type { Query } from '@kbn/es-query';
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';

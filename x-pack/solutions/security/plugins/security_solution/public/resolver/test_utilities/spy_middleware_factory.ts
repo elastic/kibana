@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnyAction } from 'redux';
+import type { AnyAction } from 'redux-v4';
 import type { SpyMiddleware, SpyMiddlewareStateActionPair } from '../types';
 
 /**

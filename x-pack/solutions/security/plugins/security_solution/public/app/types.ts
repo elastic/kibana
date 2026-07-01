@@ -14,7 +14,7 @@ import type {
   Dispatch,
   StateFromReducersMapObject,
   CombinedState,
-} from 'redux';
+} from 'redux-v4';
 import type { RouteProps } from 'react-router-dom';
 import type { AppMountParameters } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';

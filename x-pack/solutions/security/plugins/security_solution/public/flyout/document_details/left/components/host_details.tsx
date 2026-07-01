@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { v4 as uuid } from 'uuid';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {

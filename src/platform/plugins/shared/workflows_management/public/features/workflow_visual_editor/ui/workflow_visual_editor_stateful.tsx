@@ -9,7 +9,7 @@
 
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { parseWorkflowYamlToJSON } from '@kbn/workflows-yaml';

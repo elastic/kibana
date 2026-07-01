@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useLocation } from 'react-router-dom';
-import { createStore } from 'redux';
+import { createStore } from 'redux-v4';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { StartServices } from '../../../types';
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';

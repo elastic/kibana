@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { v4 as uuidv4 } from 'uuid';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { sourcererActions } from '../../../../sourcerer/store';

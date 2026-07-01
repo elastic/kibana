@@ -8,8 +8,8 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { getContext, resetContext } from 'kea';
-import { Provider } from 'react-redux';
-import type { Store } from 'redux';
+import { Provider } from 'react-redux-v7';
+import type { Store } from 'redux-v4';
 
 import { Route, Routes, Router } from '@kbn/shared-ux-router';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';

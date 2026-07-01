@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore } from 'redux-toolkit-v1';
 import {
   logRateAnalysisTableSlice,
   localStorageListenerMiddleware,

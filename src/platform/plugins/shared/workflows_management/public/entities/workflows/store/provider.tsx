@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { createWorkflowsStore } from './store';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { WorkflowsPublicPluginStart } from '../../../types';

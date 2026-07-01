@@ -6,8 +6,8 @@
  */
 
 import type { PolicyDetailsState } from '../../types';
-import type { Dispatch, Store } from 'redux';
-import { applyMiddleware, createStore } from 'redux';
+import type { Dispatch, Store } from 'redux-v4';
+import { applyMiddleware, createStore } from 'redux-v4';
 import type { PolicyDetailsAction } from '.';
 import { policyDetailsReducer, policyDetailsMiddlewareFactory } from '.';
 import { policyConfig } from './selectors';

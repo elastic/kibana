@@ -6,7 +6,7 @@
  */
 
 import React, { useContext, useCallback } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { connect, useDispatch } from 'react-redux-v7';
 import PropTypes from 'prop-types';
 import { withState, withProps, withHandlers, compose, getContext } from 'react-recompose';
 import { selectToplevelNodes } from '../../../state/actions/transient';

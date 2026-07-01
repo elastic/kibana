@@ -31,7 +31,7 @@ import type { GraphStore } from '../state_management';
 import { setDatasource, submitSearchSaga } from '../state_management';
 import type { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { createQueryStringInput } from '@kbn/kql/public/components/query_string_input/get_query_string_input';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';

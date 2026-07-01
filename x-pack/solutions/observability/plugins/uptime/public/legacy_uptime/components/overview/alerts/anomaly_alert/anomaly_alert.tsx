@@ -13,7 +13,7 @@ import {
   EuiHealth,
   EuiText,
 } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import React, { useEffect, useState } from 'react';
 
 // Individual deep imports to not consume the whole package bundle.
