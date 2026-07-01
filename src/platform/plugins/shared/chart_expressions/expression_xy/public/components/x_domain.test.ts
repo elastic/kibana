@@ -35,6 +35,7 @@ interface DateHistogramMeta {
 const createDatatableUtilities = (meta?: DateHistogramMeta): DatatableUtilitiesService =>
   ({
     getDateHistogramMeta: jest.fn().mockReturnValue(meta),
+    getColumnTimeRange: jest.fn().mockReturnValue(meta?.timeRange),
   } as unknown as DatatableUtilitiesService);
 
 const createLayer = (values: number[]): CommonXYDataLayerConfig =>
@@ -72,11 +73,11 @@ describe('getXDomain', () => {
 
     expect(baseDomain).toEqual({ min: 0, max: 10000, minInterval: ONE_SECOND });
     expect(extendedDomain).toHaveProperty('min', 0);
-    expect(extendedDomain).toHaveProperty('max', 9000);
+    expect(extendedDomain).toHaveProperty('max', 10000);
     expect(extendedDomain).toHaveProperty('minInterval', ADJUSTED_INTERVAL);
   });
 
-  it('clamps strictly to fully-contained buckets when dropPartials is true', () => {
+  it('keeps a bucket that starts exactly at the time range boundary when dropPartials is true', () => {
     const datatableUtilities = createDatatableUtilities({
       timeRange: TIME_RANGE,
       dropPartials: true,
@@ -92,7 +93,7 @@ describe('getXDomain', () => {
       'UTC'
     );
 
-    expect(extendedDomain).toHaveProperty('min', 1000);
+    expect(extendedDomain).toHaveProperty('min', 0);
     expect(extendedDomain).toHaveProperty('max', 9000);
   });
 
@@ -133,6 +134,6 @@ describe('getXDomain', () => {
     );
 
     const [gridArg] = getAdjustedIntervalMock.mock.calls[0];
-    expect(gridArg).toEqual([0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]);
+    expect(gridArg).toEqual([0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]);
   });
 });

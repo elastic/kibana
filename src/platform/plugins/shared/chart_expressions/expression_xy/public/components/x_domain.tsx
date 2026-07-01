@@ -37,6 +37,18 @@ const getDateHistogramMeta = (
     .find(Boolean);
 };
 
+const getAppliedTimeRange = (
+  datatableUtilitites: DatatableUtilitiesService,
+  layers: CommonXYDataLayerConfig[]
+) => {
+  return layers
+    .map(({ xAccessor, table }) => {
+      const xColumn = xAccessor ? getColumnByAccessor(xAccessor, table.columns) : null;
+      return xColumn ? datatableUtilitites.getColumnTimeRange(xColumn) : undefined;
+    })
+    .find(Boolean);
+};
+
 const getBucketBounds = (
   from: number,
   to: number,
@@ -65,9 +77,10 @@ const getBucketBounds = (
     const bucketStart = bucket.valueOf();
     const bucketEnd = bucket.clone().add(step, unit).valueOf();
     if (dropPartials) {
-      return bucketStart > from && bucketEnd <= to;
+      return bucketStart >= from && bucketEnd <= to;
     }
-    return bucketEnd > from && bucketStart < to;
+    // Trailing bucket boundary is inclusive of 'to', matching DSL.
+    return bucketEnd > from && bucketStart <= to;
   });
 
   if (valid.length === 0) return undefined;
@@ -155,6 +168,19 @@ export const getXDomain = (
   };
 
   if (!isFullyQualified(baseDomain)) {
+    const appliedTimeRange = getAppliedTimeRange(datatableUtilitites, layers);
+    if (appliedTimeRange?.from && appliedTimeRange?.to) {
+      const clampedDomain = {
+        min: moment(appliedTimeRange.from).valueOf(),
+        max: moment(appliedTimeRange.to).valueOf(),
+        minInterval,
+      };
+      return {
+        extendedDomain: clampedDomain,
+        baseDomain: clampedDomain,
+      };
+    }
+
     return {
       extendedDomain: baseDomain,
       baseDomain,
