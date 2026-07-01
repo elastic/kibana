@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -21,91 +21,109 @@ import { useAttackEntitiesCounts } from '../hooks/use_attack_entities_counts';
 import { INSIGHTS_ENTITIES_TEST_ID } from '../constants/test_ids';
 
 export interface EntitiesOverviewProps {
+  /** Alert IDs belonging to the attack, used to query entity cardinality. */
   alertIds: string[];
+  /** Optional callback to open the entities left panel. When undefined, the title renders as plain text. */
+  onOpenLeftPanel?: () => void;
 }
 
 /**
  * Entities section for the attack flyout. Renders related users and hosts counts.
  */
-export const EntitiesOverview: React.FC<EntitiesOverviewProps> = memo(({ alertIds }) => {
-  const { euiTheme } = useEuiTheme();
-  const { relatedUsers, relatedHosts, loading } = useAttackEntitiesCounts(alertIds);
+export const EntitiesOverview: React.FC<EntitiesOverviewProps> = memo(
+  ({ alertIds, onOpenLeftPanel }) => {
+    const { euiTheme } = useEuiTheme();
+    const { relatedUsers, relatedHosts, loading } = useAttackEntitiesCounts(alertIds);
 
-  // TODO: open left panel when v2 left panel is available
-  const link = undefined;
+    const link = useMemo(
+      () =>
+        onOpenLeftPanel
+          ? {
+              callback: onOpenLeftPanel,
+              tooltip: (
+                <FormattedMessage
+                  id="xpack.securitySolution.flyoutV2.attack.overview.insights.entitiesLinkTooltip"
+                  defaultMessage="Show related entities"
+                />
+              ),
+            }
+          : undefined,
+      [onOpenLeftPanel]
+    );
 
-  return (
-    <SectionPanel
-      data-test-subj={INSIGHTS_ENTITIES_TEST_ID}
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.flyoutV2.attack.overview.insights.entitiesTitle"
-          defaultMessage="Entities"
-        />
-      }
-      highlightTitle
-      link={link}
-      linkIconType="chevronLimitLeft"
-    >
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="m"
-        responsive={false}
-        css={css`
-          padding: ${euiTheme.size.m} ${euiTheme.size.base};
-        `}
+    return (
+      <SectionPanel
+        data-test-subj={INSIGHTS_ENTITIES_TEST_ID}
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.flyoutV2.attack.overview.insights.entitiesTitle"
+            defaultMessage="Entities"
+          />
+        }
+        highlightTitle
+        link={link}
+        linkIconType="chevronLimitLeft"
       >
-        <EuiFlexItem>
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="spaceBetween"
-            gutterSize="s"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <FormattedMessage
-                  id="xpack.securitySolution.flyoutV2.attack.overview.insights.relatedUsers"
-                  defaultMessage="Related users"
-                />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {loading ? (
-                <EuiSkeletonText lines={1} size="xs" />
-              ) : (
-                <EuiBadge color="hollow">{relatedUsers}</EuiBadge>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="spaceBetween"
-            gutterSize="s"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <FormattedMessage
-                  id="xpack.securitySolution.flyoutV2.attack.overview.insights.relatedHosts"
-                  defaultMessage="Related hosts"
-                />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {loading ? (
-                <EuiSkeletonText lines={1} size="xs" />
-              ) : (
-                <EuiBadge color="hollow">{relatedHosts}</EuiBadge>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </SectionPanel>
-  );
-});
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="m"
+          responsive={false}
+          css={css`
+            padding: ${euiTheme.size.m} ${euiTheme.size.base};
+          `}
+        >
+          <EuiFlexItem>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              gutterSize="s"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyoutV2.attack.overview.insights.relatedUsers"
+                    defaultMessage="Related users"
+                  />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {loading ? (
+                  <EuiSkeletonText lines={1} size="xs" />
+                ) : (
+                  <EuiBadge color="hollow">{relatedUsers}</EuiBadge>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              gutterSize="s"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyoutV2.attack.overview.insights.relatedHosts"
+                    defaultMessage="Related hosts"
+                  />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {loading ? (
+                  <EuiSkeletonText lines={1} size="xs" />
+                ) : (
+                  <EuiBadge color="hollow">{relatedHosts}</EuiBadge>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </SectionPanel>
+    );
+  }
+);
 
 EntitiesOverview.displayName = 'EntitiesOverview';

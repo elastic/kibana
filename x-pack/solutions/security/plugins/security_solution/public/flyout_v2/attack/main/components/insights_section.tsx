@@ -19,44 +19,51 @@ const STORAGE_KEY = 'securitySolution.attackDetailsFlyout.overviewSectionExpande
 const FIELD_ALERT_IDS = 'kibana.alert.attack_discovery.alert_ids' as const;
 
 export interface InsightsSectionProps {
+  /** The raw attack document hit. */
   hit: DataTableRecord;
+  /** Optional callback to open the entities left panel. Forwarded to EntitiesOverview. */
+  onOpenEntitiesLeftPanel?: () => void;
+  /** Optional callback to open the correlations left panel. Forwarded to CorrelationsOverview. */
+  onOpenCorrelationsLeftPanel?: () => void;
 }
 
 /**
  * Insights section for the attack flyout. Renders entities and correlations panels.
  */
-export const InsightsSection = memo(({ hit }: InsightsSectionProps) => {
-  const expanded = useExpandSection({
-    storageKey: STORAGE_KEY,
-    title: KEY,
-    defaultValue: false,
-  });
+export const InsightsSection = memo(
+  ({ hit, onOpenEntitiesLeftPanel, onOpenCorrelationsLeftPanel }: InsightsSectionProps) => {
+    const expanded = useExpandSection({
+      storageKey: STORAGE_KEY,
+      title: KEY,
+      defaultValue: false,
+    });
 
-  const alertIds = useMemo(() => {
-    const value = hit.flattened[FIELD_ALERT_IDS];
-    if (!value) return [];
-    const arr = Array.isArray(value) ? value : [value];
-    return [...new Set(arr as string[])];
-  }, [hit]);
+    const alertIds = useMemo(() => {
+      const value = hit.flattened[FIELD_ALERT_IDS];
+      if (!value) return [];
+      const arr = Array.isArray(value) ? value : [value];
+      return [...new Set(arr as string[])];
+    }, [hit]);
 
-  return (
-    <ExpandableSection
-      expanded={expanded}
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.flyoutV2.attack.overview.insightsSection.sectionTitle"
-          defaultMessage="Insights"
-        />
-      }
-      localStorageKey={STORAGE_KEY}
-      sectionId={KEY}
-      gutterSize="s"
-      data-test-subj={INSIGHTS_SECTION_TEST_ID}
-    >
-      <EntitiesOverview alertIds={alertIds} />
-      <CorrelationsOverview alertIds={alertIds} />
-    </ExpandableSection>
-  );
-});
+    return (
+      <ExpandableSection
+        expanded={expanded}
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.flyoutV2.attack.overview.insightsSection.sectionTitle"
+            defaultMessage="Insights"
+          />
+        }
+        localStorageKey={STORAGE_KEY}
+        sectionId={KEY}
+        gutterSize="s"
+        data-test-subj={INSIGHTS_SECTION_TEST_ID}
+      >
+        <EntitiesOverview alertIds={alertIds} onOpenLeftPanel={onOpenEntitiesLeftPanel} />
+        <CorrelationsOverview alertIds={alertIds} onOpenLeftPanel={onOpenCorrelationsLeftPanel} />
+      </ExpandableSection>
+    );
+  }
+);
 
 InsightsSection.displayName = 'InsightsSection';

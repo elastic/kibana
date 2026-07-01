@@ -16,6 +16,8 @@ import { AISummarySection } from '../../../flyout_v2/attack/main/components/ai_s
 import { VisualizationsSection } from '../../../flyout_v2/attack/main/components/visualizations_section';
 import { InsightsSection } from '../../../flyout_v2/attack/main/components/insights_section';
 import { useAttackDetailsContext } from '../context';
+import { useNavigateToAttackDetailsLeftPanel } from '../hooks/use_navigate_to_attack_details_left_panel';
+import { CORRELATION_TAB_ID } from '../constants/left_panel_paths';
 
 /**
  * Renders the Overview tab content in the Attack Details flyout.
@@ -23,6 +25,11 @@ import { useAttackDetailsContext } from '../context';
 export const OverviewTab = memo(() => {
   const { searchHit } = useAttackDetailsContext();
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+
+  const openEntitiesLeftPanel = useNavigateToAttackDetailsLeftPanel();
+  const openCorrelationsLeftPanel = useNavigateToAttackDetailsLeftPanel({
+    subTab: CORRELATION_TAB_ID,
+  });
 
   return (
     <EuiPanel
@@ -39,7 +46,11 @@ export const OverviewTab = memo(() => {
       <EuiHorizontalRule margin="m" />
       <VisualizationsSection hit={hit} />
       <EuiHorizontalRule margin="m" />
-      <InsightsSection hit={hit} />
+      <InsightsSection
+        hit={hit}
+        onOpenEntitiesLeftPanel={openEntitiesLeftPanel}
+        onOpenCorrelationsLeftPanel={openCorrelationsLeftPanel}
+      />
     </EuiPanel>
   );
 });

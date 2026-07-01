@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -13,63 +13,81 @@ import { SectionPanel } from './section_panel';
 import { INSIGHTS_CORRELATIONS_TEST_ID } from '../constants/test_ids';
 
 export interface CorrelationsOverviewProps {
+  /** Alert IDs belonging to the attack; the count is displayed as related alerts. */
   alertIds: string[];
+  /** Optional callback to open the correlations left panel. When undefined, the title renders as plain text. */
+  onOpenLeftPanel?: () => void;
 }
 
 /**
  * Correlation section for the attack flyout. Renders the related alerts count.
  */
-export const CorrelationsOverview: React.FC<CorrelationsOverviewProps> = memo(({ alertIds }) => {
-  const { euiTheme } = useEuiTheme();
-  const relatedAlertsCount = alertIds.length;
+export const CorrelationsOverview: React.FC<CorrelationsOverviewProps> = memo(
+  ({ alertIds, onOpenLeftPanel }) => {
+    const { euiTheme } = useEuiTheme();
+    const relatedAlertsCount = alertIds.length;
 
-  // TODO: open left panel when v2 left panel is available
-  const link = undefined;
-
-  return (
-    <SectionPanel
-      data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.flyoutV2.attack.overview.insights.correlationTitle"
-          defaultMessage="Correlation"
-        />
-      }
-      highlightTitle
-      link={link}
-      linkIconType="arrowStart"
-    >
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="m"
-        responsive={false}
-        css={css`
-          padding: ${euiTheme.size.m} ${euiTheme.size.base};
-        `}
-      >
-        <EuiFlexItem>
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="spaceBetween"
-            gutterSize="s"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
+    const link = useMemo(
+      () =>
+        onOpenLeftPanel
+          ? {
+              callback: onOpenLeftPanel,
+              tooltip: (
                 <FormattedMessage
-                  id="xpack.securitySolution.flyoutV2.attack.overview.insights.relatedAlerts"
-                  defaultMessage="Related alerts"
+                  id="xpack.securitySolution.flyoutV2.attack.overview.insights.correlationsLinkTooltip"
+                  defaultMessage="Show related alerts"
                 />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{relatedAlertsCount}</EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </SectionPanel>
-  );
-});
+              ),
+            }
+          : undefined,
+      [onOpenLeftPanel]
+    );
+
+    return (
+      <SectionPanel
+        data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.flyoutV2.attack.overview.insights.correlationTitle"
+            defaultMessage="Correlation"
+          />
+        }
+        highlightTitle
+        link={link}
+        linkIconType="arrowStart"
+      >
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="m"
+          responsive={false}
+          css={css`
+            padding: ${euiTheme.size.m} ${euiTheme.size.base};
+          `}
+        >
+          <EuiFlexItem>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              gutterSize="s"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyoutV2.attack.overview.insights.relatedAlerts"
+                    defaultMessage="Related alerts"
+                  />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">{relatedAlertsCount}</EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </SectionPanel>
+    );
+  }
+);
 
 CorrelationsOverview.displayName = 'CorrelationsOverview';

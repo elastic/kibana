@@ -109,10 +109,20 @@ describe('EntitiesOverview (v2)', () => {
     expect(screen.queryByText('0')).not.toBeInTheDocument();
   });
 
-  it('renders the title as plain text (no link) because left panel is not yet available', () => {
+  it('renders the title as plain text when onOpenLeftPanel is not provided', () => {
     renderWithEui(<EntitiesOverview alertIds={['alert-1']} />);
 
     expect(screen.getByTestId(`${INSIGHTS_ENTITIES_TEST_ID}TitleText`)).toBeInTheDocument();
     expect(screen.queryByTestId(`${INSIGHTS_ENTITIES_TEST_ID}TitleLink`)).not.toBeInTheDocument();
+  });
+
+  it('renders the title as a link when onOpenLeftPanel is provided', () => {
+    const onOpenLeftPanel = jest.fn();
+    renderWithEui(<EntitiesOverview alertIds={['alert-1']} onOpenLeftPanel={onOpenLeftPanel} />);
+
+    const link = screen.getByTestId(`${INSIGHTS_ENTITIES_TEST_ID}TitleLink`);
+    expect(link).toBeInTheDocument();
+    link.click();
+    expect(onOpenLeftPanel).toHaveBeenCalledTimes(1);
   });
 });

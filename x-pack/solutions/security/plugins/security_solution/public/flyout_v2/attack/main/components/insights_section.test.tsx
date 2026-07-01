@@ -11,6 +11,8 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { InsightsSection } from './insights_section';
 import { INSIGHTS_SECTION_TEST_ID } from '../constants/test_ids';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { EntitiesOverview } from './entities_overview';
+import { CorrelationsOverview } from './correlations_overview';
 
 jest.mock('@kbn/i18n-react', () => ({
   FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => <>{defaultMessage}</>,
@@ -38,14 +40,16 @@ jest.mock('../../../shared/components/expandable_section', () => ({
 }));
 
 jest.mock('./entities_overview', () => ({
-  EntitiesOverview: () => <div data-test-subj="entities-overview" />,
+  EntitiesOverview: jest.fn(() => <div data-test-subj="entities-overview" />),
 }));
 
 jest.mock('./correlations_overview', () => ({
-  CorrelationsOverview: () => <div data-test-subj="correlations-overview" />,
+  CorrelationsOverview: jest.fn(() => <div data-test-subj="correlations-overview" />),
 }));
 
 const mockedUseExpandSection = jest.mocked(useExpandSection);
+const mockedEntitiesOverview = jest.mocked(EntitiesOverview);
+const mockedCorrelationsOverview = jest.mocked(CorrelationsOverview);
 
 const buildHit = (alertIds: string[]): DataTableRecord =>
   ({
@@ -91,6 +95,33 @@ describe('InsightsSection (v2)', () => {
 
     expect(mockedUseExpandSection).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'insights', defaultValue: false })
+    );
+  });
+
+  it('forwards onOpenEntitiesLeftPanel to EntitiesOverview', () => {
+    const onOpenEntitiesLeftPanel = jest.fn();
+    render(
+      <InsightsSection hit={buildHit(['a'])} onOpenEntitiesLeftPanel={onOpenEntitiesLeftPanel} />
+    );
+
+    expect(mockedEntitiesOverview).toHaveBeenCalledWith(
+      expect.objectContaining({ onOpenLeftPanel: onOpenEntitiesLeftPanel }),
+      expect.anything()
+    );
+  });
+
+  it('forwards onOpenCorrelationsLeftPanel to CorrelationsOverview', () => {
+    const onOpenCorrelationsLeftPanel = jest.fn();
+    render(
+      <InsightsSection
+        hit={buildHit(['a'])}
+        onOpenCorrelationsLeftPanel={onOpenCorrelationsLeftPanel}
+      />
+    );
+
+    expect(mockedCorrelationsOverview).toHaveBeenCalledWith(
+      expect.objectContaining({ onOpenLeftPanel: onOpenCorrelationsLeftPanel }),
+      expect.anything()
     );
   });
 });
