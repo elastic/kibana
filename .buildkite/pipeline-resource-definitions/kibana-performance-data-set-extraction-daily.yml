@@ -26,6 +26,11 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/performance/data_set_extraction_daily.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/performance/data_set_extraction_daily.yml
+            cleanup_sparse_state: true
       skip_intermediate_builds: false
       provider_settings:
         trigger_mode: none

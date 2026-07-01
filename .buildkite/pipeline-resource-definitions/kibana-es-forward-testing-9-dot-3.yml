@@ -28,6 +28,11 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_forward_9_dot_3.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/es_forward_9_dot_3.yml
+            cleanup_sparse_state: true
       skip_intermediate_builds: false
       provider_settings:
         prefix_pull_request_fork_branch_names: false
