@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getTraceLogsColumns, isDiscoverDefaultLogColumns, shouldPersistTraceLogsColumnsToUrl } from './get_trace_logs_columns';
+import {
+  getTraceLogsColumns,
+  isDiscoverDefaultLogColumns,
+  shouldPersistTraceLogsColumnsToUrl,
+} from './get_trace_logs_columns';
 
 describe('isDiscoverDefaultLogColumns', () => {
   it('returns true for empty or Summary-only columns', () => {
