@@ -7,16 +7,18 @@
 
 import React, { lazy } from 'react';
 
-import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
 import { waitFor, act, screen } from '@testing-library/react';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
+import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import EditConnectorFlyout from '.';
 import type { ActionConnector, GenericValidationResult } from '../../../../types';
 import { EditConnectorTabs } from '../../../../types';
 import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
 import { TECH_PREVIEW_LABEL } from '../../translations';
-import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 const updateConnectorResponse = {
   connector_type_id: 'test',
@@ -817,5 +819,49 @@ describe('is spec connector', () => {
     );
 
     expect(await screen.findByTestId('testConnectorTab')).toBeInTheDocument();
+  });
+
+  it('executes spec connector tests with the reserved _test subAction', async () => {
+    actionTypeRegistry.has.mockReturnValue(true);
+
+    appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={connector}
+        onConnectorUpdated={onConnectorUpdated}
+        tab={EditConnectorTabs.Test}
+        isTestable={true}
+        connectorActionType={{
+          id: connector.actionTypeId,
+          name: 'Spec connector',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          source: ACTION_TYPE_SOURCES.spec,
+          testable: true,
+          isSystemActionType: false,
+          isDeprecated: false,
+        }}
+      />
+    );
+
+    await userEvent.click(await screen.findByTestId('executeActionButton'));
+
+    await waitFor(() => {
+      expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
+        '/api/actions/connector/123/_execute',
+        {
+          body: JSON.stringify({
+            params: {
+              subAction: TEST_CONNECTOR_SUB_ACTION,
+              subActionParams: {},
+            },
+          }),
+        }
+      );
+    });
   });
 });

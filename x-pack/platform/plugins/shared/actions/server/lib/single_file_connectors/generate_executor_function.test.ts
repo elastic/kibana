@@ -364,7 +364,7 @@ describe('generateExecutorFunction', () => {
     });
   });
 
-  describe('__test__ subAction', () => {
+  describe('_test subAction', () => {
     it('returns status ok when the test handler resolves', async () => {
       const testHandler = jest.fn().mockResolvedValue({ message: 'connected' });
       const actions: ConnectorSpec['actions'] = {

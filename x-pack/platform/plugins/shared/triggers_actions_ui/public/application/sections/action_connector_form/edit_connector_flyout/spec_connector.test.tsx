@@ -185,7 +185,7 @@ describe('spec connector with API fetch', () => {
     expect(await screen.findByTestId('connector-spec-load-error')).toBeInTheDocument();
   });
 
-  it('does not show save and test button for spec connectors', async () => {
+  it('does not show save and test button for non-testable spec connectors', async () => {
     appMockRenderer.render(
       <CreateConnectorFlyout
         actionTypeRegistry={actionTypeRegistry}
@@ -199,10 +199,31 @@ describe('spec connector with API fetch', () => {
 
     expect(await screen.findByTestId('nameInput')).toBeInTheDocument();
 
-    // Spec connectors should not show save and test button
     expect(screen.queryByTestId('create-connector-flyout-save-test-btn')).not.toBeInTheDocument();
-    // But should show the save button
     expect(screen.getByTestId('create-connector-flyout-save-btn')).toBeInTheDocument();
+  });
+
+  it('shows save and test button for testable spec connectors', async () => {
+    loadActionTypes.mockResolvedValue([
+      {
+        ...specConnectorType,
+        testable: true,
+      },
+    ]);
+
+    appMockRenderer.render(
+      <CreateConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        onConnectorCreated={onConnectorCreated}
+        onTestConnector={onTestConnector}
+      />
+    );
+
+    await userEvent.click(await screen.findByTestId('spec-connector-test-card'));
+
+    expect(await screen.findByTestId('nameInput')).toBeInTheDocument();
+    expect(screen.getByTestId('create-connector-flyout-save-test-btn')).toBeInTheDocument();
   });
 
   it('navigates back to connector list when pressing back button', async () => {

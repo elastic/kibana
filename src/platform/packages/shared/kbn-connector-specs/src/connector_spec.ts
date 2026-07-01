@@ -252,7 +252,7 @@ export interface Transformations {
 // TESTING
 // ============================================================================
 
-export const TEST_CONNECTOR_SUB_ACTION = '__test__';
+export const TEST_CONNECTOR_SUB_ACTION = '_test';
 
 /** Success = return optional data; failure = throw (mapped to error by the executor). */
 export type ConnectorTestHandlerResult = void | Record<string, unknown>;

@@ -26,11 +26,20 @@ describe('getSpecConnectorTestExecutionParams', () => {
     testable: true,
   } as ActionType;
 
-  it('seeds __test__ subAction for opted-in spec connectors', () => {
+  it('seeds _test subAction for opted-in spec connectors', () => {
     expect(getSpecConnectorTestExecutionParams(specActionType, {})).toEqual({
       subAction: TEST_CONNECTOR_SUB_ACTION,
       subActionParams: {},
     });
+  });
+
+  it('returns params unchanged for spec connectors that are not testable', () => {
+    const nonTestableSpecActionType = {
+      ...specActionType,
+      testable: false,
+    } as ActionType;
+
+    expect(getSpecConnectorTestExecutionParams(nonTestableSpecActionType, {})).toEqual({});
   });
 
   it('returns params unchanged when subAction is already set', () => {
