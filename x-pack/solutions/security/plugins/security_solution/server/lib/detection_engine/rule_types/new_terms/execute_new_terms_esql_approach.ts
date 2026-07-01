@@ -545,7 +545,16 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
         isAlertSuppressionActive,
       });
 
-      if (alertsWereTruncated || result.createdSignalsCount >= params.maxSignals) {
+      const reachedMaxSignalsWithRemainingCombinations =
+        result.createdSignalsCount >= params.maxSignals &&
+        combinationIndex < newTermsCombinations.length;
+
+      if (alertsWereTruncated || reachedMaxSignalsWithRemainingCombinations) {
+        if (reachedMaxSignalsWithRemainingCombinations && !alertsWereTruncated) {
+          result.warningMessages.push(
+            isAlertSuppressionActive ? getSuppressionMaxSignalsWarning() : getMaxSignalsWarning()
+          );
+        }
         break;
       }
     }
