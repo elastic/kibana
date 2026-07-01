@@ -63,8 +63,15 @@ export function httpHandlerFromKbnClient({
 
     const finalHeaders = Object.keys(nextHeaders).length ? nextHeaders : undefined;
 
-    const maxRetries = Number(process.env.KBN_EVALS_HTTP_RETRIES ?? '0') || 0;
-    const retryStatuses = new Set([429, 503, 504]);
+    const parsedRetries = Number(process.env.KBN_EVALS_HTTP_RETRIES);
+    // Default to 3 retries. Under full parallel weekly load the EIS gateway returns
+    // transient 429/5xx and Kibana keep-alive sockets get dropped mid-flight (status
+    // N/A, "fetch failed" / "other side closed"). Without a retry here a single such
+    // blip fails the whole eval example, because httpHandler passes `retries: 0` to
+    // `kbnClient.request` (bypassing the wrapKbnClientWithRetries layer, which no-ops on
+    // `retries === 0`). Honor an explicit override, including "0" to disable.
+    const maxRetries = Number.isFinite(parsedRetries) ? parsedRetries : 3;
+    const retryStatuses = new Set([429, 502, 503, 504]);
 
     async function sleep(ms: number) {
       await new Promise((r) => setTimeout(r, ms));
@@ -142,8 +149,13 @@ export function httpHandlerFromKbnClient({
 
         lastError = error;
 
+        // Transport-level failures (dropped keep-alive socket, "fetch failed",
+        // ECONNRESET) surface as a KbnClientRequesterError with no numeric HTTP status.
+        // These are transient under load and safe to retry. Numeric statuses are retried
+        // only when in the retryable set (4xx client errors stay terminal).
+        const isTransportError = typeof status !== 'number';
         const shouldRetry =
-          attempt < maxRetries && typeof status === 'number' && retryStatuses.has(status);
+          attempt < maxRetries && (isTransportError || retryStatuses.has(status as number));
 
         if (!shouldRetry) {
           throw error;
@@ -162,7 +174,9 @@ export function httpHandlerFromKbnClient({
         const delayMs = baseDelayMs + jitterMs;
 
         log.warning(
-          `HTTP ${status} from Kibana; retrying in ${Math.round(delayMs / 1000)}s (attempt ${
+          `${
+            typeof status === 'number' ? `HTTP ${status}` : `transport error (${error.message})`
+          } from Kibana; retrying in ${Math.round(delayMs / 1000)}s (attempt ${
             attempt + 1
           }/${maxRetries + 1})`
         );
