@@ -6,13 +6,29 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { IndexToRulesMap, RequiredField } from '@kbn/siem-readiness';
+import type { IndexToRulesMap, MissingFieldsEntry, RequiredField } from '@kbn/siem-readiness';
 
-export interface MissingFieldsEntry {
-  ruleId: string;
-  ruleName: string;
-  missingFields: string[];
-}
+/**
+ * Returns the set of fields that are mapped in the given indices, or null when the
+ * fieldCaps request fails — callers use null to skip the group without blocking others.
+ */
+const fetchPresentFields = async (
+  esClient: ElasticsearchClient,
+  indices: string[],
+  fields: string[]
+): Promise<Set<string> | null> => {
+  try {
+    const response = await esClient.fieldCaps({
+      index: indices,
+      fields,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+    return new Set(Object.keys(response.fields ?? {}));
+  } catch {
+    return null;
+  }
+};
 
 /**
  * For each enabled rule that declares `required_fields`, checks whether those fields
@@ -66,52 +82,42 @@ export const fetchRuleFieldCaps = async ({
   const groups = new Map<string, Group>();
 
   for (const [ruleId, requiredFields] of ruleRequiredFields.entries()) {
-    if (requiredFields.length === 0) continue;
-
     const indices = ruleToIndices.get(ruleId);
-    if (!indices || indices.length === 0) continue;
 
-    const sortedIndices = [...indices].sort();
-    const sortedFields = requiredFields.map((f) => f.name).sort();
-    const key = `${sortedIndices.join(',')}|${sortedFields.join(',')}`;
+    // Skip rules with no declared required fields or no resolved indices.
+    if (requiredFields.length > 0 && indices && indices.length > 0) {
+      const sortedIndices = [...indices].sort();
+      const sortedFields = requiredFields.map((f) => f.name).sort();
+      const key = `${sortedIndices.join(',')}|${sortedFields.join(',')}`;
 
-    const existing = groups.get(key);
-    if (existing) {
-      existing.ruleIds.push(ruleId);
-    } else {
-      groups.set(key, { indices: sortedIndices, fields: sortedFields, ruleIds: [ruleId] });
+      const existing = groups.get(key);
+      if (existing) {
+        existing.ruleIds.push(ruleId);
+      } else {
+        groups.set(key, { indices: sortedIndices, fields: sortedFields, ruleIds: [ruleId] });
+      }
     }
   }
 
   const results: MissingFieldsEntry[] = [];
 
   for (const { indices, fields, ruleIds } of groups.values()) {
-    let presentFields: Set<string>;
+    // null signals that fieldCaps failed for this group — skip it so one bad group
+    // doesn't block the others.
+    const presentFields = await fetchPresentFields(esClient, indices, fields);
 
-    try {
-      const response = await esClient.fieldCaps({
-        index: indices,
-        fields,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-      });
-      presentFields = new Set(Object.keys(response.fields ?? {}));
-    } catch {
-      // If fieldCaps fails for this group, skip it — don't block other groups
-      continue;
-    }
+    if (presentFields) {
+      for (const ruleId of ruleIds) {
+        const requiredFieldNames = ruleRequiredFields.get(ruleId)?.map((f) => f.name) ?? [];
+        const missingFields = requiredFieldNames.filter((f) => !presentFields.has(f));
 
-    for (const ruleId of ruleIds) {
-      const requiredFieldNames =
-        ruleRequiredFields.get(ruleId)?.map((f) => f.name) ?? [];
-      const missingFields = requiredFieldNames.filter((f) => !presentFields.has(f));
-
-      if (missingFields.length > 0) {
-        results.push({
-          ruleId,
-          ruleName: ruleNames.get(ruleId) ?? ruleId,
-          missingFields,
-        });
+        if (missingFields.length > 0) {
+          results.push({
+            ruleId,
+            ruleName: ruleNames.get(ruleId) ?? ruleId,
+            missingFields,
+          });
+        }
       }
     }
   }

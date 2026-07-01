@@ -8,7 +8,6 @@
 export { toDataStreamName } from './utils';
 export { fetchPipelines } from './fetch_pipelines';
 export { fetchRuleFieldCaps } from './fetch_rule_field_caps';
-export type { MissingFieldsEntry } from './fetch_rule_field_caps';
 export { fetchIndexHealth } from './fetch_index_health';
 export type { IndexHealthEntry } from './fetch_index_health';
 export { fetchCategories } from './fetch_categories';
