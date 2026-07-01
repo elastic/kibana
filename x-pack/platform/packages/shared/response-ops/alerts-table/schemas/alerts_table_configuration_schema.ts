@@ -23,6 +23,7 @@ export const alertsTableConfigurationSchema = z.object({
     .optional(),
   visibleColumns: z.array(z.string()).optional(),
   sort: z.array(z.record(z.string(), z.object({ order: z.enum(['asc', 'desc']) }))).optional(),
+  pageSize: z.number().optional(),
 });
 
 export type AlertsTableConfiguration = z.infer<typeof alertsTableConfigurationSchema>;
