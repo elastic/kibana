@@ -9,10 +9,7 @@
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import {
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-} from '@kbn/workflows';
+import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '@kbn/workflows';
 import {
   ensureExecutionDataStreamsReady,
   resetEnsureExecutionDataStreamsReadyForTests,

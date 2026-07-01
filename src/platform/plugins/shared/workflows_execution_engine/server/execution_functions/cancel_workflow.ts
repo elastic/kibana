@@ -52,14 +52,14 @@ export const cancelWorkflow = async ({
   }
 
   await workflowExecutionRepository.updateWorkflowExecution({
-      id: workflowExecution.id,
-      ...(workflowExecution.status === ExecutionStatus.PENDING
-        ? { status: ExecutionStatus.CANCELLED }
-        : {}),
-      cancelRequested: true,
-      cancellationReason: 'Cancelled by user',
-      cancelledAt: new Date().toISOString(),
-      cancelledBy: 'system',
+    id: workflowExecution.id,
+    ...(workflowExecution.status === ExecutionStatus.PENDING
+      ? { status: ExecutionStatus.CANCELLED }
+      : {}),
+    cancelRequested: true,
+    cancellationReason: 'Cancelled by user',
+    cancelledAt: new Date().toISOString(),
+    cancelledBy: 'system',
   });
 
   await workflowTaskManager.forceRunIdleTasks(workflowExecution.id, {

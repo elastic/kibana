@@ -12,10 +12,7 @@ export const PLUGIN_NAME = 'Workflows';
 
 export const WORKFLOWS_INDEX = '.workflows-workflows';
 
-export {
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX
-} from '@kbn/workflows';
+export { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '@kbn/workflows';
 
 export const WORKFLOWS_DOCUMENTATION_URL = 'https://ela.st/workflows-docs';
 

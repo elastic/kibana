@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ExecutionStatus,
-  NonTerminalExecutionStatuses,
-} from '@kbn/workflows';
+import { ExecutionStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
@@ -72,7 +69,9 @@ describe('WorkflowExecutionRepository', () => {
           '@timestamp': expect.any(String),
         }),
       });
-      expect(result).toEqual(expect.objectContaining({ id: '1', '@timestamp': expect.any(String) }));
+      expect(result).toEqual(
+        expect.objectContaining({ id: '1', '@timestamp': expect.any(String) })
+      );
     });
 
     it('should throw an error if ID is missing during creation', async () => {
@@ -134,7 +133,9 @@ describe('WorkflowExecutionRepository', () => {
     it('defaults refresh to false when not provided', async () => {
       esClient.bulk.mockResolvedValue({
         errors: false,
-        items: [{ create: { _id: 'e1', _index: TEST_BACKING_INDEX, _seq_no: 1, _primary_term: 1 } }],
+        items: [
+          { create: { _id: 'e1', _index: TEST_BACKING_INDEX, _seq_no: 1, _primary_term: 1 } },
+        ],
       });
 
       await repository.bulkCreateWorkflowExecutions([{ id: 'e1' }]);
