@@ -12,7 +12,7 @@ import {
   type FormBasedPrivateState,
   type LensDocument,
 } from '@kbn/lens-common';
-import { applyVizTypeDatasourceDefaults } from './viz_type_defaults';
+import { applyVisualizationTypeDatasourceDefaults } from './visualization_type_defaults';
 
 interface ColumnSpec {
   operationType: string;
@@ -51,11 +51,11 @@ const getIncludeEmptyRows = (state: FormBasedPrivateState, layerId: string, colu
   (state.layers[layerId].columns[columnId] as { params?: { includeEmptyRows?: boolean } }).params
     ?.includeEmptyRows;
 
-describe('applyVizTypeDatasourceDefaults', () => {
+describe('applyVisualizationTypeDatasourceDefaults', () => {
   it('returns the datasource state untouched for non form-based datasources', () => {
     const datasourceState = makeState({ first: { col1: { operationType: 'date_histogram' } } });
 
-    const result = applyVizTypeDatasourceDefaults({
+    const result = applyVisualizationTypeDatasourceDefaults({
       kind: 'typeSwitch',
       datasourceId: 'textBased',
       datasourceState,
@@ -69,7 +69,7 @@ describe('applyVizTypeDatasourceDefaults', () => {
   it('returns the datasource state untouched when no datasource id is provided', () => {
     const datasourceState = makeState({ first: { col1: { operationType: 'date_histogram' } } });
 
-    const result = applyVizTypeDatasourceDefaults({
+    const result = applyVisualizationTypeDatasourceDefaults({
       kind: 'suggestion',
       datasourceId: undefined,
       datasourceState,
@@ -94,7 +94,7 @@ describe('applyVizTypeDatasourceDefaults', () => {
         },
       });
 
-      const result = applyVizTypeDatasourceDefaults({
+      const result = applyVisualizationTypeDatasourceDefaults({
         kind: 'suggestion',
         datasourceId: LENS_DATASOURCE_ID.FORM_BASED,
         datasourceState,
@@ -111,7 +111,7 @@ describe('applyVizTypeDatasourceDefaults', () => {
         first: { col1: { operationType: 'date_histogram' } },
       });
 
-      const result = applyVizTypeDatasourceDefaults({
+      const result = applyVisualizationTypeDatasourceDefaults({
         kind: 'suggestion',
         datasourceId: LENS_DATASOURCE_ID.FORM_BASED,
         datasourceState,
@@ -129,7 +129,7 @@ describe('applyVizTypeDatasourceDefaults', () => {
         first: { col1: { operationType: 'date_histogram', params: { includeEmptyRows: true } } },
       });
 
-      const result = applyVizTypeDatasourceDefaults({
+      const result = applyVisualizationTypeDatasourceDefaults({
         kind: 'typeSwitch',
         datasourceId: LENS_DATASOURCE_ID.FORM_BASED,
         datasourceState,
@@ -162,7 +162,7 @@ describe('applyVizTypeDatasourceDefaults', () => {
         },
       } as unknown as LensDocument;
 
-      const result = applyVizTypeDatasourceDefaults({
+      const result = applyVisualizationTypeDatasourceDefaults({
         kind: 'typeSwitch',
         datasourceId: LENS_DATASOURCE_ID.FORM_BASED,
         datasourceState,

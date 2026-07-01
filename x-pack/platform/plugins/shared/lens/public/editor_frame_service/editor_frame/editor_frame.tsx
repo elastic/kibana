@@ -51,7 +51,7 @@ import { getLongMessage } from '../../user_messages_utils';
 import { useEditorFrameService } from '../editor_frame_service_context';
 import { VisualizationToolbarWrapper } from './visualization_toolbar';
 import { LayerTabsWrapper } from '../../app_plugin/shared/edit_on_the_fly/layer_tabs';
-import { applyVizTypeDatasourceDefaults } from '../../datasources/form_based/viz_type_defaults';
+import { applyVisualizationTypeDatasourceDefaults } from '../../datasources/form_based/visualization_type_defaults';
 
 export interface EditorFrameProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -119,7 +119,7 @@ export function EditorFrame(props: EditorFrameProps) {
         const targetVisualization = suggestionDatasourceId
           ? visualizationMap[suggestion.visualizationId]
           : undefined;
-        // Intentional `as FormBasedPrivateState` type assertion as suggestions carry datasource state opaquely (`unknown`); `applyVizTypeDatasourceDefaults` re-checks `datasourceId === formBased` before touching it.
+        // Intentional `as FormBasedPrivateState` type assertion as suggestions carry datasource state opaquely (`unknown`); `applyVisualizationTypeDatasourceDefaults` re-checks `datasourceId === formBased` before touching it.
         const suggestionDatasourceState = suggestion.datasourceState as
           | FormBasedPrivateState
           | undefined;
@@ -127,7 +127,7 @@ export function EditorFrame(props: EditorFrameProps) {
           targetVisualization && suggestionDatasourceId && suggestionDatasourceState
             ? {
                 ...suggestion,
-                datasourceState: applyVizTypeDatasourceDefaults({
+                datasourceState: applyVisualizationTypeDatasourceDefaults({
                   kind: 'suggestion',
                   datasourceId: suggestionDatasourceId,
                   datasourceState: suggestionDatasourceState,

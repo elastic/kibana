@@ -52,7 +52,7 @@ export interface TypeSwitchContext extends BaseContext {
   targetLayerId?: string;
 }
 
-export type VizTypeDefaultsContext = SuggestionDropContext | TypeSwitchContext;
+export type VisualizationTypeDefaultsContext = SuggestionDropContext | TypeSwitchContext;
 
 /**
  * Applies every datasource-owned default that should track the active
@@ -63,8 +63,8 @@ export type VizTypeDefaultsContext = SuggestionDropContext | TypeSwitchContext;
  * visualization-type default means extending this function rather than touching
  * each call site. Non form-based datasources are returned untouched.
  */
-export function applyVizTypeDatasourceDefaults(
-  context: VizTypeDefaultsContext
+export function applyVisualizationTypeDatasourceDefaults(
+  context: VisualizationTypeDefaultsContext
 ): FormBasedPrivateState {
   const { datasourceId, datasourceState, targetVisualizationTypeId } = context;
 

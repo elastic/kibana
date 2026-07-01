@@ -34,7 +34,7 @@ import {
   selectDatasourceStates,
   selectPersistedDoc,
 } from '../../../../state_management';
-import { applyVizTypeDatasourceDefaults } from '../../../../datasources/form_based/viz_type_defaults';
+import { applyVisualizationTypeDatasourceDefaults } from '../../../../datasources/form_based/visualization_type_defaults';
 import { generateId } from '../../../../id_generator/id_generator';
 import type { SelectableEntry } from './chart_switch_selectable';
 import { ChartSwitchSelectable } from './chart_switch_selectable';
@@ -114,7 +114,7 @@ export const ChartSwitch = memo(function ChartSwitch({
     const getPersistedVisualizationTypeId = (lId: string) =>
       getPersistedLayerVisualizationTypeId(persistedDoc, visualizationMap, lId);
 
-    // Intentional `as FormBasedPrivateState` type assertion as the editor frame stores datasource state opaquely (`DatasourceState['state']` is `unknown`); `applyVizTypeDatasourceDefaults` re-checks `datasourceId === formBased` before touching it.
+    // Intentional `as FormBasedPrivateState` type assertion as the editor frame stores datasource state opaquely (`DatasourceState['state']` is `unknown`); `applyVisualizationTypeDatasourceDefaults` re-checks `datasourceId === formBased` before touching it.
     const selectionDatasourceState = selection.datasourceState as FormBasedPrivateState | undefined;
 
     switchToSuggestion(
@@ -125,7 +125,7 @@ export const ChartSwitch = memo(function ChartSwitch({
         // A cross-visualization switch carries new datasource state; reconcile
         // it with the target visualization type's defaults.
         datasourceState: selectionDatasourceState
-          ? applyVizTypeDatasourceDefaults({
+          ? applyVisualizationTypeDatasourceDefaults({
               kind: 'typeSwitch',
               datasourceId: selection.datasourceId,
               datasourceState: selectionDatasourceState,
@@ -147,7 +147,7 @@ export const ChartSwitch = memo(function ChartSwitch({
         | FormBasedPrivateState
         | undefined;
       if (currentState) {
-        const nextState = applyVizTypeDatasourceDefaults({
+        const nextState = applyVisualizationTypeDatasourceDefaults({
           kind: 'typeSwitch',
           datasourceId: activeDatasourceId,
           datasourceState: currentState,
