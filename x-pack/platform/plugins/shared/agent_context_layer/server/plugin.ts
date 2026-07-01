@@ -215,7 +215,12 @@ export class AgentContextLayerPlugin
           logger: this.logger.get('sml'),
         };
         if (params.content !== undefined) {
-          return smlService.indexAttachment({ ...base, content: params.content });
+          return smlService.indexAttachment({
+            ...base,
+            content: params.content,
+            ...(params.createdAt !== undefined ? { createdAt: params.createdAt } : {}),
+            ...(params.permissions !== undefined ? { permissions: params.permissions } : {}),
+          });
         }
         return smlService.indexAttachment({ ...base, force: params.force });
       },

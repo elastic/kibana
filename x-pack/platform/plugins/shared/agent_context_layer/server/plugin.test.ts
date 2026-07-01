@@ -8,7 +8,7 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { SmlDocument } from './services/sml/types';
+import type { SmlDocument, SmlChunk, SmlPermissions } from './services/sml/types';
 import type { AgentContextLayerStartDependencies } from './types';
 
 const mockSmlServiceInstance = {
@@ -235,6 +235,109 @@ describe('AgentContextLayerPlugin', () => {
       });
 
       expect((start as unknown as Record<string, unknown>).checkItemsAccess).toBeUndefined();
+    });
+  });
+
+  describe('public start contract: indexAttachment', () => {
+    const setupPlugin = ({
+      indexAttachmentImpl,
+      spaceFromRequest,
+    }: {
+      indexAttachmentImpl: jest.Mock;
+      spaceFromRequest?: string;
+    }) => {
+      mockSmlServiceInstance.setup.mockReturnValue({ registerType: jest.fn() });
+      mockSmlServiceInstance.start.mockReturnValue({
+        search: jest.fn(),
+        checkItemsAccess: jest.fn(),
+        getDocuments: jest.fn(),
+        getTypeDefinition: jest.fn(),
+        indexAttachment: indexAttachmentImpl,
+        deleteAttachment: jest.fn(),
+        getCrawler: jest.fn(),
+        listTypeDefinitions: jest.fn().mockReturnValue([]),
+      });
+
+      const plugin = new AgentContextLayerPlugin(coreMock.createPluginInitializerContext());
+
+      const coreSetup = coreMock.createSetup();
+      plugin.setup(coreSetup as any, {
+        features: { registerKibanaFeature: jest.fn() } as any,
+        taskManager: { registerTaskDefinitions: jest.fn() } as any,
+      });
+
+      const coreStart = coreMock.createStart();
+      const startDeps: AgentContextLayerStartDependencies = {
+        taskManager: { schedule: jest.fn() } as any,
+        spaces: spaceFromRequest
+          ? ({
+              spacesService: { getSpaceId: jest.fn().mockReturnValue(spaceFromRequest) },
+            } as any)
+          : undefined,
+        security: { authz: {} as any } as any,
+      };
+
+      const start = plugin.start(coreStart, startDeps);
+      return { start };
+    };
+
+    beforeEach(() => {
+      mockSmlServiceInstance.setup.mockReset();
+      mockSmlServiceInstance.start.mockReset();
+    });
+
+    const baseParams = {
+      request: httpServerMock.createKibanaRequest(),
+      originId: 'origin-1',
+      attachmentType: 'dashboard',
+      action: 'create' as const,
+    };
+
+    const chunks: SmlChunk[] = [
+      {
+        type: 'dashboard',
+        content: 'some content',
+        title: 'title',
+      },
+    ];
+
+    const permissions: SmlPermissions = {
+      kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+      elasticsearch: { indices: [] },
+    };
+
+    it('forwards permissions and createdAt to smlService.indexAttachment in content mode', async () => {
+      const indexAttachmentImpl = jest.fn().mockResolvedValue(undefined);
+      const { start } = setupPlugin({ indexAttachmentImpl, spaceFromRequest: 'space-1' });
+
+      await start.indexAttachment({
+        ...baseParams,
+        content: chunks,
+        createdAt: '2024-01-01T00:00:00Z',
+        permissions,
+      });
+
+      expect(indexAttachmentImpl).toHaveBeenCalledTimes(1);
+      const callArgs = indexAttachmentImpl.mock.calls[0][0];
+      expect(callArgs.content).toBe(chunks);
+      expect(callArgs.createdAt).toBe('2024-01-01T00:00:00Z');
+      expect(callArgs.permissions).toEqual(permissions);
+    });
+
+    it('omits permissions and createdAt from the call when not supplied in content mode', async () => {
+      const indexAttachmentImpl = jest.fn().mockResolvedValue(undefined);
+      const { start } = setupPlugin({ indexAttachmentImpl, spaceFromRequest: 'space-1' });
+
+      await start.indexAttachment({
+        ...baseParams,
+        content: chunks,
+      });
+
+      expect(indexAttachmentImpl).toHaveBeenCalledTimes(1);
+      const callArgs = indexAttachmentImpl.mock.calls[0][0];
+      expect(callArgs.content).toBe(chunks);
+      expect('permissions' in callArgs).toBe(false);
+      expect('createdAt' in callArgs).toBe(false);
     });
   });
 });
