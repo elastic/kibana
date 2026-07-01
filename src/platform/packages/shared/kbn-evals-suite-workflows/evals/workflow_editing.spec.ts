@@ -21,6 +21,7 @@ import {
   createStructuralCorrectnessEvaluator,
   createEditPreservationEvaluator,
   createLiquidCorrectnessEvaluator,
+  createLiquidPresenceEvaluator,
   createEfficiencyEvaluator,
   createToolTrajectoryEvaluator,
   createLatencyEvaluator,
@@ -32,6 +33,7 @@ import {
 } from '../src/evaluators';
 
 const liquid = skipInfraErrors(skipNegativeCases(createLiquidCorrectnessEvaluator()));
+const liquidPresence = skipInfraErrors(skipNegativeCases(createLiquidPresenceEvaluator()));
 
 const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 
@@ -120,6 +122,7 @@ const evaluate = base.extend<
             skip(createStructuralCorrectnessEvaluator()),
             skip(createEditPreservationEvaluator()),
             liquid,
+            liquidPresence,
             skip(skipCompositeMode(createEfficiencyEvaluator())),
             skip(skipCompositeMode(createToolTrajectoryEvaluator())),
             skip(createLatencyEvaluator()),
