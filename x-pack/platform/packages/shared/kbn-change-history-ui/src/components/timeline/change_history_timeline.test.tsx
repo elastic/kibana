@@ -11,7 +11,11 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { ChangeHistoryProvider } from '../../provider/change_history_provider';
 import type { ChangeHistoryAdapter } from '../../types/change_history_adapter';
-import { TEST_OBJECT_ID, TEST_OBJECT_TITLE } from '../../test_utils/change_history_test_fixtures';
+import {
+  TEST_OBJECT_ID,
+  TEST_OBJECT_TITLE,
+  TEST_CHANGE_HISTORY_SCOPE,
+} from '../../test_utils/change_history_test_fixtures';
 import { ChangeHistoryTimeline } from './change_history_timeline';
 
 class IntersectionObserverMock {
@@ -40,6 +44,7 @@ const renderTimeline = (props: React.ComponentProps<typeof ChangeHistoryTimeline
         objectId={TEST_OBJECT_ID}
         adapter={adapter}
         labels={{ previewTitle: TEST_OBJECT_TITLE }}
+        scope={TEST_CHANGE_HISTORY_SCOPE}
         renderPreview={() => null}
       >
         <ChangeHistoryTimeline {...props} />
@@ -84,6 +89,7 @@ describe('ChangeHistoryTimeline', () => {
           objectId={TEST_OBJECT_ID}
           adapter={adapter}
           labels={{ previewTitle: TEST_OBJECT_TITLE }}
+          scope={TEST_CHANGE_HISTORY_SCOPE}
           renderPreview={() => null}
         >
           <ChangeHistoryTimeline items={items} selectedItemId="evt-current" />
