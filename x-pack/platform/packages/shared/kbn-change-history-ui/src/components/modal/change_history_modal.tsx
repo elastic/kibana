@@ -141,6 +141,14 @@ export function ChangeHistoryModal(): JSX.Element | null {
         justify-content: center;
         padding: ${euiTheme.size.m};
       `,
+      fullPageEmptyState: css`
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: ${euiTheme.size.m};
+      `,
     }),
     [euiTheme]
   );
@@ -150,6 +158,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
   }
 
   const hasItems = items.length > 0;
+  const hasNoHistory = !isLoading && !error && !hasItems;
   const showLoadingSidebar = isLoading && !hasItems && !error;
   const showListError = Boolean(error) && !hasItems && !isLoading;
   const allItemsLoaded = hasItems && items.length >= total;
@@ -178,14 +187,6 @@ export function ChangeHistoryModal(): JSX.Element | null {
       );
     }
 
-    if (!hasItems) {
-      return (
-        <div css={styles.sidebarEmptyState} data-test-subj="changeHistoryModalEmpty">
-          <ChangeHistoryEmptyPrompt />
-        </div>
-      );
-    }
-
     return (
       <ChangeHistoryTimeline
         items={items}
@@ -197,6 +198,29 @@ export function ChangeHistoryModal(): JSX.Element | null {
       />
     );
   };
+
+  if (hasNoHistory) {
+    return (
+      <EuiModal
+        onClose={closeModal}
+        maxWidth={false}
+        css={styles.modal}
+        data-test-subj="changeHistoryModal"
+      >
+        <EuiModalBody css={styles.modalBody}>
+          <ChangeHistoryPreviewShell
+            backLabel={labels.previewBackLabel}
+            title={labels.previewTitle}
+            onBack={closeModal}
+          >
+            <div css={styles.fullPageEmptyState} data-test-subj="changeHistoryModalEmpty">
+              <ChangeHistoryEmptyPrompt />
+            </div>
+          </ChangeHistoryPreviewShell>
+        </EuiModalBody>
+      </EuiModal>
+    );
+  }
 
   return (
     <EuiModal
