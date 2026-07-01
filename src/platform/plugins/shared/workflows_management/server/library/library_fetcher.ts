@@ -45,6 +45,15 @@ const DEFAULT_RETRY_OPTIONS = { retries: 3, factor: 2, minTimeout: 200 };
  * (see {@link DEFAULT_RETRY_OPTIONS}) still apply on top.
  */
 const DEFAULT_REQUEST_TIMEOUT_MS = 10_000;
+/**
+ * Upper bounds (bytes) on upstream response sizes. Sized to reject only
+ * disproportionate / hostile responses, not legitimately large catalogs or
+ * template bodies — responses are buffered fully in memory before parsing, so
+ * this caps the memory a single fetch can cost. The catalog (up to 1000 rows)
+ * gets a larger allowance than a single template body.
+ */
+const DEFAULT_MAX_CATALOG_BYTES = 25 * 1024 * 1024;
+const DEFAULT_MAX_BODY_BYTES = 5 * 1024 * 1024;
 
 export interface LibraryFetcherRetryOptions {
   retries?: number;
@@ -70,6 +79,13 @@ export interface LibraryFetcherDeps {
    * timeout path quickly.
    */
   requestTimeoutMs?: number;
+  /**
+   * Override the maximum accepted response sizes in bytes (defaults
+   * {@link DEFAULT_MAX_CATALOG_BYTES} for catalog/manifest JSON and
+   * {@link DEFAULT_MAX_BODY_BYTES} for template bodies).
+   */
+  maxCatalogBytes?: number;
+  maxBodyBytes?: number;
 }
 
 /**
@@ -295,7 +311,9 @@ export class LibraryFetcher {
     url: string,
     schema: { parse: (input: unknown) => T }
   ): Promise<FetchResult<T>> {
-    const result = await this.requestWithRetry(url);
+    const result = await this.requestWithRetry(url, {
+      maxBytes: this.deps.maxCatalogBytes ?? DEFAULT_MAX_CATALOG_BYTES,
+    });
     if (result.status === 'unchanged') {
       return { status: 'unchanged' };
     }
@@ -329,7 +347,10 @@ export class LibraryFetcher {
   }
 
   private async fetchText(url: string): Promise<string> {
-    const result = await this.requestWithRetry(url, { useEtag: false });
+    const result = await this.requestWithRetry(url, {
+      useEtag: false,
+      maxBytes: this.deps.maxBodyBytes ?? DEFAULT_MAX_BODY_BYTES,
+    });
     if (result.status === 'unchanged') {
       // Defensive: with useEtag=false this branch is unreachable.
       throw new LibraryFetchError(`Unexpected 304 from ${url}.`, 'http-error', url, 304);
@@ -344,16 +365,20 @@ export class LibraryFetcher {
    */
   private async requestWithRetry(
     url: string,
-    options: { useEtag?: boolean } = { useEtag: true }
+    options: { useEtag?: boolean; maxBytes?: number } = {}
   ): Promise<{ status: 'fresh'; body: string; etag?: string } | { status: 'unchanged' }> {
+    const { useEtag = true, maxBytes } = options;
     const { logger } = this.deps;
-    const previousEtag = options.useEtag ? this.etags.get(url) : undefined;
+    const previousEtag = useEtag ? this.etags.get(url) : undefined;
     const timeoutMs = this.deps.requestTimeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS;
 
     const init: RequestInit = {
       // Per-attempt timeout: node-fetch rejects with a `request-timeout`
       // FetchError once exceeded. Applied to every retry, not the whole call.
       timeout: timeoutMs,
+      // Cap the buffered response; node-fetch rejects with a `max-size`
+      // FetchError once exceeded (0 would disable the limit).
+      ...(maxBytes ? { size: maxBytes } : {}),
       headers: {
         'User-Agent': `Kibana/${this.deps.kibanaVersion} workflows-library`,
         ...(previousEtag ? { 'If-None-Match': previousEtag } : {}),
@@ -378,13 +403,22 @@ export class LibraryFetcher {
       }
 
       const etag = response.headers.get('etag') ?? undefined;
-      if (options.useEtag && etag) {
+      if (useEtag && etag) {
         this.etags.set(url, etag);
       }
       const body = await response.text();
       return { status: 'fresh', body, etag };
     } catch (err) {
       if (err instanceof LibraryFetchError) throw err;
+      if (isFetchMaxSizeError(err)) {
+        throw new LibraryFetchError(
+          `Response from ${url} exceeded the maximum allowed size of ${maxBytes} bytes.`,
+          'too-large',
+          url,
+          undefined,
+          err
+        );
+      }
       if (isFetchTimeoutError(err)) {
         throw new LibraryFetchError(
           `Request to ${url} timed out after ${timeoutMs}ms.`,
@@ -465,6 +499,13 @@ function isFetchTimeoutError(err: unknown): err is FetchError {
   return (
     (err instanceof FetchError || (err as { name?: string })?.name === 'FetchError') &&
     (err as FetchError).type === 'request-timeout'
+  );
+}
+
+function isFetchMaxSizeError(err: unknown): err is FetchError {
+  return (
+    (err instanceof FetchError || (err as { name?: string })?.name === 'FetchError') &&
+    (err as FetchError).type === 'max-size'
   );
 }
 

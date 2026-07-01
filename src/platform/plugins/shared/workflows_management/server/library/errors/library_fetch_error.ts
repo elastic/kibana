@@ -18,6 +18,7 @@ export type LibraryFetchErrorReason =
   | 'timeout' // a request exceeded the per-request timeout
   | 'malformed' // upstream payload could not be parsed (JSON / YAML / schema)
   | 'integrity' // a fetched body did not hash to its catalog row's contentHash
+  | 'too-large' // upstream response exceeded the maximum allowed size
   | 'unavailable'; // no successful fetch has happened yet (cache miss + upstream down)
 
 export class LibraryFetchError extends Error {

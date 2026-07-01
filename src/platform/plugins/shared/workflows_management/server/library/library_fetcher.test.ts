@@ -411,6 +411,16 @@ describe('LibraryFetcher.listTemplates', () => {
 
     await expect(fetcher.listTemplates()).rejects.toMatchObject({ reason: 'timeout' });
   });
+
+  it('translates a node-fetch max-size error into reason `too-large`', async () => {
+    const tooLargeErr = Object.assign(new FetchError('content size over limit', 'max-size'), {
+      type: 'max-size',
+    });
+    mockedFetch.mockRejectedValue(tooLargeErr);
+    const fetcher = buildFetcher();
+
+    await expect(fetcher.listTemplates()).rejects.toMatchObject({ reason: 'too-large' });
+  });
 });
 
 describe('LibraryFetcher.getTemplate', () => {
