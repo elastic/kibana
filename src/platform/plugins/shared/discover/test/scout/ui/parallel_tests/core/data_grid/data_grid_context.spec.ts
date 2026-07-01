@@ -55,13 +55,13 @@ const getColumnTitles = async (page: ScoutPage): Promise<string[]> => {
 
 const normalizeTimestamp = (timestamp: string) => timestamp.replace('↦', '').trim();
 
-const openAnchorDocumentDetails = async (page: ScoutPage, dataGrid: PageObjects['dataGrid']) => {
+const openAnchorDocumentDetails = async (page: ScoutPage, docViewer: PageObjects['docViewer']) => {
   const expandButton = page.testSubj.locator('docTableExpandToggleColumnAnchor');
   await expect(expandButton).toBeVisible();
   await expandButton.scrollIntoViewIfNeeded();
   await expandButton.hover();
   await expandButton.click();
-  await dataGrid.waitForDocViewerFlyoutOpen();
+  await docViewer.waitForFlyoutOpen();
 };
 
 spaceTest.describe('Discover data grid - context view', { tag: '@local-stateful-classic' }, () => {
@@ -106,7 +106,7 @@ spaceTest.describe('Discover data grid - context view', { tag: '@local-stateful-
 
       const firstTimestamp = normalizeTimestamp(await firstRowTimestampCell(page).innerText());
 
-      await pageObjects.dataGrid.openSurroundingDocuments(0);
+      await pageObjects.docViewer.openSurroundingDocuments(0);
       await expect(page).toHaveURL(/#\/context/);
       await pageObjects.dataGrid.waitForDocTableRendered();
 
@@ -129,7 +129,7 @@ spaceTest.describe('Discover data grid - context view', { tag: '@local-stateful-
           .toBe(true);
       }
 
-      await openAnchorDocumentDetails(page, pageObjects.dataGrid);
+      await openAnchorDocumentDetails(page, pageObjects.docViewer);
       await page.testSubj.click('docViewerTab-doc_view_table');
       await expect(page.testSubj.locator('tableDocViewRow-@timestamp-value')).toHaveText(
         firstTimestamp
