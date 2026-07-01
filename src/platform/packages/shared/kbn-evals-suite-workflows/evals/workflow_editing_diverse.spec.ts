@@ -366,7 +366,7 @@ evaluate.describe(
                   'The Slack step includes a connector-id field.',
                   'All existing steps are preserved.',
                 ],
-                expectedStepTypes: ['slack'],
+                expectedStepTypes: ['slack2.sendMessage'],
                 preservedStepNames: [
                   'find_incomplete_records',
                   'check_has_records',

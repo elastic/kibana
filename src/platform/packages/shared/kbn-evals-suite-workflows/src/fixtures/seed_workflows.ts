@@ -326,10 +326,11 @@ steps:
     condition: 'event.alerts[0].kibana.alert.severity: high OR event.alerts[0].kibana.alert.severity: critical'
     steps:
       - name: post_to_slack
-        type: slack
-        connector-id: my-slack-connector
+        type: slack2.sendMessage
+        connector-id: my-slack2-connector
         with:
-          message: |
+          channel: "C0123456789"
+          text: |
             :rotating_light: *High Severity Alert*
             *Rule:* {{ event.alerts[0].kibana.alert.rule.name }}
             *Severity:* {{ event.alerts[0].kibana.alert.severity }}

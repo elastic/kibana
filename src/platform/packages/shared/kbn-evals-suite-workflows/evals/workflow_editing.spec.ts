@@ -574,10 +574,11 @@ steps:
       method: GET
       url: "https://api.example.com/alerts"
   - name: notify_slack
-    type: slack
-    connector-id: my-slack-connector
+    type: slack2.sendMessage
+    connector-id: my-slack2-connector
     with:
-      message: "New alert detected"
+      channel: "C0123456789"
+      text: "New alert detected"
   - name: log_done
     type: console
     with:
