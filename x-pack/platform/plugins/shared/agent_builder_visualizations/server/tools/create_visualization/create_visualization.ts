@@ -199,7 +199,7 @@ This tool will:
         const description = `Visualization: ${nlQuery.slice(0, 50)}${
           nlQuery.length > 50 ? '...' : ''
         }`;
-        let resultAttachmentId: string | undefined;
+        let resultAttachmentId: string;
         let resultVersion: number | undefined;
         try {
           if (attachmentId && attachments.getAttachmentRecord(attachmentId)) {
@@ -223,13 +223,23 @@ This tool will:
             logger.debug(`Created new visualization attachment ${newAttachment.id}`);
           }
         } catch (attachmentError) {
-          // Persistence is best-effort: without an attachment the agent cannot
-          // render or reuse the visualization, but the config is still returned.
-          logger.warn(
-            `Could not create visualization attachment (type may not be registered): ${
-              attachmentError instanceof Error ? attachmentError.message : String(attachmentError)
-            }`
-          );
+          // Persistence failure is surfaced rather than swallowed: without an
+          // attachment the agent cannot render the visualization inline or
+          // update it later, so returning a "success" result would mislead it.
+          const message =
+            attachmentError instanceof Error ? attachmentError.message : String(attachmentError);
+          logger.error(`Failed to persist visualization attachment: ${message}`);
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message: `Failed to save visualization: ${message}`,
+                  metadata: { nlQuery, esql, renderer, chartType },
+                },
+              },
+            ],
+          };
         }
 
         // Build the tool result from the attachment data, minus the echoed
@@ -244,7 +254,7 @@ This tool will:
               tool_result_id: getToolResultId(),
               data: {
                 ...visualizationResult,
-                ...(resultAttachmentId && { attachment_id: resultAttachmentId }),
+                attachment_id: resultAttachmentId,
                 ...(resultVersion !== undefined && { version: resultVersion }),
               },
             },
