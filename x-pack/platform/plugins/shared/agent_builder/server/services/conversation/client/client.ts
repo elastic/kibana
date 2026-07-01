@@ -18,11 +18,11 @@ import {
 } from '@kbn/agent-builder-common';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
+  buildReadAccessFilter,
   hasConversationConverseAccess,
   hasConversationOwnerAccess,
   type ConversationAccess,
 } from '../access_control';
-import { buildReadAccessFilter } from '../access_control/query';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,

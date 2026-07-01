@@ -7,7 +7,11 @@
 
 import { ConversationAccessControlMode, type UserIdAndName } from '@kbn/agent-builder-common';
 import type { ConversationProperties } from '../client/storage';
-import { hasConversationConverseAccess, hasConversationOwnerAccess, isConversationOwner } from '.';
+import {
+  hasConversationConverseAccess,
+  hasConversationOwnerAccess,
+  isConversationOwner,
+} from './authorization';
 
 const user: UserIdAndName = {
   id: 'user-profile-id',

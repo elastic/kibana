@@ -19,7 +19,7 @@ import {
   hasAgentReadAccess,
   hasAgentUseAccess,
   hasAgentWriteAccess,
-} from '.';
+} from './authorization';
 import type { AgentProperties } from '../persisted/client/storage';
 
 /**

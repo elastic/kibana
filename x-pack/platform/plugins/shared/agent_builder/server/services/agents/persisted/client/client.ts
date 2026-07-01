@@ -61,9 +61,9 @@ import {
   normalizeAccessControl,
   redactAccessControlForCaller,
   validateAccessControlUpdateAccess,
-} from '../../access_control/document_access';
-import { buildReadAccessFilter } from '../../access_control/query';
-import { validateAccessControlUpdate } from '../../access_control/update_validation';
+  buildReadAccessFilter,
+  validateAccessControlUpdate,
+} from '../../access_control';
 import { hasRequiredDocumentFields } from './utils/helper';
 
 export interface GetAgentAccessControlResult {
