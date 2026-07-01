@@ -552,7 +552,7 @@ export class DashboardApp {
    * Uses the data-render-complete attribute to determine panel rendering completion.
    */
   async waitForRenderComplete() {
-    await this.dashboardViewport.waitFor({ state: 'visible', timeout: 60_000 });
+    await this.dashboardViewport.waitFor({ state: 'visible', timeout: 30_000 });
 
     await this.waitForControlsReady();
 
