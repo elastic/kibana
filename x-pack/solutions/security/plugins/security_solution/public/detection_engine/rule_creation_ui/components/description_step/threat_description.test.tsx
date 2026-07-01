@@ -11,6 +11,12 @@ import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import { TestProviders } from '../../../../common/mock';
 import { ThreatEuiFlexGroup } from './threat_description';
 
+// Warning icons are gated behind the mitreAttackUpdatesUIEnabled feature flag,
+// which is off by default. Force it on for this test suite.
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+}));
+
 jest.mock('../../../../../common/detection_engine/mitre/mitre_tactics_techniques', () => ({
   tactics: [
     {

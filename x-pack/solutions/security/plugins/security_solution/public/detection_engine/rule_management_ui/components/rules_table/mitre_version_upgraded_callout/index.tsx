@@ -15,6 +15,7 @@ import {
 } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useGetSecuritySolutionUrl } from '../../../../../common/components/link_to';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import {
   MITRE_VERSION_UPGRADED_CALLOUT_TITLE,
   MITRE_VERSION_UPGRADED_CALLOUT_LEARN_MORE,
@@ -30,6 +31,9 @@ const DISMISSAL_STORAGE_KEY = NEW_FEATURES_TOUR_STORAGE_KEYS.MITRE_VERSION_UPGRA
  * dataset bump automatically re-surfaces the callout for everyone.
  */
 export const MitreVersionUpgradedCallout = React.memo(() => {
+  const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
+    'mitreAttackUpdatesUIEnabled'
+  );
   const { docLinks } = useKibana().services;
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const coverageOverviewHref = getSecuritySolutionUrl({
@@ -46,7 +50,7 @@ export const MitreVersionUpgradedCallout = React.memo(() => {
     setIsDismissed(true);
   }, []);
 
-  if (isDismissed) {
+  if (!isMitreAttackUpdatesUIEnabled || isDismissed) {
     return null;
   }
 

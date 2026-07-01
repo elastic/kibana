@@ -12,6 +12,13 @@ import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import { AddMitreAttackThreat } from '.';
 import { TestProviders, useFormFieldMock } from '../../../../common/mock';
 
+// Ghost options, "renamed from" hints, and form-row errors are gated behind
+// the mitreAttackUpdatesUIEnabled feature flag, which is off by default.
+// Force it on for this test suite.
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+}));
+
 jest.mock('../../../../../common/detection_engine/mitre/mitre_tactics_techniques', () => ({
   tactics: [
     {

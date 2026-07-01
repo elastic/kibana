@@ -24,6 +24,7 @@ import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import type { MitreSubTechnique } from '../../../../../common/detection_engine/mitre/types';
 import { createUnsupportedMitreOption } from './unsupported_mitre_option';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -57,6 +58,10 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
   techniqueIndex,
   onFieldChange,
 }): JSX.Element => {
+  const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
+    'mitreAttackUpdatesUIEnabled'
+  );
+
   const values = field.value as Threats;
   const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubTechnique[]>([]);
 
@@ -160,20 +165,22 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
 
   const isUnsupportedSubtechnique = useCallback(
     (subtechnique: ThreatSubtechnique) =>
+      isMitreAttackUpdatesUIEnabled &&
       subtechniquesOptions.length > 0 &&
       subtechnique.name !== 'none' &&
       findCurrentSubtechniqueOption(subtechnique) === undefined,
-    [findCurrentSubtechniqueOption, subtechniquesOptions]
+    [findCurrentSubtechniqueOption, isMitreAttackUpdatesUIEnabled, subtechniquesOptions]
   );
 
   const getSubtechniqueRenamedFromName = useCallback(
     (subtechnique: ThreatSubtechnique) => {
+      if (!isMitreAttackUpdatesUIEnabled) return undefined;
       const matchedOption = findCurrentSubtechniqueOption(subtechnique);
       return matchedOption && matchedOption.name !== subtechnique.name
         ? subtechnique.name
         : undefined;
     },
-    [findCurrentSubtechniqueOption]
+    [findCurrentSubtechniqueOption, isMitreAttackUpdatesUIEnabled]
   );
 
   const getSelectSubtechnique = useCallback(

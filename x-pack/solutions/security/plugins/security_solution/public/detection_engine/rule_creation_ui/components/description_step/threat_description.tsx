@@ -22,6 +22,7 @@ import type {
 } from '../../../../../common/detection_engine/mitre/types';
 import ListTreeIcon from './assets/list_tree_icon.svg';
 import * as i18n from './translations';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -79,15 +80,20 @@ export const ThreatEuiFlexGroup = ({
     getMitre();
   }, []);
 
+  const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
+    'mitreAttackUpdatesUIEnabled'
+  );
+
   // Wait for the lazy MITRE dataset before deciding an id is unsupported, otherwise
-  // every entry would briefly render a false-positive warning on mount.
-  const mitreDataLoaded = tacticsOptions.length > 0;
+  // every entry would briefly render a false-positive warning on mount. Also gated
+  // on the feature flag so we don't surface any warnings when it's disabled.
+  const showUnsupportedWarnings = isMitreAttackUpdatesUIEnabled && tacticsOptions.length > 0;
 
   return (
     <EuiFlexGroup direction="column" data-test-subj={dataTestSubj} css={threatEuiFlexGroupStyles}>
       {threat.map((singleThreat, index) => {
         const tactic = tacticsOptions.find((t) => t.id === singleThreat.tactic.id);
-        const tacticUnsupported = mitreDataLoaded && tactic == null;
+        const tacticUnsupported = showUnsupportedWarnings && tactic == null;
         return (
           <EuiFlexItem key={`${singleThreat.tactic.name}-${index}`}>
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
@@ -112,7 +118,7 @@ export const ThreatEuiFlexGroup = ({
               {singleThreat.technique &&
                 singleThreat.technique.map((technique, techniqueIndex) => {
                   const myTechnique = techniquesOptions.find((t) => t.id === technique.id);
-                  const techniqueUnsupported = mitreDataLoaded && myTechnique == null;
+                  const techniqueUnsupported = showUnsupportedWarnings && myTechnique == null;
                   return (
                     <EuiFlexItem key={myTechnique?.id ?? techniqueIndex}>
                       <EuiFlexGroup gutterSize="xs" responsive={false} wrap={false}>
@@ -143,7 +149,7 @@ export const ThreatEuiFlexGroup = ({
                               (t) => t.id === subtechnique.id
                             );
                             const subtechniqueUnsupported =
-                              mitreDataLoaded && mySubtechnique == null;
+                              showUnsupportedWarnings && mySubtechnique == null;
                             return (
                               <EuiFlexItem
                                 key={mySubtechnique?.id ?? subtechniqueIndex}
