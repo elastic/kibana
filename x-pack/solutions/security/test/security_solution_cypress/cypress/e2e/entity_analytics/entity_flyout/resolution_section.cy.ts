@@ -63,7 +63,8 @@ const waitForTableToLoad = () => {
 // scoping to RESOLUTION_GROUP_TAB_CONTENT disambiguates.
 const groupTable = () => cy.get(RESOLUTION_GROUP_TAB_CONTENT).find(RESOLUTION_GROUP_TABLE);
 
-describe(
+// Times out: https://github.com/elastic/kibana/issues/275782
+describe.skip(
   'Entity flyout — Manual Entity Resolution',
   {
     tags: ['@ess', '@serverless'],
