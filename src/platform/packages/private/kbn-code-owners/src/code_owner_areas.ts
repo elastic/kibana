@@ -70,7 +70,6 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/obs-sig-events-team',
     'elastic/observablt-robots',
     'elastic/streams-program-team',
-    'elastic/streams-ui',
   ],
   security: [
     'elastic/contextual-security-apps',

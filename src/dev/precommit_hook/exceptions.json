@@ -352,9 +352,6 @@
   },
   "@elastic/streams-ui": {
     "src/platform/packages/shared/kbn-otel-semantic-conventions/src/generated/resolved-semconv.ts": "'resolved-semconv.ts' should be snake_case",
-    "x-pack/platform/plugins/shared/dataset_quality/public/components/dataset_quality_details/quality_issue_flyout/degraded_field/possible_mitigations/field_character_limit/Increase_field_character_limit.tsx": "'Increase_field_character_limit.tsx' should be snake_case"
-  },
-  "@elastic/streams-ui": {
     "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Android": "'Android' should be snake_case",
     "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Apache": "'Apache' should be snake_case",
     "x-pack/platform/packages/shared/kbn-sample-parser/parsers/BGL": "'BGL' should be snake_case",
@@ -370,7 +367,8 @@
     "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Spark": "'Spark' should be snake_case",
     "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Thunderbird": "'Thunderbird' should be snake_case",
     "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Windows": "'Windows' should be snake_case",
-    "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Zookeeper": "'Zookeeper' should be snake_case"
+    "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Zookeeper": "'Zookeeper' should be snake_case",
+    "x-pack/platform/plugins/shared/dataset_quality/public/components/dataset_quality_details/quality_issue_flyout/degraded_field/possible_mitigations/field_character_limit/Increase_field_character_limit.tsx": "'Increase_field_character_limit.tsx' should be snake_case"
   },
   "@elastic/obs-presentation-team": {
     "x-pack/solutions/observability/plugins/apm/ftr_e2e": "'ftr_e2e' should be kebab-case",
