@@ -92,6 +92,24 @@ export const MAX_SCHEDULED_STREAMS = 5;
 export const POLL_DELAY_SECONDS = 30;
 
 /**
+ * Significant Events scheduled discovery workflow.
+ *
+ * Detection runs at the alert-window cadence. Review runs more frequently and
+ * performs a bounded number of discovery + triage passes so it can drain small
+ * backlogs without creating an unbounded scheduled run.
+ */
+export const DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES = 30;
+export const DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES = 10;
+export const MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES = 1;
+export const DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE = 3;
+export const DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE = 5;
+export const DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES = 3;
+export const MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE = 1;
+export const MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE = 50;
+export const MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES = 1;
+export const MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES = 20;
+
+/**
  * Sigevents memory data stream backing MemoryServiceImpl.
  */
 export const MEMORIES_DATA_STREAM = '.significant_events-memories';
