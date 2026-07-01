@@ -11,7 +11,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
-import { setChartHidden, setSidebarClosed, setTableHidden } from '@kbn/discover-utils';
+import { setChartHidden, setSidebarHidden, setTableHidden } from '@kbn/discover-utils';
 import { useAppStateSelector } from '../../application/main/state_management/redux';
 import {
   internalStateActions,
@@ -149,7 +149,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
 
   const onToggleSidebar = useCallback(() => {
     const hideSidebar = !isSidebarHidden;
-    setSidebarClosed(storage, 'discover', hideSidebar);
+    setSidebarHidden(storage, 'discover', hideSidebar);
     dispatch(updateAppState({ appState: { hideSidebar } }));
   }, [dispatch, isSidebarHidden, storage, updateAppState]);
 

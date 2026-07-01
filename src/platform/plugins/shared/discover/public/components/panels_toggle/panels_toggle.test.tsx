@@ -88,7 +88,7 @@ describe('Panels toggle component', () => {
     await user.click(screen.getByTestId('dscShowSidebarButton'));
 
     await waitFor(() => {
-      expect(storageSetSpy).toHaveBeenCalledWith('discover:sidebarClosed', false);
+      expect(storageSetSpy).toHaveBeenCalledWith('discover:sidebarHidden', false);
       expect(toolkit.getCurrentTab().appState.hideSidebar).toBe(false);
     });
   });

@@ -17,7 +17,7 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   getChartHidden,
   getTableHidden,
-  getSidebarClosed,
+  getSidebarHidden,
   getDefaultSort,
   getSortArray,
   SORT_DEFAULT_ORDER_SETTING,
@@ -173,7 +173,7 @@ function getDefaultAppState({
   const columns = getDefaultColumns(persistedTab, uiSettings);
   const chartHidden = getChartHidden(storage, 'discover');
   const tableHidden = getTableHidden(storage, 'discover');
-  const sidebarHidden = getSidebarClosed(storage, 'discover');
+  const sidebarHidden = getSidebarHidden(storage, 'discover');
   const dataSource = createDataSource({
     dataView: dataView ?? persistedTab?.serializedSearchSource.index,
     query,
