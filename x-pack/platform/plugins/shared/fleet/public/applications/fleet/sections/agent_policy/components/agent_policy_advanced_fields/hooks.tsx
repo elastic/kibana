@@ -115,9 +115,10 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
       ...outputsRequest.data.items
         .filter(
           (item) =>
-            !item.is_internal ||
-            isAgentless ||
-            (isServerless && item.id === SERVERLESS_PRIVATE_OUTPUT_ID)
+            !(isAgentless && item.id === SERVERLESS_PRIVATE_OUTPUT_ID) &&
+            (!item.is_internal ||
+              isAgentless ||
+              (isServerless && item.id === SERVERLESS_PRIVATE_OUTPUT_ID))
         )
         .map((item) => {
           const isOutputTypeUnsupported = !allowedOutputTypes.includes(item.type);
@@ -155,9 +156,10 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
       ...outputsRequest.data.items
         .filter(
           (item) =>
-            !item.is_internal ||
-            isAgentless ||
-            (isServerless && item.id === SERVERLESS_PRIVATE_OUTPUT_ID)
+            !(isAgentless && item.id === SERVERLESS_PRIVATE_OUTPUT_ID) &&
+            (!item.is_internal ||
+              isAgentless ||
+              (isServerless && item.id === SERVERLESS_PRIVATE_OUTPUT_ID))
         )
         .map((item) => {
           return {
@@ -258,9 +260,10 @@ export function useFleetServerHostsOptions(agentPolicy: Partial<NewAgentPolicy |
       ...fleetServerHostsRequest.data.items
         .filter(
           (item) =>
-            !item.is_internal ||
-            isAgentless ||
-            (isServerless && item.id === SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID)
+            !(isAgentless && item.id === SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID) &&
+            (!item.is_internal ||
+              isAgentless ||
+              (isServerless && item.id === SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID))
         )
         .map((item) => {
           return {
