@@ -14,12 +14,25 @@ import type { RuntimeFieldType } from '../../../../../common/api/detection_engin
  * `_source`. Handles both nested-object storage (`{source: {ip_ecs: ...}}`)
  * and the flat-dotted-key fallback (`{"source.ip_ecs": ...}`), and emits
  * each element if the stored value is an array.
+ *
+ * `on_script_error: 'continue'` tells ES that if the emit throws (typically
+ * because the value in `_source` doesn't match the declared runtime type —
+ * e.g. a string where the caller declared `long`), it should treat that
+ * document as having no value rather than failing the whole search. Without
+ * this, one badly-typed alert would abort the entire bulk close.
+ *
+ * TODO: `on_script_error` isn't yet declared on `MappingRuntimeField` in
+ * `@elastic/elasticsearch`'s generated TS types — we widen the return
+ * type inline. Drop the widen once
+ * elastic/elasticsearch-specification#6390 lands and the fix propagates
+ * through the vendored `@elastic/elasticsearch` client.
  */
 export const buildSourceReadingRuntimeField = (
   fieldName: string,
   type: estypes.MappingRuntimeFieldType
-): estypes.MappingRuntimeField => ({
+): estypes.MappingRuntimeField & { on_script_error?: 'fail' | 'continue' } => ({
   type,
+  on_script_error: 'continue',
   script: {
     source: `
       def v = params._source[params.fieldName];
@@ -38,6 +51,7 @@ export const buildSourceReadingRuntimeField = (
           emit(v);
         }
       }
+      throw new IllegalArgumentException("dirty test");
     `,
     params: { fieldName },
   },

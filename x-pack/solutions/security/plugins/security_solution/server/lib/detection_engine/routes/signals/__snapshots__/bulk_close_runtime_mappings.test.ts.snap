@@ -2,6 +2,7 @@
 
 exports[`buildSourceReadingRuntimeField produces a stable script for a scalar runtime field type 1`] = `
 Object {
+  "on_script_error": "continue",
   "script": Object {
     "params": Object {
       "fieldName": "source.ip_ecs",
