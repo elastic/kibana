@@ -24,6 +24,7 @@ import {
   Aggregation,
   Comparator,
   generateId,
+  reconcileAlertConditionMetrics,
   DEFAULT_THRESHOLD_FORM_VALUES,
   type ThresholdFormValues,
   type StatDefinition,
@@ -442,7 +443,16 @@ export const parseThresholdEsql = (
  */
 export const parseDiscoverQueryForBuilder = (query: string): ThresholdFormValues | null => {
   const full = parseThresholdEsql(query);
-  if (full) return full;
+  if (full) {
+    return {
+      ...full,
+      alertConditions: reconcileAlertConditionMetrics(
+        full.alertConditions,
+        full.stats,
+        full.evaluations
+      ),
+    };
+  }
 
   if (!query.trim()) return null;
 

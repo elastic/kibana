@@ -938,6 +938,26 @@ describe('parseDiscoverQueryForBuilder', () => {
       expect(result!.stats[0].label).toBe('errors');
       expect(result!.stats[0].filter).toBe('status >= 500');
     });
+
+    it('reconciles empty alert condition metric to the first stat label for STATS-only queries', () => {
+      const result = parseDiscoverQueryForBuilder(
+        'FROM logs-* | STATS request_rate = COUNT(*) BY container.id'
+      );
+      expect(result).not.toBeNull();
+      expect(result!.stats[0].label).toBe('request_rate');
+      expect(result!.alertConditions[0].metric).toBe('request_rate');
+      expect(result!.alertConditions[0].comparator).toBe(Comparator.GT);
+      expect(result!.alertConditions[0].threshold).toEqual([100]);
+      expect(result!.groupByFields).toEqual(['container.id']);
+    });
+
+    it('reconciles across multiple stats — maps empty metric to first stat label', () => {
+      const result = parseDiscoverQueryForBuilder(
+        'FROM logs-* | STATS errors = COUNT(*) WHERE status >= 500, total = COUNT(*)'
+      );
+      expect(result).not.toBeNull();
+      expect(result!.alertConditions[0].metric).toBe('errors');
+    });
   });
 
   describe('extracts index pattern and filter from Discover queries', () => {
