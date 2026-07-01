@@ -48,6 +48,11 @@ export function registerTriggerDefinitions(
     )
   );
   workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/rule_signals_written').then(
+      (m) => m.ruleSignalsWrittenTriggerPublicDefinition
+    )
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
     import('./triggers/rule_created').then((m) => m.ruleCreatedTriggerPublicDefinition)
   );
   workflowsExtensions.registerTriggerDefinition(() =>

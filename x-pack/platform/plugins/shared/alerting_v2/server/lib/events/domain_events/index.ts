@@ -25,6 +25,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { ServiceIdentifier } from 'inversify';
 import type { EventBus } from '../event_bus';
 import type { AlertActionEvent } from '../alert_action_event_publisher/events';
+import type { RuleExecutorEvent } from '../rule_executor_event_publisher/events';
 import type { RuleEvent } from '../rule_event_publisher/events';
 
 export type {
@@ -59,6 +60,12 @@ export {
 } from '../alert_action_event_publisher/events';
 
 export type {
+  RuleExecutorEvent,
+  RuleExecutionSignalsWrittenEvent,
+} from '../rule_executor_event_publisher/events';
+export { RULE_EXECUTION_SIGNALS_WRITTEN_EVENT_TYPE } from '../rule_executor_event_publisher/events';
+
+export type {
   BaseRuleEvent,
   RuleCreatedEvent,
   RuleDeletedEvent,
@@ -83,7 +90,7 @@ export {
  * (and its own envelope shape if it diverges). Extend this union by adding
  * each subdomain's sub-union here.
  */
-export type AlertingDomainEvent = AlertActionEvent | RuleEvent;
+export type AlertingDomainEvent = AlertActionEvent | RuleExecutorEvent | RuleEvent;
 
 /**
  * Publisher-side context threaded through every alerting bus publish call.
