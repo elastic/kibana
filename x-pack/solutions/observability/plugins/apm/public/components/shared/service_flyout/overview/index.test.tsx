@@ -88,9 +88,7 @@ describe('ServiceFlyoutOverview infrastructure section visibility', () => {
 
     renderOverview();
 
-    expect(
-      screen.getByTestId('serviceFlyoutSection-infrastructureMetrics')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('serviceFlyoutSection-infrastructureMetrics')).toBeInTheDocument();
   });
 
   it('always renders the key metrics section regardless of system metrics', () => {
