@@ -3,7 +3,7 @@
   "id": "@kbn/synthtrace-client",
   "owner": [
     "@elastic/obs-presentation-team",
-    "@elastic/obs-onboarding-team",
+    "@elastic/streams-ui",
     "@elastic/obs-exploration-team"
   ],
   "group": "platform",
