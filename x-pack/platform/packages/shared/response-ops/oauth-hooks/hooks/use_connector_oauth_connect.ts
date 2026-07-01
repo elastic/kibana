@@ -123,9 +123,13 @@ export const useConnectorOAuthConnect = ({
       handleAuthRedirect(authorizationUrl);
     },
     onError: (error) => {
+      const body = isHttpFetchError(error) ? error.body : undefined;
       const bodyMessage =
-        isHttpFetchError(error) && typeof error.body?.message === 'string'
-          ? error.body.message
+        typeof body === 'object' &&
+        body !== null &&
+        'message' in body &&
+        typeof body.message === 'string'
+          ? body.message
           : undefined;
       onErrorRef.current?.(
         new Error(bodyMessage ?? (isError(error) ? error.message : String(error)))
