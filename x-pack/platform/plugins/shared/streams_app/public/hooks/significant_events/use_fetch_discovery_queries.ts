@@ -7,7 +7,11 @@
 
 import { calculateAuto } from '@kbn/calculate-auto';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
-import type { QueriesGetResponse, QueryOccurrenceSeries, StreamQuery } from '@kbn/streams-schema';
+import type {
+  QueriesGetResponse,
+  QueryOccurrenceSeries,
+  StreamQuery,
+} from '@kbn/significant-events-schema';
 import type { QueryStatus } from '@kbn/streams-plugin/common';
 import moment from 'moment';
 import { useKibana } from '../use_kibana';
