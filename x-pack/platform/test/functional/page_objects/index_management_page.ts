@@ -66,6 +66,7 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
     },
 
     async clickDataStreamNameLink(name: string): Promise<void> {
+      await testSubjects.setValue('dataStreamSearch', name);
       await find.clickByLinkText(name);
     },
 
