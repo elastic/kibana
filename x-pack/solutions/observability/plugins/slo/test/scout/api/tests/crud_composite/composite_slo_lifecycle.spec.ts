@@ -117,6 +117,50 @@ apiTest.describe(
     );
 
     apiTest(
+      'definition endpoint returns definition-only response and 404 after delete',
+      async ({ apiClient }) => {
+        const createRes = await apiClient.post('api/observability/slo_composites', {
+          headers,
+          body: {
+            ...DEFAULT_COMPOSITE_SLO,
+            name: 'Definition Endpoint Composite',
+            description: 'Definition-only fetch',
+            tags: ['definition-endpoint'],
+            objective: { target: 0.97 },
+          },
+          responseType: 'json',
+        });
+        expect(createRes).toHaveStatusCode(200);
+        const createdId = (createRes.body as Record<string, unknown>).id as string;
+
+        const definitionRes = await apiClient.get(
+          `api/observability/slo_composites/_definitions/${createdId}`,
+          { headers, responseType: 'json' }
+        );
+        expect(definitionRes).toHaveStatusCode(200);
+        const definitionBody = definitionRes.body as Record<string, unknown>;
+        expect(definitionBody.id).toBe(createdId);
+        expect(definitionBody.name).toBe('Definition Endpoint Composite');
+        expect(definitionBody.description).toBe('Definition-only fetch');
+        expect(definitionBody.tags).toStrictEqual(['definition-endpoint']);
+        expect(definitionBody.objective).toStrictEqual({ target: 0.97 });
+        expect(definitionBody.members).toBeDefined();
+        expect(definitionBody.summary).toBeUndefined();
+
+        await apiClient.delete(`api/observability/slo_composites/${createdId}`, {
+          headers,
+          responseType: 'json',
+        });
+
+        const afterDelete = await apiClient.get(
+          `api/observability/slo_composites/_definitions/${createdId}`,
+          { headers, responseType: 'json' }
+        );
+        expect(afterDelete).toHaveStatusCode(404);
+      }
+    );
+
+    apiTest(
       'create multiple composites and verify they are all findable',
       async ({ apiClient }) => {
         const composites = [
