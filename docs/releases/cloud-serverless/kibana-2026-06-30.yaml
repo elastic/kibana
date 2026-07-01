@@ -4,7 +4,7 @@ products:
   lifecycle: preview
   repo: kibana
   owner: elastic
-release-date: 2026-07-01
+release-date: 2026-06-30
 entries:
 - file:
     name: 274647.yaml
