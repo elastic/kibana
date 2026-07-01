@@ -34,7 +34,7 @@ permissions:
 if: >-
   !github.event.repository.fork &&
   (
-    (github.event_name == 'workflow_dispatch' && github.event.inputs.pr_number != '') ||
+    github.event_name == 'workflow_dispatch' ||
     (
       github.event_name == 'pull_request_target' &&
       github.event.pull_request.user.login == 'kibanamachine' &&
