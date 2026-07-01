@@ -645,16 +645,12 @@ describe('Task Runner', () => {
         return { state: {} };
       }
     );
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: mockedTaskInstance,
+    const taskRunner = createTaskRunner({
       context: {
         ...taskRunnerFactoryInitializerParams,
         apiKeyType: ApiKeyType.UIAM,
         shouldGrantUiam: true,
       },
-      inMemoryMetrics,
-      internalSavedObjectsRepository,
     });
 
     mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
@@ -3426,13 +3422,7 @@ describe('Task Runner', () => {
       },
     };
 
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: mockedTaskInstance,
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-      internalSavedObjectsRepository,
-    });
+    const taskRunner = createTaskRunner();
 
     mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(rawRuleSOWithSnooze);
@@ -3499,13 +3489,7 @@ describe('Task Runner', () => {
       },
     };
 
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: mockedTaskInstance,
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-      internalSavedObjectsRepository,
-    });
+    const taskRunner = createTaskRunner();
 
     mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(rawRuleSOWithSnooze);
@@ -3549,13 +3533,7 @@ describe('Task Runner', () => {
     });
     alertsService.createAlertsClient.mockImplementation(() => alertsClient);
 
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: mockedTaskInstance,
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-      internalSavedObjectsRepository,
-    });
+    const taskRunner = createTaskRunner();
 
     mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(rawRuleSOWithSnooze);
@@ -3618,13 +3596,7 @@ describe('Task Runner', () => {
     });
     alertsService.createAlertsClient.mockImplementation(() => alertsClient);
 
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: mockedTaskInstance,
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-      internalSavedObjectsRepository,
-    });
+    const taskRunner = createTaskRunner();
 
     mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(rawRuleSOWithSnooze);
@@ -3661,13 +3633,7 @@ describe('Task Runner', () => {
     });
     alertsService.createAlertsClient.mockImplementation(() => alertsClient);
 
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: mockedTaskInstance,
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-      internalSavedObjectsRepository,
-    });
+    const taskRunner = createTaskRunner();
 
     mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(rawRuleSOWithSnooze);
@@ -3704,13 +3670,7 @@ describe('Task Runner', () => {
     });
     alertsService.createAlertsClient.mockImplementation(() => alertsClient);
 
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: mockedTaskInstance,
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-      internalSavedObjectsRepository,
-    });
+    const taskRunner = createTaskRunner();
 
     mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(rawRuleSOWithSnooze);
@@ -3754,13 +3714,7 @@ describe('Task Runner', () => {
     });
     alertsService.createAlertsClient.mockImplementation(() => alertsClient);
 
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: mockedTaskInstance,
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-      internalSavedObjectsRepository,
-    });
+    const taskRunner = createTaskRunner();
 
     mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(rawRuleSOWithSnooze);
@@ -3817,13 +3771,7 @@ describe('Task Runner', () => {
     });
     alertsService.createAlertsClient.mockImplementation(() => alertsClient);
 
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: mockedTaskInstance,
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-      internalSavedObjectsRepository,
-    });
+    const taskRunner = createTaskRunner();
 
     mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(rawRuleSOWithSnooze);
@@ -3892,13 +3840,7 @@ describe('Task Runner', () => {
       new Error('simulated ES update failure')
     );
 
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: mockedTaskInstance,
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-      internalSavedObjectsRepository,
-    });
+    const taskRunner = createTaskRunner();
 
     mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(rawRuleSOWithSnooze);
@@ -3938,13 +3880,7 @@ describe('Task Runner', () => {
       },
     };
 
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: mockedTaskInstance,
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-      internalSavedObjectsRepository,
-    });
+    const taskRunner = createTaskRunner();
 
     mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(rawRuleSOAtRunStart);
