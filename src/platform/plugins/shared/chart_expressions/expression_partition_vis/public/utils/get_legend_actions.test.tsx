@@ -222,7 +222,10 @@ describe('getLegendActions', () => {
       );
     });
 
-    it('disables filter actions for a non-filterable computed date column, but hides the warning message', async () => {
+    it('does not render an action button for a non-filterable computed date column with no other actions', () => {
+      // There's no warning message to show for a suppressed date column, and no other cell
+      // actions here, so showing disabled Filter for/out buttons with nothing to explain them
+      // would be confusing — omit the button entirely instead.
       const Component = getLegendActions(
         undefined,
         makeGetFilterEventData(esqlVisDataWithComputedDateColumn),
@@ -232,12 +235,8 @@ describe('getLegendActions', () => {
         esqlVisDataWithComputedDateColumn,
         fieldFormatsMock as unknown as FieldFormatsStart
       );
-      await renderAndOpen(Component);
-      await waitFor(() => {
-        expect(screen.getByRole('menuitem', { name: 'Filter for' })).toBeDisabled();
-        expect(screen.getByRole('menuitem', { name: 'Filter out' })).toBeDisabled();
-      });
-      expect(screen.queryByTestId('legendFilterFooterMessage')).not.toBeInTheDocument();
+      renderWithKibanaRenderContext(<Component {...seriesProps} />);
+      expect(screen.queryByRole('button', { name: /legend actions/i })).not.toBeInTheDocument();
     });
 
     it('does not disable filter actions or show a warning for a renamed computed column', async () => {

@@ -125,28 +125,26 @@ export const getLegendActions = (
     const panelItems: EuiContextMenuPanelDescriptor['items'] = [];
 
     if (!isComputedColumnFilterable) {
-      // Show disabled filter items for ES|QL computed columns, with a warning message
-      // explaining why when there's one worth showing.
-      panelItems.push(
-        {
-          name: filterForValueLabel,
-          'data-test-subj': `legend-${title}-filterIn`,
-          icon: <EuiIcon type="plusCircle" size="m" aria-hidden={true} />,
-          disabled: true,
-          onClick: () => {},
-        },
-        {
-          name: filterOutValueLabel,
-          'data-test-subj': `legend-${title}-filterOut`,
-          icon: <EuiIcon type="minusCircle" size="m" aria-hidden={true} />,
-          disabled: true,
-          onClick: () => {},
-        }
-      );
       if (warningMessage) {
-        panelItems.push({
-          renderItem: () => <PopoverFooterMessage message={warningMessage} />,
-        });
+        panelItems.push(
+          {
+            name: filterForValueLabel,
+            'data-test-subj': `legend-${title}-filterIn`,
+            icon: <EuiIcon type="plusCircle" size="m" aria-hidden={true} />,
+            disabled: true,
+            onClick: () => {},
+          },
+          {
+            name: filterOutValueLabel,
+            'data-test-subj': `legend-${title}-filterOut`,
+            icon: <EuiIcon type="minusCircle" size="m" aria-hidden={true} />,
+            disabled: true,
+            onClick: () => {},
+          },
+          {
+            renderItem: () => <PopoverFooterMessage message={warningMessage} />,
+          }
+        );
       }
     } else if (!hasFilterCellAction(compatibleCellActions) && isFilterable && filterData) {
       panelItems.push(
