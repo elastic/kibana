@@ -37,7 +37,6 @@ const version = (seqNo: number, primaryTerm: number): EsDocumentVersion => ({
 
 const updateWrite = (id: string, occ?: EsDocumentVersion): DocumentUpdate<TestDoc> => ({
   doc: { id, value: 1 },
-  operation: 'update',
   version: occ,
 });
 

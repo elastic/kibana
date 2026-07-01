@@ -15,7 +15,6 @@ const DEFAULT_PASSWORD = 'changeme';
 const DEFAULT_SPACE_ID = 'default';
 
 const SECOND_MS = 1000;
-const MINUTE_MS = 60 * SECOND_MS;
 
 const config = {
   kibanaUrl: process.env.KIBANA_URL ?? DEFAULT_KIBANA_URL,

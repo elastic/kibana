@@ -207,7 +207,6 @@ export class WorkflowExecutionRepository {
       writes: [
         {
           doc: workflowExecution,
-          operation: 'update',
           version: id ? providedVersions?.[id] : undefined,
         },
       ],
@@ -234,7 +233,6 @@ export class WorkflowExecutionRepository {
       dataStreamName: this.dataStreamName,
       writes: executions.map((doc) => ({
         doc,
-        operation: 'update',
         version: doc.id ? providedVersions?.[doc.id] : undefined,
       })),
       entityName: 'workflow execution',

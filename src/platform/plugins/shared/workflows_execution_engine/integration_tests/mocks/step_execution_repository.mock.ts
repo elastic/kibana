@@ -9,6 +9,8 @@
 
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import type { DocumentVersionsById } from '../../server/repositories/document_version';
+import type { VersionedDocument } from '../../server/repositories/get_doc_by_id';
 import type {
   StepExecutionField,
   StepExecutionRepository,
@@ -74,6 +76,23 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
     return this.searchStepExecutionsByExecutionId(workflowExecutionId);
   }
 
+  public async getStepExecutionsByIdsWithVersion(
+    stepExecutionIds: string[],
+    sourceIncludes?: StepExecutionField[],
+    sourceExcludes?: StepExecutionField[]
+  ): Promise<Array<VersionedDocument<EsWorkflowStepExecution>>> {
+    const docs = await this.getStepExecutionsByIds(
+      stepExecutionIds,
+      sourceIncludes,
+      sourceExcludes
+    );
+    return docs.map((doc) => ({
+      id: doc.id,
+      doc,
+      version: { index: TEST_INDEX, seqNo: 1, primaryTerm: 1 },
+    }));
+  }
+
   public async markNonTerminalStepsFailed(
     workflowExecutionId: string,
     error: SerializedError,
@@ -100,7 +119,7 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
     );
   }
 
-  public bulkUpsert(writes: StepExecutionWrite[]): Promise<void> {
+  public bulkUpsert(writes: StepExecutionWrite[]): Promise<DocumentVersionsById> {
     for (const write of writes) {
       if (!write.doc.id) {
         throw new Error('Step execution ID is required for upsert');
@@ -111,6 +130,6 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
         ...(write.doc as EsWorkflowStepExecution),
       });
     }
-    return Promise.resolve();
+    return Promise.resolve({});
   }
 }
