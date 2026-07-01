@@ -7,26 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import type { ChangeHistoryBadgeRenderFn } from '@kbn/change-history-ui';
 
-import { CURRENT_VERSION_BADGE, CURRENT_VERSION_ONLY_BADGE, VERSION_BADGE } from './translations';
+import { CURRENT_VERSION_ONLY_BADGE, VERSION_BADGE } from './translations';
 
 export const renderWorkflowChangeHistoryBadge: ChangeHistoryBadgeRenderFn = ({ item }) => {
   const version = item.metadata?.version;
 
   if (item.isCurrent) {
-    if (typeof version === 'number') {
-      return <EuiBadge color="hollow">{CURRENT_VERSION_BADGE(version)}</EuiBadge>;
-    }
-
-    return <EuiBadge color="hollow">{CURRENT_VERSION_ONLY_BADGE}</EuiBadge>;
+    return (
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow" data-test-subj="workflowChangeHistoryCurrentVersionBadge">
+            {CURRENT_VERSION_ONLY_BADGE}
+          </EuiBadge>
+        </EuiFlexItem>
+        {typeof version === 'number' ? (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow" data-test-subj="workflowChangeHistoryVersionBadge">
+              {VERSION_BADGE(version)}
+            </EuiBadge>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+    );
   }
 
   if (typeof version !== 'number') {
     return null;
   }
 
-  return <EuiBadge color="hollow">{VERSION_BADGE(version)}</EuiBadge>;
+  return (
+    <EuiBadge color="hollow" data-test-subj="workflowChangeHistoryVersionBadge">
+      {VERSION_BADGE(version)}
+    </EuiBadge>
+  );
 };

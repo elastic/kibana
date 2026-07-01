@@ -19,6 +19,7 @@ export enum ChangeHistoryTelemetryEventTypes {
   ChangeSelected = 'change_history_change_selected',
   FilterApplied = 'change_history_filter_applied',
   DiffViewed = 'change_history_diff_viewed',
+  DiffChangeNavigated = 'change_history_diff_change_navigated',
   RestoreConfirmed = 'change_history_restore_confirmed',
   RestoreCompleted = 'change_history_restore_completed',
   RestoreFailed = 'change_history_restore_failed',
@@ -28,8 +29,7 @@ export type ChangeHistorySelectionSource = 'user_click' | 'auto_latest';
 
 export type ChangeHistoryFilterType = 'timeRange' | 'actor';
 
-/** Which baseline the diff uses: chronologically previous row or live current version. */
-export type ChangeHistoryComparisonType = 'vs_current' | 'vs_previous';
+export type ChangeHistoryComparisonType = 'vs_previous' | 'vs_row';
 
 export type ChangeHistoryCompareMode = 'unified' | 'split';
 
@@ -57,13 +57,22 @@ export interface ReportChangeHistoryFilterAppliedActionParams
   activeActorCount?: number;
 }
 
+export type ChangeHistoryDiffNavigationSource = string;
+
+export interface ReportChangeHistoryDiffChangeNavigatedActionParams
+  extends ChangeHistoryTelemetryScopeFields {
+  eventName: string;
+  navigationSource: ChangeHistoryDiffNavigationSource;
+}
+
 export interface ReportChangeHistoryDiffViewedActionParams
   extends ChangeHistoryTelemetryScopeFields {
   eventName: string;
   comparisonType: ChangeHistoryComparisonType;
   versionDistance?: number;
   compareMode?: ChangeHistoryCompareMode;
-  hasSemanticSummary?: boolean;
+  /** True when the host provides `renderChangesSummary` and the target row has summary data. */
+  hasChangesSummaryTooltip?: boolean;
 }
 
 export interface ReportChangeHistoryRestoreConfirmedActionParams
@@ -97,6 +106,7 @@ export interface ChangeHistoryTelemetryEventsMap {
   [ChangeHistoryTelemetryEventTypes.ChangeSelected]: ReportChangeHistoryChangeSelectedActionParams;
   [ChangeHistoryTelemetryEventTypes.FilterApplied]: ReportChangeHistoryFilterAppliedActionParams;
   [ChangeHistoryTelemetryEventTypes.DiffViewed]: ReportChangeHistoryDiffViewedActionParams;
+  [ChangeHistoryTelemetryEventTypes.DiffChangeNavigated]: ReportChangeHistoryDiffChangeNavigatedActionParams;
   [ChangeHistoryTelemetryEventTypes.RestoreConfirmed]: ReportChangeHistoryRestoreConfirmedActionParams;
   [ChangeHistoryTelemetryEventTypes.RestoreCompleted]: ReportChangeHistoryRestoreCompletedActionParams;
   [ChangeHistoryTelemetryEventTypes.RestoreFailed]: ReportChangeHistoryRestoreFailedActionParams;
@@ -125,6 +135,9 @@ export type ChangeHistoryTelemetryFilterAppliedParams =
 export type ChangeHistoryTelemetryDiffViewedParams =
   ChangeHistoryTelemetryReportParams<ChangeHistoryTelemetryEventTypes.DiffViewed>;
 
+export type ChangeHistoryTelemetryDiffChangeNavigatedParams =
+  ChangeHistoryTelemetryReportParams<ChangeHistoryTelemetryEventTypes.DiffChangeNavigated>;
+
 export type ChangeHistoryTelemetryRestoreConfirmedParams =
   ChangeHistoryTelemetryReportParams<ChangeHistoryTelemetryEventTypes.RestoreConfirmed>;
 
@@ -139,6 +152,7 @@ export interface ChangeHistoryTelemetryReporter {
   reportChangeSelected: (params: ChangeHistoryTelemetryChangeSelectedParams) => void;
   reportFilterApplied: (params: ChangeHistoryTelemetryFilterAppliedParams) => void;
   reportDiffViewed: (params: ChangeHistoryTelemetryDiffViewedParams) => void;
+  reportDiffChangeNavigated: (params: ChangeHistoryTelemetryDiffChangeNavigatedParams) => void;
   reportRestoreConfirmed: (params?: ChangeHistoryTelemetryRestoreConfirmedParams) => void;
   reportRestoreCompleted: (params?: ChangeHistoryTelemetryRestoreCompletedParams) => void;
   reportRestoreFailed: (params?: ChangeHistoryTelemetryRestoreFailedParams) => void;

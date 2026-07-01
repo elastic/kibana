@@ -11,10 +11,17 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import type { ChangeHistoryDiffTelemetry } from '@kbn/change-history-ui';
 import { monaco } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useWorkflowsMonacoTheme } from '@kbn/workflows-ui';
 import { applyWorkflowYamlValidationToEditor } from './apply_workflow_yaml_validation_to_editor';
+import type { WorkflowChangeHistoryCompareIndicator } from './get_workflow_change_history_compare_indicator';
+import {
+  WorkflowChangeHistoryCompareIndicatorBar,
+  WorkflowChangeHistoryCompareSplitPaneLabels,
+} from './workflow_change_history_compare_indicator';
 import {
   WORKFLOW_CHANGE_HISTORY_PREVIEW_NAVIGATOR_HEIGHT,
   WorkflowChangeHistoryDiffNavigator,
@@ -117,19 +124,29 @@ const configureDiffEditors = (
 };
 
 export interface WorkflowChangeHistoryMonacoPreviewProps {
-  yaml: string;
-  compareYaml?: string;
+  /** Monaco original model in diff mode (typically the older snapshot). */
+  baselineYaml?: string;
+  /** Monaco modified model in diff mode, or the sole editor when not diffing. */
+  targetYaml: string;
+  /** YAML validated in the preview; defaults to `targetYaml`. */
+  validationYaml?: string;
+  diffTelemetry?: ChangeHistoryDiffTelemetry;
+  compareIndicator?: WorkflowChangeHistoryCompareIndicator;
 }
 
 export const WorkflowChangeHistoryMonacoPreview = ({
-  yaml,
-  compareYaml,
+  baselineYaml,
+  targetYaml,
+  validationYaml = targetYaml,
+  diffTelemetry,
+  compareIndicator,
 }: WorkflowChangeHistoryMonacoPreviewProps): JSX.Element => {
   const styles = useMemoCss(componentStyles);
   const containerRef = useRef<HTMLDivElement>(null);
   const diffEditorRef = useRef<monaco.editor.IStandaloneDiffEditor | null>(null);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const validationDecorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+  const validationAbortControllerRef = useRef<AbortController | null>(null);
   const pendingDiffScrollIndexRef = useRef<number | null>(null);
   const [diffCurrentIndex, setDiffCurrentIndex] = useState(0);
   const [diffTotalChanges, setDiffTotalChanges] = useState(0);
@@ -140,9 +157,28 @@ export const WorkflowChangeHistoryMonacoPreview = ({
   const [validationResults, setValidationResults] = useState<YamlValidationResult[]>([]);
   const [isEditorMounted, setIsEditorMounted] = useState(false);
 
-  const hasCompare = compareYaml !== undefined && compareYaml !== yaml;
+  const isCompareMode = baselineYaml !== undefined;
+  const useDiffEditor = isCompareMode;
+
+  const handleCompareModeChange = useCallback(
+    (mode: WorkflowChangeHistoryCompareMode) => {
+      setCompareMode(mode);
+      diffTelemetry?.setCompareMode(mode);
+    },
+    [diffTelemetry]
+  );
 
   useWorkflowsMonacoTheme();
+
+  useEffect(() => {
+    if (!diffTelemetry || !useDiffEditor || baselineYaml == null) {
+      return;
+    }
+
+    if (baselineYaml !== targetYaml) {
+      diffTelemetry.reportDiffViewed();
+    }
+  }, [baselineYaml, diffTelemetry, targetYaml, useDiffEditor]);
 
   useEffect(() => () => clearWorkflowYamlComputationCache(), []);
 
@@ -165,10 +201,10 @@ export const WorkflowChangeHistoryMonacoPreview = ({
       return;
     }
 
-    if (hasCompare && compareYaml != null) {
+    if (useDiffEditor && baselineYaml != null) {
       const mountCompareMode = compareModeRef.current;
-      const originalModel = monaco.editor.createModel(compareYaml, 'yaml');
-      const modifiedModel = monaco.editor.createModel(yaml, 'yaml');
+      const originalModel = monaco.editor.createModel(baselineYaml, 'yaml');
+      const modifiedModel = monaco.editor.createModel(targetYaml, 'yaml');
       const diffEditor = monaco.editor.createDiffEditor(
         container,
         getDiffEditorOptions(mountCompareMode)
@@ -204,7 +240,7 @@ export const WorkflowChangeHistoryMonacoPreview = ({
       };
     }
 
-    const model = monaco.editor.createModel(yaml, 'yaml');
+    const model = monaco.editor.createModel(targetYaml, 'yaml');
     const editor = monaco.editor.create(container, {
       ...WORKFLOW_READ_ONLY_MONACO_OPTIONS,
       model,
@@ -224,70 +260,70 @@ export const WorkflowChangeHistoryMonacoPreview = ({
       validationDecorationsRef.current = null;
       setIsEditorMounted(false);
     };
-  }, [compareYaml, hasCompare, updateDiffState, yaml]);
+  }, [baselineYaml, targetYaml, updateDiffState, useDiffEditor]);
 
   useEffect(() => {
     const diffEditor = diffEditorRef.current;
-    if (!diffEditor || !hasCompare) {
+    if (!diffEditor || !useDiffEditor) {
       return;
     }
 
     diffEditor.updateOptions({ renderSideBySide: compareMode === 'split' });
     configureDiffEditors(diffEditor, compareMode);
-  }, [compareMode, hasCompare]);
+  }, [compareMode, useDiffEditor]);
 
-  useEffect(() => {
-    if (!isEditorMounted) {
-      return;
-    }
+  useEffect(
+    () => () => {
+      validationAbortControllerRef.current?.abort();
+    },
+    []
+  );
 
-    const abortController = new AbortController();
-    let validationRafId: number | undefined;
+  useDebounce(
+    () => {
+      if (!isEditorMounted) {
+        return;
+      }
 
-    const timeoutId = window.setTimeout(() => {
-      validationRafId = requestAnimationFrame(() => {
-        void (async () => {
-          const editor = getActiveEditor();
-          if (!editor || abortController.signal.aborted) {
+      validationAbortControllerRef.current?.abort();
+      const abortController = new AbortController();
+      validationAbortControllerRef.current = abortController;
+
+      void (async () => {
+        const editor = getActiveEditor();
+        if (!editor || abortController.signal.aborted) {
+          return;
+        }
+
+        try {
+          const { validationResults: nextValidationResults } =
+            await applyWorkflowYamlValidationToEditor(
+              editor,
+              validationYaml,
+              highlightValidationErrors,
+              validationDecorationsRef,
+              abortController.signal
+            );
+
+          if (!abortController.signal.aborted) {
+            setValidationResults(nextValidationResults);
+          }
+        } catch (validationError) {
+          if (abortController.signal.aborted) {
             return;
           }
 
-          try {
-            const { validationResults: nextValidationResults } =
-              await applyWorkflowYamlValidationToEditor(
-                editor,
-                yaml,
-                highlightValidationErrors,
-                validationDecorationsRef,
-                abortController.signal
-              );
-
-            if (!abortController.signal.aborted) {
-              setValidationResults(nextValidationResults);
-            }
-          } catch (validationError) {
-            if (abortController.signal.aborted) {
-              return;
-            }
-
-            if (validationError instanceof DOMException && validationError.name === 'AbortError') {
-              return;
-            }
-
-            setValidationResults([]);
+          if (validationError instanceof DOMException && validationError.name === 'AbortError') {
+            return;
           }
-        })();
-      });
-    }, VALIDATION_DEBOUNCE_MS);
 
-    return () => {
-      window.clearTimeout(timeoutId);
-      if (validationRafId !== undefined) {
-        cancelAnimationFrame(validationRafId);
-      }
-      abortController.abort();
-    };
-  }, [getActiveEditor, highlightValidationErrors, isEditorMounted, yaml]);
+          setValidationResults([]);
+        }
+      })();
+    },
+    VALIDATION_DEBOUNCE_MS,
+    [getActiveEditor, highlightValidationErrors, isEditorMounted, validationYaml]
+  );
 
   const handleValidationErrorClick = useCallback(
     (error: YamlValidationResult) => {
@@ -307,13 +343,20 @@ export const WorkflowChangeHistoryMonacoPreview = ({
       return;
     }
 
+    const changes = diffEditor.getLineChanges() ?? [];
+    if (changes.length === 0) {
+      return;
+    }
+
+    diffTelemetry?.reportDiffChangeNavigated('line_hunk');
+
     setDiffCurrentIndex((currentIndex) => {
       const nextIndex = Math.max(currentIndex - 1, 0);
       pendingDiffScrollIndexRef.current = null;
       scrollDiffEditorToChange(diffEditor, nextIndex);
       return nextIndex;
     });
-  }, []);
+  }, [diffTelemetry]);
 
   const handleDiffNext = useCallback(() => {
     const diffEditor = diffEditorRef.current;
@@ -321,16 +364,22 @@ export const WorkflowChangeHistoryMonacoPreview = ({
       return;
     }
 
+    const changes = diffEditor.getLineChanges() ?? [];
+    if (changes.length === 0) {
+      return;
+    }
+
+    diffTelemetry?.reportDiffChangeNavigated('line_hunk');
+
     setDiffCurrentIndex((currentIndex) => {
-      const changes = diffEditor.getLineChanges() ?? [];
       const nextIndex = Math.min(currentIndex + 1, Math.max(changes.length - 1, 0));
       pendingDiffScrollIndexRef.current = null;
       scrollDiffEditorToChange(diffEditor, nextIndex);
       return nextIndex;
     });
-  }, []);
+  }, [diffTelemetry]);
 
-  const showDiffNavigator = hasCompare && diffTotalChanges > 0;
+  const showDiffNavigator = isCompareMode;
 
   return (
     <EuiFlexGroup
@@ -341,6 +390,13 @@ export const WorkflowChangeHistoryMonacoPreview = ({
       data-test-subj="workflowChangeHistoryMonacoPreview"
     >
       <EuiFlexItem css={styles.editor} grow={true}>
+        {isCompareMode && compareIndicator ? (
+          compareMode === 'split' ? (
+            <WorkflowChangeHistoryCompareSplitPaneLabels indicator={compareIndicator} />
+          ) : (
+            <WorkflowChangeHistoryCompareIndicatorBar indicator={compareIndicator} />
+          )
+        ) : null}
         <EuiText component="div" css={styles.monacoHost}>
           <div ref={containerRef} data-test-subj="workflowChangeHistoryMonacoEditor" />
         </EuiText>
@@ -352,9 +408,9 @@ export const WorkflowChangeHistoryMonacoPreview = ({
           onValidationErrorClick={handleValidationErrorClick}
           settingsSlot={
             <WorkflowChangeHistoryPreviewSettingsPopover
-              hasCompare={hasCompare}
+              hasCompare={isCompareMode}
               compareMode={compareMode}
-              onCompareModeChange={setCompareMode}
+              onCompareModeChange={handleCompareModeChange}
               highlightValidationErrors={highlightValidationErrors}
               onHighlightValidationErrorsChange={setHighlightValidationErrors}
             />
@@ -401,12 +457,16 @@ const componentStyles = {
     overflow: 'hidden',
     position: 'relative',
     zIndex: 0,
+    display: 'flex',
+    flexDirection: 'column',
     // Monaco scrollbars default to z-index 11; keep them below floating overlays.
     '& .monaco-editor .scrollbar': {
       zIndex: 1,
     },
   }),
   monacoHost: css({
+    flex: '1 1 auto',
+    minHeight: 0,
     height: '100%',
 
     '& > div': {

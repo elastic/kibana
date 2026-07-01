@@ -6,7 +6,7 @@
  */
 
 import type { ChangeHistoryListItem } from '../types/change_history_list_item';
-import { findCurrentChangeId, findPreviousChangeId } from './find_change_history_compare_targets';
+import { findPreviousChangeId } from './find_change_history_compare_targets';
 
 const items: ChangeHistoryListItem[] = [
   {
@@ -31,20 +31,6 @@ const items: ChangeHistoryListItem[] = [
 ];
 
 describe('find_change_history_compare_targets', () => {
-  it('finds the current change id from isCurrent or the first row', () => {
-    expect(findCurrentChangeId(items)).toBe('evt-7');
-    expect(
-      findCurrentChangeId([
-        {
-          id: 'evt-2',
-          timestamp: '2026-06-16T12:00:00.000Z',
-          actor: { name: 'Alice' },
-          action: 'Updated',
-        },
-      ])
-    ).toBe('evt-2');
-  });
-
   it('finds the chronologically previous change id for a selection', () => {
     expect(findPreviousChangeId(items, 'evt-7')).toBe('evt-3');
     expect(findPreviousChangeId(items, 'evt-3')).toBe('evt-1');

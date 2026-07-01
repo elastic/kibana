@@ -13,6 +13,7 @@ export const changeHistoryTelemetryEventNames = {
   [ChangeHistoryTelemetryEventTypes.ChangeSelected]: 'Change history change selected',
   [ChangeHistoryTelemetryEventTypes.FilterApplied]: 'Change history filter applied',
   [ChangeHistoryTelemetryEventTypes.DiffViewed]: 'Change history diff viewed',
+  [ChangeHistoryTelemetryEventTypes.DiffChangeNavigated]: 'Change history diff change navigated',
   [ChangeHistoryTelemetryEventTypes.RestoreConfirmed]: 'Change history restore confirmed',
   [ChangeHistoryTelemetryEventTypes.RestoreCompleted]: 'Change history restore completed',
   [ChangeHistoryTelemetryEventTypes.RestoreFailed]: 'Change history restore failed',

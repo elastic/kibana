@@ -68,7 +68,20 @@ export const useChangeHistoryList = ({
     }
   );
 
-  const items = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data?.pages]);
+  const items = useMemo(() => {
+    if (!data?.pages) {
+      return [];
+    }
+
+    const updates = new Map<string, ChangeHistoryListItem>();
+    for (const page of data.pages) {
+      for (const updatedItem of page.updatedItems ?? []) {
+        updates.set(updatedItem.id, updatedItem);
+      }
+    }
+
+    return data.pages.flatMap((page) => page.items.map((item) => updates.get(item.id) ?? item));
+  }, [data?.pages]);
   const total = data?.pages[0]?.total ?? 0;
   const isFetchingFirstPage = isFetching && !isFetchingNextPage;
 

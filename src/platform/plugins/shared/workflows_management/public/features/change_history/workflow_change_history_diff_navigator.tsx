@@ -30,16 +30,13 @@ export const WorkflowChangeHistoryDiffNavigator = ({
   totalChanges,
   onPrevious,
   onNext,
-}: WorkflowChangeHistoryDiffNavigatorProps): JSX.Element | null => {
+}: WorkflowChangeHistoryDiffNavigatorProps): JSX.Element => {
   const styles = useMemoCss(componentStyles);
 
-  if (totalChanges <= 0) {
-    return null;
-  }
-
-  const displayIndex = Math.min(currentIndex + 1, totalChanges);
-  const isFirst = currentIndex <= 0;
-  const isLast = currentIndex >= totalChanges - 1;
+  const hasChanges = totalChanges > 0;
+  const displayIndex = hasChanges ? Math.min(currentIndex + 1, totalChanges) : 0;
+  const isFirst = !hasChanges || currentIndex <= 0;
+  const isLast = !hasChanges || currentIndex >= totalChanges - 1;
 
   const previousChangeLabel = i18n.translate(
     'xpack.workflowsManagement.changeHistory.diffNavigator.previous',
@@ -48,6 +45,10 @@ export const WorkflowChangeHistoryDiffNavigator = ({
   const nextChangeLabel = i18n.translate(
     'xpack.workflowsManagement.changeHistory.diffNavigator.next',
     { defaultMessage: 'Next change' }
+  );
+  const noChangesLabel = i18n.translate(
+    'xpack.workflowsManagement.changeHistory.diffNavigator.noChanges',
+    { defaultMessage: 'No changes' }
   );
 
   return (
@@ -76,14 +77,18 @@ export const WorkflowChangeHistoryDiffNavigator = ({
 
       <EuiFlexItem grow={false}>
         <EuiText css={styles.label} size="s" component="span">
-          <FormattedMessage
-            id="xpack.workflowsManagement.changeHistory.diffNavigator.label"
-            defaultMessage="{current} of {total} changes"
-            values={{
-              current: <strong>{displayIndex}</strong>,
-              total: <strong>{totalChanges}</strong>,
-            }}
-          />
+          {hasChanges ? (
+            <FormattedMessage
+              id="xpack.workflowsManagement.changeHistory.diffNavigator.label"
+              defaultMessage="{current} of {total} changes"
+              values={{
+                current: <strong>{displayIndex}</strong>,
+                total: <strong>{totalChanges}</strong>,
+              }}
+            />
+          ) : (
+            noChangesLabel
+          )}
         </EuiText>
       </EuiFlexItem>
 
