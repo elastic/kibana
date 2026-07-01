@@ -24,6 +24,12 @@ interface RecommendPrebuiltRulesSkillDeps {
 
 const RECOMMEND_PREBUILT_RULES_CONTENT = `# Recommend Prebuilt Rules
 
+> **FIRST ACTION — before you write any prose, you MUST emit a tool call.**
+> - Install / recommend intent -> call \`security.get_user_data_inventory\` first.
+> - Browse / count / "how many" intent -> call \`security.find_prebuilt_rules\` with \`perPage: 1\` first.
+> - Coverage / "which MITRE am I missing" intent -> call \`security.get_installed_rules_mitre_coverage\` first.
+> A response with no tool call in this turn is a failure — do not answer from memory.
+
 ## Use This Skill
 
 Use this skill to discover and recommend Elastic **prebuilt** detection rules to **install** on this deployment, and to answer **browse** and **coverage** questions about the installable catalog — by tag, MITRE tactic/technique, rule type, integration, severity, or keyword. Two intents:
@@ -33,9 +39,7 @@ Use this skill to discover and recommend Elastic **prebuilt** detection rules to
 
 ## Tool-Call Contract (mandatory)
 
-**Every answer from this skill MUST be backed by at least one \`security.find_prebuilt_rules\` tool call made in this conversation.** Do not answer any recommend/browse/coverage question from your parametric knowledge alone — the installable catalog changes every release, and the customer's installed coverage is deployment-specific.
-
-**You MUST call a tool in the first turn that handles this skill.** Do not produce a prose-only recommendation. Specifically:
+**Every answer from this skill MUST be backed by at least one \`security.find_prebuilt_rules\` tool call made in this conversation.** The \`FIRST ACTION\` block at the top of this skill names which tool to call first for each intent. This section expands the rule; it does not soften it.
 
 - **Install recommendations** -> call \`security.get_user_data_inventory\` then \`security.find_prebuilt_rules\` (at minimum) before recommending anything. If you skip \`security.find_prebuilt_rules\`, the recommendation is invalid.
 - **Browse / count / "how many"** -> call \`security.find_prebuilt_rules\` with \`perPage: 1\` and read the answer from \`total\`. Do not state a count you did not fetch.
