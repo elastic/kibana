@@ -13,7 +13,9 @@ import { ROUNDED_BORDER_RADIUS_LARGE } from '../common.styles';
 export const applicationWorkspaceFixedOverlayStyles = css`
   position: fixed;
   top: ${layoutVar('application.top', '0px')};
-  left: ${layoutVar('application.left', '0px')};
+  left: calc(
+    ${layoutVar('application.left', '0px')} + ${layoutVar('application.marginRight', '0px')}
+  );
   right: ${layoutVar('application.right', '0px')};
   bottom: ${layoutVar('application.bottom', '0px')};
   z-index: ${layoutLevels.applicationTopBar + 1};

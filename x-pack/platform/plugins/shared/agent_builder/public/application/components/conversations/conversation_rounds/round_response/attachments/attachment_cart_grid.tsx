@@ -38,6 +38,8 @@ export const AttachmentCartGrid: React.FC = () => {
   const gridStyles = css`
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-auto-rows: 1fr;
+    align-items: stretch;
     gap: ${euiTheme.size.m};
     padding: ${euiTheme.size.m};
   `;
