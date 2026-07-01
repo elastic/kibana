@@ -9,7 +9,12 @@
 
 import type { JSONSchema7 } from 'json-schema';
 import type { z } from '@kbn/zod/v4';
-import type { LegacyWorkflowInput, WorkflowInputSchema, WorkflowOutput } from '../schema';
+import type {
+  LegacyWorkflowInput,
+  WorkflowInputSchema,
+  WorkflowOutput,
+  WorkflowYaml,
+} from '../schema';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
 import type { JsonSchema } from '../schema/common/json_model_shape_schema';
 
@@ -388,3 +393,18 @@ export function applyInputDefaults(
 
   return result;
 }
+
+/**
+ * Resolves workflow inputs from the definition and normalizes them to JSON Schema object form.
+ *
+ * When inputs exist and can be normalized, the return value is always {@link JsonModelSchemaType}
+ * (never the legacy array-of-fields shape).
+ *
+ * Supports the legacy inputs format (array of field definitions) by converting it via
+ * {@link normalizeFieldsToJsonSchema}.
+ */
+export const getInputsFromDefinition = (
+  definition: WorkflowYaml | Partial<WorkflowYaml> | undefined | null
+): JsonModelSchemaType | undefined => {
+  return normalizeFieldsToJsonSchema(definition?.inputs);
+};

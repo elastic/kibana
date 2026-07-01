@@ -33,16 +33,12 @@ const requiredInputsWorkflow: WorkflowListItemDto = {
   valid: true,
   createdAt: '',
   definition: {
-    triggers: [
-      {
-        type: 'manual',
-        inputs: {
-          type: 'object',
-          properties: { ticketId: { type: 'string' } },
-          required: ['ticketId'],
-        },
-      },
-    ],
+    triggers: [{ type: 'manual' }],
+    inputs: {
+      type: 'object',
+      properties: { ticketId: { type: 'string' } },
+      required: ['ticketId'],
+    },
   } as unknown as WorkflowListItemDto['definition'],
 };
 
