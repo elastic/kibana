@@ -16,6 +16,7 @@ import {
   getAnomaliesTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import { useHasAnomalies } from '../../../entity_analytics/api/hooks/use_has_anomalies';
+import { useAnomalyPrivileges } from '../../../entity_analytics/api/hooks/use_anomaly_privileges';
 import type {
   LeftPanelTabsType,
   EntityDetailsLeftPanelTab,
@@ -64,10 +65,13 @@ export const useTabs = ({
 }: HostDetailsPanelProps): LeftPanelTabsType => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
   const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
+  const { data: anomalyPrivilegesData } = useAnomalyPrivileges(isAnomalyDetailsEnabled);
+  const hasAnomalyPrivileges = anomalyPrivilegesData?.has_all_required ?? false;
+  const loadAnomalies = isAnomalyDetailsEnabled && hasAnomalyPrivileges && !!entityStoreEntityId;
   const hasAnomalies = useHasAnomalies({
     entityId: entityStoreEntityId ?? '',
     entityType: EntityType.host,
-    enabled: !!(entityStoreEntityId && isAnomalyDetailsEnabled),
+    enabled: loadAnomalies,
   });
 
   return useMemo(() => {
@@ -113,7 +117,7 @@ export const useTabs = ({
         : [];
 
     const anomaliesTab =
-      entityStoreEntityId && isAnomalyDetailsEnabled && hasAnomalies
+      loadAnomalies && hasAnomalies
         ? [
             getAnomaliesTab({
               entityId: entityStoreEntityId,
@@ -133,7 +137,7 @@ export const useTabs = ({
     hasNonClosedAlerts,
     entityId,
     hasEntityResolutionLicense,
-    isAnomalyDetailsEnabled,
+    loadAnomalies,
     hasAnomalies,
   ]);
 };

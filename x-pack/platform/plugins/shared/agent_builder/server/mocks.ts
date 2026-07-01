@@ -76,10 +76,6 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
         list: jest.fn(),
       }),
     },
-    dashboard: {
-      syncOverview: jest.fn(),
-      syncOverviewForSpace: jest.fn(),
-    },
   };
 };
 

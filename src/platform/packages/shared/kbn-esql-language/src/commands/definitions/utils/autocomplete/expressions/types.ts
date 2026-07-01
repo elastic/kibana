@@ -65,10 +65,9 @@ export interface ExpressionContextOptions {
   addSpaceAfterOperator?: boolean; // Add a space after inserting operands or functions that follow an operator
   openSuggestions?: boolean; // Reopen the suggestions popover after applying a completion
   allowSubquery?: boolean; // Whether this expression context can suggest subquery operands
-  functionsToIgnore?: {
-    names: string[]; // Functions hidden for the current command/context
-    allowedInsideFunctions?: Record<string, string[]>; // Exceptions: keep fn visible when inside specific parent functions
-  };
+  getFunctionsToIgnore?: (
+    functionParameterContext?: FunctionParameterContext
+  ) => { names: string[]; allowedInsideFunctions?: Record<string, string[]> } | undefined; // Function suggestion exclusions, static or parameter-aware
   parentFunctionNames?: string[]; // Internal loop-prevention stack built by in-function recursion to hide the current parent from suggestions
 }
 

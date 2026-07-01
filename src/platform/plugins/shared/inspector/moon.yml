@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/core-lifecycle-browser'
   - '@kbn/presentation-util'
   - '@kbn/shared-ux-utility'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -41,6 +42,7 @@ fileGroups:
   src:
     - common/**/*
     - public/**/*
+    - test/**/*
     - index.ts
     - '!target/**/*'
   jest-config:
