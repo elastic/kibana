@@ -20,6 +20,7 @@ import {
   LOCKED_CARD_RAMSOMWARE_TITLE,
   RansomwareProtectionCard,
 } from './ransomware_protection_card';
+import { RANSOMWARE_POLICY_SECTION_DESCRIPTION } from '../policy_setting_section_descriptions';
 
 jest.mock('../../../../../../../common/hooks/use_license');
 
@@ -51,15 +52,17 @@ describe('Policy Ransomware Protections Card', () => {
     const { getByTestId } = render();
 
     expect(getByTestId(testSubj.enableDisableSwitch));
-    expect(getByTestId(testSubj.protectionPreventRadio));
-    expect(getByTestId(testSubj.notifyUserCheckbox));
+    expect(getByTestId(testSubj.windowsModeSelect));
+    expect(getByTestId(testSubj.windowsNotifyUserCheckbox));
+    expect(getByTestId(testSubj.macModeSelect));
+    expect(getByTestId(testSubj.macNotifyUserCheckbox));
   });
 
   it('should show supported OS values', () => {
     render();
 
     expect(renderResult.getByTestId(testSubj.osValuesContainer)).toHaveTextContent(
-      exactMatchText('Windows')
+      exactMatchText(RANSOMWARE_POLICY_SECTION_DESCRIPTION)
     );
   });
 
@@ -94,24 +97,19 @@ describe('Policy Ransomware Protections Card', () => {
 
       expectIsViewOnly(getByTestId(testSubj.card));
 
-      expect(getByTestId(testSubj.card)).toHaveTextContent(
-        exactMatchText(
-          'Type' +
-            'Ransomware' +
-            'Operating system' +
-            'Windows ' +
-            'Ransomware protections' +
-            'Protection level' +
-            'Prevent' +
-            'User notification' +
-            'Agent version 7.12+' +
-            'Notify user' +
-            'Notification message' +
-            '—'
-        )
+      const card = getByTestId(testSubj.card);
+      expect(getByTestId(`${testSubj.card}-type`)).toHaveTextContent(exactMatchText('Ransomware'));
+      expect(getByTestId(`${testSubj.card}-osValues`)).toHaveTextContent(
+        exactMatchText(RANSOMWARE_POLICY_SECTION_DESCRIPTION)
       );
+      expect(getByTestId(testSubj.enableDisableSwitch)).toHaveAttribute(
+        'aria-label',
+        'Ransomware protections'
+      );
+      expect(card.textContent).not.toContain('TypeRansomware');
+      expect(card.textContent).not.toContain('Operating system');
       expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('true');
-      expect(getByTestId(testSubj.notifyUserCheckbox)).toHaveAttribute('checked');
+      expect(getByTestId('test-ransomware-windowsNotifyUser-checkbox')).toBeChecked();
     });
 
     it('should display correctly when overall card is disabled', () => {
@@ -120,11 +118,17 @@ describe('Policy Ransomware Protections Card', () => {
 
       expectIsViewOnly(getByTestId(testSubj.card));
 
-      expect(getByTestId(testSubj.card)).toHaveTextContent(
-        exactMatchText(
-          ['Type', 'Ransomware', 'Operating system', 'Windows ', 'Ransomware protections'].join('')
-        )
+      const card = getByTestId(testSubj.card);
+      expect(getByTestId(`${testSubj.card}-type`)).toHaveTextContent(exactMatchText('Ransomware'));
+      expect(getByTestId(`${testSubj.card}-osValues`)).toHaveTextContent(
+        exactMatchText(RANSOMWARE_POLICY_SECTION_DESCRIPTION)
       );
+      expect(getByTestId(testSubj.enableDisableSwitch)).toHaveAttribute(
+        'aria-label',
+        'Ransomware protections'
+      );
+      expect(card.textContent).not.toContain('TypeRansomware');
+      expect(card.textContent).not.toContain('Operating system');
       expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('false');
     });
 
@@ -135,22 +139,37 @@ describe('Policy Ransomware Protections Card', () => {
 
       expectIsViewOnly(getByTestId(testSubj.card));
 
-      expect(getByTestId(testSubj.card)).toHaveTextContent(
-        exactMatchText(
-          'Type' +
-            'Ransomware' +
-            'Operating system' +
-            'Windows ' +
-            'Ransomware protections' +
-            'Protection level' +
-            'Prevent' +
-            'User notification' +
-            'Agent version 7.12+' +
-            'Notify user'
-        )
+      const card = getByTestId(testSubj.card);
+      expect(getByTestId(`${testSubj.card}-type`)).toHaveTextContent(exactMatchText('Ransomware'));
+      expect(getByTestId(`${testSubj.card}-osValues`)).toHaveTextContent(
+        exactMatchText(RANSOMWARE_POLICY_SECTION_DESCRIPTION)
       );
+      expect(getByTestId(testSubj.enableDisableSwitch)).toHaveAttribute(
+        'aria-label',
+        'Ransomware protections'
+      );
+      expect(card.textContent).not.toContain('TypeRansomware');
+      expect(card.textContent).not.toContain('Operating system');
       expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('true');
-      expect(getByTestId(testSubj.notifyUserCheckbox)).not.toHaveAttribute('checked');
+      expect(getByTestId('test-ransomware-windowsNotifyUser-checkbox')).not.toBeChecked();
     });
+
+    it('should display the macOS mode select and notify option', () => {
+      set(formProps.policy, 'mac.ransomware.mode', ProtectionModes.prevent);
+      const { getByTestId } = render();
+
+      expectIsViewOnly(getByTestId(testSubj.card));
+
+      expect(getByTestId(testSubj.macModeSelect));
+      expect(getByTestId('test-ransomware-macNotifyUser-checkbox')).toBeChecked();
+    });
+  });
+
+  it('should render the macOS mode select and notify option in edit mode', () => {
+    set(formProps.policy, 'mac.ransomware.mode', ProtectionModes.prevent);
+    const { getByTestId } = render();
+
+    expect(getByTestId(testSubj.macModeSelect));
+    expect(getByTestId(testSubj.macNotifyUserCheckbox));
   });
 });

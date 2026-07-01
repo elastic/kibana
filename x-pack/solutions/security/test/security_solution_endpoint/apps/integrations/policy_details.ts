@@ -139,13 +139,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('should show the custom message text area when the Notify User checkbox is checked', async () => {
-          expect(await testSubjects.isChecked(cardTestSubj.notifyUserCheckbox)).to.be(true);
+          expect(await testSubjects.isChecked(cardTestSubj.windowsNotifyUserCheckbox)).to.be(true);
           await testSubjects.existOrFail(cardTestSubj.notifyCustomMessage);
         });
 
         it('should not show the custom message text area when the Notify User checkbox is unchecked', async () => {
-          await pageObjects.endpointPageUtils.clickOnEuiCheckbox(cardTestSubj.notifyUserCheckbox);
-          expect(await testSubjects.isChecked(cardTestSubj.notifyUserCheckbox)).to.be(false);
+          await pageObjects.endpointPageUtils.clickOnEuiCheckbox(
+            cardTestSubj.windowsNotifyUserCheckbox
+          );
+          expect(await testSubjects.isChecked(cardTestSubj.windowsNotifyUserCheckbox)).to.be(false);
           await testSubjects.missingOrFail(cardTestSubj.notifyCustomMessage);
         });
 
@@ -204,7 +206,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should display success toast on successful save', async () => {
         await pageObjects.endpointPageUtils.clickOnEuiCheckbox(
-          formTestSubjects.windowsEvents.dnsCheckbox
+          formTestSubjects.eventCollection.windows.dnsCheckbox
         );
         await pageObjects.policy.confirmAndSave();
 
@@ -216,7 +218,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should persist update on the screen', async () => {
         await pageObjects.endpointPageUtils.clickOnEuiCheckbox(
-          formTestSubjects.windowsEvents.processCheckbox
+          formTestSubjects.eventCollection.windows.processCheckbox
         );
         await pageObjects.policy.confirmAndSave();
 
@@ -227,7 +229,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         expect(
           await (
-            await testSubjects.find(formTestSubjects.windowsEvents.processCheckbox)
+            await testSubjects.find(formTestSubjects.eventCollection.windows.processCheckbox)
           ).isSelected()
         ).to.equal(false);
       });
@@ -238,12 +240,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await Promise.all([
           pageObjects.endpointPageUtils.clickOnEuiCheckbox(
-            formTestSubjects.windowsEvents.fileCheckbox
+            formTestSubjects.eventCollection.windows.fileCheckbox
           ),
           pageObjects.endpointPageUtils.clickOnEuiCheckbox(
-            formTestSubjects.linuxEvents.fileCheckbox
+            formTestSubjects.eventCollection.linux.fileCheckbox
           ),
-          pageObjects.endpointPageUtils.clickOnEuiCheckbox(formTestSubjects.macEvents.fileCheckbox),
+          pageObjects.endpointPageUtils.clickOnEuiCheckbox(
+            formTestSubjects.eventCollection.mac.fileCheckbox
+          ),
         ]);
 
         await pageObjects.policy.showAdvancedSettingsSection();
@@ -333,34 +337,34 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should allow updates to policy items', async () => {
         const winDnsEventingCheckbox = await testSubjects.find(
-          formTestSubjects.windowsEvents.dnsCheckbox
+          formTestSubjects.eventCollection.windows.dnsCheckbox
         );
         await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(
           winDnsEventingCheckbox
         );
         expect(await winDnsEventingCheckbox.isSelected()).to.be(true);
         await pageObjects.endpointPageUtils.clickOnEuiCheckbox(
-          formTestSubjects.windowsEvents.dnsCheckbox
+          formTestSubjects.eventCollection.windows.dnsCheckbox
         );
         await pageObjects.policy.waitForCheckboxSelectionChange(
-          formTestSubjects.windowsEvents.dnsCheckbox,
+          formTestSubjects.eventCollection.windows.dnsCheckbox,
           false
         );
       });
 
       it('should include updated endpoint data when saved', async () => {
         await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(
-          await testSubjects.find(formTestSubjects.windowsEvents.dnsCheckbox)
+          await testSubjects.find(formTestSubjects.eventCollection.windows.dnsCheckbox)
         );
         await pageObjects.endpointPageUtils.clickOnEuiCheckbox(
-          formTestSubjects.windowsEvents.dnsCheckbox
+          formTestSubjects.eventCollection.windows.dnsCheckbox
         );
         const updatedCheckboxValue = await testSubjects.isSelected(
-          formTestSubjects.windowsEvents.dnsCheckbox
+          formTestSubjects.eventCollection.windows.dnsCheckbox
         );
 
         await pageObjects.policy.waitForCheckboxSelectionChange(
-          formTestSubjects.windowsEvents.dnsCheckbox,
+          formTestSubjects.eventCollection.windows.dnsCheckbox,
           false
         );
 
@@ -373,7 +377,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         await pageObjects.policy.waitForCheckboxSelectionChange(
-          formTestSubjects.windowsEvents.dnsCheckbox,
+          formTestSubjects.eventCollection.windows.dnsCheckbox,
           updatedCheckboxValue
         );
       });

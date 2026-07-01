@@ -20,6 +20,7 @@ import userEvent from '@testing-library/user-event';
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { within } from '@testing-library/react';
+import { EVENT_COLLECTION_POLICY_SECTION_DESCRIPTION } from './policy_setting_section_descriptions';
 
 describe('Policy Event Collection Card common component', () => {
   let formProps: EventCollectionCardProps<OperatingSystem.WINDOWS>;
@@ -72,7 +73,9 @@ describe('Policy Event Collection Card common component', () => {
     expect(getByTestId('test-selectedCount')).toHaveTextContent(
       exactMatchText('2 / 2 event collections enabled')
     );
-    expect(getByTestId('test-osValues')).toHaveTextContent(exactMatchText('Windows'));
+    expect(getByTestId('test-osValues')).toHaveTextContent(
+      exactMatchText(EVENT_COLLECTION_POLICY_SECTION_DESCRIPTION)
+    );
     expect(isChecked('test-file')).toBe(true);
     expect(isChecked('test-network')).toBe(true);
   });

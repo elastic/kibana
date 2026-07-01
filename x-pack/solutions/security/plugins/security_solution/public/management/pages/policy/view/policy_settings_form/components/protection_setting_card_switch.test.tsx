@@ -14,7 +14,7 @@ import { createLicenseServiceMock } from '../../../../../../../common/license/mo
 import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import type { ProtectionSettingCardSwitchProps } from './protection_setting_card_switch';
 import { ProtectionSettingCardSwitch } from './protection_setting_card_switch';
-import { exactMatchText, expectIsViewOnly, setMalwareMode } from '../mocks';
+import { expectIsViewOnly, setMalwareMode } from '../mocks';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
@@ -57,7 +57,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     const { getByTestId } = render();
 
     expect(getByTestId('test')).toHaveAttribute('aria-checked', 'true');
-    expect(getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware'));
+    expect(getByTestId('test')).toHaveAttribute('aria-label', 'Malware');
   });
 
   it('should render expected output when disabled', () => {
@@ -65,7 +65,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     const { getByTestId } = render();
 
     expect(getByTestId('test')).toHaveAttribute('aria-checked', 'false');
-    expect(getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware'));
+    expect(getByTestId('test')).toHaveAttribute('aria-label', 'Malware');
   });
 
   it('should be able to disable it', async () => {
@@ -91,11 +91,6 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
       includeSubfeatures: false,
     });
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
-    setMalwareMode({
-      policy: expectedUpdatedPolicy,
-      turnOff: false,
-      includeSubfeatures: false,
-    });
     render();
     await userEvent.click(renderResult.getByTestId('test'));
 
@@ -103,6 +98,22 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
       isValid: true,
       updatedPolicy: expectedUpdatedPolicy,
     });
+  });
+
+  it('should invoke `onMasterSwitchTurnedOff` with saved per-OS modes and policy before toggle when disabling', async () => {
+    const onMasterSwitchTurnedOff = jest.fn();
+    formProps.onMasterSwitchTurnedOff = onMasterSwitchTurnedOff;
+    render();
+    await userEvent.click(renderResult.getByTestId('test'));
+
+    expect(onMasterSwitchTurnedOff).toHaveBeenCalledTimes(1);
+    const [savedModes, policyBefore] = onMasterSwitchTurnedOff.mock.calls[0];
+    expect(savedModes).toEqual({
+      windows: formProps.policy.windows.malware.mode,
+      mac: formProps.policy.mac.malware.mode,
+      linux: formProps.policy.linux.malware.mode,
+    });
+    expect(policyBefore).toEqual(formProps.policy);
   });
 
   it('should invoke `additionalOnSwitchChange` callback if one was defined', async () => {
@@ -167,13 +178,13 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     });
 
     it('should NOT update notification settings when enabling', async () => {
-      const expectedUpdatedPolicy = cloneDeep(formProps.policy);
       setMalwareMode({
         policy: formProps.policy,
         turnOff: true,
         includePopup: false,
         includeSubfeatures: false,
       });
+      const expectedUpdatedPolicy = cloneDeep(formProps.policy);
       render();
       await userEvent.click(renderResult.getByTestId('test'));
 
@@ -198,7 +209,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     it('should show option when checked', () => {
       render();
 
-      expect(renderResult.getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware'));
+      expect(renderResult.getByTestId('test')).toHaveAttribute('aria-label', 'Malware');
       expect(renderResult.getByTestId('test').getAttribute('aria-checked')).toBe('true');
     });
 
@@ -210,7 +221,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
       });
       render();
 
-      expect(renderResult.getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware'));
+      expect(renderResult.getByTestId('test')).toHaveAttribute('aria-label', 'Malware');
       expect(renderResult.getByTestId('test').getAttribute('aria-checked')).toBe('false');
     });
   });

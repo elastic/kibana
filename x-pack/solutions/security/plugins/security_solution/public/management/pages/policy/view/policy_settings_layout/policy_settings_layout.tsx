@@ -205,7 +205,6 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(
                 <EuiButton
                   disabled={!policyModified}
                   fill={true}
-                  iconType="save"
                   data-test-subj="policyDetailsSaveButton"
                   onClick={handleSaveOnClick}
                   isLoading={isUpdating}

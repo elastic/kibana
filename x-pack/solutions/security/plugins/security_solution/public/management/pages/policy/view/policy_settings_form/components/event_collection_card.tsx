@@ -26,6 +26,7 @@ import { getEmptyValue } from '../../../../../../common/components/empty_value';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { PolicyFormComponentCommonProps } from '../types';
 import { SettingCard, SettingCardHeader } from './setting_card';
+import { EVENT_COLLECTION_POLICY_SECTION_DESCRIPTION } from './policy_setting_section_descriptions';
 import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
 import type { UIPolicyConfig } from '../../../../../../../common/endpoint/types';
 
@@ -109,6 +110,7 @@ export const EventCollectionCard = memo(
           defaultMessage: 'Event collection',
         })}
         supportedOss={[os]}
+        sectionDescription={EVENT_COLLECTION_POLICY_SECTION_DESCRIPTION}
         mode={mode}
         selected={selectedCount > 0}
         rightCorner={
@@ -127,13 +129,6 @@ export const EventCollectionCard = memo(
         }
         dataTestSubj={getTestId()}
       >
-        <SettingCardHeader>
-          {i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.eventingEvents', {
-            defaultMessage: 'Events',
-          })}
-        </SettingCardHeader>
-        <EuiSpacer size="s" />
-
         <div data-test-subj={getTestId('options')}>
           {options.map(({ name, protectionField }) => {
             const keyPath = `${policyOs}.events.${String(protectionField)}`;
@@ -250,7 +245,7 @@ interface EventCheckboxProps
   keyPath: string;
 }
 
-const EventCheckbox = memo<EventCheckboxProps>(
+export const EventCheckbox = memo<EventCheckboxProps>(
   ({ policy, onChange, label, keyPath, disabled, 'data-test-subj': dataTestSubj }) => {
     const isChecked: boolean = get(policy, keyPath);
 

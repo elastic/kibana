@@ -13,6 +13,7 @@ import React from 'react';
 import { set } from '@kbn/safer-lodash-set';
 import type { WindowsEventCollectionCardProps } from './windows_event_collection_card';
 import { WindowsEventCollectionCard } from './windows_event_collection_card';
+import { EVENT_COLLECTION_POLICY_SECTION_DESCRIPTION } from '../policy_setting_section_descriptions';
 
 describe('Policy Windows Event Collection Card', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').windowsEvents;
@@ -50,7 +51,9 @@ describe('Policy Windows Event Collection Card', () => {
     expect(getByTestId(testSubj.processCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.registryCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.securityCheckbox)).toBeChecked();
-    expect(getByTestId(testSubj.osValueContainer)).toHaveTextContent(exactMatchText('Windows'));
+    expect(getByTestId(testSubj.osValueContainer)).toHaveTextContent(
+      exactMatchText(EVENT_COLLECTION_POLICY_SECTION_DESCRIPTION)
+    );
   });
 
   describe('and is displayed in View mode', () => {
@@ -60,26 +63,20 @@ describe('Policy Windows Event Collection Card', () => {
 
     it('should render card with expected content when session data collection is disabled', () => {
       render();
-      const card = renderResult.getByTestId(testSubj.card);
+      const { getByTestId } = renderResult;
+      const card = getByTestId(testSubj.card);
 
       expectIsViewOnly(card);
-      expect(card).toHaveTextContent(
-        exactMatchText(
-          'Type' +
-            'Event collection' +
-            'Operating system' +
-            'Windows 8 / 8 event collections enabled' +
-            'Events' +
-            'API' +
-            'DLL and Driver Load' +
-            'DNS' +
-            'File' +
-            'Network' +
-            'Process' +
-            'Registry' +
-            'Security'
-        )
+      expect(getByTestId(`${testSubj.card}-type`)).toHaveTextContent(
+        exactMatchText('Event collection')
       );
+      expect(getByTestId(`${testSubj.card}-osValues`)).toHaveTextContent(
+        exactMatchText(EVENT_COLLECTION_POLICY_SECTION_DESCRIPTION)
+      );
+      expect(card).toHaveTextContent('8 / 8 event collections enabled');
+      expect(card.textContent).not.toContain('TypeEvent collection');
+      expect(card.textContent).not.toContain('Operating system');
+      expect(card).toHaveTextContent('API');
     });
 
     it('should render card with expected content when some events are un-checked', () => {
@@ -87,27 +84,19 @@ describe('Policy Windows Event Collection Card', () => {
       set(formProps.policy, 'windows.events.dns', false);
       render();
 
-      const card = renderResult.getByTestId(testSubj.card);
+      const { getByTestId } = renderResult;
+      const card = getByTestId(testSubj.card);
 
       expectIsViewOnly(card);
-      expect(card).toHaveTextContent(
-        exactMatchText(
-          'Type' +
-            'Event collection' +
-            'Operating system' +
-            'Windows ' +
-            '6 / 8 event collections enabled' +
-            'Events' +
-            'API' +
-            'DLL and Driver Load' +
-            'DNS' +
-            'File' +
-            'Network' +
-            'Process' +
-            'Registry' +
-            'Security'
-        )
+      expect(getByTestId(`${testSubj.card}-type`)).toHaveTextContent(
+        exactMatchText('Event collection')
       );
+      expect(getByTestId(`${testSubj.card}-osValues`)).toHaveTextContent(
+        exactMatchText(EVENT_COLLECTION_POLICY_SECTION_DESCRIPTION)
+      );
+      expect(card).toHaveTextContent('6 / 8 event collections enabled');
+      expect(card.textContent).not.toContain('TypeEvent collection');
+      expect(card.textContent).not.toContain('Operating system');
     });
   });
 });
