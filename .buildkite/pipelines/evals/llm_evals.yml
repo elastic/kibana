@@ -237,12 +237,13 @@ steps:
           # - If the LiteLLM proxy itself is down/over-budget, setup_connectors.sh treats
           #   LiteLLM as optional for EIS-backed runs (LITELLM_OPTIONAL) and continues
           #   EIS-only. Weekly stays green either way.
-          # VERIFY the `llm-gateway/*` slugs match the proxy's model-group names before
-          # relying on the OSS columns:
+          # Slugs are the proxy's exact (case-sensitive) model-group ids and mirror the
+          # SigEvents OSS eval set (DeepSeek V4 + Kimi K2.6). Re-verify against the proxy
+          # if the OSS columns stop populating:
           #   node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_litellm_connectors.js \
           #     --base-url "$LITELLM_BASE_URL" --team-name "$LITELLM_TEAM_NAME" \
           #     --api-key "$LITELLM_VIRTUAL_KEY" --model-prefix "llm-gateway/" | base64 -d | jq 'keys'
-          EVAL_MODEL_GROUPS: &security_oss_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-pro,eis/openai-gpt-5.4,eis/openai-gpt-oss-120b,llm-gateway/deepseek-v3.2,llm-gateway/kimi-k2.6'
+          EVAL_MODEL_GROUPS: &security_oss_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-pro,eis/openai-gpt-5.4,eis/openai-gpt-oss-120b,llm-gateway/DeepSeek-V4-Flash,llm-gateway/Kimi-K2.6'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404

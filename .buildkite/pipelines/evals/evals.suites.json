@@ -135,8 +135,8 @@
         "eis/google-gemini-3.1-pro",
         "eis/openai-gpt-5.4",
         "eis/openai-gpt-oss-120b",
-        "llm-gateway/deepseek-v3.2",
-        "llm-gateway/kimi-k2.6"
+        "llm-gateway/DeepSeek-V4-Flash",
+        "llm-gateway/Kimi-K2.6"
       ]
     },
     {
@@ -199,8 +199,8 @@
         "eis/google-gemini-3.1-pro",
         "eis/openai-gpt-5.4",
         "eis/openai-gpt-oss-120b",
-        "llm-gateway/deepseek-v3.2",
-        "llm-gateway/kimi-k2.6"
+        "llm-gateway/DeepSeek-V4-Flash",
+        "llm-gateway/Kimi-K2.6"
       ]
     },
     {
