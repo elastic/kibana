@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { classifyHeader, type SectionKind } from './section_headers';
+
 /**
  * Strip HTML tags and decode the small set of named entities that show up
  * routinely in RSS / vendor JSON descriptions.
@@ -90,6 +92,46 @@ export const truncate = (input: string, maxLength: number): string => {
 };
 
 /**
+ * Split HTML at heading tag boundaries, returning chunks annotated with
+ * their section kind. Each chunk carries the raw HTML for that segment
+ * (including the heading tag itself for non-prose chunks).
+ */
+const _splitHtmlBySections = (html: string): Array<{ kind: SectionKind; html: string }> => {
+  const chunks: Array<{ kind: SectionKind; html: string }> = [];
+  let currentKind: SectionKind = 'prose';
+  let currentHtml = '';
+
+  const headingRe = /<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi;
+  let lastIndex = 0;
+  let m: RegExpExecArray | null;
+
+  while ((m = headingRe.exec(html)) !== null) {
+    const beforeHeading = html.slice(lastIndex, m.index);
+    if (beforeHeading) {
+      currentHtml += beforeHeading;
+    }
+    // Flush the current chunk before starting the new section.
+    if (currentHtml) {
+      chunks.push({ kind: currentKind, html: currentHtml });
+    }
+    const headingText = m[2].replace(/<[^>]+>/g, ' ').trim();
+    currentKind = classifyHeader(headingText);
+    currentHtml = m[0]; // include the heading tag in this chunk
+    lastIndex = m.index + m[0].length;
+  }
+
+  const remaining = html.slice(lastIndex);
+  if (remaining) {
+    currentHtml += remaining;
+  }
+  if (currentHtml) {
+    chunks.push({ kind: currentKind, html: currentHtml });
+  }
+
+  return chunks;
+};
+
+/**
  * Convert HTML to a structured text form that preserves block boundaries,
  * table rows, headers, and lists so that IOC extraction can see table-cell
  * values as recoverable tokens rather than a collapsed space-run.
@@ -104,65 +146,90 @@ export const truncate = (input: string, maxLength: number): string => {
  *   <tr> with <td>/<th> cells → | cell1 | cell2 | pipe-delimited row
  *   <li>                      → - item text
  *   block elements (p, div, br, …) → newline boundary
+ *   <a href> in IOC/References sections → "anchortext URL" (href lifted as token)
+ *   <a href> in prose         → anchor text only (href dropped, mirrors reader-mode)
  *   inline tags               → removed; content kept
  *   HTML entities             → decoded (reuses decodeEntities)
+ *
+ * The anchor-href lift is SCOPED to IOC and References heading sections only.
+ * Prose <a href> links are collapsed to their anchor text so that clickable
+ * inline citations (learn.microsoft.com, GitHub tool links, blog navigation)
+ * don't flood extraction with reference-noise URLs. Real inline IOCs appear
+ * as defanged literal text in prose and are extracted by the regex path
+ * regardless of this anchor-text collapse.
  */
 export const htmlToStructured = (html: string | undefined | null): string => {
   if (!html) return '';
 
   // 1. Drop script/style bodies (same pre-pass as stripHtml).
-  let s = html
+  const cleaned = html
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style[\s\S]*?<\/style>/gi, ' ');
 
-  // 2. Lift <a href="URL"> hrefs into plain text FIRST, before any container strip,
-  //    so URLs inside <li>/<td> survive. Without this ordering, the list-item and
-  //    table-cell replacements below (steps 4–5) strip inner tags and the href is lost.
-  //    Produces "anchortext URL" — the URL appears as a bare token the regex
-  //    patterns can match. No markdown [label](url) syntax is emitted.
-  s = s.replace(/<a\s[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, (_m, href: string, inner: string) => {
-    const text = inner.replace(/<[^>]+>/g, ' ').trim();
-    return `${text} ${href} `;
-  });
+  // 2. Split at heading boundaries so each chunk knows its section kind.
+  //    Href-lifting is applied only to ioc and references chunks (step 3 below).
+  const sectionChunks = _splitHtmlBySections(cleaned);
 
-  // 3. Headings → "## text\n"
-  s = s.replace(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/gi, (_m, inner: string) => {
-    const text = inner.replace(/<[^>]+>/g, ' ').trim();
-    return text ? `\n## ${collapseWhitespace(text)}\n` : '';
-  });
+  const processedParts: string[] = [];
 
-  // 4. Table rows → "| cell | cell |\n"
-  // Process each <tr> independently; extract <td>/<th> cell content.
-  s = s.replace(/<tr[^>]*>([\s\S]*?)<\/tr>/gi, (_m, inner: string) => {
-    const cellTexts: string[] = [];
-    const cellPattern = /<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi;
-    let cellMatch: RegExpExecArray | null;
-    while ((cellMatch = cellPattern.exec(inner)) !== null) {
-      const cellContent = cellMatch[1].replace(/<[^>]+>/g, ' ').trim();
-      cellTexts.push(collapseWhitespace(cellContent));
+  for (const { kind, html: chunkHtml } of sectionChunks) {
+    let s = chunkHtml;
+
+    // 3. Anchor href lift — only for IOC and References sections.
+    //    In prose: collapse <a> to its inner text (href dropped).
+    if (kind === 'ioc' || kind === 'references') {
+      // Lift hrefs into plain text FIRST, before container transforms, so URLs
+      // inside <li>/<td> survive. Produces "anchortext URL" as a bare token.
+      s = s.replace(/<a\s[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, (_m, href: string, inner: string) => {
+        const text = inner.replace(/<[^>]+>/g, ' ').trim();
+        return `${text} ${href} `;
+      });
+    } else {
+      // Prose: collapse anchor to its visible text only.
+      s = s.replace(/<a\s[^>]*>([\s\S]*?)<\/a>/gi, (_m, inner: string) => {
+        return inner.replace(/<[^>]+>/g, ' ').trim() + ' ';
+      });
     }
-    return cellTexts.length > 0 ? `\n| ${cellTexts.join(' | ')} |\n` : '\n';
-  });
 
-  // 5. List items → "- text\n"
-  s = s.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_m, inner: string) => {
-    const text = inner.replace(/<[^>]+>/g, ' ').trim();
-    return text ? `\n- ${collapseWhitespace(text)}\n` : '';
-  });
+    // 4. Headings → "## text\n"
+    s = s.replace(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/gi, (_m, inner: string) => {
+      const text = inner.replace(/<[^>]+>/g, ' ').trim();
+      return text ? `\n## ${collapseWhitespace(text)}\n` : '';
+    });
 
-  // 6. Block-level elements → newline boundary (br, p, div, section, article, …)
-  s = s.replace(/<\/?(p|div|section|article|aside|header|footer|main|figure|blockquote|pre|ul|ol|table|thead|tbody|tfoot)[^>]*>/gi, '\n');
-  s = s.replace(/<br\s*\/?>/gi, '\n');
+    // 5. Table rows → "| cell | cell |\n"
+    s = s.replace(/<tr[^>]*>([\s\S]*?)<\/tr>/gi, (_m, inner: string) => {
+      const cellTexts: string[] = [];
+      const cellPattern = /<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi;
+      let cellMatch: RegExpExecArray | null;
+      while ((cellMatch = cellPattern.exec(inner)) !== null) {
+        const cellContent = cellMatch[1].replace(/<[^>]+>/g, ' ').trim();
+        cellTexts.push(collapseWhitespace(cellContent));
+      }
+      return cellTexts.length > 0 ? `\n| ${cellTexts.join(' | ')} |\n` : '\n';
+    });
 
-  // 7. Strip remaining tags (inline and any leftovers).
-  s = s.replace(/<[^>]+>/g, '');
+    // 6. List items → "- text\n"
+    s = s.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_m, inner: string) => {
+      const text = inner.replace(/<[^>]+>/g, ' ').trim();
+      return text ? `\n- ${collapseWhitespace(text)}\n` : '';
+    });
 
-  // 8. Decode HTML entities.
-  s = decodeEntities(s);
+    // 7. Block-level elements → newline boundary.
+    s = s.replace(/<\/?(p|div|section|article|aside|header|footer|main|figure|blockquote|pre|ul|ol|table|thead|tbody|tfoot)[^>]*>/gi, '\n');
+    s = s.replace(/<br\s*\/?>/gi, '\n');
 
-  // 9. Normalise runs within each line (collapse intra-line spaces) but
-  //    preserve the newlines that carry structural meaning.
-  const lines = s
+    // 8. Strip remaining tags (inline and any leftovers).
+    s = s.replace(/<[^>]+>/g, '');
+
+    processedParts.push(s);
+  }
+
+  // 9. Decode HTML entities.
+  let result = decodeEntities(processedParts.join(''));
+
+  // 10. Normalise runs within each line; preserve structural newlines.
+  const lines = result
     .split('\n')
     .map((line) => line.replace(/[ \t]+/g, ' ').trim())
     .filter((line) => line.length > 0);

@@ -9,6 +9,7 @@ import { createHash } from 'crypto';
 import { type IocType } from '../../../common/threat_intelligence/hub';
 import { IANA_TLDS } from '../data/iana_tlds';
 import { IOC_NOISE_DOMAINS } from '../data/ioc_noise_domains';
+import { normalizeHeader, IOC_HEADER_TERMS, TERMINATOR_HEADER_TERMS, TERMINATOR_PREFIXES } from '../adapters/section_headers';
 
 /**
  * Discriminating power tier for an extracted IOC.
@@ -618,69 +619,6 @@ export interface SectionSpan {
   end: number;
   kind: SectionKind;
 }
-
-/**
- * Normalize a raw heading string before classification.
- *
- * Steps (applied in order):
- *   1. lowercase
- *   2. strip trailing parenthetical — e.g. " (IOCs)" so "Indicators of Compromise (IOCs)" → "indicators of compromise"
- *   3. strip trailing punctuation/whitespace — e.g. "Sources:" → "sources"
- *   4. collapse internal whitespace — handles any double-spaces left by step 2
- */
-const normalizeHeader = (header: string): string =>
-  header
-    .toLowerCase()
-    .replace(/\s*\([^)]*\)\s*$/, '')
-    .replace(/[:\.\s]+$/, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-/** Normalized header strings that declare an Indicators-of-Compromise block. */
-const IOC_HEADER_TERMS = new Set([
-  'indicators of compromise',
-  'ioc',
-  'iocs',
-  'indicators',
-  'observations',
-  'observables',
-]);
-
-/**
- * Normalized header strings that terminate an IOC block and tag contained values
- * as references (post-article boilerplate, nav, citations — all non-intelligence).
- */
-const TERMINATOR_HEADER_TERMS = new Set([
-  'references',
-  'sources',
-  'bibliography',
-  'further reading',
-  'acknowledgements',
-  'related articles',
-  'similar articles',
-  'related posts',
-  'read more',
-  'post navigation',
-  'discussion',
-  'comments',
-  'share',
-  'share article',
-  'share this article',
-  'newsletter',
-  'discover more',
-  'about the author',
-  'author',
-  'jump to section',
-  'table of contents',
-  'let us keep you up to date',
-]);
-
-/**
- * startsWith prefixes for nav headers that may carry trailing text after normalization
- * (e.g. "Related Articles: 2024 Edition" → normalized "related articles: 2024 edition"
- * doesn't match the set, but starts with "related ").
- */
-const TERMINATOR_PREFIXES = ['related ', 'similar ', 'share ', 'about the ', 'discover '];
 
 const isIocHeader = (normalized: string): boolean => IOC_HEADER_TERMS.has(normalized);
 

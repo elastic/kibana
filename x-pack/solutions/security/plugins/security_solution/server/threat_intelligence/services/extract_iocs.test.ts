@@ -1163,8 +1163,11 @@ describe('extract_iocs — htmlToStructured leak test (markdown artifact gate)',
     }
   });
 
-  test('anchor href URLs are extractable and value is clean', () => {
+  test('anchor href URLs in IOC section are extractable and value is clean', () => {
+    // Href-lift is scoped to IOC/References sections — prose hrefs are dropped (citation noise).
+    // A real C2 link that appears in the IOC section should still be extracted.
     const html = `
+      <h2>Indicators of Compromise</h2>
       <p>Command-and-control: <a href="https://c2.evil.com/beacon">C2 link</a></p>
     `;
     const r = extractFromHtml(html);
@@ -1174,6 +1177,17 @@ describe('extract_iocs — htmlToStructured leak test (markdown artifact gate)',
     // Must NOT be [C2 link](https://c2.evil.com/beacon) markdown form
     expect(urlIoc?.value).not.toMatch(MARKDOWN_ARTIFACT_PATTERN);
     expect(urlIoc?.value).toBe('https://c2.evil.com/beacon');
+  });
+
+  test('prose anchor hrefs are dropped (citation noise prevention)', () => {
+    // Prose <a href> links (inline citations, blog references, nav links) are collapsed
+    // to their visible text so they don't flood anchor-eligible extraction.
+    const html = `
+      <p>See <a href="https://learn.microsoft.com/api/docs">the Microsoft docs</a> for details.</p>
+    `;
+    const r = extractFromHtml(html);
+    const domainHit = r.iocs.find((i) => i.value.includes('learn.microsoft.com'));
+    expect(domainHit).toBeUndefined();
   });
 
   test('defanged IOC in table cell survives refang and is clean', () => {

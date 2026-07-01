@@ -105,10 +105,22 @@ describe('htmlToStructured', () => {
     expect(result).toContain('- bad.net');
   });
 
-  it('emits anchor href URLs as plain text so they are extractable', () => {
-    const html = '<p>See <a href="https://evil.com/payload">this link</a> for details.</p>';
+  it('drops prose anchor hrefs (collapses to visible text only)', () => {
+    // Prose <a href> links are clickable citations, not IOCs. Dropping hrefs prevents
+    // reference-noise URLs from flooding anchor-eligible extraction. Real inline IOCs
+    // appear as defanged literal text in prose and are extracted via the regex path.
+    const html = '<p>See <a href="https://learn.microsoft.com/docs">this link</a> for details.</p>';
     const result = htmlToStructured(html);
-    expect(result).toContain('https://evil.com/payload');
+    expect(result).not.toContain('https://learn.microsoft.com/docs');
+    expect(result).toContain('this link');
+  });
+
+  it('lifts anchor href URLs as plain text inside an IOC section', () => {
+    // Hrefs ARE lifted inside IOC and References heading sections (the original
+    // motivation for the lift: capture citation URLs in References, C2 links in IOC tables).
+    const html = '<h2>Indicators of Compromise</h2><p>See <a href="https://c2.evil.com/beacon">this link</a>.</p>';
+    const result = htmlToStructured(html);
+    expect(result).toContain('https://c2.evil.com/beacon');
   });
 
   it('strips script and style bodies', () => {
@@ -126,20 +138,28 @@ describe('htmlToStructured', () => {
     expect(result).toContain('evil&co.com'); // &amp; decoded
   });
 
-  it('does not produce markdown link [label](url) syntax', () => {
-    const html = '<a href="https://c2.evil.com/beacon">click here</a>';
+  it('does not produce markdown link [label](url) syntax in IOC sections', () => {
+    const html = '<h2>Indicators of Compromise</h2><a href="https://c2.evil.com/beacon">click here</a>';
     const result = htmlToStructured(html);
     expect(result).not.toMatch(/\[.*\]\(.*\)/);
-    // href still present as plain text
+    // href still present as plain text in the IOC section
     expect(result).toContain('https://c2.evil.com/beacon');
   });
 
-  it('preserves anchor href URL inside a list item (anchor-lift ordering fix)', () => {
-    // Before the fix, <li> processing stripped inner <a> tags before the href lift ran,
-    // discarding the URL. After the fix, the href is lifted first so it survives the li strip.
-    const html = '<ul><li><a href="https://socket.dev/blog">Socket writeup</a></li></ul>';
+  it('preserves anchor href URL inside a list item in References section (anchor-lift ordering fix)', () => {
+    // Href-lift must run before <li> processing so the URL survives the inner-tag strip.
+    // This test verifies the fix in a References heading context (where href-lift is active).
+    const html = '<h2>References</h2><ul><li><a href="https://socket.dev/blog">Socket writeup</a></li></ul>';
     const result = htmlToStructured(html);
     expect(result).toContain('https://socket.dev/blog');
+  });
+
+  it('drops prose anchor href but collapses to anchor text in list items', () => {
+    // Without a heading context, <a href> collapses to visible text only.
+    const html = '<ul><li><a href="https://blog.example.com/nav">Read more</a></li></ul>';
+    const result = htmlToStructured(html);
+    expect(result).not.toContain('https://blog.example.com/nav');
+    expect(result).toContain('Read more');
   });
 
   it('preserves multi-column IOC table structure for downstream regex extraction', () => {
