@@ -7,8 +7,13 @@
 
 import dedent from 'dedent';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { createListConnectorTypesTool } from './list_connector_types';
 import { createProposeConnectorTool } from './propose_connector';
+
+interface ConnectorAuthoringSkillDeps {
+  getActionsStart: () => Promise<ActionsPluginStart>;
+}
 
 /**
  * Built-in skill that lets the agent help a user create a Kibana connector
@@ -16,14 +21,15 @@ import { createProposeConnectorTool } from './propose_connector';
  * actual config and secrets are entered in a form (and submitted directly to the
  * Actions API), so secrets never appear in the conversation.
  */
-export const connectorAuthoringSkill = defineSkillType({
-  id: 'connector-authoring',
-  name: 'connector-authoring',
-  basePath: 'skills/platform/agent-builder',
-  experimental: true,
-  description:
-    'Set up a Kibana connector from chat. Use when the user wants to add, connect, set up, or integrate an external system — such as GitHub, Slack, PagerDuty, or Notion — so the agent can act on it. Also use when the user mentions giving the agent access to a tool, repo, or data source, even if they do not say the word "connector".',
-  content: dedent(`
+export const connectorAuthoringSkill = ({ getActionsStart }: ConnectorAuthoringSkillDeps) =>
+  defineSkillType({
+    id: 'connector-authoring',
+    name: 'connector-authoring',
+    basePath: 'skills/platform/agent-builder',
+    experimental: true,
+    description:
+      'Set up a Kibana connector from chat. Use when the user wants to add, connect, set up, or integrate an external system — such as GitHub, Slack, PagerDuty, or Notion — so the agent can act on it. Also use when the user mentions giving the agent access to a tool, repo, or data source, even if they do not say the word "connector".',
+    content: dedent(`
 ## When to Use This Skill
 
 Use this skill when:
@@ -66,5 +72,8 @@ User: "All our services live in one GitHub monorepo."
 4. Emit: \`I can set that up here — fill in the form on the card below.\\n\\n<render_attachment id="att-..." />\`
 5. After the user completes it, continue: confirm GitHub is connected and offer to look at the repos.
   `),
-  getInlineTools: () => [createListConnectorTypesTool(), createProposeConnectorTool()],
-});
+    getInlineTools: () => [
+      createListConnectorTypesTool({ getActionsStart }),
+      createProposeConnectorTool({ getActionsStart }),
+    ],
+  });

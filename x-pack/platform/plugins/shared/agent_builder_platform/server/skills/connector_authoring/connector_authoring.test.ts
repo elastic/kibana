@@ -13,10 +13,18 @@ import type {
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { getConnectorSpec } from '@kbn/connector-specs';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { createListConnectorTypesTool } from './list_connector_types';
 import { createProposeConnectorTool } from './propose_connector';
 import { CONNECTOR_SETUP_ATTACHMENT_TYPE } from '../../../common/attachments';
 import { createConnectorSetupAttachmentType } from '../../attachment_types/connector_setup';
+
+jest.mock('@kbn/connector-specs', () => ({
+  connectorsSpecs: {},
+  getConnectorSpec: jest.fn(),
+}));
+
+const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
 
 const githubSpec = {
   metadata: {
@@ -34,25 +42,35 @@ const githubSpec = {
   },
 };
 
-const alertingOnlySpec = {
-  metadata: {
-    id: '.email',
-    displayName: 'Email',
-    description: 'Send email',
-    minimumLicense: 'basic',
-    supportedFeatureIds: ['alerting'],
-  },
-  actions: {},
-};
-
-jest.mock('@kbn/connector-specs', () => ({
-  connectorsSpecs: {},
-  getConnectorSpec: jest.fn(),
-}));
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const connectorSpecsModule = require('@kbn/connector-specs');
-const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
+const makeActionsStart = (
+  types: Array<{
+    id: string;
+    name: string;
+    description?: string;
+    minimumLicenseRequired?: string;
+    isExperimental?: boolean;
+    isSystemActionType?: boolean;
+    isDeprecated?: boolean;
+    enabledInConfig?: boolean;
+  }>
+): ActionsPluginStart =>
+  ({
+    listTypes: jest.fn().mockReturnValue(
+      types.map((t) => ({
+        id: t.id,
+        name: t.name,
+        description: t.description ?? '',
+        minimumLicenseRequired: t.minimumLicenseRequired ?? 'basic',
+        isExperimental: t.isExperimental ?? false,
+        isSystemActionType: t.isSystemActionType ?? false,
+        isDeprecated: t.isDeprecated ?? false,
+        enabled: true,
+        enabledInConfig: t.enabledInConfig ?? true,
+        enabledInLicense: true,
+        supportedFeatureIds: ['agentBuilder'],
+      }))
+    ),
+  } as unknown as ActionsPluginStart);
 
 /**
  * Build a minimal `ToolHandlerContext` carrying a real `AttachmentStateManager`
@@ -75,15 +93,24 @@ const createTestContext = () => {
 describe('connector-authoring inline tools', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    connectorSpecsModule.connectorsSpecs = {
-      GithubConnector: githubSpec,
-      EmailConnector: alertingOnlySpec,
-    };
   });
 
   describe('list_connector_types', () => {
-    it('returns only spec-backed connectors that support agentBuilder', async () => {
-      const tool = createListConnectorTypesTool();
+    it('returns connector types from the actions registry, enriched with spec data', async () => {
+      getConnectorSpecMock.mockImplementation((id) =>
+        id === '.github' ? (githubSpec as never) : undefined
+      );
+
+      const actionsStart = makeActionsStart([
+        {
+          id: '.github',
+          name: 'GitHub',
+          minimumLicenseRequired: 'enterprise',
+          isExperimental: true,
+        },
+      ]);
+      const tool = createListConnectorTypesTool({ getActionsStart: async () => actionsStart });
+
       const result = (await tool.handler(
         {},
         {} as ToolHandlerContext
@@ -105,12 +132,73 @@ describe('connector-authoring inline tools', () => {
         })
       );
     });
+
+    it('returns non-spec connectors with basic registry metadata', async () => {
+      getConnectorSpecMock.mockReturnValue(undefined);
+
+      const actionsStart = makeActionsStart([
+        {
+          id: '.webhook',
+          name: 'Webhook',
+          description: 'Send a HTTP request',
+          minimumLicenseRequired: 'gold',
+        },
+      ]);
+      const tool = createListConnectorTypesTool({ getActionsStart: async () => actionsStart });
+
+      const result = (await tool.handler(
+        {},
+        {} as ToolHandlerContext
+      )) as ToolHandlerStandardReturn;
+
+      const data = result.results[0].data as {
+        connector_types: Array<Record<string, unknown>>;
+        total: number;
+      };
+      expect(data.total).toBe(1);
+      expect(data.connector_types[0]).toEqual(
+        expect.objectContaining({
+          connector_type: '.webhook',
+          name: 'Webhook',
+          description: 'Send a HTTP request',
+          minimum_license: 'gold',
+          auth_methods: [],
+          tool_actions: [],
+        })
+      );
+    });
+
+    it('excludes system action types, deprecated types, and config-disabled types', async () => {
+      getConnectorSpecMock.mockReturnValue(undefined);
+
+      const actionsStart = makeActionsStart([
+        { id: '.system', name: 'System', isSystemActionType: true },
+        { id: '.deprecated', name: 'Deprecated', isDeprecated: true },
+        { id: '.disabled', name: 'Disabled', enabledInConfig: false },
+        { id: '.normal', name: 'Normal' },
+      ]);
+      const tool = createListConnectorTypesTool({ getActionsStart: async () => actionsStart });
+
+      const result = (await tool.handler(
+        {},
+        {} as ToolHandlerContext
+      )) as ToolHandlerStandardReturn;
+
+      const data = result.results[0].data as {
+        connector_types: Array<Record<string, unknown>>;
+        total: number;
+      };
+      expect(data.total).toBe(1);
+      expect(data.connector_types[0]).toMatchObject({ connector_type: '.normal' });
+    });
   });
 
   describe('propose_connector', () => {
     it('creates a connector_setup attachment for a known connector type', async () => {
       getConnectorSpecMock.mockReturnValue(githubSpec as never);
-      const tool = createProposeConnectorTool();
+
+      const actionsStart = makeActionsStart([{ id: '.github', name: 'GitHub' }]);
+      const tool = createProposeConnectorTool({ getActionsStart: async () => actionsStart });
       const { context, attachments } = createTestContext();
 
       const result = (await tool.handler(
@@ -132,9 +220,31 @@ describe('connector-authoring inline tools', () => {
       });
     });
 
-    it('returns an error for an unknown connector type without persisting', async () => {
+    it('creates a connector_setup attachment for a non-spec connector type', async () => {
       getConnectorSpecMock.mockReturnValue(undefined);
-      const tool = createProposeConnectorTool();
+
+      const actionsStart = makeActionsStart([{ id: '.webhook', name: 'Webhook' }]);
+      const tool = createProposeConnectorTool({ getActionsStart: async () => actionsStart });
+      const { context, attachments } = createTestContext();
+
+      const result = (await tool.handler(
+        { connector_type: '.webhook' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      const [first] = result.results;
+      expect(first.type).toBe(ToolResultType.other);
+
+      const stored = attachments.get((first.data as { attachment_id: string }).attachment_id);
+      expect(stored?.data.data).toMatchObject({
+        connector_type: '.webhook',
+        connector_type_name: 'Webhook',
+      });
+    });
+
+    it('returns an error for a connector type not in the registry', async () => {
+      const actionsStart = makeActionsStart([]);
+      const tool = createProposeConnectorTool({ getActionsStart: async () => actionsStart });
       const { context, attachments } = createTestContext();
 
       const result = (await tool.handler(
@@ -146,19 +256,38 @@ describe('connector-authoring inline tools', () => {
       expect(attachments.getActive()).toHaveLength(0);
     });
 
-    it('rejects a spec-backed connector that does not support Agent Builder', async () => {
-      // .email resolves to a real spec, but it is alerting-only (no agentBuilder
-      // support), so the agent could not use it afterwards - it must not be proposable.
-      getConnectorSpecMock.mockReturnValue(alertingOnlySpec as never);
-      const tool = createProposeConnectorTool();
+    it('rejects system action types', async () => {
+      const actionsStart = makeActionsStart([
+        { id: '.system', name: 'System', isSystemActionType: true },
+      ]);
+      const tool = createProposeConnectorTool({ getActionsStart: async () => actionsStart });
       const { context, attachments } = createTestContext();
 
       const result = (await tool.handler(
-        { connector_type: '.email' },
+        { connector_type: '.system' },
         context
       )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
+      expect(attachments.getActive()).toHaveLength(0);
+    });
+
+    it('rejects deprecated and config-disabled connector types', async () => {
+      const actionsStart = makeActionsStart([
+        { id: '.deprecated', name: 'Deprecated', isDeprecated: true },
+        { id: '.disabled', name: 'Disabled', enabledInConfig: false },
+      ]);
+      const tool = createProposeConnectorTool({ getActionsStart: async () => actionsStart });
+      const { context, attachments } = createTestContext();
+
+      for (const connectorType of ['.deprecated', '.disabled']) {
+        const result = (await tool.handler(
+          { connector_type: connectorType },
+          context
+        )) as ToolHandlerStandardReturn;
+
+        expect(result.results[0].type).toBe(ToolResultType.error);
+      }
       expect(attachments.getActive()).toHaveLength(0);
     });
   });
