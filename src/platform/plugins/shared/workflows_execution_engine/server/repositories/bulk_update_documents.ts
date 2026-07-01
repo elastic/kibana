@@ -88,6 +88,10 @@ const refreshVersions = async <TDocument extends IdentifiedDocument>({
   entityName: string;
   writes: DocumentWrite<TDocument>[];
 }): Promise<void> => {
+  if (writes.length === 0) {
+    return;
+  }
+
   const writeIndex = await resolveWriteIndex({ esClient, dataStreamName });
   const versions = await resolveDocumentVersionsByIds<TDocument>({
     esClient,
@@ -98,9 +102,7 @@ const refreshVersions = async <TDocument extends IdentifiedDocument>({
   });
 
   writes.forEach((write) => {
-    if (write.version) {
-      write.version = versions[write.doc.id as string];
-    }
+    write.version = versions[write.doc.id as string];
   });
 };
 
@@ -149,12 +151,6 @@ export const bulkUpdateDocuments = async <TDocument extends IdentifiedDocument>(
   failureVerb?: string;
   retryAttempts?: number;
   retryBaseDelayMs?: number;
-  /**
-   * Caller-supplied OCC versions keyed by document id. When present, the
-   * first attempt trusts these versions and skips the version lookup; a stale
-   * entry simply produces a conflict/missing that is re-resolved on retry.
-   */
-  providedVersions?: DocumentVersionsById;
 }): Promise<DocumentVersionsById> => {
   const resultVersions: DocumentVersionsById = {};
   if (writes.length === 0) {
@@ -177,7 +173,9 @@ export const bulkUpdateDocuments = async <TDocument extends IdentifiedDocument>(
   let lastConflictedDocuments: Array<{ id: string; error?: unknown; status?: number }> = [];
 
   for (let attempt = 1; attempt <= retryAttempts; attempt++) {
-    if (attempt === 0) {
+    // On retries, back off and re-resolve fresh versions for the conflicted
+    // writes; attempt 1 already has versions from the pre-loop fill.
+    if (attempt > 1) {
       await delayMs(getBackoffWithJitterMs(retryBaseDelayMs, attempt));
       await refreshVersions({
         esClient,

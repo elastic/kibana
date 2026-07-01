@@ -912,17 +912,20 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
     const flushedIds = Array.from(merged.keys());
 
-    // Attach the cached OCC version to each update so the upsert can skip the
-    // version lookup; creates and cache-miss updates resolve fresh in the repo.
+    // A step is created on its first flush and updated thereafter (tracked by
+    // `persistedStepExecutionIds`). Attach the cached OCC version to updates so
+    // the upsert can skip the version lookup; creates and cache-miss updates
+    // resolve fresh in the repo.
     const writes = Array.from(merged.values()).map((doc) => {
-      if (!doc.id) {
+      const persisted = doc.id ? this.persistedStepExecutionIds.has(doc.id) : false;
+      if (!persisted) {
         return { operation: 'create', doc } as const;
       }
 
       return {
         operation: 'update',
         doc,
-        version: this.stepExecutionVersions.get(doc.id),
+        version: doc.id ? this.stepExecutionVersions.get(doc.id) : undefined,
       } as const;
     });
 

@@ -10,6 +10,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import type { DocumentWrite } from './bulk_update_documents';
 import { bulkUpdateDocuments } from './bulk_update_documents';
 import type { DocumentVersionsById, EsDocumentVersion } from './document_version';
 import { extractVersionFromBulkItem } from './document_version';
@@ -190,8 +191,7 @@ export class StepExecutionRepository {
       }
     });
 
-    const updateDocs: Array<Partial<EsWorkflowStepExecution>> = [];
-    const providedVersions: DocumentVersionsById = {};
+    const updateWrites: Array<DocumentWrite<Partial<EsWorkflowStepExecution>>> = [];
     const createOperations: object[] = [];
     for (const write of writes) {
       const { doc, operation } = write;
@@ -203,10 +203,7 @@ export class StepExecutionRepository {
       };
 
       if (operation === 'update') {
-        updateDocs.push(document);
-        if (id && write.version) {
-          providedVersions[id] = write.version;
-        }
+        updateWrites.push({ doc: document, operation: 'update', version: write.version });
       } else {
         createOperations.push(
           {
@@ -223,12 +220,11 @@ export class StepExecutionRepository {
     const updateVersions = await bulkUpdateDocuments<Partial<EsWorkflowStepExecution>>({
       esClient: this.esClient,
       dataStreamName: this.dataStreamName,
-      docs: updateDocs,
+      writes: updateWrites,
       entityName: 'step execution',
       refresh: false,
       idRequiredMessage: 'Step execution ID is required for upsert',
       failureVerb: 'upsert',
-      providedVersions,
     });
 
     if (createOperations.length === 0) {

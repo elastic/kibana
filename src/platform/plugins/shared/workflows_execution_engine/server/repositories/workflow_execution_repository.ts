@@ -200,14 +200,20 @@ export class WorkflowExecutionRepository {
     workflowExecution: Partial<EsWorkflowExecution>,
     providedVersions?: DocumentVersionsById
   ): Promise<DocumentVersionsById> {
+    const id = workflowExecution.id;
     return bulkUpdateDocuments<Partial<EsWorkflowExecution>>({
       esClient: this.esClient,
       dataStreamName: this.dataStreamName,
-      docs: [workflowExecution],
+      writes: [
+        {
+          doc: workflowExecution,
+          operation: 'update',
+          version: id ? providedVersions?.[id] : undefined,
+        },
+      ],
       entityName: 'workflow execution',
       refresh: true,
       idRequiredMessage: 'Workflow execution ID is required for update',
-      providedVersions,
     });
   }
 
@@ -220,17 +226,20 @@ export class WorkflowExecutionRepository {
    * @returns A promise that resolves when all updates are complete.
    */
   public async bulkUpdateWorkflowExecutions(
-    writes: Array<Partial<EsWorkflowExecution>>,
+    executions: Array<Partial<EsWorkflowExecution>>,
     providedVersions?: DocumentVersionsById
   ): Promise<DocumentVersionsById> {
     return bulkUpdateDocuments<Partial<EsWorkflowExecution>>({
       esClient: this.esClient,
       dataStreamName: this.dataStreamName,
-      docs: writes,
+      writes: executions.map((doc) => ({
+        doc,
+        operation: 'update',
+        version: doc.id ? providedVersions?.[doc.id] : undefined,
+      })),
       entityName: 'workflow execution',
       refresh: true,
       idRequiredMessage: 'Workflow execution ID is required for bulk update',
-      providedVersions,
     });
   }
 
