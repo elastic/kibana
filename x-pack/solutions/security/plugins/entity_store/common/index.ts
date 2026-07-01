@@ -100,7 +100,16 @@ export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
-export type { Entity } from './domain/definitions/entity.gen';
+export type {
+  Entity,
+  HostEntity,
+  UserEntity,
+  ServiceEntity,
+  GenericEntity,
+  EntityField,
+  EngineMetadata,
+  Asset,
+} from './domain/definitions/entity.gen';
 
 export interface IdentitySourceFields {
   /** Fields that participate in identity (EUID composition). */
@@ -127,6 +136,17 @@ export {
   getEntityMetadataAlias,
   getMetadataEntityIndexPattern,
 } from './domain/entity_index';
+
+export type {
+  EngineStatus,
+  EngineDescriptor,
+  EngineComponentResource,
+  EngineComponentStatus,
+  GetEntityStoreStatusResponse,
+  InitEntityStoreResponse,
+  InspectQuery,
+  ListEntitiesResponse,
+} from './api_types';
 
 export { RELATIONSHIP_KINDS } from './domain/entity_metadata/relationship_metadata';
 export type {
