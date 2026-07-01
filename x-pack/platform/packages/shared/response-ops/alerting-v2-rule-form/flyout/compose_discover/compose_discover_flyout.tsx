@@ -48,7 +48,7 @@ import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal
 import { QuerySandboxFlyout } from './query_sandbox_flyout';
 import { isAlertTabDisabled } from './compose_discover_tabs';
 import { RULE_BUILDER_REGISTRY, BuilderStateProvider, type BuilderState } from './rule_builder';
-import type { ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
+import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
 import { isBuilderConditionStepId } from './types';
 import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
@@ -251,13 +251,35 @@ export function ComposeDiscoverFlyout({
 
   const isDiscoverQueryComplete = Boolean(discoverComposedQuery?.breach.segment.trim());
 
-  const [uiState, dispatch] = useComposeDiscoverState({
+  const [uiState, rawDispatch] = useComposeDiscoverState({
     mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
     initialRecoveryType: hasInitialCustomRecovery ? 'custom' : 'default',
     isQueryPrePopulated: isDiscoverQueryComplete,
     forceYamlMode,
   });
+
+  const lastFocusedRef = useRef<HTMLElement | null>(null);
+  const dispatch = useCallback(
+    (action: ComposeDiscoverAction) => {
+      // this is to ensure that the last focused element is focused after the sandbox is closed
+      if (action.type === 'OPEN_CHILD' || action.type === 'OPEN_CHILD_FOR_STEP') {
+        lastFocusedRef.current = document.activeElement as HTMLElement;
+      }
+      rawDispatch(action);
+    },
+    [rawDispatch]
+  );
+
+  const wasChildOpenRef = useRef(uiState.childOpen);
+  useEffect(() => {
+    if (wasChildOpenRef.current && !uiState.childOpen) {
+      const raf = requestAnimationFrame(() => lastFocusedRef.current?.focus());
+      wasChildOpenRef.current = uiState.childOpen;
+      return () => cancelAnimationFrame(raf);
+    }
+    wasChildOpenRef.current = uiState.childOpen;
+  }, [uiState.childOpen]);
 
   // Registered once here so providers persist across Sandbox open/close cycles.
   useEsqlAutocomplete(baseServices);
