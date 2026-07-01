@@ -9,7 +9,7 @@ Use this skill when reviewing or changing Saved Object type registrations, espec
 
 ## Mapping Mindset
 
-Saved Object mappings are search indexes, not a complete schema. Add mappings only for fields that Kibana must search, filter, sort, or aggregate on. Stored attributes do not need mappings just because they exist in the Saved Object payload.
+Saved Object mappings are search indexes, not a complete schema. Once added and released, mappings cannot be removed. Add mappings only for fields that Kibana must search, filter, sort, or aggregate on. Stored attributes do not need mappings just because they exist in the Saved Object payload.
 
 Default to `dynamic: false` for object mappings so Elasticsearch stores unmapped attributes without indexing them. Do not use `enabled: false` or `index: false`; those choices are hard to change later.
 
@@ -24,14 +24,11 @@ Default to `dynamic: false` for object mappings so Elasticsearch stores unmapped
 
 ## Common Review Findings
 
-Reject mapping churn that only mirrors TypeScript or runtime schemas. This increases Saved Object migration risk without making the data more searchable.
-
-Check whether the proposed mapping already existed in the latest root mappings before this change. Re-declaring an existing root-mapped field as newly added is noisy and can make migration history misleading.
-
-For early, unreleased Saved Object types with unstable mappings, prefer the documented WIP Saved Object type workflow instead of weakening migration checks or repeatedly reshaping committed mapping history.
+Check whether the proposed mapping already existed in the saved object root mappings (`created_at`, `created_by` etc.) before this change. Re-declaring an existing root-mapped field adds duplication and wastes resources.
 
 ## References
 
 - `docs/extend/key-concepts/saved-objects/create.md`
 - `docs/extend/key-concepts/saved-objects/update.md`
 - `packages/kbn-check-saved-objects-cli/README.md`
+- `docs/extend/key-concepts/saved-objects/validate.md`
