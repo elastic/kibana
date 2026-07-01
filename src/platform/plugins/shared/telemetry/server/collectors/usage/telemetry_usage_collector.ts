@@ -56,7 +56,7 @@ export async function readTelemetryFile<T extends object>(
   try {
     if (isFileReadable(configPath)) {
       const yaml = readFileSync(configPath);
-      const data = parse(yaml.toString(), { version: '1.1' });
+      const data = parse(yaml.toString());
 
       // don't bother returning empty objects
       if (Object.keys(data).length) {
