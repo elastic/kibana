@@ -418,6 +418,44 @@ describe('UpdateMonitorAPI', () => {
       });
     });
 
+    it('rejects a rename onto a name whose swap counterpart fails for an unrelated reason', async () => {
+      const { validateMonitor } = jest.requireMock('../monitor_validation');
+      validateMonitor.mockImplementation((m: Record<string, unknown>) =>
+        m.id === 'mon-2'
+          ? { valid: false, reason: 'Monitor schedule is invalid', details: '', payload: m }
+          : mockValidationResultFor(m)
+      );
+
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'mon-2',
+            attributes: { [ConfigKey.CONFIG_ID]: 'mon-2', [ConfigKey.NAME]: 'Beta' },
+          },
+        ],
+      });
+      mocks.findDecryptedMonitors.mockResolvedValue([
+        mockDecryptedMonitor({ id: 'mon-1' }),
+        mockDecryptedMonitor({ id: 'mon-2' }),
+      ]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({
+        updates: [
+          { id: 'mon-1', attributes: { [ConfigKey.NAME]: 'Beta' } },
+          { id: 'mon-2', attributes: { [ConfigKey.NAME]: 'Gamma' } },
+        ],
+      });
+
+      expect(result.survivors).toHaveLength(0);
+      expect(result.perIdErrors['mon-2']).toMatchObject({ code: 'validation_failed' });
+      expect(result.perIdErrors['mon-1']).toMatchObject({
+        code: 'validation_failed',
+        message: expect.stringContaining('already exists'),
+      });
+    });
+
     it('checks existing monitor name conflicts in one SO query for many name patches', async () => {
       const { routeContext, mocks } = createMockRouteContext();
       const updates = Array.from({ length: 50 }, (_, i) => ({

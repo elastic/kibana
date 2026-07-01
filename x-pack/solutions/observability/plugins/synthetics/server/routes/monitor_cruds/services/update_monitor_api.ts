@@ -88,7 +88,7 @@ export class UpdateMonitorAPI {
     const patchById = new Map<string, Partial<EncryptedSyntheticsMonitor>>(
       updates.map((update) => [update.id, update.attributes])
     );
-    this.namePatchErrors = await this.validateNamePatches(updates);
+    this.namePatchErrors = this.checkDuplicateNamesWithinBatch(updates);
 
     const decryptedMonitors = await this.findDecryptedMonitors(ids);
     this.markNotFound(ids, decryptedMonitors);
@@ -97,6 +97,8 @@ export class UpdateMonitorAPI {
       const patch = patchById.get(decryptedMonitor.id) ?? {};
       await this.processMonitor(decryptedMonitor, patch);
     }
+
+    await this.rejectNameConflictsWithExistingMonitors(updates);
 
     return this.result;
   }
@@ -240,14 +242,13 @@ export class UpdateMonitorAPI {
     return { prevAttrs, merged };
   }
 
-  private async validateNamePatches(updates: MonitorBulkUpdate[]): Promise<Map<string, string>> {
+  // Two ids requesting the same new name is always invalid, regardless of outcome.
+  private checkDuplicateNamesWithinBatch(updates: MonitorBulkUpdate[]): Map<string, string> {
     const errors = new Map<string, string>();
     const idsByName = new Map<string, string[]>();
-    const patchedNameById = new Map<string, string>();
     for (const { id, attributes } of updates) {
       const nextName = attributes[ConfigKey.NAME];
       if (typeof nextName === 'string') {
-        patchedNameById.set(id, nextName);
         const ids = idsByName.get(nextName);
         if (ids) {
           ids.push(id);
@@ -257,48 +258,90 @@ export class UpdateMonitorAPI {
       }
     }
 
-    const namesToCheck: string[] = [];
     for (const [name, ids] of idsByName) {
       if (ids.length > 1) {
         ids.forEach((id) => errors.set(id, duplicateNamePatchMessage(name)));
-      } else {
-        namesToCheck.push(name);
+      }
+    }
+    return errors;
+  }
+
+  // Runs after processing: a rename is only exempt from an on-disk name
+  // conflict if its current holder is renamed away in this same batch AND
+  // that rename survives. Loops to a fixed point for multi-way swap chains.
+  private async rejectNameConflictsWithExistingMonitors(updates: MonitorBulkUpdate[]) {
+    const patchedNameById = new Map<string, string>();
+    for (const { id, attributes } of updates) {
+      const nextName = attributes[ConfigKey.NAME];
+      if (typeof nextName === 'string') {
+        patchedNameById.set(id, nextName);
       }
     }
 
-    if (namesToCheck.length === 0) {
-      return errors;
+    const renamedSurvivorNames = new Set<string>();
+    for (const survivor of this.result.survivors) {
+      const newName = patchedNameById.get(survivor.decryptedPreviousMonitor.id);
+      if (newName !== undefined) {
+        renamedSurvivorNames.add(newName);
+      }
+    }
+    if (renamedSurvivorNames.size === 0) {
+      return;
     }
 
     const { monitorConfigRepository } = this.routeContext;
-    const filter = getSavedObjectKqlFilter({ field: 'name.keyword', values: namesToCheck });
+    const filter = getSavedObjectKqlFilter({
+      field: 'name.keyword',
+      values: [...renamedSurvivorNames],
+    });
     const { saved_objects: existingMonitors = [] } = await monitorConfigRepository.find({
       perPage: 500,
       filter,
     });
-
+    const holderIdByName = new Map<string, string>();
     for (const monitor of existingMonitors) {
       const attributes = monitor.attributes as Partial<MonitorFields>;
-      const existingName = attributes[ConfigKey.NAME];
-      const existingId = attributes[ConfigKey.CONFIG_ID] ?? monitor.id;
-      if (typeof existingName !== 'string' || typeof existingId !== 'string') {
-        continue;
-      }
-
-      // Not a conflict if the monitor that has this name is also being
-      // renamed to something else in this same batch.
-      const existingIdNextName = patchedNameById.get(existingId);
-      if (existingIdNextName !== undefined && existingIdNextName !== existingName) {
-        continue;
-      }
-
-      const requestedIds = idsByName.get(existingName);
-      if (requestedIds?.length === 1 && requestedIds[0] !== existingId) {
-        errors.set(requestedIds[0], monitorNameExistsMessage(existingName));
+      const name = attributes[ConfigKey.NAME];
+      const holderId = attributes[ConfigKey.CONFIG_ID] ?? monitor.id;
+      if (typeof name === 'string' && typeof holderId === 'string') {
+        holderIdByName.set(name, holderId);
       }
     }
 
-    return errors;
+    let rejectedSomething = true;
+    while (rejectedSomething) {
+      rejectedSomething = false;
+      const survivorIds = new Set(
+        this.result.survivors.map((survivor) => survivor.decryptedPreviousMonitor.id)
+      );
+
+      for (const survivor of this.result.survivors.slice()) {
+        const id = survivor.decryptedPreviousMonitor.id;
+        const newName = patchedNameById.get(id);
+        if (newName === undefined) {
+          continue;
+        }
+        const holderId = holderIdByName.get(newName);
+        if (!holderId || holderId === id) {
+          continue;
+        }
+
+        const holderRenamedAway =
+          survivorIds.has(holderId) &&
+          patchedNameById.get(holderId) !== undefined &&
+          patchedNameById.get(holderId) !== newName;
+        if (holderRenamedAway) {
+          continue;
+        }
+
+        this.result.survivors = this.result.survivors.filter((s) => s !== survivor);
+        this.result.perIdErrors[id] = {
+          code: 'validation_failed',
+          message: monitorNameExistsMessage(newName),
+        };
+        rejectedSomething = true;
+      }
+    }
   }
 
   // Location capability resolves once per request; space privilege once per
