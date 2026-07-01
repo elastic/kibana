@@ -17,7 +17,7 @@ import type {
   KafkaConnectionTypeType,
   AgentUpgradeDetails,
   OutputPreset,
-  AgentlessPolicy,
+  AgentlessAgentPolicyConfig,
 } from '../../common/types';
 import type {
   AgentStatus,
@@ -82,7 +82,7 @@ export interface AgentPolicySOAttributes {
   agents?: number;
   overrides?: any | null;
   global_data_tags?: Array<{ name: string; value: string | number }>;
-  agentless?: AgentlessPolicy;
+  agentless?: AgentlessAgentPolicyConfig;
   version?: string;
   has_agent_version_conditions?: boolean;
   is_verifier?: boolean;
@@ -133,6 +133,7 @@ export interface FleetServerHostSOAttributes {
   is_default: boolean;
   is_preconfigured: boolean;
   is_internal?: boolean;
+  allow_edit?: string[];
   proxy_id?: string | null;
   secrets?: {
     ssl?: {
@@ -151,7 +152,7 @@ export interface PackagePolicySOAttributes {
   revision: number;
   created_at: string;
   created_by: string;
-  inputs: PackagePolicyInput[];
+  inputs?: PackagePolicyInput[];
   policy_id?: string | null;
   policy_ids: string[];
   // Nullable to allow user to reset to default outputs

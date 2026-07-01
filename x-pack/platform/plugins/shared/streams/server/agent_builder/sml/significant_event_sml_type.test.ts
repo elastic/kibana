@@ -7,17 +7,17 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { SigEvent } from '@kbn/streams-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE, SIGNIFICANT_EVENT_SML_TYPE } from '../../../common';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../routes/types';
-import { EventService } from '../../lib/sig_events/events/event_service';
+import { EventService } from '../../lib/significant_events/events/event_service';
 import { createSignificantEventSmlType } from './significant_event_sml_type';
 
-jest.mock('../../lib/sig_events/events/event_service', () => ({
+jest.mock('../../lib/significant_events/events/event_service', () => ({
   EventService: jest.fn(),
 }));
 
-const event: SigEvent = {
+const event: SignificantEvent = {
   '@timestamp': '2026-01-01T00:00:00.000Z',
   created_at: '2026-01-01T00:00:00.000Z',
   event_id: 'event-1',
@@ -32,14 +32,15 @@ const event: SigEvent = {
   root_cause: 'Payment gateway timeout.',
   criticality: 90,
   confidence: 0.8,
-  impact: 'high',
   recommendations: ['Restart gateway client'],
 };
 
 const findLatestPaginated = jest.fn();
 const findByDiscoverySlug = jest.fn();
 
-const createGetScopedClients = (events: SigEvent[]): jest.MockedFunction<GetScopedClients> => {
+const createGetScopedClients = (
+  events: SignificantEvent[]
+): jest.MockedFunction<GetScopedClients> => {
   const getEventClient = jest.fn(() => ({
     findByDiscoverySlug: jest.fn().mockResolvedValue({ hits: events }),
   }));
@@ -106,15 +107,27 @@ describe('createSignificantEventSmlType', () => {
         expect.objectContaining({
           type: SIGNIFICANT_EVENT_SML_TYPE,
           title: 'Payment outage',
-          permissions: {
-            kibana: { privileges: [{ name: 'api:read_stream' }] },
-            elasticsearch: { indices: [] },
-          },
         }),
       ],
     });
+    expect(result?.chunks[0]).not.toHaveProperty('permissions');
     expect(result?.chunks[0].content).toContain('Payment gateway timeout.');
     expect(findByDiscoverySlug).toHaveBeenCalledWith('payment-outage');
+  });
+
+  it('getPermissions returns the streams read API privilege', () => {
+    const smlType = createSignificantEventSmlType({
+      getScopedClients: createGetScopedClients([]),
+    });
+    const permissions = smlType.getPermissions!('payment-outage', {
+      esClient: {} as never,
+      savedObjectsClient: {} as never,
+      logger: loggingSystemMock.createLogger(),
+    });
+    expect(permissions).toEqual({
+      kibana: { privileges: [{ name: 'api:read_stream' }] },
+      elasticsearch: { indices: [] },
+    });
   });
 
   it('converts an SML document into an attachment', async () => {

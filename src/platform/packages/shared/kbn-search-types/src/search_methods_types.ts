@@ -37,6 +37,11 @@ export interface IBaseSearchOptions {
    * Project routing configuration for cross-project search (CPS).
    */
   projectRouting?: ProjectRouting;
+
+  /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results.
+   */
+  approximation?: boolean;
 }
 
 // ============================================================================
@@ -220,6 +225,10 @@ export interface IEsqlSearchResult {
    * Request parameters for inspector
    */
   requestParams?: SanitizedConnectionRequestParams;
+  /**
+   * Warning message from the ES Warning HTTP response header
+   */
+  warning?: string;
 }
 
 // ============================================================================

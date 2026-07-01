@@ -10,6 +10,7 @@ import moment from 'moment';
 import { unflattenObject } from '@kbn/object-utils';
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
+import { isResponseError, type ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { entityStoreMetrics } from '../../../monitor/metrics';
 import type { Entity } from '../../../../common/domain/definitions/entity.gen';
 import {
@@ -33,6 +34,7 @@ import {
 } from '../log_pagination_probe_query_builder';
 import { executeEsqlQuery } from '../../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../../infra/elasticsearch/ingest';
+import { resolveClosedIndexAdjustments } from '../../../infra/elasticsearch/resolve_closed_indices';
 import { getUpdatesEntitiesDataStreamName } from '../../asset_manager/updates_data_stream';
 import {
   applyMaxLagCutoff,
@@ -41,6 +43,7 @@ import {
 } from '../extraction_window';
 import { capAtMaxLogsPerWindow } from '../effective_page_limits';
 import type { RemoteExtractionStrategy } from './strategies';
+import { getErrorMessage } from '../../../../common';
 
 interface RemoteExtractToUpdatesParams {
   type: EntityType;
@@ -68,6 +71,20 @@ interface RemoteExtractToUpdatesResult {
   logsCapApplied?: boolean;
 }
 
+const getEsErrorType = (error: unknown): string | undefined =>
+  isResponseError(error) ? (error.body as ElasticsearchErrorDetails)?.error?.type : undefined;
+
+// CPS is not enabled, so '_origin' can't be resolved
+const isNoSuchRemoteClusterError = (type?: string) => type === 'no_such_remote_cluster_exception';
+
+// no linked projects, so '-_origin:*' resolves to an empty scope, ESQL throws 500
+const isNoSuchElementError = (type?: string) => type === 'no_such_element_exception';
+
+const isRemoteUnavailableError = (error: unknown): boolean => {
+  const type = getEsErrorType(error);
+  return isNoSuchElementError(type) || isNoSuchRemoteClusterError(type);
+};
+
 export class RemoteLogsExtractionClient {
   private readonly logger: Logger;
 
@@ -85,8 +102,15 @@ export class RemoteLogsExtractionClient {
     try {
       return await this.doExtractToUpdates(params);
     } catch (error) {
+      const message = getErrorMessage(error);
+      if (this.strategy.id === 'cps' && isRemoteUnavailableError(error)) {
+        this.logger.warn(
+          `remote extraction unavailable (no linked projects or CPS disabled): ${message}. Returning empty result.`
+        );
+        return { count: 0, pages: 0 };
+      }
       const wrappedError = new Error(
-        `Failed to extract to updates from remote indices: ${error.message}`
+        `Failed to extract to updates from remote indices: ${message}`
       );
       this.logger.error(wrappedError);
       return { count: 0, pages: 0, error: wrappedError };
@@ -111,6 +135,16 @@ export class RemoteLogsExtractionClient {
     if (remoteIndexPatterns.length === 0) {
       return { count: 0, pages: 0 };
     }
+
+    const { openBackingIndices, negations: closedNegations } = await resolveClosedIndexAdjustments(
+      this.strategy.client,
+      remoteIndexPatterns,
+      this.logger
+    );
+    const effectiveRemoteIndexPatterns =
+      openBackingIndices.length > 0 || closedNegations.length > 0
+        ? [...remoteIndexPatterns, ...openBackingIndices, ...closedNegations]
+        : remoteIndexPatterns;
 
     const state =
       windowOverride != null
@@ -150,7 +184,7 @@ export class RemoteLogsExtractionClient {
       // Manual windowOverride runs as a single pass without persisting checkpoint.
       const result = await this.runLogsPaginationOuterLoop({
         type,
-        remoteIndexPatterns,
+        remoteIndexPatterns: effectiveRemoteIndexPatterns,
         toDateISO: effectiveWindowEnd,
         docsLimit,
         maxLogsPerPage,
@@ -211,7 +245,7 @@ export class RemoteLogsExtractionClient {
       const remainingCap = maxLogsPerWindow > 0 ? maxLogsPerWindow - totalLogs : 0;
       const subResult = await this.runLogsPaginationOuterLoop({
         type,
-        remoteIndexPatterns,
+        remoteIndexPatterns: effectiveRemoteIndexPatterns,
         toDateISO: subWindowEnd,
         docsLimit,
         maxLogsPerPage,

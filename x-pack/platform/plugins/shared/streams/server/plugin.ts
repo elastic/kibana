@@ -24,7 +24,6 @@ import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { distinctUntilChanged, filter, skip } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
@@ -40,14 +39,11 @@ import {
 } from '../common/constants';
 import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
-import { registerRules } from './lib/sig_events/rules/register_rules';
-import { getSigEventsTuningConfig } from './lib/sig_events/helpers/get_sig_events_tuning_config';
+import { registerRules } from './lib/significant_events/rules/register_rules';
+import { getSignificantEventsTuningConfig } from './lib/significant_events/helpers/get_significant_events_tuning_config';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
-import {
-  isSignificantEventsAlertingV2Active,
-  logAlertingV2PluginUnavailable,
-  readSignificantEventsAlertingV2UiEnabled,
-} from './lib/sig_events/significant_events_alerting_v2';
+import { createSignificantEventsAlertingContextResolver } from './lib/significant_events/alerting/significant_events_alerting_context';
+import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
 import { StreamsService } from './lib/streams/service';
 import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
@@ -67,10 +63,11 @@ import {
   createSignificantEventsClients,
   createSignificantEventsServices,
   initializeSignificantEventsTemplates,
-} from './lib/sig_events/significant_events_clients';
+} from './lib/significant_events/significant_events_clients';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
 import { createMemoryToolsOptions, registerStreamsAgentBuilder } from './agent_builder/register';
+import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
 import { registerStreamsMemoryAgentBuilder } from './agent_builder/skills/register_memory_skills';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
 import { registerSuggestionsInferenceFeatures } from './register_suggestions_inference_features';
@@ -201,7 +198,7 @@ export class StreamsPlugin
           rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
         }),
         contentService.getClient(),
-        getSigEventsTuningConfig(globalUiSettingsClient, this.logger),
+        getSignificantEventsTuningConfig(globalUiSettingsClient, this.logger),
       ]);
 
       const space = pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
@@ -212,66 +209,38 @@ export class StreamsPlugin
         space,
       });
 
-      let significantEventsAlertingV2StatePromise:
-        | Promise<{
-            alertingV2UiEnabled: boolean;
-            alertingV2Active: boolean;
-            alertingV2RulesClient?: RulesClientApi;
-          }>
-        | undefined;
+      const getAlertingRulesClient = async () =>
+        pluginsStart.alerting.getRulesClientWithRequestInSpace(
+          request,
+          DEFAULT_SPACE_ID,
+          rulesClientOptions
+        );
 
-      const getSignificantEventsAlertingV2State = () => {
-        significantEventsAlertingV2StatePromise ??= (async () => {
-          const alertingV2UiEnabled = await readSignificantEventsAlertingV2UiEnabled(
-            uiSettingsClient,
-            this.logger
-          );
-          const alertingV2RulesClient = pluginsStart.alertingVTwo
-            ? await pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(
-                request,
-                DEFAULT_SPACE_ID
-              )
-            : undefined;
+      const getAlertingV2RulesClient = async () =>
+        pluginsStart.alertingVTwo
+          ? pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID)
+          : undefined;
 
-          if (alertingV2UiEnabled && !alertingV2RulesClient) {
-            logAlertingV2PluginUnavailable(this.logger);
-          }
+      const resolveSigEventsAlertingContext = createSignificantEventsAlertingContextResolver({
+        uiSettingsClient,
+        getAlertingRulesClient,
+        getAlertingV2RulesClient,
+        logger: this.logger,
+      });
 
-          return {
-            alertingV2UiEnabled,
-            alertingV2Active: isSignificantEventsAlertingV2Active(
-              alertingV2UiEnabled,
-              alertingV2RulesClient
-            ),
-            alertingV2RulesClient,
-          };
-        })();
-        return significantEventsAlertingV2StatePromise;
-      };
+      const createKnowledgeIndicatorClient = (context: SignificantEventsAlertingContext) =>
+        knowledgeIndicatorService.getClient({
+          esClient: scopedClusterClient.asInternalUser,
+          soClient,
+          context,
+          config: tuningConfig,
+        });
 
-      let kiClientPromise: ReturnType<typeof knowledgeIndicatorService.getClient> | undefined;
+      let kiClientPromise: ReturnType<typeof createKnowledgeIndicatorClient> | undefined;
       const getKnowledgeIndicatorClient = () => {
-        kiClientPromise ??= (async () => {
-          const { alertingV2RulesClient } = await getSignificantEventsAlertingV2State();
-          const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
-            request,
-            DEFAULT_SPACE_ID,
-            rulesClientOptions
-          );
-          return knowledgeIndicatorService.getClient({
-            esClient: scopedClusterClient.asInternalUser,
-            soClient,
-            alertingRulesClient: rulesClient,
-            alertingV2RulesClient,
-            config: tuningConfig,
-          });
-        })();
+        kiClientPromise ??= (async () =>
+          createKnowledgeIndicatorClient(await resolveSigEventsAlertingContext()))();
         return kiClientPromise;
-      };
-
-      const getAlertingV2RulesClient = async (): Promise<RulesClientApi | undefined> => {
-        const { alertingV2RulesClient } = await getSignificantEventsAlertingV2State();
-        return alertingV2RulesClient;
       };
 
       const license = await licensing.getLicense();
@@ -296,11 +265,11 @@ export class StreamsPlugin
         soClient,
         attachmentClient,
         streamsClient,
+        getSignificantEventsAlertingContext: resolveSigEventsAlertingContext,
         getKnowledgeIndicatorClient,
         ...significantEventsClients,
         inferenceClient,
         contentClient,
-        getAlertingV2RulesClient,
         fieldsMetadataClient,
         licensing,
         uiSettingsClient,
@@ -322,6 +291,17 @@ export class StreamsPlugin
     );
     const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
 
+    // Register SML types synchronously during setup so agent_context_layer can schedule
+    // their crawler tasks during its start phase. Must happen in setup() — scheduling
+    // snapshots the registry at start() and types registered later are never crawled.
+    // Matches the contract followed by alerting_v2 and agent_builder_dashboards.
+    if (plugins.agentContextLayer && this.streamsGetScopedClients) {
+      registerAgentBuilderSmlTypes({
+        agentContextLayer: plugins.agentContextLayer,
+        getScopedClients: this.streamsGetScopedClients,
+      });
+    }
+
     if (plugins.agentBuilder) {
       void core
         .getStartServices()
@@ -333,7 +313,6 @@ export class StreamsPlugin
           await registerStreamsAgentBuilder({
             agentBuilder: plugins.agentBuilder!,
             getScopedClients: streamsGetScopedClients,
-            agentContextLayer: plugins.agentContextLayer,
             server,
             logger: this.logger,
             telemetry: telemetryClient,

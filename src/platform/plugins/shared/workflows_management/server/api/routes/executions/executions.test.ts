@@ -464,6 +464,21 @@ describe('Execution Routes', () => {
       expect(result).toEqual({ type: 'ok', body: execution });
     });
 
+    it('should return workflow document version in the response body when present', async () => {
+      const execution = { id: 'ex-1', version: 5, managed: false };
+      mockApi.getWorkflowExecution.mockResolvedValue(execution);
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: { includeInput: false, includeOutput: false },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(result).toEqual({ type: 'ok', body: execution });
+      expect(result.body.version).toBe(5);
+    });
+
     it('should return not found when execution does not exist', async () => {
       mockApi.getWorkflowExecution.mockResolvedValue(undefined);
       const h = handler('GET', path)!;
@@ -541,14 +556,18 @@ describe('Execution Routes', () => {
       expect(handler('POST', path)).toBeDefined();
     });
 
-    it('should call api.cancelAllActiveWorkflowExecutions with workflow id and space id', async () => {
+    it('should call api.cancelAllActiveWorkflowExecutions with workflow id, space id, and request', async () => {
       mockApi.cancelAllActiveWorkflowExecutions.mockResolvedValue(undefined);
       const h = handler('POST', path)!;
       const request = { params: { workflowId: 'wf-1' } };
 
       await h(mockContext, request as any, mockResponse as any);
 
-      expect(mockApi.cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith('wf-1', 'default');
+      expect(mockApi.cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith(
+        'wf-1',
+        'default',
+        expect.anything()
+      );
       expect(mockResponse.ok).toHaveBeenCalled();
     });
 
@@ -638,7 +657,8 @@ describe('Execution Routes', () => {
         'ex-1',
         'default',
         { resume: true },
-        request
+        request,
+        { channel: 'kibana_execution_view' }
       );
       expect(result).toMatchObject({
         type: 'ok',

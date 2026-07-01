@@ -13,7 +13,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { AlertEpisodesListPage } from './alert_episodes_list_page';
 import type { CustomBulkActions } from '@kbn/unified-data-table';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { UnifiedDataTable } from '@kbn/unified-data-table';
+import { UnifiedDataTable, getRenderCustomToolbarWithElements } from '@kbn/unified-data-table';
 import { fetchAlertingEpisodes } from '@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes';
 import { useAlertingEpisodesDataView } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view';
 import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
@@ -29,7 +29,17 @@ import {
 jest.mock('@kbn/unified-data-table', () => ({
   DataLoadingState: { loading: 'loading', loaded: 'loaded' },
   ROWS_HEIGHT_OPTIONS: { auto: -1, single: 1, default: 3 },
-  UnifiedDataTable: jest.fn(() => null),
+  // The page injects the episode count + reset-filters controls via the toolbar's leftSide.
+  // Render the custom toolbar (and have the toolbar builder render its leftSide) so those
+  // controls end up in the DOM and stay reactive to the page's filter state.
+  UnifiedDataTable: jest.fn((props: { renderCustomToolbar?: () => React.ReactNode }) =>
+    props.renderCustomToolbar ? props.renderCustomToolbar() : null
+  ),
+  getRenderCustomToolbarWithElements: jest.fn(
+    ({ leftSide }: { leftSide: React.ReactNode }) =>
+      () =>
+        leftSide
+  ),
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes');
@@ -160,11 +170,9 @@ const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
 
 const mockedUseEpisodesKpisQuery = jest.mocked(useEpisodesKpisQuery);
 
-// The page calls useEpisodesKpisQuery twice: filtered (filterState defined)
-// and total (filterState undefined). Differentiate by that arg.
-const defaultKpisImpl: typeof useEpisodesKpisQuery = ({ filterState }) => ({
+const defaultKpisImpl: typeof useEpisodesKpisQuery = () => ({
   data: {
-    alertsCount: filterState ? 3 : 10,
+    alertsCount: 3,
     firingRules: 0,
     assignedToMe: 0,
     unassigned: 0,
@@ -238,6 +246,21 @@ describe('AlertEpisodesListPage', () => {
     expect(Array.isArray(lastCall?.rowAdditionalLeadingControls)).toBe(true);
   });
 
+  it('passes severity column and custom renderer to UnifiedDataTable', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    expect(lastCall?.columns).toEqual([
+      'episode.status',
+      'severity',
+      '@timestamp',
+      'rule.id',
+      'duration',
+      'tags',
+      'assignees',
+    ]);
+    expect(lastCall?.externalCustomRenderers).toHaveProperty('severity');
+    expect(typeof lastCall?.externalCustomRenderers?.severity).toBe('function');
+  });
+
   it('does not pass key prop derived from tableKey (no tableKey state)', () => {
     // The table should be rendered without a dynamic key that causes remounts
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
@@ -269,6 +292,19 @@ describe('AlertEpisodesListPage', () => {
     }) => React.ReactNode;
     const node = renderDocumentView({ flattened: { 'episode.id': 'ep-1' } });
     expect(node).toBeTruthy();
+  });
+
+  it('passes a renderCustomToolbar to UnifiedDataTable', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    expect(typeof lastCall?.renderCustomToolbar).toBe('function');
+  });
+
+  it('builds the toolbar with the loaded episode count on the left side', () => {
+    // getRenderCustomToolbarWithElements receives the leftSide element, which renders the count
+    const mockGetRenderCustomToolbarWithElements = jest.mocked(getRenderCustomToolbarWithElements);
+    const lastArgs = mockGetRenderCustomToolbarWithElements.mock.calls.at(-1)?.[0];
+    expect(lastArgs?.leftSide).toBeDefined();
+    expect(screen.getByTestId('alertEpisodesItemCount')).toBeInTheDocument();
   });
 });
 
@@ -356,17 +392,16 @@ describe('episode count + reset filters toolbar', () => {
     mockedUseEpisodesKpisQuery.mockImplementation(defaultKpisImpl);
   });
 
-  it('renders "Showing X of Y alerts" with filtered and total counts', async () => {
+  it('renders the episode count', async () => {
     renderPage();
     const node = await screen.findByTestId('alertEpisodesItemCount');
-    expect(node.textContent).toMatch(/^Showing\s+3\s+of\s+10\s+alerts$/);
+    expect(node.textContent).toMatch(/^Showing\s+3\s+episodes$/);
   });
 
-  it('fires useEpisodesKpisQuery both with and without filterState', () => {
+  it('fires useEpisodesKpisQuery only with filterState', () => {
     renderPage();
     const calls = mockedUseEpisodesKpisQuery.mock.calls.map(([args]) => args);
-    expect(calls.some((c) => c.filterState !== undefined)).toBe(true);
-    expect(calls.some((c) => c.filterState === undefined)).toBe(true);
+    expect(calls.every((c) => c.filterState !== undefined)).toBe(true);
   });
 
   it('disables the reset filters button when filter state equals the default', async () => {
