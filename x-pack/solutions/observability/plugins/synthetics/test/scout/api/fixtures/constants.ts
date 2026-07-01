@@ -32,7 +32,6 @@ export const SYNTHETICS_API_URLS = {
   SYNTHETICS_MONITOR_INSPECT: '/internal/synthetics/service/monitor/inspect',
   SYNTHETICS_MONITOR_RESET: '/internal/synthetics/monitors/{monitorId}/_reset',
   SYNTHETICS_MONITORS_BULK_RESET: '/internal/synthetics/monitors/_bulk_reset',
-  SYNTHETICS_MONITORS_BULK_UPDATE: '/api/synthetics/monitors/_bulk_update',
   SYNTHETICS_MONITORS_PROJECT: '/api/synthetics/project/{projectName}/monitors',
   SYNTHETICS_MONITORS_PROJECT_UPDATE: '/api/synthetics/project/{projectName}/monitors/_bulk_update',
   SYNTHETICS_MONITORS_PROJECT_DELETE: '/api/synthetics/project/{projectName}/monitors/_bulk_delete',
