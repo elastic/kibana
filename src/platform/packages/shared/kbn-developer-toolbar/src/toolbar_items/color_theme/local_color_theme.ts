@@ -28,6 +28,22 @@ export interface LocalColorThemeController {
  * resolved theme. While active, the theme is applied live by hijacking the
  * shared core theme contract (`core.theme`) so every `KibanaEuiProvider`
  * re-themes without a page reload.
+ *
+ * Known limitation — this is a *partial* live preview:
+ *
+ * The override works by swapping `core.theme.theme$` for a live subject, so it
+ * only reaches consumers that read `theme$` (directly or via `KibanaEuiProvider`
+ * / `useKibanaIsDarkMode`) *at or after* the toggle is installed. Subsystems
+ * that snapshot the original `theme$` earlier — most notably elastic-charts,
+ * whose charts plugin theme service captures and subscribes to `theme$` once
+ * during its own `setup()` (see `charts/public/services/theme/theme.ts`) — hold
+ * the original static observable and never see our updates, so charts keep
+ * rendering the real theme. Anything reading dark mode from a different source
+ * entirely is likewise unaffected.
+ *
+ * Fully covering these would require guaranteed plugin setup ordering
+ * or core-level dynamic theme-switching support.
+ * A hard refresh always reflects the real, server-resolved theme everywhere.
  */
 export const installLocalColorThemeOverride = (
   theme: ThemeServiceStart
