@@ -6,8 +6,8 @@
  */
 
 import { ToolResultType, attachmentTools } from '@kbn/agent-builder-common';
+import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
@@ -198,7 +198,7 @@ describe('attachment tools', () => {
       const customAttachmentsService = {
         getTypeDefinition: () =>
           ({
-            id: AttachmentType.visualization,
+            id: VISUALIZATION_ATTACHMENT_TYPE,
             validate: (input: unknown) => ({ valid: true, data: input }),
             format: (formattedAttachment: Attachment) => ({
               getRepresentation: () => ({
@@ -222,7 +222,7 @@ describe('attachment tools', () => {
       };
       const attachment = await resolveAttachmentManager.add(
         {
-          type: AttachmentType.visualization,
+          type: VISUALIZATION_ATTACHMENT_TYPE,
           origin: 'so-123',
           description: 'Lens ref',
         },
@@ -245,7 +245,7 @@ describe('attachment tools', () => {
         {} as any
       )) as ToolHandlerStandardReturn;
 
-      expect((result.results[0] as any).data.type).toBe(AttachmentType.visualization);
+      expect((result.results[0] as any).data.type).toBe(VISUALIZATION_ATTACHMENT_TYPE);
       // Data is the resolved content stored directly
       expect((result.results[0] as any).data.data).toEqual(resolvedData);
       // No raw_data field in the response
