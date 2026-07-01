@@ -11,7 +11,7 @@ import React from 'react';
 import * as stories from './popover.stories';
 import { renderWithTheme } from '../../../../utils/test_helpers';
 
-const { Dependency, ExternalsList, Resource, Service } = composeStories(stories);
+const { Dependency, ExternalsList, Resource } = composeStories(stories);
 
 describe('Popover', () => {
   describe('with dependency data', () => {
@@ -40,16 +40,6 @@ describe('Popover', () => {
 
       await waitFor(() => {
         expect(screen.queryByRole('link')).not.toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('with service data', () => {
-    it('renders contents for a service', async () => {
-      renderWithTheme(<Service />);
-
-      await waitFor(() => {
-        expect(screen.getByRole('link', { name: /service details/i })).toBeInTheDocument();
       });
     });
   });

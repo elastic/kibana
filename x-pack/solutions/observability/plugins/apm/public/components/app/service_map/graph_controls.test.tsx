@@ -89,6 +89,10 @@ jest.mock('./service_map_minimap', () => ({
   ServiceMapMinimap: () => <div data-testid="react-flow-minimap" />,
 }));
 
+jest.mock('./service_map_diagnostic_button', () => ({
+  ServiceMapDiagnosticButton: () => <div data-test-subj="serviceMapDiagnosticButton" />,
+}));
+
 jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
   useApmPluginContext: () => ({
     core: {
@@ -338,5 +342,14 @@ describe('ServiceMapGraph - Controls', () => {
 
     expect(outside).toHaveFocus();
     expect(screen.getByTestId('serviceMapControlsSearch')).not.toHaveFocus();
+  });
+
+  it('renders the diagnostic button as part of the graph with no pre-selected service', () => {
+    render(
+      <ReactFlowProvider>
+        <ServiceMapGraph {...defaultProps} />
+      </ReactFlowProvider>
+    );
+    expect(screen.getByTestId('serviceMapDiagnosticButton')).toBeInTheDocument();
   });
 });
