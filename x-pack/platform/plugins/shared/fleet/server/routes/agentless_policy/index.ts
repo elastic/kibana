@@ -9,6 +9,9 @@ import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 
 import {
+  BulkUpgradeAgentlessPoliciesRequestSchema,
+  BulkUpgradeAgentlessPoliciesResponseSchema,
+  AgentlessPolicyUpgradeDryRunResponseSchema,
   CreateAgentlessPolicyRequestSchema,
   DeleteAgentlessPolicyRequestSchema,
   DeleteAgentlessPolicyResponseSchema,
@@ -26,6 +29,7 @@ import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { genericErrorResponse, notFoundResponse } from '../schema/errors';
 
 import {
+  bulkUpgradeAgentlessPoliciesHandler,
   createAgentlessPolicyHandler,
   deleteAgentlessPolicyHandler,
   getAgentlessPolicyHandler,
@@ -33,6 +37,7 @@ import {
   syncAgentlessPoliciesHandler,
   getBulkAgentlessPolicyThroughputHandler,
   updateAgentlessPolicyHandler,
+  upgradeAgentlessPoliciesDryRunHandler,
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -311,6 +316,92 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       deleteAgentlessPolicyHandler
+    );
+
+  // Bulk upgrade
+  router.versioned
+    // @ts-ignore https://github.com/elastic/kibana/issues/203170
+    .post({
+      path: AGENTLESS_POLICIES_ROUTES.UPGRADE_PATTERN,
+      summary: 'Bulk upgrade agentless policies',
+      description:
+        "Upgrade multiple agentless policies to their installed package version, migrating each package policy's config onto the new schema. On success, returns a per-policy result array; the first per-policy failure (for example a missing or non-agentless id) is returned as a top-level HTTP error. A successful result means the policy's saved object was upgraded, while the agentless deployment is reconciled asynchronously in the background. Note: agent-policy-level agentless settings (resources, ownership tags) are not re-derived from the new package version — use the update (PUT) endpoint for those.",
+      options: {
+        tags: ['oas-tag:Fleet agentless policies'],
+        availability: {
+          since: '9.5.0',
+          stability: 'experimental',
+        },
+      },
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/upgrade_agentless_policies.yaml'),
+        },
+        validate: {
+          request: BulkUpgradeAgentlessPoliciesRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => BulkUpgradeAgentlessPoliciesResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      bulkUpgradeAgentlessPoliciesHandler
+    );
+
+  // Bulk upgrade dry-run
+  router.versioned
+    // @ts-ignore https://github.com/elastic/kibana/issues/203170
+    .post({
+      path: AGENTLESS_POLICIES_ROUTES.UPGRADE_DRYRUN_PATTERN,
+      summary: 'Preview an agentless policies upgrade',
+      description:
+        'Preview upgrading multiple agentless policies to their installed package version without applying any change. Each result returns the migrated config as a consumable agentless policy (`proposedPolicy`) plus the current/proposed version and any migration errors.',
+      options: {
+        tags: ['oas-tag:Fleet agentless policies'],
+        availability: {
+          since: '9.5.0',
+          stability: 'experimental',
+        },
+      },
+      fleetAuthz: {
+        integrations: { readIntegrationPolicies: true },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/upgrade_agentless_policies_dryrun.yaml'),
+        },
+        validate: {
+          request: BulkUpgradeAgentlessPoliciesRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => AgentlessPolicyUpgradeDryRunResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      upgradeAgentlessPoliciesDryRunHandler
     );
 
   // Bulk throughput

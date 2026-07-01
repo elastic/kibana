@@ -1,0 +1,73 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        upgradeAgentlessPoliciesDryRunRequestExample:
+          description: 'Preview the upgrade of agentless policies to their installed package version'
+          value:
+            policyIds:
+              - d52a7812-5736-4fdc-aed8-72152afa1ffa
+responses:
+  200:
+    description: 'Indicates a successful response. Each item previews the migrated policy as a consumable agentless policy.'
+    content:
+      application/json:
+        examples:
+          upgradeAgentlessPoliciesDryRunResponseExample:
+            description: 'Example dry-run response with the proposed (migrated) policy. `proposedPolicy` can be fed back into the update (PUT) endpoint.'
+            value:
+              - id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                name: ess_billing-1
+                hasErrors: false
+                currentVersion: 1.5.0
+                proposedVersion: 1.6.0
+                proposedPolicy:
+                  id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                  name: ess_billing-1
+                  description: test
+                  namespace: default
+                  package:
+                    name: ess_billing
+                    title: Elasticsearch Service Billing
+                    version: 1.6.0
+                  inputs:
+                    ESS Billing-cel:
+                      enabled: true
+                      vars:
+                        organization_id: '1234'
+                  created_at: '2025-11-06T18:27:43.541Z'
+                  created_by: test_user
+                  updated_at: '2025-11-06T18:27:43.541Z'
+                  updated_by: test_user
+          upgradeAgentlessPoliciesDryRunMigrationErrorsExample:
+            description: 'Example dry-run response where migrating the config to the new version produced errors. `hasErrors` is true and `errors` explains why; do not feed the (partial) proposed config into the update endpoint without resolving them.'
+            value:
+              - id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                name: ess_billing-1
+                hasErrors: true
+                currentVersion: 1.5.0
+                proposedVersion: 1.6.0
+                errors:
+                  - message: 'Variable "organization_id" is required'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'
+  404:
+    description: 'Returned when a requested policy does not exist or is not an agentless policy. The first such per-policy failure in the batch is returned as a top-level error.'
+    content:
+      application/json:
+        examples:
+          notFoundResponseExample:
+            description: 'Example of a not-found error response'
+            value:
+              statusCode: 404
+              error: 'Not Found'
+              message: 'Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found'

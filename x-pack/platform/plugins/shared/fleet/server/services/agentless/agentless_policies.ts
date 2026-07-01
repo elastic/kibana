@@ -27,7 +27,14 @@ import type {
   PackagePolicy,
   ListWithKuery,
   ListResult,
+  UpgradePackagePolicyDryRunResponseItem,
 } from '../../../common/types';
+import type {
+  BulkUpgradeAgentlessPoliciesResponse,
+  BulkUpgradeAgentlessPolicyResult,
+  AgentlessPolicyUpgradeDryRunResponse,
+  AgentlessPolicyUpgradeDryRunResult,
+} from '../../../common/types/rest_spec/agentless_policy';
 
 import {
   AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
@@ -44,6 +51,7 @@ import type { PackagePolicyClient } from '../package_policy_service';
 
 import { agentPolicyService } from '../agent_policy';
 import { getPackageInfo } from '../epm/packages';
+import { runWithCache } from '../epm/packages/cache';
 import { appContextService, cloudConnectorService } from '..';
 import { FleetNotFoundError, PackagePolicyRequestError } from '../../errors';
 
@@ -94,6 +102,15 @@ export interface AgentlessPoliciesService {
   listAgentlessPolicies: (
     options?: ListAgentlessPoliciesOptions
   ) => Promise<ListResult<AgentlessPolicy>>;
+
+  bulkUpgradeAgentlessPolicies: (
+    policyIds: string[],
+    request?: KibanaRequest
+  ) => Promise<BulkUpgradeAgentlessPoliciesResponse>;
+
+  getAgentlessPolicyUpgradeDryRunDiff: (
+    policyIds: string[]
+  ) => Promise<AgentlessPolicyUpgradeDryRunResponse>;
 }
 
 const getAgentlessAgentPolicyConfig = (
@@ -478,7 +495,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         policyTemplate,
       });
 
-      // Handle cloud-connector add / reuse / swap. Detaching or swapping only updates the reference; 
+      // Handle cloud-connector add / reuse / swap. Detaching or swapping only updates the reference;
       // Previous connector is left in place, as connectors are shareable and managed via their own API.
       const {
         packagePolicy: integratedPackagePolicy,
@@ -666,6 +683,221 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       total: result.total,
       page: result.page,
       perPage: result.perPage,
+    };
+  }
+
+  async bulkUpgradeAgentlessPolicies(
+    policyIds: string[],
+    request?: KibanaRequest
+  ): Promise<BulkUpgradeAgentlessPoliciesResponse> {
+    this.logger.debug(`Bulk upgrading ${policyIds.length} agentless policies`);
+
+    const user = request
+      ? appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined
+      : undefined;
+
+    // Batched agentless guard: missing or non-agentless ids become per-policy 404
+    // failures rather than failing the whole batch (mirrors package-policy bulk upgrade,
+    // which collects per-policy failures into the result array).
+    const { agentlessIds, guardFailures } = await this.partitionAgentlessPolicyIds(policyIds);
+
+    const results: BulkUpgradeAgentlessPolicyResult[] = [...guardFailures];
+
+    if (agentlessIds.length === 0) {
+      return results;
+    }
+
+    // Reuse the package-policy bulk upgrade engine: it resolves the installed target
+    // version, applies the eligibility guard, migrates the existing config onto the new
+    // schema (`updatePackageInputs`), persists the saved objects and emits upgrade
+    // telemetry. Like the package-policy path, the live reconcile (deploy) is scheduled
+    // as a background task and the deployment-sync task is the backstop, so `success`
+    // reflects the saved-object upgrade, not that the workload is already running the
+    // new version. Deploying synchronously here would not scale (up to 1000 external
+    // calls per request) and would duplicate the deploy the engine already schedules.
+    //
+    // Known limitation (parity with package-policy): this migrates the package policy
+    // config only. It does NOT re-derive the backing agent policy's agentless config
+    // (resources) or ownership `global_data_tags` from the new package manifest — only
+    // create / PUT do that. If a new package version changes those agent-policy-level
+    // fields, the update (PUT) endpoint must be used to pick them up. Tracked as a follow-up.
+    const upgradeResults = await this.packagePolicyService.bulkUpgrade(
+      this.soClient,
+      this.esClient,
+      agentlessIds,
+      { user }
+    );
+
+    for (const result of upgradeResults) {
+      results.push({
+        id: result.id,
+        name: result.name,
+        success: result.success,
+        statusCode: result.statusCode,
+        body: result.body,
+      });
+    }
+
+    // Return results in the caller's requested order (guard failures and engine
+    // results are otherwise interleaved), so a client can zip the response against
+    // its input list positionally as well as by `id`.
+    return this.orderResultsByRequest(policyIds, results);
+  }
+
+  async getAgentlessPolicyUpgradeDryRunDiff(
+    policyIds: string[]
+  ): Promise<AgentlessPolicyUpgradeDryRunResponse> {
+    this.logger.debug(`Computing upgrade dry-run for ${policyIds.length} agentless policies`);
+
+    const { agentlessIds, guardFailures } = await this.partitionAgentlessPolicyIds(policyIds);
+
+    // A guard failure (missing / non-agentless) is surfaced as a dry-run item with
+    // `hasErrors: true` plus the per-policy statusCode/body, keeping the response a flat
+    // per-policy array (200 even on partial failure).
+    const results: AgentlessPolicyUpgradeDryRunResult[] = guardFailures.map((failure) => ({
+      id: failure.id,
+      name: failure.name,
+      hasErrors: true,
+      statusCode: failure.statusCode,
+      body: failure.body,
+    }));
+
+    if (agentlessIds.length === 0) {
+      return results;
+    }
+
+    // `runWithCache` shares EPM asset/package-info lookups across all policies in the
+    // batch (matches the package-policy dry-run handler), avoiding repeated fetches when
+    // policies share a package.
+    await runWithCache(async () => {
+      for (const id of agentlessIds) {
+        try {
+          const diff = await this.packagePolicyService.getUpgradeDryRunDiff(this.soClient, id);
+          results.push(this.projectUpgradeDryRunDiff(id, diff));
+        } catch (err) {
+          this.logger.error(
+            `Failed to compute upgrade dry-run for agentless policy ${id}: ${err.message}`,
+            { error: err }
+          );
+          results.push({
+            id,
+            hasErrors: true,
+            statusCode: 500,
+            body: { message: err.message },
+          });
+        }
+      }
+    });
+
+    return this.orderResultsByRequest(policyIds, results);
+  }
+
+  /**
+   * Reorders per-policy results to match the caller's requested id order. Guard failures
+   * and engine results are produced in separate passes, so without this the response would
+   * group all guard failures first. Ordering by request keeps the response positionally
+   * aligned with the input `policyIds`. Any id without a result is dropped (defensive; in
+   * practice every requested id yields exactly one result).
+   */
+  private orderResultsByRequest<T extends { id: string }>(policyIds: string[], results: T[]): T[] {
+    const resultById = new Map(results.map((result) => [result.id, result]));
+    return policyIds.flatMap((id) => {
+      const result = resultById.get(id);
+      return result ? [result] : [];
+    });
+  }
+
+  /**
+   * Splits the requested ids into agentless ids (safe to upgrade) and per-policy guard
+   * failures. Missing and non-agentless package policies are both collapsed into a 404
+   * failure so this endpoint never confirms the existence of, or operates on, regular
+   * Fleet package policies — the batched equivalent of {@link getExistingAgentlessPackagePolicy}.
+   *
+   * This performs one bulk `getByIDs` purely for the agentless guard. It is intentionally
+   * separate from (and slightly redundant with) the fetch that `bulkUpgrade` /
+   * `getUpgradeDryRunDiff` do internally: the guard must reject non-agentless ids *before*
+   * anything is handed to the shared engine, and the engine owns its own fetch for version
+   * resolution and chunking. The cost is a single extra batched read, which is the price of
+   * reusing the shared upgrade engine rather than re-implementing it here.
+   */
+  private async partitionAgentlessPolicyIds(policyIds: string[]): Promise<{
+    agentlessIds: string[];
+    guardFailures: BulkUpgradeAgentlessPolicyResult[];
+  }> {
+    const packagePolicies = await this.packagePolicyService.getByIDs(this.soClient, policyIds, {
+      ignoreMissing: true,
+    });
+    const packagePolicyById = new Map(packagePolicies.map((pp) => [pp.id, pp]));
+
+    const agentlessIds: string[] = [];
+    const guardFailures: BulkUpgradeAgentlessPolicyResult[] = [];
+
+    for (const id of policyIds) {
+      const packagePolicy = packagePolicyById.get(id);
+      if (!packagePolicy || packagePolicy.supports_agentless !== true) {
+        guardFailures.push({
+          id,
+          success: false,
+          statusCode: 404,
+          body: { message: `Agentless policy ${id} not found` },
+        });
+        continue;
+      }
+      agentlessIds.push(id);
+    }
+
+    return { agentlessIds, guardFailures };
+  }
+
+  /**
+   * Projects the package-policy dry-run diff into the clean agentless shape. Instead of
+   * exposing the raw `[PackagePolicy, DryRunPackagePolicy]` diff, it returns the migrated
+   * config as a consumable {@link AgentlessPolicy} (`proposedPolicy`) plus the current and
+   * proposed versions and any migration errors. The proposed policy is a `NewPackagePolicy`
+   * (no saved-object id/timestamps), so it is overlaid onto the current stored package
+   * policy to recover the metadata `packagePolicyToAgentlessPolicy` needs.
+   */
+  private projectUpgradeDryRunDiff(
+    id: string,
+    diff: UpgradePackagePolicyDryRunResponseItem
+  ): AgentlessPolicyUpgradeDryRunResult {
+    // A fatal per-policy dry-run error (e.g. the package is not installed, or the policy is
+    // ineligible for upgrade) is returned by `getUpgradeDryRunDiff` *without throwing* and
+    // without a `diff` pair, carrying only `statusCode`/`body`. Surface those directly instead
+    // of projecting an empty result that would drop the reason for the failure.
+    if (!diff.diff) {
+      return {
+        id,
+        name: diff.name,
+        hasErrors: true,
+        statusCode: diff.statusCode,
+        body: diff.body,
+      };
+    }
+
+    const [currentPackagePolicy, proposedPackagePolicy] = diff.diff;
+
+    let proposedPolicy: AgentlessPolicy | undefined;
+    if (currentPackagePolicy && proposedPackagePolicy) {
+      proposedPolicy = packagePolicyToAgentlessPolicy({
+        ...currentPackagePolicy,
+        ...proposedPackagePolicy,
+        id: currentPackagePolicy.id,
+        created_at: currentPackagePolicy.created_at,
+        created_by: currentPackagePolicy.created_by,
+        updated_at: currentPackagePolicy.updated_at,
+        updated_by: currentPackagePolicy.updated_by,
+      } as PackagePolicy);
+    }
+
+    return {
+      id,
+      name: diff.name,
+      hasErrors: diff.hasErrors,
+      currentVersion: currentPackagePolicy?.package?.version,
+      proposedVersion: proposedPackagePolicy?.package?.version,
+      proposedPolicy,
+      errors: proposedPackagePolicy?.errors?.map((error) => ({ message: error.message })),
     };
   }
 
