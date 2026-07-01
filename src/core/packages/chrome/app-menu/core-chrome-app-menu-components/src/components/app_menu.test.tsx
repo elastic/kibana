@@ -194,5 +194,31 @@ describe('AppMenu', () => {
       expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).toBeInTheDocument();
       expect(screen.queryByTestId('test-switch')).not.toBeInTheDocument();
     });
+
+    it('should not wrap the switch in a tooltip when no tooltip is provided', () => {
+      render(<AppMenuComponent config={{ switch: switchConfig }} />);
+
+      expect(
+        screen.getByTestId('test-switch').closest('.euiToolTipAnchor')
+      ).not.toBeInTheDocument();
+    });
+
+    it('should wrap the switch in a tooltip when tooltipContent is provided', () => {
+      render(
+        <AppMenuComponent
+          config={{ switch: { ...switchConfig, tooltipContent: 'Save changes to enable' } }}
+        />
+      );
+
+      expect(screen.getByTestId('test-switch').closest('.euiToolTipAnchor')).toBeInTheDocument();
+    });
+
+    it('should wrap the switch in a tooltip when tooltipTitle is provided', () => {
+      render(
+        <AppMenuComponent config={{ switch: { ...switchConfig, tooltipTitle: 'Disabled' } }} />
+      );
+
+      expect(screen.getByTestId('test-switch').closest('.euiToolTipAnchor')).toBeInTheDocument();
+    });
   });
 });
