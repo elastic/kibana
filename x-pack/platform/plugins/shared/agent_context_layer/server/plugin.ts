@@ -139,6 +139,7 @@ export class AgentContextLayerPlugin
 
     return {
       registerType: smlSetup.registerType,
+      registerResolver: smlSetup.registerResolver,
     };
   }
 

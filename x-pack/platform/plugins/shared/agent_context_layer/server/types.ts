@@ -28,6 +28,7 @@ import type {
   SmlIndexAttachmentOriginMode,
   SmlIndexAttachmentContentMode,
 } from './services/sml/types';
+import type { SmlResolver } from './services/sml/resolvers/types';
 import type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';
 
 export interface AgentContextLayerSetupDependencies {
@@ -44,6 +45,17 @@ export interface AgentContextLayerStartDependencies {
 
 export interface AgentContextLayerPluginSetup {
   registerType: (definition: SmlTypeDefinition) => void;
+
+  /**
+   * Register a custom SML resolver. Resolvers map an `origin_id` URI scheme
+   * (e.g. `kibana://...`) to a permission computation and an item fetch.
+   *
+   * The built-in `kibana`, `es_document` and `es_index` resolvers are
+   * registered automatically by the plugin. Downstream plugins only need
+   * to call `registerResolver` when introducing a NEW resource kind that
+   * doesn't fit any of the built-in resolvers.
+   */
+  registerResolver: (resolver: SmlResolver) => void;
 }
 
 export interface AgentContextLayerPluginStart {

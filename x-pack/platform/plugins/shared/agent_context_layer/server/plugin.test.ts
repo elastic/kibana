@@ -68,7 +68,10 @@ describe('AgentContextLayerPlugin', () => {
       getDocumentsImpl: jest.Mock;
       spaceFromRequest?: string;
     }) => {
-      mockSmlServiceInstance.setup.mockReturnValue({ registerType: jest.fn() });
+      mockSmlServiceInstance.setup.mockReturnValue({
+        registerType: jest.fn(),
+        registerResolver: jest.fn(),
+      });
       mockSmlServiceInstance.start.mockReturnValue({
         search: jest.fn(),
         checkItemsAccess,
@@ -78,6 +81,9 @@ describe('AgentContextLayerPlugin', () => {
         deleteAttachment: jest.fn(),
         getCrawler: jest.fn(),
         listTypeDefinitions: jest.fn().mockReturnValue([]),
+        getResolver: jest.fn(),
+        listResolvers: jest.fn().mockReturnValue([]),
+        resolveItem: jest.fn(),
       });
 
       const plugin = new AgentContextLayerPlugin(coreMock.createPluginInitializerContext());
