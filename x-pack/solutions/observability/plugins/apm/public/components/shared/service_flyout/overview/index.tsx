@@ -23,6 +23,7 @@ import type { Environment } from '../../../../../common/environment_rt';
 import type { ServiceNodeData } from '../../../../../common/service_map';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency_aggregation_type_select';
+import { useServiceHasSystemMetrics } from '../hooks/use_service_has_system_metrics';
 import { getChartDefinitions } from './chart_configs';
 import { ServiceFlyoutLensChart } from './lens_chart';
 import { ServiceFlyoutQueryControls } from './query_controls';
@@ -149,6 +150,12 @@ export function ServiceFlyoutOverview({
   const [latencyAggregationType, setLatencyAggregationType] = useState(LatencyAggregationType.avg);
   const { dataView } = useAdHocApmDataView();
   const indexes = dataView?.getIndexPattern();
+  const hasSystemMetrics = useServiceHasSystemMetrics({
+    serviceName: service.id,
+    environment,
+    rangeFrom,
+    rangeTo,
+  });
 
   const { keyMetrics, infrastructureMetrics } = useMemo(
     () =>
@@ -196,17 +203,19 @@ export function ServiceFlyoutOverview({
             refreshToken={refreshToken}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <ServiceFlyoutChartsSection
-            id="infrastructureMetrics"
-            title={INFRASTRUCTURE_METRICS_SECTION_TITLE}
-            description={INFRASTRUCTURE_METRICS_SECTION_DESCRIPTION}
-            charts={infrastructureMetrics}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            refreshToken={refreshToken}
-          />
-        </EuiFlexItem>
+        {hasSystemMetrics && (
+          <EuiFlexItem>
+            <ServiceFlyoutChartsSection
+              id="infrastructureMetrics"
+              title={INFRASTRUCTURE_METRICS_SECTION_TITLE}
+              description={INFRASTRUCTURE_METRICS_SECTION_DESCRIPTION}
+              charts={infrastructureMetrics}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              refreshToken={refreshToken}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </div>
   );
