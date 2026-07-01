@@ -7,7 +7,7 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import pRetry from 'p-retry';
+import { withRetry } from './retry_utils';
 
 export interface ConverseStep {
   type?: string;
@@ -47,9 +47,6 @@ interface AgentBuilderConverseApiResponse {
   steps?: ConverseStep[];
   response?: { message?: string; structured_output?: unknown };
 }
-
-const RETRIES = 2;
-const MIN_TIMEOUT_MS = 2000;
 
 export interface AgentBuilderClient {
   converse(params: AgentBuilderConverseParams): Promise<AgentBuilderClientResponse>;
@@ -96,19 +93,16 @@ export function createAgentBuilderClient({
       };
     };
 
-    return pRetry(call, {
-      retries: RETRIES,
-      minTimeout: MIN_TIMEOUT_MS,
-      onFailedAttempt: (error) => {
-        if (error.retriesLeft === 0) {
-          log.error(
-            `[AgentBuilderClient] converse(${agentId}) failed after ${error.attemptNumber} attempts: ${error.message}`
-          );
-        } else {
-          log.warning(
-            `[AgentBuilderClient] converse(${agentId}) failed on attempt ${error.attemptNumber}; retrying... (${error.message})`
-          );
-        }
+    // withRetry gives status-aware exponential backoff + jitter (6 attempts) and honors
+    // "retry after" guidance — far more resilient to EIS 429/502/503 bursts under the full
+    // parallel weekly load than a flat pRetry(2). See retry_utils.ts.
+    return withRetry(call, {
+      label: `AgentBuilderClient.converse(${agentId})`,
+      onRetry: ({ attempt, maxAttempts, delayMs, error }) => {
+        const message = error instanceof Error ? error.message : String(error);
+        log.warning(
+          `[AgentBuilderClient] converse(${agentId}) failed on attempt ${attempt}/${maxAttempts}; retrying in ${delayMs}ms... (${message})`
+        );
       },
     });
   };

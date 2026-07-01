@@ -117,7 +117,11 @@ export function createPlaywrightEvalsConfig({
     globalSetup: require.resolve('./setup.js'),
     globalTeardown: require.resolve('./teardown.js'),
     timeout: timeout ?? 5 * 60_000,
-    retries: retries ?? 0,
+    // Default to 1 retry so a single transient EIS 429/502/503 burst (or a Kibana
+    // keep-alive socket close under load) re-runs the whole example instead of
+    // failing the job. Suites can still override. Combined with withRetry on the
+    // converse/HTTP paths, this rides out the parallel-weekly rate-limit storm.
+    retries: retries ?? 1,
     // Playwright 1.61 on Node >=23.5 registers a synchronous `module.registerHooks` load hook
     // that transforms all first-party TypeScript (anything not in node_modules) with its own
     // bundled Babel. Workspace `@kbn/*` symlinks resolve to real paths outside node_modules, so

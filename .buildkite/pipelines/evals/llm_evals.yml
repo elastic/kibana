@@ -449,29 +449,12 @@ steps:
             - exit_status: '-1'
               limit: 3
 
-      - label: 'Evals: Security Multi-step Execution'
-        key: kbn-evals-weekly-security-multi-step
-        command: bash .buildkite/scripts/steps/evals/run_suite.sh
-        env:
-          KBN_EVALS: '1'
-          FTR_EIS_CCM: '1'
-          EVAL_SUITE_ID: 'security-multi-step'
-          EVAL_FANOUT: '1'
-          EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
-          EVAL_SERVER_CONFIG_SET: 'evals_security_ai_rules'
-        timeout_in_minutes: 60
-        agents:
-          image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
-          provider: gcp
-          machineType: n2-standard-8
-          preemptible: true
-        retry:
-          automatic:
-            - exit_status: '-1'
-              limit: 3
-
+      # NOTE: 'security-multi-step' is intentionally excluded from the weekly run.
+      # The suite drives a human-in-the-loop 'awaiting-prompt' flow the weekly harness
+      # cannot complete unattended, so it always fails the job and is already excluded
+      # from the matrix report (REPORT_EXCLUDED_SUITE_IDS). It still ships in
+      # evals.suites.json for on-demand/local iteration. Re-add here once the harness
+      # can drive the HITL prompt turn.
       - label: 'Evals: Lead Generation'
         key: kbn-evals-weekly-lead-generation
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
