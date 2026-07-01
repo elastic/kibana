@@ -15,7 +15,10 @@ import type { EsDocumentVersion } from './document_version';
 const DATA_STREAM = '.test-stream';
 const WRITE_INDEX = '.ds-.test-stream-000001';
 
-type TestDoc = { id?: string; value?: number };
+interface TestDoc {
+  id?: string;
+  value?: number;
+}
 
 const createEsClientMock = () => ({
   indices: { getDataStream: jest.fn() },

@@ -244,7 +244,9 @@ describe('getWorkflowExecution', () => {
 
     it('should return the execution DTO with step executions', async () => {
       mockEsClient.mget.mockResolvedValueOnce({
-        docs: [{ found: true, _id: executionId, _index: TEST_BACKING_INDEX, _source: baseExecutionDoc }],
+        docs: [
+          { found: true, _id: executionId, _index: TEST_BACKING_INDEX, _source: baseExecutionDoc },
+        ],
       } as any);
       mockEsClient.mget.mockResolvedValueOnce({
         docs: [

@@ -27,9 +27,9 @@ describe('ConcurrencyManager', () => {
 
     mockWorkflowExecutionRepository = {
       getRunningExecutionsByConcurrencyGroup: jest.fn(),
-      getWorkflowExecutionById: jest.fn().mockImplementation((id: string, spaceId: string) =>
-        Promise.resolve({ id, spaceId })
-      ),
+      getWorkflowExecutionById: jest
+        .fn()
+        .mockImplementation((id: string, spaceId: string) => Promise.resolve({ id, spaceId })),
       bulkUpdateWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
       updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<WorkflowExecutionRepository>;

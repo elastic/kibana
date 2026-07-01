@@ -116,11 +116,11 @@ describe('resolveInterruptedWorkflowRunTask', () => {
 
   it('marks failed and completes task when retrying a running execution', async () => {
     mockWorkflowExecutionRead(esClient, {
-        id: WORKFLOW_RUN_ID,
-        spaceId: 'default',
-        workflowId: 'w',
-        status: ExecutionStatus.RUNNING,
-      });
+      id: WORKFLOW_RUN_ID,
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.RUNNING,
+    });
 
     await expect(
       resolveInterruptedWorkflowRunTask({
@@ -172,11 +172,11 @@ describe('resolveInterruptedWorkflowRunTask', () => {
 
   it('returns task_complete without update when execution is terminal on retry', async () => {
     mockWorkflowExecutionRead(esClient, {
-        id: WORKFLOW_RUN_ID,
-        spaceId: 'default',
-        workflowId: 'w',
-        status: ExecutionStatus.FAILED,
-      });
+      id: WORKFLOW_RUN_ID,
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.FAILED,
+    });
 
     await expect(
       resolveInterruptedWorkflowRunTask({
@@ -194,11 +194,11 @@ describe('resolveInterruptedWorkflowRunTask', () => {
 
   it('returns task_complete without update when execution is waiting_for_input on retry', async () => {
     mockWorkflowExecutionRead(esClient, {
-        id: WORKFLOW_RUN_ID,
-        spaceId: 'default',
-        workflowId: 'w',
-        status: ExecutionStatus.WAITING_FOR_INPUT,
-      });
+      id: WORKFLOW_RUN_ID,
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+    });
     const warnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {});
 
     await expect(
@@ -219,11 +219,11 @@ describe('resolveInterruptedWorkflowRunTask', () => {
 
   it('marks failed when retrying a pending execution (stuck before run advances state)', async () => {
     mockWorkflowExecutionRead(esClient, {
-        id: WORKFLOW_RUN_ID,
-        spaceId: 'default',
-        workflowId: 'w',
-        status: ExecutionStatus.PENDING,
-      });
+      id: WORKFLOW_RUN_ID,
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.PENDING,
+    });
 
     await expect(
       resolveInterruptedWorkflowRunTask({
@@ -274,11 +274,11 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
 
   it('marks failed and completes task when retrying a running execution', async () => {
     mockWorkflowExecutionRead(esClient, {
-        id: WORKFLOW_RUN_ID,
-        spaceId: 'default',
-        workflowId: 'w',
-        status: ExecutionStatus.RUNNING,
-      });
+      id: WORKFLOW_RUN_ID,
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.RUNNING,
+    });
 
     await expect(
       resolveInterruptedWorkflowResumeTask({
@@ -329,11 +329,11 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
 
   it('returns resume_workflow when still waiting_for_input so handler can retry', async () => {
     mockWorkflowExecutionRead(esClient, {
-        id: WORKFLOW_RUN_ID,
-        spaceId: 'default',
-        workflowId: 'w',
-        status: ExecutionStatus.WAITING_FOR_INPUT,
-      });
+      id: WORKFLOW_RUN_ID,
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+    });
 
     await expect(
       resolveInterruptedWorkflowResumeTask({
@@ -351,11 +351,11 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
 
   it('returns task_complete when execution is already terminal', async () => {
     mockWorkflowExecutionRead(esClient, {
-        id: WORKFLOW_RUN_ID,
-        spaceId: 'default',
-        workflowId: 'w',
-        status: ExecutionStatus.COMPLETED,
-      });
+      id: WORKFLOW_RUN_ID,
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.COMPLETED,
+    });
 
     await expect(
       resolveInterruptedWorkflowResumeTask({
@@ -373,11 +373,11 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
 
   it('returns task_complete without update when execution is failed (terminal)', async () => {
     mockWorkflowExecutionRead(esClient, {
-        id: WORKFLOW_RUN_ID,
-        spaceId: 'default',
-        workflowId: 'w',
-        status: ExecutionStatus.FAILED,
-      });
+      id: WORKFLOW_RUN_ID,
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.FAILED,
+    });
 
     await expect(
       resolveInterruptedWorkflowResumeTask({
@@ -435,11 +435,11 @@ describe('resolveExhaustedWorkflowRunTask', () => {
 
   it('marks FAILED with TaskAttemptsExhaustedError on last attempt when execution is non-terminal', async () => {
     mockWorkflowExecutionRead(esClient, {
-        id: WORKFLOW_RUN_ID,
-        spaceId: 'default',
-        workflowId: 'w',
-        status: ExecutionStatus.RUNNING,
-      });
+      id: WORKFLOW_RUN_ID,
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.RUNNING,
+    });
 
     const thrown = new Error('handler blew up');
 
@@ -470,11 +470,11 @@ describe('resolveExhaustedWorkflowRunTask', () => {
 
   it('does not update when execution is already terminal on last attempt', async () => {
     mockWorkflowExecutionRead(esClient, {
-        id: WORKFLOW_RUN_ID,
-        spaceId: 'default',
-        workflowId: 'w',
-        status: ExecutionStatus.COMPLETED,
-      });
+      id: WORKFLOW_RUN_ID,
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.COMPLETED,
+    });
 
     await resolveExhaustedWorkflowRunTask({
       workflowExecutionRepository: repository,
@@ -536,11 +536,11 @@ describe('resolveExhaustedWorkflowRunTask', () => {
 
   it('logs error when marking FAILED throws on last attempt', async () => {
     mockWorkflowExecutionRead(esClient, {
-        id: WORKFLOW_RUN_ID,
-        spaceId: 'default',
-        workflowId: 'w',
-        status: ExecutionStatus.RUNNING,
-      });
+      id: WORKFLOW_RUN_ID,
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.RUNNING,
+    });
     esClient.update.mockRejectedValueOnce(new Error('update rejected'));
 
     await resolveExhaustedWorkflowRunTask({

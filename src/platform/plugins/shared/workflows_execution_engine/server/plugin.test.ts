@@ -75,10 +75,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       _seq_no: 2,
       _primary_term: 1,
     } as any);
-      esClient.mget = jest.fn() as any;
-      esClient.indices.getDataStream = jest.fn().mockResolvedValue({
-        data_streams: [{ indices: [{ index_name: TEST_BACKING_INDEX }] }],
-      }) as any;
+    esClient.mget = jest.fn() as any;
+    esClient.indices.getDataStream = jest.fn().mockResolvedValue({
+      data_streams: [{ indices: [{ index_name: TEST_BACKING_INDEX }] }],
+    }) as any;
     workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
     stepExecutionRepository = new StepExecutionRepository(esClient);
     jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);

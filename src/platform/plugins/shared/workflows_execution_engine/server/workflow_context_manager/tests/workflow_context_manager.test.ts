@@ -478,7 +478,7 @@ describe('WorkflowContextManager', () => {
     describe('isTestRun flag', () => {
       it('should return true in isTestRun flag if isTestRun in workflow execution is true', () => {
         testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-            workflowDefinition: workflow,
+          workflowDefinition: workflow,
           scopeStack: [] as StackFrame[],
           isTestRun: true,
         } as EsWorkflowExecution);
@@ -490,7 +490,7 @@ describe('WorkflowContextManager', () => {
         'should return false in isTestRun flag if isTestRun in workflow execution is %s',
         (isTestRun) => {
           testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-                workflowDefinition: workflow,
+            workflowDefinition: workflow,
             scopeStack: [] as StackFrame[],
             isTestRun,
           } as EsWorkflowExecution);
@@ -501,7 +501,7 @@ describe('WorkflowContextManager', () => {
 
       it('should enrich execution context with mocked data', () => {
         testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-            workflowDefinition: workflow,
+          workflowDefinition: workflow,
           id: 'fake-execution-id',
           scopeStack: [] as StackFrame[],
           startedAt: new Date('2023-01-01T00:00:00Z').toISOString(),
@@ -751,7 +751,7 @@ describe('WorkflowContextManager', () => {
 
       beforeEach(() => {
         testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-            workflowDefinition: workflow,
+          workflowDefinition: workflow,
           scopeStack: [
             {
               stepId: 'outerForeachStep',
@@ -940,7 +940,7 @@ describe('WorkflowContextManager', () => {
       beforeEach(() => {
         testContainer = createTestContainer(workflow);
         testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-            workflowDefinition: workflow,
+          workflowDefinition: workflow,
           scopeStack: [
             {
               stepId: 'outerForeachStep',
@@ -1038,7 +1038,7 @@ describe('WorkflowContextManager', () => {
 
       it('should produce empty items when foreach step input is null', () => {
         testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-            workflowDefinition: workflow,
+          workflowDefinition: workflow,
           scopeStack: [
             {
               stepId: 'outerForeachStep',
@@ -1068,7 +1068,7 @@ describe('WorkflowContextManager', () => {
 
       it('should produce empty items when foreach step input has no foreach key', () => {
         testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-            workflowDefinition: workflow,
+          workflowDefinition: workflow,
           scopeStack: [
             {
               stepId: 'outerForeachStep',
