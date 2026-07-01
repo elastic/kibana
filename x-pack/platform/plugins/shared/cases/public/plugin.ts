@@ -75,8 +75,6 @@ export class CasesUiPlugin
     const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
     const unifiedAttachmentTypeRegistry = this.unifiedAttachmentTypeRegistry;
 
-    registerInternalAttachments(unifiedAttachmentTypeRegistry);
-
     const config = this.initializerContext.config.get<CasesUiConfigType>();
     registerCaseFileKinds(config.files, plugins.files);
     if (plugins.home) {
@@ -143,6 +141,11 @@ export class CasesUiPlugin
 
   public start(core: CoreStart, plugins: CasesPublicStartDependencies): CasesPublicStart {
     const config = this.initializerContext.config.get<CasesUiConfigType>();
+
+    registerInternalAttachments(this.unifiedAttachmentTypeRegistry, {
+      hasDashboardPluginEnabled: Boolean(plugins.dashboard),
+      hasMapsPluginEnabled: Boolean(plugins.maps),
+    });
 
     KibanaServices.init({
       ...core,

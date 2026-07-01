@@ -33,83 +33,79 @@ export const ContextEngineAddEntryStepTypeId = 'contextEngine.addEntry';
 // far past the ~512-token window the embedding model truncates to. These
 // bounds exist primarily to harden the public input surface against
 // pathological payloads (CodeQL DoS rule), not to reflect storage limits.
-const MAX_SML_IDENTIFIER_LENGTH = 256;
+const MAX_SML_IDENTIFIER_LENGTH = 512;
 const MAX_SML_TITLE_LENGTH = 1024;
 const MAX_SML_DESCRIPTION_LENGTH = 8192;
 const MAX_SML_CONTENT_LENGTH = 50_000;
 const MAX_SML_REFERENCES = 100;
-const MAX_SML_PERMISSIONS = 100;
 const MAX_SML_TAGS = 100;
 const MAX_SML_TAG_LENGTH = 100;
-
-const ChunkSchema = z.object({
-  type: z
-    .string()
-    .min(1)
-    .max(MAX_SML_IDENTIFIER_LENGTH)
-    .describe('Chunk type (e.g., "visualization", "dashboard").'),
-  title: z.string().min(1).max(MAX_SML_TITLE_LENGTH).describe('Display title for the chunk.'),
-  content: z
-    .string()
-    .min(1)
-    .max(MAX_SML_CONTENT_LENGTH)
-    .describe('Searchable content (indexed as semantic_text).'),
-  description: z
-    .string()
-    .max(MAX_SML_DESCRIPTION_LENGTH)
-    .optional()
-    .describe('Optional longer summary indexed as semantic_text.'),
-  user_id: z
-    .string()
-    .max(MAX_SML_IDENTIFIER_LENGTH)
-    .optional()
-    .describe('Optional owner/last-modifier user id.'),
-  references: z
-    .array(z.string().max(MAX_SML_IDENTIFIER_LENGTH))
-    .max(MAX_SML_REFERENCES)
-    .optional()
-    .describe('Optional list of referenced SML chunk ids.'),
-  permissions: z
-    .array(z.string().max(MAX_SML_IDENTIFIER_LENGTH))
-    .max(MAX_SML_PERMISSIONS)
-    .optional()
-    .describe('Optional Kibana privilege strings required to view the chunk later.'),
-  tags: z
-    .array(
-      z
-        .string()
-        .max(MAX_SML_TAG_LENGTH)
-        .regex(
-          /^[a-z0-9][a-z0-9_-]*$/,
-          'Tag must be lowercase alphanumeric and may contain hyphens or underscores (e.g. "otel", "my-tag", "v2_data").'
-        )
-    )
-    .max(MAX_SML_TAGS)
-    .optional()
-    .describe(
-      'Optional tags for grouping and retrieval. Must be lowercase alphanumeric; hyphens and underscores are allowed (e.g. ["otel", "my-tag"]). Tags are matched with OR semantics on the list endpoint.'
-    ),
-});
+const ChunkSchema = z
+  .object({
+    type: z
+      .string()
+      .min(1)
+      .max(MAX_SML_IDENTIFIER_LENGTH)
+      .describe('Chunk type (e.g., "visualization", "dashboard").'),
+    title: z.string().min(1).max(MAX_SML_TITLE_LENGTH).describe('Display title for the chunk.'),
+    content: z
+      .string()
+      .min(1)
+      .max(MAX_SML_CONTENT_LENGTH)
+      .describe('Searchable content (indexed as semantic_text).'),
+    description: z
+      .string()
+      .max(MAX_SML_DESCRIPTION_LENGTH)
+      .optional()
+      .describe('Optional longer summary indexed as semantic_text.'),
+    user_id: z
+      .string()
+      .max(MAX_SML_IDENTIFIER_LENGTH)
+      .optional()
+      .describe('Optional owner/last-modifier user id.'),
+    references: z
+      .array(z.string().max(MAX_SML_IDENTIFIER_LENGTH))
+      .max(MAX_SML_REFERENCES)
+      .optional()
+      .describe('Optional list of referenced SML chunk ids.'),
+    tags: z
+      .array(
+        z
+          .string()
+          .max(MAX_SML_TAG_LENGTH)
+          .regex(
+            /^[a-z0-9][a-z0-9_-]*$/,
+            'Tag must be lowercase alphanumeric and may contain hyphens or underscores (e.g. "otel", "my-tag", "v2_data").'
+          )
+      )
+      .max(MAX_SML_TAGS)
+      .optional()
+      .describe(
+        'Optional tags for grouping and retrieval. Must be lowercase alphanumeric; hyphens and underscores are allowed (e.g. ["otel", "my-tag"]). Tags are matched with OR semantics on the list endpoint.'
+      ),
+  })
+  .strict();
 
 /**
  * Step input.
  *
- * Workflow-driven writes always go through the content-mode path on the SML
- * start contract — caller-supplied chunks are written as
- * `ingestion_method: 'manual'`.
- *
- * - `upsert` requires `chunks` and always performs a full replace: every
- *   prior chunk for the `origin_id` is removed and the supplied chunks are
- *   written. There is no fail-if-exists / fail-if-not-found distinction —
- *   the indexer's content-mode path is idempotent by design, so we expose
- *   a single `upsert` action rather than the misleading `create`/`update`
- *   pair.
- * - `delete` requires only the origin/type identifiers and wipes every
- *   chunk recorded for the `origin_id` regardless of how it was produced
- *   (both crawled and manual entries). This matches the "workflow owns
- *   this origin" semantic and is the opposite of the crawler's default
- *   delete (which preserves curated manual entries).
+ * Permissions are stamped by the indexer from the type's `getPermissions` hook —
+ * callers cannot supply them. Unregistered types get empty permissions (publicly
+ * readable within the space). `upsert` is a full replace; `delete` wipes all
+ * chunks for the origin regardless of how they were produced.
  */
+const AttachmentTypeSchema = z
+  .string()
+  .min(1)
+  .max(MAX_SML_IDENTIFIER_LENGTH)
+  .regex(
+    /^[a-z][a-z0-9_]*$/,
+    'attachmentType must be a lowercase identifier starting with a letter (e.g. "visualization", "my_notes")'
+  )
+  .describe(
+    "Context Engine entry type id (chunk namespace). When the value matches a registered SmlTypeDefinition the chunk inherits that type's permissions; when it does not, the indexer stamps empty permissions and the chunk is readable to anyone in the caller's space."
+  );
+
 export const SmlIndexAttachmentInputSchema = z.discriminatedUnion('action', [
   z.object({
     originId: z
@@ -117,17 +113,13 @@ export const SmlIndexAttachmentInputSchema = z.discriminatedUnion('action', [
       .min(1)
       .max(MAX_SML_IDENTIFIER_LENGTH)
       .describe('Stable identifier for the source object (e.g., saved object id).'),
-    attachmentType: z
-      .string()
-      .min(1)
-      .max(MAX_SML_IDENTIFIER_LENGTH)
-      .describe('Context Engine entry type id (chunk namespace).'),
+    attachmentType: AttachmentTypeSchema,
     action: z.literal('upsert'),
     chunks: z.array(ChunkSchema).min(1).max(100),
   }),
   z.object({
     originId: z.string().min(1).max(MAX_SML_IDENTIFIER_LENGTH),
-    attachmentType: z.string().min(1).max(MAX_SML_IDENTIFIER_LENGTH),
+    attachmentType: AttachmentTypeSchema,
     action: z.literal('delete'),
   }),
 ]);

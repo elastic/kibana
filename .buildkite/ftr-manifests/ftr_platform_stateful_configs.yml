@@ -177,11 +177,7 @@ enabled:
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group16/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group17/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group3/config_with_schedule_circuit_breaker.ts
-  - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
-  - x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/config_non_dedicated_task_runner.ts
-  - x-pack/platform/test/alerting_api_integration/security_and_spaces/group11/config_non_dedicated_task_runner.ts
-  - x-pack/platform/test/alerting_api_integration/security_and_spaces/group12/config_non_dedicated_task_runner.ts
-  - x-pack/platform/test/alerting_api_integration/security_and_spaces/group13/config_non_dedicated_task_runner.ts
+  - x-pack/platform/test/alerting_api_integration/security_and_spaces/non_dedicated_task_runner_smoke/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group1/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group2/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group3/config.ts
@@ -199,6 +195,8 @@ enabled:
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_unified_attachments.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
   - x-pack/platform/test/cases_api_integration/spaces_only/config.ts
+  - x-pack/platform/test/cases_api_integration/spaces_only/config_analytics_v2.ts
+  - x-pack/platform/test/cases_api_integration/spaces_only/config_analytics_v2_admin_routes_off.ts
   - x-pack/platform/test/disable_ems/config.ts
   - x-pack/platform/test/examples/config.ts
   - x-pack/platform/test/fleet_api_integration/config.agent.ts

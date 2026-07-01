@@ -1,5 +1,5 @@
 {
-  "sha1": "f0f47bc3d5813d360763b9200f4cc744c2389b91",
+  "sha1": "94616cae3326965b3fcd4fa5e7330fc50397972a",
   "tests": [
     {
       "id": "4aaafd2a7000640-70ec3e6d9549722",
@@ -104,7 +104,7 @@
       }
     },
     {
-      "id": "504e25785616fe1-1d8b985de6fcd2d",
+      "id": "11b72ca5d443a08-1d8b985de6fcd2d",
       "title": "Onboarding bulk status API returns not_started for every requested stream that has never been onboarded",
       "expectedStatus": "passed",
       "tags": [
@@ -114,13 +114,13 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/onboarding_bulk_status.spec.ts",
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
         "line": 29,
         "column": 12
       }
     },
     {
-      "id": "504e25785616fe1-6eae18e8b4c773e",
+      "id": "11b72ca5d443a08-6eae18e8b4c773e",
       "title": "Onboarding bulk status API rejects an empty streamNames array",
       "expectedStatus": "passed",
       "tags": [
@@ -130,13 +130,13 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/onboarding_bulk_status.spec.ts",
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
         "line": 55,
         "column": 12
       }
     },
     {
-      "id": "504e25785616fe1-4d182347c2af93f",
+      "id": "11b72ca5d443a08-4d182347c2af93f",
       "title": "Onboarding bulk status API returns 403 when significant events is disabled",
       "expectedStatus": "passed",
       "tags": [
@@ -146,13 +146,13 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/onboarding_bulk_status.spec.ts",
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
         "line": 67,
         "column": 12
       }
     },
     {
-      "id": "94c80912f6246f4-094ac08f869a28e",
+      "id": "e0e7435b0fe0092-094ac08f869a28e",
       "title": "Significant Events discovery pipeline API POST _execute (trigger) returns an executionId",
       "expectedStatus": "passed",
       "tags": [
@@ -160,13 +160,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/significant_event_discovery_run.spec.ts",
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/significant_events/significant_event_discovery_run.spec.ts",
         "line": 30,
         "column": 12
       }
     },
     {
-      "id": "94c80912f6246f4-b38b60bd6807012",
+      "id": "e0e7435b0fe0092-b38b60bd6807012",
       "title": "Significant Events discovery pipeline API GET _status returns a valid status after trigger",
       "expectedStatus": "passed",
       "tags": [
@@ -174,13 +174,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/significant_event_discovery_run.spec.ts",
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/significant_events/significant_event_discovery_run.spec.ts",
         "line": 47,
         "column": 12
       }
     },
     {
-      "id": "94c80912f6246f4-8f29a28b4278864",
+      "id": "e0e7435b0fe0092-8f29a28b4278864",
       "title": "Significant Events discovery pipeline API POST _execute (cancel) returns executionId or null",
       "expectedStatus": "passed",
       "tags": [
@@ -188,7 +188,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/significant_event_discovery_run.spec.ts",
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/significant_events/significant_event_discovery_run.spec.ts",
         "line": 72,
         "column": 12
       }
@@ -275,6 +275,68 @@
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
         "line": 230,
         "column": 10
+      }
+    },
+    {
+      "id": "bf9123d2f461ba3-a9d65106606d0b3",
+      "title": "Stream lifecycle - inherited ILM config API (classic) returns the ILM policy a classic stream would inherit from its index template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited_ilm.spec.ts",
+        "line": 61,
+        "column": 12
+      }
+    },
+    {
+      "id": "65f024391566ce3-7ad9dced46360db",
+      "title": "Stream lifecycle - inherited config API returns the lifecycle inherited from the parent wired stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
+        "line": 85,
+        "column": 12
+      }
+    },
+    {
+      "id": "65f024391566ce3-1c5362de43bf137",
+      "title": "Stream lifecycle - inherited config API reflects the parent retention even when the child has its own override",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
+        "line": 119,
+        "column": 12
+      }
+    },
+    {
+      "id": "65f024391566ce3-2ca65ae63b3ec24",
+      "title": "Stream lifecycle - inherited config API returns 404 for a non-existent stream lifecycle inheritance",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
+        "line": 154,
+        "column": 12
       }
     },
     {
@@ -1953,6 +2015,54 @@
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
         "line": 648,
         "column": 12
+      }
+    },
+    {
+      "id": "65096526c5619bd-f75acbd504e73c9",
+      "title": "Memory managed workflows system-streams-memory-synthesis: is installed and valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/workflows/managed_workflows.spec.ts",
+        "line": 40,
+        "column": 14
+      }
+    },
+    {
+      "id": "65096526c5619bd-80513cd613ff114",
+      "title": "Memory managed workflows system-streams-memory-consolidation: is installed and valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/workflows/managed_workflows.spec.ts",
+        "line": 40,
+        "column": 14
+      }
+    },
+    {
+      "id": "65096526c5619bd-7d45219dead2acf",
+      "title": "Memory managed workflows system-streams-memory-conversation-scraper: is installed and valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/workflows/managed_workflows.spec.ts",
+        "line": 40,
+        "column": 14
       }
     }
   ]

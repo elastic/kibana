@@ -10,20 +10,20 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { sigEventImpactSchema, sigEventStatusSchema } from '@kbn/streams-schema';
+import { significantEventStatusSchema } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { StreamsServer } from '../../../types';
-import { createSigEventsAvailability } from '../sig_events_availability';
+import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { createEventToolHandler } from './handler';
 
 export const STREAMS_CREATE_EVENT_TOOL_ID = platformStreamsSigEventsTools.createEvent;
 
 const createEventSchema = z.object({
-  status: sigEventStatusSchema.optional().describe(
+  status: significantEventStatusSchema.optional().describe(
     i18n.translate('xpack.streams.agentBuilder.tools.eventCreate.schema.status', {
       defaultMessage: 'Status for the new event.',
     })
@@ -33,7 +33,6 @@ const createEventSchema = z.object({
   root_cause: z.string().max(4000),
   stream_names: z.array(z.string().max(255)).min(1).max(100),
   criticality: z.number().min(0).max(100),
-  impact: sigEventImpactSchema,
   confidence: z.number().min(0).max(1),
   recommendations: z.array(z.string().max(1000)).min(1).max(50),
 });
@@ -89,7 +88,7 @@ export function createEventTool({
         ),
       }),
     },
-    availability: createSigEventsAvailability({ server, logger }),
+    availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
