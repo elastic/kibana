@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
@@ -87,7 +87,6 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh, r
         menu={menu}
         docLink={helpLink}
       />
-      <EuiSpacer size="m" />
       <JobsListView
         euiTheme={euiTheme}
         isMlEnabledInSpace={isMlEnabledInSpace}

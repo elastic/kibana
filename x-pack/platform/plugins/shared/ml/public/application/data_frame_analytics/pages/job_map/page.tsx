@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -111,7 +111,6 @@ export const Page: FC = () => {
           defaultMessage: 'Analytics map',
         })}
       />
-      <EuiSpacer size="m" />
       <AnalyticsIdSelectorControls
         setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
         selectedId={jobId ?? modelId}

@@ -286,7 +286,6 @@ export const Page: FC = () => {
           values: { pageTitleLabel },
         })}
       />
-      <EuiSpacer size="l" />
 
       <CPSUnsupportedWarning />
 

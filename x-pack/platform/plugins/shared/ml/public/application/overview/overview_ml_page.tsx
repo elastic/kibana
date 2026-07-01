@@ -149,7 +149,6 @@ export const OverviewPage: FC = () => {
       />
       <EuiPageBody restrictWidth={1200}>
         <UpgradeWarning />
-        <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="m" direction="column">
           {isADEnabled || isDFAEnabled ? (
             <>

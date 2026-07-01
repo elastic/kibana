@@ -84,7 +84,6 @@ export const DatavisualizerSelector: FC = () => {
             defaultMessage: 'Data visualizer',
           })}
         />
-        <EuiSpacer size="m" />
 
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem grow={false}>

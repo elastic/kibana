@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
-import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -141,7 +141,6 @@ export const Page: FC<{
             defaultMessage: 'Results explorer',
           })}
         />
-        <EuiSpacer size="m" />
         <AnalyticsIdSelectorControls
           setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
           selectedId={jobIdToUse}

@@ -623,7 +623,6 @@ export const ModelsList: FC<Props> = ({
         menu={menu}
         docLink={helpLink}
       />
-      <EuiSpacer size="m" />
       <div data-test-subj="mlTrainedModelsList">
         <SpaceManagementContextWrapper>
           <SavedObjectsWarning onCloseFlyout={fetchModels} forceRefresh={isLoading} />
