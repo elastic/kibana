@@ -131,6 +131,7 @@ for (const isEsqlDefault of FLAG_SETTINGS) {
             // Reload and confirm the persisted mode is restored.
             await page.gotoApp('discover');
             await pageObjects.discover.waitUntilTabIsLoaded();
+            expect(await pageObjects.discover.getCurrentQueryMode()).toBe(targetMode);
             expect(await getStoredQueryMode(page)).toBe(targetMode);
           }
         );
