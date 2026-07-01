@@ -55,7 +55,7 @@ export function WelcomeMessageConnectors({
       <div className={fadeInClassName} data-test-subj="observabilityAiAssistantConnectorsError">
         <EuiFlexGroup direction="row" alignItems="center" justifyContent="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="warning" color="danger" />
+            <EuiIcon type="warning" color="danger" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText color="danger">
