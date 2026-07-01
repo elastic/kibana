@@ -34,7 +34,7 @@ jest.mock('./storage', () => ({
 
 describe('ConversationClient', () => {
   let client: ConversationClient;
-  let agentRegistry: jest.Mocked<Pick<AgentRegistry, 'get' | 'list'>>;
+  let agentRegistry: jest.Mocked<Pick<AgentRegistry, 'get' | 'getIds'>>;
 
   const createConversationDocument = ({
     id = 'conversation-1',
@@ -74,7 +74,7 @@ describe('ConversationClient', () => {
 
     agentRegistry = {
       get: jest.fn().mockResolvedValue({ id: 'agent-1' }),
-      list: jest.fn().mockResolvedValue([{ id: 'agent-1' }]),
+      getIds: jest.fn().mockResolvedValue(['agent-1']),
     };
 
     client = createClient({
@@ -118,7 +118,7 @@ describe('ConversationClient', () => {
     });
 
     it('filters listed conversations to public-or-owned conversations for accessible agents', async () => {
-      agentRegistry.list.mockResolvedValue([{ id: 'agent-1' }, { id: 'agent-2' }] as never);
+      agentRegistry.getIds.mockResolvedValue(['agent-1', 'agent-2']);
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [createConversationDocument()],
@@ -127,6 +127,7 @@ describe('ConversationClient', () => {
 
       await client.list();
 
+      expect(agentRegistry.getIds).toHaveBeenCalled();
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           query: {
@@ -169,7 +170,7 @@ describe('ConversationClient', () => {
     });
 
     it('uses the requested agent id as the only agent filter when it is accessible', async () => {
-      agentRegistry.list.mockResolvedValue([{ id: 'agent-1' }, { id: 'agent-2' }] as never);
+      agentRegistry.getIds.mockResolvedValue(['agent-1', 'agent-2']);
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [createConversationDocument()],
@@ -205,7 +206,7 @@ describe('ConversationClient', () => {
     });
 
     it('returns an empty list without querying conversations when the requested agent is inaccessible', async () => {
-      agentRegistry.list.mockResolvedValue([{ id: 'agent-1' }] as never);
+      agentRegistry.getIds.mockResolvedValue(['agent-1']);
 
       await expect(client.list({ agentId: 'agent-2' })).resolves.toEqual([]);
 
@@ -213,7 +214,7 @@ describe('ConversationClient', () => {
     });
 
     it('returns an empty list when the user cannot access any underlying agents', async () => {
-      agentRegistry.list.mockResolvedValue([]);
+      agentRegistry.getIds.mockResolvedValue([]);
 
       await expect(client.list()).resolves.toEqual([]);
 

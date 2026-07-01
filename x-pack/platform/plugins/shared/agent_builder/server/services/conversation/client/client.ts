@@ -94,8 +94,7 @@ class ConversationClientImpl implements ConversationClient {
 
   async list(options: ConversationListOptions = {}): Promise<ConversationWithoutRounds[]> {
     const { agentId } = options;
-    const agents = await this.agentRegistry.list();
-    const accessibleAgentIds = agents.map(({ id }) => id);
+    const accessibleAgentIds = await this.agentRegistry.getIds();
 
     if (accessibleAgentIds.length === 0 || (agentId && !accessibleAgentIds.includes(agentId))) {
       return [];

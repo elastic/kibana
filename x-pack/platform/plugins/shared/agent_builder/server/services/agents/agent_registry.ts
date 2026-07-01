@@ -53,6 +53,7 @@ export interface AgentRegistry {
    */
   get(agentId: string, opts?: GetAgentOptions): Promise<InternalAgentDefinition>;
   list(opts?: AgentListOptions): Promise<InternalAgentDefinition[]>;
+  getIds(opts?: AgentListOptions): Promise<string[]>;
   create(createRequest: AgentCreateRequest): Promise<InternalAgentDefinition>;
   update(agentId: string, update: AgentUpdateRequest): Promise<InternalAgentDefinition>;
   delete(args: AgentDeleteRequest): Promise<boolean>;
@@ -126,7 +127,7 @@ class AgentRegistryImpl implements AgentRegistry {
     throw createAgentNotFoundError({ agentId });
   }
 
-  async list(opts: AgentListOptions): Promise<InternalAgentDefinition[]> {
+  async list(opts: AgentListOptions = {}): Promise<InternalAgentDefinition[]> {
     const allAgents: InternalAgentDefinition[] = [];
     for (const provider of this.orderedProviders) {
       const providerAgents = await provider.list(opts);
@@ -137,6 +138,11 @@ class AgentRegistryImpl implements AgentRegistry {
       }
     }
     return allAgents;
+  }
+
+  async getIds(opts?: AgentListOptions): Promise<string[]> {
+    const agents = await this.list(opts);
+    return agents.map(({ id }) => id);
   }
 
   async create(createRequest: AgentCreateRequest): Promise<InternalAgentDefinition> {
