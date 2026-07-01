@@ -398,17 +398,6 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
     });
 
-    it('shows the confirmation modal when the form is dirty and the X button is clicked (second check)', () => {
-      const onClose = jest.fn();
-      renderFlyout({ onClose });
-
-      fireEvent.click(screen.getByTestId('mockMakeDirty'));
-      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
-
-      expect(onClose).not.toHaveBeenCalled();
-      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
-    });
-
     it('"Continue editing" dismisses the modal and keeps the flyout open', () => {
       const onClose = jest.fn();
       renderFlyout({ onClose });
