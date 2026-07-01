@@ -7,6 +7,7 @@
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
+import type { VisualizationRenderer } from '@kbn/agent-builder-visualizations-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
 import { definePanelType } from '../panel_type';
@@ -38,6 +39,12 @@ export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
   chartType?: SupportedChartType;
   /** ES|QL query to back the visualization; generated when omitted. */
   esql?: string;
+  /**
+   * Which engine renders the panel. Honored when adding a new panel (defaults to
+   * Lens when omitted); ignored on edits, which keep the existing panel's
+   * renderer.
+   */
+  renderer?: VisualizationRenderer;
 }
 
 const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((ctx) => {
@@ -85,12 +92,20 @@ export const panelRequestSchema = z.object({
   type: z
     .literal('vis')
     .default('vis')
-    .describe('Panel type to resolve. Only "vis" (Lens) is currently resolvable from a request.'),
+    .describe(
+      'Panel type to resolve. Only "vis" is currently resolvable from a request; use "renderer" to pick Lens or Vega.'
+    ),
   grid: panelGridSchema,
   query: z
     .string()
     .max(2048)
     .describe('A natural language query describing the desired visualization.'),
+  renderer: z
+    .enum(['lens', 'vega'])
+    .optional()
+    .describe(
+      '(optional) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-Lite visualizations — small multiples/faceting, layered or combination charts, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Ignored when editing an existing panel (edits keep the existing renderer).'
+    ),
   index: z
     .string()
     .max(256)

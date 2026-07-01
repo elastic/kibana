@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { buildVisualizationConfig } from '@kbn/agent-builder-visualizations-server';
+import {
+  buildVisualizationConfig,
+  buildVegaConfig,
+} from '@kbn/agent-builder-visualizations-server';
+import { VEGA_PANEL_TYPE } from '@kbn/agent-builder-visualizations-common';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
@@ -14,9 +18,11 @@ import { createVisPanelResolver } from './vis_panel_resolver';
 
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
   buildVisualizationConfig: jest.fn(),
+  buildVegaConfig: jest.fn(),
 }));
 
 const mockedBuildVisualizationConfig = jest.mocked(buildVisualizationConfig);
+const mockedBuildVegaConfig = jest.mocked(buildVegaConfig);
 
 const createMockLogger = (): Logger =>
   ({
@@ -42,6 +48,7 @@ describe('createVisPanelResolver', () => {
 
   beforeEach(() => {
     mockedBuildVisualizationConfig.mockReset();
+    mockedBuildVegaConfig.mockReset();
   });
 
   it('creates Lens panel content for create requests', async () => {
@@ -111,6 +118,86 @@ describe('createVisPanelResolver', () => {
     );
   });
 
+  it('creates a Vega panel in the attachment API shape (config.spec) when renderer is "vega"', async () => {
+    const spec = '{"$schema":"https://vega.github.io/schema/vega-lite/v6.json"}';
+    mockedBuildVegaConfig.mockResolvedValue({ spec, esqlQuery: 'FROM logs-*' });
+
+    const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
+
+    const result = await resolveVisPanel({
+      type: 'vis',
+      operationType: 'add_panels',
+      identifier: 'a small multiples chart',
+      nlQuery: 'a small multiples chart',
+      index: 'logs-*',
+      renderer: 'vega',
+    });
+
+    expect(result).toEqual({
+      type: 'success',
+      panelContent: {
+        type: VEGA_PANEL_TYPE,
+        config: { spec },
+      },
+    });
+    expect(mockedBuildVegaConfig).toHaveBeenCalledWith(
+      expect.objectContaining({ nlQuery: 'a small multiples chart', existingSpec: undefined })
+    );
+    expect(mockedBuildVisualizationConfig).not.toHaveBeenCalled();
+  });
+
+  it('defaults to Lens when renderer is omitted on a create request', async () => {
+    mockedBuildVisualizationConfig.mockResolvedValue(
+      createBuildVisualizationConfigResult({ type: 'metric' })
+    );
+
+    const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
+
+    const result = await resolveVisPanel({
+      type: 'vis',
+      operationType: 'add_panels',
+      identifier: 'total requests',
+      nlQuery: 'total requests',
+    });
+
+    expect(result.type).toBe('success');
+    expect(mockedBuildVegaConfig).not.toHaveBeenCalled();
+    expect(mockedBuildVisualizationConfig).toHaveBeenCalled();
+  });
+
+  it('keeps the Vega renderer and reuses the embedded spec when editing a vega panel', async () => {
+    const existingSpec = '{"$schema":"vega-lite","mark":"bar"}';
+    const nextSpec = '{"$schema":"vega-lite","mark":"line"}';
+    mockedBuildVegaConfig.mockResolvedValue({ spec: nextSpec, esqlQuery: 'FROM logs-*' });
+
+    const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
+
+    const result = await resolveVisPanel({
+      type: 'vis',
+      operationType: 'edit_panels',
+      identifier: 'panel-1',
+      nlQuery: 'make it a line chart',
+      // A stale "lens" request must be ignored: edits keep the existing renderer.
+      renderer: 'lens',
+      existingPanel: {
+        id: 'panel-1',
+        type: VEGA_PANEL_TYPE,
+        config: { spec: existingSpec },
+        grid: { w: 24, h: 12, x: 0, y: 0 },
+      },
+    });
+
+    expect(result).toEqual({
+      type: 'success',
+      panelContent: {
+        type: VEGA_PANEL_TYPE,
+        config: { spec: nextSpec },
+      },
+    });
+    expect(mockedBuildVegaConfig).toHaveBeenCalledWith(expect.objectContaining({ existingSpec }));
+    expect(mockedBuildVisualizationConfig).not.toHaveBeenCalled();
+  });
+
   it('returns a failure when editing a non-Lens panel', async () => {
     const resolveVisPanel = createVisPanelResolver({
       logger,
@@ -142,5 +229,6 @@ describe('createVisPanelResolver', () => {
       },
     });
     expect(mockedBuildVisualizationConfig).not.toHaveBeenCalled();
+    expect(mockedBuildVegaConfig).not.toHaveBeenCalled();
   });
 });

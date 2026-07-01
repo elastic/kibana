@@ -21,6 +21,7 @@ import {
   SavedObjectSaveModalDashboard,
   type SaveModalDashboardProps,
 } from '@kbn/presentation-util-plugin/public';
+import { buildVegaSavedVis } from '@kbn/agent-builder-visualizations-common';
 import type { VisualizationServices } from '../services';
 import {
   visualizationWrapperStyles,
@@ -31,9 +32,6 @@ import {
 import { DEFAULT_VISUALIZATION_HEIGHT } from '../shared/get_visualization_dimensions';
 import { FallbackVisualizationActions } from '../shared/visualization_actions';
 import { useVisPreviewUnifiedSearch } from '../shared/use_vis_preview_unified_search';
-
-/** `savedVis.type` Kibana uses to render a Vega/Vega-Lite spec. */
-const VEGA_VIS_TYPE = 'vega';
 
 const saveButtonLabel = i18n.translate('xpack.agentBuilder.visualization.vega.saveToDashboard', {
   defaultMessage: 'Save to dashboard',
@@ -93,16 +91,7 @@ export function VisualizeVega({
   // Complete the subject on unmount so it does not retain subscribers.
   useEffect(() => () => timeRange$.complete(), [timeRange$]);
 
-  const buildSavedVis = useCallback(
-    (title: string) => ({
-      title,
-      type: VEGA_VIS_TYPE,
-      params: { spec },
-      uiState: {},
-      data: { aggs: [], searchSource: {} },
-    }),
-    [spec]
-  );
+  const buildSavedVis = useCallback((title: string) => buildVegaSavedVis({ spec, title }), [spec]);
 
   const getParentApi = useCallback(
     () => ({

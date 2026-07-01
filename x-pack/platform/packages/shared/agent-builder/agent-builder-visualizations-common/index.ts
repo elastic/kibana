@@ -8,3 +8,11 @@
 export { VISUALIZATION_ATTACHMENT_TYPE } from './constants';
 
 export type { VisualizationAttachmentData, VisualizationRenderer } from './visualization_types';
+
+export {
+  buildVegaSavedVis,
+  extractVegaSpecFromSavedVis,
+  VEGA_VIS_TYPE,
+  VEGA_PANEL_TYPE,
+  type VegaSavedVis,
+} from './vega_saved_vis';
