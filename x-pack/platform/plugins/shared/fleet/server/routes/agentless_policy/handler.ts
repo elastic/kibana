@@ -6,14 +6,24 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import pMap from 'p-map';
 
 import type { CreateAgentlessPolicyRequestSchema } from '../../../common/types';
-import type { FleetRequestHandler } from '../../types';
-import { appContextService } from '../../services';
+import { appContextService, packagePolicyService } from '../../services';
+import type { FleetRequestHandler, ListAgentlessPoliciesRequestSchema } from '../../types';
 import { AgentlessPoliciesServiceImpl } from '../../services/agentless/agentless_policies';
-import type { DeleteAgentlessPolicyRequestSchema } from '../../../common/types/rest_spec/agentless_policy';
+import type {
+  DeleteAgentlessPolicyRequestSchema,
+  GetBulkAgentlessPolicyThroughputRequestSchema,
+  GetAgentlessPolicyRequestSchema,
+} from '../../../common/types/rest_spec/agentless_policy';
 import { syncAgentlessDeployments } from '../../services/agentless/deployment_sync';
 import { agentlessAgentService } from '../../services/agents/agentless_agent';
+import { getPolicyThroughput } from '../../services/agentless/throughput';
+
+// Each per-policy search runs a nested date_histogram aggregation; cap it
+// to avoid overwhelming the cluster when a page has many agentless policies.
+const BULK_THROUGHPUT_CONCURRENCY = 10;
 
 export const syncAgentlessPoliciesHandler: FleetRequestHandler<
   undefined,
@@ -71,6 +81,71 @@ export const createAgentlessPolicyHandler: FleetRequestHandler<
   });
 };
 
+export const getAgentlessPolicyHandler: FleetRequestHandler<
+  TypeOf<typeof GetAgentlessPolicyRequestSchema.params>
+> = async (context, request, response) => {
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  const logger = appContextService.getLogger().get('agentless');
+
+  const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+    fleetContext.packagePolicyService.asCurrentUser,
+    soClient,
+    esClient,
+    logger
+  );
+
+  const { policyId } = request.params;
+  const item = await agentlessPoliciesService.getAgentlessPolicy(policyId);
+
+  if (!item) {
+    return response.notFound({
+      body: { message: `Agentless policy ${policyId} not found` },
+    });
+  }
+
+  return response.ok({
+    body: {
+      item,
+    },
+  });
+};
+
+export const listAgentlessPoliciesHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof ListAgentlessPoliciesRequestSchema.query>
+> = async (context, request, response) => {
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  const logger = appContextService.getLogger().get('agentless');
+
+  const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+    fleetContext.packagePolicyService.asCurrentUser,
+    soClient,
+    esClient,
+    logger
+  );
+
+  const { items, total, page, perPage } = await agentlessPoliciesService.listAgentlessPolicies(
+    request.query
+  );
+
+  return response.ok({
+    body: {
+      items,
+      total,
+      page,
+      perPage,
+    },
+  });
+};
+
 export const deleteAgentlessPolicyHandler: FleetRequestHandler<
   TypeOf<typeof DeleteAgentlessPolicyRequestSchema.params>,
   TypeOf<typeof DeleteAgentlessPolicyRequestSchema.query>
@@ -101,4 +176,34 @@ export const deleteAgentlessPolicyHandler: FleetRequestHandler<
       id: request.params.policyId,
     },
   });
+};
+
+export const getBulkAgentlessPolicyThroughputHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof GetBulkAgentlessPolicyThroughputRequestSchema.body>
+> = async (context, request, response) => {
+  const { policyIds } = request.body;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+  const packagePolicies = await packagePolicyService.getByIDs(soClient, policyIds, {
+    ignoreMissing: true,
+  });
+
+  const items = await pMap(
+    packagePolicies,
+    async (packagePolicy) => {
+      try {
+        const throughput = await getPolicyThroughput(esClient, packagePolicy);
+        return { policyId: packagePolicy.id, ...throughput };
+      } catch {
+        return { policyId: packagePolicy.id, averagePerSecond: 0, series: [] };
+      }
+    },
+    { concurrency: BULK_THROUGHPUT_CONCURRENCY }
+  );
+
+  return response.ok({ body: { items } });
 };
