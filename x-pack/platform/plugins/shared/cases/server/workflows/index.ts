@@ -16,7 +16,13 @@ export function registerCaseWorkflowSteps(
   workflowsExtensions: CasesServerSetupDependencies['workflowsExtensions'],
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>,
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
-  isCasesAttachmentsEnabled: boolean
+  isCasesAttachmentsEnabled: boolean,
+  /**
+   * Resolves once cases's own `start()` has been called by core
+   * Used by the `cases.addAttachments`loader so the discriminated union sees
+   * solution-contributed attachment types.
+   */
+  waitForStartServices: () => Promise<unknown>
 ) {
   if (!workflowsExtensions) {
     return;
