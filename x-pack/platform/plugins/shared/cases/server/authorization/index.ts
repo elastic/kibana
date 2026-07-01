@@ -71,11 +71,14 @@ const ACCESS_COMMENT_OPERATION: CasesSupportedOperations = 'getComment';
 const ACCESS_CASE_OPERATION: CasesSupportedOperations = 'getCase';
 const ACCESS_USER_ACTION_OPERATION: CasesSupportedOperations = 'getUserActions';
 /**
- * Reading templates is gated on the standard per-owner cases read privilege (same as
- * `getCase`/`findCases`), matching the "must have read privileges for the Cases feature"
- * contract documented on the public template routes.
+ * Reading templates is granted by either the standard per-owner cases read/all privilege or the
+ * manageTemplates sub-privilege (users need to be able to see templates in order to manage them),
+ * matching the "must have read privileges for the Cases feature" contract documented on the public
+ * template routes. See `manageTemplatesReadOperations` in
+ * x-pack/platform/packages/private/security/authorization_core/src/privileges/feature_privilege_builder/cases.ts
  */
-const ACCESS_TEMPLATE_OPERATION: CasesSupportedOperations = 'getCase';
+const ACCESS_TEMPLATE_OPERATION: CasesSupportedOperations = 'getTemplate';
+const FIND_TEMPLATES_OPERATION: CasesSupportedOperations = 'findTemplates';
 
 /**
  * Database constant for ECS category for use for audit logging.
@@ -227,7 +230,7 @@ const TemplateOperations = {
   },
   [ReadOperations.FindTemplates]: {
     ecsType: EVENT_TYPES.access,
-    name: ACCESS_TEMPLATE_OPERATION,
+    name: FIND_TEMPLATES_OPERATION,
     action: 'case_template_find',
     verbs: accessVerbs,
     docType: 'case templates',
