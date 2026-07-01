@@ -117,10 +117,6 @@ export const performRuleInstallationHandler = async (
       });
       installedRules.push(...results);
       ruleErrors.push(...errors);
-      const batchNum = Math.floor(i / PREBUILT_RULES_BULK_CREATE_BATCH_SIZE) + 1;
-      logger.debug(
-        `bulkCreatePrebuiltRules: batch ${batchNum} — ${results.length} created, ${errors.length} failed out of ${ruleAssets.length}`
-      );
     }
 
     const { error: timelineInstallationError } = await performTimelinesInstallation(
