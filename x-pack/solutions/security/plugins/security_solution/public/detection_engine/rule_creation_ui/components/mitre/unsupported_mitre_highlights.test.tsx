@@ -28,6 +28,13 @@ jest.mock('../../../../../common/detection_engine/mitre/mitre_tactics_techniques
       label: 'Tactic 1',
       value: 'tactic1',
     },
+    {
+      name: 'Tactic 2',
+      id: 'TA002',
+      reference: 'https://example.com/TA002',
+      label: 'Tactic 2',
+      value: 'tactic2',
+    },
   ],
   techniques: [
     {
@@ -37,6 +44,15 @@ jest.mock('../../../../../common/detection_engine/mitre/mitre_tactics_techniques
       tactics: ['tactic-1'],
       label: 'Technique 1',
       value: 'technique1',
+    },
+    // Belongs to Tactic 2 only - used to validate the reassigned-from-tactic path.
+    {
+      name: 'Moved Technique',
+      id: 'T002',
+      reference: 'https://example.com/T002',
+      tactics: ['tactic-2'],
+      label: 'Moved Technique',
+      value: 'movedtechnique',
     },
   ],
   subtechniques: [
@@ -275,5 +291,33 @@ describe('AddMitreAttackThreat - renamed MITRE entity handling', () => {
     await waitFor(() => {
       expect(screen.queryByText(/Renamed from/)).toBeNull();
     });
+  });
+
+  it('renders a ghost option and form-row error when the technique was reassigned to a different tactic', async () => {
+    // T002 lives under Tactic 2 in the dataset but the rule still stores it
+    // under Tactic 1 - this previously left the technique select blank.
+    const threats: Threats = [
+      {
+        framework: MITRE_FRAMEWORK,
+        tactic: { id: 'TA001', name: 'Tactic 1', reference: '' },
+        technique: [
+          {
+            id: 'T002',
+            name: 'Moved Technique',
+            reference: '',
+          },
+        ],
+      },
+    ];
+
+    renderWithThreats(threats);
+
+    expect(await screen.findByText('Moved Technique (T002)')).toBeInTheDocument();
+    expect(
+      await screen.findByText(/"T002" is no longer assigned to the selected tactic/)
+    ).toBeInTheDocument();
+    // Reassigned technique is still in the dataset, so we don't mislead users
+    // by flagging it as removed.
+    expect(screen.queryByText(/"T002" is not in the currently supported MITRE/)).toBeNull();
   });
 });
