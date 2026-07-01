@@ -1577,7 +1577,7 @@
     "use-resize-observer": "9.1.0",
     "usng.js": "0.4.5",
     "utility-types": "3.11.0",
-    "uuid": "11.1.0",
+    "uuid": "^14.0.0",
     "vega": "6.2.0",
     "vega-interpreter": "2.2.1",
     "vega-lite": "6.4.1",

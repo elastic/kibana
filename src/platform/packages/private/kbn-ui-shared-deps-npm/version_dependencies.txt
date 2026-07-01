@@ -506,7 +506,6 @@ use-sync-external-store@1.6.0
 util-deprecate@1.0.2
 util@0.12.5
 utility-types@3.11.0
-uuid@11.1.0
 uuid@14.0.0
 value-equal@0.4.0
 vfile-location@3.0.1
