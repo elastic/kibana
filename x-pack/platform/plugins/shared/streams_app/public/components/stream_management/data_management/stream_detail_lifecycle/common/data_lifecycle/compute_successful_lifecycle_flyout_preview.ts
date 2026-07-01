@@ -38,6 +38,7 @@ export interface ComputeSuccessfulLifecycleFlyoutPreviewArgs {
   isServerless: boolean;
   ilmPhases: IlmPhasesMap;
   hotColor: string;
+  // Used only by the ILM preview path (the DLM preview intentionally shows no per-phase sizes).
   stats?: { size?: string; sizeBytes?: number; totalDocs?: number };
 }
 
@@ -68,11 +69,10 @@ const previewForDlmSelection = ({
   isServerless,
   ilmPhases,
   hotColor,
-  stats,
   indexMode,
 }: Pick<
   ComputeSuccessfulLifecycleFlyoutPreviewArgs,
-  'effectiveLifecycle' | 'isServerless' | 'ilmPhases' | 'hotColor' | 'stats' | 'indexMode'
+  'effectiveLifecycle' | 'isServerless' | 'ilmPhases' | 'hotColor' | 'indexMode'
 >): Extract<SuccessfulLifecycleFlyoutPreview, { action: 'apply' }> => {
   const baseline = effectiveToIngestLifecycle(effectiveLifecycle);
   const baselineDsl = 'dsl' in baseline ? baseline.dsl : {};
@@ -82,7 +82,9 @@ const previewForDlmSelection = ({
     hotDescription: ilmPhases.hot.description,
     deletePhaseColor: ilmPhases.delete.color,
     deletePhaseDescription: ilmPhases.delete.description,
-    stats,
+    frozenAfter: baselineDsl.frozen_after,
+    frozenColor: ilmPhases.frozen.color,
+    frozenDescription: ilmPhases.frozen.description,
     retentionPeriod: baselineDsl.data_retention,
     downsampleSteps: baselineDsl.downsample ?? null,
     indexMode: indexMode ?? 'standard',
@@ -127,13 +129,16 @@ const previewFromLifecycle = ({
 
   const retentionPeriod = 'dsl' in baseline ? baseline.dsl.data_retention : undefined;
   const downsampleSteps = 'dsl' in baseline ? baseline.dsl.downsample ?? null : null;
+  const frozenAfter = 'dsl' in baseline ? baseline.dsl.frozen_after : undefined;
   const model = buildDlmPreviewModel({
     isServerless,
     hotColor,
     hotDescription: ilmPhases.hot.description,
     deletePhaseColor: ilmPhases.delete.color,
     deletePhaseDescription: ilmPhases.delete.description,
-    stats,
+    frozenAfter,
+    frozenColor: ilmPhases.frozen.color,
+    frozenDescription: ilmPhases.frozen.description,
     retentionPeriod,
     downsampleSteps,
     indexMode: indexMode ?? 'standard',
@@ -230,7 +235,6 @@ export const computeSuccessfulLifecycleFlyoutPreview = (
     isServerless,
     ilmPhases,
     hotColor,
-    stats,
     indexMode,
   });
 };

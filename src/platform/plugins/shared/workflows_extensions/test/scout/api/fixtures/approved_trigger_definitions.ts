@@ -64,6 +64,26 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: 'd280f377a1b17bcbd655e93f00ebb80b1935ef93951115cc1559305a5da01942',
   },
   {
+    id: 'alerting.ruleCreated',
+    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
+  },
+  {
+    id: 'alerting.ruleDeleted',
+    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
+  },
+  {
+    id: 'alerting.ruleDisabled',
+    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
+  },
+  {
+    id: 'alerting.ruleEnabled',
+    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
+  },
+  {
+    id: 'alerting.ruleUpdated',
+    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
+  },
+  {
     id: 'cases.caseCreated',
     schemaHash: '616f3b574681800b6ee48d4809ea220bd2179ddc97a08c72f77171c0844de98b',
   },
