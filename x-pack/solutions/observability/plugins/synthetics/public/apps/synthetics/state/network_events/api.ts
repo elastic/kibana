@@ -19,6 +19,7 @@ export async function fetchNetworkEvents(
     {
       checkGroup: params.checkGroup,
       stepIndex: params.stepIndex,
+      ...(params.timestamp ? { timestamp: params.timestamp } : {}),
     },
     SyntheticsNetworkEventsApiResponseType
   )) as SyntheticsNetworkEventsApiResponse;

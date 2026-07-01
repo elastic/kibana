@@ -36,14 +36,19 @@ export const StepDetailPage = () => {
 
   const dispatch = useDispatch();
 
+  // Once the step is known we forward its run `@timestamp` so the network
+  // events query can be bounded to that run and prune frozen-tier shards.
+  const stepTimestamp = currentStep?.['@timestamp'];
+
   useEffect(() => {
     dispatch(
       getNetworkEvents.get({
         checkGroup: checkGroupId,
         stepIndex: Number(stepIndex),
+        timestamp: stepTimestamp,
       })
     );
-  }, [dispatch, stepIndex, checkGroupId]);
+  }, [dispatch, stepIndex, checkGroupId, stepTimestamp]);
 
   return (
     <>
