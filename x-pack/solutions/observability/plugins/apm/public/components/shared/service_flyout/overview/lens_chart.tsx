@@ -7,11 +7,12 @@
 
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiPanel, EuiTitle } from '@elastic/eui';
-import type { LensAttributes, LensConfig, LensESQLDataset } from '@kbn/lens-embeddable-utils';
+import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import React, { memo, useEffect, useMemo, useRef } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import type { LensESQLConfig } from './types';
 
 const CHART_HEIGHT = 200;
 
@@ -19,7 +20,7 @@ interface ServiceFlyoutLensChartProps {
   id: string;
   title: string;
   titleAction?: React.ReactNode;
-  config?: LensConfig;
+  config?: LensESQLConfig;
   rangeFrom: string;
   rangeTo: string;
   refreshToken: number;
@@ -43,7 +44,7 @@ function ServiceFlyoutLensChartComponent({
     }
     const builder = new LensConfigBuilder(dataViews);
     return builder.build(config, {
-      query: { esql: (config.dataset as LensESQLDataset).esql },
+      query: { esql: config.dataset.esql },
     }) as Promise<LensAttributes>;
   }, [config, dataViews]);
 

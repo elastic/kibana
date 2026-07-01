@@ -15,9 +15,9 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import type { LensConfig } from '@kbn/lens-embeddable-utils';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
+import type { LensESQLConfig } from './types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import type { Environment } from '../../../../../common/environment_rt';
 import type { ServiceNodeData } from '../../../../../common/service_map';
@@ -63,7 +63,7 @@ interface FlyoutLensChartDefinition {
   id: string;
   title: string;
   titleAction?: React.ReactNode;
-  config?: LensConfig;
+  config?: LensESQLConfig;
 }
 
 function ServiceFlyoutChartsSection({

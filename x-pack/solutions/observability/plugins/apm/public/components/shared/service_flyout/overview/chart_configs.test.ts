@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { LensConfig, LensESQLDataset, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
+import type { LensConfig, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
+import type { LensESQLConfig } from './types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
   ENVIRONMENT_ALL,
@@ -40,11 +41,11 @@ function buildDefinitions(
   });
 }
 
-function esqlOf(config: LensConfig | undefined): string {
+function esqlOf(config: LensESQLConfig | undefined): string {
   if (!config) {
     throw new Error('Expected a built Lens config');
   }
-  return ((config as XYLensConfig).dataset as LensESQLDataset).esql;
+  return config.dataset.esql;
 }
 
 describe('service flyout chart_configs', () => {

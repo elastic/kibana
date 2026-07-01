@@ -9,6 +9,7 @@ import type { ReactNode } from 'react';
 import { esql, type ComposerQuery } from '@elastic/esql';
 import { i18n } from '@kbn/i18n';
 import type { LensConfig, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
+import type { LensESQLConfig } from './types';
 import {
   EVENT_OUTCOME,
   METRIC_CGROUP_MEMORY_LIMIT_BYTES,
@@ -35,7 +36,7 @@ interface FlyoutLensChartConfigDefinition {
   id: string;
   title: string;
   titleAction?: ReactNode;
-  config?: LensConfig;
+  config?: LensESQLConfig;
 }
 
 type LensYAxis = LensSeriesLayer['yAxis'][number];
@@ -122,7 +123,7 @@ function buildChartDefinition({
     return { id, title, titleAction };
   }
 
-  const config: LensConfig = {
+  const config: LensESQLConfig = {
     chartType: 'xy',
     title,
     dataset: { esql: `${ESQL_NULLIFY_UNMAPPED_FIELDS}\n${printQuery(buildQuery(indexes))}` },
