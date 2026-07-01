@@ -41,9 +41,6 @@ interface SavedUiMonitor extends Record<string, unknown> {
 }
 
 /**
- * Ported from FTR
- * `x-pack/solutions/observability/test/api_integration/apis/synthetics/update_monitor_bulk.ts`.
- *
  * Exercises `PUT /api/synthetics/monitors/_bulk_update` through the full stack:
  * real ESO round-trip (the AAD regression reads the monitor back via internal
  * GET, which decrypts; if `mergeSourceMonitor` ever stops carrying prev AAD
