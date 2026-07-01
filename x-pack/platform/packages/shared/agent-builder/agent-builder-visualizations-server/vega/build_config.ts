@@ -28,17 +28,16 @@ export interface BuildVegaConfigParams {
 }
 
 export interface BuildVegaConfigResult {
-  /** Serialized, render-ready Vega or Vega-Lite specification. */
+  /** Serialized, render-ready Vega-Lite specification. */
   spec: string;
   /** Canonical ES|QL query bound into the spec's data source. */
   esqlQuery: string;
 }
 
 /**
- * Orchestrate Vega spec generation (Vega-Lite by default, raw Vega when the
- * request requires it): optionally reuse a caller-provided ES|QL query (dropped
- * if it fails validation so the graph regenerates one), run the generation
- * graph, and surface a clear error if no spec is produced.
+ * Orchestrate Vega-Lite spec generation: optionally reuse a caller-provided
+ * ES|QL query (dropped if it fails validation so the graph regenerates one), run
+ * the generation graph, and surface a clear error if no spec is produced.
  */
 export const buildVegaConfig = async ({
   nlQuery,

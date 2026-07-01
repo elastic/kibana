@@ -58,7 +58,7 @@ ${existingSpec}
     : ''
 }
 DATA SOURCE RULES:
-1. Bind the data with Kibana's inline ES|QL source, as in the reference examples: for Vega-Lite a top-level "data": { "url": { "%type%": "esql", "query": <the exact query below> } }; for raw Vega a base data set named "source" with that same "url" (derived sets reference it via "source": "source"). Use the query verbatim — do not modify it; the system re-binds and validates it.
+1. Bind the data with Kibana's inline ES|QL source: a top-level "data": { "url": { "%type%": "esql", "query": <the exact query below> } }. Use the query verbatim — do not modify it; the system re-binds and validates it.
 2. The spec is built around this ES|QL query; its result columns are the only fields you may reference in encodings: ${esqlQueryJson}
 3. Reference each column by its exact name as produced by the query. If the query uses the time-picker params (?_tstart / ?_tend), add "%timefield%": "@timestamp" to the url so Kibana binds the time range.
 
@@ -82,7 +82,7 @@ LAYOUT & STYLE RULES:
 - Provide a clear, self-explanatory "title"; prefer it over redundant axis titles.
 - SORT IN LAYERED SPECS: when a categorical axis is shared across layers, pre-sort rows in ES|QL (SORT … DESC) and set "sort": null on that encoding to avoid "conflicting sort properties" warnings.
 - SHARED SCALES IN LAYERED SPECS: when multiple layers encode the same field on a shared scale (e.g. "color"), configure the "legend"/"axis"/"scale" on ONE layer only. Do NOT set "legend": null on one layer while another sets a legend for the same scale — conflicting per-layer settings trigger "Conflicting legend property" warnings.
-- INDICATOR / BIG-NUMBER charts: stack the text marks in clearly separated vertical bands and NEVER center two large text marks on the same point. A single big value is safest; when adding a label or a secondary value (e.g. "Previous", "% change"), give each its own non-overlapping band and size fonts so the tallest mark cannot grow into its neighbours at any panel aspect ratio — overlapping text is rejected by validation.
+- INDICATOR / BIG-NUMBER charts: stack the text marks in clearly separated vertical bands and NEVER center two large text marks on the same point. A single big value is safest; when adding a label or a secondary value (e.g. "Previous", "% change"), give each its own non-overlapping band and size fonts so the tallest mark cannot grow into its neighbours at any panel aspect ratio — overlapping text is hard to read.
 
 DOTS IN FIELD NAMES:
 - Vega treats an unescaped dot in a field name as nested-object access, but ES|QL columns are flat. For a column whose name contains a dot (e.g. "geo.dest"), backslash-escape every dot in "field" strings ("geo\\.dest") and use bracket access in expressions (datum['geo.dest']).
@@ -96,7 +96,7 @@ ${nlQuery}
 IMPORTANT: Return ONLY the JSON specification wrapped in a markdown code block:
 \`\`\`json
 {
-  // your Vega or Vega-Lite specification here
+  // your Vega-Lite specification here
 }
 \`\`\`
 
