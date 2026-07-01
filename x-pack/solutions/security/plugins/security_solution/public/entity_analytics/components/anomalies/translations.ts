@@ -129,6 +129,31 @@ export const ENTITY_ANOMALY_TABLE_SCORE_COLUMN_TOOLTIP = i18n.translate(
   }
 );
 
+export const ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.anomalyTable.actionsColumn',
+  { defaultMessage: 'Actions' }
+);
+
+export const ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.anomalyTable.actionsColumnTooltip',
+  { defaultMessage: 'Row actions' }
+);
+
+export const ENTITY_ANOMALY_TABLE_ROW_ACTION_VIEW_IN_SMV = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.anomalyTable.actionsColumn.rowAction.viewInSingleMetricViewer',
+  { defaultMessage: 'View in Single metric viewer' }
+);
+
+export const ENTITY_ANOMALY_TABLE_ROW_ACTION_VIEW_IN_DISCOVER = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.anomalyTable.actionsColumn.rowAction.viewInDiscover',
+  { defaultMessage: 'View in Discover' }
+);
+
+export const ENTITY_ANOMALY_TABLE_ROW_ACTION_ADD_TO_TIMELINE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.anomalyTable.actionsColumn.rowAction.addToTimeline',
+  { defaultMessage: 'Add to timeline' }
+);
+
 export const ENTITY_ANOMALY_TABLE_EXPANDED_ROW_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.anomalyTable.expanded.description',
   { defaultMessage: 'Explainer' }

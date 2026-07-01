@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { SignificantEvent } from '@kbn/streams-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE, SIGNIFICANT_EVENT_SML_TYPE } from '../../../common';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../routes/types';
 import { EventService } from '../../lib/significant_events/events/event_service';
@@ -107,15 +107,27 @@ describe('createSignificantEventSmlType', () => {
         expect.objectContaining({
           type: SIGNIFICANT_EVENT_SML_TYPE,
           title: 'Payment outage',
-          permissions: {
-            kibana: { privileges: [{ name: 'api:read_stream' }] },
-            elasticsearch: { indices: [] },
-          },
         }),
       ],
     });
+    expect(result?.chunks[0]).not.toHaveProperty('permissions');
     expect(result?.chunks[0].content).toContain('Payment gateway timeout.');
     expect(findByDiscoverySlug).toHaveBeenCalledWith('payment-outage');
+  });
+
+  it('getPermissions returns the streams read API privilege', () => {
+    const smlType = createSignificantEventSmlType({
+      getScopedClients: createGetScopedClients([]),
+    });
+    const permissions = smlType.getPermissions!('payment-outage', {
+      esClient: {} as never,
+      savedObjectsClient: {} as never,
+      logger: loggingSystemMock.createLogger(),
+    });
+    expect(permissions).toEqual({
+      kibana: { privileges: [{ name: 'api:read_stream' }] },
+      elasticsearch: { indices: [] },
+    });
   });
 
   it('converts an SML document into an attachment', async () => {
