@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   ChangeHistoryListGroupItem,
   ChangeHistoryModal,
@@ -22,6 +22,12 @@ import {
 } from './use_workflow_change_history';
 import { renderWorkflowChangeHistoryBadge } from './workflow_change_history_badge';
 import { renderWorkflowChangeHistoryPreview } from './workflow_change_history_preview';
+import {
+  WORKFLOW_CHANGE_HISTORY_DATASET,
+  WORKFLOW_CHANGE_HISTORY_MODULE,
+  WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
+} from '../../../common/lib/workflow_change_history/constants';
+import { useKibana } from '../../hooks/use_kibana';
 
 export interface WorkflowChangeHistoryProviderProps {
   workflowId: string;
@@ -34,9 +40,18 @@ export const WorkflowChangeHistoryProvider = ({
   workflowName,
   children,
 }: WorkflowChangeHistoryProviderProps): JSX.Element => {
+  const { analytics: coreAnalytics } = useKibana().services;
   const isEnabled = useWorkflowChangeHistoryEnabled();
   const adapter = useWorkflowChangeHistoryAdapter(workflowId);
   const canRestore = useWorkflowChangeHistoryRestoreEligibility();
+  const scope = useMemo(
+    () => ({
+      module: WORKFLOW_CHANGE_HISTORY_MODULE,
+      dataset: WORKFLOW_CHANGE_HISTORY_DATASET,
+      objectType: WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
+    }),
+    []
+  );
 
   if (!isEnabled) {
     return <>{children}</>;
@@ -54,6 +69,8 @@ export const WorkflowChangeHistoryProvider = ({
       }}
       features={{ restore: true }}
       permissions={{ canRestore }}
+      scope={scope}
+      analytics={coreAnalytics}
     >
       {children}
       <ChangeHistoryModal />

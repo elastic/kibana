@@ -59,6 +59,10 @@ jest.mock('./table/anomaly_score_badge', () => ({
   ),
 }));
 
+jest.mock('./table/anomaly_row_actions_menu', () => ({
+  AnomalyRowActionsMenu: () => <div data-test-subj="mock-row-actions-menu" />,
+}));
+
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );
@@ -76,6 +80,7 @@ const makeAnomaly = (overrides: Partial<AnomalySummaryEntry> = {}): AnomalySumma
   partitionFieldName: null,
   partitionFieldValue: null,
   recordScore: 75,
+  recordId: 'record-1',
   timestamp: '2024-01-15T10:00:00.000Z',
   actual: [100],
   typical: [10],
