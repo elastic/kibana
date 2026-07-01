@@ -50,7 +50,7 @@ export function toStoredFeature(
   streamName: string,
   feature: FeatureUpsert,
   includeEmbedding: boolean,
-  expiresAt?: string | undefined
+  expiresAt?: string
 ): StoredFeatureKnowledgeIndicator {
   const embedding = buildSearchEmbeddingFeature(feature, streamName);
   const timestamp = new Date().toISOString();
