@@ -26,12 +26,66 @@ const createContext = (overrides: Partial<ApiEndpointContext> = {}): ApiEndpoint
 
 describe('API_ENDPOINTS', () => {
   describe('getUrl', () => {
-    it('returns the Elasticsearch URL unchanged', () => {
-      expect(
-        getEndpoint('elasticsearch').getUrl(
-          createContext({ elasticsearchUrl: 'https://es.example.com' })
-        )
-      ).toBe('https://es.example.com');
+    describe('Elasticsearch URL', () => {
+      it('returns the Elasticsearch URL unchanged on non-Serverless deployments', () => {
+        expect(
+          getEndpoint('elasticsearch').getUrl(
+            createContext({
+              isServerless: false,
+              elasticsearchUrl: 'https://es.example.com',
+              managedOtlpServiceUrl: 'https://otlp.example.com:443',
+            })
+          )
+        ).toBe('https://es.example.com');
+      });
+
+      it('uses the managed Elasticsearch-compatible endpoint on Serverless', () => {
+        expect(
+          getEndpoint('elasticsearch').getUrl(
+            createContext({
+              isServerless: true,
+              elasticsearchUrl: 'https://es.example.com',
+              managedOtlpServiceUrl: 'https://otlp.example.com:443',
+            })
+          )
+        ).toBe('https://otlp.example.com:443/_es');
+      });
+
+      it('trims trailing slashes from the managed URL before appending the managed Elasticsearch-compatible path', () => {
+        expect(
+          getEndpoint('elasticsearch').getUrl(
+            createContext({
+              isServerless: true,
+              elasticsearchUrl: 'https://es.example.com',
+              managedOtlpServiceUrl: 'https://otlp.example.com:443//',
+            })
+          )
+        ).toBe('https://otlp.example.com:443/_es');
+      });
+
+      it('falls back to the Elasticsearch URL on Serverless when the managed URL is missing', () => {
+        expect(
+          getEndpoint('elasticsearch').getUrl(
+            createContext({
+              isServerless: true,
+              elasticsearchUrl: 'https://es.example.com',
+              managedOtlpServiceUrl: undefined,
+            })
+          )
+        ).toBe('https://es.example.com');
+      });
+
+      it('returns undefined when no Elasticsearch URL can be derived', () => {
+        expect(
+          getEndpoint('elasticsearch').getUrl(
+            createContext({
+              isServerless: true,
+              elasticsearchUrl: undefined,
+              managedOtlpServiceUrl: undefined,
+            })
+          )
+        ).toBeUndefined();
+      });
     });
 
     describe('OpenTelemetry URL', () => {
