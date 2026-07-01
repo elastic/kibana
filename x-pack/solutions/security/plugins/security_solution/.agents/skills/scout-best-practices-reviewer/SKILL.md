@@ -2,8 +2,7 @@
 name: security-scout-best-practices-reviewer
 description: >
   Use when reviewing Scout tests in x-pack/solutions/security/, running a pre-PR check on Security
-  Solution Scout code, or reviewing a Cypress-to-Scout migration in that area. Extends
-  scout-best-practices-reviewer with Security Solution-specific checks.
+  Solution Scout code, or reviewing a Cypress-to-Scout migration in that area.
 ---
 
 # Security Solution — Scout Best Practices Reviewer (Additive)
@@ -38,7 +37,7 @@ Security Solution tests commonly create resources that require explicit cleanup 
 
 ### Auth and roles
 
-Use Security Solution-specific auth methods. Never use `loginAsAdmin()`:
+Use Security Solution-specific auth methods — never `loginAsAdmin()`:
 
 | Role | Method | When to use |
 |------|--------|-------------|
@@ -47,7 +46,7 @@ Use Security Solution-specific auth methods. Never use `loginAsAdmin()`:
 | Any security role | `browserAuth.loginAsSecurityRole('role_name')` | Generic — any role in `roles.yml` |
 | Custom role | `browserAuth.loginWithCustomRole(roleDescriptor)` | Ad-hoc RBAC with inline descriptors |
 
-Never use `loginAsAdmin()`. Prefer named convenience methods (`loginAsPlatformEngineer`, `loginAsT1Analyst`) over `loginAsSecurityRole('platform_engineer')` for commonly used roles.
+Prefer named convenience methods (`loginAsPlatformEngineer`, `loginAsT1Analyst`) over `loginAsSecurityRole('platform_engineer')` for commonly used roles.
 
 ### Tags
 
@@ -90,8 +89,6 @@ When reviewing a Cypress-to-Scout migration, check these in addition to the migr
 After every review, check for new learnings worth capturing. Suggest updates if:
 
 - **New review checklist item** — found a Security-specific pattern worth verifying
-- **New Kibana component pattern** — a component required a non-obvious Playwright approach
-- **New lint workaround** — a lint rule required a non-obvious alternative
 - **New API service or page object** — reusable infrastructure was added to `@kbn/scout-security`
 
 Prompt the user: _"During this review I learned [X]. Want me to add it to the skill so future reviews benefit?"_
