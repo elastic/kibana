@@ -235,6 +235,39 @@ describe('layout manager', () => {
     });
   });
 
+  test('should preserve section panels when appending an incoming embeddable to a section-only dashboard', () => {
+    const incomingEmbeddables = [
+      {
+        embeddableId: 'incomingPanel',
+        serializedState: {
+          title: 'Incoming Panel',
+        },
+        size: {
+          height: 1,
+          width: 1,
+        },
+        type: 'testPanelType',
+      },
+    ];
+    // Dashboard whose only panel lives inside a collapsible section (no top-level panels).
+    const layoutManager = initializeLayoutManager(
+      viewModeManagerMock,
+      incomingEmbeddables,
+      [section1],
+      [],
+      trackPanelMock
+    );
+
+    const layout = layoutManager.api.layout$.value;
+    expect(Object.keys(layout.sections)).toEqual(['section1']);
+    // The section's original panel must still be present alongside the incoming panel.
+    expect(layout.panels[PANEL_ONE_ID]).toEqual({
+      grid: { w: 1, h: 1, x: 0, y: 0, sectionId: 'section1' },
+      type: 'testPanelType',
+    });
+    expect(layout.panels.incomingPanel).toBeDefined();
+  });
+
   describe('duplicatePanel', () => {
     test('should add duplicated panel to layout', async () => {
       const layoutManager = initializeLayoutManager(
