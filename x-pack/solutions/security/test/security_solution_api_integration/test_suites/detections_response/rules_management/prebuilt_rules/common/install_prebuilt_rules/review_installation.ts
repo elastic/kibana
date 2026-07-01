@@ -1082,7 +1082,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
 
         const response = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: { term: 'security-rule.tags: "Tactic: Collection"', mode: 'KQL' },
+          filter: { fields: { tags: { include: { values: ['Tactic: Collection'] } } } },
         });
 
         const ruleIds = response.rules.map((r: { rule_id: string }) => r.rule_id);
