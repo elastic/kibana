@@ -139,7 +139,8 @@ const createSpineTypeConfig = (
 
 export const SPINE_TYPE_ORDER: SpineType[] = ['chat', 'case', 'incident', 'threat_hunt'];
 
-export const PROMOTABLE_SPINE_TYPES: SpineType[] = ['case', 'incident', 'threat_hunt'];
+/** Spine types shown in the relationship badge type selector (includes Chat to unset promotion). */
+export const SELECTABLE_SPINE_TYPES: SpineType[] = SPINE_TYPE_ORDER;
 
 export const SPINE_TYPE_CONFIG: Record<SpineType, SpineTypeConfig> = {
   chat: createSpineTypeConfig(
