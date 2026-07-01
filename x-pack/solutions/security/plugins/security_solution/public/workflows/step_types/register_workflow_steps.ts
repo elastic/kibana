@@ -7,6 +7,7 @@
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { CoreSetup } from '@kbn/core/public';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import {
   REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
   REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
@@ -19,7 +20,8 @@ import {
  */
 export const registerWorkflowSteps = (
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup,
-  core: CoreSetup
+  core: CoreSetup,
+  experimentalFeatures: ExperimentalFeatures
 ): void => {
   const isEnabled = core
     .getStartServices()
@@ -57,4 +59,12 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(() =>
     import('./assign_alert_step/assign_alert_step').then((m) => m.assignAlertStepDefinition)
   );
+
+  if (experimentalFeatures.publicAttacksApiEnabled) {
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./set_attack_tags_step/set_attack_tags_step').then(
+        (m) => m.setAttackTagsStepDefinition
+      )
+    );
+  }
 };
