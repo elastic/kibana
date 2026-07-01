@@ -8,4 +8,3 @@
  */
 
 export { Inspector } from './inspector';
-export type { InspectorView } from './inspector';
