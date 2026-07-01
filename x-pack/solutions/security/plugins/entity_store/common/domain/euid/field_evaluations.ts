@@ -150,7 +150,10 @@ function buildEvaluationSourceMatchSpec(
         ? {
             and: [
               whenMatch.winningCondition,
-              { field: whenMatch.fieldMappingMatch.field, eq: whenMatch.fieldMappingMatch.matchedKey },
+              {
+                field: whenMatch.fieldMappingMatch.field,
+                eq: whenMatch.fieldMappingMatch.matchedKey,
+              },
             ],
           }
         : whenMatch.winningCondition;
