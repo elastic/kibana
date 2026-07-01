@@ -89,6 +89,11 @@ beforeAll(() => {
     configurable: true,
     value: IntersectionObserverMock,
   });
+
+  jest.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+    callback(0);
+    return 1;
+  });
 });
 
 jest.mock('./use_workflow_change_history', () => ({
@@ -205,14 +210,26 @@ const openHistoryModal = async () => {
   await waitFor(() => {
     expect(screen.getByTestId('changeHistoryModal')).toBeInTheDocument();
   });
+
+  await waitFor(() => {
+    expect(screen.getByTestId('changeHistoryTimeline')).toBeInTheDocument();
+  });
 };
 
-const selectHistoricalVersion = async (changeId = 'evt-previous') => {
+const selectHistoryItem = async (changeId = 'evt-previous') => {
+  await waitFor(() => {
+    expect(screen.getByTestId(`changeHistoryItem-${changeId}`)).toBeInTheDocument();
+  });
+
   fireEvent.click(screen.getByTestId(`changeHistoryItem-${changeId}`));
 
   await waitFor(() => {
     expect(screen.getByTestId('changeHistoryPreview')).toBeInTheDocument();
   });
+};
+
+const selectHistoricalVersion = async (changeId = 'evt-previous') => {
+  await selectHistoryItem(changeId);
 
   await waitFor(() => {
     expect(screen.getByTestId('changeHistoryRestoreButton')).toBeInTheDocument();
@@ -424,11 +441,7 @@ describe('WorkflowChangeHistoryListItem', () => {
     );
 
     await openHistoryModal();
-    fireEvent.click(screen.getByTestId('changeHistoryItem-evt-previous'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('changeHistoryPreview')).toBeInTheDocument();
-    });
+    await selectHistoryItem();
 
     expect(screen.queryByTestId('changeHistoryRestoreButton')).not.toBeInTheDocument();
   });
