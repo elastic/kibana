@@ -96,6 +96,55 @@ jest.mock('./use_workflow_change_history', () => ({
   useWorkflowChangeHistoryEnabled: jest.fn(),
 }));
 
+jest.mock('./apply_workflow_yaml_validation_to_editor', () => ({
+  applyWorkflowYamlValidationToEditor: jest.fn(() => Promise.resolve({ validationResults: [] })),
+}));
+
+const { applyWorkflowYamlValidationToEditor } = jest.requireMock(
+  './apply_workflow_yaml_validation_to_editor'
+);
+
+jest.mock('@kbn/code-editor', () => ({
+  monaco: {
+    MarkerSeverity: { Error: 8 },
+    editor: {
+      createModel: jest.fn(() => ({ dispose: jest.fn() })),
+      create: jest.fn(() => ({
+        dispose: jest.fn(),
+        getModel: jest.fn(() => ({ dispose: jest.fn() })),
+        createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
+      })),
+      createDiffEditor: jest.fn(() => ({
+        setModel: jest.fn(),
+        dispose: jest.fn(),
+        updateOptions: jest.fn(),
+        getLineChanges: jest.fn(() => [
+          {
+            originalStartLineNumber: 1,
+            originalEndLineNumber: 1,
+            modifiedStartLineNumber: 1,
+            modifiedEndLineNumber: 1,
+          },
+        ]),
+        onDidUpdateDiff: jest.fn(() => ({ dispose: jest.fn() })),
+        getOriginalEditor: jest.fn(() => ({ updateOptions: jest.fn() })),
+        getModifiedEditor: jest.fn(() => ({
+          updateOptions: jest.fn(),
+          revealLineInCenter: jest.fn(),
+          getModel: jest.fn(() => ({ dispose: jest.fn() })),
+          createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
+        })),
+      })),
+      setModelMarkers: jest.fn(),
+    },
+  },
+}));
+
+jest.mock('@kbn/workflows-ui', () => ({
+  useWorkflowsMonacoTheme: jest.fn(),
+  WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
+}));
+
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: jest.fn(),
 }));
@@ -163,6 +212,10 @@ const selectHistoricalVersion = async (changeId = 'evt-previous') => {
 
   await waitFor(() => {
     expect(screen.getByTestId('changeHistoryPreview')).toBeInTheDocument();
+  });
+
+  await waitFor(() => {
+    expect(screen.getByTestId('changeHistoryRestoreButton')).toBeInTheDocument();
   });
 };
 
@@ -253,9 +306,10 @@ describe('WorkflowChangeHistoryListItem', () => {
       expect(screen.getByTestId('changeHistoryPreview')).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId('workflowChangeHistoryYamlPreview')).toHaveTextContent(
-      'name: current'
-    );
+    expect(screen.getByTestId('workflowChangeHistoryMonacoPreview')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(applyWorkflowYamlValidationToEditor).toHaveBeenCalled();
+    });
     expect(services.http.get).toHaveBeenCalledWith(
       expect.stringContaining('/internal/workflows/workflow/workflow-1/history'),
       expect.objectContaining({
@@ -370,7 +424,11 @@ describe('WorkflowChangeHistoryListItem', () => {
     );
 
     await openHistoryModal();
-    await selectHistoricalVersion();
+    fireEvent.click(screen.getByTestId('changeHistoryItem-evt-previous'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('changeHistoryPreview')).toBeInTheDocument();
+    });
 
     expect(screen.queryByTestId('changeHistoryRestoreButton')).not.toBeInTheDocument();
   });
