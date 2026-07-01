@@ -89,6 +89,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       spaceId: request.spaceId,
       apiKeyCreatedByUser,
       userProfileId: user?.profile_uid,
+      userName: user?.username,
     });
 
     // When cloning a UIAM-authenticated request there is no Elasticsearch API key to clone:

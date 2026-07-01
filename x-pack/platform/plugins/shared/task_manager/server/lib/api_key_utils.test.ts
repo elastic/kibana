@@ -339,6 +339,7 @@ describe('api_key_utils', () => {
           apiKeyId: 'apiKeyId',
           spaceId: 'test-space',
           apiKeyCreatedByUser: false,
+          userName: 'testUser',
         },
       });
     });
@@ -369,6 +370,7 @@ describe('api_key_utils', () => {
           apiKeyId: 'apiKeyId',
           spaceId: 'default',
           apiKeyCreatedByUser: false,
+          userName: 'testUser',
         },
       });
     });
@@ -398,6 +400,7 @@ describe('api_key_utils', () => {
           apiKeyId: 'apiKeyId',
           spaceId: 'default',
           apiKeyCreatedByUser: true,
+          userName: 'testUser',
         },
       });
     });
@@ -559,6 +562,7 @@ describe('api_key_utils', () => {
           spaceId: 'default',
           apiKeyCreatedByUser: false,
           userProfileId: 'u_profile_12345',
+          userName: 'testUser',
         },
       });
     });
@@ -590,6 +594,7 @@ describe('api_key_utils', () => {
           spaceId: 'default',
           apiKeyCreatedByUser: true,
           userProfileId: 'u_profile_12345',
+          userName: 'testUser',
         },
       });
     });

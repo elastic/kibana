@@ -212,6 +212,7 @@ export const getApiKeyAndUserScope = async (
           // Cloned and granted keys are owned by Task Manager and invalidated on task removal.
           apiKeyCreatedByUser,
           userProfileId: user?.profile_uid,
+          userName: user?.username,
         },
       });
     }
