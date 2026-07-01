@@ -199,6 +199,16 @@ export const RulesListPage = () => {
     openCreateBuilderFlyout('threshold');
   };
 
+  const onCreateWithAgent = isRuleManagementABSkillAvailable ? navigateToAgentBuilder : undefined;
+  const showHeaderMenu = hasRules || hasActiveFilters;
+  const headerMenu = showHeaderMenu
+    ? getRulesListMenu({
+        onCreateRule: openCreateOptionsFlyout,
+        onCreateEsqlRule: openCreateFlyout,
+        onCreateWithAgent,
+      })
+    : undefined;
+
   return (
     <div>
       <AppHeader
@@ -206,17 +216,7 @@ export const RulesListPage = () => {
         title={RULES_LIST_PAGE_TITLE}
         titleAppend={<ExperimentalBadge />}
         padding={{ bleed: 'l' }}
-        menu={
-          hasRules || hasActiveFilters
-            ? getRulesListMenu({
-                onCreateRule: openCreateOptionsFlyout,
-                onCreateEsqlRule: openCreateFlyout,
-                onCreateWithAgent: isRuleManagementABSkillAvailable
-                  ? navigateToAgentBuilder
-                  : undefined,
-              })
-            : undefined
-        }
+        menu={headerMenu}
       />
       <EuiSpacer size="m" />
       {isInitialLoad ? (

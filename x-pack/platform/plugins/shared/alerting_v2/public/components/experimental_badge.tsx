@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBetaBadge, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const EXPERIMENTAL_LABEL = i18n.translate('xpack.alertingV2.experimentalBadge.label', {
@@ -19,22 +18,12 @@ const EXPERIMENTAL_TOOLTIP = i18n.translate('xpack.alertingV2.experimentalBadge.
     'This functionality is experimental and may be changed or removed completely in a future release. Elastic will work to fix any issues, but experimental features are not subject to the support SLA of official GA features.',
 });
 
-export const ExperimentalBadge = () => {
-  const { euiTheme } = useEuiTheme();
-
-  return (
-    <span
-      css={css`
-        margin-inline-start: ${euiTheme.size.s};
-      `}
-    >
-      <EuiBetaBadge
-        alignment="middle"
-        label={EXPERIMENTAL_LABEL}
-        tooltipContent={EXPERIMENTAL_TOOLTIP}
-        tooltipPosition="bottom"
-        data-test-subj="alertingV2ExperimentalBadge"
-      />
-    </span>
-  );
-};
+export const ExperimentalBadge = () => (
+  <EuiBetaBadge
+    alignment="middle"
+    label={EXPERIMENTAL_LABEL}
+    tooltipContent={EXPERIMENTAL_TOOLTIP}
+    tooltipPosition="bottom"
+    data-test-subj="alertingV2ExperimentalBadge"
+  />
+);

@@ -30,7 +30,7 @@ const EXECUTION_HISTORY_DENORMALIZATION_TOOLTIP = i18n.translate(
   'xpack.alertingV2.executionHistory.denormalizationTooltip',
   {
     defaultMessage:
-      'Pagination is by event. A single event may show as multiple rows — one per rule referenced by the event.',
+      'Pagination is by event. A single event may show as multiple rows, one per rule referenced by the event.',
   }
 );
 

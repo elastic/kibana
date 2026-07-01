@@ -38,7 +38,6 @@ export class ComposeDiscoverPage {
   public readonly addRunbookButton: Locator;
   public readonly relatedDashboardsSelector: Locator;
   public readonly relatedDashboardsInput: Locator;
-  /** Split-button dropdown trigger on the rules list header (table state). */
   public readonly createRuleSplitDropdownButton: Locator;
   public readonly createEsqlRuleButton: Locator;
   /** "Create ES|QL rule" card in the empty-state panel (shown when no rules exist). */
