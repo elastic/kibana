@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 import { pick } from 'lodash';
+import { EuiSpacer } from '@elastic/eui';
 
 import { LogRateAnalysis } from '@kbn/aiops-plugin/public';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
@@ -35,7 +36,8 @@ export const LogRateAnalysisPage: FC = () => {
 
   return (
     <>
-      <MlAppHeader title={pageTitle} />
+      <MlAppHeader title={pageTitle} docLink={services.docLinks.links.ml.guide} />
+      <EuiSpacer size="m" />
       {!dataView ? (
         <>
           <MlDataSourcePicker

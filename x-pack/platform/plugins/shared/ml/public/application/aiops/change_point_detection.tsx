@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 import { pick } from 'lodash';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ChangePointDetection } from '@kbn/aiops-plugin/public';
@@ -38,6 +39,7 @@ export const ChangePointDetectionPage: FC = () => {
     <>
       <MlAppHeader
         title={pageTitle}
+        docLink={services.docLinks.links.aggs.change_point}
         badges={[
           {
             label: i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaLabel', {
@@ -51,6 +53,7 @@ export const ChangePointDetectionPage: FC = () => {
           },
         ]}
       />
+      <EuiSpacer size="m" />
       {!dataView ? (
         <>
           <MlDataSourcePicker
