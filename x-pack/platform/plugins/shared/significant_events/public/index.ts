@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializer } from '@kbn/core/public';
+import type {
+  SignificantEventsPublicPluginSetup,
+  SignificantEventsPublicPluginStart,
+} from './plugin';
+import { SignificantEventsPublicPlugin } from './plugin';
 
-export const plugin = async (ctx: PluginInitializerContext) => {
-  const { SignificantEventsPublicPlugin } = await import('./plugin');
-  return new SignificantEventsPublicPlugin(ctx);
-};
+export const plugin: PluginInitializer<
+  SignificantEventsPublicPluginSetup,
+  SignificantEventsPublicPluginStart
+> = (ctx) => new SignificantEventsPublicPlugin(ctx);
