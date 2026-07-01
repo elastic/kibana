@@ -86,8 +86,8 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
-  `${internalNamespaces.streams}.significant-events.discovery.investigator`,
-  `${internalNamespaces.streams}.significant-events.discovery.judge`,
+  `${internalNamespaces.streams}.significant-events.discovery`,
+  `${internalNamespaces.streams}.significant-events.judge`,
   `${internalNamespaces.streams}.investigation`,
 ] as const;
 
