@@ -92,6 +92,9 @@ export function VisualizeVega({
     timeRange$.next(effectiveTimeRange);
   }, [effectiveTimeRange, timeRange$]);
 
+  // Complete the subject on unmount so it does not retain subscribers.
+  useEffect(() => () => timeRange$.complete(), [timeRange$]);
+
   const buildSavedVis = useCallback(
     (title: string) => ({
       title,

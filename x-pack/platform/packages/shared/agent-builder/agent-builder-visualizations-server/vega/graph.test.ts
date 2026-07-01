@@ -15,6 +15,9 @@ import { createVegaGraph } from './graph';
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
   executeEsql: jest.fn(),
+}));
+
+jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => ({
   buildTimeRangeParams: jest.fn(() => undefined),
 }));
 

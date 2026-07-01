@@ -80,7 +80,7 @@ const createVisualizationSchema = z.object({
     .max(4096)
     .optional()
     .describe(
-      '(optional) An ES|QL query. If not provided, tool with automatically generate the query. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
+      '(optional) An ES|QL query. If not provided, the tool will automatically generate the query. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
     ),
 });
 
@@ -246,13 +246,14 @@ This tool will:
           ],
         };
       } catch (error) {
-        logger.error(`Error in create_visualization tool: ${error.message}`);
+        const message = error instanceof Error ? error.message : String(error);
+        logger.error(`Error in create_visualization tool: ${message}`);
         return {
           results: [
             {
               type: ToolResultType.error,
               data: {
-                message: `Failed to create visualization: ${error.message}`,
+                message: `Failed to create visualization: ${message}`,
                 metadata: { nlQuery, esql, renderer: requestedRenderer, chartType },
               },
             },
