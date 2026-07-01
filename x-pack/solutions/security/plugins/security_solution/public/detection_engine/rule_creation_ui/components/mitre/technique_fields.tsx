@@ -165,6 +165,31 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
     [findCurrentTechniqueOption, isMitreAttackUpdatesUIEnabled, techniquesOptions]
   );
 
+  // True when the technique id still exists in the dataset but is no longer
+  // assigned to the parent tactic (e.g. MITRE moved it in a version bump).
+  // Without this signal, the EuiSuperSelect renders blank because its
+  // `valueOfSelected` matches no option in the cascade-filtered list.
+  const isTechniqueReassignedFromTactic = useCallback(
+    (parentTactic: Threat['tactic'], technique: ThreatTechnique) => {
+      if (
+        !isMitreAttackUpdatesUIEnabled ||
+        techniquesOptions.length === 0 ||
+        tacticsOptions.length === 0 ||
+        technique.name === 'none'
+      ) {
+        return false;
+      }
+      const option = findCurrentTechniqueOption(technique);
+      if (!option) {
+        return false;
+      }
+      const currentTactic = tacticsOptions.find((t) => t.id === parentTactic.id);
+      const filterTacticName = kebabCase(currentTactic?.name ?? parentTactic.name);
+      return !option.tactics.includes(filterTacticName);
+    },
+    [findCurrentTechniqueOption, isMitreAttackUpdatesUIEnabled, tacticsOptions, techniquesOptions]
+  );
+
   const getTechniqueRenamedFromName = useCallback(
     (technique: ThreatTechnique) => {
       if (!isMitreAttackUpdatesUIEnabled) return undefined;
@@ -187,6 +212,8 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
       const filterTacticName = kebabCase(currentTactic?.name ?? parentTactic.name);
       const options = techniquesOptions.filter((t) => t.tactics.includes(filterTacticName));
       const isUnsupported = isUnsupportedTechnique(technique);
+      const isReassigned = isTechniqueReassignedFromTactic(parentTactic, technique);
+      const reassignedOption = isReassigned ? findCurrentTechniqueOption(technique) : undefined;
       return (
         <>
           <EuiSuperSelect
@@ -204,6 +231,16 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
               ...(isUnsupported
                 ? [createUnsupportedMitreOption({ id: technique.id, name: technique.name })]
                 : []),
+              // Prefer the dataset's current name for reassigned techniques so
+              // the user sees the up-to-date label, falling back to stored.
+              ...(isReassigned
+                ? [
+                    createUnsupportedMitreOption({
+                      id: technique.id,
+                      name: reassignedOption?.name ?? technique.name,
+                    }),
+                  ]
+                : []),
               ...options.map((option) => ({
                 inputDisplay: <>{option.label}</>,
                 value: option.id,
@@ -218,12 +255,20 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
             data-test-subj="mitreAttackTechnique"
             disabled={disabled}
             placeholder={i18n.TECHNIQUE_PLACEHOLDER}
-            isInvalid={isUnsupported}
+            isInvalid={isUnsupported || isReassigned}
           />
         </>
       );
     },
-    [field.label, isUnsupportedTechnique, tacticsOptions, techniquesOptions, updateTechnique]
+    [
+      field.label,
+      findCurrentTechniqueOption,
+      isTechniqueReassignedFromTactic,
+      isUnsupportedTechnique,
+      tacticsOptions,
+      techniquesOptions,
+      updateTechnique,
+    ]
   );
 
   const techniques = values[threatIndex].technique ?? [];
@@ -232,17 +277,24 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
     <TechniqueContainer>
       {techniques.map((technique, index) => {
         const techniqueUnsupported = isUnsupportedTechnique(technique);
+        const techniqueReassigned = isTechniqueReassignedFromTactic(
+          values[threatIndex].tactic,
+          technique
+        );
         const techniqueRenamedFrom = getTechniqueRenamedFromName(technique);
+        const techniqueErrorMessage = techniqueUnsupported
+          ? i18n.UNSUPPORTED_MITRE_ID_ERROR(technique.id)
+          : techniqueReassigned
+          ? i18n.TECHNIQUE_REASSIGNED_FROM_TACTIC_ERROR(technique.id)
+          : undefined;
         return (
           <div key={index}>
             <EuiSpacer size="s" />
             <EuiFormRow
               fullWidth
               describedByIds={idAria ? [`${idAria} ${i18n.TECHNIQUE}`] : undefined}
-              isInvalid={techniqueUnsupported}
-              error={
-                techniqueUnsupported ? i18n.UNSUPPORTED_MITRE_ID_ERROR(technique.id) : undefined
-              }
+              isInvalid={techniqueUnsupported || techniqueReassigned}
+              error={techniqueErrorMessage}
               helpText={
                 techniqueRenamedFrom ? i18n.RENAMED_FROM_HINT(techniqueRenamedFrom) : undefined
               }

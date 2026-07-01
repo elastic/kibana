@@ -108,3 +108,13 @@ export const RENAMED_FROM_HINT = (previousName: string) =>
     defaultMessage: 'Renamed from "{previousName}" in the current MITRE ATT&CK\u00AE version.',
     values: { previousName },
   });
+
+export const TECHNIQUE_REASSIGNED_FROM_TACTIC_ERROR = (id: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.mitreAttack.techniqueReassignedFromTacticError',
+    {
+      defaultMessage:
+        '"{id}" is no longer assigned to the selected tactic in the current MITRE ATT&CK\u00AE version. Choose a tactic this technique belongs to, or replace it.',
+      values: { id },
+    }
+  );
