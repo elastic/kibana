@@ -145,6 +145,10 @@ describe('AnomaliesTab', () => {
 
   describe('basic structure', () => {
     it('renders the "Attack chain" section heading', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+      });
       render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
       expect(screen.getByText('Attack chain')).toBeInTheDocument();
     });
@@ -155,6 +159,10 @@ describe('AnomaliesTab', () => {
     });
 
     it('renders the attack chain, timeline, and table sections', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+      });
       render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
       expect(screen.getByTestId('mock-mitre-attack-chain')).toBeInTheDocument();
       expect(screen.getByTestId('mock-timeline')).toBeInTheDocument();
