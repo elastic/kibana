@@ -15,10 +15,17 @@ export const ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID =
 export const ASSET_CRITICALITY_UPDATED_WATCHED_FIELDS = ['asset.criticality'] as const;
 
 export const entityAssetCriticalityUpdatedEventSchema = z.object({
-  entityId: z.string().describe('The unique EUID of the entity whose asset criticality changed.'),
-  entityType: z.string().describe('The type of entity (e.g. host, user, service, generic).'),
+  entityId: z
+    .string()
+    .max(1000)
+    .describe('The unique EUID of the entity whose asset criticality changed.'),
+  entityType: z
+    .string()
+    .max(10)
+    .describe('The type of entity (e.g. host, user, service, generic).'),
   criticalityLevel: z
     .string()
+    .max(20)
     .nullable()
     .describe(
       'The new asset criticality level (low_impact, medium_impact, high_impact, extreme_impact), or null when criticality is unassigned.'

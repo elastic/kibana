@@ -292,7 +292,7 @@ export class CRUDClient {
       force
     );
 
-    const previousDocs = await this.eventPublisher.maybeGetExistingDocs([doc]);
+    const previousDocs = await this.eventPublisher.maybeGetExistingDocs([valid.doc]);
 
     try {
       const { result } = await this.esClient.update({

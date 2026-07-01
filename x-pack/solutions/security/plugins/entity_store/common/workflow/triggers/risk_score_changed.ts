@@ -14,8 +14,14 @@ export const ENTITY_RISK_SCORE_CHANGED_TRIGGER_ID = 'entityStore.entityRiskScore
 export const RISK_SCORE_CHANGED_WATCHED_FIELDS = ['entity.risk.calculated_score_norm'] as const;
 
 export const entityRiskScoreChangedEventSchema = z.object({
-  entityId: z.string().describe('The unique EUID of the entity whose risk score changed.'),
-  entityType: z.string().describe('The type of entity (e.g. host, user, service, generic).'),
+  entityId: z
+    .string()
+    .max(1000)
+    .describe('The unique EUID of the entity whose risk score changed.'),
+  entityType: z
+    .string()
+    .max(10)
+    .describe('The type of entity (e.g. host, user, service, generic).'),
   score: z.number().describe('The normalized risk score after the update (0–100).'),
   previousScore: z
     .number()

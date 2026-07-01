@@ -105,11 +105,11 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'entityStore.entityAssetCriticalityUpdated',
-    schemaHash: '0cac291f4c8f260c3484052be503985d84419a55978afc487aeafbf32353c87f',
+    schemaHash: '442ed32dd5ab5c75dcb04f311e0400983b01ae53625a50aea2b559e25848d545',
   },
   {
     id: 'entityStore.entityRiskScoreChanged',
-    schemaHash: 'bfa44700e06d5d947162b0bf46bb3d9694e46ad547f8120e0fa95cf9d0fc399a',
+    schemaHash: 'e7989debb026bd415fa6fbe125cd362f337fe89d77af21b799ec38883e769af0',
   },
   {
     id: 'workflows.failed',
