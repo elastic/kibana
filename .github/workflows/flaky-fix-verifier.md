@@ -310,7 +310,7 @@ When you iterate, you are editing a PR you did not open. This is allowed because
 
 - Check out the PR head branch (e.g. `gh pr checkout ${{ env.PR_NUMBER }}`), make the minimal edit, and commit it.
 - Emit a single `push-to-pull-request-branch` safe output targeting PR #${{ env.PR_NUMBER }}.
-- Keep the change test-side and minimal. Do **not** modify protected files (CI config, `.github/`, manifests). Re-running `/flaky` after the push validates the new commit, since the runner builds from the updated PR head.
+- Keep the change minimal and focused on the root cause. Re-running `/flaky` after the push validates the new commit, since the runner builds from the updated PR head.
 
 ## Guardrails
 
