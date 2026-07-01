@@ -8,6 +8,7 @@
  */
 
 import fetch, { FetchError } from 'node-fetch';
+import { createHash } from 'node:crypto';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { LibraryFetchError, LibraryNotFoundError } from './errors';
@@ -56,30 +57,15 @@ const sampleManifest = {
   latest: 'main',
 };
 
-const sampleCatalog = (overrides: Partial<{ slug: string; version: string }> = {}) => ({
-  version: 'v1',
-  kibanaVersion: '9.5.0',
-  generatedAt: '2026-06-01T00:00:00Z',
-  templates: [
-    {
-      slug: overrides.slug ?? 'demo',
-      version: overrides.version ?? '1.0.0',
-      availability: '>=9.5.0',
-      name: 'Demo',
-      description: 'Demo template',
-      categories: ['utility'],
-      definitionUrl: `templates/${overrides.slug ?? 'demo'}/${overrides.version ?? '1.0.0'}.yaml`,
-      contentHash: `sha256:${'0'.repeat(64)}`,
-      stepTypes: [],
-      triggerTypes: [],
-    },
-  ],
-});
+const contentHash = (body: string) =>
+  `sha256:${createHash('sha256').update(body, 'utf8').digest('hex')}`;
 
-const sampleBodyYaml = `
+/** Builds a template body YAML whose metadata slug/version can be varied. */
+const bodyYaml = ({ slug = 'demo', version = '1.0.0' }: { slug?: string; version?: string } = {}) =>
+  `
 template-metadata:
-  slug: demo
-  version: "1.0.0"
+  slug: ${slug}
+  version: "${version}"
   availability: ">=9.5.0"
   name: "Demo"
   description: "Demo template"
@@ -94,6 +80,28 @@ steps:
   - name: noop
     type: noop
 `;
+
+// The catalog row's `contentHash` is derived from the body the test is expected
+// to serve for the same overrides, so the fetcher's integrity check passes.
+const sampleCatalog = (overrides: Partial<{ slug: string; version: string }> = {}) => ({
+  version: 'v1',
+  kibanaVersion: '9.5.0',
+  generatedAt: '2026-06-01T00:00:00Z',
+  templates: [
+    {
+      slug: overrides.slug ?? 'demo',
+      version: overrides.version ?? '1.0.0',
+      availability: '>=9.5.0',
+      name: 'Demo',
+      description: 'Demo template',
+      categories: ['utility'],
+      definitionUrl: `templates/${overrides.slug ?? 'demo'}/${overrides.version ?? '1.0.0'}.yaml`,
+      contentHash: contentHash(bodyYaml(overrides)),
+      stepTypes: [],
+      triggerTypes: [],
+    },
+  ],
+});
 
 /** Queues a manifest then a catalog response on the mocked fetch. */
 const queueRefresh = (manifest: unknown, catalog: unknown, init?: { etag?: string }) => {
@@ -393,12 +401,22 @@ describe('LibraryFetcher.listTemplates', () => {
 
     await expect(fetcher.listTemplates()).rejects.toMatchObject({ reason: 'connection' });
   });
+
+  it('translates a node-fetch request-timeout into reason `timeout`', async () => {
+    const timeoutErr = Object.assign(new FetchError('network timeout', 'request-timeout'), {
+      type: 'request-timeout',
+    });
+    mockedFetch.mockRejectedValue(timeoutErr);
+    const fetcher = buildFetcher();
+
+    await expect(fetcher.listTemplates()).rejects.toMatchObject({ reason: 'timeout' });
+  });
 });
 
 describe('LibraryFetcher.getTemplate', () => {
   it('refreshes the catalog, fetches the body, and caches it for subsequent hits', async () => {
     queueRefresh(sampleManifest, sampleCatalog());
-    mockedFetch.mockResolvedValueOnce(jsonResponse(sampleBodyYaml));
+    mockedFetch.mockResolvedValueOnce(jsonResponse(bodyYaml()));
     const fetcher = buildFetcher();
 
     const first = await fetcher.getTemplate('demo');
@@ -419,11 +437,13 @@ describe('LibraryFetcher.getTemplate', () => {
     // A body published by a newer Kibana that adds a `template-metadata` field
     // this (older) runtime does not know about must still parse, so a template
     // the catalog lists does not 503 when opened.
-    const futureBodyYaml = sampleBodyYaml.replace(
+    const futureBodyYaml = bodyYaml().replace(
       '  categories: [utility]',
       '  categories: [utility]\n  someFutureField: hello'
     );
-    queueRefresh(sampleManifest, sampleCatalog());
+    const catalog = sampleCatalog();
+    catalog.templates[0].contentHash = contentHash(futureBodyYaml);
+    queueRefresh(sampleManifest, catalog);
     mockedFetch.mockResolvedValueOnce(jsonResponse(futureBodyYaml));
     const fetcher = buildFetcher();
 
@@ -441,8 +461,13 @@ describe('LibraryFetcher.getTemplate', () => {
   });
 
   it('wraps a parse failure as `malformed`', async () => {
-    queueRefresh(sampleManifest, sampleCatalog());
-    mockedFetch.mockResolvedValueOnce(jsonResponse('not: [valid yaml at all'));
+    // The row's hash matches the served bytes, so the integrity check passes
+    // and it is the YAML parse that fails.
+    const invalidBody = 'not: [valid yaml at all';
+    const catalog = sampleCatalog();
+    catalog.templates[0].contentHash = contentHash(invalidBody);
+    queueRefresh(sampleManifest, catalog);
+    mockedFetch.mockResolvedValueOnce(jsonResponse(invalidBody));
     const fetcher = buildFetcher();
 
     await expect(fetcher.getTemplate('demo')).rejects.toMatchObject({
@@ -451,11 +476,52 @@ describe('LibraryFetcher.getTemplate', () => {
     });
   });
 
+  it('recovers from a stale catalog by refreshing and retrying on a hash mismatch', async () => {
+    // Body URLs are mutable: a same-version re-publish changes the body (and its
+    // hash) at the same path. Simulate our cached catalog predating the new
+    // body — the first hash check fails, a forced refresh brings the matching
+    // row, and the retry succeeds.
+    const newBody = bodyYaml().replace('k: v', 'k: v2');
+    const freshCatalog = sampleCatalog();
+    freshCatalog.templates[0].contentHash = contentHash(newBody);
+
+    // Refresh #1 serves the stale catalog (hash of the old body); the body
+    // fetch returns the new body → mismatch.
+    queueRefresh(sampleManifest, sampleCatalog());
+    mockedFetch.mockResolvedValueOnce(jsonResponse(newBody));
+    // Forced refresh serves the fresh catalog (hash of the new body); the retry
+    // body fetch now matches.
+    queueRefresh(sampleManifest, freshCatalog);
+    mockedFetch.mockResolvedValueOnce(jsonResponse(newBody));
+    const fetcher = buildFetcher();
+
+    const result = await fetcher.getTemplate('demo');
+
+    expect(result.body.consts).toEqual({ k: 'v2' });
+  });
+
+  it('throws `integrity` when the body still mismatches after a forced refresh', async () => {
+    // Forced refresh returns 304 (catalog unchanged), so the body genuinely does
+    // not match its row — treated as corruption rather than staleness.
+    queueRefresh(sampleManifest, sampleCatalog());
+    mockedFetch.mockResolvedValueOnce(jsonResponse(bodyYaml({ version: '2.0.0' })));
+    mockedFetch
+      .mockResolvedValueOnce(notModifiedResponse())
+      .mockResolvedValueOnce(notModifiedResponse());
+    mockedFetch.mockResolvedValueOnce(jsonResponse(bodyYaml({ version: '2.0.0' })));
+    const fetcher = buildFetcher();
+
+    await expect(fetcher.getTemplate('demo')).rejects.toMatchObject({
+      name: 'LibraryFetchError',
+      reason: 'integrity',
+    });
+  });
+
   it('drops the body cache when the catalog is refreshed to a new version', async () => {
     queueRefresh(sampleManifest, sampleCatalog());
-    mockedFetch.mockResolvedValueOnce(jsonResponse(sampleBodyYaml));
+    mockedFetch.mockResolvedValueOnce(jsonResponse(bodyYaml()));
     queueRefresh(sampleManifest, sampleCatalog({ slug: 'demo', version: '1.1.0' }));
-    mockedFetch.mockResolvedValueOnce(jsonResponse(sampleBodyYaml));
+    mockedFetch.mockResolvedValueOnce(jsonResponse(bodyYaml({ slug: 'demo', version: '1.1.0' })));
     const fetcher = buildFetcher();
 
     await fetcher.getTemplate('demo');

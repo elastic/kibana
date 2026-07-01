@@ -14,8 +14,10 @@
  */
 export type LibraryFetchErrorReason =
   | 'http-error' // upstream returned a non-2xx response we did not (or no longer) retry
-  | 'connection' // network failure / timeout / DNS / etc.
+  | 'connection' // network failure / DNS / etc.
+  | 'timeout' // a request exceeded the per-request timeout
   | 'malformed' // upstream payload could not be parsed (JSON / YAML / schema)
+  | 'integrity' // a fetched body did not hash to its catalog row's contentHash
   | 'unavailable'; // no successful fetch has happened yet (cache miss + upstream down)
 
 export class LibraryFetchError extends Error {

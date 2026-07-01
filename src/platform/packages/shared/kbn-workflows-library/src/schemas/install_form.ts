@@ -9,13 +9,13 @@
 
 import { z } from '@kbn/zod/v4';
 
-export const InstallFormFieldTypeSchema = z.union([
-  z.literal('text'),
-  z.literal('textarea'),
-  z.literal('connector'),
-  z.literal('select'),
-  z.literal('boolean'),
-  z.literal('number'),
+export const InstallFormFieldTypeSchema = z.enum([
+  'text',
+  'textarea',
+  'connector',
+  'select',
+  'boolean',
+  'number',
 ]);
 
 export const InstallFormFieldOptionSchema = z
