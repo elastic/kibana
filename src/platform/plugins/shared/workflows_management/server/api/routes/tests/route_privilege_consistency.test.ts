@@ -48,8 +48,15 @@ import { registerWorkflowRoutes } from '../workflows';
 interface CapturedRoute {
   method: string;
   path: string;
-  security: { authz: { requiredPrivileges: any[] } };
+  security: {
+    authc?: { enabled?: boolean };
+    authz?: { enabled?: boolean; requiredPrivileges?: any[] };
+  };
   handler: (...args: any[]) => Promise<any>;
+}
+
+function usesKibanaPrivilegeAuth(security: CapturedRoute['security']): boolean {
+  return security?.authz?.enabled !== false;
 }
 
 interface EsOperation {
@@ -346,6 +353,10 @@ const ROUTE_REQUEST_FIXTURES: Record<string, { params?: any; body?: any; query?:
     params: { executionId: 'test-exec-id' },
     body: { input: {} },
   },
+  'GET:/api/workflows/executions/{executionId}/resume/external': {
+    params: { executionId: 'test-exec-id' },
+    query: { apiKey: 'test-api-key', approved: true },
+  },
 };
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -641,9 +652,29 @@ describe('Route privilege/ES-operation consistency', () => {
 
   it('should have security config on every route', () => {
     for (const [, route] of capturedRoutes) {
-      expect(route.security?.authz?.requiredPrivileges).toBeDefined();
-      expect(route.security.authz.requiredPrivileges.length).toBeGreaterThan(0);
+      if (usesKibanaPrivilegeAuth(route.security)) {
+        expect(route.security?.authz?.requiredPrivileges).toBeDefined();
+        expect(route.security.authz!.requiredPrivileges!.length).toBeGreaterThan(0);
+      } else {
+        expect(route.security?.authc?.enabled).toBe(false);
+        expect(route.security?.authz?.enabled).toBe(false);
+      }
     }
+  });
+
+  describe('external API key auth routes', () => {
+    it('disables Kibana session auth in favor of API key auth', () => {
+      const externalRoutes = [...capturedRoutes.values()].filter(
+        (route) => !usesKibanaPrivilegeAuth(route.security)
+      );
+
+      expect(externalRoutes.length).toBeGreaterThan(0);
+
+      for (const route of externalRoutes) {
+        expect(route.security?.authc?.enabled).toBe(false);
+        expect(route.security?.authz?.enabled).toBe(false);
+      }
+    });
   });
 
   describe('regular privilege modes', () => {
@@ -651,7 +682,7 @@ describe('Route privilege/ES-operation consistency', () => {
       '%s: ES operations match declared privileges',
       async (routeKey) => {
         const route = capturedRoutes.get(routeKey);
-        if (!route) {
+        if (!route || !usesKibanaPrivilegeAuth(route.security)) {
           return;
         }
 
