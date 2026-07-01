@@ -24,6 +24,8 @@ ruleTester.run('@kbn/eslint/no_viz_naming', rule, {
     { code: 'const visEditor = 1;' },
     { code: 'function VisPanel() {}' },
     { code: 'const visualization = true;' },
+    // filename without viz is fine
+    { code: 'const x = 1;', filename: 'vis_editor.ts' },
   ],
   invalid: [
     {
@@ -55,6 +57,17 @@ ruleTester.run('@kbn/eslint/no_viz_naming', rule, {
       code: 'const myViz_config = {};',
       errors: [{ messageId: 'noViz' }],
       output: 'const myVis_config = {};',
+    },
+    // filename violations
+    {
+      code: 'const x = 1;',
+      filename: 'viz_editor.ts',
+      errors: [{ messageId: 'noVizFile' }],
+    },
+    {
+      code: 'const x = 1;',
+      filename: '/some/path/my_viz_panel.tsx',
+      errors: [{ messageId: 'noVizFile' }],
     },
   ],
 });

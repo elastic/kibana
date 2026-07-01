@@ -30,9 +30,22 @@ module.exports = {
     schema: [],
     messages: {
       noViz: 'Use "vis" instead of "viz" in identifier "{{name}}". Preferred: "{{fixed}}".',
+      noVizFile: 'Use "vis" instead of "viz" in filename "{{name}}". Rename to "{{fixed}}".',
     },
   },
   create: (context) => ({
+    Program(node) {
+      const filename = context.getFilename();
+      const basename = filename.split('/').pop() || '';
+      if (VIZ_PATTERN.test(basename)) {
+        const fixed = fixName(basename);
+        context.report({
+          node,
+          messageId: 'noVizFile',
+          data: { name: basename, fixed },
+        });
+      }
+    },
     Identifier(node) {
       const { name } = node;
       if (!VIZ_PATTERN.test(name)) {
