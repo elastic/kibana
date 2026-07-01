@@ -89,9 +89,11 @@ const ChunkSchema = z
 /**
  * Step input.
  *
- * Permissions are stamped by the indexer from the type's `getPermissions` hook —
- * callers cannot supply them. Unregistered types get empty permissions (publicly
- * readable within the space). `upsert` is a full replace; `delete` wipes all
+ * `permissions` (upsert only) is used when the resolved `attachmentType` has
+ * no `getPermissions` hook (or is unregistered); it is rejected when the
+ * type derives permissions via a hook, since that hook is always
+ * authoritative and cannot be overridden by a workflow author. Omit to
+ * preserve prior behavior. `upsert` is a full replace; `delete` wipes all
  * chunks for the origin regardless of how they were produced.
  */
 const AttachmentTypeSchema = z

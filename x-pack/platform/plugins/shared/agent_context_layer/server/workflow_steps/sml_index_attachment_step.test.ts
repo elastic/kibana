@@ -243,6 +243,88 @@ describe('createContextEngineAddEntryStepDefinition', () => {
     expect((callArgs as any).content[0]).not.toHaveProperty('permissions');
   });
 
+  it('forwards a caller-supplied permissions object to indexAttachment for upsert', async () => {
+    const startContract = buildStartContract();
+    const definition = createContextEngineAddEntryStepDefinition({
+      getStartContract: () => startContract,
+      getSpaces: () => undefined,
+      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+      isFeatureEnabled: async () => true,
+    });
+
+    const context = buildHandlerContext({
+      originId: 'doc-1',
+      attachmentType: 'corpus_entry',
+      action: 'upsert',
+      chunks: [{ type: 'corpus_entry', title: 't', content: 'c' }],
+      permissions: {
+        elasticsearch: { indices: [{ name: 'my-index' }] },
+        kibana: { privileges: [] },
+      },
+    });
+
+    await definition.handler(context as any);
+
+    const callArgs = startContract.indexAttachment.mock.calls[0][0];
+    expect((callArgs as any).permissions).toEqual({
+      elasticsearch: { indices: [{ name: 'my-index' }] },
+      kibana: { privileges: [] },
+    });
+  });
+
+  it('omits permissions from the indexAttachment call when the workflow author does not supply it', async () => {
+    const startContract = buildStartContract();
+    const definition = createContextEngineAddEntryStepDefinition({
+      getStartContract: () => startContract,
+      getSpaces: () => undefined,
+      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+      isFeatureEnabled: async () => true,
+    });
+
+    const context = buildHandlerContext({
+      originId: 'doc-1',
+      attachmentType: 'corpus_entry',
+      action: 'upsert',
+      chunks: [{ type: 'corpus_entry', title: 't', content: 'c' }],
+    });
+
+    await definition.handler(context as any);
+
+    const callArgs = startContract.indexAttachment.mock.calls[0][0];
+    expect(callArgs as any).not.toHaveProperty('permissions');
+  });
+
+  it('surfaces SmlPermissionsConflictError from the start contract as a step error result', async () => {
+    const startContract = buildStartContract();
+    startContract.indexAttachment.mockRejectedValue(
+      new Error(
+        "attachmentType 'lens' derives permissions via getPermissions() and does not accept a caller-supplied 'permissions' value for origin 'doc-1'."
+      )
+    );
+    const definition = createContextEngineAddEntryStepDefinition({
+      getStartContract: () => startContract,
+      getSpaces: () => undefined,
+      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+      isFeatureEnabled: async () => true,
+    });
+
+    const context = buildHandlerContext({
+      originId: 'doc-1',
+      attachmentType: 'lens',
+      action: 'upsert',
+      chunks: [{ type: 'lens', title: 't', content: 'c' }],
+      permissions: {
+        elasticsearch: { indices: [{ name: 'spoofed' }] },
+      },
+    });
+
+    const result = await definition.handler(context as any);
+
+    expect(result.output).toBeUndefined();
+    expect(result.error).toBeInstanceOf(Error);
+    expect((result.error as Error).message).toContain('derives permissions via getPermissions()');
+  });
+
   it('handles delete by calling deleteAttachment with ingestionMethod="all" and reports requestedChunkCount = 0', async () => {
     const startContract = buildStartContract();
     const definition = createContextEngineAddEntryStepDefinition({
@@ -732,6 +814,161 @@ describe('createContextEngineAddEntryStepDefinition', () => {
       // came through content mode, but the permissions match what the
       // crawler (origin mode) would have written — single source of truth.
       expect(ops[0].index.document.ingestion_method).toBe('manual');
+    });
+
+    it('end-to-end: no-hook type + workflow-supplied permissions are stamped on the indexed document', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      jest
+        .spyOn(smlStorage, 'createSmlStorage')
+        .mockReturnValue({ getClient: getClientMock } as any);
+
+      const corpusEntryType = {
+        id: 'corpus_entry',
+        list() {
+          return (async function* () {})();
+        },
+        getSmlData: jest.fn(),
+        toAttachment: jest.fn(),
+        // No getPermissions hook, matching the real corpus_entry type.
+      };
+
+      const registry = createSmlTypeRegistry();
+      registry.register(corpusEntryType);
+
+      const logger = {
+        debug: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+        error: jest.fn(),
+        log: jest.fn(),
+        trace: jest.fn(),
+        fatal: jest.fn(),
+        get: jest.fn().mockReturnThis(),
+        isLevelEnabled: jest.fn().mockReturnValue(true),
+      };
+
+      const esClient = {
+        deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+        count: jest.fn().mockResolvedValue({ count: 0 }),
+      };
+
+      const realIndexer = createSmlIndexer({ registry, logger });
+
+      const startContract = buildStartContract();
+      startContract.indexAttachment.mockImplementation(async (params: any) => {
+        await realIndexer.indexAttachment({
+          ...params,
+          spaces: ['default'],
+          esClient,
+          savedObjectsClient: {},
+          logger,
+        });
+      });
+      startContract.getTypeDefinition.mockImplementation((id: string) => registry.get(id));
+
+      const definition = createContextEngineAddEntryStepDefinition({
+        getStartContract: () => startContract,
+        getSpaces: () => undefined,
+        getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+        isFeatureEnabled: async () => true,
+      });
+
+      const context = buildHandlerContext({
+        originId: 'ki-1',
+        attachmentType: 'corpus_entry',
+        action: 'upsert',
+        chunks: [{ type: 'corpus_entry', title: 'My KI', content: 'content' }],
+        permissions: {
+          elasticsearch: { indices: [{ name: 'my-index' }, { name: 'my-data-stream' }] },
+        },
+      });
+
+      const result = await definition.handler(context as any);
+
+      expect(result.error).toBeUndefined();
+      const ops = bulkMock.mock.calls[0][0].operations;
+      expect(ops[0].index.document.permissions).toEqual({
+        kibana: { privileges: [] },
+        elasticsearch: { indices: [{ name: 'my-index' }, { name: 'my-data-stream' }] },
+      });
+    });
+
+    it('end-to-end: hook-backed type + workflow-supplied permissions fails the step without writing to ES', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      jest
+        .spyOn(smlStorage, 'createSmlStorage')
+        .mockReturnValue({ getClient: getClientMock } as any);
+
+      const visualizationType = {
+        id: 'lens',
+        list() {
+          return (async function* () {})();
+        },
+        getSmlData: jest.fn(),
+        toAttachment: jest.fn(),
+        getPermissions: () => kibanaSavedObjectPermissions({ savedObjectType: 'lens' }),
+      };
+
+      const registry = createSmlTypeRegistry();
+      registry.register(visualizationType);
+
+      const logger = {
+        debug: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+        error: jest.fn(),
+        log: jest.fn(),
+        trace: jest.fn(),
+        fatal: jest.fn(),
+        get: jest.fn().mockReturnThis(),
+        isLevelEnabled: jest.fn().mockReturnValue(true),
+      };
+
+      const esClient = {
+        deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+        count: jest.fn().mockResolvedValue({ count: 0 }),
+      };
+
+      const realIndexer = createSmlIndexer({ registry, logger });
+
+      const startContract = buildStartContract();
+      startContract.indexAttachment.mockImplementation(async (params: any) => {
+        await realIndexer.indexAttachment({
+          ...params,
+          spaces: ['default'],
+          esClient,
+          savedObjectsClient: {},
+          logger,
+        });
+      });
+      startContract.getTypeDefinition.mockImplementation((id: string) => registry.get(id));
+
+      const definition = createContextEngineAddEntryStepDefinition({
+        getStartContract: () => startContract,
+        getSpaces: () => undefined,
+        getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+        isFeatureEnabled: async () => true,
+      });
+
+      const context = buildHandlerContext({
+        originId: 'viz-conflict',
+        attachmentType: 'lens',
+        action: 'upsert',
+        chunks: [{ type: 'lens', title: 'My Viz', content: 'content' }],
+        permissions: {
+          elasticsearch: { indices: [{ name: 'spoofed-index' }] },
+        },
+      });
+
+      const result = await definition.handler(context as any);
+
+      expect(result.output).toBeUndefined();
+      expect(result.error).toBeInstanceOf(Error);
+      expect((result.error as Error).message).toContain('getPermissions()');
+      expect(bulkMock).not.toHaveBeenCalled();
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
     });
   });
 

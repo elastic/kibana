@@ -11,7 +11,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { contextEngineAddEntryStepCommonDefinition } from '../../common/workflow_steps/sml_index_attachment_step';
 import { apiPrivileges } from '../../common/features';
-import type { SmlChunk } from '../services/sml/types';
+import type { SmlChunk, SmlPermissions } from '../services/sml/types';
 import type { AgentContextLayerPluginStart } from '../types';
 
 /**
@@ -52,13 +52,16 @@ import type { AgentContextLayerPluginStart } from '../types';
  *
  * Unregistered-type handling lives in the indexer, not here. Content-mode
  * writes (the only mode this step uses for `upsert`) accept any
- * `attachmentType`: when the type is registered, `getPermissions` is
- * stamped; when it is not, empty `SmlPermissions` is stamped and the
- * indexer emits a once-per-process warn naming the namespace. This lets
- * workflow authors write ad-hoc content without first registering an SML
- * type, at the cost of those chunks being space-readable rather than
- * gated by a privilege. `delete` calls `deleteAttachment` directly — the
- * indexer's delete path is permissive about registration so cleanup
+ * `attachmentType`: when the type is registered with a `getPermissions`
+ * hook, that hook is always authoritative and the step's `permissions`
+ * input (if supplied) is rejected as a conflict; when the type is
+ * unregistered or has no hook, the step's `permissions` input (if
+ * supplied) is stamped as-is, otherwise empty `SmlPermissions` is stamped
+ * and the indexer emits a once-per-process warn naming the namespace. This
+ * lets workflow authors write ad-hoc content — optionally scoped to
+ * specific ES indices/Kibana privileges via `permissions` — without first
+ * registering an SML type. `delete` calls `deleteAttachment` directly —
+ * the indexer's delete path is permissive about registration so cleanup
  * keeps working even after the plugin that registered the type is
  * disabled, otherwise stale chunks become unreachable from the workflow
  * surface.
@@ -140,14 +143,18 @@ export const createContextEngineAddEntryStepDefinition = ({
             ingestionMethod: 'all',
           });
         } else {
-          // Permissions are intentionally *not* passed through here. The
-          // indexer derives them from the registered type's `getPermissions`
-          // hook, which makes workflow-driven writes inherit the same gating
-          // as a crawler-driven write (and cannot be spoofed by a workflow
-          // author). If `attachmentType` is unregistered, the indexer
-          // stamps empty `SmlPermissions` (space-readable) and emits a
-          // once-per-process warn naming the namespace — see
-          // `SmlIndexer.indexManualChunks`.
+          // Permissions are forwarded only when the workflow author supplied
+          // them. The indexer decides what to do with a supplied value: for
+          // attachmentTypes with a `getPermissions` hook, supplying
+          // `permissions` here is a conflict and the indexer throws
+          // `SmlPermissionsConflictError` (caught below and surfaced as a
+          // step error) rather than silently discarding it — the hook
+          // remains the sole source of truth for hook-backed types, so a
+          // workflow author cannot spoof or widen access for those. For
+          // unregistered or no-hook types, the supplied value is stamped
+          // as-is; omitting it preserves the prior default (empty
+          // permissions, space-readable). See `SmlIndexer.indexManualChunks`
+          // and `resolvePermissionsForOrigin`.
           const chunks: SmlChunk[] = input.chunks.map((chunk) => ({
             type: chunk.type,
             title: chunk.title,
@@ -160,6 +167,21 @@ export const createContextEngineAddEntryStepDefinition = ({
               : {}),
           }));
 
+          // The Zod input schema leaves `elasticsearch`/`kibana` and their
+          // inner arrays optional (so a workflow author can supply just the
+          // half they need), but the start contract's `permissions` field is
+          // the fully-shaped `SmlPermissions`. Fold in empty arrays for any
+          // omitted piece — the same normalization
+          // `SmlIndexer.resolvePermissionsForOrigin` applies when it stamps
+          // a caller-supplied value.
+          const permissions: SmlPermissions | undefined =
+            input.permissions !== undefined
+              ? {
+                  kibana: { privileges: input.permissions.kibana?.privileges ?? [] },
+                  elasticsearch: { indices: input.permissions.elasticsearch?.indices ?? [] },
+                }
+              : undefined;
+
           await startContract.indexAttachment({
             request,
             originId,
@@ -170,6 +192,7 @@ export const createContextEngineAddEntryStepDefinition = ({
             // for the user-facing `upsert` action.
             action: 'create',
             content: chunks,
+            ...(permissions !== undefined ? { permissions } : {}),
           });
         }
 
