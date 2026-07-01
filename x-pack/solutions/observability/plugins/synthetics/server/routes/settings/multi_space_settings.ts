@@ -62,6 +62,10 @@ export const createPutMultiSpaceSettingsRoute: SyntheticsRestApiRouteFactory<
     }
     const repository = new DefaultSyntheticsMultiSpaceSettingsRepository(savedObjectsClient);
     const { spaces, ...attributes } = request.body;
-    return repository.save(attributes, spaces);
+    const result = await repository.save(attributes, spaces);
+    // `spaces` can re-share the singleton SO across arbitrary spaces, so a
+    // save can change what any space sees — clear all entries, not just this one.
+    server.syntheticsIndicesCache.invalidate();
+    return result;
   },
 });
