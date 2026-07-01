@@ -41,10 +41,6 @@ export class MetricsTab extends ServiceDetailsTab {
     this.noDataForRangeCallout = this.page.getByTestId('apmMetricsNoDataForRange');
     this.mixedAgentTypesCallout = this.page.getByTestId('apmMetricsMixedAgentTypes');
     this.mixedAgentTypesOverlapCallout = this.page.getByTestId('apmMetricsMixedAgentTypesOverlap');
-    // `EuiCallOut announceOnMount` duplicates the callout body (including these
-    // links and their data-test-subj) into an aria-live region for ~2s, so select
-    // the visible link only. The live region is rendered last, so `.first()` is
-    // the real interactive link.
     this.currentTimeRangeLink = this.page.getByTestId('apmMetricsCurrentTimeRangeLink').first();
     this.previousTimeRangeLink = this.page.getByTestId('apmMetricsPreviousTimeRangeLink').first();
   }
