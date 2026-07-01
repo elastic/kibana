@@ -20,6 +20,7 @@ import {
   seedUserEntity,
   triggerMaintainerRun,
   waitForRelationshipIds,
+  waitForEntityStoreRunning,
   assertNoRelationshipId,
 } from '../../fixtures/maintainers/helpers';
 
@@ -62,6 +63,11 @@ const registerUserTargetRawIdentifiersMaintainerSuite = (
     `Entity Store ${maintainerId} maintainer (raw_identifiers, user → user)`,
     { tag: ENTITY_STORE_TAGS },
     () => {
+      // Each test may issue multiple synchronous maintainer runs plus polling loops.
+      // The default 60s Playwright timeout is too tight; use the same 3-minute
+      // ceiling as Playwright's global setup projects.
+      apiTest.setTimeout(180_000);
+
       let defaultHeaders: Record<string, string>;
       let internalHeaders: Record<string, string>;
 
@@ -78,6 +84,10 @@ const registerUserTargetRawIdentifiersMaintainerSuite = (
           body: {},
         });
         expect([200, 201]).toContain(installResponse.statusCode);
+
+        // Wait for all engine components to finish provisioning before seeding —
+        // the `running` status flips before the latest alias is ready.
+        await waitForEntityStoreRunning(apiClient, defaultHeaders);
 
         const initResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
