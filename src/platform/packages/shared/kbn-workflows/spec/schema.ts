@@ -80,13 +80,42 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
   return schema;
 }
 
-export const CollisionStrategySchema = z.enum(['cancel-in-progress', 'drop']);
+export const CollisionStrategySchema = z
+  .enum(['cancel-in-progress', 'drop', 'queue'])
+  .describe(
+    'How to handle collisions when max concurrent runs is exceeded: `drop`, `cancel-in-progress` or `queue`.'
+  );
 export type CollisionStrategy = z.infer<typeof CollisionStrategySchema>;
 
+export const DEFAULT_CONCURRENCY_QUEUE_SIZE = 100;
+export const DEFAULT_CONCURRENCY_QUEUE_TTL = '24h';
+
 export const ConcurrencySettingsSchema = z.object({
-  key: z.string().optional(), // Concurrency group identifier e.g., '{{ event.host.name }}'
-  strategy: CollisionStrategySchema.optional(), // 'drop' or 'cancel-in-progress'
-  max: z.number().int().min(1).optional(), // Max concurrent runs per concurrency group
+  key: z
+    .string()
+    .max(512)
+    .optional()
+    .describe(
+      'Liquid template that groups executions into a concurrency bucket (e.g. `{{ event.host.name }}`).'
+    ),
+  strategy: CollisionStrategySchema.optional(),
+  max: z
+    .number()
+    .int()
+    .min(1)
+    .optional()
+    .describe('Maximum concurrent runs allowed per concurrency group.'),
+  'queue-size': z
+    .number()
+    .int()
+    .min(1)
+    .optional()
+    .describe(
+      'Only applies when strategy is `queue`. Maximum backlog size before new runs are skipped (default: `100`).'
+    ),
+  'queue-ttl': DurationSchema.optional().describe(
+    'Only applies when strategy is `queue`. Max time a run may stay queued before it is skipped (default: `24h`).'
+  ),
 });
 export type ConcurrencySettings = z.infer<typeof ConcurrencySettingsSchema>;
 
