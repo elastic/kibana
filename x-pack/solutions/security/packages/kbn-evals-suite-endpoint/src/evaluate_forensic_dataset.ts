@@ -56,7 +56,7 @@ export const createForensicTrajectoryEvaluator = (): Evaluator<
     extractToolCalls: (output) =>
       getToolCallSteps(output as TaskOutput)
         .map((step) => step.tool_id)
-        .filter((id): id is string => Boolean(id) && !SKILL_ROUTING_TOOL_IDS.has(id)),
+        .filter((id): id is string => typeof id === 'string' && !SKILL_ROUTING_TOOL_IDS.has(id)),
     goldenPathExtractor: (expected) => {
       const exp = expected as ForensicDatasetExample['output'] | undefined;
       return exp?.tool_sequence ?? [];
