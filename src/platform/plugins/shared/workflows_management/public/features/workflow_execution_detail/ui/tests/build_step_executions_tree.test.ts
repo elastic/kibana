@@ -356,6 +356,7 @@ describe('buildStepExecutionsTree', () => {
     // Two single-step branches.
     const buildSingleStepBranches = (): WorkflowStepExecutionDto[] => [
       parallelStep({
+        static: true,
         branches: [
           { index: 0, key: 'virustotal' },
           { index: 1, key: 'geoip' },
@@ -401,6 +402,7 @@ describe('buildStepExecutionsTree', () => {
     it('keeps the branch grouping node when a branch has more than one step', () => {
       const executions: WorkflowStepExecutionDto[] = [
         parallelStep({
+          static: true,
           branches: [
             { index: 0, key: 'virustotal' },
             { index: 1, key: 'geoip' },
@@ -452,6 +454,27 @@ describe('buildStepExecutionsTree', () => {
 
       // No branch name resolved -> branch node is not a "parallel-branch", so it
       // is not collapsed and keeps the raw index.
+      expect(result[0].children[0].displayLabel).toBeUndefined();
+      expect(result[0].children[0].stepId).toBe('0');
+      expect(result[0].children[0].children[0].stepId).toBe('scan_hash');
+    });
+
+    it('does NOT use the snapshotted item as a label in dynamic foreach mode', () => {
+      // Regression: dynamic fan-out snapshots each foreach item as the branch
+      // `key` (e.g. an agent prompt). That is data, not an author-chosen name, so
+      // it must NOT become the branch label — the fan-out index is the identity.
+      const executions = buildSingleStepBranches();
+      executions[0].state = {
+        static: false,
+        branches: [
+          { index: 0, key: 'In one sentence, what data sources can you access?' },
+          { index: 1, key: 'List up to 3 things you could help an analyst investigate.' },
+        ],
+      };
+
+      const result = buildStepExecutionsTree(executions);
+
+      // The long prompt must not leak into the label; index identity is kept.
       expect(result[0].children[0].displayLabel).toBeUndefined();
       expect(result[0].children[0].stepId).toBe('0');
       expect(result[0].children[0].children[0].stepId).toBe('scan_hash');

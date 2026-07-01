@@ -73,6 +73,7 @@ describe('EnterParallelNodeImpl', () => {
     stepRuntime = {
       startStep: jest.fn(),
       finishStep: jest.fn(),
+      failStep: jest.fn(),
       setInput: jest.fn(),
       enterWaitUntil: jest.fn(),
       getCurrentStepState: jest.fn(() => persistedState),
@@ -220,15 +221,19 @@ describe('EnterParallelNodeImpl', () => {
     expect(persistedState?.branches.map((b) => b.key)).toEqual(['a', 'b', 'c']);
   });
 
-  it('reports failed branches in the aggregate and marks overall status failed', async () => {
+  it('fail-fast: a failed branch fails the step (not complete) but still exposes the aggregate', async () => {
     branchOutcome = (index) => (index === 1 ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED);
     await build().run();
-    const output = stepRuntime.finishStep.mock.calls[0][0] as {
-      succeeded: number;
-      failed: number;
-      status: string;
-      results: Array<{ status: string }>;
-    };
+    // Default mode is fail-fast: a branch failure fails the STEP so it propagates.
+    expect(stepRuntime.finishStep).not.toHaveBeenCalled();
+    expect(stepRuntime.failStep).toHaveBeenCalledTimes(1);
+    const [error, output] = stepRuntime.failStep.mock.calls[0] as [
+      Error,
+      { succeeded: number; failed: number; status: string; results: Array<{ status: string }> }
+    ];
+    expect(error).toBeInstanceOf(Error);
+    expect(error.message).toContain('fail-fast');
+    // The aggregate is still persisted as the failed step's output.
     expect(output).toMatchObject({ succeeded: 2, failed: 1, status: 'failed' });
     expect(output.results.map((r) => r.status)).toEqual(['completed', 'failed', 'completed']);
   });
@@ -397,18 +402,18 @@ describe('EnterParallelNodeImpl', () => {
     expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith('exitParallel_fanOut');
   });
 
-  it('fail-fast (default): a failed branch skips not-yet-started branches', async () => {
+  it('fail-fast (default): a failed branch skips not-yet-started branches and fails the step', async () => {
     // Sequential window so a failure on branch 0 is visible before 1/2 start.
     node = makeNode({ concurrency: { max: 1 } });
     branchOutcome = (index) => (index === 0 ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED);
     await runToCompletion();
     expect(branchRunCalls).toEqual([0]);
-    const output = stepRuntime.finishStep.mock.calls[0][0] as {
-      succeeded: number;
-      failed: number;
-      status: string;
-      results: Array<{ status: string }>;
-    };
+    // fail-fast fails the STEP (propagates); the aggregate is the failed output.
+    expect(stepRuntime.finishStep).not.toHaveBeenCalled();
+    const [, output] = stepRuntime.failStep.mock.calls[0] as [
+      Error,
+      { succeeded: number; failed: number; status: string; results: Array<{ status: string }> }
+    ];
     expect(output).toMatchObject({ succeeded: 0, failed: 1, status: 'failed' });
     expect(output.results.map((r) => r.status)).toEqual(['failed', 'skipped', 'skipped']);
     expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith('exitParallel_fanOut');
@@ -475,12 +480,14 @@ describe('EnterParallelNodeImpl', () => {
       nowMs += 6_000;
       await impl.run();
 
-      expect(stepRuntime.finishStep).toHaveBeenCalledTimes(1);
-      const output = stepRuntime.finishStep.mock.calls[0][0] as {
-        failed: number;
-        status: string;
-        results: Array<{ status: string }>;
-      };
+      // Default mode is fail-fast: timed-out branches (counted as failures) fail
+      // the step so it propagates rather than silently completing.
+      expect(stepRuntime.finishStep).not.toHaveBeenCalled();
+      expect(stepRuntime.failStep).toHaveBeenCalledTimes(1);
+      const [, output] = stepRuntime.failStep.mock.calls[0] as [
+        Error,
+        { failed: number; status: string; results: Array<{ status: string }> }
+      ];
       expect(output.status).toBe('failed');
       expect(output.results.every((r) => r.status === 'timed_out')).toBe(true);
       expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith('exitParallel_fanOut');
@@ -512,6 +519,98 @@ describe('EnterParallelNodeImpl', () => {
       };
       expect(output.results.map((r) => r.status)).toEqual(['timed_out', 'completed']);
       expect(output.status).toBe('failed');
+    });
+
+    it('marks a branch parked in a durable wait TIMED_OUT when its budget elapses before re-tick', async () => {
+      // Regression: a branch that parks in a wait/poll and whose per-branch
+      // budget elapses *before* the next tick re-enters its body hits the
+      // deadline-already-passed early return in advanceBranch. That path must
+      // still transition the parked step execution to TIMED_OUT, otherwise the
+      // per-branch `wait` record leaks in WAITING even though the step finishes.
+      node = makeNode({
+        foreach: JSON.stringify(['a']),
+        mode: 'settled',
+        'branch-timeout': '3s',
+      });
+
+      const timeoutStepCalls: jest.Mock[] = [];
+      factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
+        const lastFrame = stackFrames[stackFrames.length - 1];
+        const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
+        const index = Number(scopeId ?? 0);
+        const timeoutStep = jest.fn();
+        timeoutStepCalls.push(timeoutStep);
+        return {
+          abortController: new AbortController(),
+          contextManager: { ensureContextReady: jest.fn() },
+          get stepExecution() {
+            // Parks in a durable wait and never settles on its own.
+            return { status: ExecutionStatus.WAITING, state: {} };
+          },
+          getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
+          timeoutStep,
+        } as unknown as StepExecutionRuntime;
+      }) as unknown as typeof factory.createStepExecutionRuntime;
+
+      const impl = build();
+
+      // Tick 1: branch parks in WAITING (its wait step record is WAITING).
+      await impl.run();
+      expect(stepRuntime.enterWaitUntil).toHaveBeenCalled();
+      expect(stepRuntime.finishStep).not.toHaveBeenCalled();
+
+      // Jump past the per-branch budget so the next tick sees the deadline
+      // already elapsed at the top of advanceBranch (before runBranchNode).
+      nowMs += 5_000;
+      await impl.run();
+
+      expect(stepRuntime.finishStep).toHaveBeenCalledTimes(1);
+      const output = stepRuntime.finishStep.mock.calls[0][0] as {
+        results: Array<{ status: string }>;
+        status: string;
+      };
+      expect(output.results.map((r) => r.status)).toEqual(['timed_out']);
+      // The parked branch step execution must be transitioned to TIMED_OUT.
+      expect(timeoutStepCalls.some((fn) => fn.mock.calls.length > 0)).toBe(true);
+    });
+
+    it('onCancel transitions parked branch records to TIMED_OUT (overall timeout-zone abort)', async () => {
+      // The overall step `timeout` is enforced by a surrounding timeout zone that
+      // aborts this step from the outside, so `tick()` never runs its own sweep.
+      // onCancel must clean up branches parked in a wait so none leak in WAITING.
+      node = makeNode({ foreach: JSON.stringify(['a', 'b']) });
+
+      const timeoutStepCalls: jest.Mock[] = [];
+      factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
+        const lastFrame = stackFrames[stackFrames.length - 1];
+        const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
+        const index = Number(scopeId ?? 0);
+        const timeoutStep = jest.fn();
+        timeoutStepCalls.push(timeoutStep);
+        return {
+          abortController: new AbortController(),
+          contextManager: { ensureContextReady: jest.fn() },
+          get stepExecution() {
+            return { status: ExecutionStatus.WAITING, state: {} };
+          },
+          getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
+          timeoutStep,
+        } as unknown as StepExecutionRuntime;
+      }) as unknown as typeof factory.createStepExecutionRuntime;
+
+      const impl = build();
+
+      // Both branches park in WAITING.
+      await impl.run();
+      expect(stepRuntime.enterWaitUntil).toHaveBeenCalled();
+
+      // Simulate the timeout zone aborting the step from the outside.
+      impl.onCancel();
+
+      // Every started branch's step record is transitioned to TIMED_OUT, so none
+      // leaks in WAITING, and the persisted state reflects the terminal branches.
+      expect(timeoutStepCalls.filter((fn) => fn.mock.calls.length > 0).length).toBe(2);
+      expect(persistedState?.branches.every((b) => b.status === 'timed_out')).toBe(true);
     });
   });
 

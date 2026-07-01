@@ -901,15 +901,14 @@ steps:
         await driveToTerminal(workflowRunFixture, 20);
       });
 
-      it('contains branch failures: the parallel step completes and the workflow continues', () => {
-        // Branch failures are reported via the aggregate, NOT escalated to a
-        // whole-workflow failure (the documented contract: "handle failures in a
-        // step AFTER the parallel via steps.<id>.output"). The parallel step
-        // successfully produced an aggregate, so it COMPLETED and the workflow
-        // reaches a terminal non-failed state.
+      it('a branch failure fails the parallel step and the workflow (fail-fast)', () => {
+        // fail-fast mirrors Promise.all: the first branch failure fails the STEP
+        // so the failure propagates and the workflow fails (unless handled),
+        // rather than silently succeeding. The aggregate is still persisted as the
+        // failed step's output (see the next test).
         const [parallel] = stepExecutionsFor(workflowRunFixture, 'fanOut');
-        expect(parallel.status).toBe(ExecutionStatus.COMPLETED);
-        expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.COMPLETED);
+        expect(parallel.status).toBe(ExecutionStatus.FAILED);
+        expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.FAILED);
       });
 
       it('does NOT run all branches (short-circuits after the first failure)', () => {
@@ -919,7 +918,7 @@ steps:
         expect(branchRuns).toBeLessThan(ITEMS.length);
       });
 
-      it('aggregate output reports failed status with skipped branches', () => {
+      it('still exposes the aggregate on the failed step (failed status, skipped branches)', () => {
         const [parallel] = stepExecutionsFor(workflowRunFixture, 'fanOut');
         const output = parallel.output as {
           total: number;

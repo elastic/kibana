@@ -74,6 +74,21 @@ export function enrichErrorMessage(
   return result;
 }
 
+// Schema-aware enrichment replaces the issue message with a description of the
+// *type* expected at the path (e.g. "max expects number"). That is helpful when
+// the author supplied the wrong shape, but it destroys precise, author-written
+// constraint messages: a `too_big` issue carrying "Parallel concurrency \"max\"
+// cannot exceed 20." would be rewritten to the useless "max expects number".
+// For constraint violations the zod issue message is already specific and
+// authoritative, so skip the type-describing enrichment and keep it verbatim.
+const CONSTRAINT_ERROR_CODES = new Set([
+  'too_big',
+  'too_small',
+  'not_multiple_of',
+  'invalid_value',
+  'invalid_format',
+]);
+
 function computeEnrichment(
   path: PropertyKey[],
   originalMessage: string,
@@ -88,7 +103,7 @@ function computeEnrichment(
     return { message: domainEnriched, enriched: true };
   }
 
-  if (path.length > 0) {
+  if (path.length > 0 && !CONSTRAINT_ERROR_CODES.has(errorCode)) {
     const schemaEnriched = trySchemaAwareEnrichment(
       path,
       fieldName,

@@ -9,8 +9,9 @@
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { WorkflowRepository } from '@kbn/workflows';
-import { WorkflowGraph } from '@kbn/workflows/graph';
+import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
+import { isGraphBuildError, WorkflowGraph } from '@kbn/workflows/graph';
+import { WorkflowGraphSetupError } from './workflow_graph_setup_error';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
@@ -91,10 +92,36 @@ export async function setupDependencies(
     ...(visitedWorkflowIds.length > 0 ? { visitedWorkflowIds } : {}),
   });
 
-  let workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
-    workflowExecution.workflowDefinition,
-    defaultWorkflowSettings
-  );
+  // Compiling the definition into its execution graph can throw a GraphBuildError
+  // for a structurally-unsupported workflow (e.g. nested flow-control inside a
+  // parallel branch). This is a permanent author error, not a transient fault, so
+  // mark the execution FAILED with the actionable message and rethrow a typed,
+  // non-retryable error — otherwise the raw throw escapes the task runner and the
+  // run is force-recovered into an opaque "Execution abandoned" TaskRecoveryError
+  // with no failure reason and no step records.
+  let workflowExecutionGraph: WorkflowGraph;
+  try {
+    workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
+      workflowExecution.workflowDefinition,
+      defaultWorkflowSettings
+    );
+  } catch (error) {
+    if (isGraphBuildError(error)) {
+      const finishedAt = new Date();
+      await workflowExecutionRepository.updateWorkflowExecution({
+        id: workflowRunId,
+        status: ExecutionStatus.FAILED,
+        error: { type: 'GraphBuildError', message: error.message },
+        finishedAt: finishedAt.toISOString(),
+        duration: finishedAt.getTime() - new Date(workflowExecution.startedAt).getTime(),
+      });
+      logger.error(
+        `Workflow execution ${workflowRunId} failed to build its execution graph: ${error.message}`
+      );
+      throw new WorkflowGraphSetupError(error.message);
+    }
+    throw error;
+  }
 
   // If the execution is for a specific step, narrow the graph to that step
   if (workflowExecution.stepId) {

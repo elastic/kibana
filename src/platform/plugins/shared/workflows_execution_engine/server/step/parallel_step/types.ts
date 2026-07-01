@@ -62,6 +62,14 @@ export interface ParallelStepState extends Record<string, unknown> {
   branches: ParallelBranchState[];
   /** Epoch ms when the parallel step began fanning out; used for overall timeout. */
   startedAt: number;
+  /**
+   * True for static scatter-gather (`branches`) mode, where each branch `key` is
+   * an author-chosen name. False for dynamic `foreach` fan-out, where `key` is
+   * the snapshotted item (which may be arbitrary/long data). The execution view
+   * uses this to decide whether the branch `key` is a meaningful display label
+   * (static) or whether it should fall back to the fan-out index (dynamic).
+   */
+  static: boolean;
 }
 
 /** A single entry of the index-aligned results array exposed to downstream steps. */

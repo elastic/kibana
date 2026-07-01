@@ -28,7 +28,7 @@ import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowScopeStack } from '../../workflow_context_manager/workflow_scope_stack';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
-import type { NodeImplementation } from '../node_implementation';
+import type { CancellableNode, NodeImplementation } from '../node_implementation';
 import type { NodesFactory } from '../nodes_factory';
 
 // Re-tick the parallel node when branches still have work to do but nothing is
@@ -45,6 +45,11 @@ import type { NodesFactory } from '../nodes_factory';
 // at a small fixed delay rather than 1ms.
 const RETICK_FLOOR_MS = 1_000;
 
+// Error recorded on a branch's step execution when the branch is terminated by
+// its per-branch (or the overall step) timeout. Shared by every timeout path so
+// the per-branch step record carries a consistent reason.
+const PARALLEL_BRANCH_TIMEOUT_MESSAGE = 'Parallel branch was terminated by a timeout.';
+
 const TERMINAL_BRANCH_STATUSES = new Set<ParallelBranchState['status']>([
   'completed',
   'failed',
@@ -55,7 +60,7 @@ const TERMINAL_BRANCH_STATUSES = new Set<ParallelBranchState['status']>([
 type ParallelMode = 'fail-fast' | 'settled';
 const DEFAULT_PARALLEL_MODE: ParallelMode = 'fail-fast';
 
-export class EnterParallelNodeImpl implements NodeImplementation {
+export class EnterParallelNodeImpl implements NodeImplementation, CancellableNode {
   /**
    * True while a branch's scope is installed on the shared workflow runtime.
    * Used by {@link withBranchScope} to detect re-entrant (overlapping) scope
@@ -82,6 +87,28 @@ export class EnterParallelNodeImpl implements NodeImplementation {
     await this.tick(state);
   }
 
+  /**
+   * Cancellation cleanup. The parallel step's overall `timeout` is enforced by a
+   * surrounding step-level timeout zone (the inner node's own `timeout` is
+   * stripped at graph-build time), so when that zone fires it aborts this step
+   * from the outside — `tick()` never runs its own overall-timeout sweep. Without
+   * cleanup, branches parked in a durable wait/poll would leak their step records
+   * in WAITING forever even though the parallel step is failed.
+   *
+   * Here we transition every still-running branch's step record to TIMED_OUT so
+   * no per-branch record leaks. The parallel step record itself is failed by the
+   * surrounding error handling (the timeout zone's TimeoutError). Idempotent:
+   * branches already terminal are skipped, and `timeoutStep` upserts by id.
+   */
+  public onCancel(): void {
+    const state = this.stepExecutionRuntime.getCurrentStepState() as ParallelStepState | undefined;
+    if (!state) {
+      return;
+    }
+    this.timeOutNonTerminalBranches(state, Date.now());
+    this.stepExecutionRuntime.setCurrentStepState(state);
+  }
+
   /** True when this is a static scatter-gather (`branches`) parallel step. */
   private get isStatic(): boolean {
     return Array.isArray(this.node.branches) && this.node.branches.length > 0;
@@ -100,6 +127,7 @@ export class EnterParallelNodeImpl implements NodeImplementation {
       total: branches.length,
       branches,
       startedAt: Date.now(),
+      static: this.isStatic,
     };
     this.stepExecutionRuntime.setCurrentStepState(state);
     this.workflowLogger.logDebug(
@@ -173,13 +201,7 @@ export class EnterParallelNodeImpl implements NodeImplementation {
     // so the step terminates immediately with a clear reason.
     const overallTimeoutMs = this.resolveTimeoutMs(this.node.configuration.timeout);
     if (overallTimeoutMs !== undefined && now - state.startedAt > overallTimeoutMs) {
-      for (const branch of state.branches) {
-        if (!TERMINAL_BRANCH_STATUSES.has(branch.status)) {
-          branch.status = 'timed_out';
-          branch.timedOut = true;
-          branch.finishedAt = now;
-        }
-      }
+      this.timeOutNonTerminalBranches(state, now);
       this.stepExecutionRuntime.setCurrentStepState(state);
       this.workflowLogger.logDebug(
         `Parallel step "${this.node.stepId}" exceeded its overall timeout of ${this.node.configuration.timeout}.`,
@@ -383,7 +405,14 @@ export class EnterParallelNodeImpl implements NodeImplementation {
       visited.add(currentNodeId);
 
       // If the deadline has already passed before starting the next node, stop.
+      // This happens when the branch parked in a durable wait/poll on a prior
+      // tick and its `branch-timeout` elapsed before it was re-ticked. The parked
+      // step execution is still WAITING here, so transition it to TIMED_OUT —
+      // otherwise the per-branch record leaks in WAITING after the step finishes
+      // (the `runBranchNode` deadline path below marks its own record, but this
+      // early return never enters `runBranchNode`).
       if (deadline !== undefined && Date.now() >= deadline) {
+        this.markBranchNodeTimedOutAt(index, branchStackFrames, currentNodeId);
         return { status: 'timed_out', currentNodeId };
       }
 
@@ -492,7 +521,7 @@ export class EnterParallelNodeImpl implements NodeImplementation {
       // in RUNNING forever. Mark it TIMED_OUT here so the per-branch step record
       // matches the aggregate `results[]`. This does not set the workflow error
       // (the parallel step owns timeout disposition); see `timeoutStep`.
-      branchRuntime.timeoutStep(new Error(`Parallel branch was terminated by a timeout.`));
+      branchRuntime.timeoutStep(new Error(PARALLEL_BRANCH_TIMEOUT_MESSAGE));
       return 'timed_out';
     }
 
@@ -591,13 +620,50 @@ export class EnterParallelNodeImpl implements NodeImplementation {
    * timeout path. Recreates the branch runtime for its current node and records
    * the timeout without touching the workflow-level error.
    */
+  /**
+   * Marks every non-terminal branch TIMED_OUT — both in the persisted parallel
+   * state and on each branch's own step-execution record — so no branch leaks in
+   * WAITING/RUNNING when the step is torn down by an overall timeout (whether via
+   * the in-`tick` overall-timeout sweep or an external cancel/timeout-zone abort).
+   */
+  private timeOutNonTerminalBranches(state: ParallelStepState, now: number): void {
+    const nonTerminal = state.branches.filter(
+      (branch) => !TERMINAL_BRANCH_STATUSES.has(branch.status)
+    );
+    for (const branch of nonTerminal) {
+      branch.status = 'timed_out';
+      branch.timedOut = true;
+      branch.finishedAt = now;
+      // Only branches that actually started have a step-execution record to
+      // transition; not-yet-started (queued) branches have none.
+      if (branch.started) {
+        this.markBranchNodeTimedOut(branch);
+      }
+    }
+  }
+
   private markBranchNodeTimedOut(branch: ParallelBranchState): void {
     const nodeId = branch.currentNodeId ?? this.getBranchStartNodeId(branch.index);
+    this.markBranchNodeTimedOutAt(branch.index, this.buildBranchStackFrames(branch.index), nodeId);
+  }
+
+  /**
+   * Transitions branch `index`'s current step execution to TIMED_OUT using the
+   * exact stack frames the branch ran with, so the upsert targets the same
+   * deterministic step-execution id as the parked record (rather than recomputing
+   * frames from the current scope, which can drift). Does not touch the
+   * workflow-level error; the parallel step owns timeout disposition.
+   */
+  private markBranchNodeTimedOutAt(
+    index: number,
+    branchStackFrames: StackFrame[],
+    nodeId: string
+  ): void {
     const branchRuntime = this.stepExecutionRuntimeFactory.createStepExecutionRuntime({
       nodeId,
-      stackFrames: this.buildBranchStackFrames(branch.index),
+      stackFrames: branchStackFrames,
     });
-    branchRuntime.timeoutStep(new Error(`Parallel branch was terminated by a timeout.`));
+    branchRuntime.timeoutStep(new Error(PARALLEL_BRANCH_TIMEOUT_MESSAGE));
   }
 
   private buildBranchStackFrames(index: number): StackFrame[] {
@@ -719,8 +785,56 @@ export class EnterParallelNodeImpl implements NodeImplementation {
       output.branches = namedBranches;
     }
 
+    // Failure disposition follows the `mode`, mirroring Promise.all vs
+    // Promise.allSettled:
+    //   - `fail-fast` (default): any failed/timed-out branch fails the STEP, so
+    //     the failure propagates and the workflow stops (unless handled) instead
+    //     of silently succeeding. The aggregate is still persisted as the failed
+    //     step's output, so `steps.<p>.output.results` remains readable.
+    //   - `settled`: every branch ran to a terminal state on purpose; the step
+    //     COMPLETES and the author inspects `output.results` / `.failed` /
+    //     `.status` downstream. (The aggregate `status` is still `failed` when any
+    //     branch failed — that is a report of the branches, not the step.)
+    // `failStep` sets the workflow-level error; the execution loop's `catchError`
+    // then bubbles it up the scope stack, exactly like a failing atomic step. We
+    // still navigate to the exit node so the graph cursor is consistent (the
+    // mirror of `navigateToNextNode()` on a failing atomic step).
+    if (this.resolveMode() === 'fail-fast' && failed > 0) {
+      this.stepExecutionRuntime.failStep(this.buildAggregateFailureError(output), output);
+      this.wfExecutionRuntimeManager.navigateToNode(this.node.exitNodeId);
+      return;
+    }
+
     this.stepExecutionRuntime.finishStep(output);
     this.wfExecutionRuntimeManager.navigateToNode(this.node.exitNodeId);
+  }
+
+  /**
+   * Builds the error recorded on the parallel step when it fails under
+   * `fail-fast`. Prefers the first failed branch's own error message (with its
+   * index/key for correlation) so the surfaced reason is actionable, falling back
+   * to a count summary when no branch error was captured.
+   */
+  private buildAggregateFailureError(output: ParallelStepOutput): Error {
+    const firstFailure = output.results.find(
+      (result) => result.status === 'failed' || result.status === 'timed_out'
+    );
+    const branchLabel =
+      firstFailure?.key !== undefined && typeof firstFailure.key === 'string'
+        ? `"${firstFailure.key}"`
+        : `${firstFailure?.index ?? '?'}`;
+    const branchError =
+      firstFailure?.error &&
+      typeof firstFailure.error === 'object' &&
+      firstFailure.error !== null &&
+      'message' in firstFailure.error
+        ? String((firstFailure.error as { message?: unknown }).message ?? '')
+        : undefined;
+    const reason = branchError ? `: ${branchError}` : '.';
+    return new Error(
+      `Parallel step "${this.node.stepId}" failed (fail-fast): ${output.failed} of ${output.total} ` +
+        `branch(es) failed; first failure in branch ${branchLabel}${reason}`
+    );
   }
 
   /**

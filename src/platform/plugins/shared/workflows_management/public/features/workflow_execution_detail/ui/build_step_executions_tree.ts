@@ -88,7 +88,19 @@ function resolveParallelBranchName(
     return undefined;
   }
 
-  const branches = (parentStepExecution.state as { branches?: unknown } | undefined)?.branches;
+  const parallelState = parentStepExecution.state as
+    | { branches?: unknown; static?: unknown }
+    | undefined;
+
+  // Only static `branches` mode has meaningful author-chosen names as the branch
+  // `key`. In dynamic `foreach` fan-out the `key` is the snapshotted item (which
+  // may be arbitrary/long data, e.g. an agent prompt), so the fan-out index is
+  // the correct label — fall back to it by returning undefined here.
+  if (parallelState?.static !== true) {
+    return undefined;
+  }
+
+  const branches = parallelState.branches;
   if (!Array.isArray(branches)) {
     return undefined;
   }
