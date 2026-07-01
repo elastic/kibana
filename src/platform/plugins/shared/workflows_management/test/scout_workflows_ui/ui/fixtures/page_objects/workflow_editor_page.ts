@@ -272,9 +272,21 @@ export class WorkflowEditorPage {
   }
 
   /**
+   * Open the app menu overflow ("More") popover.
+   *
+   * The run action is forced into the overflow popover, so it is not present in
+   * the DOM until the overflow button is opened.
+   */
+  async openAppMenuOverflow() {
+    await this.page.testSubj.click('app-menu-overflow-button');
+    await this.runButton.waitFor({ state: 'visible' });
+  }
+
+  /**
    * Click the run button (opens execute modal or unsaved changes confirmation)
    */
   async clickRunButton() {
+    await this.openAppMenuOverflow();
     await this.runButton.click();
   }
 
@@ -282,7 +294,7 @@ export class WorkflowEditorPage {
    * Run the workflow and confirm if there are unsaved changes
    */
   async runWorkflowWithUnsavedChanges() {
-    await this.runButton.click();
+    await this.clickRunButton();
     await this.page.testSubj.waitForSelector('runWorkflowWithUnsavedChangesConfirmationModal', {
       state: 'visible',
     });

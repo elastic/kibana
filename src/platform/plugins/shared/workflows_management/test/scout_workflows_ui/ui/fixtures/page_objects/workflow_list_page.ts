@@ -113,6 +113,10 @@ export class WorkflowListPage {
 
   /** Clicks the import workflows button in the toolbar. */
   async clickImportButton() {
+    // The import action is forced into the app menu overflow ("More") popover, so it is
+    // not present in the DOM until the overflow button is opened.
+    await this.page.testSubj.click('app-menu-overflow-button');
+    await this.page.testSubj.waitForSelector('importWorkflowsButton', { state: 'visible' });
     await this.page.testSubj.click('importWorkflowsButton');
   }
 
