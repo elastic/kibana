@@ -7,7 +7,10 @@
 
 import type { LensConfig, LensESQLDataset, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import {
+  ENVIRONMENT_ALL,
+  ENVIRONMENT_NOT_DEFINED,
+} from '../../../../../common/environment_filter_values';
 import { ChartType } from '../../charts/helper/get_timeseries_color';
 import { getChartDefinitions, getLatencyChartType } from './chart_configs';
 
@@ -105,6 +108,14 @@ describe('service flyout chart_configs', () => {
       keyMetrics.forEach(({ config }) => {
         expect(esqlOf(config)).not.toContain('transaction.type');
       });
+    });
+
+    it('filters by the literal sentinel and missing field when environment is ENVIRONMENT_NOT_DEFINED', () => {
+      const { keyMetrics } = buildDefinitions({ environment: ENVIRONMENT_NOT_DEFINED.value });
+
+      expect(esqlOf(keyMetrics[0].config)).toEqual(
+        'FROM traces-apm*, metrics-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "ENVIRONMENT_NOT_DEFINED" OR `service.environment` IS NULL | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
+      );
     });
 
     it('omits the environment clause when environment is ENVIRONMENT_ALL', () => {

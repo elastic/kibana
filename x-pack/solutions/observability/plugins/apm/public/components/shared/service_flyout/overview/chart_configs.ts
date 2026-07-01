@@ -22,7 +22,10 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import {
+  ENVIRONMENT_ALL,
+  ENVIRONMENT_NOT_DEFINED,
+} from '../../../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { ChartType, getTimeSeriesColor } from '../../charts/helper/get_timeseries_color';
 
@@ -71,7 +74,14 @@ function createBaseServiceQuery({
     query.where`${esql.col(TRANSACTION_TYPE)} == ${transactionType}`;
   }
 
-  if (environment !== ENVIRONMENT_ALL.value) {
+  // ENVIRONMENT_NOT_DEFINED is a sentinel pushed into the environments list when documents with no
+  // service.environment field exist: https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/routes/environments/get_environments.ts
+  // This ES|QL clause mirrors the DSL equivalent in: https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/common/utils/environment_query.ts
+  if (environment === ENVIRONMENT_NOT_DEFINED.value) {
+    query.where`${esql.col(SERVICE_ENVIRONMENT)} == ${ENVIRONMENT_NOT_DEFINED.value} OR ${esql.col(
+      SERVICE_ENVIRONMENT
+    )} IS NULL`;
+  } else if (environment !== ENVIRONMENT_ALL.value) {
     query.where`${esql.col(SERVICE_ENVIRONMENT)} == ${environment}`;
   }
 
