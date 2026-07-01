@@ -26,6 +26,5 @@
     "@kbn/ai-tools",
     "@kbn/std",
     "@kbn/streamlang",
-    "@kbn/streams-plugin",
   ]
 }
