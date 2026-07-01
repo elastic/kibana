@@ -658,10 +658,7 @@ export class DiscoverApp {
   }
 
   async openSidebar() {
-    const fieldsButton = this.page.testSubj.locator('dscShowSidebarButton');
-    if (await fieldsButton.isVisible()) {
-      await fieldsButton.click();
-    }
+    await this.page.testSubj.locator('dscShowSidebarButton').click();
     await this.waitUntilFieldListHasCountOfFields();
   }
 
