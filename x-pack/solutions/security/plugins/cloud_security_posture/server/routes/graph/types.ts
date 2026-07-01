@@ -102,6 +102,13 @@ export interface EventEsqlRow {
   sourceCountryCodes?: string | string[] | null;
   actorDocData: string | string[];
   targetDocData: string | string[];
+  /**
+   * Per-target → source-document mapping, one entry per (target, doc) pair, encoded as
+   * "<targetEntityId>\n<_id>". Lets regroupEvents attribute each target to the document(s)
+   * that referenced it after the STATS pre-aggregation drops targetEntityId from the group key,
+   * so label nodes stay split by document just as they would be if grouping by targetEntityId.
+   */
+  targetDocMap: string | string[];
 }
 
 /**

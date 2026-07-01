@@ -442,6 +442,12 @@ ${buildPinnedEsql(pinnedIds)}
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
     ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
   ${JSON_OBJECT_END})
+// Per-target → source-document mapping ("<targetEntityId>\\n<_id>"), collected via VALUES so
+// that after STATS drops targetEntityId from the group key we can still attribute each target
+// to the document(s) that referenced it. regroupEvents uses this to compute each target-type
+// group's own docIds, which keeps label nodes split by document exactly as they would be if the
+// query still grouped by targetEntityId.
+| EVAL targetDocMap = CONCAT(COALESCE(targetEntityId, ""), "\\n", _id)
 
 // Map host and source values to enriched contextual data
 | EVAL sourceIps = source.ip
@@ -497,7 +503,8 @@ ${buildPinnedEsql(pinnedIds)}
   actorEntityId = MV_DEDUPE(VALUES(actorEntityId)),
   targetEntityId = MV_DEDUPE(VALUES(targetEntityId)),
   actorDocData = VALUES(actorDocData),
-  targetDocData = VALUES(targetDocData)
+  targetDocData = VALUES(targetDocData),
+  targetDocMap = VALUES(targetDocMap)
     BY action,
       isOrigin,
       isOriginAlert,
@@ -588,10 +595,58 @@ const filterDocDataToIds = (
 };
 
 /**
+ * Parses the targetDocMap multi-value column ("<targetEntityId>\n<_id>" entries) into a
+ * map of targetEntityId → set of source document _ids. This lets a type group recover exactly
+ * which documents referenced its targets, even though the STATS step no longer groups by
+ * targetEntityId. An empty target id (the "no target" sentinel) maps every doc to itself.
+ */
+const parseTargetDocMap = (targetDocMap: string | string[]): Map<string, Set<string>> => {
+  const entries = Array.isArray(targetDocMap) ? targetDocMap : targetDocMap ? [targetDocMap] : [];
+  const map = new Map<string, Set<string>>();
+  for (const entry of entries) {
+    if (!entry) continue;
+    const sep = entry.indexOf('\n');
+    if (sep === -1) continue;
+    const targetId = entry.slice(0, sep);
+    const docId = entry.slice(sep + 1);
+    if (!docId) continue;
+    let set = map.get(targetId);
+    if (!set) {
+      set = new Set();
+      map.set(targetId, set);
+    }
+    set.add(docId);
+  }
+  return map;
+};
+
+/**
+ * Returns the set of document _ids that referenced any of the given targets, using the
+ * per-target → doc attribution built from targetDocMap. When the group has no targets
+ * (targetIdsForGroup empty), falls back to every doc referenced by the row.
+ */
+const docIdsForTargets = (
+  targetDocByTarget: Map<string, Set<string>>,
+  targetIdsForGroup: string[]
+): Set<string> => {
+  const docIds = new Set<string>();
+  if (targetIdsForGroup.length === 0) {
+    // No-target group ("" sentinel key) — take whatever docs the row attributed to "".
+    for (const id of targetDocByTarget.get('') ?? []) docIds.add(id);
+    return docIds;
+  }
+  for (const targetId of targetIdsForGroup) {
+    for (const id of targetDocByTarget.get(targetId) ?? []) docIds.add(id);
+  }
+  return docIds;
+};
+
+/**
  * Merges one row's contribution into a group: adds the badge, unions every multi-value
  * column, and records the actor/target IDs that belong to this group from this row.
- * actorDocData / targetDocData are filtered to only the IDs in this group's type bucket
- * so that a row shared across multiple type-groups doesn't leak doc data across groups.
+ * Doc id / doc / doc-data columns are restricted to the documents that referenced this group's
+ * targets (via targetDocMap) so that a STATS row shared across multiple target-type groups keeps
+ * each group's documents, counts, and label node separate — matching a targetEntityId group key.
  * Doc id / doc-data columns drop the empty-string sentinel; source IP / country keep
  * the historical null-only guard.
  */
@@ -604,10 +659,21 @@ const accumulateEventRecord = (
   group.badge += record.badge;
   group.isAlert = group.isAlert || Boolean(record.isAlert);
 
-  addValuesToSet(group.docIds, record.docIds, { dropEmpty: true });
-  addValuesToSet(group.alertDocIds, record.alertDocIds, { dropEmpty: true });
-  addValuesToSet(group.nonAlertDocIds, record.nonAlertDocIds, { dropEmpty: true });
-  addValuesToSet(group.docs, record.docs, { dropEmpty: true });
+  // Restrict this group's documents to the ones that referenced its targets.
+  const groupDocIds = docIdsForTargets(parseTargetDocMap(record.targetDocMap), targetIdsForGroup);
+  const toArray = (v: string | string[] | null | undefined): string[] =>
+    Array.isArray(v) ? v : v != null ? [v] : [];
+  const keepDoc = (docId: string): boolean => docId !== '' && groupDocIds.has(docId);
+
+  addValuesToSet(group.docIds, [...groupDocIds], { dropEmpty: true });
+  addValuesToSet(group.alertDocIds, toArray(record.alertDocIds).filter(keepDoc), {
+    dropEmpty: true,
+  });
+  addValuesToSet(group.nonAlertDocIds, toArray(record.nonAlertDocIds).filter(keepDoc), {
+    dropEmpty: true,
+  });
+  // `docs` entries are JSON strings whose "id" is the source document _id.
+  addValuesToSet(group.docs, filterDocDataToIds(record.docs, groupDocIds), { dropEmpty: true });
 
   const actorIdSet = new Set(actorIdsForGroup);
   const targetIdSet = new Set(targetIdsForGroup);
@@ -623,16 +689,6 @@ const accumulateEventRecord = (
 
   for (const id of actorIdsForGroup) group.actorEntityIds.add(id);
   for (const id of targetIdsForGroup) group.targetEntityIds.add(id);
-};
-
-/**
- * Returns the entity type derived from the EUID prefix (e.g. "user" for "user:alice"),
- * or null for generic EUIDs that have no typed prefix.
- * Used as a grouping fallback when enrichment is unavailable.
- */
-const getEuidType = (euid: string): string | null => {
-  const prefix = TYPED_ENTITY_PREFIXES.find((p) => euid.startsWith(`${p}:`));
-  return prefix ?? null;
 };
 
 /**
@@ -667,8 +723,9 @@ const groupEventRecords = (
     const pinned = record.pinned ?? null;
 
     // Group actor IDs by their (type, subType).
-    // Prefer enrichment-supplied type; fall back to the EUID prefix (e.g. "user", "host",
-    // "service") so typed-but-unenriched entities don't collapse with generic ones.
+    // Type comes from entity-store enrichment only; unenriched actors get a null type so that
+    // all unenriched actors acted on by the same (action, isOrigin, isOriginAlert, pinned) event
+    // collapse into a single group regardless of their EUID prefix.
     const actorsByTypeKey = new Map<
       string,
       { type: string | null; subType: string | null; ids: string[] }
@@ -676,7 +733,7 @@ const groupEventRecords = (
     for (const actorId of rawActorIds) {
       if (!actorId) continue;
       const enrichment = enrichmentMap.get(actorId);
-      const actorType = enrichment?.type ?? getEuidType(actorId);
+      const actorType = enrichment?.type ?? null;
       const actorSubType = enrichment?.subType ?? null;
       const key = `${actorType}\0${actorSubType}`;
       let entry = actorsByTypeKey.get(key);
@@ -687,7 +744,8 @@ const groupEventRecords = (
       entry.ids.push(actorId);
     }
 
-    // Group target IDs by their (type, subType) — same EUID-prefix fallback.
+    // Group target IDs by their (type, subType) — entity-store enrichment only, so all
+    // unenriched targets (null type) collapse into a single group regardless of EUID prefix.
     const targetsByTypeKey = new Map<
       string,
       { type: string | null; subType: string | null; ids: string[] }
@@ -698,7 +756,7 @@ const groupEventRecords = (
       for (const targetId of rawTargetIds) {
         if (!targetId) continue;
         const enrichment = enrichmentMap.get(targetId);
-        const targetType = enrichment?.type ?? getEuidType(targetId);
+        const targetType = enrichment?.type ?? null;
         const targetSubType = enrichment?.subType ?? null;
         const key = `${targetType}\0${targetSubType}`;
         let entry = targetsByTypeKey.get(key);
@@ -773,9 +831,11 @@ export const regroupEvents = (
         : hashIds(targetEntityIds);
 
     const docIds = [...group.docIds];
-    // Include targetNodeId in the label hash so two groups that share the same documents
-    // but target different entity-type groups produce distinct label nodes.
-    const labelNodeId = hashIds([...docIds, targetNodeId ?? '']);
+    // Label node is keyed on this group's own documents (already restricted, via targetDocMap, to
+    // the docs that referenced this group's targets). Two target-type groups that share the exact
+    // same documents therefore share one label node that fans out to both targets; groups backed
+    // by different documents get separate label nodes — matching a targetEntityId group key.
+    const labelNodeId = docIds.length === 1 ? docIds[0] : hashIds(docIds);
 
     const actorNames = actorEntityIds
       .map((id) => enrichmentMap.get(id)?.name)

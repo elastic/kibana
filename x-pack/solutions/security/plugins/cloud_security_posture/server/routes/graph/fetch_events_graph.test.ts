@@ -228,6 +228,22 @@ const buildEventEsqlRow = (
 ): EventEsqlRow => {
   const docId = `doc-${++nextRowId}`;
   const isAlert = overrides.isAlert ?? false;
+  const rowDocIds = overrides.docIds
+    ? Array.isArray(overrides.docIds)
+      ? overrides.docIds
+      : [overrides.docIds]
+    : [docId];
+  const targetIds = overrides.targetEntityId
+    ? Array.isArray(overrides.targetEntityId)
+      ? overrides.targetEntityId
+      : [overrides.targetEntityId]
+    : [];
+  // Default attribution: every target (or the "" no-target sentinel) is referenced by every
+  // document in the row — matching a single pre-aggregated row. Tests that need per-target
+  // document attribution can override targetDocMap explicitly.
+  const defaultTargetDocMap = (targetIds.length > 0 ? targetIds : ['']).flatMap((t) =>
+    rowDocIds.map((d) => `${t}\n${d}`)
+  );
   return {
     action: 'test-action',
     targetEntityId: overrides.targetEntityId ?? null,
@@ -244,6 +260,7 @@ const buildEventEsqlRow = (
     targetDocData: overrides.targetEntityId
       ? `{"id":"${overrides.targetEntityId}","type":"entity","sourceFields":{}}`
       : '',
+    targetDocMap: defaultTargetDocMap,
     ...overrides,
   };
 };
@@ -253,7 +270,7 @@ describe('regroupEvents', () => {
     expect(regroupEvents([], new Map())).toEqual([]);
   });
 
-  it('single record with no enrichment derives actorEntityType from EUID prefix', () => {
+  it('single record with no enrichment has null entity types (EUID prefix is not used)', () => {
     const record = buildEventEsqlRow({
       actorEntityId: 'user:alice',
       targetEntityId: 'host:server1',
@@ -262,8 +279,8 @@ describe('regroupEvents', () => {
     const [group] = regroupEvents([record], new Map());
 
     expect(group.actorNodeId).toBe('user:alice');
-    expect(group.actorEntityType).toBe('user');
-    expect(group.targetEntityType).toBe('host');
+    expect(group.actorEntityType).toBeNull();
+    expect(group.targetEntityType).toBeNull();
     expect(group.actorsDocData).toEqual([record.actorDocData]);
     expect(group.targetsDocData).toEqual([record.targetDocData]);
   });
@@ -343,10 +360,10 @@ describe('regroupEvents', () => {
     expect(regroupEvents([record1, record2], enrichmentMap)).toHaveLength(2);
   });
 
-  it('unenriched entities with a typed EUID prefix do not collapse with generic entities', () => {
-    // service:iam.googleapis.com has a "service:" prefix → type 'service'
-    // projects/my-proj has no prefix → type null (generic)
-    // They must end up in separate groups even without enrichment
+  it('unenriched entities collapse into a single group regardless of EUID prefix', () => {
+    // Neither entity is in the store, so both get a null type. Per the grouping rule,
+    // unenriched entities acted on by the same event must land in the same group even
+    // when their EUID prefixes differ (service: vs generic).
     const record = buildEventEsqlRow({
       actorEntityId: 'user:actor',
       targetEntityId: ['service:iam.googleapis.com', 'projects/my-proj'] as unknown as string,
@@ -354,31 +371,41 @@ describe('regroupEvents', () => {
 
     const result = regroupEvents([record], new Map());
 
-    expect(result).toHaveLength(2);
-    const types = result.map((g) => g.targetEntityType).sort();
-    expect(types).toEqual([null, 'service']);
+    expect(result).toHaveLength(1);
+    expect(result[0].targetEntityType).toBeNull();
+    expect(result[0].targetIdsCount).toBe(2);
   });
 
-  it('labelNodeId is unique per target-type group even when doc IDs are shared', () => {
-    // One ES|QL row with two target types (service vs generic) that share the same docs.
-    // Each type group must produce a distinct label node.
+  it('enriched and unenriched targets from the same row share one label node', () => {
+    // One ES|QL row with an enriched target (type Host) and an unenriched target (null)
+    // that share the same single document. They form two type groups, but because the label
+    // node is keyed on documents only, both groups share the same labelNodeId — the label node
+    // then fans out to both targets via separate edges (see parse_records dedup).
     const record = buildEventEsqlRow({
       actorEntityId: 'user:actor',
-      targetEntityId: ['service:svc', 'projects/generic'] as unknown as string,
+      targetEntityId: ['host:server', 'projects/generic'] as unknown as string,
       docIds: ['doc-shared'],
       docs: ['{"id":"doc-shared","type":"event"}'],
       nonAlertDocIds: ['doc-shared'],
       alertDocIds: [],
     });
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      [
+        'host:server',
+        { name: 'Server', type: 'Host', subType: null, engineType: 'ecs', hostIps: [] },
+      ],
+    ]);
 
-    const result = regroupEvents([record], new Map());
+    const result = regroupEvents([record], enrichmentMap);
 
     expect(result).toHaveLength(2);
     const labelIds = result.map((g) => g.labelNodeId);
-    expect(labelIds[0]).not.toBe(labelIds[1]);
+    expect(labelIds[0]).toBe(labelIds[1]);
+    // Single document → labelNodeId is the raw document _id.
+    expect(labelIds[0]).toBe('doc-shared');
   });
 
-  it('labelNodeId is SHA-256 of sorted document _ids plus targetNodeId sentinel', () => {
+  it('labelNodeId is SHA-256 of sorted document _ids across merged rows', () => {
     const record1 = buildEventEsqlRow({
       actorEntityId: 'user:alice',
       docIds: ['doc-a'],
@@ -394,9 +421,9 @@ describe('regroupEvents', () => {
 
     const [group] = regroupEvents([record1, record2], new Map());
 
-    // targetNodeId is null → '' sentinel; hashIds sorts inputs before hashing
+    // Multiple documents → hashIds sorts inputs before hashing.
     const expectedLabelNodeId = createHash('sha256')
-      .update(['', 'doc-a', 'doc-b'].join(','))
+      .update(['doc-a', 'doc-b'].join(','))
       .digest('hex');
     expect(group.labelNodeId).toBe(expectedLabelNodeId);
   });
@@ -512,27 +539,34 @@ describe('regroupEvents', () => {
   });
 
   it('does not leak targetsDocData across type groups from the same row', () => {
-    // One ES|QL row: actor → [service:svc, projects/generic]
-    // Each type group must only contain its own target's doc data
-    const serviceDoc = '{"id":"service:svc","type":"entity","sourceFields":{}}';
+    // One ES|QL row: actor → [host:server (enriched, type Host), projects/generic (unenriched)].
+    // The enriched and unenriched targets form separate type groups, and each group must only
+    // contain its own target's doc data.
+    const hostDoc = '{"id":"host:server","type":"entity","sourceFields":{}}';
     const genericDoc = '{"id":"projects/generic","type":"entity","sourceFields":{}}';
 
     const record = buildEventEsqlRow({
       actorEntityId: 'user:actor',
-      targetEntityId: ['service:svc', 'projects/generic'] as unknown as string,
-      targetDocData: [serviceDoc, genericDoc] as unknown as string,
+      targetEntityId: ['host:server', 'projects/generic'] as unknown as string,
+      targetDocData: [hostDoc, genericDoc] as unknown as string,
     });
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      [
+        'host:server',
+        { name: 'Server', type: 'Host', subType: null, engineType: 'ecs', hostIps: [] },
+      ],
+    ]);
 
-    const result = regroupEvents([record], new Map());
+    const result = regroupEvents([record], enrichmentMap);
 
     expect(result).toHaveLength(2);
-    const serviceGroup = result.find((g) => g.targetEntityType === 'service')!;
+    const hostGroup = result.find((g) => g.targetEntityType === 'Host')!;
     const genericGroup = result.find((g) => g.targetEntityType === null)!;
 
-    expect(serviceGroup.targetsDocData).toContain(serviceDoc);
-    expect(serviceGroup.targetsDocData).not.toContain(genericDoc);
+    expect(hostGroup.targetsDocData).toContain(hostDoc);
+    expect(hostGroup.targetsDocData).not.toContain(genericDoc);
     expect(genericGroup.targetsDocData).toContain(genericDoc);
-    expect(genericGroup.targetsDocData).not.toContain(serviceDoc);
+    expect(genericGroup.targetsDocData).not.toContain(hostDoc);
   });
 
   it('deduplicates docs when the same document appears across merged rows', () => {
@@ -627,6 +661,7 @@ describe('regroupEvents', () => {
         nonAlertDocIds: ['d1', 'd2', 'd3'],
         actorDocData: '{"id":"host:a"}',
         targetDocData: '{"id":"host:t"}',
+        targetDocMap: ['host:t\nd1', 'host:t\nd2', 'host:t\nd3'],
       },
       {
         action: 'connect',
@@ -643,6 +678,7 @@ describe('regroupEvents', () => {
         nonAlertDocIds: ['d4', 'd5'],
         actorDocData: '{"id":"host:b"}',
         targetDocData: '{"id":"host:t"}',
+        targetDocMap: ['host:t\nd4', 'host:t\nd5'],
       },
     ];
 
