@@ -9,8 +9,12 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MITRE_ATTACK_VERSION } from '../../../../../../common/detection_engine/mitre/mitre_version';
-import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../common/constants';
+import {
+  NEW_FEATURES_TOUR_STORAGE_KEYS,
+  SecurityPageName,
+} from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useGetSecuritySolutionUrl } from '../../../../../common/components/link_to';
 import {
   MITRE_VERSION_UPGRADED_CALLOUT_TITLE,
   MITRE_VERSION_UPGRADED_CALLOUT_LEARN_MORE,
@@ -27,6 +31,10 @@ const DISMISSAL_STORAGE_KEY = NEW_FEATURES_TOUR_STORAGE_KEYS.MITRE_VERSION_UPGRA
  */
 export const MitreVersionUpgradedCallout = React.memo(() => {
   const { docLinks } = useKibana().services;
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const coverageOverviewHref = getSecuritySolutionUrl({
+    deepLinkId: SecurityPageName.coverageOverview,
+  });
   const [isDismissed, setIsDismissed] = useState(true);
 
   useEffect(() => {
@@ -55,9 +63,20 @@ export const MitreVersionUpgradedCallout = React.memo(() => {
         <p>
           <FormattedMessage
             id="xpack.securitySolution.rulesManagement.mitreVersionUpgradedCallout.body"
-            defaultMessage="The MITRE ATT&CK® dataset bundled with Kibana was updated to {version}. Elastic prebuilt rule mappings were refreshed for this version — install the latest prebuilt rule updates to keep them in sync. Custom rules that reference IDs no longer present in {version} are flagged on the MITRE ATT&CK® coverage page and on the rule edit form. {learnMoreLink}"
+            defaultMessage="The MITRE ATT&CK® dataset bundled with Kibana was updated to {version}. Rules that reference IDs no longer present in {version} are flagged on the {coverageLink} and on the rule edit form. {learnMoreLink}"
             values={{
               version: MITRE_ATTACK_VERSION,
+              coverageLink: (
+                <EuiLink
+                  href={coverageOverviewHref}
+                  data-test-subj="mitreVersionUpgradedCalloutCoverageLink"
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.rulesManagement.mitreVersionUpgradedCallout.coverageLink"
+                    defaultMessage="MITRE ATT&CK® coverage page"
+                  />
+                </EuiLink>
+              ),
               learnMoreLink: (
                 <EuiLink
                   href={docLinks.links.siem.mitreCoverage}

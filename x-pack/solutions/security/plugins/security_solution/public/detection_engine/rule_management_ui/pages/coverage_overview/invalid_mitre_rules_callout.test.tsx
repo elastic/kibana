@@ -10,6 +10,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { CoverageOverviewInvalidMitreRulesCallout } from './invalid_mitre_rules_callout';
+import { MITRE_ATTACK_VERSION } from '../../../../../common/detection_engine/mitre/mitre_version';
 import type { CoverageOverviewDashboard } from '../../../rule_management/model/coverage_overview/dashboard';
 
 const emptyInvalidlyMappedRules: CoverageOverviewDashboard['invalidlyMappedRules'] = {
@@ -43,7 +44,7 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
     const callout = screen.getByTestId('coverageOverviewInvalidMitreRulesCallout');
     expect(callout).toBeInTheDocument();
     expect(callout.textContent).toContain('You have 1 rule that references MITRE ATT&CK® IDs');
-    expect(callout.textContent).toContain('currently supported version (v19.1)');
+    expect(callout.textContent).toContain(`currently supported version (${MITRE_ATTACK_VERSION})`);
     expect(callout.textContent).toContain('Elastic prebuilt rule mappings were updated');
     expect(
       screen.getByTestId('coverageOverviewInvalidMitreRulesLearnMoreLink')
@@ -64,7 +65,7 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
     expect(callout.textContent).toContain('You have 2 rules that reference MITRE ATT&CK® IDs');
   });
 
-  it('mentions the currently supported MITRE version in the callout title', () => {
+  it('renders the outdated-mappings warning title', () => {
     renderCallout({
       invalidlyMappedRules: {
         enabledRules: [{ id: 'rule-1', name: 'Enabled rule', invalidMitreIds: ['TA9999'] }],
@@ -72,7 +73,7 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
       },
     });
 
-    expect(screen.getByText(/currently supported: v19\.1/)).toBeInTheDocument();
+    expect(screen.getByText(/Some rules have outdated MITRE ATT&CK® mappings/)).toBeInTheDocument();
   });
 
   it('opens the modal with all invalid rules grouped by status', async () => {
