@@ -137,7 +137,9 @@ export const getQualityTool = (
       const filteredSummary =
         filteredStatus === 'noData'
           ? 'No quality check results available. Run the Data Quality dashboard or enable rules with required_fields to see results.'
-          : `${parts.join('; ')}.`;
+          : parts.length > 0
+          ? `${parts.join('; ')}.`
+          : `All ${categorizedItems.length} checked indices have compatible ECS field mappings.`;
 
       return {
         results: [
