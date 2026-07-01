@@ -82,6 +82,8 @@ interface ScoutConfigTestSuite {
   type: 'scoutConfig';
   scoutConfig: string;
   count: number;
+  /** Forwarded to `scout run-tests` as `--grep` to narrow the config to matching test titles. */
+  grep?: string;
 }
 
 interface CommandTestSuite {
@@ -213,10 +215,18 @@ function getTestSuitesFromJson(json: string) {
         );
       }
 
+      if (
+        item.grep !== undefined &&
+        (typeof item.grep !== 'string' || item.grep.trim().length === 0)
+      ) {
+        fail(`testSuite.grep must be a non-empty string for scoutConfig entries`);
+      }
+
       testSuites.push({
         type: 'scoutConfig',
         scoutConfig,
         count,
+        ...(typeof item.grep === 'string' ? { grep: item.grep } : {}),
       });
       continue;
     }

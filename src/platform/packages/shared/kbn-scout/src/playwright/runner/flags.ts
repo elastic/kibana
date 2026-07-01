@@ -21,6 +21,7 @@ export interface RunTestsOptions {
   configPath: string;
   headed: boolean;
   repeatEach: number | undefined;
+  grep?: string;
   testFiles?: string[];
   esFrom: 'serverless' | 'source' | 'snapshot' | undefined;
   installDir: string | undefined;
@@ -30,7 +31,7 @@ export interface RunTestsOptions {
 export const TEST_FLAG_OPTIONS: FlagOptions = {
   ...SERVER_FLAG_OPTIONS,
   boolean: [...(SERVER_FLAG_OPTIONS.boolean || []), 'headed'],
-  string: [...(SERVER_FLAG_OPTIONS.string || []), 'config', 'testFiles', 'repeatEach'],
+  string: [...(SERVER_FLAG_OPTIONS.string || []), 'config', 'testFiles', 'repeatEach', 'grep'],
   default: { ...SERVER_FLAG_OPTIONS.default, headed: false },
   help: `
     ${SERVER_FLAG_OPTIONS.help}
@@ -38,6 +39,8 @@ export const TEST_FLAG_OPTIONS: FlagOptions = {
     --testFiles         Comma-separated list of test file paths or test directory path (required if --config not provided)
     --headed            Run Playwright with browser head
     --repeatEach        Run each test N times for local flakiness validation (e.g. --repeatEach 5)
+    --grep              Only run tests whose title matches this regular expression (e.g. --grep 'my test').
+                        Anchors (^, $) are not supported as the pattern is embedded in a lookahead.
   `,
 };
 
@@ -63,6 +66,12 @@ export async function parseTestFlags(flags: FlagsReader) {
     throw createFlagError(`'--repeatEach' must be a positive integer, got '${repeatEach}'`);
   }
 
+  const grep = flags.string('grep');
+
+  if (grep !== undefined && grep.trim().length === 0) {
+    throw createFlagError(`'--grep' must be a non-empty string when provided`);
+  }
+
   let scoutConfigPath: string;
   const testFiles: string[] = [];
 
@@ -86,6 +95,7 @@ export async function parseTestFlags(flags: FlagsReader) {
     configPath: scoutConfigPath,
     headed,
     repeatEach,
+    ...(grep !== undefined && { grep }),
     ...(testFiles.length > 0 && { testFiles }),
   };
 }

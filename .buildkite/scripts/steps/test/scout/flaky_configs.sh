@@ -10,6 +10,8 @@ source .buildkite/scripts/steps/functional/common.sh
 
 SCOUT_CONFIG=${SCOUT_CONFIG:-}
 SCOUT_SERVER_RUN_FLAGS=${SCOUT_SERVER_RUN_FLAGS:-}
+# Optional `--grep` pattern forwarded from the flaky request to narrow the config to matching tests.
+SCOUT_GREP=${SCOUT_GREP:-}
 
 if [[ -z "${SCOUT_REPORTER_ENABLED:-}" ]]; then
   export SCOUT_REPORTER_ENABLED=true
@@ -64,16 +66,33 @@ run_failed_test_reporter_and_annotate() {
 
 echo "--- Config: $config_path"
 echo "    Mode:   $mode"
+if [[ -n "$SCOUT_GREP" ]]; then
+  echo "    Grep:   $SCOUT_GREP"
+fi
 echo "--- Running tests: $config_path ($mode)"
+
+grep_args=()
+if [[ -n "$SCOUT_GREP" ]]; then
+  grep_args=(--grep "$SCOUT_GREP")
+fi
 
 # prevent non-zero exit code from breaking the script before reporting runs
 set +e;
-node scripts/scout run-tests $mode --config "$config_path" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
+node scripts/scout run-tests $mode --config "$config_path" --kibanaInstallDir "$KIBANA_BUILD_LOCATION" "${grep_args[@]+"${grep_args[@]}"}"
 EXIT_CODE=$?
 set -e;
 
 if [[ $EXIT_CODE -eq 0 ]]; then
   echo "--- Scout Test Run Complete: $config_path ($mode) ✅"
+  exit 0
+fi
+
+# Exit code 2 means "no tests matched" (see hasTestsInPlaywrightConfig). With `--grep`, a config
+# fans out to one job per (arch, domain) mode and the same pattern is applied to each, so it is
+# expected for some modes to match zero tests. Treat that as a non-failure (mirrors configs.sh)
+# instead of reporting a spurious red job.
+if [[ $EXIT_CODE -eq 2 ]]; then
+  echo "--- No matching tests for $config_path ($mode)${SCOUT_GREP:+ [grep: $SCOUT_GREP]} — skipping"
   exit 0
 fi
 

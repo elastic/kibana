@@ -53,6 +53,9 @@ export const runTestsCmd: Command<void> = {
 
     Local flakiness validation (run each test N times):
     node scripts/scout run-tests --arch stateful --domain classic --config <playwright_config_path> --repeatEach 5
+
+    Narrow a config to tests whose title matches a pattern:
+    node scripts/scout run-tests --arch stateful --domain classic --config <playwright_config_path> --grep '<pattern>'
   `,
   flags: TEST_FLAG_OPTIONS,
   run: async ({ flagsReader, log }) => {

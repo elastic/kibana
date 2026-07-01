@@ -27,6 +27,26 @@ import type { ScoutPlaywrightProjects } from '../types';
 import { execPromise, getPlaywrightGrepTag, withKibanaBabelRegister } from '../utils';
 import type { RunTestsOptions } from './flags';
 
+/**
+ * Scout always passes a single Playwright `--grep` to restrict a run to the deployment-tag of the
+ * current (arch, domain) mode (e.g. `@svlSearch`). Playwright honors only one `--grep` value, so a
+ * user-supplied pattern can't simply be appended — it has to be AND-combined with the tag into one
+ * regex. We do that with lookaheads so both the mode tag and the user pattern must match the test
+ * title: `(?=.*<tag>)(?=.*<userGrep>)`.
+ *
+ * Note: because the user pattern is embedded inside `(?=.*<userGrep>)`, anchored patterns
+ * (e.g. `^My Test$`) won't behave as expected — `.*^` can't match mid-string. Standard `--grep`
+ * patterns are substring matches and are not anchored, so this is an accepted limitation.
+ */
+export const buildPlaywrightGrepArg = (modeTag: string, userGrep?: string): string => {
+  const trimmedUserGrep = userGrep?.trim();
+  if (!trimmedUserGrep) {
+    return modeTag;
+  }
+
+  return `(?=.*${modeTag})(?=.*${trimmedUserGrep})`;
+};
+
 export const getPlaywrightProject = (
   testTarget: RunTestsOptions['testTarget']
 ): ScoutPlaywrightProjects => {
@@ -74,6 +94,13 @@ async function runPlaywrightTest(
   });
 }
 
+// `execPromise` runs through a shell, so each token must be quoted before being joined into a
+// command string. Without this, args that legitimately contain shell metacharacters — e.g. the
+// `--grep=(?=.*<tag>)(?=.*<userGrep>)` lookahead regex built by `buildPlaywrightGrepArg` — break
+// `/bin/sh` parsing. Single-quote wrapping passes the token through literally; embedded single
+// quotes are escaped as `'\''`.
+const quoteShellArg = (arg: string): string => `'${arg.replace(/'/g, `'\\''`)}'`;
+
 export async function hasTestsInPlaywrightConfig(
   log: ToolingLog,
   cmd: string,
@@ -82,7 +109,7 @@ export async function hasTestsInPlaywrightConfig(
 ): Promise<number> {
   log.info(`scout: Validate Playwright config has tests`);
   try {
-    const validationCmd = [cmd, ...cmdArgs, '--list'].join(' ');
+    const validationCmd = [cmd, ...cmdArgs, '--list'].map(quoteShellArg).join(' ');
 
     const result = await execPromise(validationCmd, {
       env: withKibanaBabelRegister({
@@ -196,12 +223,16 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     );
   }
 
+  if (options.grep) {
+    log.info(`scout: Filtering tests by --grep pattern: ${options.grep}`);
+  }
+
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
   const pwCmdArgs = [
     'test',
     ...(pwTestFiles.length ? pwTestFiles : []),
     `--config=${pwConfigPath}`,
-    `--grep=${pwGrepTag}`,
+    `--grep=${buildPlaywrightGrepArg(pwGrepTag, options.grep)}`,
     `--project=${pwProject}`,
     ...(options.headed ? ['--headed'] : []),
     ...(options.repeatEach ? [`--repeat-each=${options.repeatEach}`] : []),
