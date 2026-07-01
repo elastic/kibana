@@ -10,9 +10,6 @@ import { SmlError } from './sml_error';
 /**
  * Thrown when a content-mode write supplies a `permissions` value for an
  * `attachmentType` whose registered `SmlTypeDefinition` also defines
- * `getPermissions`. The hook is always authoritative for hook-backed types —
- * this error surfaces the conflict loudly instead of silently discarding the
- * caller-supplied `permissions`, which would otherwise let a workflow author
- * believe their `permissions` field took effect when it did not.
+ * `getPermissions`. 
  */
 export class SmlPermissionsConflictError extends SmlError {}
