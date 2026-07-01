@@ -155,27 +155,55 @@ export const createCloudSession = async (
   );
 };
 
-export const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log: ToolingLog) => {
+export const createSAMLRequest = async (
+  kbnUrl: string,
+  kbnVersion: string,
+  log: ToolingLog,
+  maxRetryCount = 3
+) => {
   const url = kbnUrl + '/internal/security/login';
-  let samlResponse: Response;
-  try {
-    samlResponse = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'kbn-version': kbnVersion,
-        'x-elastic-internal-origin': 'Kibana',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        providerType: 'saml',
-        providerName: 'cloud-saml-kibana',
-        currentURL: kbnUrl + '/login?next=%2F"',
-      }),
-      redirect: 'manual',
-    });
-  } catch (ex) {
-    log.error('Failed to create SAML request');
-    throw ex;
+  const requestInit: RequestInit = {
+    method: 'POST',
+    headers: {
+      'kbn-version': kbnVersion,
+      'x-elastic-internal-origin': 'Kibana',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      providerType: 'saml',
+      providerName: 'cloud-saml-kibana',
+      currentURL: kbnUrl + '/login?next=%2F"',
+    }),
+    redirect: 'manual',
+  };
+
+  let samlResponse: Response | undefined;
+  let attemptsLeft = maxRetryCount + 1;
+  while (attemptsLeft > 0) {
+    try {
+      samlResponse = await fetch(url, requestInit);
+      break;
+    } catch (ex) {
+      // `fetch failed` is undici's wrapper for a transient network-layer error
+      // (DNS/connection reset/socket hang-up); retry a bounded number of times,
+      // mirroring the retry behavior of the sibling helpers in this file.
+      if (--attemptsLeft > 0) {
+        // randomize delay to avoid retrying API call in parallel workers concurrently
+        const attemptDelay = randomInt(500, 2_500);
+        log.error(
+          `Failed to create SAML request: ${ex.message}\nWaiting ${attemptDelay} ms before the next attempt`
+        );
+        await delay(attemptDelay);
+      } else {
+        log.error('Failed to create SAML request');
+        throw ex;
+      }
+    }
+  }
+
+  if (!samlResponse) {
+    // should never be reached: the loop either breaks with a response or throws
+    throw new Error('Failed to create SAML request');
   }
 
   const bodyText = await samlResponse.text();
