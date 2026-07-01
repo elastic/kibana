@@ -190,7 +190,6 @@ export const HostPanel = memo(function HostPanel({
 
   const hasEntityStoreRecord = observedHost.entityRecord != null;
 
-
   const assetCriticalityPrivileges = useAssetCriticalityPrivileges(entityId ?? hostName);
 
   useQueryInspector({
