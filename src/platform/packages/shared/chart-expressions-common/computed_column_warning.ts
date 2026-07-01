@@ -45,15 +45,7 @@ function isComputedColumnNonFilterable(column: DatatableColumn): boolean {
   if (column.isComputedColumn !== true) {
     return false;
   }
-  const sourceField = column.meta?.sourceParams?.sourceField;
-  // Without a string sourceField the filter action falls back to column.name, which always
-  // collides with the computed output column itself — filtering is never possible.
-  if (typeof sourceField !== 'string') {
-    return true;
-  }
-  // A column produced by RENAME has name !== sourceField; the underlying index field
-  // remains addressable, so filtering is still possible.
-  return column.name === sourceField;
+  return column.meta?.sourceParams?.isSourceFieldFilterable !== true;
 }
 
 /**

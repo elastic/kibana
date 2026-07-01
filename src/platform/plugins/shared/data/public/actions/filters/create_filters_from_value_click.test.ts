@@ -293,6 +293,37 @@ describe('createFiltersFromClickEvent', () => {
         expect(filter).toEqual([]);
       });
 
+      test('returns no filters for that same computed column even after it is given a custom Lens label', async () => {
+        // Renaming the dimension via the Appearance section only changes column.name/label; it
+        // must not make an EVAL-computed column look like a genuine RENAME of the real field.
+        table.columns[0].isComputedColumn = true;
+        table.columns[0].name = 'My Custom Label';
+        mockFieldByName.mockReturnValue({
+          name: 'message',
+          filterable: true,
+        });
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(mockFieldByName).toHaveBeenCalledWith('message');
+        expect(filter).toEqual([]);
+      });
+
+      test('still creates a filter for a genuinely RENAMEd column, even with a custom Lens label', async () => {
+        table.columns[0].isComputedColumn = true;
+        table.columns[0].name = 'My Custom Label';
+        (table.columns[0].meta!.sourceParams as Record<string, unknown>)!.isSourceFieldFilterable =
+          true;
+        mockFieldByName.mockReturnValue({
+          name: 'message',
+          filterable: true,
+        });
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(filter).toHaveLength(1);
+      });
+
       test('should create phrases filter for array value using sourceField for index field name', async () => {
         const mockFilterableField = {
           name: 'tags',

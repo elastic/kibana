@@ -166,8 +166,10 @@ const createFilterFromRawColumnsESQL = async (
     return [];
   }
 
-  // Avoid index phrase filter when output column name collides with an index field
-  if (column.isComputedColumn === true && column.name === fieldName) {
+  if (
+    column.isComputedColumn === true &&
+    column.meta?.sourceParams?.isSourceFieldFilterable !== true
+  ) {
     return [];
   }
 

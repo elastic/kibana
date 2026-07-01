@@ -132,6 +132,7 @@ describe('getEsqlFn', () => {
     );
 
     expect(result?.columns?.[0]?.meta?.sourceParams?.sourceField).toBe('old_name');
+    expect(result?.columns?.[0]?.meta?.sourceParams?.isSourceFieldFilterable).toBe(true);
     expect(result?.columns?.[0]?.name).toBe('new_name');
   });
 
@@ -144,7 +145,37 @@ describe('getEsqlFn', () => {
       createExecutionContext()
     );
 
+    // A plain pass-through field is its own real, filterable field, even though it was never
+    // renamed.
     expect(result?.columns?.[0]?.meta?.sourceParams?.sourceField).toBe('host');
+    expect(result?.columns?.[0]?.meta?.sourceParams?.isSourceFieldFilterable).toBe(true);
+  });
+
+  it('treats an EVAL-computed field with no rename as not filterable', async () => {
+    const mockSearchService = getMockSearchService([{ name: 'doubled', type: 'long' }]);
+
+    const result = await createEsqlFn(mockSearchService).fn(
+      null,
+      { query: 'FROM index | EVAL doubled = bytes * 2' },
+      createExecutionContext()
+    );
+
+    expect(result?.columns?.[0]?.meta?.sourceParams?.sourceField).toBe('doubled');
+    expect(result?.columns?.[0]?.meta?.sourceParams?.isSourceFieldFilterable).toBe(false);
+  });
+
+  it('treats a METADATA column as filterable, even though it was never renamed', async () => {
+    const mockSearchService = getMockSearchService([{ name: '_id', type: 'keyword' }]);
+
+    const result = await createEsqlFn(mockSearchService).fn(
+      null,
+      { query: 'FROM index METADATA _id' },
+      createExecutionContext()
+    );
+
+    expect(result?.columns?.[0]?.isComputedColumn).toBe(true);
+    expect(result?.columns?.[0]?.meta?.sourceParams?.sourceField).toBe('_id');
+    expect(result?.columns?.[0]?.meta?.sourceParams?.isSourceFieldFilterable).toBe(true);
   });
 
   it('resolves chained RENAME pipeline for meta.sourceParams.sourceField', async () => {

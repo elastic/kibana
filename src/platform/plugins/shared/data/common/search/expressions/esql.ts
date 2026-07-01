@@ -127,6 +127,8 @@ function mapResponseToDatatable(
         ? KBN_FIELD_TYPES.CONFLICT
         : esFieldTypeToKibanaFieldType(type);
 
+      const isSourceFieldFilterable =
+        !querySummary.newColumns.has(name) || (renameSourceFieldMap?.has(name) ?? false);
       const sourceField = renameSourceFieldMap?.get(name) ?? name;
 
       return {
@@ -142,10 +144,12 @@ function mapResponseToDatatable(
                   params: {},
                   indexPattern,
                   sourceField,
+                  isSourceFieldFilterable,
                 }
               : {
                   indexPattern,
                   sourceField,
+                  isSourceFieldFilterable,
                 },
           params: {
             id: kibanaFieldType,
