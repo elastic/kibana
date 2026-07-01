@@ -123,7 +123,6 @@ export function ClassicStreamDetailManagement({
       <LifecycleTabLabel
         definition={definition}
         showActions={tab === 'lifecycle'}
-        indexTemplateName={definition.elasticsearch_assets?.indexTemplate}
         notifications={notifications}
         share={share}
       />
