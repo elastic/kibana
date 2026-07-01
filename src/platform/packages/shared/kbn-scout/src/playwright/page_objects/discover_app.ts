@@ -59,7 +59,11 @@ export class DiscoverApp {
 
     // There should be exactly one visible data view switch.
     // If both are visible (bug), fail explicitly instead of picking one
-    await expect(discoverSwitch.or(fallbackSwitch)).toBeVisible();
+    await this.page
+      .locator(
+        '[data-test-subj="discover-dataView-switch-link"], [data-test-subj="dataView-switch-link"]'
+      )
+      .waitFor({ state: 'visible' });
 
     const discoverVisible = await discoverSwitch.isVisible();
     const fallbackVisible = await fallbackSwitch.isVisible();
@@ -94,17 +98,16 @@ export class DiscoverApp {
     }
     await this.hideTabPreview();
     await dataViewSwitch.click();
-    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeVisible();
+    const switcher = this.page.testSubj.locator('indexPattern-switcher');
+    await switcher.waitFor({ state: 'visible' });
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
-    const matchingDataViewLocator = this.page.testSubj
-      .locator('indexPattern-switcher')
-      .locator(`[data-test-subj="dataView-${name}"]`);
+    const matchingDataViewLocator = switcher.locator(`[data-test-subj="dataView-${name}"]`);
     if (await matchingDataViewLocator.isVisible()) {
       await matchingDataViewLocator.click();
     } else {
       await this.page.testSubj.locator('explore-matching-indices-button').click();
     }
-    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeHidden();
+    await switcher.waitFor({ state: 'hidden' });
     await this.waitUntilFieldListHasCountOfFields();
   }
 
@@ -169,6 +172,24 @@ export class DiscoverApp {
     await switcher.waitFor({ state: 'hidden' });
 
     return dataViews;
+  }
+
+  async isCurrentDataViewAdHoc(): Promise<boolean> {
+    const dataViewSwitch = await this.getVisibleDataViewSwitch();
+    const dataViewTitle = await dataViewSwitch.getAttribute('title');
+
+    if (!dataViewTitle) {
+      throw new Error('Current data view switch is missing a title attribute');
+    }
+
+    await this.openDataViewSwitcher();
+    const isAdHoc = await this.page.testSubj
+      .locator(`dataViewItemTempBadge-${dataViewTitle}`)
+      .isVisible();
+    await this.page.keyboard.press('Escape');
+    await this.page.testSubj.locator('indexPattern-switcher').waitFor({ state: 'hidden' });
+
+    return isAdHoc;
   }
 
   async editCurrentDataViewName(name: string) {
@@ -290,6 +311,37 @@ export class DiscoverApp {
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
     await this.waitUntilSearchingHasFinished();
+  }
+
+  async getSharedUrl(): Promise<string> {
+    await this.clickAppMenuItem('shareTopNavButton');
+
+    const copyButton = this.page.testSubj.locator('copyShareUrlButton');
+    const sharePanel = this.page.testSubj.locator('sharePanel-Permalinks');
+
+    if (!(await copyButton.isVisible()) && (await sharePanel.isVisible())) {
+      await sharePanel.click();
+    }
+
+    await copyButton.waitFor({ state: 'visible' });
+    await copyButton.click();
+
+    const sharedUrl = await this.page.waitForFunction(() => {
+      return document
+        .querySelector('[data-test-subj="copyShareUrlButton"]')
+        ?.getAttribute('data-share-url');
+    });
+
+    return sharedUrl.jsonValue();
+  }
+
+  async closeShareModal() {
+    const shareModal = this.page.testSubj.locator('shareContextModal');
+
+    if (await shareModal.isVisible()) {
+      await shareModal.getByLabel(/Close/).click();
+      await shareModal.waitFor({ state: 'hidden' });
+    }
   }
 
   /**

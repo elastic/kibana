@@ -20,12 +20,19 @@ export const UNIFIED_TABS_TEST_SUBJ = {
   editTabLabelInputPrefix: 'unifiedTabs_editTabLabelInput_',
   newTabBtn: 'unifiedTabs_tabsBar_newTabBtn',
   tabsBar: 'unifiedTabs_tabsBar',
+  tabsBarMenuButton: 'unifiedTabs_tabsBarMenuButton',
+  tabsBarMenuPanel: 'unifiedTabs_tabsBarMenuPanel',
   duplicateMenuItem: 'unifiedTabs_tabMenuItem_duplicate',
+  clearRecentlyClosed: 'unifiedTabs_tabsMenu_clearRecentlyClosed',
+  restoreAllRecentlyClosedTabs: 'unifiedTabs_tabsMenu_restoreAllTabs',
   tabPreviewOuterPanelPrefix: 'unifiedTabs_tabPreview_outerPanel_',
   tabPreviewContentPanel: 'unifiedTabs_tabPreview_contentPanel',
   tabPreviewTitlePrefix: 'unifiedTabs_tabPreview_title_',
   tabPreviewQueryPrefix: 'unifiedTabs_tabPreviewCodeBlock_',
   tabPreviewLabelPrefix: 'unifiedTabs_tabPreview_label_',
+  recentlyClosedTabPrefix: 'unifiedTabs_tabsMenu_recentlyClosedTab_',
+  recentlyClosedGroupPrefix: 'unifiedTabs_tabsMenu_recentlyClosedGroup_',
+  recentlyClosedGroupTabPrefix: 'unifiedTabs_tabsMenu_recentlyClosedGroupTab_',
 } as const;
 
 export interface TabPreviewContent {
@@ -88,6 +95,17 @@ export class UnifiedTabs {
     const tab = this.getTabsBar().getByRole('tab', { name });
     await tab.click();
     await expect(tab).toHaveAttribute('aria-selected', 'true');
+  }
+
+  async getTabLabels(): Promise<string[]> {
+    return this.getTabs().evaluateAll((tabs) =>
+      tabs.map((tab) => (tab as HTMLElement).innerText.trim())
+    );
+  }
+
+  async getSelectedTabLabel(): Promise<string> {
+    await this.activeTabLocator.waitFor({ state: 'visible' });
+    return (await this.activeTabLocator.innerText()).trim();
   }
 
   /**
@@ -186,6 +204,97 @@ export class UnifiedTabs {
     await this.clickNewTabButton();
     await this.activeTabLocator.waitFor({ state: 'visible' });
     await this.hideTabPreview();
+  }
+
+  private async openTabsBarMenu() {
+    await this.page.testSubj.click(UNIFIED_TABS_TEST_SUBJ.tabsBarMenuButton);
+    await this.page.testSubj
+      .locator(UNIFIED_TABS_TEST_SUBJ.tabsBarMenuPanel)
+      .waitFor({ state: 'visible' });
+  }
+
+  private async closeTabsBarMenu() {
+    await this.page.keyboard.press('Escape');
+    await this.page.testSubj
+      .locator(UNIFIED_TABS_TEST_SUBJ.tabsBarMenuPanel)
+      .waitFor({ state: 'hidden' });
+  }
+
+  private getRecentlyClosedTabs(): Locator {
+    return this.page.locator(
+      `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.recentlyClosedTabPrefix}"]`
+    );
+  }
+
+  private getRecentlyClosedGroups(): Locator {
+    return this.page.locator(
+      `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.recentlyClosedGroupPrefix}"]`
+    );
+  }
+
+  private getRecentlyClosedGroupTabs(): Locator {
+    return this.page.locator(
+      `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.recentlyClosedGroupTabPrefix}"]`
+    );
+  }
+
+  private getRecentlyClosedRootItems(): Locator {
+    return this.page.locator(
+      `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.recentlyClosedGroupPrefix}"], [data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.recentlyClosedTabPrefix}"]`
+    );
+  }
+
+  private async getRecentlyClosedItemTitles(items: Locator): Promise<string[]> {
+    const texts = await items.evaluateAll((elements) =>
+      elements.map((element) => (element as HTMLElement).innerText.trim())
+    );
+
+    return texts.map((text) => text.split('\n')[0]);
+  }
+
+  async getRecentlyClosedTabLabels(): Promise<string[]> {
+    await this.openTabsBarMenu();
+    const labels = await this.getRecentlyClosedItemTitles(this.getRecentlyClosedTabs());
+    await this.closeTabsBarMenu();
+
+    return labels;
+  }
+
+  async getRecentlyClosedRootTitles(): Promise<string[]> {
+    await this.openTabsBarMenu();
+    const titles = await this.getRecentlyClosedItemTitles(this.getRecentlyClosedRootItems());
+    await this.closeTabsBarMenu();
+
+    return titles;
+  }
+
+  async getRecentlyClosedGroupTabTitles(groupIndex: number): Promise<string[]> {
+    await this.openTabsBarMenu();
+    const groups = await this.getRecentlyClosedGroups().all();
+    const group = groups[groupIndex];
+    if (!group) {
+      throw new Error(`Recently closed group index ${groupIndex} is out of bounds`);
+    }
+    await group.click();
+    await this.page.testSubj
+      .locator(UNIFIED_TABS_TEST_SUBJ.restoreAllRecentlyClosedTabs)
+      .waitFor({ state: 'visible' });
+    const titles = await this.getRecentlyClosedItemTitles(this.getRecentlyClosedGroupTabs());
+    await this.closeTabsBarMenu();
+
+    return titles;
+  }
+
+  async clearRecentlyClosedTabs() {
+    await this.openTabsBarMenu();
+
+    const clearButton = this.page.testSubj.locator(UNIFIED_TABS_TEST_SUBJ.clearRecentlyClosed);
+    if (await clearButton.isVisible()) {
+      await clearButton.click();
+      await clearButton.waitFor({ state: 'hidden' });
+    }
+
+    await this.closeTabsBarMenu();
   }
 
   /**

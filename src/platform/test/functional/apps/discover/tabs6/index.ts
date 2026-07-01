@@ -44,7 +44,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await discover.waitUntilTabIsLoaded();
     });
 
-    loadTestFile(require.resolve('./_sharing'));
     loadTestFile(require.resolve('./_recently_closed_tabs'));
   });
 }
