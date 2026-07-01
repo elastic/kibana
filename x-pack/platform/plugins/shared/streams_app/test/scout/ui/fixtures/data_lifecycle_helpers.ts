@@ -20,7 +20,7 @@ export const RETENTION_TEST_IDS = {
   successfulFlyoutApplyButton: 'dataLifecycleFlyoutApplyButton',
   successfulFlyoutCancelButton: 'dataLifecycleFlyoutCancelButton',
 
-  // Successful data: delete phase flyout (custom DSL retention)
+  // Successful data: delete phase flyout (custom DSL retention) — serverless "Add delete phase" flow
   successfulDeletePhaseFlyout: 'streamsEditSuccessfulDeletePhaseFlyout',
   successfulDeletePhaseValue: 'streamsEditSuccessfulDeletePhaseFlyoutDeleteAfterValue',
   successfulDeletePhaseUnit: 'streamsEditSuccessfulDeletePhaseFlyoutDeleteAfterUnit',
@@ -28,6 +28,22 @@ export const RETENTION_TEST_IDS = {
   successfulDeletePhaseCancelButton: 'streamsEditSuccessfulDeletePhaseFlyoutCancelButton',
   successfulDeletePhaseRemoveButton:
     'streamsEditSuccessfulDeletePhaseFlyoutRemoveDeletePhaseButton',
+
+  // Successful data: DLM data phases flyout (stateful "Add data phase" hot → frozen → delete flow).
+  // On stateful the delete-only button/flyout above is replaced by this popover + flyout
+  // (stateful is gated on `!isServerless`), so the delete phase is configured here instead.
+  addDataPhaseButton: 'dataLifecycleSummaryAddDataPhaseButton',
+  addDataPhaseDeleteOption: 'dataLifecycleSummaryAddDataPhaseOption-delete',
+  dataPhasesFlyout: 'streamsEditDataPhasesFlyout',
+  dataPhasesDeletePanel: 'streamsEditDataPhasesFlyoutPanel-delete',
+  dataPhasesDeleteValue: 'streamsEditDataPhasesFlyoutMoveAfterValue',
+  dataPhasesDeleteUnit: 'streamsEditDataPhasesFlyoutMoveAfterUnit',
+  dataPhasesSaveButton: 'streamsEditDataPhasesFlyoutSaveButton',
+  dataPhasesRemoveDeleteButton: 'streamsEditDataPhasesFlyoutRemoveDeletePhaseButton',
+
+  // Timeline phase popover actions for the (successful data) delete phase — same in both flows.
+  deletePhaseTimelineButton: 'lifecyclePhase-delete-button',
+  deletePhaseTimelineEditButton: 'lifecyclePhase-delete-editButton',
 
   // Lifecycle method cards (DLM / ILM)
   methodCardDlm: 'editDataLifecycle-methodCard-dlm',
@@ -145,7 +161,7 @@ export async function toggleInheritSwitch(page: ScoutPage, enabled: boolean): Pr
 /**
  * Selects the ILM lifecycle method inside the lifecycle method flyout.
  */
-export async function selectIlmMethod(page: ScoutPage): Promise<void> {
+async function selectIlmMethod(page: ScoutPage): Promise<void> {
   const card = page.getByTestId(RETENTION_TEST_IDS.methodCardIlm);
   await card.waitFor({ state: 'visible' });
   await card.getByRole('radio').click();
@@ -164,31 +180,98 @@ export async function selectIlmPolicy(page: ScoutPage, policyName: string): Prom
 }
 
 /**
- * Opens the delete-phase flyout for successful data so a custom DSL retention can be set.
+ * Test ids for the flyout used to configure the (successful data) delete phase. Stateful and
+ * serverless use different flows: stateful configures delete inside the multi-phase DLM "data
+ * phases" flyout, serverless uses the dedicated delete-phase flyout (gated on `!isServerless`).
+ * {@link openDeletePhaseFlyout} detects the active flow and returns the matching set so callers
+ * work unchanged in both environments.
  */
-export async function openDeletePhaseFlyout(
+interface DeletePhaseFlyout {
+  // Top-level flyout locator — used to wait for the flyout to close.
+  flyout: Locator;
+  // Container the value/unit fields are scoped to (the delete panel in the data phases flyout, so a
+  // coexisting frozen panel can't match the same ids; the whole flyout in the delete-only flyout).
+  fields: Locator;
+  valueTestId: string;
+  unitTestId: string;
+  applyTestId: string;
+  removeTestId: string;
+  // Stateful "data phases" flyout: the remove button only edits the form (delete.enabled = false),
+  // so the change must then be saved. Serverless: the remove button applies and closes immediately.
+  isDataPhaseFlow: boolean;
+}
+
+const dataPhaseFlow = (page: ScoutPage): DeletePhaseFlyout => {
+  const flyout = page.getByTestId(RETENTION_TEST_IDS.dataPhasesFlyout);
+  return {
+    flyout,
+    fields: flyout.getByTestId(RETENTION_TEST_IDS.dataPhasesDeletePanel),
+    valueTestId: RETENTION_TEST_IDS.dataPhasesDeleteValue,
+    unitTestId: RETENTION_TEST_IDS.dataPhasesDeleteUnit,
+    applyTestId: RETENTION_TEST_IDS.dataPhasesSaveButton,
+    removeTestId: RETENTION_TEST_IDS.dataPhasesRemoveDeleteButton,
+    isDataPhaseFlow: true,
+  };
+};
+
+const deleteOnlyFlow = (page: ScoutPage): DeletePhaseFlyout => {
+  const flyout = page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout);
+  return {
+    flyout,
+    fields: flyout,
+    valueTestId: RETENTION_TEST_IDS.successfulDeletePhaseValue,
+    unitTestId: RETENTION_TEST_IDS.successfulDeletePhaseUnit,
+    applyTestId: RETENTION_TEST_IDS.successfulDeletePhaseApplyButton,
+    removeTestId: RETENTION_TEST_IDS.successfulDeletePhaseRemoveButton,
+    isDataPhaseFlow: false,
+  };
+};
+
+/**
+ * Opens the delete-phase flyout for successful data so a custom DSL retention can be set.
+ *
+ * Works in both environments: on stateful the delete phase is configured through the multi-phase
+ * "Add data phase" popover + DLM data phases flyout, on serverless through the dedicated "Add delete
+ * phase" button + flyout. The active flow is detected from whichever entry point / flyout the UI
+ * renders, so callers don't need to know the deployment mode.
+ */
+async function openDeletePhaseFlyout(
   page: ScoutPage,
   { existing = false }: { existing?: boolean } = {}
-): Promise<Locator> {
-  const flyout = page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout);
-
+): Promise<DeletePhaseFlyout> {
   if (existing) {
-    const deletePhaseButton = page.getByTestId('lifecyclePhase-delete-button');
+    // Editing an existing delete phase goes through the timeline phase popover in both flows; only
+    // the resulting flyout differs.
+    const deletePhaseButton = page.getByTestId(RETENTION_TEST_IDS.deletePhaseTimelineButton);
     await deletePhaseButton.waitFor({ state: 'visible' });
     await deletePhaseButton.click();
-    await page.getByTestId('lifecyclePhase-delete-editButton').click();
+    await page.getByTestId(RETENTION_TEST_IDS.deletePhaseTimelineEditButton).click();
   } else {
-    // .click() auto-waits for the button to be visible and enabled.
-    await page.getByTestId(RETENTION_TEST_IDS.addDeletePhaseButton).click();
+    const addDataPhaseButton = page.getByTestId(RETENTION_TEST_IDS.addDataPhaseButton);
+    const addDeletePhaseButton = page.getByTestId(RETENTION_TEST_IDS.addDeletePhaseButton);
+    // Exactly one entry point is rendered depending on the deployment (the other is not mounted, so
+    // `.or()` resolves to a single element). Wait for whichever it is, then take that path.
+    await addDataPhaseButton.or(addDeletePhaseButton).waitFor({ state: 'visible' });
+    if (await addDataPhaseButton.isVisible()) {
+      await addDataPhaseButton.click();
+      await page.getByTestId(RETENTION_TEST_IDS.addDataPhaseDeleteOption).click();
+    } else {
+      await addDeletePhaseButton.click();
+    }
   }
 
-  await flyout.waitFor({ state: 'visible' });
-  return flyout;
+  // Only one of the two flyouts is ever mounted; wait for whichever appears and return its ids.
+  const dataPhasesFlyout = page.getByTestId(RETENTION_TEST_IDS.dataPhasesFlyout);
+  const deleteOnlyFlyout = page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout);
+  await dataPhasesFlyout.or(deleteOnlyFlyout).waitFor({ state: 'visible' });
+
+  return (await dataPhasesFlyout.isVisible()) ? dataPhaseFlow(page) : deleteOnlyFlow(page);
 }
 
 /**
  * Sets a custom DSL retention (delete phase) for successful data.
- * Opens the delete-phase flyout, fills the value/unit and applies.
+ * Opens the delete-phase flyout ({@link openDeletePhaseFlyout} resolves the stateful vs serverless
+ * flow), fills the value/unit and applies.
  */
 export async function setCustomRetention(
   page: ScoutPage,
@@ -199,24 +282,25 @@ export async function setCustomRetention(
     expectOverrideConfirmation = false,
   }: { existing?: boolean; expectOverrideConfirmation?: boolean } = {}
 ): Promise<void> {
-  const flyout = await openDeletePhaseFlyout(page, { existing });
+  const { flyout, fields, valueTestId, unitTestId, applyTestId } = await openDeletePhaseFlyout(
+    page,
+    { existing }
+  );
 
-  const field = flyout.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseValue);
+  const field = fields.getByTestId(valueTestId);
   await field.fill('');
   await field.fill(value);
 
-  await flyout.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseUnit).selectOption(unit);
+  await fields.getByTestId(unitTestId).selectOption(unit);
 
   // Blur so the field commits before submit.
-  await flyout.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseUnit).click();
+  await fields.getByTestId(unitTestId).click();
 
-  await page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseApplyButton).click();
+  await page.getByTestId(applyTestId).click();
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
-  await page
-    .getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout)
-    .waitFor({ state: 'hidden' });
+  await flyout.waitFor({ state: 'hidden' });
 }
 
 /**
@@ -226,14 +310,19 @@ export async function removeDeletePhase(
   page: ScoutPage,
   { expectOverrideConfirmation = false }: { expectOverrideConfirmation?: boolean } = {}
 ): Promise<void> {
-  await openDeletePhaseFlyout(page, { existing: true });
-  await page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseRemoveButton).click();
+  const { flyout, removeTestId, applyTestId, isDataPhaseFlow } = await openDeletePhaseFlyout(page, {
+    existing: true,
+  });
+  await page.getByTestId(removeTestId).click();
+  // In the stateful "data phases" flyout the remove button only clears the phase in the form; the
+  // change still has to be saved. The serverless flyout removes and closes in one click.
+  if (isDataPhaseFlow) {
+    await page.getByTestId(applyTestId).click();
+  }
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
-  await page
-    .getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout)
-    .waitFor({ state: 'hidden' });
+  await flyout.waitFor({ state: 'hidden' });
 }
 
 /**
@@ -267,7 +356,7 @@ export async function openFailureStoreFlyout(page: ScoutPage): Promise<Locator> 
  * "Enable failure store" action). Pin the failure store as disabled via the API
  * before calling so this entry point is deterministic.
  */
-export async function openDisabledFailureStoreFlyout(page: ScoutPage): Promise<Locator> {
+async function openDisabledFailureStoreFlyout(page: ScoutPage): Promise<Locator> {
   await page.getByTestId(RETENTION_TEST_IDS.failureStoreEnableButton).click();
   const flyout = page.getByTestId(RETENTION_TEST_IDS.failedLifecycleFlyout);
   await expect(flyout).toBeVisible();

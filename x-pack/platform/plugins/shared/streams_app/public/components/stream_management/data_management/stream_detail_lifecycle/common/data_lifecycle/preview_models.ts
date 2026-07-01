@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { SerializedPolicy } from '@kbn/index-lifecycle-management-common-shared';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import { PHASE_ORDER, type IlmPhase } from '@kbn/data-lifecycle-phases';
-import { buildLifecyclePhases } from './lifecycle_types';
+import { buildLifecyclePhases, getFrozenPhaseLabel } from './lifecycle_types';
 import { formatBytes } from '../../helpers/format_bytes';
 import { getIlmPhaseGrowValues, type GrowValue } from '../../../../../../util/ilm_policy_phases';
 
@@ -151,9 +151,7 @@ export const buildDlmPreviewModel = ({
     !isServerless && frozenAfter !== undefined
       ? {
           frozenAfter,
-          frozenLabel: i18n.translate('xpack.streams.streamDetailLifecycle.frozen', {
-            defaultMessage: 'Frozen',
-          }),
+          frozenLabel: getFrozenPhaseLabel(),
           frozenColor,
           frozenDescription,
         }

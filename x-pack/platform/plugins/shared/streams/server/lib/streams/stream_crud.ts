@@ -51,8 +51,8 @@ export function getDataStreamLifecycle(
 
     return {
       dsl: {
-        data_retention: retention ? String(retention) : undefined,
-        frozen_after: frozenAfter ? String(frozenAfter) : undefined,
+        data_retention: retention != null ? String(retention) : undefined,
+        frozen_after: frozenAfter != null ? String(frozenAfter) : undefined,
         downsample: downsampling?.map((step) => ({
           after: step.after,
           fixed_interval: step.fixed_interval,

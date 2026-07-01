@@ -42,6 +42,8 @@ import { StatusError } from '../../../../lib/streams/errors/status_error';
 
 type PhaseNameWithoutDelete = Exclude<PhaseName, 'delete'>;
 
+const MAX_BACKING_INDICES = 1000;
+
 export interface DslPhaseStat {
   size_in_bytes: number;
   docs_count: number;
@@ -93,7 +95,7 @@ const getDslPhaseStats = async (
           },
           aggs: {
             indices: {
-              terms: { field: '_index', size: 1000 },
+              terms: { field: '_index', size: MAX_BACKING_INDICES },
             },
           },
         },
@@ -476,18 +478,34 @@ const lifecycleSnapshotRepositoriesRoute = createServerRoute({
   handler: async ({
     request,
     getScopedClients,
-  }): Promise<{ repositories: Array<{ name: string; type: string }> }> => {
+  }): Promise<{
+    repositories: Array<{ name: string; type: string }>;
+    default_repository?: string;
+  }> => {
     const { scopedClusterClient } = await getScopedClients({ request });
-    const repositoriesByName = await scopedClusterClient.asCurrentUser.snapshot.getRepository({
-      name: '*',
-    });
+    const [repositoriesByName, clusterSettings] = await Promise.all([
+      scopedClusterClient.asCurrentUser.snapshot.getRepository({ name: '*' }),
+      scopedClusterClient.asCurrentUser.cluster.getSettings({
+        filter_path: 'persistent.repositories.default_repository',
+      }),
+    ]);
 
     const repositories = Object.entries(repositoriesByName).map(([name, { type }]) => ({
       name,
       type: type ?? '',
     }));
 
-    return { repositories };
+    // The frozen data stream lifecycle phase relies on the cluster's default snapshot repository
+    // (`persistent.repositories.default_repository`) for its searchable snapshots.
+    const rawDefaultRepository = (
+      clusterSettings.persistent?.repositories as { default_repository?: unknown } | undefined
+    )?.default_repository;
+    const defaultRepository =
+      typeof rawDefaultRepository === 'string' && rawDefaultRepository.trim().length > 0
+        ? rawDefaultRepository
+        : undefined;
+
+    return { repositories, default_repository: defaultRepository };
   },
 });
 

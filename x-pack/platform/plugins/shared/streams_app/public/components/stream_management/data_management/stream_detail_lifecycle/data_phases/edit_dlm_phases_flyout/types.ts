@@ -18,6 +18,7 @@ export interface EditDlmPhasesFlyoutProps extends DataPhasesFlyoutCommonProps {
   isRefreshingDefaultRepository?: boolean;
   manageRepositoriesHref?: string;
   defaultRepositoryName?: string;
+  canCreateRepository?: boolean;
 
   onChange: (next: IngestStreamLifecycleDSL['dsl'], meta: EditDataPhasesFlyoutChangeMeta) => void;
   onSave: (next: IngestStreamLifecycleDSL['dsl']) => void;
