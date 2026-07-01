@@ -26,6 +26,25 @@ triggers:
         default: 5
         required: false
         description: 'Max discoveries per judge invocation. Caps agent message size; remaining discoveries are picked up on the next cycle.'
+      - name: completeNoWorkAsSuccess
+        type: boolean
+        default: false
+        required: false
+        description: 'When true, no-work runs complete with queue stats instead of cancelling. Intended for scheduled wrapper workflows.'
+
+outputs:
+  - name: candidateCount
+    type: number
+  - name: processedCount
+    type: number
+  - name: remainingCount
+    type: number
+  - name: hasRemaining
+    type: boolean
+  - name: queueEmpty
+    type: boolean
+  - name: noWork
+    type: boolean
 
 consts:
   DISCOVERIES_INDEX: '.significant_events-discoveries'
@@ -94,24 +113,54 @@ steps:
   # Step 2: Filter to only unassessed slugs (latest doc is discovery or quiet,
   # not handled).
   # -----------------------------------------------------------------------
-  - name: collect_discoveries
+  - name: collect_discovery_candidates
     type: data.set
     with:
       findings: >-
         ${{ steps.get_unassessed_discoveries.output.hits.hits
           | map: '_source'
           | reject: 'kind', 'handled'
+          | default: [] }}
+
+  - name: collect_discoveries
+    type: data.set
+    with:
+      findings: >-
+        ${{ steps.collect_discovery_candidates.output.findings
           | slice: 0, inputs.discoveryBatchMax
           | default: [] }}
+
+  - name: compute_queue_stats
+    type: data.set
+    with:
+      candidateCount: '${{ steps.collect_discovery_candidates.output.findings.size | default: 0 }}'
+      processedCount: '${{ steps.collect_discoveries.output.findings.size | default: 0 }}'
+      remainingCount: '${{ steps.collect_discovery_candidates.output.findings.size | minus: steps.collect_discoveries.output.findings.size | at_least: 0 }}'
+      hasRemaining: '${{ steps.collect_discovery_candidates.output.findings.size > steps.collect_discoveries.output.findings.size }}'
+      queueEmpty: '${{ steps.collect_discovery_candidates.output.findings.size <= steps.collect_discoveries.output.findings.size }}'
 
   # -----------------------------------------------------------------------
   # Step 3: Exit early when there is nothing to triage.
   # -----------------------------------------------------------------------
+  - name: output_no_discoveries
+    type: workflow.output
+    if: >-
+      ${{ inputs.completeNoWorkAsSuccess
+      and steps.collect_discoveries.output.findings.size == 0 }}
+    with:
+      candidateCount: '${{ steps.compute_queue_stats.output.candidateCount }}'
+      processedCount: '${{ steps.compute_queue_stats.output.processedCount }}'
+      remainingCount: '${{ steps.compute_queue_stats.output.remainingCount }}'
+      hasRemaining: '${{ steps.compute_queue_stats.output.hasRemaining }}'
+      queueEmpty: '${{ steps.compute_queue_stats.output.queueEmpty }}'
+      noWork: true
+
   - name: exit_no_discoveries
     type: workflow.output
     if: >-
-      ${{ steps.collect_discoveries.output.findings == null
-      or steps.collect_discoveries.output.findings.size == 0 }}
+      ${{ not inputs.completeNoWorkAsSuccess
+      and (steps.collect_discoveries.output.findings == null
+      or steps.collect_discoveries.output.findings.size == 0) }}
     status: cancelled
     with:
       reason: 'No unassessed discoveries or quiet docs — nothing to triage'
@@ -351,3 +400,13 @@ steps:
               recommendations: '${{ foreach.item.recommendations | default: [] }}'
         on-failure:
           continue: true
+
+  - name: output_result
+    type: workflow.output
+    with:
+      candidateCount: '${{ steps.compute_queue_stats.output.candidateCount }}'
+      processedCount: '${{ steps.compute_queue_stats.output.processedCount }}'
+      remainingCount: '${{ steps.compute_queue_stats.output.remainingCount }}'
+      hasRemaining: '${{ steps.compute_queue_stats.output.hasRemaining }}'
+      queueEmpty: '${{ steps.compute_queue_stats.output.queueEmpty }}'
+      noWork: false
