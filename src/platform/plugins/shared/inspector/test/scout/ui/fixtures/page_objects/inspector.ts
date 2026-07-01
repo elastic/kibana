@@ -9,7 +9,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 
-export class Inspector {
+export class InspectorView {
   constructor(private readonly page: ScoutPage) {}
 
   async open() {
