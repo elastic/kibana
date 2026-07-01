@@ -13,7 +13,8 @@ import type {
   ScoutParallelWorkerFixtures,
 } from '@kbn/scout';
 import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
-import { MetricsExperiencePage, Inspector } from './page_objects';
+import { Inspector } from '@kbn/inspector-plugin/test/scout/ui/fixtures/page_objects';
+import { MetricsExperiencePage } from './page_objects';
 import { METRICS_EXPERIENCE_VIEWER_ROLE, METRICS_EXPERIENCE_PRIVILEGED_ROLE } from './constants';
 
 export interface MetricsExperienceTestFixtures extends ScoutParallelTestFixtures {
