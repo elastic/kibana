@@ -66,7 +66,9 @@ import type { SearchUnifiedAlertsRequestBodyInput } from '@kbn/security-solution
 import type { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import type { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import type { SetAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
+import type { SetAttacksAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/attacks/set_assignees/set_assignees_route.gen';
 import type { SetAttacksStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/attacks/set_workflow_status/set_workflow_status_route.gen';
+import type { SetAttacksTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/attacks/set_tags/set_attacks_tags_route.gen';
 import type { SetUnifiedAlertsAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/unified_alerts/set_alert_assignees/set_alert_assignees_route.gen';
 import type { SetUnifiedAlertsTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/unified_alerts/set_alert_tags/set_alert_tags_route.gen';
 import type { SetUnifiedAlertsWorkflowStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/unified_alerts/set_workflow_status/set_workflow_status_route.gen';
@@ -632,11 +634,37 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
       .send(props.body as object);
   },
   /**
+      * Assign users to attack discovery alerts, and unassign them from alerts.
+Optionally cascade the change to related detection alerts via `kibana.alert.attack_discovery.alert_ids`.
+> info
+> You cannot add and remove the same assignee in the same request.
+
+      */
+  setAttacksAssignees(props: SetAttacksAssigneesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/attacks/assignees', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
    * Set the workflow status of one or more attack discovery alerts by IDs, optionally cascading the status to their related detection alerts.
    */
   setAttacksStatus(props: SetAttacksStatusProps, kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/detection_engine/attacks/status', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Add tags to attack discovery alerts, and remove them from alerts, by attack IDs in a single request. Optionally cascade tag changes to related detection alerts.
+   */
+  setAttacksTags(props: SetAttacksTagsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/attacks/tags', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -820,8 +848,14 @@ export interface SetAlertsStatusProps {
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
 }
+export interface SetAttacksAssigneesProps {
+  body: SetAttacksAssigneesRequestBodyInput;
+}
 export interface SetAttacksStatusProps {
   body: SetAttacksStatusRequestBodyInput;
+}
+export interface SetAttacksTagsProps {
+  body: SetAttacksTagsRequestBodyInput;
 }
 export interface SetUnifiedAlertsAssigneesProps {
   body: SetUnifiedAlertsAssigneesRequestBodyInput;
