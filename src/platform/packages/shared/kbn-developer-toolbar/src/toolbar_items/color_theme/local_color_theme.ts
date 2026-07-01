@@ -9,6 +9,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { CoreTheme, ThemeServiceStart } from '@kbn/core-theme-browser';
+// eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
+import { _setDarkMode } from '@kbn/ui-theme';
 
 export interface LocalColorThemeController {
   /** Emits the currently applied dark-mode state. */
@@ -36,6 +38,9 @@ export const installLocalColorThemeOverride = (
   const theme$ = new BehaviorSubject<CoreTheme>(baseTheme);
 
   const apply = (darkMode: boolean): void => {
+    // Flip the `euiThemeVars`/`euiDarkVars` proxy (read at access time) so
+    // components that read those static vars directly also reflect the preview.
+    _setDarkMode(darkMode);
     (globalThis as { __kbnThemeTag__?: string }).__kbnThemeTag__ = `${baseTheme.name}${
       darkMode ? 'dark' : 'light'
     }`;
