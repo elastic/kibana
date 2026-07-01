@@ -151,34 +151,36 @@ test.describe(
       expect(await discover.getEsqlQueryValue()).toMatch(new RegExp('logs-'));
     });
 
-    test('navigates to Service Details (alerts)', async ({
+    test('navigates to Service Details (alerts) and page loads', async ({
       page,
       pageObjects: { serviceMapPage },
     }) => {
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.openServiceNodeFlyout(SERVICE_OPBEANS_JAVA);
-
       await expect(serviceMapPage.serviceMapFlyout).toBeVisible();
 
       await serviceMapPage.clickServiceMapFlyoutAction('openAlerts');
 
       await expect(page).toHaveURL(new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/alerts`));
+      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toBeVisible();
     });
 
-    test('navigates to SLOs', async ({ page, pageObjects: { serviceMapPage } }) => {
+    test('navigates to SLOs and page loads', async ({ page, pageObjects: { serviceMapPage } }) => {
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.openServiceNodeFlyout(SERVICE_OPBEANS_JAVA);
-
       await expect(serviceMapPage.serviceMapFlyout).toBeVisible();
 
       await serviceMapPage.clickServiceMapFlyoutAction('openSlos');
 
       await expect(page).toHaveURL(new RegExp(`/app/slos`));
+      await expect(
+        page.getByTestId('slosPage').or(page.getByTestId('sloWelcomePage'))
+      ).toBeVisible();
     });
 
-    test('navigates to Service Details from flyout title', async ({
+    test('navigates to Service Details from flyout title and page loads', async ({
       page,
       pageObjects: { serviceMapPage },
     }) => {
@@ -191,6 +193,7 @@ test.describe(
       await expect(page).toHaveURL(
         new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/overview`)
       );
+      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toBeVisible();
     });
 
     test('navigates to Dependency Details from popover', async ({
