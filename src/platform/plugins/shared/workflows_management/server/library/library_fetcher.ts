@@ -37,7 +37,7 @@ import { LibraryCache, type LibraryHealth } from './library_cache';
  * `registryUrl` / `bundlePath` mutual-exclusion validator can distinguish "user
  * set this" from "schema defaulted it".
  */
-const DEFAULT_LIBRARY_REGISTRY_URL = 'https://workflows.elastic.co/v1';
+const DEFAULT_LIBRARY_REGISTRY_URL = 'https://workflows.elastic.co/library/v1';
 const DEFAULT_RETRY_OPTIONS = { retries: 3, factor: 2, minTimeout: 200 };
 /**
  * Per-request timeout (ms) applied to each individual attempt. Bounds a single
