@@ -10,7 +10,7 @@
 import type { CodeOwnerArea } from './code_owner_areas';
 import {
   CODE_OWNER_AREAS,
-  CODE_OWNER_AREA_MAPPINGS,
+  getCodeOwnerAreaMappings,
   findAreaForCodeOwner,
 } from './code_owner_areas';
 import { getTeamByGithubHandle } from './teams';
@@ -115,9 +115,9 @@ describe('code owner areas (registry-backed)', () => {
     });
   });
 
-  describe('CODE_OWNER_AREA_MAPPINGS', () => {
+  describe('getCodeOwnerAreaMappings', () => {
     it('only references known areas', () => {
-      expect(Object.keys(CODE_OWNER_AREA_MAPPINGS).sort()).toEqual([...CODE_OWNER_AREAS].sort());
+      expect(Object.keys(getCodeOwnerAreaMappings()).sort()).toEqual([...CODE_OWNER_AREAS].sort());
     });
 
     it.each(CODE_OWNER_AREAS)(
@@ -125,7 +125,7 @@ describe('code owner areas (registry-backed)', () => {
       (area) => {
         // Multi-area teams (e.g. elastic/search-kibana under search, workplaceai
         // and vectordb) must still appear under every one of their areas.
-        expect([...CODE_OWNER_AREA_MAPPINGS[area]].sort()).toEqual(
+        expect([...getCodeOwnerAreaMappings()[area]].sort()).toEqual(
           [...LEGACY_CODE_OWNER_AREA_MAPPINGS[area]].sort()
         );
       }

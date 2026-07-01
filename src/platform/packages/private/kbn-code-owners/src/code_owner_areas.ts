@@ -22,16 +22,29 @@ export const CODE_OWNER_AREAS = [
 ] as const;
 export type CodeOwnerArea = (typeof CODE_OWNER_AREAS)[number];
 
+let cachedAreaMappings: { [area in CodeOwnerArea]: string[] } | undefined;
+
 /**
  * Area mappings for code owners, derived from the team registry (`teams.jsonc`).
+ *
+ * A team appears under every area in its `areas`, preserving multi-area
+ * membership. Computed lazily and memoized on first call so merely importing
+ * this module (e.g. for {@link findAreaForCodeOwner}) does not read the registry
+ * from disk; consumers that never need the mapping pay no IO or parse cost.
  */
-export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } =
-  CODE_OWNER_AREAS.reduce((mappings, area) => {
-    mappings[area] = getTeams()
-      .filter((team) => team.github.team !== undefined && team.areas?.includes(area))
-      .map((team) => team.github.team as string);
-    return mappings;
-  }, {} as { [area in CodeOwnerArea]: string[] });
+export function getCodeOwnerAreaMappings(): { [area in CodeOwnerArea]: string[] } {
+  if (cachedAreaMappings === undefined) {
+    const teams = getTeams();
+    cachedAreaMappings = CODE_OWNER_AREAS.reduce((mappings, area) => {
+      mappings[area] = teams
+        .filter((team) => team.github.team !== undefined && team.areas?.includes(area))
+        .map((team) => team.github.team as string);
+      return mappings;
+    }, {} as { [area in CodeOwnerArea]: string[] });
+  }
+
+  return cachedAreaMappings;
+}
 
 /**
  * Find what area a code owner belongs to
