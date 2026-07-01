@@ -10,6 +10,7 @@ import {
   rawAdHocRunParamsSchemaV1,
   rawAdHocRunParamsSchemaV2,
   rawAdHocRunParamsSchemaV3,
+  rawAdHocRunParamsSchemaV4,
 } from '../schemas/raw_ad_hoc_run_params';
 import { backfillInitiator } from '../../../common/constants';
 
@@ -47,6 +48,16 @@ export const adHocRunParamsModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawAdHocRunParamsSchemaV3.extends({}, { unknowns: 'ignore' }),
       create: rawAdHocRunParamsSchemaV3,
+    },
+  },
+  '4': {
+    // `uiamApiKey` is an encrypted attribute, so it is not mapped/searchable and
+    // requires no `mappings_addition`. Existing saved objects without the field
+    // remain valid because it is optional.
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawAdHocRunParamsSchemaV4.extends({}, { unknowns: 'ignore' }),
+      create: rawAdHocRunParamsSchemaV4,
     },
   },
 };

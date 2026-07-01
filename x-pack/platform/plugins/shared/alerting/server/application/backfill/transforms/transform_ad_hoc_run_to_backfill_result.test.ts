@@ -525,6 +525,24 @@ describe('transformAdHocRunToAdHocRunData', () => {
     });
   });
 
+  test('should carry over the UIAM api key when present', () => {
+    const attributes = getMockAdHocRunAttributes();
+    attributes.uiamApiKey = 'uiamApiKeyValue';
+
+    expect(
+      transformAdHocRunToAdHocRunData({
+        adHocRunSO: getBulkCreateResponse('abc', '1', attributes),
+        isSystemAction,
+      })
+    ).toEqual(
+      expect.objectContaining({
+        apiKeyId: '123',
+        apiKeyToUse: 'MTIzOmFiYw==',
+        uiamApiKey: 'uiamApiKeyValue',
+      })
+    );
+  });
+
   test('should transform bulk create response with actions and include api key', () => {
     expect(
       transformAdHocRunToAdHocRunData({

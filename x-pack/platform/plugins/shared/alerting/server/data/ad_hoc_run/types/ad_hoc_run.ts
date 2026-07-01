@@ -50,6 +50,9 @@ type AdHocRunRule = Omit<AdHocRunSORule, 'actions'> & Pick<RuleDomain, 'id' | 'a
 export interface AdHocRunSO extends Record<string, unknown> {
   apiKeyId: string;
   apiKeyToUse: string;
+  // UIAM API key snapshotted from the rule when the backfill was scheduled.
+  // Optional because legacy ad hoc runs and ES-only deployments don't have one.
+  uiamApiKey?: string;
   createdAt: string;
   duration: string;
   enabled: boolean;
@@ -66,6 +69,7 @@ export interface AdHocRunSO extends Record<string, unknown> {
 export interface AdHocRun {
   apiKeyId: string;
   apiKeyToUse: string;
+  uiamApiKey?: string;
   createdAt: string;
   duration: string;
   enabled: boolean;
