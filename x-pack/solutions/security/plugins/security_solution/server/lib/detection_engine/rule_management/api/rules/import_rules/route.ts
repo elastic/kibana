@@ -39,10 +39,13 @@ import {
   getTupleDuplicateErrorsAndUniqueRules,
   migrateLegacyActionsIds,
 } from '../../../utils/utils';
-import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../timeouts';
+import {
+  RULE_MANAGEMENT_IMPORT_BATCH_SIZE,
+  RULE_MANAGEMENT_IMPORT_CONCURRENCY,
+  RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS,
+} from '../../constants';
+import { routeLimitedConcurrencyTag } from '../../../../../../utils/route_limited_concurrency_tag';
 import { createPrebuiltRuleObjectsClient } from '../../../../prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
-
-const CHUNK_PARSED_OBJECT_SIZE = 50;
 
 export const importRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -63,6 +66,7 @@ export const importRulesRoute = (
           maxBytes: config.maxRuleImportPayloadBytes,
           output: 'stream',
         },
+        tags: [routeLimitedConcurrencyTag(RULE_MANAGEMENT_IMPORT_CONCURRENCY)],
         timeout: {
           idleSocket: RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS,
         },
@@ -187,7 +191,8 @@ export const importRulesRoute = (
                 ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
             });
 
-          const ruleChunks = chunk(CHUNK_PARSED_OBJECT_SIZE, validatedResponseActionsRules);
+          const experimentalFeatures = ctx.securitySolution.getConfig().experimentalFeatures;
+          const ruleChunks = chunk(RULE_MANAGEMENT_IMPORT_BATCH_SIZE, validatedResponseActionsRules);
 
           const importRuleResponse = await importRules({
             ruleChunks,
@@ -200,6 +205,7 @@ export const importRulesRoute = (
             allowMissingConnectorSecrets: !!actionConnectors.length,
             ruleSourceImporter,
             detectionRulesClient,
+            experimentalFeatures,
           });
 
           const parseErrors = parsedRuleErrors.map((error) =>
