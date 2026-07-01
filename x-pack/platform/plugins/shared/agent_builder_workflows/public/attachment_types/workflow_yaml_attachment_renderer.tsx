@@ -15,7 +15,7 @@ import type {
   CanvasRenderCallbacks,
 } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
-import { CodeEditor } from '@kbn/code-editor';
+import { CodeEditor, type monaco } from '@kbn/code-editor';
 import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
@@ -109,30 +109,57 @@ const saveWorkflow = async ({
   }
 };
 
-const READONLY_EDITOR_OPTIONS = {
-  readOnly: true,
+const READONLY_EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
   automaticLayout: true,
   lineNumbers: 'on' as const,
+  glyphMargin: true,
   scrollBeyondLastLine: false,
+  folding: true,
+  showFoldingControls: 'mouseover',
   tabSize: 2,
+  lineNumbersMinChars: 2,
+  insertSpaces: true,
   fontSize: 14,
-  lineHeight: 23,
-  renderWhitespace: 'none' as const,
-  wordWrap: 'on' as const,
+  lineHeight: 23, // default ~21px + 2px
+  renderWhitespace: 'none',
+  roundedSelection: false,
+  guides: { indentation: true },
+  wordWrap: 'on',
   wordWrapColumn: 80,
-  wrappingIndent: 'indent' as const,
+  wrappingIndent: 'indent',
   theme: WORKFLOWS_MONACO_EDITOR_THEME,
-  padding: { top: 24, bottom: 16 },
-  domReadOnly: true,
-  contextmenu: false,
+  padding: {
+    top: 24,
+    bottom: 16,
+  },
+  quickSuggestions: {
+    other: true,
+    comments: false,
+    strings: true,
+  },
+  suggest: {
+    snippetsPreventQuickSuggestions: false,
+    showSnippets: true,
+    filterGraceful: true, // Better filtering
+    localityBonus: true, // Prioritize matches near cursor
+  },
+  wordBasedSuggestions: false,
+  hover: {
+    enabled: true,
+    delay: 300,
+    sticky: true,
+    above: false, // Force hover below cursor to avoid clipping
+  },
+  formatOnType: true,
+  suggestLineHeight: 25, // default 21 + 4px for padding
 };
 
 const WorkflowYamlCanvasContent: React.FC<{
   attachment: WorkflowYamlAttachment;
   isSidebar: boolean;
-  registerActionButtons: CanvasRenderCallbacks['registerActionButtons'];
-  updateOrigin: CanvasRenderCallbacks['updateOrigin'];
+  registerActionButtons?: CanvasRenderCallbacks['registerActionButtons'];
+  updateOrigin?: CanvasRenderCallbacks['updateOrigin'];
   application: ApplicationStart;
   isOnWorkflowPage: (workflowId: string) => boolean;
   telemetry: WorkflowsBaseTelemetry;
@@ -170,6 +197,10 @@ const WorkflowYamlCanvasContent: React.FC<{
   const isPersisted = Boolean(attachment.origin);
 
   const handleSave = useCallback(async () => {
+    if (!updateOrigin) {
+      return;
+    }
+
     const id = await saveWorkflow({
       workflowApi,
       notifications,
@@ -270,6 +301,10 @@ const WorkflowYamlCanvasContent: React.FC<{
           application.navigateToApp(WORKFLOW_PLUGIN_ID, { path: workflowId });
         },
       });
+    }
+
+    if (!registerActionButtons) {
+      return;
     }
 
     registerActionButtons(buttons);
@@ -378,6 +413,19 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
 
       return buttons;
     },
+
+    // renderInlineContent: ({ attachment, isSidebar }) => (
+    //   <KibanaContextProvider services={core}>
+    //     <WorkflowYamlCanvasContent
+    //       attachment={attachment}
+    //       isSidebar={isSidebar}
+    //       application={application}
+    //       isOnWorkflowPage={isOnWorkflowPage}
+    //       telemetry={telemetry}
+    //       queryClient={queryClient}
+    //     />
+    //   </KibanaContextProvider>
+    // ),
 
     renderCanvasContent: ({ attachment, isSidebar }, { registerActionButtons, updateOrigin }) => (
       <KibanaContextProvider services={core}>
