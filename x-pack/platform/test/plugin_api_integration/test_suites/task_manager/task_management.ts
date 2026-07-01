@@ -712,6 +712,36 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('captures the requesting user name on userScope when scheduling with an API key', async () => {
+      const scheduled = await scheduleTaskWithApiKey({
+        id: 'test-task-for-sample-task-plugin-to-capture-user-name',
+        taskType: 'sampleTask',
+        params: {},
+      });
+
+      const result = await currentTask(scheduled.id);
+
+      // the user name is resolved from the authenticated request via getCurrentUser
+      // and persisted on userScope at schedule time (no enrichment needed)
+      expect(result.userScope?.userName).not.empty();
+
+      // cross-check the captured user name against the owner of the API key that was created for the task
+      const queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      const createdApiKey = queryResult.body.apiKeys.find(
+        (apiKey: { id: string }) => apiKey.id === result.userScope?.apiKeyId
+      );
+
+      expect(createdApiKey).not.to.be(undefined);
+      expect(result.userScope?.userName).to.eql(createdApiKey.username);
+
+      await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
+    });
+
     it('should schedule tasks with fake request if request is provided', async () => {
       let queryResult = await supertest
         .post('/internal/security/api_key/_query')
@@ -1813,6 +1843,69 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(retryAt).to.be.greaterThan(now + 5 * 60 * 1000);
         expect(retryAt).to.be.lessThan(now + 6.5 * 60 * 1000);
+      });
+    });
+
+    describe('user profile enrichment', () => {
+      function scheduleTaskForProfileTest(
+        task: Partial<ConcreteTaskInstance>,
+        userProfileId: string,
+        userName?: string
+      ): Promise<SerializedConcreteTaskInstance> {
+        return supertest
+          .post('/api/sample_tasks/schedule_for_profile_test')
+          .set('kbn-xsrf', 'xxx')
+          .send({ task, userProfileId, userName })
+          .expect(200)
+          .then((response: { body: SerializedConcreteTaskInstance }) => {
+            log.debug(`Task Scheduled: ${response.body.id}`);
+            return response.body;
+          });
+      }
+
+      it('persists userProfileId and userName on userScope and resolves them via getCurrentUser at run time', async () => {
+        const testProfileUid = 'test-user-profile-uid-1';
+        const testUserName = 'test-user-name-1';
+        const scheduled = await scheduleTaskForProfileTest(
+          {
+            id: 'test-task-for-user-profile-enrichment',
+            taskType: 'sampleUserResolvingTask',
+            params: {},
+          },
+          testProfileUid,
+          testUserName
+        );
+
+        expect(scheduled.userScope?.userProfileId).to.eql(testProfileUid);
+        expect(scheduled.userScope?.userName).to.eql(testUserName);
+        expect(scheduled.userScope?.apiKeyCreatedByUser).to.be(true);
+
+        // The task is one-shot, so it's removed from saved objects after it
+        // runs. The task indexes its captured state into the test history
+        // index instead, so assert against that.
+        await retry.try(async () => {
+          const docs = await historyDocs(scheduled.id);
+          expect(docs.length).to.eql(1);
+
+          const state = JSON.parse(docs[0]._source.state) as {
+            resolvedFromTaskRequest: {
+              profileUid?: string;
+              username?: string;
+            } | null;
+            resolvedFromChildRequest: {
+              profileUid?: string;
+              username?: string;
+            } | null;
+          };
+
+          expect(state.resolvedFromTaskRequest).to.be.an('object');
+          expect(state.resolvedFromTaskRequest?.profileUid).to.eql(testProfileUid);
+          expect(state.resolvedFromTaskRequest?.username).to.eql(testUserName);
+
+          expect(state.resolvedFromChildRequest).to.be.an('object');
+          expect(state.resolvedFromChildRequest?.profileUid).to.eql(testProfileUid);
+          expect(state.resolvedFromChildRequest?.username).to.eql(testUserName);
+        });
       });
     });
   });

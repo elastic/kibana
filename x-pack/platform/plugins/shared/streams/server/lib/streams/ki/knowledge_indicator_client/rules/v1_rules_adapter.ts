@@ -7,7 +7,7 @@
 
 import { isBoom } from '@hapi/boom';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { EsqlRuleParams } from '../../../../sig_events/rules/esql/types';
+import type { EsqlRuleParams } from '../../../../significant_events/rules/esql/types';
 import {
   STREAMS_RULE_CONSUMER,
   STREAMS_ESQL_RULE_TYPE_ID,
@@ -24,7 +24,7 @@ import {
  * 404 on update → create instead (idempotent update).
  * 400 on bulk delete → swallowed (rules may not have existed yet).
  */
-export class V1RulesAdapter implements IRulesManagementClient {
+export class RulesAdapterV1 implements IRulesManagementClient {
   constructor(private readonly rulesClient: RulesClient) {}
 
   async createRule(id: string, body: CreateRuleBody): Promise<void> {

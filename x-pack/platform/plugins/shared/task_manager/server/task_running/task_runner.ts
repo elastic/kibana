@@ -16,17 +16,11 @@ import { withActiveSpan } from '@kbn/tracing-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { addSpanLabels, withSpan } from '@kbn/apm-utils';
 import { flow, identity, omit } from 'lodash';
-import type {
-  ExecutionContextStart,
-  FakeRawRequest,
-  Headers,
-  KibanaRequest,
-  Logger,
-} from '@kbn/core/server';
+import type { ExecutionContextStart, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { asSpaceId } from '@kbn/core-spaces-common';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { buildChildRequestEnricher, buildTaskFakeRequest } from './fake_request_factory';
 import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
 import {
@@ -138,6 +132,7 @@ type Opts = {
   getPollInterval: () => number;
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
+  enrichFakeRequest?: FakeRequestEnricher;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -195,6 +190,7 @@ export class TaskManagerRunner implements TaskRunner {
   private apiKeyStrategy: ApiKeyStrategy;
   private eventLogger: TaskEventLogger;
   private isCancelled = false;
+  private readonly enrichFakeRequest?: FakeRequestEnricher;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -223,6 +219,7 @@ export class TaskManagerRunner implements TaskRunner {
     getPollInterval,
     apiKeyStrategy,
     eventLogger,
+    enrichFakeRequest,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -245,6 +242,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.getPollInterval = getPollInterval;
     this.apiKeyStrategy = apiKeyStrategy;
     this.eventLogger = eventLogger;
+    this.enrichFakeRequest = enrichFakeRequest;
   }
 
   /**
@@ -427,6 +425,7 @@ export class TaskManagerRunner implements TaskRunner {
 
         const modifiedContext = await this.beforeRun({
           taskInstance: stateValidationResult.taskInstance,
+          executionUuid: this.uuid,
         });
 
         this.onTaskEvent(
@@ -448,10 +447,22 @@ export class TaskManagerRunner implements TaskRunner {
           const apiKeyForRequest = this.apiKeyStrategy.getApiKeyForFakeRequest(
             modifiedContext.taskInstance
           );
-          const fakeRequest = this.getFakeKibanaRequest(
-            apiKeyForRequest,
-            modifiedContext.taskInstance.userScope?.spaceId
-          );
+          const userProfileId = modifiedContext.taskInstance.userScope?.userProfileId;
+          const userName = modifiedContext.taskInstance.userScope?.userName;
+
+          const fakeRequest = buildTaskFakeRequest({
+            apiKey: apiKeyForRequest,
+            spaceId: modifiedContext.taskInstance.userScope?.spaceId,
+            userProfileId,
+            userName,
+            enrichFakeRequest: this.enrichFakeRequest,
+          });
+
+          const enrichRequest = buildChildRequestEnricher({
+            userProfileId,
+            userName,
+            enrichFakeRequest: this.enrichFakeRequest,
+          });
 
           const abortController = new AbortController();
 
@@ -459,6 +470,8 @@ export class TaskManagerRunner implements TaskRunner {
             taskInstance: sanitizedTaskInstance,
             fakeRequest,
             abortController,
+            enrichRequest,
+            executionUuid: this.uuid,
           });
 
           const originalTaskCancel = this.task.cancel;
@@ -575,7 +588,22 @@ export class TaskManagerRunner implements TaskRunner {
     // mget claim strategy sets the task to `running` during the claim cycle
     // so this update to mark the task as running is unnecessary
     if (this.claimStrategy === CLAIM_STRATEGY_MGET) {
-      this.instance = asReadyToRun(this.instance.task as ConcreteTaskInstanceWithStartedAt);
+      const { task } = this.instance;
+      // A ready-to-run mget task should always have a `startedAt`; log if it doesn't
+      // so we can diagnose the issue.
+      if (task.startedAt == null) {
+        this.logger.warn(
+          `Task ${this} is ready to run (mget) without a startedAt, which breaks the running-task invariant. ` +
+            `status=${task.status} attempts=${task.attempts} ` +
+            `runAt=${task.runAt?.toISOString() ?? 'null'} ` +
+            `retryAt=${task.retryAt?.toISOString() ?? 'null'} ` +
+            `scheduledAt=${task.scheduledAt?.toISOString() ?? 'null'} ` +
+            `ownerId=${task.ownerId ?? 'null'} version=${task.version ?? 'null'} ` +
+            `schedule=${task.schedule ? JSON.stringify(task.schedule) : 'null'}`,
+          { tags: [this.taskType, this.id] }
+        );
+      }
+      this.instance = asReadyToRun(task as ConcreteTaskInstanceWithStartedAt);
       return true;
     }
 
@@ -597,6 +625,7 @@ export class TaskManagerRunner implements TaskRunner {
         try {
           const { taskInstance } = await this.beforeMarkRunning({
             taskInstance: this.instance.task,
+            executionUuid: this.uuid,
           });
 
           const attempts = taskInstance.attempts + 1;
@@ -1037,21 +1066,6 @@ export class TaskManagerRunner implements TaskRunner {
     return this.definition?.maxAttempts ?? this.defaultMaxAttempts;
   }
 
-  private getFakeKibanaRequest(apiKey?: string, spaceId?: string): KibanaRequest | undefined {
-    if (apiKey) {
-      const requestHeaders: Headers = {};
-
-      requestHeaders.authorization = `ApiKey ${apiKey}`;
-
-      const fakeRawRequest: FakeRawRequest = {
-        headers: requestHeaders,
-        spaceId: asSpaceId(spaceId || 'default'),
-      };
-
-      return kibanaRequestFactory(fakeRawRequest);
-    }
-  }
-
   private updateRetryAtOnIntervalForLongRunningTasks() {
     let stopped = false;
 
@@ -1123,6 +1137,7 @@ export class TaskManagerRunner implements TaskRunner {
           type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
           ...(scheduleDelayNs != null ? { schedule_delay: scheduleDelayNs } : {}),
+          execution: { uuid: this.uuid },
         },
       },
       message: `Task ${this.taskType} "${this.id}" started.`,
@@ -1159,6 +1174,7 @@ export class TaskManagerRunner implements TaskRunner {
           type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
           schedule_delay: scheduleDelayNs,
+          execution: { uuid: this.uuid },
         },
       },
       message,
@@ -1180,6 +1196,7 @@ export class TaskManagerRunner implements TaskRunner {
           id: this.id,
           type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
+          execution: { uuid: this.uuid },
         },
       },
       message: `Task ${this.taskType} "${this.id}" has been cancelled.`,

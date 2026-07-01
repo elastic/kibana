@@ -20,6 +20,7 @@ export const WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID = 'workflows:experimenta
 export const WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID = 'workflows:ui:visualEditor:enabled';
 export const WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID = 'workflows:ui:executionGraph:enabled';
 export const WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID = 'workflows:ui:showExecutor:enabled';
+export const WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID = 'workflows:ui:showManagedWorkflows';
 
 /**
  * Feature flag ID for enabling / disabling the workflow execution stats bar UI
@@ -30,6 +31,16 @@ export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStats
  * Hidden Advanced Setting gate for workflow versioning (change-history writes and read routes).
  */
 export const WORKFLOWS_VERSIONING_SETTING_ID = 'workflows:versioning:enabled';
+
+/**
+ * Global Advanced Setting gating the Workflow Template Library tech preview.
+ *
+ * Registered as a global uiSetting (not per-space) so the same toggle is
+ * readable from both the server runtime (cache refresh + route handlers) and
+ * any browser plugin that consumes `@kbn/workflows-library` without taking a
+ * runtime dep on `workflows_management`.
+ */
+export const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = 'workflowsManagement:library:enabled';
 
 /**
  * Map of regular (saved object) connector types -> their system connector equivalents.

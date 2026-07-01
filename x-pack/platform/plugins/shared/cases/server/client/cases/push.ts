@@ -28,6 +28,7 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  MAX_DOCS_PER_PAGE,
   OWNER_FIELD,
 } from '../../../common/constants';
 import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
@@ -75,20 +76,18 @@ const changeAlertsStatusToClose = async (
     AttachmentType.alert
   );
 
-  const alertFilter = isCasesAttachmentsEnabled
-    ? combineFilters(
-        [
-          legacyAlertFilter,
-          buildFilter({
-            filters: UNIFIED_ALERT_TYPES_ARRAY,
-            field: 'type',
-            operator: 'or',
-            type: CASE_ATTACHMENT_SAVED_OBJECT,
-          }),
-        ],
-        NodeBuilderOperators.or
-      )
-    : legacyAlertFilter;
+  const alertFilter = combineFilters(
+    [
+      legacyAlertFilter,
+      buildFilter({
+        filters: UNIFIED_ALERT_TYPES_ARRAY,
+        field: 'type',
+        operator: 'or',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+      }),
+    ],
+    NodeBuilderOperators.or
+  );
 
   const alertAttachments = await caseService.getAllCaseComments({
     id: [caseId],
@@ -232,7 +231,7 @@ export const push = async (
         id: caseId,
         options: {
           page: 1,
-          perPage: theCase?.totalComment ?? 0,
+          perPage: MAX_DOCS_PER_PAGE,
         },
       }),
     ]);
