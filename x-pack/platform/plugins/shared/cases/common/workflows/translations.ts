@@ -431,6 +431,24 @@ export const ADD_TAG_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
+export const REMOVE_TAG_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.removeTags.label', {
+  defaultMessage: 'Cases - Remove tags from case',
+});
+
+export const REMOVE_TAG_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.removeTags.description',
+  {
+    defaultMessage: 'Remove tags from an existing case',
+  }
+);
+
+export const REMOVE_TAG_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.removeTags.documentation.details',
+  {
+    defaultMessage: 'This step removes tags from an existing case.',
+  }
+);
+
 export const ADD_CATEGORY_STEP_LABEL = i18n.translate(
   'xpack.cases.workflowSteps.addCategory.label',
   {
@@ -661,5 +679,24 @@ export const GET_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   {
     defaultMessage:
       'This step retrieves up to 1000 cases in a single request. Any IDs that could not be fetched are reported in the errors array. Use this to avoid N sequential get operations in fan-out workflows.',
+  }
+);
+
+export const PUSH_CASE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.pushCases.label', {
+  defaultMessage: 'Cases - Push cases',
+});
+
+export const PUSH_CASE_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.pushCases.description',
+  {
+    defaultMessage: 'Pushes a case or multiple cases to their configured external connector',
+  }
+);
+
+export const PUSH_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.pushCases.documentation.details',
+  {
+    defaultMessage:
+      'This step pushes a case or multiple cases to their external connector. If no connector is configured on a case, the step will fail. The step returns the updated case objects after the push.',
   }
 );

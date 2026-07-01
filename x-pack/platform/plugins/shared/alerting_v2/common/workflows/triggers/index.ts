@@ -79,3 +79,15 @@ export {
   ruleSignalsWrittenTriggerCommonDefinition,
 } from './rule_signals_written';
 export type { RuleExecutionSnapshot, RuleSignalsWrittenPayload } from './rule_signals_written';
+
+export { RuleCreatedTriggerId, ruleCreatedTriggerCommonDefinition } from './rule_created';
+export { RuleUpdatedTriggerId, ruleUpdatedTriggerCommonDefinition } from './rule_updated';
+export { RuleDeletedTriggerId, ruleDeletedTriggerCommonDefinition } from './rule_deleted';
+export { RuleEnabledTriggerId, ruleEnabledTriggerCommonDefinition } from './rule_enabled';
+export { RuleDisabledTriggerId, ruleDisabledTriggerCommonDefinition } from './rule_disabled';
+export {
+  ruleSnapshotSchema,
+  ruleLifecycleEventSchema,
+  type RuleSnapshot,
+  type RuleLifecycleEvent,
+} from './schemas';
