@@ -45,6 +45,7 @@ interface Props {
   isEditing: boolean;
   ruleId?: string;
   builderType?: string;
+  onManualSplit?: () => void;
 }
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -59,6 +60,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         dispatch={props.dispatch}
         services={props.services}
         isEditing={props.isEditing}
+        onManualSplit={props.onManualSplit}
       />
     ),
     validate: (methods, s) => {
@@ -177,6 +179,7 @@ export const ComposeDiscoverForm = ({
   isEditing,
   ruleId,
   builderType,
+  onManualSplit,
 }: Props) => {
   const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const { steps, renderCustomRecovery } = useMemo(
@@ -194,6 +197,7 @@ export const ComposeDiscoverForm = ({
     isEditing,
     ruleId,
     renderCustomRecovery,
+    onManualSplit,
   });
 
   if (!isAlertConditionStep) {

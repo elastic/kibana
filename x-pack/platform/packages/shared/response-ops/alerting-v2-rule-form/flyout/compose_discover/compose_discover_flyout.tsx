@@ -34,6 +34,7 @@ import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import { ConfirmRuleClose } from '../confirm_rule_close';
 import type { FormValues, RuleNotificationsValue, RuleQuery } from '../../form/types';
 import { getBreachQuery } from '../../form/utils/query_helpers';
+import { enterManualSplitQuery, exitManualSplitQuery } from './manual_split_query';
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
 import { isNonRepresentableRule } from '../../form/utils/is_non_representable';
 import { ComposeDiscoverFooter } from './compose_discover_footer';
@@ -339,6 +340,13 @@ export function ComposeDiscoverFlyout({
    * to re-dispatch OPEN_CHILD to restore it.
    */
   const reopenChildRef = useRef(false);
+
+  /*
+   * True after ENABLE_MANUAL_SPLIT until the user Applies, merges back to unified,
+   * or closes the sandbox — used to revert manual split mode when a draft split
+   * is discarded on close without Apply.
+   */
+  const manualSplitUncommittedRef = useRef(false);
 
   const prevExternalQueryRef = useRef<
     { query: string | undefined; esqlVariables: ESQLControlVariable[] | undefined } | undefined
@@ -665,6 +673,7 @@ export function ComposeDiscoverFlyout({
       if (forceYamlMode) return;
 
       if (enabled) {
+        manualSplitUncommittedRef.current = false;
         const serialized = serializeFormToYaml(methods.getValues());
         setYamlText(serialized);
         yamlBaselineRef.current = serialized;
@@ -701,11 +710,14 @@ export function ComposeDiscoverFlyout({
 
   const handleSandboxApply = useCallback(() => {
     /*
-     * In create mode the sandbox always shows a single unified editor — no
+     * In create mode the sandbox defaults to a single unified editor — no
      * base/alert tabs. On Apply, derive the base query and alert condition
      * from that unified text via the heuristic split.
+     * When the user has opted in to manual split, Apply commits the already-separated
+     * base/alert verbatim without running the heuristic.
      */
-    const shouldRunHeuristicSplit = uiState.mode === 'create' && !uiState.yamlMode && isAlert;
+    const shouldRunHeuristicSplit =
+      uiState.mode === 'create' && !uiState.yamlMode && isAlert && !uiState.manualSplitEnabled;
 
     let queryToCommit: RuleQuery = sandboxQuery;
     if (shouldRunHeuristicSplit) {
@@ -724,6 +736,7 @@ export function ComposeDiscoverFlyout({
       yamlBaselineRef.current = serialized;
     }
     dispatch({ type: 'COMMIT_QUERY' });
+    manualSplitUncommittedRef.current = false;
     if (!uiState.yamlMode) {
       dispatch({ type: 'CLOSE_CHILD' });
     }
@@ -732,6 +745,7 @@ export function ComposeDiscoverFlyout({
     sandboxTimeField,
     uiState.yamlMode,
     uiState.mode,
+    uiState.manualSplitEnabled,
     isAlert,
     methods,
     dispatch,
@@ -865,6 +879,7 @@ export function ComposeDiscoverFlyout({
         step: uiState.step,
         recoveryType: uiState.recoveryType,
         mode: uiState.mode,
+        manualSplitEnabled: uiState.manualSplitEnabled,
       });
     }
     /*
@@ -879,24 +894,34 @@ export function ComposeDiscoverFlyout({
     uiState.recoveryType,
     uiState.step,
     uiState.mode,
+    uiState.manualSplitEnabled,
     sandboxQuery.format,
     isAlert,
   ]);
 
   /*
-   * Help text shown above the single unified editor in the create-mode alert flow.
-   * Absent in edit mode (where the sandbox shows base/alert tabs instead), in
-   * builder/read-only mode (where the sandbox has no Apply button), and in YAML
-   * mode (where shouldRunHeuristicSplit is false and the split does not run).
+   * Help text shown above the editor in the create-mode alert flow.
+   * - Unified (default): describes the automatic split on Apply.
+   * - Manual split: explains that automatic splitting is disabled and tabs are separate.
+   * Absent in edit mode (where no helper is needed), builder/read-only mode, and YAML mode.
    */
   const sandboxHelpText =
-    isAlert && !sandboxTabs?.length && !isBuilderMode && !uiState.yamlMode ? (
-      <EuiText size="s" color="subdued" data-test-subj="querySandboxUnifiedHelper">
-        <FormattedMessage
-          id="xpack.alertingV2.composeDiscover.querySandbox.unifiedHelperText"
-          defaultMessage="We'll automatically identify the base query and alert condition when you apply changes."
-        />
-      </EuiText>
+    isAlert && !isBuilderMode && !uiState.yamlMode && uiState.mode === 'create' ? (
+      uiState.manualSplitEnabled ? (
+        <EuiText size="s" color="subdued" data-test-subj="querySandboxManualSplitHelper">
+          <FormattedMessage
+            id="xpack.alertingV2.composeDiscover.querySandbox.manualSplitHelperText"
+            defaultMessage="Define the base query and alert condition separately. Automatic query splitting is disabled in this mode."
+          />
+        </EuiText>
+      ) : (
+        <EuiText size="s" color="subdued" data-test-subj="querySandboxUnifiedHelper">
+          <FormattedMessage
+            id="xpack.alertingV2.composeDiscover.querySandbox.unifiedHelperText"
+            defaultMessage="We'll automatically identify the base query and alert condition when you apply changes."
+          />
+        </EuiText>
+      )
     ) : undefined;
 
   const handleSandboxTabChange = useCallback(
@@ -911,6 +936,123 @@ export function ComposeDiscoverFlyout({
     },
     [dispatch, sandboxQuery, sandboxTabs]
   );
+
+  /*
+   * Opt in to manual split from the sandbox header button.
+   * Puts the entire current unified query into the base tab and leaves the alert
+   * segment empty — the user defines the split themselves. We intentionally do NOT
+   * run the heuristic here: the heuristic can produce a standalone format (no base)
+   * for queries without a WHERE/STATS, which would leave the base editor blank.
+   */
+  const handleEnableManualSplit = useCallback(() => {
+    setSandboxQuery(enterManualSplitQuery(getBreachQuery(sandboxQuery)));
+    manualSplitUncommittedRef.current = true;
+    dispatch({ type: 'ENABLE_MANUAL_SPLIT' });
+  }, [sandboxQuery, dispatch]);
+
+  /*
+   * Opt back in to unified editor from the sandbox header button.
+   * Recombines base+alert into one pipeline and re-enables auto-split on Apply.
+   */
+  const handleDisableManualSplit = useCallback(() => {
+    setSandboxQuery(exitManualSplitQuery(getBreachQuery(sandboxQuery)));
+    manualSplitUncommittedRef.current = false;
+    dispatch({ type: 'DISABLE_MANUAL_SPLIT' });
+  }, [sandboxQuery, dispatch]);
+
+  /*
+   * Triggered by the split-failed CTA on the form step (sandbox is closed).
+   * Opens the sandbox in manual split mode, placing the full pipeline into the
+   * base tab so the user can manually carve out the alert condition.
+   *
+   * `split_failed` is normally a composed query with an empty base and a non-empty
+   * alert segment; `getBreachQuery` returns that segment as the full pipeline. A
+   * standalone committed query would surface as `no_alert_condition` instead — if
+   * that ever changes, the same helper still places the breach text in `base`.
+   */
+  const handleManualSplitFromForm = useCallback(() => {
+    const committedQuery = methods.getValues('query');
+    setSandboxQuery(enterManualSplitQuery(getBreachQuery(committedQuery)));
+    manualSplitUncommittedRef.current = true;
+    dispatch({ type: 'ENABLE_MANUAL_SPLIT' });
+    dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: uiState.step, isAlert });
+  }, [methods, dispatch, uiState.step, isAlert]);
+
+  const handleSandboxClose = useCallback(() => {
+    if (manualSplitUncommittedRef.current) {
+      dispatch({ type: 'DISABLE_MANUAL_SPLIT' });
+      manualSplitUncommittedRef.current = false;
+    }
+    syncSandbox();
+    dispatch({ type: 'CLOSE_CHILD' });
+  }, [syncSandbox, dispatch]);
+
+  /*
+   * Split / Merge header buttons passed into the sandbox via headerActions.
+   * Only shown in create-mode alert flow, not in builder, YAML, or edit mode.
+   */
+  const sandboxHeaderActions = useMemo(() => {
+    if (isBuilderMode || uiState.yamlMode || uiState.mode !== 'create' || !isAlert) {
+      return undefined;
+    }
+    if (uiState.manualSplitEnabled) {
+      return (
+        <EuiToolTip
+          content={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.mergeTooltip', {
+            defaultMessage:
+              'Combine the base query and alert condition in one editor. When you apply, we automatically split them again.',
+          })}
+        >
+          <EuiButton
+            size="s"
+            color="text"
+            iconType="querySelector"
+            onClick={handleDisableManualSplit}
+            data-test-subj="querySandboxUseSingleEditor"
+          >
+            {i18n.translate(
+              'xpack.alertingV2.composeDiscover.querySandbox.useSingleEditorButtonLabel',
+              { defaultMessage: 'Use single editor' }
+            )}
+          </EuiButton>
+        </EuiToolTip>
+      );
+    }
+    const activeQuery = getBreachQuery(sandboxQuery);
+    if (!activeQuery.trim()) {
+      return undefined;
+    }
+    return (
+      <EuiToolTip
+        content={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.splitTooltip', {
+          defaultMessage:
+            'Open separate editors for the base query and alert condition. Automatic splitting is disabled in this mode.',
+        })}
+      >
+        <EuiButton
+          size="s"
+          color="text"
+          iconType="inputOutput"
+          onClick={handleEnableManualSplit}
+          data-test-subj="querySandboxSplitBaseAndAlert"
+        >
+          {i18n.translate(
+            'xpack.alertingV2.composeDiscover.querySandbox.splitBaseAndAlertButtonLabel',
+            { defaultMessage: 'Split base and alert' }
+          )}
+        </EuiButton>
+      </EuiToolTip>
+    );
+  }, [
+    isBuilderMode,
+    uiState.yamlMode,
+    uiState.mode,
+    uiState.manualSplitEnabled,
+    isAlert,
+    sandboxQuery,
+    handleEnableManualSplit,
+    handleDisableManualSplit,
+  ]);
 
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
@@ -1023,6 +1165,9 @@ export function ComposeDiscoverFlyout({
                       isEditing={isEditing}
                       ruleId={ruleId}
                       builderType={builderType}
+                      onManualSplit={
+                        uiState.mode === 'create' ? handleManualSplitFromForm : undefined
+                      }
                     />
                   </BuilderStateProvider>
                 </>
@@ -1062,11 +1207,9 @@ export function ComposeDiscoverFlyout({
                 onTabChange={handleSandboxTabChange}
                 onAlertEditorMount={onAlertEditorMount}
                 onRecoveryEditorMount={onRecoveryEditorMount}
-                onClose={() => {
-                  syncSandbox();
-                  dispatch({ type: 'CLOSE_CHILD' });
-                }}
+                onClose={handleSandboxClose}
                 helpText={sandboxHelpText}
+                headerActions={sandboxHeaderActions}
                 onApply={isBuilderMode ? undefined : handleSandboxApply}
               />
             )}

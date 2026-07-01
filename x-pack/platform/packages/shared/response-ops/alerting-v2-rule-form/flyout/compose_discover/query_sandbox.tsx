@@ -78,6 +78,12 @@ export interface QuerySandboxProps {
    */
   helpText?: React.ReactNode;
   /**
+   * Optional actions rendered right-aligned in the ES|QL query header row, just before
+   * the Search button. Use for header-level controls such as Split / Merge buttons.
+   * Absent or `undefined` → nothing is rendered.
+   */
+  headerActions?: React.ReactNode;
+  /**
    * When provided, the editor panel renders `ComposeDiscoverTabs` with a tab
    * bar instead of a single `CodeEditor`. Absent or `[]` → single editor.
    */
@@ -117,6 +123,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   isTimeFieldResolved: isTimeFieldResolvedProp,
   helpText,
   tabProps,
+  headerActions,
 }) => {
   const services = useRuleFormServices();
   const isReadOnly = !onQueryChange;
@@ -281,6 +288,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
             width="full"
           />
         </EuiFlexItem>
+        {headerActions && <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>}
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.searchTooltip', {
