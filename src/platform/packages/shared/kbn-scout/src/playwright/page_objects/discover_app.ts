@@ -630,7 +630,7 @@ export class DiscoverApp {
     await this.codeEditor.waitCodeEditorReady('ESQLEditor');
   }
 
-  async switchToClassicMode() {
+  async selectClassicMode() {
     const currentMode = await this.getCurrentQueryMode();
 
     if (currentMode !== 'classic') {
@@ -650,8 +650,8 @@ export class DiscoverApp {
       }
     }
 
-    await expect.poll(() => this.getCurrentQueryMode()).toBe('classic');
     await this.waitUntilSearchingHasFinished();
+    expect(await this.getCurrentQueryMode()).toBe('classic');
   }
 
   async writeAndSubmitEsqlQuery(query: string) {
