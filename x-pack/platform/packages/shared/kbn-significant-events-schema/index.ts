@@ -78,11 +78,17 @@ export {
   type KnowledgeIndicator,
   type SignificantEvent,
   type SignificantEventStatus,
+  type SignificantEventsTuningConfig,
+  type TuningConfigFieldBounds,
+  DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
+  SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
   detectionSchema,
   discoverySchema,
   significantEventSchema,
   significantEventStatusSchema,
+  significantEventsTuningConfigSchema,
+  validateSignificantEventsTuningConfig,
 } from './src/significant_events';
 
 export type {

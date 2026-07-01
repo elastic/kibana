@@ -10,7 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getSampleDocumentsEsql } from '@kbn/ai-tools';
-import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/streams-plugin/common/significant_events_tuning_config';
+import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/significant-events-schema';
 import {
   MANAGED_STREAM_SEARCH_PATTERN,
   type KIFeatureExtractionScenario,

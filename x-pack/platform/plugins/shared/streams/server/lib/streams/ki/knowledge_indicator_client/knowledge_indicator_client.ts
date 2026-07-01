@@ -16,7 +16,7 @@ import type { Streams } from '@kbn/streams-schema';
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   type SignificantEventsTuningConfig,
-} from '../../../../../common/significant_events_tuning_config';
+} from '@kbn/significant-events-schema';
 import type { SearchMode } from '../../../../../common/queries';
 import type { KnowledgeIndicatorType } from '../fields';
 import {

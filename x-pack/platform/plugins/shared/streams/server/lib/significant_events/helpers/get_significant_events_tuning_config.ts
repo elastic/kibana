@@ -13,7 +13,7 @@ import {
   SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
   validateSignificantEventsTuningConfig,
   type SignificantEventsTuningConfig,
-} from '@kbn/streams-schema';
+} from '@kbn/significant-events-schema';
 
 /**
  * Reads the tuning config from global uiSettings, merging with defaults

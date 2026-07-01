@@ -25,11 +25,14 @@ import {
   type ExcludedFeatureSummary,
   type IgnoredFeature,
 } from '@kbn/streams-ai';
+import {
+  DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+  type SignificantEventsTuningConfig,
+} from '@kbn/significant-events-schema';
 import type { KnowledgeIndicatorClient } from '../../streams/ki';
 import { fetchSampleDocuments } from '../../tasks/task_definitions/features_identification/fetch_sample_documents';
 import { PromptsConfigService } from '../saved_objects/prompts_config_service';
-import type { SignificantEventsTuningConfig } from '../../../../common/significant_events_tuning_config';
-import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '../../../../common/significant_events_tuning_config';
+
 import {
   reconcileInferredFeatures,
   toFeatureSummary,

@@ -23,12 +23,12 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2,
 } from '@kbn/management-settings-ids';
+import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import {
-  DEFAULT_INDEX_PATTERNS,
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
   validateSignificantEventsTuningConfig,
-} from '@kbn/streams-schema';
+} from '@kbn/significant-events-schema';
 import type { StreamsPluginStartDependencies } from './types';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
 import { DEFAULT_EXTRACTION_INTERVAL_HOURS } from '../common/constants';
