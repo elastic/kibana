@@ -20,6 +20,7 @@ import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
 import { createFindRulesSkill } from './find_rules';
 import { siemReadinessSkill } from './siem_readiness';
 import { createRecommendPrebuiltRulesSkill } from './recommend_prebuilt_rules';
+import { endpointForensicAnalysisSkill } from './endpoint_forensic_analysis';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -76,5 +77,9 @@ export const registerSkills = async ({
 
   if (experimentalFeatures.pciComplianceAgentBuilder) {
     agentBuilder.skills.register(pciComplianceSkill);
+  }
+
+  if (experimentalFeatures.endpointForensicAnalysisSkill) {
+    await agentBuilder.skills.register(endpointForensicAnalysisSkill);
   }
 };
