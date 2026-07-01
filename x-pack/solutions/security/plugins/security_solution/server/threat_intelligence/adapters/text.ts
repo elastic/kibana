@@ -115,13 +115,23 @@ export const htmlToStructured = (html: string | undefined | null): string => {
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style[\s\S]*?<\/style>/gi, ' ');
 
-  // 2. Headings → "## text\n"
+  // 2. Lift <a href="URL"> hrefs into plain text FIRST, before any container strip,
+  //    so URLs inside <li>/<td> survive. Without this ordering, the list-item and
+  //    table-cell replacements below (steps 4–5) strip inner tags and the href is lost.
+  //    Produces "anchortext URL" — the URL appears as a bare token the regex
+  //    patterns can match. No markdown [label](url) syntax is emitted.
+  s = s.replace(/<a\s[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, (_m, href: string, inner: string) => {
+    const text = inner.replace(/<[^>]+>/g, ' ').trim();
+    return `${text} ${href} `;
+  });
+
+  // 3. Headings → "## text\n"
   s = s.replace(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/gi, (_m, inner: string) => {
     const text = inner.replace(/<[^>]+>/g, ' ').trim();
     return text ? `\n## ${collapseWhitespace(text)}\n` : '';
   });
 
-  // 3. Table rows → "| cell | cell |\n"
+  // 4. Table rows → "| cell | cell |\n"
   // Process each <tr> independently; extract <td>/<th> cell content.
   s = s.replace(/<tr[^>]*>([\s\S]*?)<\/tr>/gi, (_m, inner: string) => {
     const cellTexts: string[] = [];
@@ -134,31 +144,23 @@ export const htmlToStructured = (html: string | undefined | null): string => {
     return cellTexts.length > 0 ? `\n| ${cellTexts.join(' | ')} |\n` : '\n';
   });
 
-  // 4. List items → "- text\n"
+  // 5. List items → "- text\n"
   s = s.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_m, inner: string) => {
     const text = inner.replace(/<[^>]+>/g, ' ').trim();
     return text ? `\n- ${collapseWhitespace(text)}\n` : '';
   });
 
-  // 5. Block-level elements → newline boundary (br, p, div, section, article, …)
+  // 6. Block-level elements → newline boundary (br, p, div, section, article, …)
   s = s.replace(/<\/?(p|div|section|article|aside|header|footer|main|figure|blockquote|pre|ul|ol|table|thead|tbody|tfoot)[^>]*>/gi, '\n');
   s = s.replace(/<br\s*\/?>/gi, '\n');
 
-  // 6a. Lift <a href="URL"> hrefs into plain text so IOC URLs are extractable.
-  //     Produces "anchortext URL" — the URL appears as a bare token the regex
-  //     patterns can match. No markdown [label](url) syntax is emitted.
-  s = s.replace(/<a\s[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, (_m, href: string, inner: string) => {
-    const text = inner.replace(/<[^>]+>/g, ' ').trim();
-    return `${text} ${href} `;
-  });
-
-  // 6b. Strip remaining tags (inline and any leftovers).
+  // 7. Strip remaining tags (inline and any leftovers).
   s = s.replace(/<[^>]+>/g, '');
 
-  // 7. Decode HTML entities.
+  // 8. Decode HTML entities.
   s = decodeEntities(s);
 
-  // 8. Normalise runs within each line (collapse intra-line spaces) but
+  // 9. Normalise runs within each line (collapse intra-line spaces) but
   //    preserve the newlines that carry structural meaning.
   const lines = s
     .split('\n')

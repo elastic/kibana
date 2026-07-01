@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { extractIocs, type IocTier } from './extract_iocs';
+import { classifySectionSpans, extractIocs, type IocTier } from './extract_iocs';
 
 /** Helper: extract IOC values of a specific type from the result. */
 const valuesOf = (result: ReturnType<typeof extractIocs>, type: string) =>
@@ -288,10 +288,11 @@ describe('extract_iocs — DROP side (precision filters)', () => {
       expect(tieredValues(r, 'reference', 'domain')).toContain('bazaar.abuse.ch');
     });
 
-    test('github.com bare domain passes through to uncertain (content-host, path is the signal)', () => {
+    test('github.com bare domain → contextual/known_cdn (content-host; path is the signal, bare host not discriminating)', () => {
       const r = extractIocs({ text: 'source code at github.com' });
       const ioc = r.iocs.find((i) => i.type === 'domain' && i.value === 'github.com');
-      expect(ioc?.tier).toBe('uncertain');
+      expect(ioc?.tier).toBe('contextual');
+      expect(ioc?.tier_basis).toBe('known_cdn');
     });
 
     test('attack.mitre.org is emitted with tier=reference', () => {
@@ -386,13 +387,14 @@ describe('extract_iocs — KEEP side (real IOCs retained)', () => {
       expect(domainValues(r)).toContain('c2infrastructure.io');
     });
 
-    test('retains raw.githubusercontent.com as uncertain (content-host, URL carries the signal)', () => {
+    test('retains raw.githubusercontent.com as contextual/known_cdn (content-host; bare host not discriminating)', () => {
       const r = extractIocs({
         text: 'payload fetched from raw.githubusercontent.com via certutil',
       });
       expect(domainValues(r)).toContain('raw.githubusercontent.com');
       const ioc = r.iocs.find((i) => i.value === 'raw.githubusercontent.com');
-      expect(ioc?.tier).toBe('uncertain');
+      expect(ioc?.tier).toBe('contextual');
+      expect(ioc?.tier_basis).toBe('known_cdn');
     });
   });
 
@@ -1025,20 +1027,22 @@ describe('extract_iocs — vendor/research domains (B1.6 Fix 2)', () => {
     expect(ioc?.tier_basis).toBe('vendor_research');
   });
 
-  test('raw.githubusercontent.com → uncertain (content-host; URL IOCs still captured)', () => {
+  test('raw.githubusercontent.com → contextual/known_cdn (content-host; URL IOCs still captured)', () => {
     const r = extractIocs({
       text: 'payload at https://raw.githubusercontent.com/attacker/repo/stage2.bin raw.githubusercontent.com',
     });
     const bareIoc = r.iocs.find((i) => i.type === 'domain' && i.value === 'raw.githubusercontent.com');
-    expect(bareIoc?.tier).toBe('uncertain');
+    expect(bareIoc?.tier).toBe('contextual');
+    expect(bareIoc?.tier_basis).toBe('known_cdn');
     // URL itself is still extracted
     expect(urlValues(r)).toContain('https://raw.githubusercontent.com/attacker/repo/stage2.bin');
   });
 
-  test('github.com → uncertain (content-host, not in denylist or vendor set)', () => {
+  test('github.com → contextual/known_cdn (content-host; path is the signal, bare host never discriminating)', () => {
     const r = extractIocs({ text: 'source at github.com' });
     const ioc = r.iocs.find((i) => i.value === 'github.com');
-    expect(ioc?.tier).toBe('uncertain');
+    expect(ioc?.tier).toBe('contextual');
+    expect(ioc?.tier_basis).toBe('known_cdn');
   });
 
   test('baidu.com → uncertain (removed from denylist; benign incumbent for B2 to judge)', () => {
@@ -1187,6 +1191,492 @@ describe('extract_iocs — htmlToStructured leak test (markdown artifact gate)',
     for (const ioc of r.iocs) {
       if (ioc.tier === 'reference' || ioc.tier === 'denied') continue;
       expect(ioc.value).not.toMatch(MARKDOWN_ARTIFACT_PATTERN);
+    }
+  });
+});
+
+// ── Section miner (Part B) ───────────────────────────────────────────────────
+
+describe('classifySectionSpans', () => {
+  test('returns empty for text with no ## headings', () => {
+    const text = 'callnrwise.com contacted the dropper\nhttps://elastic.co analysis';
+    expect(classifySectionSpans(text)).toHaveLength(0);
+  });
+
+  test('classifies "## Indicators of Compromise" as ioc kind', () => {
+    const text = '## Indicators of Compromise\nevil.com contacted';
+    const spans = classifySectionSpans(text);
+    expect(spans).toHaveLength(1);
+    expect(spans[0].kind).toBe('ioc');
+  });
+
+  test('classifies "## IOCs" as ioc kind', () => {
+    const spans = classifySectionSpans('## IOCs\nevil.com');
+    expect(spans[0].kind).toBe('ioc');
+  });
+
+  test('classifies "## IOC" as ioc kind', () => {
+    const spans = classifySectionSpans('## IOC\nevil.com');
+    expect(spans[0].kind).toBe('ioc');
+  });
+
+  test('classifies "## Indicators" as ioc kind', () => {
+    const spans = classifySectionSpans('## Indicators\nevil.com');
+    expect(spans[0].kind).toBe('ioc');
+  });
+
+  test('classifies "## References" as references kind', () => {
+    const spans = classifySectionSpans('## References\nhttps://elastic.co');
+    expect(spans[0].kind).toBe('references');
+  });
+
+  test('classifies "## Sources" and "## Bibliography" as references kind', () => {
+    const spans1 = classifySectionSpans('## Sources\nhttps://elastic.co');
+    const spans2 = classifySectionSpans('## Bibliography\nhttps://elastic.co');
+    expect(spans1[0].kind).toBe('references');
+    expect(spans2[0].kind).toBe('references');
+  });
+
+  test('span end is bounded by the next heading, not end of text', () => {
+    const text = '## Indicators of Compromise\nevil.com\n## References\nhttps://elastic.co';
+    const spans = classifySectionSpans(text);
+    expect(spans).toHaveLength(2);
+    expect(spans[0].kind).toBe('ioc');
+    expect(spans[1].kind).toBe('references');
+    // Spans are contiguous — IOC ends exactly where References begins (no overlap, no gap).
+    expect(spans[0].end).toBeLessThanOrEqual(spans[1].start);
+  });
+
+  test('prose headings (non-IOC, non-references) produce no span', () => {
+    const text = '## Background\nevil.com\n## Indicators of Compromise\nbad.net';
+    const spans = classifySectionSpans(text);
+    expect(spans).toHaveLength(1);
+    expect(spans[0].kind).toBe('ioc');
+  });
+});
+
+// ── Real vendor header classification (header-normalizer validation) ────────────
+// These exact heading strings appear in live NVISO/Elastic/ESET reports.
+// They validate that normalizeHeader + the term/prefix sets work against real input.
+
+describe('classifySectionSpans — real vendor headers', () => {
+  // NVISO: "## Indicators of Compromise (IOCs)" — trailing parenthetical breaks old $ anchor
+  test('"Indicators of Compromise (IOCs)" → ioc', () => {
+    const spans = classifySectionSpans('## Indicators of Compromise (IOCs)\nevil.com');
+    expect(spans).toHaveLength(1);
+    expect(spans[0].kind).toBe('ioc');
+  });
+
+  // Mixed case: "## IoCs" — as it may appear in some reports
+  test('"IoCs" (mixed case) → ioc', () => {
+    const spans = classifySectionSpans('## IoCs\nevil.com');
+    expect(spans).toHaveLength(1);
+    expect(spans[0].kind).toBe('ioc');
+  });
+
+  // Elastic: "## Observations" — Elastic reports put IOC tables under this heading
+  test('"Observations" → ioc', () => {
+    const spans = classifySectionSpans('## Observations\nevil.com');
+    expect(spans).toHaveLength(1);
+    expect(spans[0].kind).toBe('ioc');
+  });
+
+  // NVISO: "## Sources:" — trailing colon breaks old $ anchor
+  test('"Sources:" (trailing colon) → references', () => {
+    const spans = classifySectionSpans('## Sources:\nhttps://elastic.co');
+    expect(spans).toHaveLength(1);
+    expect(spans[0].kind).toBe('references');
+  });
+
+  // ESET post-article nav: "## Related Articles"
+  test('"Related Articles" → references', () => {
+    const spans = classifySectionSpans('## Related Articles\nhttps://eset.com/blog');
+    expect(spans).toHaveLength(1);
+    expect(spans[0].kind).toBe('references');
+  });
+
+  // ESET post-article nav: "## Discussion"
+  test('"Discussion" → references', () => {
+    const spans = classifySectionSpans('## Discussion\nsome comments');
+    expect(spans).toHaveLength(1);
+    expect(spans[0].kind).toBe('references');
+  });
+
+  // Regression: previous synthetic cases still work
+  test('"Indicators of Compromise" (plain, no parens) still → ioc', () => {
+    const spans = classifySectionSpans('## Indicators of Compromise\nevil.com');
+    expect(spans).toHaveLength(1);
+    expect(spans[0].kind).toBe('ioc');
+  });
+
+  test('"References" (plain) still → references', () => {
+    const spans = classifySectionSpans('## References\nhttps://elastic.co');
+    expect(spans).toHaveLength(1);
+    expect(spans[0].kind).toBe('references');
+  });
+
+  // Normal content headers must NOT false-match
+  test('"Introduction" → no span (prose heading)', () => {
+    const spans = classifySectionSpans('## Introduction\nsome text');
+    expect(spans).toHaveLength(0);
+  });
+
+  test('"Campaign Overview" → no span (prose heading)', () => {
+    const spans = classifySectionSpans('## Campaign Overview\nsome text');
+    expect(spans).toHaveLength(0);
+  });
+
+  test('"Detection logic" → no span (prose heading)', () => {
+    const spans = classifySectionSpans('## Detection logic\nsome text');
+    expect(spans).toHaveLength(0);
+  });
+});
+
+describe('extract_iocs — section-miner overrides (Part B)', () => {
+  test('(a) uncertain domain in ## Indicators of Compromise → discriminating/ioc_section', () => {
+    // callnrwise.com is undefanged → heuristic is uncertain. IOC section lifts it.
+    const text = '## Indicators of Compromise\ncallnrwise.com contacted the dropper';
+    const r = extractIocs({ text });
+    const ioc = r.iocs.find((i) => i.value === 'callnrwise.com');
+    expect(ioc).toBeDefined();
+    expect(ioc?.tier).toBe('discriminating');
+    expect(ioc?.tier_basis).toBe('ioc_section');
+    // tier_heuristic is immutable — still reflects the per-value verdict
+    expect(ioc?.tier_heuristic).toBe('uncertain');
+  });
+
+  test('(b) domain in ## References → reference/references_section', () => {
+    // github.com is contextual/known_cdn by heuristic; references section demotes it.
+    const text = '## References\ngithub.com used for hosting';
+    const r = extractIocs({ text });
+    const ioc = r.iocs.find((i) => i.value === 'github.com');
+    expect(ioc).toBeDefined();
+    expect(ioc?.tier).toBe('reference');
+    expect(ioc?.tier_basis).toBe('references_section');
+    expect(ioc?.tier_heuristic).toBe('contextual');
+  });
+
+  test('(c) defanged domain in ## References stays discriminating (precedence: defanged > references)', () => {
+    // evil[.]com is defanged → heuristic discriminating/defanged_source.
+    // References section must NOT downgrade it.
+    const text = '## References\nevil[.]com cited for comparison';
+    const r = extractIocs({ text });
+    const ioc = r.iocs.find((i) => i.value === 'evil.com');
+    expect(ioc).toBeDefined();
+    expect(ioc?.tier).toBe('discriminating');
+    // tier_basis is from the heuristic (defanged_source), not references_section
+    expect(ioc?.tier_basis).toBe('defanged_source');
+  });
+
+  test('(d) denylist domain in ## Indicators of Compromise stays reference (precedence: denylist > ioc_section)', () => {
+    // virustotal.com is in IOC_NOISE_DOMAINS → reference/denylist.
+    // A sloppy IOC table must not override the denylist.
+    const text = '## Indicators of Compromise\nvirustotal.com listed as tool';
+    const r = extractIocs({ text });
+    const ioc = r.iocs.find((i) => i.value === 'virustotal.com');
+    expect(ioc).toBeDefined();
+    expect(ioc?.tier).toBe('reference');
+    expect(ioc?.tier_basis).toBe('denylist');
+  });
+
+  test('(e) tier_heuristic reflects pre-override verdict, not section tier', () => {
+    // callnrwise.com gets ioc_section override, but tier_heuristic must stay uncertain.
+    const text = '## Indicators of Compromise\ncallnrwise.com contacted';
+    const r = extractIocs({ text });
+    const ioc = r.iocs.find((i) => i.value === 'callnrwise.com');
+    expect(ioc?.tier).toBe('discriminating');
+    expect(ioc?.tier_heuristic).not.toBe('discriminating');
+    expect(ioc?.tier_heuristic).toBe('uncertain');
+  });
+
+  test('plain text (no ## headings) → no section spans → behavior identical to today', () => {
+    // Same text without headings — domain stays uncertain (no section override).
+    const text = 'callnrwise.com contacted the dropper';
+    const r = extractIocs({ text });
+    const ioc = r.iocs.find((i) => i.value === 'callnrwise.com');
+    expect(ioc).toBeDefined();
+    expect(ioc?.tier).toBe('uncertain');
+    expect(ioc?.tier_heuristic).toBe('uncertain');
+  });
+
+  test('vendor_research domain in ## Indicators of Compromise stays reference (precedence)', () => {
+    // eset.com is vendor_research → reference. Must not be upgraded to ioc_section.
+    const text = '## Indicators of Compromise\neset.com analysis tool';
+    const r = extractIocs({ text });
+    const ioc = r.iocs.find((i) => i.value === 'eset.com');
+    expect(ioc).toBeDefined();
+    expect(ioc?.tier).toBe('reference');
+    expect(ioc?.tier_basis).toBe('vendor_research');
+  });
+
+  test('(f) value in prose BEFORE IOC section → still gets discriminating/ioc_section', () => {
+    // Root-cause regression: dedup keeps the first (prose) offset. The IOC-table
+    // occurrence must still be found via value-scan so the section override fires.
+    const text = [
+      '## Campaign Overview',
+      'The actor used sfrclak.com as primary C2 throughout the campaign.',
+      '## Indicators of Compromise (IOCs)',
+      '| Domain | sfrclak.com | C2 server |',
+    ].join('\n');
+    const r = extractIocs({ text });
+    const ioc = r.iocs.find((i) => i.value === 'sfrclak.com');
+    expect(ioc).toBeDefined();
+    expect(ioc?.tier).toBe('discriminating');
+    expect(ioc?.tier_basis).toBe('ioc_section');
+    // tier_heuristic is the per-value verdict — uncertain (not defanged, not CDN)
+    expect(ioc?.tier_heuristic).toBe('uncertain');
+  });
+
+  test('(g) value in prose AND References section (no IOC section) → reference/references_section', () => {
+    // Value appears in prose first, then in ## Sources. Should still get references tag.
+    const text = [
+      '## Background',
+      'The actor registered sfrclak.com for exfil.',
+      '## Sources',
+      'See sfrclak.com tracking at tracker.example.org',
+    ].join('\n');
+    const r = extractIocs({ text });
+    const ioc = r.iocs.find((i) => i.value === 'sfrclak.com');
+    expect(ioc).toBeDefined();
+    expect(ioc?.tier).toBe('reference');
+    expect(ioc?.tier_basis).toBe('references_section');
+  });
+});
+
+// ── NVISO-style end-to-end fixture ────────────────────────────────────────────
+// Mirrors the real NVISO Axios report structure: C2 domains appear in the KQL/
+// campaign prose first, then again in the ## Indicators of Compromise (IOCs) table,
+// and reference URLs appear under ## Sources:. Validates both halves simultaneously.
+
+describe('extract_iocs — NVISO-style multi-occurrence end-to-end', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { htmlToStructured } = require('../adapters/text') as typeof import('../adapters/text');
+
+  const NVISO_STYLE_HTML = `
+    <h2>Campaign Overview</h2>
+    <p>
+      NVISO observed three domains used as C2: sfrclak.com, callnrwise.com, and calltan.com.
+      Detection KQL: event.domain : ("sfrclak.com" OR "callnrwise.com" OR "calltan.com").
+    </p>
+    <h2>Indicators of Compromise (IOCs)</h2>
+    <table>
+      <tr><th>Type</th><th>Value</th><th>Context</th></tr>
+      <tr><td>Domain</td><td>sfrclak.com</td><td>Primary C2</td></tr>
+      <tr><td>Domain</td><td>callnrwise.com</td><td>Backup C2</td></tr>
+      <tr><td>Domain</td><td>calltan.com</td><td>Exfil endpoint</td></tr>
+    </table>
+    <h2>Sources:</h2>
+    <ul>
+      <li><a href="https://socket.dev/npm/package/axios">socket.dev report</a></li>
+      <li><a href="https://nviso.eu/blog/axios-analysis">nviso.eu analysis</a></li>
+    </ul>
+  `;
+
+  test('C2 domains in IOC table → discriminating/ioc_section (even though they appear in prose first)', () => {
+    const structured = htmlToStructured(NVISO_STYLE_HTML);
+    const r = extractIocs({ text: structured });
+
+    for (const domain of ['sfrclak.com', 'callnrwise.com', 'calltan.com']) {
+      const ioc = r.iocs.find((i) => i.value === domain);
+      expect(ioc).toBeDefined();
+      expect(ioc?.tier).toBe('discriminating');
+      expect(ioc?.tier_basis).toBe('ioc_section');
+      // heuristic is uncertain (not defanged in source, not CDN)
+      expect(ioc?.tier_heuristic).toBe('uncertain');
+    }
+  });
+
+  test('citation URLs in Sources block → reference/references_section', () => {
+    const structured = htmlToStructured(NVISO_STYLE_HTML);
+    const r = extractIocs({ text: structured });
+
+    // socket.dev and nviso.eu are the citation hosts; their extracted domains
+    // should be tagged references_section (or vendor_research for nviso.eu).
+    const socketIoc = r.iocs.find((i) => i.value === 'socket.dev');
+    if (socketIoc) {
+      // socket.dev appears only in Sources → references_section
+      expect(socketIoc.tier).toBe('reference');
+    }
+
+    // nviso.eu is in VENDOR_RESEARCH_DOMAINS → reference/vendor_research regardless
+    const nvisoIoc = r.iocs.find((i) => i.value === 'nviso.eu');
+    if (nvisoIoc) {
+      expect(nvisoIoc.tier).toBe('reference');
+    }
+  });
+
+  test('C2 domains are anchor-eligible (not reference or denied)', () => {
+    const structured = htmlToStructured(NVISO_STYLE_HTML);
+    const r = extractIocs({ text: structured });
+    const anchors = r.iocs
+      .filter((i) => i.tier !== 'reference' && i.tier !== 'denied')
+      .map((i) => i.value);
+
+    expect(anchors).toContain('sfrclak.com');
+    expect(anchors).toContain('callnrwise.com');
+    expect(anchors).toContain('calltan.com');
+  });
+});
+
+// ── IOC-section carve-out: LOW_DISCRIMINATION bare hosts ─────────────────────
+// A bare content-host / CDN domain inside an IOC section must NOT be promoted to
+// discriminating — the path-bearing URL is the indicator, not the bare host.
+
+describe('extract_iocs — IOC-section carve-out for content-host/CDN bare domains', () => {
+  test('bare github.com inside IOC section stays non-discriminating (contextual/known_cdn)', () => {
+    // Real case: Elastic links the IOC repo URL inside Observations/IOC section.
+    // The derived bare github.com host must not be promoted — it would false-correlate
+    // every report that links GitHub.
+    const text = [
+      '## Observations',
+      'IOC list: https://github.com/elastic/labs-releases/tree/main/indicators/tollbooth',
+      '| Domain | c.cseo99.com | C2 server |',
+    ].join('\n');
+    const r = extractIocs({ text });
+
+    // Bare github.com (derived from URL host) must NOT be discriminating
+    const githubIoc = r.iocs.find((i) => i.type === 'domain' && i.value === 'github.com');
+    if (githubIoc) {
+      expect(githubIoc.tier).not.toBe('discriminating');
+      expect(githubIoc.tier_basis).toBe('known_cdn');
+    }
+
+    // A real C2 domain in the same section IS promoted
+    const c2Ioc = r.iocs.find((i) => i.value === 'c.cseo99.com');
+    expect(c2Ioc).toBeDefined();
+    expect(c2Ioc?.tier).toBe('discriminating');
+    expect(c2Ioc?.tier_basis).toBe('ioc_section');
+  });
+
+  test('amazonaws.com subdomain (known_cdn) inside IOC section stays contextual', () => {
+    // Attacker-hosted S3 bucket link in the IOC section: bare subdomain stays contextual.
+    const text = [
+      '## Indicators of Compromise',
+      'Payload: https://attacker.s3.amazonaws.com/payload.bin',
+      '| Domain | evilc2.com | C2 |',
+    ].join('\n');
+    const r = extractIocs({ text });
+
+    const s3Ioc = r.iocs.find((i) => i.value === 'attacker.s3.amazonaws.com');
+    if (s3Ioc) {
+      expect(s3Ioc.tier).not.toBe('discriminating');
+    }
+
+    // Real C2 in same section is promoted
+    const c2Ioc = r.iocs.find((i) => i.value === 'evilc2.com');
+    expect(c2Ioc?.tier).toBe('discriminating');
+    expect(c2Ioc?.tier_basis).toBe('ioc_section');
+  });
+
+  test('path-bearing URL on a content-host (url type) inside IOC section CAN stay ioc_section', () => {
+    // The url IOC itself (with full path) is a real curated link — not subject to the
+    // bare-host carve-out (ioc.type === 'url', not 'domain').
+    const text = [
+      '## Indicators of Compromise',
+      'https://github.com/elastic/labs-releases/tree/main/indicators/tollbooth',
+      '| Domain | evilc2.com | C2 |',
+    ].join('\n');
+    const r = extractIocs({ text });
+
+    const urlIoc = r.iocs.find(
+      (i) => i.type === 'url' && i.value.includes('github.com/elastic/labs-releases')
+    );
+    expect(urlIoc).toBeDefined();
+    // URL type is NOT subject to the known_cdn carve-out (path is the signal)
+    expect(urlIoc?.tier).toBe('discriminating');
+    expect(urlIoc?.tier_basis).toBe('ioc_section');
+  });
+});
+
+// ── Elastic-style end-to-end fixture ─────────────────────────────────────────
+// Mirrors the real Elastic Tollbooth report structure: C2 domains + hashes in an
+// ## Observations section, with a GitHub IOC-repo URL that derives a bare github.com
+// host. The C2 domains must be promoted; github.com must be carved out.
+
+describe('extract_iocs — Elastic-style end-to-end (Observations + GitHub IOC link)', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { htmlToStructured } = require('../adapters/text') as typeof import('../adapters/text');
+
+  const ELASTIC_STYLE_HTML = `
+    <h2>Campaign Overview</h2>
+    <p>Elastic observed TOLLBOOTH targeting managed service providers.</p>
+    <h2>Observations</h2>
+    <p>All indicators available at
+      <a href="https://github.com/elastic/labs-releases/tree/main/indicators/tollbooth">
+        labs-releases/tollbooth
+      </a>.
+    </p>
+    <table>
+      <tr><th>Type</th><th>Value</th><th>Context</th></tr>
+      <tr><td>Domain</td><td>c.cseo99.com</td><td>C2 server</td></tr>
+      <tr><td>Domain</td><td>f.fseo99.com</td><td>C2 server</td></tr>
+      <tr><td>Domain</td><td>api.aseo99.com</td><td>Exfil endpoint</td></tr>
+      <tr><td>SHA256</td><td>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2</td><td>Malware loader</td></tr>
+    </table>
+    <h2>References</h2>
+    <ul>
+      <li><a href="https://elastic.co/security-labs/tollbooth">elastic.co blog</a></li>
+    </ul>
+  `;
+
+  test('real C2 domains in Observations → discriminating/ioc_section', () => {
+    const structured = htmlToStructured(ELASTIC_STYLE_HTML);
+    const r = extractIocs({ text: structured });
+
+    for (const domain of ['c.cseo99.com', 'f.fseo99.com', 'api.aseo99.com']) {
+      const ioc = r.iocs.find((i) => i.value === domain);
+      expect(ioc).toBeDefined();
+      expect(ioc?.tier).toBe('discriminating');
+      expect(ioc?.tier_basis).toBe('ioc_section');
+    }
+  });
+
+  test('malware hash in Observations → discriminating (hash_high_entropy, ioc_section lift)', () => {
+    const structured = htmlToStructured(ELASTIC_STYLE_HTML);
+    const r = extractIocs({ text: structured });
+
+    const hashIoc = r.iocs.find(
+      (i) => i.value === 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2'
+    );
+    expect(hashIoc).toBeDefined();
+    expect(hashIoc?.tier).toBe('discriminating');
+  });
+
+  test('bare github.com (derived from IOC repo URL in Observations) is NOT discriminating', () => {
+    const structured = htmlToStructured(ELASTIC_STYLE_HTML);
+    const r = extractIocs({ text: structured });
+
+    const githubIoc = r.iocs.find((i) => i.type === 'domain' && i.value === 'github.com');
+    if (githubIoc) {
+      expect(githubIoc.tier).not.toBe('discriminating');
+      expect(githubIoc.tier_basis).toBe('known_cdn');
+    }
+    // If github.com is not emitted at all, that's also acceptable — it would be consumed
+    // by the URL span and not re-emitted as a bare domain. Either way: not discriminating.
+  });
+
+  test('NVISO regression: sfrclak/callnrwise/calltan still → discriminating/ioc_section', () => {
+    // Re-run the NVISO fixture here to confirm the carve-out does not break prior behavior.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { htmlToStructured: h2s } = require('../adapters/text') as typeof import('../adapters/text');
+    const NVISO_HTML = `
+      <h2>Campaign Overview</h2>
+      <p>NVISO observed C2 at sfrclak.com, callnrwise.com, calltan.com.</p>
+      <h2>Indicators of Compromise (IOCs)</h2>
+      <table>
+        <tr><td>Domain</td><td>sfrclak.com</td><td>Primary C2</td></tr>
+        <tr><td>Domain</td><td>callnrwise.com</td><td>Backup C2</td></tr>
+        <tr><td>Domain</td><td>calltan.com</td><td>Exfil</td></tr>
+      </table>
+    `;
+    const structured = h2s(NVISO_HTML);
+    const r = extractIocs({ text: structured });
+
+    for (const domain of ['sfrclak.com', 'callnrwise.com', 'calltan.com']) {
+      const ioc = r.iocs.find((i) => i.value === domain);
+      expect(ioc).toBeDefined();
+      expect(ioc?.tier).toBe('discriminating');
+      expect(ioc?.tier_basis).toBe('ioc_section');
     }
   });
 });

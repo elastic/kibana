@@ -16,9 +16,14 @@ import { ingestReport } from '../services';
 import { resolveCurrentSpaceId } from '../lib/space_filter';
 import type { RouteRegistrationDeps } from '.';
 
+// Raw HTML can substantially exceed Kibana's default 1 MiB body cap.
+// Match the same ceiling used by the extract_iocs route.
+const INGEST_REPORT_MAX_BODY_BYTES = 10 * 1024 * 1024;
+
 const ingestReportBodySchema = schema.object({
   title: schema.string({ minLength: 1 }),
   body_text: schema.string({ minLength: 1 }),
+  body_html: schema.maybe(schema.string()),
   source_name: schema.string({ minLength: 1 }),
   source_url: schema.maybe(schema.uri()),
   severity: schema.maybe(
@@ -52,6 +57,12 @@ export const registerIngestReportRoute = ({
           requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.writeSubscriptions],
         },
       },
+      options: {
+        body: {
+          accepts: ['application/json'],
+          maxBytes: INGEST_REPORT_MAX_BODY_BYTES,
+        },
+      },
     })
     .addVersion(
       {
@@ -66,6 +77,7 @@ export const registerIngestReportRoute = ({
           const result = await ingestReport(esClient, logger, spaceId, {
             title: request.body.title,
             body_text: request.body.body_text,
+            body_html: request.body.body_html,
             source_name: request.body.source_name,
             source_url: request.body.source_url,
             severity: request.body.severity as SeverityLevel | undefined,

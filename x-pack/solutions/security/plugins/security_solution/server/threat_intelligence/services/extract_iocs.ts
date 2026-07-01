@@ -81,6 +81,9 @@ export interface ExtractedIoc {
   port?: number;
 }
 
+/** Internal working type — carries extraction offset for section override. Stripped before return. */
+type WorkingIoc = ExtractedIoc & { _offset?: number };
+
 export interface ExtractIocsResult {
   count: number;
   iocs: ExtractedIoc[];
@@ -398,6 +401,9 @@ const LOW_DISCRIMINATION_DOMAINS = new Set([
   'sytes.net',
   'redirectme.net',
   'onthewifi.com',
+  // Content-hosting platforms: path is the signal, bare host is not discriminating.
+  'github.com',
+  'raw.githubusercontent.com',
 ]);
 
 /**
@@ -510,6 +516,7 @@ interface DomainCandidate {
   domain: string;
   tier: IocTier;
   basis: string;
+  offset: number;
 }
 
 /**
@@ -604,12 +611,217 @@ const maskConsumedSpans = (text: string, consumed: readonly Span[]): string => {
   return chars.join('');
 };
 
+export type SectionKind = 'ioc' | 'references';
+
+export interface SectionSpan {
+  start: number;
+  end: number;
+  kind: SectionKind;
+}
+
+/**
+ * Normalize a raw heading string before classification.
+ *
+ * Steps (applied in order):
+ *   1. lowercase
+ *   2. strip trailing parenthetical — e.g. " (IOCs)" so "Indicators of Compromise (IOCs)" → "indicators of compromise"
+ *   3. strip trailing punctuation/whitespace — e.g. "Sources:" → "sources"
+ *   4. collapse internal whitespace — handles any double-spaces left by step 2
+ */
+const normalizeHeader = (header: string): string =>
+  header
+    .toLowerCase()
+    .replace(/\s*\([^)]*\)\s*$/, '')
+    .replace(/[:\.\s]+$/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+/** Normalized header strings that declare an Indicators-of-Compromise block. */
+const IOC_HEADER_TERMS = new Set([
+  'indicators of compromise',
+  'ioc',
+  'iocs',
+  'indicators',
+  'observations',
+  'observables',
+]);
+
+/**
+ * Normalized header strings that terminate an IOC block and tag contained values
+ * as references (post-article boilerplate, nav, citations — all non-intelligence).
+ */
+const TERMINATOR_HEADER_TERMS = new Set([
+  'references',
+  'sources',
+  'bibliography',
+  'further reading',
+  'acknowledgements',
+  'related articles',
+  'similar articles',
+  'related posts',
+  'read more',
+  'post navigation',
+  'discussion',
+  'comments',
+  'share',
+  'share article',
+  'share this article',
+  'newsletter',
+  'discover more',
+  'about the author',
+  'author',
+  'jump to section',
+  'table of contents',
+  'let us keep you up to date',
+]);
+
+/**
+ * startsWith prefixes for nav headers that may carry trailing text after normalization
+ * (e.g. "Related Articles: 2024 Edition" → normalized "related articles: 2024 edition"
+ * doesn't match the set, but starts with "related ").
+ */
+const TERMINATOR_PREFIXES = ['related ', 'similar ', 'share ', 'about the ', 'discover '];
+
+const isIocHeader = (normalized: string): boolean => IOC_HEADER_TERMS.has(normalized);
+
+const isTerminatorHeader = (normalized: string): boolean =>
+  TERMINATOR_HEADER_TERMS.has(normalized) ||
+  TERMINATOR_PREFIXES.some((p) => normalized.startsWith(p));
+
+/**
+ * Segment structured text (output of htmlToStructured) into labelled section spans.
+ * Only `## <heading>` lines delimit sections; prose blocks have no span entry.
+ *
+ * Returns only 'ioc' and 'references' spans — other headings are ignored.
+ * Spans cover from the heading line start to the next heading (or end of text).
+ * Offsets are character positions in `text` (the same string passed to extractIocs).
+ */
+export const classifySectionSpans = (text: string): readonly SectionSpan[] => {
+  const spans: SectionSpan[] = [];
+  const lines = text.split('\n');
+  let offset = 0;
+  let currentKind: SectionKind | null = null;
+  let currentStart = 0;
+
+  for (const line of lines) {
+    const headingMatch = /^##\s+(.+)$/.exec(line);
+    if (headingMatch) {
+      if (currentKind !== null) {
+        spans.push({ start: currentStart, end: offset, kind: currentKind });
+        currentKind = null;
+      }
+      const normalized = normalizeHeader(headingMatch[1]);
+      if (isIocHeader(normalized)) {
+        currentKind = 'ioc';
+        currentStart = offset;
+      } else if (isTerminatorHeader(normalized)) {
+        currentKind = 'references';
+        currentStart = offset;
+      }
+    }
+    // Advance past this line and its trailing '\n' (join('\n') separator).
+    offset += line.length + 1;
+  }
+
+  if (currentKind !== null) {
+    spans.push({ start: currentStart, end: text.length, kind: currentKind });
+  }
+
+  return spans;
+};
+
+/**
+ * Determine the highest-priority section kind that contains the IOC value,
+ * scanning ALL section spans for a string occurrence of the value.
+ *
+ * This is Option A of the multi-occurrence fix: instead of relying on the
+ * single deduped _offset (which records the FIRST extraction — often a prose
+ * occurrence before the IOC table), scan the span text for the value itself.
+ * Because spans are computed on refangedText, and ioc.value is the refanged
+ * canonical form, spanText.includes(value) correctly matches table cells.
+ *
+ * Precedence: 'ioc' > 'references' > null (no span / prose).
+ */
+const findBestSectionKind = (
+  value: string,
+  spans: readonly SectionSpan[],
+  refangedText: string
+): SectionKind | null => {
+  let best: SectionKind | null = null;
+  for (const span of spans) {
+    const spanText = refangedText.slice(span.start, span.end).toLowerCase();
+    if (!spanText.includes(value.toLowerCase())) continue;
+    if (span.kind === 'ioc') return 'ioc'; // highest priority — short-circuit
+    if (best === null) best = span.kind;
+  }
+  return best;
+};
+
+/**
+ * Post-pass: override tier/tier_basis for IOCs that appear in a classified
+ * section span. tier_heuristic is NEVER modified — it records the per-value
+ * heuristic verdict immutably for the observability loop.
+ *
+ * Uses value-string scanning (Option A) rather than the stored _offset so that
+ * values appearing in prose BEFORE their IOC-table occurrence are correctly
+ * promoted — the deduped _offset captures the first (prose) occurrence, but
+ * findBestSectionKind finds the IOC-table occurrence via text scan.
+ *
+ * Precedence (do NOT violate):
+ *   defanged/ioc_section (discriminating) > denylist/vendor_research (reference)
+ *     > references_section (reference) > per-value heuristic
+ *
+ * IOC-section: → discriminating/ioc_section
+ *   UNLESS tier_heuristic === 'reference' with basis 'denylist' or 'vendor_research'
+ *   (high-confidence reference stays reference even in a sloppy IOC table).
+ *
+ * References-section: → reference/references_section
+ *   UNLESS already discriminating (defanged_source or ioc_section) — defanged value
+ *   in a citation is still a real IOC.
+ */
+const applySectionOverrides = (
+  iocs: readonly WorkingIoc[],
+  spans: readonly SectionSpan[],
+  refangedText: string
+): void => {
+  if (spans.length === 0) return;
+  for (const ioc of iocs) {
+    const kind = findBestSectionKind(ioc.value, spans, refangedText);
+    if (kind === null) continue;
+
+    if (kind === 'ioc') {
+      // Denylist / vendor_research reference stays — they are high-confidence noise.
+      if (
+        ioc.tier_heuristic === 'reference' &&
+        (ioc.tier_basis === 'denylist' || ioc.tier_basis === 'vendor_research')
+      ) {
+        continue;
+      }
+      // Bare content-host / CDN domains: the path-bearing URL is the indicator, not the
+      // bare host. A bare github.com in an IOC section is a URL reference, not a C2 anchor.
+      // tier_basis 'known_cdn' is set by classifyDomainTier for LOW_DISCRIMINATION_DOMAINS
+      // entries (including github.com, raw.githubusercontent.com, amazonaws.com subdomains,
+      // etc.). These stay at their heuristic tier (contextual/uncertain), not discriminating.
+      if (ioc.type === 'domain' && ioc.tier_basis === 'known_cdn') {
+        continue;
+      }
+      ioc.tier = 'discriminating';
+      ioc.tier_basis = 'ioc_section';
+    } else {
+      // references section: downgrade unless already discriminating
+      if (ioc.tier === 'discriminating') continue;
+      ioc.tier = 'reference';
+      ioc.tier_basis = 'references_section';
+    }
+  }
+};
+
 export const extractIocs = ({ text, defang = true }: ExtractIocsParams): ExtractIocsResult => {
   // Pre-pass: recover defanged IOCs before regex matching.
   const refangedText = refang(text);
   const seen = new Set<string>();
-  const iocByKey = new Map<string, ExtractedIoc>();
-  const iocs: ExtractedIoc[] = [];
+  const iocByKey = new Map<string, WorkingIoc>();
+  const iocs: WorkingIoc[] = [];
   const consumed: Span[] = [];
 
   // ── Corroboration signal 1: defanged-in-source domains ───────────────────
@@ -658,7 +870,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
     )
   );
 
-  const pushIoc = (ioc: ExtractedIoc) => {
+  const pushIoc = (ioc: WorkingIoc) => {
     const dedupKey = `${ioc.type}:${ioc.value.toLowerCase()}`;
     if (seen.has(dedupKey)) return;
     seen.add(dedupKey);
@@ -689,12 +901,14 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
         tier,
         tier_heuristic: tier,
         tier_basis: basis,
+        _offset: idx,
       });
     }
   }
 
   // ── PASS 2: URLs ──────────────────────────────────────────────────────────
   const rawUrls: string[] = [];
+  const rawUrlOffsets: number[] = [];
   {
     const pattern = new RegExp(URL_PATTERN.source, URL_PATTERN.flags);
     for (const match of refangedText.matchAll(pattern)) {
@@ -703,6 +917,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
       const idx = match.index;
       consumed.push([idx, idx + match[0].length]);
       rawUrls.push(raw);
+      rawUrlOffsets.push(idx);
 
       // URL tier: lift-only. A discriminating host lifts the URL to discriminating.
       // Any non-discriminating host (reference, contextual, uncertain) leaves the URL
@@ -729,6 +944,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
         tier,
         tier_heuristic: tier,
         tier_basis: basis,
+        _offset: idx,
       });
     }
   }
@@ -747,7 +963,8 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   // The URL consumes its span; the host must be derived explicitly so it
   // isn't lost. Run through domain filter pipeline — urlHosts corroboration
   // means ambiguous TLDs (evil.py) correctly pass the gate here.
-  for (const host of urlHostList) {
+  for (let i = 0; i < urlHostList.length; i++) {
+    const host = urlHostList[i];
     const result = classifyDomain(host, defangedDomains, urlHosts);
     if (!result.emit) continue;
     const dedupKey = `domain:${host}`;
@@ -760,6 +977,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
         tier: result.tier,
         tier_heuristic: result.tier,
         tier_basis: result.basis,
+        _offset: rawUrlOffsets[i],
       });
     }
   }
@@ -790,6 +1008,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
         tier: cidrTier,
         tier_heuristic: cidrTier,
         tier_basis: cidrBasis,
+        _offset: idx,
       });
 
       // Derived bare IP — private wins, then defanged-in-source, else uncertain.
@@ -812,6 +1031,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
         tier: ipTier,
         tier_heuristic: ipTier,
         tier_basis: ipBasis,
+        _offset: idx,
       });
     }
   }
@@ -838,6 +1058,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
           tier: 'discriminating',
           tier_heuristic: 'discriminating',
           tier_basis: 'wallet_high_entropy',
+          _offset: idx,
         });
       }
     }
@@ -878,7 +1099,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
         const dedupKey = `ip:${host}`;
         if (!seen.has(dedupKey)) {
           seen.add(dedupKey);
-          const ioc: ExtractedIoc = {
+          const ioc: WorkingIoc = {
             type: 'ip',
             value: host,
             defanged: defangValue('ip', host, defang),
@@ -886,6 +1107,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
             tier_heuristic: tier,
             tier_basis: basis,
             port: portNum,
+            _offset: idx,
           };
           iocs.push(ioc);
           iocByKey.set(dedupKey, ioc);
@@ -904,7 +1126,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
           const dedupKey = `domain:${host}`;
           if (!seen.has(dedupKey)) {
             seen.add(dedupKey);
-            const ioc: ExtractedIoc = {
+            const ioc: WorkingIoc = {
               type: 'domain',
               value: host,
               defanged: defangValue('domain', host, defang),
@@ -912,6 +1134,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
               tier_heuristic: result.tier,
               tier_basis: result.basis,
               port: portNum,
+              _offset: idx,
             };
             iocs.push(ioc);
             iocByKey.set(dedupKey, ioc);
@@ -998,12 +1221,12 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
     const result = classifyDomain(raw, defangedDomains, urlHosts);
     if (!result.emit) continue;
 
-    candidateDomains.push({ domain: raw, tier: result.tier, basis: result.basis });
+    candidateDomains.push({ domain: raw, tier: result.tier, basis: result.basis, offset: match.index });
   }
 
   // Step f — longest-match PSL dedup (reference/denied candidates are exempt).
   const filteredDomains = longestMatchDomainDedup(candidateDomains);
-  for (const { domain, tier, basis } of filteredDomains) {
+  for (const { domain, tier, basis, offset } of filteredDomains) {
     const dedupKey = `domain:${domain}`;
     if (!seen.has(dedupKey)) {
       seen.add(dedupKey);
@@ -1014,9 +1237,15 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
         tier,
         tier_heuristic: tier,
         tier_basis: basis,
+        _offset: offset,
       });
     }
   }
+
+  // ── Section override post-pass ────────────────────────────────────────────
+  // Runs only when the input text contains ## headings (HTML path). Plain-text
+  // fallback produces no section spans, leaving all tier assignments unchanged.
+  applySectionOverrides(iocs, classifySectionSpans(refangedText), refangedText);
 
   // Sorted-set fingerprint of the anchor-eligible IOC values in this report.
   // Only discriminating / contextual / uncertain tiers are hashed — reference and
@@ -1040,7 +1269,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
 
   return {
     count: iocs.length,
-    iocs,
+    iocs: iocs as ExtractedIoc[],
     ioc_set_hash: iocSetHash,
   };
 };

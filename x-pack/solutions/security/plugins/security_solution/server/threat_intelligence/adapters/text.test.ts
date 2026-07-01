@@ -134,6 +134,14 @@ describe('htmlToStructured', () => {
     expect(result).toContain('https://c2.evil.com/beacon');
   });
 
+  it('preserves anchor href URL inside a list item (anchor-lift ordering fix)', () => {
+    // Before the fix, <li> processing stripped inner <a> tags before the href lift ran,
+    // discarding the URL. After the fix, the href is lifted first so it survives the li strip.
+    const html = '<ul><li><a href="https://socket.dev/blog">Socket writeup</a></li></ul>';
+    const result = htmlToStructured(html);
+    expect(result).toContain('https://socket.dev/blog');
+  });
+
   it('preserves multi-column IOC table structure for downstream regex extraction', () => {
     // Realistic vendor HTML snippet: Type/Indicator columns
     const html = `

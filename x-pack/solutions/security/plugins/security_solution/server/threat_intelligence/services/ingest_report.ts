@@ -25,6 +25,7 @@ import { buildReportContent } from '../adapters/text';
 export interface IngestReportParams {
   title: string;
   body_text: string;
+  body_html?: string;
   source_name: string;
   source_url?: string;
   severity?: SeverityLevel;
@@ -71,6 +72,7 @@ export const ingestReport = async (
   const {
     title,
     body_text: bodyText,
+    body_html: bodyHtml,
     source_name: sourceName,
     source_url: sourceUrl,
     severity = 'medium',
@@ -130,7 +132,7 @@ export const ingestReport = async (
         url: sourceUrl,
         adapter_id: 'manual:analyst-paste',
       },
-      content: buildReportContent({ title, bodyText, language }),
+      content: buildReportContent({ title, bodyText, bodyHtml, language }),
       severity: {
         level: severity,
         score: severityScore(severity),
