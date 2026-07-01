@@ -29,13 +29,6 @@ fi
 # Bootstrap workspace deps + download build artifacts (same setup as FTR/Scout CI steps)
 source .buildkite/scripts/steps/functional/common.sh
 
-# TODO: revert before merge — always skip golden-cluster writes for notify testing.
-# Skip golden-cluster writes (scores/traces). Keeps golden reads (EVALUATIONS_KBN_*) and GCS snapshots.
-echo "--- Skipping golden-cluster export; dataset reads and GCS snapshots unchanged"
-unset EVALUATIONS_ES_URL EVALUATIONS_ES_API_KEY
-unset TRACING_ES_URL TRACING_ES_API_KEY TRACING_EXPORTERS
-export KBN_EVALS_SKIP_PREFLIGHT_EXPORT=true
-
 EVAL_SUITE_INFO="$(
   node x-pack/platform/packages/shared/kbn-evals/scripts/ci/get_suite_info.js "$EVAL_SUITE_ID" || true
 )"
