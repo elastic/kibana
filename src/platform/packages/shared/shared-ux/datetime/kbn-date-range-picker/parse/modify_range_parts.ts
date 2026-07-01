@@ -7,67 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
 import { MODIFICATION_INCREASE, MODIFICATION_DECREASE } from '../constants';
-import type { ModificationAction } from '../types';
+import type { ModificationAction, TimeUnit } from '../types';
+import {
+  ENGLISH_GRAMMAR,
+  getActiveGrammar,
+  getCompiledGrammar,
+  resolveUnit,
+  type LocaleGrammar,
+} from './locale_grammar';
 import type { PartKind, RangePart } from './parse_range_parts';
 
-type RelativeUnit = (typeof RELATIVE_UNIT_CYCLE)[number];
-
-const RELATIVE_UNIT_CYCLE = ['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'] as const;
+const RELATIVE_UNIT_CYCLE: readonly TimeUnit[] = ['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];
 const ROUNDING_UNIT_CYCLE = ['s', 'm', 'h', 'd'] as const;
 
-// TODO centralize these English-only aliases and labels with the input parser
-// grammar before adding localized date range input support.
-const RELATIVE_UNIT_ALIASES: Readonly<Record<string, RelativeUnit>> = {
-  ms: 'ms',
-  millisecond: 'ms',
-  milliseconds: 'ms',
-  s: 's',
-  second: 's',
-  seconds: 's',
-  sec: 's',
-  secs: 's',
-  m: 'm',
-  minute: 'm',
-  minutes: 'm',
-  min: 'm',
-  mins: 'm',
-  h: 'h',
-  hour: 'h',
-  hours: 'h',
-  hr: 'h',
-  hrs: 'h',
-  d: 'd',
-  day: 'd',
-  days: 'd',
-  w: 'w',
-  week: 'w',
-  weeks: 'w',
-  wk: 'w',
-  wks: 'w',
-  M: 'M',
-  month: 'M',
-  months: 'M',
-  mo: 'M',
-  mos: 'M',
-  y: 'y',
-  year: 'y',
-  years: 'y',
-  yr: 'y',
-  yrs: 'y',
-};
-const RELATIVE_UNIT_WORDS: Readonly<Record<RelativeUnit, { singular: string; plural: string }>> = {
-  ms: { singular: 'millisecond', plural: 'milliseconds' },
-  s: { singular: 'second', plural: 'seconds' },
-  m: { singular: 'minute', plural: 'minutes' },
-  h: { singular: 'hour', plural: 'hours' },
-  d: { singular: 'day', plural: 'days' },
-  w: { singular: 'week', plural: 'weeks' },
-  M: { singular: 'month', plural: 'months' },
-  y: { singular: 'year', plural: 'years' },
-};
 // Maps a step-able absolute date part to the moment duration unit it advances.
 // `weekday` steps by whole days so that arrow keys move the date forward/back.
 const ABSOLUTE_STEP_UNITS: Readonly<
@@ -91,9 +47,6 @@ const splicePart = (text: string, part: RangePart, replacement: string): string 
   if (part.text === replacement) return undefined;
   return `${text.slice(0, part.start)}${replacement}${text.slice(part.end)}`;
 };
-
-const resolveRelativeUnit = (unit: string): RelativeUnit | undefined =>
-  RELATIVE_UNIT_ALIASES[unit] ?? RELATIVE_UNIT_ALIASES[unit.toLowerCase()];
 
 const getNextCycleValue = <T extends string>(
   cycle: readonly T[],
@@ -141,46 +94,107 @@ const modifyRelativeValue = (
   return splicePart(text, part, String(nextValue));
 };
 
+/** The leading direction word of a `"{word} {count} {unit}"`-shaped duration template. */
+const extractLeadingWord = (template: string): string | undefined => template.match(/^(\S+)/)?.[0];
+
+/**
+ * Finds the opposite-direction word for `word` within `grammar`, or
+ * `undefined` if `word` isn't one of this grammar's direction words, or the
+ * `action` doesn't apply (e.g. stepping a future word further into the future).
+ * Always returns the FIRST template's word for the target direction — matches
+ * historical behavior where "past" (an alias of "last") flips forward to
+ * "next", but flipping back always lands on the canonical "last".
+ */
+const getOppositeDirectionWord = (
+  word: string,
+  grammar: LocaleGrammar,
+  action: ModificationAction
+): string | undefined => {
+  const lower = word.toLowerCase();
+  const pastWords = grammar.durationTemplates.past
+    .map(extractLeadingWord)
+    .filter((w): w is string => !!w);
+  const futureWords = grammar.durationTemplates.future
+    .map(extractLeadingWord)
+    .filter((w): w is string => !!w);
+
+  if (pastWords.some((w) => w.toLowerCase() === lower) && action === MODIFICATION_INCREASE) {
+    return futureWords[0];
+  }
+  if (futureWords.some((w) => w.toLowerCase() === lower) && action === MODIFICATION_DECREASE) {
+    return pastWords[0];
+  }
+  return undefined;
+};
+
 const modifyRelativeDirection = (
   text: string,
   part: RangePart,
-  action: ModificationAction
+  action: ModificationAction,
+  locale: string | undefined
 ): string | undefined => {
-  if (part.text === '-')
+  if (part.text === '-') {
     return action === MODIFICATION_INCREASE ? splicePart(text, part, '+') : undefined;
-  if (part.text === '+')
-    return action === MODIFICATION_DECREASE ? splicePart(text, part, '-') : undefined;
-
-  const direction = part.text.toLowerCase();
-  if ((direction === 'last' || direction === 'past') && action === MODIFICATION_INCREASE) {
-    return splicePart(text, part, matchCasing(part.text, 'next'));
   }
-  if (direction === 'next' && action === MODIFICATION_DECREASE) {
-    return splicePart(text, part, matchCasing(part.text, 'last'));
+  if (part.text === '+') {
+    return action === MODIFICATION_DECREASE ? splicePart(text, part, '-') : undefined;
+  }
+
+  // Preserve whichever language the current word belongs to — never silently
+  // translate the user's own typed text into the active locale.
+  const englishNext = getOppositeDirectionWord(part.text, ENGLISH_GRAMMAR, action);
+  if (englishNext) return splicePart(text, part, matchCasing(part.text, englishNext));
+
+  const activeGrammar = getActiveGrammar(locale);
+  if (activeGrammar !== ENGLISH_GRAMMAR) {
+    const localeNext = getOppositeDirectionWord(part.text, activeGrammar, action);
+    if (localeNext) return splicePart(text, part, matchCasing(part.text, localeNext));
   }
 
   return undefined;
+};
+
+/** Resolves `text` to a canonical unit and the grammar whose word list it belongs to. */
+const resolveUnitSource = (
+  text: string,
+  locale: string | undefined
+): { unit: TimeUnit; grammar: LocaleGrammar } | undefined => {
+  const englishUnit = resolveUnit(text, ENGLISH_GRAMMAR.unitAliases);
+  if (englishUnit) return { unit: englishUnit, grammar: ENGLISH_GRAMMAR };
+
+  const activeGrammar = getActiveGrammar(locale);
+  if (activeGrammar === ENGLISH_GRAMMAR) return undefined;
+
+  const localeUnit = resolveUnit(text, activeGrammar.unitAliases);
+  return localeUnit ? { unit: localeUnit, grammar: activeGrammar } : undefined;
 };
 
 const modifyRelativeUnit = (
   text: string,
   part: RangePart,
   action: ModificationAction,
-  parts: RangePart[]
+  parts: RangePart[],
+  locale: string | undefined
 ): string | undefined => {
-  const currentUnit = resolveRelativeUnit(part.text);
-  if (!currentUnit) return undefined;
-
-  const nextUnit = getNextCycleValue(RELATIVE_UNIT_CYCLE, currentUnit, action);
-  if (!nextUnit) return undefined;
-
   if (isShorthandUnit(part, parts)) {
-    return splicePart(text, part, nextUnit);
+    // Shorthand units are the canonical datemath symbol (ms/s/m/h/d/w/M/y),
+    // identical across every locale — no word-form lookup needed.
+    const compiled = getCompiledGrammar(locale);
+    const currentUnit = resolveUnit(part.text, compiled.unitAliases);
+    if (!currentUnit) return undefined;
+    const nextUnit = getNextCycleValue(RELATIVE_UNIT_CYCLE, currentUnit, action);
+    return nextUnit ? splicePart(text, part, nextUnit) : undefined;
   }
+
+  const source = resolveUnitSource(part.text, locale);
+  if (!source) return undefined;
+
+  const nextUnit = getNextCycleValue(RELATIVE_UNIT_CYCLE, source.unit, action);
+  if (!nextUnit) return undefined;
 
   const currentValue = getRelativeValue(part, parts);
   if (currentValue === undefined) return undefined;
-  const unitWords = RELATIVE_UNIT_WORDS[nextUnit];
+  const unitWords = source.grammar.unitWords[nextUnit];
   const nextText = currentValue === 1 ? unitWords.singular : unitWords.plural;
   return splicePart(text, part, nextText);
 };
@@ -277,21 +291,26 @@ const modifyAbsoluteTimezone = (
 };
 
 /**
- * Applies an arrow-key modification to a selected range part.
+ * Applies an arrow-key modification to a selected range part. Relative
+ * direction/unit words are resolved against `locale` merged with English —
+ * whichever language the part's CURRENT text belongs to is preserved (a part
+ * already typed in English is never silently translated into the active locale).
  */
 export function applyPartModification(
   text: string,
   part: RangePart,
   action: ModificationAction,
-  parts: RangePart[]
+  parts: RangePart[],
+  locale?: string
 ): string | undefined {
+  const resolvedLocale = locale ?? i18n.getLocale();
   switch (part.kind) {
     case 'relative-value':
       return modifyRelativeValue(text, part, action);
     case 'relative-direction':
-      return modifyRelativeDirection(text, part, action);
+      return modifyRelativeDirection(text, part, action, resolvedLocale);
     case 'relative-unit':
-      return modifyRelativeUnit(text, part, action, parts);
+      return modifyRelativeUnit(text, part, action, parts, resolvedLocale);
     case 'rounding-unit':
       return modifyRoundingUnit(text, part, action);
     case 'month':
