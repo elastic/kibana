@@ -281,7 +281,9 @@ export class ExecutionPlan {
 
     const { getKnowledgeIndicatorClient } = this.dependencies;
     if (!getKnowledgeIndicatorClient) {
-      return;
+      throw new Error(
+        'knowledgeIndicatorClient is required for deleteQueries but was not provided'
+      );
     }
     const kiClient = await getKnowledgeIndicatorClient();
     return Promise.all(
@@ -316,7 +318,9 @@ export class ExecutionPlan {
 
     const { getKnowledgeIndicatorClient } = this.dependencies;
     if (!getKnowledgeIndicatorClient) {
-      return;
+      throw new Error(
+        'knowledgeIndicatorClient is required for unlinkFeatures but was not provided'
+      );
     }
     const kiClient = await getKnowledgeIndicatorClient();
     return Promise.all(
