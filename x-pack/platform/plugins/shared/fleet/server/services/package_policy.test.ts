@@ -2385,6 +2385,109 @@ describe('Package policy service', () => {
       });
     });
 
+    it('should inject data_stream.dataset into templateVars when absent from stream vars (composable integration)', async () => {
+      const pkgInfo = {
+        name: 'dsvarpkg',
+        version: '1.0.0',
+        type: 'integration',
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'dsvarpkg.customds',
+            path: 'customds',
+            streams: [
+              {
+                input: 'log',
+                template_path: 'stream_ds.yml',
+              },
+            ],
+          },
+        ],
+        policy_templates: [{ inputs: [{ type: 'log' }] }],
+      } as unknown as PackageInfo;
+
+      const inputs = await _compilePackagePolicyInputs(
+        pkgInfo,
+        {},
+        [
+          {
+            type: 'log',
+            enabled: true,
+            streams: [
+              {
+                id: 'stream-composable-no-dataset-var',
+                data_stream: { dataset: 'dsvarpkg.customds', type: 'logs' },
+                enabled: true,
+                vars: {
+                  paths: { value: ['/var/log/app.log'], type: 'text' },
+                  // data_stream.dataset intentionally absent — composable integration case
+                },
+              },
+            ],
+          },
+        ],
+        ASSETS_MAP_FIXTURES
+      );
+
+      expect(inputs[0].streams[0].compiled_stream).toEqual({
+        type: 'log',
+        data_stream: { dataset: 'dsvarpkg.customds' },
+        paths: ['/var/log/app.log'],
+      });
+    });
+
+    it('should not overwrite data_stream.dataset in templateVars when already present in stream vars', async () => {
+      const pkgInfo = {
+        name: 'dsvarpkg',
+        version: '1.0.0',
+        type: 'integration',
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'dsvarpkg.customds',
+            path: 'customds',
+            streams: [
+              {
+                input: 'log',
+                template_path: 'stream_ds.yml',
+              },
+            ],
+          },
+        ],
+        policy_templates: [{ inputs: [{ type: 'log' }] }],
+      } as unknown as PackageInfo;
+
+      const inputs = await _compilePackagePolicyInputs(
+        pkgInfo,
+        {},
+        [
+          {
+            type: 'log',
+            enabled: true,
+            streams: [
+              {
+                id: 'stream-existing-dataset-var',
+                data_stream: { dataset: 'dsvarpkg.customds', type: 'logs' },
+                enabled: true,
+                vars: {
+                  paths: { value: ['/var/log/app.log'], type: 'text' },
+                  'data_stream.dataset': { value: 'user.custom_dataset', type: 'text' },
+                },
+              },
+            ],
+          },
+        ],
+        ASSETS_MAP_FIXTURES
+      );
+
+      // stream.data_stream.dataset is 'dsvarpkg.customds' but the user-set var should win
+      expect(inputs[0].streams[0].compiled_stream).toEqual({
+        type: 'log',
+        data_stream: { dataset: 'user.custom_dataset' },
+        paths: ['/var/log/app.log'],
+      });
+    });
+
     it('should work with a two level dataset name', async () => {
       const inputs = await _compilePackagePolicyInputs(
         {
