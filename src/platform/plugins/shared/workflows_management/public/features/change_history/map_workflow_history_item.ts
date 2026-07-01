@@ -15,6 +15,16 @@ export interface MapWorkflowHistoryItemOptions {
   isCurrent?: boolean;
 }
 
+export interface WorkflowChangeHistorySnapshot {
+  workflow: {
+    yaml: string;
+  };
+}
+
+export const toWorkflowChangeHistorySnapshot = (yaml: string): WorkflowChangeHistorySnapshot => ({
+  workflow: { yaml },
+});
+
 export const mapWorkflowHistoryItemToListItem = (
   item: WorkflowHistoryItem,
   { isCurrent }: MapWorkflowHistoryItemOptions = {}
@@ -28,6 +38,7 @@ export const mapWorkflowHistoryItemToListItem = (
   action: item.action,
   ...(isCurrent ? { isCurrent: true } : {}),
   ...(item.version != null ? { metadata: { version: item.version } } : {}),
+  ...(item.comment ? { comment: item.comment } : {}),
 });
 
 export const mapWorkflowHistoryItemToDetail = (
@@ -35,9 +46,5 @@ export const mapWorkflowHistoryItemToDetail = (
   options: MapWorkflowHistoryItemOptions = {}
 ): ChangeHistoryDetail => ({
   ...mapWorkflowHistoryItemToListItem(item, options),
-  snapshot: {
-    workflow: {
-      yaml: item.workflow.yaml,
-    },
-  },
+  snapshot: toWorkflowChangeHistorySnapshot(item.workflow.yaml),
 });
