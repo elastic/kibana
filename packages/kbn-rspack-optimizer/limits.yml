@@ -181,6 +181,7 @@ pageLoadAssetSize:
   shared-packages: 3079800
   shared-plugins: 12276963
   shared-solution-packages: 184340
+  significant_events: 295
   slo: 19531
   snapshotRestore: 16909
   spaces: 22966
