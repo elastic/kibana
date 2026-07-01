@@ -7,12 +7,19 @@
 
 import type {
   RuleResponse,
-  RecoveryPolicyType,
   CreateRuleData,
+  Query,
   UpdateRuleData,
+  RecoveryStrategy,
+  NoDataStrategy,
 } from '@kbn/alerting-v2-schemas';
 import { DELAY_MODE } from '../types';
 import type { FormValues, StateTransition } from '../types';
+import {
+  deriveAlertDelayModeFromStateTransition,
+  deriveRecoveryDelayModeFromStateTransition,
+} from './state_transition_helpers';
+import { ruleQueryToApiQuery, apiQueryToFormQuery } from './query_mappers';
 import {
   mapArtifacts,
   mergeArtifactsByType,
@@ -21,26 +28,28 @@ import {
 } from './artifact_mappers';
 
 // ---------------------------------------------------------------------------
-// FormValues → API request
+// Shared helpers
 // ---------------------------------------------------------------------------
 
 /**
- * Builds the `recovery_policy.query` portion of the API payload.
- *
- * Only full-query mode is supported: the user provides a standalone recovery
- * base query.
+ * Resolves the recovery_strategy for an API request.
+ * Non-representable strategies (no_breach, none) are preserved as-is.
+ * 'query' is always derived from the recovery block presence — never
+ * kept as a stale value — because the form can add/remove recovery
+ * without updating the recoveryStrategy field.
  */
-const buildRecoveryQuery = (
-  recoveryPolicy: NonNullable<FormValues['recoveryPolicy']>
-): { query: { base: string } } | Record<string, never> => {
-  const { query } = recoveryPolicy;
-
-  if (query?.base) {
-    return { query: { base: query.base } };
+export const resolveRecoveryStrategy = (
+  formValues: Pick<FormValues, 'recoveryStrategy' | 'query'>
+): RecoveryStrategy | undefined => {
+  if (formValues.recoveryStrategy && formValues.recoveryStrategy !== 'query') {
+    return formValues.recoveryStrategy;
   }
-
-  return {};
+  return formValues.query.recovery != null ? ('query' as const) : undefined;
 };
+
+// ---------------------------------------------------------------------------
+// FormValues → API request
+// ---------------------------------------------------------------------------
 
 const mapMetadata = (metadata: FormValues['metadata']) => ({
   name: metadata.name,
@@ -54,42 +63,8 @@ const mapSchedule = (schedule: FormValues['schedule']) => ({
   lookback: schedule.lookback,
 });
 
-const mapEvaluation = (evaluation: FormValues['evaluation']) => ({
-  query: {
-    base: evaluation.query.base,
-  },
-});
-
 const mapGrouping = (grouping: FormValues['grouping']) =>
   grouping?.fields?.length ? { fields: grouping.fields } : undefined;
-
-const mapRecoveryPolicy = (recoveryPolicy: FormValues['recoveryPolicy']) => {
-  if (!recoveryPolicy) return undefined;
-  return {
-    type: recoveryPolicy.type,
-    ...(recoveryPolicy.type === 'query' ? buildRecoveryQuery(recoveryPolicy) : {}),
-  };
-};
-
-/** Derives alert-delay mode from persisted `state_transition` (same rules as `AlertDelayField`). */
-export const deriveAlertDelayModeFromStateTransition = (
-  stateTransition?: StateTransition | null
-): FormValues['stateTransitionAlertDelayMode'] => {
-  if (stateTransition?.pendingTimeframe != null) return DELAY_MODE.duration;
-  if (stateTransition?.pendingCount != null && stateTransition.pendingCount > 0)
-    return DELAY_MODE.breaches;
-  return DELAY_MODE.immediate;
-};
-
-/** Derives recovery-delay mode from persisted `state_transition` (same rules as `RecoveryDelayField`). */
-export const deriveRecoveryDelayModeFromStateTransition = (
-  stateTransition?: StateTransition | null
-): FormValues['stateTransitionRecoveryDelayMode'] => {
-  if (stateTransition?.recoveringTimeframe != null) return DELAY_MODE.duration;
-  if (stateTransition?.recoveringCount != null && stateTransition.recoveringCount > 0)
-    return DELAY_MODE.recoveries;
-  return DELAY_MODE.immediate;
-};
 
 const mapStateTransition = (formValues: FormValues) => {
   const { kind, stateTransition } = formValues;
@@ -142,9 +117,10 @@ export interface RuleRequestCommon {
   metadata: { name: string; description?: string; owner?: string; tags?: string[] };
   time_field: string;
   schedule: { every: string; lookback?: string };
-  evaluation: { query: { base: string } };
+  query: Query;
+  recovery_strategy?: RecoveryStrategy;
+  no_data_strategy?: NoDataStrategy;
   grouping?: { fields: string[] };
-  recovery_policy?: { type: RecoveryPolicyType; query?: { base?: string } };
   state_transition?: {
     pending_count?: number;
     pending_timeframe?: string;
@@ -154,48 +130,38 @@ export interface RuleRequestCommon {
   artifacts?: RuleArtifactPayload;
 }
 
-/**
- * Maps `FormValues` to the common API request shape (snake_case) shared by
- * both create and update endpoints. Does not include `kind`.
- */
 export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestCommon => {
-  const { metadata, timeField, schedule, evaluation, grouping, recoveryPolicy } = formValues;
+  const { metadata, timeField, schedule, query, grouping } = formValues;
   const mappedArtifacts = mapArtifacts(mergeArtifactsByType(formValues));
+  const recoveryStrategy = resolveRecoveryStrategy(formValues);
 
   return {
     metadata: mapMetadata(metadata),
     time_field: timeField,
     schedule: mapSchedule(schedule),
-    evaluation: mapEvaluation(evaluation),
+    query: ruleQueryToApiQuery(query),
+    ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
+    ...(formValues.noDataStrategy ? { no_data_strategy: formValues.noDataStrategy } : {}),
     grouping: mapGrouping(grouping),
-    recovery_policy: mapRecoveryPolicy(recoveryPolicy),
     state_transition: mapStateTransition(formValues),
     ...(mappedArtifacts ? { artifacts: mappedArtifacts } : {}),
   };
 };
 
-/**
- * Maps `FormValues` to the create API request payload.
- * Adds `kind` on top of the common request shape since it is required for creation.
- */
 export const mapFormValuesToCreateRequest = (formValues: FormValues): CreateRuleData => ({
   kind: formValues.kind,
   ...mapFormValuesToRuleRequest(formValues),
 });
 
-/**
- * Maps `FormValues` to the update API request payload.
- * Coerces absent optional fields to `null` so the API interprets them as
- * explicit removals (as opposed to `undefined` which omits the key entirely).
- */
 export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRuleData => {
-  const { grouping, recovery_policy, state_transition, artifacts, ...rest } =
+  const { grouping, state_transition, artifacts, recovery_strategy, no_data_strategy, ...rest } =
     mapFormValuesToRuleRequest(formValues);
 
   return {
     ...rest,
+    recovery_strategy: resolveRecoveryStrategy(formValues) ?? null,
+    no_data_strategy: no_data_strategy ?? null,
     grouping: grouping ?? null,
-    recovery_policy: recovery_policy ?? null,
     state_transition: state_transition ?? null,
     artifacts: artifacts ?? null,
   };
@@ -205,12 +171,6 @@ export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRule
 // API response → FormValues
 // ---------------------------------------------------------------------------
 
-/**
- * Maps a `RuleResponse` (API shape, snake_case) to `Partial<FormValues>` (form shape, camelCase).
- *
- * Only fields present in the response are included so the form defaults fill in the rest.
- * Use this when populating the edit form with an existing rule's data.
- */
 export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormValues> => {
   const stateTransition: StateTransition = {
     pendingCount: rule.state_transition?.pending_count ?? null,
@@ -233,26 +193,10 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
       every: rule.schedule.every,
       lookback: rule.schedule.lookback ?? '1m',
     },
-    evaluation: {
-      query: {
-        base: rule.evaluation.query.base,
-      },
-    },
+    query: apiQueryToFormQuery(rule.query, rule.recovery_strategy),
+    recoveryStrategy: rule.recovery_strategy ?? undefined,
+    noDataStrategy: rule.no_data_strategy ?? undefined,
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
-    ...(rule.recovery_policy
-      ? {
-          recoveryPolicy: {
-            type: rule.recovery_policy.type,
-            ...(rule.recovery_policy.query
-              ? {
-                  query: {
-                    base: rule.recovery_policy.query.base,
-                  },
-                }
-              : {}),
-          },
-        }
-      : {}),
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
     stateTransitionRecoveryDelayMode: deriveRecoveryDelayModeFromStateTransition(stateTransition),

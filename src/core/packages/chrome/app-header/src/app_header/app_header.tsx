@@ -34,13 +34,19 @@ export interface AppHeaderViewProps {
   back?: AppHeaderBack | AppHeaderBack[];
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
-  menu?: AppMenuConfig;
+  menu?: AppMenuConfig & { isCollapsed?: boolean };
   favorite?: ReactNode;
+  titleAppend?: ReactNode;
   metadata?: AppHeaderMetadataItems;
   sticky?: boolean;
   padding?: AppHeaderPadding;
   docLink?: string;
   showAddIntegrations?: boolean;
+  /**
+   * Omits the header's bottom border. Used when the content rendered below the header owns the
+   * separating line instead (e.g. Discover using UnifiedTabs).
+   */
+  borderless?: boolean;
 }
 
 export const AppHeaderView = React.memo<AppHeaderViewProps>(
@@ -51,9 +57,11 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
     badges,
     menu,
     favorite,
+    titleAppend,
     metadata,
     sticky,
     padding,
+    borderless,
     docLink,
     showAddIntegrations,
   }) => {
@@ -72,6 +80,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
       !!tabs?.length ||
       !!resolvedBadges?.length ||
       !!menu?.items?.length ||
+      !!titleAppend ||
       !!shareAction ||
       !!favorite ||
       !!metadata?.length ||
@@ -88,6 +97,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
         title={<TitleArea title={title} back={back} size={titleSize} />}
         badges={<AppBadges badges={resolvedBadges} />}
         titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
+        titleAppend={titleAppend}
         trailing={
           <AppMenu menu={menu} docLink={docLink} showAddIntegrations={showAddIntegrations} />
         }
@@ -95,6 +105,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
         tabs={tabs?.length ? <AppTabs tabs={tabs} /> : undefined}
         sticky={sticky}
         padding={padding}
+        borderless={borderless}
       />
     );
   }

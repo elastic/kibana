@@ -18,7 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/code-editor';
-import type { RuleQuery } from './compose_form_types';
+import type { RuleQuery } from '../../form/types';
+import { getBreachQuery } from '../../form/utils/query_helpers';
 import type { QueryTab } from './types';
 import { QuerySandbox } from './query_sandbox';
 import type { QuerySandboxProps } from './query_sandbox';
@@ -62,6 +63,9 @@ export interface QuerySandboxFlyoutProps {
   timeField: string;
   /** Absent → time field selector is read-only. */
   onTimeFieldChange?: (tf: string) => void;
+  /** When provided, resolution is owned by the parent and passed through to QuerySandbox. */
+  timeFieldOptions?: Array<{ value: string; text: string }>;
+  isTimeFieldResolved?: boolean;
   /** Preview date range. Never resets on close — caller owns persistence. */
   dateRange: { dateStart: string; dateEnd: string };
   /** Always required — date range is always interactive. */
@@ -69,6 +73,11 @@ export interface QuerySandboxFlyoutProps {
   /** When provided an Apply button is shown. No-args: caller already holds current state. */
   onApply?: () => void;
   onClose: () => void;
+  /**
+   * Optional help text rendered above the editor — passed through to `QuerySandbox`.
+   * Callers are responsible for content and styling (e.g. wrapping in `<EuiText>`).
+   */
+  helpText?: React.ReactNode;
   title?: string;
   onAlertEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
@@ -84,10 +93,13 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   onTabChange,
   timeField,
   onTimeFieldChange,
+  timeFieldOptions,
+  isTimeFieldResolved,
   dateRange,
   onDateRangeChange,
   onApply,
   onClose,
+  helpText,
   onAlertEditorMount,
   onRecoveryEditorMount,
   title = i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.defaultTitle', {
@@ -99,8 +111,16 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   const queryFields = useMemo(
     () =>
       query.format === 'composed'
-        ? { base: query.base, breach: query.blocks.breach, recover: query.blocks.recover ?? '' }
-        : { base: query.no_data ?? '', breach: query.breach, recover: query.recover ?? '' },
+        ? {
+            base: query.base,
+            breach: query.breach.segment,
+            recover: query.recovery?.segment ?? '',
+          }
+        : {
+            base: query.no_data?.query ?? '',
+            breach: query.breach.query,
+            recover: query.recovery?.query ?? '',
+          },
     [query]
   );
 
@@ -113,25 +133,35 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           ? {
               format: 'composed',
               base: next.base,
-              blocks: { breach: next.breach, ...(next.recover ? { recover: next.recover } : {}) },
+              breach: { segment: next.breach },
+              ...(next.recover ? { recovery: { segment: next.recover } } : {}),
             }
           : {
               format: 'standalone',
-              breach: next.breach,
-              ...(next.base ? { no_data: next.base } : {}),
-              ...(next.recover ? { recover: next.recover } : {}),
+              breach: { query: next.breach },
+              ...(next.base ? { no_data: { query: next.base } } : {}),
+              ...(next.recover ? { recovery: { query: next.recover } } : {}),
             }
       );
     },
     [query, queryFields, onQueryChange]
   );
 
-  const activeQuery =
-    query.format === 'composed'
-      ? [query.base, query.blocks.breach].filter(Boolean).join('\n')
-      : query.breach;
+  const activeQuery = query.format === 'composed' ? getBreachQuery(query) : query.breach.query;
 
-  const handleQueryChange = useCallback((v: string) => updateQuery({ breach: v }), [updateQuery]);
+  /*
+   * Unified composed mode: the editor holds the whole pipeline, so write it to
+   * `base` with an empty `segment` and `getBreachQuery` returns it verbatim.
+   * Writing to `segment` would re-join base + segment and duplicate lines; the
+   * heuristic split runs on Apply, not here.
+   */
+  const handleQueryChange = useCallback(
+    (v: string) =>
+      query.format === 'composed'
+        ? updateQuery({ base: v, breach: '' })
+        : updateQuery({ breach: v }),
+    [query.format, updateQuery]
+  );
 
   const tabProps: QuerySandboxProps['tabProps'] = useMemo(() => {
     if (!tabs?.length) return undefined;
@@ -180,9 +210,12 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           onQueryChange={isReadOnly ? undefined : handleQueryChange}
           timeField={timeField}
           onTimeFieldChange={onTimeFieldChange}
+          timeFieldOptions={timeFieldOptions}
+          isTimeFieldResolved={isTimeFieldResolved}
           dateRange={dateRange}
           onDateRangeChange={onDateRangeChange}
           autoRun
+          helpText={helpText}
           tabProps={tabProps}
         />
       </EuiFlyoutBody>

@@ -27,6 +27,7 @@ import {
   EuiScreenReaderLive,
   EuiFlexGroup,
   EuiButtonIcon,
+  EuiEmptyPrompt,
   EuiPanel,
   EuiToolTip,
   useGeneratedHtmlId,
@@ -62,7 +63,7 @@ import {
 } from './apply_service_map_visibility';
 import { useServiceMapFilterState } from './use_service_map_filter_state';
 import { focusServiceMapFindInput } from './service_map_find_in_page';
-import { ServiceMapSearchProvider } from '../../shared/service_map/service_map_search_context';
+import { ServiceMapHighlightProvider } from '../../shared/service_map/service_map_search_context';
 import { ServiceMapAlertsNavigateProvider } from '../../shared/service_map/service_map_alerts_navigate_context';
 import { useServiceMapAlertsNavigateFactory } from './use_service_map_alerts_tab_href';
 import {
@@ -105,6 +106,11 @@ interface GraphProps {
   fullMapHref?: string;
   /** When true, hides minimap, options panel, and navigation actions that don't apply in dashboard embeds. */
   isEmbedded?: boolean;
+  /**
+   * When true, shows the quick-filters toggle/menu and minimap even in embedded mode.
+   * Used by the dashboard embeddable when the panel is maximized in view mode.
+   */
+  showEmbeddedControls?: boolean;
   /** Override for the popover's Focus map button visibility. Defaults to `!isEmbedded`. */
   showFocusMap?: boolean;
   /** Focus button always navigates, even for the currently focused service. */
@@ -124,10 +130,6 @@ interface GraphProps {
   viewFilters?: ServiceMapViewFilters;
   /** Called when view filters change in the options panel. */
   onViewFiltersChange?: (next: ServiceMapViewFilters) => void;
-  /** Controlled find-in-page query when supplied (e.g. embeddable hydrating from persisted state). */
-  searchQuery?: string;
-  /** Called when the user edits the find-in-page search field. */
-  onSearchQueryChange?: (next: string) => void;
   /** Optional service group filter — forwarded to the "Add to dashboard" panel state. */
   serviceGroupId?: string;
   /**
@@ -153,6 +155,7 @@ function GraphInner({
   onToggleFullscreen,
   fullMapHref,
   isEmbedded = false,
+  showEmbeddedControls = false,
   showFocusMap,
   alwaysNavigateOnPopoverFocus,
   clearKueryOnPopoverNavigation,
@@ -161,8 +164,6 @@ function GraphInner({
   onMapOrientationChange,
   viewFilters: controlledViewFilters,
   onViewFiltersChange,
-  searchQuery: controlledSearchQuery,
-  onSearchQueryChange,
   serviceGroupId,
   rangeFrom,
   rangeTo,
@@ -205,15 +206,9 @@ function GraphInner({
     },
     [onViewFiltersChange]
   );
-  const [internalSearchQuery, setInternalSearchQuery] = useState(controlledSearchQuery ?? '');
-  const searchQuery = controlledSearchQuery ?? internalSearchQuery;
-  const setSearchQuery = useCallback(
-    (next: string) => {
-      setInternalSearchQuery(next);
-      onSearchQueryChange?.(next);
-    },
-    [onSearchQueryChange]
-  );
+  // Find-in-page is a standalone-only affordance (the options panel that hosts it never renders
+  // when embedded), so the search query is purely internal state.
+  const [searchQuery, setSearchQuery] = useState('');
   // Used to badge the controls toggle when the panel is collapsed but state is non-default.
   // Persisted view filters / search query keep the map "the same view" — but the options panel
   // itself stays closed on the dashboard (product feedback: it's an authoring affordance).
@@ -224,6 +219,16 @@ function GraphInner({
     viewFilters.anomalySeverityFilter.length > 0 ||
     searchQuery.trim().length > 0;
   const [panelExpanded, setPanelExpanded] = useState(!isEmbedded);
+  // When the panel is maximized in a dashboard (view mode), we show the quick-filters and minimap
+  // even though we're embedded. In all other embedded states they stay hidden.
+  const showControls = !isEmbedded || showEmbeddedControls;
+  // Auto-open the quick-filters panel the moment the dashboard panel is maximized so users
+  // immediately discover the controls. The user can still close it manually mid-session.
+  useEffect(() => {
+    if (showEmbeddedControls) {
+      setPanelExpanded(true);
+    }
+  }, [showEmbeddedControls]);
   const [internalOrientation, setInternalOrientation] = useState<ServiceMapOrientation>(
     controlledOrientation ?? 'horizontal'
   );
@@ -443,6 +448,11 @@ function GraphInner({
   }, [nodesAfterFilters, selectedNodeId, handlePopoverClose]);
 
   useEffect(() => {
+    // Find-in-page (and its Cmd/Ctrl+K shortcut) only exists in the standalone view; when
+    // embedded the search box isn't rendered, so the shortcut would be a silent no-op.
+    if (isEmbedded) {
+      return;
+    }
     const onKeyDown = (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey;
       if (!mod || e.key.toLowerCase() !== 'k') {
@@ -473,7 +483,7 @@ function GraphInner({
     };
     window.addEventListener('keydown', onKeyDown, true);
     return () => window.removeEventListener('keydown', onKeyDown, true);
-  }, []);
+  }, [isEmbedded]);
 
   // Close popover when user starts dragging (map panning or node dragging)
   const handleDragStart = useCallback(() => {
@@ -646,7 +656,7 @@ function GraphInner({
   });
 
   return (
-    <ServiceMapSearchProvider>
+    <ServiceMapHighlightProvider>
       <ServiceMapAlertsNavigateProvider makeAlertsNavigateHandler={makeAlertsNavigateHandler}>
         <div
           ref={mapRegionRef}
@@ -685,9 +695,33 @@ function GraphInner({
             edgesFocusable={false}
           >
             <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
+            {initialNodes.length > 0 && nodes.length === 0 && (
+              <Panel position="top-center">
+                <EuiEmptyPrompt
+                  iconType="filter"
+                  titleSize="xs"
+                  title={
+                    <h2>
+                      {i18n.translate('xpack.apm.serviceMap.noNodesMatchFiltersTitle', {
+                        defaultMessage: 'No services match these filters',
+                      })}
+                    </h2>
+                  }
+                  body={
+                    <p>
+                      {i18n.translate('xpack.apm.serviceMap.noNodesMatchFiltersBody', {
+                        defaultMessage:
+                          'Try removing or changing the view filters to see services again.',
+                      })}
+                    </p>
+                  }
+                  data-test-subj="serviceMapNoNodesMatchFilters"
+                />
+              </Panel>
+            )}
             <Panel position="top-left" css={topLeftToolbarStyles}>
               <div css={topLeftToolbarColumnStyles}>
-                {!isEmbedded && (
+                {showControls && (
                   <ServiceMapOptionsPanelToggle
                     isExpanded={panelExpanded}
                     onExpandedChange={setPanelExpanded}
@@ -787,7 +821,7 @@ function GraphInner({
                   <ServiceMapLegend controlIconCss={mapToolbarControlIconCss} />
                 </EuiPanel>
               </div>
-              {!isEmbedded && panelExpanded && (
+              {showControls && panelExpanded && (
                 <ServiceMapOptionsPanel
                   nodes={nodesAfterFilters}
                   filterOptionCounts={filterOptionCounts}
@@ -811,7 +845,6 @@ function GraphInner({
                   onMapOrientationChange={setMapOrientation}
                   searchQuery={searchQuery}
                   onSearchQueryChange={setSearchQuery}
-                  layoutControlsOnly={isEmbedded}
                 />
               )}
             </Panel>
@@ -835,13 +868,12 @@ function GraphInner({
                     serviceGroupId={serviceGroupId}
                     mapOrientation={mapOrientation}
                     viewFilters={viewFilters}
-                    searchQuery={searchQuery}
                     controlIconCss={mapToolbarControlIconCss}
                   />
                 </EuiPanel>
               </Panel>
             )}
-            {!isEmbedded && <ServiceMapMinimap />}
+            {showControls && <ServiceMapMinimap />}
           </ReactFlow>
           <MapPopover
             selectedNode={selectedNodeForPopover}
@@ -859,7 +891,7 @@ function GraphInner({
           />
         </div>
       </ServiceMapAlertsNavigateProvider>
-    </ServiceMapSearchProvider>
+    </ServiceMapHighlightProvider>
   );
 }
 

@@ -13,7 +13,6 @@ import { test as base } from '@kbn/scout';
 import { createEsClientForTesting } from '@kbn/test-es-server';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { KibanaEvalsClient } from './kibana_evals_executor/client';
-import type { EvaluationTestOptions } from './config/create_playwright_eval_config';
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { wrapKbnClientWithRetries } from './utils/kbn_client_with_retries';
 import { getEvaluationsKbnClient } from './utils/evaluations_kbn_client';
@@ -22,6 +21,7 @@ import { getGitMetadata } from './utils/git_metadata';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
 import { wrapInferenceClientWithEisConnectorTelemetry } from './utils/wrap_inference_client_with_connector_telemetry';
+import { createAgentBuilderClient } from './utils/agent_builder_client';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
 import {
@@ -125,24 +125,32 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     { scope: 'worker' },
   ],
   connector: [
-    async ({ fetch, log }, use, testInfo) => {
-      const predefinedConnector = (testInfo.project.use as Pick<EvaluationTestOptions, 'connector'>)
-        .connector;
-
-      await createConnectorFixture({ predefinedConnector, fetch, log, use });
+    async ({ fetch, log, connectorParam }, use) => {
+      if (!connectorParam) {
+        throw new Error(
+          'The `connectorParam` option must be set per-project in the Playwright config.'
+        );
+      }
+      await createConnectorFixture({ predefinedConnector: connectorParam, fetch, log, use });
     },
     {
       scope: 'worker',
     },
   ],
   evaluationConnector: [
-    async ({ fetch, log, connector }, use, testInfo) => {
-      const predefinedConnector = (
-        testInfo.project.use as Pick<EvaluationTestOptions, 'evaluationConnector'>
-      ).evaluationConnector;
-
-      if (resolveConnectorId(predefinedConnector.id) !== connector.id) {
-        await createConnectorFixture({ predefinedConnector, fetch, log, use });
+    async ({ fetch, log, connector, evaluationConnectorParam }, use) => {
+      if (!evaluationConnectorParam) {
+        throw new Error(
+          'The `evaluationConnectorParam` option must be set per-project in the Playwright config.'
+        );
+      }
+      if (resolveConnectorId(evaluationConnectorParam.id) !== connector.id) {
+        await createConnectorFixture({
+          predefinedConnector: evaluationConnectorParam,
+          fetch,
+          log,
+          use,
+        });
       } else {
         // If the evaluation connector is the same as the main connector, reuse it
         await use(connector);
@@ -166,6 +174,21 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       log.serviceLoaded?.('inferenceClient');
 
       await use(wrappedInferenceClient);
+    },
+    { scope: 'worker' },
+  ],
+
+  agentBuilderClient: [
+    async ({ fetch, log, connector }, use) => {
+      const agentBuilderClient = createAgentBuilderClient({
+        fetch,
+        log,
+        connectorId: connector.id,
+      });
+
+      log.serviceLoaded?.('agentBuilderClient');
+
+      await use(agentBuilderClient);
     },
     { scope: 'worker' },
   ],
@@ -332,11 +355,19 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       await use(executorClient);
 
       const datasetRunResults = await executorClient.getDatasetRunResults();
-      for (const result of datasetRunResults) {
-        await reportModelScore(evalsClient, result.id, log, {
+      if (datasetRunResults.length > 0 && executionId) {
+        await reportModelScore(evalsClient, datasetRunResults[0].id, log, {
           taskModelId: model.id,
           suiteId,
+          executionId,
         });
+      } else {
+        for (const result of datasetRunResults) {
+          await reportModelScore(evalsClient, result.id, log, {
+            taskModelId: model.id,
+            suiteId,
+          });
+        }
       }
     },
     {
@@ -413,12 +444,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
-  repetitions: [
-    async ({}, use, testInfo) => {
-      // Get repetitions from test options (set in playwright config)
-      const repetitions = (testInfo.project.use as any).repetitions || 1;
-      await use(repetitions);
-    },
-    { scope: 'worker' },
-  ],
+  // User-selected execution parameters, set per-project in the Playwright config.
+  // Playwright >=1.61 requires anything set in a project's `use` to be declared as an
+  // `{ option: true }` fixture, so these carry the selected values into the fixtures above.
+  connectorParam: [undefined, { option: true, scope: 'worker' }],
+  evaluationConnectorParam: [undefined, { option: true, scope: 'worker' }],
+  repetitions: [1, { option: true, scope: 'worker' }],
 });

@@ -14,15 +14,14 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { QuerySandbox, RuleFormProvider } from '@kbn/alerting-v2-rule-form';
+import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { useRule } from '../rule_context';
 
 const queryClient = new QueryClient();
 
 const RuleSidebarPreviewTabInner: React.FC = () => {
   const rule = useRule();
-  // The persisted rule only stores `evaluation.query.base`; split alert/recovery
-  // blocks are a compose-time concern and aren't saved on the rule object.
-  const query = rule.evaluation?.query?.base ?? '';
+  const query = rule.query ? getRootEsqlQuery(rule.query) : '';
   const timeField = rule.time_field ?? '@timestamp';
 
   const http = useService<HttpStart>(CoreStart('http'));

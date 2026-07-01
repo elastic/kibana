@@ -12,7 +12,7 @@
  *
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
- * Registry groups: 144
+ * Registry groups: 145
  * Metric groups: 534
  * Hardcoded fields: 34
  * Total fields: 1201
@@ -687,6 +687,13 @@ export const semconvFlat = {
     type: 'long',
     example: '1000',
   },
+  'azure.resource_group.name': {
+    name: 'azure.resource_group.name',
+    description:
+      'The name of the Azure [resource group](https://learn.microsoft.com/azure/azure-resource-manager/management/manage-resource-groups-portal) the resource belongs to.',
+    type: 'keyword',
+    example: 'my-resource-group',
+  },
   'azure.resource_provider.namespace': {
     name: 'azure.resource_provider.namespace',
     description:
@@ -870,7 +877,7 @@ export const semconvFlat = {
     name: 'cicd.worker.state',
     description: 'The state of a CI/CD worker / agent.',
     type: 'keyword',
-    example: 'idle',
+    example: 'available',
   },
   'cicd.worker.url.full': {
     name: 'cicd.worker.url.full',
@@ -1207,7 +1214,7 @@ export const semconvFlat = {
   },
   'db.operation.batch.size': {
     name: 'db.operation.batch.size',
-    description: 'The number of queries included in a batch operation.',
+    description: 'The number of database operations included in a batch operation.',
     type: 'long',
     example: '2',
   },
@@ -5462,11 +5469,6 @@ export const semconvFlat = {
     description: 'Garbage collection duration.',
     type: 'double',
   },
-  'metrics.v8js.memory.heap.limit': {
-    name: 'metrics.v8js.memory.heap.limit',
-    description: 'Maximum heap size allowed by the V8 engine.',
-    type: 'double',
-  },
   'metrics.v8js.memory.heap.space.available_size': {
     name: 'metrics.v8js.memory.heap.space.available_size',
     description: 'Heap space available size.',
@@ -5606,7 +5608,8 @@ export const semconvFlat = {
   },
   'network.io.direction': {
     name: 'network.io.direction',
-    description: 'The network IO operation direction.',
+    description:
+      "The direction of traffic from the perspective of the observing host's physical or virtual network interface. It should not be used to represent the logical direction of a stateful connection or network flow.",
     type: 'keyword',
     example: 'transmit',
   },

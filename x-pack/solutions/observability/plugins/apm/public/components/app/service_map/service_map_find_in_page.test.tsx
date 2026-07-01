@@ -35,7 +35,7 @@ jest.mock('@xyflow/react', () => {
 
 jest.mock('../../shared/service_map/service_map_search_context', () => ({
   ...jest.requireActual('../../shared/service_map/service_map_search_context'),
-  useServiceMapSearchContext: () => ({
+  useServiceMapHighlight: () => ({
     setSearchHighlight: mockSetSearchHighlight,
   }),
 }));

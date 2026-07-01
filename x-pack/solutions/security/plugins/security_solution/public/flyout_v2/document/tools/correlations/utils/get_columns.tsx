@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SeverityBadge } from '../../../../../common/components/severity_badge';
 import { PreviewLink } from '../../../../../flyout/shared/components/preview_link';
-import { ChildLink } from '../../../../shared/components/child_link';
+import { OpenFlyoutLink } from '../../../../shared/components/open_flyout_link';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
@@ -34,18 +34,29 @@ export const getColumns = ({
 }): Array<EuiBasicTableColumn<Record<string, unknown>>> => [
   {
     render: (row: Record<string, unknown>) => (
-      <EuiButtonIcon
-        iconType="expand"
-        data-test-subj={`${dataTestSubj}AlertPreviewButton`}
-        onClick={() => onShowAlert(row.id as string, row.index as string)}
-        aria-label={i18n.translate(
+      <EuiToolTip
+        content={i18n.translate(
           'xpack.securitySolution.flyout.correlations.alertPreview.ariaLabel',
           {
             defaultMessage: 'Preview alert with id {id}',
             values: { id: row.id as string },
           }
         )}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          iconType="expand"
+          data-test-subj={`${dataTestSubj}AlertPreviewButton`}
+          onClick={() => onShowAlert(row.id as string, row.index as string)}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.flyout.correlations.alertPreview.ariaLabel',
+            {
+              defaultMessage: 'Preview alert with id {id}',
+              values: { id: row.id as string },
+            }
+          )}
+        />
+      </EuiToolTip>
     ),
     width: '5%',
   },
@@ -92,13 +103,13 @@ export const getColumns = ({
               <span>{ruleName}</span>
             </PreviewLink>
           ) : (
-            <ChildLink
+            <OpenFlyoutLink
               field={ALERT_RULE_NAME}
               value={ruleId}
               data-test-subj={`${dataTestSubj}RuleLink`}
             >
               <span>{ruleName}</span>
-            </ChildLink>
+            </OpenFlyoutLink>
           )}
         </EuiToolTip>
       );

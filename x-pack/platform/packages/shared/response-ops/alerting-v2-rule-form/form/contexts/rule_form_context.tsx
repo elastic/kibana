@@ -6,6 +6,7 @@
  */
 
 import type { ApplicationStart, HttpStart, NotificationsStart } from '@kbn/core/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -23,6 +24,7 @@ export interface RuleFormServices {
   lens: LensPublicStart;
   uiActions?: UiActionsStart;
   dashboard?: DashboardStart;
+  cps?: CPSPluginStart;
 }
 
 export type RuleFormLayout = 'page' | 'flyout';

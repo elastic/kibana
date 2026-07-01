@@ -179,9 +179,8 @@ export const ALERTING_V2_ACTION_POLICIES_READ_ROLE: KibanaRole = {
 
 /**
  * Composite role granting full access to action policies plus read access to
- * rules. Required by the create/upsert action policy routes, which also need
- * `alerting_v2_rules: ['read']` to validate the referenced rule when callers
- * create a policy with `type: 'single_rule'`.
+ * rules. Used by routes that also need `alerting_v2_rules: ['read']`, such as
+ * matching action policies for a rule.
  */
 export const ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE: KibanaRole = {
   elasticsearch: WRITER_ES_PRIVILEGES,

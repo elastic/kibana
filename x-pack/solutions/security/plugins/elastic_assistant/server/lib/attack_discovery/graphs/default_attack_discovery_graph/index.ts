@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import type { ActionsClientLlm } from '@kbn/langchain/server';
+import type { BaseLLM } from '@langchain/core/language_models/llms';
 import { END, START, StateGraph } from '@langchain/langgraph';
 
 import {
@@ -33,7 +33,7 @@ export interface GetDefaultAttackDiscoveryGraphParams {
   end?: string;
   esClient: ElasticsearchClient;
   filter?: Record<string, unknown>;
-  llm: ActionsClientLlm;
+  llm: BaseLLM;
   logger?: Logger;
   onNewReplacements?: (replacements: Replacements) => void;
   prompts: CombinedPrompts;

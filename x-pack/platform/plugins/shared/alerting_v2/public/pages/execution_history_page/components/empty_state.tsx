@@ -32,16 +32,48 @@ export const PoliciesEmptyState = () => (
   />
 );
 
-export const RulesPlaceholder = () => (
+export const FilteredEmptyState = () => (
   <EuiEmptyPrompt
-    iconType="visGauge"
+    data-test-subj="executionHistoryFilteredEmptyPrompt"
+    iconType="search"
     title={
       <h2>
         <FormattedMessage
-          id="xpack.alertingV2.executionHistory.rulesTab.placeholderTitle"
-          defaultMessage="Rules execution history is not available yet."
+          id="xpack.alertingV2.executionHistory.filteredEmptyTitle"
+          defaultMessage="No matches for the current search and filters."
         />
       </h2>
+    }
+    body={
+      <p>
+        <FormattedMessage
+          id="xpack.alertingV2.executionHistory.filteredEmptyBody"
+          defaultMessage="Try a different search term or change the outcome filter."
+        />
+      </p>
+    }
+  />
+);
+
+export const RulesEmptyState = () => (
+  <EuiEmptyPrompt
+    data-test-subj="ruleExecutionHistoryEmptyPrompt"
+    iconType="clock"
+    title={
+      <h2>
+        <FormattedMessage
+          id="xpack.alertingV2.executionHistory.rulesTab.emptyTitle"
+          defaultMessage="No rule execution history."
+        />
+      </h2>
+    }
+    body={
+      <p>
+        <FormattedMessage
+          id="xpack.alertingV2.executionHistory.rulesTab.emptyBody"
+          defaultMessage="Execution history will appear here after rules run."
+        />
+      </p>
     }
   />
 );

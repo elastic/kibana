@@ -227,11 +227,16 @@ EOF
         resolved_pr_number="${BASH_REMATCH[1]}"
       fi
 
+      # Only ping suite owners on the pipeline's default branch (main). Manual rebuilds
+      # from feature branches still run the evals but skip the Slack notification, so we
+      # don't spam suite owners with results from in-progress/experimental branches.
+      EVAL_NOTIFY_BRANCH="${BUILDKITE_PIPELINE_DEFAULT_BRANCH:-main}"
+      
       # Enable the suite owner notify step when there is somewhere to send triage:
       # - weekly: the suite's team channel
       # - any run: a PR comment (PR context) or EVAL_SLACK_NOTIFICATION_CHANNEL
       enable_suite_owner_notify="false"
-      if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]] && [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]]; then
+      if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]] && [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]] && [[ "${BUILDKITE_BRANCH:-}" == "${EVAL_NOTIFY_BRANCH}" ]]; then
         enable_suite_owner_notify="true"
       elif [[ -n "${resolved_pr_number}" ]]; then
         enable_suite_owner_notify="true"

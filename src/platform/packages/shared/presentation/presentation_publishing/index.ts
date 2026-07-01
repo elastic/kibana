@@ -143,6 +143,11 @@ export {
 } from './interfaces/publishes_phase_events';
 export { apiPublishesRendered, type PublishesRendered } from './interfaces/publishes_rendered';
 export {
+  apiPublishesRelatedPanels,
+  type PublishesRelatedPanels,
+} from './interfaces/publishes_related_panels';
+
+export {
   apiPublishesSavedObjectId,
   type PublishesSavedObjectId,
 } from './interfaces/publishes_saved_object_id';
@@ -200,6 +205,18 @@ export type { PublishesSearchSession } from './interfaces/fetch/publishes_search
 // =============================================
 
 export { apiCanAddNewPanel, type CanAddNewPanel } from './interfaces/containers/can_add_new_panel';
+export {
+  apiCanIndicateRelatedChildren,
+  apiCanIndicateRelatedSiblings,
+  type CanIndicateRelatedChildren,
+  type CanIndicateRelatedSiblings,
+} from './interfaces/containers/related_panels/can_indicate_related_panels';
+export {
+  initializeRelatedPanels,
+  type InitializeRelatedPanelsArgs,
+  type RelatedPanelsConfig,
+} from './interfaces/containers/related_panels/initialize_related_panels';
+export { panelIsRelatedByGlobalFilters } from './interfaces/containers/related_panels/panel_is_related_by_global_filters';
 
 export {
   apiHasSerializedChildState,
@@ -265,3 +282,5 @@ export {
 } from './interfaces/containers/publishes_settings';
 
 export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/containers/can_focus_panel';
+
+export { apiPublishesESQLQuery, type PublishesESQLQuery } from './interfaces/publishes_esql_query';

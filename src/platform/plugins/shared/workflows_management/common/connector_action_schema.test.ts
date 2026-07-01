@@ -43,6 +43,15 @@ describe('ConnectorActionInputSchemas', () => {
       expect(schema).toBeInstanceOf(z.ZodType);
     }
   });
+
+  it('maps XSOAR actions to schemas used by workflow snippets and validation', () => {
+    const actions = ConnectorActionInputSchemas.get('.xsoar');
+
+    expect(actions).toBeDefined();
+    expect(Object.keys(actions!).toSorted()).toEqual(['getPlaybooks', 'run']);
+    expect(actions!.getPlaybooks.parse({})).toEqual({});
+    expect(actions!.run).toBeInstanceOf(z.ZodType);
+  });
 });
 
 describe('ConnectorActionOutputSchemas', () => {
@@ -110,5 +119,17 @@ describe('staticConnectors', () => {
     const esReq = staticConnectors.find((c) => c.type === 'elasticsearch.request')!;
     const result = esReq.paramsSchema.safeParse({ method: 'GET', path: '/_cat/health' });
     expect(result.success).toBe(true);
+  });
+
+  it('kibana.request paramsSchema validates correct input', () => {
+    const kibanaReq = staticConnectors.find((c) => c.type === 'kibana.request')!;
+    const result = kibanaReq.paramsSchema.safeParse({ method: 'POST', path: '/api/status' });
+    expect(result.success).toBe(true);
+  });
+
+  it('kibana.request paramsSchema rejects invalid method', () => {
+    const kibanaReq = staticConnectors.find((c) => c.type === 'kibana.request')!;
+    const result = kibanaReq.paramsSchema.safeParse({ method: 'POSTs', path: '/api/status' });
+    expect(result.success).toBe(false);
   });
 });

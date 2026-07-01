@@ -13,6 +13,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -206,14 +207,21 @@ export const ExpressionRow = ({
     <>
       <EuiFlexGroup gutterSize="xs" data-test-subj="metricThresholdExpressionRow">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
-            onClick={toggle}
-            data-test-subj="expandRow"
-            aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
+          <EuiToolTip
+            content={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
               defaultMessage: 'Expand row.',
             })}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+              onClick={toggle}
+              data-test-subj="expandRow"
+              aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
+                defaultMessage: 'Expand row.',
+              })}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow>
           <EuiFlexGroup
@@ -303,19 +311,29 @@ export const ExpressionRow = ({
                     defaultMessage="Warning"
                   />
                 </StyledHealth>
-                <EuiButtonIcon
-                  data-test-subj="infraExpressionRowButton"
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.infra.metrics.alertFlyout.removeWarningThreshold',
                     {
                       defaultMessage: 'Remove warningThreshold',
                     }
                   )}
-                  iconSize="s"
-                  color="text"
-                  iconType={'minusCircle'}
-                  onClick={toggleWarningThreshold}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    data-test-subj="infraExpressionRowButton"
+                    aria-label={i18n.translate(
+                      'xpack.infra.metrics.alertFlyout.removeWarningThreshold',
+                      {
+                        defaultMessage: 'Remove warningThreshold',
+                      }
+                    )}
+                    iconSize="s"
+                    color="text"
+                    iconType={'minusCircle'}
+                    onClick={toggleWarningThreshold}
+                  />
+                </EuiToolTip>
               </EuiFlexGroup>
             </>
           )}
@@ -337,15 +355,22 @@ export const ExpressionRow = ({
         </EuiFlexItem>
         {canDelete && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="infraExpressionRowButton"
-              aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
+            <EuiToolTip
+              content={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
                 defaultMessage: 'Remove condition',
               })}
-              color={'danger'}
-              iconType={'trash'}
-              onClick={() => remove(expressionId)}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="infraExpressionRowButton"
+                aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
+                  defaultMessage: 'Remove condition',
+                })}
+                color={'danger'}
+                iconType={'trash'}
+                onClick={() => remove(expressionId)}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

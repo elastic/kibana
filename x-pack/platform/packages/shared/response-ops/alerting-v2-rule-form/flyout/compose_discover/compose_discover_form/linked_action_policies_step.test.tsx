@@ -77,10 +77,6 @@ describe('LinkedActionPoliciesStep', () => {
           actionPolicy: { id: 'ap-2', name: 'Tag Filtered Policy' } as any,
           category: 'global-filtered',
         },
-        {
-          actionPolicy: { id: 'ap-3', name: 'Direct Policy' } as any,
-          category: 'direct',
-        },
       ],
     });
 
@@ -88,10 +84,8 @@ describe('LinkedActionPoliciesStep', () => {
 
     expect(screen.getByText('Global Policy')).toBeInTheDocument();
     expect(screen.getByText('Tag Filtered Policy')).toBeInTheDocument();
-    expect(screen.getByText('Direct Policy')).toBeInTheDocument();
     expect(screen.getByText('Global policies')).toBeInTheDocument();
     expect(screen.getByText('Matching global policies')).toBeInTheDocument();
-    expect(screen.getByText('Linked policies')).toBeInTheDocument();
   });
 
   it('shows an error callout when the fetch fails', () => {

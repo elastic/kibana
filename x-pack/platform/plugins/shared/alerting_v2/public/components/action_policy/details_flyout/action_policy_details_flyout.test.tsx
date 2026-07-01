@@ -64,8 +64,6 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   version: 'v1',
   name: 'Critical alerts policy',
   description: 'Routes critical alerts to the oncall workflow',
-  type: 'global',
-  ruleId: null,
   enabled: true,
   destinations: [
     { type: 'workflow', id: 'wf-1' },
@@ -163,23 +161,6 @@ describe('ActionPolicyDetailsFlyout', () => {
       renderFlyout({ policy: createPolicy({ snoozedUntil: null }) });
       expect(screen.queryByText(/Snoozed until/i)).not.toBeInTheDocument();
     });
-
-    it('renders a "Global" badge for global policies', () => {
-      renderFlyout({ policy: createPolicy({ type: 'global', ruleId: null }) });
-
-      expect(screen.getByText('Global')).toBeInTheDocument();
-      expect(screen.queryByText('Single rule')).not.toBeInTheDocument();
-    });
-
-    it('renders a "Single rule" badge and a link to the rule details for single_rule policies', () => {
-      renderFlyout({
-        policy: createPolicy({ type: 'single_rule', ruleId: 'rule-42' }),
-      });
-
-      expect(screen.getByText('Single rule')).toBeInTheDocument();
-      const link = screen.getByTestId('actionPolicyDefinitionLinkedRuleLink');
-      expect(link).toHaveAttribute('href', expect.stringContaining('rule-42'));
-    });
   });
 
   describe('body sections', () => {
@@ -188,6 +169,21 @@ describe('ActionPolicyDetailsFlyout', () => {
 
       expect(screen.getByText('Routes critical alerts to the oncall workflow')).toBeInTheDocument();
       expect(screen.getByText('production')).toBeInTheDocument();
+    });
+
+    it('renders a expandable list of tags when there are more than one', () => {
+      renderFlyout();
+
+      expect(screen.getByText('production')).toBeInTheDocument();
+      expect(screen.getByText('+1')).toBeInTheDocument();
+    });
+
+    it('opens the tags popover when the "+N" button is clicked', async () => {
+      const user = userEvent.setup();
+      renderFlyout();
+
+      await user.click(screen.getByText('+1'));
+
       expect(screen.getByText('oncall')).toBeInTheDocument();
     });
 

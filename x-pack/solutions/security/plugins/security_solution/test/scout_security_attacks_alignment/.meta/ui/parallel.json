@@ -1,5 +1,5 @@
 {
-  "sha1": "dfb3c830cfc4dae464ff0c796692ffec69d61a51",
+  "sha1": "3cf9437c9e5aa4e542ccaaa4b1886e8c67ce2766",
   "tests": [
     {
       "id": "343791488d016cc-1054e603e578b92",
@@ -89,6 +89,22 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_filters.spec.ts",
         "line": 33,
+        "column": 14
+      }
+    },
+    {
+      "id": "97e35cdc4d140e2-47e4d3edab4532d",
+      "title": "Attacks page filters filters attacks by type and persists selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_filters.spec.ts",
+        "line": 56,
         "column": 14
       }
     },

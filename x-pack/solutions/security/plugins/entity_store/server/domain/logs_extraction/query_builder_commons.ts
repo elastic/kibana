@@ -121,6 +121,7 @@ function buildLogsPageEndFilter(end: LogSlicePaginationParams): string {
 
 export function aggregationStats(fields: EntityField[], renameToRecent: boolean = true): string {
   return fields
+    .filter((field) => field.retention.operation !== 'managed')
     .map((field) => {
       const { retention, destination: dest } = field;
       const finalDest = renameToRecent ? recentData(dest) : dest;
@@ -141,6 +142,7 @@ export function aggregationStats(fields: EntityField[], renameToRecent: boolean 
 
 export function fieldsToKeep(definitionFields: EntityField[], defaultFields: string[]): string {
   const allFieldPatterns = definitionFields
+    .filter((field) => field.retention.operation !== 'managed')
     .map(({ destination }) => destination)
     .concat(defaultFields)
     .map((field) => {
@@ -224,13 +226,17 @@ export interface BuildSetFieldsByConditionPostStatsContext {
 
 /**
  * Builds ESQL EVAL CASE fragments for when-condition field overrides (pre-STATS by default).
- * Pass `postStats` for after-STATS rows in logs extraction (main vs CCS differs by `useRecentDataPrefix`).
+ * Pass `postStats` for after-STATS rows in logs extraction (main vs remote differs by `useRecentDataPrefix`).
  */
-export function buildSetFieldsByCondition(
+export function buildSetFieldsByConditionAssignments(
   setFieldsByCondition: SetFieldsByCondition,
   postStats?: BuildSetFieldsByConditionPostStatsContext
 ): string {
   const { condition, fields: overrideFields } = setFieldsByCondition;
+
+  if (Object.keys(overrideFields).length === 0) {
+    throw new Error('buildSetFieldsByConditionAssignments: fields must not be empty');
+  }
 
   if (postStats) {
     const logicalToColumn = buildPostStatsLogicalToColumnMap(
@@ -240,36 +246,45 @@ export function buildSetFieldsByCondition(
     const resolveColumn = (logical: string) => logicalToColumn.get(logical) ?? logical;
     const remappedCondition = mapConditionFieldsForPostStats(condition, resolveColumn);
     const conditionEsql = conditionToESQL(remappedCondition);
-    const evals = Object.entries(overrideFields).map(([field, value]) => {
-      const targetCol = resolveColumn(field);
-      const valueExpr = fieldValueToEsqlExpressionAfterStats(
-        value,
-        postStats.entityFields,
-        logicalToColumn
-      );
-      return `${targetCol} = CASE((${conditionEsql}), ${valueExpr}, ${targetCol})`;
-    });
-    return `| EVAL ${evals.join(',\n    ')}`;
+    return Object.entries(overrideFields)
+      .map(([field, value]) => {
+        const targetCol = resolveColumn(field);
+        const valueExpr = fieldValueToEsqlExpressionAfterStats(
+          value,
+          postStats.entityFields,
+          logicalToColumn
+        );
+        return `${targetCol} = CASE((${conditionEsql}), ${valueExpr}, ${targetCol})`;
+      })
+      .join(',\n    ');
   }
 
   const conditionEsql = conditionToESQL(condition);
-  const evals = Object.entries(overrideFields).map(([field, value]) => {
-    const valueExpr = fieldValueToEsqlExpression(value);
-    return `${field} = CASE((${conditionEsql}), ${valueExpr}, ${castField(field)})`;
-  });
-  return `| EVAL ${evals.join(',\n    ')}`;
+  return Object.entries(overrideFields)
+    .map(([field, value]) => {
+      const valueExpr = fieldValueToEsqlExpression(value);
+      return `${field} = CASE((${conditionEsql}), ${valueExpr}, ${castField(field)})`;
+    })
+    .join(',\n    ');
+}
+
+export function buildSetFieldsByCondition(
+  setFieldsByCondition: SetFieldsByCondition,
+  postStats?: BuildSetFieldsByConditionPostStatsContext
+): string {
+  return `| EVAL ${buildSetFieldsByConditionAssignments(setFieldsByCondition, postStats)}`;
 }
 
 /**
  * Maps logical field paths (entity `fields[].source` / `fields[].destination`) to ESQL column names
- * after STATS: `recent.<destination>` when `useRecentDataPrefix` is true (main extraction), else `<destination>` (CCS).
+ * after STATS: `recent.<destination>` when `useRecentDataPrefix` is true (main extraction), else `<destination>` (remote).
  */
 export function buildPostStatsLogicalToColumnMap(
   entityFields: EntityField[],
   useRecentDataPrefix: boolean
 ): Map<string, string> {
   const m = new Map<string, string>();
-  for (const f of entityFields) {
+  for (const f of entityFields.filter((field) => field.retention.operation !== 'managed')) {
     const col = useRecentDataPrefix ? recentData(f.destination) : f.destination;
     m.set(f.destination, col);
     m.set(f.source, col);
@@ -281,7 +296,9 @@ const RECENT_ESQL_COLUMN_PREFIX = 'recent.';
 
 /** Destinations aggregated under `recent.<destination>` in main logs extraction STATS. */
 export function statsFieldDestinations(fields: EntityField[]): Set<string> {
-  return new Set(fields.map((f) => f.destination));
+  return new Set(
+    fields.filter((f) => f.retention.operation !== 'managed').map((f) => f.destination)
+  );
 }
 
 /**

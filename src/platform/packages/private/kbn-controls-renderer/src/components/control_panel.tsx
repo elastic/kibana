@@ -8,7 +8,7 @@
  */
 
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription, of } from 'rxjs';
 
 import { useSortable } from '@dnd-kit/sortable';
@@ -18,7 +18,8 @@ import {
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
-  EuiToolTip,
+  EuiIcon,
+  transparentize,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -26,13 +27,22 @@ import type { HasCustomPrepend, PinnedControlLayoutState } from '@kbn/controls-s
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { EmbeddableRenderer, type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useBatchedPublishingSubjects, type PublishingSubject } from '@kbn/presentation-publishing';
-
+import {
+  apiPublishesRelatedPanels,
+  useBatchedPublishingSubjects,
+  type PublishingSubject,
+} from '@kbn/presentation-publishing';
+import {
+  apiPublishesTooltipLabel,
+  type PublishesTooltipLabel,
+} from '@kbn/controls-schemas/src/types';
 import type { ControlsRendererParentApi } from '../types';
 import { apiPublishesLabel } from '../utils';
 import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 import { FloatingActions } from './floating_actions';
+import { ControlLabelTooltip } from './control_label_tooltip';
+import { useIndicateRelatedPanelsSelector } from '../hooks';
 
 export const ControlPanel = ({
   parentApi,
@@ -45,20 +55,50 @@ export const ControlPanel = ({
 }) => {
   const styles = useMemoCss(controlPanelStyles);
 
-  const [api, setApi] = useState<(DefaultEmbeddableApi & Partial<HasCustomPrepend>) | null>(null);
+  const [api, setApi] = useState<
+    (DefaultEmbeddableApi & Partial<HasCustomPrepend> & Partial<PublishesTooltipLabel>) | null
+  >(null);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
   });
 
-  const [viewMode, disabledActionIds] = useBatchedPublishingSubjects(
+  const [viewMode, disabledActionIds, relatedPanelsIndicatorId] = useBatchedPublishingSubjects(
     parentApi.viewMode$,
-    parentApi.disabledActionIds$ ?? (of([] as string[]) as PublishingSubject<string[]>)
+    parentApi.disabledActionIds$ ?? (of([] as string[]) as PublishingSubject<string[]>),
+    parentApi.relatedPanelsIndicatorId$ ?? (of(undefined) as PublishingSubject<undefined>)
   );
 
   const [panelLabel, setPanelLabel] = useState<string | undefined>();
+  const [panelTooltipLabel, setPanelTooltipLabel] = useState<string | undefined>();
+  const [selectedPanelRelatedPanels, setSelectedPanelRelatedPanels] = useState<string[]>([]);
 
   const prependWrapperRef = useRef<HTMLDivElement>(null);
+
+  const selectedPanel = useMemo(
+    () =>
+      relatedPanelsIndicatorId &&
+      Object.entries(parentApi.children$.value).find(
+        ([key]) => key === relatedPanelsIndicatorId
+      )?.[1],
+    [parentApi.children$.value, relatedPanelsIndicatorId]
+  );
+  const indicateControl = useMemo(
+    () =>
+      Boolean(
+        api && // Check to make sure onApiAvailable has returned; control panels initialize their own apis internally
+          selectedPanel &&
+          apiPublishesRelatedPanels(selectedPanel) &&
+          selectedPanelRelatedPanels.includes(id)
+      ),
+    [api, selectedPanel, selectedPanelRelatedPanels, id]
+  );
+  const {
+    canIndicateRelatedPanels,
+    isIndicatingRelatedPanels,
+    onToggleIndicateRelatedPanels,
+    numberOfRelatedPanels,
+  } = useIndicateRelatedPanelsSelector(api);
 
   useEffect(() => {
     if (!api) return;
@@ -72,10 +112,22 @@ export const ControlPanel = ({
         })
       );
     }
+    if (apiPublishesTooltipLabel(api)) {
+      subscriptions.add(
+        api.tooltipLabel$.subscribe((result) => {
+          setPanelTooltipLabel(result);
+        })
+      );
+    }
+    if (apiPublishesRelatedPanels(selectedPanel)) {
+      subscriptions.add(selectedPanel.relatedPanels$.subscribe(setSelectedPanelRelatedPanels));
+    } else {
+      setSelectedPanelRelatedPanels([]);
+    }
     return () => {
       subscriptions.unsubscribe();
     };
-  }, [api]);
+  }, [api, selectedPanel]);
 
   const setRefs = useCallback(
     (ref: HTMLElement | null) => {
@@ -94,6 +146,50 @@ export const ControlPanel = ({
   );
 
   const isEditable = viewMode === 'edit';
+  const enableIndicateRelatedPanels = Boolean(canIndicateRelatedPanels && numberOfRelatedPanels);
+  const handleToggleIndicateRelated = useCallback(
+    () => (enableIndicateRelatedPanels ? onToggleIndicateRelatedPanels() : null),
+    [enableIndicateRelatedPanels, onToggleIndicateRelatedPanels]
+  );
+
+  const controlLabel = (
+    <ControlLabelTooltip
+      canIndicateRelatedPanels={canIndicateRelatedPanels}
+      isIndicatingRelatedPanels={isIndicatingRelatedPanels}
+      numberOfRelatedPanels={numberOfRelatedPanels}
+      panelLabel={panelLabel}
+      panelTooltipLabel={panelTooltipLabel}
+      anchorProps={{ className: 'eui-textTruncate', css: styles.tooltipStyles }}
+    >
+      <EuiFormLabel
+        className="controlPanel--label"
+        onClick={handleToggleIndicateRelated}
+        onKeyDown={(e) =>
+          e.key === 'Enter' || e.key === ' ' ? handleToggleIndicateRelated() : null
+        }
+        role={enableIndicateRelatedPanels ? 'button' : undefined}
+        tabIndex={enableIndicateRelatedPanels ? 0 : undefined}
+      >
+        <span css={styles.prependWrapperStyles} ref={prependWrapperRef}>
+          {panelLabel}
+          {canIndicateRelatedPanels && numberOfRelatedPanels === 0 && (
+            <>
+              {' '}
+              <EuiIcon
+                size="s"
+                aria-label={i18n.translate('controls.controlGroup.warningNoRelatedPanels', {
+                  defaultMessage: 'Warning: No related panels',
+                })}
+                type="warning"
+                className="controlLabel__warning-icon"
+              />
+            </>
+          )}
+        </span>
+      </EuiFormLabel>
+    </ControlLabelTooltip>
+  );
+
   return (
     <EuiFlexItem
       component="li"
@@ -128,6 +224,8 @@ export const ControlPanel = ({
             fullWidth
             className={classNames('controlFrame__formControlLayout', {
               'controlFrame__formControlLayout--edit': isEditable,
+              'controlFrame__formControlLayout--focused': indicateControl,
+              'controlFrame__formControlLayout--selected': isIndicatingRelatedPanels,
               type,
             })}
             css={styles.formControl}
@@ -145,24 +243,19 @@ export const ControlPanel = ({
                     <api.CustomPrependComponent />
                   </>
                 ) : (
-                  <DragHandle
-                    isEditable={isEditable}
-                    controlTitle={panelLabel}
-                    className="controlFrame__dragHandle"
-                    {...attributes}
-                    {...listeners}
-                  >
-                    <EuiToolTip
-                      content={panelLabel}
-                      anchorProps={{ className: 'eui-textTruncate', css: styles.tooltipStyles }}
+                  <>
+                    <DragHandle
+                      isEditable={isEditable}
+                      controlTitle={panelLabel}
+                      className="controlFrame__dragHandle"
+                      highContrast={isIndicatingRelatedPanels}
+                      {...attributes}
+                      {...listeners}
                     >
-                      <EuiFormLabel className="controlPanel--label">
-                        <span css={styles.prependWrapperStyles} ref={prependWrapperRef}>
-                          {panelLabel}
-                        </span>
-                      </EuiFormLabel>
-                    </EuiToolTip>
-                  </DragHandle>
+                      {!enableIndicateRelatedPanels && controlLabel}
+                    </DragHandle>
+                    {enableIndicateRelatedPanels && controlLabel}
+                  </>
                 )}
               </>
             }
@@ -217,10 +310,29 @@ const controlPanelStyles = {
           paddingInlineStart: `${euiTheme.size.xxs} !important`, // corrected syntax for skinny icon
         },
       },
+      '&.controlFrame__formControlLayout--focused': {
+        outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0}`,
+      },
+      '&.controlFrame__formControlLayout--selected': {
+        outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0}`,
+        backgroundColor: transparentize(euiTheme.colors.vis.euiColorVis0, 0.1),
+        '& div, & button': {
+          backgroundColor: 'transparent',
+        },
+      },
       '.controlPanel--label': {
         padding: '0 !important',
         height: '100%',
         maxWidth: '100%',
+        '&[role="button"]': {
+          cursor: 'pointer',
+        },
+      },
+      '.controlLabel__warning-icon': {
+        // Warning icon has a tiny bit of whitespace at the top which makes it look visually off-center with the text next
+        // to it when "correctly" aligned, so nudge it upward by a subpixel. -1px is too much, but -0.5px manages to trick
+        // most browser engines' anti-aliasing into aligning the icon just right
+        transform: 'translateY(-0.5px)',
       },
     }),
 };

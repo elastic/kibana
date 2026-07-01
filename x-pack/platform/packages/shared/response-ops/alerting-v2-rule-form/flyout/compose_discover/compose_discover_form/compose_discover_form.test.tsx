@@ -16,21 +16,34 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { ComposeDiscoverForm, getSteps } from '.';
 import { RuleFormProvider, type RuleFormServices } from '../../../form/contexts';
 import { createMockServices, createTestQueryClient } from '../../../test_utils';
-import type { ComposeFormValues } from '../compose_form_types';
+import type { FormValues } from '../../../form/types';
 import type { ComposeDiscoverState } from '../types';
 import { createInitialState } from '../use_compose_discover_state';
+
+jest.mock('./alert_condition_step', () => ({
+  AlertConditionStep: () => <div data-test-subj="mockAlertConditionStep" />,
+}));
+
+jest.mock('../compose_discover_time_field_context', () => ({
+  useComposeDiscoverTimeField: () => ({
+    timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
+    isTimeFieldResolved: true,
+  }),
+  ComposeDiscoverTimeFieldContextProvider: ({ children }: { children: React.ReactNode }) =>
+    children,
+}));
 
 const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDiscoverState => ({
   ...createInitialState({ mode: 'create' }),
   ...overrides,
 });
 
-const BASE_COMPOSE_VALUES: ComposeFormValues = {
+const BASE_COMPOSE_VALUES: FormValues = {
   kind: 'alert',
   metadata: { name: 'Test rule', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'composed', base: '', blocks: { breach: '' } },
+  query: { format: 'composed', base: '', breach: { segment: '' } },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
   artifacts: [],
@@ -61,13 +74,13 @@ const mockDashboard = {
 } as unknown as DashboardStart;
 
 const createComposeFormWrapper = (
-  defaultValues: ComposeFormValues = BASE_COMPOSE_VALUES,
+  defaultValues: FormValues = BASE_COMPOSE_VALUES,
   services: RuleFormServices = { ...createMockServices(), dashboard: mockDashboard }
 ) => {
   const queryClient = createTestQueryClient();
 
   return ({ children }: { children: React.ReactNode }) => {
-    const form = useForm<ComposeFormValues>({ defaultValues });
+    const form = useForm<FormValues>({ defaultValues });
 
     return (
       <IntlProvider locale="en">
@@ -83,7 +96,7 @@ const createComposeFormWrapper = (
   };
 };
 
-const renderComposeDiscoverDetailsStep = (defaultValues: ComposeFormValues = BASE_COMPOSE_VALUES) =>
+const renderComposeDiscoverDetailsStep = (defaultValues: FormValues = BASE_COMPOSE_VALUES) =>
   render(
     <ComposeDiscoverForm
       state={createState({ step: 2 })}
@@ -104,16 +117,93 @@ describe('step validation', () => {
   describe('alertCondition.validate', () => {
     const alertStep = getSteps(false).steps.find((s) => s.id === 'alertCondition')!;
 
-    it('returns true when queryCommitted is true', async () => {
+    it('returns true when queryCommitted and composed alert query is complete', async () => {
       const state = createState({ queryCommitted: true });
-      const methods = {} as UseFormReturn<ComposeFormValues>;
+      const methods = {
+        getValues: (field?: keyof FormValues) => {
+          if (field === 'kind') return 'alert';
+          if (field === 'query') {
+            return {
+              format: 'composed',
+              base: 'FROM logs-*',
+              breach: { segment: '| WHERE status == "error"' },
+            };
+          }
+          return undefined;
+        },
+      } as unknown as UseFormReturn<FormValues>;
 
       expect(await alertStep.validate!(methods, state)).toBe(true);
     });
 
+    it('returns false for a base-only alert persisted as a standalone query (no_where)', async () => {
+      const state = createState({ queryCommitted: true });
+      const methods = {
+        getValues: (field?: keyof FormValues) => {
+          if (field === 'kind') return 'alert';
+          if (field === 'query') {
+            return { format: 'standalone', breach: { query: 'FROM logs-*' } };
+          }
+          return undefined;
+        },
+      } as unknown as UseFormReturn<FormValues>;
+
+      // Per #621/#623 an alert without an alert condition cannot advance.
+      expect(await alertStep.validate!(methods, state)).toBe(false);
+    });
+
+    it('returns false for a composed alert with base but no breach segment in edit mode', async () => {
+      const state = createState({ queryCommitted: true, mode: 'edit' });
+      const methods = {
+        getValues: (field?: keyof FormValues) => {
+          if (field === 'kind') return 'alert';
+          if (field === 'query') {
+            return {
+              format: 'composed',
+              base: 'FROM logs-*',
+              breach: { segment: '' },
+            };
+          }
+          return undefined;
+        },
+      } as unknown as UseFormReturn<FormValues>;
+
+      expect(await alertStep.validate!(methods, state)).toBe(false);
+    });
+
+    it('returns true for a signal rule with a non-empty standalone query', async () => {
+      const state = createState({ queryCommitted: true });
+      const methods = {
+        getValues: (field?: keyof FormValues) => {
+          if (field === 'kind') return 'signal';
+          if (field === 'query') {
+            return { format: 'standalone', breach: { query: 'FROM logs-*' } };
+          }
+          return undefined;
+        },
+      } as unknown as UseFormReturn<FormValues>;
+
+      expect(await alertStep.validate!(methods, state)).toBe(true);
+    });
+
+    it('returns false when the composed alert query has no base (empty query)', async () => {
+      const state = createState({ queryCommitted: true });
+      const methods = {
+        getValues: (field?: keyof FormValues) => {
+          if (field === 'kind') return 'alert';
+          if (field === 'query') {
+            return { format: 'composed', base: '', breach: { segment: '' } };
+          }
+          return undefined;
+        },
+      } as unknown as UseFormReturn<FormValues>;
+
+      expect(await alertStep.validate!(methods, state)).toBe(false);
+    });
+
     it('returns false when queryCommitted is false', async () => {
       const state = createState({ queryCommitted: false });
-      const methods = {} as UseFormReturn<ComposeFormValues>;
+      const methods = {} as UseFormReturn<FormValues>;
 
       expect(await alertStep.validate!(methods, state)).toBe(false);
     });
@@ -126,7 +216,7 @@ describe('step validation', () => {
       const state = createState();
       const methods = {
         trigger: jest.fn().mockResolvedValue(true),
-      } as unknown as UseFormReturn<ComposeFormValues>;
+      } as unknown as UseFormReturn<FormValues>;
 
       const result = await detailsStep.validate!(methods, state);
 
@@ -138,7 +228,7 @@ describe('step validation', () => {
       const state = createState();
       const methods = {
         trigger: jest.fn().mockResolvedValue(false),
-      } as unknown as UseFormReturn<ComposeFormValues>;
+      } as unknown as UseFormReturn<FormValues>;
 
       const result = await detailsStep.validate!(methods, state);
 
@@ -197,7 +287,7 @@ describe('step validation', () => {
       const state = createState({ mode: 'create' });
       const methods = {
         getValues: jest.fn().mockReturnValue(undefined),
-      } as unknown as UseFormReturn<ComposeFormValues>;
+      } as unknown as UseFormReturn<FormValues>;
       expect(await notificationsStep.validate!(methods, state)).toBe(true);
     });
 
@@ -207,7 +297,7 @@ describe('step validation', () => {
         getValues: jest.fn().mockReturnValue({
           workflows: [{ id: 'item-1', source: 'existing', workflowId: null }],
         }),
-      } as unknown as UseFormReturn<ComposeFormValues>;
+      } as unknown as UseFormReturn<FormValues>;
       expect(await notificationsStep.validate!(methods, state)).toBe(false);
     });
 
@@ -217,7 +307,7 @@ describe('step validation', () => {
         getValues: jest.fn().mockReturnValue({
           workflows: [{ id: 'item-1', source: 'existing', workflowId: 'wf-1' }],
         }),
-      } as unknown as UseFormReturn<ComposeFormValues>;
+      } as unknown as UseFormReturn<FormValues>;
       expect(await notificationsStep.validate!(methods, state)).toBe(true);
     });
 
@@ -235,7 +325,7 @@ describe('step validation', () => {
             },
           ],
         }),
-      } as unknown as UseFormReturn<ComposeFormValues>;
+      } as unknown as UseFormReturn<FormValues>;
       expect(await notificationsStep.validate!(methods, state)).toBe(false);
     });
 
@@ -243,7 +333,7 @@ describe('step validation', () => {
       const state = createState({ mode: 'create' });
       const methods = {
         getValues: jest.fn().mockReturnValue({ workflows: [] }),
-      } as unknown as UseFormReturn<ComposeFormValues>;
+      } as unknown as UseFormReturn<FormValues>;
       expect(await notificationsStep.validate!(methods, state)).toBe(true);
     });
   });
@@ -256,5 +346,85 @@ describe('step validation', () => {
       'details',
       'notifications',
     ]);
+  });
+});
+
+describe('shell shared fields', () => {
+  const renderShell = (
+    stateOverrides: Partial<ComposeDiscoverState> = {},
+    formOverrides: Partial<FormValues> = {}
+  ) => {
+    const services = { ...createMockServices(), dashboard: mockDashboard };
+    return render(
+      <ComposeDiscoverForm
+        state={createState({ queryCommitted: true, ...stateOverrides })}
+        dispatch={jest.fn()}
+        services={services}
+        onRecoveryTypeChange={jest.fn()}
+        onKindChange={jest.fn()}
+        isEditing={false}
+      />,
+      { wrapper: createComposeFormWrapper({ ...BASE_COMPOSE_VALUES, ...formOverrides }, services) }
+    );
+  };
+
+  it('renders ModeSelect, AlertDelayField, ScheduleField, and LookbackWindowField on alert condition step', () => {
+    renderShell({ step: 0 }, { kind: 'alert' });
+
+    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('alertDelayFormRow')).toBeInTheDocument();
+    expect(screen.getByText('Schedule')).toBeInTheDocument();
+    expect(screen.getByText('Lookback Window')).toBeInTheDocument();
+  });
+
+  it('does not render AlertDelayField when kind is signal', () => {
+    renderShell(
+      { step: 0 },
+      { kind: 'signal', query: { format: 'standalone', breach: { query: 'FROM logs-*' } } }
+    );
+
+    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertDelayFormRow')).not.toBeInTheDocument();
+    expect(screen.getByText('Schedule')).toBeInTheDocument();
+    expect(screen.getByText('Lookback Window')).toBeInTheDocument();
+  });
+
+  it('does not render shared fields on non-alert-condition steps', () => {
+    // step 2 = 'details' when isAlert=true (alertCondition -> recoveryCondition -> details)
+    renderShell({ step: 2 });
+
+    expect(screen.queryByTestId('composeDiscoverModeSelect')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertDelayFormRow')).not.toBeInTheDocument();
+    expect(screen.queryByText('Schedule')).not.toBeInTheDocument();
+    expect(screen.queryByText('Lookback Window')).not.toBeInTheDocument();
+  });
+
+  it('disables ModeSelect when query is not committed', () => {
+    renderShell({ step: 0, queryCommitted: false });
+
+    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
+  });
+
+  it('disables ModeSelect in edit mode', () => {
+    const services = { ...createMockServices(), dashboard: mockDashboard };
+    render(
+      <ComposeDiscoverForm
+        state={createState({ queryCommitted: true, step: 0 })}
+        dispatch={jest.fn()}
+        services={services}
+        onRecoveryTypeChange={jest.fn()}
+        onKindChange={jest.fn()}
+        isEditing={true}
+      />,
+      { wrapper: createComposeFormWrapper({ ...BASE_COMPOSE_VALUES }, services) }
+    );
+
+    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
+  });
+
+  it('enables ModeSelect in create mode when query is committed', () => {
+    renderShell({ step: 0, queryCommitted: true });
+
+    expect(screen.getByTestId('composeDiscoverModeSelect')).not.toBeDisabled();
   });
 });
