@@ -24,7 +24,6 @@ import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { distinctUntilChanged, filter, skip } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
@@ -44,11 +43,8 @@ import { ContentService } from './lib/content/content_service';
 import { registerRules } from './lib/significant_events/rules/register_rules';
 import { getSignificantEventsTuningConfig } from './lib/significant_events/helpers/get_significant_events_tuning_config';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
-import {
-  isSignificantEventsAlertingV2Active,
-  logAlertingV2PluginUnavailable,
-  readSignificantEventsAlertingV2UiEnabled,
-} from './lib/significant_events/significant_events_alerting_v2';
+import { createSignificantEventsAlertingContextResolver } from './lib/significant_events/alerting/significant_events_alerting_context';
+import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
 import { StreamsService } from './lib/streams/service';
 import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
@@ -218,71 +214,41 @@ export class StreamsPlugin
         space,
       });
 
-      let significantEventsAlertingV2StatePromise:
-        | Promise<{
-            alertingV2UiEnabled: boolean;
-            alertingV2Active: boolean;
-            alertingV2RulesClient?: RulesClientApi;
-          }>
-        | undefined;
+      const getAlertingRulesClient = async () =>
+        pluginsStart.alerting.getRulesClientWithRequestInSpace(
+          request,
+          DEFAULT_SPACE_ID,
+          rulesClientOptions
+        );
 
-      const getSignificantEventsAlertingV2State = () => {
-        significantEventsAlertingV2StatePromise ??= (async () => {
-          const alertingV2UiEnabled = await readSignificantEventsAlertingV2UiEnabled(
-            uiSettingsClient,
-            this.logger
-          );
-          const alertingV2RulesClient = pluginsStart.alertingVTwo
-            ? await pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(
-                request,
-                DEFAULT_SPACE_ID
-              )
-            : undefined;
+      const getAlertingV2RulesClient = async () =>
+        pluginsStart.alertingVTwo
+          ? pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID)
+          : undefined;
 
-          if (alertingV2UiEnabled && !alertingV2RulesClient) {
-            logAlertingV2PluginUnavailable(this.logger);
-          }
+      const resolveSigEventsAlertingContext = createSignificantEventsAlertingContextResolver({
+        uiSettingsClient,
+        getAlertingRulesClient,
+        getAlertingV2RulesClient,
+        logger: this.logger,
+      });
 
-          return {
-            alertingV2UiEnabled,
-            alertingV2Active: isSignificantEventsAlertingV2Active(
-              alertingV2UiEnabled,
-              alertingV2RulesClient
-            ),
-            alertingV2RulesClient,
-          };
-        })();
-        return significantEventsAlertingV2StatePromise;
-      };
+      const createKnowledgeIndicatorClient = (context: SignificantEventsAlertingContext) =>
+        knowledgeIndicatorService.getClient({
+          esClient: scopedClusterClient.asInternalUser,
+          soClient,
+          context,
+          config: tuningConfig,
+        });
 
-      // Use the registered KI provider (from significant_events plugin) if available;
-      // fall back to internal construction while significant_events hasn't moved KI yet.
-      let kiClientPromise: Promise<KnowledgeIndicatorClientContract> | undefined;
+      let kiClientPromise: ReturnType<typeof createKnowledgeIndicatorClient> | undefined;
       const getKnowledgeIndicatorClient = this.kiProvider
         ? () => this.kiProvider!(request)
         : () => {
-            kiClientPromise ??= (async () => {
-              const { alertingV2RulesClient } = await getSignificantEventsAlertingV2State();
-              const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
-                request,
-                DEFAULT_SPACE_ID,
-                rulesClientOptions
-              );
-              return knowledgeIndicatorService.getClient({
-                esClient: scopedClusterClient.asInternalUser,
-                soClient,
-                alertingRulesClient: rulesClient,
-                alertingV2RulesClient,
-                config: tuningConfig,
-              });
-            })();
+            kiClientPromise ??= (async () =>
+              createKnowledgeIndicatorClient(await resolveSigEventsAlertingContext()))();
             return kiClientPromise;
           };
-
-      const getAlertingV2RulesClient = async (): Promise<RulesClientApi | undefined> => {
-        const { alertingV2RulesClient } = await getSignificantEventsAlertingV2State();
-        return alertingV2RulesClient;
-      };
 
       const license = await licensing.getLicense();
       const isSecurityEnabled = license.getFeature('security').isEnabled;
@@ -306,11 +272,11 @@ export class StreamsPlugin
         soClient,
         attachmentClient,
         streamsClient,
+        getSignificantEventsAlertingContext: resolveSigEventsAlertingContext,
         getKnowledgeIndicatorClient,
         ...significantEventsClients,
         inferenceClient,
         contentClient,
-        getAlertingV2RulesClient,
         fieldsMetadataClient,
         licensing,
         uiSettingsClient,

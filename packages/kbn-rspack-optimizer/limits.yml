@@ -1,15 +1,15 @@
 pageLoadAssetSize:
   actions: 3110
   advancedSettings: 1981
-  agentBuilder: 289
+  agentBuilder: 376
   agentBuilderDashboards: 3074
-  agentBuilderPlatform: 4152
-  agentBuilderWorkflows: 13383
-  agentContextLayer: 324
+  agentBuilderPlatform: 14043
+  agentBuilderWorkflows: 11662
+  agentContextLayer: 409
   aiAssistantManagementSelection: 355
   aiops: 317
   alerting: 8789
-  alertingVTwo: 10685
+  alertingVTwo: 15189
   apm: 33124
   apmSourcesAccess: 779
   automaticImport: 13257
@@ -30,11 +30,11 @@ pageLoadAssetSize:
   contentManagement: 6738
   controls: 4166
   core: 320
-  cps: 5080
+  cps: 5030
   crossClusterReplication: 7691
   customIntegrations: 636
   dashboard: 452
-  dashboardMarkdown: 4405
+  dashboardMarkdown: 4012
   data: 11799
   dataQuality: 5836
   datasetQuality: 41081
@@ -54,46 +54,46 @@ pageLoadAssetSize:
   elasticConsole: 850
   embeddable: 895
   embeddableAlertsTable: 1263
-  enterpriseSearch: 28392
-  entityStore: 1216
+  enterpriseSearch: 28188
+  entityStore: 1425
   esql: 308
   esqlDataGrid: 215
   esUiShared: 2284
   evals: 1711
   eventAnnotation: 17299
-  eventAnnotationListing: 2401
+  eventAnnotationListing: 2987
   exploratoryView: 707
   expressionGauge: 5424
   expressionHeatmap: 12370
-  expressionLegacyMetricVis: 6800
+  expressionLegacyMetricVis: 7969
   expressionMetricVis: 13684
   expressionPartitionVis: 21956
   expressions: 2689
   expressionTagcloud: 6629
   expressionXY: 566
   features: 1218
-  feedback: 2246
-  fieldFormats: 4165
+  feedback: 3625
+  fieldFormats: 4136
   fieldsMetadata: 1568
   files: 3957
   filesManagement: 952
   fileUpload: 217
   fleet: 4772
-  genAiSettings: 1542
+  genAiSettings: 1541
   globalSearch: 5183
-  globalSearchBar: 18715
+  globalSearchBar: 21462
   globalSearchProviders: 2586
   graph: 3659
   grokdebugger: 1333
   home: 9251
   imageEmbeddable: 1732
   inbox: 1294
-  indexLifecycleManagement: 39553
+  indexLifecycleManagement: 28548
   indexManagement: 316
-  inference: 5751
-  inferenceWorkflows: 25000
+  inference: 5564
+  inferenceWorkflows: 895
   infra: 45673
-  ingestHub: 1923
+  ingestHub: 7958
   ingestPipelines: 270
   inputControlVis: 3216
   inspectComponent: 1152
@@ -122,8 +122,8 @@ pageLoadAssetSize:
   ml: 663
   mockIdpPlugin: 4203
   monitoring: 22416
-  navigation: 10081
-  newsfeed: 9707
+  navigation: 332
+  newsfeed: 10708
   noDataPage: 630
   notificationCenter: 332
   observability: 3614
@@ -152,42 +152,43 @@ pageLoadAssetSize:
   savedObjectsManagement: 18227
   savedObjectsTagging: 18398
   savedObjectsTaggingOss: 808
-  savedSearch: 696
+  savedSearch: 849
   screenshotMode: 979
   screenshotting: 1493
   searchAssistant: 1545
   searchGettingStarted: 2339
   searchHomepage: 3873
   searchInferenceEndpoints: 4138
-  searchNavigation: 5579
+  searchNavigation: 7205
   searchNotebooks: 3490
   searchPlayground: 5566
   searchprofiler: 2260
   searchQueryRules: 2167
   searchSynonyms: 1919
-  security: 627
-  securitySolution: 118003
+  security: 718
+  securitySolution: 134103
   securitySolutionEss: 19938
   securitySolutionServerless: 33422
   serverless: 1272
-  serverlessObservability: 14424
-  serverlessSearch: 18261
-  serverlessVectordb: 3694
+  serverlessObservability: 14095
+  serverlessSearch: 18034
+  serverlessVectordb: 7099
   serverlessWorkplaceAI: 3338
   sessionView: 379
   share: 440
   shared-core: 315647
-  shared-misc: 77371
-  shared-packages: 3079800
+  shared-misc: 103672
+  shared-packages: 3882095
   shared-plugins: 12276963
-  shared-solution-packages: 184340
+  shared-solution-packages: 212194
+  significant_events: 295
   slo: 19531
   snapshotRestore: 16909
   spaces: 22966
   stackAlerts: 1717
-  stackConnectors: 67445
-  streams: 6521
-  streamsApp: 56877
+  stackConnectors: 63527
+  streams: 7983
+  streamsApp: 81395
   synthetics: 18443
   telemetry: 20586
   telemetryManagementSection: 1738
@@ -204,7 +205,7 @@ pageLoadAssetSize:
   usageCollection: 223
   ux: 2418
   vendors: 4591364
-  vendors-heavy: 1388239
+  vendors-heavy: 2181404
   visDefaultEditor: 738
   visTypeGauge: 7639
   visTypeHeatmap: 6961
@@ -214,12 +215,12 @@ pageLoadAssetSize:
   visTypeTagcloud: 3119
   visTypeTimelion: 6661
   visTypeTimeseries: 12718
-  visTypeVega: 14703
+  visTypeVega: 4860
   visTypeVislib: 21971
   visTypeXy: 24402
-  visualizationListing: 1091
+  visualizationListing: 1339
   visualizations: 1147
   watcher: 5497
   workflowsExtensions: 38186
-  workflowsManagement: 28317
+  workflowsManagement: 31546
   workplaceAIApp: 1505
