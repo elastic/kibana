@@ -56,8 +56,9 @@ const getNextRunAtSpy = jest.spyOn(nextRunAtUtils, 'getNextRunAt');
 const eventLoggerMock = { logEvent: jest.fn() } as unknown as TaskEventLogger;
 const dateRegExp = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/;
 
+const TASK_EXECUTION_UUID = 'NEW_UUID';
 jest.mock('uuid', () => ({
-  v4: () => 'NEW_UUID',
+  v4: () => TASK_EXECUTION_UUID,
 }));
 
 beforeAll(() => {
@@ -863,6 +864,70 @@ describe('TaskManagerRunner', () => {
       expect(store.update).not.toHaveBeenCalled();
     });
 
+    test('logs a warning for mget claim strategy when a ready-to-run task has a null startedAt', async () => {
+      const { runner, logger, store } = await pendingStageSetup({
+        instance: {
+          schedule: {
+            interval: '10m',
+          },
+          status: TaskStatus.Running,
+          // a claim anomaly can leave a ready-to-run mget task without a startedAt,
+          // which breaks the running-task invariant; the runner should surface it
+          startedAt: null,
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `1m`,
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+        strategy: CLAIM_STRATEGY_MGET,
+      });
+
+      const result = await runner.markTaskAsRunning();
+
+      expect(result).toBe(true);
+      expect(store.update).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Task bar "foo" is ready to run (mget) without a startedAt, which breaks the running-task invariant'
+        ),
+        expect.objectContaining({ tags: ['bar', 'foo'] })
+      );
+    });
+
+    test('does not log for mget claim strategy when startedAt is already set', async () => {
+      const startedAt = new Date('1970-01-01T00:00:00.000Z');
+      const { runner, logger } = await pendingStageSetup({
+        instance: {
+          schedule: {
+            interval: '10m',
+          },
+          status: TaskStatus.Running,
+          startedAt,
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `1m`,
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+        strategy: CLAIM_STRATEGY_MGET,
+      });
+
+      const result = await runner.markTaskAsRunning();
+
+      expect(result).toBe(true);
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(runner.startedAt).toEqual(startedAt);
+    });
+
     describe('cost', () => {
       test('task instance cost takes precedence over task definition cost', async () => {
         const { runner } = await pendingStageSetup({
@@ -1167,6 +1232,235 @@ describe('TaskManagerRunner', () => {
       expect(createTaskRunnerParams.fakeRequest).toBeDefined();
       expect(createTaskRunnerParams.taskInstance).toEqual(instance);
     });
+
+    test('calls enrichFakeRequest with the fake request and userProfileId when both are present', async () => {
+      const enrichFakeRequest = jest.fn();
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+            userProfileId: 'u_profile_123',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        enrichFakeRequest,
+      });
+
+      await runner.run();
+
+      expect(enrichFakeRequest).toHaveBeenCalledTimes(1);
+      expect(enrichFakeRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ headers: expect.any(Object) }),
+        { profileId: 'u_profile_123', username: undefined }
+      );
+    });
+
+    test('passes enrichRequest on RunContext when userProfileId is present', async () => {
+      const enrichFakeRequest = jest.fn();
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+            userProfileId: 'u_profile_123',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        enrichFakeRequest,
+      });
+
+      await runner.run();
+
+      const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
+      expect(createTaskRunnerParams.enrichRequest).toBeDefined();
+      expect(typeof createTaskRunnerParams.enrichRequest).toBe('function');
+    });
+
+    test('enrichRequest is undefined when userProfileId is absent', async () => {
+      const enrichFakeRequest = jest.fn();
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        enrichFakeRequest,
+      });
+
+      await runner.run();
+
+      expect(enrichFakeRequest).not.toHaveBeenCalled();
+      const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
+      expect(createTaskRunnerParams.enrichRequest).toBeUndefined();
+    });
+
+    test('enrichRequest calls enrichFakeRequest for child requests', async () => {
+      const enrichFakeRequest = jest.fn();
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+            userProfileId: 'u_profile_123',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        enrichFakeRequest,
+      });
+
+      await runner.run();
+
+      const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
+      const childRequest = { fake: 'child-request' };
+      createTaskRunnerParams.enrichRequest(childRequest);
+
+      expect(enrichFakeRequest).toHaveBeenCalledTimes(2);
+      expect(enrichFakeRequest).toHaveBeenLastCalledWith(childRequest, {
+        profileId: 'u_profile_123',
+        username: undefined,
+      });
+    });
+
+    test('runs without error and passes undefined enrichRequest when no enrichFakeRequest hook is provided', async () => {
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+            userProfileId: 'u_profile_123',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        // no enrichFakeRequest supplied (simulates Core without the hook)
+      });
+
+      await runner.run();
+
+      const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
+      expect(createTaskRunnerParams.fakeRequest).toBeDefined();
+      expect(createTaskRunnerParams.enrichRequest).toBeUndefined();
+    });
+
+    test('still enriches when apiKeyCreatedByUser is true but userProfileId is present', async () => {
+      const enrichFakeRequest = jest.fn();
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: true,
+            userProfileId: 'u_profile_123',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        enrichFakeRequest,
+      });
+
+      await runner.run();
+
+      expect(enrichFakeRequest).toHaveBeenCalledTimes(1);
+      expect(enrichFakeRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ headers: expect.any(Object) }),
+        { profileId: 'u_profile_123', username: undefined }
+      );
+      const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
+      expect(createTaskRunnerParams.enrichRequest).toBeDefined();
+    });
+
+    test('propagates enrichFakeRequest errors when enrichRequest is called on a non-fake child request', async () => {
+      let callCount = 0;
+      const enrichFakeRequest = jest.fn().mockImplementation(() => {
+        callCount += 1;
+        // succeed on the initial fake-request enrichment, throw on the child request
+        if (callCount > 1) {
+          throw new Error('boom');
+        }
+      });
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+            userProfileId: 'u_profile_123',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        enrichFakeRequest,
+      });
+
+      await runner.run();
+
+      const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
+      const childRequest = { fake: 'child-request' };
+
+      expect(() => createTaskRunnerParams.enrichRequest(childRequest)).toThrow('boom');
+    });
+
     test('queues a reattempt if the task fails', async () => {
       const initialAttempts = _.random(0, 2);
       const id = Date.now().toString();
@@ -2785,6 +3079,7 @@ describe('TaskManagerRunner', () => {
               type: 'bar',
               schedule_delay: expect.any(String),
               scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
             },
           },
           message: `Task bar "${id}" started.`,
@@ -2815,6 +3110,35 @@ describe('TaskManagerRunner', () => {
         expect(startCallIndex).toBeGreaterThanOrEqual(0);
         expect(endCallIndex).toBeGreaterThanOrEqual(0);
         expect(startCallIndex).toBeLessThan(endCallIndex);
+      });
+
+      test('task-run-start and task-run events share the same execution.uuid', async () => {
+        const id = _.random(1, 20).toString();
+        const { runner } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const calls = (eventLoggerMock.logEvent as jest.Mock).mock.calls;
+        const startEvent = calls.find((c) => c[0].event.action === 'task-run-start');
+        const endEvent = calls.find((c) => c[0].event.action === 'task-run');
+        expect(startEvent).toBeDefined();
+        expect(endEvent).toBeDefined();
+        const startUuid = startEvent![0].kibana.task.execution.uuid;
+        const endUuid = endEvent![0].kibana.task.execution.uuid;
+        expect(startUuid).toEqual(expect.any(String));
+        expect(startUuid).toBe(endUuid);
       });
 
       test('eventLog logs a start event even when a task run fails', async () => {
@@ -2880,6 +3204,7 @@ describe('TaskManagerRunner', () => {
               type: 'bar',
               schedule_delay: expect.any(String),
               scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
             },
           },
           message: `Task bar "${id}" completed successfully.`,
@@ -2929,6 +3254,7 @@ describe('TaskManagerRunner', () => {
               type: 'bar',
               schedule_delay: expect.any(String),
               scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
             },
           },
           message: `Task bar "${id}" failed with a taskRunError.`,
@@ -2972,6 +3298,7 @@ describe('TaskManagerRunner', () => {
               type: 'bar',
               schedule_delay: expect.any(String),
               scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
             },
           },
           message: `Task bar "${id}" failed.`,
@@ -3025,7 +3352,12 @@ describe('TaskManagerRunner', () => {
             start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, type: 'bar', scheduled: expect.any(String) },
+            task: {
+              id,
+              type: 'bar',
+              scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
+            },
           },
           message: `Task bar "${id}" has been cancelled.`,
         });
@@ -3046,6 +3378,7 @@ describe('TaskManagerRunner', () => {
               type: 'bar',
               schedule_delay: expect.any(String),
               scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
             },
           },
           message: `Task bar "${id}" failed.`,
@@ -3097,7 +3430,12 @@ describe('TaskManagerRunner', () => {
             start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, type: 'bar', scheduled: expect.any(String) },
+            task: {
+              id,
+              type: 'bar',
+              scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
+            },
           },
           message: `Task bar "${id}" has been cancelled.`,
         });
@@ -3117,6 +3455,7 @@ describe('TaskManagerRunner', () => {
               type: 'bar',
               schedule_delay: expect.any(String),
               scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
             },
           },
           message: `Task bar "${id}" failed.`,
@@ -3163,7 +3502,12 @@ describe('TaskManagerRunner', () => {
             start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, type: 'bar', scheduled: expect.any(String) },
+            task: {
+              id,
+              type: 'bar',
+              scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
+            },
           },
           message: `Task bar "${id}" has been cancelled.`,
         });
@@ -3181,6 +3525,7 @@ describe('TaskManagerRunner', () => {
               type: 'bar',
               schedule_delay: expect.any(String),
               scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
             },
           },
           message: `Task bar "${id}" completed successfully.`,
@@ -3224,7 +3569,12 @@ describe('TaskManagerRunner', () => {
             start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, type: 'bar', scheduled: expect.any(String) },
+            task: {
+              id,
+              type: 'bar',
+              scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
+            },
           },
           message: `Task bar "${id}" has been cancelled.`,
         });
@@ -3242,6 +3592,7 @@ describe('TaskManagerRunner', () => {
               type: 'bar',
               schedule_delay: expect.any(String),
               scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
             },
           },
           message: `Task bar "${id}" completed successfully.`,
@@ -3682,6 +4033,7 @@ describe('TaskManagerRunner', () => {
     onTaskEvent?: jest.Mock<(event: TaskEvent<unknown, unknown>) => void>;
     allowReadingInvalidState?: boolean;
     strategy?: string;
+    enrichFakeRequest?: jest.Mock;
   }
 
   function withAnyTiming(taskRun: TaskRun) {
@@ -3763,6 +4115,7 @@ describe('TaskManagerRunner', () => {
       getPollInterval: () => 500,
       apiKeyStrategy: new EsApiKeyStrategy(),
       eventLogger: eventLoggerMock,
+      enrichFakeRequest: opts.enrichFakeRequest,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {

@@ -9,9 +9,12 @@
 
 import { EuiBadge, EuiFlyout } from '@elastic/eui';
 import { getFieldValue } from '@kbn/discover-utils';
+import { useObservable } from '@kbn/use-observable';
+import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import React from 'react';
 import type { RootProfileProvider } from '../../../profiles';
 import { SolutionType } from '../../../profiles';
+import { EXAMPLE_PROFILE_STATE_DEF } from '../profile_state';
 
 export const createExampleRootProfileProvider = (): RootProfileProvider => ({
   profileId: 'example-root-profile',
@@ -19,21 +22,35 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
   profile: {
     getDefaultAdHocDataViews,
     getDefaultEsqlQuery,
-    getCellRenderers: (prev) => (params) => ({
-      ...prev(params),
-      '@timestamp': (props) => {
+    getCellRenderers: (prev, { toolkit }) => {
+      const stateAdapter = toolkit.getStateAdapter(EXAMPLE_PROFILE_STATE_DEF);
+      const profileState$ = stateAdapter.getState$();
+
+      const Timestamp = (props: DataGridCellValueElementProps) => {
         const timestamp = getFieldValue(props.row, '@timestamp') as string;
+        const profileState = useObservable(profileState$, stateAdapter.getState());
+        const timestampColor = profileState.timestampColor;
 
         return (
-          <EuiBadge color="hollow" title={timestamp} data-test-subj="exampleRootProfileTimestamp">
+          <EuiBadge
+            color={timestampColor}
+            title={timestamp}
+            data-color={timestampColor}
+            data-test-subj="exampleRootProfileTimestamp"
+          >
             {timestamp}
           </EuiBadge>
         );
-      },
-    }),
+      };
+
+      return (params) => ({
+        ...prev(params),
+        '@timestamp': (props) => <Timestamp {...props} />,
+      });
+    },
     /**
-     * The `getAppMenu` extension point gives access to AppMenuRegistry with methods `registerCustomItem` and
-     * `registerCustomPopoverItem`.
+     * The `getAppMenu` extension point gives access to AppMenuRegistry with methods like `registerCustomItem` and
+     * `registerPopoverItem`.
      * The extension also provides the essential params like current dataView, adHocDataViews etc when defining a custom action implementation.
      * And it supports opening custom flyouts and any other modals on the click.
      * `getAppMenu` can be configured in both root and data source profiles.
@@ -70,7 +87,7 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
                 order: 2,
                 label: 'Custom action 12 (from Root profile)',
                 testId: 'example-custom-root-action12',
-                run: ({ context: { onFinishAction } }) => {
+                render: ({ context: { onFinishAction } }) => {
                   // This is an example of a custom action that opens a flyout or any other custom modal.
                   // To do so, simply return a React element and call onFinishAction when you're done.
                   return (

@@ -8,15 +8,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '../../queries/episodes_query';
 import { RelatedAlertEpisode } from './related_alert_episode';
 
 describe('RelatedAlertEpisode', () => {
-  const rule = {
-    metadata: { name: 'CPU spike' },
-    grouping: { fields: ['host.name'] },
-  } as RuleResponse;
+  const ruleName = 'CPU spike';
+  const groupingFields = ['host.name'];
 
   const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
     '@timestamp': '2026-04-06T13:30:00.000Z',
@@ -35,7 +32,8 @@ describe('RelatedAlertEpisode', () => {
     render(
       <RelatedAlertEpisode
         episode={makeEpisode({ 'episode.id': 'ep-1' })}
-        rule={rule}
+        ruleName={ruleName}
+        groupingFields={groupingFields}
         href="/app/management/alertingV2/episodes/ep-1"
       />
     );
@@ -48,13 +46,32 @@ describe('RelatedAlertEpisode', () => {
     expect(screen.getByLabelText('host.name: server-1')).toBeInTheDocument();
   });
 
+  it('renders the severity badge after the status badge', () => {
+    render(
+      <RelatedAlertEpisode
+        episode={makeEpisode({ 'episode.id': 'ep-3', severity: 'high' })}
+        ruleName={ruleName}
+        groupingFields={groupingFields}
+        href="/app/management/alertingV2/episodes/ep-3"
+      />
+    );
+
+    expect(screen.getByTestId('alertingV2EpisodeSeverityBadge-high')).toHaveTextContent('High');
+  });
+
   it('omits status badges when episode status is missing', () => {
     const { 'episode.status': _status, ...episodeWithoutStatus } = makeEpisode({
       'episode.id': 'ep-2',
     });
 
-    // @ts-expect-error - testing missing status field
-    render(<RelatedAlertEpisode episode={episodeWithoutStatus} rule={rule} href="/x" />);
+    render(
+      <RelatedAlertEpisode
+        episode={episodeWithoutStatus as AlertEpisode}
+        ruleName={ruleName}
+        groupingFields={groupingFields}
+        href="/x"
+      />
+    );
 
     expect(screen.queryByTestId('alertEpisodeStatusCell')).not.toBeInTheDocument();
   });

@@ -145,7 +145,7 @@ export const initRoutes = (
 
   // If publicAttacksApiEnabled is enabled, register the attacks routes.
   if (publicAttacksApiEnabled) {
-    registerAttacksRoutes(router);
+    registerAttacksRoutes(router, ruleDataClient);
   }
 
   if (previewTelemetryUrlEnabled) {

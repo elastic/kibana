@@ -43,6 +43,7 @@ export function getDataStreamLifecycle(
 
   if (dataStream.next_generation_managed_by === 'Data stream lifecycle') {
     const retention = dataStream.lifecycle?.data_retention;
+    const frozenAfter = dataStream.lifecycle?.frozen_after;
     // TODO: Remove this cast when Elasticsearch is updated to a version with the correct downsampling type
     // The expected type is already updated in the elasticsearch-specification repo:
     // https://github.com/elastic/elasticsearch-specification/blob/main/output/typescript/types.ts#L12220-L12223
@@ -51,6 +52,7 @@ export function getDataStreamLifecycle(
     return {
       dsl: {
         data_retention: retention ? String(retention) : undefined,
+        frozen_after: frozenAfter ? String(frozenAfter) : undefined,
         downsample: downsampling?.map((step) => ({
           after: step.after,
           fixed_interval: step.fixed_interval,

@@ -26,6 +26,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { AutomaticImportPluginStartDependencies } from '../types';
 import type { ApproveIntegrationParams, CreateUpdateIntegrationParams } from '../routes/types';
 import type { AutomaticImportSamplesIndexService } from './samples_index/index_service';
@@ -897,6 +898,7 @@ describe('AutomaticImportSetupService', () => {
       // Mock the saved object service methods
       asPrivate(service).savedObjectService = {
         updateDataStreamSavedObjectAttributes: mockUpdateDataStream,
+        updateDataStreamPhase: jest.fn().mockResolvedValue(undefined),
         getDataStream: mockGetDataStream,
       } as unknown as AutomaticImportSavedObjectService;
 
@@ -964,11 +966,13 @@ describe('AutomaticImportSetupService', () => {
       const abortController = new AbortController();
 
       // Create task runner
-      const taskRunner = createTaskRunner({
-        taskInstance: mockTaskInstance as unknown as ConcreteTaskInstance,
-        fakeRequest: {} as unknown as KibanaRequest,
-        abortController,
-      });
+      const taskRunner = createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: mockTaskInstance as unknown as ConcreteTaskInstance,
+          fakeRequest: {} as unknown as KibanaRequest,
+          abortController,
+        })
+      );
 
       // Replace runTask to inject our mock core setup
       const tmForRunTask = asTaskManagerPrivate(taskManagerService);
@@ -998,9 +1002,16 @@ describe('AutomaticImportSetupService', () => {
       // Run the task
       await taskRunner.run();
 
-      // Verify that updateDataStreamSavedObjectAttributes was called
-      expect(mockUpdateDataStream).toHaveBeenCalledTimes(1);
-      expect(mockUpdateDataStream).toHaveBeenCalledWith(
+      // Verify that updateDataStreamSavedObjectAttributes was called: first to mark
+      // the data stream as processing at task start, then to persist the completed result.
+      expect(mockUpdateDataStream).toHaveBeenCalledTimes(2);
+      expect(mockUpdateDataStream).toHaveBeenNthCalledWith(1, {
+        integrationId: 'test-integration',
+        dataStreamId: 'test-datastream',
+        status: 'processing',
+      });
+      expect(mockUpdateDataStream).toHaveBeenNthCalledWith(
+        2,
         {
           integrationId: 'test-integration',
           dataStreamId: 'test-datastream',
@@ -1077,11 +1088,12 @@ describe('AutomaticImportSetupService', () => {
         invokeAutomaticImportAgent: jest.fn(),
       };
 
-      const taskRunner = createTaskRunner({
-        taskInstance: mockTaskInstance as unknown as ConcreteTaskInstance,
-        fakeRequest: {} as unknown as KibanaRequest,
-        abortController: new AbortController(),
-      });
+      const taskRunner = createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: mockTaskInstance as unknown as ConcreteTaskInstance,
+          fakeRequest: {} as unknown as KibanaRequest,
+        })
+      );
 
       const originalRunTask = tmFailedTest.runTask;
       tmFailedTest.runTask = jest
@@ -1178,11 +1190,12 @@ describe('AutomaticImportSetupService', () => {
         invokeAutomaticImportAgent: jest.fn(),
       };
 
-      const taskRunner = createTaskRunner({
-        taskInstance: mockTaskInstance as unknown as ConcreteTaskInstance,
-        fakeRequest: {} as unknown as KibanaRequest,
-        abortController: new AbortController(),
-      });
+      const taskRunner = createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: mockTaskInstance as unknown as ConcreteTaskInstance,
+          fakeRequest: {} as unknown as KibanaRequest,
+        })
+      );
 
       const originalRunTask = tmUnrecoverable.runTask;
       tmUnrecoverable.runTask = jest

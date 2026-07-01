@@ -18,6 +18,7 @@ import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
 import { type ESQLControlVariable } from '@kbn/esql-types';
+import { getESQLQueryVariables } from './query_parsing_helpers';
 
 export const hasStartEndParams = (query: string) => /\?_tstart|\?_tend/i.test(query);
 
@@ -48,9 +49,12 @@ export const getNamedParams = (
 ) => {
   const namedParams: ESQLSearchParams['params'] = getStartEndParams(query, timeRange);
   if (variables?.length) {
-    variables?.forEach(({ key, value }) => {
-      namedParams.push({ [key]: value });
-    });
+    const usedVariables = new Set(getESQLQueryVariables(query));
+    variables
+      .filter(({ key }) => usedVariables.has(key))
+      .forEach(({ key, value }) => {
+        namedParams.push({ [key]: value });
+      });
   }
   return namedParams;
 };
@@ -182,6 +186,7 @@ export async function getESQLResults({
   variables,
   timezone,
   executionContext,
+  approximation,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
@@ -192,6 +197,7 @@ export async function getESQLResults({
   variables?: ESQLControlVariable[];
   timezone?: string;
   executionContext?: KibanaExecutionContext;
+  approximation?: boolean;
 }): Promise<{
   response: ESQLSearchResponse;
   params: ESQLSearchParams;
@@ -212,6 +218,7 @@ export async function getESQLResults({
         abortSignal: signal,
         strategy: 'esql_async',
         ...(executionContext ? { executionContext } : {}),
+        ...(approximation !== undefined ? { approximation } : {}),
       }
     )
   );

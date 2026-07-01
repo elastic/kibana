@@ -9,7 +9,12 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 
 import { normalizeHostsForAgents } from '../../../common/services';
 import type { FleetConfigType } from '../../config';
-import { DEFAULT_FLEET_SERVER_HOST_ID, ECH_AGENTLESS_FLEET_SERVER_HOST_ID } from '../../constants';
+import {
+  DEFAULT_FLEET_SERVER_HOST_ID,
+  ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+  SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+} from '../../constants';
 
 import { FleetError } from '../../errors';
 
@@ -20,8 +25,13 @@ import { isAgentlessEnabled } from '../utils/agentless';
 
 import { agentPolicyService } from '../agent_policy';
 
-import { isDifferent } from './utils';
+import { applyAllowEditOverrides, isDifferent } from './utils';
 import { hashSecret, isSecretDifferent } from './outputs';
+
+const PRIVATELINK_HOST_IDS = new Set([
+  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+  SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+]);
 
 export function getCloudFleetServersHosts() {
   const cloudSetup = appContextService.getCloud();
@@ -42,7 +52,9 @@ export function getCloudFleetServersHosts() {
   }
 }
 
-export function getPreconfiguredFleetServerHostFromConfig(config?: FleetConfigType) {
+export function getPreconfiguredFleetServerHostFromConfig(
+  config?: FleetConfigType
+): FleetServerHost[] {
   const { fleetServerHosts: fleetServerHostsFromConfig } = config;
 
   const legacyFleetServerHostsConfig = getConfigFleetServerHosts(config);
@@ -71,13 +83,36 @@ export function getPreconfiguredFleetServerHostFromConfig(config?: FleetConfigTy
           },
         ]
       : []),
+    // Include private Fleet Server host when PrivateLink is enabled (serverless only)
+    ...(config?.internal?.privateFleetServerHost
+      ? [
+          {
+            id: SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+            name: 'Private Fleet Server',
+            host_urls: [config.internal.privateFleetServerHost],
+            is_default: false,
+            is_preconfigured: true,
+          },
+        ]
+      : []),
   ]);
 
   if (fleetServerHosts.filter((fleetServerHost) => fleetServerHost.is_default).length > 1) {
     throw new FleetError('Only one default Fleet Server host is allowed');
   }
 
-  return fleetServerHosts;
+  // Ensure the serverless PrivateLink default and private hosts both allow their
+  // is_default field to be changed at runtime (via the PrivateLink toggle in Fleet Settings).
+  // Without this, the preconfig sync would revert a runtime is_default change on every restart
+  // because isPreconfiguredFleetServerHostDifferentFromCurrent diffs is_default.
+  return fleetServerHosts.map((host) => {
+    if (!PRIVATELINK_HOST_IDS.has(host.id)) {
+      return host;
+    }
+    const existingAllowEdit = host.allow_edit ?? [];
+    const merged = Array.from(new Set([...existingAllowEdit, 'is_default']));
+    return { ...host, allow_edit: merged };
+  });
 }
 
 export async function ensurePreconfiguredFleetServerHosts(
@@ -122,14 +157,22 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
       const { id, ...data } = preconfiguredFleetServerHost;
       const secretHashes = await hashSecrets(preconfiguredFleetServerHost);
 
+      // Fields listed in allow_edit are preserved from the existing SO rather than being
+      // overwritten by the preconfigured value — matching the same pattern in outputs.ts.
+      // This allows the PrivateLink toggle to flip is_default at runtime and survive restarts.
+      if (existingHost && preconfiguredFleetServerHost.allow_edit) {
+        applyAllowEditOverrides(
+          data as unknown as Record<string, unknown>,
+          existingHost as unknown as Record<string, unknown>,
+          preconfiguredFleetServerHost.allow_edit
+        );
+      }
+
       const isCreate = !existingHost;
       const isUpdateWithNewData =
         existingHost &&
         (!existingHost.is_preconfigured ||
-          (await isPreconfiguredFleetServerHostDifferentFromCurrent(
-            existingHost,
-            preconfiguredFleetServerHost
-          )));
+          (await isPreconfiguredFleetServerHostDifferentFromCurrent(existingHost, data)));
 
       if (isCreate) {
         toCreate.push({ ...data, is_preconfigured: true, id, secretHashes });
@@ -202,15 +245,36 @@ export async function cleanPreconfiguredFleetServerHosts(
     }
 
     if (existingFleetServerHost.is_default) {
-      await fleetServerHostService.update(
-        soClient,
-        esClient,
-        existingFleetServerHost.id,
-        { is_preconfigured: false },
-        {
+      // When PrivateLink is disabled and the private host was the active default,
+      // restore the public serverless default host so agents are not left pointing
+      // at an unreachable PrivateLink URL, then delete the private host entirely
+      // so it cannot be re-enabled by mistake.
+      if (existingFleetServerHost.id === SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID) {
+        const logger = appContextService.getLogger();
+        logger.info(
+          `PrivateLink fleet server host ${existingFleetServerHost.id} was the default; restoring ${SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID} as default`
+        );
+        await fleetServerHostService.update(
+          soClient,
+          esClient,
+          SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+          { is_default: true },
+          { fromPreconfiguration: true }
+        );
+        await fleetServerHostService.delete(esClient, existingFleetServerHost.id, {
           fromPreconfiguration: true,
-        }
-      );
+        });
+      } else {
+        await fleetServerHostService.update(
+          soClient,
+          esClient,
+          existingFleetServerHost.id,
+          { is_preconfigured: false },
+          {
+            fromPreconfiguration: true,
+          }
+        );
+      }
     } else {
       await fleetServerHostService.delete(esClient, existingFleetServerHost.id, {
         fromPreconfiguration: true,
@@ -275,6 +339,7 @@ async function isPreconfiguredFleetServerHostDifferentFromCurrent(
   return (
     existingFleetServerHost.is_default !== preconfiguredFleetServerHost.is_default ||
     existingFleetServerHost.name !== preconfiguredFleetServerHost.name ||
+    isDifferent(existingFleetServerHost.allow_edit, preconfiguredFleetServerHost.allow_edit) ||
     isDifferent(existingFleetServerHost.is_internal, preconfiguredFleetServerHost.is_internal) ||
     isDifferent(
       existingFleetServerHost.host_urls.map(normalizeHostsForAgents),
