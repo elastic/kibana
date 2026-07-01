@@ -17,6 +17,7 @@ export interface ListChangeHistoryParams {
 }
 
 export interface ListChangeHistoryResult {
+  /** Newest-first; see {@link ChangeHistoryAdapter.listChanges}. */
   items: ChangeHistoryListItem[];
   total: number;
 }
