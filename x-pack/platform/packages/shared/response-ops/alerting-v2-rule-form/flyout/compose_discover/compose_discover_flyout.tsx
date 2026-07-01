@@ -53,7 +53,7 @@ import {
   parseDiscoverQueryForBuilder,
   type BuilderState,
 } from './rule_builder';
-import type { ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
+import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
 import { isBuilderConditionStepId } from './types';
 import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
@@ -115,6 +115,11 @@ const YAML_ONLY_TOOLTIP = i18n.translate(
     defaultMessage:
       'The current YAML configuration contains features that cannot be represented in the GUI.',
   }
+);
+
+const SANDBOX_OPEN_MODE_TOGGLE_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.composeDiscover.editMode.sandboxOpenTooltip',
+  { defaultMessage: 'Close the query editor to switch views' }
 );
 
 const EDIT_MODE_OPTIONS = [
@@ -251,13 +256,35 @@ export function ComposeDiscoverFlyout({
 
   const isDiscoverQueryComplete = Boolean(discoverComposedQuery?.breach.segment.trim());
 
-  const [uiState, dispatch] = useComposeDiscoverState({
+  const [uiState, rawDispatch] = useComposeDiscoverState({
     mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
     initialRecoveryType: hasInitialCustomRecovery ? 'custom' : 'default',
     isQueryPrePopulated: isDiscoverQueryComplete,
     forceYamlMode,
   });
+
+  const lastFocusedRef = useRef<HTMLElement | null>(null);
+  /* Wraps rawDispatch to snapshot the focused trigger before the sandbox opens so focus can be restored when it closes. */
+  const dispatch = useCallback(
+    (action: ComposeDiscoverAction) => {
+      if (!uiState.childOpen) {
+        lastFocusedRef.current = document.activeElement as HTMLElement;
+      }
+      rawDispatch(action);
+    },
+    [rawDispatch, uiState.childOpen]
+  );
+
+  const wasChildOpenRef = useRef(uiState.childOpen);
+  useEffect(() => {
+    if (wasChildOpenRef.current && !uiState.childOpen) {
+      const raf = requestAnimationFrame(() => lastFocusedRef.current?.focus());
+      wasChildOpenRef.current = uiState.childOpen;
+      return () => cancelAnimationFrame(raf);
+    }
+    wasChildOpenRef.current = uiState.childOpen;
+  }, [uiState.childOpen]);
 
   // Registered once here so providers persist across Sandbox open/close cycles.
   useEsqlAutocomplete(baseServices);
@@ -940,6 +967,17 @@ export function ComposeDiscoverFlyout({
     [dispatch, sandboxQuery, sandboxTabs]
   );
 
+  // Freeze the view toggle while the sandbox is open in FORM mode. In YAML mode the
+  // sandbox stays open by design, so the toggle remains enabled (#623 gating table).
+  const modeToggleSandboxLocked = uiState.childOpen && !uiState.yamlMode;
+  const modeToggleDisabled = forceYamlMode || modeToggleSandboxLocked;
+
+  const getModeToggleTooltip = (): string | undefined => {
+    if (forceYamlMode) return YAML_ONLY_TOOLTIP;
+    if (modeToggleSandboxLocked) return SANDBOX_OPEN_MODE_TOGGLE_TOOLTIP;
+    return undefined;
+  };
+
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
       <FormProvider {...methods}>
@@ -1000,14 +1038,14 @@ export function ComposeDiscoverFlyout({
                         </EuiFlexItem>
                       )}
                       <EuiFlexItem grow={false}>
-                        <EuiToolTip content={forceYamlMode ? YAML_ONLY_TOOLTIP : undefined}>
+                        <EuiToolTip content={getModeToggleTooltip()}>
                           <EuiButtonGroup
                             legend={EDIT_MODE_LEGEND}
                             options={EDIT_MODE_OPTIONS}
                             idSelected={uiState.yamlMode ? 'yaml' : 'form'}
                             onChange={(id) => handleToggleYamlMode(id === 'yaml')}
                             isIconOnly
-                            isDisabled={forceYamlMode}
+                            isDisabled={modeToggleDisabled}
                             buttonSize="compressed"
                             data-test-subj="composeDiscoverEditModeToggle"
                           />
@@ -1071,8 +1109,6 @@ export function ComposeDiscoverFlyout({
               onNext={handleNext}
               onFinalSubmit={handleFinalSubmit}
               onYamlSave={handleYamlSave}
-              onRequestClose={handleRequestClose}
-              closeSourceRef={closeSourceRef}
             />
 
             {uiState.childOpen && (
