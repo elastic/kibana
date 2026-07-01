@@ -453,6 +453,61 @@ export const SwitchWithItems: Story = {
   },
 };
 
+const overflowLoadingConfig: AppMenuConfig = {
+  items: [
+    {
+      id: 'refresh',
+      order: 1,
+      overflow: true,
+      label: 'Refresh',
+      run: action('refresh-clicked'),
+      iconType: 'refresh',
+      testId: 'refreshButton',
+      isLoading: true,
+    },
+    {
+      id: 'manageIndex',
+      order: 2,
+      overflow: true,
+      label: 'Manage index',
+      iconType: 'managementApp',
+      testId: 'manageIndexButton',
+      popoverWidth: 200,
+      isLoading: true,
+      items: [
+        {
+          run: () => action('close-index-clicked'),
+          id: 'closeIndex',
+          order: 1,
+          label: 'Close index',
+          iconType: 'cross',
+          testId: 'closeIndexButton',
+        },
+        {
+          run: () => action('delete-index-clicked'),
+          id: 'deleteIndex',
+          order: 2,
+          label: 'Delete index',
+          iconType: 'trash',
+          testId: 'deleteIndexButton',
+        },
+      ],
+    },
+  ],
+};
+
+/**
+ * Overflow items honor `isLoading`: the item icon is replaced with a spinner and the item is
+ * disabled while the action runs. Open the "More" menu to see both a simple item and an item
+ * with sub-items in their loading state.
+ */
+export const OverflowItemLoading: Story = {
+  name: 'Overflow item - loading state',
+  args: {
+    config: overflowLoadingConfig,
+  },
+};
+
 export const PrimaryActionWithPopover: Story = {
   name: 'Primary action with popover',
   args: {
@@ -492,5 +547,50 @@ export const PrimaryActionWithPopover: Story = {
         ],
       },
     },
+  },
+};
+
+const destructiveItemConfig: AppMenuConfig = {
+  items: [
+    {
+      id: 'runRule',
+      order: 1,
+      label: 'Run rule',
+      run: action('run-rule-clicked'),
+      iconType: 'play',
+      testId: 'runRuleButton',
+    },
+    {
+      id: 'delete',
+      order: 3,
+      label: 'Delete',
+      run: action('delete-clicked'),
+      iconType: 'trash',
+      testId: 'deleteButton',
+      isDestructive: true,
+      overflow: true,
+    },
+    {
+      id: 'updateApiKey',
+      order: 4,
+      label: 'Update API key',
+      run: action('update-api-key-clicked'),
+      iconType: 'key',
+      testId: 'updateApiKeyButton',
+      overflow: true,
+    },
+  ],
+  primaryActionItem: {
+    run: action('edit-clicked'),
+    id: 'edit',
+    label: 'Edit rule',
+    testId: 'editButton',
+    iconType: 'pencil',
+  },
+};
+export const DestructiveItems: Story = {
+  name: 'Destructive items',
+  args: {
+    config: destructiveItemConfig,
   },
 };
