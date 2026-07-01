@@ -228,6 +228,26 @@ export const contextEngineAddEntryStepCommonDefinition: CommonStepDefinition<
         description: "Auto-generated quarterly summary"
 \`\`\``,
 
+      `## Add an entry gated to specific Elasticsearch indices
+\`\`\`yaml
+- name: add_scoped_entry
+  type: ${ContextEngineAddEntryStepTypeId}
+  with:
+    originId: "sink-index-ki"
+    attachmentType: "corpus_entry"
+    action: "upsert"
+    chunks:
+      - type: "corpus_entry"
+        title: "Sales data summary"
+        content: "Key figures extracted from the sales index ..."
+    permissions:
+      elasticsearch:
+        indices:
+          - name: "sales-data"
+          - name: "sales-data-archive"
+\`\`\`
+Only used when \`attachmentType\` has no registered \`getPermissions\` hook (e.g. \`corpus_entry\`). Supplying \`permissions\` for a type that already derives permissions via a hook (e.g. \`dashboard\`, \`connector\`) fails the step — the hook is always authoritative for those types.`,
+
       `## Remove a previously added entry
 \`\`\`yaml
 - name: remove_entry
