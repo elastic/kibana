@@ -7,7 +7,7 @@
 
 import type { ToolSelection } from '../tools';
 import type { UserIdAndName } from '../base/users';
-import type { AgentAccessControl } from './access_control/types';
+import type { AgentAccessControl } from './access_control';
 
 /**
  * The type of an agent.

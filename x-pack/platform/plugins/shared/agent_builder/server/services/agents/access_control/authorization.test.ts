@@ -20,7 +20,7 @@ import {
   hasAgentUseAccess,
   hasAgentWriteAccess,
   isAgentOwner,
-} from '.';
+} from './authorization';
 
 const owner: UserIdAndName = { id: 'owner-id', username: 'alice' };
 const ownerUser: CurrentUser = { id: 'owner-id', username: 'alice' };

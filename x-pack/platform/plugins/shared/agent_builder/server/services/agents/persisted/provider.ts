@@ -93,12 +93,24 @@ const createPersistedProvider = async ({
     },
     list: async (opts) => {
       const definitions = await client.list(opts);
-      const hasDefault = definitions.some((def) => def.id === agentBuilderDefaultAgentId);
-      if (!hasDefault) {
+      const ids = definitions.map(({ id }) => id);
+
+      if (!ids.includes(agentBuilderDefaultAgentId)) {
         const defaultAgent = await ensureDefaultAgent(client);
         definitions.push(defaultAgent);
       }
+
       return definitions.map((definition) => toInternalDefinition({ definition }));
+    },
+    getIds: async (opts) => {
+      const ids = await client.getIds(opts);
+
+      if (!ids.includes(agentBuilderDefaultAgentId)) {
+        const defaultAgent = await ensureDefaultAgent(client);
+        ids.push(defaultAgent.id);
+      }
+
+      return ids;
     },
     create: async (createRequest) => {
       if (createRequest.id === agentBuilderDefaultAgentId) {
