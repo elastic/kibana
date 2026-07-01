@@ -10,6 +10,8 @@
 import { isValidElement } from 'react';
 import { render } from '@testing-library/react';
 import type { EuiThemeComputed } from '@elastic/eui';
+import type { ReactElement } from 'react';
+import { EuiSwitch, EuiToolTip, type EuiThemeComputed } from '@elastic/eui';
 import {
   createReturnFocus,
   getDisplayedItemsAllowedAmount,
@@ -551,6 +553,22 @@ describe('utils', () => {
       const result = getPopoverSwitchItems({ switchConfig: defaultSwitch });
 
       expect(result[1].renderItem).toBeDefined();
+    });
+
+    it('should not wrap the switch in a tooltip when no tooltip is provided', () => {
+      const result = getPopoverSwitchItems({ switchConfig: defaultSwitch });
+      const element = result[1].renderItem?.() as ReactElement;
+
+      expect(element.type).toBe(EuiSwitch);
+    });
+
+    it('should wrap the switch in a tooltip when tooltipContent is provided', () => {
+      const result = getPopoverSwitchItems({
+        switchConfig: { ...defaultSwitch, tooltipContent: 'Save changes to enable' },
+      });
+      const element = result[1].renderItem?.() as ReactElement;
+
+      expect(element.type).toBe(EuiToolTip);
     });
   });
 
