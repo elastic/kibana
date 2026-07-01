@@ -46,7 +46,13 @@ export function registerCaseWorkflowSteps(
   workflowsExtensions: CasesServerSetupDependencies['workflowsExtensions'],
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>,
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
-  isCasesAttachmentsEnabled: boolean
+  isCasesAttachmentsEnabled: boolean,
+  /**
+   * Resolves once cases's own `start()` has been called by core
+   * Used by the `cases.addAttachments`loader so the discriminated union sees
+   * solution-contributed attachment types.
+   */
+  waitForStartServices: () => Promise<unknown>
 ) {
   if (!workflowsExtensions) {
     return;
@@ -68,18 +74,17 @@ export function registerCaseWorkflowSteps(
   workflowsExtensions.registerStepDefinition(unassignCaseStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(addAlertsStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(addEventsStepDefinition(getCasesClient));
-  // The unified attachment registry is populated during cases `setup` (built-in
-  // types) and by other solutions' `setup` (which runs after cases's since they
-  // depend on it). We register the step through an async loader so the union is
-  // composed after all `setup` phases have resolved — matching the public side
-  // and letting the loader resolve to `undefined` (a silently-skipped step)
-  // when no authorable type ends up registered.
+  // Solutions register their attachment types in their own `setup` (after
+  // cases's), and the server step registry invokes loaders eagerly at
+  // register-time — awaiting start services here delays the registry snapshot
+  // until every plugin's `setup` has completed, so the discriminated union
+  // sees the full authorable type list.
   if (isCasesAttachmentsEnabled) {
-    workflowsExtensions.registerStepDefinition(() =>
-      import('./steps/add_attachments').then((m) =>
-        m.addAttachmentsStepDefinition(unifiedAttachmentTypeRegistry, getCasesClient)
-      )
-    );
+    workflowsExtensions.registerStepDefinition(async () => {
+      await waitForStartServices();
+      const { addAttachmentsStepDefinition } = await import('./steps/add_attachments');
+      return addAttachmentsStepDefinition(unifiedAttachmentTypeRegistry, getCasesClient);
+    });
   }
   workflowsExtensions.registerStepDefinition(findSimilarCasesStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(setDescriptionStepDefinition(getCasesClient));

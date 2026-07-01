@@ -263,7 +263,8 @@ export class CasePlugin
       plugins.workflowsExtensions,
       getCasesClient,
       this.unifiedAttachmentTypeRegistry,
-      this.caseConfig.attachments?.enabled === true
+      this.caseConfig.attachments?.enabled === true,
+      () => core.getStartServices()
     );
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 
