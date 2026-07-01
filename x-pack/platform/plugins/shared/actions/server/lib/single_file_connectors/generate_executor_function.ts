@@ -7,9 +7,11 @@
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import {
+  ConnectorResponseSizeLimitError,
   getConnectorActionErrorMeta,
   getFinitePositiveNumber,
   getHeaderValue,
+  isConnectorResponseSizeLimitError,
 } from '@kbn/connector-specs';
 import type { ExecutorParams } from '../../sub_action_framework/types';
 import type {
@@ -131,6 +133,19 @@ export const generateExecutorFunction = ({
       });
       const errorMeta = getErrorMeta({ error, contentLengthBytes });
       logger.error(`error on ${connectorId} event: ${errorMessage}`);
+
+      // Re-throw the typed size-limit error (enriched with the connector's
+      // declared responseSizeHeader value and any provider size hints) so the
+      // action executor can surface it as a structured `errorName` result.
+      if (isConnectorResponseSizeLimitError(error)) {
+        throw new ConnectorResponseSizeLimitError({
+          message: errorMessage,
+          limitBytes: error.limitBytes,
+          contentLengthBytes: getFinitePositiveNumber(errorMeta?.contentLengthBytes),
+          estimatedOutputBytes: getFinitePositiveNumber(errorMeta?.estimatedOutputBytes),
+        });
+      }
+
       return {
         status: 'error',
         message: errorMessage,

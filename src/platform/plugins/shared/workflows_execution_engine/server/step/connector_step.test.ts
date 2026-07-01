@@ -230,7 +230,7 @@ describe('ConnectorStepImpl', () => {
     expect(result.error.message).toBe('connector failed');
   });
 
-  it('returns ResponseSizeLimitError when maxContentLength exceeded', async () => {
+  it('returns ResponseSizeLimitError when ConnectorResponseSizeLimitError is reported', async () => {
     const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
       createMocks();
 
@@ -238,6 +238,8 @@ describe('ConnectorStepImpl', () => {
       status: 'error',
       message: null,
       serviceMessage: 'maxContentLength size of 10485760 exceeded',
+      errorName: 'ConnectorResponseSizeLimitError',
+      errorMeta: { limitBytes: 10485760 },
     });
 
     const step = {
@@ -267,7 +269,9 @@ describe('ConnectorStepImpl', () => {
       status: 'error',
       message: null,
       serviceMessage: 'maxContentLength size of 1048576 exceeded',
+      errorName: 'ConnectorResponseSizeLimitError',
       errorMeta: {
+        limitBytes: 1024 * 1024,
         contentLengthBytes: 10 * 1024 * 1024,
         estimatedOutputBytes: 14 * 1024 * 1024,
       },
@@ -314,6 +318,8 @@ describe('ConnectorStepImpl', () => {
       status: 'error',
       message: null,
       serviceMessage: 'maxContentLength size of 1048576 exceeded',
+      errorName: 'ConnectorResponseSizeLimitError',
+      errorMeta: { limitBytes: 1024 * 1024 },
     });
 
     const step = {
@@ -352,7 +358,9 @@ describe('ConnectorStepImpl', () => {
       status: 'error',
       message: null,
       serviceMessage: 'maxContentLength size of 1048576 exceeded',
+      errorName: 'ConnectorResponseSizeLimitError',
       errorMeta: {
+        limitBytes: 1024 * 1024,
         contentLengthBytes: 10 * 1024 * 1024,
         estimatedOutputBytes: 14 * 1024 * 1024,
       },
@@ -394,7 +402,8 @@ describe('ConnectorStepImpl', () => {
       status: 'error',
       message: null,
       serviceMessage: 'maxContentLength size of 1048576 exceeded',
-      errorMeta: { contentLengthBytes: 10 * 1024 * 1024 },
+      errorName: 'ConnectorResponseSizeLimitError',
+      errorMeta: { limitBytes: 1048576, contentLengthBytes: 10 * 1024 * 1024 },
     });
 
     const step = {
@@ -422,6 +431,37 @@ describe('ConnectorStepImpl', () => {
       contentLengthBytes: 10 * 1024 * 1024,
       suggestedLimitBytes: 10 * 1024 * 1024,
     });
+  });
+
+  it('returns ConnectorExecutionError for connector errors without the size-limit errorName', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+
+    // Even if the message happens to contain "maxContentLength", detection is now
+    // driven by errorName, not string-matching.
+    connectorExecutor.execute.mockResolvedValue({
+      status: 'error',
+      message: null,
+      serviceMessage: 'maxContentLength size of 1048576 exceeded',
+    });
+
+    const step = {
+      name: 'http-step',
+      stepId: 'http-step',
+      type: 'http',
+      'connector-id': 'conn-123',
+    };
+
+    const impl = new ConnectorStepImpl(
+      step,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    const result = await (impl as any)._run({});
+    expect(result.error.type).toBe('ConnectorExecutionError');
   });
 
   it('throws when connectorExecutor is undefined', async () => {
