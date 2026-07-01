@@ -11,13 +11,13 @@ import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
-  SigEventsWorkflowStatus,
-  type SigEventsWorkflowStatusResult,
-  type StreamsKIsOnboardingResult,
-  type StreamsKIsOnboardingStatusResult,
+  SignificantEventsWorkflowStatus,
+  type SignificantEventsWorkflowStatusResult,
+  type KIsOnboardingResult,
+  type KIsOnboardingStatusResult,
   type BaseFeature,
   type GeneratedSignificantEventQuery,
-} from '@kbn/streams-schema';
+} from '@kbn/significant-events-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -103,7 +103,7 @@ interface OnboardingWorkflowOutputContext {
  * Nested domain representation of a completed onboarding run, grouped by step.
  * Used to extract summary counts for the status response.
  */
-export interface StreamsKIsOnboardingOutput extends StreamsKIsOnboardingResult {
+export interface StreamsKIsOnboardingOutput extends KIsOnboardingResult {
   streamName: string;
 }
 
@@ -249,17 +249,13 @@ export class StreamsKIsOnboardingClient {
    * For completed executions a second fetch retrieves the full execution
    * context so output counts can be included in the result.
    */
-  async getStatus({
-    streamName,
-  }: {
-    streamName: string;
-  }): Promise<StreamsKIsOnboardingStatusResult> {
+  async getStatus({ streamName }: { streamName: string }): Promise<KIsOnboardingStatusResult> {
     const result = await this.workflowExecutionService.getStatus({
       spaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
       queryParams: { concurrencyGroupKey: buildConcurrencyKey(streamName) },
     });
 
-    if (result.status !== SigEventsWorkflowStatus.Completed) {
+    if (result.status !== SignificantEventsWorkflowStatus.Completed) {
       return result;
     }
 
@@ -288,15 +284,18 @@ export class StreamsKIsOnboardingClient {
     streamNames,
   }: {
     streamNames: string[];
-  }): Promise<Record<string, SigEventsWorkflowStatusResult>> {
+  }): Promise<Record<string, SignificantEventsWorkflowStatusResult>> {
     if (streamNames.length === 0) {
       return {};
     }
 
-    const statuses: Record<string, SigEventsWorkflowStatusResult> = {};
+    const statuses: Record<string, SignificantEventsWorkflowStatusResult> = {};
 
     for (const streamName of streamNames) {
-      statuses[streamName] = { status: SigEventsWorkflowStatus.NotStarted, executionId: null };
+      statuses[streamName] = {
+        status: SignificantEventsWorkflowStatus.NotStarted,
+        executionId: null,
+      };
     }
 
     const requested = new Set(streamNames);
