@@ -79,6 +79,9 @@ export const AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID =
 export const AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID = 'agentBuilder:tracing:includeRealNames';
 export const AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID = 'agentBuilder:tracing:includeRealIds';
 
+// Context engine settings
+export const CONTEXT_ENGINE_ENABLED_SETTING_ID = 'contextEngine:enabled';
+
 // Autocomplete settings
 export const AUTOCOMPLETE_USE_TIME_RANGE_ID = 'autocomplete:useTimeRange';
 export const AUTOCOMPLETE_VALUE_SUGGESTION_METHOD_ID = 'autocomplete:valueSuggestionMethod';
@@ -170,9 +173,9 @@ export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS =
   'observability:streamsContinuousKiExtractionIntervalHours';
 export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS =
   'observability:streamsContinuousKiExtractionExcludedStreamPatterns';
-export const OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS =
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS =
   'observability:streamsSigEventsIndexPatterns';
-export const OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG =
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG =
   'observability:streamsSigEventsTuningConfig';
 export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2 =
   'observability:streamsEnableSignificantEventsAlertingV2';
