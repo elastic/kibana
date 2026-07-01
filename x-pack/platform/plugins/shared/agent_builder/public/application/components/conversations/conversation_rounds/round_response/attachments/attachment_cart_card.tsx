@@ -100,6 +100,14 @@ export const AttachmentCartCard: React.FC<AttachmentCartCardProps> = ({ attachme
 
   const cardWrapperStyles = css`
     position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  `;
+
+  const cardStyles = css`
+    flex: 1 1 auto;
     height: 100%;
   `;
 
@@ -121,6 +129,7 @@ export const AttachmentCartCard: React.FC<AttachmentCartCardProps> = ({ attachme
       }}
     >
       <EuiCard
+        className={cardStyles}
         hasBorder
         display="plain"
         textAlign="left"
