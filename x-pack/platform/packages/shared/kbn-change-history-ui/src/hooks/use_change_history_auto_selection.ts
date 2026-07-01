@@ -14,6 +14,7 @@ export interface UseChangeHistoryAutoSelectionArgs {
   isFetchingFirstPage: boolean;
   enabled?: boolean;
   setSelectedChangeId: (changeId: string | undefined) => void;
+  onAutoSelect?: (item: ChangeHistoryListItem) => void;
 }
 
 export interface UseChangeHistoryAutoSelectionResult {
@@ -27,6 +28,7 @@ export const useChangeHistoryAutoSelection = ({
   isFetchingFirstPage,
   enabled = true,
   setSelectedChangeId,
+  onAutoSelect,
 }: UseChangeHistoryAutoSelectionArgs): UseChangeHistoryAutoSelectionResult => {
   const decidedRef = useRef(false);
 
@@ -48,18 +50,19 @@ export const useChangeHistoryAutoSelection = ({
       return;
     }
 
-    const firstChangeId = items[0]?.id;
+    const firstItem = items[0];
 
-    if (!firstChangeId) {
+    if (!firstItem?.id) {
       return;
     }
 
-    setSelectedChangeId(firstChangeId);
+    setSelectedChangeId(firstItem.id);
+    onAutoSelect?.(firstItem);
 
     if (!isFetchingFirstPage) {
       decidedRef.current = true;
     }
-  }, [enabled, isFetchingFirstPage, items, setSelectedChangeId]);
+  }, [enabled, isFetchingFirstPage, items, onAutoSelect, setSelectedChangeId]);
 
   return { lockSelectionDecision, unlockSelectionDecision };
 };
