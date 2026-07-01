@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout/ui';
 import fs from 'fs';
 import os from 'os';
+import { tags } from '@kbn/scout';
 import { test } from '../../fixtures';
 import {
   SavedObjectsTracker,
@@ -15,7 +16,6 @@ import {
   installLogsSampleData,
   removeLogsSampleData,
 } from '../../helpers';
-import { tags } from '`@kbn/scout`';
 
 const defaultSettings = {
   defaultIndex: 'kibana_sample_data_logs',
