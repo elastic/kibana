@@ -18,14 +18,14 @@ export const visualizationAttachmentDataSchema = z
     // Optional for backwards compatibility: attachments created before the Vega
     // renderer existed have no `renderer` field and are implicitly Lens.
     renderer: z.enum(['lens', 'vega']).optional(),
-    query: z.string(),
-    visualization: z.record(z.string(), z.unknown()),
-    chart_type: z.string().optional(),
-    esql: z.string(),
+    query: z.string().max(2048),
+    visualization: z.record(z.string().max(1024), z.unknown()),
+    chart_type: z.string().max(256).optional(),
+    esql: z.string().max(4096),
     time_range: z
       .object({
-        from: z.string(),
-        to: z.string(),
+        from: z.string().max(256),
+        to: z.string().max(256),
       })
       .optional(),
   })

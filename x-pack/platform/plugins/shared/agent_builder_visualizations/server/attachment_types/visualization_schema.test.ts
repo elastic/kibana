@@ -63,4 +63,15 @@ describe('visualizationAttachmentDataSchema', () => {
 
     expect(result.success).toBe(false);
   });
+
+  it('rejects an unbounded query string', () => {
+    const result = visualizationAttachmentDataSchema.safeParse({
+      renderer: 'lens',
+      query: 'a'.repeat(2049),
+      visualization: { title: 'Hosts' },
+      esql: 'FROM logs | STATS count() BY host',
+    });
+
+    expect(result.success).toBe(false);
+  });
 });

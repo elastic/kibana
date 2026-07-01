@@ -45,15 +45,20 @@ const getExistingVegaSpec = (data: VisualizationAttachmentData | undefined): str
 };
 
 const createVisualizationSchema = z.object({
-  query: z.string().describe('A natural language query describing the desired visualization.'),
+  query: z
+    .string()
+    .max(2048)
+    .describe('A natural language query describing the desired visualization.'),
   index: z
     .string()
+    .max(1024)
     .optional()
     .describe(
       '(optional) Index, alias, or datastream to target. If not provided, the tool will attempt to discover the best index to use.'
     ),
   attachment_id: z
     .string()
+    .max(256)
     .optional()
     .describe(
       '(optional) ID of an existing visualization attachment to update. If provided, the tool will read the existing configuration and modify it based on the query.'
@@ -72,6 +77,7 @@ const createVisualizationSchema = z.object({
     ),
   esql: z
     .string()
+    .max(4096)
     .optional()
     .describe(
       '(optional) An ES|QL query. If not provided, tool with automatically generate the query. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
