@@ -196,7 +196,9 @@ describe('entity risk score V2 calculation route', () => {
 
   it('runs resolution scoring against the entity itself when no resolved entity exists', async () => {
     // override default mock that returns an entity with a resolved_to
-    mockCrudClient.listEntities = jest.fn().mockResolvedValue({ entities: [{ entity: { id: entityId } }] });
+    mockCrudClient.listEntities = jest
+      .fn()
+      .mockResolvedValue({ entities: [{ entity: { id: entityId } }] });
 
     await server.inject(buildRequest(), requestContextMock.convertContext(context));
 
