@@ -233,6 +233,7 @@ export const Slack: ConnectorSpec = {
           tokenType: 'Bearer',
         },
       },
+      'bearer'
     ],
   },
 
