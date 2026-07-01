@@ -8,7 +8,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import type { SearchFilterConfig } from '@elastic/eui';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type {
   ContentEditorFeatureConfig,
@@ -56,7 +55,6 @@ import { ClientStrategyContext } from './client_strategy_context';
 import type { ClientStrategyContextValue } from './client_strategy_context';
 import { defineContentListFilter, type ContentListFilterMap } from './filters';
 import type { ResolvedContentListFilter } from './filters';
-import { CustomFilterRenderer } from './custom_filter_renderer';
 import type { ContentListSortFieldMap } from './sorting';
 import { resolveSortFieldMap, toSortField } from './sorting';
 
@@ -513,18 +511,14 @@ const ContentListClientProviderInner = ({
 
   // Rewrite the client-flavored `contentEditor` config into the base
   // `{ open }` shape (or drop it). Every other field passes through unchanged.
+  // Custom filters are *registered* here (KQL field definitions + client-side
+  // filtering/facet counts via `filterDimensions`), but never auto-rendered in
+  // the toolbar. Consumers place a control explicitly with
+  // `createFilterControl` / `CustomFilterRenderer`, so registration and
+  // placement stay decoupled — see `RecentsFilterRenderer` for the same shape.
   const features: ContentListFeatures = useMemo(() => {
     const baseContentEditor: ContentEditorFeatureConfig | undefined = open ? { open } : undefined;
     const { filters: _filters, sorting: _sorting, ...baseFeatures } = featuresProp;
-    const toolbarFilters: Record<string, SearchFilterConfig> = Object.fromEntries(
-      Object.values(customFilters).map((filter) => [
-        filter.id,
-        {
-          type: 'custom_component' as const,
-          component: (props) => <CustomFilterRenderer {...props} filterDefinition={filter} />,
-        },
-      ])
-    );
     return {
       ...baseFeatures,
       sorting: sortingFeature,
@@ -532,7 +526,6 @@ const ContentListClientProviderInner = ({
         ...(featuresProp.fields ?? []),
         ...Object.values(customFilters).map((filter) => filter.toFieldDefinition()),
       ],
-      toolbarFilters,
       tags: tagsFeature,
       userProfiles: userProfilesFeature,
       contentEditor: baseContentEditor,
