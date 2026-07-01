@@ -128,8 +128,10 @@ export const createVegaGraph = async (
             esClient: esClient.asCurrentUser,
           }));
         } catch (providedError) {
+          const message =
+            providedError instanceof Error ? providedError.message : String(providedError);
           logger.warn(
-            `Provided ES|QL query failed to execute (${providedError.message}); regenerating a corrected query`
+            `Provided ES|QL query failed to execute (${message}); regenerating a corrected query`
           );
           query = '';
         }
@@ -180,8 +182,9 @@ export const createVegaGraph = async (
 
       action = { type: 'generate_esql', success: true, query, columns };
     } catch (error) {
-      logger.error(`Failed to resolve ES|QL query for Vega: ${error.message}`);
-      action = { type: 'generate_esql', success: false, error: error.message };
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error(`Failed to resolve ES|QL query for Vega: ${message}`);
+      action = { type: 'generate_esql', success: false, error: message };
     }
 
     return {

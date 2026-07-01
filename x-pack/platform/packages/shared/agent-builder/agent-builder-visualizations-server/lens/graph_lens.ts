@@ -153,11 +153,12 @@ export const createVisualizationGraph = async (
         };
       }
     } catch (error) {
-      logger.error(`Failed to generate ES|QL query: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(`Failed to generate ES|QL query: ${errorMessage}`);
       action = {
         type: 'generate_esql',
         success: false,
-        error: error.message,
+        error: errorMessage,
       };
     }
 
@@ -316,7 +317,7 @@ export const createVisualizationGraph = async (
         };
       }
     } catch (error) {
-      const errorMessage = error.message;
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.warn(`Configuration validation failed: ${errorMessage}`);
 
       action = {
@@ -392,12 +393,13 @@ What is the most appropriate time range for this visualization?`,
         timeRange: { from: result.from, to: result.to },
       };
     } catch (error) {
-      logger.warn(`Failed to generate time range, defaulting to now-24h: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.warn(`Failed to generate time range, defaulting to now-24h: ${errorMessage}`);
       action = {
         type: 'generate_time_range',
         success: false,
         timeRange: { from: 'now-24h', to: 'now' },
-        error: error.message,
+        error: errorMessage,
       };
     }
 
