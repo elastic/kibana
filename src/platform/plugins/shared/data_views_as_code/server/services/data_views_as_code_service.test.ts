@@ -11,8 +11,14 @@ import {
   fromStoredDataViewToAsCodeSavedSchema,
   toStoredDataView,
 } from '@kbn/as-code-data-views-transforms';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { DataViewsAsCodeService } from './data_views_as_code_service';
-import type { DataViewLazy, DataViewSpec } from '@kbn/data-views-plugin/common';
+import {
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+  type DataViewLazy,
+  type DataViewSpec,
+} from '@kbn/data-views-plugin/common';
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 
 const createMockDataViewLazy = ({
@@ -21,12 +27,14 @@ const createMockDataViewLazy = ({
   version = '1',
   namespaces = ['default'],
   spec = {},
+  savedObjectBody,
 }: {
   id?: string;
   managed?: boolean;
   version?: string;
   namespaces?: string[];
   spec?: Record<string, unknown>;
+  savedObjectBody?: Record<string, unknown>;
 } = {}) =>
   ({
     id,
@@ -34,11 +42,14 @@ const createMockDataViewLazy = ({
     version,
     namespaces,
     toSpec: jest.fn().mockResolvedValue(spec),
+    getAsSavedObjectBody: jest.fn().mockReturnValue(savedObjectBody ?? spec),
   } as unknown as DataViewLazy);
 
 const createService = () => {
-  const service = new DataViewsAsCodeService(dataViewsService);
-  return { service, mockDataViewsService: dataViewsService };
+  dataViewsService.clearInstanceCache = jest.fn();
+  const mockSavedObjectsClient = savedObjectsClientMock.create();
+  const service = new DataViewsAsCodeService(dataViewsService, mockSavedObjectsClient);
+  return { service, mockDataViewsService: dataViewsService, mockSavedObjectsClient };
 };
 
 const getExpectedMappedData = (spec: DataViewSpec) => {
@@ -48,7 +59,7 @@ const getExpectedMappedData = (spec: DataViewSpec) => {
 
 describe('DataViewsAsCodeService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('get', () => {
@@ -266,6 +277,137 @@ describe('DataViewsAsCodeService', () => {
 
       await expect(service.delete('dv-missing')).rejects.toThrow('Data view not found');
       expect(mockDataViewsService.delete).toHaveBeenCalledWith('dv-missing');
+    });
+  });
+
+  describe('upsert', () => {
+    const id = 'dv-upsert';
+    const inputSpecWithoutId = { index_pattern: 'logs-*', time_field: '@timestamp' };
+    const storedSpec = toStoredDataView({ id, ...inputSpecWithoutId }) as DataViewSpec;
+
+    it('should update a data view when it already exists', async () => {
+      const { service, mockDataViewsService, mockSavedObjectsClient } = createService();
+
+      const existingDataView = createMockDataViewLazy({ id, spec: storedSpec });
+      const updatableDataView = createMockDataViewLazy({ id, spec: storedSpec });
+      const refetchedDataView = createMockDataViewLazy({
+        id,
+        managed: true,
+        version: '2',
+        namespaces: ['default', 'space-1'],
+        spec: storedSpec,
+      });
+      mockDataViewsService.getDataViewLazy
+        .mockResolvedValueOnce(existingDataView)
+        .mockResolvedValueOnce(refetchedDataView);
+      mockDataViewsService.createFromSpecLazy = jest.fn().mockResolvedValue(updatableDataView);
+      mockSavedObjectsClient.update.mockResolvedValue({
+        id,
+        type: DATA_VIEW_SAVED_OBJECT_TYPE,
+        attributes: updatableDataView.getAsSavedObjectBody(),
+        references: [],
+        version: '2',
+      });
+
+      const result = await service.upsert(id, inputSpecWithoutId);
+
+      expect(mockDataViewsService.getDataViewLazy).toHaveBeenCalledTimes(2);
+      expect(mockDataViewsService.getDataViewLazy).toHaveBeenNthCalledWith(1, id);
+      expect(mockDataViewsService.getDataViewLazy).toHaveBeenNthCalledWith(2, id);
+      expect(mockDataViewsService.createAndSaveDataViewLazy).not.toHaveBeenCalled();
+      expect(mockDataViewsService.createFromSpecLazy).toHaveBeenCalledWith(storedSpec);
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        DATA_VIEW_SAVED_OBJECT_TYPE,
+        id,
+        updatableDataView.getAsSavedObjectBody(),
+        { mergeAttributes: false, refresh: true }
+      );
+      expect(mockDataViewsService.clearInstanceCache).toHaveBeenCalledWith(id);
+      expect(result).toEqual({
+        action: 'updated',
+        body: {
+          id,
+          data: getExpectedMappedData(storedSpec),
+          meta: {
+            managed: true,
+            version: '2',
+            namespaces: ['default', 'space-1'],
+          },
+        },
+      });
+    });
+
+    it('should create a data view when it does not already exist', async () => {
+      const { service, mockDataViewsService, mockSavedObjectsClient } = createService();
+
+      mockDataViewsService.getDataViewLazy.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError()
+      );
+      mockDataViewsService.createFromSpecLazy = jest.fn();
+      const createdDataView = createMockDataViewLazy({
+        id,
+        managed: false,
+        version: '1',
+        namespaces: ['default'],
+        spec: storedSpec,
+      });
+      mockDataViewsService.createAndSaveDataViewLazy.mockResolvedValue(createdDataView);
+
+      const result = await service.upsert(id, inputSpecWithoutId);
+
+      expect(mockDataViewsService.getDataViewLazy).toHaveBeenCalledWith(id);
+      expect(mockDataViewsService.createAndSaveDataViewLazy).toHaveBeenCalledWith(storedSpec);
+      expect(mockDataViewsService.createFromSpecLazy).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        action: 'created',
+        body: {
+          id,
+          data: getExpectedMappedData(storedSpec),
+          meta: {
+            managed: false,
+            version: '1',
+            namespaces: ['default'],
+          },
+        },
+      });
+    });
+
+    it('should propagate errors from createAndSaveDataViewLazy when creating', async () => {
+      const { service, mockDataViewsService, mockSavedObjectsClient } = createService();
+
+      const error = new Error('Create failed');
+      mockDataViewsService.getDataViewLazy.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError()
+      );
+      mockDataViewsService.createAndSaveDataViewLazy.mockRejectedValue(error);
+      mockDataViewsService.createFromSpecLazy = jest.fn();
+
+      await expect(service.upsert(id, inputSpecWithoutId)).rejects.toThrow('Create failed');
+      expect(mockDataViewsService.getDataViewLazy).toHaveBeenCalledWith(id);
+      expect(mockDataViewsService.createFromSpecLazy).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
+    it('should propagate errors from savedObjectsClient.update when updating', async () => {
+      const { service, mockDataViewsService, mockSavedObjectsClient } = createService();
+
+      const existingDataView = createMockDataViewLazy({ id, spec: storedSpec });
+      const updatableDataView = createMockDataViewLazy({ id, spec: storedSpec });
+      mockDataViewsService.getDataViewLazy.mockResolvedValue(existingDataView);
+      mockDataViewsService.createFromSpecLazy = jest.fn().mockResolvedValue(updatableDataView);
+      mockSavedObjectsClient.update.mockRejectedValue(new Error('Update failed'));
+
+      await expect(service.upsert(id, inputSpecWithoutId)).rejects.toThrow('Update failed');
+
+      expect(mockDataViewsService.createAndSaveDataViewLazy).not.toHaveBeenCalled();
+      expect(mockDataViewsService.createFromSpecLazy).toHaveBeenCalledWith(storedSpec);
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        DATA_VIEW_SAVED_OBJECT_TYPE,
+        id,
+        updatableDataView.getAsSavedObjectBody(),
+        { mergeAttributes: false, refresh: true }
+      );
     });
   });
 });

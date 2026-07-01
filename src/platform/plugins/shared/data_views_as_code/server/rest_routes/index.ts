@@ -10,9 +10,11 @@
 import { registerPostDataViewAsCodeRoute } from './post_data_view';
 import { registerGetDataViewAsCodeRoute } from './get_data_view';
 import { registerDeleteDataViewAsCodeRoute } from './delete_data_view';
+import { registerPutDataViewAsCodeRoute } from './put_data_view';
 
 export const routes = [
   registerGetDataViewAsCodeRoute,
   registerDeleteDataViewAsCodeRoute,
   registerPostDataViewAsCodeRoute,
+  registerPutDataViewAsCodeRoute,
 ];

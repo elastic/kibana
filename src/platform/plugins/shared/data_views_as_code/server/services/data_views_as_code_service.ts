@@ -12,15 +12,18 @@ import {
   fromStoredDataViewToAsCodeSavedSchema,
   toStoredDataView,
 } from '@kbn/as-code-data-views-transforms';
-import type { DataViewLazy } from '@kbn/data-views-plugin/common';
+import { SavedObjectsErrorHelpers, type SavedObjectsClientContract } from '@kbn/core/server';
+import { DATA_VIEW_SAVED_OBJECT_TYPE, type DataViewLazy } from '@kbn/data-views-plugin/common';
 import type { DataViewsService } from '@kbn/data-views-plugin/server';
 import { omit } from 'lodash';
 
 export class DataViewsAsCodeService {
   private dataViewsService: DataViewsService;
+  private savedObjectsClient: SavedObjectsClientContract;
 
-  constructor(dataViewsService: DataViewsService) {
+  constructor(dataViewsService: DataViewsService, savedObjectsClient: SavedObjectsClientContract) {
     this.dataViewsService = dataViewsService;
+    this.savedObjectsClient = savedObjectsClient;
   }
 
   private async mapDataView(dataView: DataViewLazy) {
@@ -53,5 +56,47 @@ export class DataViewsAsCodeService {
 
   public delete(id: string) {
     return this.dataViewsService.delete(id);
+  }
+
+  public async upsert(id: string, spec: Omit<AsCodeSavedDataView, 'id'>) {
+    const dataViewSpec = toStoredDataView({ id, ...spec });
+
+    if (await this.exists(id)) {
+      // 1. Create a new data view instance from the spec and update it.
+      const dataViewInstance = await this.dataViewsService.createFromSpecLazy(dataViewSpec);
+
+      // 2. Update the saved object with the new data view instance.
+      await this.savedObjectsClient.update(
+        DATA_VIEW_SAVED_OBJECT_TYPE,
+        id,
+        dataViewInstance.getAsSavedObjectBody(),
+        { mergeAttributes: false, refresh: true }
+      );
+
+      // 3 . Clear the data view service cache
+      this.dataViewsService.clearInstanceCache(id);
+
+      // 4. Return the updated data view.
+      return {
+        action: 'updated',
+        // After that, it needs to be refetched, otherwise it won't get the meta fields correctly.
+        body: await this.mapDataView(await this.dataViewsService.getDataViewLazy(id)),
+      };
+    }
+
+    const createdDataView = await this.dataViewsService.createAndSaveDataViewLazy(dataViewSpec);
+    return { action: 'created', body: await this.mapDataView(createdDataView) };
+  }
+
+  private async exists(id: string) {
+    try {
+      await this.dataViewsService.getDataViewLazy(id);
+      return true;
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        return false;
+      }
+      throw e;
+    }
   }
 }
