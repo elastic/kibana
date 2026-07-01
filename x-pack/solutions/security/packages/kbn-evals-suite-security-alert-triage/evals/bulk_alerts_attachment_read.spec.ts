@@ -19,12 +19,14 @@
 
 import { tags } from '@kbn/scout';
 import {
+  createSkillInvocationEvaluator,
   selectEvaluators,
   type DefaultEvaluators,
   type EvaluationDataset,
   type EvalsExecutorClient,
   type Example,
 } from '@kbn/evals';
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import { evaluate as base } from '../src/evaluate';
@@ -68,12 +70,14 @@ function createEvaluateAlertBatches({
   connector,
   evaluators,
   executorClient,
+  traceEsClient,
   log,
 }: {
   fetch: HttpHandler;
   connector: { id: string };
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
+  traceEsClient: EsClient;
   log: ToolingLog;
 }) {
   return async function evaluateAlertBatches({
@@ -83,6 +87,11 @@ function createEvaluateAlertBatches({
   }) {
     const selectedEvaluators = selectEvaluators([
       attachmentReadCompliance,
+      createSkillInvocationEvaluator({
+        traceEsClient,
+        log,
+        skillName: 'alert-analysis',
+      }),
       ...Object.values(evaluators.traceBasedEvaluators),
     ]);
 
@@ -111,13 +120,14 @@ type EvaluateAlertBatches = ReturnType<typeof createEvaluateAlertBatches>;
 
 const evaluate = base.extend<{ evaluateAlertBatches: EvaluateAlertBatches }, {}>({
   evaluateAlertBatches: [
-    ({ fetch, connector, evaluators, executorClient, log }, use) => {
+    ({ fetch, connector, evaluators, executorClient, traceEsClient, log }, use) => {
       use(
         createEvaluateAlertBatches({
           fetch,
           connector,
           evaluators,
           executorClient,
+          traceEsClient,
           log,
         })
       );

@@ -226,6 +226,12 @@ export interface ChatCompleteResponse<
    * Optional metadata attached by inference runtime.
    */
   metadata?: AnonymizationResponseMetadata;
+  /**
+   * Server-side OpenTelemetry trace ID for the inference request. Exposed so
+   * consumers (e.g. eval trace-based evaluators) can query `traces-*` for
+   * `gen_ai.usage.*` spans emitted during this chat completion.
+   */
+  traceId?: string;
 }
 
 /**

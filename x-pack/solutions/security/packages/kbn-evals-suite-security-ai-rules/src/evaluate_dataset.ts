@@ -11,6 +11,7 @@ import type {
   EvaluationDataset,
   Example,
   EvalsExecutorClient,
+  TaskOutput,
 } from '@kbn/evals';
 import { createEsqlEquivalenceEvaluator } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
@@ -32,6 +33,12 @@ import {
 export interface RuleGenerationTaskOutput {
   generatedRule?: Partial<ReferenceRule>;
   error?: string;
+  traceId?: string;
+  steps?: Array<{
+    type: string;
+    tool_id?: string;
+    results?: unknown[];
+  }>;
 }
 
 // ---------------------------------------------------------------------------
@@ -42,6 +49,10 @@ export interface DatasetSkipSummary {
   datasetName: string;
   totalExamples: number;
   succeeded: number;
+  positiveTotal: number;
+  positiveSucceeded: number;
+  negativeTotal: number;
+  negativeSucceeded: number;
   missingIndexSkips: number;
   otherFailures: number;
   otherFailureReasons: string[];
@@ -436,7 +447,7 @@ export function createRuleDescriptionEvaluator(
 }
 
 // ---------------------------------------------------------------------------
-// Factory — mirrors the agent-builder createEvaluateDataset pattern
+// Factory — wires CODE + LLM evaluators and per-example success tracking for the suite summary.
 // ---------------------------------------------------------------------------
 
 export function createEvaluateDataset({
@@ -466,6 +477,9 @@ export function createEvaluateDataset({
   const skip = (e: Evaluator<RuleExample, RuleGenerationTaskOutput>) =>
     skipAgentErrors(skipMissingIndexFailures(e));
 
+  const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+    evaluators.traceBasedEvaluators;
+
   const allEvaluators: Array<Evaluator<RuleExample, RuleGenerationTaskOutput>> = [
     // CODE — deterministic
     skip(skipNegativeCases(createQuerySyntaxValidityEvaluator())),
@@ -486,6 +500,11 @@ export function createEvaluateDataset({
     // skip(skipNegativeCases(createRuleDescriptionEvaluator(evaluators))),
     // Rejection — scores 1 when model correctly refuses a negative case, N/A otherwise
     skip(createRejectionEvaluator()),
+    toolCalls as Evaluator<RuleExample, TaskOutput>,
+    latency as Evaluator<RuleExample, TaskOutput>,
+    inputTokens as Evaluator<RuleExample, TaskOutput>,
+    outputTokens as Evaluator<RuleExample, TaskOutput>,
+    cachedTokens as Evaluator<RuleExample, TaskOutput>,
   ];
 
   return async function evaluateDataset({
@@ -495,6 +514,10 @@ export function createEvaluateDataset({
   }): Promise<void> {
     let totalExamples = 0;
     let succeeded = 0;
+    let positiveTotal = 0;
+    let positiveSucceeded = 0;
+    let negativeTotal = 0;
+    let negativeSucceeded = 0;
     let missingIndexFailures = 0;
     let otherFailures = 0;
     const otherFailureReasons: string[] = [];
@@ -505,18 +528,25 @@ export function createEvaluateDataset({
         task: async ({ input, output: expected }) => {
           if (!input) throw new Error('Missing input for task');
           totalExamples++;
+          const isNegative = expected?.category === 'negative';
+          if (isNegative) {
+            negativeTotal++;
+          } else {
+            positiveTotal++;
+          }
           const SEP = '═'.repeat(60);
           log.info(`[Task] Prompt: "${input.prompt}"`);
           try {
             const taskResult = await chatClient.generateRule(input.prompt);
 
             if (!taskResult.generatedRule) {
-              if (expected?.category === 'negative') {
+              if (isNegative) {
                 // Negative-case prompts are expected to be rejected. Treat a refusal as success
                 // so dataset summaries don't misclassify correct behavior as an "agent error".
                 succeeded++;
+                negativeSucceeded++;
                 log.info('[Task] Negative case: model refused to generate a rule (expected)');
-                return {};
+                return { traceId: taskResult.traceId, steps: taskResult.steps };
               }
 
               const isMissingIndex =
@@ -531,10 +561,14 @@ export function createEvaluateDataset({
                 otherFailureReasons.push(truncate(taskResult.error ?? 'No rule returned'));
                 log.warning(`[Task] No rule generated. Error: ${taskResult.error}`);
               }
-              return { error: taskResult.error || 'No rule returned from agent' };
+              return {
+                error: taskResult.error || 'No rule returned from agent',
+                traceId: taskResult.traceId,
+                steps: taskResult.steps,
+              };
             }
 
-            if (expected?.category === 'negative') {
+            if (isNegative) {
               // Negative-case prompts should not produce rules.
               otherFailures++;
               otherFailureReasons.push(truncate('Generated a rule for a negative-case prompt'));
@@ -543,6 +577,7 @@ export function createEvaluateDataset({
               );
             } else {
               succeeded++;
+              positiveSucceeded++;
             }
             log.info(SEP);
             log.success(`Generated rule: "${taskResult.generatedRule.name}"`);
@@ -592,6 +627,10 @@ export function createEvaluateDataset({
       datasetName: dataset.name,
       totalExamples,
       succeeded,
+      positiveTotal,
+      positiveSucceeded,
+      negativeTotal,
+      negativeSucceeded,
       missingIndexSkips: missingIndexFailures,
       otherFailures,
       otherFailureReasons,
@@ -599,13 +638,15 @@ export function createEvaluateDataset({
 
     if (missingIndexFailures > 0 || otherFailures > 0) {
       const parts = [
-        `${succeeded} succeeded`,
+        `${succeeded} succeeded (${positiveSucceeded}/${positiveTotal} positive, ${negativeSucceeded}/${negativeTotal} negative)`,
         missingIndexFailures > 0 ? `${missingIndexFailures} skipped (missing index)` : undefined,
         otherFailures > 0 ? `${otherFailures} failed (agent error)` : undefined,
       ].filter(Boolean);
       log.warning(`[Summary] ${dataset.name}: ${totalExamples} total — ${parts.join(', ')}`);
     } else {
-      log.info(`[Summary] ${dataset.name}: ${totalExamples} total — ${succeeded} succeeded`);
+      log.info(
+        `[Summary] ${dataset.name}: ${totalExamples} total — ${succeeded} succeeded (${positiveSucceeded}/${positiveTotal} positive, ${negativeSucceeded}/${negativeTotal} negative)`
+      );
     }
   };
 }

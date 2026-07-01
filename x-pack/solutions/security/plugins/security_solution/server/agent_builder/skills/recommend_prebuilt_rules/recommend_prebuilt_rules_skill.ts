@@ -24,12 +24,30 @@ interface RecommendPrebuiltRulesSkillDeps {
 
 const RECOMMEND_PREBUILT_RULES_CONTENT = `# Recommend Prebuilt Rules
 
+> **FIRST ACTION — before you write any prose, you MUST emit a tool call.**
+> - Install / recommend intent -> call \`security.get_user_data_inventory\` first.
+> - Browse / count / "how many" intent -> call \`security.find_prebuilt_rules\` with \`perPage: 1\` first.
+> - Coverage / "which MITRE am I missing" intent -> call \`security.get_installed_rules_mitre_coverage\` first.
+> A response with no tool call in this turn is a failure — do not answer from memory.
+
 ## Use This Skill
 
 Use this skill to discover and recommend Elastic **prebuilt** detection rules to **install** on this deployment, and to answer **browse** and **coverage** questions about the installable catalog — by tag, MITRE tactic/technique, rule type, integration, severity, or keyword. Two intents:
 
 - **Install** — "what rules should I install?", "recommend rules for my Okta data", "fill my coverage gaps".
 - **Browse / count / coverage** — "what LLM rules can I install?", "how many critical ES|QL rules are available?", "which MITRE tactics am I missing?".
+
+## Tool-Call Contract (mandatory)
+
+**Every answer from this skill MUST be backed by at least one \`security.find_prebuilt_rules\` tool call made in this conversation.** The \`FIRST ACTION\` block at the top of this skill names which tool to call first for each intent. This section expands the rule; it does not soften it.
+
+- **Install recommendations** -> call \`security.get_user_data_inventory\` then \`security.find_prebuilt_rules\` (at minimum) before recommending anything. If you skip \`security.find_prebuilt_rules\`, the recommendation is invalid.
+- **Browse / count / "how many"** -> call \`security.find_prebuilt_rules\` with \`perPage: 1\` and read the answer from \`total\`. Do not state a count you did not fetch.
+- **Coverage / "which MITRE am I missing"** -> call \`security.get_installed_rules_mitre_coverage\`. To recommend gap-fillers, follow with \`security.find_prebuilt_rules\`.
+
+If a tool call fails or returns zero results, say so plainly — do **not** fall back to recommending rules from memory. An honest "no results for that filter, try X" is always correct; a memory-based recommendation is never correct.
+
+**Why this is non-negotiable:** rule names, \`rule_id\`s, tag values, counts, and MITRE mappings are all catalog-specific and versioned. Inventing them produces a recommendation the user cannot act on (the rule may not exist, or may already be installed, or may be named differently in their version). Only tool results in *this* conversation are ground truth.
 
 ## Boundaries
 

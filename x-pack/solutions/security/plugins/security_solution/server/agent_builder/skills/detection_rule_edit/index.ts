@@ -15,7 +15,7 @@ export const getDetectionRuleEditSkill = () =>
     name: 'detection-rule-edit',
     basePath: 'skills/security/rules',
     description:
-      'Guide to creating and editing security detection rules via the rule attachment. Use when a user asks to create, edit, modify, or update a detection rule or its fields (tags, severity, MITRE ATT&CK, schedule, query, etc.).',
+      'Create or edit a single security detection rule via a rule attachment in the conversation. Use when the user asks to create, edit, modify, or update one rule (severity, schedule, query, MITRE mappings on that rule, etc.) or when a rule attachment is present. Not for listing, counting, filtering, or inventorying detection rules — use find-security-rules for "list/show/count detection rules", MITRE-tagged rule inventories, or rule discovery without an attachment.',
     content: SKILL_CONTENT,
     getRegistryTools: () => [
       SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
@@ -35,6 +35,16 @@ Use this skill when the user asks to:
 - Modify rule logic or metadata (e.g., "add MITRE ATT&CK mappings", "change the index patterns", "update the description", "add new terms to the query")
 
 This covers the rule type ES|QL. Do not create a rule with a rule type other than ES|QL. Only create ES|QL rules.
+
+## When NOT to Use This Skill
+
+Do **not** load this skill for read-only rule inventory or discovery — use **find-security-rules** instead:
+- "List all enabled detection rules tagged with MITRE"
+- "Show detection rules covering MITRE technique T1059"
+- "How many custom detection rules are enabled?"
+- Any list, count, filter, sort, or rank question over the rule catalog without a rule attachment
+
+Listing or counting rules is not editing. Mentioning "detection rules", "MITRE", or "tags" in a **list/show/count** question does not mean the user wants to edit a rule.
 
 ## ⚠️ IMPORTANT: "The Rule" Always Means the Rule Attachment
 

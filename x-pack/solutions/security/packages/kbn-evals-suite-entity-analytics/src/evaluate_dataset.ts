@@ -8,6 +8,9 @@
 import {
   createQuantitativeCorrectnessEvaluators,
   createQuantitativeGroundednessEvaluator,
+  createSkillInvocationEvaluator,
+  createTrajectoryEvaluator,
+  getToolCallSteps,
   selectEvaluators,
   withEvaluatorSpan,
   type DefaultEvaluators,
@@ -16,7 +19,10 @@ import {
   type EvaluationResult,
   type Evaluator,
   type Example,
+  type TaskOutput,
 } from '@kbn/evals';
+import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   EvaluationChatClient,
   ErrorResponse,
@@ -67,8 +73,52 @@ interface DatasetExample extends Example {
     criteria?: string[];
     toolCalls?: ToolCallAssertion[];
     attachments?: AttachmentAssertion[];
+    /** Optional explicit golden tool order; otherwise derived from `toolCalls` primary ids. */
+    tool_sequence?: string[];
   };
   metadata?: { query_intent?: string };
+}
+
+const FILESTORE_READ_TOOL_ID = 'filestore.read';
+
+export function deriveEntityAnalyticsGoldenToolSequence(
+  expected: DatasetExample['output'] | undefined
+): string[] {
+  if (expected?.tool_sequence && expected.tool_sequence.length > 0) {
+    return expected.tool_sequence;
+  }
+  return (expected?.toolCalls ?? []).map((tc) => tc.id).filter(Boolean);
+}
+
+export function createEntityAnalyticsTrajectoryEvaluator(): Evaluator<DatasetExample, TaskOutput> {
+  const inner = createTrajectoryEvaluator({
+    extractToolCalls: (output) =>
+      getToolCallSteps(output as TaskOutput)
+        .map((step) => step.tool_id)
+        .filter((id): id is string => Boolean(id) && id !== FILESTORE_READ_TOOL_ID),
+    goldenPathExtractor: (expected) =>
+      deriveEntityAnalyticsGoldenToolSequence(expected as DatasetExample['output']),
+    orderWeight: 0.6,
+    coverageWeight: 0.4,
+  });
+
+  return {
+    ...inner,
+    name: 'Trajectory',
+    evaluate: async (args) => {
+      const golden = deriveEntityAnalyticsGoldenToolSequence(
+        args.expected as DatasetExample['output']
+      );
+      if (golden.length === 0) {
+        return {
+          score: null,
+          label: 'N/A',
+          explanation: 'No tool_sequence or toolCalls annotation — skipping trajectory evaluation.',
+        };
+      }
+      return inner.evaluate(args);
+    },
+  } as Evaluator<DatasetExample, TaskOutput>;
 }
 
 interface ChatTaskOutput {
@@ -245,18 +295,30 @@ interface CreateEvaluateDatasetOpts {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   chatClient: EvaluationChatClient;
+  traceEsClient: EsClient;
+  log: ToolingLog;
 }
 
 export function createEvaluateDataset({
   evaluators,
   executorClient,
   chatClient,
+  traceEsClient,
+  log,
 }: CreateEvaluateDatasetOpts): EvaluateDataset {
   return async function evaluateDataset({
     dataset: { name, description, examples },
     concurrency = DEFAULT_CONCURRENCY,
   }: EvaluateDatasetOpts) {
     const dataset = { name, description, examples } satisfies EvaluationDataset;
+
+    const {
+      inputTokens,
+      outputTokens,
+      cachedTokens,
+      toolCalls: traceToolCalls,
+      latency,
+    } = evaluators.traceBasedEvaluators;
 
     await executorClient.runExperiment(
       {
@@ -318,6 +380,17 @@ export function createEvaluateDataset({
             // ground truth text, so quantitative correctness comparison produces noise (low scores).
           ),
         ]),
+        traceToolCalls as Evaluator<DatasetExample, TaskOutput>,
+        latency as Evaluator<DatasetExample, TaskOutput>,
+        inputTokens as Evaluator<DatasetExample, TaskOutput>,
+        outputTokens as Evaluator<DatasetExample, TaskOutput>,
+        cachedTokens as Evaluator<DatasetExample, TaskOutput>,
+        createSkillInvocationEvaluator({
+          traceEsClient,
+          log,
+          skillName: 'entity-analytics',
+        }) as Evaluator<DatasetExample, TaskOutput>,
+        createEntityAnalyticsTrajectoryEvaluator(),
       ]
     );
   };

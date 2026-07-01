@@ -17,8 +17,8 @@ import {
 const createdRuleIds: string[] = [];
 
 evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
-  evaluate.beforeAll(async ({ internalEsClient, chatClient, fetch, log, uiSettings }) => {
-    await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
+  evaluate.beforeAll(async ({ internalEsClient, chatClient, fetch, log }) => {
+    // agentBuilder:experimentalFeatures is enabled via evals_siem_readiness server config override.
     await seedSiemReadinessData({ esClient: internalEsClient, log });
 
     // Create detection rules for blast-radius testing
@@ -88,8 +88,7 @@ evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  evaluate.afterAll(async ({ internalEsClient, fetch, log, uiSettings }) => {
-    await uiSettings.unset('agentBuilder:experimentalFeatures');
+  evaluate.afterAll(async ({ internalEsClient, fetch, log }) => {
     await cleanupSiemReadinessData({ esClient: internalEsClient, log });
     const idsToDelete = createdRuleIds.splice(0);
     if (idsToDelete.length > 0) {
@@ -132,6 +131,7 @@ evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
                 'Response contains a Suggested Actions section.',
                 'The overall status is actionsRequired (not healthy or noData) since there are known issues seeded.',
               ],
+              tool_sequence: ['security.siem_readiness.get_coverage'],
             },
           },
         ],
@@ -163,6 +163,7 @@ evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
                 'The response confirms Endpoint, Identity, Network, and Cloud categories have data.',
                 'The Application/SaaS finding includes Affected Platform, Affected Rules, and Affected Tactics sub-bullets.',
               ],
+              tool_sequence: ['security.siem_readiness.get_coverage'],
             },
           },
         ],
@@ -196,6 +197,7 @@ evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
                 'The quality finding includes Affected Platform, Affected Rules, and Affected Tactics sub-bullets.',
                 'Did not fabricate ECS issues for indices with 0 incompatible fields.',
               ],
+              tool_sequence: ['security.siem_readiness.get_quality'],
             },
           },
         ],
@@ -228,6 +230,7 @@ evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
                 'The pipeline finding includes Affected Platform, Affected Rules, and Affected Tactics sub-bullets.',
                 'The pipeline finding is labeled as critical or actionRequired.',
               ],
+              tool_sequence: ['security.siem_readiness.get_continuity'],
             },
           },
         ],
@@ -262,6 +265,7 @@ evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
                 'The non-compliant finding includes Affected Platform, Affected Rules, and Affected Tactics sub-bullets.',
                 'Does not flag the compliant data stream as a problem.',
               ],
+              tool_sequence: ['security.siem_readiness.get_retention'],
             },
           },
         ],
@@ -297,6 +301,7 @@ evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
                   'The blast-radius fields (Affected Platform, Affected Rules, Affected Tactics) are shown as explicit labeled sub-bullets under the finding, not embedded in prose.',
                   'blastRadiusStatus is not shown as "unavailable (lookup failed)" for indexed categories (endpoint, identity, network, cloud have data and rules).',
                 ],
+                tool_sequence: ['security.siem_readiness.get_coverage'],
               },
             },
           ],
@@ -330,6 +335,7 @@ evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
                 'The failing pipeline is identified.',
                 'Other dimensions (Coverage, Quality, Retention) are either omitted or noted as "not evaluated for this query".',
               ],
+              tool_sequence: ['security.siem_readiness.get_continuity'],
             },
           },
         ],
@@ -361,6 +367,7 @@ evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
                 'The response does NOT fabricate quality findings or invent incompatible fields.',
                 'The overall quality status is noData or indicates no results available.',
               ],
+              tool_sequence: ['security.siem_readiness.get_quality'],
             },
           },
         ],
@@ -393,6 +400,7 @@ evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
                 'The sections appear in the order: Status → Summary → Findings → Suggested Actions (or equivalent top-down structure).',
                 'Each finding in the Findings section has Affected Platform, Affected Rules, and Affected Tactics shown as sub-items (not in prose).',
               ],
+              tool_sequence: ['security.siem_readiness.get_coverage'],
             },
           },
         ],

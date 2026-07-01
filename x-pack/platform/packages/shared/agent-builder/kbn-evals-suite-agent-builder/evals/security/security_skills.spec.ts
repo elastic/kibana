@@ -9,6 +9,10 @@ import { tags } from '@kbn/scout';
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
+import {
+  disableAgentBuilderExperimentalFeatures,
+  enableAgentBuilderExperimentalFeatures,
+} from './agent_builder_experimental';
 
 const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   evaluateDataset: [
@@ -25,6 +29,14 @@ const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
     },
     { scope: 'test' },
   ],
+});
+
+evaluate.beforeAll(async ({ uiSettings }) => {
+  await enableAgentBuilderExperimentalFeatures(uiSettings);
+});
+
+evaluate.afterAll(async ({ uiSettings }) => {
+  await disableAgentBuilderExperimentalFeatures(uiSettings);
 });
 
 evaluate.describe(

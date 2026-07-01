@@ -5,13 +5,21 @@
  * 2.0.
  */
 
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import type {
   DefaultEvaluators,
   EvaluationDataset,
   Evaluator,
   EvalsExecutorClient,
   Example,
+  TaskOutput,
 } from '@kbn/evals';
+import {
+  createSkillInvocationEvaluator,
+  createTrajectoryEvaluator,
+  getToolCallSteps,
+} from '@kbn/evals';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { SecurityEvalChatClient } from './chat_client';
 
 export interface SecurityDatasetExample extends Example {
@@ -20,8 +28,85 @@ export interface SecurityDatasetExample extends Example {
   };
   output: {
     criteria: string[];
+    /** Optional golden tool order for L2 trajectory; defaults to baseline troubleshooting sequence. */
+    tool_sequence?: string[];
   };
 }
+
+const FILESTORE_READ_TOOL_ID = 'filestore.read';
+
+/** Minimum-sufficient sequence from elastic-defend-configuration-troubleshooting SKILL.md process. */
+export const ENDPOINT_BASELINE_TOOL_SEQUENCE = [
+  'automatic_troubleshooting.check_endpoint_package_freshness',
+  'automatic_troubleshooting.generate_insight',
+] as const;
+
+export function deriveEndpointGoldenToolSequence(
+  expected: SecurityDatasetExample['output'] | undefined
+): string[] {
+  if (expected?.tool_sequence && expected.tool_sequence.length > 0) {
+    return expected.tool_sequence;
+  }
+  return [...ENDPOINT_BASELINE_TOOL_SEQUENCE];
+}
+
+export function createEndpointTrajectoryEvaluator(): Evaluator<SecurityDatasetExample, TaskOutput> {
+  const inner = createTrajectoryEvaluator({
+    extractToolCalls: (output) =>
+      getToolCallSteps(output as TaskOutput)
+        .map((step) => step.tool_id)
+        .filter((id): id is string => Boolean(id) && id !== FILESTORE_READ_TOOL_ID),
+    goldenPathExtractor: (expected) =>
+      deriveEndpointGoldenToolSequence(expected as SecurityDatasetExample['output']),
+    orderWeight: 0.6,
+    coverageWeight: 0.4,
+  });
+
+  return {
+    ...inner,
+    name: 'Trajectory',
+    evaluate: async (args) => inner.evaluate(args),
+  } as Evaluator<SecurityDatasetExample, TaskOutput>;
+}
+
+/**
+ * L4 (Tool Selection) signal for the endpoint suite — code-judged, zero LLM cost.
+ * Mirrors the alerts-rag `ExpectedToolCalled` pattern: returns N/A when an example
+ * has no `tool_sequence` so partial-coverage datasets don't get penalised.
+ *
+ * Scores 1 if the first tool in the golden sequence was called, 0 otherwise. The
+ * full-order alignment is already covered by the Trajectory evaluator (L2); this
+ * answers the narrower "did the agent reach for the right entry-point tool?"
+ */
+export const createEndpointExpectedToolCalledEvaluator = (): Evaluator<
+  SecurityDatasetExample,
+  TaskOutput
+> => ({
+  name: 'ExpectedToolCalled',
+  kind: 'CODE',
+  evaluate: async ({ output, expected }) => {
+    const goldenSequence = deriveEndpointGoldenToolSequence(
+      expected as SecurityDatasetExample['output'] | undefined
+    );
+    if (goldenSequence.length === 0) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'No tool_sequence annotation — skipping ExpectedToolCalled.',
+      };
+    }
+
+    const expectedToolId = goldenSequence[0];
+    const usedToolIds = getToolCallSteps(output as TaskOutput)
+      .map((step) => step.tool_id)
+      .filter((id): id is string => Boolean(id) && id !== FILESTORE_READ_TOOL_ID);
+
+    return {
+      score: usedToolIds.includes(expectedToolId) ? 1 : 0,
+      metadata: { expectedToolId, usedToolIds },
+    };
+  },
+});
 
 export type EvaluateSecurityDataset = (options: {
   dataset: {
@@ -50,10 +135,14 @@ export function createEvaluateSecurityDataset({
   evaluators,
   executorClient,
   chatClient,
+  traceEsClient,
+  log,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   chatClient: SecurityEvalChatClient;
+  traceEsClient: EsClient;
+  log: ToolingLog;
 }): EvaluateSecurityDataset {
   return async function evaluateSecurityDataset({
     dataset: { name, description, examples },
@@ -70,6 +159,9 @@ export function createEvaluateSecurityDataset({
       examples,
     } satisfies EvaluationDataset;
 
+    const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+      evaluators.traceBasedEvaluators;
+
     await executorClient.runExperiment(
       {
         datasets: [dataset],
@@ -84,7 +176,21 @@ export function createEvaluateSecurityDataset({
           };
         },
       },
-      [createEndpointCriteriaEvaluator({ evaluators })]
+      [
+        createEndpointCriteriaEvaluator({ evaluators }),
+        createSkillInvocationEvaluator({
+          traceEsClient,
+          log,
+          skillName: 'elastic-defend-configuration-troubleshooting',
+        }) as Evaluator<SecurityDatasetExample, TaskOutput>,
+        createEndpointTrajectoryEvaluator(),
+        createEndpointExpectedToolCalledEvaluator(),
+        toolCalls as Evaluator<SecurityDatasetExample, TaskOutput>,
+        latency as Evaluator<SecurityDatasetExample, TaskOutput>,
+        inputTokens as Evaluator<SecurityDatasetExample, TaskOutput>,
+        outputTokens as Evaluator<SecurityDatasetExample, TaskOutput>,
+        cachedTokens as Evaluator<SecurityDatasetExample, TaskOutput>,
+      ]
     );
   };
 }

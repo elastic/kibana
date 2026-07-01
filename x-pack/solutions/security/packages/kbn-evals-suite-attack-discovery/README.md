@@ -32,9 +32,12 @@ It is managed via the Evals dataset API on the golden cluster: https://kbn-evals
 
 ### Default (CI / golden cluster)
 
-By default, the suite uses `trustUpstreamDataset: true` and resolves the dataset
-by name from the golden cluster. The name defaults to `attack_discovery: bundled alerts (jsonl)`
-and can be overridden with `ATTACK_DISCOVERY_DATASET_NAME`.
+By default, the suite uses the checked-in reference JSONL at
+`data/eval_dataset_attack_discovery_all_scenarios.jsonl`. When
+`EVALUATIONS_KBN_URL` points at the golden cluster (CI via Vault, or
+`--datasets-profile dev-vault` locally), it resolves the full dataset by name.
+The name defaults to `Attack Discovery All Scenarios` and can be overridden with
+`ATTACK_DISCOVERY_DATASET_NAME`.
 
 This requires `EVALUATIONS_KBN_URL` and `EVALUATIONS_KBN_API_KEY` to be set
 (automatically configured in CI via the vault config, or locally via `local_ci_env.sh`).

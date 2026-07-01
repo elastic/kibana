@@ -11,9 +11,9 @@ import Fs from 'fs/promises';
 import Path from 'path';
 import type { AttackDiscoveryDatasetExample, AnonymizedAlert } from '../types';
 
-const DEFAULT_DATASET_NAME = 'attack_discovery: bundled alerts (jsonl)';
+const DEFAULT_DATASET_NAME = 'Attack Discovery All Scenarios';
 const DEFAULT_DATASET_DESCRIPTION =
-  'Attack Discovery evaluation dataset loaded from eval_dataset_attack_discovery_all_scenarios.jsonl';
+  'Attack Discovery evaluation dataset (reference scenarios). Loaded from eval_dataset_attack_discovery_all_scenarios.jsonl';
 
 const resolveJsonlPath = (): string => {
   // __dirname is: .../src/dataset
@@ -25,11 +25,18 @@ const parseJsonlLine = (line: string, lineNumber: number): AttackDiscoveryDatase
   const parsed = JSON.parse(line) as {
     inputs?: { anonymizedAlerts?: AnonymizedAlert[] };
     outputs?: { attackDiscoveries?: unknown };
-    metadata?: { Title?: string; dataset_split?: unknown };
+    metadata?: {
+      Title?: string;
+      dataset_split?: unknown;
+      is_distractor?: boolean;
+      criteria?: string[];
+    };
   };
 
   const anonymizedAlerts = parsed.inputs?.anonymizedAlerts ?? [];
   const attackDiscoveries = (parsed.outputs?.attackDiscoveries ?? []) as AttackDiscovery[];
+  const metadata = parsed.metadata ?? { Title: `Line ${lineNumber}` };
+  const criteria = Array.isArray(metadata.criteria) ? (metadata.criteria as string[]) : undefined;
 
   return {
     input: {
@@ -38,8 +45,9 @@ const parseJsonlLine = (line: string, lineNumber: number): AttackDiscoveryDatase
     },
     output: {
       attackDiscoveries,
+      ...(criteria ? { criteria } : {}),
     },
-    metadata: parsed.metadata ?? { Title: `Line ${lineNumber}` },
+    metadata,
   };
 };
 

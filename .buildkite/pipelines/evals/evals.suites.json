@@ -27,7 +27,8 @@
       ],
       "ciLabels": [
         "evals:agent-builder"
-      ]
+      ],
+      "serverConfigSet": "evals_security_ai_rules"
     },
     {
       "id": "esql-generation",
@@ -125,7 +126,8 @@
       "slackChannel": "#security-detection-engine-alerts",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules/playwright.config.ts",
       "tags": ["security", "ai-rules"],
-      "ciLabels": ["evals:security-ai-rules"]
+      "ciLabels": ["evals:security-ai-rules"],
+      "serverConfigSet": "evals_security_ai_rules"
     },
     {
       "id": "endpoint",
@@ -178,7 +180,8 @@
       ],
       "ciLabels": [
         "evals:attack-discovery"
-      ]
+      ],
+      "serverConfigSet": "evals_tracing"
     },
     {
       "id": "lead-generation",
@@ -217,7 +220,8 @@
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations/playwright.config.ts",
       "tags": ["security", "migrations"],
-      "ciLabels": ["evals:security-automatic-migrations"]
+      "ciLabels": ["evals:security-automatic-migrations"],
+      "serverConfigSet": "evals_tracing"
     },
     {
       "id": "security-alerts-rag-regression",
@@ -225,7 +229,8 @@
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag/playwright.config.ts",
       "tags": ["security", "alerts-rag"],
-      "ciLabels": ["evals:security-alerts-rag-regression"]
+      "ciLabels": ["evals:security-alerts-rag-regression"],
+      "serverConfigSet": "evals_tracing"
     },
     {
       "id": "security-esql-generation-regression",
@@ -233,7 +238,8 @@
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression/playwright.config.ts",
       "tags": ["security", "esql-generation"],
-      "ciLabels": ["evals:security-esql-generation-regression"]
+      "ciLabels": ["evals:security-esql-generation-regression"],
+      "serverConfigSet": "evals_tracing"
     },
     {
       "id": "agent-builder-dashboards",
@@ -260,7 +266,8 @@
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage/playwright.config.ts",
       "tags": ["security", "alert-triage"],
-      "ciLabels": ["evals:security-alert-triage"]
+      "ciLabels": ["evals:security-alert-triage"],
+      "serverConfigSet": "evals_security_alert_triage"
     },
     {
       "id": "siem-readiness",
@@ -269,7 +276,16 @@
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness/playwright.config.ts",
       "tags": ["security", "siem-readiness"],
       "ciLabels": ["evals:siem-readiness"],
-      "serverConfigSet": "evals_tracing"
+      "serverConfigSet": "evals_siem_readiness"
+    },
+    {
+      "id": "security-multi-step",
+      "name": "Security Multi-step Execution",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-multi-step/playwright.config.ts",
+      "tags": ["security", "multi-step"],
+      "ciLabels": ["evals:security-multi-step"],
+      "serverConfigSet": "evals_security_ai_rules"
     }
   ]
 }

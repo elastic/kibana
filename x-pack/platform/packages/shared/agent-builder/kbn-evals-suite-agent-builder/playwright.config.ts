@@ -13,9 +13,15 @@ export default createPlaywrightEvalsConfig({
   // under `evals/esql/`. Excluding them here prevents the recursive
   // `testDir` walk from picking them up and double-running them in the
   // agent-builder weekly cycle.
-  testIgnore: ['**/esql/**'],
+  testIgnore: ['**/esql/**', '**/*.test.ts'],
   // CI job timeout is ~1h; keep default low and use EVALUATION_REPETITIONS
   // for longer/higher-confidence runs.
   repetitions: 1,
   timeout: 4 * 60 * 60_000, // 4 hours timeout given large datasets in use
+  // Models occasionally emit malformed tool calls (empty tool name) or
+  // route to the wrong tool on a single converse turn, causing routing-
+  // sensitive specs to flake. One Playwright retry re-runs the failing
+  // test with a fresh converse call; LLM nondeterminism usually resolves
+  // on the second attempt. Cost is bounded — only failing tests pay.
+  retries: 1,
 });

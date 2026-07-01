@@ -15,7 +15,7 @@ import type {
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { extractSearchRetrievedDocs } from './rag_extractor';
-import { createEvaluateExternalDataset } from './evaluate_dataset';
+import { allowedDomainToolIdsForExample, createEvaluateExternalDataset } from './evaluate_dataset';
 import type { AgentBuilderEvaluationChatClient } from './chat_client';
 
 describe('extractSearchRetrievedDocs', () => {
@@ -218,5 +218,29 @@ describe('createEvaluateExternalDataset', () => {
       }),
       expect.any(Array)
     );
+  });
+});
+
+describe('allowedDomainToolIdsForExample', () => {
+  it('allows discover_rule_tags + find_rules for find-rules routing metadata', () => {
+    expect(
+      allowedDomainToolIdsForExample({
+        expectedOnlyToolId: 'security.find_rules',
+        category: 'find-rules',
+      })
+    ).toEqual(['security.discover_rule_tags', 'security.find_rules']);
+  });
+
+  it('returns a single-tool allowlist for non find-rules examples', () => {
+    expect(
+      allowedDomainToolIdsForExample({
+        expectedOnlyToolId: 'security.create_detection_rule',
+        category: 'rule-creation',
+      })
+    ).toEqual(['security.create_detection_rule']);
+  });
+
+  it('returns null when expectedOnlyToolId is absent', () => {
+    expect(allowedDomainToolIdsForExample({ category: 'find-rules' })).toBeNull();
   });
 });

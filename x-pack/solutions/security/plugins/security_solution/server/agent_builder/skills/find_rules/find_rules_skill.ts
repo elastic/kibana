@@ -28,14 +28,71 @@ export const createFindRulesSkill = ({
     name: 'find-security-rules',
     basePath: 'skills/security/rules',
     description:
-      'Discover, list, rank, and count Security detection rules. ' +
-      'Filter by tags, MITRE technique, severity, rule type, name, or enabled state. ' +
-      'Read-only.',
+      'List, count, filter, and rank Security detection rules (read-only inventory). Use for ' +
+      '"list all enabled detection rules tagged with MITRE", "show rules for T1059", ' +
+      '"how many custom rules are enabled", or any list/count/filter over the rule catalog — ' +
+      'by tags (including MITRE), MITRE technique/tactic ID, severity, enabled state, or name. ' +
+      'Prefer this over detection-rule-edit when the user lists or counts rules without a rule ' +
+      'attachment. Tools: security.discover_rule_tags then security.find_rules only — never ES|QL ' +
+      'or platform.core search. Not for creating, editing, or hunting raw events.',
     content: `# Find Detection Rules
 
-## Use This Skill
+## When to Use
 
-Use this skill to list, count, sort, or rank multiple Security detection rules.
+Use this skill when the user wants to **inventory, list, count, filter, sort, or rank Security detection rules** stored in Kibana — for example:
+
+- "List detection rules tagged with MITRE" or "rules with the MITRE tag"
+- "Show rules covering MITRE technique T1059" or a tactic name/ID
+- "How many custom (non-prebuilt) detection rules are enabled?"
+- "Find enabled critical rules" or "rules named PowerShell"
+
+Do **not** use this skill when the user wants to **create or edit** a rule (use detection rule creation / detection-rule-edit) or hunt **raw events** with ES|QL (use threat-hunting).
+
+## Process
+
+**Allowed tools for rule inventory:** ONLY \`security.discover_rule_tags\`, \`security.find_rules\`, and (for noisy-rule ranking) \`security.alerts\`. Once this skill is loaded, do **not** call \`platform.core.search\`, \`platform.core.list_indices\`, \`platform.core.sml_search\`, \`platform.core.generate_esql\`, or \`platform.core.execute_esql\` — detection rules are not indexed documents you query with ES|QL.
+
+1. **Load this skill** (\`find-security-rules\`) — do not answer from platform search or ES|QL alone.
+2. **Call \`security.discover_rule_tags\` with \`{}\`** — required before every \`security.find_rules\` call in the same turn.
+3. **Call \`security.find_rules\`** with filters derived from discovery (tags, \`mitreTechnique\`, \`mitreTactic\`, \`enabled\`, \`ruleSource\`, \`perPage: 1\` for count-only questions, etc.).
+4. **Answer from tool results only** — cite \`total\` for counts; render the rule table from \`security.find_rules\` output.
+
+## Examples
+
+### Example 1: List enabled rules tagged with MITRE (tag filter)
+
+User: "List all enabled detection rules tagged with MITRE."
+
+Steps:
+1. \`security.discover_rule_tags({})\` — scan returned tag values for MITRE-related entries (e.g. \`MITRE\`, \`Tactic: …\`, \`Technique: …\`).
+2. \`security.find_rules({ enabled: true, tags: ["MITRE"], perPage: 10 })\` — use exact tag values from discovery; omit \`tags\` if no MITRE-like tag exists and say so.
+3. Reply with filter summary + **Name | Severity | Enabled | Type** table from tool output.
+
+Do **not** call \`platform.core.execute_esql\` or search \`.alerts-security.alerts-*\` indices — rule metadata comes only from \`security.find_rules\`.
+
+### Example 2: Rules for MITRE technique T1059 (structured MITRE filter)
+
+User: "Show me detection rules covering MITRE technique T1059."
+
+Steps:
+1. \`security.discover_rule_tags({})\` — still required every turn before \`find_rules\`.
+2. \`security.find_rules({ mitreTechnique: "T1059", perPage: 10 })\` — use \`mitreTechnique\`, not the \`tags\` filter, for technique IDs.
+3. Reply from \`total\` and returned rules.
+
+### Example 3: Count enabled custom rules
+
+User: "How many custom (non-prebuilt) detection rules do I have enabled?"
+
+Steps:
+1. \`security.discover_rule_tags({})\`
+2. \`security.find_rules({ enabled: true, ruleSource: "custom", perPage: 1 })\`
+3. Answer: "You have {total} enabled custom detection rules." — cite \`total\` from the tool result.
+
+## Guardrails
+
+- **Never** use \`platform.core.search\`, \`platform.core.list_indices\`, \`platform.core.get_index_mapping\`, \`platform.core.sml_search\`, \`platform.core.generate_esql\`, or \`platform.core.execute_esql\` to list or count detection rules. Rule metadata lives in Kibana's detection-rules API, exposed only through \`security.discover_rule_tags\` and \`security.find_rules\`.
+- **Never** call \`security.find_rules\` without calling \`security.discover_rule_tags\` first in the **same** response turn (even on MITRE technique/tactic queries — discovery still runs; MITRE filters use \`mitreTechnique\` / \`mitreTactic\`, not the \`tags\` filter).
+- **Never** call \`security.create_detection_rule\` from this skill — read-only inventory only.
 
 ## Boundaries
 
@@ -68,6 +125,14 @@ Every tag name, index pattern, rule name, rule ID, alert count, and total in the
 In a multi-turn conversation, do not infer tag values from rule results — rule \`tags\` arrays in \`security.find_rules\` responses only reflect the rules already fetched. Use tag values from the most recent \`security.discover_rule_tags\` call.
 
 When the user refines a previous query — phrases like "which of them are network", "now show the Windows ones", "filter by endpoint" — make a fresh \`security.discover_rule_tags\` call to get current tag values, then call \`security.find_rules\` with the matching tags and any carry-over filters (e.g. severity). Do not filter the in-memory results from the previous response.
+
+## Multi-Turn Severity Changes
+
+When the user asks for a **different severity** than the previous turn (e.g. turn 1 was critical-only, turn 2 asks for medium-only), you **must** call \`security.discover_rule_tags\` and \`security.find_rules\` again with the new \`severity\` filter. **Never** answer from the prior turn's rule table or counts — severity changes always require a fresh inventory query.
+
+Example:
+- Turn 1: "List critical rules" -> \`security.find_rules({ severity: ["critical"], perPage: 10 })\`
+- Turn 2: "Now list medium severity rules" -> \`security.discover_rule_tags({})\` then \`security.find_rules({ severity: ["medium"], perPage: 10 })\` (do not reuse turn-1 results)
 
 ## Tag Discovery
 
@@ -154,6 +219,14 @@ Examples:
 - Sort: \`sortField: "severity"\` (or \`risk_score\`, \`updatedAt\`, etc.) + \`sortOrder: "desc"\`
 - Top-N: \`perPage: N\`
 - If \`truncated: true\`, mention that additional groups exist beyond the returned buckets.
+
+## Response Format
+
+- Open with one sentence stating the exact filters used (\`enabled\`, \`tags\`, \`mitreTechnique\`, etc.).
+- Rule inventory: markdown table **Name | Severity | Enabled | Type** (max 10 rows unless user asked for more).
+- Count-only questions: single sentence citing \`total\` from \`security.find_rules\`.
+- Zero results: say so explicitly; mention closest tag values from discovery when relevant.
+- Never include ES|QL queries or index names in the reply for rule inventory questions.
 
 ## No Actions
 

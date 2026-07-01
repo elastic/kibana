@@ -235,6 +235,10 @@ export function withChatCompleteSpan(
                   content: value.content,
                   toolCalls: value.toolCalls,
                 });
+                const traceId = span.spanContext().traceId;
+                if (traceId) {
+                  Object.assign(value, { traceId });
+                }
               } else if (isChatCompletionTokenCountEvent(value)) {
                 setTokens(span, value.tokens);
                 setResponseModel(span, { modelName: value.model });

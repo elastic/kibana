@@ -9,11 +9,15 @@ jest.mock('@kbn/inference-tracing', () => ({
   // Avoid initializing tracing in unit tests (can keep Jest alive).
   withInferenceContext: (fn: () => unknown) => fn(),
 }));
-jest.mock('../utils/tracing', () => ({
-  withTaskSpan: jest.fn((_name: string, _opts: unknown, cb: () => unknown) => cb()),
-  withEvaluatorSpan: jest.fn((_name: string, _opts: unknown, cb: () => unknown) => cb()),
-  getCurrentTraceId: jest.fn(),
-}));
+jest.mock('../utils/tracing', () => {
+  const actual = jest.requireActual('../utils/tracing');
+  return {
+    ...actual,
+    withTaskSpan: jest.fn((_name: string, _opts: unknown, cb: () => unknown) => cb()),
+    withEvaluatorSpan: jest.fn((_name: string, _opts: unknown, cb: () => unknown) => cb()),
+    getCurrentTraceId: jest.fn(),
+  };
+});
 
 import { ModelFamily, ModelProvider } from '@kbn/inference-common';
 import type { Model } from '@kbn/inference-common';
@@ -183,6 +187,39 @@ describe('KibanaEvalsClient', () => {
     const all = await client.getDatasetRunResults();
     expect(all).toHaveLength(1);
     expect(all[0].id).toBe(exp.id);
+  });
+
+  it('prefers the server trace ID from task output for evaluator input', async () => {
+    const client = createClient();
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [{ input: { q: 1 }, output: { expected: 1 } }],
+    };
+
+    const serverTraceId = '4bf92f3577b34da6a3ce929d0e0e4736';
+    const workerTraceId = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const task = async () => ({ value: 1, traceId: serverTraceId });
+
+    let evaluatorInputTraceId: string | undefined;
+    const evaluators: Array<Evaluator<EvaluationDataset['examples'][number], { value: number }>> = [
+      {
+        name: 'CaptureTraceId',
+        kind: 'CODE',
+        evaluate: async ({ output }) => {
+          evaluatorInputTraceId = (output as { traceId?: string }).traceId;
+          return { score: 1 };
+        },
+      },
+    ];
+
+    (getCurrentTraceId as jest.Mock).mockReturnValue(workerTraceId);
+
+    const [exp] = await client.runExperiment({ datasets: [dataset], task }, evaluators);
+    const [firstRun] = Object.values(exp.runs);
+
+    expect(evaluatorInputTraceId).toBe(serverTraceId);
+    expect(firstRun.traceId).toBe(serverTraceId);
   });
 
   it('captures and stores trace IDs for tasks and evaluators', async () => {

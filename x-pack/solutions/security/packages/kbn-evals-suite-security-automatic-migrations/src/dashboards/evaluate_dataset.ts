@@ -10,6 +10,7 @@ import type {
   Evaluator,
   EvaluationDataset,
   EvalsExecutorClient,
+  TaskOutput,
 } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { DashboardExample } from '../../datasets/dashboards/types';
@@ -97,6 +98,9 @@ export function createEvaluateDataset({
   log: ToolingLog;
   connectorId: string;
 }): ({ dataset }: { dataset: EvaluationDataset<DashboardExample> }) => Promise<void> {
+  const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+    evaluators.traceBasedEvaluators;
+
   const allEvaluators: Array<Evaluator<DashboardExample, MigrationResult>> = [
     createLookupJoinPresenceEvaluator(),
     createEsqlCompletenessEvaluator(),
@@ -105,6 +109,11 @@ export function createEvaluateDataset({
     createTranslationCompletenessEvaluator(),
     createIndexPatternValidityEvaluator(),
     createTranslationFidelityEvaluator(evaluators),
+    toolCalls as Evaluator<DashboardExample, TaskOutput>,
+    latency as Evaluator<DashboardExample, TaskOutput>,
+    inputTokens as Evaluator<DashboardExample, TaskOutput>,
+    outputTokens as Evaluator<DashboardExample, TaskOutput>,
+    cachedTokens as Evaluator<DashboardExample, TaskOutput>,
   ];
 
   return async function evaluateDataset({

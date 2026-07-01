@@ -17,6 +17,22 @@ if [[ -z "${KBN_EVALS_CONFIG_B64:-}" ]]; then
   exit 1
 fi
 
+# Benchmarker on-demand evals inject a vLLM connector via build env (BENCHMARK_MODEL_ID +
+# KIBANA_TESTING_AI_CONNECTORS). Skip LiteLLM generation so the injected connector is preserved.
+if [[ -n "${BENCHMARK_MODEL_ID:-}" ]]; then
+  if [[ -z "${KIBANA_TESTING_AI_CONNECTORS:-}" ]]; then
+    echo "ERROR: BENCHMARK_MODEL_ID is set but KIBANA_TESTING_AI_CONNECTORS is missing"
+    exit 1
+  fi
+  echo "--- Using benchmarker-injected vLLM connectors (BENCHMARK_MODEL_ID=${BENCHMARK_MODEL_ID})"
+  if ! node -e "const b=process.env.KIBANA_TESTING_AI_CONNECTORS||'';const s=Buffer.from(b,'base64').toString('utf8');const o=JSON.parse(s);if(!o||typeof o!=='object'||Array.isArray(o))process.exit(1);const id=process.env.EVAL_PROJECT||process.env.EVALUATION_CONNECTOR_ID||'';if(id&&!Object.prototype.hasOwnProperty.call(o,id))process.exit(2);" ; then
+    echo "ERROR: KIBANA_TESTING_AI_CONNECTORS is not a connector map or missing EVAL_PROJECT id"
+    exit 1
+  fi
+  export KIBANA_TESTING_AI_CONNECTORS
+  return 0
+fi
+
 KBN_EVALS_CONFIG_JSON="$(printf '%s' "$KBN_EVALS_CONFIG_B64" | base64 -d)"
 
 LITELLM_BASE_URL="$(jq -r '.litellm.baseUrl // empty' <<<"$KBN_EVALS_CONFIG_JSON")"

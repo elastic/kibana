@@ -10,6 +10,7 @@ import type {
   Evaluator,
   EvaluationDataset,
   EvalsExecutorClient,
+  TaskOutput,
 } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { RuleExample, RuleInput } from '../../datasets/rules/types';
@@ -96,6 +97,9 @@ export function createRuleEvaluateDataset({
   dataset: EvaluationDataset<RuleExample>;
   vendor: 'splunk' | 'qradar';
 }) => Promise<void> {
+  const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+    evaluators.traceBasedEvaluators;
+
   const sharedEvaluators: Array<Evaluator<RuleExample, RuleMigrationResult>> = [
     createCustomQueryAccuracyEvaluator(),
     createLookupJoinPreservationEvaluator(),
@@ -105,6 +109,11 @@ export function createRuleEvaluateDataset({
     createUnsupportedPatternDetectionEvaluator(),
     createTranslationResultEvaluator(),
     createHallucinationDetectionEvaluator(evaluators),
+    toolCalls as Evaluator<RuleExample, TaskOutput>,
+    latency as Evaluator<RuleExample, TaskOutput>,
+    inputTokens as Evaluator<RuleExample, TaskOutput>,
+    outputTokens as Evaluator<RuleExample, TaskOutput>,
+    cachedTokens as Evaluator<RuleExample, TaskOutput>,
   ];
 
   const qradarEvaluators: Array<Evaluator<RuleExample, RuleMigrationResult>> = [

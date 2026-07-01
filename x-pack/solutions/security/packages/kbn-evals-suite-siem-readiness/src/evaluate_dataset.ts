@@ -11,7 +11,15 @@ import type {
   Evaluator,
   EvalsExecutorClient,
   Example,
+  TaskOutput,
 } from '@kbn/evals';
+import {
+  createSkillInvocationEvaluator,
+  createTrajectoryEvaluator,
+  getToolCallSteps,
+} from '@kbn/evals';
+import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { SiemReadinessEvalChatClient } from './chat_client';
 
 export interface SiemReadinessDatasetExample extends Example {
@@ -20,8 +28,16 @@ export interface SiemReadinessDatasetExample extends Example {
   };
   output: {
     criteria: string[];
+    /**
+     * Optional golden tool order for L2 trajectory / L4 ExpectedToolCalled.
+     * When omitted, both evaluators report N/A so the example doesn't dilute
+     * the suite's averages.
+     */
+    tool_sequence?: string[];
   };
 }
+
+const FILESTORE_READ_TOOL_ID = 'filestore.read';
 
 export type EvaluateSiemReadinessDataset = (options: {
   dataset: {
@@ -75,14 +91,92 @@ export function createSiemReadinessCriteriaEvaluator({
   };
 }
 
+/**
+ * L2 (Tool Trajectory) signal — code-judged, zero LLM cost. Returns N/A when an
+ * example has no `tool_sequence` annotation so partial-coverage datasets don't
+ * get penalised. Mirrors the alerts-rag / endpoint pattern.
+ */
+export function createSiemReadinessTrajectoryEvaluator(): Evaluator<
+  SiemReadinessDatasetExample,
+  TaskOutput
+> {
+  const inner = createTrajectoryEvaluator({
+    extractToolCalls: (output) =>
+      getToolCallSteps(output as TaskOutput)
+        .map((step) => step.tool_id)
+        .filter((id): id is string => Boolean(id) && id !== FILESTORE_READ_TOOL_ID),
+    goldenPathExtractor: (expected) => {
+      const exp = expected as SiemReadinessDatasetExample['output'] | undefined;
+      return exp?.tool_sequence ?? [];
+    },
+    orderWeight: 0.6,
+    coverageWeight: 0.4,
+  });
+
+  return {
+    ...inner,
+    name: 'Trajectory',
+    evaluate: async (args) => {
+      const exp = args.expected as SiemReadinessDatasetExample['output'] | undefined;
+      if (!exp?.tool_sequence || exp.tool_sequence.length === 0) {
+        return {
+          score: null,
+          label: 'N/A',
+          explanation: 'No tool_sequence annotation — skipping trajectory evaluation.',
+        };
+      }
+      return inner.evaluate(args);
+    },
+  } as Evaluator<SiemReadinessDatasetExample, TaskOutput>;
+}
+
+/**
+ * L4 (Tool Selection) signal — code-judged, zero LLM cost. Returns N/A when an
+ * example has no `tool_sequence` annotation. Scores 1 if the first tool in the
+ * golden sequence was called, 0 otherwise. Full-order alignment is covered by
+ * the Trajectory evaluator (L2).
+ */
+export const createSiemReadinessExpectedToolCalledEvaluator = (): Evaluator<
+  SiemReadinessDatasetExample,
+  TaskOutput
+> => ({
+  name: 'ExpectedToolCalled',
+  kind: 'CODE',
+  evaluate: async ({ output, expected }) => {
+    const exp = expected as SiemReadinessDatasetExample['output'] | undefined;
+    const toolSequence = exp?.tool_sequence;
+    if (!toolSequence?.length) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'No tool_sequence annotation — skipping ExpectedToolCalled.',
+      };
+    }
+
+    const expectedToolId = toolSequence[0];
+    const usedToolIds = getToolCallSteps(output as TaskOutput)
+      .map((step) => step.tool_id)
+      .filter((id): id is string => Boolean(id) && id !== FILESTORE_READ_TOOL_ID);
+
+    return {
+      score: usedToolIds.includes(expectedToolId) ? 1 : 0,
+      metadata: { expectedToolId, usedToolIds },
+    };
+  },
+});
+
 export function createEvaluateSiemReadinessDataset({
   evaluators,
   executorClient,
   chatClient,
+  traceEsClient,
+  log,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   chatClient: SiemReadinessEvalChatClient;
+  traceEsClient?: Client;
+  log?: ToolingLog;
 }): EvaluateSiemReadinessDataset {
   return async function evaluateSiemReadinessDataset({
     dataset: { name, description, examples },
@@ -99,6 +193,30 @@ export function createEvaluateSiemReadinessDataset({
       examples,
     } satisfies EvaluationDataset;
 
+    const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+      evaluators.traceBasedEvaluators;
+
+    const baseEvaluators: Evaluator<SiemReadinessDatasetExample, TaskOutput>[] = [
+      createSiemReadinessCriteriaEvaluator({ evaluators }),
+      createSiemReadinessTrajectoryEvaluator(),
+      createSiemReadinessExpectedToolCalledEvaluator(),
+      toolCalls as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
+      latency as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
+      inputTokens as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
+      outputTokens as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
+      cachedTokens as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
+    ];
+
+    if (traceEsClient && log) {
+      baseEvaluators.push(
+        createSkillInvocationEvaluator({
+          skillName: 'siem-readiness',
+          traceEsClient,
+          log,
+        }) as Evaluator<SiemReadinessDatasetExample, TaskOutput>
+      );
+    }
+
     await executorClient.runExperiment(
       {
         datasets: [dataset],
@@ -113,13 +231,7 @@ export function createEvaluateSiemReadinessDataset({
           };
         },
       },
-      [
-        createSiemReadinessCriteriaEvaluator({ evaluators }),
-        // Non-functional trace-based metrics (tool calls, latency, token usage).
-        // These are derived from the run's OTel trace and add no extra LLM cost,
-        // so always measure them alongside the quality criteria.
-        ...Object.values(evaluators.traceBasedEvaluators),
-      ]
+      baseEvaluators
     );
   };
 }

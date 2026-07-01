@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { createSkillInvocationEvaluator } from './skill_invocation';
+import {
+  createSkillInvocationEvaluator,
+  createExampleScopedSkillInvocationEvaluator,
+} from './skill_invocation';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -64,6 +67,32 @@ describe('createSkillInvocationEvaluator', () => {
     expect(calledQuery).toContain('attributes.elastic.inference.span.kind == "TOOL"');
     expect(calledQuery).toContain('attributes.gen_ai.tool.name == "filestore.read"');
     expect(calledQuery).toContain('*/data-exploration/SKILL.md*');
+    expect(calledQuery).toContain('attributes.gen_ai.tool.name == "load_skill"');
+    expect(calledQuery).toContain('"skill\\":\\"data-exploration\\"');
+  });
+
+  it('should build a query that detects load_skill invocations', async () => {
+    const evaluator = createSkillInvocationEvaluator({
+      traceEsClient: mockEsClient,
+      log: mockLog,
+      skillName: 'alert-analysis',
+    });
+
+    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+      columns: [
+        { name: 'total_spans', type: 'long' },
+        { name: 'total_tool_spans', type: 'long' },
+        { name: 'skill_invoked', type: 'long' },
+      ],
+      values: [[50, 2, 1]],
+    });
+
+    await evaluateWith(evaluator, VALID_TRACE_ID);
+
+    const calledQuery = (mockEsClient.esql.query as jest.Mock).mock.calls[0][0].query;
+    expect(calledQuery).toContain('attributes.gen_ai.tool.name == "load_skill"');
+    expect(calledQuery).toContain('"skill\\":\\"alert-analysis\\"');
+    expect(calledQuery).toContain('*/alert-analysis/SKILL.md*');
   });
 
   it('should return 1 when the skill was invoked', async () => {
@@ -287,5 +316,77 @@ describe('createSkillInvocationEvaluator', () => {
         skillName: 'bad"; DROP TABLE',
       })
     ).toThrow(/Invalid skillName/);
+  });
+});
+
+describe('createExampleScopedSkillInvocationEvaluator', () => {
+  let mockEsClient: jest.Mocked<EsClient>;
+  let mockLog: jest.Mocked<ToolingLog>;
+
+  beforeEach(() => {
+    mockEsClient = {
+      esql: {
+        query: jest.fn(),
+      },
+    } as any;
+
+    mockLog = {
+      error: jest.fn(),
+      warning: jest.fn(),
+      info: jest.fn(),
+      debug: jest.fn(),
+    } as any;
+  });
+
+  it('returns N/A when the example targets a different skill', async () => {
+    const evaluator = createExampleScopedSkillInvocationEvaluator({
+      traceEsClient: mockEsClient,
+      log: mockLog,
+      skillName: 'find-security-rules',
+      resolveContext: ({ metadata }) => ({
+        expectedSkill: (metadata as { expectedSkill?: string })?.expectedSkill,
+      }),
+    });
+
+    const result = await evaluator.evaluate({
+      input: {},
+      output: { traceId: VALID_TRACE_ID },
+      expected: {},
+      metadata: { expectedSkill: 'alert-analysis' },
+    });
+
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
+    expect(mockEsClient.esql.query).not.toHaveBeenCalled();
+  });
+
+  it('inverts the score for distractor examples', async () => {
+    const evaluator = createExampleScopedSkillInvocationEvaluator({
+      traceEsClient: mockEsClient,
+      log: mockLog,
+      skillName: 'find-security-rules',
+      resolveContext: ({ metadata }) => ({
+        shouldNotActivateSkill: (metadata as { shouldNotActivateSkill?: string })
+          ?.shouldNotActivateSkill,
+      }),
+    });
+
+    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+      columns: [
+        { name: 'total_spans', type: 'long' },
+        { name: 'total_tool_spans', type: 'long' },
+        { name: 'skill_invoked', type: 'long' },
+      ],
+      values: [[50, 2, 0]],
+    });
+
+    const result = await evaluator.evaluate({
+      input: {},
+      output: { traceId: VALID_TRACE_ID },
+      expected: {},
+      metadata: { shouldNotActivateSkill: 'find-security-rules' },
+    });
+
+    expect(result.score).toBe(1);
   });
 });

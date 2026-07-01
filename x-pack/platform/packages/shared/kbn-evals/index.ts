@@ -99,7 +99,12 @@ export {
 } from './src/evaluators/correctness/scoring';
 export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
-export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
+export {
+  withEvaluatorSpan,
+  withTaskSpan,
+  getCurrentTraceId,
+  resolveEvaluationTraceId,
+} from './src/utils/tracing';
 export { withRetry, type RetryOptions } from './src/utils/retry_utils';
 export {
   containsAllTerms,
@@ -147,6 +152,8 @@ export {
   type TraceBasedEvaluatorConfig,
   createSpanLatencyEvaluator,
   createSkillInvocationEvaluator,
+  createExampleScopedSkillInvocationEvaluator,
+  buildSkillInvokedCaseExpression,
   createToolCallsEvaluator,
 } from './src/evaluators/trace_based';
 export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';
