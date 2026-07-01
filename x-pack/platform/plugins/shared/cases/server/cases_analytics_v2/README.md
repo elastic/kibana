@@ -510,9 +510,13 @@ deliberate differences driven by the user-action shape:
   (`action.status_new`, `action.severity_new`, `action.assignees_changed`,
   `action.tags_changed`, `action.connector_id_new`) for the common
   analytical pivots, AND stringifies the full payload as
-  `action.payload_json` (`keyword`, `ignore_above: 32766`) so analysts
+  `action.payload_json` (`wildcard`, no length cap) so analysts
   can dig into any payload sub-field via ES|QL `MV_FROM_JSON` without
-  per-type mapping churn.
+  per-type mapping churn. `wildcard` (not `keyword`) is deliberate: a
+  `keyword` past `ignore_above` silently drops the value from the index
+  and doc values, so an oversized payload (large bulk-edit) would read
+  back as `null` in ES|QL; `wildcard` has no such cap and is built for
+  large, opaque strings queried with grep-style predicates.
 - **No `index.mode: lookup`.** `.cases-activity` is the **fact** table
   in the analytics model. ES|QL queries `FROM .cases-activity | LOOKUP
   JOIN .cases ON cases.id`; the lookup-mode index is on the cases side.

@@ -350,34 +350,51 @@ export class CasesAnalyticsV2Service {
     this.logger.info('cases-analytics v2 starting');
 
     // Bootstrap the cases + activity indices. Idempotent and
-    // independent; running them in parallel halves first-start latency
-    // on a fresh cluster. Errors are caught here (not inside ensure*)
-    // so the plugin still starts even when ES is temporarily at the
-    // shard limit — analytics is a downstream feature, not core.
-    // Administrators can trigger a re-bootstrap via the /reset route.
-    try {
-      await Promise.all([
-        ensureCaseIndex({ esClient: deps.esClient, logger: this.logger }),
-        ensureActivityIndex({ esClient: deps.esClient, logger: this.logger }),
-      ]);
-    } catch (err) {
+    // independent; settled in parallel so first-start latency on a fresh
+    // cluster is halved and one surface's failure doesn't mask the
+    // other's outcome. Bootstrap failure is non-fatal to plugin start —
+    // analytics is a downstream feature, not core.
+    const [caseBootstrap, activityBootstrap] = await Promise.allSettled([
+      ensureCaseIndex({ esClient: deps.esClient, logger: this.logger }),
+      ensureActivityIndex({ esClient: deps.esClient, logger: this.logger }),
+    ]);
+
+    // Swap each no-op writer for the real one ONLY if that surface's
+    // index bootstrapped. A writer whose index failed to bootstrap stays
+    // a no-op so a subsequent write can't implicitly create a mis-mapped
+    // `.cases*` index on clusters where `action.auto_create_index` is
+    // enabled — an auto-created index would silently replace the strict,
+    // hidden-index mapping with a dynamic one and corrupt the analytics
+    // contract. A surface left disabled here re-attempts bootstrap on the
+    // next Kibana restart (`/reset` deliberately refuses to run against a
+    // no-op writer, so restart is the recovery path for a start-time
+    // bootstrap failure).
+    if (caseBootstrap.status === 'fulfilled') {
+      this.writer = new CasesAnalyticsV2Writer({
+        esClient: deps.esClient,
+        logger: this.logger,
+      });
+    } else {
       this.logger.error(
-        `cases-analyticsV2: index bootstrap failed at plugin start: ${err?.message ?? err}`,
-        { error: err }
+        `cases-analyticsV2: .cases bootstrap failed at plugin start; case analytics writer stays disabled (no-op) to avoid implicitly creating a mis-mapped index. Restart Kibana once the cluster issue is resolved to re-attempt. Error: ${
+          caseBootstrap.reason?.message ?? caseBootstrap.reason
+        }`,
+        { error: caseBootstrap.reason }
       );
     }
-
-    // Swap the no-op writers for the real ones. From this point, every
-    // call through `writerProxy` / `activityWriterProxy` reaches
-    // Elasticsearch.
-    this.writer = new CasesAnalyticsV2Writer({
-      esClient: deps.esClient,
-      logger: this.logger,
-    });
-    this.activityWriter = new CasesActivityV2Writer({
-      esClient: deps.esClient,
-      logger: this.logger,
-    });
+    if (activityBootstrap.status === 'fulfilled') {
+      this.activityWriter = new CasesActivityV2Writer({
+        esClient: deps.esClient,
+        logger: this.logger,
+      });
+    } else {
+      this.logger.error(
+        `cases-analyticsV2: .cases-activity bootstrap failed at plugin start; activity analytics writer stays disabled (no-op) to avoid implicitly creating a mis-mapped index. Restart Kibana once the cluster issue is resolved to re-attempt. Error: ${
+          activityBootstrap.reason?.message ?? activityBootstrap.reason
+        }`,
+        { error: activityBootstrap.reason }
+      );
+    }
 
     // Capture lifecycle deps used after start by the reconciliation
     // task, administrator routes, and the per-request data-view ensure

@@ -261,7 +261,10 @@ export async function waitForActivityForCase(
     try {
       const search = await es.search<ActivityDocSource>({
         index: ACTIVITY_INDEX,
-        size: 100,
+        // Fetch at least `minCount` hits (floor of 100) so the threshold
+        // below is always satisfiable — a fixed `size: 100` would make any
+        // caller passing `minCount > 100` loop until timeout.
+        size: Math.max(minCount, 100),
         sort: [{ '@timestamp': { order: 'asc' } }],
         query: { term: { 'cases.id': caseId } },
       });

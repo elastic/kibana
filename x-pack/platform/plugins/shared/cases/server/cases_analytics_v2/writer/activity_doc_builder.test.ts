@@ -96,7 +96,7 @@ describe('buildActivityDoc', () => {
       expect(JSON.parse(doc.action.payload_json)).toEqual(payload);
     });
 
-    it('returns an empty string for an empty payload', () => {
+    it('serializes an empty payload as "{}"', () => {
       const doc = buildActivityDoc(makeUserAction('ua-1', { payload: {} }));
       expect(doc.action.payload_json).toBe('{}');
     });
