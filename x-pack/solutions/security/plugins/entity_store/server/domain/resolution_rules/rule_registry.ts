@@ -6,20 +6,33 @@
  */
 
 import {
+  RESOLUTION_RULE_KINDS,
   RESOLUTION_RULE_IDS,
+  type ResolutionRuleKind,
   type ResolutionRuleId,
 } from '../../../common/domain/resolution_rules/constants';
 
 export interface ResolutionRuleConfig {
   id: ResolutionRuleId;
+  kind: ResolutionRuleKind;
   description: string;
+  defaultEnabled: boolean;
 }
 
-// The rules wired into the maintainer and exposed by the API. Adding a rule here
-// is all that's needed to ship it — its per-rule state backfills on first run.
 export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
   {
     id: RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH,
+    kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
     description: 'Email exact match across identity providers',
+    defaultEnabled: true,
+  },
+  {
+    id: RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE,
+    kind: RESOLUTION_RULE_KINDS.RELATED_USER_BRIDGE,
+    description: 'Related user bridge across identity providers',
+    defaultEnabled: false,
   },
 ];
+
+export const getResolutionRuleConfig = (id: ResolutionRuleId): ResolutionRuleConfig | undefined =>
+  RESOLUTION_RULE_CONFIGS.find((config) => config.id === id);

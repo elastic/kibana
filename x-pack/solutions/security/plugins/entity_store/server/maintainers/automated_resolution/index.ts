@@ -6,12 +6,14 @@
  */
 
 import { RESOLUTION_RULE_IDS } from '../../../common/domain/resolution_rules/constants';
+import { RESOLUTION_RULE_KINDS } from '../../../common/domain/resolution_rules/constants';
 import type { RegisterEntityMaintainerConfig } from '../../tasks/entity_maintainers/types';
 import { ResolutionClient } from '../../domain/resolution';
 import type { AutomatedResolutionState, PerRuleState } from './types';
 import { migrate } from './migrate';
-import { RESOLUTION_RULE_CONFIGS } from './rule_config';
+import { RESOLUTION_RULE_CONFIGS } from '../../domain/resolution_rules';
 import { runEmailRuleResolution } from './run';
+import { runRelatedUserBridge } from '../related_user_bridge';
 
 export const MAINTAINER_ID = 'automated-resolution';
 
@@ -29,24 +31,49 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
   interval: '5m',
   initialState: createInitialState(),
   minLicense: 'enterprise',
-  run: async ({ status, abortController, logger, esClient }) => {
+  run: async ({ status, abortController, logger, esClient, resolutionRulesClient, telemetry }) => {
     const namespace = status.metadata.namespace;
     const state = migrate(status.state, logger);
 
     const resolutionClient = new ResolutionClient({ logger, esClient, namespace });
     const rules: Record<string, PerRuleState> = { ...state.rules };
+    const effectiveRules = new Map(
+      (await resolutionRulesClient.getEffectiveRules()).map((rule) => [rule.id, rule])
+    );
 
     for (const ruleConfig of RESOLUTION_RULE_CONFIGS) {
-      // Only the email rule has a runner today; further rules add their own.
-      if (ruleConfig.id === RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH) {
-        rules[ruleConfig.id] = await runEmailRuleResolution({
-          state: state.rules[ruleConfig.id] ?? EMPTY_RULE_STATE,
-          namespace,
-          esClient,
-          logger,
-          resolutionClient,
-          abortController,
-        });
+      const effectiveRule = effectiveRules.get(ruleConfig.id);
+      if (!effectiveRule?.enabled) {
+        logger.debug(`Skipping disabled resolution rule '${ruleConfig.id}'`);
+        continue;
+      }
+
+      const ruleState = state.rules[ruleConfig.id] ?? EMPTY_RULE_STATE;
+      try {
+        if (ruleConfig.kind === RESOLUTION_RULE_KINDS.SAME_FIELD) {
+          if (ruleConfig.id === RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH) {
+            rules[ruleConfig.id] = await runEmailRuleResolution({
+              state: ruleState,
+              namespace,
+              esClient,
+              logger,
+              resolutionClient,
+              abortController,
+            });
+          }
+        } else if (ruleConfig.kind === RESOLUTION_RULE_KINDS.RELATED_USER_BRIDGE) {
+          rules[ruleConfig.id] = await runRelatedUserBridge({
+            state: ruleState,
+            namespace,
+            esClient,
+            logger,
+            resolutionClient,
+            abortController,
+            telemetry,
+          });
+        }
+      } catch (error) {
+        logger.warn(`Resolution rule '${ruleConfig.id}' failed: ${error}`);
       }
     }
 

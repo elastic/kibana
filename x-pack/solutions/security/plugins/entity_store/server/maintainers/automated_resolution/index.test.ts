@@ -8,12 +8,36 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityMaintainerTaskMethodContext } from '../../tasks/entity_maintainers/types';
-import { RESOLUTION_RULE_IDS } from '../../../common/domain/resolution_rules/constants';
+import {
+  RESOLUTION_RULE_IDS,
+  RESOLUTION_RULE_KINDS,
+} from '../../../common/domain/resolution_rules/constants';
 import { automatedResolutionMaintainerConfig, MAINTAINER_ID } from '.';
+import { runRelatedUserBridge } from '../related_user_bridge';
 import type { AutomatedResolutionState } from './types';
 
 const EMAIL_RULE = RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH;
+const BRIDGE_RULE = RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE;
 const NAMESPACE = 'default';
+
+jest.mock('../related_user_bridge', () => ({
+  runRelatedUserBridge: jest.fn(),
+}));
+
+const DEFAULT_EFFECTIVE_RULES = [
+  {
+    id: RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH,
+    kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
+    managed: true,
+    enabled: true,
+  },
+  {
+    id: RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE,
+    kind: RESOLUTION_RULE_KINDS.RELATED_USER_BRIDGE,
+    managed: true,
+    enabled: false,
+  },
+];
 
 const noEmailsSearchResponse = {
   aggregations: {
@@ -41,7 +65,8 @@ const createEsClient = () =>
 
 const runConfig = async (
   esClient: ElasticsearchClient,
-  persistedState: unknown
+  persistedState: unknown,
+  effectiveRules = DEFAULT_EFFECTIVE_RULES
 ): Promise<AutomatedResolutionState> => {
   const context = {
     status: {
@@ -58,6 +83,10 @@ const runConfig = async (
     logger: loggerMock.create(),
     esClient,
     cpsEsClient: esClient,
+    resolutionRulesClient: {
+      getEffectiveRules: jest.fn().mockResolvedValue(effectiveRules),
+    },
+    telemetry: { report: jest.fn() },
   } as unknown as EntityMaintainerTaskMethodContext;
 
   const result = await automatedResolutionMaintainerConfig.run(context);
@@ -117,5 +146,35 @@ describe('automatedResolutionMaintainerConfig', () => {
       resolutionsCreated: 0,
       skippedAmbiguousBuckets: 0,
     });
+  });
+
+  it('skips disabled bridge rule and preserves its existing state', async () => {
+    const esClient = createEsClient();
+    const bridgeState = {
+      lastProcessedTimestamp: '2026-06-01T00:00:00Z',
+      lastRun: {
+        seedsScanned: 10,
+        linksCreated: 2,
+      },
+    };
+
+    const result = await runConfig(esClient, { rules: { [BRIDGE_RULE]: bridgeState } }, [
+      {
+        id: EMAIL_RULE,
+        kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
+        managed: true,
+        enabled: false,
+      },
+      {
+        id: BRIDGE_RULE,
+        kind: RESOLUTION_RULE_KINDS.RELATED_USER_BRIDGE,
+        managed: true,
+        enabled: false,
+      },
+    ]);
+
+    expect(runRelatedUserBridge).not.toHaveBeenCalled();
+    expect(esClient.search).not.toHaveBeenCalled();
+    expect(result.rules[BRIDGE_RULE]).toEqual(bridgeState);
   });
 });

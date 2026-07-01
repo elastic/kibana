@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-export {
-  ResolutionClient,
-  type LinkResult,
-  type CascadeResult,
-  type UnlinkResult,
-  type ResolutionGroup,
-} from './resolution_client';
-export { NAMESPACE_PRIORITY, selectTarget, type TargetSelectionEntity } from './target_selection';
+import { z } from '@kbn/zod/v4';
+
+export const ruleIdParamsSchema = z.object({
+  id: z.string().describe('The stable identifier of the entity resolution rule.'),
+});

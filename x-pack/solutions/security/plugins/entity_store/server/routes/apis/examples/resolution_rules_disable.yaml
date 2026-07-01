@@ -1,0 +1,31 @@
+summary: Disable an entity resolution rule
+description: Disables a managed entity resolution rule in the current space.
+parameters:
+  - name: id
+    in: path
+    required: true
+    schema:
+      type: string
+responses:
+  '200':
+    description: Updated entity resolution rule.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            id:
+              type: string
+            kind:
+              type: string
+            managed:
+              type: boolean
+            enabled:
+              type: boolean
+          required:
+            - id
+            - kind
+            - managed
+            - enabled
+  '404':
+    description: Unknown entity resolution rule.

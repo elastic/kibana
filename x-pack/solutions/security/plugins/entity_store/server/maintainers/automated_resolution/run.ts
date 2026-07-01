@@ -19,13 +19,13 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { getLatestEntitiesIndexName } from '../../../common';
 import type { ResolutionClient } from '../../domain/resolution';
+import { selectTarget } from '../../domain/resolution';
 import { getFieldValue } from '../../../common/domain/euid/commons';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
 import type { PerRuleState, MatchBucket, EntityHit } from './types';
 
 const MATCH_FIELD = 'user.email';
 const ENTITY_TYPE = 'user';
-const NAMESPACE_PRIORITY = ['active_directory', 'okta', 'entra_id'];
 const PAGE_SIZE = 10_000;
 const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
@@ -324,22 +324,4 @@ async function resolveMatchBuckets(
   return { resolutionsCreated, skippedAmbiguousBuckets, failedBuckets };
 }
 
-/**
- * Target selection: prefer entities from identity provider namespaces
- * (in priority order), with alphabetical entity.id tiebreaker.
- * Uses exact match on entity.namespace — normalized, stable identifiers
- * that don't change across index naming conventions.
- */
-export function selectTarget(entities: EntityHit[]): EntityHit {
-  for (const ns of NAMESPACE_PRIORITY) {
-    const candidates = entities.filter((e) => e.namespace === ns);
-    if (candidates.length > 0) {
-      candidates.sort((a, b) => a.entityId.localeCompare(b.entityId));
-      return candidates[0];
-    }
-  }
-
-  // Fallback: alphabetically first entity.id
-  const sorted = [...entities].sort((a, b) => a.entityId.localeCompare(b.entityId));
-  return sorted[0];
-}
+export { selectTarget };

@@ -36,6 +36,7 @@ import type { RemoteLogsExtractionClient } from './domain/logs_extraction/remote
 import type { HistorySnapshotClient } from './domain/history_snapshot';
 import type { CRUDClient } from './domain/crud';
 import type { ResolutionClient } from './domain/resolution';
+import type { ResolutionRulesClient } from './domain/resolution_rules';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 
 export interface EntityStoreSetupPlugins {
@@ -60,6 +61,7 @@ export interface EntityStoreApiRequestHandlerContext {
   entityMaintainersClient: EntityMaintainersClient;
   crudClient: CRUDClient;
   resolutionClient: ResolutionClient;
+  entityResolutionRuleClient: ResolutionRulesClient;
   remoteLogsExtractionClient: RemoteLogsExtractionClient;
   featureFlags: FeatureFlags;
   logsExtractionClient: LogsExtractionClient;

@@ -1,0 +1,30 @@
+summary: List entity resolution rules
+description: Lists managed entity resolution rules and their effective enabled state.
+responses:
+  '200':
+    description: Entity resolution rules.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            rules:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  kind:
+                    type: string
+                  managed:
+                    type: boolean
+                  enabled:
+                    type: boolean
+                required:
+                  - id
+                  - kind
+                  - managed
+                  - enabled
+          required:
+            - rules

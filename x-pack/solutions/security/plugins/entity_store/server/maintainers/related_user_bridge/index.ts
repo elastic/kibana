@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export {
-  ResolutionClient,
-  type LinkResult,
-  type CascadeResult,
-  type UnlinkResult,
-  type ResolutionGroup,
-} from './resolution_client';
-export { NAMESPACE_PRIORITY, selectTarget, type TargetSelectionEntity } from './target_selection';
+export { runRelatedUserBridge, type RunRelatedUserBridgeDeps } from './run';

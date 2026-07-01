@@ -6,10 +6,8 @@
  */
 
 export {
-  ResolutionClient,
-  type LinkResult,
-  type CascadeResult,
-  type UnlinkResult,
-  type ResolutionGroup,
-} from './resolution_client';
-export { NAMESPACE_PRIORITY, selectTarget, type TargetSelectionEntity } from './target_selection';
+  RESOLUTION_RULE_CONFIGS,
+  getResolutionRuleConfig,
+  type ResolutionRuleConfig,
+} from './rule_registry';
+export { ResolutionRulesClient, type EffectiveResolutionRule } from './rule_client';

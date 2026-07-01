@@ -18,6 +18,7 @@ import {
   type EntityMaintainerTaskMethod,
 } from './types';
 import { CRUDClient, type EntityUpdateClient } from '../../domain/crud';
+import { ResolutionRulesClient } from '../../domain/resolution_rules';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
 import { wrapTaskRun } from '../../telemetry/traces';
@@ -134,6 +135,7 @@ export async function executeMaintainerRun({
   const cpsEsClient = coreStart.elasticsearch.client.asScoped(request, {
     projectRouting: 'space',
   }).asCurrentUser;
+  const soClient = coreStart.savedObjects.getScopedClient(request);
   const crudClient = new CRUDClient({
     logger,
     esClient,
@@ -166,6 +168,11 @@ export async function executeMaintainerRun({
         esClient,
         cpsEsClient,
         crudClient,
+        resolutionRulesClient: new ResolutionRulesClient(
+          soClient,
+          maintainerStatus.metadata.namespace,
+          taskLogger
+        ),
         id,
         analytics,
         telemetryClient,
@@ -197,6 +204,7 @@ export async function runEntityMaintainerTask({
   esClient,
   cpsEsClient,
   crudClient,
+  resolutionRulesClient,
   id,
   analytics,
   telemetryClient,
@@ -210,6 +218,7 @@ export async function runEntityMaintainerTask({
   esClient: ElasticsearchClient;
   cpsEsClient: ElasticsearchClient;
   crudClient: EntityUpdateClient;
+  resolutionRulesClient: ResolutionRulesClient;
   id: string;
   analytics: TelemetryReporter;
   telemetryClient: InternalMaintainerTelemetryClient;
@@ -241,6 +250,7 @@ export async function runEntityMaintainerTask({
         esClient,
         cpsEsClient,
         crudClient,
+        resolutionRulesClient,
         telemetry: telemetryClient,
       });
       analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
@@ -258,6 +268,7 @@ export async function runEntityMaintainerTask({
       esClient,
       cpsEsClient,
       crudClient,
+      resolutionRulesClient,
       telemetry: telemetryClient,
     });
     analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {

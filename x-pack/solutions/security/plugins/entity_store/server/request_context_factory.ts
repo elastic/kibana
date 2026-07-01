@@ -21,6 +21,7 @@ import { createRemoteLogsExtractionClient } from './domain/logs_extraction/remot
 import { HistorySnapshotClient } from './domain/history_snapshot';
 import { CRUDClient } from './domain/crud';
 import { ResolutionClient } from './domain/resolution';
+import { ResolutionRulesClient } from './domain/resolution_rules';
 import type { TelemetryReporter } from './telemetry/events';
 
 interface EntityStoreApiRequestHandlerContextDeps {
@@ -131,6 +132,11 @@ export async function createRequestHandlerContext({
       esClient: core.elasticsearch.client.asCurrentUser,
       namespace,
     }),
+    entityResolutionRuleClient: new ResolutionRulesClient(
+      core.savedObjects.client,
+      namespace,
+      logger
+    ),
     remoteLogsExtractionClient,
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,

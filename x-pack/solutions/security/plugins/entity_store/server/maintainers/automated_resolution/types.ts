@@ -17,7 +17,7 @@ export interface PerRuleLastRunStats extends EntityMaintainerState {
 
 export interface PerRuleState extends EntityMaintainerState {
   lastProcessedTimestamp: string | null;
-  lastRun: PerRuleLastRunStats | null;
+  lastRun: EntityMaintainerState | null;
 }
 
 // `rules` is an open map keyed by rule id rather than a fixed set: a rule with no
