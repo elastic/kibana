@@ -10,6 +10,7 @@ import {
   EXTRACT_IOCS_API_PATH,
   THREAT_INTELLIGENCE_API_PRIVILEGES,
 } from '../../../common/threat_intelligence/hub';
+import { extractArticleHtml } from '../adapters/extract_article';
 import { htmlToStructured } from '../adapters/text';
 import { extractIocs } from '../services';
 import type { RouteRegistrationDeps } from '.';
@@ -67,7 +68,7 @@ export const registerExtractIocsRoute = ({ router, logger }: RouteRegistrationDe
           // extractIocs stays a pure string-in function.
           const inputText =
             request.body.html != null
-              ? htmlToStructured(request.body.html)
+              ? htmlToStructured(extractArticleHtml(request.body.html))
               : request.body.text;
           const result = extractIocs({
             text: inputText,
