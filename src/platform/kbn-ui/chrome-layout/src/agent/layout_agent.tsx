@@ -8,7 +8,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useCallback, useLayoutEffect, useMemo } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { euiIncludeSelectorInFocusTrap } from '@kbn/ui-chrome-layout-constants';
 
@@ -19,7 +19,7 @@ import {
 } from '../panel_layout_transition';
 import { resolveAgentPanelTargetWidth } from './resolve_agent_panel_target_width';
 import { useSyncAgentWidthDuringAnimation } from './use_sync_agent_width_during_animation';
-import { styles } from './layout_agent.styles';
+import { CONTENT_FADE_MS, contentHiddenStyles, styles } from './layout_agent.styles';
 
 export interface LayoutAgentProps {
   children: ReactNode;
@@ -75,6 +75,28 @@ export const LayoutAgent = ({ children }: LayoutAgentProps) => {
   const shouldSyncVisibleWidth = chromeStyle === 'project';
   const { syncWidth, flushWidth } = useSyncAgentWidthDuringAnimation(shouldSyncVisibleWidth);
 
+  const prevAgentWorkspaceOpenRef = useRef(agentWorkspaceOpen);
+  const prevTargetWidthRef = useRef(targetWidth);
+  const [contentOpacity, setContentOpacity] = useState(agentWorkspaceOpen ? 1 : 0);
+  const [isContentVisibilityHidden, setIsContentVisibilityHidden] = useState(!agentWorkspaceOpen);
+
+  const isDualPanelClose =
+    shouldAnimateWidth && applicationWorkspaceOpen && !agentWorkspaceOpen;
+
+  const widthTransition = useMemo(() => {
+    if (!shouldAnimateWidth) {
+      return { duration: 0 };
+    }
+
+    const base = getPanelLayoutTransition(true);
+
+    if (isDualPanelClose) {
+      return { ...base, delay: CONTENT_FADE_MS / 1000 };
+    }
+
+    return base;
+  }, [isDualPanelClose, shouldAnimateWidth]);
+
   useLayoutEffect(() => {
     if (!shouldSyncVisibleWidth || shouldAnimateWidth) {
       return;
@@ -82,6 +104,38 @@ export const LayoutAgent = ({ children }: LayoutAgentProps) => {
 
     flushWidth(targetWidth);
   }, [flushWidth, shouldAnimateWidth, shouldSyncVisibleWidth, targetWidth]);
+
+  useLayoutEffect(() => {
+    const prevOpen = prevAgentWorkspaceOpenRef.current;
+    const prevWidth = prevTargetWidthRef.current;
+
+    if (!shouldAnimateWidth) {
+      setContentOpacity(agentWorkspaceOpen ? 1 : 0);
+      setIsContentVisibilityHidden(!agentWorkspaceOpen);
+      prevAgentWorkspaceOpenRef.current = agentWorkspaceOpen;
+      prevTargetWidthRef.current = targetWidth;
+      return;
+    }
+
+    if (prevOpen && !agentWorkspaceOpen && applicationWorkspaceOpen) {
+      setIsContentVisibilityHidden(false);
+      setContentOpacity(0);
+    } else if (!prevOpen && agentWorkspaceOpen && applicationWorkspaceOpen) {
+      setIsContentVisibilityHidden(true);
+      setContentOpacity(0);
+    } else if (agentWorkspaceOpen && targetWidth < prevWidth) {
+      setIsContentVisibilityHidden(false);
+      setContentOpacity(0);
+    }
+
+    prevAgentWorkspaceOpenRef.current = agentWorkspaceOpen;
+    prevTargetWidthRef.current = targetWidth;
+  }, [
+    agentWorkspaceOpen,
+    applicationWorkspaceOpen,
+    shouldAnimateWidth,
+    targetWidth,
+  ]);
 
   const handleUpdate = useCallback(
     (latest: { width?: number | string }) => {
@@ -92,9 +146,29 @@ export const LayoutAgent = ({ children }: LayoutAgentProps) => {
     [syncWidth]
   );
 
-  const handleAnimationComplete = useCallback(() => {
+  const handleShellAnimationComplete = useCallback(() => {
     flushWidth(targetWidth);
-  }, [flushWidth, targetWidth]);
+
+    if (!shouldAnimateWidth) {
+      return;
+    }
+
+    if (agentWorkspaceOpen) {
+      setIsContentVisibilityHidden(false);
+      requestAnimationFrame(() => {
+        setContentOpacity(1);
+      });
+      return;
+    }
+
+    setIsContentVisibilityHidden(true);
+  }, [agentWorkspaceOpen, flushWidth, shouldAnimateWidth, targetWidth]);
+
+  const handleContentAnimationComplete = useCallback(() => {
+    if (isDualPanelClose && contentOpacity === 0) {
+      setIsContentVisibilityHidden(true);
+    }
+  }, [contentOpacity, isDualPanelClose]);
 
   return (
     <motion.div
@@ -102,15 +176,26 @@ export const LayoutAgent = ({ children }: LayoutAgentProps) => {
       className="kbnChromeLayoutAgent"
       initial={false}
       animate={{ width: targetWidth }}
-      transition={getPanelLayoutTransition(shouldAnimateWidth)}
+      transition={widthTransition}
       onUpdate={handleUpdate}
-      onAnimationComplete={handleAnimationComplete}
+      onAnimationComplete={handleShellAnimationComplete}
       data-test-subj="kbnChromeLayoutAgent"
       data-agent-workspace-open={agentWorkspaceOpen}
       {...euiIncludeSelectorInFocusTrap.prop}
     >
       <div css={styles.panel(chromeStyle)}>
-        <div css={styles.content}>{children}</div>
+        <motion.div
+          css={[styles.content, isContentVisibilityHidden ? contentHiddenStyles : undefined]}
+          initial={false}
+          animate={{ opacity: contentOpacity }}
+          transition={{
+            duration: shouldAnimateWidth ? CONTENT_FADE_MS / 1000 : 0,
+            ease: 'easeInOut',
+          }}
+          onAnimationComplete={handleContentAnimationComplete}
+        >
+          {children}
+        </motion.div>
       </div>
     </motion.div>
   );

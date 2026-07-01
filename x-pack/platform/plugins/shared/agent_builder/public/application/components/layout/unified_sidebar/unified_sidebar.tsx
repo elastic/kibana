@@ -25,18 +25,23 @@ import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id'
 import { ConversationSidebarView } from './views/conversation_view';
 import { ManageSidebarView } from './views/manage_view';
 import { SidebarHeader } from './shared/sidebar_header';
+import type { CondensedSidebarTransitionState } from './use_condensed_sidebar_transition';
+export { CONDENSED_SIDEBAR_WIDTH, SIDEBAR_WIDTH } from './unified_sidebar.constants';
 
-export const SIDEBAR_WIDTH = 300;
-export const CONDENSED_SIDEBAR_WIDTH = 48;
-
-interface UnifiedSidebarProps {
-  isCondensed: boolean;
+interface UnifiedSidebarProps extends CondensedSidebarTransitionState {
   onToggleCondensed: () => void;
 }
 
+const expandedContentHiddenStyles = css`
+  visibility: hidden;
+`;
+
 export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
-  isCondensed,
   onToggleCondensed,
+  showCondensedChrome,
+  showExpandedChrome,
+  isExpandedContentHidden,
+  expandedContentStyles,
 }) => {
   const location = useLocation();
   const sidebarView = getSidebarViewForRoute(location.pathname);
@@ -60,17 +65,20 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
   );
 
   const sidebarStyles = css`
-    width: ${isCondensed ? CONDENSED_SIDEBAR_WIDTH : SIDEBAR_WIDTH}px;
+    width: 100%;
     height: 100%;
     border-radius: 0;
     display: flex;
     flex-direction: column;
-    padding-top: ${isCondensed ? euiTheme.size.s : 0};
+    padding-top: ${showCondensedChrome && !showExpandedChrome ? euiTheme.size.s : 0};
+    overflow: hidden;
   `;
 
   const sidebarContentStyles = css`
     flex: 1;
     position: relative;
+    min-height: 0;
+    min-width: 0;
     overflow: hidden;
   `;
 
@@ -87,11 +95,19 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
         sidebarView={sidebarView}
         agentId={agentIdFromUrl ?? getLastAgentId()}
         getNavigationPath={getNavigationPath}
-        isCondensed={isCondensed}
+        showCondensedChrome={showCondensedChrome}
+        showExpandedChrome={showExpandedChrome}
+        expandedChromeStyles={expandedContentStyles}
         onToggleCondensed={onToggleCondensed}
       />
-      {!isCondensed && (
-        <EuiFlexGroup css={sidebarContentStyles}>
+      {showExpandedChrome && (
+        <EuiFlexGroup
+          css={[
+            sidebarContentStyles,
+            expandedContentStyles,
+            isExpandedContentHidden ? expandedContentHiddenStyles : undefined,
+          ]}
+        >
           {sidebarView === 'conversation' && <ConversationSidebarView />}
           {sidebarView === 'manage' && <ManageSidebarView pathname={location.pathname} />}
         </EuiFlexGroup>
