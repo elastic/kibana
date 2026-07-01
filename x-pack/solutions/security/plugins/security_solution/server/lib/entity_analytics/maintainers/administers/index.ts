@@ -69,7 +69,8 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
         droppedNotInStore: result.totalNotFound,
         failed: result.totalWriteErrors,
         metadataDocsApplied: result.totalMetadataDocsApplied,
-        // TODO: extend telemetry schema to include droppedTargets (phantom ID validation)
+        // TODO: investigate whether to extend the telemetry funnel schema with a new field for
+        // droppedTargets (result.totalDroppedTargets) or map it to an existing field before wiring.
       },
       sources: collector.sources,
       ...(Object.keys(collector.relationshipTypeApplied).length > 0 && {
@@ -91,9 +92,10 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
       return status.state;
     }
 
+    const { lastRunTimestamp, ...persistedResult } = result;
     return {
-      ...result,
-      lastProcessedTimestamp: result.lastRunTimestamp,
+      ...persistedResult,
+      lastProcessedTimestamp: lastRunTimestamp,
     };
   },
 };
