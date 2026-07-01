@@ -39,7 +39,7 @@ jobs:
             .github/codeql/codeql-config.yml > "$RUNNER_TEMP/extract-config.yml"
           echo "--- extraction config ---"; head -3 "$RUNNER_TEMP/extract-config.yml"
 
-      - name: Create database (mirrors CI extraction: SKIP_TYPES + paths-ignore)
+      - name: "Create database (SKIP_TYPES + paths-ignore, mirrors CI)"
         env:
           CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES: "true"
         run: |
