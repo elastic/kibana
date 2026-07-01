@@ -403,6 +403,9 @@ const InteractiveSwitchWrapper = (props: AppMenuWrapperProps) => {
         setChecked(value);
         action('switch-toggled')(value);
       },
+      tooltipContent: checked
+        ? 'Disable to stop running the workflow'
+        : 'Enable to start running the workflow',
       'data-test-subj': 'switch',
     },
   };
