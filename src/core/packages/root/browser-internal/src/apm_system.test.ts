@@ -158,6 +158,76 @@ describe('ApmSystem', () => {
           'cached-resources': 0,
         });
       });
+
+      it('sets a low-cardinality fallback name when no parameterized page is available', async () => {
+        const apmSystem = new ApmSystem({ active: true });
+        const currentAppId$ = new Subject<string>();
+        const executionContext = executionContextServiceMock.createInternalStartContract();
+        executionContext.get.mockReturnValue({
+          type: 'application',
+          name: 'myapp',
+          url: '/app/myapp',
+        });
+        const mockTransaction: MockedKeys<Transaction> = {
+          type: 'page-load',
+          name: '/app/myapp/some/raw/path',
+          // @ts-expect-error 2345
+          block: jest.fn(),
+          mark: jest.fn(),
+          end: jest.fn(),
+          addLabels: jest.fn(),
+        };
+        apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
+        await apmSystem.setup();
+        await apmSystem.start({
+          application: {
+            currentAppId$,
+          } as any as InternalApplicationStart,
+          executionContext,
+        });
+        currentAppId$.next('myapp');
+
+        // Simulate `.end()` firing the transaction:end observer: it must not
+        // override the fallback name when no parameterized page is available.
+        const observer = apmMock.observe.mock.calls[1][1];
+        observer(mockTransaction);
+
+        expect(mockTransaction.name).toBe('/app/myapp');
+      });
+
+      it('normalizes the page load transaction name from the execution context', async () => {
+        const apmSystem = new ApmSystem({ active: true });
+        const currentAppId$ = new Subject<string>();
+        const executionContext = executionContextServiceMock.createInternalStartContract();
+        executionContext.get.mockReturnValue({
+          name: 'apm',
+          page: '/services/:serviceName/overview',
+        });
+        const mockTransaction: MockedKeys<Transaction> = {
+          type: 'page-load',
+          name: '/app/apm/services/my-service/overview',
+          // @ts-expect-error 2345
+          block: jest.fn(),
+          mark: jest.fn(),
+          end: jest.fn(),
+          addLabels: jest.fn(),
+        };
+        apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
+        await apmSystem.setup();
+        await apmSystem.start({
+          application: {
+            currentAppId$,
+          } as any as InternalApplicationStart,
+          executionContext,
+        });
+        currentAppId$.next('apm');
+
+        // The route-change normalization observer is the second registered observer
+        const observer = apmMock.observe.mock.calls[1][1];
+        observer(mockTransaction);
+
+        expect(mockTransaction.name).toBe('apm /services/:serviceName/overview');
+      });
     });
 
     describe('http request normalization', () => {
