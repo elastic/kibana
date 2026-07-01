@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseThresholdEsql, parseRecoveryBlock } from './parse_esql';
+import { parseThresholdEsql, parseRecoveryBlock, parseDiscoverQueryForBuilder } from './parse_esql';
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
 import { Aggregation, Comparator } from './form_types';
 import type { ThresholdFormValues } from './form_types';
@@ -894,5 +894,197 @@ describe('recovery round-trip', () => {
     const result = parseThresholdEsql(alertQuery);
     expect(result).not.toBeNull();
     expect(result!.recovery).toBeUndefined();
+  });
+});
+
+describe('parseDiscoverQueryForBuilder', () => {
+  describe('returns null for unparseable queries', () => {
+    it('returns null for empty string', () => {
+      expect(parseDiscoverQueryForBuilder('')).toBeNull();
+    });
+
+    it('returns null for whitespace', () => {
+      expect(parseDiscoverQueryForBuilder('   ')).toBeNull();
+    });
+
+    it('returns null for invalid ES|QL', () => {
+      expect(parseDiscoverQueryForBuilder('NOT VALID ESQL AT ALL')).toBeNull();
+    });
+
+    it('returns null for query not starting with FROM', () => {
+      expect(parseDiscoverQueryForBuilder('ROW x = 1')).toBeNull();
+    });
+  });
+
+  describe('delegates to parseThresholdEsql for complete threshold queries', () => {
+    it('returns full builder state for FROM + STATS + WHERE', () => {
+      const result = parseDiscoverQueryForBuilder(
+        'FROM logs-* | STATS count = COUNT(*) | WHERE count > 100'
+      );
+      expect(result).not.toBeNull();
+      expect(result!.indexPattern).toBe('logs-*');
+      expect(result!.stats[0].aggregation).toBe(Aggregation.COUNT);
+      expect(result!.alertConditions[0].metric).toBe('count');
+      expect(result!.alertConditions[0].comparator).toBe(Comparator.GT);
+      expect(result!.alertConditions[0].threshold).toEqual([100]);
+    });
+
+    it('returns full builder state with filter and STATS', () => {
+      const result = parseDiscoverQueryForBuilder(
+        'FROM logs-* | WHERE service.name == "api" | STATS errors = COUNT(*) WHERE status >= 500'
+      );
+      expect(result).not.toBeNull();
+      expect(result!.filterQuery).toBe('service.name == "api"');
+      expect(result!.stats[0].label).toBe('errors');
+      expect(result!.stats[0].filter).toBe('status >= 500');
+    });
+
+    it('reconciles empty alert condition metric to the first stat label for STATS-only queries', () => {
+      const result = parseDiscoverQueryForBuilder(
+        'FROM logs-* | STATS request_rate = COUNT(*) BY container.id'
+      );
+      expect(result).not.toBeNull();
+      expect(result!.stats[0].label).toBe('request_rate');
+      expect(result!.alertConditions[0].metric).toBe('request_rate');
+      expect(result!.alertConditions[0].comparator).toBe(Comparator.GT);
+      expect(result!.alertConditions[0].threshold).toEqual([100]);
+      expect(result!.groupByFields).toEqual(['container.id']);
+    });
+
+    it('reconciles across multiple stats — maps empty metric to first stat label', () => {
+      const result = parseDiscoverQueryForBuilder(
+        'FROM logs-* | STATS errors = COUNT(*) WHERE status >= 500, total = COUNT(*)'
+      );
+      expect(result).not.toBeNull();
+      expect(result!.alertConditions[0].metric).toBe('errors');
+    });
+  });
+
+  describe('extracts index pattern and filter from Discover queries', () => {
+    it('extracts index pattern and filter from FROM + WHERE', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-* | WHERE status >= 500');
+      expect(result).not.toBeNull();
+      expect(result!.indexPattern).toBe('logs-*');
+      expect(result!.filterQuery).toBe('status >= 500');
+      expect(result!.stats).toHaveLength(1);
+      expect(result!.stats[0].aggregation).toBe(Aggregation.COUNT);
+      expect(result!.alertConditions).toHaveLength(1);
+    });
+
+    it('extracts index pattern from FROM-only query', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-*');
+      expect(result).not.toBeNull();
+      expect(result!.indexPattern).toBe('logs-*');
+      expect(result!.filterQuery).toBeUndefined();
+    });
+
+    it('extracts compound WHERE filter', () => {
+      const result = parseDiscoverQueryForBuilder(
+        'FROM logs-* | WHERE service.name == "api" AND status >= 400'
+      );
+      expect(result).not.toBeNull();
+      expect(result!.filterQuery).toContain('service.name == "api"');
+      expect(result!.filterQuery).toContain('status >= 400');
+    });
+
+    it('extracts index pattern with wildcard', () => {
+      const result = parseDiscoverQueryForBuilder('FROM metrics-apm.* | WHERE env == "prod"');
+      expect(result).not.toBeNull();
+      expect(result!.indexPattern).toBe('metrics-apm.*');
+      expect(result!.filterQuery).toBe('env == "prod"');
+    });
+
+    it('extracts index pattern for remote cluster', () => {
+      const result = parseDiscoverQueryForBuilder('FROM remote:logs-* | WHERE status >= 500');
+      expect(result).not.toBeNull();
+      expect(result!.indexPattern).toBe('remote:logs-*');
+    });
+  });
+
+  describe('handles queries with extra commands after FROM/WHERE', () => {
+    it('extracts index and filter when LIMIT follows', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-* | WHERE status >= 500 | LIMIT 10');
+      expect(result).not.toBeNull();
+      expect(result!.indexPattern).toBe('logs-*');
+      expect(result!.filterQuery).toBe('status >= 500');
+    });
+
+    it('extracts index and filter when SORT follows', () => {
+      const result = parseDiscoverQueryForBuilder(
+        'FROM logs-* | WHERE status >= 500 | SORT @timestamp DESC'
+      );
+      expect(result).not.toBeNull();
+      expect(result!.indexPattern).toBe('logs-*');
+      expect(result!.filterQuery).toBe('status >= 500');
+    });
+
+    it('extracts index when KEEP follows FROM', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-* | KEEP status, message');
+      expect(result).not.toBeNull();
+      expect(result!.indexPattern).toBe('logs-*');
+      expect(result!.filterQuery).toBeUndefined();
+    });
+
+    it('only extracts first WHERE as filter, ignoring non-WHERE commands', () => {
+      const result = parseDiscoverQueryForBuilder(
+        'FROM logs-* | WHERE status >= 500 | EVAL doubled = status * 2 | WHERE doubled > 1000'
+      );
+      expect(result).not.toBeNull();
+      expect(result!.indexPattern).toBe('logs-*');
+      expect(result!.filterQuery).toBe('status >= 500');
+    });
+  });
+
+  describe('provides default builder values for non-extracted fields', () => {
+    it('provides default stats with COUNT aggregation', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-* | WHERE status >= 500');
+      expect(result).not.toBeNull();
+      expect(result!.stats).toHaveLength(1);
+      expect(result!.stats[0].aggregation).toBe(Aggregation.COUNT);
+      expect(result!.stats[0].label).toBe('count');
+    });
+
+    it('provides default alert condition', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-* | WHERE status >= 500');
+      expect(result).not.toBeNull();
+      expect(result!.alertConditions).toHaveLength(1);
+      expect(result!.alertConditions[0].metric).toBe('count');
+      expect(result!.alertConditions[0].comparator).toBe(Comparator.GT);
+      expect(result!.alertConditions[0].threshold).toEqual([100]);
+    });
+
+    it('defaults timeField to @timestamp', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-*');
+      expect(result).not.toBeNull();
+      expect(result!.timeField).toBe('@timestamp');
+    });
+
+    it('defaults conditionOperator to AND', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-*');
+      expect(result).not.toBeNull();
+      expect(result!.conditionOperator).toBe('AND');
+    });
+
+    it('defaults groupByFields to empty array', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-*');
+      expect(result).not.toBeNull();
+      expect(result!.groupByFields).toEqual([]);
+    });
+
+    it('defaults evaluations to empty array', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-*');
+      expect(result).not.toBeNull();
+      expect(result!.evaluations).toEqual([]);
+    });
+  });
+
+  describe('generates unique IDs', () => {
+    it('generates unique IDs for stats and conditions', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-*');
+      expect(result).not.toBeNull();
+      expect(result!.stats[0].id).toBeDefined();
+      expect(result!.alertConditions[0].id).toBeDefined();
+      expect(result!.stats[0].id).not.toBe(result!.alertConditions[0].id);
+    });
   });
 });
