@@ -4,7 +4,7 @@
     "outDir": "target/types",
   },
   "include": [
-    "public/**/*",
+    "public/**/*", "test/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -22,6 +22,7 @@
     "@kbn/code-editor",
     "@kbn/rollup",
     "@kbn/css-utils",
+    "@kbn/scout",
   ],
   "exclude": [
     "target/**/*",
