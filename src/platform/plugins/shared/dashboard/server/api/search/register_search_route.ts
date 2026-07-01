@@ -56,7 +56,7 @@ export function registerSearchRoute(
       },
       validate: {
         request: {
-          query: schema.oneOf([searchRequestParamsSchema, legacySearchRequestParamsSchema]),
+          query: searchRequestParamsSchema,
         },
         response: {
           200: {
