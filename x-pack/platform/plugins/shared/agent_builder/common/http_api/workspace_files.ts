@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export type { RendererDefinition, RendererPayloadOf } from './renderer_definition';
-export { renderFileSchema, type RenderFile } from './render_file';
+export interface ReadWorkspaceFileResponse {
+  /** Normalized absolute `/workspace` path that was read. */
+  path: string;
+  /** UTF-8 decoded file content. */
+  content: string;
+}

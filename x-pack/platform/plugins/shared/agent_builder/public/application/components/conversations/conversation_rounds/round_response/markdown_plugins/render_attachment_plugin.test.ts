@@ -6,8 +6,6 @@
  */
 
 import type { ReactElement } from 'react';
-import unified from 'unified';
-import remarkParse from 'remark-parse-no-trim';
 import type { Node, Parent } from 'unist';
 import type {
   AttachmentVersionRef,
@@ -22,18 +20,8 @@ import {
 import { AttachmentLoadingSkeleton } from '../attachments/attachment_loading_skeleton';
 import { InlineAttachmentWithActions } from '../attachments/inline_attachment_with_actions';
 import { renderAttachmentElement } from '@kbn/agent-builder-common/tools/custom_rendering';
+import { parseMarkdown } from './test_utils';
 import type { MutableNode } from './utils';
-
-/**
- * Parses markdown the same way the chat renderer does (remark parser + the
- * render_attachment tag parser transformer), so the test exercises the real
- * mdast shapes produced by remark rather than hand-built trees.
- */
-const parseMarkdown = (markdown: string): Node => {
-  const processor = unified().use(remarkParse).use(renderAttachmentTagParser);
-  const tree = processor.parse(markdown);
-  return processor.runSync(tree);
-};
 
 const collectNodesByType = (tree: Node, type: string): MutableNode[] => {
   const found: MutableNode[] = [];

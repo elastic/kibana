@@ -9,6 +9,7 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
+import type { RendererTypeDefinition } from '@kbn/agent-builder-server/renderers';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ResolvedConfiguration } from '../types';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
@@ -32,6 +33,7 @@ export interface PromptFactoryParams {
   outputSchema?: Record<string, unknown>;
   conversationTimestamp: string;
   experimentalFeatures: ExperimentalFeatures;
+  renderers: RendererTypeDefinition[];
 }
 
 export interface ResearchAgentPromptRuntimeParams {

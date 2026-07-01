@@ -17,6 +17,7 @@ import { formatDate } from './utils/helpers';
 import { getFileSystemInstructions } from './utils/filestore';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 import { renderVisualizationPrompt } from './utils/visualizations';
+import { renderRenderersPrompt } from './utils/renderers';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
 
@@ -57,8 +58,11 @@ const getAgentSystemMessage = async ({
   skills,
   experimentalFeatures,
   capabilities,
+  renderers,
 }: ResearchAgentPromptParams): Promise<string> => {
   const visEnabled = capabilities.visualizations;
+
+  const rendersEnabled = experimentalFeatures.bash && renderers.length > 0;
 
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -139,6 +143,8 @@ When the user picks from the @ menu, the message includes markdown links: \`[@la
 ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 
 ${renderAttachmentPrompt()}
+
+${rendersEnabled ? renderRenderersPrompt(renderers) : ''}
 
 ## ADDITIONAL INFO
 - Current date: ${formatDate(conversationTimestamp)}`);

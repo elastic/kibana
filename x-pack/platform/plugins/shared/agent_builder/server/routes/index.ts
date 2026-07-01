@@ -24,6 +24,7 @@ import { registerSkillsRoutes } from './skills';
 import { registerPluginsRoutes } from './plugins';
 import { registerInternalExecutionRoutes } from './internal/executions';
 import { registerAccessPrincipalsRoutes } from './internal/access_principals';
+import { registerWorkspaceFileRoutes } from './internal/workspace_files';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
@@ -44,4 +45,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerPluginsRoutes(dependencies);
   registerInternalExecutionRoutes(dependencies);
   registerAccessPrincipalsRoutes(dependencies);
+  registerWorkspaceFileRoutes(dependencies);
 };
