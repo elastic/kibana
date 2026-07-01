@@ -47,7 +47,7 @@ describe('Case View Page similar cases tab', () => {
     const { KibanaServices } = jest.requireMock('../../../common/lib/kibana') as {
       KibanaServices: { getConfig: jest.Mock };
     };
-    KibanaServices.getConfig.mockReturnValueOnce({ casesRedesign: { details: true } });
+    KibanaServices.getConfig.mockReturnValue({ casesRedesign: { details: true } });
 
     renderWithTestingProviders(<CaseViewSimilarCases caseData={caseData} />);
 
