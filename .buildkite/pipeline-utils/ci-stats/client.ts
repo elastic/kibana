@@ -7,8 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { gzipSync } from 'zlib';
 import type { Method, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
+
+// Version of the ci-stats _pick_test_group_run_order endpoint. v3 is a
+// drop-in replacement for v2 (same request/response/auth) with server-side
+// caching and gzip request support. Switch to 'v2' to roll back; everything
+// version-specific is keyed off this constant below.
+const PICK_RUN_ORDER_VERSION: 'v2' | 'v3' = 'v2' as 'v2' | 'v3';
+
+// v3 accepts gzip-compressed request bodies (Content-Encoding: gzip); v2 does not.
+const PICK_RUN_ORDER_GZIP_REQUEST = PICK_RUN_ORDER_VERSION === 'v3';
 
 export interface CiStatsClientConfig {
   baseUrl?: string;
@@ -183,13 +193,33 @@ export class CiStatsClient {
     console.log('requesting test group run order from ci-stats:');
     console.log(JSON.stringify(body, null, 2));
 
+    // axios sends Accept-Encoding: gzip by default and decompresses the
+    // response transparently, regardless of how we send the request.
+    const json = JSON.stringify(body);
+    let data;
+    let headers = {};
+    if (PICK_RUN_ORDER_GZIP_REQUEST) {
+      console.time('gzip');
+      data = gzipSync(Buffer.from(json));
+      headers = { 'Content-Encoding': 'gzip' };
+      console.timeEnd('gzip');
+    } else {
+      data = json;
+    }
+
+    console.time('request');
     const resp = await axios.request<TestGroupRunOrderResponse>({
       method: 'POST',
       baseURL: this.baseUrl,
-      headers: this.defaultHeaders,
-      url: '/v2/_pick_test_group_run_order',
-      data: body,
+      headers: {
+        ...this.defaultHeaders,
+        'Content-Type': 'application/json',
+        ...headers,
+      },
+      url: `/${PICK_RUN_ORDER_VERSION}/_pick_test_group_run_order`,
+      data,
     });
+    console.timeEnd('request');
 
     return resp.data;
   };
