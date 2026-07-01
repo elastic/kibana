@@ -83,7 +83,7 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
 export const CollisionStrategySchema = z
   .enum(['cancel-in-progress', 'drop', 'queue'])
   .describe(
-    'How to handle collisions when max concurrent runs is exceeded: drop, cancel-in-progress, or queue.'
+    'How to handle collisions when max concurrent runs is exceeded: `drop`, `cancel-in-progress` or `queue`.'
   );
 export type CollisionStrategy = z.infer<typeof CollisionStrategySchema>;
 
@@ -110,10 +110,10 @@ export const ConcurrencySettingsSchema = z.object({
     .min(1)
     .optional()
     .describe(
-      'Only applies when strategy is `queue`. Maximum backlog size before new runs are skipped (default: 100).'
+      'Only applies when strategy is `queue`. Maximum backlog size before new runs are skipped (default: `100`).'
     ),
   'queue-ttl': DurationSchema.optional().describe(
-    'Only applies when strategy is `queue`. Max time a run may stay queued before it is skipped (default: 24h).'
+    'Only applies when strategy is `queue`. Max time a run may stay queued before it is skipped (default: `24h`).'
   ),
 });
 export type ConcurrencySettings = z.infer<typeof ConcurrencySettingsSchema>;

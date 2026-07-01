@@ -364,7 +364,10 @@ export class WorkflowExecutionRepository {
         },
       },
       _source: ['id'], // Only fetch ID field for efficiency
-      sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }], // Stable FIFO ordering
+      sort: [
+        { createdAt: { order: 'asc' } },
+        { id: { order: 'asc' } }, // Tie-break for determinism when createdAt collides; not chronological order
+      ],
       size: Math.min(size, 10000), // Cap at ES default max_result_window for validation
     });
 
