@@ -7,12 +7,7 @@
  */
 
 const { slugifyId } = require('./slugify_id');
-const {
-  parseMaybeBase64Json,
-  parseVaultConfig,
-  connectorIdToLitellmModel,
-  buildLitellmConnectorFromVault,
-} = require('./ai_connectors');
+const { parseMaybeBase64Json, buildLitellmConnectorFromVault } = require('./ai_connectors');
 
 const MAX_LOG_EXCERPT_CHARS = 4000;
 const MAX_CONTEXT_JSON_BYTES = 30 * 1024;
@@ -22,6 +17,27 @@ const DEFAULT_TRIAGE_MODEL_ID = 'litellm-llm-gateway-claude-haiku-4-5';
 
 const TRIAGE_SYSTEM_PROMPT =
   'You are an SRE assistant triaging failed LLM evaluation CI runs. Be concise and factual, and base every statement on the provided context.';
+
+// Static output contract for the per-suite structured triage prompt.
+const TRIAGE_OUTPUT_INSTRUCTIONS = `Return ONLY a JSON object of this shape (no prose, no markdown, no code fences):
+{"groups":[{"error":"<most relevant error line, verbatim from the excerpts, one line>","location":"<file:line / test or scenario if shown, else empty>","models":["<affected model id>"],"rootCause":"<short cause + one short action>"}]}
+
+Rules:
+- One group per distinct error. Merge the same failure (same message/location) into one group and list all its affected models.
+- Quote "error" verbatim from the excerpts; do not invent errors, file names, line numbers, or causes.
+- Set "location" only if the excerpts show it; otherwise use an empty string.
+- Keep "rootCause" to one short sentence plus one short action.
+- If the excerpts show no clear error, return {"groups": []}.
+- Output valid JSON only: no prose before or after, no comments, no trailing commas, no code fences.`;
+
+// Static output contract for the weekly cross-suite rollup prompt.
+const WEEKLY_ROLLUP_OUTPUT_INSTRUCTIONS = `Output exactly these bullets, in this order, and nothing else:
+- Overall: <X> suites likely retryable, <Y> need a team to investigate.
+- Shared causes: group suites that share the same likely cause (e.g. "3 suites hit the same gpt-5.4 timeout"); omit this bullet if no cause is shared.
+- Needs action: list suite ids that need investigation, each with a one-line cause.
+- Retry: list suite ids that can simply be retried.
+
+Constraints: base everything on the per-suite triage above (do not invent suites, models, or causes); no second person, narration, or preamble; portable markdown only (bullets and inline \`code\`; no bold, headings, links, or code fences); stay under 900 characters.`;
 
 function failureLogMetadataKey(suiteId, project) {
   return `kbn-evals:suite-failure-log:${slugifyId(suiteId)}:${slugifyId(project)}`;
@@ -78,16 +94,7 @@ function buildTriageUserPrompt(context, header) {
     'Failure context (JSON, includes each model log excerpt):',
     truncateContextJson(context),
     '',
-    'Return ONLY a JSON object of this shape (no prose, no markdown, no code fences):',
-    '{"groups":[{"error":"<most relevant error line, verbatim from the excerpts, one line>","location":"<file:line / test or scenario if shown, else empty>","models":["<affected model id>"],"rootCause":"<short cause + one short action>"}]}',
-    '',
-    'Rules:',
-    '- One group per distinct error. Merge the same failure (same message/location) into one group and list all its affected models.',
-    '- Quote "error" verbatim from the excerpts; do not invent errors, file names, line numbers, or causes.',
-    '- Set "location" only if the excerpts show it; otherwise use an empty string.',
-    '- Keep "rootCause" to one short sentence plus one short action.',
-    '- If the excerpts show no clear error, return {"groups": []}.',
-    '- Output valid JSON only: no prose before or after, no comments, no trailing commas, no code fences.'
+    TRIAGE_OUTPUT_INSTRUCTIONS
   );
 
   return lines.join('\n');
@@ -163,16 +170,7 @@ function buildWeeklyRollupUserPrompt(suites, meta = {}) {
     );
   }
 
-  lines.push(
-    '',
-    'Output exactly these bullets, in this order, and nothing else:',
-    '- Overall: <X> suites likely retryable, <Y> need a team to investigate.',
-    '- Shared causes: group suites that share the same likely cause (e.g. "3 suites hit the same gpt-5.4 timeout"); omit this bullet if no cause is shared.',
-    '- Needs action: list suite ids that need investigation, each with a one-line cause.',
-    '- Retry: list suite ids that can simply be retried.',
-    '',
-    'Constraints: base everything on the per-suite triage above (do not invent suites, models, or causes); no second person, narration, or preamble; portable markdown only (bullets and inline `code`; no bold, headings, links, or code fences); stay under 900 characters.'
-  );
+  lines.push('', WEEKLY_ROLLUP_OUTPUT_INSTRUCTIONS);
 
   return lines.join('\n');
 }
@@ -369,9 +367,6 @@ module.exports = {
   buildWeeklyRollupUserPrompt,
   extractSuiteRootCauseLine,
   buildLitellmChatRequest,
-  parseVaultConfig,
-  connectorIdToLitellmModel,
-  buildLitellmConnectorFromVault,
   parseLitellmChatContent,
   postLitellmChatRequest,
   resolveTriageConnector,

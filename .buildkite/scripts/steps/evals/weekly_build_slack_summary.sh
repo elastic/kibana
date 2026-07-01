@@ -182,4 +182,4 @@ if [[ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" =~ ^(1|true)$ ]]; then
 fi
 
 echo "$slack_body"
-exit 1
+exit 0

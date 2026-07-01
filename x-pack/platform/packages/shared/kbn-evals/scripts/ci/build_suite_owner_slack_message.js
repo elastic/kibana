@@ -47,6 +47,8 @@ const buildUrl = process.env.BUILDKITE_BUILD_URL || '';
 
 const headerLabel = notifyMode === 'on-demand' ? 'On-demand LLM eval' : 'Weekly LLM evals';
 const headerEmoji = notifyMode === 'on-demand' ? ':test_tube:' : ':rotating_light:';
+const githubHeaderLabel = 'LLM eval (PR)';
+const githubHeaderEmoji = ':test_tube:';
 
 function renderTriageBody(triage, openFence) {
   if (triage.error) {
@@ -110,7 +112,7 @@ function renderSlack(triage) {
  */
 function renderGithub(triage) {
   const lines = [
-    `${headerEmoji} **${headerLabel}** — ${suiteName} (\`${suiteId}\`) failed.`,
+    `${githubHeaderEmoji} **${githubHeaderLabel}** — ${suiteName} (\`${suiteId}\`) failed.`,
     '',
     '**Failing models:**',
     ...failingProjects.map((project) => `- \`${project}\``),
