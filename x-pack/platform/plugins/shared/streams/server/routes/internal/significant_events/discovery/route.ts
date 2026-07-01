@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type {
-  QueryOccurrencesResponse,
   SignificantEventsWorkflowStatusResult,
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
@@ -13,11 +12,7 @@ import type {
 import { TaskStatus, deriveQueryType } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
-import { BUCKET_SIZE_PATTERN } from '../../../../lib/significant_events/helpers/fill_bucket_gaps';
-import { fetchQueryOccurrencesFromAlerts } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
-import { resolveAlertsSource } from '../../../utils/resolve_alerts_source';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import { searchModeSchema } from '../../../utils/search_mode';
 import {
   getSignificantEventsQueriesGenerationTaskId,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
@@ -163,73 +158,6 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
   },
 });
 
-const readQueryOccurrenceStatsRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/_query_occurrence_stats',
-  params: z.object({
-    query: z.object({
-      from: dateFromString.describe('Start of the time range'),
-      to: dateFromString.describe('End of the time range'),
-      bucketSize: z
-        .string()
-        .regex(BUCKET_SIZE_PATTERN)
-        .describe('Size of time buckets for aggregation'),
-      query: z.string().max(4096).optional().describe('Query string to filter stream queries'),
-      streamNames: z
-        .union([z.string().transform((val) => [val]), z.array(z.string())])
-        .optional()
-        .describe('Stream names to filter results by'),
-      searchMode: searchModeSchema,
-    }),
-  }),
-  options: {
-    access: 'internal',
-    summary: 'Read query occurrence stats',
-    description: 'Read query occurrence stats',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<QueryOccurrencesResponse> => {
-    const {
-      getKnowledgeIndicatorClient,
-      getAlertingV2RulesClient,
-      scopedClusterClient,
-      licensing,
-      uiSettingsClient,
-    } = await getScopedClients({
-      request,
-    });
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const { from, to, bucketSize, query, streamNames, searchMode } = params.query;
-
-    const alertsSource = await resolveAlertsSource({
-      uiSettingsClient,
-      alertingV2RulesClient: await getAlertingV2RulesClient(),
-    });
-    const kiClient = await getKnowledgeIndicatorClient();
-    return fetchQueryOccurrencesFromAlerts(
-      {
-        from,
-        to,
-        bucketSize,
-        query,
-        streamNames,
-        searchMode,
-        alertsSource,
-      },
-      { kiClient, scopedClusterClient }
-    );
-  },
-});
-
 const significantEventsDiscoveryExecuteRoute = createServerRoute({
   endpoint: 'POST /internal/streams/significant_events/discovery/_execute',
   params: z.object({
@@ -326,9 +254,6 @@ const significantEventsDiscoveryStatusRoute = createServerRoute({
 });
 
 export const internalSignificantEventsRoutes = {
-  ...significantEventsQueriesGenerationStatusRoute,
-  ...significantEventsQueriesGenerationTaskRoute,
-  ...readQueryOccurrenceStatsRoute,
   ...significantEventsDiscoveryExecuteRoute,
   ...significantEventsDiscoveryStatusRoute,
 };

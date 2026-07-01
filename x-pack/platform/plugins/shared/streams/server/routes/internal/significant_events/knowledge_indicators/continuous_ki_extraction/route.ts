@@ -11,13 +11,13 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
 } from '@kbn/management-settings-ids';
-import { createServerRoute } from '../../../create_server_route';
-import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
+import { createServerRoute } from '../../../../create_server_route';
+import { assertSignificantEventsAccess } from '../../../../utils/assert_significant_events_access';
+import { FeatureNotEnabledError } from '../../../../../lib/streams/errors/feature_not_enabled_error';
 import {
   STREAMS_API_PRIVILEGES,
   MIN_EXTRACTION_INTERVAL_HOURS,
-} from '../../../../../common/constants';
+} from '../../../../../../common/constants';
 
 const putKiExtractionSettingsBodySchema = z.object({
   continuousKiExtraction: z.object({
@@ -27,8 +27,8 @@ const putKiExtractionSettingsBodySchema = z.object({
   }),
 });
 
-export const putKiExtractionSettingsRoute = createServerRoute({
-  endpoint: 'PUT /internal/streams/_continuous_ki_extraction/settings',
+export const putContinuousKiExtractionSettingsRoute = createServerRoute({
+  endpoint: 'PUT /internal/streams/_knowledge_indicators/continuous_ki_extraction/settings',
   options: {
     access: 'internal',
     summary: 'Update continuous KI extraction settings',
@@ -116,5 +116,5 @@ export const putKiExtractionSettingsRoute = createServerRoute({
 });
 
 export const internalKiExtractionRoutes = {
-  ...putKiExtractionSettingsRoute,
+  ...putContinuousKiExtractionSettingsRoute,
 };
