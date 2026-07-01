@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { normalizeVegaSpec, normalizeRawVegaSpec, VEGA_LITE_SCHEMA } from './normalize_spec';
-import { VEGA_V5_SCHEMA } from './dialect';
+import { normalizeVegaSpec, VEGA_LITE_SCHEMA } from './normalize_spec';
 
 const ESQL = 'FROM logs-* | STATS count = COUNT() BY status';
 
@@ -212,95 +211,5 @@ describe('normalizeVegaSpec', () => {
       expect(layer[0].encoding.color.legend).toBeNull();
       expect(layer[1].encoding.color.legend).toBeNull();
     });
-  });
-});
-
-describe('normalizeRawVegaSpec', () => {
-  const rawSpec = () => ({
-    $schema: 'https://vega.github.io/schema/vega/v3.json',
-    width: 600,
-    height: 400,
-    data: [
-      { name: 'source', values: [{ a: 1 }] },
-      { name: 'nodes', source: 'source', transform: [{ type: 'filter', expr: 'datum.a > 0' }] },
-    ],
-    marks: [{ type: 'rect', from: { data: 'nodes' } }],
-  });
-
-  it('pins the raw Vega v5 schema', () => {
-    const result = normalizeRawVegaSpec({ spec: rawSpec(), esqlQuery: ESQL });
-
-    expect(result.$schema).toBe(VEGA_V5_SCHEMA);
-  });
-
-  it('binds the ES|QL url onto the base "source" data set and drops its inline values', () => {
-    const result = normalizeRawVegaSpec({ spec: rawSpec(), esqlQuery: ESQL });
-
-    const data = result.data as Array<Record<string, unknown>>;
-    expect(data[0]).toEqual({ name: 'source', url: { '%type%': 'esql', query: ESQL } });
-  });
-
-  it('leaves derived data sets (those with a "source") untouched', () => {
-    const result = normalizeRawVegaSpec({ spec: rawSpec(), esqlQuery: ESQL });
-
-    const data = result.data as Array<Record<string, unknown>>;
-    expect(data[1]).toEqual({
-      name: 'nodes',
-      source: 'source',
-      transform: [{ type: 'filter', expr: 'datum.a > 0' }],
-    });
-  });
-
-  it('adds %timefield% to the bound url when the query is time-aware', () => {
-    const timeAwareEsql =
-      'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS count = COUNT()';
-
-    const result = normalizeRawVegaSpec({ spec: rawSpec(), esqlQuery: timeAwareEsql });
-
-    const data = result.data as Array<Record<string, unknown>>;
-    expect(data[0]).toEqual({
-      name: 'source',
-      url: { '%type%': 'esql', query: timeAwareEsql, '%timefield%': '@timestamp' },
-    });
-  });
-
-  it('strips fixed top-level sizing so the chart fills its container', () => {
-    const result = normalizeRawVegaSpec({ spec: rawSpec(), esqlQuery: ESQL });
-
-    expect(result.width).toBeUndefined();
-    expect(result.height).toBeUndefined();
-  });
-
-  it('escapes dotted field references in marks/scales', () => {
-    const spec = {
-      data: [{ name: 'source', values: [] }],
-      scales: [{ name: 'color', domain: { data: 'source', field: 'geo.src' } }],
-      marks: [{ type: 'rect', encode: { update: { fill: { field: 'geo.src' } } } }],
-    };
-
-    const result = normalizeRawVegaSpec({ spec, esqlQuery: ESQL });
-
-    const scales = result.scales as Array<{ domain: { field: string } }>;
-    expect(scales[0].domain.field).toBe('geo\\.src');
-  });
-
-  it('returns the data array unchanged when no "source" data set is present', () => {
-    const spec = {
-      data: [{ name: 'rawData', values: [] }],
-      marks: [{ type: 'rect' }],
-    };
-
-    const result = normalizeRawVegaSpec({ spec, esqlQuery: ESQL });
-
-    expect(result.data).toEqual([{ name: 'rawData', values: [] }]);
-  });
-
-  it('does not mutate the input spec', () => {
-    const spec = rawSpec();
-    const snapshot = JSON.parse(JSON.stringify(spec));
-
-    normalizeRawVegaSpec({ spec, esqlQuery: ESQL });
-
-    expect(spec).toEqual(snapshot);
   });
 });

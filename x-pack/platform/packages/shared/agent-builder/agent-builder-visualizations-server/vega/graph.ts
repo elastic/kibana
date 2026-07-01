@@ -15,12 +15,7 @@ import { generateEsql, executeEsql } from '@kbn/agent-builder-genai-utils';
 import { buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import { esqlAdditionalInstructions } from '../shared/esql_instructions';
-import {
-  normalizeVegaSpec,
-  normalizeRawVegaSpec,
-  RAW_VEGA_SOURCE_DATA_NAME,
-} from './normalize_spec';
-import { detectVegaDialect } from './dialect';
+import { normalizeVegaSpec } from './normalize_spec';
 import { createAuthorVegaSpecPrompt } from './prompts';
 import { validateVegaSpec } from './vega_validator';
 import {
@@ -62,25 +57,6 @@ const RENDERABLE_VIEW_KEYS = [
 /** Whether a Vega-Lite spec declares something renderable (a mark or composite view). */
 const hasRenderableView = (spec: Record<string, unknown>): boolean =>
   RENDERABLE_VIEW_KEYS.some((key) => key in spec);
-
-/**
- * Whether a raw Vega spec is renderable: it needs a non-empty `marks` array and
- * a base data set named `source` for the ES|QL query to bind onto. (Derived data
- * sets reference `source`, so without it the chart has no data.)
- */
-const hasRenderableRawView = (spec: Record<string, unknown>): boolean => {
-  const { marks, data } = spec as { marks?: unknown; data?: unknown };
-  const hasMarks = Array.isArray(marks) && marks.length > 0;
-  const hasSource =
-    Array.isArray(data) &&
-    data.some(
-      (dataSet) =>
-        !!dataSet &&
-        typeof dataSet === 'object' &&
-        (dataSet as { name?: unknown }).name === RAW_VEGA_SOURCE_DATA_NAME
-    );
-  return hasMarks && hasSource;
-};
 
 /**
  * Warning substrings that signal a real authoring mistake (not cosmetic noise)
@@ -329,36 +305,19 @@ export const createVegaGraph = async (
         throw new Error(lastAuthor?.error ?? 'No spec found to validate');
       }
 
-      // The author picks the dialect by structure/$schema (raw Vega is the
-      // escalation tier for flow/hierarchy charts); normalize + check accordingly.
-      const dialect = detectVegaDialect(lastAuthor.spec);
+      if (!hasRenderableView(lastAuthor.spec)) {
+        throw new Error(
+          'Vega-Lite spec must declare a "mark" or a composite view ("layer"/"facet"/"repeat"/"concat"/"hconcat"/"vconcat").'
+        );
+      }
 
       // Deterministic hardening: pin schema, bind the canonical ES|QL data
       // source, strip fixed sizing, escape dotted field references.
-      let normalized: Record<string, unknown>;
-      if (dialect === 'vega') {
-        if (!hasRenderableRawView(lastAuthor.spec)) {
-          throw new Error(
-            'Raw Vega spec must declare a non-empty "marks" array and a base data set named "source".'
-          );
-        }
-        normalized = normalizeRawVegaSpec({
-          spec: lastAuthor.spec,
-          esqlQuery: state.esqlQuery,
-          columns: state.columns,
-        });
-      } else {
-        if (!hasRenderableView(lastAuthor.spec)) {
-          throw new Error(
-            'Vega-Lite spec must declare a "mark" or a composite view ("layer"/"facet"/"repeat"/"concat"/"hconcat"/"vconcat").'
-          );
-        }
-        normalized = normalizeVegaSpec({
-          spec: lastAuthor.spec,
-          esqlQuery: state.esqlQuery,
-          columns: state.columns,
-        });
-      }
+      const normalized = normalizeVegaSpec({
+        spec: lastAuthor.spec,
+        esqlQuery: state.esqlQuery,
+        columns: state.columns,
+      });
 
       const { error: renderError, warnings } = await validateVegaSpec({
         spec: normalized,

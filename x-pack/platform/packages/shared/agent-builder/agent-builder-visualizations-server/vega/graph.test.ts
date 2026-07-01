@@ -10,7 +10,6 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { generateEsql, executeEsql } from '@kbn/agent-builder-genai-utils';
 import { VEGA_LITE_SCHEMA } from './normalize_spec';
-import { VEGA_V5_SCHEMA } from './dialect';
 import { validateVegaSpec } from './vega_validator';
 import { createVegaGraph } from './graph';
 
@@ -217,51 +216,6 @@ describe('createVegaGraph', () => {
     expect(invoke).toHaveBeenCalledTimes(3);
     expect(state.error).toBeNull();
     expect(JSON.parse(state.spec!).mark).toBe('bar');
-  });
-
-  it('routes a raw Vega spec through the raw normalize path (binds ES|QL onto "source")', async () => {
-    invoke.mockResolvedValue(
-      asCodeBlock({
-        $schema: 'https://vega.github.io/schema/vega/v3.json',
-        data: [{ name: 'source' }, { name: 'nodes', source: 'source' }],
-        marks: [{ type: 'rect', from: { data: 'nodes' } }],
-      })
-    );
-
-    const state = await run({ esqlQuery: PROVIDED_ESQL });
-
-    expect(state.error).toBeNull();
-    const spec = JSON.parse(state.spec!);
-    expect(spec.$schema).toBe(VEGA_V5_SCHEMA);
-    expect(spec.data[0]).toEqual({
-      name: 'source',
-      url: { '%type%': 'esql', query: PROVIDED_ESQL },
-    });
-    expect(spec.data[1]).toEqual({ name: 'nodes', source: 'source' });
-  });
-
-  it('rejects a raw Vega spec missing a "source" data set and retries', async () => {
-    invoke
-      .mockResolvedValueOnce(
-        asCodeBlock({
-          $schema: 'https://vega.github.io/schema/vega/v5.json',
-          data: [{ name: 'rawData' }],
-          marks: [{ type: 'rect' }],
-        })
-      )
-      .mockResolvedValueOnce(
-        asCodeBlock({
-          $schema: 'https://vega.github.io/schema/vega/v5.json',
-          data: [{ name: 'source' }],
-          marks: [{ type: 'rect', from: { data: 'source' } }],
-        })
-      );
-
-    const state = await run({ esqlQuery: PROVIDED_ESQL });
-
-    expect(invoke).toHaveBeenCalledTimes(2);
-    expect(state.error).toBeNull();
-    expect(JSON.parse(state.spec!).$schema).toBe(VEGA_V5_SCHEMA);
   });
 
   it('regenerates a corrected query when the provided ES|QL fails to execute', async () => {

@@ -7,13 +7,9 @@
 
 import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import { escapeVegaFieldReferences } from './field_escaping';
-import { VEGA_V5_SCHEMA } from './dialect';
 
 /** Vega-Lite schema the generator targets. */
 export const VEGA_LITE_SCHEMA = 'https://vega.github.io/schema/vega-lite/v6.json';
-
-/** Name of the base raw-Vega data set the ES|QL query is bound to. */
-export const RAW_VEGA_SOURCE_DATA_NAME = 'source';
 
 /** Default event-time field assumed when the query is time-aware but no date column is known. */
 const DEFAULT_TIMEFIELD = '@timestamp';
@@ -198,62 +194,4 @@ export const normalizeVegaSpec = ({
   };
 
   return escapeVegaFieldReferences(normalized);
-};
-
-/** A raw-Vega data set entry; only the fields we touch are typed. */
-interface RawVegaDataSet {
-  name?: string;
-  url?: unknown;
-  values?: unknown;
-  source?: unknown;
-  [key: string]: unknown;
-}
-
-/**
- * Make a model-authored raw Vega spec safe to render in Kibana:
- * - pin the raw Vega v5 `$schema`,
- * - bind the canonical ES|QL query onto the base `source` data set (the model
- *   declares a named `source` data set with no url; derived data sets reference
- *   it via their own `source`), and
- * - drop fixed top-level sizing so the spec fills its container (raw Vega scales
- *   use the `width`/`height` signals Kibana provides; an explicit size pins it).
- *
- * Dotted ES|QL column names are escaped in `field` references; raw-Vega
- * expressions (`expr`/`signal`) are left untouched, so prefer dot-free column
- * aliases in the query for fields used inside expressions.
- *
- * Returns a new object; the input is not mutated. Binding requires a `source`
- * data set; when it is absent the data array is returned unchanged and the
- * caller's renderable check rejects the spec.
- */
-export const normalizeRawVegaSpec = ({
-  spec,
-  esqlQuery,
-  columns,
-  timefield,
-}: NormalizeVegaSpecParams): Record<string, unknown> => {
-  const escaped = escapeVegaFieldReferences(spec);
-  const { width, height, data, ...rest } = escaped;
-
-  const url = buildEsqlDataUrl({ esqlQuery, columns, timefield });
-
-  const boundData = Array.isArray(data)
-    ? data.map((dataSet) => {
-        if (
-          dataSet &&
-          typeof dataSet === 'object' &&
-          (dataSet as RawVegaDataSet).name === RAW_VEGA_SOURCE_DATA_NAME
-        ) {
-          const { values: _values, source: _source, ...dataSetRest } = dataSet as RawVegaDataSet;
-          return { ...dataSetRest, url };
-        }
-        return dataSet;
-      })
-    : data;
-
-  return {
-    ...rest,
-    $schema: VEGA_V5_SCHEMA,
-    data: boundData,
-  };
 };
