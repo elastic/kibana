@@ -8,5 +8,5 @@ products:
   target: 2026-06-30
 areas:
 - Search and data
-title: Address version-specific policies and integration rollback gaps
-description: 'Integration rollback now correctly tears down version-specific policy variants: rolling back a package clears stale compiled inputs, re-evaluates agent version conditions, reassigns agents from variant policies back to their parent, and removes orphaned variant fleet-policy documents. The auto-install task also no longer re-upgrades packages that were intentionally rolled back.'
+title: Fix integration rollback for version-specific agent policies
+description: 'Integration rollback now correctly tears down version-specific policy variants. Rolling back a package clears stale compiled inputs, re-evaluates agent version conditions, reassigns agents from variant policies back to their parent, and removes orphaned variant fleet-policy documents. The auto-install task also no longer re-upgrades packages that were intentionally rolled back.'

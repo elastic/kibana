@@ -6,4 +6,5 @@ type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-06-30
-title: Add read-side sub-actions for history, user, and channel lookups
+title: Add Slack lookup steps for conversation history, users, and channels
+description: Adds read-side sub-actions to the Slack v2 connector so workflows can fetch conversation history, user profiles, and channel details without custom HTTP requests.

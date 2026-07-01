@@ -6,4 +6,5 @@ products:
   target: 2026-06-30
 areas:
 - Alerting and reporting
-title: 'Add auto extract observables in add '
+title: Fix observables auto-extraction when attaching alerts with the cases comments API
+description: Attaching alerts through `/api/cases/{caseId}/comments` now triggers observables auto-extraction, matching behavior available in other case attachment flows.

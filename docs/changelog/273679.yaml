@@ -8,4 +8,5 @@ products:
   target: 2026-06-30
 areas:
 - Search and data
-title: Improve performance of agent action queries
+title: Fix agent action request timeouts on large Fleet deployments
+description: Bulk agent action requests no longer fetch up to 10,000 full agent documents just to read a total count, preventing multi-minute delays and HTTP timeouts on large deployments.

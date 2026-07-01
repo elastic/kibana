@@ -9,4 +9,4 @@ products:
 areas:
 - Search and data
 title: Fix alerting assets space awareness
-description: Fixes integration alerting assets management in Kibana spaces other than the one it was originally installed in.
+description: Integration alerting assets management now works correctly in Kibana spaces other than the one where the integration was originally installed.

@@ -6,4 +6,4 @@ products:
   target: 2026-06-30
 areas:
 - Discover and ES|QL
-title: enabling sorting in the index editor
+title: Enable sorting in the index editor

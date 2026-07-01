@@ -9,4 +9,4 @@ products:
   target: 2026-06-30
 areas:
 - Search and data
-title: Align OTel profile integrations with non-ECS ones
+title: Fix OTel profile integration input handling in Fleet

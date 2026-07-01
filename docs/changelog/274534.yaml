@@ -8,4 +8,5 @@ products:
   target: 2026-06-30
 areas:
 - Discover and ES|QL
-title: closed indices warning on lookup join
+title: Warn when `LOOKUP JOIN` references closed indices
+description: When a closed lookup index is referenced in a `LOOKUP JOIN` command, the ES|QL editor now shows a closed-indices warning instead of a misleading create lookup index tooltip.
