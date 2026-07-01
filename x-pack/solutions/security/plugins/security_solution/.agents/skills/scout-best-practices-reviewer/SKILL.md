@@ -12,15 +12,13 @@ description: >
 
 ## Security-specific checklist
 
-Use the same output format (blocker → major → minor → nit).
-
 ### Page objects — Security-specific placement
 
 New page objects belong in `kbn-scout-security/src/playwright/fixtures/test/page_objects/`. Register via the `pageObjects` fixture so specs access them as `pageObjects.myPage`.
 
 ### Data cleanup — Security Solution resources
 
-Flag missing cleanup as **blocker** — leaked state breaks parallel tests.
+Flag missing cleanup — leaked state breaks parallel tests.
 
 Security Solution tests commonly create resources that require explicit cleanup in `afterAll`/`afterEach`:
 
@@ -49,7 +47,7 @@ Use Security Solution-specific auth methods. Never use `loginAsAdmin()`:
 | Any security role | `browserAuth.loginAsSecurityRole('role_name')` | Generic — any role in `roles.yml` |
 | Custom role | `browserAuth.loginWithCustomRole(roleDescriptor)` | Ad-hoc RBAC with inline descriptors |
 
-Flag `loginAsAdmin()` as **blocker**. Prefer named convenience methods (`loginAsPlatformEngineer`, `loginAsT1Analyst`) over `loginAsSecurityRole('platform_engineer')` for commonly used roles.
+Never use `loginAsAdmin()`. Prefer named convenience methods (`loginAsPlatformEngineer`, `loginAsT1Analyst`) over `loginAsSecurityRole('platform_engineer')` for commonly used roles.
 
 ### Tags
 
