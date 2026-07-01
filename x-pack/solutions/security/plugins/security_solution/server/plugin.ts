@@ -172,6 +172,10 @@ import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
+import {
+  markSecurityManagedWorkflowsReady,
+  registerSecurityManagedWorkflowOwner,
+} from './workflows/managed_workflows';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
@@ -855,6 +859,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     if (plugins.workflowsExtensions) {
       registerWorkflowSteps(plugins.workflowsExtensions, core);
+      registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
     }
 
     setupAlertsCapabilitiesSwitcher({
@@ -886,6 +891,13 @@ export class Plugin implements ISecuritySolutionPlugin {
     ).catch(() => {});
 
     this.ruleMonitoringService.start(core, plugins);
+
+    if (plugins.workflowsExtensions) {
+      void markSecurityManagedWorkflowsReady({
+        workflowsExtensions: plugins.workflowsExtensions,
+        logger,
+      });
+    }
 
     const savedObjectsClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([
