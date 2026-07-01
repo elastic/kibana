@@ -120,6 +120,10 @@ describe('ChangeHistoryModal', () => {
     await waitFor(() => {
       expect(screen.getByTestId('changeHistoryModalEmpty')).toBeInTheDocument();
     });
+
+    expect(screen.getByTestId('changeHistoryEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('changeHistorySidebarPanel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('changeHistoryPreviewEmpty')).not.toBeInTheDocument();
   });
 
   it('selects a different row when clicked', async () => {
