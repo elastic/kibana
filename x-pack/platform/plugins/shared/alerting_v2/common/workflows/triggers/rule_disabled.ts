@@ -15,6 +15,7 @@ export const ruleDisabledTriggerCommonDefinition: CommonTriggerDefinition<
   typeof ruleLifecycleEventSchema
 > = {
   id: RuleDisabledTriggerId,
+  stability: 'tech_preview',
   eventSchema: ruleLifecycleEventSchema,
   title: i18n.translate('xpack.alertingV2.workflowTriggers.ruleDisabled.title', {
     defaultMessage: 'Alerting - Rule disabled',
