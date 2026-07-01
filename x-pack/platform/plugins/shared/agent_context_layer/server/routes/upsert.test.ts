@@ -364,5 +364,28 @@ describe('registerUpsertRoute', () => {
       });
       expect(response.ok).not.toHaveBeenCalled();
     });
+
+    it('rejects permissions.elasticsearch.indices / kibana.privileges arrays over the entry-count cap', () => {
+      // Matches the length cap on the parallel contextEngine.addEntry Zod
+      // schema — an unbounded array here is public-input DoS surface.
+      const [routeConfig] = router.put.mock.calls[0];
+      const bodySchema = (routeConfig as any).validate.body;
+
+      const tooManyIndices = Array.from({ length: 101 }, (_, i) => ({ name: `index-${i}` }));
+      expect(() =>
+        bodySchema.validate({
+          ...validBody,
+          permissions: { elasticsearch: { indices: tooManyIndices } },
+        })
+      ).toThrow(/permissions/);
+
+      const tooManyPrivileges = Array.from({ length: 101 }, (_, i) => ({ name: `priv-${i}` }));
+      expect(() =>
+        bodySchema.validate({
+          ...validBody,
+          permissions: { kibana: { privileges: tooManyPrivileges } },
+        })
+      ).toThrow(/permissions/);
+    });
   });
 });

@@ -22,5 +22,8 @@ export const MAX_SML_TAGS_PER_DOCUMENT = 100;
 // Length cap for a single `permissions.elasticsearch.indices[].name` or
 // `permissions.kibana.privileges[].name` entry.
 export const MAX_SML_PERMISSIONS_NAME_LENGTH = 512;
+// Entry count cap for `permissions.elasticsearch.indices` / `permissions.kibana.privileges`.
+// Matches the bound on the parallel `contextEngine.addEntry` workflow-step schema.
+export const MAX_SML_PERMISSIONS_ENTRIES = 100;
 // Cross-space guard may miss chunks beyond this limit — see findByOriginAcrossSpaces.
 export const MAX_CHUNKS_PER_ORIGIN = 1000;

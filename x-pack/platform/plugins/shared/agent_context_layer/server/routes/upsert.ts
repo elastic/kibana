@@ -17,6 +17,7 @@ import {
   MAX_SML_TAG_LENGTH,
   MAX_SML_TAGS_PER_DOCUMENT,
   MAX_SML_PERMISSIONS_NAME_LENGTH,
+  MAX_SML_PERMISSIONS_ENTRIES,
 } from '../../common/constants';
 import { SmlPermissionsConflictError } from '../services/sml/errors';
 import type { SmlChunk, SmlPermissions, SmlService } from '../services/sml/types';
@@ -114,7 +115,8 @@ export const registerUpsertRoute = ({
                             minLength: 1,
                             maxLength: MAX_SML_PERMISSIONS_NAME_LENGTH,
                           }),
-                        })
+                        }),
+                        { maxSize: MAX_SML_PERMISSIONS_ENTRIES }
                       )
                     ),
                   })
@@ -128,7 +130,8 @@ export const registerUpsertRoute = ({
                             minLength: 1,
                             maxLength: MAX_SML_PERMISSIONS_NAME_LENGTH,
                           }),
-                        })
+                        }),
+                        { maxSize: MAX_SML_PERMISSIONS_ENTRIES }
                       )
                     ),
                   })
