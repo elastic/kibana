@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
+import { kibanaSavedObjectPermissions } from '@kbn/agent-context-layer-plugin/server';
 import type { ConnectorAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { getConnectorSpec } from '@kbn/connector-specs';
@@ -73,10 +74,6 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
               type: CONNECTOR_SML_TYPE,
               title: name,
               content: contentParts.join('\n'),
-              permissions: {
-                kibana: { privileges: [{ name: 'action:execute' }] },
-                elasticsearch: { indices: [] },
-              },
             },
           ],
         };
@@ -87,6 +84,8 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         return undefined;
       }
     },
+
+    getPermissions: () => kibanaSavedObjectPermissions({ savedObjectType: 'action' }),
 
     toAttachment: async (item, context) => {
       try {
