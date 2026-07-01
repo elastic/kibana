@@ -65,7 +65,7 @@ const manageRuleSettingsOperations: Record<AlertingEntity, string[]> = {
 
 // Covers both per-alert snooze/unsnooze and muteAlert/unmuteAlert
 const muteAlertsOperations: Record<AlertingEntity, string[]> = {
-  rule: ['muteAlert', 'unmuteAlert', 'findMutedAlerts'],
+  rule: ['muteAlert', 'unmuteAlert', 'snoozeAlert', 'unsnoozeAlert', 'findMutedAlerts'],
   alert: [],
 };
 
@@ -86,9 +86,11 @@ const writeOperations: Record<AlertingEntity, string[]> = {
     'muteAlert',
     'unmuteAlert',
     'snooze',
+    'unsnooze',
+    'snoozeAlert',
+    'unsnoozeAlert',
     'bulkEdit',
     'bulkDelete',
-    'unsnooze',
     'runSoon',
   ],
   alert: ['update'],

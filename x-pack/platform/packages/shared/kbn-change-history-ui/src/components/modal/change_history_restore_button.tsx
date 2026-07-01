@@ -5,28 +5,37 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { useChangeHistoryRestore } from '../../hooks/use_change_history_restore';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
 import type { ChangeHistoryDetail } from '../../types/change_history_detail';
+import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
+import { buildChangeHistoryRestoreTelemetryParams } from '../../utils/build_change_history_restore_telemetry';
 import { getRestoreVersionLabel } from '../../utils/get_restore_version_label';
 import * as i18n from './restore_translations';
 
 export interface ChangeHistoryRestoreButtonProps {
   change: ChangeHistoryDetail;
+  /** Live/current change used for rollback-distance telemetry when sequences are present. */
+  currentChange?: ChangeHistoryListItem;
   /** Invoked after a successful restore (e.g. to refetch and re-select the current change). */
   onRestored?: () => Promise<void> | void;
 }
 
 export function ChangeHistoryRestoreButton({
   change,
+  currentChange,
   onRestored,
 }: ChangeHistoryRestoreButtonProps): JSX.Element | null {
-  const { objectId, supports } = useChangeHistoryConfig();
+  const { objectId, supports, telemetry } = useChangeHistoryConfig();
   const { restoreChange, isRestoring, error, clearError } = useChangeHistoryRestore({ onRestored });
   const [isConfirmVisible, setIsConfirmVisible] = useState(false);
 
+  const restoreTelemetry = useMemo(
+    () => buildChangeHistoryRestoreTelemetryParams(change, currentChange),
+    [change, currentChange]
+  );
   const versionLabel = getRestoreVersionLabel(change);
 
   const handleOpenConfirm = useCallback(() => {
@@ -43,12 +52,21 @@ export function ChangeHistoryRestoreButton({
   }, [clearError, isRestoring]);
 
   const handleConfirmRestore = useCallback(async () => {
-    const succeeded = await restoreChange({ objectId, changeId: change.id });
+    const confirmedAtMs = Date.now();
+
+    telemetry.reportRestoreConfirmed(restoreTelemetry);
+
+    const succeeded = await restoreChange({
+      objectId,
+      changeId: change.id,
+      restoreTelemetry,
+      confirmedAtMs,
+    });
     if (succeeded) {
       setIsConfirmVisible(false);
       clearError();
     }
-  }, [change, clearError, objectId, restoreChange]);
+  }, [change.id, clearError, objectId, restoreChange, restoreTelemetry, telemetry]);
 
   if (!supports.restore || change.isCurrent) {
     return null;

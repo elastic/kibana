@@ -398,6 +398,7 @@ export interface DocLinks {
     readonly queryDsl: string;
     readonly queryESQL: string;
     readonly queryESQLExamples: string;
+    readonly queryESQLApproximateResults: string;
     readonly queryESQLMultiValueControls: string;
     readonly queryESQLMvIntersects: string;
   };
