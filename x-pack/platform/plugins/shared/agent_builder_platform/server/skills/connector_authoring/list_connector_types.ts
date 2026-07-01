@@ -14,7 +14,7 @@ import { AgentBuilderConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { ActionType } from '@kbn/actions-plugin/common';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { isConnectorTypeAvailable } from './utils';
+import { getConnectorTypeDisplayName, isConnectorTypeAvailable } from './utils';
 
 interface ListedConnectorAction {
   name: string;
@@ -49,7 +49,7 @@ const projectConnectorType = (actionType: ActionType): ListedConnectorType => {
 
   return {
     connector_type: actionType.id,
-    name: actionType.name,
+    name: getConnectorTypeDisplayName(actionType),
     description: spec?.metadata.description ?? actionType.description ?? '',
     minimum_license: actionType.minimumLicenseRequired,
     technical_preview: actionType.isExperimental ?? spec?.metadata.isTechnicalPreview ?? false,
@@ -65,14 +65,9 @@ export type ListConnectorTypesInput = z.infer<typeof listConnectorTypesSchema>;
 /**
  * Inline tool that enumerates the connector types the agent can create from chat.
  *
- * Uses the Kibana Actions registry as the source of truth (filtered by the
- * `agentBuilder` feature ID), so it reflects every connector type available
- * for that feature rather than only the ones with a spec in
- * `@kbn/connector-specs`. Deprecated and config-disabled types are excluded
- * (see {@link isConnectorTypeAvailable}) since we don't want the agent
- * proposing a connector the user shouldn't create or couldn't finish setting
- * up. Connector types that have a spec are enriched with auth methods and
- * tool actions; others surface basic registry metadata.
+ * Lists Agent Builder connector types from the Actions registry (same source as
+ * the Connectors UI), enriched from `@kbn/connector-specs` when a spec exists.
+ * Filtered by {@link isConnectorTypeAvailable}. Call before `propose_connector`.
  */
 export const createListConnectorTypesTool = ({
   getActionsStart,

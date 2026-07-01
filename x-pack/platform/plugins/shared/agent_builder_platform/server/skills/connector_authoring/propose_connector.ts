@@ -11,13 +11,12 @@ import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/t
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { AgentBuilderConnectorFeatureId } from '@kbn/actions-plugin/common';
-import { getConnectorSpec } from '@kbn/connector-specs';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import {
   CONNECTOR_SETUP_ATTACHMENT_TYPE,
   type ConnectorSetupAttachmentData,
 } from '../../../common/attachments';
-import { isConnectorTypeAvailable } from './utils';
+import { getConnectorTypeDisplayName, isConnectorTypeAvailable } from './utils';
 
 const proposeConnectorSchema = z.object({
   connector_type: z
@@ -82,8 +81,7 @@ export const createProposeConnectorTool = ({
       };
     }
 
-    const spec = getConnectorSpec(input.connector_type);
-    const displayName = spec?.metadata.displayName ?? actionType.name;
+    const displayName = getConnectorTypeDisplayName(actionType);
 
     const data: ConnectorSetupAttachmentData = {
       connector_type: input.connector_type,

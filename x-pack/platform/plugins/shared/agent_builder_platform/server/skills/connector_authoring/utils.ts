@@ -6,6 +6,16 @@
  */
 
 import type { ActionType } from '@kbn/actions-plugin/common';
+import { getConnectorSpec } from '@kbn/connector-specs';
+
+/**
+ * Human-readable connector type name, preferring the spec display name when one
+ * exists so `list_connector_types` and `propose_connector` stay aligned.
+ */
+export const getConnectorTypeDisplayName = (actionType: ActionType): string => {
+  const spec = getConnectorSpec(actionType.id);
+  return spec?.metadata.displayName ?? actionType.name;
+};
 
 export interface ConnectorTypeAvailabilityOptions {
   /** Include connector types marked deprecated in the Actions registry. Defaults to `false`. */

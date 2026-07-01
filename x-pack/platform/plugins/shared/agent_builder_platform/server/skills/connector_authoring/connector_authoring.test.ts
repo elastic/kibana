@@ -12,6 +12,7 @@ import type {
 } from '@kbn/agent-builder-server/tools';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { AgentBuilderConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { createListConnectorTypesTool } from './list_connector_types';
@@ -123,6 +124,7 @@ describe('connector-authoring inline tools', () => {
         total: number;
       };
       expect(data.total).toBe(1);
+      expect(actionsStart.listTypes).toHaveBeenCalledWith(AgentBuilderConnectorFeatureId);
       expect(data.connector_types[0]).toEqual(
         expect.objectContaining({
           connector_type: '.github',
@@ -131,6 +133,35 @@ describe('connector-authoring inline tools', () => {
           tool_actions: [{ name: 'searchRepositories', description: 'Search repos' }],
         })
       );
+    });
+
+    it('prefers spec display name over registry name when they differ', async () => {
+      getConnectorSpecMock.mockReturnValue({
+        metadata: {
+          id: '.slack2',
+          displayName: 'Slack (v2)',
+          description: 'Slack connector',
+          minimumLicense: 'gold',
+          supportedFeatureIds: ['agentBuilder'],
+        },
+        actions: {},
+      } as never);
+
+      const actionsStart = makeActionsStart([{ id: '.slack2', name: 'Slack' }]);
+      const tool = createListConnectorTypesTool({ getActionsStart: async () => actionsStart });
+
+      const result = (await tool.handler(
+        {},
+        {} as ToolHandlerContext
+      )) as ToolHandlerStandardReturn;
+
+      const data = result.results[0].data as {
+        connector_types: Array<Record<string, unknown>>;
+      };
+      expect(data.connector_types[0]).toMatchObject({
+        connector_type: '.slack2',
+        name: 'Slack (v2)',
+      });
     });
 
     it('returns non-spec connectors with basic registry metadata', async () => {

@@ -56,7 +56,7 @@ Never ask the user to paste API keys, tokens, passwords, or webhook URLs into th
 
 2. **Find the connector type.** Call \`list_connector_types\` and match the user's intent to a \`connector_type\` using the names and descriptions. Prefer the connector whose \`tool_actions\` cover what the user needs. If nothing fits, say so plainly rather than guessing.
 
-3. **Mention what they'll need.** Briefly tell the user what the connector enables and, from the \`auth_methods\`, what kind of credential they'll provide (e.g. "GitHub uses a token or OAuth"). Do not collect the credential here.
+3. **Mention what they'll need.** Briefly tell the user what the connector enables and, when \`auth_methods\` is non-empty, what kind of credential they'll provide (e.g. "GitHub uses a token or OAuth"). Some registry-only connectors return an empty \`auth_methods\` list — in that case say they'll configure credentials in the setup form. Do not collect credentials in chat.
 
 4. **Render the setup card.** Call \`propose_connector\` with the chosen \`connector_type\` (and an optional \`suggested_name\` / one-line \`reason\`). On success, emit \`<render_attachment id="ATTACHMENT_ID" />\` **on its own line** (a blank line before it — a tag on the same line as prose renders as raw text). Keep your prose short — prompt the user to click "Set up connector" and complete the form.
 
