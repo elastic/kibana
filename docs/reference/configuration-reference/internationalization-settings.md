@@ -38,13 +38,10 @@ When a user sets a preferred language, it is stored in their user profile and ta
    on surfaces where the profile isn't available — login pages, error
    pages, and any browsing the user does after signing out. Only used
    when the cookie value matches a locale {{kib}} can serve.
-3. **`Accept-Language` header** {applies_to}`serverless: ga` — On
-   serverless deployments, {{kib}} consults the browser's
-   `Accept-Language` preferences when neither the profile setting nor
-   the cookie produces a match. The first weighted preference that's an
+3. **`Accept-Language` header** — When neither the profile setting nor
+   the cookie produces a match, {{kib}} consults the browser's
+   `Accept-Language` preferences. The first weighted preference that's an
    exact match (region included) for an entry in `i18n.locales` wins.
-   This step is skipped on traditional/self-managed deployments to keep
-   existing users' language stable across upgrades.
 4. **`i18n.defaultLocale` config** — The server-wide default set in `kibana.yml`.
 
 #### About the `KBN_LOCALE` cookie
@@ -62,8 +59,9 @@ It does not track the user, store identity, or enable cross-site activity.
 To disable the cookie entirely, set `i18n.allowLocaleCookie: false` in
 `kibana.yml`. When disabled, the per-user language selection still works via
 user profiles; however, anonymous pages and pages visited after signing out
-will always fall back to `i18n.defaultLocale` (or `Accept-Language` on
-serverless deployments) rather than remembering the previously resolved locale.
+resolve their locale from the browser's `Accept-Language` preferences (or
+`i18n.defaultLocale` when no preference matches) rather than remembering the
+previously resolved locale.
 
 ## Example configurations
 
