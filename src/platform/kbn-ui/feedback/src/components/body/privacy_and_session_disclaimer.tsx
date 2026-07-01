@@ -19,7 +19,7 @@ export const PrivacyAndSessionDisclaimer = () => (
         id="kbnUI.feedback.disclaimer.supportInfo"
         defaultMessage="If you need assistance, submit a <supportLink>support request</supportLink> instead."
         values={{
-          supportLink: (linkText) => (
+          supportLink: (linkText: React.ReactNode[]) => (
             <EuiLink href="https://support.elastic.co" target="_blank">
               {linkText}
             </EuiLink>
@@ -39,7 +39,7 @@ export const PrivacyAndSessionDisclaimer = () => (
         id="kbnUI.feedback.disclaimer.privacyStatement"
         defaultMessage="See our <privacyStatement>Privacy Statement</privacyStatement> for details and your rights."
         values={{
-          privacyStatement: (linkText) => (
+          privacyStatement: (linkText: React.ReactNode[]) => (
             <EuiLink href="https://www.elastic.co/legal/privacy-statement" target="_blank">
               {linkText}
             </EuiLink>
