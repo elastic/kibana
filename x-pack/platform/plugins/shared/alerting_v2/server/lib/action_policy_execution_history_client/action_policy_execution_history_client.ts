@@ -18,8 +18,12 @@ import {
   type PolicyExecutionOutcome,
   type PolicyExecutionOutcomeFilter,
   type SearchMatchCounts,
-  MAX_RULES_PER_ITEM,
 } from '@kbn/alerting-v2-schemas';
+
+// Cap the per-page name-lookup batch. Independent from the embedded rules cap
+// in the response — broad policies can reference thousands of ids in a single
+// event but we only need names for ids that will actually render.
+const MAX_RULES_PER_NAME_LOOKUP = 1000;
 import { ActionPolicyClient } from '../action_policy_client';
 import { RulesClient } from '../rules_client';
 import { WorkflowsManagementApiToken } from '../dispatcher/steps/dispatch_step_tokens';
@@ -232,11 +236,11 @@ export class ActionPolicyExecutionHistoryClient {
   private async lookupRulesByIds(ruleIds: string[]): Promise<RuleResponse[]> {
     if (ruleIds.length === 0) return [];
 
-    const cappedRuleIds = ruleIds.slice(0, MAX_RULES_PER_ITEM);
+    const cappedRuleIds = ruleIds.slice(0, MAX_RULES_PER_NAME_LOOKUP);
 
     const response = await this.rulesClient.findRules({
       filter: this.buildRuleIdsFilter(cappedRuleIds),
-      perPage: MAX_RULES_PER_ITEM,
+      perPage: MAX_RULES_PER_NAME_LOOKUP,
     });
 
     return response.items;

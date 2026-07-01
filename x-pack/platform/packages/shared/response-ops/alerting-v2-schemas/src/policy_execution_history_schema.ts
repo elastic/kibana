@@ -71,10 +71,10 @@ const namedRefSchema = z.object({
 
 // Defensive upper bounds to keep response payloads sane.
 const MAX_WORKFLOWS_PER_ITEM = 100;
-// Cap rule lookups per page to keep the KQL filter and SO `find` bounded —
-// a single broad Action Policy can emit one event referencing thousands of rules.
-// Rule IDs over this cap render as the raw ID in the UI.
-export const MAX_RULES_PER_ITEM = 1000;
+// Cap for the embedded `rules` array in each item. A broad Action Policy can
+// emit one event referencing thousands of rules; the response only carries a
+// bounded sample and clients rely on `totalRuleCount` for the true count.
+export const MAX_EMBEDDED_RULES_PER_ITEM = 20;
 
 export const policyExecutionHistoryItemSchema = z.object({
   '@timestamp': z.string(),
@@ -84,9 +84,14 @@ export const policyExecutionHistoryItemSchema = z.object({
   action_group_count: z.number(),
   rules: z
     .array(namedRefSchema)
-    .max(MAX_RULES_PER_ITEM)
+    .max(MAX_EMBEDDED_RULES_PER_ITEM)
     .describe(
-      'Rules referenced by this event. When a search resolves to specific rule IDs, this array is filtered to that subset server-side.'
+      'Rules referenced by this event, bounded to MAX_EMBEDDED_RULES_PER_ITEM. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `totalRuleCount` for the full count.'
+    ),
+  totalRuleCount: z
+    .number()
+    .describe(
+      'Total number of rules referenced by this event after search / rule-filter narrowing. May exceed `rules.length` when the embedded array is truncated to the cap.'
     ),
   workflows: z.array(namedRefSchema).max(MAX_WORKFLOWS_PER_ITEM),
 });

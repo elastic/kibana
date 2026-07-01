@@ -6,10 +6,11 @@
  */
 
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
-import type {
-  PolicyExecutionHistoryItem,
-  PolicyExecutionOutcome,
-  SearchMatchCounts,
+import {
+  MAX_EMBEDDED_RULES_PER_ITEM,
+  type PolicyExecutionHistoryItem,
+  type PolicyExecutionOutcome,
+  type SearchMatchCounts,
 } from '@kbn/alerting-v2-schemas';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { ACTION_POLICY_EVENT_ACTIONS } from '../dispatcher/steps/constants';
@@ -126,7 +127,10 @@ export function buildExecutionHistoryItem(
       : searchScopedRuleIds;
   if (relevantRuleIds.length === 0) return null;
 
-  const rules = relevantRuleIds.map((id) => ({ id, name: ruleNames.get(id) ?? null }));
+  const totalRuleCount = relevantRuleIds.length;
+  const rules = relevantRuleIds
+    .slice(0, MAX_EMBEDDED_RULES_PER_ITEM)
+    .map((id) => ({ id, name: ruleNames.get(id) ?? null }));
 
   const workflows = (dispatcher.workflow_ids ?? [])
     .filter(isString)
@@ -139,6 +143,7 @@ export function buildExecutionHistoryItem(
     episode_count: Number(dispatcher.episode_count ?? 0),
     action_group_count: Number(dispatcher.action_group_count ?? 0),
     rules,
+    totalRuleCount,
     workflows,
   };
 }

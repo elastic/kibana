@@ -10,15 +10,14 @@ import {
   EuiBadge,
   EuiBadgeGroup,
   EuiBasicTable,
-  EuiButtonIcon,
-  EuiCode,
-  EuiIcon,
+  EuiCallOut,
   EuiLink,
-  EuiPanel,
-  EuiScreenReaderOnly,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiSpacer,
   EuiText,
-  useEuiTheme,
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -38,48 +37,133 @@ import { TruncatedCallout } from './truncated_callout';
 
 const DEFAULT_PER_PAGE = 100;
 const DEFAULT_OUTCOME: PolicyExecutionOutcomeFilter = 'all';
+const MAX_VISIBLE_RULES = 3;
+const RULE_BADGE_MAX_WIDTH = 200;
 
-const getItemId = (item: PolicyExecutionHistoryItem): string =>
-  `${item['@timestamp']}|${item.policy.id}|${item.outcome}`;
-
-const buildExpandColumn = (
-  expandedRowMap: Record<string, React.ReactNode>,
-  onToggle: (item: PolicyExecutionHistoryItem) => void
-): EuiBasicTableColumn<PolicyExecutionHistoryItem> => ({
-  align: 'left',
-  width: '40px',
-  isExpander: true,
-  name: (
-    <EuiScreenReaderOnly>
-      <span>
-        {i18n.translate('xpack.alertingV2.executionHistory.columns.expandRow', {
-          defaultMessage: 'Expand row',
+const OverflowPopover = ({
+  hiddenRules,
+  notShownCount,
+  onRuleClick,
+}: {
+  hiddenRules: PolicyExecutionHistoryItem['rules'];
+  notShownCount: number;
+  onRuleClick: (ruleId: string) => void;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const total = hiddenRules.length + notShownCount;
+  return (
+    <EuiPopover
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="downCenter"
+      button={
+        <EuiBadge
+          color="hollow"
+          onClick={() => setIsOpen((v) => !v)}
+          onClickAriaLabel={i18n.translate(
+            'xpack.alertingV2.executionHistory.columns.rules.overflowAria',
+            {
+              defaultMessage: 'Show {count, plural, one {# more rule} other {# more rules}}',
+              values: { count: total },
+            }
+          )}
+        >
+          {`+${total}`}
+        </EuiBadge>
+      }
+    >
+      <EuiPopoverTitle paddingSize="s">
+        {i18n.translate('xpack.alertingV2.executionHistory.columns.rules.overflowTitle', {
+          defaultMessage: 'More rules',
         })}
-      </span>
-    </EuiScreenReaderOnly>
-  ),
-  render: (item: PolicyExecutionHistoryItem) => {
-    const isExpanded = Boolean(expandedRowMap[getItemId(item)]);
-    return (
-      <EuiButtonIcon
-        onClick={() => onToggle(item)}
-        aria-label={
-          isExpanded
-            ? i18n.translate('xpack.alertingV2.executionHistory.columns.collapseRowAria', {
-                defaultMessage: 'Collapse',
-              })
-            : i18n.translate('xpack.alertingV2.executionHistory.columns.expandRowAria', {
-                defaultMessage: 'Expand',
-              })
-        }
-        iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-      />
-    );
-  },
-});
+      </EuiPopoverTitle>
+      <div css={{ maxHeight: 320, overflowY: 'auto', minWidth: 240 }}>
+        <EuiListGroup maxWidth={false}>
+          {hiddenRules.map((rule) => (
+            <EuiListGroupItem
+              key={rule.id}
+              iconType="bell"
+              wrapText
+              label={rule.name ?? rule.id}
+              onClick={() => {
+                setIsOpen(false);
+                onRuleClick(rule.id);
+              }}
+            />
+          ))}
+        </EuiListGroup>
+        {notShownCount > 0 && (
+          <EuiCallOut
+            size="s"
+            iconType="warning"
+            color="warning"
+            title={i18n.translate(
+              'xpack.alertingV2.executionHistory.columns.rules.overflowNotShown',
+              {
+                defaultMessage:
+                  '{count, plural, one {# more rule not shown} other {# more rules not shown}}. Use the rule filter to narrow.',
+                values: { count: notShownCount },
+              }
+            )}
+          />
+        )}
+      </div>
+    </EuiPopover>
+  );
+};
 
-const buildDataColumns = (
+const RulesCell = ({
+  rules,
+  totalRuleCount,
+  activeRuleId,
+  onRuleClick,
+}: {
+  rules: PolicyExecutionHistoryItem['rules'];
+  totalRuleCount: number;
+  activeRuleId: string | null;
+  onRuleClick: (ruleId: string) => void;
+}) => {
+  if (totalRuleCount === 0) return null;
+  const visible = rules.slice(0, MAX_VISIBLE_RULES);
+  const hiddenRules = rules.slice(MAX_VISIBLE_RULES);
+  const notShownCount = totalRuleCount - rules.length;
+  const overflowCount = hiddenRules.length + notShownCount;
+  return (
+    <EuiBadgeGroup gutterSize="xs">
+      {visible.map((rule) => {
+        const isActive = rule.id === activeRuleId;
+        return (
+          <EuiBadge
+            key={rule.id}
+            color={isActive ? 'primary' : 'hollow'}
+            iconType="bell"
+            onClick={() => onRuleClick(rule.id)}
+            onClickAriaLabel={i18n.translate(
+              'xpack.alertingV2.executionHistory.columns.rules.openRuleAria',
+              { defaultMessage: 'Open rule details' }
+            )}
+            css={{ maxWidth: `${RULE_BADGE_MAX_WIDTH}px` }}
+          >
+            {rule.name ?? rule.id}
+          </EuiBadge>
+        );
+      })}
+      {overflowCount > 0 && (
+        <OverflowPopover
+          hiddenRules={hiddenRules}
+          notShownCount={notShownCount}
+          onRuleClick={onRuleClick}
+        />
+      )}
+    </EuiBadgeGroup>
+  );
+};
+
+const buildColumns = (
   onPolicyClick: (policyId: string) => void,
+  onRuleClick: (ruleId: string) => void,
+  activeRuleId: string | null,
   getWorkflowUrl: (workflowId: string) => string,
   formatTimestamp: (value: string) => string
 ): Array<EuiBasicTableColumn<PolicyExecutionHistoryItem>> => [
@@ -109,6 +193,19 @@ const buildDataColumns = (
       <EuiBadge color="hollow" iconType={outcome === 'dispatched' ? 'check' : 'clock'}>
         {outcome}
       </EuiBadge>
+    ),
+  },
+  {
+    name: i18n.translate('xpack.alertingV2.executionHistory.columns.rules', {
+      defaultMessage: 'Rules',
+    }),
+    render: (item: PolicyExecutionHistoryItem) => (
+      <RulesCell
+        rules={item.rules}
+        totalRuleCount={item.totalRuleCount}
+        activeRuleId={activeRuleId}
+        onRuleClick={onRuleClick}
+      />
     ),
   },
   {
@@ -151,83 +248,6 @@ const buildDataColumns = (
   },
 ];
 
-type RuleRow = PolicyExecutionHistoryItem['rules'][number];
-
-const MatchedRulesTable = ({
-  rules,
-  activeRuleId,
-  onRuleClick,
-}: {
-  rules: PolicyExecutionHistoryItem['rules'];
-  activeRuleId: string | null;
-  onRuleClick: (ruleId: string) => void;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const columns: Array<EuiBasicTableColumn<RuleRow>> = [
-    {
-      width: '32px',
-      name: '',
-      render: () => (
-        <EuiIcon type="bell" size="s" color={euiTheme.colors.subduedText} aria-hidden />
-      ),
-    },
-    {
-      name: i18n.translate('xpack.alertingV2.executionHistory.subTable.name', {
-        defaultMessage: 'Name',
-      }),
-      render: (rule: RuleRow) => (
-        <EuiLink
-          onClick={() => onRuleClick(rule.id)}
-          css={{ fontWeight: euiTheme.font.weight.medium }}
-        >
-          {rule.name ?? rule.id}
-        </EuiLink>
-      ),
-    },
-    {
-      name: i18n.translate('xpack.alertingV2.executionHistory.subTable.id', {
-        defaultMessage: 'ID',
-      }),
-      width: '360px',
-      render: (rule: RuleRow) => (
-        <EuiCode transparentBackground css={{ fontSize: euiTheme.size.m }}>
-          {rule.id}
-        </EuiCode>
-      ),
-    },
-  ];
-
-  return (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
-      paddingSize="s"
-      color="subdued"
-      css={{ marginLeft: euiTheme.size.l }}
-    >
-      <EuiText size="xs" color="subdued" css={{ marginBottom: euiTheme.size.xs }}>
-        <strong>
-          {i18n.translate('xpack.alertingV2.executionHistory.subTable.title', {
-            defaultMessage: 'Matched rules ({count})',
-            values: { count: rules.length },
-          })}
-        </strong>
-      </EuiText>
-      <EuiBasicTable<RuleRow>
-        items={rules}
-        columns={columns}
-        itemId="id"
-        compressed
-        rowProps={(rule) =>
-          rule.id === activeRuleId
-            ? { style: { background: euiTheme.colors.backgroundLightPrimary } }
-            : {}
-        }
-      />
-    </EuiPanel>
-  );
-};
-
 interface Props {
   onPolicyClick: (policyId: string) => void;
   onRuleClick: (ruleId: string) => void;
@@ -242,12 +262,10 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
   const [outcome, setOutcome] = useState<PolicyExecutionOutcomeFilter>(DEFAULT_OUTCOME);
   const [lastSeenAt, setLastSeenAt] = useState(() => new Date().toISOString());
   const [isLoadingNewEvents, setIsLoadingNewEvents] = useState(false);
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(() => new Set());
 
   const trimmedSearch = search.trim();
   const searchParam = trimmedSearch.length > 0 ? trimmedSearch : undefined;
   const ruleIdsParam = ruleFilters.length > 0 ? ruleFilters.map((r) => r.id) : undefined;
-  const hasRuleFilter = ruleFilters.length > 0;
 
   const { data, isFetching, isError, refetch } = useFetchExecutionHistory({
     page: page + 1,
@@ -278,16 +296,6 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
     }
   }, [isLoadingNewEvents, isFetching]);
 
-  const toggleExpanded = useCallback((item: PolicyExecutionHistoryItem) => {
-    const id = getItemId(item);
-    setExpandedRows((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
-
   const onLoadNewEvents = () => {
     setIsLoadingNewEvents(true);
     setPage(0);
@@ -307,7 +315,6 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
   const onRuleFiltersChange = useCallback((values: RuleOption[]) => {
     setRuleFilters(values);
     setPage(0);
-    setExpandedRows(new Set());
   }, []);
 
   const onTableChange = ({
@@ -322,7 +329,8 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
   const items = data?.items ?? [];
   const totalEvents = data?.totalEvents ?? 0;
   const showBanner = newEventsCount > 0 && !isError;
-  const isFiltered = searchParam !== undefined || hasRuleFilter || outcome !== DEFAULT_OUTCOME;
+  const isFiltered =
+    searchParam !== undefined || ruleFilters.length > 0 || outcome !== DEFAULT_OUTCOME;
 
   if (isError) {
     return <ExecutionHistoryErrorState onRetry={() => refetch()} />;
@@ -332,27 +340,13 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
     application.getUrlForApp(WORKFLOWS_APP_ID, { path: `/${workflowId}` });
   const formatTimestamp = (value: string) => moment(value).format(dateTimeFormat);
 
-  const itemIdToExpandedRowMap: Record<string, React.ReactNode> = {};
-  if (hasRuleFilter) {
-    for (const item of items) {
-      if (expandedRows.has(getItemId(item))) {
-        itemIdToExpandedRowMap[getItemId(item)] = (
-          <MatchedRulesTable
-            rules={item.rules}
-            activeRuleId={activeRuleId}
-            onRuleClick={onRuleClick}
-          />
-        );
-      }
-    }
-  }
-
-  const columns = hasRuleFilter
-    ? [
-        buildExpandColumn(itemIdToExpandedRowMap, toggleExpanded),
-        ...buildDataColumns(onPolicyClick, getWorkflowUrl, formatTimestamp),
-      ]
-    : buildDataColumns(onPolicyClick, getWorkflowUrl, formatTimestamp);
+  const columns = buildColumns(
+    onPolicyClick,
+    onRuleClick,
+    activeRuleId,
+    getWorkflowUrl,
+    formatTimestamp
+  );
 
   return (
     <>
@@ -388,8 +382,6 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
         columns={columns}
         loading={isFetching}
         noItemsMessage={isFiltered ? <FilteredEmptyState /> : <PoliciesEmptyState />}
-        itemId={hasRuleFilter ? getItemId : undefined}
-        itemIdToExpandedRowMap={hasRuleFilter ? itemIdToExpandedRowMap : undefined}
         pagination={{
           pageIndex: page,
           pageSize: perPage,
