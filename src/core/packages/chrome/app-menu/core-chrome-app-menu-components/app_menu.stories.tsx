@@ -403,6 +403,9 @@ const InteractiveSwitchWrapper = (props: AppMenuWrapperProps) => {
         setChecked(value);
         action('switch-toggled')(value);
       },
+      tooltipContent: checked
+        ? 'Disable to stop running the workflow'
+        : 'Enable to start running the workflow',
       'data-test-subj': 'switch',
     },
   };
@@ -450,6 +453,61 @@ export const SwitchWithItems: Story = {
         iconType: 'controls',
       },
     },
+  },
+};
+
+const overflowLoadingConfig: AppMenuConfig = {
+  items: [
+    {
+      id: 'refresh',
+      order: 1,
+      overflow: true,
+      label: 'Refresh',
+      run: action('refresh-clicked'),
+      iconType: 'refresh',
+      testId: 'refreshButton',
+      isLoading: true,
+    },
+    {
+      id: 'manageIndex',
+      order: 2,
+      overflow: true,
+      label: 'Manage index',
+      iconType: 'managementApp',
+      testId: 'manageIndexButton',
+      popoverWidth: 200,
+      isLoading: true,
+      items: [
+        {
+          run: () => action('close-index-clicked'),
+          id: 'closeIndex',
+          order: 1,
+          label: 'Close index',
+          iconType: 'cross',
+          testId: 'closeIndexButton',
+        },
+        {
+          run: () => action('delete-index-clicked'),
+          id: 'deleteIndex',
+          order: 2,
+          label: 'Delete index',
+          iconType: 'trash',
+          testId: 'deleteIndexButton',
+        },
+      ],
+    },
+  ],
+};
+
+/**
+ * Overflow items honor `isLoading`: the item icon is replaced with a spinner and the item is
+ * disabled while the action runs. Open the "More" menu to see both a simple item and an item
+ * with sub-items in their loading state.
+ */
+export const OverflowItemLoading: Story = {
+  name: 'Overflow item - loading state',
+  args: {
+    config: overflowLoadingConfig,
   },
 };
 
