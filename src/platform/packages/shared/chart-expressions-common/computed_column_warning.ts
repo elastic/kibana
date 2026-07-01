@@ -10,16 +10,16 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 
-const getFilterDrilldownDisabledMessage = ({
-  nonFilterableColumnNames,
-  allColumnsNonFilterable,
+const buildFilterDrilldownMessage = ({
+  columnNamesToExplain,
+  allColumnsNeedExplanation,
 }: {
-  nonFilterableColumnNames: string[];
-  allColumnsNonFilterable: boolean;
+  columnNamesToExplain: string[];
+  allColumnsNeedExplanation: boolean;
 }) => {
-  const count = nonFilterableColumnNames.length;
+  const count = columnNamesToExplain.length;
 
-  if (allColumnsNonFilterable) {
+  if (allColumnsNeedExplanation) {
     return i18n.translate(
       'chartExpressionsCommon.computedColumn.filterDrilldownDisabledDescription',
       {
@@ -30,7 +30,7 @@ const getFilterDrilldownDisabledMessage = ({
     );
   }
 
-  const names = nonFilterableColumnNames.map((n) => `'${n}'`).join(', ');
+  const names = columnNamesToExplain.map((n) => `'${n}'`).join(', ');
   return i18n.translate(
     'chartExpressionsCommon.computedColumn.partialFilterDrilldownDisabledDescription',
     {
@@ -48,11 +48,6 @@ const isNonFilterableComputedColumn = (column: DatatableColumn): boolean => {
   return column.meta?.sourceParams?.isSourceFieldFilterable !== true;
 };
 
-/**
- * Returns false if any of the given columns can't be filtered or drilled down into. Unaffected
- * by warning-message suppression rules (e.g. for dates, see `getFilterDrilldownWarningMessage`)
- * — this is the fact that filter/drilldown actions should be gated on.
- */
 export const isFilterableColumnSet = (columns: Array<DatatableColumn | undefined>): boolean => {
   const defined = columns.filter((c): c is DatatableColumn => c != null);
   return !defined.some((col) => isNonFilterableComputedColumn(col));
@@ -60,10 +55,7 @@ export const isFilterableColumnSet = (columns: Array<DatatableColumn | undefined
 
 /**
  * Returns the warning message to show when filterable chart columns are computed ES|QL fields
- * that cannot be used for filtering. Returns `undefined` when there is nothing to warn about,
- * including when every non-filterable column is a date — the "created at query time" message
- * reads as misleading for dates (product decision), so those are left out of the text even
- * though they're still non-filterable per `isFilterableColumnSet`.
+ * that cannot be used for filtering.
  */
 export const getFilterDrilldownWarningMessage = (
   columns: Array<DatatableColumn | undefined>
@@ -73,17 +65,17 @@ export const getFilterDrilldownWarningMessage = (
     return undefined;
   }
 
-  const nonFilterableColumnNames = defined
+  // Suppress the message for date columns (product decision).
+  const columnNamesToExplain = defined
     .filter((col) => isNonFilterableComputedColumn(col) && col.meta.type !== 'date')
     .map((col) => col.name);
 
-  if (nonFilterableColumnNames.length === 0) {
+  if (columnNamesToExplain.length === 0) {
     return undefined;
   }
 
-  const allColumnsNonFilterable = nonFilterableColumnNames.length === defined.length;
-  return getFilterDrilldownDisabledMessage({
-    nonFilterableColumnNames,
-    allColumnsNonFilterable,
+  return buildFilterDrilldownMessage({
+    columnNamesToExplain,
+    allColumnsNeedExplanation: columnNamesToExplain.length === defined.length,
   });
 };
