@@ -133,19 +133,17 @@ const RulesCell = ({
     <EuiBadgeGroup gutterSize="xs">
       {visible.map((rule) => {
         const isActive = rule.id === activeRuleId;
+        const label = rule.name ?? rule.id;
         return (
           <EuiBadge
             key={rule.id}
             color={isActive ? 'primary' : 'hollow'}
             iconType="bell"
             onClick={() => onRuleClick(rule.id)}
-            onClickAriaLabel={i18n.translate(
-              'xpack.alertingV2.executionHistory.columns.rules.openRuleAria',
-              { defaultMessage: 'Open rule details' }
-            )}
+            onClickAriaLabel={label}
             css={{ maxWidth: `${RULE_BADGE_MAX_WIDTH}px` }}
           >
-            {rule.name ?? rule.id}
+            {label}
           </EuiBadge>
         );
       })}

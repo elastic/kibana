@@ -43,6 +43,11 @@ jest.mock('../../hooks/use_count_new_execution_history_events', () => ({
     mockUseCountNewExecutionHistoryEvents(...args),
 }));
 
+const mockUseFetchRules = jest.fn();
+jest.mock('../../hooks/use_fetch_rules', () => ({
+  useFetchRules: (...args: unknown[]) => mockUseFetchRules(...args),
+}));
+
 jest.mock(
   '../../components/action_policy/details_flyout/action_policy_details_flyout_container',
   () => ({
@@ -94,7 +99,8 @@ const buildItem = (
 ): PolicyExecutionHistoryItem => ({
   '@timestamp': '2026-05-05T10:00:00.000Z',
   policy: { id: 'policy-1', name: 'My Policy' },
-  rule: { id: 'rule-1', name: 'My Rule' },
+  rules: [{ id: 'rule-1', name: 'My Rule' }],
+  totalRuleCount: 1,
   outcome: 'dispatched',
   episode_count: 3,
   action_group_count: 2,
@@ -135,6 +141,11 @@ describe('ExecutionHistoryPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { count: 0 } });
+    mockUseFetchRules.mockReturnValue({
+      data: { items: [], total: 0 },
+      isFetching: false,
+      isLoading: false,
+    });
   });
 
   it('renders the page title and tabs', () => {
@@ -150,13 +161,6 @@ describe('ExecutionHistoryPage', () => {
     renderPage();
 
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
-  });
-
-  it('renders the denormalization info tooltip next to the Policies tab', () => {
-    mockFetchResult();
-    renderPage();
-
-    expect(screen.getByTestId('executionHistoryDenormalizationTip')).toBeInTheDocument();
   });
 
   it('shows the 24h time window in the page description', () => {
@@ -218,7 +222,7 @@ describe('ExecutionHistoryPage', () => {
         items: [
           buildItem({
             policy: { id: 'policy-orphan', name: null },
-            rule: { id: 'rule-orphan', name: null },
+            rules: [{ id: 'rule-orphan', name: null }],
             workflows: [{ id: 'wf-orphan', name: null }],
           }),
         ],
