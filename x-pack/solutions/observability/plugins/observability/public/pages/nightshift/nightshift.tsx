@@ -36,7 +36,7 @@ const getCloseGapsInitialMessage = (connectorName?: string) =>
   connectorName
     ? i18n.translate('xpack.observability.nightshift.closeGapsConnectorInitialMessage', {
         defaultMessage:
-          'Start the significant-events-onboarding skill. Read the _gaps/overview memory page, summarise the highest priority gaps, and help me close them one by one by gathering the missing operational context. Start with connector {connectorName}, then go from there.',
+          'Start the significant-events-onboarding skill. Help me set up the {connectorName} connector and note down in sigevents memory how it relates.',
         values: { connectorName },
       })
     : CLOSE_GAPS_INITIAL_MESSAGE;
@@ -94,6 +94,9 @@ export function NightshiftPage() {
   );
 
   useEffect(() => {
+    if (!isEnabled) {
+      return;
+    }
     http
       .get<{ available: boolean; data?: GapsReport }>('/internal/streams/memory/_gaps_overview')
       .then((response) => {
@@ -104,9 +107,12 @@ export function NightshiftPage() {
       .catch(() => {
         // gaps report not yet available — keep null so empty state is shown
       });
-  }, [http]);
+  }, [http, isEnabled]);
 
   useEffect(() => {
+    if (!isEnabled) {
+      return;
+    }
     http
       .get<ActionConnectorResponseItem[]>('/api/actions/connectors')
       .then((connectors) => {
@@ -119,7 +125,7 @@ export function NightshiftPage() {
       .catch(() => {
         setInstalledConnectorActionTypeIds([]);
       });
-  }, [http]);
+  }, [http, isEnabled]);
 
   if (!isEnabled) {
     history.replace(OVERVIEW_PATH);
