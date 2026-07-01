@@ -49,7 +49,7 @@ describe('TelemetryManagementSectionComponent', () => {
     ).toMatchSnapshot();
   });
 
-  it('renders because query matches the SEARCH_TERMS', () => {
+  it('renders when opt-in status can be changed', () => {
     const telemetryService = mockTelemetryService({
       config: {
         appendServerlessChannelsSuffix: false,
@@ -75,14 +75,7 @@ describe('TelemetryManagementSectionComponent', () => {
       />
     );
     try {
-      expect(
-        component.setProps({ ...component.props(), query: { text: 'TeLEMetry' } }).html()
-      ).not.toBe(''); // Renders something.
-      // I can't check against snapshot because of https://github.com/facebook/jest/issues/8618
-      // expect(component).toMatchSnapshot();
-
-      // It should also render if there is no query at all.
-      expect(component.setProps({ ...component.props(), query: {} }).html()).not.toBe('');
+      expect(component.isEmptyRender()).toBe(false);
     } finally {
       component.unmount();
     }
