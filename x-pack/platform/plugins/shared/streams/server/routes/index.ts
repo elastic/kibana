@@ -39,6 +39,7 @@ import { timeSeriesRoutes } from './internal/streams/time_series/route';
 import { internalMemoryRoutes } from './internal/memory/route';
 import { internalSigEventsAvailabilityRoutes } from './internal/significant_events/availability/route';
 import { internalSigEventsDetectionsRoutes } from './internal/significant_events/detections/route';
+import { internalSigEventsDetectionsWorkflowRoutes } from './internal/significant_events/detections/workflow_route';
 import { internalSigEventsDiscoveriesRoutes } from './internal/significant_events/discoveries/route';
 import { internalSigEventsEventsRoutes } from './internal/significant_events/events/route';
 import { keepAliveRoutes } from './internal/significant_events/knowledge_indicators/keep_alive_route';
@@ -68,6 +69,7 @@ export const streamsRouteRepository = {
   ...internalMemoryRoutes,
   ...internalSigEventsAvailabilityRoutes,
   ...internalSigEventsDetectionsRoutes,
+  ...internalSigEventsDetectionsWorkflowRoutes,
   ...internalSigEventsDiscoveriesRoutes,
   ...internalSigEventsEventsRoutes,
   ...keepAliveRoutes,
