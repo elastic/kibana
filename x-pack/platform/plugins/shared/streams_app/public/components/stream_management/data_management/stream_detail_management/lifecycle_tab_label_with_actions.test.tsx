@@ -8,10 +8,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
-import type { Streams } from '@kbn/streams-schema';
 import type { CoreStart } from '@kbn/core/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { copyToClipboard } from '@elastic/eui';
+import {
+  createMockClassicStreamDefinition,
+  createMockWiredStreamDefinition,
+} from '../shared/mocks/stream_definitions';
 import {
   LifecycleTabLabel,
   LifecycleTabLabelWithActions,
@@ -24,6 +27,22 @@ jest.mock('@elastic/eui', () => {
     copyToClipboard: jest.fn(() => true),
   };
 });
+
+const mockPush = jest.fn();
+jest.mock('../../../../hooks/use_streams_app_router', () => ({
+  useStreamsAppRouter: () => ({
+    push: mockPush,
+    link: jest.fn(),
+    replace: jest.fn(),
+  }),
+}));
+
+jest.mock('../../../../hooks/use_time_range', () => ({
+  useTimeRange: () => ({
+    rangeFrom: 'now-15m',
+    rangeTo: 'now',
+  }),
+}));
 
 const mockCopyToClipboard = copyToClipboard as jest.Mock;
 
@@ -72,20 +91,26 @@ describe('LifecycleTabLabelWithActions', () => {
     expect(onCopy).toHaveBeenCalledTimes(1);
   });
 
-  it('does not render the edit index template item when onEditIndexTemplate is not provided', async () => {
+  it('does not render the edit action item when editAction is not provided', async () => {
     render(<LifecycleTabLabelWithActions showActions onCopy={jest.fn()} />);
 
     await openActionsMenu();
 
     expect(screen.queryByTestId('streamsLifecycleTabEditIndexTemplate')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('streamsLifecycleTabEditParentStream')).not.toBeInTheDocument();
   });
 
-  it('disables the edit index template item when no index template name is available', async () => {
+  it('disables the edit action item when editAction is disabled', async () => {
     render(
       <LifecycleTabLabelWithActions
         showActions
         onCopy={jest.fn()}
-        onEditIndexTemplate={jest.fn()}
+        editAction={{
+          label: 'Edit index template',
+          disabled: true,
+          onClick: jest.fn(),
+          'data-test-subj': 'streamsLifecycleTabEditIndexTemplate',
+        }}
       />
     );
 
@@ -94,61 +119,50 @@ describe('LifecycleTabLabelWithActions', () => {
     expect(screen.getByTestId('streamsLifecycleTabEditIndexTemplate')).toBeDisabled();
   });
 
-  it('calls onEditIndexTemplate with the template name when enabled', async () => {
-    const onEditIndexTemplate = jest.fn();
+  it('calls editAction.onClick when enabled', async () => {
+    const onClick = jest.fn();
     render(
       <LifecycleTabLabelWithActions
         showActions
         onCopy={jest.fn()}
-        indexTemplateName="logs@stream"
-        onEditIndexTemplate={onEditIndexTemplate}
+        editAction={{
+          label: 'Edit index template',
+          onClick,
+          'data-test-subj': 'streamsLifecycleTabEditIndexTemplate',
+        }}
       />
     );
 
     await openActionsMenu();
     await clickMenuItem('streamsLifecycleTabEditIndexTemplate');
 
-    expect(onEditIndexTemplate).toHaveBeenCalledWith('logs@stream');
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 });
 
 describe('LifecycleTabLabel', () => {
-  const createDefinition = (): Streams.WiredStream.GetResponse => ({
-    stream: {
-      type: 'wired',
-      name: 'logs-test',
-      description: '',
-      updated_at: '2026-01-01T00:00:00.000Z',
-      ingest: {
-        lifecycle: { dsl: { data_retention: '30d' } },
-        processing: { steps: [], updated_at: '2026-01-01T00:00:00.000Z' },
-        settings: {},
-        wired: { fields: {}, routing: [] },
-        failure_store: { inherit: {} },
+  const createWiredDefinition = (streamName: string) => {
+    const baseDefinition = createMockWiredStreamDefinition();
+    return createMockWiredStreamDefinition({
+      stream: {
+        ...baseDefinition.stream,
+        name: streamName,
       },
-    },
-    effective_lifecycle: { dsl: { data_retention: '30d' }, from: 'logs-test' },
-    effective_settings: {},
-    data_stream_exists: true,
-    inherited_fields: {},
-    dashboards: [],
-    rules: [],
-    privileges: {
-      manage: true,
-      monitor: true,
-      lifecycle: true,
-      simulate: true,
-      text_structure: true,
-      read_failure_store: true,
-      manage_failure_store: true,
-      view_index_metadata: true,
-      create_snapshot_repository: true,
-    },
-    effective_failure_store: {
-      lifecycle: { enabled: { is_default_retention: true } },
-      from: 'logs-test',
-    },
-  });
+    });
+  };
+
+  const createClassicDefinition = (indexTemplate?: string) =>
+    createMockClassicStreamDefinition(
+      indexTemplate
+        ? {
+            elasticsearch_assets: {
+              indexTemplate,
+              componentTemplates: [],
+              dataStream: 'logs-test',
+            },
+          }
+        : {}
+    );
 
   const createNotifications = () =>
     ({
@@ -175,7 +189,7 @@ describe('LifecycleTabLabel', () => {
 
     render(
       <LifecycleTabLabel
-        definition={createDefinition()}
+        definition={createWiredDefinition('logs-test')}
         showActions
         notifications={notifications}
         share={createShare()}
@@ -187,7 +201,7 @@ describe('LifecycleTabLabel', () => {
 
     expect(mockCopyToClipboard).toHaveBeenCalledTimes(1);
     const copied = mockCopyToClipboard.mock.calls[0][0];
-    expect(copied).toContain('PUT /api/streams/logs-test/_ingest');
+    expect(copied).toContain('PUT kbn:/api/streams/logs-test/_ingest');
     expect(notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
   });
 
@@ -197,7 +211,7 @@ describe('LifecycleTabLabel', () => {
 
     render(
       <LifecycleTabLabel
-        definition={createDefinition()}
+        definition={createWiredDefinition('logs-test')}
         showActions
         notifications={notifications}
         share={createShare()}
@@ -210,16 +224,15 @@ describe('LifecycleTabLabel', () => {
     expect(notifications.toasts.addSuccess).not.toHaveBeenCalled();
   });
 
-  it('opens the index template edit page in a new tab via the index management locator', async () => {
+  it('opens the index template edit page in a new tab for classic streams', async () => {
     const editUrl = '/app/management/data/index_management/templates/edit/logs@stream';
     const locatorGetUrl = jest.fn(async () => editUrl);
     const windowOpenSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
 
     render(
       <LifecycleTabLabel
-        definition={createDefinition()}
+        definition={createClassicDefinition('logs@stream')}
         showActions
-        indexTemplateName="logs@stream"
         notifications={createNotifications()}
         share={createShare(locatorGetUrl)}
       />
@@ -235,5 +248,45 @@ describe('LifecycleTabLabel', () => {
     expect(windowOpenSpy).toHaveBeenCalledWith(editUrl, '_blank');
 
     windowOpenSpy.mockRestore();
+  });
+
+  it('does not render the edit action for wired root streams', async () => {
+    render(
+      <LifecycleTabLabel
+        definition={createWiredDefinition('logs')}
+        showActions
+        notifications={createNotifications()}
+        share={createShare()}
+      />
+    );
+
+    await openActionsMenu();
+
+    expect(screen.queryByTestId('streamsLifecycleTabEditParentStream')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('streamsLifecycleTabEditIndexTemplate')).not.toBeInTheDocument();
+  });
+
+  it('navigates to the parent stream lifecycle page for wired child streams', async () => {
+    render(
+      <LifecycleTabLabel
+        definition={createWiredDefinition('logs.child')}
+        showActions
+        notifications={createNotifications()}
+        share={createShare()}
+      />
+    );
+
+    await openActionsMenu();
+
+    expect(screen.getByTestId('streamsLifecycleTabEditParentStream')).toHaveTextContent(
+      'Edit parent stream'
+    );
+
+    await clickMenuItem('streamsLifecycleTabEditParentStream');
+
+    expect(mockPush).toHaveBeenCalledWith('/{key}/management/{tab}', {
+      path: { key: 'logs', tab: 'lifecycle' },
+      query: { rangeFrom: 'now-15m', rangeTo: 'now' },
+    });
   });
 });
