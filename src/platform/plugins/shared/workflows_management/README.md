@@ -232,6 +232,9 @@ These routes use `access: internal` and are **not** included in the public OpenA
 | GET | `/internal/workflows/config` | Execution engine feature flags for the plugin. |
 | POST | `/internal/workflows/disable` | Disable all workflows (administrative). |
 | POST | `/api/workflows/validate` | Validate a workflow YAML definition without saving. |
+| GET | `/internal/workflows/library/templates` | List Workflow Template Library catalog rows (optional `solution` / `category` / `search` filters). Gated by the `workflowsManagement:library:enabled` global uiSetting; returns `503` when off. |
+| GET | `/internal/workflows/library/templates/{slug}` | Get the parsed template body (metadata + workflow body + raw YAML) for a catalog slug. `404` when the slug is missing, `503` when the library is disabled. |
+| GET | `/internal/workflows/library/health` | Diagnostic — returns the cache's `sourceMode`, `lastRefreshAt`, and `lastError`. Not gated by the library toggle so admins can reach it while the feature is off. |
 
 ---
 
