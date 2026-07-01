@@ -70,6 +70,12 @@ const DELETE_COMMENT_OPERATION: CasesSupportedOperations = 'deleteComment';
 const ACCESS_COMMENT_OPERATION: CasesSupportedOperations = 'getComment';
 const ACCESS_CASE_OPERATION: CasesSupportedOperations = 'getCase';
 const ACCESS_USER_ACTION_OPERATION: CasesSupportedOperations = 'getUserActions';
+/**
+ * Reading templates is gated on the standard per-owner cases read privilege (same as
+ * `getCase`/`findCases`), matching the "must have read privileges for the Cases feature"
+ * contract documented on the public template routes.
+ */
+const ACCESS_TEMPLATE_OPERATION: CasesSupportedOperations = 'getCase';
 
 /**
  * Database constant for ECS category for use for audit logging.
@@ -208,6 +214,22 @@ const TemplateOperations = {
     name: WriteOperations.ManageTemplate as const,
     action: 'case_template_manage',
     verbs: updateVerbs,
+    docType: 'case templates',
+    savedObjectType: CASE_TEMPLATE_SAVED_OBJECT,
+  },
+  [ReadOperations.GetTemplate]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_TEMPLATE_OPERATION,
+    action: 'case_template_get',
+    verbs: accessVerbs,
+    docType: 'case templates',
+    savedObjectType: CASE_TEMPLATE_SAVED_OBJECT,
+  },
+  [ReadOperations.FindTemplates]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_TEMPLATE_OPERATION,
+    action: 'case_template_find',
+    verbs: accessVerbs,
     docType: 'case templates',
     savedObjectType: CASE_TEMPLATE_SAVED_OBJECT,
   },
