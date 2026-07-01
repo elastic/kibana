@@ -1920,8 +1920,7 @@ x-pack/platform/plugins/shared/streams/server/agent_builder/tools/memory @elasti
 x-pack/platform/plugins/shared/streams/server/routes/significant_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/routes/internal/significant_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/test/scout/api/tests/significant_events @elastic/obs-sig-events-team
-# common
-x-pack/platform/plugins/shared/streams/common/significant_events_tuning_config.ts @elastic/obs-sig-events-team
+
 
 # Infra Monitoring tests
 /x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-presentation-team

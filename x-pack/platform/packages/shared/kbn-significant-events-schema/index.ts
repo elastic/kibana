@@ -81,14 +81,19 @@ export {
   type SignificantEventsTuningConfig,
   type TuningConfigFieldBounds,
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
-  SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
+  type SignificantEventInvestigation,
+  type SignificantEventInvestigationStatus,
+  SIGNIFICANT_EVENT_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_INVESTIGATION_STATUS_OPTIONS,
   detectionSchema,
   discoverySchema,
   significantEventSchema,
   significantEventStatusSchema,
   significantEventsTuningConfigSchema,
   validateSignificantEventsTuningConfig,
+  significantEventInvestigationSchema,
+  significantEventInvestigationStatusSchema,
 } from './src/significant_events';
 
 export type {

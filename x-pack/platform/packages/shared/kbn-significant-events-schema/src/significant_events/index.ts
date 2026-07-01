@@ -10,8 +10,13 @@ export { discoverySchema, type Discovery } from './discoveries';
 export type { KnowledgeIndicator } from '../queries';
 export {
   type SignificantEvent,
+  type SignificantEventInvestigation,
+  type SignificantEventInvestigationStatus,
   type SignificantEventStatus,
+  SIGNIFICANT_EVENT_INVESTIGATION_STATUS_OPTIONS,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
+  significantEventInvestigationSchema,
+  significantEventInvestigationStatusSchema,
   significantEventSchema,
   significantEventStatusSchema,
 } from './events';
