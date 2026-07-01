@@ -246,6 +246,7 @@ const getActionDetailsList = async ({
     [actionResponses, agentsHostInfo] = await Promise.all([
       fetchActionResponses({
         esClient: endpointService.getInternalEsClient(),
+        endpointService,
         actionIds: actionReqIds,
       }),
 

@@ -274,5 +274,19 @@ describe('EndpointMetadataService', () => {
         agentIds: [data.unitedMetadata.agent.id],
       });
     });
+
+    it('should query the CCS-prefixed index when ccsEnabled is true', async () => {
+      const data = testMockedContext.applyMetadataMocks(
+        testMockedContext.esClient,
+        testMockedContext.fleetServices
+      );
+      testMockedContext.endpointAppContextService.isCcsEnabled.mockResolvedValue(true);
+      await metadataService.getMetadataForEndpoints([data.unitedMetadata.agent.id]);
+
+      const expectedQuery = getESQueryHostMetadataByIDs([data.unitedMetadata.agent.id], true);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: expectedQuery.index })
+      );
+    });
   });
 });

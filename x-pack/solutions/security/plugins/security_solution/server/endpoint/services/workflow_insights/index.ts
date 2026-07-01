@@ -313,10 +313,13 @@ class SecurityWorkflowInsightsService {
       return [];
     }
 
+    const ccsEnabled = await this.endpointContext.isCcsEnabled();
+
     const workflowInsights = await buildWorkflowInsights({
       defendInsights,
       endpointMetadataService: this.endpointContext.getEndpointMetadataService(spaceId),
       esClient: this.esClient,
+      ccsEnabled,
       options: {
         insightType,
         endpointIds,

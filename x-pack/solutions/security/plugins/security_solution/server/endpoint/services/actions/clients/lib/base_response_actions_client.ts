@@ -521,6 +521,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   ): Promise<FetchActionResponseEsDocsResponse<TOutputContent, TMeta>> {
     const responseDocs = await fetchEndpointActionResponses<TOutputContent, TMeta>({
       esClient: this.options.esClient,
+      endpointService: this.options.endpointService,
       actionIds: [actionId],
       agentIds,
     });
@@ -830,7 +831,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     }
   }
 
-  protected fetchAllPendingActions<
+  protected async *fetchAllPendingActions<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
     TMeta extends {} = {}
@@ -840,7 +841,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     const esClient = this.options.esClient;
     const query: QueryDslQueryContainer = getUnExpiredActionsEsQuery(this.agentType);
 
-    return createEsSearchIterable<
+    yield* createEsSearchIterable<
       LogsEndpointAction,
       Array<ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>>
     >({
@@ -861,6 +862,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         if (actionRequests.length > 0) {
           const actionResults = await fetchActionResponses({
             esClient,
+            endpointService: this.options.endpointService,
             actionIds: actionRequests.map((action) => action.EndpointActions.action_id),
           });
           const responsesByActionId = mapResponsesByActionId(actionResults);

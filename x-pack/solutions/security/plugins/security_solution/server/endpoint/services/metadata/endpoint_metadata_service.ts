@@ -46,6 +46,7 @@ import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/end
 import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import type { EndpointFleetServicesInterface } from '../fleet/endpoint_fleet_services_factory';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
@@ -62,6 +63,7 @@ export class EndpointMetadataService {
     private readonly esClient: ElasticsearchClient,
     private readonly soClient: SavedObjectsClientContract,
     private readonly fleetServices: EndpointFleetServicesInterface,
+    private readonly endpointContext: EndpointAppContextService,
     private readonly logger?: Logger
   ) {}
 
@@ -97,7 +99,8 @@ export class EndpointMetadataService {
    * @throws
    */
   async getHostMetadata(endpointId: string): Promise<HostMetadata> {
-    const query = getESQueryHostMetadataByID(endpointId);
+    const ccsEnabled = await this.endpointContext.isCcsEnabled();
+    const query = getESQueryHostMetadataByID(endpointId, ccsEnabled);
     const queryResult = await this.esClient.search<HostMetadata>(query).catch(catchAndWrapError);
 
     await this.ensureDataValidForSpace(queryResult);
@@ -116,7 +119,8 @@ export class EndpointMetadataService {
    * @param fleetAgentIds
    */
   async findHostMetadataForFleetAgents(fleetAgentIds: string[]): Promise<HostMetadata[]> {
-    const query = getESQueryHostMetadataByFleetAgentIds(fleetAgentIds);
+    const ccsEnabled = await this.endpointContext.isCcsEnabled();
+    const query = getESQueryHostMetadataByFleetAgentIds(fleetAgentIds, ccsEnabled);
 
     query.size = fleetAgentIds.length;
 
@@ -347,12 +351,14 @@ export class EndpointMetadataService {
   async getHostMetadataList(
     queryOptions: GetMetadataListRequestQuery
   ): Promise<Pick<MetadataListResponse, 'data' | 'total'>> {
+    const ccsEnabled = await this.endpointContext.isCcsEnabled();
     const endpointPolicies = await this.getAllEndpointPackagePolicies();
     const endpointPolicyIds = uniq(endpointPolicies.flatMap((policy) => policy.policy_ids));
     const unitedIndexQuery = await buildUnitedIndexQuery(
       this.soClient,
       queryOptions,
-      endpointPolicyIds
+      endpointPolicyIds,
+      ccsEnabled
     );
 
     let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadataPersistedData>;
@@ -442,7 +448,8 @@ export class EndpointMetadataService {
   }
 
   async getMetadataForEndpoints(endpointIDs: string[]): Promise<HostMetadata[]> {
-    const query = getESQueryHostMetadataByIDs(endpointIDs);
+    const ccsEnabled = await this.endpointContext.isCcsEnabled();
+    const query = getESQueryHostMetadataByIDs(endpointIDs, ccsEnabled);
     const searchResult = await this.esClient.search<HostMetadata>(query).catch(catchAndWrapError);
 
     await this.ensureDataValidForSpace(searchResult);

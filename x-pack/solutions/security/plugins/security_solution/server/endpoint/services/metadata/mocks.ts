@@ -20,7 +20,11 @@ import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_ge
 import { applyEsClientSearchMock } from '../../mocks/utils.mock';
 import type { EndpointInternalFleetServicesInterfaceMocked } from '../fleet/endpoint_fleet_services_factory.mocks';
 import { createEndpointFleetServicesFactoryMock } from '../fleet/endpoint_fleet_services_factory.mocks';
-import { createMockEndpointAppContextServiceStartContract } from '../../mocks';
+import {
+  createMockEndpointAppContextService,
+  createMockEndpointAppContextServiceStartContract,
+} from '../../mocks';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { EndpointMetadataService } from './endpoint_metadata_service';
 import { SavedObjectsClientFactory } from '../saved_objects';
 import {
@@ -39,6 +43,7 @@ export interface EndpointMetadataServiceTestContextMock {
   agentPolicyService: jest.Mocked<AgentPolicyServiceInterface>;
   packagePolicyService: ReturnType<typeof createPackagePolicyServiceMock>;
   endpointMetadataService: EndpointMetadataService;
+  endpointAppContextService: jest.Mocked<EndpointAppContextService>;
   fleetServices: EndpointInternalFleetServicesInterfaceMocked;
   logger: ReturnType<ReturnType<typeof loggingSystemMock.create>['get']>;
   esClient: ElasticsearchClientMock;
@@ -55,10 +60,12 @@ export const createEndpointMetadataServiceTestContextMock =
       fleetDependencies: fleetStartServices,
       savedObjects: savedObjectsServiceFactory,
     }).service.asInternalUser();
+    const endpointAppContextService = createMockEndpointAppContextService();
     const endpointMetadataService = new EndpointMetadataService(
       esClient,
       savedObjectsServiceFactory.createInternalScopedSoClient({ readonly: false }),
       fleetServices,
+      endpointAppContextService,
       logger
     );
 
@@ -82,6 +89,7 @@ export const createEndpointMetadataServiceTestContextMock =
       packagePolicyService: fleetServices.packagePolicy,
       logger,
       endpointMetadataService,
+      endpointAppContextService,
       fleetServices,
       applyMetadataMocks,
       esClient: esClient as ElasticsearchClientMock,

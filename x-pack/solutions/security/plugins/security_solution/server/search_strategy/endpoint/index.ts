@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { map, mergeMap, from } from 'rxjs';
+import { map, mergeMap, from, forkJoin } from 'rxjs';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
 import type {
@@ -33,12 +33,16 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
       if (request.factoryQueryType == null) {
         throw new Error('factoryQueryType is required');
       }
-      return from(endpointContext.service.getEndpointAuthz(deps.request)).pipe(
-        mergeMap((authz) => {
+      return forkJoin({
+        authz: from(endpointContext.service.getEndpointAuthz(deps.request)),
+        ccsEnabled: endpointContext.service.isCcsEnabled(),
+      }).pipe(
+        mergeMap(({ authz, ccsEnabled }) => {
           const queryFactory: EndpointFactory<T> = endpointFactory[request.factoryQueryType];
           const strictRequest = {
             factoryQueryType: request.factoryQueryType,
             sort: request.sort,
+            ccsEnabled,
             ...('alertIds' in request ? { alertIds: request.alertIds } : {}),
             ...('agentId' in request ? { agentId: request.agentId } : {}),
             ...('expiration' in request ? { expiration: request.expiration } : {}),
