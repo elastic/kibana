@@ -5,11 +5,9 @@ description: >
   Audits the sigevents memory knowledge base against 11 required knowledge
   dimensions and writes a structured "_gaps/overview" memory page listing
   what is unknown, ambiguous, or missing. Runs on a weekly schedule.
-  Also scrapes recent investigation workflow results and incorporates any
-  new knowledge gaps into the "_gaps/overview" page.
 enabled: false
 settings:
-  timeout: "60m"
+  timeout: "30m"
   concurrency:
     key: "streams-gap-detection"
     strategy: drop
@@ -59,67 +57,4 @@ steps:
           - gaps_found
           - summary
     on-failure:
-      continue: true
-
-  - name: get_rca_outputs
-    type: elasticsearch.request
-    with:
-      method: POST
-      path: '/.workflows-step-executions/_search'
-      body:
-        size: 20
-        sort:
-          - startedAt:
-              order: desc
-        _source:
-          - output.structured_output.gaps_found
-          - output.gaps_found
-          - workflowRunId
-        query:
-          bool:
-            must:
-              - term:
-                  stepId: 'platform_streams_investigation_rca'
-              - term:
-                  status: 'completed'
-              - range:
-                  startedAt:
-                    gte: 'now-7d'
-    on-failure:
-      continue: true
-
-  - name: merge_investigation_gaps
-    type: ai.agent
-    connector-id: ".anthropic-claude-4.6-sonnet-chat_completion"
-    create-conversation: false
-    with:
-      timeout: 120s
-      message: |
-        Call load_skill with path skills/platform/streams/streams-gap-detection to get memory tools.
-
-        Read the current _gaps/overview page using platform_streams_memory_read.
-
-        The following are structured outputs from recent investigation workflow runs. Each hit may contain a gaps_found array from the investigation's structured output:
-
-        {{ steps.get_rca_outputs.output | json }}
-
-        Before incorporating any gap, apply this strict filter: only keep items that represent **missing data that could reasonably be provided** — a data source that was absent or inaccessible and would have helped the investigation. Discard anything that is an incident-specific observation (e.g. "the pod crashed", "no logs existed during the outage window", "the service was down") — those describe what happened, not a knowledge gap that can be fixed.
-
-        Good examples of gaps to incorporate (actionable, structural deficiencies):
-        - "No traces available for the cart service"
-        - "Infrastructure metrics absent for host X"
-        - "No code repository access for service Y"
-        - "Cart service logs not flowing into logs.otel"
-
-        Bad examples to discard (incident observations, not gaps):
-        - "Cart service logs were absent during the failure window"
-        - "The pod crashed and produced no telemetry"
-        - "During the RCA, traces were unavailable because the service was fully down"
-
-        When incorporating a gap, distill it to the underlying structural deficiency and note why it would help future investigations. Keep it brief and actionable.
-
-        Check whether any of the filtered gaps reveal something not already covered in the existing report. If every remaining gap is already reflected in the page, stop — do not write anything. Only if there are genuinely new gaps, incorporate them by weaving them into the appropriate existing sections naturally. Do not create a separate section for investigation gaps.
-
-        Write the updated page using platform_streams_memory_write with categories ["_system/gaps"] only if you made changes.
-    on-failure:
-      continue: true
+      continue: false
