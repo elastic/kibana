@@ -15,8 +15,15 @@ import type {
   AttachmentInput,
   AttachmentVersionRef,
 } from '../attachments';
-import type { PromptRequest, PromptResponse, PromptStorageState } from '../agents/prompts';
+import type {
+  PromptRequest,
+  PromptResponse,
+  PromptStorageState,
+  AskUserQuestionItem,
+  AskUserQuestionAnswer,
+} from '../agents/prompts';
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
+import type { ConversationAccessControl } from './access_control/types';
 import type { RoundState } from './round_state';
 
 /**
@@ -79,6 +86,7 @@ export enum ConversationRoundStepType {
   compaction = 'compaction',
   backgroundAgentComplete = 'background_agent_complete',
   updateTodos = 'update_todos',
+  askUserQuestion = 'ask_user_question',
 }
 
 // tool call step
@@ -225,6 +233,33 @@ export const isTodosStep = (step: ConversationRoundStep): step is TodosStep => {
   return step.type === ConversationRoundStepType.updateTodos;
 };
 
+// ask_user_question step
+
+export interface AskUserQuestionStepData {
+  /** Id of the prompt that produced this step. Matches the entry in `state.prompt.responses` and the prompt request's `id`. */
+  prompt_id: string;
+  /** The questions presented to the user. */
+  questions: AskUserQuestionItem[];
+  /** Undefined while the step is pending; populated on resume back-fill. */
+  answers?: AskUserQuestionAnswer[];
+}
+
+export type AskUserQuestionStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.askUserQuestion,
+  AskUserQuestionStepData
+>;
+
+export const createAskUserQuestionStep = (data: AskUserQuestionStepData): AskUserQuestionStep => {
+  return {
+    type: ConversationRoundStepType.askUserQuestion,
+    ...data,
+  };
+};
+
+export const isAskUserQuestionStep = (step: ConversationRoundStep): step is AskUserQuestionStep => {
+  return step.type === ConversationRoundStepType.askUserQuestion;
+};
+
 /**
  * Returns the (single) todos step from a list of steps, if present.
  * A round only ever has at most one todos step, which is updated in place.
@@ -251,7 +286,8 @@ export type ConversationRoundStep =
   | ReasoningStep
   | CompactionStep
   | BackgroundAgentCompleteStep
-  | TodosStep;
+  | TodosStep
+  | AskUserQuestionStep;
 
 export enum ConversationRoundStatus {
   /** round is currently being processed */
@@ -371,6 +407,12 @@ export interface Conversation {
   read?: boolean;
   /** current status of the conversation */
   status?: ConversationRoundStatus;
+  /**
+   * Identifier of the bash/VFS workspace for this conversation.
+   */
+  workspace_id?: string;
+  /** Access mode for the conversation. Missing values are treated as private. */
+  access_control?: ConversationAccessControl;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';

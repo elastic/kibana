@@ -7,12 +7,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { test, tags } from '@kbn/scout';
-import { SavedObjectsTracker, installLogsSampleData, removeLogsSampleData } from '../../helpers';
-
-const defaultSettings = {
-  defaultIndex: 'kibana_sample_data_logs',
-  'dateFormat:tz': 'UTC',
-};
+import { SavedObjectsTracker } from '../../helpers';
 
 // Sample data for `kibana_sample_data_logs` is generated relative to the install
 // time and spans roughly three weeks in the past and one week in the future, so
@@ -47,24 +42,16 @@ const CONTROLS_GROUP_WRAPPER = 'controls-group-wrapper';
 const tracker = new SavedObjectsTracker();
 
 test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ kbnClient, apiServices }) => {
-    await installLogsSampleData({ apiServices, kbnClient, settings: defaultSettings });
-  });
-
   test.beforeEach(async ({ browserAuth, pageObjects, uiSettings }) => {
     await browserAuth.loginAsAdmin();
     await uiSettings.set({
       'timepicker:timeDefaults': TIME_DEFAULTS,
     });
-    await pageObjects.discover.goto();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
   });
 
   test.afterEach(async ({ kbnClient }) => {
     await tracker.cleanup(kbnClient);
-  });
-
-  test.afterAll(async ({ kbnClient, apiServices }) => {
-    await removeLogsSampleData({ apiServices, kbnClient });
   });
 
   test('should switch the query bar to ES|QL and display the default sample query', async ({
@@ -303,8 +290,8 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
       // Expanding a row proves the embedded saved-search grid is fully
       // interactive end-to-end: rows are rendered, the expand action
       // surfaces, and the document-viewer flyout opens for the row.
-      await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
-      await pageObjects.discover.closeDocViewerFlyout();
+      await pageObjects.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+      await pageObjects.dataGrid.closeDocViewerFlyout();
     });
   });
 

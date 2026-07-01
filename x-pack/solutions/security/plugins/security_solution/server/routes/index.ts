@@ -143,7 +143,7 @@ export const initRoutes = (
 
   // If publicAttacksApiEnabled is enabled, register the attacks routes.
   if (publicAttacksApiEnabled) {
-    registerAttacksRoutes(router);
+    registerAttacksRoutes(router, ruleDataClient);
   }
 
   if (previewTelemetryUrlEnabled) {
@@ -159,6 +159,7 @@ export const initRoutes = (
     logger,
     telemetrySender,
     ml,
+    hasEncryptionKey,
   });
   registerSiemMigrationsRoutes(router, config, logger);
 

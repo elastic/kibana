@@ -9,15 +9,18 @@ import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
+import type { PluginConfig } from '../../config';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import type { ActionPolicyClient } from '../action_policy_client';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { UserService } from '../services/user_service/user_service';
 import { createUserService } from '../services/user_service/user_service.mock';
 import { createRuleSoAttributes } from '../test_utils';
+import type { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
+import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher.mock';
 import { RulesClient } from './rules_client';
 import type { CreateRuleParams, UpdateRuleData } from './types';
 
@@ -40,20 +43,14 @@ const baseCreateData: CreateRuleParams['data'] = {
   metadata: { name: 'rule-1' },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '1m' },
-  evaluation: {
-    query: {
-      base: 'FROM logs-* | LIMIT 1',
-    },
-  },
+  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
 };
 
 const baseSoAttrs = createRuleSoAttributes({
   metadata: { name: 'rule-1' },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '1m' },
-  evaluation: {
-    query: { base: 'FROM logs-* | LIMIT 1' },
-  },
+  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
 });
 
 describe('RulesClient', () => {
@@ -68,6 +65,13 @@ describe('RulesClient', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    ({ publisher: ruleEventPublisher } = createRuleEventPublisher());
+    jest.spyOn(ruleEventPublisher, 'emitRuleCreated');
+    jest.spyOn(ruleEventPublisher, 'emitRuleUpdated');
+    jest.spyOn(ruleEventPublisher, 'emitRuleDeleted');
+    jest.spyOn(ruleEventPublisher, 'emitRuleEnabled');
+    jest.spyOn(ruleEventPublisher, 'emitRuleDisabled');
 
     ({ userService } = createUserService());
     mockSavedObjectsClient.create.mockResolvedValue({
@@ -104,20 +108,32 @@ describe('RulesClient', () => {
     jest.useRealTimers();
   });
 
-  function createClient() {
-    const actionPolicyClient = {
-      deleteActionPoliciesByFilter: jest
-        .fn()
-        .mockResolvedValue({ processed: 0, total: 0, errors: [] }),
-    } as unknown as ActionPolicyClient;
+  let ruleEventPublisher: RuleEventPublisher;
+
+  function createClient(rulesConfigOverrides?: Partial<PluginConfig['rules']>) {
+    const config = {
+      enabled: true,
+      invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
+      rules: {
+        minimumScheduleInterval: '1m',
+        maxScheduledPerMinute: 400,
+        ...rulesConfigOverrides,
+      },
+    } as PluginConfig;
+
+    const pluginConfigAccessor = {
+      get: () => config,
+    } as unknown as PluginInitializerContext<PluginConfig>['config'];
 
     return new RulesClient(
       request,
       rulesSavedObjectService,
       taskManager,
       userService,
-      actionPolicyClient,
-      'space-1'
+      'space-1',
+      pluginConfigAccessor,
+      rulesSavedObjectService,
+      ruleEventPublisher
     );
   }
 
@@ -248,9 +264,7 @@ describe('RulesClient', () => {
         client.createRule({
           data: {
             ...baseCreateData,
-            evaluation: {
-              query: { base: 'FROM |' },
-            },
+            query: { format: 'standalone', breach: { query: 'FROM |' } },
           },
           options: { id: 'rule-id-5' },
         })
@@ -1189,7 +1203,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 2,
         perPage: 50,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
       });
 
@@ -1237,7 +1251,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 1,
         perPage: 20,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
       });
       expect(mockSavedObjectsClient.bulkGet).not.toHaveBeenCalled();
@@ -1263,7 +1277,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 1,
         perPage: 20,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
         filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
       });
@@ -1285,7 +1299,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 2,
         perPage: 10,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
         search: 'prod* alerts*',
         searchFields: ['metadata.name', 'metadata.description'],
@@ -1350,7 +1364,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 1,
         perPage: 20,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
       });
     });
@@ -2403,6 +2417,569 @@ describe('RulesClient', () => {
             field: 'nonsense_field',
           }),
         },
+      });
+    });
+  });
+
+  describe('workflow trigger events', () => {
+    const workflowRuleTags = ['production'];
+    const workflowSoAttrs = createRuleSoAttributes({
+      metadata: { name: 'rule-1', tags: workflowRuleTags },
+      time_field: '@timestamp',
+      schedule: { every: '1m', lookback: '1m' },
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | LIMIT 1' },
+      },
+    });
+    const workflowCreateData: CreateRuleParams['data'] = {
+      ...baseCreateData,
+      metadata: { name: 'rule-1', tags: workflowRuleTags },
+    };
+
+    const mockGetExistingRule = (
+      id: string,
+      attributes: RuleSavedObjectAttributes = workflowSoAttrs,
+      version = 'v1'
+    ) => {
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id,
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes,
+        version,
+        references: [],
+      });
+    };
+
+    const expectNoRuleEventEmits = () => {
+      expect(ruleEventPublisher.emitRuleCreated).not.toHaveBeenCalled();
+      expect(ruleEventPublisher.emitRuleUpdated).not.toHaveBeenCalled();
+      expect(ruleEventPublisher.emitRuleDeleted).not.toHaveBeenCalled();
+      expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
+      expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
+    };
+
+    describe('createRule', () => {
+      it('emits ruleCreated after createRule', async () => {
+        const client = createClient();
+        mockSavedObjectsClient.create.mockResolvedValueOnce({
+          id: 'rule-id-wf-1',
+          type: RULE_SAVED_OBJECT_TYPE,
+          attributes: workflowSoAttrs,
+          references: [],
+        });
+
+        await client.createRule({ data: workflowCreateData, options: { id: 'rule-id-wf-1' } });
+
+        expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-1', spaceId: 'space-1' },
+        ]);
+      });
+    });
+
+    describe('updateRule', () => {
+      it('emits ruleUpdated only after a content update', async () => {
+        const client = createClient();
+        mockGetExistingRule('rule-id-wf-2');
+
+        await client.updateRule({
+          id: 'rule-id-wf-2',
+          data: { metadata: { name: 'renamed' } },
+        });
+
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-2', spaceId: 'space-1' },
+        ]);
+        expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
+        expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
+      });
+
+      it('emits only ruleUpdated for an enable-only PATCH (no lifecycle event via the update path)', async () => {
+        const client = createClient();
+        mockGetExistingRule('rule-id-wf-3', { ...workflowSoAttrs, enabled: false });
+
+        await client.updateRule({ id: 'rule-id-wf-3', data: { enabled: true } });
+
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-3', spaceId: 'space-1' },
+        ]);
+        expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
+        expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
+      });
+
+      it('emits only ruleUpdated for a disable-only PATCH (no lifecycle event via the update path)', async () => {
+        const client = createClient();
+        mockGetExistingRule('rule-id-wf-3b');
+
+        await client.updateRule({ id: 'rule-id-wf-3b', data: { enabled: false } });
+
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-3b', spaceId: 'space-1' },
+        ]);
+        expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
+        expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
+      });
+
+      it('emits only ruleUpdated when content and enabled change together', async () => {
+        const client = createClient();
+        mockGetExistingRule('rule-id-wf-3c', { ...workflowSoAttrs, enabled: false });
+
+        await client.updateRule({
+          id: 'rule-id-wf-3c',
+          data: { metadata: { name: 'renamed' }, enabled: true },
+        });
+
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-3c', spaceId: 'space-1' },
+        ]);
+        expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
+        expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
+      });
+
+      it('emits ruleUpdated only when enabled is set but unchanged in the PATCH', async () => {
+        const client = createClient();
+        mockGetExistingRule('rule-id-wf-3d');
+
+        await client.updateRule({
+          id: 'rule-id-wf-3d',
+          data: { enabled: true, metadata: { name: 'renamed' } },
+        });
+
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-3d', spaceId: 'space-1' },
+        ]);
+        expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
+        expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('upsertRule', () => {
+      it('emits ruleCreated when the rule is created', async () => {
+        const client = createClient();
+        mockSavedObjectsClient.get.mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createGenericNotFoundError(
+            RULE_SAVED_OBJECT_TYPE,
+            'rule-id-wf-upsert-create'
+          )
+        );
+        mockSavedObjectsClient.create.mockResolvedValueOnce({
+          id: 'rule-id-wf-upsert-create',
+          type: RULE_SAVED_OBJECT_TYPE,
+          attributes: workflowSoAttrs,
+          references: [],
+        });
+
+        await client.upsertRule({ id: 'rule-id-wf-upsert-create', data: workflowCreateData });
+
+        expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-upsert-create', spaceId: 'space-1' },
+        ]);
+      });
+
+      it('publishes rule updated when an existing rule is replaced', async () => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-wf-upsert-replace',
+          type: RULE_SAVED_OBJECT_TYPE,
+          attributes: { ...workflowSoAttrs, enabled: false },
+          version: 'v1',
+          references: [],
+        };
+        mockSavedObjectsClient.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        mockSavedObjectsClient.update.mockResolvedValueOnce({
+          id: 'rule-id-wf-upsert-replace',
+          type: RULE_SAVED_OBJECT_TYPE,
+          attributes: {
+            ...workflowSoAttrs,
+            enabled: false,
+            metadata: { name: 'replaced', tags: workflowRuleTags },
+          },
+          references: [],
+        });
+
+        await client.upsertRule({
+          id: 'rule-id-wf-upsert-replace',
+          data: { ...workflowCreateData, metadata: { name: 'replaced', tags: workflowRuleTags } },
+        });
+
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-upsert-replace', spaceId: 'space-1' },
+        ]);
+      });
+    });
+
+    describe('deleteRule', () => {
+      it('emits ruleDeleted with the deleted rule id', async () => {
+        const client = createClient();
+        mockGetExistingRule('rule-id-wf-4');
+
+        await client.deleteRule({ id: 'rule-id-wf-4' });
+
+        expect(ruleEventPublisher.emitRuleDeleted).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-4', spaceId: 'space-1' },
+        ]);
+      });
+    });
+
+    describe('enableRule', () => {
+      it('publishes rule enabled when the rule transitions to enabled', async () => {
+        const client = createClient();
+        mockGetExistingRule('rule-id-wf-enable', { ...workflowSoAttrs, enabled: false });
+
+        await client.enableRule({ id: 'rule-id-wf-enable' });
+
+        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-enable', spaceId: 'space-1' },
+        ]);
+      });
+
+      it('still emits ruleEnabled and re-ensures the task when the rule is already enabled', async () => {
+        const client = createClient();
+        mockGetExistingRule('rule-id-wf-enable-noop');
+
+        await client.enableRule({ id: 'rule-id-wf-enable-noop' });
+
+        // Re-enabling is not a no-op: it re-writes the SO and re-ensures the
+        // executor task (self-heal), and still emits the event.
+        expect(mockSavedObjectsClient.update).toHaveBeenCalled();
+        expect(ensureRuleExecutorTaskScheduledMock).toHaveBeenCalled();
+        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-enable-noop', spaceId: 'space-1' },
+        ]);
+      });
+    });
+
+    describe('disableRule', () => {
+      it('publishes rule disabled when the rule transitions to disabled', async () => {
+        const client = createClient();
+        mockGetExistingRule('rule-id-wf-disable');
+
+        await client.disableRule({ id: 'rule-id-wf-disable' });
+
+        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-disable', spaceId: 'space-1' },
+        ]);
+      });
+
+      it('still emits ruleDisabled and removes the task when the rule is already disabled', async () => {
+        const client = createClient();
+        mockGetExistingRule('rule-id-wf-5', { ...workflowSoAttrs, enabled: false });
+
+        await client.disableRule({ id: 'rule-id-wf-5' });
+
+        // Re-disabling is not a no-op: it re-writes the SO and removes the
+        // executor task (self-heal), and still emits the event.
+        expect(mockSavedObjectsClient.update).toHaveBeenCalled();
+        expect(taskManager.removeIfExists).toHaveBeenCalled();
+        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-5', spaceId: 'space-1' },
+        ]);
+      });
+    });
+
+    describe('bulkEnableRules', () => {
+      it('emits ruleEnabled for only successfully enabled rules', async () => {
+        const client = createClient();
+        mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+          saved_objects: [
+            {
+              id: 'rule-ok',
+              type: RULE_SAVED_OBJECT_TYPE,
+              attributes: { ...workflowSoAttrs, enabled: false },
+              version: 'v1',
+              references: [],
+            },
+            {
+              id: 'rule-missing',
+              type: RULE_SAVED_OBJECT_TYPE,
+              error: { statusCode: 404, message: 'Not found', error: 'Not found' },
+              attributes: undefined,
+              references: [],
+            },
+          ],
+        });
+        mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+          saved_objects: [
+            {
+              id: 'rule-ok',
+              type: RULE_SAVED_OBJECT_TYPE,
+              attributes: { ...workflowSoAttrs, enabled: true },
+              references: [],
+            },
+          ],
+        });
+
+        await client.bulkEnableRules({ ids: ['rule-ok', 'rule-missing'] });
+
+        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(request, [
+          { id: 'rule-ok', spaceId: 'space-1' },
+        ]);
+        const enabledIds = (ruleEventPublisher.emitRuleEnabled as jest.Mock).mock.calls[0][1];
+        expect(enabledIds).toEqual([{ id: 'rule-ok', spaceId: 'space-1' }]);
+      });
+
+      it('does not publish when all requested rules are already enabled', async () => {
+        const client = createClient();
+        mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+          saved_objects: [
+            {
+              id: 'rule-already-enabled',
+              type: RULE_SAVED_OBJECT_TYPE,
+              attributes: workflowSoAttrs,
+              version: 'v1',
+              references: [],
+            },
+          ],
+        });
+
+        await client.bulkEnableRules({ ids: ['rule-already-enabled'] });
+
+        expectNoRuleEventEmits();
+      });
+    });
+
+    describe('bulkDisableRules', () => {
+      it('emits ruleDisabled for only successfully disabled rules', async () => {
+        const client = createClient();
+        mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+          saved_objects: [
+            {
+              id: 'rule-ok',
+              type: RULE_SAVED_OBJECT_TYPE,
+              attributes: workflowSoAttrs,
+              version: 'v1',
+              references: [],
+            },
+            {
+              id: 'rule-missing',
+              type: RULE_SAVED_OBJECT_TYPE,
+              error: { statusCode: 404, message: 'Not found', error: 'Not found' },
+              attributes: undefined,
+              references: [],
+            },
+          ],
+        });
+        mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+          saved_objects: [
+            {
+              id: 'rule-ok',
+              type: RULE_SAVED_OBJECT_TYPE,
+              attributes: { ...workflowSoAttrs, enabled: false },
+              references: [],
+            },
+          ],
+        });
+
+        await client.bulkDisableRules({ ids: ['rule-ok', 'rule-missing'] });
+
+        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(request, [
+          { id: 'rule-ok', spaceId: 'space-1' },
+        ]);
+        const disabledIds = (ruleEventPublisher.emitRuleDisabled as jest.Mock).mock.calls[0][1];
+        expect(disabledIds).toEqual([{ id: 'rule-ok', spaceId: 'space-1' }]);
+      });
+
+      it('publishes no event (empty array) when all requested rules are already disabled', async () => {
+        const client = createClient();
+        mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+          saved_objects: [
+            {
+              id: 'rule-already-disabled',
+              type: RULE_SAVED_OBJECT_TYPE,
+              attributes: { ...workflowSoAttrs, enabled: false },
+              version: 'v1',
+              references: [],
+            },
+          ],
+        });
+
+        await client.bulkDisableRules({ ids: ['rule-already-disabled'] });
+
+        // The length guard was removed; emitRuleDisabled is invoked
+        // unconditionally and no-ops on the empty array (no event published).
+        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(request, []);
+        expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('bulkDeleteRules', () => {
+      it('emits ruleDeleted with the ids of successfully deleted rules', async () => {
+        const client = createClient();
+        mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+          statuses: [
+            { id: 'rule-1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+            { id: 'rule-2', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          ],
+        });
+
+        await client.bulkDeleteRules({ ids: ['rule-1', 'rule-2'] });
+
+        expect(ruleEventPublisher.emitRuleDeleted).toHaveBeenCalledWith(request, [
+          { id: 'rule-1', spaceId: 'space-1' },
+          { id: 'rule-2', spaceId: 'space-1' },
+        ]);
+      });
+
+      it('publishes rule deleted only for rules that were successfully deleted', async () => {
+        const client = createClient();
+        mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+          statuses: [
+            { id: 'rule-1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+            {
+              id: 'rule-2',
+              type: RULE_SAVED_OBJECT_TYPE,
+              success: false,
+              error: { error: 'Not Found', message: 'Rule not found', statusCode: 404 },
+            },
+          ],
+        });
+
+        await client.bulkDeleteRules({ ids: ['rule-1', 'rule-2'] });
+
+        expect(ruleEventPublisher.emitRuleDeleted).toHaveBeenCalledWith(request, [
+          { id: 'rule-1', spaceId: 'space-1' },
+        ]);
+      });
+    });
+  });
+
+  describe('schedule guardrails', () => {
+    describe('minimumScheduleInterval', () => {
+      it('rejects creating a rule whose interval is below the configured minimum', async () => {
+        const client = createClient({ minimumScheduleInterval: '1m' });
+
+        await expect(
+          client.createRule({
+            data: { ...baseCreateData, schedule: { every: '30s', lookback: '1m' } },
+          })
+        ).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: {
+            code: 'SCHEDULE_INTERVAL_TOO_SHORT',
+            details: { interval: '30s', minimumScheduleInterval: '1m' },
+          },
+        });
+
+        expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      it('allows creating a rule whose interval equals the configured minimum', async () => {
+        const client = createClient({ minimumScheduleInterval: '1m' });
+
+        await expect(client.createRule({ data: baseCreateData })).resolves.toBeDefined();
+        expect(mockSavedObjectsClient.create).toHaveBeenCalled();
+      });
+
+      it('rejects updating a rule to an interval below the configured minimum', async () => {
+        const client = createClient({ minimumScheduleInterval: '5m' });
+
+        mockSavedObjectsClient.get.mockResolvedValueOnce({
+          attributes: baseSoAttrs,
+          version: 'WzEsMV0=',
+          id: 'rule-id-1',
+          type: RULE_SAVED_OBJECT_TYPE,
+          references: [],
+        });
+
+        await expect(
+          client.updateRule({ id: 'rule-id-1', data: { schedule: { every: '1m' } } })
+        ).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'SCHEDULE_INTERVAL_TOO_SHORT' },
+        });
+
+        expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('maxScheduledPerMinute', () => {
+      it('rejects creating a rule when the limit is already reached', async () => {
+        const client = createClient({ maxScheduledPerMinute: 1 });
+        jest.spyOn(rulesSavedObjectService, 'getTotalScheduledPerMinute').mockResolvedValueOnce(1);
+
+        await expect(client.createRule({ data: baseCreateData })).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: {
+            code: 'MAX_SCHEDULES_PER_MINUTE_EXCEEDED',
+            details: { interval: '1m', maxScheduledPerMinute: 1 },
+          },
+        });
+
+        expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      it('allows creating a rule when there is remaining capacity', async () => {
+        const client = createClient({ maxScheduledPerMinute: 400 });
+        jest.spyOn(rulesSavedObjectService, 'getTotalScheduledPerMinute').mockResolvedValueOnce(10);
+
+        await expect(client.createRule({ data: baseCreateData })).resolves.toBeDefined();
+        expect(mockSavedObjectsClient.create).toHaveBeenCalled();
+      });
+
+      it('adds the previous schedule back when updating an already-enabled rule', async () => {
+        const client = createClient({ maxScheduledPerMinute: 1 });
+        // The single available slot is consumed by this rule's existing 1m schedule.
+        jest.spyOn(rulesSavedObjectService, 'getTotalScheduledPerMinute').mockResolvedValueOnce(1);
+
+        mockSavedObjectsClient.get.mockResolvedValueOnce({
+          attributes: baseSoAttrs,
+          version: 'WzEsMV0=',
+          id: 'rule-id-1',
+          type: RULE_SAVED_OBJECT_TYPE,
+          references: [],
+        });
+
+        // Re-saving with the same 1m schedule must not be rejected.
+        await expect(
+          client.updateRule({ id: 'rule-id-1', data: { schedule: { every: '1m' } } })
+        ).resolves.toBeDefined();
+        expect(mockSavedObjectsClient.update).toHaveBeenCalled();
+      });
+
+      it('allows reducing the schedule frequency of an enabled rule without scanning, even past the limit', async () => {
+        const client = createClient({ maxScheduledPerMinute: 1 });
+        const getTotalSpy = jest
+          .spyOn(rulesSavedObjectService, 'getTotalScheduledPerMinute')
+          .mockResolvedValue(1000);
+
+        // Existing enabled rule runs every 1m; moving to a less frequent 5m adds no load.
+        mockSavedObjectsClient.get.mockResolvedValueOnce({
+          attributes: baseSoAttrs,
+          version: 'WzEsMV0=',
+          id: 'rule-id-1',
+          type: RULE_SAVED_OBJECT_TYPE,
+          references: [],
+        });
+
+        await expect(
+          client.updateRule({ id: 'rule-id-1', data: { schedule: { every: '5m' } } })
+        ).resolves.toBeDefined();
+
+        // The cluster-wide scan is skipped because the schedule adds no load.
+        expect(getTotalSpy).not.toHaveBeenCalled();
+        expect(mockSavedObjectsClient.update).toHaveBeenCalled();
+      });
+
+      it('rejects enabling a disabled rule when the limit is already reached', async () => {
+        const client = createClient({ maxScheduledPerMinute: 1 });
+        jest.spyOn(rulesSavedObjectService, 'getTotalScheduledPerMinute').mockResolvedValueOnce(1);
+
+        mockSavedObjectsClient.get.mockResolvedValueOnce({
+          attributes: { ...baseSoAttrs, enabled: false },
+          version: 'WzEsMV0=',
+          id: 'rule-id-1',
+          type: RULE_SAVED_OBJECT_TYPE,
+          references: [],
+        });
+
+        await expect(client.enableRule({ id: 'rule-id-1' })).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'MAX_SCHEDULES_PER_MINUTE_EXCEEDED' },
+        });
+
+        expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
       });
     });
   });

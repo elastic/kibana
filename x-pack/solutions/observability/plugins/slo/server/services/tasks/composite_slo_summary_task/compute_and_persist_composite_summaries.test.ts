@@ -295,15 +295,19 @@ describe('computeAndPersistCompositeSummaries', () => {
           createdAt: '2024-01-01T00:00:00.000Z',
           updatedAt: '2024-01-01T00:00:00.000Z',
         },
-        sliValue: 0.995,
-        status: 'HEALTHY',
-        errorBudgetInitial: 0.01,
-        errorBudgetConsumed: 0.5,
-        errorBudgetRemaining: 0.5,
-        errorBudgetIsEstimated: false,
-        fiveMinuteBurnRate: 0.5,
-        oneHourBurnRate: 0.4,
-        oneDayBurnRate: 0.3,
+        summary: {
+          sliValue: 0.995,
+          status: 'HEALTHY',
+          errorBudget: {
+            initial: 0.01,
+            consumed: 0.5,
+            remaining: 0.5,
+            isEstimated: false,
+          },
+          fiveMinuteBurnRate: 0.5,
+          oneHourBurnRate: 0.4,
+          oneDayBurnRate: 0.3,
+        },
         unresolvedMemberIds: [],
       });
     });

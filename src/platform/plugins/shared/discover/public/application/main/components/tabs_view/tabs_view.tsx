@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { i18n } from '@kbn/i18n';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
 import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
+import { ChromeAppHeader, useIsChromeNextProjectHeader } from '../chrome_app_header';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
@@ -39,6 +40,7 @@ export const TabsView = (props: SingleTabViewProps) => {
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
   const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
+  const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
 
   const {
     shouldCollapseAppMenu,
@@ -74,6 +76,26 @@ export const TabsView = (props: SingleTabViewProps) => {
     () => <SingleTabView key={currentTabId} {...props} />,
     [currentTabId, props]
   );
+
+  const wrapTabsBar = useMemo((): UnifiedTabsProps['wrapTabsBar'] => {
+    if (isChromeNextProjectHeader) {
+      return (tabsBar) => (
+        <ChromeAppHeader
+          menu={topNavMenuItems}
+          hasTabs={Boolean(tabsBar)}
+          titleAppend={tabsBar}
+          isCollapsed={shouldCollapseAppMenu}
+        />
+      );
+    }
+  }, [isChromeNextProjectHeader, topNavMenuItems, shouldCollapseAppMenu]);
+
+  const appendRight = useMemo(() => {
+    if (!isChromeNextProjectHeader) {
+      return <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />;
+    }
+    return undefined;
+  }, [isChromeNextProjectHeader, topNavMenuItems, shouldCollapseAppMenu]);
 
   const onTabLimitReached: UnifiedTabsProps['onTabLimitReached'] = useCallback(
     (droppedCount: number) => {
@@ -116,9 +138,8 @@ export const TabsView = (props: SingleTabViewProps) => {
             onTabLimitReached={onTabLimitReached}
             getTopTabMenuItems={getTopTabMenuItems}
             getAdditionalTabMenuItems={getAdditionalTabMenuItems}
-            appendRight={
-              <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
-            }
+            wrapTabsBar={wrapTabsBar}
+            appendRight={appendRight}
           />
         </div>
       )}

@@ -79,8 +79,9 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
   /**
-   * Opt-in to the new DateRangePicker. Only takes effect when the
-   * `unifiedSearch.newDateRangePickerEnabled` feature flag is also enabled.
+   * Whether to use the new DateRangePicker. Defaults to `true`; pass `false`
+   * to opt out and keep the legacy EuiSuperDatePicker. Only takes effect when
+   * the `unifiedSearch.newDateRangePickerEnabled` feature flag is also enabled.
    */
   enableDateRangePicker?: boolean;
   filters?: Filter[];
@@ -154,6 +155,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   submitOnBlur?: boolean;
 
   renderQueryInputAppend?: () => React.ReactNode;
+  esqlApproximation?: QueryBarTopRowProps['esqlApproximation'];
   onESQLDocsFlyoutVisibilityChanged?: QueryBarTopRowProps['onESQLDocsFlyoutVisibilityChanged'];
   /**
    * Optional configuration for ES|QL variables.
@@ -797,6 +799,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           submitOnBlur={this.props.submitOnBlur}
           suggestionsAbstraction={this.props.suggestionsAbstraction}
           renderQueryInputAppend={this.props.renderQueryInputAppend}
+          esqlApproximation={this.props.esqlApproximation}
           disableExternalPadding={this.props.displayStyle === 'withBorders'}
           onESQLDocsFlyoutVisibilityChanged={this.props.onESQLDocsFlyoutVisibilityChanged}
           bubbleSubmitEvent={this.props.bubbleSubmitEvent}

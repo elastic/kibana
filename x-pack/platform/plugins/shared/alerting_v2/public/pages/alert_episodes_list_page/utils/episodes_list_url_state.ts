@@ -34,6 +34,10 @@ const isNonEmptyString = (v: unknown): v is string => isString(v) && v.trim().le
 const isStringArray = (v: unknown): v is string[] =>
   isArray(v) && v.length > 0 && v.every(isString);
 
+const isGroupingValues = (v: unknown): v is Record<string, string | null> =>
+  isPlainObject(v) &&
+  Object.values(v as Record<string, unknown>).every((val) => isString(val) || val === null);
+
 function decodeFilterFields(o: Record<string, unknown>): EpisodesFilterState {
   const result: EpisodesFilterState = {};
   if (o.status === EPISODES_LIST_STATUS_URL_ALL) {
@@ -44,11 +48,22 @@ function decodeFilterFields(o: Record<string, unknown>): EpisodesFilterState {
   if (isNonEmptyString(o.ruleId)) {
     result.ruleId = o.ruleId;
   }
+  if (isNonEmptyString(o.groupHash)) {
+    result.groupHash = o.groupHash;
+  }
+  if (isGroupingValues(o.groupingValues)) {
+    result.groupingValues = o.groupingValues;
+  }
   if (isNonEmptyString(o.queryString)) {
     result.queryString = o.queryString.trim();
   }
   if (isStringArray(o.tags)) {
     result.tags = [...o.tags];
+  }
+  if (isStringArray(o.severity)) {
+    result.severity = [...o.severity];
+  } else if (isStringArray(o.severities)) {
+    result.severity = [...o.severities];
   }
   if (isNonEmptyString(o.assigneeUid)) {
     result.assigneeUid = o.assigneeUid;
@@ -88,11 +103,20 @@ function encodeFilterFields(state: EpisodesFilterState): Record<string, unknown>
   if (isNonEmptyString(state.ruleId)) {
     result.ruleId = state.ruleId;
   }
+  if (isNonEmptyString(state.groupHash)) {
+    result.groupHash = state.groupHash;
+  }
+  if (isGroupingValues(state.groupingValues)) {
+    result.groupingValues = { ...state.groupingValues };
+  }
   if (isNonEmptyString(state.queryString)) {
     result.queryString = state.queryString.trim();
   }
   if (isStringArray(state.tags)) {
     result.tags = [...state.tags];
+  }
+  if (isStringArray(state.severity)) {
+    result.severity = [...state.severity];
   }
   if (isNonEmptyString(state.assigneeUid)) {
     result.assigneeUid = state.assigneeUid;

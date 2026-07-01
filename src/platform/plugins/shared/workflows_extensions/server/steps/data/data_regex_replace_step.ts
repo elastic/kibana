@@ -15,7 +15,7 @@ export const dataRegexReplaceStepDefinition = createServerStepDefinition({
   ...dataRegexReplaceStepCommonDefinition,
   handler: async (context) => {
     try {
-      const source = context.contextManager.renderInputTemplate(context.config.source);
+      const source = context.config.source;
       const detailed = context.config.detailed || false;
       const { pattern, replacement, flags = '' } = context.input;
 

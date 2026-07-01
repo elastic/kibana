@@ -21,6 +21,8 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
+  EuiToolTip,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutResizable,
@@ -33,7 +35,9 @@ import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { EvaluatorStats } from '@kbn/evals-common';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import {
+  useDatasets,
   useEvaluationExperiment,
   useEvalsTraceFetcher,
   useExperimentDatasetExamples,
@@ -45,6 +49,7 @@ import * as i18n from './translations';
 interface DatasetStatsGroup {
   datasetId: string;
   datasetName: string;
+  exampleCount: number;
   stats: EvaluatorStats[];
 }
 
@@ -52,13 +57,12 @@ interface DatasetStatsAccordionProps {
   experimentId: string;
   executionId?: string;
   group: DatasetStatsGroup;
-  totalRepetitions: number;
   statsColumns: Array<EuiBasicTableColumn<EvaluatorStats>>;
   experimentLoading: boolean;
   isOpen: boolean;
+  datasetExists: boolean;
   selectedExampleId?: string | null;
   onTraceClick: (traceId: string, exampleId: string) => void;
-  onDatasetClick: (datasetId: string) => void;
   onDatasetToggle: (datasetId: string, isOpen: boolean) => void;
   onExampleClick: (exampleId: string) => void;
 }
@@ -67,24 +71,21 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   experimentId,
   executionId,
   group,
-  totalRepetitions,
   statsColumns,
   experimentLoading,
   isOpen,
+  datasetExists,
   selectedExampleId,
   onTraceClick,
-  onDatasetClick,
   onDatasetToggle,
   onExampleClick,
 }) => {
+  const history = useHistory();
   const {
     data: datasetExamples,
     isLoading: examplesLoading,
     error: examplesError,
   } = useExperimentDatasetExamples(experimentId, isOpen ? group.datasetId : '', executionId);
-
-  const scoreCount = group.stats[0]?.stats.count;
-  const exampleCount = scoreCount != null ? Math.round(scoreCount / totalRepetitions) : undefined;
 
   return (
     <>
@@ -95,25 +96,32 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
             <EuiFlexItem grow={false}>
               <EuiText size="s">
                 <h4>
-                  <EuiLink
-                    onClick={(event: MouseEvent<HTMLAnchorElement>) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      onDatasetClick(group.datasetId);
-                    }}
-                  >
-                    {group.datasetName}
-                  </EuiLink>
+                  {datasetExists ? (
+                    <EuiLink
+                      {...reactRouterNavigate(
+                        history,
+                        `/datasets/${group.datasetId}`,
+                        (event: MouseEvent<HTMLAnchorElement>) => event.stopPropagation()
+                      )}
+                    >
+                      {group.datasetName}
+                    </EuiLink>
+                  ) : (
+                    <EuiToolTip content={i18n.DELETED_DATASET_TOOLTIP}>
+                      <span tabIndex={0}>
+                        {group.datasetName}{' '}
+                        <EuiTextColor color="subdued">{i18n.DELETED_DATASET_SUFFIX}</EuiTextColor>
+                      </span>
+                    </EuiToolTip>
+                  )}
                 </h4>
               </EuiText>
             </EuiFlexItem>
-            {exampleCount != null && (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {i18n.getExampleCountLabel(exampleCount)}
-                </EuiText>
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {i18n.getExampleCountLabel(group.exampleCount)}
+              </EuiText>
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
         forceState={isOpen ? 'open' : 'closed'}
@@ -154,6 +162,12 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
     </>
   );
 };
+
+// Upper bound on datasets fetched solely to resolve which referenced datasets
+// still exist (for the "(deleted)" label). Above this, existence is treated as
+// undetermined and links are kept. A server-side existence flag is the proper
+// long-term fix
+const MAX_DATASETS_FOR_EXISTENCE_CHECK = 1000;
 
 export const ExperimentDetailPage: React.FC = () => {
   const { experimentId } = useParams<{ experimentId: string }>();
@@ -251,11 +265,20 @@ export const ExperimentDetailPage: React.FC = () => {
     [updateSearchParams]
   );
 
+  const { data: datasetsData } = useDatasets({ perPage: MAX_DATASETS_FOR_EXISTENCE_CHECK });
+
+  // A null set means existence is undetermined (still loading, or there are more
+  // datasets than we fetched), in which case we keep the link to avoid rendering
+  // a false "(deleted)" label.
+  const existingDatasetIds = useMemo(() => {
+    if (!datasetsData || datasetsData.total > datasetsData.datasets.length) {
+      return null;
+    }
+    return new Set(datasetsData.datasets.map((dataset) => dataset.id));
+  }, [datasetsData]);
+
   const datasetStatsGroups = useMemo(() => {
-    const groupedStats = new Map<
-      string,
-      { datasetId: string; datasetName: string; stats: EvaluatorStats[] }
-    >();
+    const groupedStats = new Map<string, DatasetStatsGroup>();
 
     for (const stat of experimentDetail?.stats ?? []) {
       const existingGroup = groupedStats.get(stat.dataset_id);
@@ -264,9 +287,12 @@ export const ExperimentDetailPage: React.FC = () => {
         continue;
       }
 
+      // example_count is identical for all evaluators in a dataset (comes from the outer
+      // by_dataset cardinality bucket), so we only need to capture it from the first stat.
       groupedStats.set(stat.dataset_id, {
         datasetId: stat.dataset_id,
         datasetName: stat.dataset_name,
+        exampleCount: stat.example_count,
         stats: [stat],
       });
     }
@@ -450,19 +476,18 @@ export const ExperimentDetailPage: React.FC = () => {
           <h3>{i18n.SECTION_DATASETS}</h3>
         </EuiText>
         <EuiSpacer size="m" />
-        {datasetStatsGroups.map(({ datasetId, datasetName, stats }) => (
+        {datasetStatsGroups.map((group) => (
           <DatasetStatsAccordion
-            key={datasetId}
+            key={group.datasetId}
             experimentId={experimentId}
             executionId={executionId}
-            group={{ datasetId, datasetName, stats }}
-            totalRepetitions={experimentDetail?.total_repetitions ?? 1}
+            group={group}
             statsColumns={statsColumns}
             experimentLoading={experimentLoading}
-            isOpen={openDatasetId === datasetId}
-            selectedExampleId={openDatasetId === datasetId ? selectedExampleId : null}
+            isOpen={openDatasetId === group.datasetId}
+            datasetExists={existingDatasetIds ? existingDatasetIds.has(group.datasetId) : true}
+            selectedExampleId={openDatasetId === group.datasetId ? selectedExampleId : null}
             onTraceClick={(traceId, exampleId) => setSelectedTrace(traceId, exampleId)}
-            onDatasetClick={(targetDatasetId) => history.push(`/datasets/${targetDatasetId}`)}
             onDatasetToggle={(targetDatasetId, nextIsOpen) =>
               setOpenDatasetId(nextIsOpen ? targetDatasetId : null)
             }

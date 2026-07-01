@@ -8,6 +8,8 @@
 import { buildValuesFileUrl } from './build_values_file_url';
 import { OTEL_KUBE_STACK_VERSION, OTEL_STACK_NAMESPACE } from './constants';
 
+const DAEMON_PROCESSOR_START_INDEX = 9;
+
 export function buildInstallStackCommand({
   isMetricsOnboardingEnabled,
   isManagedOtlpServiceAvailable,
@@ -39,11 +41,9 @@ export function buildInstallStackCommand({
     agentVersion,
   });
 
-  // The base kube-stack Helm values file defines processors[0..7] for the
-  // logs/node and metrics/node/otel pipelines. Custom processors
-  // (onboarding_id, wired_streams) are appended starting at index 8.
-  let nextLogProcessorIndex = 8;
-  let nextMetricProcessorIndex = 8;
+  // Helm --set replaces list items by index. The current EDOT values file has
+  // nine base daemon processors, so Kibana's custom processors start at 9.
+  let nextLogProcessorIndex = DAEMON_PROCESSOR_START_INDEX;
 
   const onboardingIdConfig = (() => {
     let config = ` \\
@@ -53,7 +53,7 @@ export function buildInstallStackCommand({
   --set 'collectors.daemon.config.service.pipelines.logs\\/node.processors[${nextLogProcessorIndex++}]=resource/onboarding_id'`;
     if (isMetricsOnboardingEnabled) {
       config += ` \\
-  --set 'collectors.daemon.config.service.pipelines.metrics\\/node\\/otel.processors[${nextMetricProcessorIndex++}]=resource/onboarding_id'`;
+  --set 'collectors.daemon.config.service.pipelines.metrics\\/node\\/otel.processors[${DAEMON_PROCESSOR_START_INDEX}]=resource/onboarding_id'`;
     }
     return config;
   })();

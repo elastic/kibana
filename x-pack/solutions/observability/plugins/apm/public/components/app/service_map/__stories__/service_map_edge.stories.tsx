@@ -22,7 +22,7 @@ import { ServiceNode } from '../../../shared/service_map/service_node';
 import { DependencyNode } from '../../../shared/service_map/dependency_node';
 import { ServiceMapEdge } from '../service_map_edge';
 import { applyDagreLayout } from '../../../shared/service_map/layout';
-import { ServiceMapSearchProvider } from '../../../shared/service_map/service_map_search_context';
+import { ServiceMapHighlightProvider } from '../../../shared/service_map/service_map_search_context';
 import type {
   ServiceMapNode,
   ServiceMapEdge as ServiceMapEdgeType,
@@ -47,9 +47,9 @@ const meta: Meta = {
   decorators: [
     (Story) => (
       <ReactFlowProvider>
-        <ServiceMapSearchProvider>
+        <ServiceMapHighlightProvider>
           <Story />
-        </ServiceMapSearchProvider>
+        </ServiceMapHighlightProvider>
       </ReactFlowProvider>
     ),
   ],

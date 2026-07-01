@@ -9,14 +9,20 @@
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { screen } from '@testing-library/react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 import { FlyoutPanel } from './flyout_panel';
 
 describe('FlyoutPanel', () => {
   it('renders', () => {
-    const wrapper = shallow(<FlyoutPanel title="Title" />);
+    renderWithKibanaRenderContext(
+      <FlyoutPanel title="My panel">
+        <p>panel content</p>
+      </FlyoutPanel>
+    );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByRole('heading', { level: 4, name: 'My panel' })).toBeInTheDocument();
+    expect(screen.getByText('panel content')).toBeInTheDocument();
   });
 });

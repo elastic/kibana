@@ -40,7 +40,7 @@ export class AlertActionsClient {
     @inject(Request) private readonly request: KibanaRequest,
     @inject(RequestSpaceIdToken) private readonly spaceId: string,
     @inject(AlertActionEventPublisher)
-    private readonly alertActionEventPublisher: AlertActionEventPublisher
+    private readonly eventPublisher: AlertActionEventPublisher
   ) {}
 
   public async createAction(params: {
@@ -62,7 +62,7 @@ export class AlertActionsClient {
     });
 
     await this.bulkIndexActions([doc]);
-    this.alertActionEventPublisher.emitEpisodeActions(this.request, [doc]);
+    this.eventPublisher.emitEpisodeActions(this.request, [doc]);
   }
 
   public async createBulkActions(
@@ -98,7 +98,7 @@ export class AlertActionsClient {
 
     if (docs.length > 0) {
       await this.bulkIndexActions(docs);
-      this.alertActionEventPublisher.emitEpisodeActions(this.request, docs);
+      this.eventPublisher.emitEpisodeActions(this.request, docs);
     }
 
     return { processed: docs.length, total: actions.length };

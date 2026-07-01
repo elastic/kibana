@@ -9,7 +9,6 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   EuiComboBox,
-  type EuiComboBoxOptionOption,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,6 +17,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';

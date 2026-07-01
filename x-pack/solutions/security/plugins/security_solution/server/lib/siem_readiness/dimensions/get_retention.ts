@@ -27,7 +27,7 @@ export const getRetention = async ({
     .map((item) => {
       const retentionLabel = item.retentionDays ? `${item.retentionDays}d` : 'no retention policy';
       return {
-        severity: 'warning' as const,
+        severity: 'WARNING' as const,
         message: `${item.indexName} has retention of ${retentionLabel}, below the 365-day FedRAMP threshold`,
         resource: item.indexName,
       };

@@ -8,6 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "server/**/*.json",
     "test/scout_agent_builder/**/*",
     "test/scout_agent_builder_smoke/**/*",
     "test/scout_agent_builder_shared/**/*"
@@ -138,6 +139,6 @@
     "@kbn/test-es-server",
     "@kbn/react-kibana-mount",
     "@kbn/user-profile-components",
-    "@kbn/telemetry"
+    "@kbn/telemetry",
   ]
 }

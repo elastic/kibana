@@ -88,7 +88,11 @@ export const THRESHOLD_TEST_INDEX = 'scout-threshold-rule-test';
 // name + THRESHOLD_TEST_INDEX + time field (first non-placeholder option).
 // Callers must create THRESHOLD_TEST_INDEX (with @timestamp mapping) in beforeAll.
 // Used in both rules_create_flow.spec.ts and connector_slack.spec.ts.
-export const defineIndexThresholdRule = async (page: ScoutPage, name: string) => {
+export const defineIndexThresholdRule = async (
+  page: ScoutPage,
+  name: string,
+  indexName: string = THRESHOLD_TEST_INDEX
+) => {
   await page.testSubj.click('createRuleButton');
   await page.testSubj.locator('ruleTypeModal').waitFor({ state: 'visible' });
   await page.testSubj.click('.index-threshold-SelectOption');
@@ -102,10 +106,13 @@ export const defineIndexThresholdRule = async (page: ScoutPage, name: string) =>
 
   await indexCombo.locator('[data-test-subj="comboBoxInput"]').click();
 
+  // Type all but the last character so the "custom pattern" option gets
+  // title = indexName.slice(0,-1), which differs from the real index title.
+  // That makes .euiComboBoxOption[title="${indexName}"] match exactly one element.
   await indexCombo
     .locator('[data-test-subj="comboBoxSearchInput"]')
-    .pressSequentially('scout-threshold-rule', { delay: 50 });
-  const indexOption = page.locator(`.euiComboBoxOption[title="${THRESHOLD_TEST_INDEX}"]`);
+    .pressSequentially(indexName.slice(0, -1), { delay: 50 });
+  const indexOption = page.testSubj.locator(`thresholdIndexOption-${indexName}`);
   await indexOption.waitFor({ state: 'visible', timeout: 30000 });
   await indexOption.click();
 
@@ -140,7 +147,7 @@ export const makeEsQueryRule = (namePrefix: string) => ({
     excludeHitsFromPreviousRun: false,
     sourceFields: [],
     index: ['.kibana'],
-    timeField: '@timestamp',
+    timeField: 'updated_at',
   },
   schedule: { interval: '1m' },
   tags: [namePrefix],

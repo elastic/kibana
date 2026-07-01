@@ -17,7 +17,7 @@ export default ({ getService }: FtrProviderContext) => {
   // Request bodies/queries below are placeholders — `enterpriseLicenseMiddleware`
   // fires before request validation, so any well-formed payload triggers the 403.
   describe('@ess basic license api access', function () {
-    this.tags('skipFIPS');
+    this.tags('skipFIPS'); // FIPS runs with a platinum/trial license
     it('should reject link with 403', async () => {
       const { status, body } = await supertest
         .post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK)

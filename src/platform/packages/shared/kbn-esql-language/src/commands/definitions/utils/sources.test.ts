@@ -16,6 +16,7 @@ import {
   shouldBeQuotedSource,
   sourceExists,
   buildSourcesDefinitions,
+  buildViewsDefinitions,
   getLookupJoinSource,
   hasWiredStreamsInQuery,
   getIndexSourcesFromQuery,
@@ -313,6 +314,103 @@ describe('buildSourcesDefinitions', () => {
     it('defaults to Index detail when type is not provided', () => {
       const [suggestion] = buildSourcesDefinitions([{ name: 'my-index', isIntegration: false }]);
       expect(suggestion.detail).toBe(SOURCES_TYPES.INDEX);
+    });
+  });
+});
+
+describe('buildViewsDefinitions', () => {
+  describe('basic', () => {
+    it('creates a suggestion for each view', () => {
+      const suggestions = buildViewsDefinitions([
+        { name: 'my-view', query: 'FROM logs*' },
+        { name: 'another-view', query: 'FROM metrics*' },
+      ]);
+      expect(suggestions).toHaveLength(2);
+      expect(suggestions.map((s) => s.label)).toEqual(['my-view', 'another-view']);
+    });
+
+    it('filters out already used views', () => {
+      const suggestions = buildViewsDefinitions(
+        [
+          { name: 'my-view', query: 'FROM logs*' },
+          { name: 'used-view', query: 'FROM metrics*' },
+        ],
+        ['used-view']
+      );
+      expect(suggestions).toHaveLength(1);
+      expect(suggestions[0].label).toBe('my-view');
+    });
+
+    it('quotes view names containing special characters', () => {
+      const [suggestion] = buildViewsDefinitions([{ name: 'my:view', query: 'FROM logs*' }]);
+      expect(suggestion.text).toBe('"my:view"');
+    });
+  });
+
+  describe('detail', () => {
+    it('defaults to View when type is not provided', () => {
+      const [suggestion] = buildViewsDefinitions([{ name: 'my-view', query: 'FROM logs*' }]);
+      expect(suggestion.detail).toBe('View');
+    });
+
+    it('shows the type when provided', () => {
+      const [suggestion] = buildViewsDefinitions([
+        { name: 'my-view', query: 'FROM logs*', type: SOURCES_TYPES.QUERY_STREAM },
+      ]);
+      expect(suggestion.detail).toBe(SOURCES_TYPES.QUERY_STREAM);
+    });
+  });
+
+  describe('documentation', () => {
+    it('is undefined when neither description nor links are provided', () => {
+      const [suggestion] = buildViewsDefinitions([{ name: 'my-view', query: 'FROM logs*' }]);
+      expect(suggestion.documentation).toBeUndefined();
+    });
+
+    it('includes only description when no links are provided', () => {
+      const [suggestion] = buildViewsDefinitions([
+        { name: 'my-view', query: 'FROM logs*', description: 'A query stream description' },
+      ]);
+      expect(suggestion.documentation).toEqual({ value: 'A query stream description' });
+    });
+
+    it('includes only links when no description is provided', () => {
+      const [suggestion] = buildViewsDefinitions([
+        {
+          name: 'my-view',
+          query: 'FROM logs*',
+          links: [
+            {
+              label: 'View details',
+              url: 'http://localhost:5699/foo/app/streams/my-view/management/overview',
+            },
+          ],
+        },
+      ]);
+      expect(suggestion.documentation).toEqual({
+        value: '[View details](http://localhost:5699/foo/app/streams/my-view/management/overview)',
+      });
+    });
+
+    it('includes links followed by a blank line and description when both are provided', () => {
+      const [suggestion] = buildViewsDefinitions([
+        {
+          name: 'my-view',
+          query: 'FROM logs*',
+          description: 'Error logs from all sources',
+          links: [
+            {
+              label: 'View details',
+              url: 'http://localhost:5699/foo/app/streams/my-view/management/overview',
+            },
+            { label: 'Docs', url: 'https://example.com/docs' },
+          ],
+        },
+      ]);
+      expect(suggestion.documentation).toEqual({
+        value:
+          '[View details](http://localhost:5699/foo/app/streams/my-view/management/overview)\n[Docs](https://example.com/docs)\n\nError logs from all sources',
+      });
     });
   });
 });

@@ -53,6 +53,7 @@ export interface ExperimentStats {
 interface GetExperimentFilters {
   taskModelId?: string;
   suiteId?: string;
+  executionId?: string;
 }
 
 export interface UpsertDatasetInput {
@@ -149,6 +150,7 @@ const mapStatsResponse = (
 const buildExperimentQuery = (options?: GetExperimentFilters) => ({
   suite_id: options?.suiteId,
   model_id: options?.taskModelId,
+  execution_id: options?.executionId,
 });
 
 const VERSIONED_HEADERS = { 'elastic-api-version': API_VERSIONS.internal.v1 };

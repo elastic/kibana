@@ -94,7 +94,6 @@ export {
   isLegacyAttachmentRequest,
   isUnifiedEventAttachment,
   isUnifiedAlertAttachment,
-  assertValidIndexMetadata,
   isIndexMetadata,
   toStringArray,
   toStringOrStringArray,
@@ -105,3 +104,6 @@ export {
 } from './utils/attachments';
 
 export { AttachmentActionType } from './utils/attachment_actions';
+
+export { buildAlertAttachmentPayloadSchema } from './types/domain_zod/attachment/alert/v2';
+export type { AlertAttachmentMetadata } from './types/domain_zod/attachment/alert/v2';

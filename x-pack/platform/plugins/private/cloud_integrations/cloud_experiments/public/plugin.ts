@@ -124,6 +124,8 @@ export class CloudExperimentsPlugin
             : this.initializerContext.env.packageInfo.version,
       },
       bootstrap,
+      // Remove the query params from the URL
+      eventUrlTransformer: (url) => url.split('?')[0],
     });
   }
 }

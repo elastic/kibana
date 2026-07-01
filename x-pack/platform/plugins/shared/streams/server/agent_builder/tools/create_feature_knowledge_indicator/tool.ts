@@ -13,11 +13,9 @@ import type {
   ToolAvailabilityResult,
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import {
-  baseFeatureSchema,
-  getStreamTypeFromDefinition,
-  type StreamType,
-} from '@kbn/streams-schema';
+import { z } from '@kbn/zod/v4';
+import { getStreamTypeFromDefinition, type StreamType } from '@kbn/streams-schema';
+import { baseFeatureSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { StreamsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -27,6 +25,16 @@ import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
 
 export const STREAMS_CREATE_FEATURE_KNOWLEDGE_INDICATOR_TOOL_ID =
   platformStreamsSigEventsTools.createFeatureKnowledgeIndicator;
+
+const createFeatureKISchema = baseFeatureSchema.extend({
+  expires_at: z.iso
+    .datetime()
+    .optional()
+    .describe(
+      'Optional expiry deadline (ISO 8601). Provide to create a managed KI that expires at this date. ' +
+        'Omit to create a durable KI with no expiry.'
+    ),
+});
 
 export function createFeatureKnowledgeIndicatorTool({
   getScopedClients,
@@ -38,8 +46,8 @@ export function createFeatureKnowledgeIndicatorTool({
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
-}): StaticToolRegistration<typeof baseFeatureSchema> {
-  const toolDefinition: BuiltinToolDefinition<typeof baseFeatureSchema> = {
+}): StaticToolRegistration<typeof createFeatureKISchema> {
+  const toolDefinition: BuiltinToolDefinition<typeof createFeatureKISchema> = {
     id: STREAMS_CREATE_FEATURE_KNOWLEDGE_INDICATOR_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
@@ -49,7 +57,7 @@ export function createFeatureKnowledgeIndicatorTool({
       Use this tool when the conversation discovers a new stream behavior pattern and it should be
       saved as a feature KI for future investigations.
     `,
-    schema: baseFeatureSchema,
+    schema: createFeatureKISchema,
     tags: ['streams', 'significant_events'],
     confirmation: {
       askUser: 'always',
@@ -96,12 +104,12 @@ export function createFeatureKnowledgeIndicatorTool({
         }
       },
     },
-    handler: async ({ stream_name: streamName, ...featureInput }, context) => {
+    handler: async ({ stream_name: streamName, expires_at, ...featureInput }, context) => {
       const { request } = context;
       let streamType: StreamType | 'unknown' = 'unknown';
 
       try {
-        const { streamsClient, getFeatureClient, licensing, uiSettingsClient } =
+        const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
           await getScopedClients({
             request,
           });
@@ -110,11 +118,12 @@ export function createFeatureKnowledgeIndicatorTool({
         const definition = await streamsClient.getStream(streamName);
         streamType = getStreamTypeFromDefinition(definition);
 
-        const featureClient = await getFeatureClient();
-        const { id, uuid } = await createFeatureKnowledgeIndicatorToolHandler({
-          featureClient,
+        const kiClient = await getKnowledgeIndicatorClient();
+        const { id } = await createFeatureKnowledgeIndicatorToolHandler({
+          kiClient,
           streamName,
           featureInput,
+          expiresAt: expires_at,
           logger,
         });
 
@@ -134,7 +143,6 @@ export function createFeatureKnowledgeIndicatorTool({
                 stream_name: streamName,
                 feature: {
                   id,
-                  uuid,
                 },
                 acknowledged: true,
               },

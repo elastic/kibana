@@ -9,7 +9,7 @@ import pLimit from 'p-limit';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
-import { getSchemaVersion } from '@kbn/storage-adapter';
+import { isResponseError } from '@kbn/es-errors';
 import type {
   SmlTypeDefinition,
   SmlContext,
@@ -22,8 +22,7 @@ import {
   createSmlCrawlerStateStorage,
   type SmlCrawlerStateStorage,
 } from './sml_crawler_state_storage';
-import { createSmlStorage, smlIndexName, storageSettings } from './sml_storage';
-import { isNotFoundError } from './sml_service';
+import { createSmlStorage, smlIndexName, type SmlStorage } from './sml_storage';
 
 export type { SmlCrawler };
 
@@ -64,16 +63,14 @@ export class SmlCrawlerImpl implements SmlCrawler {
       logger: this.logger,
     };
 
+    const storage = createSmlStorage({ logger: this.logger, esClient });
     const crawlStartTime = new Date().toISOString();
-    this.logger.info(`SML crawler: starting crawl for type '${definition.id}' across all spaces`);
+    this.logger.debug(`SML crawler: starting crawl for type '${definition.id}' across all spaces`);
 
-    const indexRecreated = await this.recreateIndexIfMappingsChanged({ esClient });
+    const indexRebuilt = await this.applyMappingsOrRebuild({ storage });
 
-    // Data integrity check: if the SML data index is empty for this type but
-    // state docs exist, clear state to force a full re-index.
-    // Also triggered when the index was just recreated due to a schema change.
     const integrityResetNeeded =
-      indexRecreated ||
+      indexRebuilt ||
       (await this.checkDataIntegrity({
         esClient,
         stateClient,
@@ -117,7 +114,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
       return;
     }
 
-    this.logger.info(
+    this.logger.debug(
       `SML crawler: enumerated ${totalItems} item(s) for type '${definition.id}': ${newCount} new, ${updatedCount} updated, ${unchangedCount} unchanged`
     );
 
@@ -134,7 +131,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
     }
 
     if (newCount === 0 && updatedCount === 0 && deletedCount === 0) {
-      this.logger.info(`SML crawler: no state changes needed for type '${definition.id}'`);
+      this.logger.debug(`SML crawler: no state changes needed for type '${definition.id}'`);
     }
 
     // Process queued actions (create/update/delete)
@@ -144,6 +141,30 @@ export class SmlCrawlerImpl implements SmlCrawler {
       savedObjectsClient,
       stateClient,
     });
+  }
+
+  /** Returns true when the index was dropped due to a mapping update failure. */
+  private async applyMappingsOrRebuild({ storage }: { storage: SmlStorage }): Promise<boolean> {
+    try {
+      await storage.getClient().reconcileMappings();
+      return false;
+    } catch (error) {
+      if (!isResponseError(error)) throw error;
+      if (error.statusCode === 404) return false;
+
+      const errorType = (error.body as { error?: { type?: string } })?.error?.type ?? error.message;
+      this.logger.warn(
+        `SML crawler: mapping update failed (${error.statusCode} ${errorType}) — dropping index '${smlIndexName}' and re-crawling immediately`
+      );
+      try {
+        await storage.getClient().clean();
+      } catch (cleanError) {
+        if (!isResponseError(cleanError) || cleanError.statusCode !== 404) {
+          throw cleanError;
+        }
+      }
+      return true;
+    }
   }
 
   /**
@@ -163,7 +184,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
     if (stateCount === 0) return false;
 
     const smlDataCount = await this.countSmlDocuments({ esClient, attachmentType });
-    this.logger.info(
+    this.logger.debug(
       `SML crawler: integrity check for type '${attachmentType}' — ${stateCount} state doc(s), ${smlDataCount} SML data doc(s) in index '${smlIndexName}'`
     );
     if (smlDataCount === 0) {
@@ -174,47 +195,6 @@ export class SmlCrawlerImpl implements SmlCrawler {
       );
       return true;
     }
-    return false;
-  }
-
-  /**
-   * Compare the current schema version with the one stored in the index _meta.
-   * If they differ, drop and recreate the index so the new mappings take effect.
-   * Returns true when the index was recreated.
-   */
-  private async recreateIndexIfMappingsChanged({
-    esClient,
-  }: {
-    esClient: ElasticsearchClient;
-  }): Promise<boolean> {
-    const storage = createSmlStorage({ logger: this.logger, esClient });
-    const smlClient = storage.getClient();
-
-    const indexExists = await smlClient.existsIndex();
-    if (!indexExists) {
-      return false;
-    }
-
-    try {
-      const expectedVersion = getSchemaVersion(storageSettings);
-      const response = await esClient.indices.getMapping({ index: smlIndexName });
-      const existingVersion = Object.values(response)[0]?.mappings?._meta?.version as
-        | string
-        | undefined;
-
-      if (existingVersion !== expectedVersion) {
-        this.logger.warn(
-          `SML crawler: schema version mismatch (existing='${existingVersion}', expected='${expectedVersion}') — deleting index '${smlIndexName}' and recreating with current schema`
-        );
-        await smlClient.clean();
-        return true;
-      }
-    } catch (error) {
-      if (!isNotFoundError(error)) {
-        throw error;
-      }
-    }
-
     return false;
   }
 
@@ -324,14 +304,14 @@ export class SmlCrawlerImpl implements SmlCrawler {
       const pendingItems = pendingResponse.hits.hits;
       if (pendingItems.length === 0) {
         if (processedCount === 0) {
-          this.logger.info(
+          this.logger.debug(
             `SML crawler: no pending actions to process for type '${attachmentType}'`
           );
         }
         break;
       }
 
-      this.logger.info(
+      this.logger.debug(
         `SML crawler: processing batch of ${pendingItems.length} pending action(s) for type '${attachmentType}'`
       );
 
@@ -515,7 +495,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
         }
       }
     } catch (error) {
-      if (isNotFoundError(error)) {
+      if (isResponseError(error) && error.statusCode === 404) {
         return result;
       }
       this.logger.warn(

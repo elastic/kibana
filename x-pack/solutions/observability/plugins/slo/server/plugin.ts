@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import type {
   CoreSetup,
   CoreStart,
@@ -18,7 +17,7 @@ import { DEFAULT_APP_CATEGORIES, SavedObjectsClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { LockAcquisitionError, LockManagerService } from '@kbn/lock-manager';
 import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
-import { DEPRECATED_ALERTING_CONSUMERS, SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { SLO_ALERTING_FEATURES } from '@kbn/rule-data-utils';
 import { mapValues } from 'lodash';
 import { getScopedClusterClientWithInspect } from './lib/inspect/create_inspectable_scoped_cluster_client';
 import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
@@ -67,8 +66,6 @@ import { StaleInstancesCleanupTask } from './services/tasks/stale_instances_clea
 import { CompositeSloSummaryTask } from './services/tasks/composite_slo_summary_task/composite_slo_summary_task';
 import { registerDataProviders } from './agent_builder/register_data_provider';
 
-const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
-
 export class SLOPlugin
   implements
     Plugin<SLOServerSetup, SLOServerStart, SLOPluginSetupDependencies, SLOPluginStartDependencies>
@@ -102,10 +99,7 @@ export class SLOPlugin
       SO_SLO_COMPOSITE_TYPE,
     ];
 
-    const alertingFeatures = sloRuleTypes.map((ruleTypeId) => ({
-      ruleTypeId,
-      consumers: [sloFeatureId, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
-    }));
+    const alertingFeatures = SLO_ALERTING_FEATURES;
 
     plugins.features.registerKibanaFeature({
       id: sloFeatureId,
@@ -225,7 +219,7 @@ export class SLOPlugin
           ]);
 
           const repository = new DefaultSLODefinitionRepository(soClient, logger);
-          const compositeSloRepository = new DefaultCompositeSLORepository(soClient, logger);
+          const compositeRepository = new DefaultCompositeSLORepository(soClient, logger);
           const settingsRepository = new DefaultSLOSettingsRepository(soClient);
           const templateRepository = new DefaultSLOTemplateRepository(soClient);
 
@@ -248,7 +242,7 @@ export class SLOPlugin
             rulesClient,
             spaceId,
             repository,
-            compositeSloRepository,
+            compositeRepository,
             settingsRepository,
             templateRepository,
             transformManager,

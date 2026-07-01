@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable no-console */
-
 import { readdirSync, readFileSync, existsSync, statSync } from 'fs';
 import { join } from 'path';
 
@@ -32,6 +30,9 @@ export interface ListDefinitionDirectoriesOptions {
 export const ELASTICSEARCH_ESQL_KIBANA_ROOT = 'docs/reference/query-languages/esql/kibana';
 export const ELASTICSEARCH_PROMQL_KIBANA_ROOT = 'docs/reference/query-languages/promql/kibana';
 
+const getKibanaRoot = (language: Language): string =>
+  language === 'esql' ? ELASTICSEARCH_ESQL_KIBANA_ROOT : ELASTICSEARCH_PROMQL_KIBANA_ROOT;
+
 /** Minimum shape of JSON definition objects from Elasticsearch; `name` is required for merge/sort. */
 export interface ElasticsearchJsonDefinition {
   name: string;
@@ -43,9 +44,9 @@ export function readElasticsearchDefinitions<T extends ElasticsearchJsonDefiniti
   const { pathToElasticsearch, keywordType: definitionType, language } = options;
 
   if (!pathToElasticsearch) {
-    console.error('Error: Path to Elasticsearch is required.');
-    console.error('Usage: yarn make:defs <path/to/elasticsearch>');
-    process.exit(1);
+    throw new Error(
+      'Path to Elasticsearch is required. Usage: yarn make:defs <path/to/elasticsearch>'
+    );
   }
 
   const definitionFilePaths = listDocDefinitionFiles({
@@ -58,8 +59,13 @@ export function readElasticsearchDefinitions<T extends ElasticsearchJsonDefiniti
   const definitions = mergeJsonDefinitionsFromFiles<T>(definitionFilePaths, definitionType);
 
   if (definitions.length === 0) {
-    console.log(`No ${definitionType} definitions found.`);
-    process.exit(0);
+    throw new Error(
+      `No ${language} ${definitionType} definitions found under ${join(
+        pathToElasticsearch,
+        getKibanaRoot(language),
+        'generated'
+      )}. The Elasticsearch definitions layout may have changed.`
+    );
   }
 
   return definitions;
@@ -77,21 +83,21 @@ export function mergeJsonDefinitionsFromFiles<T extends ElasticsearchJsonDefinit
 ): T[] {
   const definitions: T[] = [];
 
-  try {
-    for (const filePath of definitionFilePaths) {
-      if (!filePath.endsWith('.json')) {
-        continue;
-      }
+  for (const filePath of definitionFilePaths) {
+    if (!filePath.endsWith('.json')) {
+      continue;
+    }
 
+    try {
       const fileContent = readFileSync(filePath, 'utf-8');
       const parsed = JSON.parse(fileContent);
       const { comment, ...rest } = parsed;
       definitions.push(rest);
+    } catch (error) {
+      throw new Error(
+        `Failed to read ${definitionType} definition file ${filePath}: ${error.message}`
+      );
     }
-  } catch (error) {
-    const errorMessage = `An error occurred while merging ${definitionType} definitions: ${error.message}`;
-    console.warn(`Warning: ${errorMessage} \n Skipping ${definitionType} definitions generation.`);
-    process.exit(0);
   }
 
   return definitions.sort((definitionA, definitionB) =>
@@ -109,6 +115,22 @@ function listProjectNames(generatedRoot: string): string[] {
 }
 
 /**
+ * Resolves `.../kibana/generated` for a language, throwing a clear error when it is missing
+ * (e.g. the Elasticsearch documentation layout changed).
+ */
+function resolveGeneratedRoot(pathToElasticsearch: string, language: Language): string {
+  const generatedRoot = join(pathToElasticsearch, getKibanaRoot(language), 'generated');
+
+  if (!existsSync(generatedRoot)) {
+    throw new Error(
+      `Could not find the Elasticsearch generated definitions directory at ${generatedRoot}. The Elasticsearch definitions layout may have changed.`
+    );
+  }
+
+  return generatedRoot;
+}
+
+/**
  * Finds `.../kibana/generated/<project>/<fileType>/<keywordType>/` for each project,
  * then returns every **file** path in those directories (not subdirectories).
  */
@@ -118,26 +140,72 @@ export function listDocDefinitionFiles({
   language,
   fileType,
 }: ListDefinitionDirectoriesOptions): string[] {
-  const kibanaRoot =
-    language === 'esql' ? ELASTICSEARCH_ESQL_KIBANA_ROOT : ELASTICSEARCH_PROMQL_KIBANA_ROOT;
-  const generatedRoot = join(pathToElasticsearch, kibanaRoot, 'generated');
+  const generatedRoot = resolveGeneratedRoot(pathToElasticsearch, language);
 
   const filePaths: string[] = [];
 
-  if (existsSync(generatedRoot)) {
-    for (const projectName of listProjectNames(generatedRoot)) {
-      const dir = join(generatedRoot, projectName, fileType, keywordType);
-      if (!existsSync(dir) || !statSync(dir).isDirectory()) {
-        continue;
-      }
+  for (const projectName of listProjectNames(generatedRoot)) {
+    const dir = join(generatedRoot, projectName, fileType, keywordType);
+    if (!existsSync(dir) || !statSync(dir).isDirectory()) {
+      continue;
+    }
 
-      for (const entry of readdirSync(dir, { withFileTypes: true })) {
-        if (entry.isFile()) {
-          filePaths.push(join(dir, entry.name));
-        }
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isFile()) {
+        filePaths.push(join(dir, entry.name));
       }
     }
   }
 
   return filePaths.sort();
+}
+
+/**
+ * Recursively searches `dir` for the first file whose name matches `fileName`.
+ * Returns the absolute path, or `undefined` if not found.
+ */
+function findFileRecursively(dir: string, fileName: string): string | undefined {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const entryPath = join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      const found = findFileRecursively(entryPath, fileName);
+      if (found) {
+        return found;
+      }
+    } else if (entry.isFile() && entry.name === fileName) {
+      return entryPath;
+    }
+  }
+
+  return undefined;
+}
+
+export interface FindDefinitionFileOptions {
+  pathToElasticsearch: string;
+  language: Language;
+  fileName: string;
+}
+
+/**
+ * Locates a single named definition file (e.g. `inline_cast.json`) anywhere under
+ * `.../kibana/generated`, regardless of which project directory holds it. Throws a clear
+ * error if the generated root or the file cannot be found.
+ */
+export function findDefinitionFileByName({
+  pathToElasticsearch,
+  language,
+  fileName,
+}: FindDefinitionFileOptions): string {
+  const generatedRoot = resolveGeneratedRoot(pathToElasticsearch, language);
+
+  const filePath = findFileRecursively(generatedRoot, fileName);
+
+  if (!filePath) {
+    throw new Error(
+      `Could not find "${fileName}" under ${generatedRoot}. The Elasticsearch definitions layout may have changed.`
+    );
+  }
+
+  return filePath;
 }

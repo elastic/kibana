@@ -10,7 +10,8 @@ import type { Client } from '@elastic/elasticsearch';
 import type { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
 import type { SearchTotalHits, Refresh } from '@elastic/elasticsearch/lib/api/types';
-import type { BaseFeature, Feature, Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import type { BaseFeature, Feature } from '@kbn/significant-events-schema';
 import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
@@ -308,6 +309,10 @@ export async function getFailureStoreStats(
     .then((response) => response.body);
 }
 
+/**
+ * Lists the significant-event queries attached to a stream via the dedicated queries API.
+ * Queries are no longer part of the stream GET response, so tests read them through here.
+ */
 export async function getQueries(
   apiClient: StreamsSupertestRepositoryClient,
   name: string,
@@ -317,6 +322,30 @@ export async function getQueries(
     .fetch('GET /api/streams/{name}/queries 2023-10-31', {
       params: {
         path: { name },
+      },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
+/**
+ * Bulk-applies significant-event query operations (index/delete) to a stream via the dedicated
+ * queries API. Queries are no longer part of the stream upsert, so tests seed them through here.
+ */
+export async function bulkQueries(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  operations: ClientRequestParamsOf<
+    StreamsRouteRepository,
+    'POST /api/streams/{name}/queries/_bulk 2023-10-31'
+  >['params']['body']['operations'],
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
+      params: {
+        path: { name },
+        body: { operations },
       },
     })
     .expect(expectStatusCode)
@@ -544,12 +573,35 @@ export async function importContent(
     .then((response) => response.body);
 }
 
+export async function previewContent(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  body: {
+    content: Readable;
+    filename: string;
+  },
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .sendFile('POST /internal/streams/{name}/content/preview', {
+      params: {
+        path: { name },
+        body: {
+          content: body.content,
+        },
+      },
+      file: { key: 'content', filename: body.filename },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
 export async function upsertFeature(
   client: StreamsSupertestRepositoryClient,
   streamName: string,
   feature: BaseFeature,
   expectedStatusCode = 200
-): Promise<{ uuid: string }> {
+): Promise<{ id: string; uuid: string }> {
   await client
     .fetch('POST /internal/streams/{name}/features', {
       params: {
@@ -566,7 +618,7 @@ export async function upsertFeature(
     throw new Error(`Feature with id "${feature.id}" not found after upsert`);
   }
 
-  return { uuid: created.uuid };
+  return { id: created.id, uuid: created.uuid };
 }
 
 export async function listFeatures(
@@ -611,13 +663,13 @@ export async function bulkFeatures(
 export async function deleteFeature(
   client: StreamsSupertestRepositoryClient,
   streamName: string,
-  uuid: string,
+  id: string,
   expectedStatusCode = 200
 ) {
   return client
-    .fetch('DELETE /internal/streams/{name}/features/{uuid}', {
+    .fetch('DELETE /internal/streams/{name}/features/{id}', {
       params: {
-        path: { name: streamName, uuid },
+        path: { name: streamName, id },
       },
     })
     .expect(expectedStatusCode)

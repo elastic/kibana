@@ -25,11 +25,15 @@ export const AlertEpisodeDetailsHeaderSection = ({
   services,
   titleSize,
 }: AlertEpisodeDetailsHeaderSectionProps) => {
-  const { data: episode } = useFetchEpisodeQuery({ episodeId, services });
+  const { data: episode, isLoading: isLoadingEpisode } = useFetchEpisodeQuery({
+    episodeId,
+    services,
+  });
 
   const ruleId = episode?.['rule.id'];
   const groupHash = episode?.group_hash;
   const lastStatus = episode?.['episode.status'];
+  const severity = episode?.severity;
 
   const { data: episodeActionsMap } = useFetchEpisodeActions({
     episodeIds: [episodeId],
@@ -39,7 +43,7 @@ export const AlertEpisodeDetailsHeaderSection = ({
     groupHashes: groupHash ? [groupHash] : [],
     services,
   });
-  const { data: rule } = useFetchRule({ id: ruleId, http: services.http });
+  const { ruleState } = useFetchRule({ id: ruleId, http: services.http });
 
   const episodeAction = episodeActionsMap?.get(episodeId);
   const groupAction = groupHash ? groupActionsMap?.get(groupHash) : undefined;
@@ -47,10 +51,11 @@ export const AlertEpisodeDetailsHeaderSection = ({
 
   return (
     <AlertEpisodeDetailsHeader
-      title={rule?.metadata.name}
-      description={rule?.metadata.description}
+      isLoadingEpisode={isLoadingEpisode}
+      ruleState={ruleState}
       tags={tags}
       status={lastStatus}
+      severity={severity}
       episodeAction={episodeAction}
       groupAction={groupAction}
       titleSize={titleSize}

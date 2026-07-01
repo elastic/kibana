@@ -4,6 +4,14 @@
     "outDir": "target/types"
   },
   "include": ["server/**/*"],
-  "kbn_references": ["@kbn/core", "@kbn/data-views-plugin"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-views-plugin",
+    "@kbn/as-code-data-views-schema",
+    "@kbn/as-code-data-views-transforms",
+    "@kbn/config-schema",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/as-code-shared-schemas"
+  ],
   "exclude": ["target/**/*"]
 }

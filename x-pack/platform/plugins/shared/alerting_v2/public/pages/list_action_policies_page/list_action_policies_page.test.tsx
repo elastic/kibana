@@ -160,8 +160,6 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   version: 'WzEsMV0=',
   name: 'Policy One',
   description: 'Policy description',
-  type: 'global',
-  ruleId: null,
   enabled: true,
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   matcher: null,
@@ -218,6 +216,12 @@ describe('ListActionPoliciesPage', () => {
       isError: false,
       error: null,
     });
+  });
+
+  it('renders the experimental badge in the page header', () => {
+    renderPage();
+
+    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
   });
 
   it('formats updatedAt using the user date format setting', () => {

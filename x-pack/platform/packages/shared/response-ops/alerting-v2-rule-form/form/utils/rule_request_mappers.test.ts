@@ -27,10 +27,9 @@ describe('rule_request_mappers', () => {
     },
     timeField: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
-    evaluation: {
-      query: {
-        base: 'FROM logs-* | LIMIT 10',
-      },
+    query: {
+      format: 'standalone',
+      breach: { query: 'FROM logs-* | LIMIT 10' },
     },
     stateTransitionAlertDelayMode: 'immediate',
     stateTransitionRecoveryDelayMode: 'immediate',
@@ -44,9 +43,8 @@ describe('rule_request_mappers', () => {
         metadata: { name: 'Test Rule', owner: 'test-owner', tags: ['tag1', 'tag2'] },
         time_field: '@timestamp',
         schedule: { every: '5m', lookback: '1m' },
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
         grouping: undefined,
-        recovery_policy: undefined,
         state_transition: undefined,
       });
     });
@@ -77,35 +75,6 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToRuleRequest(formValues);
 
       expect(result.grouping).toBeUndefined();
-    });
-
-    it('maps recovery_policy type no_breach without query', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        recoveryPolicy: { type: 'no_breach' },
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.recovery_policy).toEqual({ type: 'no_breach' });
-      expect(result.recovery_policy!.query).toBeUndefined();
-    });
-
-    it('maps recovery_policy type query with full base query', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        recoveryPolicy: {
-          type: 'query',
-          query: { base: 'FROM logs | WHERE status = "ok"' },
-        },
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.recovery_policy).toEqual({
-        type: 'query',
-        query: { base: 'FROM logs | WHERE status = "ok"' },
-      });
     });
 
     it('maps state_transition for alert kind with pending count and timeframe', () => {
@@ -365,6 +334,32 @@ describe('rule_request_mappers', () => {
       expect(result.artifacts).toBeUndefined();
     });
 
+    it('maps recovery query and sets recovery_strategy: "query"', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 10' },
+          recovery: { query: 'FROM logs-* | WHERE ok == true' },
+        },
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.query).toEqual({
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | LIMIT 10' },
+        recovery: { query: 'FROM logs-* | WHERE ok == true' },
+      });
+      expect(result.recovery_strategy).toBe('query');
+    });
+
+    it('omits recovery_strategy when query.recovery is absent', () => {
+      const result = mapFormValuesToRuleRequest(baseFormValues);
+
+      expect(result.recovery_strategy).toBeUndefined();
+    });
+
     it('keeps non-empty runbook artifact value unchanged', () => {
       const formValues: FormValues = {
         ...baseFormValues,
@@ -495,9 +490,10 @@ describe('rule_request_mappers', () => {
       };
 
       expect(updateRequest.grouping).toBeNull();
-      expect(updateRequest.recovery_policy).toBeNull();
       expect(updateRequest.state_transition).toBeNull();
       expect(updateRequest.artifacts).toBeNull();
+      expect(updateRequest.recovery_strategy).toBeNull();
+      expect(updateRequest.no_data_strategy).toBeNull();
     });
 
     it('does not include kind in the update payload', () => {
@@ -511,7 +507,8 @@ describe('rule_request_mappers', () => {
         ...baseFormValues,
         kind: 'alert',
         grouping: { fields: ['host.name'] },
-        recoveryPolicy: { type: 'no_breach' },
+        recoveryStrategy: 'no_breach',
+        noDataStrategy: 'emit',
         stateTransitionAlertDelayMode: 'duration',
         stateTransitionRecoveryDelayMode: 'immediate',
         stateTransition: { pendingCount: 2, pendingTimeframe: '5m' },
@@ -520,7 +517,8 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToUpdateRequest(formValues);
 
       expect(result.grouping).toEqual({ fields: ['host.name'] });
-      expect(result.recovery_policy).toEqual({ type: 'no_breach' });
+      expect(result.recovery_strategy).toBe('no_breach');
+      expect(result.no_data_strategy).toBe('emit');
       expect(result.state_transition).toEqual({
         pending_count: 2,
         pending_timeframe: '5m',
@@ -550,7 +548,10 @@ describe('rule_request_mappers', () => {
       });
       expect(result.time_field).toBe('@timestamp');
       expect(result.schedule).toEqual({ every: '5m', lookback: '1m' });
-      expect(result.evaluation).toEqual({ query: { base: 'FROM logs-* | LIMIT 10' } });
+      expect(result.query).toEqual({
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | LIMIT 10' },
+      });
     });
 
     it('coerces empty artifacts array to null for explicit removal', () => {
@@ -562,6 +563,33 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToUpdateRequest(formValues);
 
       expect(result.artifacts).toBeNull();
+    });
+
+    it('infers recovery_strategy: query when user adds recovery via form (recoveryStrategy undefined)', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        query: {
+          format: 'composed',
+          base: 'FROM logs-*',
+          breach: { segment: 'WHERE count > 100' },
+          recovery: { segment: 'WHERE count < 50' },
+        },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.recovery_strategy).toBe('query');
+    });
+
+    it('nullifies recovery_strategy when user removes recovery from a loaded rule', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        recoveryStrategy: 'query',
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.recovery_strategy).toBeNull();
     });
   });
 
@@ -580,10 +608,9 @@ describe('rule_request_mappers', () => {
         every: '5m',
         lookback: '2m',
       },
-      evaluation: {
-        query: {
-          base: 'FROM logs-* | STATS count() BY host',
-        },
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | STATS count() BY host' },
       },
     } as RuleResponse;
 
@@ -636,13 +663,12 @@ describe('rule_request_mappers', () => {
       expect(result.schedule).toEqual({ every: '10m', lookback: '1m' });
     });
 
-    it('maps evaluation query base', () => {
+    it('maps query to RuleQuery shape', () => {
       const result = mapRuleResponseToFormValues(baseRuleResponse);
 
-      expect(result.evaluation).toEqual({
-        query: {
-          base: 'FROM logs-* | STATS count() BY host',
-        },
+      expect(result.query).toEqual({
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | STATS count() BY host' },
       });
     });
 
@@ -661,41 +687,6 @@ describe('rule_request_mappers', () => {
       const result = mapRuleResponseToFormValues(baseRuleResponse);
 
       expect(result).not.toHaveProperty('grouping');
-    });
-
-    it('maps recovery_policy with query', () => {
-      const rule = {
-        ...baseRuleResponse,
-        recovery_policy: {
-          type: 'query',
-          query: { base: 'FROM logs' },
-        },
-      } as RuleResponse;
-
-      const result = mapRuleResponseToFormValues(rule);
-
-      expect(result.recoveryPolicy).toEqual({
-        type: 'query',
-        query: { base: 'FROM logs' },
-      });
-    });
-
-    it('maps recovery_policy without query (no_breach)', () => {
-      const rule = {
-        ...baseRuleResponse,
-        recovery_policy: { type: 'no_breach' },
-      } as RuleResponse;
-
-      const result = mapRuleResponseToFormValues(rule);
-
-      expect(result.recoveryPolicy).toEqual({ type: 'no_breach' });
-      expect(result.recoveryPolicy!.query).toBeUndefined();
-    });
-
-    it('omits recoveryPolicy when not present in response', () => {
-      const result = mapRuleResponseToFormValues(baseRuleResponse);
-
-      expect(result).not.toHaveProperty('recoveryPolicy');
     });
 
     it('maps state_transition when present', () => {
@@ -813,10 +804,6 @@ describe('rule_request_mappers', () => {
         ...baseRuleResponse,
         metadata: { ...baseRuleResponse.metadata, description: 'Roundtrip description' },
         grouping: { fields: ['host.name'] },
-        recovery_policy: {
-          type: 'query',
-          query: { base: 'FROM logs-* | STATS count() BY host | WHERE count <= 50' },
-        },
         state_transition: { pending_count: 3, pending_timeframe: '10m' },
       } as RuleResponse;
 
@@ -828,9 +815,8 @@ describe('rule_request_mappers', () => {
         metadata: formValues.metadata!,
         timeField: formValues.timeField!,
         schedule: formValues.schedule as FormValues['schedule'],
-        evaluation: formValues.evaluation!,
+        query: formValues.query!,
         grouping: formValues.grouping,
-        recoveryPolicy: formValues.recoveryPolicy,
         stateTransition: formValues.stateTransition,
         stateTransitionAlertDelayMode: formValues.stateTransitionAlertDelayMode!,
         stateTransitionRecoveryDelayMode: formValues.stateTransitionRecoveryDelayMode!,
@@ -843,12 +829,11 @@ describe('rule_request_mappers', () => {
 
       expect(createPayload.kind).toBe('alert');
       expect(createPayload.metadata.description).toBe('Roundtrip description');
-      expect(createPayload.evaluation.query.base).toBe('FROM logs-* | STATS count() BY host');
-      expect(createPayload.grouping).toEqual({ fields: ['host.name'] });
-      expect(createPayload.recovery_policy).toEqual({
-        type: 'query',
-        query: { base: 'FROM logs-* | STATS count() BY host | WHERE count <= 50' },
+      expect(createPayload.query).toEqual({
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | STATS count() BY host' },
       });
+      expect(createPayload.grouping).toEqual({ fields: ['host.name'] });
       expect(createPayload.state_transition).toEqual({
         pending_count: 3,
         pending_timeframe: '10m',

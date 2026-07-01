@@ -20,7 +20,12 @@ import {
   OAS_TAG,
 } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY } from '../utils/route_security';
+import {
+  canReadManagedWorkflowExecutions,
+  hasWorkflowReadPrivilege,
+  resolveAuthorizedManagedFilter,
+  WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY,
+} from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 const querySchema = schema.object({
@@ -51,6 +56,16 @@ const querySchema = schema.object({
       meta: { description: 'Filter by managed status. Defaults to "unmanaged".' },
     })
   ),
+  sortField: schema.maybe(
+    schema.oneOf([schema.literal('name'), schema.literal('enabled')], {
+      meta: { description: 'Field to sort by.' },
+    })
+  ),
+  sortOrder: schema.maybe(
+    schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+      meta: { description: 'Sort direction.' },
+    })
+  ),
 });
 
 export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependencies) {
@@ -76,15 +91,19 @@ export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependen
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          if (request.authzResult?.[WorkflowsManagementApiActions.read] !== true) {
+          if (!hasWorkflowReadPrivilege(request)) {
             return response.forbidden();
           }
-          const params = prepareParams(request.query);
+          const managedFilter = resolveAuthorizedManagedFilter(request, request.query.managed);
+          const params = prepareParams({ ...request.query, managed: managedFilter });
           const spaceId = spaces.getSpaceId(request);
           const includeExecutionHistory =
             request.authzResult?.[WorkflowsManagementApiActions.readExecution] === true;
           return response.ok({
-            body: await api.getWorkflows(params, spaceId, { includeExecutionHistory }),
+            body: await api.getWorkflows(params, spaceId, {
+              includeExecutionHistory,
+              includeManagedExecutionHistory: canReadManagedWorkflowExecutions(request),
+            }),
           });
         } catch (error) {
           return handleRouteError(response, error);
@@ -101,6 +120,8 @@ function prepareParams({
   tags,
   query,
   managed,
+  sortField,
+  sortOrder,
 }: TypeOf<typeof querySchema>): GetWorkflowsParams {
   return {
     query,
@@ -110,5 +131,7 @@ function prepareParams({
     createdBy: createdBy != null && !Array.isArray(createdBy) ? [createdBy] : createdBy,
     tags: tags != null && !Array.isArray(tags) ? [tags] : tags,
     managedFilter: managed,
+    sortField,
+    sortOrder,
   };
 }

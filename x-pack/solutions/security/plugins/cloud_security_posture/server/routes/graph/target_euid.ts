@@ -19,29 +19,34 @@ export const toTargetField = (field: string): string => {
 };
 
 /**
- * Generates ESQL evaluation for a target entity EUID.
+ * Generates an ES|QL EVAL assignments fragment for a target entity EUID.
  *
- * Workaround: transforms the actor ESQL by replacing identity source field names
- * with their target-namespace equivalents (e.g., `user.email` → `user.target.email`).
- * Computed intermediate fields like `entity.namespace` are preserved since they are
- * excluded from `getEuidSourceFields`.
+ * Builds the actor fragment via {@link getEuidEsqlEvaluation}, then rewrites every identity
+ * source field name to its target-namespace equivalent (e.g. `user.email` → `user.target.email`)
+ * so the `_present` booleans and CONCAT expressions reference the target fields.
  *
- * This is temporary until Entity Store provides a proper target EUID API.
+ * Returns a comma-separated EVAL assignments fragment — wrap with `| EVAL`:
+ * ```ts
+ * parts.push(`| EVAL ${getTargetEuidEsqlEvaluation(type, outputColumn)}`);
+ * ```
  */
-export const getTargetEuidEsqlEvaluation = (entityType: EntityType): string => {
-  const actorEsql = getEuidEsqlEvaluation(entityType);
+export const getTargetEuidEsqlEvaluation = (
+  entityType: EntityType,
+  outputColumn: string
+): string => {
+  const fragment = getEuidEsqlEvaluation(entityType, outputColumn);
   const { identitySourceFields } = getEuidSourceFields(entityType);
 
   // Sort by length descending to prevent partial matches
   // (e.g., `host.hostname` must be replaced before `host.name`)
   const sortedFields = [...identitySourceFields].sort((a, b) => b.length - a.length);
 
-  let targetEsql = actorEsql;
+  let out = fragment;
   for (const field of sortedFields) {
-    targetEsql = targetEsql.replaceAll(field, toTargetField(field));
+    out = out.replaceAll(field, toTargetField(field));
   }
 
-  return targetEsql;
+  return out;
 };
 
 /**

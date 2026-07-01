@@ -24,7 +24,10 @@ import {
   Location,
   FULL_TEXT_SEARCH_FUNCTIONS,
 } from '@kbn/esql-language';
-import { readElasticsearchDefinitions } from '../lib/elasticsearch_definitions';
+import {
+  readElasticsearchDefinitions,
+  findDefinitionFileByName,
+} from '../lib/elasticsearch_definitions';
 import {
   aliasTable,
   aliases,
@@ -99,11 +102,15 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
           type: convertDateTime(param.type),
           license: param.license?.toLowerCase(),
           description: param.description,
+          // ES does not yet emit hints for full-text search functions, so we
+          // mark their non-field params as constant-only here. The `field` param instead
+          // only accepts fields (no function or literal).
           ...(FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)
-            ? // Default to false. If set to true, this parameter does not accept a function or literal, only fields.
-              param.name === 'field'
+            ? param.name === 'field'
               ? { fieldsOnly: true }
-              : { constantOnly: true }
+              : !param.hint
+              ? { hint: { kind: 'constant' as const } }
+              : {}
             : {}),
         })),
         returnType: convertDateTime(signature.returnType),
@@ -147,31 +154,10 @@ const replaceParamName = (str: string) => {
 const enrichGrouping = (
   groupingFunctionDefinitions: FunctionDefinition[]
 ): FunctionDefinition[] => {
-  return groupingFunctionDefinitions.map((op) => {
-    const newOp = {
-      ...op,
-      locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
-    };
-    if (newOp.name === 'bucket') {
-      const updatedSignatures = newOp.signatures.map((signature) => {
-        const newSignature = { ...signature };
-        if (newSignature.params && newSignature.params.length > 1) {
-          const indicesToMakeConstantOnly = [1, 2, 3];
-
-          newSignature.params = newSignature.params.map((param, index) => {
-            const newParam = { ...param };
-            if (indicesToMakeConstantOnly.includes(index)) {
-              newParam.constantOnly = true;
-            }
-            return newParam;
-          });
-        }
-        return newSignature;
-      });
-      newOp.signatures = updatedSignatures;
-    }
-    return newOp;
-  });
+  return groupingFunctionDefinitions.map((op) => ({
+    ...op,
+    locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
+  }));
 };
 
 const enrichOperators = (
@@ -703,14 +689,15 @@ ${functionsEnum}
 `
   );
 
-  // Copies docs/reference/esql/functions/kibana/inline_cast.json from ES.
+  // Copies inline_cast.json from ES.
   // It holds a mapping of inline casts to the respective function name that performs the cast.
   // Inline casting, `field::int`, is sugar syntax for `to_integer(field)`, so it's usefull to know this mapping
   // to perform validations.
-  const ESInlineCastsFilePath = join(
+  const ESInlineCastsFilePath = findDefinitionFileByName({
     pathToElasticsearch,
-    '/docs/reference/query-languages/esql/kibana/generated/x-pack-esql/definition/inline_cast.json'
-  );
+    language: 'esql',
+    fileName: 'inline_cast.json',
+  });
   const inlineCastsDefinition = JSON.parse(readFileSync(ESInlineCastsFilePath, 'utf-8'));
   const castsMap = JSON.stringify(inlineCastsDefinition, null, 2);
   await writeFile(
@@ -829,4 +816,7 @@ export const inlineCastsMapping = ${castsMap} as const;
     GENERATED_PROMQL_LABEL_MATCHERS_OUTPUT_PATH,
     printPromQLLabelMatchersGeneratedFile(promqlLabelMatcherDefinitions)
   );
-})();
+})().catch((error) => {
+  process.stderr.write(`${error.stack ?? error.message}\n`);
+  process.exit(1);
+});

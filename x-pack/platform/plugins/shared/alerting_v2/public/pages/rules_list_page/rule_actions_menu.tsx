@@ -12,6 +12,7 @@ import {
   EuiContextMenuPanel,
   EuiIcon,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleApiResponse } from '../../services/rules_api';
@@ -91,15 +92,22 @@ export const RuleActionsMenu = ({
   return (
     <EuiPopover
       button={
-        <EuiButtonIcon
-          iconType="boxesHorizontal"
-          aria-label={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
+        <EuiToolTip
+          content={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
             defaultMessage: 'More actions',
           })}
-          color="text"
-          onClick={() => setIsOpen((open) => !open)}
-          data-test-subj={`ruleActionsButton-${rule.id}`}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="boxesHorizontal"
+            aria-label={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
+              defaultMessage: 'More actions',
+            })}
+            color="text"
+            onClick={() => setIsOpen((open) => !open)}
+            data-test-subj={`ruleActionsButton-${rule.id}`}
+          />
+        </EuiToolTip>
       }
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
