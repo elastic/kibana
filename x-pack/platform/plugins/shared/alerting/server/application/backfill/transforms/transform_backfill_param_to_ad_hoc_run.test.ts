@@ -171,6 +171,31 @@ describe('transformBackfillParamToAdHocRun', () => {
     });
   });
 
+  test('should snapshot the UIAM api key when the rule has one', () => {
+    const { adHocRunSO } = transformBackfillParamToAdHocRun(
+      getMockData(),
+      getMockRule({ uiamApiKey: 'uiamApiKeyValue' }),
+      [],
+      'default'
+    );
+    expect(adHocRunSO).toEqual(
+      expect.objectContaining({
+        apiKeyToUse: 'MTIzOmFiYw==',
+        uiamApiKey: 'uiamApiKeyValue',
+      })
+    );
+  });
+
+  test('should not set a UIAM api key when the rule has none', () => {
+    const { adHocRunSO } = transformBackfillParamToAdHocRun(
+      getMockData(),
+      getMockRule(),
+      [],
+      'default'
+    );
+    expect(adHocRunSO).not.toHaveProperty('uiamApiKey');
+  });
+
   test('should omit rule actions when runActions=false', () => {
     const actions = [
       { uuid: '123abc', group: 'default', actionRef: 'action_0', actionTypeId: 'test', params: {} },

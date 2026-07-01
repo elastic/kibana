@@ -62,6 +62,7 @@ interface ConstructorParams {
 
 interface RunParams {
   adHocRunData: AdHocRun;
+  effectiveApiKey: string | null;
   fakeRequest: KibanaRequest;
   scheduleToRun: AdHocRunSchedule | null;
   validatedParams: RuleTypeParams;
@@ -102,6 +103,9 @@ export class AdHocTaskRunner implements CancellableTask {
   private taskRunning: AdHocTaskRunningHandler;
   private timer: TaskRunnerTimer;
   private apiKeyToUse: string | null = null;
+  private uiamApiKey: string | undefined;
+  private apiKeyCreatedByUser: boolean | null | undefined;
+  private apiKeyOwner: string | null | undefined;
 
   constructor({ context, internalSavedObjectsRepository, taskInstance }: ConstructorParams) {
     this.context = context;
@@ -167,6 +171,7 @@ export class AdHocTaskRunner implements CancellableTask {
 
   private async runRule({
     adHocRunData,
+    effectiveApiKey,
     fakeRequest,
     scheduleToRun,
     validatedParams: params,
@@ -176,7 +181,7 @@ export class AdHocTaskRunner implements CancellableTask {
       return ruleRunMetricsStore.getMetrics();
     }
 
-    const { rule, apiKeyToUse, apiKeyId } = adHocRunData;
+    const { rule, apiKeyId } = adHocRunData;
     const ruleType = this.ruleTypeRegistry.get(rule.alertTypeId);
 
     const ruleLabel = `${ruleType.id}:${rule.id}: '${rule.name}'`;
@@ -283,7 +288,7 @@ export class AdHocTaskRunner implements CancellableTask {
       taskRunnerContext: this.context,
       taskInstance: this.taskInstance,
       ruleRunMetricsStore,
-      apiKey: apiKeyToUse,
+      apiKey: effectiveApiKey,
       apiKeyId,
       ruleConsumer: rule.consumer,
       executionId: this.executionId,
@@ -378,8 +383,11 @@ export class AdHocTaskRunner implements CancellableTask {
         );
       }
 
-      const { rule, apiKeyToUse, schedule, start, end } = adHocRunData;
+      const { rule, apiKeyToUse, uiamApiKey, schedule, start, end } = adHocRunData;
       this.apiKeyToUse = apiKeyToUse;
+      this.uiamApiKey = uiamApiKey;
+      this.apiKeyCreatedByUser = rule.apiKeyCreatedByUser;
+      this.apiKeyOwner = rule.apiKeyOwner;
       this.adHocRunData = adHocRunData;
 
       let ruleType: UntypedNormalizedRuleType;
@@ -468,13 +476,24 @@ export class AdHocTaskRunner implements CancellableTask {
         );
       }
 
-      // Generate fake request with API key
-      const { fakeRequest } = getFakeKibanaRequest(this.context, spaceId, apiKeyToUse, {
-        ruleId: rule.id,
-      });
+      // Generate fake request with API key. Threading the UIAM key (and owner
+      // metadata) mirrors the regular rule runner so backfills authenticate with
+      // the UIAM key in UIAM deployments instead of falling back to the ES key.
+      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(
+        this.context,
+        spaceId,
+        apiKeyToUse,
+        {
+          uiamApiKey,
+          apiKeyCreatedByUser: rule.apiKeyCreatedByUser,
+          apiKeyOwner: rule.apiKeyOwner,
+          ruleId: rule.id,
+        }
+      );
 
       return {
         adHocRunData,
+        effectiveApiKey,
         fakeRequest,
         scheduleToRun:
           this.scheduleToRunIndex > -1 ? this.adHocRunSchedule[this.scheduleToRunIndex] : null,
@@ -699,7 +718,12 @@ export class AdHocTaskRunner implements CancellableTask {
       this.context,
       this.taskInstance.params.spaceId,
       this.apiKeyToUse,
-      { ruleId: this.ruleId }
+      {
+        uiamApiKey: this.uiamApiKey,
+        apiKeyCreatedByUser: this.apiKeyCreatedByUser,
+        apiKeyOwner: this.apiKeyOwner,
+        ruleId: this.ruleId,
+      }
     );
 
     const eventLogClient = await this.context.getEventLogClient(fakeRequest);
