@@ -429,10 +429,8 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
         scopedClusterClient,
       });
 
-      const ruleA = result.significant_events.find(
-        (e) => e.stream_name === 'logs.test' && e.id === 'qa'
-      )!;
-      const ruleB = result.significant_events.find((e) => e.id === 'qb')!;
+      const ruleA = result.queries.find((e) => e.stream_name === 'logs.test' && e.id === 'qa')!;
+      const ruleB = result.queries.find((e) => e.id === 'qb')!;
 
       expect(ruleA.occurrences).toHaveLength(6);
       expect(ruleA.occurrences.map((o) => o.count)).toEqual([2, 0, 1, 0, 0, 0]);
@@ -453,8 +451,8 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
         scopedClusterClient,
       });
 
-      expect(result.significant_events).toHaveLength(1);
-      expect(result.significant_events[0].occurrences).toEqual([]);
+      expect(result.queries).toHaveLength(1);
+      expect(result.queries[0].occurrences).toEqual([]);
       expect(result.aggregated_occurrences).toEqual([]);
     });
 
