@@ -504,7 +504,10 @@ describe('getSourceMatchSpec', () => {
     ).toEqual({
       type: 'condition',
       condition: {
-        and: [{ field: 'event.kind', includes: 'asset' }, { field: 'cloud.provider', eq: 'gcp' }],
+        and: [
+          { field: 'event.kind', includes: 'asset' },
+          { field: 'cloud.provider', eq: 'gcp' },
+        ],
       },
     });
 
@@ -516,7 +519,10 @@ describe('getSourceMatchSpec', () => {
     ).toEqual({
       type: 'condition',
       condition: {
-        and: [{ field: 'event.kind', includes: 'asset' }, { field: 'cloud.provider', eq: 'aws' }],
+        and: [
+          { field: 'event.kind', includes: 'asset' },
+          { field: 'cloud.provider', eq: 'aws' },
+        ],
       },
     });
 
@@ -558,13 +564,19 @@ describe('getSourceMatchSpec', () => {
     expect(awsSpec).toEqual({
       type: 'condition',
       condition: {
-        and: [{ field: 'event.kind', includes: 'asset' }, { field: 'cloud.provider', eq: 'aws' }],
+        and: [
+          { field: 'event.kind', includes: 'asset' },
+          { field: 'cloud.provider', eq: 'aws' },
+        ],
       },
     });
     expect(gcpSpec).toEqual({
       type: 'condition',
       condition: {
-        and: [{ field: 'event.kind', includes: 'asset' }, { field: 'cloud.provider', eq: 'gcp' }],
+        and: [
+          { field: 'event.kind', includes: 'asset' },
+          { field: 'cloud.provider', eq: 'gcp' },
+        ],
       },
     });
 
