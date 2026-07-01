@@ -66,11 +66,32 @@ export const EntityAnalyticsReadPrivilegesCallout = React.memo(
         ...getAnomalyMissingKibanaPrivileges(anomalyPrivileges),
       ];
 
+  }: {
+    riskEngineReadPrivileges: RiskEngineMissingPrivilegesResponse;
+    entityEnginePrivileges: EntityAnalyticsPrivileges | undefined;
+    leadGenerationPrivileges?: EntityAnalyticsPrivileges;
+    anomalyPrivileges?: EntityAnalyticsPrivileges;
+  }) => {
+    const message = useMemo(() => {
+      const indexPrivileges: MissingIndexPrivileges[] = [
+        ...getRiskEngineMissingReadPrivileges(riskEngineReadPrivileges),
+        ...getAnyMissingReadPrivileges(entityEnginePrivileges),
+        ...getAnyMissingReadPrivileges(leadGenerationPrivileges),
+        ...getAnyMissingReadPrivileges(anomalyPrivileges),
+      ];
+
+      const featurePrivileges: MissingFeaturePrivileges[] = [
+        ...getAnomalyMissingKibanaPrivileges(anomalyPrivileges),
+      ];
+
       if (indexPrivileges.length === 0 && featurePrivileges.length === 0) return null;
 
       return {
         type: 'primary' as const,
-        id: `${id}-missing-privileges-${hash({ indexPrivileges, featurePrivileges })}`,
+        id: `entity-analytics-home-missing-privileges-${hash({
+          indexPrivileges,
+          featurePrivileges,
+        })}`,
         title: MISSING_PRIVILEGES_CALLOUT_TITLE,
         description: missingPrivilegesCallOutBody({
           indexPrivileges,
@@ -99,7 +120,7 @@ EntityAnalyticsReadPrivilegesCallout.displayName = 'EntityAnalyticsPrivilegesCal
 
 const READ_RELEVANT_PRIVILEGES = new Set(['read', 'view_index_metadata']);
 
-const getEntityStoreMissingReadPrivileges = (
+const getAnyMissingReadPrivileges = (
   privileges: EntityAnalyticsPrivileges | undefined
 ): MissingIndexPrivileges[] => {
   if (!privileges) return [];
