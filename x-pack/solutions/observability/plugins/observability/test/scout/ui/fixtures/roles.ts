@@ -87,10 +87,11 @@ export const CASES_READ_WITH_ALERTS_ROLE: KibanaRole = observabilityRole({
  * Both roles grant `observabilityAlerts: ['read']`, which authorizes alert read
  * for *every* observability rule type (so the alerts table shows both the logs
  * and metrics alerts) but grants no rule read. Each role then layers a single
- * solution feature on top to authorize rule read for one rule type only:
- * `logs` for `logs.alert.document.count` and `infrastructure` for
- * `metrics.alert.threshold`. The rule links must therefore appear for the rule
- * the user can read and stay hidden for the one it cannot.
+ * solution feature on top to authorize rule read for one consumer only: the
+ * `logs` feature authorizes the custom threshold rule under the `logs` consumer
+ * and the `infrastructure` feature under the `infrastructure` consumer. The rule
+ * links must therefore appear for the rule the user can read and stay hidden for
+ * the one it cannot.
  *
  * Elasticsearch privileges are intentionally empty: alerts-as-data reads go
  * through Kibana's internal user + RAC, so the gating is driven purely by the

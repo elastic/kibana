@@ -26,8 +26,9 @@ import { cleanRuleLinkRbacAlerts, ingestRuleLinkRbacAlerts } from '../fixtures/r
  * management affordances (Manage rules button, rule stats) are instead gated on
  * whether the user can read *any* rules.
  *
- * Three personas are exercised against the same two alerts (one logs, one
- * metrics), all of which can read every observability alert:
+ * Three personas are exercised against the same two custom threshold alerts (one
+ * created with the `logs` consumer, one with the `infrastructure` consumer), all
+ * of which can read every observability alert:
  *  - a user that can read logs rules only,
  *  - a user that can read metrics rules only,
  *  - a user that can read no rules at all (Observability Alerts only).
@@ -38,6 +39,7 @@ test.describe(
   () => {
     let logsRuleId: string;
     let metricsRuleId: string;
+    let cleanupTag: string;
 
     const RULE_LINK_SUBJ = 'o11yAlertFlyoutRuleLink';
     const VIEW_RULE_DETAILS_SUBJ = 'viewRuleDetailsFlyout';
@@ -46,17 +48,18 @@ test.describe(
     const RULE_STAT_SUBJS = ['statRuleCount', 'statDisabled', 'statMuted', 'statErrors'];
 
     test.beforeAll(async ({ apiServices, esClient }) => {
-      const ruleIds = await ingestRuleLinkRbacAlerts({
+      const ingested = await ingestRuleLinkRbacAlerts({
         esClient,
         apiServices,
         timestamp: new Date().toISOString(),
       });
-      logsRuleId = ruleIds.logsRuleId;
-      metricsRuleId = ruleIds.metricsRuleId;
+      logsRuleId = ingested.logsRuleId;
+      metricsRuleId = ingested.metricsRuleId;
+      cleanupTag = ingested.cleanupTag;
     });
 
     test.afterAll(async ({ apiServices, esClient }) => {
-      await cleanRuleLinkRbacAlerts({ esClient, apiServices });
+      await cleanRuleLinkRbacAlerts({ esClient, apiServices, cleanupTag });
     });
 
     /**

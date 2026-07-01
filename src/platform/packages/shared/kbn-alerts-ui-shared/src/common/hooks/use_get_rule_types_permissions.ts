@@ -111,7 +111,12 @@ export const useGetRuleTypesPermissions = ({
   // is enforced per rule type (and consumer), so callers operating on a single
   // rule (e.g. an alert details page) should prefer this over the coarse
   // `authorizedToReadAnyRules`. When a consumer is provided it is checked
-  // specifically; otherwise any authorized consumer with read access qualifies.
+  // strictly: the user must be authorized to read that rule type under that exact
+  // consumer. This mirrors server-side authorization (which keys off the rule's
+  // consumer) and matters for shared rule types that are registered under
+  // multiple features/consumers, where "any authorized consumer" would wrongly
+  // grant access to a rule the user cannot actually read. When no consumer is
+  // provided, any authorized consumer with read access qualifies.
   const authorizedToReadRuleType = useCallback(
     (ruleTypeId: string, consumer?: string) => {
       const ruleType = filteredIndex.get(ruleTypeId);
@@ -119,9 +124,9 @@ export const useGetRuleTypesPermissions = ({
         return false;
       }
       const consumers = ruleType.authorizedConsumers;
-      const specificConsumer = consumer ? consumers[consumer] : undefined;
-      if (specificConsumer) {
-        return Boolean(specificConsumer.read || specificConsumer.all);
+      if (consumer) {
+        const specificConsumer = consumers[consumer];
+        return Boolean(specificConsumer?.read || specificConsumer?.all);
       }
       return Object.values(consumers).some(
         (authorizedConsumer) => authorizedConsumer.read || authorizedConsumer.all

@@ -32,9 +32,10 @@ import {
  * the one behind this alert must still get the generic overview, not the custom
  * one.
  *
- * The alert under test is a logs threshold alert (`logs.alert.document.count`),
- * a rule type that ships a custom section (`logsThresholdAlertDetailsPage`) and
- * is enabled for the alert details page. Two personas, both able to read every
+ * The alert under test is a custom threshold alert
+ * (`observability.rules.custom_threshold`) created with the `logs` consumer, a
+ * rule type that ships a custom section (`thresholdAlertOverviewSection`) and is
+ * enabled for the alert details page. Two personas, both able to read every
  * observability alert, are exercised against it:
  *  - a user that can read logs rules (sees the custom section),
  *  - a user that can read metrics rules but not logs rules (sees the generic
@@ -45,9 +46,10 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let logsAlertId: string;
+    let cleanupTag: string;
 
-    // Custom overview registered by the logs threshold rule type.
-    const CUSTOM_SECTION_SUBJ = 'logsThresholdAlertDetailsPage';
+    // Custom overview registered by the custom threshold rule type.
+    const CUSTOM_SECTION_SUBJ = 'thresholdAlertOverviewSection';
     // Generic overview shown when the custom section cannot be rendered.
     const DEFAULT_OVERVIEW_SUBJ = 'overviewTabPanel';
     // Tabs that need rule data (rule read), hidden when the rule is unreadable.
@@ -56,18 +58,19 @@ test.describe(
     const ADD_TO_CASE_SELECTOR = '[data-test-subj^="add-to-cases-button-"]';
 
     test.beforeAll(async ({ apiServices, esClient }) => {
-      const { logsRuleId } = await ingestRuleLinkRbacAlerts({
+      const ingested = await ingestRuleLinkRbacAlerts({
         esClient,
         apiServices,
         timestamp: new Date().toISOString(),
       });
       // `ingestRuleLinkRbacAlerts` indexes the alert document with a deterministic
       // `_id` derived from the rule id, which is what the details page resolves.
-      logsAlertId = alertIdForRule(logsRuleId);
+      logsAlertId = alertIdForRule(ingested.logsRuleId);
+      cleanupTag = ingested.cleanupTag;
     });
 
     test.afterAll(async ({ apiServices, esClient }) => {
-      await cleanRuleLinkRbacAlerts({ esClient, apiServices });
+      await cleanRuleLinkRbacAlerts({ esClient, apiServices, cleanupTag });
     });
 
     /**

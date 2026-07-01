@@ -217,8 +217,11 @@ describe('useGetRuleTypesPermissions', () => {
       expect(result.current.authorizedToReadRuleType('rule-type-1', 'alerts')).toBe(true);
       // Present but not readable under the `logs` consumer
       expect(result.current.authorizedToReadRuleType('rule-type-1', 'logs')).toBe(false);
-      // Unknown consumer falls back to "any authorized consumer with read access"
-      expect(result.current.authorizedToReadRuleType('rule-type-1', 'unknown-consumer')).toBe(true);
+      // A consumer the user is not authorized for is denied (strict per-consumer
+      // check), even though another consumer is readable.
+      expect(result.current.authorizedToReadRuleType('rule-type-1', 'unknown-consumer')).toBe(
+        false
+      );
     });
   });
 });

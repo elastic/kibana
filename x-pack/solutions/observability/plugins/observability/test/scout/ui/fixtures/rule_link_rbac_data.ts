@@ -5,43 +5,65 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { EsClient, ObltWorkerFixtures } from '@kbn/scout-oblt';
 
 /**
- * Backing alerts-as-data indices for the two rule types under test. Kibana
- * provisions these write aliases at boot for the log/metric threshold rule
- * types, so the documents can be indexed straight into them (mirrors the
- * approach in `alerts_data.ts` and the infra Scout alerts fixture).
+ * Backing alerts-as-data index for the custom threshold rule type. Kibana
+ * provisions this write alias at boot, so the documents can be indexed straight
+ * into it (mirrors the approach in `alerts_data.ts` and the infra Scout alerts
+ * fixture).
  */
-export const LOGS_ALERTS_INDEX = '.alerts-observability.logs.alerts-default';
-export const METRICS_ALERTS_INDEX = '.alerts-observability.metrics.alerts-default';
-
-/** Tag applied to both the rules and the alert documents so cleanup is scoped. */
-export const RULE_LINK_RBAC_TAG = 'obs-rule-link-rbac-scout-test';
+export const THRESHOLD_ALERTS_INDEX = '.alerts-observability.threshold.alerts-default';
 
 /**
- * The logs alert is readable (rule read) only by a user with the `logs`
- * feature; the metrics alert only by a user with the `infrastructure` feature.
+ * Tag prefix applied to both the rules and the alert documents. Each `ingest`
+ * call appends a unique suffix so cleanup only removes the data it created:
+ * these specs run in parallel (`workers: 2`) against shared Elasticsearch, and a
+ * single shared tag would let one spec file's `afterAll` `deleteByQuery` wipe the
+ * other file's alerts mid-run.
+ */
+const RULE_LINK_RBAC_TAG_PREFIX = 'obs-rule-link-rbac-scout-test';
+
+/**
+ * Both alerts are custom threshold rules (`observability.rules.custom_threshold`),
+ * a rule type that is registered in every observability deployment (stateful and
+ * serverless) and that ships a custom alert details overview section.
+ *
+ * Custom threshold is a *shared* rule type registered under multiple features:
+ * the `logs` feature authorizes it under the `logs` consumer and the
+ * `infrastructure` feature under the `infrastructure` consumer. Rule read is
+ * authorized per rule type *and consumer*, so a rule created with consumer
+ * `logs` is readable only by a user with the `logs` feature, and one with
+ * consumer `infrastructure` only by a user with the `infrastructure` feature.
+ * The rule links must therefore appear for the rule the user can read and stay
+ * hidden for the one it cannot.
  */
 export const LOGS_RULE = {
-  name: 'Scout Logs Threshold Rule',
-  ruleTypeId: 'logs.alert.document.count',
+  name: 'Scout Custom Threshold Rule (logs)',
+  ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   consumer: 'logs',
-  producer: 'logs',
-  category: 'Log threshold',
+  producer: 'observability',
+  category: 'Custom threshold',
 } as const;
 
 export const METRICS_RULE = {
-  name: 'Scout Metric Threshold Rule',
-  ruleTypeId: 'metrics.alert.threshold',
+  name: 'Scout Custom Threshold Rule (infrastructure)',
+  ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   consumer: 'infrastructure',
-  producer: 'infrastructure',
-  category: 'Metric threshold',
+  producer: 'observability',
+  category: 'Custom threshold',
 } as const;
 
-export interface RuleLinkRbacRuleIds {
+export interface RuleLinkRbacIngestResult {
   logsRuleId: string;
   metricsRuleId: string;
+  /**
+   * Unique tag applied to this ingest's rules and alert documents. Pass it back
+   * to `cleanRuleLinkRbacAlerts` so cleanup only removes this ingest's data.
+   */
+  cleanupTag: string;
 }
 
 /**
@@ -52,13 +74,44 @@ export const alertIdForRule = (ruleId: string): string => `${ruleId}-alert`;
 
 type RuleDefinition = typeof LOGS_RULE | typeof METRICS_RULE;
 
+/**
+ * Minimal-but-valid custom threshold params. The rules are created disabled, so
+ * these are never executed; they exist so the created rule validates and so the
+ * indexed alert's `kibana.alert.rule.parameters` has the `criteria` the custom
+ * alert details overview section reads to render.
+ */
+const buildRuleParams = (index: string) => ({
+  criteria: [
+    {
+      comparator: '>' as const,
+      metrics: [{ name: 'A', aggType: 'count' as const }],
+      threshold: [100],
+      timeSize: 5,
+      timeUnit: 'm' as const,
+    },
+  ],
+  alertOnNoData: false,
+  alertOnGroupDisappear: false,
+  searchConfiguration: {
+    query: { query: '', language: 'kuery' as const },
+    index,
+  },
+});
+
+const LOGS_RULE_PARAMS = buildRuleParams('logs-*');
+const METRICS_RULE_PARAMS = buildRuleParams('metrics-*');
+
 const buildAlertDoc = ({
   rule,
   ruleId,
+  params,
+  tag,
   timestamp,
 }: {
   rule: RuleDefinition;
   ruleId: string;
+  params: ReturnType<typeof buildRuleParams>;
+  tag: string;
   timestamp: string;
 }) => ({
   '@timestamp': timestamp,
@@ -76,18 +129,25 @@ const buildAlertDoc = ({
   'kibana.alert.rule.rule_type_id': rule.ruleTypeId,
   'kibana.alert.rule.name': rule.name,
   'kibana.alert.rule.uuid': ruleId,
+  'kibana.alert.rule.parameters': params,
+  // One evaluated value per criterion. The custom threshold alert details
+  // section indexes into this array per criterion with a non-null assertion
+  // (`alert.fields[ALERT_EVALUATION_VALUES]![index]`), so it must be present and
+  // aligned with `params.criteria` or the section throws while rendering.
+  'kibana.alert.evaluation.values': params.criteria.map(() => 150),
   'kibana.alert.start': timestamp,
   'kibana.alert.time_range': { gte: timestamp },
   'kibana.space_ids': ['default'],
   'kibana.version': '8.0.0',
-  tags: [RULE_LINK_RBAC_TAG],
+  tags: [tag],
 });
 
 /**
- * Creates a (disabled) logs threshold rule and metric threshold rule, then
- * indexes one active alert document for each so the alerts table and flyout have
- * data to render. The rules are created disabled because the test only relies on
- * the documents indexed here, not on rule execution.
+ * Creates two (disabled) custom threshold rules — one with the `logs` consumer
+ * and one with the `infrastructure` consumer — then indexes one active alert
+ * document for each so the alerts table and flyout have data to render. The
+ * rules are created disabled because the tests only rely on the documents
+ * indexed here, not on rule execution.
  */
 export const ingestRuleLinkRbacAlerts = async ({
   esClient,
@@ -97,21 +157,17 @@ export const ingestRuleLinkRbacAlerts = async ({
   esClient: EsClient;
   apiServices: ObltWorkerFixtures['apiServices'];
   timestamp: string;
-}): Promise<RuleLinkRbacRuleIds> => {
+}): Promise<RuleLinkRbacIngestResult> => {
+  const cleanupTag = `${RULE_LINK_RBAC_TAG_PREFIX}-${uuidv4()}`;
+
   const logsRule = await apiServices.alerting.rules.create({
     name: LOGS_RULE.name,
     ruleTypeId: LOGS_RULE.ruleTypeId,
     consumer: LOGS_RULE.consumer,
     enabled: false,
     schedule: { interval: '1m' },
-    tags: [RULE_LINK_RBAC_TAG],
-    params: {
-      count: { comparator: 'more than', value: 100 },
-      criteria: [{ field: 'log.level', comparator: 'equals', value: 'error' }],
-      timeUnit: 'm',
-      timeSize: 5,
-      logView: { logViewId: 'default', type: 'log-view-reference' },
-    },
+    tags: [cleanupTag],
+    params: LOGS_RULE_PARAMS,
   });
 
   const metricsRule = await apiServices.alerting.rules.create({
@@ -120,13 +176,8 @@ export const ingestRuleLinkRbacAlerts = async ({
     consumer: METRICS_RULE.consumer,
     enabled: false,
     schedule: { interval: '1m' },
-    tags: [RULE_LINK_RBAC_TAG],
-    params: {
-      criteria: [
-        { aggType: 'count', comparator: '>', threshold: [100], timeSize: 5, timeUnit: 'm' },
-      ],
-      sourceId: 'default',
-    },
+    tags: [cleanupTag],
+    params: METRICS_RULE_PARAMS,
   });
 
   const logsRuleId = logsRule.data.id as string;
@@ -138,10 +189,22 @@ export const ingestRuleLinkRbacAlerts = async ({
   // (`buildEsQueryWithAuthz` issues `_id:<id>`), so the document id must be known
   // and stable for `alertDetailsPage.goto(<alertId>)` to resolve it.
   const operations = [
-    { create: { _index: LOGS_ALERTS_INDEX, _id: alertIdForRule(logsRuleId) } },
-    buildAlertDoc({ rule: LOGS_RULE, ruleId: logsRuleId, timestamp }),
-    { create: { _index: METRICS_ALERTS_INDEX, _id: alertIdForRule(metricsRuleId) } },
-    buildAlertDoc({ rule: METRICS_RULE, ruleId: metricsRuleId, timestamp }),
+    { create: { _index: THRESHOLD_ALERTS_INDEX, _id: alertIdForRule(logsRuleId) } },
+    buildAlertDoc({
+      rule: LOGS_RULE,
+      ruleId: logsRuleId,
+      params: LOGS_RULE_PARAMS,
+      tag: cleanupTag,
+      timestamp,
+    }),
+    { create: { _index: THRESHOLD_ALERTS_INDEX, _id: alertIdForRule(metricsRuleId) } },
+    buildAlertDoc({
+      rule: METRICS_RULE,
+      ruleId: metricsRuleId,
+      params: METRICS_RULE_PARAMS,
+      tag: cleanupTag,
+      timestamp,
+    }),
   ];
 
   const bulkResponse = await esClient.bulk({ operations, refresh: 'wait_for' });
@@ -152,22 +215,24 @@ export const ingestRuleLinkRbacAlerts = async ({
     throw new Error(`Failed to ingest rule-link RBAC alert documents: ${failures.join('; ')}`);
   }
 
-  return { logsRuleId, metricsRuleId };
+  return { logsRuleId, metricsRuleId, cleanupTag };
 };
 
 export const cleanRuleLinkRbacAlerts = async ({
   esClient,
   apiServices,
+  cleanupTag,
 }: {
   esClient: EsClient;
   apiServices: ObltWorkerFixtures['apiServices'];
+  cleanupTag: string;
 }): Promise<void> => {
-  await apiServices.alerting.cleanup.deleteRulesByTags([RULE_LINK_RBAC_TAG]);
+  await apiServices.alerting.cleanup.deleteRulesByTags([cleanupTag]);
 
   await esClient
     .deleteByQuery({
       index: '.alerts-observability.*',
-      query: { term: { tags: RULE_LINK_RBAC_TAG } },
+      query: { term: { tags: cleanupTag } },
       refresh: true,
       conflicts: 'proceed',
       ignore_unavailable: true,
