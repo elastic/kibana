@@ -72,10 +72,9 @@ describe('useCalculateEntityRiskScore', () => {
 
   it('forwards entityId to the V2 API call', async () => {
     const entityId = 'test-euid';
-    const { result } = renderHook(
-      () => useCalculateEntityRiskScore({ ...params, entityId }),
-      { wrapper: TestProviders }
-    );
+    const { result } = renderHook(() => useCalculateEntityRiskScore({ ...params, entityId }), {
+      wrapper: TestProviders,
+    });
 
     await act(async () => {
       result.current.calculateEntityRiskScore();
