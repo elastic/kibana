@@ -21,7 +21,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { PageTitle } from '../../../../components/page_title';
 import {
   useMlKibana,
   useMlManagementLocator,
@@ -32,8 +31,11 @@ import { useDataSource } from '../../../../contexts/ml';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { LinkCard } from '../../../../components/link_card';
-import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
-import { MlPageHeader } from '../../../../components/page_header';
+import {
+  useCreateAndNavigateToMlLink,
+  useMlLink,
+} from '../../../../contexts/kibana/use_create_url';
+import { MlAppHeader } from '../../../../components/ml_app_header';
 import { CPSUnsupportedWarning } from '../../../../components/cps_unsupported_warning';
 
 export const Page: FC = () => {
@@ -49,6 +51,9 @@ export const Page: FC = () => {
   const onSelectDifferentIndex = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX
   );
+  const selectDifferentIndexHref = useMlLink({
+    page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
+  });
 
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
 
@@ -281,18 +286,12 @@ export const Page: FC = () => {
 
   return (
     <div data-test-subj="mlPageJobTypeSelection">
-      <MlPageHeader>
-        <PageTitle
-          title={
-            <FormattedMessage
-              id="xpack.ml.newJob.wizard.jobType.createJobFromTitle"
-              defaultMessage="Create a job from the {pageTitleLabel}"
-              values={{ pageTitleLabel }}
-            />
-          }
-        />
-      </MlPageHeader>
-      <EuiSpacer size="l" />
+      <MlAppHeader
+        title={i18n.translate('xpack.ml.newJob.wizard.jobType.createJobFromTitle', {
+          defaultMessage: 'Create a job from the {pageTitleLabel}',
+          values: { pageTitleLabel },
+        })}
+      />
 
       <CPSUnsupportedWarning />
 
@@ -309,7 +308,7 @@ export const Page: FC = () => {
               defaultMessage="Anomaly detection can only be run over indices which are time based."
             />
             <br />
-            <EuiLink onClick={onSelectDifferentIndex}>
+            <EuiLink href={selectDifferentIndexHref} onClick={onSelectDifferentIndex}>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.jobType.selectDifferentIndexLinkText"
                 defaultMessage="Select a different data view or saved Discover session"
