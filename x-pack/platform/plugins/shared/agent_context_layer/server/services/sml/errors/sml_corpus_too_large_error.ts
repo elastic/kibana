@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './common/attacks.gen';
-export * from './search/search_route.gen';
-export * from './set_assignees/set_assignees_route.gen';
-export * from './set_workflow_status/set_workflow_status_route.gen';
+import { SmlError } from './sml_error';
+
+/** Thrown when permission-field distinct values exceed the enumeration ceiling. Fails closed rather than authorize against a truncated universe. */
+export class SmlCorpusTooLargeError extends SmlError {}

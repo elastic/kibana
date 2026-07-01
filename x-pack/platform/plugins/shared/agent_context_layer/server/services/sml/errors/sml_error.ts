@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export * from './common/attacks.gen';
-export * from './search/search_route.gen';
-export * from './set_assignees/set_assignees_route.gen';
-export * from './set_workflow_status/set_workflow_status_route.gen';
+/** Base for typed SML errors — routes map subclasses to specific HTTP statuses. */
+export class SmlError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = this.constructor.name;
+  }
+}
