@@ -443,6 +443,18 @@ describe('LibraryFetcher.getTemplate', () => {
     );
   });
 
+  it('accepts an uppercase-hex contentHash (case-insensitive integrity check)', async () => {
+    const catalog = sampleCatalog();
+    catalog.templates[0].contentHash = contentHash(bodyYaml()).toUpperCase();
+    queueRefresh(sampleManifest, catalog);
+    mockedFetch.mockResolvedValueOnce(jsonResponse(bodyYaml()));
+    const fetcher = buildFetcher();
+
+    const result = await fetcher.getTemplate('demo');
+
+    expect(result.metadata.slug).toBe('demo');
+  });
+
   it('tolerates an unknown `template-metadata` field in the fetched body (forward-compat)', async () => {
     // A body published by a newer Kibana that adds a `template-metadata` field
     // this (older) runtime does not know about must still parse, so a template

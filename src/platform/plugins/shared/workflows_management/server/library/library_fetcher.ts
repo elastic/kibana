@@ -478,7 +478,9 @@ async function doRequest(url: string, init: RequestInit): Promise<Response> {
  */
 function assertContentHashMatches(row: Template, text: string, url: string): void {
   const actual = `sha256:${createHash('sha256').update(text, 'utf8').digest('hex')}`;
-  if (actual !== row.contentHash) {
+  // `digest('hex')` is lowercase; the catalog schema accepts case-insensitive
+  // hex, so normalize the row hash before comparing.
+  if (actual !== row.contentHash.toLowerCase()) {
     throw new LibraryFetchError(
       `Template body at ${url} failed its integrity check ` +
         `(catalog: ${row.contentHash}, body: ${actual}).`,
