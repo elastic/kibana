@@ -122,14 +122,43 @@ describe('buildVegaConfig', () => {
         esClient,
       });
 
-    it('regenerates ES|QL when no query is provided, passing the existing spec through', async () => {
+    it('reuses the ES|QL embedded in the existing spec when no query is provided', async () => {
       await edit(undefined);
 
+      // The recovered query is already known-good, so it bypasses pre-validation
+      // and is handed to the graph, which re-executes it while re-authoring.
       expect(mockedValidateEsqlQuery).not.toHaveBeenCalled();
       expect(invoke.mock.calls[0][0]).toMatchObject({
-        esqlQuery: '',
+        esqlQuery: PROVIDED_ESQL,
         existingSpec,
       });
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('Reusing the ES|QL'));
+    });
+
+    it('regenerates when the existing spec has no ES|QL binding to recover', async () => {
+      const specWithoutEsql = JSON.stringify({ mark: 'bar', data: { values: [{ a: 1 }] } });
+
+      await buildVegaConfig({
+        nlQuery: 'make the bars blue',
+        existingSpec: specWithoutEsql,
+        modelProvider,
+        logger,
+        events,
+        esClient,
+      });
+
+      expect(invoke.mock.calls[0][0]).toMatchObject({
+        esqlQuery: '',
+        existingSpec: specWithoutEsql,
+      });
+    });
+
+    it('prefers a valid provided ES|QL over the query embedded in the spec', async () => {
+      const newEsql = 'FROM metrics-* | STATS avg = AVG(value)';
+
+      await edit(newEsql);
+
+      expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: newEsql });
     });
 
     it('passes a valid provided ES|QL through when editing', async () => {
@@ -140,13 +169,15 @@ describe('buildVegaConfig', () => {
       expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: newEsql });
     });
 
-    it('drops an invalid provided ES|QL and regenerates when editing', async () => {
+    it('recovers the embedded ES|QL when a provided query fails validation on edit', async () => {
       mockedValidateEsqlQuery.mockResolvedValue('line 1, column 1: bad query');
 
       await edit('INVALID QUERY');
 
+      // The invalid query is dropped, then recovery falls back to the query
+      // embedded in the existing spec rather than regenerating from scratch.
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('bad query'));
-      expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: '' });
+      expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: PROVIDED_ESQL });
     });
   });
 });

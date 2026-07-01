@@ -12,6 +12,7 @@ import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_re
 import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import { createVegaGraph } from './graph';
+import { extractEsqlFromSpec } from './recover_esql';
 
 export interface BuildVegaConfigParams {
   nlQuery: string;
@@ -68,6 +69,20 @@ export const buildVegaConfig = async ({
         `Provided ES|QL failed validation; regenerating from the natural-language query. Error: ${validationError}`
       );
       providedEsql = undefined;
+    }
+  }
+
+  // On edit, reuse the ES|QL embedded in the existing spec rather than
+  // regenerating one, so the graph re-authors only what the instruction asks.
+  // This also recovers the query when a caller-provided ES|QL was dropped above,
+  // and survives save/import round-trips where the spec is the source of truth.
+  // The graph re-executes the query to validate it, so a recovered-but-now-stale
+  // query still self-corrects.
+  if (!providedEsql && existingSpec) {
+    const recoveredEsql = extractEsqlFromSpec(existingSpec);
+    if (recoveredEsql) {
+      logger.debug('Reusing the ES|QL embedded in the existing Vega spec for this edit');
+      providedEsql = recoveredEsql;
     }
   }
 
