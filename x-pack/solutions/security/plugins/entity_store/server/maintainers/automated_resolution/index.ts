@@ -59,6 +59,7 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
               logger,
               resolutionClient,
               abortController,
+              telemetry,
             });
           }
         } else if (ruleConfig.kind === RESOLUTION_RULE_KINDS.RELATED_USER_BRIDGE) {
