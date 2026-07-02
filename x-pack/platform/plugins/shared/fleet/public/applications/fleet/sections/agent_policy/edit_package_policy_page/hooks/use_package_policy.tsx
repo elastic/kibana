@@ -133,7 +133,10 @@ export function usePackagePolicyWithRelatedData(
       try {
         const { item } = await sendUpdateAgentlessPolicy(
           packagePolicyId,
-          toNewAgentlessPolicy(restPackagePolicy as NewPackagePolicy, varGroups)
+          // Pass `packageInfo` so the write-side input/stream allow-check matches the read path
+          // (`agentlessPolicyToPackagePolicy`); without it an unedited load→save could flip input
+          // enablement for deployment-mode-restricted packages.
+          toNewAgentlessPolicy(restPackagePolicy as NewPackagePolicy, varGroups, packageInfo)
         );
         setFormState('SUBMITTED');
         return { data: { item }, error: null };
