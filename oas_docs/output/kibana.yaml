@@ -69146,6 +69146,16 @@ paths:
               - managed
               - unmanaged
             type: string
+        - description: When managed workflows are included, only return managed workflows visible in these contexts.
+          in: query
+          name: visibilityContext
+          required: false
+          schema:
+            items:
+              maxLength: 128
+              type: string
+            maxItems: 1000
+            type: array
         - description: Field to sort by.
           in: query
           name: sortField
