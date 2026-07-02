@@ -6,6 +6,7 @@
  */
 
 import type { RunContext } from '@kbn/agent-builder-server';
+import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 
 /**
  * Builds the comment recorded on a dispatched response action so its entry in
@@ -15,7 +16,9 @@ import type { RunContext } from '@kbn/agent-builder-server';
  * no structured "source conversation" field, so the free-text comment — the
  * established place for analyst context — carries it.
  *
- * An analyst-supplied comment is preserved and the anchor is appended to it.
+ * The conversation id lives on the agent entry of the run-context stack, so it
+ * is resolved via `getAgentFromRunContext`. An analyst-supplied comment is
+ * preserved and the anchor is appended to it.
  */
 export function buildResponseActionComment(
   defaultComment: string,
@@ -23,7 +26,7 @@ export function buildResponseActionComment(
   analystComment?: string
 ): string {
   const base = analystComment ?? defaultComment;
-  const correlationId = runContext.conversationId ?? runContext.runId;
+  const correlationId = getAgentFromRunContext(runContext)?.conversationId ?? runContext.runId;
   return correlationId ? `${base} [AI agent conversation: ${correlationId}]` : base;
 }
 
