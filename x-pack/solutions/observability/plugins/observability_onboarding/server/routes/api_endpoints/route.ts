@@ -126,7 +126,8 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     const managedOtlpPrwEndpointEnabled =
       (await featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED, false)) &&
       Boolean(managedOtlpServiceUrl);
-    const isManagedElasticsearchEndpointAvailable = Boolean(managedOtlpServiceUrl);
+    const isManagedElasticsearchEndpointAvailable =
+      isManagedOtlpServiceAvailable && Boolean(managedOtlpServiceUrl);
 
     const apiKeyFactoryContext: ApiKeyFactoryContext = {
       isManagedOtlpServiceAvailable,

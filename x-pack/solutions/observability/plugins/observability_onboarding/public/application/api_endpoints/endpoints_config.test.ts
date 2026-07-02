@@ -27,11 +27,24 @@ const createContext = (overrides: Partial<ApiEndpointContext> = {}): ApiEndpoint
 describe('API_ENDPOINTS', () => {
   describe('getUrl', () => {
     describe('Elasticsearch URL', () => {
-      it('uses the managed Elasticsearch-compatible bulk endpoint when the managed URL is available on non-Serverless deployments', () => {
+      it('uses the Elasticsearch bulk URL when the managed OTLP service is unavailable on non-Serverless deployments', () => {
         expect(
           getEndpoint('elasticsearch').getUrl(
             createContext({
               isServerless: false,
+              elasticsearchUrl: 'https://es.example.com',
+              managedOtlpServiceUrl: 'https://otlp.example.com:443',
+            })
+          )
+        ).toBe('https://es.example.com/_bulk');
+      });
+
+      it('uses the managed Elasticsearch-compatible bulk endpoint when the managed OTLP service is available on non-Serverless deployments', () => {
+        expect(
+          getEndpoint('elasticsearch').getUrl(
+            createContext({
+              isServerless: false,
+              isManagedOtlpServiceAvailable: true,
               elasticsearchUrl: 'https://es.example.com',
               managedOtlpServiceUrl: 'https://otlp.example.com:443',
             })
@@ -55,6 +68,7 @@ describe('API_ENDPOINTS', () => {
           getEndpoint('elasticsearch').getUrl(
             createContext({
               isServerless: true,
+              isManagedOtlpServiceAvailable: true,
               elasticsearchUrl: 'https://es.example.com',
               managedOtlpServiceUrl: 'https://otlp.example.com:443',
             })
@@ -67,6 +81,7 @@ describe('API_ENDPOINTS', () => {
           getEndpoint('elasticsearch').getUrl(
             createContext({
               isServerless: true,
+              isManagedOtlpServiceAvailable: true,
               elasticsearchUrl: 'https://es.example.com',
               managedOtlpServiceUrl: 'https://otlp.example.com:443//',
             })

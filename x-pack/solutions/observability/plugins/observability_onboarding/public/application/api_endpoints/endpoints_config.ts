@@ -78,10 +78,10 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
       defaultMessage: 'Elasticsearch',
     }),
     euiIconType: 'logoElasticsearch',
-    getUrl: ({ managedOtlpServiceUrl, elasticsearchUrl }) => {
+    getUrl: ({ isManagedOtlpServiceAvailable, managedOtlpServiceUrl, elasticsearchUrl }) => {
       const managedUrl = normalizeEndpointUrl(managedOtlpServiceUrl);
 
-      if (managedUrl) {
+      if (isManagedOtlpServiceAvailable && managedUrl) {
         return `${managedUrl}/_es/_bulk`;
       }
       const fallbackUrl = normalizeEndpointUrl(elasticsearchUrl);
