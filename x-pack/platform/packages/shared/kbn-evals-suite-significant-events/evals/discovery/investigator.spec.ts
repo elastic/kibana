@@ -10,6 +10,7 @@ import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
 import type { Detection, Discovery } from '@kbn/significant-events-schema';
 
+import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   replayIntoManagedStream,
   SIGEVENTS_SNAPSHOT_RUN,
@@ -25,6 +26,8 @@ import { evaluate } from '../../src/evaluate';
 import {
   getActiveDatasets,
   MANAGED_STREAM_SEARCH_PATTERN,
+  resolveScenarioSnapshotSource,
+  snapshotCatalogKey,
   snapshotSourceKey,
 } from '../../src/datasets';
 import { buildAvailableSnapshotsBySource } from '../shared';
