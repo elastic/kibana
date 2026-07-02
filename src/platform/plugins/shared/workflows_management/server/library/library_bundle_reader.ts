@@ -17,10 +17,10 @@ import type {
   TemplatesCatalog,
 } from '@kbn/workflows-library';
 import {
-  KibanaVersionsManifestLenientSchema,
+  KibanaVersionsManifestConsumptionSchema,
   parseTemplateYaml,
   TemplateParseError,
-  TemplatesCatalogLenientSchema,
+  TemplatesCatalogConsumptionSchema,
 } from '@kbn/workflows-library';
 import { ZodError } from '@kbn/zod/v4';
 
@@ -160,16 +160,16 @@ export class LibraryBundleReader implements LibrarySource {
   private async readManifest(root: string): Promise<KibanaVersionsManifest> {
     const file = path.join(root, VERSIONS_FILE);
     return this.readJson(file, (json) =>
-      // Lenient schema: tolerate unknown fields from a newer bundle.
-      KibanaVersionsManifestLenientSchema.parse(json)
+      // Loosened consumption schema: tolerate unknown fields from a newer bundle.
+      KibanaVersionsManifestConsumptionSchema.parse(json)
     );
   }
 
   private async readCatalog(root: string, versionId: string): Promise<TemplatesCatalog> {
     const file = path.join(root, versionId, 'catalogs', 'templates.json');
     return this.readJson(file, (json) =>
-      // Lenient schema: tolerate unknown fields from a newer bundle.
-      TemplatesCatalogLenientSchema.parse(json)
+      // Loosened consumption schema: tolerate unknown fields from a newer bundle.
+      TemplatesCatalogConsumptionSchema.parse(json)
     );
   }
 
@@ -182,10 +182,7 @@ export class LibraryBundleReader implements LibrarySource {
     const file = this.resolveBodyPath(root, definitionUrl);
     const text = await this.readFileOrThrow(file);
     try {
-      // Lenient parse for parity with the HTTP path: tolerate unknown
-      // `template-metadata` fields (top-level and nested `install`) from a
-      // newer bundle so a listed template doesn't 503 on open.
-      const { metadata, body, raw } = parseTemplateYaml(text, { lenient: true });
+      const { metadata, body, raw } = parseTemplateYaml(text);
       return { metadata, body, raw };
     } catch (err) {
       if (err instanceof TemplateParseError) {

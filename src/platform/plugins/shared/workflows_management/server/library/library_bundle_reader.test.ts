@@ -60,34 +60,6 @@ steps:
     type: noop
 `;
 
-// A body from a newer publisher: unknown fields at the top level and inside the
-// nested `install` block. Exercises the lenient body parse (parity with HTTP).
-const FUTURE_BODY_YAML = `
-template-metadata:
-  slug: demo
-  version: "1.0.0"
-  availability: ">=9.5.0"
-  name: "Demo"
-  description: "Demo template"
-  categories: [utility]
-  someFutureField: hello
-  install:
-    someFutureInstallKey: hi
-    form:
-      - name: api-key
-        inputType: text
-        someFutureFieldKey: hi
-
-consts:
-  k: v
-inputs:
-  - name: ip
-    type: string
-steps:
-  - name: noop
-    type: noop
-`;
-
 interface BundleOptions {
   manifest?: unknown;
   manifestRaw?: string;
@@ -285,18 +257,6 @@ describe('LibraryBundleReader', () => {
       expect(first.metadata.slug).toBe('demo');
       expect(first.body.consts).toEqual({ k: 'v' });
       expect(first.raw).toContain('template-metadata:');
-    });
-
-    it('tolerates unknown `template-metadata` fields in the body (forward-compat parity with HTTP)', async () => {
-      await writeBundle(tmpRoot, { body: FUTURE_BODY_YAML });
-      const reader = buildReader(tmpRoot);
-
-      const result = await reader.getTemplate('demo');
-
-      expect(result.metadata.slug).toBe('demo');
-      expect(result.metadata).not.toHaveProperty('someFutureField');
-      expect(result.metadata.install).not.toHaveProperty('someFutureInstallKey');
-      expect(result.metadata.install?.form[0]).not.toHaveProperty('someFutureFieldKey');
     });
 
     it('throws LibraryNotFoundError when the slug is absent from the catalog', async () => {

@@ -13,7 +13,7 @@ export type LibrarySourceMode = 'http' | 'bundle';
 
 export interface LibraryHealth {
   sourceMode: LibrarySourceMode;
-  lastRefreshAt: string | null;
+  lastRefreshAt?: string;
   lastError?: { message: string; at: string };
 }
 
@@ -80,7 +80,7 @@ export class LibraryCache {
   getHealth(): LibraryHealth {
     return {
       sourceMode: this.sourceMode,
-      lastRefreshAt: this.lastRefreshAt?.toISOString() ?? null,
+      lastRefreshAt: this.lastRefreshAt?.toISOString(),
       lastError: this.lastError
         ? { message: this.lastError.message, at: this.lastError.at.toISOString() }
         : undefined,

@@ -14,14 +14,17 @@ import React, { Suspense } from 'react';
 import type { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { ExecutionStatus } from '@kbn/workflows';
+import {
+  getBaseConnectorType,
+  getConnectorSpecIcon,
+  getStepIconType,
+  getTriggerTypeIconType,
+  HardcodedIcons,
+} from '@kbn/workflows-ui';
 import type {
   PublicStepDefinition,
   WorkflowsExtensionsPublicPluginStart,
 } from '@kbn/workflows-extensions/public';
-import { getBaseConnectorType } from './get_base_connector_type';
-import { getConnectorSpecIcon } from './get_connector_spec_icon';
-import { getStepIconType, getTriggerTypeIconType } from './get_step_icon_type';
-import { HardcodedIcons } from './hardcoded_icons';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getExecutionStatusColors, getExecutionStatusIcon } from '../status_badge';
 import { withTooltip } from '../with_tooltip';

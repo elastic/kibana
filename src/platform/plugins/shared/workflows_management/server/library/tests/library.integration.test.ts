@@ -130,7 +130,7 @@ describe('Library integration — LibraryFetcher against a local fixture CDN', (
   it('records the refresh timestamp in getHealth after the first read', async () => {
     const fetcher = buildFetcher(server.baseUrl);
 
-    expect(fetcher.getHealth()).toEqual({ sourceMode: 'http', lastRefreshAt: null });
+    expect(fetcher.getHealth()).toEqual({ sourceMode: 'http' });
     await fetcher.listTemplates();
 
     expect(fetcher.getHealth()).toMatchObject({
@@ -239,7 +239,7 @@ describe('Library integration — LibraryBundleReader against a fixture bundle',
   it('reports the bundle source mode in getHealth', async () => {
     const reader = buildReader(FIXTURE_ROOT);
 
-    expect(reader.getHealth()).toEqual({ sourceMode: 'bundle', lastRefreshAt: null });
+    expect(reader.getHealth()).toEqual({ sourceMode: 'bundle' });
     await reader.listTemplates();
 
     expect(reader.getHealth()).toMatchObject({

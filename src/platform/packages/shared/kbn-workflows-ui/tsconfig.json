@@ -10,6 +10,7 @@
     "@kbn/react-query",
     "@kbn/kibana-react-plugin",
     "@kbn/workflows",
+    "@kbn/workflows-library",
     "@kbn/react-kibana-context-theme",
     "@kbn/i18n",
     "@kbn/i18n-react",
@@ -17,10 +18,12 @@
     "@kbn/core-http-browser",
     "@kbn/core-application-browser",
     "@kbn/core-ui-settings-browser",
+    "@kbn/core-chrome-browser-hooks",
     "@kbn/zod",
     "@kbn/data-views-plugin",
     "@kbn/monaco",
     "@kbn/code-editor",
     "@kbn/use-observable",
+    "@kbn/connector-specs",
   ]
 }
