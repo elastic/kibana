@@ -275,8 +275,8 @@ describe('Data Loader', () => {
       { meta: { alias: 'external filter', negate: false, disabled: false } },
     ];
 
-    const visQuery = { language: 'kquery', query: 'saved filter' };
-    const visFilters = [
+    const visQuery: Query = { language: 'kquery', query: 'saved filter' };
+    const visFilters: Filter[] = [
       { meta: { alias: 'test', negate: false, disabled: false, index: 'filter-0' } },
     ];
 
