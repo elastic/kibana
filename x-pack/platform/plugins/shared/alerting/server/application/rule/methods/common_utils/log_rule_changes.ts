@@ -76,7 +76,7 @@ export async function logRuleChanges({
     : ruleSOs;
   const changes: RuleChange[] = [];
   // Fallback timestamp is used when both timestamp and ruleSO.updated_at are missing.
-  // It practice it'll be almost never used.
+  // In practice it'll be almost never used.
   const fallbackChangeTimestamp = new Date().toISOString();
 
   for (const ruleSO of effectiveRuleSOs) {
