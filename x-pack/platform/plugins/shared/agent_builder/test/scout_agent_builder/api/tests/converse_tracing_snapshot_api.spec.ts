@@ -217,6 +217,10 @@ apiTest.describe(
         await expect
           .poll(
             async () => {
+              const indexExists = await esClient.indices.exists({ index: TRACE_INDEX });
+              if (!indexExists) {
+                return 0;
+              }
               await esClient.indices.refresh({ index: TRACE_INDEX });
               const traceResult = await esClient.search({
                 index: TRACE_INDEX,
@@ -228,7 +232,7 @@ apiTest.describe(
               hits = traceResult.hits.hits;
               return hits.length;
             },
-            { timeout: 10_000, intervals: [500, 1000, 2000] }
+            { timeout: 30_000, intervals: [500, 1000, 2000] }
           )
           .toBe(EXPECTED_SPAN_COUNT);
 

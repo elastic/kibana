@@ -42,6 +42,7 @@ export const servers: ScoutServerConfig = {
       '--uiSettings.overrides.agentBuilder:tracing:includeRealIds=true',
       '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
       '--uiSettings.overrides.aiAssistant:preferredChatExperience=agent',
+      '--xpack.agentBuilder.tracing.scheduledDelay=500',
       `--xpack.agentBuilder.githubBaseUrl=http://localhost:${AGENT_BUILDER_GITHUB_MOCK_PORT}`,
     ],
   },
