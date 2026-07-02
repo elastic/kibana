@@ -1051,8 +1051,8 @@ describe('RiskInputsTab', () => {
           <RiskInputsTab
             entityType={EntityType.user}
             entityName="elastic"
-            scopeId={'scopeId'}
             entityId="user:elastic"
+            onShowAlert={mockOnShowAlert}
           />
         </TestProviders>
       );
@@ -1068,7 +1068,11 @@ describe('RiskInputsTab', () => {
 
       const { queryByTestId } = render(
         <TestProviders>
-          <RiskInputsTab entityType={EntityType.user} entityName="elastic" scopeId={'scopeId'} />
+          <RiskInputsTab
+            entityType={EntityType.user}
+            entityName="elastic"
+            onShowAlert={mockOnShowAlert}
+          />
         </TestProviders>
       );
 

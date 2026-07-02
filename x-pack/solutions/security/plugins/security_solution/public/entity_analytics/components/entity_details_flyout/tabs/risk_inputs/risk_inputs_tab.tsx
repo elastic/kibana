@@ -143,7 +143,7 @@ export const RiskInputsTab = <T extends EntityType>({
     loading: loadingRiskScore,
     inspect: inspectRiskScore,
     refetch,
-  } = useRiskScore<T>({
+  } = useRiskScore<EntityType>({
     riskEntity: entityType,
     filterQuery: entityFilterQuery,
     onlyLatest: false,
@@ -180,7 +180,7 @@ export const RiskInputsTab = <T extends EntityType>({
     loading: loadingResolutionRiskScore,
     inspect: inspectResolutionRiskScore,
     refetch: refetchResolutionRiskScore,
-  } = useRiskScore<T>({
+  } = useRiskScore<EntityType>({
     riskEntity: entityType,
     filterQuery: resolutionFilterQuery,
     onlyLatest: false,
@@ -236,7 +236,6 @@ export const RiskInputsTab = <T extends EntityType>({
       entityType={entityType}
       entityName={entityName}
       entityId={entityId}
-      scopeId={scopeId}
       entityRiskScore={entityRiskScore}
       resolutionRiskScore={resolutionRiskScore}
       hasResolutionScore={hasResolutionScore}
@@ -260,7 +259,6 @@ interface RiskInputsTabContentProps<T extends EntityType> {
   entityType: T;
   entityName: string;
   entityId: string | undefined;
-  scopeId: string;
   entityRiskScore: EntityRiskScore<T> | undefined;
   resolutionRiskScore: EntityRiskScore<T> | undefined;
   hasResolutionScore: boolean;
@@ -280,7 +278,6 @@ const RiskInputsTabContent = <T extends EntityType>({
   entityType,
   entityName,
   entityId,
-  scopeId,
   entityRiskScore,
   resolutionRiskScore,
   hasResolutionScore,
