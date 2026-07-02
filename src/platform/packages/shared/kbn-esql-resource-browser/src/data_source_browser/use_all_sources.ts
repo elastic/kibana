@@ -10,9 +10,11 @@
 import { useEffect, useRef, useState } from 'react';
 import type {
   ESQLSourceResult,
+  EsqlDatasetsResult,
   IndexAutocompleteItem,
   IndicesAutocompleteResult,
 } from '@kbn/esql-types';
+import { SOURCES_TYPES } from '@kbn/esql-types';
 
 const normalizeTimeseriesIndices = ({
   indices,
@@ -27,12 +29,22 @@ const normalizeTimeseriesIndices = ({
   );
 };
 
+const normalizeDatasets = ({ datasets }: EsqlDatasetsResult): ESQLSourceResult[] =>
+  datasets?.map((d) => ({
+    name: d.name,
+    title: d.name,
+    description: d.description,
+    type: SOURCES_TYPES.EXTERNAL,
+    hidden: false,
+  })) ?? [];
+
 export interface UseAllSourcesParams {
   isOpen: boolean;
   preloadedSources?: ESQLSourceResult[];
   isTimeseries: boolean;
   getSources: () => Promise<ESQLSourceResult[]>;
   getTimeseriesIndices: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  getDatasets?: () => Promise<EsqlDatasetsResult>;
 }
 
 export const useAllSources = ({
@@ -41,6 +53,7 @@ export const useAllSources = ({
   isTimeseries,
   getSources,
   getTimeseriesIndices,
+  getDatasets,
 }: UseAllSourcesParams): { allSources: ESQLSourceResult[]; isLoading: boolean } => {
   const [allSources, setAllSources] = useState<ESQLSourceResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,8 +70,24 @@ export const useAllSources = ({
     if (!isOpen) return;
     let isEffectActive = true;
 
+    const fetchDatasets = async (): Promise<ESQLSourceResult[]> => {
+      if (isTimeseries || !getDatasets) return [];
+      try {
+        const result = await getDatasets();
+        return normalizeDatasets(result);
+      } catch {
+        return [];
+      }
+    };
+
     if (preloadedSources !== undefined) {
-      setAllSources(preloadedSources);
+      // Even with preloaded sources we still need to fetch datasets, since preloaded
+      // sources come from the autocomplete cache and don't include federated datasets.
+      fetchDatasets().then((datasets) => {
+        if (isMountedRef.current && isEffectActive) {
+          setAllSources([...preloadedSources, ...datasets]);
+        }
+      });
       return;
     }
 
@@ -70,8 +99,11 @@ export const useAllSources = ({
           const normalized = normalizeTimeseriesIndices(result);
           if (isMountedRef.current && isEffectActive) setAllSources(normalized);
         } else {
-          const fetched = (await getSources?.()) ?? [];
-          if (isMountedRef.current && isEffectActive) setAllSources(fetched);
+          const [fetched, datasets] = await Promise.all([
+            getSources?.() ?? [],
+            fetchDatasets(),
+          ]);
+          if (isMountedRef.current && isEffectActive) setAllSources([...fetched, ...datasets]);
         }
       } catch {
         if (isMountedRef.current && isEffectActive) setAllSources([]);
@@ -85,7 +117,7 @@ export const useAllSources = ({
     return () => {
       isEffectActive = false;
     };
-  }, [getSources, getTimeseriesIndices, isTimeseries, isOpen, preloadedSources]);
+  }, [getSources, getTimeseriesIndices, getDatasets, isTimeseries, isOpen, preloadedSources]);
 
   return { allSources, isLoading };
 };
