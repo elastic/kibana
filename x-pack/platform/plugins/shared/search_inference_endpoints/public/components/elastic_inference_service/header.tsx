@@ -61,24 +61,13 @@ export const ElasticInferenceServiceModelsHeader = () => {
                     }
                   )}
                 >
-                  {i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button', {
-                    defaultMessage: 'View Cloud usage',
-                  })}
-                </EuiButton>,
-              ]
-            : []),
-          ...(showManageRegions
-            ? [
-                <EuiButtonEmpty
-                  iconType="gear"
-                  onClick={() => setIsManageRegionsOpen(true)}
-                  data-test-subj="eisManageRegionsButton"
-                >
                   {i18n.translate(
-                    'xpack.searchInferenceEndpoints.eisModelsPage.manageRegionsButton',
-                    { defaultMessage: 'Manage regions' }
+                    'xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button',
+                    {
+                      defaultMessage: 'View Cloud usage',
+                    }
                   )}
-                </EuiButtonEmpty>,
+                </EuiButton>,
               ]
             : []),
           <EuiButtonEmpty
@@ -98,6 +87,20 @@ export const ElasticInferenceServiceModelsHeader = () => {
               defaultMessage: 'Documentation',
             })}
           </EuiButtonEmpty>,
+          ...(showManageRegions
+            ? [
+                <EuiButtonEmpty
+                  iconType="gear"
+                  onClick={() => setIsManageRegionsOpen(true)}
+                  data-test-subj="eisManageRegionsButton"
+                >
+                  {i18n.translate(
+                    'xpack.searchInferenceEndpoints.eisModelsPage.manageRegionsButton',
+                    { defaultMessage: 'Manage regions' }
+                  )}
+                </EuiButtonEmpty>,
+              ]
+            : []),
         ]}
       />
 

@@ -76,7 +76,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
   // Seed checkbox state once the policy finishes loading.
   // No policy (null/empty allowed_regions) means no restrictions — all regions selected.
   React.useEffect(() => {
-    if (!isPolicyLoading && !syncedFromPolicy) {
+    if (!isPolicyLoading && !isEndpointsLoading && !syncedFromPolicy) {
       const existing = policy?.region_policy?.allowed_regions ?? [];
       if (existing.length > 0) {
         setCheckedKeys(new Set(existing.map(regionKey)));
@@ -85,7 +85,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
       }
       setSyncedFromPolicy(true);
     }
-  }, [isPolicyLoading, syncedFromPolicy, policy, availableRegions]);
+  }, [isPolicyLoading, isEndpointsLoading, syncedFromPolicy, policy, availableRegions]);
 
   const zoneGroups = useMemo((): ZoneGroup[] => {
     const byZone = new Map<string, CspRegion[]>();
