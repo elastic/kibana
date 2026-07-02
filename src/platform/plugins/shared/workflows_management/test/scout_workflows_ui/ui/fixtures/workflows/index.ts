@@ -25,6 +25,8 @@ export {
   getWorkflowWithCommentedVariablesYaml,
   getScrollTestWorkflowYaml,
   getLongRunningCancellationWorkflowYaml,
+  getMultiStepGraphWorkflowYaml,
+  getBrokenGraphWorkflowYaml,
 } from './console_workflows';
 export {
   TEST_ALERTS_INDEX,
