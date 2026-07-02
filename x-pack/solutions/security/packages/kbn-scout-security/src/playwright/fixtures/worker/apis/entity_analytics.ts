@@ -66,15 +66,19 @@ export const getEntityAnalyticsApiService = ({
         log,
         'security.entityAnalytics.deleteEntityStoreEngines',
         async () => {
-          // The v2 status/uninstall routes return 403 when the entity store v2
-          // feature flag is disabled. In that case there is nothing to clean
-          // up, so short-circuit instead of polling forever.
-          try {
-            await service.getEntityStoreStatus();
-          } catch (error) {
-            log.debug(
-              `Skipping entity store cleanup; status route unavailable: ${(error as Error).message}`
-            );
+          // The v2 status route returns 403 when the entity store v2 feature
+          // flag is disabled. In that case there is nothing to clean up, so
+          // short-circuit instead of polling forever. Use ignoreErrors so only
+          // a 403 is treated as "flag off"; any other error (5xx, network)
+          // still surfaces and fails the test.
+          const statusProbe = await kbnClient.request<GetEntityStoreStatusResponse>({
+            method: 'GET',
+            path: `${basePath}${ENTITY_STORE_STATUS_URL}`,
+            headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+            ignoreErrors: [403],
+          });
+          if (statusProbe.status === 403) {
+            log.debug('Skipping entity store cleanup; feature flag disabled (403)');
             return;
           }
           await kbnClient.request({
