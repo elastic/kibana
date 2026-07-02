@@ -97,7 +97,7 @@ describe('resumeWorkflowExecutionExternally', () => {
 
     const engine = await workflowsService.getWorkflowsExecutionEngine();
     const claimOrder = workflowsService.claimHitlStepForExternalResume.mock.invocationCallOrder[0];
-    const resumeOrder = engine.resumeWorkflowExecution.mock.invocationCallOrder[0];
+    const resumeOrder = (engine.resumeWorkflowExecution as jest.Mock).mock.invocationCallOrder[0];
     expect(claimOrder).toBeLessThan(resumeOrder);
     expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
       'exec-1',

@@ -39,7 +39,7 @@ describe('handleExternalResumeError', () => {
       response as any,
       new Error('index_not_found_exception [.workflows-step-executions]'),
       logger
-    );
+    ) as unknown as { statusCode: number; body: string };
 
     expect(result).toMatchObject({
       statusCode: 400,

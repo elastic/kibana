@@ -35,7 +35,9 @@ describe('mintHitlExternalResumeApiKey', () => {
 
     await mintHitlExternalResumeApiKey({
       stepExecutionRuntime,
-      execution: { id: 'execution-id', workflowId: 'workflow-id' },
+      execution: { id: 'execution-id', workflowId: 'workflow-id' } as Parameters<
+        typeof mintHitlExternalResumeApiKey
+      >[0]['execution'],
       stepId: 'step-id',
       spaceId: 'default',
       timeout: '2w',

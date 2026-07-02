@@ -6,7 +6,8 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { getExecutionState } from './get_execution_state';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { getExecutionState, toWorkflowExecutionState } from './get_execution_state';
 import { getWorkflowOutput } from './get_workflow_output';
 
 jest.mock('./get_workflow_output', () => ({
@@ -332,9 +333,9 @@ describe('getExecutionState', () => {
       expect(state?.waiting_input).toBeUndefined();
     });
 
-    it('includes approval labels from waitForApproval step execution input', async () => {
-      const workflowApi = createWorkflowApi();
-      workflowApi.getWorkflowExecution = jest.fn().mockResolvedValue({
+    it('includes waitForApproval waiting_input with approval schema', () => {
+      const state = toWorkflowExecutionState({
+        id: 'exec-approval',
         status: ExecutionStatus.WAITING_FOR_INPUT,
         workflowId: 'wf-approval',
         startedAt: '2026-01-01T00:00:00.000Z',
@@ -344,11 +345,7 @@ describe('getExecutionState', () => {
             {
               name: 'request-approval',
               type: 'waitForApproval',
-              with: {
-                message: 'Approve change?',
-                approveLabel: 'Approve',
-                rejectLabel: 'Decline',
-              },
+              with: { message: 'Approve change?' },
             },
           ],
         },
@@ -358,28 +355,20 @@ describe('getExecutionState', () => {
             stepId: 'request-approval',
             status: ExecutionStatus.WAITING_FOR_INPUT,
             scopeStack: [],
-            input: {
-              message: 'Approve change to prod?',
-              approveLabel: 'Ship it',
-              rejectLabel: 'Hold',
-              schema: { type: 'object', properties: { approved: { type: 'boolean' } } },
-            },
           },
         ],
-      });
+      } as unknown as WorkflowExecutionDto);
 
-      const state = await getExecutionState({
-        executionId: 'exec-approval',
-        spaceId: 'default',
-        workflowApi,
-      });
-
-      expect(state?.waiting_input).toEqual({
+      expect(state.waiting_input).toEqual({
         step_execution_id: 'step-exec-approval',
-        message: 'Approve change to prod?',
-        schema: { type: 'object', properties: { approved: { type: 'boolean' } } },
-        approve_label: 'Ship it',
-        reject_label: 'Hold',
+        message: 'Approve change?',
+        schema: {
+          type: 'object',
+          properties: {
+            approved: { type: 'boolean', description: 'Whether the request was approved' },
+          },
+          required: ['approved'],
+        },
       });
     });
   });

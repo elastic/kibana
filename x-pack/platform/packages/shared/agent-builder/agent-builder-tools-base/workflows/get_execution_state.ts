@@ -8,7 +8,11 @@
 import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WaitForApprovalStep, WaitForInputStep, WorkflowExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus, getStepByNameFromNestedSteps } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
+  getStepByNameFromNestedSteps,
+} from '@kbn/workflows';
 import { getWorkflowOutput } from './get_workflow_output';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
@@ -20,10 +24,6 @@ export interface WaitingInputContext {
   message?: string;
   /** JSON Schema describing the expected input, from the step's `with.schema`. */
   schema?: Record<string, unknown>;
-  /** Present for `waitForApproval` steps. */
-  approve_label?: string;
-  /** Present for `waitForApproval` steps. */
-  reject_label?: string;
 }
 
 export interface WorkflowExecutionState {
@@ -70,12 +70,6 @@ export const toWorkflowExecutionState = (
     );
 
     if (waitingStep) {
-      const stepInput = (waitingStep.input ?? {}) as {
-        message?: string;
-        schema?: Record<string, unknown>;
-        approveLabel?: string;
-        rejectLabel?: string;
-      };
       const step = getStepByNameFromNestedSteps(
         execution.workflowDefinition.steps,
         waitingStep.stepId
@@ -86,18 +80,17 @@ export const toWorkflowExecutionState = (
           : step?.type === 'waitForApproval'
           ? (step as WaitForApprovalStep).with
           : undefined;
+      const schema =
+        step?.type === 'waitForApproval'
+          ? WAIT_FOR_APPROVAL_RESPONSE_SCHEMA
+          : stepConfig && 'schema' in stepConfig
+          ? stepConfig.schema
+          : undefined;
 
       const waitContext: WaitingInputContext = {
         step_execution_id: waitingStep.id,
-        ...(stepInput.message && { message: stepInput.message }),
-        ...(stepInput.schema && { schema: stepInput.schema }),
-        ...(!stepInput.message && stepConfig?.message && { message: stepConfig.message }),
-        ...(!stepInput.schema &&
-          stepConfig &&
-          'schema' in stepConfig &&
-          stepConfig.schema && { schema: stepConfig.schema as Record<string, unknown> }),
-        ...(stepInput.approveLabel && { approve_label: stepInput.approveLabel }),
-        ...(stepInput.rejectLabel && { reject_label: stepInput.rejectLabel }),
+        ...(stepConfig?.message && { message: stepConfig.message }),
+        ...(schema && { schema: schema as Record<string, unknown> }),
       };
       state.waiting_input = waitContext;
     }
