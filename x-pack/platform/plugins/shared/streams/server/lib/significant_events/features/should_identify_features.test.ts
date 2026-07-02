@@ -5,94 +5,126 @@
  * 2.0.
  */
 
+import { COMPUTED_FEATURE_TYPES, INFERRED_FEATURE_TYPES } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicatorClient } from '../../streams/ki';
 import { shouldIdentifyFeatures } from './should_identify_features';
 
-const createMockKiClient = (response: { '@timestamp': string } | null = null) =>
+type Timestamp = { '@timestamp': string } | null;
+
+const isInferredCall = (options?: { types?: string[] }) =>
+  Boolean(
+    options?.types?.some((type) => (INFERRED_FEATURE_TYPES as readonly string[]).includes(type))
+  );
+
+/**
+ * Mocks `getLatestRevisionTimestamp` so it answers differently for the inferred
+ * (existence) probe and the computed (recency) probe.
+ */
+const createMockKiClient = ({
+  inferred = null,
+  computed = null,
+}: {
+  inferred?: Timestamp;
+  computed?: Timestamp;
+} = {}) =>
   ({
-    getLatestRevisionTimestamp: jest.fn().mockResolvedValue(response),
+    getLatestRevisionTimestamp: jest
+      .fn()
+      .mockImplementation((_stream: string, options?: { types?: string[] }) =>
+        Promise.resolve(isInferredCall(options) ? inferred : computed)
+      ),
   } as unknown as KnowledgeIndicatorClient);
 
 describe('shouldIdentifyFeatures', () => {
   const streamName = 'test-stream';
   const thresholdHours = 12;
+  const recent = () => new Date(Date.now() - 1 * 3_600_000).toISOString();
 
-  it('returns shouldIdentify: true when no inferred features exist', async () => {
-    const kiClient = createMockKiClient(null);
+  it('returns shouldIdentify: true when there are no active inferred features', async () => {
+    const kiClient = createMockKiClient({ inferred: null, computed: { '@timestamp': recent() } });
 
-    const result = await shouldIdentifyFeatures({
-      kiClient,
-      streamName,
-      thresholdHours,
-    });
+    const result = await shouldIdentifyFeatures({ kiClient, streamName, thresholdHours });
 
     expect(result).toEqual({ shouldIdentify: true });
   });
 
-  it('passes INFERRED_FEATURE_TYPES as types filter', async () => {
-    const kiClient = createMockKiClient(null);
+  it('probes inferred features for existence before checking recency', async () => {
+    const kiClient = createMockKiClient({ inferred: null });
 
-    await shouldIdentifyFeatures({
-      kiClient,
-      streamName,
-      thresholdHours,
-    });
+    await shouldIdentifyFeatures({ kiClient, streamName, thresholdHours });
 
     expect(kiClient.getLatestRevisionTimestamp).toHaveBeenCalledWith(
       streamName,
-      expect.objectContaining({ types: expect.any(Array) })
+      expect.objectContaining({ types: [...INFERRED_FEATURE_TYPES] })
+    );
+    // Short-circuits on empty inferred set: the computed probe is never issued.
+    expect(kiClient.getLatestRevisionTimestamp).toHaveBeenCalledTimes(1);
+  });
+
+  it('gates recency on COMPUTED_FEATURE_TYPES once inferred features exist', async () => {
+    const kiClient = createMockKiClient({
+      inferred: { '@timestamp': recent() },
+      computed: { '@timestamp': recent() },
+    });
+
+    await shouldIdentifyFeatures({ kiClient, streamName, thresholdHours });
+
+    expect(kiClient.getLatestRevisionTimestamp).toHaveBeenCalledWith(
+      streamName,
+      expect.objectContaining({ types: [...COMPUTED_FEATURE_TYPES] })
     );
   });
 
-  it('returns shouldIdentify: false when newest inferred feature is within threshold', async () => {
-    const recentDate = new Date(Date.now() - 1 * 3_600_000).toISOString();
-    const kiClient = createMockKiClient({ '@timestamp': recentDate });
+  it('returns shouldIdentify: true when inferred features exist but no computed features do', async () => {
+    const kiClient = createMockKiClient({ inferred: { '@timestamp': recent() }, computed: null });
 
-    const result = await shouldIdentifyFeatures({
-      kiClient,
-      streamName,
-      thresholdHours,
+    const result = await shouldIdentifyFeatures({ kiClient, streamName, thresholdHours });
+
+    expect(result).toEqual({ shouldIdentify: true });
+  });
+
+  it('returns shouldIdentify: false when newest computed feature is within threshold', async () => {
+    const kiClient = createMockKiClient({
+      inferred: { '@timestamp': recent() },
+      computed: { '@timestamp': new Date(Date.now() - 1 * 3_600_000).toISOString() },
     });
+
+    const result = await shouldIdentifyFeatures({ kiClient, streamName, thresholdHours });
 
     expect(result).toEqual({ shouldIdentify: false });
   });
 
-  it('returns shouldIdentify: true when newest inferred feature exceeds threshold', async () => {
-    const oldDate = new Date(Date.now() - 24 * 3_600_000).toISOString();
-    const kiClient = createMockKiClient({ '@timestamp': oldDate });
-
-    const result = await shouldIdentifyFeatures({
-      kiClient,
-      streamName,
-      thresholdHours,
+  it('returns shouldIdentify: true when newest computed feature exceeds threshold', async () => {
+    const kiClient = createMockKiClient({
+      inferred: { '@timestamp': recent() },
+      computed: { '@timestamp': new Date(Date.now() - 24 * 3_600_000).toISOString() },
     });
+
+    const result = await shouldIdentifyFeatures({ kiClient, streamName, thresholdHours });
 
     expect(result).toEqual({ shouldIdentify: true });
   });
 
-  it('returns shouldIdentify: true for invalid timestamps', async () => {
-    const kiClient = createMockKiClient({ '@timestamp': 'not-a-date' });
-
-    const result = await shouldIdentifyFeatures({
-      kiClient,
-      streamName,
-      thresholdHours,
+  it('returns shouldIdentify: true for invalid computed timestamps', async () => {
+    const kiClient = createMockKiClient({
+      inferred: { '@timestamp': recent() },
+      computed: { '@timestamp': 'not-a-date' },
     });
+
+    const result = await shouldIdentifyFeatures({ kiClient, streamName, thresholdHours });
 
     expect(result).toEqual({ shouldIdentify: true });
   });
 
   it('returns shouldIdentify: false at the threshold boundary', async () => {
-    const justWithinThreshold = new Date(
-      Date.now() - thresholdHours * 3_600_000 + 1000
-    ).toISOString();
-    const kiClient = createMockKiClient({ '@timestamp': justWithinThreshold });
-
-    const result = await shouldIdentifyFeatures({
-      kiClient,
-      streamName,
-      thresholdHours,
+    const kiClient = createMockKiClient({
+      inferred: { '@timestamp': recent() },
+      computed: {
+        '@timestamp': new Date(Date.now() - thresholdHours * 3_600_000 + 1000).toISOString(),
+      },
     });
+
+    const result = await shouldIdentifyFeatures({ kiClient, streamName, thresholdHours });
 
     expect(result).toEqual({ shouldIdentify: false });
   });

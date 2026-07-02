@@ -864,7 +864,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     if (plugins.workflowsExtensions) {
-      registerWorkflowSteps(plugins.workflowsExtensions, core);
+      registerWorkflowSteps(plugins.workflowsExtensions, core, experimentalFeatures);
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
       registerInitAlertValidationWorkflowFlowDependencies(core);
     }
