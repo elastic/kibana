@@ -19,6 +19,7 @@ import {
 } from './types';
 import { CRUDClient, type EntityUpdateClient } from '../../domain/crud';
 import { ResolutionRulesClient } from '../../domain/resolution_rules';
+import { EntityMetadataClient } from '../../domain/entity_metadata';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
 import { wrapTaskRun } from '../../telemetry/traces';
@@ -141,6 +142,11 @@ export async function executeMaintainerRun({
     esClient,
     namespace: maintainerStatus.metadata.namespace,
   });
+  const entityMetadataClient = new EntityMetadataClient({
+    logger,
+    esClient: coreStart.elasticsearch.client.asInternalUser,
+    namespace: maintainerStatus.metadata.namespace,
+  });
   const taskLogger = logger.get(taskId);
   const abortController = taskAbortController ?? new AbortController();
   const telemetryClient = createMaintainerTelemetryClient({
@@ -173,6 +179,7 @@ export async function executeMaintainerRun({
           maintainerStatus.metadata.namespace,
           taskLogger
         ),
+        entityMetadataClient,
         id,
         analytics,
         telemetryClient,
@@ -205,6 +212,7 @@ export async function runEntityMaintainerTask({
   cpsEsClient,
   crudClient,
   resolutionRulesClient,
+  entityMetadataClient,
   id,
   analytics,
   telemetryClient,
@@ -219,6 +227,7 @@ export async function runEntityMaintainerTask({
   cpsEsClient: ElasticsearchClient;
   crudClient: EntityUpdateClient;
   resolutionRulesClient: ResolutionRulesClient;
+  entityMetadataClient: EntityMetadataClient;
   id: string;
   analytics: TelemetryReporter;
   telemetryClient: InternalMaintainerTelemetryClient;
@@ -251,6 +260,7 @@ export async function runEntityMaintainerTask({
         cpsEsClient,
         crudClient,
         resolutionRulesClient,
+        entityMetadataClient,
         telemetry: telemetryClient,
       });
       analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
@@ -269,6 +279,7 @@ export async function runEntityMaintainerTask({
       cpsEsClient,
       crudClient,
       resolutionRulesClient,
+      entityMetadataClient,
       telemetry: telemetryClient,
     });
     analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {

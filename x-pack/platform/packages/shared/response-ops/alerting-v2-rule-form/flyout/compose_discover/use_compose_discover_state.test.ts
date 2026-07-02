@@ -72,8 +72,8 @@ describe('createInitialState', () => {
     expect(withSignal.recoveryType).toBe('default');
   });
 
-  it('opens the query preview in builder create mode', () => {
-    const state = createInitialState({ mode: 'create', isBuilderMode: true });
+  it('opens the query preview in create mode', () => {
+    const state = createInitialState({ mode: 'create' });
 
     expect(state.childOpen).toBe(true);
     expect(state.queryCommitted).toBe(false);
@@ -194,6 +194,50 @@ describe('reducer', () => {
 
       expect(next.yamlMode).toBe(false);
       expect(next.childOpen).toBe(false);
+    });
+  });
+
+  describe('GO_NEXT', () => {
+    it('closes preview when advancing in non-builder mode', () => {
+      const state = createState({ step: 0, childOpen: true });
+      const next = reducer(state, { type: 'GO_NEXT', isAlert: true });
+
+      expect(next.step).toBe(1);
+      expect(next.childOpen).toBe(false);
+    });
+
+    it('preserves preview state when advancing in builder mode', () => {
+      const state = createState({ step: 0, childOpen: true });
+      const next = reducer(state, { type: 'GO_NEXT', isAlert: true, isBuilderMode: true });
+
+      expect(next.step).toBe(1);
+      expect(next.childOpen).toBe(true);
+    });
+
+    it('keeps preview closed if user closed it in builder mode', () => {
+      const state = createState({ step: 0, childOpen: false });
+      const next = reducer(state, { type: 'GO_NEXT', isAlert: true, isBuilderMode: true });
+
+      expect(next.step).toBe(1);
+      expect(next.childOpen).toBe(false);
+    });
+  });
+
+  describe('GO_BACK', () => {
+    it('closes preview when going back in non-builder mode', () => {
+      const state = createState({ step: 2, childOpen: true });
+      const next = reducer(state, { type: 'GO_BACK' });
+
+      expect(next.step).toBe(1);
+      expect(next.childOpen).toBe(false);
+    });
+
+    it('preserves preview state when going back in builder mode', () => {
+      const state = createState({ step: 2, childOpen: true });
+      const next = reducer(state, { type: 'GO_BACK', isBuilderMode: true });
+
+      expect(next.step).toBe(1);
+      expect(next.childOpen).toBe(true);
     });
   });
 

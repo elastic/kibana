@@ -42,7 +42,7 @@ export class ComposeDiscoverPage {
   public readonly createEsqlRuleButton: Locator;
   /** "Create ES|QL rule" card in the empty-state panel (shown when no rules exist). */
   public readonly createEsqlRuleCard: Locator;
-  public readonly cancelButton: Locator;
+  public readonly modeSelect: Locator;
   /**
    * Callout shown after Apply when the query has a base but no alert condition
    * (no WHERE) — the whole query is treated as the breach query (every row breaches).
@@ -73,10 +73,10 @@ export class ComposeDiscoverPage {
     this.relatedDashboardsInput = this.flyout.locator(
       'input[placeholder="Link related dashboards for investigation"]'
     );
+    this.modeSelect = this.page.testSubj.locator('composeDiscoverModeSelect');
     this.createRulePopoverButton = this.page.testSubj.locator('createRulePopoverButton');
     this.createEsqlRuleButton = this.page.testSubj.locator('createEsqlRuleButton');
     this.createEsqlRuleCard = this.page.testSubj.locator('createEsqlRuleCard');
-    this.cancelButton = this.page.testSubj.locator('composeDiscoverCancel');
     this.noAlertConditionCallout = this.page.testSubj.locator('esqlSummaryNoAlertConditionCallout');
     this.emptyQueryCallout = this.page.testSubj.locator('esqlSummaryEmptyCallout');
   }
