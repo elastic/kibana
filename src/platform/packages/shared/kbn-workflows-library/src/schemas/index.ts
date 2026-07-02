@@ -11,16 +11,17 @@ export {
   InstallFormFieldOptionSchema,
   InstallFormFieldSchema,
   InstallFormFieldTypeSchema,
+  InstallFormLenientSchema,
   InstallFormSchema,
 } from './install_form';
 
-export { TemplateMetadataSchema } from './template';
+export { TemplateMetadataLenientSchema, TemplateMetadataSchema } from './template';
 
 export {
   KibanaVersionEntrySchema,
-  KibanaVersionsManifestConsumptionSchema,
+  KibanaVersionsManifestLenientSchema,
   KibanaVersionsManifestSchema,
   TemplateSchema,
-  TemplatesCatalogConsumptionSchema,
+  TemplatesCatalogLenientSchema,
   TemplatesCatalogSchema,
 } from './catalog';

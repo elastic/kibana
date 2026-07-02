@@ -68,6 +68,7 @@ export type {
   ManagedWorkflowVisibilityContext,
 } from './managed/types';
 export * from './definition';
+export * from './graph_layout';
 export * from './common/elasticsearch_request_builder';
 export * from './common/kibana_request_builder';
 export * from './server/constants';
