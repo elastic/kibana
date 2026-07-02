@@ -11,7 +11,7 @@ import {
   counterRate,
   formatColumn,
   mapToColumns,
-  getDropPartialBucketsTextBased,
+  getDateHistogramTextBased,
   getTimeScale,
   getDatatable,
   formulaIntervalFn,
@@ -35,6 +35,6 @@ export const setupExpressions = (
     mapToColumns,
     getDatatable(getFormatFactory(core)),
     getTimeScale(getDatatableUtilitiesFactory(core), getTimeZoneFactory(core)),
-    getDropPartialBucketsTextBased(getDatatableUtilitiesFactory(core), getTimeZoneFactory(core)),
+    getDateHistogramTextBased(getDatatableUtilitiesFactory(core), getTimeZoneFactory(core)),
   ].forEach((expressionFn) => expressions.registerFunction(expressionFn));
 };

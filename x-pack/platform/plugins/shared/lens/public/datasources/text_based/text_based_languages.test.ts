@@ -1050,7 +1050,7 @@ describe('Textbased Data Source', () => {
             },
             Object {
               "arguments": Object {},
-              "function": "lens_drop_partial_buckets_textbased",
+              "function": "lens_date_histogram_textbased",
               "type": "function",
             },
           ],

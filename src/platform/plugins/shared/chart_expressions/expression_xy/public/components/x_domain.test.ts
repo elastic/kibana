@@ -12,7 +12,7 @@ import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import type { CommonXYDataLayerConfig } from '../../common';
 import { getXDomain } from './x_domain';
 
-const ADJUSTED_INTERVAL = 1618; // arbitrary value, just need to test that it's used
+const ADJUSTED_INTERVAL = 1618; // arbitrary value returned by the getAdjustedInterval mock
 
 jest.mock('@kbn/charts-plugin/public', () => ({
   Endzones: () => null,
@@ -32,17 +32,35 @@ interface DateHistogramMeta {
   dropPartials?: boolean;
 }
 
+// Mirrors the real DatatableUtilitiesService, which reads the precomputed extent from
+// sourceParams.computedDomain and surfaces it as meta.domain.
 const createDatatableUtilities = (meta?: DateHistogramMeta): DatatableUtilitiesService =>
   ({
-    getDateHistogramMeta: jest.fn().mockReturnValue(meta),
+    getDateHistogramMeta: jest.fn(
+      (column?: { meta?: { sourceParams?: { computedDomain?: { min: number; max: number } } } }) =>
+        meta && { ...meta, domain: column?.meta?.sourceParams?.computedDomain }
+    ),
     getColumnTimeRange: jest.fn().mockReturnValue(meta?.timeRange),
   } as unknown as DatatableUtilitiesService);
 
-const createLayer = (values: number[]): CommonXYDataLayerConfig =>
+const createLayer = (
+  values: number[],
+  computedDomain?: { min: number; max: number }
+): CommonXYDataLayerConfig =>
   ({
     xAccessor: 'x',
     table: {
-      columns: [{ id: 'x', name: 'x', meta: { type: 'date', field: '@timestamp' } }],
+      columns: [
+        {
+          id: 'x',
+          name: 'x',
+          meta: {
+            type: 'date',
+            field: '@timestamp',
+            ...(computedDomain ? { sourceParams: { computedDomain } } : {}),
+          },
+        },
+      ],
       rows: values.map((value) => ({ x: value })),
     },
   } as unknown as CommonXYDataLayerConfig);
@@ -52,57 +70,91 @@ const TIME_RANGE = {
   from: '1970-01-01T00:00:00.000Z',
   to: '1970-01-01T00:00:10.000Z',
 };
-const ONE_SECOND = 1000;
+
+const datatableUtilities = createDatatableUtilities({ timeRange: TIME_RANGE, dropPartials: false });
 
 describe('getXDomain', () => {
-  it('builds the domain from the applied time range and the bucket grid', () => {
-    const datatableUtilities = createDatatableUtilities({
-      timeRange: TIME_RANGE,
-      dropPartials: false,
+  describe('extent (min/max)', () => {
+    it('derives the extent from the row values and the applied time range', () => {
+      const { baseDomain, extendedDomain } = getXDomain(
+        datatableUtilities,
+        [createLayer([2000, 5000])],
+        1000,
+        true,
+        false,
+        true,
+        'UTC'
+      );
+
+      expect(baseDomain).toEqual({ min: 0, max: 10000, minInterval: 1000 });
+      expect(extendedDomain).toEqual({ min: 0, max: 9000, minInterval: 1000 });
     });
 
-    const { baseDomain, extendedDomain } = getXDomain(
-      datatableUtilities,
-      [createLayer([2000, 5000])],
-      ONE_SECOND,
-      true,
-      false,
-      true,
-      'UTC'
-    );
+    it('uses the precomputed extent from the column meta when present', () => {
+      const { extendedDomain } = getXDomain(
+        datatableUtilities,
+        [createLayer([2000, 5000], { min: 500, max: 8500 })],
+        1000,
+        true,
+        false,
+        true,
+        'UTC'
+      );
 
-    expect(baseDomain).toEqual({ min: 0, max: 10000, minInterval: ONE_SECOND });
-    expect(extendedDomain).toHaveProperty('min', 0);
-    expect(extendedDomain).toHaveProperty('max', 9000);
-    expect(extendedDomain).toHaveProperty('minInterval', ADJUSTED_INTERVAL);
+      expect(extendedDomain).toEqual({ min: 500, max: 8500, minInterval: 1000 });
+    });
+
+    it('merges precomputed extents across layers', () => {
+      const { extendedDomain } = getXDomain(
+        datatableUtilities,
+        [
+          createLayer([2000, 5000], { min: 1000, max: 7000 }),
+          createLayer([3000, 9000], { min: 500, max: 9000 }),
+        ],
+        1000,
+        true,
+        false,
+        true,
+        'UTC'
+      );
+
+      expect(extendedDomain).toEqual({ min: 500, max: 9000, minInterval: 1000 });
+    });
   });
 
-  it('keeps a bucket that starts exactly at the time range boundary when dropPartials is true', () => {
-    const datatableUtilities = createDatatableUtilities({
-      timeRange: TIME_RANGE,
-      dropPartials: true,
+  describe('minInterval', () => {
+    it('passes the interval through unchanged for fixed-width units', () => {
+      const { extendedDomain } = getXDomain(
+        datatableUtilities,
+        [createLayer([2000, 5000])],
+        1000,
+        true,
+        false,
+        true,
+        'UTC'
+      );
+
+      expect(getAdjustedIntervalMock).not.toHaveBeenCalled();
+      expect(extendedDomain).toHaveProperty('minInterval', 1000);
     });
 
-    const { extendedDomain } = getXDomain(
-      datatableUtilities,
-      [createLayer([2000, 5000])],
-      ONE_SECOND,
-      true,
-      false,
-      true,
-      'UTC'
-    );
+    it('adjusts the interval from the data for calendar units', () => {
+      const { extendedDomain } = getXDomain(
+        datatableUtilities,
+        [createLayer([2000, 5000])],
+        1000 * 60 * 60 * 24, // 1 day in milliseconds
+        true,
+        false,
+        true,
+        'UTC'
+      );
 
-    expect(extendedDomain).toHaveProperty('min', 0);
-    expect(extendedDomain).toHaveProperty('max', 9000);
+      expect(getAdjustedIntervalMock).toHaveBeenCalledTimes(1);
+      expect(extendedDomain).toHaveProperty('minInterval', ADJUSTED_INTERVAL);
+    });
   });
 
   it('returns the base domain when no interval is available', () => {
-    const datatableUtilities = createDatatableUtilities({
-      timeRange: TIME_RANGE,
-      dropPartials: false,
-    });
-
     const { baseDomain, extendedDomain } = getXDomain(
       datatableUtilities,
       [createLayer([2000, 5000])],
@@ -115,25 +167,5 @@ describe('getXDomain', () => {
 
     expect(baseDomain).toHaveProperty('minInterval', undefined);
     expect(extendedDomain).toBe(baseDomain);
-  });
-
-  it('feeds the full reconstructed grid (not the sparse values) to getAdjustedInterval', () => {
-    const datatableUtilities = createDatatableUtilities({
-      timeRange: TIME_RANGE,
-      dropPartials: false,
-    });
-
-    getXDomain(
-      datatableUtilities,
-      [createLayer([2000, 7000])],
-      ONE_SECOND,
-      true,
-      false,
-      true,
-      'UTC'
-    );
-
-    const [gridArg] = getAdjustedIntervalMock.mock.calls[0];
-    expect(gridArg).toEqual([0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]);
   });
 });

@@ -7,7 +7,7 @@
 
 export * from './defs/counter_rate';
 export * from './defs/collapse';
-export * from './defs/drop_partial_buckets';
+export * from './defs/date_histogram';
 export * from './defs/format_column';
 export * from './defs/map_to_columns';
 export * from './defs/time_scale';

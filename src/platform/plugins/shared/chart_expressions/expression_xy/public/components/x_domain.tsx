@@ -14,7 +14,6 @@ import type { Unit } from '@kbn/datemath';
 import dateMath from '@kbn/datemath';
 import { Endzones, getAdjustedInterval } from '@kbn/charts-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import { splitStringInterval } from '@kbn/data-plugin/common';
 import { getAccessorByDimension, getColumnByAccessor } from '@kbn/chart-expressions-common';
 import type { AxisExtentConfigResult, CommonXYDataLayerConfig } from '../../common';
 
@@ -49,54 +48,32 @@ const getAppliedTimeRange = (
     .find(Boolean);
 };
 
-const getBucketBounds = (
-  from: number,
-  to: number,
-  anchor: number,
-  step: number,
-  unit: Unit,
-  timeZone: string,
-  dropPartials: boolean
-) => {
-  if (!step || step <= 0) {
+const getComputedDomain = (
+  datatableUtilitites: DatatableUtilitiesService,
+  layers: CommonXYDataLayerConfig[]
+): { min: number; max: number } | undefined => {
+  const domains: { min: number; max: number }[] = [];
+  for (const { xAccessor, table } of layers) {
+    const xColumn = xAccessor ? getColumnByAccessor(xAccessor, table.columns) : null;
+    const computedDomain = xColumn
+      ? datatableUtilitites.getDateHistogramMeta(xColumn)?.domain
+      : undefined;
+    if (computedDomain) {
+      domains.push(computedDomain);
+    }
+  }
+
+  if (domains.length === 0) {
     return undefined;
   }
 
-  const anchorTime = moment.tz(anchor, timeZone);
-
-  const stepsBefore = Math.ceil(anchorTime.diff(moment.tz(from, timeZone), unit, true) / step);
-  const start = anchorTime.clone().subtract(stepsBefore * step, unit);
-
-  const stepsAfter = Math.ceil(moment.tz(to, timeZone).diff(anchorTime, unit, true) / step);
-  const end = anchorTime.clone().add(stepsAfter * step, unit);
-
-  const count = Math.round(end.diff(start, unit, true) / step) + 1;
-  const buckets = Array.from({ length: count }, (_, i) => start.clone().add(i * step, unit));
-
-  const valid = buckets.filter((bucket) => {
-    const bucketStart = bucket.valueOf();
-    const bucketEnd = bucket.clone().add(step, unit).valueOf();
-    if (dropPartials) {
-      return bucketStart >= from && bucketEnd <= to;
-    }
-    return bucketEnd > from && bucketStart < to;
-  });
-
-  if (valid.length === 0) return undefined;
-
-  const adjustedInterval = getAdjustedInterval(
-    valid.map((bucket) => bucket.valueOf()),
-    step,
-    unit,
-    timeZone
-  );
-
   return {
-    min: valid[0].valueOf(),
-    max: valid[valid.length - 1].valueOf(),
-    minInterval: adjustedInterval,
+    min: Math.min(...domains.map(({ min }) => min)),
+    max: Math.max(...domains.map(({ max }) => max)),
   };
 };
+
+const CALENDAR_UNITS: readonly Unit[] = ['d', 'w', 'M', 'y'];
 
 const getXValues = (layers: CommonXYDataLayerConfig[]) => {
   return uniq(
@@ -158,7 +135,6 @@ export const getXDomain = (
 
   const from = dateHistogram?.meta?.timeRange?.from;
   const to = dateHistogram?.meta?.timeRange?.to;
-  const dropPartials = dateHistogram?.meta?.dropPartials;
 
   const baseDomain = {
     min: from ? moment(from).valueOf() : NaN,
@@ -188,35 +164,27 @@ export const getXDomain = (
 
   const xValues = getXValues(layers);
 
-  const duration = moment.duration(baseDomain.minInterval);
-  const parsedInterval = dateHistogram?.meta?.interval
-    ? splitStringInterval(dateHistogram.meta.interval)
-    : null;
-  const unit =
-    parsedInterval?.unit ?? (find(dateMath.units, (u) => Number.isInteger(duration.as(u))) as Unit);
-  const step = parsedInterval?.value ?? duration.as(unit);
-
-  // we construct the bucket list based on applied time range, min interval and one anchor point.
-  // this is needed as we might not have all the data points in the time range (ES|QL).
-  const buckets = getBucketBounds(
-    baseDomain.min,
-    baseDomain.max,
-    xValues[0] ?? baseDomain.min,
-    step,
-    unit,
-    timeZone,
-    !!dropPartials
-  );
-
-  const domainMin = buckets?.min ?? baseDomain.min;
-  const domainMaxValue = buckets?.max ?? baseDomain.max - baseDomain.minInterval;
+  // The domain extent (min/max) comes from the precomputed domain from ES|QL and directly from the data for DSL/agg
+  // responses (which already contain the full grid via extended_bounds + min_doc_count: 0).
+  const computedDomain = getComputedDomain(datatableUtilitites, layers);
+  const domainMin = computedDomain ? computedDomain.min : Math.min(xValues[0], baseDomain.min);
+  const domainMaxValue = computedDomain
+    ? computedDomain.max
+    : Math.max(baseDomain.max - baseDomain.minInterval, xValues[xValues.length - 1]);
   const domainMax = hasBars ? domainMaxValue : domainMaxValue + baseDomain.minInterval;
+
+  const duration = moment.duration(baseDomain.minInterval);
+  const unit = find(dateMath.units, (u) => Number.isInteger(duration.as(u))) as Unit;
+  const minIntervalForDomain =
+    xValues.length && CALENDAR_UNITS.includes(unit)
+      ? getAdjustedInterval(xValues, duration.as(unit), unit, timeZone)
+      : baseDomain.minInterval;
 
   return {
     extendedDomain: {
       min: domainMin,
       max: domainMax,
-      minInterval: buckets?.minInterval ?? baseDomain.minInterval,
+      minInterval: minIntervalForDomain,
     },
     baseDomain,
   };

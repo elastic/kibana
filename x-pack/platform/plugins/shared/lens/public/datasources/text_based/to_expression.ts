@@ -104,7 +104,7 @@ function getExpressionForLayer(
     });
     textBasedQueryToAst.chain.push({
       type: 'function',
-      function: 'lens_drop_partial_buckets_textbased',
+      function: 'lens_date_histogram_textbased',
       arguments: {},
     });
     textBasedQueryToAst.chain.push(...formatterOverrides);
@@ -130,7 +130,7 @@ function getExpressionForLayer(
         },
         {
           type: 'function',
-          function: 'lens_drop_partial_buckets_textbased',
+          function: 'lens_date_histogram_textbased',
           arguments: {},
         },
         ...formatterOverrides,

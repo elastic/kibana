@@ -25,6 +25,7 @@ interface DateHistogramMeta {
   timeZone?: string;
   timeRange?: TimeRange;
   dropPartials?: boolean;
+  domain?: { min: number; max: number };
 }
 
 interface HistogramDSLParams {
@@ -92,6 +93,14 @@ const getDropPartials = (params: unknown): boolean | undefined => {
   return undefined;
 };
 
+const isDomain = (value: unknown): value is { min: number; max: number } =>
+  typeof value === 'object' && value !== null && 'min' in value && 'max' in value;
+
+const getDomain = (column: DatatableColumn): { min: number; max: number } | undefined => {
+  const computedDomain = column.meta.sourceParams?.computedDomain;
+  return isDomain(computedDomain) ? computedDomain : undefined;
+};
+
 export class DatatableUtilitiesService {
   constructor(
     private aggs: AggsCommonStart,
@@ -146,11 +155,13 @@ export class DatatableUtilitiesService {
     // ES|QL path: interval comes from the raw esMeta.bucket,
     const bucket = getEsqlBucket(column);
     if (bucket && bucket.unit && isESQLUnit(bucket.unit)) {
+      const domain = getDomain(column);
       return {
         interval: getEsqlDateInterval(bucket),
         timeZone: defaults.timeZone,
         timeRange: appliedTimeRange,
         dropPartials,
+        domain,
       };
     }
 

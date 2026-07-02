@@ -176,6 +176,46 @@ describe('DatatableUtilitiesService', () => {
         dropPartials: undefined,
       });
     });
+
+    it('surfaces the precomputed domain from sourceParams for an ES|QL column', () => {
+      const column = {
+        id: 'test',
+        name: 'test',
+        meta: {
+          type: 'date',
+          esMeta: { bucket: { interval: 1, unit: 'day' } },
+          sourceParams: { computedDomain: { min: 1000, max: 5000 } },
+        },
+      } as unknown as DatatableColumn;
+
+      expect(datatableUtilitiesService.getDateHistogramMeta(column, { timeZone: 'UTC' })).toEqual({
+        interval: '1d',
+        timeZone: 'UTC',
+        timeRange: undefined,
+        dropPartials: undefined,
+        domain: { min: 1000, max: 5000 },
+      });
+    });
+
+    it('ignores a malformed computedDomain on an ES|QL column', () => {
+      const column = {
+        id: 'test',
+        name: 'test',
+        meta: {
+          type: 'date',
+          esMeta: { bucket: { interval: 1, unit: 'day' } },
+          sourceParams: { computedDomain: { min: 1000 } },
+        },
+      } as unknown as DatatableColumn;
+
+      expect(datatableUtilitiesService.getDateHistogramMeta(column, { timeZone: 'UTC' })).toEqual({
+        interval: '1d',
+        timeZone: 'UTC',
+        timeRange: undefined,
+        dropPartials: undefined,
+        domain: undefined,
+      });
+    });
   });
 
   describe('getColumnTimeRange', () => {
