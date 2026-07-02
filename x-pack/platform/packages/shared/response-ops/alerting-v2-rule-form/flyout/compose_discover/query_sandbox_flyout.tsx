@@ -149,13 +149,17 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
 
   // Run whichever pipeline the active tab represents. Unified mode (no tabs)
   // has no per-tab concept — always run the full breach query.
-  const activeQuery = !tabs?.length
-    ? getBreachQuery(query)
-    : activeTab === 'base'
-    ? queryFields.base
-    : activeTab === 'recovery'
-    ? getRecoverQuery(query)
-    : getBreachQuery(query);
+  const activeQuery = (() => {
+    if (!tabs?.length) return getBreachQuery(query);
+    switch (activeTab) {
+      case 'base':
+        return queryFields.base;
+      case 'recovery':
+        return getRecoverQuery(query);
+      default:
+        return getBreachQuery(query);
+    }
+  })();
 
   /*
    * Unified composed mode: the editor holds the whole pipeline, so write it to
