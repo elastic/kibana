@@ -18,7 +18,7 @@
 @elastic/esql@4.4.0
 @elastic/eui-theme-borealis@8.0.0
 @elastic/eui-theme-common@10.0.0
-@elastic/eui@116.3.1
+@elastic/eui@116.5.0
 @elastic/numeral@2.5.1
 @elastic/prismjs-esql@1.1.2
 @emotion/babel-plugin@11.13.5
@@ -113,7 +113,7 @@ baseline-browser-mapping@2.9.14
 bezier-easing@2.1.0
 bn.js@4.11.9
 bn.js@5.2.3
-brace-expansion@1.1.14
+brace-expansion@1.1.15
 brorand@1.1.0
 browser-resolve@2.0.0
 browserify-aes@1.2.0
