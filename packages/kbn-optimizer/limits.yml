@@ -44,7 +44,7 @@ pageLoadAssetSize:
   dataViewManagement: 6250
   dataViews: 66000
   dataVisualizer: 32727
-  developerToolbar: 5758
+  developerToolbar: 6503
   devTools: 8107
   discover: 30501
   discoverEnhanced: 5353
@@ -176,6 +176,7 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 4855
   sessionView: 47912
   share: 64059
+  significant_events: 15000
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
