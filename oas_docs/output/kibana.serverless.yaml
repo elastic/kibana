@@ -29584,6 +29584,7 @@ paths:
                             - MIGRATE
                             - PRIVILEGE_LEVEL_CHANGE
                             - ROLLBACK
+                            - REMOVE_COLLECTOR
                           type: string
                         version:
                           description: agent version number (UPGRADE action)
