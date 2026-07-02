@@ -10,10 +10,12 @@
 import { createHash, randomUUID } from 'node:crypto';
 import type { KibanaRequest } from '@kbn/core/server';
 import { isWebhookTrigger, pickManagedWorkflowFields } from '@kbn/workflows';
-import type { WorkflowDetailDto, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type {
+  WebhookTrigger,
+  WorkflowDetailDto,
+  WorkflowExecutionEngineModel,
+} from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
-import type { WebhookTrigger } from '@kbn/workflows';
-import type { WorkflowsService } from '../workflows_management_service';
 import {
   getWebhookCredentialDocumentId,
   getWebhookDispatchTaskId,
@@ -27,6 +29,7 @@ import type {
   WebhookInvocationResult,
   WebhookPrepareResult,
 } from './types';
+import type { WorkflowsService } from '../workflows_management_service';
 
 type RunWorkflow = (
   workflow: WorkflowExecutionEngineModel,
