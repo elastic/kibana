@@ -325,6 +325,56 @@ describe('resumeWorkflowExecutionExternallyWithInput', () => {
     );
   });
 
+  it('preserves repeated query params for array schema fields on GET resume', async () => {
+    workflowsService.getWorkflowExecution.mockResolvedValue({
+      id: 'exec-1',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      stepExecutions: [
+        {
+          workflowRunId: 'exec-1',
+          stepId: 'request-input',
+          stepType: 'waitForInput',
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+          input: {
+            _hitlApiKeyId: 'api-key-id',
+            schema: {
+              type: 'object',
+              properties: {
+                tactics: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    enum: ['initial_access', 'execution', 'persistence'],
+                  },
+                },
+              },
+              required: ['tactics'],
+            },
+          },
+        } as unknown as WorkflowStepExecutionDto,
+      ],
+    } as unknown as WorkflowExecutionDto);
+
+    await resumeWorkflowExecutionExternallyViaGet(workflowsService, {
+      executionId: 'exec-1',
+      spaceId: 'default',
+      apiKey: ENCODED_API_KEY,
+      query: {
+        apiKey: ENCODED_API_KEY,
+        tactics: ['initial_access', 'execution'],
+      },
+    });
+
+    const engine = await workflowsService.getWorkflowsExecutionEngine();
+    expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
+      'exec-1',
+      'default',
+      { tactics: ['initial_access', 'execution'] },
+      undefined,
+      { resumedBy: 'api_key:api-key-id' }
+    );
+  });
+
   it('ignores non-schema query params on waitForInput GET resume', async () => {
     await resumeWorkflowExecutionExternallyViaGet(workflowsService, {
       executionId: 'exec-1',

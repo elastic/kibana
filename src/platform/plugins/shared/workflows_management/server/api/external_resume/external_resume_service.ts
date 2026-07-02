@@ -358,16 +358,26 @@ function getStepInputSchema(input: unknown): JsonModelSchemaType | undefined {
   return undefined;
 }
 
+function normalizeExternalResumeQueryValue(value: unknown, fieldSchema: unknown): unknown {
+  if (!Array.isArray(value)) {
+    return value;
+  }
+
+  const fieldType = (fieldSchema as { type?: string } | undefined)?.type;
+  return fieldType === 'array' ? value : value[0];
+}
+
 function getExternalResumeInputFromQuery(
   query: Record<string, unknown>,
   schema: JsonModelSchemaType | undefined
 ): Record<string, unknown> {
-  const allowed = new Set(Object.keys(schema?.properties ?? {}));
+  const properties = schema?.properties ?? {};
+  const allowed = new Set(Object.keys(properties));
   const input: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(query)) {
     if (key !== 'apiKey' && allowed.has(key)) {
-      input[key] = Array.isArray(value) ? value[0] : value;
+      input[key] = normalizeExternalResumeQueryValue(value, properties[key]);
     }
   }
 
