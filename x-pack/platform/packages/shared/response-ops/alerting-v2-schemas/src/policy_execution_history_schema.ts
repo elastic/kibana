@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { ID_MAX_LENGTH } from './constants';
 
 export const POLICY_EXECUTION_HISTORY_MAX_PER_PAGE = 100;
 export const POLICY_EXECUTION_HISTORY_SEARCH_MAX_LENGTH = 200;
@@ -29,7 +30,7 @@ const sharedFilterFields = {
   ruleIds: z
     .preprocess(
       (v) => (v === undefined || Array.isArray(v) ? v : [v]),
-      z.array(z.string().trim().min(1)).max(50)
+      z.array(z.string().trim().min(1).max(ID_MAX_LENGTH)).max(50)
     )
     .optional()
     .describe(
