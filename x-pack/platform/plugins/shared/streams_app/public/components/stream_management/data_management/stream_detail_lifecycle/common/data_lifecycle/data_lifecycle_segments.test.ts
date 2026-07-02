@@ -536,6 +536,23 @@ describe('Segment Utilities', () => {
       ]);
     });
 
+    it('keeps a downsample step past the frozen boundary when the config is out of order', () => {
+      // frozen_after=20d, delete/retention=1d (out of order) with a step at 24d (beyond frozen). The
+      // config is invalid, so all steps stay visible — the 24d step must not vanish just because it
+      // is past the frozen boundary.
+      const phases: SegmentPhase[] = [
+        { grow: true, min_age: '0d', label: 'hot' },
+        { grow: true, min_age: '20d', label: 'frozen' },
+        { grow: false, min_age: '1d', isDelete: true },
+      ];
+      const downsampleSteps = [{ after: '24d', fixed_interval: '1h' }];
+
+      const result = buildDslSegments(phases, downsampleSteps);
+
+      expect(result.downsamplingSegments.filter((s) => s.step)).toHaveLength(1);
+      expect(result.timelineSegments.map((s) => s.leftValue)).toContain('24d');
+    });
+
     it('should filter out downsample steps after retention', () => {
       const phases: SegmentPhase[] = [
         { grow: true, min_age: '0d' },

@@ -192,16 +192,20 @@ export const buildDslSegments = (
   const retentionMs = toMillis(retentionLabel);
 
   // Downsample steps are normally hidden once they fall after retention (they'd never run). But when
-  // phases are out of order (e.g. frozen_after=7d while delete=1d), a later phase boundary extends
-  // the visible timeline past retention, so steps inside that extended range must stay visible.
-  // Filter against the effective timeline end — the max of retention and the largest phase boundary —
-  // instead of retention alone. In normal in-order configs retention is the max, so this is a no-op.
+  // the config is out of order — delete/retention is before a later phase boundary (e.g. delete=1d
+  // while frozen_after=20d) — it is invalid and the timeline shows everything so the user can see
+  // and fix it; filtering steps by retention there would make steps beyond the frozen boundary (e.g.
+  // a 24d step) vanish. So: skip step filtering entirely when out of order, and otherwise filter by
+  // retention as usual (in-order configs).
   const phaseBoundaryMsValues = nonDeletePhases
     .slice(1)
     .map((phase) => (phase.min_age ? toMillis(phase.min_age) : undefined))
     .filter((ms): ms is number => ms !== undefined);
-  const effectiveRetentionMs =
-    retentionMs === undefined ? undefined : Math.max(retentionMs, ...phaseBoundaryMsValues);
+  const maxPhaseBoundaryMs = phaseBoundaryMsValues.length
+    ? Math.max(...phaseBoundaryMsValues)
+    : undefined;
+  const isOutOfOrder = retentionMs !== undefined && retentionMs < (maxPhaseBoundaryMs ?? 0);
+  const effectiveRetentionMs = isOutOfOrder ? undefined : retentionMs;
 
   // Get downsample step start times, filtering out those after the effective timeline end
   const stepStarts = filterStepStartsBeforeRetention(
