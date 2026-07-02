@@ -13,7 +13,11 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 
 import { BehaviorSubject } from 'rxjs';
-import type { DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
+import {
+  installLocalColorThemeOverride,
+  type DeveloperToolbarItemProps,
+} from '@kbn/developer-toolbar';
+
 import { NEXT_CHROME_FEATURE_FLAG_KEY } from '@kbn/core-chrome-feature-flags';
 
 export type UnregisterItemFn = () => void;
@@ -23,6 +27,12 @@ export interface DeveloperToolbarItemRegistry {
 
 export type DeveloperToolbarSetup = DeveloperToolbarItemRegistry;
 export type DeveloperToolbarStart = DeveloperToolbarItemRegistry;
+
+const LazyColorThemeToggle = lazy(() =>
+  import('@kbn/developer-toolbar').then(({ LiveColorThemeToggle }) => ({
+    default: LiveColorThemeToggle,
+  }))
+);
 
 const LazyMeasureButton = lazy(() =>
   import('@kbn/design-tools').then(({ MeasureButton }) => ({
@@ -56,6 +66,21 @@ export class DeveloperToolbarPlugin
         <LazyToolbar items$={this.items$} envInfo={this.context.env} />
       </Suspense>
     );
+
+    /**
+     * Install the override eagerly so it takes effect globally (before the app
+     * root subscribes to `core.theme.theme$`).
+     */
+    const colorThemeController = installLocalColorThemeOverride(core.theme);
+
+    this.registerItem({
+      id: 'Color Theme',
+      children: (
+        <Suspense fallback={null}>
+          <LazyColorThemeToggle controller={colorThemeController} />
+        </Suspense>
+      ),
+    });
 
     this.registerItem({
       id: 'Measure Component',

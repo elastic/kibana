@@ -7,27 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCodeBlock } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React from 'react';
 import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
+import { getWorkflowYamlFromSnapshot } from './get_workflow_yaml_from_snapshot';
+import { WorkflowChangeHistoryMonacoPreview } from './workflow_change_history_monaco_preview';
 
-import { getWorkflowYamlFromSnapshot } from './map_workflow_history_item';
-
-export const renderWorkflowChangeHistoryPreview: ChangeHistoryPreviewRenderFn = ({ change }) => {
-  const selectedYaml = getWorkflowYamlFromSnapshot(change.snapshot);
-
-  return (
-    <EuiCodeBlock
-      language="yaml"
-      isCopyable
-      paddingSize="none"
-      css={css`
-        height: 100%;
-      `}
-      data-test-subj="workflowChangeHistoryYamlPreview"
-    >
-      {selectedYaml}
-    </EuiCodeBlock>
-  );
-};
+export const renderWorkflowChangeHistoryPreview: ChangeHistoryPreviewRenderFn = ({
+  change,
+  previousChange,
+  isLoadingCompareContext,
+}) => (
+  <WorkflowChangeHistoryMonacoPreview
+    yaml={getWorkflowYamlFromSnapshot(change.snapshot)}
+    compareYaml={
+      !isLoadingCompareContext && previousChange
+        ? getWorkflowYamlFromSnapshot(previousChange.snapshot)
+        : undefined
+    }
+  />
+);
