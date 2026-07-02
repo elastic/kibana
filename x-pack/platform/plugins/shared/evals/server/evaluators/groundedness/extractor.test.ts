@@ -8,10 +8,9 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { extractGroundednessEvidence } from './extractor';
-import { createTraceAccessor } from '../trace_accessor';
 
 describe('groundedness trace extractor', () => {
-  const traceId = 'trace-id-123';
+  const traceId = '0af7651916cd43dd8448eb211c80319c';
 
   const createEsClient = () => {
     const queryMock = jest.fn();
@@ -27,7 +26,6 @@ describe('groundedness trace extractor', () => {
   it('queries span events and tool spans for the trace and maps groundedness evidence', async () => {
     const logger = loggingSystemMock.createLogger();
     const { esClient, queryMock } = createEsClient();
-    const traceAccessor = createTraceAccessor({ traceId, esClient });
 
     queryMock
       // 1. User message span event from logs-*
@@ -68,14 +66,23 @@ describe('groundedness trace extractor', () => {
         ],
       });
 
-    const evidence = await extractGroundednessEvidence(traceAccessor, logger);
+    const evidence = await extractGroundednessEvidence({ traceId, esClient }, logger);
 
     expect(queryMock).toHaveBeenCalledTimes(3);
-    expect(queryMock.mock.calls[0][0]?.query).toContain(`trace_id == "${traceId}"`);
+
+    // Logs queries use ?trace_id placeholder with bound params
+    expect(queryMock.mock.calls[0][0]?.query).toContain('trace_id == ?trace_id');
+    expect(queryMock.mock.calls[0][0]?.params).toEqual([{ trace_id: traceId }]);
     expect(queryMock.mock.calls[0][0]?.query).toContain('gen_ai.user.message');
-    expect(queryMock.mock.calls[1][0]?.query).toContain(`trace_id == "${traceId}"`);
+
+    expect(queryMock.mock.calls[1][0]?.query).toContain('trace_id == ?trace_id');
+    expect(queryMock.mock.calls[1][0]?.params).toEqual([{ trace_id: traceId }]);
     expect(queryMock.mock.calls[1][0]?.query).toContain('gen_ai.choice');
-    expect(queryMock.mock.calls[2][0]?.query).toContain(`trace.id == "${traceId}"`);
+
+    // Traces query uses trace.id with bound params
+    expect(queryMock.mock.calls[2][0]?.query).toContain('trace.id == ?trace_id');
+    expect(queryMock.mock.calls[2][0]?.params).toEqual([{ trace_id: traceId }]);
+
     expect(evidence).toEqual({
       user_query: 'What is the payment status?',
       agent_response: 'Payment service is healthy.',
@@ -88,31 +95,5 @@ describe('groundedness trace extractor', () => {
         },
       ],
     });
-  });
-
-  it('automatically injects trace filter into queries without a WHERE clause', async () => {
-    const { esClient, queryMock } = createEsClient();
-    const traceAccessor = createTraceAccessor({ traceId, esClient });
-
-    queryMock.mockResolvedValueOnce({ columns: [], values: [] });
-
-    await traceAccessor.runEsql('FROM traces-*\n| STATS count = COUNT(*)');
-
-    expect(queryMock.mock.calls[0][0]?.query).toContain(`trace.id == "${traceId}"`);
-  });
-
-  it('automatically injects trace filter into queries with an existing WHERE clause', async () => {
-    const { esClient, queryMock } = createEsClient();
-    const traceAccessor = createTraceAccessor({ traceId, esClient });
-
-    queryMock.mockResolvedValueOnce({ columns: [], values: [] });
-
-    await traceAccessor.runEsql(
-      'FROM traces-*\n| WHERE attributes.elastic.inference.span.kind == "TOOL"\n| LIMIT 10'
-    );
-
-    const executedQuery = queryMock.mock.calls[0][0]?.query;
-    expect(executedQuery).toContain(`trace.id == "${traceId}"`);
-    expect(executedQuery).toContain('attributes.elastic.inference.span.kind == "TOOL"');
   });
 });

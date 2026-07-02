@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { LOGS_INDEX_PATTERN } from '@kbn/evals-common';
 import pRetry from 'p-retry';
 import type { TraceAccessor } from './types';
 import { createTraceAccessor } from './trace_accessor';
@@ -23,21 +22,15 @@ interface AgentResponseRow extends Record<string, unknown> {
   [AGENT_RESPONSE_CONTENT_COLUMN]: string | null;
 }
 
-const buildUserMessageQuery = () => {
-  return `FROM ${LOGS_INDEX_PATTERN}
-| WHERE event_name == "gen_ai.user.message"
+const USER_MESSAGE_PIPELINE = `| WHERE event_name == "gen_ai.user.message"
 | KEEP @timestamp, ${USER_MESSAGE_CONTENT_COLUMN}, span_id
 | SORT @timestamp ASC
 | LIMIT 1`;
-};
 
-const buildAgentResponseQuery = () => {
-  return `FROM ${LOGS_INDEX_PATTERN}
-| WHERE event_name == "gen_ai.choice"
+const AGENT_RESPONSE_PIPELINE = `| WHERE event_name == "gen_ai.choice"
 | KEEP @timestamp, ${AGENT_RESPONSE_CONTENT_COLUMN}, span_id
 | SORT @timestamp DESC
 | LIMIT 1`;
-};
 
 export const extractChatEvidence = async (
   traceAccessor: TraceAccessor,
@@ -47,7 +40,7 @@ export const extractChatEvidence = async (
 
   return pRetry(
     async () => {
-      const userMsgResponse = await accessor.runEsql(buildUserMessageQuery());
+      const userMsgResponse = await accessor.runEsql('logs', USER_MESSAGE_PIPELINE);
       const userMsgRows = rowsFromEsqlResponse<UserMessageRow>(userMsgResponse);
 
       if (userMsgRows.length === 0) {
@@ -56,7 +49,7 @@ export const extractChatEvidence = async (
 
       const userQuery = userMsgRows[0][USER_MESSAGE_CONTENT_COLUMN] ?? '';
 
-      const agentRespResponse = await accessor.runEsql(buildAgentResponseQuery());
+      const agentRespResponse = await accessor.runEsql('logs', AGENT_RESPONSE_PIPELINE);
       const agentRespRows = rowsFromEsqlResponse<AgentResponseRow>(agentRespResponse);
       const agentResponse =
         agentRespRows.length > 0 ? agentRespRows[0][AGENT_RESPONSE_CONTENT_COLUMN] ?? '' : '';

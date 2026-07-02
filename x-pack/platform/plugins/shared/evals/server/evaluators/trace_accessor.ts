@@ -5,53 +5,32 @@
  * 2.0.
  */
 
+import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { isValidTraceId } from '@opentelemetry/api';
 import { LOGS_INDEX_PATTERN, TRACES_INDEX_PATTERN } from '@kbn/evals-common';
 import type { TraceAccessor } from './types';
 
+const TRACE_SOURCE = {
+  traces: { index: TRACES_INDEX_PATTERN, field: 'trace.id' },
+  logs: { index: LOGS_INDEX_PATTERN, field: 'trace_id' },
+} as const;
+
+export type TraceSource = keyof typeof TRACE_SOURCE;
+
 export interface TraceAccessorWithEsql extends TraceAccessor {
-  runEsql(query: string): Promise<ESQLSearchResponse>;
+  runEsql(source: TraceSource, pipeline: string): Promise<ESQLSearchResponse>;
 }
 
-const TRACE_FILTER_FIELD: Record<string, string> = {
-  [TRACES_INDEX_PATTERN]: 'trace.id',
-  [LOGS_INDEX_PATTERN]: 'trace_id',
-};
-
-const injectTraceFilter = (query: string, traceId: string): string => {
-  const fromMatch = query.match(/FROM\s+([\w.*-]+)/i);
-  if (!fromMatch) {
-    throw new Error('ES|QL query must contain a FROM clause');
-  }
-
-  const index = fromMatch[1];
-  const filterField = TRACE_FILTER_FIELD[index];
-  if (!filterField) {
-    throw new Error(
-      `Unknown index pattern "${index}". Expected one of: ${Object.keys(TRACE_FILTER_FIELD).join(
-        ', '
-      )}`
-    );
-  }
-
-  const traceFilter = `${filterField} == "${traceId}"`;
-  const whereMatch = query.match(/\|\s*WHERE\s+/i);
-
-  if (whereMatch) {
-    return query.replace(/\|\s*WHERE\s+/i, `| WHERE ${traceFilter} AND `);
-  }
-
-  return query.replace(/(FROM\s+[\w.*-]+)/i, `$1\n| WHERE ${traceFilter}`);
-};
-
-export const createTraceAccessor = (traceAccessor: TraceAccessor): TraceAccessorWithEsql => {
-  return {
-    ...traceAccessor,
-    runEsql: async (query: string) => {
-      const scopedQuery = injectTraceFilter(query, traceAccessor.traceId);
-      return (await traceAccessor.esClient.esql.query({
-        query: scopedQuery,
-      })) as ESQLSearchResponse;
-    },
-  };
-};
+export const createTraceAccessor = (traceAccessor: TraceAccessor): TraceAccessorWithEsql => ({
+  ...traceAccessor,
+  runEsql: async (source: TraceSource, pipeline: string) => {
+    if (!isValidTraceId(traceAccessor.traceId)) {
+      throw new Error('Invalid trace_id: must be a 32-character hex string');
+    }
+    const { index, field } = TRACE_SOURCE[source];
+    const query = `FROM ${index}\n| WHERE ${field} == ?trace_id\n${pipeline}`;
+    const params = [{ trace_id: traceAccessor.traceId }] as unknown as FieldValue[];
+    return (await traceAccessor.esClient.esql.query({ query, params })) as ESQLSearchResponse;
+  },
+});

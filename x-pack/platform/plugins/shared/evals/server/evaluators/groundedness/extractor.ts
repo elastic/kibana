@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { TRACES_INDEX_PATTERN } from '@kbn/evals-common';
 import pRetry from 'p-retry';
 import { extractChatEvidence } from '../chat_evidence';
 import type { TraceAccessor } from '../types';
@@ -60,12 +59,9 @@ const parseJsonIfPossible = (value: unknown): unknown => {
   }
 };
 
-const buildToolSpansQuery = () => {
-  return `FROM ${TRACES_INDEX_PATTERN}
-| WHERE attributes.elastic.inference.span.kind == "TOOL"
+const TOOL_SPANS_PIPELINE = `| WHERE attributes.elastic.inference.span.kind == "TOOL"
 | KEEP attributes.gen_ai.tool.call.id, attributes.gen_ai.tool.name, attributes.gen_ai.tool.call.arguments, attributes.gen_ai.tool.call.result, @timestamp
 | SORT @timestamp ASC`;
-};
 
 export const extractGroundednessEvidence = async (
   traceAccessor: TraceAccessor,
@@ -91,7 +87,7 @@ export const extractGroundednessEvidence = async (
       throw new Error(`Missing agent response for trace ${accessor.traceId}`);
     }
 
-    const toolResponse = await accessor.runEsql(buildToolSpansQuery());
+    const toolResponse = await accessor.runEsql('traces', TOOL_SPANS_PIPELINE);
     const toolRows = rowsFromEsqlResponse<ToolSpanRow>(toolResponse);
 
     const toolCallHistory = toolRows.map((toolRow) => {

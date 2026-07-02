@@ -13,7 +13,7 @@ import { createEvaluatorRegistry } from '../registry';
 import { correctnessEvaluator } from '.';
 
 describe('correctness evaluator', () => {
-  const traceId = 'trace-id-123';
+  const traceId = '0af7651916cd43dd8448eb211c80319c';
 
   const createEsClient = () => {
     const queryMock = jest.fn();
