@@ -40,6 +40,7 @@ import { identifySignificantEventsFeaturesRoutes } from './internal/significant_
 import { internalSignificantEventsEventsRoutes } from './internal/significant_events/events/route';
 import { internalSignificantEventsKiExtractionRoutes } from './internal/significant_events/knowledge_indicators/continuous_ki_extraction/route';
 import { internalSignificantEventsOnboardingRoutes } from './internal/significant_events/onboarding/route';
+import { internalSignificantEventsPromptsRoutes } from './internal/significant_events/prompts/route';
 import { internalSignificantEventsQueriesRoutes } from './internal/significant_events/queries/route';
 import { internalSignificantEventsQueryOccurrencesRoutes } from './internal/significant_events/query_occurrences/route';
 
@@ -69,6 +70,7 @@ export const streamsRouteRepository = {
   ...identifySignificantEventsFeaturesRoutes,
   ...internalSignificantEventsKiExtractionRoutes,
   ...internalSignificantEventsOnboardingRoutes,
+  ...internalSignificantEventsPromptsRoutes,
   ...internalSignificantEventsQueriesRoutes,
   ...internalSignificantEventsQueryOccurrencesRoutes,
   ...storageStatsRoutes,
