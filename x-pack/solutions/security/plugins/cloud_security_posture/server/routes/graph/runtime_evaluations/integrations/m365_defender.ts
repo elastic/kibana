@@ -70,7 +70,6 @@ export const m365_defenderEvaluations = {
       section: "Combined ES|QL \u2014 event action",
       esql: `| EVAL
   event.action = CASE(
-    data_stream.dataset == "m365_defender.alert" AND m365_defender.alert.title IS NOT NULL, m365_defender.alert.title,
     event.action IS NOT NULL, event.action,
     data_stream.dataset == "m365_defender.event" AND m365_defender.event.action.type IS NOT NULL, m365_defender.event.action.type,
     null
