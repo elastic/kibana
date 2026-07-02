@@ -18,9 +18,6 @@ project:
   sourceRoot: src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker-presets
 dependsOn:
   - '@kbn/core-notifications-browser'
-  - '@kbn/core-ui-settings-browser'
-  - '@kbn/core-user-profile-browser'
-  - '@kbn/core-user-storage-browser'
   - '@kbn/date-range-picker-presets-common'
   - '@kbn/i18n'
   - '@kbn/use-observable'
