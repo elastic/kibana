@@ -6,9 +6,15 @@ For system context (three execution paths, security surfaces, where these events
 
 ## Privacy contract
 
-**No event field may carry**: query content, alert content, alert rule names, user-defined workflow names, user identifiers, connector credentials. Only enums, counts, durations, booleans, and IDs (UUIDs / connector IDs / workflow IDs).
+**No event field may carry**: query content, alert content, alert rule names, user-defined workflow names, user identifiers, connector credentials. Aside from the diagnostic free-text fields called out below, fields are enums, counts, durations, booleans, and IDs (UUIDs / connector IDs / workflow IDs).
 
-This contract is enforced at the boundary by the per-event reporters (`reportMisconfiguration`, `reportStepFailure`, `reportScheduleAction`, `reportWorkflowSuccess`, `reportWorkflowError`). Failed events MUST NOT include stack traces with file paths, raw provider error text, or user-controlled strings — only the classified `error_category` and a sanitized reason.
+Free-text handling on the failure paths differs by event and is **not** uniform:
+
+- `attack_discovery_step_failure` carries **no** free text — the error is reduced to the bounded `error_category` enum (plus IDs, counts, and a duration). This is the fully sanitized failure signal.
+- `attack_discovery_error` carries `errorMessage`, the **raw** error message (a legacy field shared with `elastic_assistant`). It is system-generated error text, and can include stack-trace-derived detail from underlying failures.
+- `attack_discovery_misconfiguration` carries `detail`, a human-readable description of the failed pre-execution check (e.g. which check failed and why).
+
+`errorMessage` and `detail` are diagnostic strings intended for root-cause analysis. They must never be constructed from query/alert content, rule or workflow display names, or credentials, but they are not otherwise redacted. When a fully sanitized failure signal is required, use `attack_discovery_step_failure.error_category`.
 
 ### EBT event flow
 
@@ -87,26 +93,28 @@ Emitted after a successful generation workflow execution. This event type is reg
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `actionTypeId` | keyword | yes | Kibana connector type (e.g. `.gen-ai`) _(legacy)_ |
+| `alert_retrieval_mode` | keyword | no | Alert retrieval mode: `custom_query`, `esql`, `custom_only`, or `provided` |
 | `alertsContextCount` | integer | yes | Number of alerts sent as context to the LLM _(legacy)_ |
 | `alertsCount` | integer | yes | Unique alerts referenced in generated discoveries _(legacy)_ |
 | `configuredAlertsCount` | integer | yes | Number of alerts configured by the user _(legacy)_ |
 | `custom_retrieval_workflow_count` | integer | no | Number of user-selected custom alert retrieval workflows |
 | `dateRangeDuration` | integer | yes | Duration of the time range in hours _(legacy)_ |
-| `default_alert_retrieval_mode` | keyword | no | Default retrieval mode: `custom_query`, `esql`, or `disabled` |
 | `discoveriesGenerated` | integer | yes | Number of attack discoveries generated _(legacy)_ |
 | `duplicatesDroppedCount` | integer | no | Number of discoveries dropped because they were duplicates of existing ones _(legacy)_ |
 | `durationMs` | integer | yes | Total pipeline duration in ms _(legacy)_ |
 | `execution_mode` | keyword | no | Always `workflow` when emitted by `discoveries` (absent on legacy) |
+| `hallucinations_filtered_count` | integer | no | Number of discoveries filtered out as hallucinations by the validation step |
 | `hasFilter` | boolean | yes | Whether a filter was applied to the alerts used as context _(legacy)_ |
 | `isDefaultDateRange` | boolean | yes | Whether the default date range (last 24 hours) was used _(legacy)_ |
 | `model` | keyword | no | LLM model ID |
 | `prebuilt_step_types_used` | keyword[] | no | Prebuilt step type IDs that participated in the execution |
 | `provider` | keyword | no | Connector provider (e.g. `OpenAI`) |
 | `retrieval_workflow_count` | integer | no | Total number of retrieval workflows executed (default + custom) |
-| `trigger` | keyword | no | What triggered generation: `manual` or `schedule` |
+| `scheduleInfo` | object | no | Schedule metadata (`id`, `interval`, `actions`) when the run was scheduled _(legacy)_ |
+| `trigger` | keyword | no | What triggered generation: `manual`, `schedule`, `agent_builder`, `workflow`, or `unknown` |
 | `uses_default_retrieval` | boolean | no | Whether the default alert retrieval workflow was run |
 | `uses_default_validation` | boolean | no | Whether the default validation workflow was used |
-| `validation_discoveries_count` | integer | no | Post-validation count of valid discoveries |
+| `validation_discoveries_count` | integer | no | Number of discoveries persisted after hallucination filtering and deduplication |
 
 | Detail | |
 | --- | --- |
@@ -126,12 +134,15 @@ Emitted when the generation workflow fails. Augmented with step-failure and misc
 | `misconfiguration_detected` | boolean | no | Whether a misconfiguration was detected as the root cause |
 | `model` | keyword | no | LLM model ID |
 | `provider` | keyword | no | Connector provider |
-| `trigger` | keyword | no | What triggered generation: `manual` or `schedule` |
+| `scheduleInfo` | object | no | Schedule metadata (`id`, `interval`, `actions`) when the run was scheduled _(legacy)_ |
+| `trigger` | keyword | no | What triggered generation: `manual`, `schedule`, `agent_builder`, `workflow`, or `unknown` |
 
 | Detail | |
 | --- | --- |
 | **Registered by** | `elastic_assistant` (shared event type) |
 | **Emitted from** | `execute_generation_workflow.ts` via `reportWorkflowError` |
+
+> `errorMessage` carries the raw error text (see [Privacy contract](#privacy-contract)).
 
 ### `attack_discovery_misconfiguration`
 
@@ -176,15 +187,7 @@ Emitted when an individual pipeline step fails during generation. Provides per-s
 
 **`step` values**: `alert_retrieval`, `generation`, `validation`
 
-**`error_category` values**:
-
-| Value | Meaning |
-| --- | --- |
-| `connector_error` | Connector-related failure |
-| `timeout` | Step timed out |
-| `unknown` | Unclassified error |
-| `validation_error` | Validation-specific failure |
-| `workflow_error` | Workflow execution failure |
+**`error_category` values**: the full 16-value enum, produced by `classifyErrorCategory` — see the [`error_category` enum reference](#error_category-enum-reference) below for the complete table.
 
 | Detail | |
 | --- | --- |
@@ -229,17 +232,28 @@ Emitted when an individual pipeline step fails during generation. Provides per-s
 
 ## `error_category` enum reference
 
-`error_category` on `attack_discovery_step_failure` is produced by `classifyErrorCategory` (see [`report_step_failure/`](report_step_failure/)) which heuristically maps an error to one of the bounded values below. The raw error message is **not** retained on the event.
+`error_category` on `attack_discovery_step_failure` is produced by `classifyErrorCategory` (see [`report_step_failure/`](report_step_failure/)) which maps an error to one of the bounded values below — either directly from an `AttackDiscoveryError.errorCategory`, or heuristically from the error message. The raw error message is **not** retained on the event. The canonical enum lives in `@kbn/discoveries-schemas` (`ERROR_CATEGORIES`); the rules are ordered so more-specific patterns win over generic ones.
 
 | Value | Meaning |
 | --- | --- |
+| `anonymization_error` | Alert anonymization failed |
+| `cluster_health` | Elasticsearch cluster health issue (`no_shard_available`, `cluster_block`, `circuit_breaking_exception`, `es_rejected_execution`) |
+| `concurrent_conflict` | Concurrency/version conflict (`409`, `version_conflict`, superseded/cancelled by a newer request) |
 | `connector_error` | Connector-related failure (LLM rejected request, auth failure, model unavailable) |
-| `timeout` | Step exceeded its workflow `timeout` value |
-| `validation_error` | Validation step rejected the discoveries (e.g., hallucination detection failed all of them) |
-| `workflow_error` | Workflow execution failure (engine error, missing step, invalid YAML) |
+| `interrupted` | A prior run was interrupted mid-execution (server restart/crash/shutdown) |
+| `network_error` | Network-level failure (`ECONNREFUSED`, `ENOTFOUND`, `socket hang up`, `fetch failed`, `ETIMEDOUT`) |
+| `permission_error` | Authorization failure (`401`/`403`, `forbidden`, `unauthorized`, `insufficient privileges`, `security_exception`) |
+| `rate_limit` | Rate limited by the provider (`429`, `rate limit`, `too many requests`) |
+| `step_registration_error` | A workflow step type was not registered / unknown |
+| `timeout` | Step timed out or the pipeline budget was exceeded |
 | `unknown` | Heuristic could not classify; fallback so the field is always set |
+| `validation_error` | Validation step rejected the discoveries (e.g., hallucination detection failed all of them) |
+| `workflow_deleted` | Referenced workflow was not found |
+| `workflow_disabled` | Referenced workflow is disabled / not enabled |
+| `workflow_error` | Generic workflow execution failure (engine error) |
+| `workflow_invalid` | Workflow definition is invalid or missing step definitions |
 
-If a new failure mode warrants its own category, extend the enum in `classifyErrorCategory` and update this table.
+If a new failure mode warrants its own category, extend `ERROR_CATEGORIES` in `@kbn/discoveries-schemas`, add a rule to `classifyErrorCategory`, and update this table.
 
 ## FAQ
 

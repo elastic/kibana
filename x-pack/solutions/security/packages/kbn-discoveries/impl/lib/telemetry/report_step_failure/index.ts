@@ -8,6 +8,7 @@
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 
 import { AttackDiscoveryError } from '../../errors/attack_discovery_error';
+import { isContextLengthExceededError } from '../../errors/is_context_length_exceeded_error';
 import {
   ATTACK_DISCOVERY_STEP_FAILURE_EVENT,
   type ErrorCategory,
@@ -34,6 +35,14 @@ const CATEGORY_RULES: ReadonlyArray<{
   category: ErrorCategory;
   test: (lower: string) => boolean;
 }> = [
+  // Token/context-length overflow is checked first: these messages often arrive
+  // wrapped in generic "workflow"/"connector" text, so classifying them before
+  // the generic buckets keeps them in the dedicated `context_length_exceeded`
+  // category rather than `workflow_error` / `connector_error`.
+  {
+    category: 'context_length_exceeded',
+    test: (l) => isContextLengthExceededError(l),
+  },
   {
     category: 'timeout',
     test: (l) => includesAny(l, ['timeout', 'timed out', 'budget exceeded']),

@@ -255,6 +255,32 @@ describe('classifyErrorCategory', () => {
     ).toBe('timeout');
   });
 
+  it('returns context_length_exceeded for the openAI maximum context length message', () => {
+    expect(
+      classifyErrorCategory(
+        new Error(
+          "This model's maximum context length is 4097 tokens, however you requested 5360 tokens"
+        )
+      )
+    ).toBe('context_length_exceeded');
+  });
+
+  it('returns context_length_exceeded for the gemini token-count message', () => {
+    expect(
+      classifyErrorCategory(
+        new Error('The input token count (1125602) exceeds the maximum number of tokens allowed')
+      )
+    ).toBe('context_length_exceeded');
+  });
+
+  it('prefers context_length_exceeded over workflow_error when the message is wrapped', () => {
+    expect(
+      classifyErrorCategory(
+        new Error('Generation workflow failed: input is too long for requested model')
+      )
+    ).toBe('context_length_exceeded');
+  });
+
   it('returns unknown for unrecognized errors', () => {
     expect(classifyErrorCategory(new Error('Something went wrong'))).toBe('unknown');
   });

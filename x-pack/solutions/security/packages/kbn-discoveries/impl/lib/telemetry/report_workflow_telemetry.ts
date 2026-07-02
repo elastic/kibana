@@ -7,49 +7,10 @@
 
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 
-interface ScheduleInfo {
-  actions: string[];
-  id: string;
-  interval: string;
-}
-
-interface WorkflowSuccessTelemetryParams {
-  actionTypeId: string;
-  alertsContextCount: number;
-  alertsCount: number;
-  configuredAlertsCount: number;
-  custom_retrieval_workflow_count: number;
-  dateRangeDuration: number;
-  alert_retrieval_mode: string;
-  discoveriesGenerated: number;
-  duplicatesDroppedCount?: number;
-  durationMs: number;
-  hallucinations_filtered_count?: number;
-  execution_mode: string;
-  hasFilter: boolean;
-  isDefaultDateRange: boolean;
-  model?: string;
-  prebuilt_step_types_used: string[];
-  provider?: string;
-  retrieval_workflow_count: number;
-  scheduleInfo?: ScheduleInfo;
-  trigger: string;
-  uses_default_retrieval: boolean;
-  uses_default_validation: boolean;
-  validation_discoveries_count?: number;
-}
-
-interface WorkflowErrorTelemetryParams {
-  actionTypeId: string;
-  errorMessage: string;
-  execution_mode: string;
-  failed_step?: string;
-  misconfiguration_detected?: boolean;
-  model?: string;
-  provider?: string;
-  scheduleInfo?: ScheduleInfo;
-  trigger: string;
-}
+import type {
+  WorkflowErrorTelemetryEvent,
+  WorkflowSuccessTelemetryEvent,
+} from './event_based_telemetry';
 
 export const reportWorkflowSuccess = ({
   analytics,
@@ -58,7 +19,7 @@ export const reportWorkflowSuccess = ({
 }: {
   analytics: AnalyticsServiceSetup;
   logger: Logger;
-  params: WorkflowSuccessTelemetryParams;
+  params: WorkflowSuccessTelemetryEvent;
 }): void => {
   try {
     analytics.reportEvent('attack_discovery_success', params);
@@ -74,7 +35,7 @@ export const reportWorkflowError = ({
 }: {
   analytics: AnalyticsServiceSetup;
   logger: Logger;
-  params: WorkflowErrorTelemetryParams;
+  params: WorkflowErrorTelemetryEvent;
 }): void => {
   try {
     analytics.reportEvent('attack_discovery_error', params);
