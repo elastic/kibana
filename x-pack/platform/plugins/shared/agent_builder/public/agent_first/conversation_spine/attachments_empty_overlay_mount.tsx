@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useReducer } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiEmptyPrompt,
@@ -16,26 +15,14 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { css, keyframes } from '@emotion/react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { getApplicationWorkspaceMountElement } from '../../agent_workspace/agent_workspace_flyout_defaults';
-import { applicationWorkspaceFixedOverlayStyles } from '../../agent_workspace/application_workspace_fixed_overlay_styles';
 import { headerHeight } from '../../application/components/conversations/conversation.styles';
 import { ConversationTitle } from '../../application/components/conversations/conversation_header/conversation_title';
 import { useIsAgentWorkspaceMount } from '../../application/hooks/use_navigation';
+import { AgentCartPushFlyout } from './agent_cart_push_flyout';
 import { useOptionalConversationSpineContext } from './conversation_spine_context';
 import { useEscapeKeyHandler } from './hooks/use_escape_key_handler';
-
-const overlayEntrance = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
 
 const labels = {
   close: i18n.translate('xpack.agentBuilder.conversationSpine.attachmentsEmptyOverlay.close', {
@@ -45,6 +32,12 @@ const labels = {
     defaultMessage:
       'No pinned items yet. Open an app and click the pin button to add content to this conversation.',
   }),
+  ariaLabel: i18n.translate(
+    'xpack.agentBuilder.conversationSpine.attachmentsEmptyOverlay.ariaLabel',
+    {
+      defaultMessage: 'Empty attachment cart',
+    }
+  ),
 };
 
 export const AttachmentsEmptyOverlayMount: React.FC = () => {
@@ -53,48 +46,22 @@ export const AttachmentsEmptyOverlayMount: React.FC = () => {
   const spineContext = useOptionalConversationSpineContext();
   const hasAttachments = spineContext?.hasAttachments ?? false;
   const isAttachmentsEmptyOpen = spineContext?.isAttachmentsEmptyOpen ?? false;
+  const isCartFlyoutReady = spineContext?.isCartFlyoutReady ?? true;
   const closeAttachmentsEmptyOverlay =
     spineContext?.closeAttachmentsEmptyOverlay ?? (() => undefined);
-  const [, retryMount] = useReducer((count) => count + 1, 0);
 
-  const isOverlayOpen = isAgentWorkspaceMount && isAttachmentsEmptyOpen && !hasAttachments;
+  const isOverlayOpen =
+    isAgentWorkspaceMount && isAttachmentsEmptyOpen && !hasAttachments && isCartFlyoutReady;
 
   const onEscape = useCallback(() => {
     closeAttachmentsEmptyOverlay();
   }, [closeAttachmentsEmptyOverlay]);
 
-  useEscapeKeyHandler(onEscape, isOverlayOpen);
+  useEscapeKeyHandler(onEscape, isAgentWorkspaceMount && isAttachmentsEmptyOpen && !hasAttachments);
 
-  useEffect(() => {
-    if (!isAgentWorkspaceMount || !isAttachmentsEmptyOpen || hasAttachments) {
-      return;
-    }
-
-    if (getApplicationWorkspaceMountElement()) {
-      return;
-    }
-
-    const rafId = requestAnimationFrame(() => {
-      retryMount();
-    });
-
-    return () => window.cancelAnimationFrame(rafId);
-  }, [hasAttachments, isAgentWorkspaceMount, isAttachmentsEmptyOpen]);
-
-  if (!isAgentWorkspaceMount || !isAttachmentsEmptyOpen || hasAttachments) {
+  if (!isOverlayOpen) {
     return null;
   }
-
-  const mountElement = getApplicationWorkspaceMountElement();
-  if (!mountElement) {
-    return null;
-  }
-
-  const overlayStyles = css`
-    ${applicationWorkspaceFixedOverlayStyles};
-    background: ${euiTheme.colors.backgroundBasePlain};
-    animation: ${overlayEntrance} 200ms ease-out;
-  `;
 
   const headerStyles = css`
     flex-shrink: 0;
@@ -114,8 +81,13 @@ export const AttachmentsEmptyOverlayMount: React.FC = () => {
     justify-content: center;
   `;
 
-  return createPortal(
-    <div css={overlayStyles} data-test-subj="agentBuilderAttachmentsEmptyOverlay">
+  return (
+    <AgentCartPushFlyout
+      isOpen={true}
+      onClose={() => closeAttachmentsEmptyOverlay()}
+      ariaLabel={labels.ariaLabel}
+      data-test-subj="agentBuilderAttachmentsEmptyOverlay"
+    >
       <div css={headerStyles}>
         <EuiFlexGroup
           responsive={false}
@@ -137,7 +109,7 @@ export const AttachmentsEmptyOverlayMount: React.FC = () => {
                 aria-label={labels.close}
                 color="text"
                 size="s"
-                onClick={closeAttachmentsEmptyOverlay}
+                onClick={() => closeAttachmentsEmptyOverlay()}
                 data-test-subj="agentBuilderAttachmentsEmptyOverlayClose"
               />
             </EuiToolTip>
@@ -145,12 +117,8 @@ export const AttachmentsEmptyOverlayMount: React.FC = () => {
         </EuiFlexGroup>
       </div>
       <div css={contentStyles}>
-        <EuiEmptyPrompt
-          icon={<EuiIcon type="paperClip" size="xl" />}
-          body={labels.body}
-        />
+        <EuiEmptyPrompt icon={<EuiIcon type="paperClip" size="xl" />} body={labels.body} />
       </div>
-    </div>,
-    mountElement
+    </AgentCartPushFlyout>
   );
 };

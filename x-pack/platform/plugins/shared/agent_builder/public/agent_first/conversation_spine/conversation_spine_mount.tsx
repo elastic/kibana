@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useReducer } from 'react';
-import { createPortal } from 'react-dom';
-import { useEuiTheme } from '@elastic/eui';
-import { css, keyframes } from '@emotion/react';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import type { AttachmentsService } from '../../services/attachments/attachements_service';
-import { applicationWorkspaceFixedOverlayStyles } from '../../agent_workspace/application_workspace_fixed_overlay_styles';
-import { getApplicationWorkspaceMountElement } from '../../agent_workspace/agent_workspace_flyout_defaults';
 import { useIsAgentWorkspaceMount } from '../../application/hooks/use_navigation';
+import { AgentCartPushFlyout } from './agent_cart_push_flyout';
 import { useOptionalConversationSpineContext } from './conversation_spine_context';
 import { GenericConversationSpine } from './generic_conversation_spine';
 
@@ -20,61 +17,35 @@ interface ConversationSpineMountProps {
   attachmentsService: AttachmentsService;
 }
 
-const spineEntrance = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
+const spineAriaLabel = i18n.translate('xpack.agentBuilder.conversationSpine.cartFlyout.ariaLabel', {
+  defaultMessage: 'Attachment cart',
+});
 
 /**
- * Portals the generic conversation spine into the application workspace column.
+ * Renders the generic conversation spine as a push flyout within the agent workspace column.
  */
 export const ConversationSpineMount: React.FC<ConversationSpineMountProps> = ({
   attachmentsService,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
   const spineContext = useOptionalConversationSpineContext();
   const isSpineActive = spineContext?.isSpineActive ?? false;
+  const isCartFlyoutReady = spineContext?.isCartFlyoutReady ?? true;
   const hasAttachments = spineContext?.hasAttachments ?? false;
-  const [, retryMount] = useReducer((count) => count + 1, 0);
+  const closeSpine = spineContext?.closeSpine ?? (() => undefined);
 
-  useEffect(() => {
-    if (!isAgentWorkspaceMount || !isSpineActive || !hasAttachments || getApplicationWorkspaceMountElement()) {
-      return;
-    }
-
-    const rafId = requestAnimationFrame(() => {
-      retryMount();
-    });
-
-    return () => window.cancelAnimationFrame(rafId);
-  }, [hasAttachments, isAgentWorkspaceMount, isSpineActive]);
-
-  if (!isAgentWorkspaceMount || !isSpineActive || !hasAttachments) {
+  if (!isAgentWorkspaceMount || !isSpineActive || !hasAttachments || !isCartFlyoutReady) {
     return null;
   }
 
-  const mountElement = getApplicationWorkspaceMountElement();
-  if (!mountElement) {
-    return null;
-  }
-
-  const mountStyles = css`
-    ${applicationWorkspaceFixedOverlayStyles};
-    background: ${euiTheme.colors.backgroundBasePlain};
-    animation: ${spineEntrance} 200ms ease-out;
-  `;
-
-  return createPortal(
-    <div css={mountStyles}>
+  return (
+    <AgentCartPushFlyout
+      isOpen={true}
+      onClose={() => closeSpine()}
+      ariaLabel={spineAriaLabel}
+      data-test-subj="agentWorkspaceConversationSpineFlyout"
+    >
       <GenericConversationSpine attachmentsService={attachmentsService} />
-    </div>,
-    mountElement
+    </AgentCartPushFlyout>
   );
 };

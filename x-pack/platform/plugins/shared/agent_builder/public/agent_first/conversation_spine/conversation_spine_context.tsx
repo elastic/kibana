@@ -15,6 +15,10 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import {
+  AGENT_CART_FORCE_HIDE_APP_BREAKPOINT,
+  AGENT_CART_PANEL_LAYOUT_TRANSITION_MS,
+} from '../agent_cart_constants';
 import { useConversationId } from '../../application/context/conversation/use_conversation_id';
 import { useActiveConversationAttachmentCount } from '../../application/hooks/use_active_conversation_attachment_count';
 import { useKibana } from '../../application/hooks/use_kibana';
@@ -33,17 +37,22 @@ import type {
   SpineType,
 } from './types';
 
+interface CartDismissOptions {
+  restoreWorkspace?: boolean;
+}
+
 interface ConversationSpineContextValue {
   spineState: ConversationSpineState | null;
   isSpineActive: boolean;
+  isCartFlyoutReady: boolean;
   hasAttachments: boolean;
   isAttachmentsEmptyOpen: boolean;
   spineDisplayLabel: string | null;
   promotedSpineType: SpineType;
   openSpine: (options?: OpenSpineOptions) => void;
-  closeSpine: () => void;
+  closeSpine: (options?: CartDismissOptions) => void;
   openAttachmentsEmptyOverlay: () => void;
-  closeAttachmentsEmptyOverlay: () => void;
+  closeAttachmentsEmptyOverlay: (options?: CartDismissOptions) => void;
   setSpineType: (type: SpineType) => void;
   setActiveTab: (tabId: SpineTabId) => void;
   openAttachmentPreview: (attachment: UnknownAttachment) => void;
@@ -75,32 +84,125 @@ export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps>
   const [spineState, setSpineState] = useState<ConversationSpineState | null>(null);
   const [promotedSpineType, setPromotedSpineType] = useState<SpineType>('chat');
   const [isAttachmentsEmptyOpen, setIsAttachmentsEmptyOpen] = useState(false);
+  const [isCartFlyoutDeferred, setIsCartFlyoutDeferred] = useState(false);
+  const appWasForceHiddenRef = useRef(false);
   const prevConversationIdRef = useRef(conversationId);
+  const isCartManagingApplicationWorkspaceRef = useRef(false);
+  const cartFlyoutDeferTimeoutRef = useRef<number | undefined>(undefined);
+  const cartWorkspaceRestoreTimeoutRef = useRef<number | undefined>(undefined);
 
-  const closeSpine = useCallback(() => {
-    setSpineState(null);
+  const clearCartFlyoutDeferTimeout = useCallback(() => {
+    if (cartFlyoutDeferTimeoutRef.current !== undefined) {
+      window.clearTimeout(cartFlyoutDeferTimeoutRef.current);
+      cartFlyoutDeferTimeoutRef.current = undefined;
+    }
   }, []);
 
-  const closeAttachmentsEmptyOverlay = useCallback(() => {
-    setIsAttachmentsEmptyOpen(false);
+  const clearCartWorkspaceRestoreTimeout = useCallback(() => {
+    if (cartWorkspaceRestoreTimeoutRef.current !== undefined) {
+      window.clearTimeout(cartWorkspaceRestoreTimeoutRef.current);
+      cartWorkspaceRestoreTimeoutRef.current = undefined;
+    }
   }, []);
 
-  const openApplicationWorkspace = useCallback(() => {
-    chrome.applicationWorkspace.open();
-  }, [chrome]);
+  const deferCartFlyoutUntilWorkspaceTransition = useCallback(() => {
+    clearCartFlyoutDeferTimeout();
+    setIsCartFlyoutDeferred(true);
+    cartFlyoutDeferTimeoutRef.current = window.setTimeout(() => {
+      setIsCartFlyoutDeferred(false);
+      cartFlyoutDeferTimeoutRef.current = undefined;
+    }, AGENT_CART_PANEL_LAYOUT_TRANSITION_MS);
+  }, [clearCartFlyoutDeferTimeout]);
+
+  useEffect(() => {
+    return () => {
+      clearCartFlyoutDeferTimeout();
+      clearCartWorkspaceRestoreTimeout();
+    };
+  }, [clearCartFlyoutDeferTimeout, clearCartWorkspaceRestoreTimeout]);
+
+  const clearApplicationWorkspaceForceHiddenFlag = useCallback(() => {
+    appWasForceHiddenRef.current = false;
+  }, []);
+
+  const restoreApplicationWorkspaceIfForceHidden = useCallback(() => {
+    const shouldRestore = appWasForceHiddenRef.current;
+    appWasForceHiddenRef.current = false;
+
+    if (!shouldRestore || chrome.applicationWorkspace.getIsOpen()) {
+      return;
+    }
+
+    clearCartWorkspaceRestoreTimeout();
+    cartWorkspaceRestoreTimeoutRef.current = window.setTimeout(() => {
+      chrome.applicationWorkspace.open();
+      cartWorkspaceRestoreTimeoutRef.current = undefined;
+    }, AGENT_CART_PANEL_LAYOUT_TRANSITION_MS);
+  }, [chrome, clearCartWorkspaceRestoreTimeout]);
+
+  const prepareApplicationWorkspaceForCartOpen = useCallback(() => {
+    if (window.innerWidth < AGENT_CART_FORCE_HIDE_APP_BREAKPOINT) {
+      const wasApplicationWorkspaceOpen = chrome.applicationWorkspace.getIsOpen();
+      if (wasApplicationWorkspaceOpen) {
+        isCartManagingApplicationWorkspaceRef.current = true;
+        chrome.applicationWorkspace.close();
+        isCartManagingApplicationWorkspaceRef.current = false;
+        appWasForceHiddenRef.current = true;
+        deferCartFlyoutUntilWorkspaceTransition();
+      } else {
+        appWasForceHiddenRef.current = false;
+        clearCartFlyoutDeferTimeout();
+        setIsCartFlyoutDeferred(false);
+      }
+      return;
+    }
+
+    appWasForceHiddenRef.current = false;
+    clearCartFlyoutDeferTimeout();
+    setIsCartFlyoutDeferred(false);
+  }, [chrome, clearCartFlyoutDeferTimeout, deferCartFlyoutUntilWorkspaceTransition]);
+
+  const closeSpine = useCallback(
+    ({ restoreWorkspace = true }: CartDismissOptions = {}) => {
+      setSpineState(null);
+      clearCartFlyoutDeferTimeout();
+      setIsCartFlyoutDeferred(false);
+      if (restoreWorkspace) {
+        restoreApplicationWorkspaceIfForceHidden();
+      }
+    },
+    [clearCartFlyoutDeferTimeout, restoreApplicationWorkspaceIfForceHidden]
+  );
+
+  const closeAttachmentsEmptyOverlay = useCallback(
+    ({ restoreWorkspace = true }: CartDismissOptions = {}) => {
+      setIsAttachmentsEmptyOpen(false);
+      clearCartFlyoutDeferTimeout();
+      setIsCartFlyoutDeferred(false);
+      if (restoreWorkspace) {
+        restoreApplicationWorkspaceIfForceHidden();
+      }
+    },
+    [clearCartFlyoutDeferTimeout, restoreApplicationWorkspaceIfForceHidden]
+  );
 
   useEffect(() => {
     return chrome.applicationWorkspace.registerOnClose(() => {
-      closeSpine();
-      closeAttachmentsEmptyOverlay();
+      if (isCartManagingApplicationWorkspaceRef.current) {
+        return;
+      }
+
+      closeSpine({ restoreWorkspace: false });
+      closeAttachmentsEmptyOverlay({ restoreWorkspace: false });
+      clearApplicationWorkspaceForceHiddenFlag();
     });
-  }, [chrome, closeAttachmentsEmptyOverlay, closeSpine]);
+  }, [chrome, clearApplicationWorkspaceForceHiddenFlag, closeAttachmentsEmptyOverlay, closeSpine]);
 
   const openAttachmentsEmptyOverlay = useCallback(() => {
-    openApplicationWorkspace();
-    closeSpine();
+    prepareApplicationWorkspaceForCartOpen();
+    closeSpine({ restoreWorkspace: false });
     setIsAttachmentsEmptyOpen(true);
-  }, [closeSpine, openApplicationWorkspace]);
+  }, [closeSpine, prepareApplicationWorkspaceForCartOpen]);
 
   useEffect(() => {
     const previousConversationId = prevConversationIdRef.current;
@@ -127,22 +229,24 @@ export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps>
         };
       });
     } else {
-      closeSpine();
-      closeAttachmentsEmptyOverlay();
+      closeSpine({ restoreWorkspace: false });
+      closeAttachmentsEmptyOverlay({ restoreWorkspace: false });
+      clearApplicationWorkspaceForceHiddenFlag();
       setPromotedSpineType('chat');
     }
 
     prevConversationIdRef.current = conversationId;
-  }, [closeAttachmentsEmptyOverlay, closeSpine, conversationId]);
+  }, [clearApplicationWorkspaceForceHiddenFlag, closeAttachmentsEmptyOverlay, closeSpine, conversationId]);
 
   const prevHasAttachmentsRef = useRef(hasAttachments);
   useEffect(() => {
     if (prevHasAttachmentsRef.current && !hasAttachments) {
-      closeSpine();
-      closeAttachmentsEmptyOverlay();
+      closeSpine({ restoreWorkspace: false });
+      closeAttachmentsEmptyOverlay({ restoreWorkspace: false });
+      clearApplicationWorkspaceForceHiddenFlag();
     }
     prevHasAttachmentsRef.current = hasAttachments;
-  }, [closeAttachmentsEmptyOverlay, closeSpine, hasAttachments]);
+  }, [clearApplicationWorkspaceForceHiddenFlag, closeAttachmentsEmptyOverlay, closeSpine, hasAttachments]);
 
   const openSpine = useCallback(
     (options?: OpenSpineOptions) => {
@@ -150,8 +254,8 @@ export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps>
         return;
       }
 
-      openApplicationWorkspace();
-      closeAttachmentsEmptyOverlay();
+      prepareApplicationWorkspaceForCartOpen();
+      closeAttachmentsEmptyOverlay({ restoreWorkspace: false });
 
       const isSidebar = options?.isSidebar ?? false;
       const record = buildSpineRecord(spineConversationId, promotedSpineType);
@@ -164,7 +268,13 @@ export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps>
         isSidebar,
       });
     },
-    [closeAttachmentsEmptyOverlay, hasAttachments, openApplicationWorkspace, promotedSpineType, spineConversationId]
+    [
+      closeAttachmentsEmptyOverlay,
+      hasAttachments,
+      prepareApplicationWorkspaceForCartOpen,
+      promotedSpineType,
+      spineConversationId,
+    ]
   );
 
   const setSpineType = useCallback(
@@ -236,6 +346,7 @@ export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps>
   }, []);
 
   const isSpineActive = spineState !== null;
+  const isCartFlyoutReady = !isCartFlyoutDeferred;
 
   const spineDisplayLabel = useMemo(() => {
     if (!hasAttachments) {
@@ -256,6 +367,7 @@ export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps>
     () => ({
       spineState,
       isSpineActive,
+      isCartFlyoutReady,
       hasAttachments,
       isAttachmentsEmptyOpen,
       spineDisplayLabel,
@@ -273,6 +385,7 @@ export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps>
     [
       spineState,
       isSpineActive,
+      isCartFlyoutReady,
       hasAttachments,
       isAttachmentsEmptyOpen,
       spineDisplayLabel,
