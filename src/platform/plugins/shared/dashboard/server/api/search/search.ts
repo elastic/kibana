@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG, getMeta } from '@kbn/as-code-shared-schemas';
+import { getMeta } from '@kbn/as-code-shared-schemas';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
 
@@ -25,15 +25,10 @@ import type {
 export async function search(
   requestCtx: RequestHandlerContext,
   searchParams: DashboardSearchRequestParams | LegacyDashboardSearchRequestParams,
-  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
+  useAsCodeSearchSchemas: boolean
 ): Promise<DashboardSearchResponseBody | LegacyDashboardSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
-  // Fallback is `true` so the on-prem stack (which has no remote feature-flag service and so uses
-  // this default) ships the GA schemas. Serverless sets the flag explicitly via phased rollout.
-  const useAsCodeSearchSchemas = await core.featureFlags.getBooleanValue(
-    AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
-    true
-  );
   const normalizeToArray = (value?: string | string[]) => {
     if (value === undefined) return undefined;
     return Array.isArray(value) ? value : [value];

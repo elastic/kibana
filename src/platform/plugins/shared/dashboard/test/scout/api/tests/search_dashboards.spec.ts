@@ -95,6 +95,18 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.data).toHaveLength(10);
   });
 
+  apiTest('should reject per page limits above the GA maximum', async ({ apiClient }) => {
+    const response = await apiClient.get(buildUrl({ per_page: 1001 }), {
+      headers: {
+        ...COMMON_HEADERS,
+        ...viewerCredentials.apiKeyHeader,
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+  });
+
   apiTest(
     'should allow users to paginate through the list of dashboards',
     async ({ apiClient }) => {

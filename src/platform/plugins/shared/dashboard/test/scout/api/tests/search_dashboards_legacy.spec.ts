@@ -104,6 +104,19 @@ apiTest.describe('dashboards - search - LEGACY', { tag: tags.deploymentAgnostic 
     expect(response.body.dashboards).toHaveLength(10);
   });
 
+  apiTest('should allow legacy per page limits above the GA maximum', async ({ apiClient }) => {
+    const response = await apiClient.get(buildUrl({ per_page: 1001 }), {
+      headers: {
+        ...COMMON_HEADERS,
+        ...viewerCredentials.apiKeyHeader,
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.total).toBe(101);
+  });
+
   apiTest(
     'should allow users to paginate through the list of dashboards',
     async ({ apiClient }) => {
