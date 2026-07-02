@@ -7,3 +7,8 @@
 
 export * as archives from './archives';
 export * as detection_rules from './detection_rules';
+<<<<<<< HEAD
+=======
+export type * from './entity_analytics';
+export { FULL_KIBANA_SECURITY_ROLE } from './roles';
+>>>>>>> f1949013b6c8 ([scout] separate scout tests into namespace sub-directories (#275087))

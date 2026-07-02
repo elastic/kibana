@@ -8,6 +8,14 @@
 // Security-specific test framework
 export { test, spaceTest } from './src/playwright';
 
+<<<<<<< HEAD
+=======
+// Security-specific test constants
+export { CUSTOM_QUERY_RULE } from './src/playwright/constants/detection_rules';
+export { FULL_KIBANA_SECURITY_ROLE } from './src/playwright/constants/roles';
+export { ES as SECURITY_ARCHIVES } from './src/playwright/constants/archives';
+
+>>>>>>> f1949013b6c8 ([scout] separate scout tests into namespace sub-directories (#275087))
 // re-exported test framework from @kbn/scout
 export { lighthouseTest, apiTest, globalSetupHook, globalTeardownHook, tags } from '@kbn/scout';
 

@@ -164,6 +164,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/playwright.config.ts',
               exists: true,
@@ -197,6 +198,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/parallel.playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/parallel.playwright.config.ts',
               exists: true,
@@ -228,6 +230,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/shared/pluginB/test/scout/api/playwright.config.ts',
             category: 'api',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/shared/pluginB/test/scout/api/playwright.config.ts',
               exists: true,
@@ -259,6 +262,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'src/platform/packages/shared/packageA/test/scout/api/playwright.config.ts',
             category: 'api',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'src/platform/packages/shared/packageA/test/scout/api/playwright.config.ts',
               exists: true,
@@ -496,6 +500,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
           path: 'x-pack/platform/plugins/private/pluginLocalServerless/test/scout/ui/playwright.config.ts',
           category: 'ui',
           type: 'playwright',
+          namespace: undefined,
           manifest: {
             path: 'x-pack/platform/plugins/private/pluginLocalServerless/test/scout/ui/playwright.config.ts',
             exists: true,
@@ -564,6 +569,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginCustom/test/scout_custom/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginCustom/test/scout_custom/ui/playwright.config.ts',
               exists: true,
@@ -586,6 +592,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginCustom/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginCustom/test/scout/ui/playwright.config.ts',
               exists: true,
@@ -645,6 +652,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: excludedConfigPath,
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/.meta/ui/parallel.json',
               exists: true,
@@ -667,6 +675,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/playwright.config.ts',
               exists: true,
@@ -757,6 +766,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginNoMatch/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginNoMatch/test/scout/ui/playwright.config.ts',
               exists: true,
@@ -842,6 +852,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginNoTests/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginNoTests/test/scout/ui/playwright.config.ts',
               exists: true,
@@ -897,6 +908,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginMixedTests/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginMixedTests/test/scout/ui/playwright.config.ts',
               exists: true,
@@ -1002,6 +1014,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginTestModes/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginTestModes/test/scout/ui/playwright.config.ts',
               exists: true,
@@ -1028,6 +1041,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginTestModes/test/scout/api/playwright.config.ts',
             category: 'api',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginTestModes/test/scout/api/playwright.config.ts',
               exists: true,
@@ -1080,6 +1094,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginSearch/test/scout/ui/playwright.config.ts',
               category: 'ui',
               type: 'playwright',
+              namespace: undefined,
               manifest: {
                 path: 'x-pack/platform/plugins/private/pluginSearch/test/scout/ui/playwright.config.ts',
                 exists: true,
@@ -1102,6 +1117,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginSearch/test/scout/api/playwright.config.ts',
               category: 'api',
               type: 'playwright',
+              namespace: undefined,
               manifest: {
                 path: 'x-pack/platform/plugins/private/pluginSearch/test/scout/api/playwright.config.ts',
                 exists: true,
@@ -1133,6 +1149,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginPlatform/test/scout/ui/playwright.config.ts',
               category: 'ui',
               type: 'playwright',
+              namespace: undefined,
               manifest: {
                 path: 'x-pack/platform/plugins/private/pluginPlatform/test/scout/ui/playwright.config.ts',
                 exists: true,
@@ -1164,6 +1181,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/solutions/observability/plugins/pluginOblt/test/scout/ui/playwright.config.ts',
               category: 'ui',
               type: 'playwright',
+              namespace: undefined,
               manifest: {
                 path: 'x-pack/solutions/observability/plugins/pluginOblt/test/scout/ui/playwright.config.ts',
                 exists: true,
@@ -1387,6 +1405,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginMultiMode/test/scout/ui/playwright.config.ts',
               category: 'ui',
               type: 'playwright',
+              namespace: undefined,
               manifest: {
                 path: 'x-pack/platform/plugins/private/pluginMultiMode/test/scout/ui/playwright.config.ts',
                 exists: true,
