@@ -57,13 +57,15 @@ const querySchema = schema.object({
     })
   ),
   visibilityContext: schema.maybe(
-    schema.arrayOf(schema.string(), {
-      maxSize: MAX_ARRAY_PARAM_SIZE,
-      meta: {
-        description:
-          'When managed workflows are included, only return managed workflows visible in these contexts.',
-      },
-    })
+    schema.oneOf(
+      [schema.string(), schema.arrayOf(schema.string(), { maxSize: MAX_ARRAY_PARAM_SIZE })],
+      {
+        meta: {
+          description:
+            'When managed workflows are included, only return managed workflows visible in these contexts.',
+        },
+      }
+    )
   ),
   sortField: schema.maybe(
     schema.oneOf([schema.literal('name'), schema.literal('enabled')], {
@@ -144,7 +146,10 @@ function prepareParams({
     createdBy: createdBy != null && !Array.isArray(createdBy) ? [createdBy] : createdBy,
     tags: tags != null && !Array.isArray(tags) ? [tags] : tags,
     managedFilter: managed,
-    visibilityContext,
+    visibilityContext:
+      visibilityContext != null && !Array.isArray(visibilityContext)
+        ? [visibilityContext]
+        : visibilityContext,
     sortField,
     sortOrder,
   };

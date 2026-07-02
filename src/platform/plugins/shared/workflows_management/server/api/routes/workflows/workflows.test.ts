@@ -226,12 +226,12 @@ describe('Workflow routes', () => {
       });
     });
 
-    it('should pass selector availability to api.getWorkflows', async () => {
+    it('should normalize selector visibility context to an array for api.getWorkflows', async () => {
       mockApi.getWorkflows.mockResolvedValue({ workflows: [], total: 0 });
       const request = httpServerMock.createKibanaRequest({
         query: {
           managed: 'all',
-          visibilityContext: [getManagedWorkflowSelectorVisibilityContext('rule_action')],
+          visibilityContext: getManagedWorkflowSelectorVisibilityContext('rule_action'),
         },
       });
       (request as any).authzResult = {
