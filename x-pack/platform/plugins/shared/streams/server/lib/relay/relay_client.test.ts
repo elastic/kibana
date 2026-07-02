@@ -33,15 +33,15 @@ describe('RelayClientImpl', () => {
       json: async () => body,
     } as Response);
 
-  const deploymentToken = 'a'.repeat(48);
+  const kibanaApiKey = 'a'.repeat(48);
 
   describe('startSlackInstall', () => {
-    it('POSTs to /v1/slack/install with the deployment_token + created_by_user_key and maps the response', async () => {
+    it('POSTs to /v1/slack/install with the kibana_api_key + created_by_user_key and maps the response', async () => {
       fetchMock.mockResolvedValue(okResponse(relayResponse));
       const client = new RelayClientImpl({ baseUrl: 'https://relay.example', logger });
 
       const result = await client.startSlackInstall({
-        deploymentToken,
+        kibanaApiKey,
         createdByUserKey: 'user-42',
       });
 
@@ -53,7 +53,7 @@ describe('RelayClientImpl', () => {
         headers: { 'content-type': 'application/json' },
       });
       expect(JSON.parse(init.body)).toEqual({
-        deployment_token: deploymentToken,
+        kibana_api_key: kibanaApiKey,
         created_by_user_key: 'user-42',
       });
       expect(result).toEqual({ authorizeUrl: relayResponse.authorize_url });
@@ -63,7 +63,7 @@ describe('RelayClientImpl', () => {
       fetchMock.mockResolvedValue(okResponse(relayResponse));
       const client = new RelayClientImpl({ baseUrl: 'https://relay.example', logger });
 
-      await client.startSlackInstall({ deploymentToken });
+      await client.startSlackInstall({ kibanaApiKey });
 
       const [, init] = fetchMock.mock.calls[0];
       expect(init.headers).toEqual({ 'content-type': 'application/json' });
@@ -77,7 +77,7 @@ describe('RelayClientImpl', () => {
         logger,
       });
 
-      await client.startSlackInstall({ deploymentToken });
+      await client.startSlackInstall({ kibanaApiKey });
 
       const [, init] = fetchMock.mock.calls[0];
       expect(init.headers).toEqual({
@@ -90,7 +90,7 @@ describe('RelayClientImpl', () => {
       fetchMock.mockResolvedValue(okResponse(relayResponse));
       const client = new RelayClientImpl({ baseUrl: 'https://relay.example/', logger });
 
-      await client.startSlackInstall({ deploymentToken });
+      await client.startSlackInstall({ kibanaApiKey });
 
       expect(fetchMock.mock.calls[0][0]).toBe('https://relay.example/v1/slack/install');
     });
@@ -103,10 +103,8 @@ describe('RelayClientImpl', () => {
       } as Response);
       const client = new RelayClientImpl({ baseUrl: 'https://relay.example', logger });
 
-      await expect(client.startSlackInstall({ deploymentToken })).rejects.toThrow(
-        RelayResponseError
-      );
-      await expect(client.startSlackInstall({ deploymentToken })).rejects.toThrow(/status 503/);
+      await expect(client.startSlackInstall({ kibanaApiKey })).rejects.toThrow(RelayResponseError);
+      await expect(client.startSlackInstall({ kibanaApiKey })).rejects.toThrow(/status 503/);
       expect(logger.error).toHaveBeenCalled();
     });
 
@@ -114,10 +112,10 @@ describe('RelayClientImpl', () => {
       fetchMock.mockRejectedValue(new Error('ECONNREFUSED'));
       const client = new RelayClientImpl({ baseUrl: 'https://relay.example', logger });
 
-      await expect(client.startSlackInstall({ deploymentToken })).rejects.toThrow(
+      await expect(client.startSlackInstall({ kibanaApiKey })).rejects.toThrow(
         RelayUnreachableError
       );
-      await expect(client.startSlackInstall({ deploymentToken })).rejects.toThrow(
+      await expect(client.startSlackInstall({ kibanaApiKey })).rejects.toThrow(
         /Failed to reach the relay service/
       );
       expect(logger.error).toHaveBeenCalled();

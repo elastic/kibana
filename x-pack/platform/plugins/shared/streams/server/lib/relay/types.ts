@@ -12,7 +12,7 @@
 export interface StartInstallRequestBody {
   // Encoded Kibana API key the relay stores and later uses to call Agent Builder
   // on this deployment. Must be at least 32 chars (enforced by the relay).
-  deployment_token: string;
+  kibana_api_key: string;
   created_by_user_key?: string;
 }
 
@@ -28,7 +28,7 @@ export interface StartInstallResponseBody {
  * initiate-only scope we only surface the authorize URL.
  */
 export interface StartSlackInstallInput {
-  deploymentToken: string;
+  kibanaApiKey: string;
   createdByUserKey?: string;
 }
 

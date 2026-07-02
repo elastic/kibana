@@ -68,7 +68,7 @@ export class RelayClientImpl implements RelayClient {
   async startSlackInstall(input: StartSlackInstallInput): Promise<StartSlackInstallResult> {
     const url = `${this.baseUrl}/v1/slack/install`;
     const body: StartInstallRequestBody = {
-      deployment_token: input.deploymentToken,
+      kibana_api_key: input.kibanaApiKey,
       created_by_user_key: input.createdByUserKey,
     };
 

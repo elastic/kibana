@@ -57,7 +57,7 @@ const connectSlackRoute = createServerRoute({
 
     // Mint the managed Agent Builder API key the relay stores and later uses to
     // converse with this deployment.
-    const deploymentToken = await createDeploymentToken({
+    const kibanaApiKey = await createDeploymentToken({
       security: server.security,
       request,
       logger,
@@ -68,7 +68,7 @@ const connectSlackRoute = createServerRoute({
       headers: server.config.relayService?.headers,
       logger,
     });
-    return relay.startSlackInstall({ deploymentToken, createdByUserKey });
+    return relay.startSlackInstall({ kibanaApiKey, createdByUserKey });
   },
 });
 
