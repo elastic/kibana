@@ -1025,12 +1025,6 @@ steps:
                         - {{ factor }}
                         {%- endfor %}
 
-                        ### Related Alert IDs
-                        {% for alert in steps.onechat_runAgent_step.output.structured_output.related_alert_ids %}
-                        - [{{ alert.alert_id }}](/app/security/alerts/redirect/{{ alert.alert_id }})
-                        {%- endfor %}
-
-
                         ### Timestamp
                         {{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S' }}
 
