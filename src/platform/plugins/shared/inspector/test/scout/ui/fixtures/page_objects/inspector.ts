@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '..';
+import type { ScoutPage } from '@kbn/scout';
 
 export class Inspector {
   constructor(private readonly page: ScoutPage) {}
