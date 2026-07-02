@@ -149,6 +149,50 @@ describe('createAiRuleCreationHandler', () => {
       expect(updateOrigin).toHaveBeenCalledWith('saved-id-1');
     });
 
+    it('keeps saving state held until updateOrigin has settled', async () => {
+      mockCreateRule.mockResolvedValue(savedRule);
+      const service = makeService();
+      let resolveOrigin!: () => void;
+      const updateOrigin = jest.fn(() => new Promise<void>((resolve) => (resolveOrigin = resolve)));
+
+      createAiRuleCreationHandler({
+        aiRuleCreation: service,
+        notifications: makeNotifications() as never,
+        agentBuilder: makeAgentBuilder('conv-1') as never,
+      });
+
+      emit(service as never, { rule: makeRule(), updateOrigin });
+      await flush();
+
+      expect(updateOrigin).toHaveBeenCalled();
+      expect(service.clearSaving).not.toHaveBeenCalled();
+
+      resolveOrigin();
+      await flush();
+
+      expect(service.clearSaving).toHaveBeenCalled();
+    });
+
+    it('shows a warning toast and still clears saving when updateOrigin rejects', async () => {
+      mockCreateRule.mockResolvedValue(savedRule);
+      const service = makeService();
+      const notifications = makeNotifications();
+      const updateOrigin = jest.fn().mockRejectedValue(new Error('link failed'));
+
+      createAiRuleCreationHandler({
+        aiRuleCreation: service,
+        notifications: notifications as never,
+        agentBuilder: makeAgentBuilder('conv-1') as never,
+      });
+
+      emit(service as never, { rule: makeRule(), updateOrigin });
+      await flush();
+
+      expect(notifications.toasts.addWarning).toHaveBeenCalled();
+      expect(notifications.toasts.addDanger).not.toHaveBeenCalled();
+      expect(service.clearSaving).toHaveBeenCalled();
+    });
+
     it('does not call updateOrigin when convId is absent', async () => {
       mockCreateRule.mockResolvedValue(savedRule);
       const service = makeService();

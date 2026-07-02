@@ -121,7 +121,6 @@ export const createAiRuleCreationHandler = ({
               })
         );
 
-        aiRuleCreation.clearSaving();
         // Deactivate so a post-save form edit can't clobber the attachment before the next AI
         // round reactivates sync.
         aiRuleCreation.deactivateFormSync();
@@ -169,9 +168,26 @@ export const createAiRuleCreationHandler = ({
           try {
             await updateOrigin(saved.id);
           } catch {
-            // Non-fatal: the rule is saved; a manual refresh will reconcile the card state.
+            // Non-fatal: the rule is saved. Warn because the card may still read "Create rule",
+            // and a second click would create a duplicate.
+            notifications.toasts.addWarning({
+              title: i18n.translate(
+                'xpack.securitySolution.saveRuleHandler.originLinkFailedTitle',
+                {
+                  defaultMessage: 'Rule saved, but the chat card could not be linked to it',
+                }
+              ),
+              text: i18n.translate('xpack.securitySolution.saveRuleHandler.originLinkFailedText', {
+                defaultMessage:
+                  'The rule was saved successfully. Refresh the conversation before saving from this card again to avoid creating a duplicate.',
+              }),
+            });
           }
         }
+
+        // Cleared LAST: the save button stays disabled until origin linking has settled, so a
+        // rapid second click can't fire another create while the card still reads "Create rule".
+        aiRuleCreation.clearSaving();
       } catch (err) {
         aiRuleCreation.clearSaving();
         const message =
