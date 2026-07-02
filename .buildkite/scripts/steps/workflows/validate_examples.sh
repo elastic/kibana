@@ -51,7 +51,7 @@ main () {
   .buildkite/scripts/bootstrap.sh
 
   local examples_dir="$WORKFLOWS_CHECKOUT/$EXAMPLES_SUBPATH"
-  if [[ ! -d "$examples_dir" ]; then
+  if [[ ! -d "$examples_dir" ]]; then
     echo "Error: examples directory '$examples_dir' does not exist." >&2
     echo "Override the subpath with WORKFLOWS_EXAMPLES_SUBPATH if upstream layout changed." >&2
     exit 1
