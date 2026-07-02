@@ -30,7 +30,9 @@ const DATA_PHASES_FLYOUT_DELETE_PANEL = 'streamsEditDataPhasesFlyoutPanel-delete
 const DATA_PHASES_FLYOUT_MOVE_AFTER_VALUE = 'streamsEditDataPhasesFlyoutMoveAfterValue';
 const DATA_PHASES_FLYOUT_MOVE_AFTER_UNIT = 'streamsEditDataPhasesFlyoutMoveAfterUnit';
 const DATA_PHASES_FLYOUT_SAVE = 'streamsEditDataPhasesFlyoutSaveButton';
+const DATA_PHASES_FLYOUT_CANCEL = 'streamsEditDataPhasesFlyoutCancelButton';
 const DEFAULT_REPO_MODAL_TITLE = 'streamsDlmFrozenDefaultRepositoryRequiredModalTitle';
+const DEFAULT_REPO_MODAL_REFRESH = 'streamsDlmFrozenDefaultRepositoryRequiredModalRefreshButton';
 // The frozen phase's timeline test id uses its localized, capitalized display label ("Frozen").
 const FROZEN_PHASE_BUTTON = 'lifecyclePhase-Frozen-button';
 const FROZEN_PHASE_EDIT_BUTTON = 'lifecyclePhase-Frozen-editButton';
@@ -216,6 +218,45 @@ test.describe(
       // Selecting frozen opens the gating modal instead of the edit flyout.
       await expect(page.getByTestId(DEFAULT_REPO_MODAL_TITLE)).toBeVisible();
       await expect(page.getByTestId(DATA_PHASES_FLYOUT)).toBeHidden();
+    });
+
+    test('resumes adding the frozen phase when a default repository is created and the modal is refreshed', async ({
+      page,
+      esClient,
+    }) => {
+      // No default repository yet (cleared in beforeAll), so selecting frozen opens the gating modal.
+      await page.getByTestId(ADD_DATA_PHASE_BUTTON).click();
+      await page.getByTestId(FROZEN_OPTION).click();
+      await expect(page.getByTestId(DEFAULT_REPO_MODAL_TITLE)).toBeVisible();
+
+      const REPO_NAME = 'streams-frozen-resume-test-repo';
+      try {
+        // Configure a default snapshot repository out of band while the modal is open.
+        await esClient.snapshot.createRepository({
+          name: REPO_NAME,
+          repository: { type: 'fs', settings: { location: '/tmp/repo' } },
+        });
+        await esClient.cluster.putSettings({
+          persistent: { 'repositories.default_repository': REPO_NAME },
+        });
+
+        // Refresh should detect the repository, close the modal, and resume the flow by opening the
+        // data phases flyout on the frozen panel (rather than leaving the user stuck in the modal).
+        await page.getByTestId(DEFAULT_REPO_MODAL_REFRESH).click();
+
+        await expect(page.getByTestId(DEFAULT_REPO_MODAL_TITLE)).toBeHidden();
+        await page.getByTestId(DATA_PHASES_FLYOUT).waitFor({ state: 'visible' });
+        await expect(page.getByTestId(DATA_PHASES_FLYOUT_FROZEN_PANEL)).toBeVisible();
+
+        // Close the flyout so the resumed (unsaved) frozen phase doesn't leak into the next test.
+        await page.getByTestId(DATA_PHASES_FLYOUT_CANCEL).click();
+        await page.getByTestId(DATA_PHASES_FLYOUT).waitFor({ state: 'hidden' });
+      } finally {
+        await esClient.cluster.putSettings({
+          persistent: { 'repositories.default_repository': null },
+        });
+        await esClient.snapshot.deleteRepository({ name: REPO_NAME }).catch(() => {});
+      }
     });
 
     test('opens the data phases flyout when editing an existing phase from the timeline', async ({

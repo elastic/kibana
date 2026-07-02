@@ -230,6 +230,10 @@ const StreamDetailGeneralDataInner = ({
   // Frozen phase is not available in serverless
   const dataPhaseFlowEnabled = !isServerless;
 
+  // Points at `openEditDataPhasesFlyout` (defined below) so the gating hook can resume the flow once
+  // a default repository is created - without a forward reference.
+  const openDataPhasesFlyoutRef = useRef<(phase: PhaseName) => void>(() => {});
+
   // Only fetch frozen-phase gating data (snapshot repositories, license) when the data-phase flow
   // is actually offered for this DLM stream.
   const frozenPhaseGating = useDlmFrozenPhaseGating({
@@ -238,6 +242,9 @@ const StreamDetailGeneralDataInner = ({
       dataPhaseFlowEnabled &&
       Boolean(definition.privileges.lifecycle) &&
       !isIlmLifecycle(definition.effective_lifecycle),
+    // When the "default repository required" modal resolves (repo created + Refresh), resume adding
+    // the frozen phase by opening the flyout.
+    onFrozenGatingResolved: useCallback(() => openDataPhasesFlyoutRef.current('frozen'), []),
   });
 
   const { confirmOverride: confirmDataPhasesOverride, modal: dataPhasesOverrideModal } =
@@ -287,6 +294,9 @@ const StreamDetailGeneralDataInner = ({
       frozenPhaseGating,
     ]
   );
+
+  // Keep the ref current so the gating hook's resume callback opens the latest flyout handler.
+  openDataPhasesFlyoutRef.current = openEditDataPhasesFlyout;
 
   const dataPhasesInitialDsl: IngestStreamLifecycleDSL['dsl'] = React.useMemo(() => {
     const baseline = effectiveToIngestLifecycle(definition.effective_lifecycle);

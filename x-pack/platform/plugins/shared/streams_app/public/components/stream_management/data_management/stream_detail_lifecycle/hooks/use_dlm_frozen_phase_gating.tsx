@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Streams } from '@kbn/streams-schema';
 import {
@@ -19,6 +19,12 @@ import { useSnapshotRepositories } from './use_snapshot_repositories';
 interface UseDlmFrozenPhaseGatingProps {
   definition: Streams.ingest.all.GetResponse;
   enabled: boolean;
+  /**
+   * Called when the "default snapshot repository required" gating modal is open and a default
+   * repository becomes available (e.g. the user created one and hit Refresh). Lets the caller resume
+   * the blocked action - adding the frozen phase and opening the flyout.
+   */
+  onFrozenGatingResolved?: () => void;
 }
 
 export interface DlmFrozenPhaseGating {
@@ -55,6 +61,7 @@ export interface DlmFrozenPhaseGating {
 export const useDlmFrozenPhaseGating = ({
   definition,
   enabled,
+  onFrozenGatingResolved,
 }: UseDlmFrozenPhaseGatingProps): DlmFrozenPhaseGating => {
   const {
     core: { application },
@@ -90,6 +97,16 @@ export const useDlmFrozenPhaseGating = ({
 
   const [activeModal, setActiveModal] = useState<'enterprise' | 'defaultRepository' | undefined>();
   const closeModal = useCallback(() => setActiveModal(undefined), []);
+
+  // Resume the blocked "add frozen phase" flow once a default repository is detected while the
+  // gating modal is open (e.g. the user created one and clicked Refresh). Close the modal and let
+  // the caller open the flyout.
+  useEffect(() => {
+    if (activeModal === 'defaultRepository' && hasDefaultRepository) {
+      setActiveModal(undefined);
+      onFrozenGatingResolved?.();
+    }
+  }, [activeModal, hasDefaultRepository, onFrozenGatingResolved]);
 
   const onUpgradeEnterprise = useCallback(() => setActiveModal('enterprise'), []);
   const onMissingDefaultRepository = useCallback(() => {

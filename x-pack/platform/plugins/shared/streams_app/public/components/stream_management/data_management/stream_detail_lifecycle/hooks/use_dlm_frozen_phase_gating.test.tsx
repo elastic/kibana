@@ -187,4 +187,51 @@ describe('useDlmFrozenPhaseGating', () => {
       ).toBeNull();
     });
   });
+
+  describe('resuming the frozen flow after the default repository is configured', () => {
+    it('closes the gating modal and calls onFrozenGatingResolved once a default repository appears', () => {
+      setSnapshotRepositories(undefined);
+      const onFrozenGatingResolved = jest.fn();
+      const { result, rerender } = renderHook(() =>
+        useDlmFrozenPhaseGating({
+          definition: createDefinition(true),
+          enabled: true,
+          onFrozenGatingResolved,
+        })
+      );
+
+      // Adding frozen with no default repository blocks the flyout and opens the gating modal.
+      let blocked: boolean | undefined;
+      act(() => {
+        blocked = result.current.handleAddPhaseGating('frozen');
+      });
+      expect(blocked).toBe(true);
+      expect(onFrozenGatingResolved).not.toHaveBeenCalled();
+
+      // The user creates a repository and hits Refresh → a default repository is now detected.
+      setSnapshotRepositories('brand-new-repo');
+      rerender();
+
+      // The blocked flow resumes: the caller is asked to reopen the flyout and gating no longer blocks.
+      expect(onFrozenGatingResolved).toHaveBeenCalledTimes(1);
+      expect(result.current.handleAddPhaseGating('frozen')).toBe(false);
+    });
+
+    it('does not call onFrozenGatingResolved when no gating modal is open', () => {
+      const onFrozenGatingResolved = jest.fn();
+      const { rerender } = renderHook(() =>
+        useDlmFrozenPhaseGating({
+          definition: createDefinition(true),
+          enabled: true,
+          onFrozenGatingResolved,
+        })
+      );
+
+      // Repository availability changing on its own (no pending "add frozen") must not resume anything.
+      setSnapshotRepositories('brand-new-repo');
+      rerender();
+
+      expect(onFrozenGatingResolved).not.toHaveBeenCalled();
+    });
+  });
 });
