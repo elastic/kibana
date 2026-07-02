@@ -363,7 +363,7 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
         defaultMessage: 'Workflow',
       }),
 
-    // getIcon: () => 'workflowsApp',
+    getIcon: () => 'workflowsApp',
 
     getActionButtons: ({ attachment, isCanvas, openCanvas }) => {
       if (isCanvas) return [];
@@ -401,19 +401,6 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
 
       return buttons;
     },
-
-    // renderInlineContent: ({ attachment, isSidebar }) => (
-    //   <KibanaContextProvider services={core}>
-    //     <WorkflowYamlCanvasContent
-    //       attachment={attachment}
-    //       isSidebar={isSidebar}
-    //       application={application}
-    //       isOnWorkflowPage={isOnWorkflowPage}
-    //       telemetry={telemetry}
-    //       queryClient={queryClient}
-    //     />
-    //   </KibanaContextProvider>
-    // ),
 
     renderCanvasContent: ({ attachment, isSidebar }, { registerActionButtons, updateOrigin }) => (
       <KibanaContextProvider services={core}>
