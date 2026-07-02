@@ -7,8 +7,18 @@
 
 import type { IconType } from '@elastic/eui';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import type { EpisodeEventRow } from '../../../queries/episode_events_query';
+import {
+  isSupportedEpisodeSeverity,
+  normalizeEpisodeSeverity,
+  type EpisodeSeverity,
+} from '../../severity/severity_utils';
 import type { EpisodeActionHistoryEntry } from '../../../queries/episode_actions_history_query';
+
+export interface StateChangeSourceRow {
+  '@timestamp': string;
+  'episode.status': AlertEpisodeStatus;
+  event_count?: number;
+}
 
 export interface StateChangeEntry {
   kind: 'state_change';
@@ -19,12 +29,27 @@ export interface StateChangeEntry {
   prevEventCount: number;
 }
 
+export interface SeverityChangeSourceRow {
+  '@timestamp': string;
+  severity?: string | null;
+  event_count?: number;
+}
+
+export interface SeverityChangeEntry {
+  kind: 'severity_change';
+  timestamp: string;
+  newSeverity: EpisodeSeverity;
+  /** undefined when this is the episode's initial supported severity */
+  prevSeverity: EpisodeSeverity | undefined;
+  prevEventCount: number;
+}
+
 export interface ActionEntry {
   kind: 'action';
   entry: EpisodeActionHistoryEntry;
 }
 
-export type TimelineEntry = StateChangeEntry | ActionEntry;
+export type TimelineEntry = StateChangeEntry | SeverityChangeEntry | ActionEntry;
 
 /** Icon shown on the avatar for each action type (no system actor profile). */
 export const ACTION_ICON: Record<string, IconType> = {
@@ -42,13 +67,14 @@ export const ACTION_ICON: Record<string, IconType> = {
  * Collapses a chronological run of episode event rows into the status
  * transitions between them, tracking how many events preceded each change.
  */
-export const deriveStateChangeEntries = (eventRows: EpisodeEventRow[]): StateChangeEntry[] => {
+export const deriveStateChangeEntries = (eventRows: StateChangeSourceRow[]): StateChangeEntry[] => {
   const entries: StateChangeEntry[] = [];
   let prevStatus: AlertEpisodeStatus | undefined;
   let runCount = 0;
 
   for (const row of eventRows) {
     const status = row['episode.status'];
+    const eventCount = row.event_count ?? 1;
     if (prevStatus === undefined) {
       entries.push({
         kind: 'state_change',
@@ -58,7 +84,7 @@ export const deriveStateChangeEntries = (eventRows: EpisodeEventRow[]): StateCha
         prevEventCount: 0,
       });
       prevStatus = status;
-      runCount = 1;
+      runCount = eventCount;
     } else if (status !== prevStatus) {
       entries.push({
         kind: 'state_change',
@@ -68,9 +94,56 @@ export const deriveStateChangeEntries = (eventRows: EpisodeEventRow[]): StateCha
         prevEventCount: runCount,
       });
       prevStatus = status;
-      runCount = 1;
+      runCount = eventCount;
     } else {
-      runCount++;
+      runCount += eventCount;
+    }
+  }
+
+  return entries;
+};
+
+/**
+ * Collapses a chronological run of episode severity rows into the supported
+ * severity transitions between them, tracking how many events preceded each change.
+ */
+export const deriveSeverityChangeEntries = (
+  eventRows: SeverityChangeSourceRow[]
+): SeverityChangeEntry[] => {
+  const entries: SeverityChangeEntry[] = [];
+  let prevSeverity: EpisodeSeverity | undefined;
+  let runCount = 0;
+
+  for (const row of eventRows) {
+    const { severity } = row;
+    if (!isSupportedEpisodeSeverity(severity)) {
+      continue;
+    }
+
+    const normalizedSeverity = normalizeEpisodeSeverity(severity);
+    const eventCount = row.event_count ?? 1;
+    if (prevSeverity === undefined) {
+      entries.push({
+        kind: 'severity_change',
+        timestamp: row['@timestamp'],
+        newSeverity: normalizedSeverity,
+        prevSeverity: undefined,
+        prevEventCount: 0,
+      });
+      prevSeverity = normalizedSeverity;
+      runCount = eventCount;
+    } else if (normalizedSeverity !== prevSeverity) {
+      entries.push({
+        kind: 'severity_change',
+        timestamp: row['@timestamp'],
+        newSeverity: normalizedSeverity,
+        prevSeverity,
+        prevEventCount: runCount,
+      });
+      prevSeverity = normalizedSeverity;
+      runCount = eventCount;
+    } else {
+      runCount += eventCount;
     }
   }
 
@@ -78,15 +151,16 @@ export const deriveStateChangeEntries = (eventRows: EpisodeEventRow[]): StateCha
 };
 
 const getEntryTimestamp = (entry: TimelineEntry): string =>
-  entry.kind === 'state_change' ? entry.timestamp : entry.entry['@timestamp'];
+  entry.kind === 'action' ? entry.entry['@timestamp'] : entry.timestamp;
 
-/** Merges state changes and action history into a single newest-first list. */
+/** Merges state changes, severity changes, and action history into a single newest-first list. */
 export const mergeTimelineEntries = (
   stateChangeEntries: StateChangeEntry[],
+  severityChangeEntries: SeverityChangeEntry[],
   actionEntries: EpisodeActionHistoryEntry[]
 ): TimelineEntry[] => {
   const actionItems: TimelineEntry[] = actionEntries.map((entry) => ({ kind: 'action', entry }));
-  return [...stateChangeEntries, ...actionItems].sort((a, b) =>
+  return [...stateChangeEntries, ...severityChangeEntries, ...actionItems].sort((a, b) =>
     getEntryTimestamp(b).localeCompare(getEntryTimestamp(a))
   );
 };

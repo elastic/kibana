@@ -8,11 +8,16 @@
 import React, { useMemo } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
+import { useFetchEpisodeStateTransitionsQuery } from '../../hooks/use_fetch_episode_state_transitions_query';
+import { useFetchEpisodeSeverityTransitionsQuery } from '../../hooks/use_fetch_episode_severity_transitions_query';
 import { useFetchEpisodeActionsHistoryQuery } from '../../hooks/use_fetch_episode_actions_history_query';
 import { useBulkGetProfiles } from '../../hooks/use_bulk_get_profiles';
 import type { AlertEpisodeDetailsServices } from './types';
-import { deriveStateChangeEntries, mergeTimelineEntries } from './timeline/entries';
+import {
+  deriveSeverityChangeEntries,
+  deriveStateChangeEntries,
+  mergeTimelineEntries,
+} from './timeline/entries';
 import { AlertEpisodeTimeline } from './timeline/timeline';
 import * as i18n from './timeline/translations';
 
@@ -27,7 +32,15 @@ export const AlertEpisodeTimelineSection = ({
   groupHash,
   services,
 }: AlertEpisodeTimelineSectionProps) => {
-  const { data: eventRows = [] } = useFetchEpisodeEventsQuery({ episodeId, services });
+  const { data: stateTransitionRows = [] } = useFetchEpisodeStateTransitionsQuery({
+    episodeId,
+    services,
+  });
+
+  const { data: severityTransitionRows = [] } = useFetchEpisodeSeverityTransitionsQuery({
+    episodeId,
+    services,
+  });
 
   const { data: actionEntries = [], isLoading } = useFetchEpisodeActionsHistoryQuery({
     episodeId,
@@ -64,11 +77,19 @@ export const AlertEpisodeTimelineSection = ({
     return map;
   }, [profiles]);
 
-  const stateChangeEntries = useMemo(() => deriveStateChangeEntries(eventRows), [eventRows]);
+  const stateChangeEntries = useMemo(
+    () => deriveStateChangeEntries(stateTransitionRows),
+    [stateTransitionRows]
+  );
+
+  const severityChangeEntries = useMemo(
+    () => deriveSeverityChangeEntries(severityTransitionRows),
+    [severityTransitionRows]
+  );
 
   const mergedEntries = useMemo(
-    () => mergeTimelineEntries(stateChangeEntries, actionEntries),
-    [stateChangeEntries, actionEntries]
+    () => mergeTimelineEntries(stateChangeEntries, severityChangeEntries, actionEntries),
+    [stateChangeEntries, severityChangeEntries, actionEntries]
   );
 
   if (isLoading) {

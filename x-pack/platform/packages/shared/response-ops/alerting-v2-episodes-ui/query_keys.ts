@@ -36,6 +36,12 @@ export const queryKeys = {
   episodeTrendAll: () => [...queryKeys.all, 'episode-trend'] as const,
   episodeTrend: (spaceId: string, episodeId: string, metricLabels: string[]) =>
     [...queryKeys.episodeTrendAll(), spaceId, episodeId, ...metricLabels] as const,
+  episodeStateTransitionsAll: () => [...queryKeys.all, 'episode-state-transitions'] as const,
+  episodeStateTransitions: (spaceId: string, episodeId: string) =>
+    [...queryKeys.episodeStateTransitionsAll(), spaceId, episodeId] as const,
+  episodeSeverityTransitionsAll: () => [...queryKeys.all, 'episode-severity-transitions'] as const,
+  episodeSeverityTransitions: (spaceId: string, episodeId: string) =>
+    [...queryKeys.episodeSeverityTransitionsAll(), spaceId, episodeId] as const,
   relatedSameGroupEpisodes: (
     spaceId: string,
     ruleId: string,

@@ -10,6 +10,8 @@ import { css } from '@emotion/react';
 import { EuiAvatar, EuiComment, EuiCommentList, EuiSpacer, EuiText } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { AlertEpisodeStatusBadge } from '../../status/status_badge';
+import { AlertEpisodeSeverityBadge } from '../../severity/episode_severity_badge';
+import { getEpisodeSeverityLabel } from '../../severity/severity_utils';
 import type { TimelineEntry } from './entries';
 import { formatTimestamp } from './entries';
 import { AlertEpisodeTimelineActionComment } from './timeline_action_comment';
@@ -40,6 +42,43 @@ export const AlertEpisodeTimeline = ({ entries, profilesMap }: AlertEpisodeTimel
             entry={item.entry}
             profilesMap={profilesMap}
           />
+        );
+      }
+
+      if (item.kind === 'severity_change') {
+        const isInitial = item.prevSeverity === undefined;
+        return (
+          <EuiComment
+            key={`severity-${idx}`}
+            data-test-subj="alertingV2TimelineEntry"
+            data-timestamp={item.timestamp}
+            username={i18n.SYSTEM_LABEL}
+            timestamp={formatTimestamp(item.timestamp)}
+            timelineAvatar={
+              <EuiAvatar
+                size="s"
+                name={isInitial ? i18n.SEVERITY_SET : i18n.SEVERITY_CHANGED}
+                iconType={isInitial ? 'flag' : 'arrowRight'}
+                color="subdued"
+              />
+            }
+            event={isInitial ? i18n.SEVERITY_SET : i18n.SEVERITY_CHANGED}
+          >
+            <>
+              <AlertEpisodeSeverityBadge severity={item.newSeverity} />
+              {item.prevSeverity !== undefined && (
+                <>
+                  <EuiSpacer size="xs" />
+                  <EuiText size="s" color="subdued">
+                    {i18n.getAfterNEventsLabel(
+                      item.prevEventCount,
+                      getEpisodeSeverityLabel(item.prevSeverity)
+                    )}
+                  </EuiText>
+                </>
+              )}
+            </>
+          </EuiComment>
         );
       }
 

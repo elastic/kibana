@@ -9,18 +9,22 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { EpisodeEventRow } from '../../queries/episode_events_query';
+import type { EpisodeStateTransitionRow } from '../../queries/episode_state_transitions_query';
+import type { EpisodeSeverityTransitionRow } from '../../queries/episode_severity_transitions_query';
 import type { EpisodeActionHistoryEntry } from '../../queries/episode_actions_history_query';
-import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
+import { useFetchEpisodeStateTransitionsQuery } from '../../hooks/use_fetch_episode_state_transitions_query';
+import { useFetchEpisodeSeverityTransitionsQuery } from '../../hooks/use_fetch_episode_severity_transitions_query';
 import { useFetchEpisodeActionsHistoryQuery } from '../../hooks/use_fetch_episode_actions_history_query';
 import { useBulkGetProfiles } from '../../hooks/use_bulk_get_profiles';
 import { AlertEpisodeTimelineSection } from './timeline_section';
 
-jest.mock('../../hooks/use_fetch_episode_events_query');
+jest.mock('../../hooks/use_fetch_episode_state_transitions_query');
+jest.mock('../../hooks/use_fetch_episode_severity_transitions_query');
 jest.mock('../../hooks/use_fetch_episode_actions_history_query');
 jest.mock('../../hooks/use_bulk_get_profiles');
 
-const mockUseFetchEvents = jest.mocked(useFetchEpisodeEventsQuery);
+const mockUseFetchStateTransitions = jest.mocked(useFetchEpisodeStateTransitionsQuery);
+const mockUseFetchSeverityTransitions = jest.mocked(useFetchEpisodeSeverityTransitionsQuery);
 const mockUseFetchActionsHistory = jest.mocked(useFetchEpisodeActionsHistoryQuery);
 const mockUseBulkGetProfiles = jest.mocked(useBulkGetProfiles);
 
@@ -30,17 +34,23 @@ const mockServices = {
   userProfile: {} as never,
 };
 
-const makeRow = (status: string, ts: string): EpisodeEventRow => ({
+const makeRow = (status: string, ts: string): EpisodeStateTransitionRow => ({
   '@timestamp': ts,
-  'episode.id': 'ep-1',
-  'episode.status': status as EpisodeEventRow['episode.status'],
-  'rule.id': 'rule-1',
-  group_hash: 'hash-1',
+  'episode.status': status as EpisodeStateTransitionRow['episode.status'],
+  event_count: 1,
 });
 
 const mockEventRows = [
   makeRow(ALERT_EPISODE_STATUS.PENDING, '2024-01-01T00:00:00.000Z'),
   makeRow(ALERT_EPISODE_STATUS.ACTIVE, '2024-01-01T00:01:00.000Z'),
+];
+
+const mockSeverityRows: EpisodeSeverityTransitionRow[] = [
+  {
+    '@timestamp': '2024-01-01T00:00:30.000Z',
+    severity: 'high',
+    event_count: 1,
+  },
 ];
 
 const mockAction: EpisodeActionHistoryEntry = {
@@ -64,8 +74,11 @@ const renderSection = () => {
   );
 };
 
-const mockEvents = (eventRows: EpisodeEventRow[]) =>
-  mockUseFetchEvents.mockReturnValue({ data: eventRows, isLoading: false } as never);
+const mockStateTransitions = (eventRows: EpisodeStateTransitionRow[]) =>
+  mockUseFetchStateTransitions.mockReturnValue({ data: eventRows, isLoading: false } as never);
+
+const mockSeverityTransitions = (eventRows: EpisodeSeverityTransitionRow[]) =>
+  mockUseFetchSeverityTransitions.mockReturnValue({ data: eventRows, isLoading: false } as never);
 
 const mockActions = (actions: EpisodeActionHistoryEntry[], isLoading = false) =>
   mockUseFetchActionsHistory.mockReturnValue({ data: actions, isLoading } as never);
@@ -73,7 +86,8 @@ const mockActions = (actions: EpisodeActionHistoryEntry[], isLoading = false) =>
 beforeEach(() => {
   jest.clearAllMocks();
   mockUseBulkGetProfiles.mockReturnValue({ data: [], isLoading: false } as never);
-  mockEvents(mockEventRows);
+  mockStateTransitions(mockEventRows);
+  mockSeverityTransitions(mockSeverityRows);
   mockActions([]);
 });
 
@@ -85,45 +99,55 @@ describe('AlertEpisodeTimelineSection', () => {
   });
 
   it('shows empty prompt when there are no events and no actions', () => {
-    mockEvents([]);
+    mockStateTransitions([]);
+    mockSeverityTransitions([]);
     mockActions([]);
     renderSection();
     expect(screen.getByTestId('alertingV2TimelineSectionEmpty')).toBeInTheDocument();
   });
 
   it('renders one EuiComment per merged entry, newest first', () => {
-    mockEvents(mockEventRows);
+    mockStateTransitions(mockEventRows);
+    mockSeverityTransitions(mockSeverityRows);
     mockActions([mockAction]);
     renderSection();
-    // 2 state-change entries + 1 action entry = 3 comments
+    // 2 state-change entries + 1 severity-change entry + 1 action entry = 4 comments
     const comments = screen.getAllByTestId('alertingV2TimelineEntry');
-    expect(comments).toHaveLength(3);
+    expect(comments).toHaveLength(4);
     expect(comments[0]).toHaveAttribute('data-timestamp', '2024-01-01T00:01:30.000Z');
   });
 
   it('shows "Episode started" text for the initial state entry', () => {
-    mockEvents([makeRow(ALERT_EPISODE_STATUS.PENDING, '2024-01-01T00:00:00.000Z')]);
+    mockStateTransitions([makeRow(ALERT_EPISODE_STATUS.PENDING, '2024-01-01T00:00:00.000Z')]);
     mockActions([]);
     renderSection();
     expect(screen.getByText(/Episode started/i)).toBeInTheDocument();
   });
 
   it('shows "Episode status changed" text for subsequent transitions', () => {
-    mockEvents(mockEventRows);
+    mockStateTransitions(mockEventRows);
     mockActions([]);
     renderSection();
     expect(screen.getByText(/Episode status changed/i)).toBeInTheDocument();
   });
 
+  it('shows "Episode severity set" text for the initial severity entry', () => {
+    mockStateTransitions([]);
+    mockSeverityTransitions(mockSeverityRows);
+    mockActions([]);
+    renderSection();
+    expect(screen.getByText(/Episode severity set/i)).toBeInTheDocument();
+  });
+
   it('shows the action label for action entries', () => {
-    mockEvents([]);
+    mockStateTransitions([]);
     mockActions([mockAction]);
     renderSection();
     expect(screen.getByText('acknowledged on')).toBeInTheDocument();
   });
 
   it('falls back to "system" username when actor is null', () => {
-    mockEvents([]);
+    mockStateTransitions([]);
     mockActions([{ ...mockAction, actor: null }]);
     renderSection();
     expect(screen.getAllByText('system').length).toBeGreaterThan(0);

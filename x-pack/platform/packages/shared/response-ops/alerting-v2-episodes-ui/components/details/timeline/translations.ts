@@ -49,6 +49,20 @@ export const STATUS_CHANGED = i18n.translate(
   }
 );
 
+export const SEVERITY_SET = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.timeline.severitySet',
+  {
+    defaultMessage: 'Episode severity set',
+  }
+);
+
+export const SEVERITY_CHANGED = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.timeline.severityChanged',
+  {
+    defaultMessage: 'Episode severity changed',
+  }
+);
+
 export const getAfterNEventsLabel = (count: number, prevStatus: string): string =>
   i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.afterNEvents', {
     defaultMessage: 'After {count} {prevStatus} {count, plural, one {event} other {events}}',
