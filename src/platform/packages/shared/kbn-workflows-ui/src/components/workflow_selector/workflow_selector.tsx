@@ -32,7 +32,7 @@ import { WorkflowSelectorEmptyState } from './workflow_selector_empty_state';
 import { getSelectedWorkflowDisabledError, processWorkflowsToOptions } from './workflow_utils';
 import type { WorkflowOption, WorkflowSelectorConfig } from './workflow_utils';
 import { IconDisabledWorkflow } from '../../assets/icons';
-import { useWorkflows } from '../../hooks';
+import { useWorkflows, useWorkflowsCapabilities } from '../../hooks';
 
 interface WorkflowSelectorProps {
   selectedWorkflowId?: string;
@@ -68,6 +68,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   const [isSearching, setIsSearching] = useState(true);
   const { application } = useKibana().services;
   const { euiTheme } = useEuiTheme();
+  const { canReadManagedWorkflow } = useWorkflowsCapabilities();
 
   const finalConfig = useMemo(() => ({ ...defaultConfig, ...config }), [config]);
 
@@ -80,7 +81,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     size: 1000,
     page: 1,
     query: '',
-    ...(finalConfig.availableInSelector
+    ...(finalConfig.availableInSelector && canReadManagedWorkflow
       ? { managed: 'all' as const, availableInSelector: finalConfig.availableInSelector }
       : {}),
   });
