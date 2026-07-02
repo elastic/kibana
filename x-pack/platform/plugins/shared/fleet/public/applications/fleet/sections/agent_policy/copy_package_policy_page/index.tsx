@@ -12,9 +12,11 @@ import { EuiEmptyPrompt, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from '@emotion/styled';
 
-import { EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES } from '../../../../../../common/constants';
+import {
+  EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES,
+  IS_AGENTLESS_QUERY_PARAM,
+} from '../../../../../../common/constants';
 
-import { useGetOnePackagePolicy } from '../../../../integrations/hooks';
 import { Loading } from '../../../components';
 import type { EditPackagePolicyFrom } from '../create_package_policy_page/types';
 
@@ -22,6 +24,8 @@ import { CreatePackagePolicySinglePage } from '../create_package_policy_page/sin
 import { useBreadcrumbs, useGetOneAgentPolicy } from '../../../hooks';
 import { useBreadcrumbs as useIntegrationsBreadcrumbs } from '../../../../integrations/hooks';
 import { copyPackagePolicy } from '../../../../../../common/services/copy_package_policy_utils';
+
+import { useCopyPackagePolicyData } from './hooks/use_copy_package_policy_data';
 
 const ContentWrapper = styled(EuiFlexGroup)`
   height: 100%;
@@ -57,18 +61,28 @@ export const CopyPackagePolicyPage = memo(() => {
     params: { packagePolicyId, policyId },
   } = useRouteMatch<{ packagePolicyId: string; policyId?: string }>();
 
-  const packagePolicy = useGetOnePackagePolicy(packagePolicyId);
-  const agentPolicy = useGetOneAgentPolicy(policyId);
-
-  const packagePolicyData = useMemo(() => {
-    if (packagePolicy.data?.item) {
-      return copyPackagePolicy(packagePolicy.data.item);
-    }
-  }, [packagePolicy.data?.item]);
-
-  // Parse the 'from' query parameter to determine navigation after save
   const { search } = useLocation();
 
+  // Detect-before-read hint: agentless copies read/hydrate through the agentless API instead of the
+  // package-policy/agent-policy APIs.
+  const isAgentless = useMemo(
+    () => new URLSearchParams(search).get(IS_AGENTLESS_QUERY_PARAM) === 'true',
+    [search]
+  );
+
+  const { item: sourcePolicy, isLoading } = useCopyPackagePolicyData(packagePolicyId, {
+    isAgentless,
+  });
+  // Agentless deployments have no user-facing agent policy, so skip the agent-policy read for them.
+  const agentPolicy = useGetOneAgentPolicy(isAgentless ? undefined : policyId);
+
+  const packagePolicyData = useMemo(() => {
+    if (sourcePolicy) {
+      return copyPackagePolicy(sourcePolicy);
+    }
+  }, [sourcePolicy]);
+
+  // Determine navigation after save from the 'from' query parameter
   const from = useMemo(() => {
     const qs = new URLSearchParams(search);
     const qsFrom = (qs.get('from') as EditPackagePolicyFrom | null) ?? 'fleet-policy-list';
@@ -82,7 +96,7 @@ export const CopyPackagePolicyPage = memo(() => {
     }
   }, [search]);
 
-  if (packagePolicy.isLoading || !packagePolicy.data) {
+  if (isLoading || !sourcePolicy) {
     return (
       <>
         <Loading />
@@ -94,16 +108,16 @@ export const CopyPackagePolicyPage = memo(() => {
     from === 'copy-from-fleet-policy-list' && policyId ? (
       <PoliciesBreadcrumb policyName={agentPolicy.data?.item?.name || ''} policyId={policyId} />
     ) : from === 'copy-from-installed-integrations' ? (
-      <InstalledIntegrationsBreadcrumb policyName={packagePolicy.data?.item?.name || ''} />
+      <InstalledIntegrationsBreadcrumb policyName={sourcePolicy.name || ''} />
     ) : (
       <IntegrationsBreadcrumb
-        pkgTitle={packagePolicy.data?.item?.package?.title || ''}
-        policyName={packagePolicy.data?.item?.name || ''}
-        pkgkey={packagePolicy.data?.item?.package?.name || ''}
+        pkgTitle={sourcePolicy.package?.title || ''}
+        policyName={sourcePolicy.name || ''}
+        pkgkey={sourcePolicy.package?.name || ''}
       />
     );
 
-  const pkgName = packagePolicy.data?.item?.package?.name;
+  const pkgName = sourcePolicy.package?.name;
 
   if (pkgName && EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES.includes(pkgName)) {
     return (
@@ -128,8 +142,8 @@ export const CopyPackagePolicyPage = memo(() => {
       {breadcrumb}
       <CreatePackagePolicySinglePage
         from={from}
-        pkgName={packagePolicy.data!.item!.package!.name}
-        pkgVersion={packagePolicy.data!.item!.package!.version}
+        pkgName={sourcePolicy.package!.name}
+        pkgVersion={sourcePolicy.package!.version}
         defaultPolicyData={packagePolicyData}
         noBreadcrumb={true}
         prerelease={true}

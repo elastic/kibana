@@ -126,7 +126,10 @@ export const sendGetPackagePolicies = (query: GetPackagePoliciesRequest['query']
   });
 };
 
-export const useGetOnePackagePolicyQuery = (packagePolicyId: string) => {
+export const useGetOnePackagePolicyQuery = (
+  packagePolicyId: string,
+  options?: { enabled?: boolean }
+) => {
   return useQuery<GetOnePackagePolicyResponse, RequestError>(
     ['packagePolicy', packagePolicyId],
     () =>
@@ -134,7 +137,8 @@ export const useGetOnePackagePolicyQuery = (packagePolicyId: string) => {
         method: 'get',
         version: API_VERSIONS.public.v1,
         path: packagePolicyRouteService.getInfoPath(packagePolicyId),
-      })
+      }),
+    { enabled: options?.enabled }
   );
 };
 
