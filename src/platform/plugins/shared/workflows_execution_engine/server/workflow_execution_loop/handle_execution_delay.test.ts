@@ -12,7 +12,11 @@ import {
   WORKFLOW_EXECUTE_ASYNC_STEP_TYPE,
   WORKFLOW_EXECUTE_STEP_TYPE,
 } from '@kbn/workflows';
-import { handleExecutionDelay } from './handle_execution_delay';
+import {
+  ensureWorkflowIdleTimeoutResumeAfterLoop,
+  getWorkflowIdleTimeoutResumeAtAfterLoop,
+  handleExecutionDelay,
+} from './handle_execution_delay';
 import type { WorkflowExecutionLoopParams } from './types';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 const makeParams = (): jest.Mocked<WorkflowExecutionLoopParams> =>
@@ -23,6 +27,7 @@ const makeParams = (): jest.Mocked<WorkflowExecutionLoopParams> =>
         startedAt: '2025-06-01T12:00:00.000Z',
         scopeStack: [],
       }),
+      getCurrentNode: jest.fn().mockReturnValue(undefined),
     },
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),
@@ -508,5 +513,72 @@ describe('handleExecutionDelay', () => {
         'task manager unavailable'
       );
     });
+  });
+});
+
+describe('getWorkflowIdleTimeoutResumeAtAfterLoop', () => {
+  it('returns a future runAt when execution is still waiting for input', () => {
+    const params = makeParams();
+    (params.workflowRuntime.getWorkflowExecution as jest.Mock).mockReturnValue({
+      id: 'exec-parent',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      startedAt: '2025-06-01T12:00:00.000Z',
+      scopeStack: [],
+    });
+    (params.workflowRuntime.getCurrentNode as jest.Mock).mockReturnValue({
+      stepId: 'app',
+      type: 'waitForApproval',
+      configuration: { timeout: '24h' },
+    });
+    (params.workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
+      startedAt: '2025-06-01T12:00:00.000Z',
+    });
+
+    const resumeAt = getWorkflowIdleTimeoutResumeAtAfterLoop(params);
+
+    expect(resumeAt).toBeInstanceOf(Date);
+    expect(resumeAt!.getTime()).toBeGreaterThan(Date.now());
+  });
+});
+
+describe('ensureWorkflowIdleTimeoutResumeAfterLoop', () => {
+  it('schedules the global-timeout resume task when execution is still waiting for input', async () => {
+    const params = makeParams();
+    (params.workflowRuntime.getWorkflowExecution as jest.Mock).mockReturnValue({
+      id: 'exec-parent',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      startedAt: '2025-06-01T12:00:00.000Z',
+      scopeStack: [],
+    });
+    (params.workflowRuntime.getCurrentNode as jest.Mock).mockReturnValue({
+      stepId: 'app',
+      type: 'waitForApproval',
+      configuration: { timeout: '24h' },
+    });
+    (params.workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
+      startedAt: '2025-06-01T12:00:00.000Z',
+    });
+
+    await ensureWorkflowIdleTimeoutResumeAfterLoop(params);
+
+    expect(
+      params.workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask
+    ).toHaveBeenCalledTimes(1);
+  });
+
+  it('does nothing when execution is not waiting', async () => {
+    const params = makeParams();
+    (params.workflowRuntime.getWorkflowExecution as jest.Mock).mockReturnValue({
+      id: 'exec-parent',
+      status: ExecutionStatus.RUNNING,
+      startedAt: '2025-06-01T12:00:00.000Z',
+      scopeStack: [],
+    });
+
+    await ensureWorkflowIdleTimeoutResumeAfterLoop(params);
+
+    expect(
+      params.workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask
+    ).not.toHaveBeenCalled();
   });
 });

@@ -8,6 +8,7 @@
  */
 
 import { DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT, DEFAULT_WAIT_FOR_INPUT_TIMEOUT } from '@kbn/workflows';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isWaitForApproval, isWaitForInput } from '@kbn/workflows/graph';
 import { parseDuration } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
@@ -36,23 +37,30 @@ export function hasHitlWaitExpired(
   return nowMs >= deadlineMs;
 }
 
-export function getHitlIdleDeadlineMsForStep(
-  stepExecutionRuntime: StepExecutionRuntime
+export function getHitlIdleDeadlineMsForNode(
+  node: GraphNodeUnion,
+  startedAt: string | undefined
 ): number | undefined {
-  const { node, stepExecution } = stepExecutionRuntime;
-  if (!stepExecution?.startedAt) {
+  if (!startedAt) {
     return undefined;
   }
 
   if (isWaitForApproval(node)) {
     const timeout = node.configuration.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT;
-    return computeHitlWaitDeadlineMs(stepExecution.startedAt, timeout);
+    return computeHitlWaitDeadlineMs(startedAt, timeout);
   }
 
   if (isWaitForInput(node)) {
     const timeout = node.configuration.timeout ?? DEFAULT_WAIT_FOR_INPUT_TIMEOUT;
-    return computeHitlWaitDeadlineMs(stepExecution.startedAt, timeout);
+    return computeHitlWaitDeadlineMs(startedAt, timeout);
   }
 
   return undefined;
+}
+
+export function getHitlIdleDeadlineMsForStep(
+  stepExecutionRuntime: StepExecutionRuntime
+): number | undefined {
+  const { node, stepExecution } = stepExecutionRuntime;
+  return getHitlIdleDeadlineMsForNode(node, stepExecution?.startedAt);
 }

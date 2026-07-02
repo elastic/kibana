@@ -20,6 +20,10 @@ import type {
 } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
+import {
+  ensureWorkflowIdleTimeoutResumeAfterLoop,
+  getWorkflowIdleTimeoutResumeAtAfterLoop,
+} from '../workflow_execution_loop/handle_execution_delay';
 
 export async function resumeWorkflow({
   workflowRunId,
@@ -43,7 +47,7 @@ export async function resumeWorkflow({
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   meteringService?: WorkflowsMeteringService;
   internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
-}): Promise<void> {
+}): Promise<{ idleTimeoutResumeAt?: Date }> {
   const {
     workflowRuntime,
     stepExecutionRuntimeFactory,
@@ -70,27 +74,33 @@ export async function resumeWorkflow({
     logger.info(
       `Resume skipped for ${workflowRunId}: already in terminal status ${loadedExecution.status}`
     );
-    return;
+    return {};
   }
 
   await workflowRuntime.resume();
 
+  const workflowExecutionLoopParams = {
+    workflowRuntime,
+    stepExecutionRuntimeFactory,
+    workflowExecutionState,
+    stepIoService,
+    workflowExecutionRepository,
+    workflowLogger,
+    nodesFactory,
+    workflowExecutionGraph,
+    esClient,
+    fakeRequest,
+    coreStart: dependencies.coreStart,
+    taskAbortController,
+    workflowTaskManager,
+  };
+
+  let idleTimeoutResumeAt: Date | undefined;
+
   try {
-    await workflowExecutionLoop({
-      workflowRuntime,
-      stepExecutionRuntimeFactory,
-      workflowExecutionState,
-      stepIoService,
-      workflowExecutionRepository,
-      workflowLogger,
-      nodesFactory,
-      workflowExecutionGraph,
-      esClient,
-      fakeRequest,
-      coreStart: dependencies.coreStart,
-      taskAbortController,
-      workflowTaskManager,
-    });
+    await workflowExecutionLoop(workflowExecutionLoopParams);
+    idleTimeoutResumeAt = getWorkflowIdleTimeoutResumeAtAfterLoop(workflowExecutionLoopParams);
+    await ensureWorkflowIdleTimeoutResumeAfterLoop(workflowExecutionLoopParams);
   } finally {
     await emitWorkflowExecutionFailedEventIfFailed({
       workflowRuntime,
@@ -113,4 +123,6 @@ export async function resumeWorkflow({
     meteringService,
     cloudSetup: dependencies.cloudSetup,
   });
+
+  return { idleTimeoutResumeAt };
 }
