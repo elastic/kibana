@@ -33,8 +33,8 @@ describe('allowRequest', () => {
     expect(allowRequest(url, rules)).toEqual(false);
   });
 
-  it('denies requests when a rule matches tasking into account port', () => {
-    const url = 'https://bad.com:80/cool/route/broå';
+  it('denies requests when a rule matches, when the url has a port', () => {
+    const url = 'https://bad.com:80/cool/route/bro';
     const rules = [{ allow: false, host: 'bad.com' }, { allow: true }];
 
     expect(allowRequest(url, rules)).toEqual(false);
