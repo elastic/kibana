@@ -747,6 +747,112 @@ describe('DataStreamDetailPanel', () => {
       });
     });
 
+    it('shows a success toast and closes the flyout after saving', async () => {
+      mockAppContext = createMockAppContext();
+      mockAppContext.config.isServerless = true;
+      mockUseAppContext.mockReturnValue(mockAppContext);
+
+      const dataStream = createMockDataStream({
+        lifecycle: {
+          enabled: true,
+          data_retention: '10d',
+          retention_determined_by: 'index_template',
+        } as any,
+        nextGenerationManagedBy: 'Data stream lifecycle',
+        privileges: {
+          delete_index: true,
+          manage_data_stream_lifecycle: true,
+          read_failure_store: true,
+        },
+      });
+
+      mockUseLoadDataStream.mockReturnValue({
+        data: dataStream,
+        isLoading: false,
+        error: null,
+        resendRequest: jest.fn(),
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
+
+      mockSendRequest.mockResolvedValue({
+        data: {
+          name: 'indexTemplate',
+          template: { lifecycle: { enabled: true, data_retention: '80d' } },
+          _kbnMeta: { hasDatastream: true },
+        },
+      } as any);
+
+      const { getByTestId } = renderWithI18n(
+        <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
+      );
+
+      await waitFor(() => expect(getByTestId('manageDataStreamButton')).toBeInTheDocument());
+      await userEvent.click(getByTestId('manageDataStreamButton'));
+      await waitFor(() => expect(getByTestId('editDataLifecycleButton')).toBeInTheDocument());
+      await userEvent.click(getByTestId('editDataLifecycleButton'));
+      await userEvent.click(getByTestId('editDataLifecycleFlyoutApplyButton'));
+
+      await waitFor(() => expect(onCloseMock).toHaveBeenCalledWith(true));
+      expect(mockAppContext.services.notificationService.showSuccessToast).toHaveBeenCalledTimes(1);
+      expect(mockAppContext.services.notificationService.showDangerToast).not.toHaveBeenCalled();
+    });
+
+    it('shows a tailored error toast and still closes when only one request fails', async () => {
+      mockAppContext = createMockAppContext();
+      mockAppContext.config.isServerless = true;
+      mockUseAppContext.mockReturnValue(mockAppContext);
+
+      const dataStream = createMockDataStream({
+        lifecycle: {
+          enabled: true,
+          data_retention: '10d',
+          retention_determined_by: 'index_template',
+        } as any,
+        nextGenerationManagedBy: 'Data stream lifecycle',
+        privileges: {
+          delete_index: true,
+          manage_data_stream_lifecycle: true,
+          read_failure_store: true,
+        },
+      });
+
+      mockUseLoadDataStream.mockReturnValue({
+        data: dataStream,
+        isLoading: false,
+        error: null,
+        resendRequest: jest.fn(),
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
+
+      mockSendRequest.mockResolvedValue({
+        data: {
+          name: 'indexTemplate',
+          template: { lifecycle: { enabled: true, data_retention: '80d' } },
+          _kbnMeta: { hasDatastream: true },
+        },
+      } as any);
+
+      // The successful-data request succeeds while the failed-data (failure store) request fails.
+      mockUpdateDSFailureStore.mockResolvedValue({ error: { message: 'boom' } } as any);
+
+      const { getByTestId } = renderWithI18n(
+        <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
+      );
+
+      await waitFor(() => expect(getByTestId('manageDataStreamButton')).toBeInTheDocument());
+      await userEvent.click(getByTestId('manageDataStreamButton'));
+      await waitFor(() => expect(getByTestId('editDataLifecycleButton')).toBeInTheDocument());
+      await userEvent.click(getByTestId('editDataLifecycleButton'));
+      await userEvent.click(getByTestId('editDataLifecycleFlyoutApplyButton'));
+
+      await waitFor(() => expect(onCloseMock).toHaveBeenCalledWith(true));
+      expect(mockAppContext.services.notificationService.showSuccessToast).not.toHaveBeenCalled();
+      expect(mockAppContext.services.notificationService.showDangerToast).toHaveBeenCalledWith(
+        'The successful data lifecycle was saved, but the failed data lifecycle could not be saved',
+        'Failed to inherit failure store configuration: boom'
+      );
+    });
+
     it('treats failure store as inherited when retention is the Elasticsearch default and the template defines no failure store', async () => {
       mockAppContext = createMockAppContext();
       mockAppContext.config.isServerless = true;

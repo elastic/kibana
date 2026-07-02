@@ -410,6 +410,13 @@ export const useEditDataLifecycle = ({
         return;
       }
 
+      const showSaveSuccessToast = () =>
+        services.notificationService.showSuccessToast(
+          i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.saveSuccessTitle', {
+            defaultMessage: 'Data lifecycle updated',
+          })
+        );
+
       try {
         // Wired streams are managed by the Streams app: persist through the Streams ingest
         // API so the Streams definition (the source of truth) is updated. Writing ES directly
@@ -504,6 +511,7 @@ export const useEditDataLifecycle = ({
             throwIfRequestError(streamsPut, 'Failed to update stream ingest settings');
 
             setIsEditingDataLifecycle(false);
+            showSaveSuccessToast();
             onClose(true);
             return;
           }
@@ -698,8 +706,59 @@ export const useEditDataLifecycle = ({
           throwIfRequestError(put, 'Failed to update failure store configuration');
         };
 
-        await Promise.all([applySuccessful(), applyFailed()]);
+        // Apply both parts independently so that a failure in one does not discard the other's
+        // result. Elasticsearch has no transaction spanning these calls, so part of the
+        // configuration may persist even when the other fails; we surface a tailored message and
+        // still close + reload the flyout so it reflects whatever actually persisted.
+        const [successfulResult, failedResult] = await Promise.allSettled([
+          applySuccessful(),
+          applyFailed(),
+        ]);
+
         setIsEditingDataLifecycle(false);
+
+        const successfulFailed = successfulResult.status === 'rejected';
+        const failedFailed = failedResult.status === 'rejected';
+
+        if (!successfulFailed && !failedFailed) {
+          showSaveSuccessToast();
+          onClose(true);
+          return;
+        }
+
+        const successfulReason =
+          successfulResult.status === 'rejected'
+            ? getErrorMessage(successfulResult.reason)
+            : undefined;
+        const failedReason =
+          failedResult.status === 'rejected' ? getErrorMessage(failedResult.reason) : undefined;
+
+        if (successfulFailed && failedFailed) {
+          services.notificationService.showDangerToast(
+            i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.saveErrorTitle', {
+              defaultMessage: 'Could not save changes',
+            }),
+            [successfulReason, failedReason].filter(Boolean).join('; ')
+          );
+        } else if (successfulFailed) {
+          services.notificationService.showDangerToast(
+            i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.saveSuccessfulDataErrorTitle', {
+              defaultMessage:
+                'The failed data lifecycle was saved, but the successful data lifecycle could not be saved',
+            }),
+            successfulReason
+          );
+        } else {
+          services.notificationService.showDangerToast(
+            i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.saveFailedDataErrorTitle', {
+              defaultMessage:
+                'The successful data lifecycle was saved, but the failed data lifecycle could not be saved',
+            }),
+            failedReason
+          );
+        }
+
+        // Reload so the flyout no longer shows stale values for the part that did persist.
         onClose(true);
       } catch (error) {
         services.notificationService.showDangerToast(
