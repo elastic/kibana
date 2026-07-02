@@ -143,11 +143,6 @@ export interface CreateCrossClusterAPIKeyParams {
   expiration?: string;
   name: string;
   metadata?: { [key: string]: any };
-  /**
-   * The certificate identity to associate with this cross-cluster API key. Restricts the API key to
-   * connections authenticated by a specific TLS certificate (matching the certificate's
-   * distinguished name). Validation of this value is performed by Elasticsearch.
-   */
   certificate_identity?: string;
   access: {
     search?: Array<{
@@ -158,7 +153,6 @@ export interface CreateCrossClusterAPIKeyParams {
     }>;
     replication?: Array<{
       names: string[];
-      allow_restricted_indices?: boolean;
     }>;
   };
 }
@@ -271,12 +265,6 @@ export interface UpdateCrossClusterAPIKeyParams {
   type: 'cross_cluster';
   expiration?: string;
   metadata?: { [key: string]: any };
-  /**
-   * The certificate identity to associate with this cross-cluster API key. Restricts the API key to
-   * connections authenticated by a specific TLS certificate (matching the certificate's
-   * distinguished name). Pass `null` to clear a previously assigned value. Validation of this value
-   * is performed by Elasticsearch.
-   */
   certificate_identity?: string | null;
   access: {
     search?: Array<{
@@ -287,7 +275,6 @@ export interface UpdateCrossClusterAPIKeyParams {
     }>;
     replication?: Array<{
       names: string[];
-      allow_restricted_indices?: boolean;
     }>;
   };
 }

@@ -71,10 +71,7 @@ type CrossClusterApiKeySearch = Pick<
 >;
 
 // TODO: Remove this type when `@elastic/elasticsearch` has been updated.
-type CrossClusterApiKeyReplication = Pick<
-  estypes.SecurityIndicesPrivileges,
-  'names' | 'allow_restricted_indices'
->;
+type CrossClusterApiKeyReplication = Pick<estypes.SecurityIndicesPrivileges, 'names'>;
 
 export type ApiKeyRoleDescriptors = Record<string, estypes.SecurityRoleDescriptor>;
 
