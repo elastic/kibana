@@ -11,7 +11,7 @@ import pRetry from 'p-retry';
 import { extractChatEvidence } from '../chat_evidence';
 import type { TraceAccessor } from '../types';
 import { createTraceAccessor } from '../trace_accessor';
-import { asOptionalString, rowsFromEsqlResponse } from '../esql_utils';
+import { rowsFromEsqlResponse } from '../esql_utils';
 
 interface GroundednessEvidence {
   user_query: string;
@@ -35,6 +35,13 @@ const TOOL_CALL_ID_COLUMN = 'attributes.gen_ai.tool.call.id';
 const TOOL_NAME_COLUMN = 'attributes.gen_ai.tool.name';
 const TOOL_ARGUMENTS_COLUMN = 'attributes.gen_ai.tool.call.arguments';
 const TOOL_RESULT_COLUMN = 'attributes.gen_ai.tool.call.result';
+
+interface ToolSpanRow extends Record<string, unknown> {
+  [TOOL_CALL_ID_COLUMN]: string | null;
+  [TOOL_NAME_COLUMN]: string | null;
+  [TOOL_ARGUMENTS_COLUMN]: string | null;
+  [TOOL_RESULT_COLUMN]: string | null;
+}
 
 const parseJsonIfPossible = (value: unknown): unknown => {
   if (typeof value !== 'string') {
@@ -85,12 +92,12 @@ export const extractGroundednessEvidence = async (
     }
 
     const toolResponse = await accessor.runEsql(buildToolSpansQuery());
-    const toolRows = rowsFromEsqlResponse(toolResponse);
+    const toolRows = rowsFromEsqlResponse<ToolSpanRow>(toolResponse);
 
     const toolCallHistory = toolRows.map((toolRow) => {
       return {
-        tool_call_id: asOptionalString(toolRow[TOOL_CALL_ID_COLUMN]),
-        tool_id: asOptionalString(toolRow[TOOL_NAME_COLUMN]),
+        tool_call_id: toolRow[TOOL_CALL_ID_COLUMN] ?? undefined,
+        tool_id: toolRow[TOOL_NAME_COLUMN] ?? undefined,
         arguments: parseJsonIfPossible(toolRow[TOOL_ARGUMENTS_COLUMN]),
         result: parseJsonIfPossible(toolRow[TOOL_RESULT_COLUMN]),
       };

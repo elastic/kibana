@@ -10,10 +10,18 @@ import { LOGS_INDEX_PATTERN } from '@kbn/evals-common';
 import pRetry from 'p-retry';
 import type { TraceAccessor } from './types';
 import { createTraceAccessor } from './trace_accessor';
-import { asString, rowsFromEsqlResponse } from './esql_utils';
+import { rowsFromEsqlResponse } from './esql_utils';
 
 const USER_MESSAGE_CONTENT_COLUMN = 'attributes.content';
 const AGENT_RESPONSE_CONTENT_COLUMN = 'attributes.message.content';
+
+interface UserMessageRow extends Record<string, unknown> {
+  [USER_MESSAGE_CONTENT_COLUMN]: string | null;
+}
+
+interface AgentResponseRow extends Record<string, unknown> {
+  [AGENT_RESPONSE_CONTENT_COLUMN]: string | null;
+}
 
 const buildUserMessageQuery = () => {
   return `FROM ${LOGS_INDEX_PATTERN}
@@ -40,18 +48,18 @@ export const extractChatEvidence = async (
   return pRetry(
     async () => {
       const userMsgResponse = await accessor.runEsql(buildUserMessageQuery());
-      const userMsgRows = rowsFromEsqlResponse(userMsgResponse);
+      const userMsgRows = rowsFromEsqlResponse<UserMessageRow>(userMsgResponse);
 
       if (userMsgRows.length === 0) {
         throw new Error(`No user message span events found for trace ${accessor.traceId}`);
       }
 
-      const userQuery = asString(userMsgRows[0][USER_MESSAGE_CONTENT_COLUMN]);
+      const userQuery = userMsgRows[0][USER_MESSAGE_CONTENT_COLUMN] ?? '';
 
       const agentRespResponse = await accessor.runEsql(buildAgentResponseQuery());
-      const agentRespRows = rowsFromEsqlResponse(agentRespResponse);
+      const agentRespRows = rowsFromEsqlResponse<AgentResponseRow>(agentRespResponse);
       const agentResponse =
-        agentRespRows.length > 0 ? asString(agentRespRows[0][AGENT_RESPONSE_CONTENT_COLUMN]) : '';
+        agentRespRows.length > 0 ? agentRespRows[0][AGENT_RESPONSE_CONTENT_COLUMN] ?? '' : '';
 
       return { user_query: userQuery, agent_response: agentResponse };
     },

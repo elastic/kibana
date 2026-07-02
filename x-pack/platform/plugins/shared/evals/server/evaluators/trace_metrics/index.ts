@@ -9,7 +9,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import pRetry from 'p-retry';
 import type { EvaluatorDefinition, EvaluatorResult } from '../types';
 import { createTraceAccessor } from '../trace_accessor';
-import { asNumber, rowsFromEsqlResponse } from '../esql_utils';
+import { rowsFromEsqlResponse } from '../esql_utils';
 
 const getTraceMetricResult = async ({
   evaluatorName,
@@ -30,7 +30,7 @@ const getTraceMetricResult = async ({
     const score = await pRetry(
       async () => {
         const response = await runEsql(query);
-        const rows = rowsFromEsqlResponse(response);
+        const rows = rowsFromEsqlResponse<Record<string, number | null>>(response);
         const firstRow = rows[0];
         if (!firstRow) {
           throw new Error(
@@ -38,8 +38,8 @@ const getTraceMetricResult = async ({
           );
         }
 
-        const metricValue = asNumber(firstRow[columnName]);
-        if (metricValue === undefined) {
+        const metricValue = firstRow[columnName];
+        if (metricValue == null || !Number.isFinite(metricValue)) {
           throw new Error(
             `Metric "${columnName}" is not numeric for evaluator "${evaluatorName}" and trace "${traceId}"`
           );

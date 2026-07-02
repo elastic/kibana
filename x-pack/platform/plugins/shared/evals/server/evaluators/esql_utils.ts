@@ -7,9 +7,9 @@
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
 
-export const rowsFromEsqlResponse = (
+export const rowsFromEsqlResponse = <T extends Record<string, unknown> = Record<string, unknown>>(
   response: ESQLSearchResponse
-): Array<Record<string, unknown>> => {
+): T[] => {
   const columns = response.columns ?? [];
   const values = response.values ?? [];
 
@@ -17,35 +17,6 @@ export const rowsFromEsqlResponse = (
     return columns.reduce<Record<string, unknown>>((acc, column, columnIndex) => {
       acc[column.name] = row[columnIndex];
       return acc;
-    }, {});
+    }, {}) as T;
   });
-};
-
-export const asString = (value: unknown): string => {
-  if (typeof value === 'string') {
-    return value;
-  }
-  if (value == null) {
-    return '';
-  }
-
-  return String(value);
-};
-
-export const asOptionalString = (value: unknown): string | undefined => {
-  const stringValue = asString(value).trim();
-  return stringValue ? stringValue : undefined;
-};
-
-export const asNumber = (value: unknown): number | undefined => {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return value;
-  }
-
-  if (typeof value === 'string' && value.trim()) {
-    const parsedNumber = Number(value);
-    return Number.isFinite(parsedNumber) ? parsedNumber : undefined;
-  }
-
-  return undefined;
 };
