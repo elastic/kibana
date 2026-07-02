@@ -29,8 +29,8 @@ export class SignificantEventsPlugin
     _core: CoreSetup<SignificantEventsPluginStartDependencies>,
     plugins: SignificantEventsPluginSetupDependencies
   ): SignificantEventsPluginSetup {
-    // Stage 2: register KnowledgeIndicatorService provider into streams so
-    // streams-core can call KI operations without depending on this plugin.
+    // Stage 2: inject the KnowledgeIndicatorClient into streams so streams can
+    // call KI operations without requiring significant_events as a plugin dependency.
     // plugins.streams.registerKnowledgeIndicatorClientProvider((request) => ...);
     void plugins;
     return {};
