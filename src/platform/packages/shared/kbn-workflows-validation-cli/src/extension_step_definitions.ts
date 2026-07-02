@@ -99,7 +99,7 @@ const toContract = (def: AnyStepDefinition): BaseConnectorContract => ({
   ...(def.configSchema !== undefined && { configSchema: def.configSchema as z.ZodObject }),
 });
 
-let cache: BaseConnectorContract[] | undefined;
+let cachedContracts: BaseConnectorContract[] | undefined;
 
 /**
  * Returns BaseConnectorContract entries for all extension step definitions
@@ -109,7 +109,7 @@ let cache: BaseConnectorContract[] | undefined;
  * placeholders because that plugin is not accessible from a platform package.
  */
 export const getExtensionStepContracts = (): BaseConnectorContract[] => {
-  if (cache) return cache;
+  if (cachedContracts) return cachedContracts;
 
   const securityPlaceholders: BaseConnectorContract[] = SECURITY_STEP_IDS.map((id) => ({
     type: id,
@@ -119,7 +119,7 @@ export const getExtensionStepContracts = (): BaseConnectorContract[] => {
     outputSchema: z.any(),
   }));
 
-  cache = [
+  cachedContracts = [
     // data.*
     toContract(dataAggregateStepCommonDefinition),
     toContract(dataConcatStepCommonDefinition),
@@ -173,5 +173,5 @@ export const getExtensionStepContracts = (): BaseConnectorContract[] => {
     // security.* (private plugin — permissive placeholders)
     ...securityPlaceholders,
   ];
-  return cache;
+  return cachedContracts;
 };

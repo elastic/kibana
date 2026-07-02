@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Borrowed from @kbn/workflows-library (PR #274505). Replace with an import once that package merges.
+// Schema copied from @kbn/workflows-library (PR #274505).
+// TODO: replace with a direct import once PR #274505 merges to avoid drift.
 
 import { parse as parseYaml } from 'yaml';
 import semver from 'semver';
@@ -119,17 +120,20 @@ export const detectTemplate = (yaml: string): boolean => {
 /**
  * Like `detectTemplate`, but also surfaces any YAML parse error so the caller
  * can report `syntax-error` before mode-mismatch classification.
+ *
+ * Returns the parsed document so callers can pass it to `validateTemplateMetadata`
+ * without re-parsing.
  */
 export const detectTemplateSafe = (
   yaml: string
-): { isTemplate: boolean; syntaxError: string | null } => {
+): { isTemplate: boolean; syntaxError: string | null; doc: unknown } => {
   try {
     const doc = parseYaml(yaml);
     const isTemplate =
       doc !== null && typeof doc === 'object' && !Array.isArray(doc) && METADATA_KEY in doc;
-    return { isTemplate, syntaxError: null };
+    return { isTemplate, syntaxError: null, doc };
   } catch (e) {
-    return { isTemplate: false, syntaxError: (e as Error).message };
+    return { isTemplate: false, syntaxError: (e as Error).message, doc: null };
   }
 };
 
@@ -141,16 +145,10 @@ export const detectTemplateSafe = (
  * Validates the `template-metadata` block and returns any issues as `SchemaIssue[]`
  * with paths prefixed by `template-metadata.` so they appear alongside body issues.
  * Returns an empty array on success.
+ *
+ * Accepts the pre-parsed document from `detectTemplateSafe` to avoid a redundant YAML parse.
  */
-export const validateTemplateMetadata = (yaml: string): SchemaIssue[] => {
-  let doc: unknown;
-  try {
-    doc = parseYaml(yaml);
-  } catch {
-    // Caller should have caught YAML syntax errors first; return no issues here.
-    return [];
-  }
-
+export const validateTemplateMetadata = (doc: unknown): SchemaIssue[] => {
   if (doc === null || typeof doc !== 'object' || Array.isArray(doc)) {
     return [{ path: METADATA_KEY, message: 'template-metadata block is missing or invalid.' }];
   }

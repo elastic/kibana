@@ -15,10 +15,12 @@ let cachedSchema: z.ZodType | undefined;
 
 export const buildWorkflowSchema = (): z.ZodType => {
   if (cachedSchema) return cachedSchema;
+  // loose=true: passthrough schema tolerates unknown top-level keys (e.g. template-metadata).
+  const loose = true;
   cachedSchema = generateYamlSchemaFromConnectors(
     [...getAllStaticConnectors(), ...getExtensionStepContracts()],
     [],
-    true
+    loose
   );
   return cachedSchema;
 };

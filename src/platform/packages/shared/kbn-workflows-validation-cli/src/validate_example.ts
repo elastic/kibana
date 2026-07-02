@@ -47,7 +47,7 @@ export const validateExampleYaml = (
 
   // Check for YAML syntax errors before any mode-specific logic, so a bad YAML
   // file always reports `syntax-error` rather than a misleading `wrong-type`.
-  const { isTemplate, syntaxError } = detectTemplateSafe(yaml);
+  const { isTemplate, syntaxError, doc } = detectTemplateSafe(yaml);
   if (syntaxError !== null) {
     return { kind: 'syntax-error', message: syntaxError };
   }
@@ -70,7 +70,7 @@ export const validateExampleYaml = (
   }
 
   if (effectiveMode === 'template') {
-    return validateAsTemplate(yaml, schema);
+    return validateAsTemplate(yaml, schema, doc);
   }
   return validateAsPlain(yaml, schema);
 };
@@ -99,7 +99,7 @@ const validateAsPlain = (yaml: string, schema: z.ZodType): ValidationOutcome => 
   return { kind: 'unexpected-error', message: error.message };
 };
 
-const validateAsTemplate = (yaml: string, schema: z.ZodType): ValidationOutcome => {
+const validateAsTemplate = (yaml: string, schema: z.ZodType, doc: unknown): ValidationOutcome => {
   // Validate body (passthrough schema ignores template-metadata key) then metadata.
   // Surface syntax errors first — body validation catches them.
   const bodyOutcome = validateAsPlain(yaml, schema);
@@ -107,12 +107,12 @@ const validateAsTemplate = (yaml: string, schema: z.ZodType): ValidationOutcome 
     return bodyOutcome;
   }
 
-  const metadataIssues = validateTemplateMetadata(yaml);
-
   const bodyIssues: readonly SchemaIssue[] =
     bodyOutcome.kind === 'schema-error' ? bodyOutcome.issues : [];
 
-  const allIssues = [...metadataIssues, ...bodyIssues];
+  const metadataIssues = validateTemplateMetadata(doc);
+
+  const allIssues = [...bodyIssues, ...metadataIssues];
   if (allIssues.length > 0) {
     return { kind: 'schema-error', issues: allIssues };
   }
