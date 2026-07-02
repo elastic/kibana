@@ -41,6 +41,6 @@ export const setupExpressions = (
     datatableColumn,
     getDatatable(formatFactory),
     getTimeScale(getDatatableUtilities, getTimeZone, getForceNow),
-    getDateHistogramTextBased(getDatatableUtilities, getTimeZone),
+    getDateHistogramTextBased(getDatatableUtilities),
   ].forEach((expressionFn) => expressions.registerFunction(expressionFn));
 };

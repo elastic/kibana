@@ -35,6 +35,6 @@ export const setupExpressions = (
     mapToColumns,
     getDatatable(getFormatFactory(core)),
     getTimeScale(getDatatableUtilitiesFactory(core), getTimeZoneFactory(core)),
-    getDateHistogramTextBased(getDatatableUtilitiesFactory(core), getTimeZoneFactory(core)),
+    getDateHistogramTextBased(getDatatableUtilitiesFactory(core)),
   ].forEach((expressionFn) => expressions.registerFunction(expressionFn));
 };
