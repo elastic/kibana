@@ -6,9 +6,12 @@
  */
 
 import { tags } from '@kbn/scout-security';
-import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
-import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import { evaluate } from '../../src/evaluate';
+import {
+  bulkIndexEntities,
+  deleteEntityEngines,
+  installEntityStoreV2AndWait,
+} from '../../src/setup_helpers';
 
 /**
  * Entity Store V2 — set_asset_criticality tool evals.
@@ -23,69 +26,17 @@ evaluate.describe(
     const server1Euid = 'host:crit-server1';
     const aliceEuid = 'user:crit-alice';
 
-    evaluate.beforeAll(async ({ log, esClient: es, supertest }) => {
-      log.info('[set-criticality-evals] beforeAll: installing entity store v2');
-      const installRes = await supertest
-        .post('/api/security/entity_store/install')
-        .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'Kibana')
-        .set('elastic-api-version', '2023-10-31')
-        .send({ entityTypes: ['user', 'host'] });
+    evaluate.beforeAll(async ({ log, esClient, supertest }) => {
+      await installEntityStoreV2AndWait({ supertest, log, entityTypes: ['user', 'host'] });
 
-      if (installRes.status !== 200 && installRes.status !== 201) {
-        throw new Error(
-          `Entity Store V2 install failed (${installRes.status}): ${JSON.stringify(
-            installRes.body
-          )}`
-        );
-      }
-
-      await waitForCondition(
-        async () => {
-          const res = await supertest
-            .get('/api/security/entity_store/status')
-            .set('elastic-api-version', '2023-10-31');
-          if (res.status !== 200) return false;
-          const status = (res.body as { status?: string }).status;
-          if (status === 'error') {
-            throw new Error(`Entity Store V2 is in error state: ${JSON.stringify(res.body)}`);
-          }
-          return status === 'running';
-        },
-        { label: 'entity store v2 status=running', timeoutMs: 120_000, log }
-      );
-
-      log.info('[set-criticality-evals] beforeAll: seeding entities');
-      const latestAlias = getEntitiesAlias(ENTITY_LATEST, 'default');
-      const now = new Date().toISOString();
-      await es.bulk({
-        refresh: true,
-        operations: [
-          { index: { _index: latestAlias, _id: hashEuid(server1Euid) } },
-          {
-            '@timestamp': now,
-            entity: { id: server1Euid, EngineMetadata: { Type: 'host' } },
-            host: { name: 'crit-server1' },
-            asset: { criticality: 'low_impact' },
-          },
-          { index: { _index: latestAlias, _id: hashEuid(aliceEuid) } },
-          {
-            '@timestamp': now,
-            entity: { id: aliceEuid, EngineMetadata: { Type: 'user' } },
-            user: { name: 'crit-alice' },
-          },
-        ],
+      await bulkIndexEntities({
+        esClient,
+        entities: [{ euid: server1Euid, assetCriticality: 'low_impact' }, { euid: aliceEuid }],
       });
-
-      log.info('[set-criticality-evals] beforeAll: setup complete');
     });
 
     evaluate.afterAll(async ({ log, quickApiClient }) => {
-      try {
-        await quickApiClient.deleteEntityEngines({ query: { delete_data: true } });
-      } catch (err) {
-        log.warning(`deleteEntityEngines failed during teardown: ${(err as Error).message}`);
-      }
+      await deleteEntityEngines({ quickApiClient, log });
     });
 
     evaluate(
@@ -171,29 +122,3 @@ evaluate.describe(
     );
   }
 );
-
-async function waitForCondition(
-  check: () => Promise<boolean>,
-  {
-    label,
-    timeoutMs,
-    intervalMs = 2000,
-    log,
-  }: {
-    label: string;
-    timeoutMs: number;
-    intervalMs?: number;
-    log: { warning: (m: string) => void };
-  }
-): Promise<void> {
-  const start = Date.now();
-  while (Date.now() - start < timeoutMs) {
-    try {
-      if (await check()) return;
-    } catch (err) {
-      log.warning(`${label} check threw: ${(err as Error).message}`);
-    }
-    await new Promise((r) => setTimeout(r, intervalMs));
-  }
-  throw new Error(`Timed out waiting for: ${label}`);
-}
