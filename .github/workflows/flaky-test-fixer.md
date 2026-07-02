@@ -27,6 +27,8 @@ concurrency:
 
 env:
   ISSUE_NUMBER: &issue_number ${{ github.event.issue.number || github.event.inputs.issue_number }}
+  # Whoever triggered this run: the user who applied `ai:fix-flaky`, or the manual dispatcher.
+  REQUESTED_BY: ${{ github.actor }}
 
 engine:
   id: claude
@@ -74,6 +76,9 @@ safe-outputs:
     base-branch: main
     allowed-base-branches: ['main', '9.*', '8.*', '7.*']
     if-no-changes: 'ignore'
+    # Open the PR as `kibanamachine` (a user), not the default GITHUB_TOKEN bot, so
+    # the PR's `opened` event can trigger the Flaky Fix Verifier (GITHUB_TOKEN events don't).
+    github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
     protected-files: fallback-to-issue
     # Use git format-patch / `git am --3way` instead of a git bundle. The bundle
     # transport makes the shallow safe_outputs checkout run `git fetch --unshallow`,
@@ -86,15 +91,20 @@ timeout-minutes: 90
 
 # Flaky Test Fixer
 
-Open a single draft PR with the smallest possible test-side fix for this flaky-test issue. Do not open a PR if either of the following is true: you find an existing open PR with an identical or similar fix (search PRs for ones that reference this issue number in their body, or check the issue timeline for PRs that reference it), or you cannot identify a credible fix.
+Open a single draft PR with the smallest possible test-side fix for this flaky-test issue. Do not open a PR if either of the following is true: you find an existing open PR with an identical or similar fix (search PRs for ones that reference this issue number in their body, or check the issue timeline for PRs that reference it), or you cannot identify a credible fix. Whatever the outcome, always finish by leaving one concise comment on the issue (see "Outcome comment").
+
+## Requester mention
+
+`${{ env.REQUESTED_BY }}` triggered this run — the user who applied `ai:fix-flaky`, or the manual dispatcher. @-mention them (`@${{ env.REQUESTED_BY }}`) in both the outcome comment and the PR body so they hear the result, but **only if it is a real user account**: if `${{ env.REQUESTED_BY }}` ends with `[bot]` or is `kibanamachine`, omit the mention (and the "Requested by" line) entirely.
 
 ## Steps
 
-1. Read the investigator's comment on the issue for the suspected root cause and proposed fix. If no action is needed, stop.
+1. Read the investigator's comment on the issue for the suspected root cause and proposed fix. If no action is needed, skip to step 6.
 2. Read the failing test and the helpers, fixtures, and page objects it imports.
 3. Apply the smallest test-side patch that addresses the root cause.
 4. Run the test locally until it passes.
 5. Open the PR (see "PR format" below).
+6. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 
 ## PR format
 
@@ -127,5 +137,15 @@ Add the following at the very end of the PR description (and outside of the deta
 
 ```markdown
 > [!NOTE]
-> Created by the Flaky Test Fixer workflow. Share feedback or questions in #appex-qa.
+> Created by the Flaky Test Fixer workflow, requested by @${{ env.REQUESTED_BY }}. Share feedback or questions in #apps-qa.
 ```
+
+(Per "Requester mention", drop `requested by @${{ env.REQUESTED_BY }}` from the NOTE if the requester is a bot or `kibanamachine`.)
+
+## Outcome comment
+
+In **every** run, finish by posting exactly one concise comment (1–2 sentences, no preamble, no sign-off) on issue #${{ env.ISSUE_NUMBER }} via the `add-comment` safe output. Lead with `@${{ env.REQUESTED_BY }}` (see "Requester mention"), then the outcome. Match the case:
+
+- **PR opened**: `Opened a draft fix PR (linked to this issue) that <one clause on the change>.` The PR carries `Fixes #${{ env.ISSUE_NUMBER }}`, so don't include a URL.
+- **Existing PR already covers it**: `A fix is already in progress in #<number>, so I didn't open a duplicate.`
+- **No PR opened**: `No fix PR: <one-sentence reason>.` — e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified from the available evidence.
