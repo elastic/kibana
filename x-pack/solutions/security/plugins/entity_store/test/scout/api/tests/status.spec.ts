@@ -19,6 +19,8 @@ import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import {
   LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
   LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
+  LOG_EXTRACTION_FREQUENCY_DEFAULT,
+  DEFAULT_LOG_EXTRACTION_OVERRIDES,
 } from '../../../../server/domain/saved_objects';
 
 const ALL_ENTITY_TYPES = ['generic', 'host', 'service', 'user'];
@@ -57,6 +59,13 @@ apiTest.describe('Entity Store Status API tests', { tag: ENTITY_STORE_TAGS }, ()
         expect(engine.status).toBe('started');
         expect(engine.maxLogsPerWindow).toBe(LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT);
         expect(engine.maxLogsPerWindowCapBehavior).toBe(LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT);
+
+        // effective per-type cadence: the type's default override when set (#269261),
+        // otherwise the shared global default
+        const expectedFrequency =
+          DEFAULT_LOG_EXTRACTION_OVERRIDES[engine.type].frequency ??
+          LOG_EXTRACTION_FREQUENCY_DEFAULT;
+        expect(engine.frequency).toBe(expectedFrequency);
       }
     }
   );

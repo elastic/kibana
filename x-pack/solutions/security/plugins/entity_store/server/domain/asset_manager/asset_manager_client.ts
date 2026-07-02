@@ -28,9 +28,12 @@ import {
   type EngineDescriptor,
   type EngineDescriptorClient,
   type EntityStoreGlobalStateClient,
+  DEFAULT_LOG_EXTRACTION_OVERRIDES,
+  EngineLogExtractionOverrides,
   HistorySnapshotState,
   LogExtractionConfig,
 } from '../saved_objects';
+import { mergeCadenceOverrides } from '../logs_extraction/cadence_overrides';
 import type { HistorySnapshotBodyParams, LogExtractionInstallParams } from '../../routes/constants';
 import {
   ENGINE_STATUS,
@@ -126,6 +129,11 @@ export class AssetManagerClient {
         logsExtractionParams
       );
       const historySnapshot = HistorySnapshotState.parse(historySnapshotParams ?? {});
+      // A caller-supplied frequency is an explicit request for the whole store and must win
+      // over a type's built-in default cadence override (e.g. Service/Generic's reduced
+      // cadence) — otherwise existing consumers who set a custom frequency at install time
+      // would silently stop getting it for those types.
+      const hasExplicitFrequency = logsExtractionParams?.frequency !== undefined;
 
       // Phase 1: Install shared ES assets/storage and run independent setup tasks.
       await Promise.all([
@@ -156,7 +164,9 @@ export class AssetManagerClient {
 
       // Phase 2: Initialize engines and start background tasks.
       await Promise.all([
-        ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
+        ...entityTypes.map((type) =>
+          this.initEntity(request, type, logsExtraction, hasExplicitFrequency)
+        ),
 
         scheduleHistorySnapshotTasks({
           logger: this.logger,
@@ -318,11 +328,20 @@ export class AssetManagerClient {
   private async initEntity(
     request: KibanaRequest,
     type: EntityType,
-    logsExtractionConfig: LogExtractionConfig
+    logsExtractionConfig: LogExtractionConfig,
+    hasExplicitFrequency: boolean
   ): Promise<boolean> {
-    const installed = await this.install(type);
+    // A caller-supplied frequency wins over this type's built-in cadence default (e.g.
+    // Service/Generic's reduced cadence); otherwise seed the type's default override.
+    const overridesToSeed = hasExplicitFrequency
+      ? EngineLogExtractionOverrides.parse({})
+      : DEFAULT_LOG_EXTRACTION_OVERRIDES[type];
+    const installed = await this.install(type, overridesToSeed);
     if (installed) {
-      await this.start(request, type, logsExtractionConfig);
+      // Schedule the extraction task at the effective (merged) frequency, not the raw
+      // global one, so the seeded override takes effect immediately.
+      const effectiveConfig = mergeCadenceOverrides(logsExtractionConfig, overridesToSeed);
+      await this.start(request, type, effectiveConfig);
     }
     this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_EVENT, {
       entityType: type,
@@ -367,7 +386,10 @@ export class AssetManagerClient {
     });
   }
 
-  public async install(type: EntityType): Promise<boolean> {
+  public async install(
+    type: EntityType,
+    logExtractionOverrides: EngineLogExtractionOverrides = DEFAULT_LOG_EXTRACTION_OVERRIDES[type]
+  ): Promise<boolean> {
     try {
       const { engines } = await this.getStatus();
       if (engines.some((e) => e.type === type)) {
@@ -377,7 +399,7 @@ export class AssetManagerClient {
       this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
       // Engine installation is per-type. Shared indices and data streams are created once
       // during `init()` before parallel engine initialization begins.
-      await this.engineDescriptorClient.init(type);
+      await this.engineDescriptorClient.init(type, logExtractionOverrides);
       this.logger.debug(`Installed definition: ${type}`);
 
       return true;

@@ -8,6 +8,8 @@
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import type { EntityType } from '../../../../common/domain/definitions/entity_schema';
+import { DEFAULT_LOG_EXTRACTION_OVERRIDES } from './constants';
 
 export const EngineDescriptorTypeName = 'entity-engine-descriptor-v2';
 
@@ -36,6 +38,13 @@ export const EngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
         paginationTimestamp: { type: 'date' },
         paginationId: { type: 'keyword' },
         lastExecutionTimestamp: { type: 'date' },
+      },
+    },
+    logExtractionOverrides: {
+      properties: {
+        frequency: { type: 'keyword' },
+        delay: { type: 'keyword' },
+        lookbackPeriod: { type: 'keyword' },
       },
     },
     error: {
@@ -318,11 +327,69 @@ const version6: SavedObjectsFullModelVersion = {
   },
 };
 
+const logExtractionOverridesSchemaV7 = schema.object({
+  frequency: schema.nullable(schema.string()),
+  delay: schema.nullable(schema.string()),
+  lookbackPeriod: schema.nullable(schema.string()),
+});
+
+const engineDescriptorSchemaV7 = engineDescriptorSchemaV6.extends({
+  logExtractionOverrides: logExtractionOverridesSchemaV7,
+});
+
+const version7: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition' as const,
+      addedMappings: {
+        logExtractionOverrides: {
+          properties: {
+            frequency: { type: 'keyword' as const },
+            delay: { type: 'keyword' as const },
+            lookbackPeriod: { type: 'keyword' as const },
+          },
+        },
+      },
+    },
+    {
+      // Seeds the per-type cadence defaults introduced by #269261: Service and Generic
+      // entities extract at a reduced cadence out of the box, while Host/User keep
+      // inheriting the shared global cadence (no override).
+      type: 'data_backfill' as const,
+      backfillFn: (document) => {
+        const entityType = document.attributes.type as EntityType;
+        const defaultOverride = DEFAULT_LOG_EXTRACTION_OVERRIDES[entityType] ?? {
+          frequency: null,
+          delay: null,
+          lookbackPeriod: null,
+        };
+        return {
+          attributes: {
+            logExtractionOverrides: defaultOverride,
+          },
+        };
+      },
+    },
+  ],
+  schemas: {
+    create: engineDescriptorSchemaV7,
+    forwardCompatibility: engineDescriptorSchemaV7.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EngineDescriptorTypeMappings,
-  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4, 5: version5, 6: version6 },
+  modelVersions: {
+    1: version1,
+    2: version2,
+    3: version3,
+    4: version4,
+    5: version5,
+    6: version6,
+    7: version7,
+  },
   hiddenFromHttpApis: true,
 };

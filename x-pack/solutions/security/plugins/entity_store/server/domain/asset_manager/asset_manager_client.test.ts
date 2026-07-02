@@ -146,14 +146,16 @@ describe('AssetManagerClient', () => {
     });
   });
 
+  const noOverride = { frequency: null, delay: null, lookbackPeriod: null };
+
   it('creates shared indices and data streams once during init', async () => {
     await client.init({} as KibanaRequest, ['host', 'user']);
 
     expect(mockInstallSharedElasticsearchAssets).toHaveBeenCalledTimes(1);
     expect(mockInstallIndicesAndDataStreams).not.toHaveBeenCalled();
     expect(mockEngineDescriptorClient.init).toHaveBeenCalledTimes(2);
-    expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('host');
-    expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('user');
+    expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('host', noOverride);
+    expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('user', noOverride);
     expect(mockScheduleExtractEntityTask).toHaveBeenCalledTimes(2);
   });
 
@@ -161,9 +163,101 @@ describe('AssetManagerClient', () => {
     const installed = await client.install('host');
 
     expect(installed).toBe(true);
-    expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('host');
+    expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('host', noOverride);
     expect(mockInstallIndicesAndDataStreams).not.toHaveBeenCalled();
     expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+  });
+
+  describe('default per-type cadence overrides', () => {
+    it('schedules service and generic extraction tasks at their reduced default frequency', async () => {
+      mockGlobalStateClient.find.mockResolvedValue(undefined);
+
+      await client.init({} as KibanaRequest, ['service', 'generic']);
+
+      // per-type overrides are seeded on the engine descriptor...
+      expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('service', {
+        frequency: '10m',
+        delay: null,
+        lookbackPeriod: null,
+      });
+      expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('generic', {
+        frequency: '30m',
+        delay: null,
+        lookbackPeriod: null,
+      });
+      // ...while the shared global config is untouched, still at the system default
+      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
+        expect.objectContaining({ logsExtraction: expect.objectContaining({ frequency: '1m' }) })
+      );
+      expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'service', frequency: '10m' })
+      );
+      expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'generic', frequency: '30m' })
+      );
+    });
+
+    it('schedules host and user extraction tasks at the global frequency (no default override)', async () => {
+      mockGlobalStateClient.find.mockResolvedValue(undefined);
+
+      await client.init({} as KibanaRequest, ['host', 'user']);
+
+      expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('host', noOverride);
+      expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('user', noOverride);
+      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
+        expect.objectContaining({ logsExtraction: expect.objectContaining({ frequency: '1m' }) })
+      );
+      expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'host', frequency: '1m' })
+      );
+      expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'user', frequency: '1m' })
+      );
+    });
+
+    it('lets an explicitly supplied global frequency win over a type default', async () => {
+      mockGlobalStateClient.find.mockResolvedValue(undefined);
+
+      await client.init({} as KibanaRequest, ['service', 'host'], { frequency: '5m' });
+
+      // an explicit frequency at install time is a deliberate request for the whole store;
+      // it must not be silently overridden by service's built-in 10m default
+      expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('service', noOverride);
+      expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('host', noOverride);
+      // the requested frequency is what actually gets persisted as the shared global config
+      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
+        expect.objectContaining({ logsExtraction: expect.objectContaining({ frequency: '5m' }) })
+      );
+      expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'service', frequency: '5m' })
+      );
+      expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'host', frequency: '5m' })
+      );
+    });
+
+    it('still applies the type default when other (non-frequency) logExtraction params are supplied', async () => {
+      mockGlobalStateClient.find.mockResolvedValue(undefined);
+
+      await client.init({} as KibanaRequest, ['service'], { delay: '2m' });
+
+      // frequency is untouched by the request, so the type default is still seeded...
+      expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('service', {
+        frequency: '10m',
+        delay: null,
+        lookbackPeriod: null,
+      });
+      // ...while the requested delay is populated on the shared global config as expected,
+      // alongside the untouched system-default frequency
+      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logsExtraction: expect.objectContaining({ delay: '2m', frequency: '1m' }),
+        })
+      );
+      expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'service', frequency: '10m' })
+      );
+    });
   });
 
   describe('getPrivileges', () => {
