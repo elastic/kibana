@@ -7,7 +7,7 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
-import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common/tools';
+import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import instructions from './instructions/investigator.md.text';
 import {
   OBSERVABILITY_GET_LOGS_TOOL_ID,
@@ -36,7 +36,7 @@ const investigationAgent = {
     tools: [
       {
         tool_ids: [
-          platformStreamsSigEventsTools.searchKnowledgeIndicators,
+          platformSignificantEventsTools.searchKnowledgeIndicators,
           platformCoreTools.executeEsql,
           platformCoreTools.generateEsql,
           OBSERVABILITY_GET_LOGS_TOOL_ID,

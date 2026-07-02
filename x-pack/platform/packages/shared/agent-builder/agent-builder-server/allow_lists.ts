@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common/tools';
+import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 
 /**
@@ -16,7 +16,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // platform core tools are registered from the agent builder plugin so will trigger a review anyway
   ...Object.values(platformCoreTools),
   // Streams / Significant Events
-  ...Object.values(platformStreamsSigEventsTools),
+  ...Object.values(platformSignificantEventsTools),
 
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,
@@ -86,8 +86,8 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
-  `${internalNamespaces.streams}.significant-events.discovery.investigator`,
-  `${internalNamespaces.streams}.significant-events.discovery.judge`,
+  `${internalNamespaces.streams}.sig_events.discovery.investigator`,
+  `${internalNamespaces.streams}.sig_events.discovery.judge`,
   `${internalNamespaces.streams}.investigation`,
 ] as const;
 
