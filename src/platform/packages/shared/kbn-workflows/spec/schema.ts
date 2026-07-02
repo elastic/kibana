@@ -18,6 +18,7 @@ import {
   LegacyWorkflowInputSchema,
 } from './schema/triggers/manual_trigger_schema';
 import {
+  HITL_EXTERNAL_CHANNELS_DESCRIPTION,
   HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
 } from '../common/hitl';
@@ -293,7 +294,7 @@ export const WaitForApprovalChannelsSchema = z
     slack_api: WaitForApprovalSlackApiChannelSchema.optional(),
   })
   .optional()
-  .describe('Optional external notification channels for HITL response links');
+  .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
 
 export const HitlExternalChannelsSchema = WaitForApprovalChannelsSchema;
 

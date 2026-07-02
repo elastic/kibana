@@ -22,3 +22,9 @@ export const DEFAULT_HITL_INPUT_OPEN_FORM_LABEL = 'Open form' as const;
 
 export const DEFAULT_HITL_INPUT_CHANNEL_MESSAGE =
   'Respond here: {{context.hitl.externalFormLink}}' as const;
+
+/**
+ * YAML schema description for `with.channels` on HITL wait steps with scope boundary definition.
+ */
+export const HITL_EXTERNAL_CHANNELS_DESCRIPTION =
+  'Optional external notification channels. Sends public short-lived resume links. Do not use for destructive, production-impacting or otherwise hard-to-reverse workflows.' as const;
