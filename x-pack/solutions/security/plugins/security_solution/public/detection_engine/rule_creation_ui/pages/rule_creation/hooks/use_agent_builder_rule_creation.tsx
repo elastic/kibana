@@ -9,8 +9,6 @@ import { useEffect, useCallback, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import { isRoundCompleteEvent } from '@kbn/agent-builder-common/chat/events';
-import { isToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
@@ -51,10 +49,6 @@ const ruleDefaultMetadataFields = {
 };
 
 const SYNC_DEBOUNCE_MS = 500;
-
-// Must match server-side tool registrations (create_detection_rule_tool.ts + platform builtin).
-const RULE_CREATE_TOOL_ID = 'security.create_detection_rule';
-const ATTACHMENT_UPDATE_TOOL_ID = 'attachments.update';
 
 // Adapts a `VersionedAttachment` (data lives under `versions[]`) to the `{ data }` shape the rule
 // helpers read.
@@ -281,72 +275,6 @@ export const useAgentBuilderRuleCreation = ({
     });
     return () => subscription.unsubscribe();
   }, [aiRuleCreation]);
-
-  // CHAT -> FORM
-  useEffect(() => {
-    if (!agentBuilder?.events?.chat$) return;
-    const subscription = agentBuilder.events.chat$.subscribe((event) => {
-      if (!isRoundCompleteEvent(event)) return;
-
-      const steps = event.data.round?.steps ?? [];
-      let touchedAttachmentId: string | undefined;
-
-      for (const step of steps) {
-        if (isToolCallStep(step)) {
-          const toolId = step.tool_id;
-          if (toolId === RULE_CREATE_TOOL_ID || toolId === ATTACHMENT_UPDATE_TOOL_ID) {
-            for (const result of step.results) {
-              const resultData = result.data as Record<string, unknown> | undefined;
-              if (resultData) {
-                const candidateId = resultData.attachment_id as string | undefined;
-                if (candidateId) {
-                  touchedAttachmentId = candidateId;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      // Whether the AI updated an existing card or minted a new one, always fall through so the
-      // attachment lookup below can bind to it and push the AI's output into the form.
-
-      // Priority: touched attachment this round → bound attachment → first-of-type in event.
-      const attachments = event.data.attachments ?? [];
-      const resolvedId = touchedAttachmentId ?? aiRuleCreation.getBoundAttachmentId() ?? undefined;
-      const ruleAttachment = resolvedId
-        ? attachments.find(
-            (a) => a.id === resolvedId && a.type === SecurityAgentBuilderAttachments.rule
-          )
-        : attachments.find((a) => a.type === SecurityAgentBuilderAttachments.rule);
-
-      if (!ruleAttachment) return;
-
-      if (ruleAttachment.id !== aiRuleCreation.getBoundAttachmentId()) {
-        aiRuleCreation.setBoundAttachment(ruleAttachment.id);
-      }
-
-      const latestVersion = getLatestVersion(ruleAttachment);
-      if (!latestVersion) return;
-      let parsed: RuleResponse | undefined;
-      try {
-        const text = (latestVersion.data as { text?: string })?.text;
-        if (!text) return;
-        const result = JSON.parse(text);
-        if (!result || typeof result !== 'object' || Array.isArray(result)) return;
-        parsed = result as RuleResponse;
-      } catch {
-        return;
-      }
-      const versionedView = versionedAttachmentView(ruleAttachment as never);
-      intentRef.current = getRuleAttachmentIntent(versionedView as never);
-      const savedRuleId = getRuleIdFromAttachment(versionedView as never) ?? undefined;
-      const ruleToApply =
-        intentRef.current === 'update' && savedRuleId ? { ...parsed, id: savedRuleId } : parsed;
-      updateFormFromChatRef.current(ruleToApply, { silent: true });
-    });
-    return () => subscription.unsubscribe();
-  }, [agentBuilder, aiRuleCreation]);
 
   // Latest form inputs, read inside the debounce so the effect doesn't need them as deps.
   const formInputsRef = useRef({
