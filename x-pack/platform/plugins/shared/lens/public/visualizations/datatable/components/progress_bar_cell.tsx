@@ -5,22 +5,26 @@
  * 2.0.
  */
 
-import React, { type ReactNode } from 'react';
+import React, { type CSSProperties, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 import { EuiLink, useEuiTheme } from '@elastic/eui';
 import { Meter, MeterFillStyle, MeterSize } from '@elastic/charts';
 import type { MeterColorStop, MeterFill } from '@elastic/charts';
+import type { RawValue } from '@kbn/data-plugin/common';
 import type { DataGridDensity, CellDecorationFillConfig } from '@kbn/lens-common';
 import { LENS_DATAGRID_DENSITY } from '@kbn/lens-common';
 import { getCellClassName, type Alignment } from './cell_value_helpers';
 
 // Bar thickness per table density, expressed as `Meter` size presets
 // (Small=4px, Medium=8px, Large=16px; corner radius is a fixed 8px, so Medium
-// and Large both read as a full rounded pill). The normal-density bar uses the
-// thick pill from the issue mockup; compact/expanded step down/up around it.
+// and Large both read as a full rounded pill). `Meter` only exposes those three
+// presets, so Kibana trims the default "Normal" density with a small inline
+// height override rather than widening the public charts API for this table-only
+// refinement.
 const COMPACT_BAR_HEIGHT = MeterSize.Medium;
 const NORMAL_BAR_HEIGHT = MeterSize.Large;
 const EXPANDED_BAR_HEIGHT = MeterSize.Large;
+const NORMAL_BAR_RENDERED_HEIGHT_PX = 12;
 
 /** Maps the table density to a Meter thickness preset. */
 export function getProgressBarSize(
@@ -34,6 +38,24 @@ export function getProgressBarSize(
     case LENS_DATAGRID_DENSITY.NORMAL:
     default:
       return NORMAL_BAR_HEIGHT;
+  }
+}
+
+/**
+ * Returns an optional inline height override for the rendered Meter.
+ *
+ * Lens keeps the existing size presets for layout semantics but trims the
+ * default/normal density to an intermediate height between compact (8px) and
+ * expanded (16px), matching follow-up review feedback without changing charts.
+ */
+export function getProgressBarStyle(density?: DataGridDensity): CSSProperties | undefined {
+  switch (density) {
+    case LENS_DATAGRID_DENSITY.COMPACT:
+    case LENS_DATAGRID_DENSITY.EXPANDED:
+      return undefined;
+    case LENS_DATAGRID_DENSITY.NORMAL:
+    default:
+      return { height: `${NORMAL_BAR_RENDERED_HEIGHT_PX}px` };
   }
 }
 
@@ -82,6 +104,7 @@ export interface ProgressBarCellProps {
   domain: [number, number];
   fill: MeterFill;
   size: (typeof MeterSize)[keyof typeof MeterSize];
+  meterStyle?: CSSProperties;
   alignment: Alignment;
   /**
    * Character width to reserve for the value gutter so the bar starts/ends at the
@@ -105,7 +128,7 @@ export interface ProgressBarCellProps {
 const MIN_LABEL_WIDTH_CH = 3;
 
 interface LabelFormatter {
-  convertToText?: (value: unknown) => string;
+  convertToText?: (value: RawValue) => string;
 }
 
 /**
@@ -166,6 +189,7 @@ export const ProgressBarCell = ({
   domain,
   fill,
   size,
+  meterStyle,
   alignment,
   labelWidthCh,
   baseline = 0,
@@ -220,6 +244,7 @@ export const ProgressBarCell = ({
         // the track, matching the issue mockup (and the Metric chart's bar).
         fillBorderColor={euiTheme.colors.emptyShade}
         fillBorderWidth={1}
+        style={meterStyle}
         ariaLabel={ariaLabel}
         ariaValueNow={value}
         ariaValueMin={domain[0]}

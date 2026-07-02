@@ -38,11 +38,20 @@ import {
   getMeterFill,
   getProgressBarLabelWidthCh,
   getProgressBarSize,
+  getProgressBarStyle,
   toMeterColorStops,
 } from './progress_bar_cell';
 
+interface ProgressBarRenderProps {
+  value: number;
+  domain: [number, number];
+  fill: ReturnType<typeof getMeterFill>;
+  labelWidthCh: number;
+  baseline: number | undefined;
+}
+
 export const createGridCell = (
-  formatters: Record<string, ReturnType<FormatFactory>>,
+  formatters: { [columnId: string]: ReturnType<FormatFactory> },
   columnConfig: DatatableColumnConfig,
   DataContext: React.Context<DataContextType>,
   isDarkMode: boolean,
@@ -57,6 +66,7 @@ export const createGridCell = (
 ) => {
   const columnConfigLookup = buildColumnConfigLookup(columnConfig.columns);
   const progressBarSize = getProgressBarSize(density);
+  const progressBarStyle = getProgressBarStyle(density);
 
   return ({ rowIndex, columnId, setCellProps, isExpanded }: EuiDataGridCellValueElementProps) => {
     const { table, alignments, handleFilterClick, minMaxByColumnId } = useContext(DataContext);
@@ -101,7 +111,7 @@ export const createGridCell = (
 
     const fillStyle = useMemo(() => parseCellDecorationFillConfig(rawFillStyle), [rawFillStyle]);
 
-    const progressBarProps = useMemo(() => {
+    const progressBarProps = useMemo<ProgressBarRenderProps | null>(() => {
       if (renderMode !== 'progress' || !fillStyle || typeof rawValue !== 'number') {
         return null;
       }
@@ -124,7 +134,8 @@ export const createGridCell = (
       // row's bar shares the same edge regardless of digit count.
       const labelWidthCh = getProgressBarLabelWidthCh(formatter, dataBounds.min, dataBounds.max);
       return {
-        domain: [min, max] as [number, number],
+        value: rawValue,
+        domain: [min, max],
         fill,
         labelWidthCh,
         baseline: fillStyle.baseline,
@@ -195,11 +206,12 @@ export const createGridCell = (
         }
         return (
           <ProgressBarCell
-            value={rawValue as number}
+            value={progressBarProps.value}
             label={formatter?.convertToReact(rawValue) ?? fallbackText}
             domain={progressBarProps.domain}
             fill={progressBarProps.fill}
             size={progressBarSize}
+            meterStyle={progressBarStyle}
             alignment={alignment}
             labelWidthCh={progressBarProps.labelWidthCh}
             baseline={progressBarProps.baseline}

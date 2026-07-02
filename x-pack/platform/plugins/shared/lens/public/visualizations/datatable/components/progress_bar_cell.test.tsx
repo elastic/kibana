@@ -9,22 +9,26 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MeterFillStyle, MeterSize } from '@elastic/charts';
+import type { MeterFill, MeterProps } from '@elastic/charts';
+import type { RawValue } from '@kbn/data-plugin/common';
 import { LENS_DATAGRID_DENSITY } from '@kbn/lens-common';
 import type { CellDecorationFillConfig } from '@kbn/lens-common';
 import {
   ProgressBarCell,
+  type ProgressBarCellProps,
   getMeterFill,
   getProgressBarLabelWidthCh,
   getProgressBarSize,
+  getProgressBarStyle,
   toMeterColorStops,
 } from './progress_bar_cell';
 
 jest.mock('@elastic/charts', () => {
   const actual = jest.requireActual('@elastic/charts');
-  const mockMeter = jest.fn((_props: Record<string, unknown>) => null);
+  const mockMeter = jest.fn((_props: MeterProps) => null);
   return {
     ...actual,
-    Meter: (props: Record<string, unknown>) => {
+    Meter: (props: MeterProps) => {
       mockMeter(props);
       return <div data-test-subj="mockMeter" />;
     },
@@ -32,7 +36,10 @@ jest.mock('@elastic/charts', () => {
   };
 });
 
-const meterMock = (jest.requireMock('@elastic/charts') as { __mockMeter: jest.Mock }).__mockMeter;
+const chartsMock: {
+  __mockMeter: jest.Mock<null, [MeterProps]>;
+} = jest.requireMock('@elastic/charts');
+const meterMock = chartsMock.__mockMeter;
 
 describe('progress bar cell helpers', () => {
   describe('getProgressBarSize', () => {
@@ -41,6 +48,15 @@ describe('progress bar cell helpers', () => {
       expect(getProgressBarSize(LENS_DATAGRID_DENSITY.NORMAL)).toBe(MeterSize.Large);
       expect(getProgressBarSize(LENS_DATAGRID_DENSITY.EXPANDED)).toBe(MeterSize.Large);
       expect(getProgressBarSize(undefined)).toBe(MeterSize.Large);
+    });
+  });
+
+  describe('getProgressBarStyle', () => {
+    it('trims only the default/normal density to an intermediate rendered height', () => {
+      expect(getProgressBarStyle(LENS_DATAGRID_DENSITY.COMPACT)).toBeUndefined();
+      expect(getProgressBarStyle(LENS_DATAGRID_DENSITY.NORMAL)).toEqual({ height: '12px' });
+      expect(getProgressBarStyle(LENS_DATAGRID_DENSITY.EXPANDED)).toBeUndefined();
+      expect(getProgressBarStyle(undefined)).toEqual({ height: '12px' });
     });
   });
 
@@ -96,7 +112,7 @@ describe('progress bar cell helpers', () => {
   });
 
   describe('getProgressBarLabelWidthCh', () => {
-    const formatter = { convertToText: (v: unknown) => String(v) };
+    const formatter = { convertToText: (v: RawValue) => String(v) };
 
     it('reserves width for the widest formatted bound (negative min wider than max)', () => {
       // "-30" is 3 chars, "27" is 2 chars -> gutter must fit the wider one.
@@ -104,7 +120,7 @@ describe('progress bar cell helpers', () => {
     });
 
     it('uses the formatter so suffixed/padded values are measured (e.g. percent)', () => {
-      const percent = { convertToText: (v: unknown) => `${v}%` };
+      const percent = { convertToText: (v: RawValue) => `${v}%` };
       // "100%" is 4 chars.
       expect(getProgressBarLabelWidthCh(percent, 0, 100)).toBe(4);
     });
@@ -123,13 +139,14 @@ describe('progress bar cell helpers', () => {
   });
 
   describe('ProgressBarCell label', () => {
-    const baseProps = {
+    const baseFill: MeterFill = { type: MeterFillStyle.Single, color: '#123' };
+    const baseProps: ProgressBarCellProps = {
       value: 42,
       label: '42',
-      domain: [0, 100] as [number, number],
-      fill: { type: MeterFillStyle.Single, color: '#123' } as ReturnType<typeof getMeterFill>,
+      domain: [0, 100],
+      fill: baseFill,
       size: MeterSize.Medium,
-      alignment: 'right' as const,
+      alignment: 'right',
     };
 
     it('renders a static label when not clickable', () => {
@@ -164,16 +181,24 @@ describe('progress bar cell helpers', () => {
   });
 
   describe('ProgressBarCell baseline', () => {
-    const baseProps = {
+    const baseFill: MeterFill = { type: MeterFillStyle.Single, color: '#123' };
+    const baseProps: ProgressBarCellProps = {
       value: 42,
       label: '42',
-      domain: [0, 100] as [number, number],
-      fill: { type: MeterFillStyle.Single, color: '#123' } as ReturnType<typeof getMeterFill>,
+      domain: [0, 100],
+      fill: baseFill,
       size: MeterSize.Medium,
-      alignment: 'right' as const,
+      alignment: 'right',
     };
 
     beforeEach(() => meterMock.mockClear());
+
+    it('forwards a density-specific meter style override', () => {
+      render(<ProgressBarCell {...baseProps} meterStyle={{ height: '12px' }} />);
+      expect(meterMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({ style: { height: '12px' } })
+      );
+    });
 
     it('defaults the fill baseline to 0 and rounds the start at the domain edge', () => {
       render(<ProgressBarCell {...baseProps} />);
