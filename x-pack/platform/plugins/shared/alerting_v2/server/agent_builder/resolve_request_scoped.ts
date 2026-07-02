@@ -14,7 +14,7 @@ import type { ServiceIdentifier } from 'inversify';
 /**
  * Resolves a request-scoped service outside the core HTTP route pipeline.
  *
- * Agent Builder tool handlers (SML types, attachment types) receive a real
+ * Agent Builder tool handlers (CE types, attachment types) receive a real
  * `KibanaRequest` but execute outside the route pipeline, so the automatic
  * per-request container scope (set up by core-di's `loadHttp` module) is never
  * created for them. This forks the container, binds the incoming request, and

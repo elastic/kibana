@@ -40,7 +40,7 @@ import {
   NavigationService,
   ToolsService,
   SkillsService,
-  SmlService,
+  CeService,
   OAuthClientsService,
   PluginsService,
   EventsService,
@@ -168,7 +168,7 @@ export class AgentBuilderPlugin
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
     const skillsService = new SkillsService({ http });
-    const smlService = new SmlService({ http });
+    const ceService = new CeService({ http });
     const pluginsService = new PluginsService({ http });
     const oauthClientsService = new OAuthClientsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
@@ -236,7 +236,7 @@ export class AgentBuilderPlugin
       navigationService,
       toolsService,
       skillsService,
-      smlService,
+      ceService,
       pluginsService,
       oauthClientsService,
       startDependencies,

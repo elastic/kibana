@@ -11,9 +11,9 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
-  AgentContextLayerPluginSetup,
-  AgentContextLayerPluginStart,
-} from '@kbn/agent-context-layer-plugin/server';
+  ContextEnginePluginSetup,
+  ContextEnginePluginStart,
+} from '@kbn/context-engine-plugin/server';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
@@ -74,7 +74,7 @@ export interface ElasticsearchAccessorOptions {
 
 export interface StreamsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
-  agentContextLayer?: AgentContextLayerPluginSetup;
+  contextEngine?: ContextEnginePluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
   alerting: AlertingServerSetup;
@@ -102,7 +102,7 @@ export interface StreamsPluginStartDependencies {
   fieldsMetadata: FieldsMetadataServerStart;
   console: ConsoleServerStart;
   agentBuilder?: AgentBuilderPluginStart;
-  agentContextLayer?: AgentContextLayerPluginStart;
+  contextEngine?: ContextEnginePluginStart;
   spaces?: SpacesPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;

@@ -10,7 +10,7 @@ import { optionalWithDescription as opt } from './common';
 import { ruleResponseSchema } from './rule_data_schema';
 
 export const RULE_ATTACHMENT_TYPE = 'rule' as const;
-export const RULE_SML_TYPE = 'alerting_v2_rule' as const;
+export const RULE_CE_TYPE = 'alerting_v2_rule' as const;
 
 /**
  * Data stored inside a rule attachment.

@@ -4560,10 +4560,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/agent-context-layer-plugin@link:x-pack/platform/plugins/shared/agent_context_layer":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
   version "0.0.0"
   uid ""
@@ -5241,6 +5237,10 @@
   uid ""
 
 "@kbn/content-packs-schema@link:x-pack/platform/packages/shared/kbn-content-packs-schema":
+  version "0.0.0"
+  uid ""
+
+"@kbn/context-engine-plugin@link:x-pack/platform/plugins/shared/context_engine":
   version "0.0.0"
   uid ""
 

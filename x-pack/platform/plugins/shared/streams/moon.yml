@@ -102,7 +102,7 @@ dependsOn:
   - '@kbn/elastic-agent-utils'
   - '@kbn/sample-log-parser'
   - '@kbn/workflows-extensions'
-  - '@kbn/agent-context-layer-plugin'
+  - '@kbn/context-engine-plugin'
   - '@kbn/traced-es-client'
 tags:
   - plugin

@@ -26,20 +26,17 @@ export type {
 export type { ConversationListOptions } from '@kbn/agent-builder-common';
 
 export type {
-  SmlTypeDefinition,
-  SmlChunk,
-  SmlData,
-  SmlContext,
-  SmlToAttachmentContext,
-  SmlListItem,
-  SmlSearchResult,
-  SmlIndexAttachmentParams,
-} from '@kbn/agent-context-layer-plugin/server';
+  CeTypeDefinition,
+  CeEntry,
+  CeData,
+  CeContext,
+  CeToAttachmentContext,
+  CeListItem,
+  CeSearchResult,
+  CeIndexAttachmentParams,
+} from '@kbn/context-engine-plugin/server';
 
-export {
-  smlElasticsearchIndexMappings,
-  smlIndexName,
-} from '@kbn/agent-context-layer-plugin/server';
+export { ceElasticsearchIndexMappings, ceIndexName } from '@kbn/context-engine-plugin/server';
 
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,

@@ -110,9 +110,9 @@ describe('createBadgeElement', () => {
     expect(badge.title).toBe('/Summarize');
   });
 
-  it('wraps SML label the same way', () => {
+  it('wraps CE label the same way', () => {
     const badge = createCommandBadgeElement({
-      commandId: CommandId.Sml,
+      commandId: CommandId.Ce,
       label: 'dashboard/My chart',
       id: 'chunk-1',
       metadata: {},

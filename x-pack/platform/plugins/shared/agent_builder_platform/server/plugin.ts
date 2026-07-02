@@ -17,8 +17,8 @@ import type {
 import { registerTools } from './tools';
 import { registerAttachmentTypes } from './attachment_types';
 import { registerSkills } from './skills';
-import { visualizationSmlType } from './sml_types/visualization';
-import { createConnectorSmlType } from './sml_types/connector';
+import { visualizationCeType } from './ce_types/visualization';
+import { createConnectorCeType } from './ce_types/connector';
 import { createConnectorLifecycleHandler } from './connector_lifecycle/connector_lifecycle_handler';
 
 export class AgentBuilderPlatformPlugin
@@ -49,16 +49,16 @@ export class AgentBuilderPlatformPlugin
       setupDeps,
     });
     registerSkills(setupDeps.agentBuilder);
-    setupDeps.agentContextLayer.registerType(visualizationSmlType);
+    setupDeps.contextEngine.registerType(visualizationCeType);
 
-    const connectorSmlType = createConnectorSmlType({
+    const connectorCeType = createConnectorCeType({
       getActionSavedObjectsClient: async (request) => {
         const [coreStart] = await coreSetup.getStartServices();
         return coreStart.savedObjects.getScopedClient(request, { includedHiddenTypes: ['action'] });
       },
-      logger: this.logger.get('sml-connector'),
+      logger: this.logger.get('ce-connector'),
     });
-    setupDeps.agentContextLayer.registerType(connectorSmlType);
+    setupDeps.contextEngine.registerType(connectorCeType);
 
     const connectorLifecycleHandler = createConnectorLifecycleHandler({
       logger: this.logger.get('connector-lifecycle'),

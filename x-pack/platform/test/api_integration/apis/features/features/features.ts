@@ -102,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
             'actions',
             'anonymization',
             'agentBuilder',
-            'agentContextLayer',
+            'contextEngine',
             'enterpriseSearch',
             'enterpriseSearchApplications',
             'enterpriseSearchAnalytics',

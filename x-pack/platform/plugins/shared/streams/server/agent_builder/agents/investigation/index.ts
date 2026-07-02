@@ -50,7 +50,7 @@ const investigationAgent = {
         ],
       },
     ],
-    // Explicit: smlSearch + executeConnectorSubAction let the agent discover and
+    // Explicit: ceSearch + executeConnectorSubAction let the agent discover and
     // invoke system connectors (e.g. source repositories) without hard-coding IDs.
     enable_elastic_capabilities: true,
   },

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SmlSearchFilters,
-  SmlSearchConstraints,
-} from '@kbn/agent-context-layer-plugin/public';
+import type { CeSearchFilters, CeSearchConstraints } from '@kbn/context-engine-plugin/public';
 
 /**
  * Query keys for react-query
@@ -62,11 +59,11 @@ export const queryKeys = {
     byId: (skillId?: string) => ['skills', skillId],
     byAgent: (agentId?: string) => ['skills', 'byAgent', agentId],
   },
-  sml: {
-    search: (query: string, constraints?: SmlSearchConstraints, filters?: SmlSearchFilters) =>
-      ['sml', 'search', { query, constraints, filters }] as const,
-    autocomplete: (query: string, constraints?: SmlSearchConstraints, filters?: SmlSearchFilters) =>
-      ['sml', 'autocomplete', { query, constraints, filters }] as const,
+  ce: {
+    search: (query: string, constraints?: CeSearchConstraints, filters?: CeSearchFilters) =>
+      ['ce', 'search', { query, constraints, filters }] as const,
+    autocomplete: (query: string, constraints?: CeSearchConstraints, filters?: CeSearchFilters) =>
+      ['ce', 'autocomplete', { query, constraints, filters }] as const,
   },
   plugins: {
     all: ['plugins', 'list'] as const,

@@ -14,7 +14,7 @@
       "dashboard",
       "dashboardMarkdown",
       "data",
-      "agentContextLayer",
+      "contextEngine",
       "share",
       "unifiedSearch"
     ]

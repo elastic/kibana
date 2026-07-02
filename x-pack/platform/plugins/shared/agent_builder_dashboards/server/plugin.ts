@@ -20,7 +20,7 @@ import type {
 } from './types';
 import { registerSkills } from './skills';
 import { createDashboardAttachmentType } from './attachment_types';
-import { createDashboardSmlType } from './sml_types';
+import { createDashboardCeType } from './ce_types';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -55,7 +55,7 @@ export class AgentBuilderDashboardsPlugin
         getDashboardClient,
       }) as Parameters<typeof setupDeps.agentBuilder.attachments.registerType>[0]
     );
-    setupDeps.agentContextLayer.registerType(createDashboardSmlType({ getDashboardClient }));
+    setupDeps.contextEngine.registerType(createDashboardCeType({ getDashboardClient }));
     registerSkills(setupDeps.agentBuilder);
     return {};
   }

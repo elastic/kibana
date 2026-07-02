@@ -34,7 +34,7 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/management-settings-ids",
     "@kbn/core-spaces-common",
-    "@kbn/agent-context-layer-plugin",
+    "@kbn/context-engine-plugin",
     "@kbn/actions-plugin",
     "@kbn/triggers-actions-ui-plugin",
   ]

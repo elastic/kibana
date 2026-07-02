@@ -47,8 +47,8 @@ describe('CommandBadgeText', () => {
     expect(screen.getByText('[/Unknown](unknown://id-1)')).toBeInTheDocument();
   });
 
-  it('renders SML badges with full type/title text', () => {
-    renderWithProvider(<CommandBadgeText text="[@dashboard/A](sml://chunk-1)" />);
+  it('renders CE badges with full type/title text', () => {
+    renderWithProvider(<CommandBadgeText text="[@dashboard/A](ce://chunk-1)" />);
 
     expect(screen.getByText('@dashboard/A')).toBeInTheDocument();
   });

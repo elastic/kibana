@@ -181,11 +181,11 @@ Do **not** use this skill for:
 ## Rule Discovery
 
 When a user asks about existing rules:
-- Search with \`platform.core.sml_search\`, using keywords from the user's request.
+- Search with \`platform.core.ce_search\`, using keywords from the user's request.
 - For a broad listing, use \`keywords: ["*"]\`.
 - Summarize matches in plain language: name, kind, schedule, and query snippet.
 - Do **not** attach rules by default when only listing or comparing.
-- To inspect or edit a saved rule, attach it with \`platform.core.sml_attach\` using the \`chunk_id\` from the search result.
+- To inspect or edit a saved rule, attach it with \`platform.core.ce_attach\` using the \`entry_id\` from the search result.
 - After attaching, use the returned \`attachment_id\` for subsequent ${alertingTools.manageRule} calls.
 
 ## Composing and Modifying Rules
@@ -314,9 +314,9 @@ Action policies control how alert episodes are matched, grouped, throttled, and 
 ## Action Policy Discovery
 
 When a user asks about existing action policies:
-- Search with \`platform.core.sml_search\`, using keywords like the policy name, matcher, or destination.
+- Search with \`platform.core.ce_search\`, using keywords like the policy name, matcher, or destination.
 - Summarize matches: name, enabled/disabled, destination count, matcher snippet, grouping mode.
-- To inspect or edit a saved policy, attach it with \`platform.core.sml_attach\` using the \`chunk_id\`.
+- To inspect or edit a saved policy, attach it with \`platform.core.ce_attach\` using the \`entry_id\`.
 - After attaching, use the returned \`attachment_id\` for subsequent ${alertingTools.manageActionPolicy} calls.
 
 ## Composing and Modifying Action Policies

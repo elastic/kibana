@@ -6,7 +6,7 @@ set -euo pipefail
 # This ensures credentials never appear in the calling process's output.
 #
 # When agentBuilder:experimentalFeatures is true, creating a connector automatically
-# indexes it into the Semantic Metadata Layer (SML), making its sub-actions
+# indexes it into the Context Engine, making its sub-actions
 # discoverable by AI agents.
 
 CONNECTOR_TYPE=""
@@ -172,7 +172,7 @@ if [[ "$HTTP_CODE" -ge 200 && "$HTTP_CODE" -lt 300 ]]; then
     echo ""
     echo "Connector ID: $CONNECTOR_ID"
     echo ""
-    echo "The connector's sub-actions are now discoverable by AI agents via the SML."
+    echo "The connector's sub-actions are now discoverable by AI agents via the CE."
     echo "Use list_connectors.sh to verify."
   fi
 else

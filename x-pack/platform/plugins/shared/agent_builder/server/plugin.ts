@@ -38,7 +38,7 @@ import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/regist
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
-import { createSmlTools } from './services/tools/builtin/sml';
+import { createCeTools } from './services/tools/builtin/ce';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import {
@@ -171,15 +171,15 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
     });
 
-    const smlTools = createSmlTools({
-      getAgentContextLayer: () => {
+    const ceTools = createCeTools({
+      getContextEngine: () => {
         if (!this.startDeps) {
-          throw new Error('Agent Context Layer not available — plugin has not started');
+          throw new Error('Context Engine not available — plugin has not started');
         }
-        return this.startDeps.agentContextLayer;
+        return this.startDeps.contextEngine;
       },
     });
-    smlTools.forEach((tool) => {
+    ceTools.forEach((tool) => {
       serviceSetups.tools.register(tool);
     });
 
@@ -231,10 +231,6 @@ export class AgentBuilderPlugin
     const { inference, spaces, actions, taskManager, searchInferenceEndpoints } = startDeps;
     const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
-
-    this.cleanupLegacySmlTasks(taskManager).catch((error) => {
-      this.logger.warn(`Failed to clean up legacy SML tasks: ${(error as Error).message}`);
-    });
 
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
@@ -342,23 +338,5 @@ export class AgentBuilderPlugin
 
   async stop() {
     await this.teardownTracing?.();
-  }
-  /**
-   * Remove orphaned SML crawler task instances from older scheduled-task id prefixes.
-   * Safe on every start — uses a single `bulkRemove` for the known legacy instance ids.
-   */
-  private async cleanupLegacySmlTasks(taskManager: AgentBuilderStartDependencies['taskManager']) {
-    const logger = this.logger.get('sml-migration');
-    const legacyTaskIds = [
-      'agent_builder:sml_crawler:visualization',
-      'agent_builder:sml_crawler:connector',
-      'agent_builder:sml_crawler:dashboard',
-      'agent_builder:sml_crawler:workflow',
-    ];
-    try {
-      await taskManager.bulkRemove(legacyTaskIds);
-    } catch (error) {
-      logger.warn(`Failed to remove legacy SML crawler tasks: ${(error as Error).message}`);
-    }
   }
 }

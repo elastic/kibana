@@ -17,7 +17,7 @@ import type {
   AgentBuilderWorkflowsPluginStart,
 } from './types';
 import { WorkflowsAiTelemetryClient } from './telemetry/workflows_ai_telemetry_client';
-import { createWorkflowSmlType } from './sml_types/workflow';
+import { createWorkflowCeType } from './ce_types/workflow';
 import { registerWorkflowYamlAttachment } from './attachment_types/workflow_yaml_attachment';
 import { registerWorkflowYamlDiffAttachment } from './attachment_types/workflow_yaml_diff_attachment';
 import { workflowAuthoringSkill } from './skills/workflow_authoring_skill';
@@ -55,7 +55,7 @@ export class AgentBuilderWorkflowsPlugin
     coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderWorkflowsPluginStart>,
     setupDeps: PluginSetupDependencies
   ): AgentBuilderWorkflowsPluginSetup {
-    const { agentBuilder, agentContextLayer, workflowsManagement } = setupDeps;
+    const { agentBuilder, contextEngine, workflowsManagement } = setupDeps;
     const api = workflowsManagement.management;
     this.api = api;
 
@@ -76,8 +76,8 @@ export class AgentBuilderWorkflowsPlugin
     // Workflow authoring skill
     agentBuilder.skills.register(workflowAuthoringSkill);
 
-    // Workflow SML type for the agent context layer
-    agentContextLayer.registerType(createWorkflowSmlType(api));
+    // Workflow CE type for the agent context layer
+    contextEngine.registerType(createWorkflowCeType(api));
 
     // Platform-level workflow execution tools
     const platformTools: Array<BuiltinToolDefinition<any>> = [
@@ -97,10 +97,7 @@ export class AgentBuilderWorkflowsPlugin
     startDeps: PluginStartDependencies
   ): AgentBuilderWorkflowsPluginStart {
     if (this.api) {
-      this.api.setSmlIndexAttachment(
-        startDeps.agentContextLayer.indexAttachment,
-        this.logger.get('sml')
-      );
+      this.api.setCeIndexAttachment(startDeps.contextEngine.indexAttachment, this.logger.get('ce'));
     }
     return {};
   }

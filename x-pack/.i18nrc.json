@@ -102,6 +102,7 @@
       "platform/packages/shared/agent-builder"
     ],
     "xpack.agentBuilderPlatform": "platform/plugins/shared/agent_builder_platform",
+    "xpack.contextEngine": "platform/plugins/shared/context_engine",
     "xpack.osquery": ["platform/plugins/shared/osquery"],
     "xpack.painlessLab": "platform/plugins/private/painless_lab",
     "xpack.profiling": ["solutions/observability/plugins/profiling"],

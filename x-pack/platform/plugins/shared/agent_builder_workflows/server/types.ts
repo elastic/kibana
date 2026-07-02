@@ -7,20 +7,20 @@
 
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
-  AgentContextLayerPluginSetup,
-  AgentContextLayerPluginStart,
-} from '@kbn/agent-context-layer-plugin/server';
+  ContextEnginePluginSetup,
+  ContextEnginePluginStart,
+} from '@kbn/context-engine-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
 export interface PluginSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
-  agentContextLayer: AgentContextLayerPluginSetup;
+  contextEngine: ContextEnginePluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
 }
 
 export interface PluginStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
-  agentContextLayer: AgentContextLayerPluginStart;
+  contextEngine: ContextEnginePluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

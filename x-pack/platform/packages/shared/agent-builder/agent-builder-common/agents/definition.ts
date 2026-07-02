@@ -119,7 +119,7 @@ export interface AgentConfiguration {
 
   /**
    * Optional list of connector IDs associated with this agent.
-   * When set, SML search filters connector results to only those in this list.
+   * When set, CE search filters connector results to only those in this list.
    * When undefined, all connectors remain visible (backward compatibility).
    */
   connector_ids?: string[];

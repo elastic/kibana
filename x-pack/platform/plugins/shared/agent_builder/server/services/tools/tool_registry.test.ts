@@ -117,7 +117,7 @@ describe('ToolRegistryImpl', () => {
     const builtinTool = availableTool({
       id: 'builtin-search',
       type: ToolType.builtin,
-      tags: ['search', 'sml'],
+      tags: ['search', 'ce'],
     });
 
     const esqlTool = availableTool({
@@ -306,7 +306,7 @@ describe('ToolRegistryImpl', () => {
           persistedTools: [esqlTool, mcpTool, workflowTool],
         });
 
-        const tools = await registry.list({ tags: ['sml', 'external'] });
+        const tools = await registry.list({ tags: ['ce', 'external'] });
 
         expect(tools).toHaveLength(2);
         expect(tools.map((t) => t.id)).toEqual(['builtin-search', 'mcp.tavily.search']);

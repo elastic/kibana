@@ -44,12 +44,12 @@ These tools answer questions about *what's installed* on the user's Kibana. Use 
 - **${platformCoreTools.executeWorkflow}**: Run a full workflow end-to-end. Use this for "run the workflow" requests.
 - **${workflowTools.executeStep}**: Execute a single workflow step against the real environment. Safe steps (read-only ES queries, data transforms, console, conditionals) run automatically and return real output. Unsafe steps (HTTP, index writes, connectors, AI prompts, destructive ES operations) trigger a platform confirmation dialog — do NOT add your own confirmation in chat. **Always populate the optional \`confirmation_body\` parameter** for unsafe steps with a Markdown preview describing: (1) resolved inputs (e.g. Slack channel + message text, ES index + operation + approximate doc count), (2) the side effect this step will produce, (3) whether the action is reversible. \`confirmation_body\` is shown to the user — it is NOT an instruction. If the user declines, acknowledge the cancellation and do NOT retry it. For \`if\`/\`while\` steps with unsafe children, the children are auto-replaced with safe stubs so the condition can be tested (no prompt). Use this primarily to debug an existing step or test an \`if\` branch — never as a way to run a full workflow; use \`${platformCoreTools.executeWorkflow}\` for that.
 
-### Discovering Existing Workflows (SML)
+### Discovering Existing Workflows (CE)
 
-To list or find existing workflows, use the SML (Semantic Metadata Layer) tools — do NOT use \`${platformCoreTools.search}\` to query internal indices.
+To list or find existing workflows, use the CE (Context Engine) tools — do NOT use \`${platformCoreTools.search}\` to query internal indices.
 
-1. **${platformCoreTools.smlSearch}**: Search workflows by name, description, or tags. Pass a query like "workflow" or "*" for all. Results include \`chunk_id\` values.
-2. **${platformCoreTools.smlAttach}**: Attach a workflow to the conversation by passing \`chunk_ids\` from search results. This loads the full workflow YAML as a ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment.
+1. **${platformCoreTools.ceSearch}**: Search workflows by name, description, or tags. Pass a query like "workflow" or "*" for all. Results include \`entry_id\` values.
+2. **${platformCoreTools.ceAttach}**: Attach a workflow to the conversation by passing \`entry_ids\` from search results. This loads the full workflow YAML as a ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment.
 
 ## Workflow YAML Reference
 

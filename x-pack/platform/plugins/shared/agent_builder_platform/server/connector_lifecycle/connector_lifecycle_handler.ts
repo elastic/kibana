@@ -17,16 +17,12 @@ import type {
 } from '@kbn/actions-plugin/server';
 import type { CoreStart } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { AgentContextLayerPluginStart } from '@kbn/agent-context-layer-plugin/server';
+import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/server';
 
 interface ConnectorLifecycleHandlerDeps {
   logger: Logger;
   getStartServices: () => Promise<
-    [
-      CoreStart,
-      { spaces?: SpacesPluginStart; agentContextLayer: AgentContextLayerPluginStart },
-      unknown
-    ]
+    [CoreStart, { spaces?: SpacesPluginStart; contextEngine: ContextEnginePluginStart }, unknown]
   >;
 }
 
@@ -49,8 +45,8 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         const request = params.request;
         const soClient = coreStart.savedObjects.getScopedClient(request);
         const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
-        // SML ingest lives in the Agent Builder family, so crawling connectors
-        // into SML requires both the Agent Builder experimental flag and the
+        // CE ingest lives in the Agent Builder family, so crawling connectors
+        // into CE requires both the Agent Builder experimental flag and the
         // dedicated Context Engine flag. Both must be enabled.
         const [isExperimentalEnabled, isContextEngineEnabled] = await Promise.all([
           uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID),
@@ -59,18 +55,18 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         if (!isExperimentalEnabled || !isContextEngineEnabled) return;
 
         try {
-          await startDeps.agentContextLayer.indexAttachment({
+          await startDeps.contextEngine.indexAttachment({
             request,
             originId: connectorId,
             attachmentType: AttachmentType.connector,
             action: 'create',
             includedHiddenTypes: ['action'],
           });
-          logger.info(`Connector lifecycle: indexed connector ${connectorId} into SML`);
-        } catch (smlError) {
+          logger.info(`Connector lifecycle: indexed connector ${connectorId} into CE`);
+        } catch (ceError) {
           logger.warn(
-            `Connector lifecycle: failed to index connector ${connectorId} into SML: ${
-              (smlError as Error).message
+            `Connector lifecycle: failed to index connector ${connectorId} into CE: ${
+              (ceError as Error).message
             }`
           );
         }
@@ -95,17 +91,17 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         const request = params.request;
 
         try {
-          await startDeps.agentContextLayer.indexAttachment({
+          await startDeps.contextEngine.indexAttachment({
             request,
             originId: connectorId,
             attachmentType: AttachmentType.connector,
             action: 'delete',
           });
-          logger.info(`Connector lifecycle: removed connector ${connectorId} from SML`);
-        } catch (smlError) {
+          logger.info(`Connector lifecycle: removed connector ${connectorId} from CE`);
+        } catch (ceError) {
           logger.warn(
-            `Connector lifecycle: failed to remove connector ${connectorId} from SML: ${
-              (smlError as Error).message
+            `Connector lifecycle: failed to remove connector ${connectorId} from CE: ${
+              (ceError as Error).message
             }`
           );
         }

@@ -1072,11 +1072,11 @@ agentBuilder.skills.register({
 });
 ```
 
-## Semantic Metadata Layer (SML) — Developer Guide
+## Context Engine — Developer Guide
 
-### 1. What is SML?
+### 1. What is CE?
 
-The **Semantic Metadata Layer** is an indexing and search subsystem inside
+The **Context Engine** is an indexing and search subsystem inside
 Agent Builder. It allows solutions to expose their Kibana assets
 (visualizations, dashboards, saved searches, …) so the AI agent can find and
 attach them to a conversation.
@@ -1087,15 +1087,15 @@ attach them to a conversation.
 ┌──────────────────────────────────────────────────────────────┐
 │  Solution plugin (e.g. agent_builder_platform)               │
 │  ┌────────────────────────────┐                              │
-│  │  SmlTypeDefinition         │ ← you provide this           │
+│  │  CeTypeDefinition         │ ← you provide this           │
 │  │  • id                      │                              │
 │  │  • list()                  │                              │
-│  │  • getSmlData()            │                              │
+│  │  • getCeData()            │                              │
 │  │  • toAttachment()          │                              │
 │  └────────────────────────────┘                              │
 └──────────────────────────────────────────────────────────────┘
                           │
-                          │ agentBuilder.sml.registerType(...)
+                          │ agentBuilder.ce.registerType(...)
                           ▼
 ┌──────────────────────────────────────────────────────────────┐
 │  agent_builder plugin (server)                               │
@@ -1107,8 +1107,8 @@ attach them to a conversation.
 │                                                 │            │
 │                                                 ▼            │
 │  ┌──────────────┐    ┌──────────────────────────────────┐   │
-│  │  sml_search  │◀───│  SmlService.search()              │   │
-│  │  sml_attach  │    │  (space + permission filtering)   │   │
+│  │  ce_search  │◀───│  CeService.search()              │   │
+│  │  ce_attach  │    │  (space + permission filtering)   │   │
 │  └──────────────┘    └──────────────────────────────────┘   │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -1117,25 +1117,25 @@ attach them to a conversation.
 
 | Concept | Description |
 |---|---|
-| **SML Type** | A category of content you expose (e.g. `visualization`, `dashboard`). You implement `SmlTypeDefinition`. |
-| **Crawler** | A Task Manager background task that periodically calls your `list()` and `getSmlData()` hooks, indexing content into system indices. Uses mark-and-sweep with `last_crawled_at` timestamps for efficient change detection. |
-| **SML Document** | A single indexed chunk stored in the `.chat-sml-data` system index, containing title, content, permissions, and space information. |
-| **`sml_search` tool** | A built-in Agent Builder tool the AI uses to keyword-search SML documents. Results are filtered by the requesting user's space and permissions. |
-| **`sml_attach` tool** | A built-in Agent Builder tool the AI uses to convert SML search hits into conversation attachments. It accepts `chunk_ids` from `sml_search`;  `chunk_id` format is `attachment_type:origin_id:uuid`. |
-| **Origin ID** | The unique identifier for the source asset (typically a saved object ID). Used to link SML documents back to their source. |
+| **CE Type** | A category of content you expose (e.g. `visualization`, `dashboard`). You implement `CeTypeDefinition`. |
+| **Crawler** | A Task Manager background task that periodically calls your `list()` and `getCeData()` hooks, indexing content into system indices. Uses mark-and-sweep with `last_crawled_at` timestamps for efficient change detection. |
+| **CE Document** | A single indexed entry stored in the `.chat-sml-data` system index, containing title, content, permissions, and space information. |
+| **`ce_search` tool** | A built-in Agent Builder tool the AI uses to keyword-search CE documents. Results are filtered by the requesting user's space and permissions. |
+| **`ce_attach` tool** | A built-in Agent Builder tool the AI uses to convert CE search hits into conversation attachments. It accepts `entry_ids` from `ce_search`;  `entry_id` format is `attachment_type:origin_id:uuid`. |
+| **Origin ID** | The unique identifier for the source asset (typically a saved object ID). Used to link CE documents back to their source. |
 
 #### Data flow
 
 1. **Crawl**: The crawler runs on a configurable interval (default 10 min).
-   For each registered SML type it calls `list()` to enumerate items, detects
-   changes via timestamps, and calls `getSmlData()` for new/updated items.
+   For each registered CE type it calls `list()` to enumerate items, detects
+   changes via timestamps, and calls `getCeData()` for new/updated items.
 2. **Index**: Results are written to the `.chat-sml-data` system index.
    Crawler state (which items have been seen) is stored in a separate
    `.chat-sml-crawler-state` index.
-3. **Search**: When the AI agent calls `sml_search`, the SML service queries
+3. **Search**: When the AI agent calls `ce_search`, the CE service queries
    the data index, filtering by the user's current space and checking Kibana
    privileges against each result's `permissions` array.
-4. **Attach**: When the AI agent calls `sml_attach` with `chunk_ids`, the service loads each chunk, resolves the saved object via your `toAttachment()` hook, and adds the result as a conversation attachment (with `origin` when applicable).
+4. **Attach**: When the AI agent calls `ce_attach` with `entry_ids`, the service loads each entry, resolves the saved object via your `toAttachment()` hook, and adds the result as a conversation attachment (with `origin` when applicable).
 
 #### Security model
 
@@ -1143,21 +1143,21 @@ attach them to a conversation.
   content from all spaces.
 - Access control is enforced at **query time**: results are filtered by space
   and by Kibana feature privileges (the `permissions` array you set in
-  `getSmlData`).
+  `getCeData`).
 
 ---
 
-### 2. How to add a new SML type
+### 2. How to add a new CE type
 
-#### Step 1: Implement `SmlTypeDefinition`
+#### Step 1: Implement `CeTypeDefinition`
 
 Create a file in your plugin (e.g.
-`server/sml_types/my_asset.ts`). You need to implement four things:
+`server/ce_types/my_asset.ts`). You need to implement four things:
 
 ```typescript
-import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
+import type { CeTypeDefinition } from '@kbn/agent-builder-plugin/server';
 
-export const myAssetSmlType: SmlTypeDefinition = {
+export const myAssetCeType: CeTypeDefinition = {
   // Unique identifier — lowercase, alphanumeric, hyphens, underscores.
   // Must match /^[a-z][a-z0-9_-]*$/
   id: 'my-asset',
@@ -1192,13 +1192,13 @@ export const myAssetSmlType: SmlTypeDefinition = {
 
   // Fetch the full data for a single item to index.
   // Return undefined to skip the item (e.g. if it was deleted).
-  getSmlData: async (originId, context) => {
+  getCeData: async (originId, context) => {
     try {
       const so = await context.savedObjectsClient.get('my-saved-object-type', originId);
       const attrs = so.attributes as { title?: string; description?: string };
 
       return {
-        chunks: [
+        entries: [
           {
             type: 'my-asset',
             title: attrs.title ?? originId,
@@ -1222,7 +1222,7 @@ export const myAssetSmlType: SmlTypeDefinition = {
     }
   },
 
-  // Convert an SML document back into a conversation attachment.
+  // Convert a CE document back into a conversation attachment.
   // Called when the AI agent wants to "attach" a search result.
   toAttachment: async (item, context) => {
     const resolveResult = await context.savedObjectsClient.resolve(
@@ -1249,11 +1249,11 @@ export const myAssetSmlType: SmlTypeDefinition = {
 In your plugin's `setup` method:
 
 ```typescript
-import { myAssetSmlType } from './sml_types/my_asset';
+import { myAssetCeType } from './ce_types/my_asset';
 
 export class MyPlugin implements Plugin {
   setup(core: CoreSetup, { agentBuilder }: { agentBuilder: AgentBuilderPluginSetup }) {
-    agentBuilder.sml.registerType(myAssetSmlType);
+    agentBuilder.ce.registerType(myAssetCeType);
   }
 }
 ```
@@ -1265,17 +1265,17 @@ start indexing on the configured interval.
 
 ##### `list()` — Use `AsyncIterable` for memory safety
 
-The `list` hook must return an `AsyncIterable<SmlListItem[]>`. Each yielded
+The `list` hook must return an `AsyncIterable<CeListItem[]>`. Each yielded
 array is one "page" of items. The crawler processes pages with O(page_size)
 memory, so even types with millions of items won't cause OOM.
 
 Use `createPointInTimeFinder` with `namespaces: ['*']` to enumerate across
 all spaces. The crawler indexes everything; access control happens at query time.
 
-##### `getSmlData()` — Chunks and permissions
+##### `getCeData()` — Entries and permissions
 
-You can return multiple chunks per item (e.g. if a dashboard has multiple
-panels). Each chunk gets its own document in the SML index.
+You can return multiple entries per item (e.g. if a dashboard has multiple
+panels). Each entry gets its own document in the CE index.
 
 The `permissions` array should list the Kibana saved object privileges
 required to access the underlying asset. Common patterns:
@@ -1284,21 +1284,21 @@ required to access the underlying asset. Common patterns:
 - `['saved_object:dashboard/get']` for dashboards
 - `['saved_object:search/get']` for saved searches
 
-Users without the listed privileges won't see the item in `sml_search` results.
+Users without the listed privileges won't see the item in `ce_search` results.
 
 ##### `toAttachment()` — Resolving saved objects
 
 Use `savedObjectsClient.resolve()` instead of `get()` when possible — it
 handles saved object aliasing (e.g. after a space migration).
 
-Return `undefined` if the item can no longer be resolved. The `sml_attach`
+Return `undefined` if the item can no longer be resolved. The `ce_attach`
 tool will report a per-item error to the AI agent without failing the entire
 call.
 
 You may include an optional `description` string on the object returned from
 `toAttachment`. It is stored on the conversation
 attachment and shown in the Agent Builder UI (for example, the “Attachment
-added: …” line). If you omit it, a default label is derived from the SML
+added: …” line). If you omit it, a default label is derived from the CE
 document’s type and title.
 
 ##### `fetchFrequency` — Choose an appropriate interval
@@ -1311,8 +1311,8 @@ The default is `10m` if you don't specify `fetchFrequency`.
 
 #### Real-world example: Visualizations
 
-The visualization SML type is registered in
-`x-pack/platform/plugins/shared/agent_builder_platform/server/sml_types/visualization.ts`.
+The visualization CE type is registered in
+`x-pack/platform/plugins/shared/agent_builder_platform/server/ce_types/visualization.ts`.
 
 It:
 - Lists all `lens` saved objects across all spaces
@@ -1323,7 +1323,7 @@ It:
 
 ```typescript
 // Registration (in agent_builder_platform plugin setup):
-setupDeps.agentBuilder.sml.registerType(visualizationSmlType);
+setupDeps.agentBuilder.ce.registerType(visualizationCeType);
 ```
 
 The full implementation is ~130 lines and serves as the reference for new types.
@@ -1429,7 +1429,7 @@ keep writing to A's cache. B loads cleanly from the server.
 
 `useConversation` is disabled for a conversation when (a) a stream is currently writing
 to its cache, or (b) the cache shows it's paused on a HITL prompt. The cache is
-authoritative in both cases, so a refetch would race with optimistic chunks (streaming)
+authoritative in both cases, so a refetch would race with optimistic entries (streaming)
 or with the resume mutation about to fire on Approve (HITL). Other conversations stay
 free to refetch — switch to conversation B while A streams and B loads cleanly. See the
 inline comment on the `enabled` predicate for details.

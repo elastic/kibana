@@ -48,7 +48,7 @@ export type { SignificantEventsTuningConfig } from './significant_events_tuning_
 export { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from './significant_events_tuning_config';
 export {
   SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
-  SIGNIFICANT_EVENT_SML_TYPE,
+  SIGNIFICANT_EVENT_CE_TYPE,
   type SignificantEventAttachment,
   type PendingSignificantEventAttachment,
 } from './significant_event_attachment';

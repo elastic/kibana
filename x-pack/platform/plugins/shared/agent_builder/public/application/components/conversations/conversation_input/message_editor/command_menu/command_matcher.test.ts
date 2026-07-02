@@ -23,7 +23,7 @@ describe('matchCommand', () => {
     it('matches earlier sequence when it is closest to cursor', () => {
       const result = matchCommand('/foo @bar', allCommands);
       expect(result.isActive).toBe(true);
-      expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
+      expect(result.activeCommand?.command.id).toBe(CommandId.Ce);
       expect(result.activeCommand?.query).toBe('bar');
     });
   });
@@ -70,7 +70,7 @@ describe('matchCommand', () => {
     it('matches "@" at start of input', () => {
       const result = matchCommand('@', allCommands);
       expect(result.isActive).toBe(true);
-      expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
+      expect(result.activeCommand?.command.id).toBe(CommandId.Ce);
       expect(result.activeCommand?.query).toBe('');
       expect(result.activeCommand?.commandStartOffset).toBe(0);
     });
@@ -78,7 +78,7 @@ describe('matchCommand', () => {
     it('matches "@" after whitespace', () => {
       const result = matchCommand('hello @', allCommands);
       expect(result.isActive).toBe(true);
-      expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
+      expect(result.activeCommand?.command.id).toBe(CommandId.Ce);
       expect(result.activeCommand?.query).toBe('');
     });
 

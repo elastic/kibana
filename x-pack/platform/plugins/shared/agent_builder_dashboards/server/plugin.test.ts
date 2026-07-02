@@ -10,10 +10,10 @@ import { AgentBuilderDashboardsPlugin } from './plugin';
 import { dashboardManagementSkill } from './skills/dashboard_management_skill';
 
 describe('AgentBuilderDashboardsPlugin', () => {
-  it('registers the dashboard attachment type, skill, and SML type', () => {
+  it('registers the dashboard attachment type, skill, and CE type', () => {
     const registerAttachmentType = jest.fn();
     const registerSkill = jest.fn();
-    const registerSmlType = jest.fn();
+    const registerCeType = jest.fn();
 
     const plugin = new AgentBuilderDashboardsPlugin(coreMock.createPluginInitializerContext());
 
@@ -24,15 +24,15 @@ describe('AgentBuilderDashboardsPlugin', () => {
           attachments: { registerType: registerAttachmentType },
           skills: { register: registerSkill },
         },
-        agentContextLayer: {
-          registerType: registerSmlType,
+        contextEngine: {
+          registerType: registerCeType,
         },
       } as never
     );
 
     expect(registerAttachmentType).toHaveBeenCalledTimes(1);
     expect(registerSkill).toHaveBeenCalledWith(dashboardManagementSkill);
-    expect(registerSmlType).toHaveBeenCalledTimes(1);
-    expect(registerSmlType).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboard' }));
+    expect(registerCeType).toHaveBeenCalledTimes(1);
+    expect(registerCeType).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboard' }));
   });
 });
