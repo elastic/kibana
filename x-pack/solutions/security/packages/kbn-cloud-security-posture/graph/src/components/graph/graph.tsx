@@ -16,7 +16,14 @@ import {
   useEdgesState,
   useNodesState,
 } from '@xyflow/react';
-import type { Edge, FitViewOptions, Node, ReactFlowInstance, FitView } from '@xyflow/react';
+import type {
+  Edge,
+  FitViewOptions,
+  Node,
+  NodeChange,
+  ReactFlowInstance,
+  FitView,
+} from '@xyflow/react';
 import { useGeneratedHtmlId, useEuiTheme } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -50,6 +57,16 @@ import {
   GRAPH_ENTITY_FILTERS_ACTIVE_CLASS,
   GRAPH_IN_PAGE_SEARCH_ACTIVE_CLASS,
 } from './graph_search_utils';
+import { GraphLayoutProvider } from './graph_layout_context';
+
+const captureLayoutPositions = (
+  layoutedNodes: Array<Node<NodeViewModel>>
+): Map<string, { x: number; y: number }> =>
+  new Map(
+    layoutedNodes
+      .filter((node) => !node.parentId)
+      .map((node) => [node.id, { x: node.position.x, y: node.position.y }])
+  );
 
 export interface GraphProps extends CommonProps {
   /**
@@ -168,6 +185,48 @@ export const Graph = memo<GraphProps>(
     const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
     const [reactFlowKey, setReactFlowKey] = useState(0);
     const prevHighlightOriginsOnlyRef = useRef(highlightOriginsOnly);
+    const layoutPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+    const [useBundledEdgeRouting, setUseBundledEdgeRouting] = useState(true);
+
+    const applyLayoutedNodes = useCallback(
+      (layoutedNodes: Array<Node<NodeViewModel>>) => {
+        layoutPositionsRef.current = captureLayoutPositions(layoutedNodes);
+        setUseBundledEdgeRouting(true);
+        setNodes(layoutedNodes);
+      },
+      [setNodes]
+    );
+
+    const handleNodesChange = useCallback(
+      (changes: NodeChange<Node<NodeViewModel>>[]) => {
+        onNodesChange(changes);
+
+        if (!useBundledEdgeRouting) {
+          return;
+        }
+
+        for (const change of changes) {
+          if (change.type !== 'position' || change.dragging !== false || !change.position) {
+            continue;
+          }
+
+          const layoutPosition = layoutPositionsRef.current.get(change.id);
+
+          if (!layoutPosition) {
+            continue;
+          }
+
+          const deltaX = Math.abs(change.position.x - layoutPosition.x);
+          const deltaY = Math.abs(change.position.y - layoutPosition.y);
+
+          if (deltaX > GRID_SIZE || deltaY > GRID_SIZE) {
+            setUseBundledEdgeRouting(false);
+            break;
+          }
+        }
+      },
+      [onNodesChange, useBundledEdgeRouting]
+    );
 
     // Sync isGraphInteractive with interactive prop and re-process nodes when it changes.
     // Highlight-only updates are handled separately to preserve viewport zoom/pan.
@@ -187,11 +246,11 @@ export const Graph = memo<GraphProps>(
         setReactFlowKey((prev) => prev + 1);
 
         setTimeout(() => {
-          setNodes(layoutedNodes);
+          applyLayoutedNodes(layoutedNodes);
           setEdges(initialEdges);
         }, 0);
       }
-    }, [interactive, setEdges, setNodes]);
+    }, [applyLayoutedNodes, interactive, setEdges]);
 
     // Filter the ids of those nodes that are origin events
     const originNodeIds = useMemo(
@@ -279,7 +338,7 @@ export const Graph = memo<GraphProps>(
 
       // Then set nodes and edges after a microtask to ensure ReactFlow has remounted
       setTimeout(() => {
-        setNodes(layoutedNodes);
+        applyLayoutedNodes(layoutedNodes);
         setEdges(initialEdges);
       }, 0);
 
@@ -526,9 +585,17 @@ export const Graph = memo<GraphProps>(
       [isFullscreen]
     );
 
+    const graphLayoutContextValue = useMemo(
+      () => ({
+        useBundledEdgeRouting,
+      }),
+      [useBundledEdgeRouting]
+    );
+
     return (
       <GraphInteractionToolContext.Provider value={interactionToolContextValue}>
         <GraphSearchProvider>
+          <GraphLayoutProvider value={graphLayoutContextValue}>
           <GraphFullscreenContext.Provider value={fullscreenContextValue}>
             <div
               ref={graphContainerRef}
@@ -554,7 +621,7 @@ export const Graph = memo<GraphProps>(
                 onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
                 snapToGrid={true} // Snap to grid is enabled to avoid sub-pixel positioning
                 snapGrid={[GRID_SIZE, GRID_SIZE]} // Snap nodes to a 10px grid
-                onNodesChange={onNodesChange}
+                onNodesChange={handleNodesChange}
                 onEdgesChange={onEdgesChange}
                 proOptions={{ hideAttribution: true }}
                 panOnDrag={canDragInteract && isPanTool}
@@ -603,6 +670,7 @@ export const Graph = memo<GraphProps>(
               />
             </div>
           </GraphFullscreenContext.Provider>
+          </GraphLayoutProvider>
         </GraphSearchProvider>
       </GraphInteractionToolContext.Provider>
     );

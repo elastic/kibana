@@ -12,7 +12,8 @@ import { getShapeHandlePosition } from './utils';
 import { getMarkerEnd } from './markers';
 import { useEdgeColor } from './styles';
 import { GRAPH_EDGE_ID } from '../test_ids';
-import { getGraphEdgePath } from './get_graph_edge_path';
+import { getGraphEdgePath, GRAPH_EDGE_STEP_OFFSET } from './get_graph_edge_path';
+import { useGraphLayoutContext } from '../graph/graph_layout_context';
 
 type EdgeColor = EdgeViewModel['color'];
 
@@ -34,6 +35,7 @@ export const DefaultEdge = memo(
     targetPosition,
     data,
   }: EdgeProps) => {
+    const { useBundledEdgeRouting } = useGraphLayoutContext();
     const color: EdgeColor = data?.color || 'primary';
     const sourceMargin = getShapeHandlePosition(data?.sourceShape);
     const targetMargin = getShapeHandlePosition(data?.targetShape);
@@ -54,6 +56,7 @@ export const DefaultEdge = memo(
       targetX: tX,
       targetY: tY,
       targetPosition,
+      stepOffset: useBundledEdgeRouting ? 0 : GRAPH_EDGE_STEP_OFFSET,
     });
 
     return (

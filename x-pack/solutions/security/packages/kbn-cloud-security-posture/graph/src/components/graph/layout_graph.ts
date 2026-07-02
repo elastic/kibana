@@ -23,14 +23,20 @@ import {
 } from '../constants';
 import { CARD_NODE_DEFAULT_HEIGHT, CARD_NODE_WIDTH } from '../node/card_node';
 import { alignOriginSpineInPlace } from './layout_origin_spine';
-
-const GRID_SIZE_OFFSET = GRID_SIZE * 2;
+import {
+  GRAPH_LAYOUT_MIN_NODE_GAP,
+  GRAPH_LAYOUT_NODE_SEP,
+  GRAPH_LAYOUT_RANK_SEP,
+  LAYOUT_GRID_SIZE_OFFSET,
+} from './layout_constants';
 
 /** Dagre minimum separation between ranks (horizontal gaps in LR layout). */
-const GRAPH_RANK_SEP = GRID_SIZE_OFFSET * 8;
+const GRAPH_RANK_SEP = GRAPH_LAYOUT_RANK_SEP;
 
 /** Dagre minimum separation between nodes in the same rank (vertical gaps in LR layout). */
-const GRAPH_NODE_SEP = GRID_SIZE_OFFSET * 10;
+const GRAPH_NODE_SEP = GRAPH_LAYOUT_NODE_SEP;
+
+const GRID_SIZE_OFFSET = LAYOUT_GRID_SIZE_OFFSET;
 
 /**
  * Layout height for entity cards when DOM measurement is unavailable.
@@ -138,6 +144,11 @@ export const layoutGraph = (
     }
   );
 
+  resolveRankOverlapsInPlace(g, (nodeId: string) => {
+    const node = nodesById[nodeId]?.data;
+    return node !== undefined && isStackedLabel(node);
+  });
+
   const layoutedNodes = nodes.map((node) => {
     // For stacked nodes, we want to keep the original position relative to the parent
     if (isConnectorNode(node.data) && node.data.parentId) {
@@ -155,8 +166,9 @@ export const layoutGraph = (
     const dagreNode = g.node(node.data.id);
 
     if (isConnectorNode(node.data)) {
+      const nodeHeight = dagreNode.height ?? NODE_LABEL_TOTAL_HEIGHT;
       const x = snapped(Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2));
-      const y = Math.round(dagreNode.y - NODE_LABEL_HEIGHT / 2);
+      const y = Math.round(dagreNode.y - nodeHeight / 2);
 
       return {
         ...node,
@@ -165,8 +177,9 @@ export const layoutGraph = (
     }
 
     if (isEntityNode(node.data)) {
+      const nodeHeight = dagreNode.height ?? CARD_NODE_LAYOUT_HEIGHT;
       const x = snapped(Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2));
-      const y = Math.round(dagreNode.y - NODE_HEIGHT / 2);
+      const y = Math.round(dagreNode.y - nodeHeight / 2);
 
       return {
         ...node,
@@ -331,14 +344,24 @@ const handleMultipleChildren = (
     const allChildren = Array.from(allChildrenSet);
     const commonCenterY = calculateCenterY(allChildren, Y);
 
-    const siblingIndex = siblingsWithSharedChildren.indexOf(currNode);
-    const siblingCount = siblingsWithSharedChildren.length;
-    const spacing = Height(currNode) + GRID_SIZE_OFFSET;
-    const totalHeight = (siblingCount - 1) * spacing;
-    const newY = commonCenterY - totalHeight / 2 + siblingIndex * spacing;
+    const sortedSiblings = [...siblingsWithSharedChildren].sort((a, b) => Y(a) - Y(b));
+    const heights = sortedSiblings.map((nodeId) => Height(nodeId));
+    const totalHeight =
+      heights.reduce((sum, height) => sum + height, 0) +
+      (sortedSiblings.length - 1) * GRID_SIZE_OFFSET;
 
-    prevNodeY[currNode] = currY;
-    setY(currNode, snapped(newY));
+    let topEdge = commonCenterY - totalHeight / 2;
+
+    for (let index = 0; index < sortedSiblings.length; index += 1) {
+      const nodeId = sortedSiblings[index];
+      const centerY = topEdge + heights[index] / 2;
+
+      prevNodeY[nodeId] = Y(nodeId);
+      setY(nodeId, snapped(centerY));
+      topEdge += heights[index] + GRID_SIZE_OFFSET;
+    }
+
+    return;
   } else {
     const centerY = calculateCenterY(children, Y);
     prevNodeY[currNode] = currY;
@@ -542,4 +565,54 @@ function analyzeSiblings(
 
 const snapped = (value: number, method: 'round' | 'floor' = 'round'): number => {
   return Math[method](value / GRID_SIZE_OFFSET) * GRID_SIZE_OFFSET;
+};
+
+/**
+ * Ensures nodes in the same rank do not overlap after spine and centering adjustments.
+ * Mutates the Dagre graph in place.
+ */
+const resolveRankOverlapsInPlace = (
+  g: Dagre.graphlib.Graph,
+  filter: (nodeId: string) => boolean
+): void => {
+  const nodesByRank = new Map<number, string[]>();
+
+  for (const nodeId of g.nodes()) {
+    if (!filter(nodeId)) {
+      continue;
+    }
+
+    const dagreNode = g.node(nodeId) as Dagre.Node;
+    const rankKey = Math.round(dagreNode.x);
+    const rankNodes = nodesByRank.get(rankKey) ?? [];
+
+    rankNodes.push(nodeId);
+    nodesByRank.set(rankKey, rankNodes);
+  }
+
+  for (const rankNodeIds of nodesByRank.values()) {
+    if (rankNodeIds.length < 2) {
+      continue;
+    }
+
+    const sorted = [...rankNodeIds].sort(
+      (left, right) => (g.node(left) as Dagre.Node).y - (g.node(right) as Dagre.Node).y
+    );
+
+    for (let index = 1; index < sorted.length; index += 1) {
+      const previousNode = g.node(sorted[index - 1]) as Dagre.Node;
+      const currentNode = g.node(sorted[index]) as Dagre.Node;
+      const previousHeight = previousNode.height ?? NODE_HEIGHT;
+      const currentHeight = currentNode.height ?? NODE_HEIGHT;
+      const minCenterY =
+        previousNode.y +
+        previousHeight / 2 +
+        GRAPH_LAYOUT_MIN_NODE_GAP +
+        currentHeight / 2;
+
+      if (currentNode.y < minCenterY) {
+        currentNode.y = snapped(minCenterY);
+      }
+    }
+  }
 };

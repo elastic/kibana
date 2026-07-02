@@ -10,12 +10,14 @@ import type { Edge, Node } from '@xyflow/react';
 import type { EdgeViewModel, NodeViewModel } from '../types';
 import { isEntityNode, isRelationshipNode, isStackNode } from '../utils';
 import { isOriginEntityOrEventNode } from './graph_origin_utils';
-import { GRID_SIZE, NODE_HEIGHT, NODE_LABEL_HEIGHT } from '../constants';
+import { NODE_HEIGHT, NODE_LABEL_TOTAL_HEIGHT } from '../constants';
+import { CARD_NODE_DEFAULT_HEIGHT } from '../node/card_node';
+import { GRAPH_LAYOUT_NODE_SEP, LAYOUT_GRID_SIZE_OFFSET } from './layout_constants';
 
-const GRID_SIZE_OFFSET = GRID_SIZE * 2;
+const GRID_SIZE_OFFSET = LAYOUT_GRID_SIZE_OFFSET;
 
 /** Dagre minimum separation between nodes in the same rank (vertical gaps in LR layout). */
-const GRAPH_NODE_SEP = GRID_SIZE_OFFSET * 10;
+const GRAPH_NODE_SEP = GRAPH_LAYOUT_NODE_SEP;
 
 export interface LayoutEdge {
   source: string;
@@ -211,7 +213,11 @@ export const alignOriginSpineInPlace = (
 /** Converts a laid-out node position to its vertical center for spine comparisons. */
 export const getLayoutNodeCenterY = (node: Node<NodeViewModel>): number => {
   if (node.type === 'label' || node.type === 'relationship') {
-    return node.position.y + NODE_LABEL_HEIGHT / 2;
+    return node.position.y + NODE_LABEL_TOTAL_HEIGHT / 2;
+  }
+
+  if (isEntityNode(node.data)) {
+    return node.position.y + (node.measured?.height ?? CARD_NODE_DEFAULT_HEIGHT) / 2;
   }
 
   if (

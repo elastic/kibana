@@ -76,12 +76,17 @@ const CARD_BORDER_RADIUS = 10;
 const ICON_SIZE = 40;
 /** Simplified (zoomed-out) entity icon square — 8px larger than the full-card icon box. */
 const SIMPLIFIED_ICON_SIZE = 48;
+/** Icon glyph inside the simplified square — one step (8px) smaller than the shell. */
+const SIMPLIFIED_ICON_INNER_SIZE = SIMPLIFIED_ICON_SIZE - 8;
 const SIMPLIFIED_EXPAND_BUTTON_SIZE = 32;
 const SIMPLIFIED_BADGE_SIZE = 24;
 const SIMPLIFIED_LABEL_GAP = 4;
 const SIMPLIFIED_LABEL_MAX_WIDTH = CARD_NODE_WIDTH;
 const SIMPLIFIED_LABEL_TRUNCATE_LENGTH = 27;
 const EXPAND_BUTTON_SIZE = 24;
+/** Minimum layout footprint for simplified cards (icon + caption). */
+export const SIMPLIFIED_CARD_LAYOUT_HEIGHT =
+  SIMPLIFIED_ICON_SIZE + SIMPLIFIED_LABEL_GAP + CARD_METADATA_LINE_HEIGHT;
 const GROUP_STACK_HEIGHT = 8;
 const GROUP_STACK_PADDING_X = 16;
 
@@ -113,6 +118,8 @@ const SimplifiedCardContainer = styled.div`
   align-items: center;
   gap: ${SIMPLIFIED_LABEL_GAP}px;
   width: max-content;
+  min-width: ${SIMPLIFIED_ICON_SIZE}px;
+  min-height: ${SIMPLIFIED_CARD_LAYOUT_HEIGHT}px;
   max-width: ${SIMPLIFIED_LABEL_MAX_WIDTH}px;
 `;
 
@@ -575,7 +582,18 @@ const SimplifiedCard = ({
               <EntityGroupCountBadge count={count} isDanger={isDanger} isSimplified={true} />
             </SimplifiedIconCountBadge>
           )}
-          <EuiIcon type={resolvedIcon} size="xl" color={iconColor} aria-hidden={true} />
+          <EuiIcon
+            type={resolvedIcon}
+            size="l"
+            color={iconColor}
+            aria-hidden={true}
+            css={css`
+              svg {
+                width: ${SIMPLIFIED_ICON_INNER_SIZE}px;
+                height: ${SIMPLIFIED_ICON_INNER_SIZE}px;
+              }
+            `}
+          />
         </SimplifiedIconBox>
 
         {interactive && showExpandButton && (

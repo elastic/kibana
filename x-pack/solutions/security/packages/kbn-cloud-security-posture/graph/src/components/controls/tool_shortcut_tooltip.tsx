@@ -8,7 +8,6 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { GraphNotificationBadge } from '../graph_notification_badge';
 
 interface ToolShortcutTooltipProps {
   label: string;
@@ -23,13 +22,18 @@ export const ToolShortcutTooltip = ({ label, shortcut }: ToolShortcutTooltipProp
       css={css({
         display: 'inline-flex',
         alignItems: 'center',
-        gap: euiTheme.size.s,
       })}
     >
       <span>{label}</span>
-      <GraphNotificationBadge color="subdued" size="s">
+      <span
+        css={css({
+          marginLeft: euiTheme.size.s,
+          color: euiTheme.colors.textInverse,
+          opacity: 0.64,
+        })}
+      >
         {shortcut}
-      </GraphNotificationBadge>
+      </span>
     </span>
   );
 };

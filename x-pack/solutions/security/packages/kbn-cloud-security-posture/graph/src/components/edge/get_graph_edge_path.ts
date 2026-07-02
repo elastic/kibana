@@ -12,11 +12,14 @@ import { GRID_SIZE } from '../constants';
 /** Corner radius for stepped graph edges. */
 export const GRAPH_EDGE_BORDER_RADIUS = 8;
 
+/** Offset for stepped paths so parallel edges do not share the same corridor. */
+export const GRAPH_EDGE_STEP_OFFSET = GRID_SIZE * 2;
+
 /**
  * When endpoints are nearly aligned on an axis, small handle offsets create visible
- * mid-path jogs. Snap within one grid unit so those segments flatten out.
+ * mid-path jogs. Snap within two grid units so those segments flatten out.
  */
-export const GRAPH_EDGE_ALIGN_THRESHOLD = GRID_SIZE;
+export const GRAPH_EDGE_ALIGN_THRESHOLD = GRID_SIZE * 2;
 
 const isHorizontalHandle = (position: Position): boolean =>
   position === Position.Left || position === Position.Right;
@@ -59,7 +62,9 @@ export const alignEdgeEndpoints = (
 type EdgePathParams = Pick<
   EdgeProps,
   'sourceX' | 'sourceY' | 'targetX' | 'targetY' | 'sourcePosition' | 'targetPosition'
->;
+> & {
+  stepOffset?: number;
+};
 
 export const getGraphEdgePath = ({
   sourceX,
@@ -68,6 +73,7 @@ export const getGraphEdgePath = ({
   targetY,
   sourcePosition,
   targetPosition,
+  stepOffset = GRAPH_EDGE_STEP_OFFSET,
 }: EdgePathParams): string => {
   const aligned = alignEdgeEndpoints(
     sourceX,
@@ -97,7 +103,7 @@ export const getGraphEdgePath = ({
     sourcePosition,
     targetPosition,
     borderRadius: GRAPH_EDGE_BORDER_RADIUS,
-    offset: 0,
+    offset: stepOffset,
   });
 
   return path;

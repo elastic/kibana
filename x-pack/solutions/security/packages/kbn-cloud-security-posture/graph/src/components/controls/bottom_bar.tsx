@@ -117,6 +117,11 @@ const InteractionToolButton = ({
     .euiButtonIcon__icon {
       color: ${euiTheme.colors.textInverse};
     }
+
+    &:hover:not(:disabled),
+    &:focus-visible:not(:disabled) {
+      background-color: ${euiTheme.components.button.backgroundFilledPrimaryHover};
+    }
   `;
 
   return (
@@ -413,10 +418,6 @@ export const BottomBar = ({
               </div>
             </GraphControlTooltip>
           </GraphSearchPanel>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <div css={verticalDividerCss} aria-hidden={true} />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

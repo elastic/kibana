@@ -56,5 +56,28 @@ describe('get_graph_edge_path', () => {
       expect(path).toContain('Q');
       expect(path).not.toBe('M 0,100L 200,160');
     });
+
+    it('uses zero offset when bundled routing is enabled', () => {
+      const bundledPath = getGraphEdgePath({
+        sourceX: 0,
+        sourceY: 100,
+        targetX: 200,
+        targetY: 160,
+        sourcePosition: Position.Right,
+        targetPosition: Position.Left,
+        stepOffset: 0,
+      });
+      const separatedPath = getGraphEdgePath({
+        sourceX: 0,
+        sourceY: 100,
+        targetX: 200,
+        targetY: 160,
+        sourcePosition: Position.Right,
+        targetPosition: Position.Left,
+        stepOffset: 20,
+      });
+
+      expect(bundledPath).not.toEqual(separatedPath);
+    });
   });
 });
