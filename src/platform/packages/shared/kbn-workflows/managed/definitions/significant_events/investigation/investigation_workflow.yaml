@@ -168,7 +168,7 @@ steps:
     with:
       timeout: 120s
       message: |
-        Call load_skill with path skills/platform/significant-events/memory to get the memory tools.
+        Call load_skill with path skills/platform/streams/significant-events-memory to get the memory tools.
 
         The following knowledge gaps were identified during an investigation:
 
