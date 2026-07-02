@@ -26,6 +26,7 @@ import { renderUrl } from '../../../timelines/components/timeline/body/renderers
 import { PortOrServiceNameLink } from '../../../common/components/links';
 import { PORT_NAMES } from '../../../explore/network/components/port/helpers';
 import { INDICATOR_REFERENCE } from '../../../../common/cti/constants';
+import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
 // Fields rendered as external links (no flyout): the value is a URL.
 const URL_FIELD_NAMES: readonly string[] = [
@@ -80,12 +81,17 @@ export const TableTab = memo(({ hit, renderCellActions, scopeId = '' }: TableTab
     [hit]
   );
 
-  const investigationFields = useMemo<string[]>(() => {
-    const raw = hit.flattened['kibana.alert.investigation_fields.field_names'];
-    if (Array.isArray(raw)) return raw.map(String);
-    if (raw != null) return [String(raw)];
-    return [];
-  }, [hit]);
+  const ruleUuid = useMemo(() => {
+    const raw = hit.flattened['kibana.alert.rule.uuid'] ?? hit.flattened['signal.rule.id'] ?? null;
+    const resolved = Array.isArray(raw) ? raw[0] : raw;
+    return resolved != null ? String(resolved) : null;
+  }, [hit.flattened]);
+
+  const { rule: maybeRule } = useRuleWithFallback(ruleUuid ?? '');
+  const investigationFields = useMemo<string[]>(
+    () => maybeRule?.investigation_fields?.field_names ?? [],
+    [maybeRule]
+  );
 
   const highlightedFieldsResult = useHighlightedFields({ hit, investigationFields });
   const highlightedFieldNames = useMemo(
@@ -157,16 +163,10 @@ export const TableTab = memo(({ hit, renderCellActions, scopeId = '' }: TableTab
     [hit.flattened]
   );
 
-  // The rule flyout is keyed by rule UUID, not the displayed rule name. `OpenFlyoutLink`
-  // uses a single `value` as both the shown text and the flyout target, so for rule name
-  // fields we substitute the UUID as the target and keep the name as the text. When no
+  // The rule flyout is keyed by rule UUID (see `ruleUuid` above), not the displayed rule name.
+  // `OpenFlyoutLink` uses a single `value` as both the shown text and the flyout target, so for
+  // rule name fields we substitute the UUID as the target and keep the name as the text. When no
   // UUID is present we render plain text to avoid opening a rule flyout with an invalid id.
-  const ruleUuid = useMemo(() => {
-    const raw = hit.flattened['kibana.alert.rule.uuid'] ?? hit.flattened['signal.rule.id'] ?? null;
-    const resolved = Array.isArray(raw) ? raw[0] : raw;
-    return resolved != null ? String(resolved) : null;
-  }, [hit.flattened]);
-
   const isRuleNameField = useCallback(
     (field: string) =>
       field === SIGNAL_RULE_NAME_FIELD_NAME || field === LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,

@@ -70,6 +70,10 @@ jest.mock('../../document/main/hooks/use_highlighted_fields', () => ({
   useHighlightedFields: () => ({}),
 }));
 
+jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => ({
+  useRuleWithFallback: () => ({ rule: null }),
+}));
+
 const mockStorage = { get: jest.fn(), set: jest.fn() };
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: () => ({ services: { storage: mockStorage } }),
