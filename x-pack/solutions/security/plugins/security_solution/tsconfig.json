@@ -293,5 +293,6 @@
     "@kbn/shared-ux-column-presets",
     "@kbn/core-overlays-browser",
     "@kbn/core-application-browser-mocks",
+    "@kbn/ftr-llm-proxy",
   ]
 }
