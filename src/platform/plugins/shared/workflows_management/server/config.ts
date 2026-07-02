@@ -25,11 +25,8 @@ const librarySchema = schema.object(
      * HTTP. The bundle mirrors the CDN `/v1` tree, so this is a local
      * equivalent of `registryUrl`; it may point at that root or at a parent
      * containing a single `v1/` directory. Mutually exclusive with `registryUrl`.
-<<<<<<< HEAD
-=======
      * Absolute paths are recommended; relative paths are accepted and resolved
      * relative to the Kibana process's current working directory.
->>>>>>> upstream/main
      */
     bundlePath: schema.maybe(schema.string({ minLength: 1 })),
     /** Interval between background catalog refreshes (HTTP source mode). */
