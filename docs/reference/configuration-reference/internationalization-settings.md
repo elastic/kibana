@@ -18,6 +18,10 @@ applies_to:
 {{kib}} ships translation files for English, French, Japanese, Simplified Chinese, and German. Plugins and admin-installed translation files can add additional locales. Any locale listed in `i18n.locales` for which a translation file exists will be served; locales without translation files fall back to English.
 
 ## Per-user language selection
+```{applies_to}
+stack: ga 9.5
+serverless: ga
+```
 
 When `i18n.locales` is not empty, individual users can choose their preferred display language:
 
