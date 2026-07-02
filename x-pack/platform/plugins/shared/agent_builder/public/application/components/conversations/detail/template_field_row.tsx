@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TemplateFieldDefinition } from './template_conversation_utils';
 import { getFieldBadgeColor } from './template_conversation_utils';
@@ -37,12 +38,18 @@ const labels = {
   ),
 };
 
+interface LinkedConversationSummary {
+  title?: string;
+  updatedAt?: string;
+}
+
 interface TemplateFieldRowProps {
   definition: TemplateFieldDefinition;
   value: unknown;
   isSaving: boolean;
   onChange: (key: string, value: unknown) => void;
   onOpenConversation?: (conversationId: string) => void;
+  resolveLinkedConversation?: (conversationId: string) => LinkedConversationSummary | undefined;
 }
 
 const stringifyValue = (value: unknown): string => {
@@ -79,6 +86,7 @@ export const TemplateFieldRow: React.FC<TemplateFieldRowProps> = ({
   isSaving,
   onChange,
   onOpenConversation,
+  resolveLinkedConversation,
 }) => {
   const { euiTheme } = useEuiTheme();
   const stringValue = value === undefined || value === null ? '' : String(value);
@@ -157,10 +165,14 @@ export const TemplateFieldRow: React.FC<TemplateFieldRowProps> = ({
     }
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexGroup direction="column" gutterSize="s">
         {conversationIds.map((conversationId, index) => {
-          const baseLabel = definition.linkLabel ?? labels.openConversation;
-          const label = conversationIds.length > 1 ? `${baseLabel} ${index + 1}` : baseLabel;
+          const linked = resolveLinkedConversation?.(conversationId);
+          const fallbackLabel = definition.linkLabel ?? labels.openConversation;
+          // Prefer the linked conversation's own title; fall back to the generic action label
+          // (e.g. while the conversation list is still loading or is inaccessible).
+          const label = linked?.title || fallbackLabel;
+          const updatedAt = linked?.updatedAt ? Date.parse(linked.updatedAt) : NaN;
 
           return (
             <EuiFlexItem key={conversationId} grow={false}>
@@ -170,6 +182,12 @@ export const TemplateFieldRow: React.FC<TemplateFieldRowProps> = ({
               >
                 {label}
               </EuiLink>
+              {!Number.isNaN(updatedAt) && (
+                <EuiText size="xs" color="subdued">
+                  <FormattedDate value={updatedAt} year="numeric" month="short" day="2-digit" />{' '}
+                  <FormattedTime value={updatedAt} hour="numeric" minute="numeric" />
+                </EuiText>
+              )}
             </EuiFlexItem>
           );
         })}

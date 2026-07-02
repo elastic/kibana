@@ -23,6 +23,7 @@ import React, { useCallback, useState } from 'react';
 import type { Conversation } from '@kbn/agent-builder-common';
 import { usePatchConversationMetadata } from '../../../hooks/use_patch_conversation_metadata';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { useConversationList } from '../../../hooks/use_conversation_list';
 import { ConversationMembers } from './conversation_members';
 import { TemplateFieldRow } from './template_field_row';
 import {
@@ -87,6 +88,9 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
   const tabsId = useGeneratedHtmlId({ prefix: 'conversationDetailSidebarTabs' });
   const { mutate, isLoading } = usePatchConversationMetadata();
   const { openSidebarConversation } = useAgentBuilderServices();
+  // Linked conversation ids (e.g. the incident's investigation link) are resolved to their
+  // title + last-updated time so the sidebar shows a meaningful label instead of "Open …".
+  const { conversations } = useConversationList();
   const fieldDefinitions = getTemplateFieldDefinitions(conversation);
   const templateLabel = getTemplateLabel(conversation);
   const isCollaborative = isCollaborativeTemplateConversation(conversation);
@@ -115,6 +119,17 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
       openSidebarConversation({ conversationId });
     },
     [openSidebarConversation]
+  );
+
+  const resolveLinkedConversation = useCallback(
+    (conversationId: string) => {
+      const linked = conversations?.find((candidate) => candidate.id === conversationId);
+      if (!linked) {
+        return undefined;
+      }
+      return { title: linked.title, updatedAt: linked.updated_at };
+    },
+    [conversations]
   );
 
   const tabs = [
@@ -171,6 +186,7 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
               isSaving={isLoading}
               onChange={handleFieldChange}
               onOpenConversation={handleOpenConversation}
+              resolveLinkedConversation={resolveLinkedConversation}
             />
           ))}
 
