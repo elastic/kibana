@@ -9,7 +9,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiHealth, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AnomalyDetectorType } from '@kbn/apm-types';
+import type { AnomalyDetectorType, Environment } from '@kbn/apm-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
@@ -69,16 +69,23 @@ const anomaliesBadgeHealthCss = css`
 
 type OverviewQuery = TypeOf<ApmRoutes, '/services/{serviceName}/overview'>['query'];
 
-function toAnomalyOverviewQuery(query: OverviewQuery): OverviewQuery {
+function toAnomalyOverviewQuery(
+  query: OverviewQuery,
+  severity: ML_ANOMALY_SEVERITY,
+  anomalyEnvironment: Environment
+): OverviewQuery {
   return {
     ...query,
     kuery: '',
+    anomalyThreshold: severity === ML_ANOMALY_SEVERITY.UNKNOWN ? undefined : severity,
+    environment: anomalyEnvironment,
   };
 }
 
 export interface AnomaliesBadgeNavigationProps {
   serviceName: string;
   agentName: AgentName;
+  anomalyEnvironment: Environment;
   /**
    * Ambient query from the consumer's own route context (rangeFrom/rangeTo/
    * environment/etc).
@@ -123,13 +130,17 @@ export function AnomaliesBadge({
             : '/services/{serviceName}/overview',
           {
             path: { serviceName: navigationProps.serviceName },
-            query: toAnomalyOverviewQuery(navigationProps.query),
+            query: toAnomalyOverviewQuery(
+              navigationProps.query,
+              severity,
+              navigationProps.anomalyEnvironment
+            ),
           }
         )
       : undefined;
 
   const onClick =
-    href && navigateOnClick && navigateToUrl
+    href && navigateOnClick
       ? (e: React.MouseEvent | React.KeyboardEvent) => {
           navigateToUrl(href);
         }

@@ -181,7 +181,14 @@ export function ServiceHeaderBadges({
             score={anomalyData?.anomalyScore}
             detectorType={anomalyData?.detectorType}
             navigationProps={
-              agentName ? { serviceName, agentName: agentName as AgentName, query } : undefined
+              agentName && anomalyData?.anomalyEnvironment
+                ? {
+                    serviceName,
+                    agentName: agentName as AgentName,
+                    anomalyEnvironment: anomalyData.anomalyEnvironment,
+                    query,
+                  }
+                : undefined
             }
           />
         </EuiFlexItem>

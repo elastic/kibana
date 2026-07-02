@@ -45,7 +45,7 @@ export async function getServiceAnomalyScores({
   });
 
   return serviceAnomalies.map(
-    ({ serviceName, anomalyScore, detectorType, environment: anomalyEnvironment }) => ({
+    ({ serviceName, anomalyScore, detectorType, anomalyEnvironment }) => ({
       serviceName,
       anomalyScore,
       detectorType,
