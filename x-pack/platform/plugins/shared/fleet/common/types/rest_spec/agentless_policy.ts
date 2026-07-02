@@ -51,11 +51,12 @@ export const CreateAgentlessPolicyRequestSchema = {
         )
       ),
       // Cloud connector configuration - all connector settings go here.
-      // Nullable (not just optional) so a GET response round-trips cleanly into a PUT/POST:
-      // the GET mapper emits `cloud_connector: null` when no connector is attached, and `null`
-      // is treated the same as omitted (no connector / detach on update).
+      // Optional AND accepts an explicit `null` so a GET response round-trips cleanly into a
+      // PUT/POST: the GET mapper emits `cloud_connector: null` when no connector is attached, and
+      // `null` is treated the same as omitted (no connector / detach on update).
       cloud_connector: schema.maybe(
-        schema.nullable(
+        schema.oneOf([
+          schema.literal(null),
           schema.object({
             enabled: schema.boolean({
               defaultValue: false,
@@ -91,8 +92,8 @@ export const CreateAgentlessPolicyRequestSchema = {
                 }
               )
             ),
-          })
-        )
+          }),
+        ])
       ),
     },
     // Distinct meta.id so this extension does not silently overwrite the
