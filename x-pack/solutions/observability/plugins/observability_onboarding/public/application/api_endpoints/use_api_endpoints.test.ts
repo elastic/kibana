@@ -94,6 +94,16 @@ describe('useApiEndpoints', () => {
     expect(findEndpoint(result, 'elasticsearch')?.url).toBe('https://otlp.example.com:443/_es');
   });
 
+  it('falls back to the Elasticsearch URL when the managed OTLP URL is blank on Serverless', () => {
+    const { result } = setup({
+      isServerless: true,
+      elasticsearchUrl: 'https://es.example.com',
+      managedOtlpServiceUrl: '   ',
+    });
+
+    expect(findEndpoint(result, 'elasticsearch')?.url).toBe('https://es.example.com');
+  });
+
   it('uses the on-prem Elasticsearch URL resolved server-side for Prometheus', () => {
     const { result } = setup({
       isServerless: false,

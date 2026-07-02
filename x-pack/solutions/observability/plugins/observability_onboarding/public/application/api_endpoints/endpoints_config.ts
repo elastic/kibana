@@ -27,6 +27,11 @@ export interface ApiEndpointDefinition {
 }
 
 const trimTrailingSlashes = (url: string): string => url.replace(/\/+$/, '');
+const normalizeEndpointUrl = (url?: string): string | undefined => {
+  const trimmedUrl = url?.trim();
+  return trimmedUrl ? trimTrailingSlashes(trimmedUrl) : undefined;
+};
+const MANAGED_ELASTICSEARCH_COMPATIBLE_PATH = '/_es';
 
 export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
   {
@@ -75,10 +80,12 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
     }),
     euiIconType: 'logoElasticsearch',
     getUrl: ({ isServerless, managedOtlpServiceUrl, elasticsearchUrl }) => {
-      if (isServerless && managedOtlpServiceUrl) {
-        return `${trimTrailingSlashes(managedOtlpServiceUrl)}/_es`;
+      const managedUrl = normalizeEndpointUrl(managedOtlpServiceUrl);
+
+      if (isServerless && managedUrl) {
+        return `${managedUrl}${MANAGED_ELASTICSEARCH_COMPATIBLE_PATH}`;
       }
-      return elasticsearchUrl;
+      return normalizeEndpointUrl(elasticsearchUrl);
     },
   },
 ];

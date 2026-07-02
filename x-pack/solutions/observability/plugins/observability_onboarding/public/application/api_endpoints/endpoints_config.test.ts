@@ -39,6 +39,17 @@ describe('API_ENDPOINTS', () => {
         ).toBe('https://es.example.com');
       });
 
+      it('trims trailing slashes from the Elasticsearch URL fallback', () => {
+        expect(
+          getEndpoint('elasticsearch').getUrl(
+            createContext({
+              isServerless: false,
+              elasticsearchUrl: 'https://es.example.com//',
+            })
+          )
+        ).toBe('https://es.example.com');
+      });
+
       it('uses the managed Elasticsearch-compatible endpoint on Serverless', () => {
         expect(
           getEndpoint('elasticsearch').getUrl(
@@ -70,6 +81,18 @@ describe('API_ENDPOINTS', () => {
               isServerless: true,
               elasticsearchUrl: 'https://es.example.com',
               managedOtlpServiceUrl: undefined,
+            })
+          )
+        ).toBe('https://es.example.com');
+      });
+
+      it('falls back to the Elasticsearch URL on Serverless when the managed URL is blank', () => {
+        expect(
+          getEndpoint('elasticsearch').getUrl(
+            createContext({
+              isServerless: true,
+              elasticsearchUrl: 'https://es.example.com',
+              managedOtlpServiceUrl: '   ',
             })
           )
         ).toBe('https://es.example.com');
