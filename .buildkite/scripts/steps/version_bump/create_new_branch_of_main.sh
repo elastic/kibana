@@ -20,8 +20,7 @@ git fetch origin main
 git checkout -b "$branch" origin/main
 if [ "${DRY_RUN:-}" = "true" ]; then
   git push origin "$branch"
-  git push origin --delete "$branch"
-  echo "DRY_RUN temporary branch '$branch' was pushed and deleted"
+  echo "DRY_RUN temporary branch '$branch' was pushed"
 else
   git push origin "$branch"
   echo "Branch '$branch' created and pushed to origin"
