@@ -25,24 +25,24 @@ export function DiscoverFlyoutStreamFieldByStreamName({
   locator,
   cpsHasLinkedProjects,
 }: DiscoverFlyoutStreamFieldByStreamNameProps) {
-  const remote = parseRemoteStreamName(streamName);
+  const remoteSource = parseRemoteStreamName(streamName);
 
   const { value, loading, error } = useResolvedDefinitionName({
     streamsRepositoryClient,
-    fallbackStreamName: remote?.streamName ?? streamName,
-    cpsHasLinkedProjects: remote ? undefined : cpsHasLinkedProjects,
+    fallbackStreamName: remoteSource?.streamName ?? streamName,
+    cpsHasLinkedProjects: remoteSource ? undefined : cpsHasLinkedProjects,
   });
 
-  if (remote) {
+  if (remoteSource) {
     return (
       <StreamLinkContent
-        name={remote.streamName}
+        name={remoteSource.streamName}
         existsLocally={false}
         loading={false}
         error={undefined}
         locator={locator}
         remoteSearchType={cpsHasLinkedProjects ? REMOTE_SEARCH_TYPE.CPS : REMOTE_SEARCH_TYPE.CCS}
-        remoteName={remote.remoteName}
+        remoteName={remoteSource.remoteName}
       />
     );
   }
@@ -54,7 +54,6 @@ export function DiscoverFlyoutStreamFieldByStreamName({
       loading={loading}
       error={error}
       locator={locator}
-      remoteSearchType={cpsHasLinkedProjects ? REMOTE_SEARCH_TYPE.CPS : undefined}
     />
   );
 }
