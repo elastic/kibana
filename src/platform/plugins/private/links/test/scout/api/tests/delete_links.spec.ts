@@ -60,6 +60,7 @@ apiTest.describe('links - delete', { tag: tags.deploymentAgnostic }, () => {
       responseType: 'json',
     });
 
+    expect(response).toHaveStatusCode(404);
     expect(response.body).toStrictEqual({
       statusCode: 404,
       error: 'Not Found',

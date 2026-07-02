@@ -19,7 +19,7 @@ import {
 } from '../fixtures';
 
 /** Minimal valid dashboard link object — uses a placeholder destination ID */
-export const DASHBOARD_LINK = {
+const DASHBOARD_LINK = {
   type: 'dashboardLink' as const,
   destination: 'test-dashboard-id',
   options: {
