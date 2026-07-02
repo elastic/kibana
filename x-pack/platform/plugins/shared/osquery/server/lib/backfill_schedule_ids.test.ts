@@ -37,12 +37,18 @@ const createMockCoreStart = (
   scopedClient?: ReturnType<typeof createMockScopedClient>
 ) => {
   const sc = scopedClient ?? createMockScopedClient();
+  const findResultBatch = (findResult as { saved_objects: unknown[] }).saved_objects;
 
   return {
     core: {
       savedObjects: {
         createInternalRepository: jest.fn().mockReturnValue({
-          find: jest.fn().mockResolvedValue(findResult),
+          createPointInTimeFinder: jest.fn().mockReturnValue({
+            close: jest.fn().mockResolvedValue(undefined),
+            find: async function* asyncGenerator() {
+              yield { saved_objects: findResultBatch };
+            },
+          }),
         }),
         getScopedClient: jest.fn().mockReturnValue(sc),
       },
@@ -55,11 +61,18 @@ const createMockCoreStart = (
   };
 };
 
+// `fetchAllItems` returns `Promise<AsyncIterable<PackagePolicy[]>>` — an async
+// generator yielding one batch is sufficient to exercise the drain loop.
+const mockFetchAllItems = (items: unknown[]) =>
+  jest.fn().mockImplementation(async function* asyncGenerator() {
+    yield items;
+  });
+
 const createMockOsqueryContext = (packagePolicyService?: unknown) =>
   ({
     getPackagePolicyService: jest.fn().mockReturnValue(
       packagePolicyService ?? {
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        fetchAllItems: mockFetchAllItems([]),
         update: jest.fn().mockResolvedValue({}),
       }
     ),
@@ -113,11 +126,11 @@ describe('reconcileScheduleIdsToWire', () => {
   test('mints nothing on the Saved Object (no SO update call)', async () => {
     const scopedClient = createMockScopedClient();
     const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-    const packagePolicyList = jest.fn().mockResolvedValue({ items: [buildPackagePolicy()] });
+    const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
 
     const { core } = createMockCoreStart(buildEnabledPackFindResult(), scopedClient);
     const osqueryContext = createMockOsqueryContext({
-      list: packagePolicyList,
+      fetchAllItems: packagePolicyList,
       update: packagePolicyUpdate,
     });
     const logger = createMockLogger();
@@ -138,11 +151,11 @@ describe('reconcileScheduleIdsToWire', () => {
   test('projects the SO schedule_id onto the Fleet wire', async () => {
     const scopedClient = createMockScopedClient();
     const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-    const packagePolicyList = jest.fn().mockResolvedValue({ items: [buildPackagePolicy()] });
+    const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
 
     const { core } = createMockCoreStart(buildEnabledPackFindResult(), scopedClient);
     const osqueryContext = createMockOsqueryContext({
-      list: packagePolicyList,
+      fetchAllItems: packagePolicyList,
       update: packagePolicyUpdate,
     });
     const logger = createMockLogger();
@@ -168,12 +181,12 @@ describe('reconcileScheduleIdsToWire', () => {
   // emits). This is the realistic steady-state input the diff gate must match.
   const buildInSyncPolicyFromFirstReconcile = async () => {
     const firstUpdate = jest.fn().mockResolvedValue({});
-    const firstList = jest.fn().mockResolvedValue({ items: [buildPackagePolicy()] });
+    const firstList = mockFetchAllItems([buildPackagePolicy()]);
 
     const seed = createMockCoreStart(buildEnabledPackFindResult(), createMockScopedClient());
     await reconcileScheduleIdsToWire({
       coreStart: seed.core,
-      osqueryContext: createMockOsqueryContext({ list: firstList, update: firstUpdate }),
+      osqueryContext: createMockOsqueryContext({ fetchAllItems: firstList, update: firstUpdate }),
       logger: createMockLogger() as unknown as Parameters<
         typeof reconcileScheduleIdsToWire
       >[0]['logger'],
@@ -194,18 +207,110 @@ describe('reconcileScheduleIdsToWire', () => {
     const reconciledPolicy = await buildInSyncPolicyFromFirstReconcile();
 
     const secondUpdate = jest.fn().mockResolvedValue({});
-    const secondList = jest.fn().mockResolvedValue({ items: [reconciledPolicy] });
+    const secondList = mockFetchAllItems([reconciledPolicy]);
     const logger = createMockLogger();
 
     const { core } = createMockCoreStart(buildEnabledPackFindResult(), createMockScopedClient());
     const result = await reconcileScheduleIdsToWire({
       coreStart: core,
-      osqueryContext: createMockOsqueryContext({ list: secondList, update: secondUpdate }),
+      osqueryContext: createMockOsqueryContext({ fetchAllItems: secondList, update: secondUpdate }),
       logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
     });
 
     expect(result).toEqual({ hadFailures: false });
     expect(secondUpdate).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('already in sync on policy pp-1, skipping write')
+    );
+  });
+
+  test('fetches the space package-policy set once for multiple enabled packs in the same space', async () => {
+    const scopedClient = createMockScopedClient();
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const secondPack = buildPackagePolicy('default--second-pack', 'pack-2');
+    const packagePolicyList = mockFetchAllItems([buildPackagePolicy(), secondPack]);
+
+    const twoPacksFindResult = {
+      saved_objects: [
+        ...buildEnabledPackFindResult().saved_objects,
+        {
+          id: 'pack-2',
+          namespaces: ['default'],
+          references: [{ id: 'policy-1', name: 'policy-1', type: 'ingest-agent-policies' }],
+          attributes: {
+            name: 'second-pack',
+            enabled: true,
+            queries: [
+              { id: 'q1', query: 'SELECT 1', interval: 60, name: 'q1', schedule_id: 'sched-q1' },
+            ],
+          },
+        },
+      ],
+      total: 2,
+    };
+
+    const { core } = createMockCoreStart(twoPacksFindResult, scopedClient);
+    const osqueryContext = createMockOsqueryContext({
+      fetchAllItems: packagePolicyList,
+      update: packagePolicyUpdate,
+    });
+    const logger = createMockLogger();
+
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext,
+      logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
+    });
+
+    expect(result).toEqual({ hadFailures: false });
+    // Two enabled packs in the same space share a single policy fetch.
+    expect(packagePolicyList).toHaveBeenCalledTimes(1);
+    expect(packagePolicyUpdate).toHaveBeenCalledTimes(2);
+  });
+
+  test('skips a legacy-keyed pack whose wire block already matches the SO (no revision churn)', async () => {
+    // Seed a route-shaped, in-sync block via a real first reconcile (same
+    // technique as buildInSyncPolicyFromFirstReconcile), then move it to the
+    // legacy bare-name key. The diff gate must read the legacy key (since the
+    // namespaced key no longer exists) to detect it's in sync, rather than
+    // always seeing `undefined` under the namespaced key and rewriting.
+    const reconciledPolicy = await buildInSyncPolicyFromFirstReconcile();
+    const inSyncBlock =
+      reconciledPolicy.inputs[0].config.osquery.value.packs['default--reconcile-pack'];
+    const legacyInSyncPolicy = {
+      ...reconciledPolicy,
+      inputs: [
+        {
+          ...reconciledPolicy.inputs[0],
+          config: {
+            osquery: {
+              value: {
+                packs: { 'reconcile-pack': inSyncBlock },
+              },
+            },
+          },
+        },
+      ],
+    };
+
+    const packagePolicyList = mockFetchAllItems([legacyInSyncPolicy]);
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+
+    const { core } = createMockCoreStart(buildEnabledPackFindResult(), createMockScopedClient());
+    const osqueryContext = createMockOsqueryContext({
+      fetchAllItems: packagePolicyList,
+      update: packagePolicyUpdate,
+    });
+    const logger = createMockLogger();
+
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext,
+      logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
+    });
+
+    expect(result).toEqual({ hadFailures: false });
+    expect(packagePolicyUpdate).not.toHaveBeenCalled();
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining('already in sync on policy pp-1, skipping write')
     );
@@ -218,11 +323,11 @@ describe('reconcileScheduleIdsToWire', () => {
     // but `shard` must survive (it controls pack rollout percentage).
     const stalePolicy = buildPackagePolicy();
     stalePolicy.inputs[0].config.osquery.value.packs['default--reconcile-pack'].shard = 42;
-    const packagePolicyList = jest.fn().mockResolvedValue({ items: [stalePolicy] });
+    const packagePolicyList = mockFetchAllItems([stalePolicy]);
 
     const { core } = createMockCoreStart(buildEnabledPackFindResult(), scopedClient);
     const osqueryContext = createMockOsqueryContext({
-      list: packagePolicyList,
+      fetchAllItems: packagePolicyList,
       update: packagePolicyUpdate,
     });
     const logger = createMockLogger();
@@ -248,11 +353,11 @@ describe('reconcileScheduleIdsToWire', () => {
     // modern key AND carry `shard` across (the SO never carried it).
     const legacyPolicy = buildPackagePolicy('reconcile-pack');
     legacyPolicy.inputs[0].config.osquery.value.packs['reconcile-pack'].shard = 7;
-    const packagePolicyList = jest.fn().mockResolvedValue({ items: [legacyPolicy] });
+    const packagePolicyList = mockFetchAllItems([legacyPolicy]);
 
     const { core } = createMockCoreStart(buildEnabledPackFindResult(), scopedClient);
     const osqueryContext = createMockOsqueryContext({
-      list: packagePolicyList,
+      fetchAllItems: packagePolicyList,
       update: packagePolicyUpdate,
     });
     const logger = createMockLogger();
@@ -276,10 +381,10 @@ describe('reconcileScheduleIdsToWire', () => {
   test('is idempotent — a second run changes no schedule_id', async () => {
     const scopedClient = createMockScopedClient();
     const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-    const packagePolicyList = jest.fn().mockResolvedValue({ items: [buildPackagePolicy()] });
+    const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
 
     const osqueryContext = createMockOsqueryContext({
-      list: packagePolicyList,
+      fetchAllItems: packagePolicyList,
       update: packagePolicyUpdate,
     });
     const logger = createMockLogger();
@@ -315,14 +420,14 @@ describe('reconcileScheduleIdsToWire', () => {
   test('skips disabled packs (only enabled packs reach the wire)', async () => {
     const scopedClient = createMockScopedClient();
     const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-    const packagePolicyList = jest.fn().mockResolvedValue({ items: [buildPackagePolicy()] });
+    const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
 
     const { core } = createMockCoreStart(
       buildEnabledPackFindResult({ enabled: false }),
       scopedClient
     );
     const osqueryContext = createMockOsqueryContext({
-      list: packagePolicyList,
+      fetchAllItems: packagePolicyList,
       update: packagePolicyUpdate,
     });
     const logger = createMockLogger();
@@ -361,11 +466,11 @@ describe('reconcileScheduleIdsToWire', () => {
     const packagePolicyUpdate = jest
       .fn()
       .mockRejectedValueOnce(Object.assign(new Error('Conflict'), { statusCode: 409 }));
-    const packagePolicyList = jest.fn().mockResolvedValue({ items: [buildPackagePolicy()] });
+    const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
 
     const { core } = createMockCoreStart(buildEnabledPackFindResult(), scopedClient);
     const osqueryContext = createMockOsqueryContext({
-      list: packagePolicyList,
+      fetchAllItems: packagePolicyList,
       update: packagePolicyUpdate,
     });
     const logger = createMockLogger();
@@ -388,11 +493,11 @@ describe('reconcileScheduleIdsToWire', () => {
   test('logs and flags hadFailures on non-conflict errors', async () => {
     const scopedClient = createMockScopedClient();
     const packagePolicyUpdate = jest.fn().mockRejectedValueOnce(new Error('something went wrong'));
-    const packagePolicyList = jest.fn().mockResolvedValue({ items: [buildPackagePolicy()] });
+    const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
 
     const { core } = createMockCoreStart(buildEnabledPackFindResult(), scopedClient);
     const osqueryContext = createMockOsqueryContext({
-      list: packagePolicyList,
+      fetchAllItems: packagePolicyList,
       update: packagePolicyUpdate,
     });
     const logger = createMockLogger();
@@ -437,13 +542,13 @@ describe('reconcileScheduleIdsToWire', () => {
     test('flag on + rrule-mode SO — wire carries default_rrule_schedule and schedule_id', async () => {
       const scopedClient = createMockScopedClient();
       const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-      const packagePolicyList = jest
-        .fn()
-        .mockResolvedValue({ items: [buildPackagePolicy('default--rrule-pack', 'pack-rrule')] });
+      const packagePolicyList = mockFetchAllItems([
+        buildPackagePolicy('default--rrule-pack', 'pack-rrule'),
+      ]);
 
       const { core } = createMockCoreStart(buildRrulePackFindResult(), scopedClient);
       const osqueryContext = createMockOsqueryContext({
-        list: packagePolicyList,
+        fetchAllItems: packagePolicyList,
         update: packagePolicyUpdate,
       });
       const logger = createMockLogger();
@@ -470,13 +575,13 @@ describe('reconcileScheduleIdsToWire', () => {
     test('flag off + rrule-mode SO — wire omits rrule fields but still carries schedule_id', async () => {
       const scopedClient = createMockScopedClient();
       const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-      const packagePolicyList = jest
-        .fn()
-        .mockResolvedValue({ items: [buildPackagePolicy('default--rrule-pack', 'pack-rrule')] });
+      const packagePolicyList = mockFetchAllItems([
+        buildPackagePolicy('default--rrule-pack', 'pack-rrule'),
+      ]);
 
       const { core } = createMockCoreStart(buildRrulePackFindResult(), scopedClient);
       const osqueryContext = createMockOsqueryContext({
-        list: packagePolicyList,
+        fetchAllItems: packagePolicyList,
         update: packagePolicyUpdate,
       });
       const logger = createMockLogger();
@@ -503,9 +608,9 @@ describe('reconcileScheduleIdsToWire', () => {
     test('flag off + legacy interval pack — legacy per-query shape plus default_space_id and schedule_id', async () => {
       const scopedClient = createMockScopedClient();
       const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-      const packagePolicyList = jest
-        .fn()
-        .mockResolvedValue({ items: [buildPackagePolicy('default--legacy-pack', 'pack-legacy')] });
+      const packagePolicyList = mockFetchAllItems([
+        buildPackagePolicy('default--legacy-pack', 'pack-legacy'),
+      ]);
 
       const { core } = createMockCoreStart(
         {
@@ -535,7 +640,7 @@ describe('reconcileScheduleIdsToWire', () => {
       );
 
       const osqueryContext = createMockOsqueryContext({
-        list: packagePolicyList,
+        fetchAllItems: packagePolicyList,
         update: packagePolicyUpdate,
       });
       const logger = createMockLogger();
@@ -595,9 +700,9 @@ describe('reconcileScheduleIdsToWire', () => {
       // 3) Feed the migrated SO into the reconciler.
       const scopedClient = createMockScopedClient();
       const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-      const packagePolicyList = jest
-        .fn()
-        .mockResolvedValue({ items: [buildPackagePolicy('default--legacy-pack', 'pack-legacy')] });
+      const packagePolicyList = mockFetchAllItems([
+        buildPackagePolicy('default--legacy-pack', 'pack-legacy'),
+      ]);
 
       const { core } = createMockCoreStart(
         {
@@ -619,7 +724,7 @@ describe('reconcileScheduleIdsToWire', () => {
       );
 
       const osqueryContext = createMockOsqueryContext({
-        list: packagePolicyList,
+        fetchAllItems: packagePolicyList,
         update: packagePolicyUpdate,
       });
       const logger = createMockLogger();

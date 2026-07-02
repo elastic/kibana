@@ -60,24 +60,20 @@ export const reconcileScheduleIdsToWire = async ({
 }): Promise<{ hadFailures: boolean }> => {
   const internalClient = await getInternalSavedObjectsClient(coreStart);
 
-  // Page through every pack across all spaces — a deployment can have >1000
-  // packs, and a single missed page leaves those packs' `schedule_id` never
-  // projected onto the wire.
-  const PER_PAGE = 1000;
+  // Page through every pack across all spaces via the platform's all-pages
+  // iterator — a deployment can have >1000 packs, and this has no
+  // offset-window ceiling and cannot spin on a stale `total`.
+  const packFinder = internalClient.createPointInTimeFinder<PackSavedObject>({
+    type: packSavedObjectType,
+    perPage: 1000,
+    namespaces: ['*'],
+  });
   const allPackSavedObjects: Array<SavedObjectsFindResult<PackSavedObject>> = [];
-  let page = 1;
-  let total = Infinity;
-  do {
-    const response = await internalClient.find<PackSavedObject>({
-      type: packSavedObjectType,
-      perPage: PER_PAGE,
-      page,
-      namespaces: ['*'],
-    });
-    allPackSavedObjects.push(...response.saved_objects);
-    total = response.total;
-    page += 1;
-  } while (allPackSavedObjects.length < total);
+  for await (const { saved_objects: packBatch } of packFinder.find()) {
+    allPackSavedObjects.push(...packBatch);
+  }
+
+  await packFinder.close();
 
   // Only enabled packs reach the Fleet wire. A pack whose SO carries
   // `schedule_id` values (guaranteed post-V4 for every query) is a reconcile
@@ -107,7 +103,15 @@ export const reconcileScheduleIdsToWire = async ({
     return { hadFailures: true };
   }
 
+  const packsBySpaceId = new Map<string, Array<SavedObjectsFindResult<PackSavedObject>>>();
   for (const packSO of packsToReconcile) {
+    const spaceId = packSO.namespaces?.[0] ?? 'default';
+    const spacePacks = packsBySpaceId.get(spaceId) ?? [];
+    spacePacks.push(packSO);
+    packsBySpaceId.set(spaceId, spacePacks);
+  }
+
+  for (const [spaceId, spacePacks] of packsBySpaceId) {
     if (abortController?.signal.aborted) {
       logger.info(
         'reconcileScheduleIdsToWire: aborted by task manager, will retry remaining packs'
@@ -116,108 +120,104 @@ export const reconcileScheduleIdsToWire = async ({
       return { hadFailures: true };
     }
 
-    try {
-      const spaceId = packSO.namespaces?.[0] ?? 'default';
-      const spaceClient = getInternalSavedObjectsClientForSpaceId(coreStart, spaceId);
+    const spaceClient = getInternalSavedObjectsClientForSpaceId(coreStart, spaceId);
 
-      const policyRefs =
-        packSO.references
-          ?.filter((r) => r.type === LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE)
-          .map((r) => r.id) ?? [];
+    // Fetch this space's osquery package policies once, regardless of how
+    // many enabled packs it contains — collapses O(packs × policies) Fleet
+    // list I/O to O(policies-per-space).
+    const packagePolicies: PackagePolicy[] = [];
+    for await (const policyBatch of await packagePolicyService.fetchAllItems(spaceClient, {
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+    })) {
+      packagePolicies.push(...policyBatch);
+    }
 
-      if (!policyRefs.length) {
-        continue;
-      }
+    for (const packSO of spacePacks) {
+      try {
+        const policyRefs =
+          packSO.references
+            ?.filter((r) => r.type === LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE)
+            .map((r) => r.id) ?? [];
 
-      // Page through every osquery package policy in the space — a single
-      // space can hold >1000, and a missed page leaves that policy's wire
-      // unreconciled with no signal.
-      const packagePolicies: PackagePolicy[] = [];
-      let policyPage = 1;
-      let policyTotal = Infinity;
-      do {
-        const result = (await packagePolicyService.list(spaceClient, {
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-          perPage: PER_PAGE,
-          page: policyPage,
-        })) ?? { items: [], total: 0 };
-        packagePolicies.push(...result.items);
-        policyTotal = result.total ?? result.items.length;
-        policyPage += 1;
-      } while (packagePolicies.length < policyTotal);
-
-      for (const pp of packagePolicies) {
-        if (policyHasPack(pp, packSO.attributes.name, spaceId)) {
-          const packPath = `inputs[0].config.osquery.value.packs.${makePackKey(
-            packSO.attributes.name,
-            spaceId
-          )}`;
-
-          const { queries: builtQueries, ...packDefaults } = convertSOQueriesToPackConfig(
-            packSO.attributes.queries ?? [],
-            {
-              spaceId,
-              packSchedule: {
-                schedule_type: packSO.attributes.schedule_type,
-                interval: packSO.attributes.interval,
-                rrule_schedule: packSO.attributes.rrule_schedule,
-              },
-              isRruleFeatureEnabled,
-            }
-          );
-
-          const existingPackBlock = get(pp, packPath) as Record<string, unknown> | undefined;
-
-          const legacyPackBlock = get(
-            pp,
-            `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`
-          ) as Record<string, unknown> | undefined;
-          const existingShard = existingPackBlock?.shard ?? legacyPackBlock?.shard;
-
-          // The exact block the write below re-sets, so it IS the post-write
-          // state — used as the diff gate against the current wire.
-          const intendedPackBlock = {
-            ...(existingShard !== undefined ? { shard: existingShard } : {}),
-            pack_id: packSO.id,
-            ...packDefaults,
-            queries: builtQueries,
-          };
-
-          if (isEqual(existingPackBlock, intendedPackBlock)) {
-            logger.debug(
-              `reconcileScheduleIdsToWire: pack ${packSO.id} already in sync on policy ${pp.id}, skipping write`
-            );
-            continue;
-          }
-
-          await packagePolicyService.update(
-            spaceClient,
-            esClient,
-            pp.id,
-            produce<PackagePolicy>(pp, (draft) => {
-              unset(draft, 'id');
-              removePackFromPolicy(draft, packSO.attributes.name, spaceId);
-              set(draft, packPath, intendedPackBlock);
-
-              return draft;
-            })
-          );
+        if (!policyRefs.length) {
+          continue;
         }
-      }
 
-      logger.debug(`reconcileScheduleIdsToWire: reconciled pack ${packSO.id} in space ${spaceId}`);
-    } catch (err) {
-      const error = err as Error & { statusCode?: number };
-      if (error.statusCode === 409) {
+        const { queries: builtQueries, ...packDefaults } = convertSOQueriesToPackConfig(
+          packSO.attributes.queries ?? [],
+          {
+            spaceId,
+            packSchedule: {
+              schedule_type: packSO.attributes.schedule_type,
+              interval: packSO.attributes.interval,
+              rrule_schedule: packSO.attributes.rrule_schedule,
+            },
+            isRruleFeatureEnabled,
+          }
+        );
+
+        for (const pp of packagePolicies) {
+          if (policyHasPack(pp, packSO.attributes.name, spaceId)) {
+            const packPath = `inputs[0].config.osquery.value.packs.${makePackKey(
+              packSO.attributes.name,
+              spaceId
+            )}`;
+
+            const legacyPackBlock = get(
+              pp,
+              `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`
+            ) as Record<string, unknown> | undefined;
+            const existingPackBlock =
+              (get(pp, packPath) as Record<string, unknown> | undefined) ?? legacyPackBlock;
+            const existingShard = existingPackBlock?.shard ?? legacyPackBlock?.shard;
+
+            // The exact block the write below re-sets, so it IS the post-write
+            // state — used as the diff gate against the current wire.
+            const intendedPackBlock = {
+              ...(existingShard !== undefined ? { shard: existingShard } : {}),
+              pack_id: packSO.id,
+              ...packDefaults,
+              queries: builtQueries,
+            };
+
+            if (isEqual(existingPackBlock, intendedPackBlock)) {
+              logger.debug(
+                `reconcileScheduleIdsToWire: pack ${packSO.id} already in sync on policy ${pp.id}, skipping write`
+              );
+              continue;
+            }
+
+            await packagePolicyService.update(
+              spaceClient,
+              esClient,
+              pp.id,
+              produce<PackagePolicy>(pp, (draft) => {
+                unset(draft, 'id');
+                removePackFromPolicy(draft, packSO.attributes.name, spaceId);
+                set(draft, packPath, intendedPackBlock);
+
+                return draft;
+              })
+            );
+          }
+        }
+
         logger.debug(
-          `reconcileScheduleIdsToWire: version conflict for pack ${packSO.id}, will retry`
+          `reconcileScheduleIdsToWire: reconciled pack ${packSO.id} in space ${spaceId}`
         );
-        hadFailures = true;
-      } else {
-        logger.warn(
-          `reconcileScheduleIdsToWire: failed to reconcile pack ${packSO.id}: ${error.message}`
-        );
-        hadFailures = true;
+      } catch (err) {
+        const error = err as Error & { statusCode?: number };
+        if (error.statusCode === 409) {
+          logger.debug(
+            `reconcileScheduleIdsToWire: version conflict for pack ${packSO.id}, will retry`
+          );
+          hadFailures = true;
+        } else {
+          logger.warn(
+            `reconcileScheduleIdsToWire: failed to reconcile pack ${packSO.id}: ${error.message}`
+          );
+          hadFailures = true;
+        }
       }
     }
   }
