@@ -31,27 +31,30 @@ export const dropPartialBucketsTextBasedFn =
 
     const contextTimeZone = await getTimezone(context);
     const datatableUtilities = await getDatatableUtilities(context);
-    const bucketColumn = input.columns.find(
-      (column) =>
-        datatableUtilities.getDateHistogramMeta(column, { timeZone: contextTimeZone })
-          ?.dropPartials === true
-    );
+
+    const bucketColumn = (() => {
+      for (const column of input.columns) {
+        const meta = datatableUtilities.getDateHistogramMeta(column, { timeZone: contextTimeZone });
+        if (meta?.dropPartials === true) {
+          return { column, meta };
+        }
+      }
+      return undefined;
+    })();
 
     if (!bucketColumn) {
       return input;
     }
 
-    const meta = datatableUtilities.getDateHistogramMeta(bucketColumn, {
-      timeZone: contextTimeZone,
-    });
+    const interval = bucketColumn.meta?.interval
+      ? parseInterval(bucketColumn.meta.interval)
+      : undefined;
 
-    const interval = meta?.interval ? parseInterval(meta.interval) : undefined;
-
-    if (!meta?.timeRange || !meta.timeZone || !interval) {
+    if (!bucketColumn.meta?.timeRange || !bucketColumn.meta.timeZone || !interval) {
       return input;
     }
 
-    const { timeZone, timeRange } = meta;
+    const { timeZone, timeRange } = bucketColumn.meta;
     const from = moment.tz(timeRange.from, timeZone);
     const to = moment.tz(timeRange.to, timeZone);
 
@@ -61,7 +64,7 @@ export const dropPartialBucketsTextBasedFn =
     return {
       ...input,
       rows: input.rows.filter((row) => {
-        const bucketStart = row[bucketColumn.id];
+        const bucketStart = row[bucketColumn.column.id];
         return (
           (typeof bucketStart !== 'string' && typeof bucketStart !== 'number') ||
           isFullyContained(moment.tz(bucketStart, timeZone))
