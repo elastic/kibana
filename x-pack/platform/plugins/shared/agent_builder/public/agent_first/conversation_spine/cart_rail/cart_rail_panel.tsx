@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { CART_RAIL_POPOVER_MAX_HEIGHT, CART_RAIL_WIDTH } from './cart_rail.constants';
+import { CART_RAIL_POPOVER_MAX_HEIGHT } from './cart_rail.constants';
 
 export interface CartRailPanelProps {
   children: React.ReactNode;
@@ -26,7 +26,7 @@ export const CartRailPanel: React.FC<CartRailPanelProps> = ({
   const { euiTheme } = useEuiTheme();
 
   const panelStyles = css`
-    width: ${isPopoverMode ? '100%' : `${CART_RAIL_WIDTH}px`};
+    width: 100%;
     height: 100%;
     max-height: ${isPopoverMode ? CART_RAIL_POPOVER_MAX_HEIGHT : 'none'};
     border-radius: 0;

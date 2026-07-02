@@ -14,6 +14,7 @@ import { useOptionalCartRailContext } from './cart_rail_context';
 import { CartRailContent } from './cart_rail_content';
 import { CartRailPanel } from './cart_rail_panel';
 import { useIsCartRailOpen } from './use_is_cart_rail_open';
+import { CART_RAIL_WIDTH } from './cart_rail.constants';
 
 interface AgentCartRailPushProps {
   attachmentsService: AttachmentsService;
@@ -26,6 +27,7 @@ export const AgentCartRailPush: React.FC<AgentCartRailPushProps> = ({ attachment
   const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
   const cartRailContext = useOptionalCartRailContext();
   const isCartOpen = useIsCartRailOpen();
+  const cartPushWidth = cartRailContext?.cartPushWidth ?? `${CART_RAIL_WIDTH}px`;
 
   if (!isAgentWorkspaceMount || !isCartOpen || cartRailContext?.isPopoverMode) {
     return null;
@@ -34,6 +36,9 @@ export const AgentCartRailPush: React.FC<AgentCartRailPushProps> = ({ attachment
   const pushRailStyles = css`
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
+    width: ${cartPushWidth};
+    min-width: 0;
     min-height: 0;
     height: 100%;
   `;

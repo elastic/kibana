@@ -7,7 +7,12 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
 
-import { AGENT_PANEL_CART_POPOVER_AT_WIDTH } from './cart_rail.constants';
+import {
+  AGENT_PANEL_CART_POPOVER_AT_WIDTH,
+  AGENT_PANEL_CART_WIDE_AT_WIDTH,
+  CART_RAIL_WIDE_WIDTH,
+  CART_RAIL_WIDTH,
+} from './cart_rail.constants';
 
 const getAgentPanelElement = (container: HTMLElement | null): HTMLElement | null =>
   container?.closest('.kbnChromeLayoutAgent') ?? container;
@@ -21,6 +26,7 @@ const getAgentPanelWidth = (container: HTMLElement | null): number =>
  */
 export const useCartRailLayout = () => {
   const [isPopoverMode, setIsPopoverMode] = useState(true);
+  const [cartPushWidth, setCartPushWidth] = useState(`${CART_RAIL_WIDTH}px`);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -30,8 +36,12 @@ export const useCartRailLayout = () => {
     }
 
     const syncMode = () => {
-      setIsPopoverMode(
-        getAgentPanelWidth(containerRef.current) < AGENT_PANEL_CART_POPOVER_AT_WIDTH
+      const agentPanelWidth = getAgentPanelWidth(containerRef.current);
+      setIsPopoverMode(agentPanelWidth < AGENT_PANEL_CART_POPOVER_AT_WIDTH);
+      setCartPushWidth(
+        agentPanelWidth > AGENT_PANEL_CART_WIDE_AT_WIDTH
+          ? CART_RAIL_WIDE_WIDTH
+          : `${CART_RAIL_WIDTH}px`
       );
     };
 
@@ -45,5 +55,6 @@ export const useCartRailLayout = () => {
   return {
     containerRef,
     isPopoverMode,
+    cartPushWidth,
   };
 };

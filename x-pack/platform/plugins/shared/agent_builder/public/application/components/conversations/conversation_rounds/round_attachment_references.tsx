@@ -46,7 +46,7 @@ const labels = {
     defaultMessage: 'Attachments',
   }),
   pinnedItems: i18n.translate('xpack.agentBuilder.roundAttachmentReferences.pinnedItems', {
-    defaultMessage: 'Pinned items',
+    defaultMessage: 'Attached items',
   }),
   attachmentAdded: (description: string) =>
     i18n.translate('xpack.agentBuilder.roundAttachmentReferences.attachmentAdded', {

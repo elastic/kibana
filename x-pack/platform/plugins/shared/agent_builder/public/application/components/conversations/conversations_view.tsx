@@ -27,7 +27,7 @@ import {
 export const AgentBuilderConversationsView: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const { attachmentsService } = useAgentBuilderServices();
-  const { containerRef, isPopoverMode } = useCartRailLayout();
+  const { containerRef, isPopoverMode, cartPushWidth } = useCartRailLayout();
 
   const containerStyles = css`
     display: flex;
@@ -62,7 +62,7 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
   return (
     <RoutedConversationsProvider>
       <ConversationSpineProvider>
-        <CartRailProvider isPopoverMode={isPopoverMode}>
+        <CartRailProvider isPopoverMode={isPopoverMode} cartPushWidth={cartPushWidth}>
           <CanvasProvider>
             <div ref={containerRef} css={containerStyles} data-test-subj="agentBuilderPageConversations">
               <div css={headerShellStyles}>

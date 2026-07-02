@@ -26,7 +26,7 @@ const labels = {
     defaultMessage: 'Attachments',
   }),
   pinnedItems: i18n.translate('xpack.agentBuilder.attachmentPillsRow.pinnedItems', {
-    defaultMessage: 'Pinned items',
+    defaultMessage: 'Attached items',
   }),
 };
 

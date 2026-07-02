@@ -14,8 +14,8 @@ import { registerApplicationAttachButtonElement } from './attachment_coordinator
 import { useApplicationAttachmentState } from './use_application_attachment_state';
 
 const labels = {
-  pin: i18n.translate('xpack.agentBuilder.applicationAttachmentButton.pin', {
-    defaultMessage: 'Pin to conversation',
+  addToConversation: i18n.translate('xpack.agentBuilder.applicationAttachmentButton.pin', {
+    defaultMessage: 'Add to conversation',
   }),
   alreadyPinned: i18n.translate(
     'xpack.agentBuilder.applicationAttachmentButton.alreadyPinned',
@@ -65,8 +65,8 @@ export const ApplicationAttachmentButton: React.FC<ApplicationAttachmentButtonPr
     ? conversationTitle
       ? labels.alreadyPinnedTo(conversationTitle)
       : labels.alreadyPinned
-    : labels.pin;
-  const buttonIconType = isLinked ? 'pinFilled' : 'pin';
+    : labels.addToConversation;
+  const buttonIconType = 'paperClip';
 
   const isAppHeader = displayVariant === 'appHeader';
   const appHeaderIconButton = useMemo(

@@ -9,14 +9,17 @@ import React, { createContext, useContext } from 'react';
 
 export interface CartRailContextValue {
   isPopoverMode: boolean;
+  cartPushWidth: string;
 }
 
 const CartRailContext = createContext<CartRailContextValue | null>(null);
 
 export const CartRailProvider: React.FC<
   CartRailContextValue & { children: React.ReactNode }
-> = ({ isPopoverMode, children }) => (
-  <CartRailContext.Provider value={{ isPopoverMode }}>{children}</CartRailContext.Provider>
+> = ({ isPopoverMode, cartPushWidth, children }) => (
+  <CartRailContext.Provider value={{ isPopoverMode, cartPushWidth }}>
+    {children}
+  </CartRailContext.Provider>
 );
 
 export const useOptionalCartRailContext = (): CartRailContextValue | null =>
