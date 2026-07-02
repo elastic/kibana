@@ -21,7 +21,11 @@ import {
   SavedObjectSaveModalDashboard,
   type SaveModalDashboardProps,
 } from '@kbn/presentation-util-plugin/public';
-import { buildVegaSavedVis } from '@kbn/agent-builder-visualizations-common';
+import {
+  buildVegaSavedVis,
+  normalizeVegaConfig,
+  type VegaConfig,
+} from '@kbn/agent-builder-visualizations-common';
 import type { VisualizationServices } from '../services';
 import {
   visualizationWrapperStyles,
@@ -70,8 +74,10 @@ export function VisualizeVega({
   timeRange?: TimeRange;
   registerActionButtons?: InlineRenderCallbacks['registerActionButtons'];
 }) {
-  const spec =
-    'spec' in visualization && typeof visualization.spec === 'string' ? visualization.spec : '';
+  const vegaConfig = useMemo<VegaConfig>(
+    () => normalizeVegaConfig(visualization) ?? { spec: '' },
+    [visualization]
+  );
   const { application, unifiedSearch, embeddable } = services;
   const SearchBar = unifiedSearch.ui.SearchBar;
   const canWriteDashboards = application?.capabilities.dashboard_v2?.showWriteControls === true;
@@ -91,14 +97,12 @@ export function VisualizeVega({
   // Complete the subject on unmount so it does not retain subscribers.
   useEffect(() => () => timeRange$.complete(), [timeRange$]);
 
-  const buildSavedVis = useCallback((title: string) => buildVegaSavedVis({ spec, title }), [spec]);
-
   const getParentApi = useCallback(
     () => ({
       timeRange$,
-      getSerializedStateForChild: () => ({ savedVis: buildSavedVis('') }),
+      getSerializedStateForChild: () => ({ savedVis: buildVegaSavedVis(vegaConfig) }),
     }),
-    [buildSavedVis, timeRange$]
+    [vegaConfig, timeRange$]
   );
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
@@ -117,7 +121,11 @@ export function VisualizeVega({
       // date picker. A per-panel time range would pin the panel and ignore the
       // dashboard picker.
       const serializedState = {
-        savedVis: buildSavedVis(newTitle),
+        savedVis: buildVegaSavedVis({
+          ...vegaConfig,
+          title: newTitle,
+          description: newDescription,
+        }),
         title: newTitle,
         description: newDescription,
       };
@@ -127,7 +135,7 @@ export function VisualizeVega({
         path: dashboardId && dashboardId !== 'new' ? `#/view/${dashboardId}` : '#/create',
       });
     },
-    [buildSavedVis, embeddable]
+    [vegaConfig, embeddable]
   );
 
   // The tool-result / markdown surface has no attachment header to host buttons,

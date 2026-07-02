@@ -17,6 +17,19 @@ export const VEGA_VIS_TYPE = 'vega';
 export const VEGA_PANEL_TYPE = 'vega';
 
 /**
+ * Canonical Vega config carried by Agent Builder attachments. This is the
+ * shared "future native Vega API" payload used by both surfaces — the standalone
+ * visualization attachment (`visualization`) and the dashboard Vega panel
+ * (`config`) — so a single {@link buildVegaSavedVis} transform can render either.
+ */
+export interface VegaConfig {
+  /** The serialized Vega/Vega-Lite spec. */
+  spec: string;
+  title?: string;
+  description?: string;
+}
+
+/**
  * The by-value `savedVis` shape a Kibana legacy-vis (`visualization`) embeddable
  * expects for a Vega/Vega-Lite spec. Kept minimal (no persisted saved object) so
  * the same spec can be rendered inline in chat and embedded in a dashboard panel.
@@ -39,11 +52,7 @@ export const buildVegaSavedVis = ({
   spec,
   title = '',
   description = '',
-}: {
-  spec: string;
-  title?: string;
-  description?: string;
-}): VegaSavedVis => ({
+}: VegaConfig): VegaSavedVis => ({
   title,
   description,
   type: VEGA_VIS_TYPE,
@@ -51,6 +60,30 @@ export const buildVegaSavedVis = ({
   uiState: {},
   data: { aggs: [], searchSource: {} },
 });
+
+/**
+ * Read a {@link VegaConfig} out of an untyped attachment payload (e.g. the
+ * standalone visualization attachment's `visualization` record). Returns
+ * `undefined` when there is no usable spec, so callers can guard rendering.
+ */
+export const normalizeVegaConfig = (input: unknown): VegaConfig | undefined => {
+  const record = input as
+    | { spec?: unknown; title?: unknown; description?: unknown }
+    | null
+    | undefined;
+  const spec = record?.spec;
+  if (typeof spec !== 'string' || spec.length === 0) {
+    return undefined;
+  }
+  const config: VegaConfig = { spec };
+  if (typeof record?.title === 'string') {
+    config.title = record.title;
+  }
+  if (typeof record?.description === 'string') {
+    config.description = record.description;
+  }
+  return config;
+};
 
 /**
  * Read the serialized Vega spec out of a legacy-vis (`visualization`) panel's

@@ -8,6 +8,7 @@
 import {
   buildVegaSavedVis,
   extractVegaSpecFromSavedVis,
+  normalizeVegaConfig,
   VEGA_VIS_TYPE,
 } from './vega_saved_vis';
 
@@ -61,5 +62,25 @@ describe('extractVegaSpecFromSavedVis', () => {
     expect(extractVegaSpecFromSavedVis({ attributes: {} })).toBeUndefined();
     expect(extractVegaSpecFromSavedVis({ savedVis: { type: 'vega', params: {} } })).toBeUndefined();
     expect(extractVegaSpecFromSavedVis(undefined)).toBeUndefined();
+  });
+});
+
+describe('normalizeVegaConfig', () => {
+  it('reads spec, title, and description from an untyped attachment payload', () => {
+    expect(normalizeVegaConfig({ spec: '{"mark":"bar"}', title: 'T', description: 'D' })).toEqual({
+      spec: '{"mark":"bar"}',
+      title: 'T',
+      description: 'D',
+    });
+  });
+
+  it('omits title/description when they are not strings', () => {
+    expect(normalizeVegaConfig({ spec: '{}', title: 5 })).toEqual({ spec: '{}' });
+  });
+
+  it('returns undefined when the spec is missing or empty', () => {
+    expect(normalizeVegaConfig({ title: 'T' })).toBeUndefined();
+    expect(normalizeVegaConfig({ spec: '' })).toBeUndefined();
+    expect(normalizeVegaConfig(undefined)).toBeUndefined();
   });
 });
