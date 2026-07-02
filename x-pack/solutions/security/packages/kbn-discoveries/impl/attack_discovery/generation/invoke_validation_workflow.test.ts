@@ -393,11 +393,11 @@ describe('invokeValidationWorkflow', () => {
         ...mockCompletedExecution,
         stepExecutions: [
           {
-            // persisted_discoveries contains ALL items in the index (new + existing duplicates),
-            // so it has generatedCount (2) items; duplicates_dropped_count is subtracted to get 1.
+            // persisted_discoveries contains ONLY the net-new discovery (duplicates are
+            // dropped on write), so persistedCount is its length directly.
             output: {
               duplicates_dropped_count: 1,
-              persisted_discoveries: [{ title: 'D1' }, { title: 'D1-duplicate' }],
+              persisted_discoveries: [{ title: 'D1' }],
             },
             stepType: 'security.attack-discovery.persistDiscoveries',
           },
@@ -419,10 +419,10 @@ describe('invokeValidationWorkflow', () => {
         ...mockCompletedExecution,
         stepExecutions: [
           {
-            // persisted_discoveries contains ALL items (new + existing), duplicates subtracted below
+            // persisted_discoveries contains ONLY the net-new discovery (duplicates dropped on write)
             output: {
               duplicates_dropped_count: 1,
-              persisted_discoveries: [{ title: 'D1' }, { title: 'D1-duplicate' }],
+              persisted_discoveries: [{ title: 'D1' }],
             },
             stepType: 'security.attack-discovery.persistDiscoveries',
           },
@@ -453,10 +453,10 @@ describe('invokeValidationWorkflow', () => {
         ...mockCompletedExecution,
         stepExecutions: [
           {
-            // persisted_discoveries contains ALL items (new + existing), duplicates subtracted below
+            // persisted_discoveries contains ONLY the net-new discovery (duplicates dropped on write)
             output: {
               duplicates_dropped_count: 1,
-              persisted_discoveries: [{ title: 'D1' }, { title: 'D1-duplicate' }],
+              persisted_discoveries: [{ title: 'D1' }],
             },
             stepType: 'security.attack-discovery.persistDiscoveries',
           },
@@ -1401,12 +1401,9 @@ describe('invokeValidationWorkflow', () => {
 
   describe('success log and event use persistedCount (Bug 1 + Bug 2 fixes)', () => {
     it('logs the persisted discovery count from persist step output', async () => {
-      // persisted_discoveries contains ALL items in the index (new + existing duplicate).
-      // generatedCount=2, duplicates_dropped_count=1 → persistedCount = 2 - 1 = 1.
-      const allDiscoveries = [
-        { alert_ids: ['a1'], title: 'Only One Survived' },
-        { alert_ids: ['a0'], title: 'Pre-existing Duplicate' },
-      ];
+      // persisted_discoveries contains ONLY the net-new discovery; the pre-existing
+      // duplicate was dropped on write and counted in duplicates_dropped_count.
+      const newDiscoveries = [{ alert_ids: ['a1'], title: 'Only One Survived' }];
 
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
       (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
@@ -1416,7 +1413,7 @@ describe('invokeValidationWorkflow', () => {
           {
             output: {
               duplicates_dropped_count: 1,
-              persisted_discoveries: allDiscoveries,
+              persisted_discoveries: newDiscoveries,
             },
             stepType: 'security.attack-discovery.persistDiscoveries',
           },
@@ -1435,12 +1432,9 @@ describe('invokeValidationWorkflow', () => {
     });
 
     it('passes persistedCount as newAlerts to the success event log (Bug 1 fix)', async () => {
-      // persisted_discoveries contains ALL items in the index (new + existing duplicate).
-      // generatedCount=2, duplicates_dropped_count=1 → persistedCount = 2 - 1 = 1.
-      const allDiscoveries = [
-        { alert_ids: ['a1'], title: 'Only One Survived' },
-        { alert_ids: ['a0'], title: 'Pre-existing Duplicate' },
-      ];
+      // persisted_discoveries contains ONLY the net-new discovery; the pre-existing
+      // duplicate was dropped on write and counted in duplicates_dropped_count.
+      const newDiscoveries = [{ alert_ids: ['a1'], title: 'Only One Survived' }];
 
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
       (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
@@ -1450,7 +1444,7 @@ describe('invokeValidationWorkflow', () => {
           {
             output: {
               duplicates_dropped_count: 1,
-              persisted_discoveries: allDiscoveries,
+              persisted_discoveries: newDiscoveries,
             },
             stepType: 'security.attack-discovery.persistDiscoveries',
           },
@@ -1496,11 +1490,11 @@ describe('invokeValidationWorkflow', () => {
       );
     });
 
-    it('subtracts duplicatesDroppedCount from persisted_discoveries.length when persisted_discoveries is present (production scenario)', async () => {
-      // Mirrors the real production case: 8 generated, 5 duplicates → 3 newly persisted.
-      // persisted_discoveries contains ALL 8 items (existing + new); subtracting the 5 duplicates
-      // gives the correct persistedCount = 3.
-      const allDiscoveries = Array.from({ length: 8 }, (_, i) => ({ title: `D${i + 1}` }));
+    it('reports persisted_discoveries.length as persistedCount (already the net-new set)', async () => {
+      // Mirrors the real production case: 8 generated, 5 duplicates dropped on write → 3
+      // newly persisted. persisted_discoveries contains ONLY those 3 net-new discoveries.
+      const generatedDiscoveries = Array.from({ length: 8 }, (_, i) => ({ title: `D${i + 1}` }));
+      const newDiscoveries = generatedDiscoveries.slice(0, 3);
 
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
       (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
@@ -1510,7 +1504,7 @@ describe('invokeValidationWorkflow', () => {
           {
             output: {
               duplicates_dropped_count: 5,
-              persisted_discoveries: allDiscoveries,
+              persisted_discoveries: newDiscoveries,
             },
             stepType: 'security.attack-discovery.persistDiscoveries',
           },
@@ -1521,11 +1515,11 @@ describe('invokeValidationWorkflow', () => {
         ...defaultProps,
         generationResult: {
           ...mockGenerationResult,
-          attackDiscoveries: allDiscoveries as typeof mockGenerationResult.attackDiscoveries,
+          attackDiscoveries: generatedDiscoveries as typeof mockGenerationResult.attackDiscoveries,
         },
       });
 
-      // 8 total in index - 5 pre-existing duplicates = 3 newly persisted
+      // persisted_discoveries already contains only the 3 net-new discoveries
       expect(result.validationSummary.persistedCount).toBe(3);
     });
 

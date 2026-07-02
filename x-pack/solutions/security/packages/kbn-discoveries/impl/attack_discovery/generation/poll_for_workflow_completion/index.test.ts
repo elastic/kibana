@@ -88,10 +88,11 @@ describe('pollForWorkflowCompletion', () => {
   it('polls until execution becomes terminal', async () => {
     const workflowsManagementApi: WorkflowsManagementApi = {
       getWorkflow: jest.fn(),
+      // running (status poll) -> completed (status poll) -> completed (terminal full fetch)
       getWorkflowExecution: jest
         .fn()
         .mockResolvedValueOnce(createExecution('running'))
-        .mockResolvedValueOnce(createExecution('completed')),
+        .mockResolvedValue(createExecution('completed')),
       runWorkflow: jest.fn(),
       scheduleWorkflow: jest.fn(),
     };
@@ -172,7 +173,9 @@ describe('pollForWorkflowCompletion', () => {
       });
 
       expect(result.status).toBe('completed');
-      expect(workflowsManagementApi.getWorkflowExecution).toHaveBeenCalledTimes(1);
+      // one status-only poll observes the terminal status, then one full fetch
+      // (includeOutput: true) retrieves the payload consumers need.
+      expect(workflowsManagementApi.getWorkflowExecution).toHaveBeenCalledTimes(2);
     });
 
     it('returns immediately when terminal and isReady returns true on first poll', async () => {
@@ -202,7 +205,8 @@ describe('pollForWorkflowCompletion', () => {
 
       expect(result.status).toBe('completed');
       expect(result.stepExecutions).toHaveLength(1);
-      expect(workflowsManagementApi.getWorkflowExecution).toHaveBeenCalledTimes(1);
+      // one status-only poll observes terminal, one full fetch satisfies isReady.
+      expect(workflowsManagementApi.getWorkflowExecution).toHaveBeenCalledTimes(2);
     });
 
     it('re-polls when terminal but isReady returns false, then returns when isReady passes', async () => {
@@ -327,7 +331,8 @@ describe('pollForWorkflowCompletion', () => {
       });
 
       expect(result.status).toBe('failed');
-      expect(workflowsManagementApi.getWorkflowExecution).toHaveBeenCalledTimes(1);
+      // one status-only poll observes terminal, one full fetch confirms non-completed.
+      expect(workflowsManagementApi.getWorkflowExecution).toHaveBeenCalledTimes(2);
     });
 
     it('uses a shorter polling interval during readiness re-polls', async () => {
@@ -338,8 +343,10 @@ describe('pollForWorkflowCompletion', () => {
 
       const workflowsManagementApi: WorkflowsManagementApi = {
         getWorkflow: jest.fn(),
+        // status poll (terminal) -> full fetch (no steps yet) -> readiness re-poll (steps ready)
         getWorkflowExecution: jest
           .fn()
+          .mockResolvedValueOnce(terminalWithoutSteps)
           .mockResolvedValueOnce(terminalWithoutSteps)
           .mockResolvedValueOnce(terminalWithSteps),
         runWorkflow: jest.fn(),
@@ -361,13 +368,89 @@ describe('pollForWorkflowCompletion', () => {
         workflowsManagementApi,
       });
 
-      // After 100ms (readiness poll interval), the second poll should have fired
+      // Advancing only the 100ms readiness interval (not the 500ms poll interval)
+      // is enough to trigger the readiness re-poll and resolve.
       await jest.advanceTimersByTimeAsync(100);
 
       const result = await promise;
 
       expect(result.stepExecutions).toHaveLength(1);
-      expect(workflowsManagementApi.getWorkflowExecution).toHaveBeenCalledTimes(2);
+      expect(workflowsManagementApi.getWorkflowExecution).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('polling cost controls', () => {
+    it('polls status-only (includeOutput: false) while running and fetches the full payload once terminal', async () => {
+      const getWorkflowExecution = jest
+        .fn()
+        .mockResolvedValueOnce(createExecution('running'))
+        .mockResolvedValue(createExecution('completed'));
+
+      const workflowsManagementApi: WorkflowsManagementApi = {
+        getWorkflow: jest.fn(),
+        getWorkflowExecution,
+        runWorkflow: jest.fn(),
+        scheduleWorkflow: jest.fn(),
+      };
+
+      const promise = pollForWorkflowCompletion({
+        executionId,
+        logger: mockLogger,
+        pollIntervalMs: 500,
+        spaceId,
+        workflowsManagementApi,
+      });
+
+      await jest.advanceTimersByTimeAsync(500);
+
+      await promise;
+
+      // While running, output is excluded from the read.
+      expect(getWorkflowExecution).toHaveBeenNthCalledWith(1, executionId, spaceId, {
+        includeOutput: false,
+      });
+      // The full payload is fetched exactly once, after the terminal status is observed.
+      const includeOutputTrueCalls = getWorkflowExecution.mock.calls.filter(
+        ([, , options]) => options?.includeOutput === true
+      );
+      expect(includeOutputTrueCalls).toHaveLength(1);
+    });
+
+    it('backs off the polling interval for long-running executions', async () => {
+      const getWorkflowExecution = jest.fn().mockResolvedValue(createExecution('running'));
+
+      const workflowsManagementApi: WorkflowsManagementApi = {
+        getWorkflow: jest.fn(),
+        getWorkflowExecution,
+        runWorkflow: jest.fn(),
+        scheduleWorkflow: jest.fn(),
+      };
+
+      pollForWorkflowCompletion({
+        executionId,
+        logger: mockLogger,
+        maxPollIntervalMs: 3000,
+        pollIntervalMs: 500,
+        spaceId,
+        workflowsManagementApi,
+      }).catch(() => {
+        // ignored — this poll never terminates; we only assert the backoff cadence
+      });
+
+      // Initial fetch fires synchronously before any delay.
+      expect(getWorkflowExecution).toHaveBeenCalledTimes(1);
+
+      // First interval is 500ms.
+      await jest.advanceTimersByTimeAsync(500);
+      expect(getWorkflowExecution).toHaveBeenCalledTimes(2);
+
+      // Next interval backs off to 750ms (500 * 1.5): 600ms is not yet enough...
+      await jest.advanceTimersByTimeAsync(600);
+      expect(getWorkflowExecution).toHaveBeenCalledTimes(2);
+
+      // ...but the remaining 150ms completes the 750ms interval.
+      await jest.advanceTimersByTimeAsync(150);
+      expect(getWorkflowExecution).toHaveBeenCalledTimes(3);
     });
   });
 });

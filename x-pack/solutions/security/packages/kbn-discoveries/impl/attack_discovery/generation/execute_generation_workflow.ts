@@ -38,6 +38,7 @@ import type { MisconfigurationType } from '../../lib/telemetry/event_based_telem
 import { getSpaceId } from '../../lib/helpers/get_space_id';
 import { AttackDiscoveryError } from '../../lib/errors/attack_discovery_error';
 import { assertAttackDiscoveryType } from './assert_attack_discovery_type';
+import { assertAuthorizedToExecuteWorkflows } from './assert_authorized_to_execute_workflows';
 import { buildResolveConnector } from './build_resolve_connector';
 import { createAuthenticatedUserForEventLogging } from './create_authenticated_user_for_event_logging';
 import { fetchAnonymizationFields } from './fetch_anonymization_fields';
@@ -485,6 +486,7 @@ export async function executeGenerationWorkflow({
   alertsIndexPattern,
   analytics,
   apiConfig,
+  authz,
   checkIntegrity,
   end,
   esClient: preAuthenticatedEsClient,
@@ -525,9 +527,6 @@ export async function executeGenerationWorkflow({
     const startServices = await getStartServices();
     coreStart = startServices.coreStart;
     const { pluginsStart } = startServices;
-    parsedApiConfig = getParsedApiConfig(apiConfig);
-
-    assertAttackDiscoveryType({ type });
 
     const { spaces: spacesPlugin } = pluginsStart as { spaces?: SpacesPluginStart };
 
@@ -535,6 +534,17 @@ export async function executeGenerationWorkflow({
       request,
       spaces: spacesPlugin?.spacesService,
     });
+
+    // Authoritative authorization guard (sole choke point for ALL four AD 2.0
+    // surfaces: ad hoc, scheduled, agent-builder tool, and workflow run-step).
+    // Runs before any work so unauthorized principals never reach any
+    // runWorkflow/scheduleWorkflow call under runManualOrchestration. On throw,
+    // the catch below routes through handleGenerationFailure.
+    await assertAuthorizedToExecuteWorkflows({ authz, request, spaceId });
+
+    parsedApiConfig = getParsedApiConfig(apiConfig);
+
+    assertAttackDiscoveryType({ type });
 
     logger.debug(() => {
       return `Invoking generation workflow with config: ${JSON.stringify({

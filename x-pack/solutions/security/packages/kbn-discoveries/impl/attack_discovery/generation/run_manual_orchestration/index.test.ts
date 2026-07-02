@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 
 import { runManualOrchestration } from '.';
@@ -307,6 +307,56 @@ describe('runManualOrchestration', () => {
 
       expect(infoCall).toBeDefined();
       expect(infoCall[0]).toContain('/s/my-space/app/workflows/');
+    });
+  });
+
+  describe('step failure telemetry', () => {
+    const createAnalytics = (): AnalyticsServiceSetup =>
+      ({ reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup);
+
+    it('reports the resolved default validation workflow id when validation_workflow_id is the empty-string sentinel', async () => {
+      const analytics = createAnalytics();
+      mockRunValidationStep.mockRejectedValue(new Error('validation boom'));
+
+      await expect(
+        runManualOrchestration({
+          ...baseParams,
+          analytics,
+          workflowConfig: { ...baseParams.workflowConfig, validation_workflow_id: '' },
+        })
+      ).rejects.toThrow('validation boom');
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        'attack_discovery_step_failure',
+        expect.objectContaining({
+          step: 'validation',
+          workflow_id: 'validate',
+        })
+      );
+    });
+
+    it('reports the custom validation workflow id when one is configured', async () => {
+      const analytics = createAnalytics();
+      mockRunValidationStep.mockRejectedValue(new Error('validation boom'));
+
+      await expect(
+        runManualOrchestration({
+          ...baseParams,
+          analytics,
+          workflowConfig: {
+            ...baseParams.workflowConfig,
+            validation_workflow_id: 'custom-validate',
+          },
+        })
+      ).rejects.toThrow('validation boom');
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        'attack_discovery_step_failure',
+        expect.objectContaining({
+          step: 'validation',
+          workflow_id: 'custom-validate',
+        })
+      );
     });
   });
 

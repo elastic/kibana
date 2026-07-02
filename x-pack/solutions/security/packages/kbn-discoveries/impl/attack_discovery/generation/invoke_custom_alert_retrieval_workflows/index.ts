@@ -78,7 +78,14 @@ const buildCustomWorkflowInputs = ({
 }): Record<string, unknown> => ({
   alerts_index_pattern: alertsIndexPattern,
   anonymization_fields: anonymizationFields,
-  api_config: apiConfig,
+  // Allow list of fields the strict workflow input schema allows
+  // (`additionalProperties: false`); forwarding the full ParsedApiConfig can
+  // carry `provider` and fail validation.
+  api_config: {
+    action_type_id: apiConfig.action_type_id,
+    connector_id: apiConfig.connector_id,
+    model: apiConfig.model,
+  },
   filter: filter ?? undefined,
   size: size ?? 100,
 });

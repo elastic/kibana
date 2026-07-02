@@ -112,7 +112,11 @@ export const runManualOrchestration = async ({
 
   const orchestrationStart = Date.now();
 
-  const validationWorkflowId = workflowConfig.validation_workflow_id ?? defaultValidationWorkflowId;
+  // `validation_workflow_id` is a required string whose empty-string value is the
+  // "use default validation workflow" sentinel (see `reportGenerationSuccessTelemetry`).
+  // Use `||` (not `??`) so the empty-string sentinel also falls back to the resolved
+  // default, otherwise step-failure telemetry would report an empty `workflow_id`.
+  const validationWorkflowId = workflowConfig.validation_workflow_id || defaultValidationWorkflowId;
 
   // Mutable execution state — a single const object used by try/catch/finally
   // to share the partial results and failure context across all three blocks.

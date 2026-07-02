@@ -339,6 +339,47 @@ describe('invokeCustomAlertRetrievalWorkflows', () => {
     });
   });
 
+  it('does not forward provider on api_config (allow list of fields the strict workflow input schema allows)', async () => {
+    const api = createMockWorkflowsApi();
+
+    api.getWorkflow.mockResolvedValue({
+      definition: { steps: [] },
+      enabled: true,
+      id: 'workflow-1',
+      name: 'Test',
+      valid: true,
+      yaml: 'name: test',
+    } as never);
+
+    api.runWorkflow.mockResolvedValue('run-1');
+
+    api.getWorkflowExecution.mockResolvedValue({
+      id: 'run-1',
+      status: 'completed',
+      stepExecutions: [],
+    } as never);
+
+    await invokeCustomAlertRetrievalWorkflows({
+      alertsIndexPattern: '.alerts-security.alerts-default',
+      anonymizationFields: [],
+      apiConfig: { ...mockApiConfig, provider: 'OpenAI' },
+      authenticatedUser: mockAuthenticatedUser,
+      eventLogger: mockEventLogger,
+      eventLogIndex: mockEventLogIndex,
+      executionUuid: mockExecutionUuid,
+      logger: mockLogger,
+      request: mockRequest,
+      spaceId: 'default',
+      workflowIds: ['workflow-1'],
+      workflowsManagementApi: api,
+    });
+
+    const [, , inputs] = api.runWorkflow.mock.calls[0];
+    const apiConfig = inputs.api_config as Record<string, unknown>;
+
+    expect(apiConfig).not.toHaveProperty('provider');
+  });
+
   it('invokes multiple workflows in parallel rather than sequentially', async () => {
     const api = createMockWorkflowsApi();
     const callOrder: string[] = [];

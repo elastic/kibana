@@ -540,6 +540,38 @@ describe('invokeGenerationWorkflow', () => {
     });
   });
 
+  describe('when workflow execution fails with a context-length error', () => {
+    const mockContextLengthExecution: WorkflowExecutionDto = {
+      ...mockCompletedExecution,
+      error: {
+        message:
+          "This model's maximum context length is 4097 tokens, however you requested 5360 tokens",
+        type: 'Error',
+      },
+      status: ExecutionStatus.FAILED,
+    };
+
+    beforeEach(() => {
+      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+        'workflow-run-id'
+      );
+      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        mockContextLengthExecution
+      );
+    });
+
+    it('throws with errorCategory context_length_exceeded', async () => {
+      await expect(invokeGenerationWorkflow(defaultProps)).rejects.toMatchObject({
+        errorCategory: 'context_length_exceeded',
+      });
+    });
+
+    it('throws with a friendly, actionable message', async () => {
+      await expect(invokeGenerationWorkflow(defaultProps)).rejects.toThrow('exceeded the model');
+    });
+  });
+
   describe('when workflow execution is skipped due to concurrency limit', () => {
     const mockSkippedExecution: WorkflowExecutionDto = {
       ...mockCompletedExecution,
