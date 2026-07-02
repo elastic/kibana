@@ -324,12 +324,12 @@ export const WorkflowYAMLEditor = ({
   openAgentChatRef.current = openAgentChat;
 
   useEffect(() => {
-    if (!isAgentBuilderAvailable || hasAutoOpenedAgentChatRef.current) {
+    if (!isAgentBuilderAvailable || isReadOnlyYaml || hasAutoOpenedAgentChatRef.current) {
       return;
     }
     hasAutoOpenedAgentChatRef.current = true;
     openAgentChatRef.current();
-  }, [isAgentBuilderAvailable]);
+  }, [isAgentBuilderAvailable, isReadOnlyYaml]);
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
     if (!editorRef.current) {
@@ -834,15 +834,12 @@ export const WorkflowYAMLEditor = ({
       >
         <StepActions onStepRun={onStepRun} />
       </div>
-      {(isAgentBuilderAvailable || isDevelopment) && !isReadOnlyYaml ? (
+      {isDevelopment && !isReadOnlyYaml ? (
         <div css={styles.agentBuilderSectionCss}>
           <WorkflowYamlEditorAssistActions
-            isAgentBuilderAvailable={isAgentBuilderAvailable}
-            isDevelopment={isDevelopment}
             workflowJsonSchema={
               (workflowJsonSchemaStrict ?? null) as SchemasSettings['schema'] | null
             }
-            onOpenAgentChat={openAgentChat}
             onDownloadSchema={downloadSchema}
           />
         </div>
@@ -878,44 +875,36 @@ export const WorkflowYAMLEditor = ({
 };
 
 const WorkflowYamlEditorAssistActions = React.memo(function WorkflowYamlEditorAssistActions({
-  isAgentBuilderAvailable,
-  isDevelopment,
   workflowJsonSchema,
-  onOpenAgentChat,
   onDownloadSchema,
 }: {
-  isAgentBuilderAvailable: boolean;
-  isDevelopment: boolean;
   workflowJsonSchema: SchemasSettings['schema'] | null;
-  onOpenAgentChat: () => void;
   onDownloadSchema: () => void;
 }) {
   const styles = useWorkflowEditorStyles();
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      {isDevelopment && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            css={styles.downloadSchemaButton}
-            iconType={workflowJsonSchema === null ? 'warning' : 'download'}
-            size="xs"
-            aria-label="Download JSON schema for debugging"
-            onClick={onDownloadSchema}
-            tabIndex={0}
-            disabled={workflowJsonSchema === null}
-            onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.currentTarget.click();
-              }
-            }}
-          >
-            <FormattedMessage
-              id="workflows.yamlEditor.downloadSchemaButtonLabel"
-              defaultMessage="JSON Schema"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          css={styles.downloadSchemaButton}
+          iconType={workflowJsonSchema === null ? 'warning' : 'download'}
+          size="xs"
+          aria-label="Download JSON schema for debugging"
+          onClick={onDownloadSchema}
+          tabIndex={0}
+          disabled={workflowJsonSchema === null}
+          onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.currentTarget.click();
+            }
+          }}
+        >
+          <FormattedMessage
+            id="workflows.yamlEditor.downloadSchemaButtonLabel"
+            defaultMessage="JSON Schema"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 });
