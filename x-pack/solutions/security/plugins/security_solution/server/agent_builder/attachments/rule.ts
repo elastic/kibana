@@ -29,7 +29,7 @@ export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
 
 const DETECTION_RULE_SKILL_NAME_ID = 'detection-rule-edit';
 
-type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;
+export type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;
 
 const isRuleAttachmentData = (data: unknown): data is RuleAttachmentData => {
   return ruleAttachmentDataSchema.safeParse(data).success;

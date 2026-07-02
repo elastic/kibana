@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
 import { ToolType } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
@@ -26,8 +27,19 @@ import {
 } from '../../../common/constants';
 import { getBuildAgent } from '../../lib/detection_engine/ai_rule_creation/agent';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
+import type { RuleAttachmentData } from '../attachments/rule';
 
 export const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = securityTool('create_detection_rule');
+
+/**
+ * Type guard for the rule attachment. Mirrors `isDashboardAttachment` — it trusts
+ * the stored `type` field (only `attachments.add` assigns it, and `update` can't
+ * change it) and narrows `data` to {@link RuleAttachmentData} for typed access.
+ */
+const isRuleAttachment = (
+  attachment: VersionedAttachment
+): attachment is VersionedAttachment<SecurityAgentBuilderAttachments.rule, RuleAttachmentData> =>
+  attachment.type === SecurityAgentBuilderAttachments.rule;
 
 /**
  * Mint a hyphen-free attachment id for new rule cards so the model-assembled
@@ -161,16 +173,26 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
         let isNewCard: boolean;
 
         if (attachmentId) {
-          // Branch 1: explicit update
+          // Branch 1: explicit update. Fail closed — a hallucinated/stale id, a
+          // non-rule target, or a versionless record must error rather than silently
+          // no-op (update() returns undefined for a missing id) or overwrite the
+          // wrong card. Mirrors the dashboards `retrieveLatestVersion` guards.
           const record = attachments.getAttachmentRecord(attachmentId);
-          const latestVersion = record ? getLatestVersion(record) : undefined;
-          if (!latestVersion) {
-            logger.warn(
-              `create_detection_rule: attachment ${attachmentId} has no resolvable version — treating as fresh create`
+          if (!record) {
+            throw new Error(`Rule attachment "${attachmentId}" not found`);
+          }
+          if (!isRuleAttachment(record)) {
+            throw new Error(
+              `Attachment "${attachmentId}" is not a ${SecurityAgentBuilderAttachments.rule} attachment`
             );
           }
-          const versionData = latestVersion?.data as Record<string, unknown> | undefined;
-          existingRuleText = versionData?.text as string | undefined;
+          const latestVersion = getLatestVersion(record);
+          if (!latestVersion) {
+            throw new Error(
+              `Could not retrieve latest version of rule attachment "${attachmentId}"`
+            );
+          }
+          existingRuleText = latestVersion.data.text;
           resolvedAttachmentId = attachmentId;
           isNewCard = false;
         } else {
@@ -268,25 +290,33 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
         let resultVersion: number | undefined;
 
         try {
-          if (!isNewCard) {
-            // Update an existing card (branch 1 or branch 2)
-            const updated = await attachments.update(resolvedAttachmentId, {
-              data: attachmentData,
-              description: attachmentDescription,
-            });
-            resultVersion = updated?.current_version;
-            logger.debug(`Updated rule attachment ${resolvedAttachmentId} v${resultVersion}`);
-          } else {
-            // Mint a new card (branch 3)
-            const created = await attachments.add({
-              id: resolvedAttachmentId,
-              type: SecurityAgentBuilderAttachments.rule,
-              data: attachmentData,
-              description: attachmentDescription,
-            });
-            resultVersion = created.current_version;
-            logger.debug(`Created rule attachment ${resolvedAttachmentId} v${resultVersion}`);
+          const persisted = isNewCard
+            ? // Mint a new card (branch 3)
+              await attachments.add({
+                id: resolvedAttachmentId,
+                type: SecurityAgentBuilderAttachments.rule,
+                data: attachmentData,
+                description: attachmentDescription,
+              })
+            : // Update an existing card (branch 1 or branch 2)
+              await attachments.update(resolvedAttachmentId, {
+                data: attachmentData,
+                description: attachmentDescription,
+              });
+
+          // update() soft-fails to `undefined` if the id vanished (e.g. the card was
+          // deleted during the long agent.invoke() above) — treat that as a hard error
+          // rather than reporting success with no version.
+          if (!persisted) {
+            throw new Error(`Failed to persist rule attachment "${resolvedAttachmentId}"`);
           }
+
+          resultVersion = persisted.current_version;
+          logger.debug(
+            `${
+              isNewCard ? 'Created' : 'Updated'
+            } rule attachment ${resolvedAttachmentId} v${resultVersion}`
+          );
         } catch (attachmentError) {
           logger.error(
             `Could not persist rule attachment: ${

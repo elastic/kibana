@@ -26,7 +26,10 @@ import {
 } from './create_detection_rule_tool';
 import { getBuildAgent } from '../../lib/detection_engine/ai_rule_creation/agent';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
-import { SECURITY_RULE_ATTACHMENT_ID } from '../../../common/constants';
+import {
+  SECURITY_RULE_ATTACHMENT_ID,
+  SecurityAgentBuilderAttachments,
+} from '../../../common/constants';
 
 jest.mock('../../lib/detection_engine/ai_rule_creation/agent', () => ({
   getBuildAgent: jest.fn(),
@@ -444,6 +447,7 @@ describe('createDetectionRuleTool', () => {
           id === existingAttachmentId
             ? {
                 id: existingAttachmentId,
+                type: SecurityAgentBuilderAttachments.rule,
                 current_version: 1,
                 versions: [{ version: 1, data: { text: existingRuleJson, ruleId: null } }],
               }
@@ -492,6 +496,7 @@ describe('createDetectionRuleTool', () => {
           id === existingAttachmentId
             ? {
                 id: existingAttachmentId,
+                type: SecurityAgentBuilderAttachments.rule,
                 current_version: 1,
                 versions: [
                   { version: 1, data: { text: JSON.stringify(existingRule), ruleId: null } },
@@ -524,6 +529,7 @@ describe('createDetectionRuleTool', () => {
           id === existingAttachmentId
             ? {
                 id: existingAttachmentId,
+                type: SecurityAgentBuilderAttachments.rule,
                 current_version: 1,
                 versions: [
                   { version: 1, data: { text: JSON.stringify(mockRule), ruleId: 'saved-rule-id' } },
@@ -556,6 +562,7 @@ describe('createDetectionRuleTool', () => {
           id === existingAttachmentId
             ? {
                 id: existingAttachmentId,
+                type: SecurityAgentBuilderAttachments.rule,
                 current_version: 1,
                 versions: [{ version: 1, data: { text: '{}' } }],
               }
@@ -577,6 +584,123 @@ describe('createDetectionRuleTool', () => {
           unknown
         >;
         expect(resultData.isNewCard).toBe(false);
+      });
+    });
+
+    // -----------------------------------------------------------------
+    // Branch 1 fail-closed guards — attachment_id provided but unusable.
+    // A hallucinated/stale id, a non-rule target, or a versionless record
+    // must error rather than silently no-op or overwrite the wrong card.
+    // -----------------------------------------------------------------
+    describe('fail-closed guards — attachment_id provided but unusable', () => {
+      const expectFailClosed = (
+        result: Parameters<typeof isToolHandlerStandardReturn>[0],
+        messageFragment: string
+      ) => {
+        expect(isToolHandlerStandardReturn(result)).toBe(true);
+        const { type, data } = (result as ToolHandlerStandardReturn).results[0];
+        expect(type).toBe(ToolResultType.error);
+        expect((data as { message: string }).message).toContain(messageFragment);
+      };
+
+      it('errors when the attachment does not exist (hallucinated/stale id)', async () => {
+        const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider,
+          events: mockEvents,
+        });
+        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValue(undefined);
+
+        const result = await tool.handler(
+          { user_query: userQuery, attachment_id: 'air:doesnotexist' },
+          context
+        );
+
+        expectFailClosed(result, 'not found');
+        expect(context.attachments.update).not.toHaveBeenCalled();
+        expect(context.attachments.add).not.toHaveBeenCalled();
+      });
+
+      it('errors when the target attachment is not a rule', async () => {
+        const wrongTypeId = 'security.entity:user:abc';
+        const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider,
+          events: mockEvents,
+        });
+        (context.attachments.getAttachmentRecord as jest.Mock).mockImplementation((id: string) =>
+          id === wrongTypeId
+            ? {
+                id: wrongTypeId,
+                type: SecurityAgentBuilderAttachments.entity,
+                current_version: 1,
+                versions: [{ version: 1, data: { text: '{}' } }],
+              }
+            : undefined
+        );
+
+        const result = await tool.handler(
+          { user_query: userQuery, attachment_id: wrongTypeId },
+          context
+        );
+
+        expectFailClosed(result, `is not a ${SecurityAgentBuilderAttachments.rule} attachment`);
+        expect(context.attachments.update).not.toHaveBeenCalled();
+        expect(context.attachments.add).not.toHaveBeenCalled();
+      });
+
+      it('errors when the rule attachment has no resolvable version', async () => {
+        const versionlessId = 'air:versionless';
+        const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider,
+          events: mockEvents,
+        });
+        (context.attachments.getAttachmentRecord as jest.Mock).mockImplementation((id: string) =>
+          id === versionlessId
+            ? {
+                id: versionlessId,
+                type: SecurityAgentBuilderAttachments.rule,
+                current_version: 1,
+                versions: [],
+              }
+            : undefined
+        );
+
+        const result = await tool.handler(
+          { user_query: userQuery, attachment_id: versionlessId },
+          context
+        );
+
+        expectFailClosed(result, 'Could not retrieve latest version');
+        expect(context.attachments.update).not.toHaveBeenCalled();
+        expect(context.attachments.add).not.toHaveBeenCalled();
+      });
+
+      it('errors when update() returns undefined (card vanished mid-invoke)', async () => {
+        const existingAttachmentId = 'air:vanishing';
+        const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider,
+          events: mockEvents,
+        });
+        (context.attachments.getAttachmentRecord as jest.Mock).mockImplementation((id: string) =>
+          id === existingAttachmentId
+            ? {
+                id: existingAttachmentId,
+                type: SecurityAgentBuilderAttachments.rule,
+                current_version: 1,
+                versions: [{ version: 1, data: { text: '{}' } }],
+              }
+            : undefined
+        );
+        // The record resolved cleanly, but by the time we persist the id is gone —
+        // update() soft-fails to undefined instead of throwing.
+        (context.attachments.update as jest.Mock).mockResolvedValue(undefined);
+
+        const result = await tool.handler(
+          { user_query: userQuery, attachment_id: existingAttachmentId },
+          context
+        );
+
+        expectFailClosed(result, 'Failed to create detection rule');
+        expect(context.attachments.update).toHaveBeenCalled();
       });
     });
 
