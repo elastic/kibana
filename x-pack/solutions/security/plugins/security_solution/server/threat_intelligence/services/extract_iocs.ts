@@ -1205,9 +1205,11 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
           )
           .digest('hex');
 
+  const cleanedIocs: ExtractedIoc[] = iocs.map(({ _offset: _, ...rest }) => rest);
+
   return {
-    count: iocs.length,
-    iocs: iocs as ExtractedIoc[],
+    count: cleanedIocs.length,
+    iocs: cleanedIocs,
     ioc_set_hash: iocSetHash,
   };
 };

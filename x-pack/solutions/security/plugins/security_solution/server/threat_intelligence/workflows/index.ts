@@ -39,24 +39,24 @@ const buildSystemRequest = () =>
  */
 export const BUILTIN_WORKFLOWS = [
   {
-    id: 'threat-intel.source_ingestion',
+    id: 'threat-intel-source-ingestion',
     description:
       'Pull enabled .kibana-threat-intel-sources and write normalized reports to .kibana-threat-reports',
     yaml: SOURCE_INGESTION_YAML,
   },
   {
-    id: 'threat-intel.nl_extraction_behavioral',
+    id: 'threat-intel-nl-extraction-behavioral',
     description:
       'Extract IOCs + behaviors from freshly ingested threat reports (deduped by content_fingerprint)',
     yaml: NL_EXTRACTION_BEHAVIORAL_YAML,
   },
   {
-    id: 'threat-intel.digest_delivery',
+    id: 'threat-intel-digest-delivery',
     description: 'Render and deliver per-subscription threat intelligence digests',
     yaml: DIGEST_DELIVERY_YAML,
   },
   {
-    id: 'threat-intel.hit_provenance_backfill',
+    id: 'threat-intel-hit-provenance-backfill',
     description:
       'Attribute Detection Engine alerts back to their originating .kibana-threat-reports docs (Layers 1/2)',
     yaml: HIT_PROVENANCE_BACKFILL_YAML,

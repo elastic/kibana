@@ -19,6 +19,7 @@ const assessRelevanceBodySchema = schema.object({
   url: schema.maybe(schema.string({ minLength: 1 })),
   title: schema.maybe(schema.string()),
   text: schema.string({ minLength: 1 }),
+  html: schema.maybe(schema.string()),
 });
 
 const ASSESS_RELEVANCE_MAX_BODY_BYTES = 10 * 1024 * 1024;
