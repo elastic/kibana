@@ -12,8 +12,19 @@ import type { QueryAlertsBodyParams } from '../../../../../../common/api/detecti
  *
  * @returns an error message when the params are empty, otherwise `undefined`.
  */
-export const validateSearchAlertsParams = (params: QueryAlertsBodyParams): string | undefined => {
-  const { query, aggs, _source, fields, track_total_hits: trackTotalHits, size, sort } = params;
+export const validateSearchAlertsParams = (
+  params: QueryAlertsBodyParams & { ids?: string[] }
+): string | undefined => {
+  const {
+    query,
+    aggs,
+    _source,
+    fields,
+    track_total_hits: trackTotalHits,
+    size,
+    sort,
+    ids,
+  } = params;
 
   if (
     query == null &&
@@ -22,7 +33,8 @@ export const validateSearchAlertsParams = (params: QueryAlertsBodyParams): strin
     fields == null &&
     trackTotalHits == null &&
     size == null &&
-    sort == null
+    sort == null &&
+    ids == null
   ) {
     return '"value" must have at least 1 children';
   }

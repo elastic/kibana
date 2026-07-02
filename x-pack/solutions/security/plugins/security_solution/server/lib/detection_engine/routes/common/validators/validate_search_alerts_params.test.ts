@@ -13,7 +13,7 @@ describe('validateSearchAlertsParams', () => {
     expect(validateSearchAlertsParams({})).toEqual('"value" must have at least 1 children');
   });
 
-  it.each<[string, QueryAlertsBodyParams]>([
+  it.each<[string, QueryAlertsBodyParams & { ids?: string[] }]>([
     ['query', { query: { match_all: {} } }],
     ['aggs', { aggs: { myAgg: { terms: { field: 'host.name' } } } }],
     ['_source', { _source: ['host.name'] }],
@@ -21,6 +21,7 @@ describe('validateSearchAlertsParams', () => {
     ['track_total_hits', { track_total_hits: true }],
     ['size', { size: 10 }],
     ['sort', { sort: ['@timestamp'] }],
+    ['ids', { ids: ['attack-id-1'] }],
   ])('returns undefined when %s is provided', (_, params) => {
     expect(validateSearchAlertsParams(params)).toBeUndefined();
   });
