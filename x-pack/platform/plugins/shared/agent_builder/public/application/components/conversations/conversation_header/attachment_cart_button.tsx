@@ -36,7 +36,7 @@ const labels = {
       values: { count },
     }),
   pinnedItems: i18n.translate('xpack.agentBuilder.conversationHeader.attachmentCart.pinnedItems', {
-    defaultMessage: 'Pinned items',
+    defaultMessage: 'Attached items',
   }),
   pinnedItemsAria: (count: number) =>
     i18n.translate('xpack.agentBuilder.conversationHeader.attachmentCart.pinnedItemsAria', {
