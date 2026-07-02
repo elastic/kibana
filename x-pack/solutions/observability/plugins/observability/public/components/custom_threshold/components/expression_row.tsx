@@ -6,22 +6,25 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiHealth,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ReactElement } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { AggregationType, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import { debounce } from 'lodash';
+import { debounce, omit } from 'lodash';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import { builtInComparatorsWithInclusive } from '../../../constants/comparators';
@@ -64,9 +67,18 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     kql,
   } = props;
 
-  const { metrics, comparator = COMPARATORS.GREATER_THAN, threshold = [] } = expression;
+  const {
+    metrics,
+    comparator = COMPARATORS.GREATER_THAN,
+    threshold = [],
+    warningThreshold = [],
+    warningComparator,
+  } = expression;
   const isMetricPct = useMemo(() => isPercent(metrics), [metrics]);
   const [label, setLabel] = useState<string | undefined>(expression?.label || undefined);
+  const [displayWarningThreshold, setDisplayWarningThreshold] = useState(
+    Boolean(warningThreshold?.length)
+  );
 
   // Keep a ref that always points to the latest expression prop so debounced
   // callbacks never close over a stale snapshot.
@@ -96,6 +108,44 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     [expressionId, expression, convertThreshold, setRuleParams]
   );
 
+  const updateWarningComparator = useCallback(
+    (c?: string) => {
+      setRuleParams(expressionId, { ...expression, warningComparator: c as COMPARATORS });
+    },
+    [expressionId, expression, setRuleParams]
+  );
+
+  const updateWarningThreshold = useCallback(
+    (enteredThreshold: any) => {
+      const t = convertThreshold(enteredThreshold);
+      if (t.join() !== expression.warningThreshold?.join()) {
+        setRuleParams(expressionId, { ...expression, warningThreshold: t });
+      }
+    },
+    [expressionId, expression, convertThreshold, setRuleParams]
+  );
+
+  const toggleWarningThreshold = useCallback(() => {
+    if (!displayWarningThreshold) {
+      setDisplayWarningThreshold(true);
+      setRuleParams(expressionId, {
+        ...expression,
+        warningComparator: comparator,
+        warningThreshold: [],
+      });
+    } else {
+      setDisplayWarningThreshold(false);
+      setRuleParams(expressionId, omit(expression, 'warningComparator', 'warningThreshold'));
+    }
+  }, [
+    displayWarningThreshold,
+    setDisplayWarningThreshold,
+    setRuleParams,
+    comparator,
+    expression,
+    expressionId,
+  ]);
+
   const handleCustomMetricChange = useCallback(
     (exp: any) => {
       setRuleParams(expressionId, exp);
@@ -121,6 +171,17 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       updateComparator={updateComparator}
       updateThreshold={updateThreshold}
       errors={(errors.critical as IErrorObject) ?? {}}
+      isMetricPct={isMetricPct}
+    />
+  );
+
+  const warningThresholdExpression = displayWarningThreshold && (
+    <ThresholdElement
+      comparator={warningComparator || comparator}
+      threshold={warningThreshold}
+      updateComparator={updateWarningComparator}
+      updateThreshold={updateWarningThreshold}
+      errors={(errors.warning as IErrorObject) ?? {}}
       isMetricPct={isMetricPct}
     />
   );
@@ -186,7 +247,65 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
               dataView={dataView}
               kql={kql}
             />
-            {criticalThresholdExpression}
+            {!displayWarningThreshold && criticalThresholdExpression}
+            {!displayWarningThreshold && (
+              <EuiFlexGroup alignItems="center">
+                <EuiButtonEmpty
+                  data-test-subj="o11yExpressionRowAddWarningThresholdButton"
+                  color={'primary'}
+                  flush={'left'}
+                  size="xs"
+                  iconType={'plusCircle'}
+                  onClick={toggleWarningThreshold}
+                >
+                  <FormattedMessage
+                    id="xpack.observability.customThreshold.rule.alertFlyout.addWarningThreshold"
+                    defaultMessage="Add warning threshold"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexGroup>
+            )}
+            {displayWarningThreshold && (
+              <>
+                <EuiFlexGroup alignItems="center">
+                  {criticalThresholdExpression}
+                  <EuiHealth color="danger">
+                    <FormattedMessage
+                      id="xpack.observability.customThreshold.rule.alertFlyout.criticalThreshold"
+                      defaultMessage="Alert"
+                    />
+                  </EuiHealth>
+                </EuiFlexGroup>
+                <EuiFlexGroup alignItems="center">
+                  {warningThresholdExpression}
+                  <EuiHealth color="warning">
+                    <FormattedMessage
+                      id="xpack.observability.customThreshold.rule.alertFlyout.warningThreshold"
+                      defaultMessage="Warning"
+                    />
+                  </EuiHealth>
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.observability.customThreshold.rule.alertFlyout.removeWarningThreshold',
+                      { defaultMessage: 'Remove warning threshold' }
+                    )}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      data-test-subj="o11yExpressionRowRemoveWarningThresholdButton"
+                      aria-label={i18n.translate(
+                        'xpack.observability.customThreshold.rule.alertFlyout.removeWarningThreshold',
+                        { defaultMessage: 'Remove warning threshold' }
+                      )}
+                      iconSize="s"
+                      color="text"
+                      iconType={'minusCircle'}
+                      onClick={toggleWarningThreshold}
+                    />
+                  </EuiToolTip>
+                </EuiFlexGroup>
+              </>
+            )}
             <EuiSpacer size={'s'} />
             <EuiFlexGroup>
               <EuiFlexItem>

@@ -16,7 +16,10 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { KqlPluginStart } from '@kbn/kql/public';
 
 describe('ExpressionRow', () => {
-  async function setup(expression: MetricExpression) {
+  async function setup(
+    expression: MetricExpression,
+    setRuleParams: (id: number, params: MetricExpression) => void = () => {}
+  ) {
     const wrapper = mountWithIntl(
       <ExpressionRow
         title={<>Condition</>}
@@ -36,7 +39,7 @@ describe('ExpressionRow', () => {
         kql={{} as KqlPluginStart}
         key={1}
         expressionId={1}
-        setRuleParams={() => {}}
+        setRuleParams={setRuleParams}
         errors={{
           aggField: [],
           timeSizeUnit: [],
@@ -131,5 +134,67 @@ describe('ExpressionRow', () => {
 
     expect(comparatorOptionValues).toContain(COMPARATORS.BETWEEN_INCLUSIVE);
     expect(comparatorOptionValues).toContain(COMPARATORS.NOT_BETWEEN_INCLUSIVE);
+  });
+
+  describe('warning threshold', () => {
+    const baseExpression: MetricExpression = {
+      comparator: COMPARATORS.GREATER_THAN,
+      metrics: [
+        {
+          name: 'A',
+          aggType: Aggregators.COUNT,
+          field: 'system.load.1',
+        },
+      ],
+      threshold: [0.5],
+      timeSize: 1,
+      timeUnit: 'm',
+    };
+
+    it('shows an "Add warning threshold" button when no warning threshold is set', async () => {
+      const { wrapper } = await setup(baseExpression);
+      expect(
+        wrapper.find('button[data-test-subj="o11yExpressionRowAddWarningThresholdButton"]').exists()
+      ).toBe(true);
+      expect(
+        wrapper
+          .find('button[data-test-subj="o11yExpressionRowRemoveWarningThresholdButton"]')
+          .exists()
+      ).toBe(false);
+    });
+
+    it('adds an empty warning threshold when the toggle is clicked', async () => {
+      const setRuleParams = jest.fn();
+      const { wrapper, update } = await setup(baseExpression, setRuleParams);
+
+      wrapper
+        .find('button[data-test-subj="o11yExpressionRowAddWarningThresholdButton"]')
+        .simulate('click');
+      await update();
+
+      expect(setRuleParams).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({
+          warningComparator: baseExpression.comparator,
+          warningThreshold: [],
+        })
+      );
+    });
+
+    it('renders both threshold rows with Alert/Warning badges once a warning threshold exists', async () => {
+      const { wrapper } = await setup({
+        ...baseExpression,
+        warningComparator: COMPARATORS.GREATER_THAN,
+        warningThreshold: [0.25],
+      });
+
+      expect(
+        wrapper
+          .find('button[data-test-subj="o11yExpressionRowRemoveWarningThresholdButton"]')
+          .exists()
+      ).toBe(true);
+      expect(wrapper.text()).toContain('Alert');
+      expect(wrapper.text()).toContain('Warning');
+    });
   });
 });
