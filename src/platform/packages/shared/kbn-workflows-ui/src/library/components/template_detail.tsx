@@ -30,7 +30,7 @@ export interface TemplateDetailProps {
  * `WORKFLOW_READ_ONLY_MONACO_OPTIONS` from
  * `workflows_management/public/shared/ui` and
  * `workflows_management/public/widgets/workflow_yaml_editor/lib/workflow_monaco_layout_options`),
- * the install-form preview, and the Install CTA (Phase 4).
+ * the install-form preview, and the Install CTA.
  */
 export const TemplateDetail = React.memo<TemplateDetailProps>(({ slug }) => {
   const { data, isLoading, isError } = useTemplate(slug);

@@ -17,7 +17,7 @@ import { useWorkflowsApi } from '../../api/use_workflows_api';
  * Fetches the full Workflow Template Library catalog (cached across callers via
  * react-query) and applies {@link filterCatalog} client-side. At v1 scale
  * (dozens to low hundreds of templates) fetching once and filtering in-memory is
- * comfortable — see `RESEARCH.md` §8.
+ * comfortable.
  *
  * @example
  * ```tsx

@@ -25,12 +25,6 @@ function humanizeSolutionId(id: string): string {
   return id.length > 0 ? id[0].toUpperCase() + id.slice(1) : id;
 }
 
-/**
- * Replaces the "Tags" dropdown from the initial catalog mock — v1 has no free-form
- * tags (`RESEARCH.md` §3.5). When a solution-scoped navigation context is active
- * (serverless project, or an ESS solution-nav space), the caller pre-selects that
- * solution and disables this control (`RESEARCH.md` §7).
- */
 export const SolutionFilter = React.memo<SolutionFilterProps>(
   ({ templates, value, onChange, disabled = false }) => {
     const options = useMemo(() => {

@@ -28,9 +28,7 @@ function humanizeCategoryId(id: string): string {
 
 /**
  * Facet sidebar over the closed-vocabulary `categories` field. Labels humanize
- * the kebab-case category id (e.g. `threat-intel` → `Threat Intel`); rendering
- * the canonical `library/categories.yaml` names is a known follow-up
- * (`PROPOSAL_phase3.md` Task 1).
+ * the kebab-case category id (e.g. `threat-intel` → `Threat Intel`);
  */
 export const CategoryFacets = React.memo<CategoryFacetsProps>(
   ({ templates, selectedCategories, onChange }) => {
