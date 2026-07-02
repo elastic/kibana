@@ -16,21 +16,15 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+import { QueryAlertsBodyParams } from '../../signals/query_signals/query_signals_route.gen';
 import { AlertIds } from '../../../model/alert.gen';
-import { AlertsSort } from '../../signals/query_signals/query_signals_route.gen';
 
 export const SearchAttacksBodyParams = lazySchema(() =>
-  z.object({
-    ids: AlertIds.optional(),
-    query: z.object({}).catchall(z.unknown()).optional(),
-    aggs: z.object({}).catchall(z.unknown()).optional(),
-    size: z.number().int().min(0).optional(),
-    track_total_hits: z.boolean().optional(),
-    _source: z.union([z.boolean(), z.string(), z.array(z.string())]).optional(),
-    fields: z.array(z.string()).optional(),
-    runtime_mappings: z.object({}).catchall(z.unknown()).optional(),
-    sort: AlertsSort.optional(),
-  })
+  QueryAlertsBodyParams.merge(
+    z.object({
+      ids: AlertIds.optional(),
+    })
+  )
 );
 export type SearchAttacksBodyParams = z.infer<typeof SearchAttacksBodyParams>;
 
