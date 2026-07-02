@@ -43,7 +43,10 @@ export function MobileSearchBar({
 }: Props) {
   const { isMedium } = useBreakpoints();
   const hasSecondaryFilters =
-    showEnvironmentFilter || showTimeComparison || showMobileFilters || showAnomalyThresholdSelector;
+    showEnvironmentFilter ||
+    showTimeComparison ||
+    showMobileFilters ||
+    showAnomalyThresholdSelector;
 
   const { secondaryFiltersWidthStyle, setSearchBarContainerRef } = useSecondaryFiltersWidthStyle({
     isMedium,
