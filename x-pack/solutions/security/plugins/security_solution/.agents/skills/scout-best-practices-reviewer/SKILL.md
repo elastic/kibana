@@ -54,7 +54,7 @@ Prefer named convenience methods (`loginAsPlatformEngineer`, `loginAsT1Analyst`)
 
 Verify the test is tagged for the correct deployment targets. Tags must reflect what the test actually covers — stateful-only, serverless-only, or both. Flag missing tags or tags that don't match the test's actual scope. Available stateful: `tags.stateful.classic`. Available serverless tiers: `security.complete`, `security.essentials`, `security.ease`, `security.all`.
 
-**Choosing serverless tiers.** Default to `security.complete` for functionality that is available across tiers — the common case. Use `security.essentials` or `security.ease` only when the test covers behaviour specific to that tier: a feature that is or isn't available there, or that behaves differently. Don't blanket-tag every tier "to be safe" — pick the narrowest set that's still correct, since each extra tier tag spins up another CI run. Combine multiple serverless tiers only when the feature is genuinely exercised across them. (See `docs/extend/testing/deployment-tags.md`.)
+**Choosing serverless tiers.** Default to `security.complete` for functionality that is available across tiers — the common case. Use `security.essentials` or `security.ease` only when the test covers behaviour specific to that tier: a feature that is or isn't available there, or that behaves differently. Don't blanket-tag every tier "to be safe" — pick the narrowest set that's still correct, since each extra tier tag spins up another CI run. (See `docs/extend/testing/deployment-tags.md`.)
 
 ### API services reuse
 
