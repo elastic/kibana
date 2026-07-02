@@ -20,13 +20,28 @@ const adapterWithoutRestore: ChangeHistoryAdapter = {
 };
 
 describe('resolveChangeHistorySupports', () => {
+  it('enables compare by default', () => {
+    expect(resolveChangeHistorySupports(adapterWithRestore)).toEqual({
+      compare: true,
+      restore: false,
+    });
+  });
+
+  it('disables compare when the feature flag is off', () => {
+    expect(
+      resolveChangeHistorySupports(adapterWithRestore, {
+        features: { compare: false },
+      })
+    ).toEqual({ compare: false, restore: false });
+  });
+
   it('enables restore when feature, adapter, and permissions allow it', () => {
     expect(
       resolveChangeHistorySupports(adapterWithRestore, {
         features: { restore: true },
         permissions: { canRestore: true },
       })
-    ).toEqual({ restore: true });
+    ).toEqual({ compare: true, restore: true });
   });
 
   it('disables restore when the feature flag is off', () => {
@@ -34,7 +49,7 @@ describe('resolveChangeHistorySupports', () => {
       resolveChangeHistorySupports(adapterWithRestore, {
         features: { restore: false },
       })
-    ).toEqual({ restore: false });
+    ).toEqual({ compare: true, restore: false });
   });
 
   it('disables restore when the adapter does not implement restoreChange', () => {
@@ -42,7 +57,7 @@ describe('resolveChangeHistorySupports', () => {
       resolveChangeHistorySupports(adapterWithoutRestore, {
         features: { restore: true },
       })
-    ).toEqual({ restore: false });
+    ).toEqual({ compare: true, restore: false });
   });
 
   it('disables restore when permissions are omitted', () => {
@@ -50,7 +65,7 @@ describe('resolveChangeHistorySupports', () => {
       resolveChangeHistorySupports(adapterWithRestore, {
         features: { restore: true },
       })
-    ).toEqual({ restore: false });
+    ).toEqual({ compare: true, restore: false });
   });
 
   it('disables restore when permissions deny it', () => {
@@ -59,6 +74,6 @@ describe('resolveChangeHistorySupports', () => {
         features: { restore: true },
         permissions: { canRestore: false },
       })
-    ).toEqual({ restore: false });
+    ).toEqual({ compare: true, restore: false });
   });
 });

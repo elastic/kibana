@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { SignificantEventsWorkflowStatus } from '@kbn/streams-schema';
+import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionService } from './workflow_execution_service';
 
@@ -42,6 +42,7 @@ describe('WorkflowExecutionService', () => {
   describe('classifyExecutionStatus', () => {
     it.each([
       [ExecutionStatus.PENDING, SignificantEventsWorkflowStatus.InProgress],
+      [ExecutionStatus.QUEUED, SignificantEventsWorkflowStatus.InProgress],
       [ExecutionStatus.RUNNING, SignificantEventsWorkflowStatus.InProgress],
       [ExecutionStatus.WAITING, SignificantEventsWorkflowStatus.InProgress],
       [ExecutionStatus.WAITING_FOR_INPUT, SignificantEventsWorkflowStatus.InProgress],
