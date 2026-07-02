@@ -51,8 +51,12 @@ const renderAlertAnalysisWorkflowYaml = ({
 export const SECURITY_ALERT_ANALYSIS_WORKFLOW = {
   id: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 1,
+  version: 2,
   billable: false,
+  visibility: {
+    selectors: ['rule_action'],
+    solutions: ['security'],
+  },
   yamlTemplate: renderAlertAnalysisWorkflowYaml,
   management: {
     lifecycle: 'dynamic',

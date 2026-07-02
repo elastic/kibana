@@ -291,9 +291,9 @@ describe('managedWorkflowDefinitions', () => {
     (id, definition) => {
       const representativeValues =
         templateRepresentativeValuesById[id as TemplatedManagedWorkflowId];
-      const renderedYaml = (definition as YamlTemplateManagedWorkflowDefinition).yamlTemplate(
-        representativeValues
-      );
+      const renderedYaml = (
+        definition as unknown as YamlTemplateManagedWorkflowDefinition
+      ).yamlTemplate(representativeValues);
 
       expect(typeof renderedYaml).toBe('string');
       expect(renderedYaml.trim()).not.toHaveLength(0);
