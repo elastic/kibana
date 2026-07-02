@@ -158,6 +158,19 @@ describe('mergeTimelineEntries', () => {
     expect(merged[0].kind).toBe('severity_change');
     expect(merged[2].kind).toBe('action');
   });
+
+  it('puts the initial state change ("Episode started") last when it ties with the initial severity change', () => {
+    const stateChanges = deriveStateChangeEntries([
+      makeRow(ALERT_EPISODE_STATUS.PENDING, '2024-01-01T00:00:00.000Z'),
+    ]);
+    const severityChanges = deriveSeverityChangeEntries([
+      makeSeverityRow('high', '2024-01-01T00:00:00.000Z'),
+    ]);
+
+    const merged = mergeTimelineEntries(stateChanges, severityChanges, []);
+
+    expect(merged.map((e) => e.kind)).toEqual(['severity_change', 'state_change']);
+  });
 });
 
 describe('deriveSeverityChangeEntries', () => {

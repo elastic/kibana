@@ -32,21 +32,27 @@ export const AlertEpisodeTimelineSection = ({
   groupHash,
   services,
 }: AlertEpisodeTimelineSectionProps) => {
-  const { data: stateTransitionRows = [] } = useFetchEpisodeStateTransitionsQuery({
-    episodeId,
-    services,
-  });
+  const { data: stateTransitionRows = [], isLoading: isLoadingStateTransitions } =
+    useFetchEpisodeStateTransitionsQuery({
+      episodeId,
+      services,
+    });
 
-  const { data: severityTransitionRows = [] } = useFetchEpisodeSeverityTransitionsQuery({
-    episodeId,
-    services,
-  });
+  const { data: severityTransitionRows = [], isLoading: isLoadingSeverityTransitions } =
+    useFetchEpisodeSeverityTransitionsQuery({
+      episodeId,
+      services,
+    });
 
-  const { data: actionEntries = [], isLoading } = useFetchEpisodeActionsHistoryQuery({
-    episodeId,
-    groupHash,
-    services,
-  });
+  const { data: actionEntries = [], isLoading: isLoadingActionEntries } =
+    useFetchEpisodeActionsHistoryQuery({
+      episodeId,
+      groupHash,
+      services,
+    });
+
+  const isLoading =
+    isLoadingStateTransitions || isLoadingSeverityTransitions || isLoadingActionEntries;
 
   const actorUids = useMemo(
     () => [

@@ -74,11 +74,11 @@ const renderSection = () => {
   );
 };
 
-const mockStateTransitions = (eventRows: EpisodeStateTransitionRow[]) =>
-  mockUseFetchStateTransitions.mockReturnValue({ data: eventRows, isLoading: false } as never);
+const mockStateTransitions = (eventRows: EpisodeStateTransitionRow[], isLoading = false) =>
+  mockUseFetchStateTransitions.mockReturnValue({ data: eventRows, isLoading } as never);
 
-const mockSeverityTransitions = (eventRows: EpisodeSeverityTransitionRow[]) =>
-  mockUseFetchSeverityTransitions.mockReturnValue({ data: eventRows, isLoading: false } as never);
+const mockSeverityTransitions = (eventRows: EpisodeSeverityTransitionRow[], isLoading = false) =>
+  mockUseFetchSeverityTransitions.mockReturnValue({ data: eventRows, isLoading } as never);
 
 const mockActions = (actions: EpisodeActionHistoryEntry[], isLoading = false) =>
   mockUseFetchActionsHistory.mockReturnValue({ data: actions, isLoading } as never);
@@ -94,6 +94,18 @@ beforeEach(() => {
 describe('AlertEpisodeTimelineSection', () => {
   it('shows a spinner while loading actions', () => {
     mockActions([], true);
+    renderSection();
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+  });
+
+  it('shows a spinner while loading state transitions', () => {
+    mockStateTransitions(mockEventRows, true);
+    renderSection();
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+  });
+
+  it('shows a spinner while loading severity transitions', () => {
+    mockSeverityTransitions(mockSeverityRows, true);
     renderSection();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });

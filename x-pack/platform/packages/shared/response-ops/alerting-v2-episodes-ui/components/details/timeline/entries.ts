@@ -153,6 +153,16 @@ export const deriveSeverityChangeEntries = (
 const getEntryTimestamp = (entry: TimelineEntry): string =>
   entry.kind === 'action' ? entry.entry['@timestamp'] : entry.timestamp;
 
+/** Break timestamp ties by putting severity changes and actions ahead of state changes,
+ * since the initial state and severity rows share the exact same timestamp when they
+ * originate from the same underlying event, and "Episode started" (the initial state
+ * change) must sort as the oldest, bottom-most entry in the newest-first list. */
+const KIND_PRIORITY: Record<TimelineEntry['kind'], number> = {
+  severity_change: 0,
+  action: 1,
+  state_change: 2,
+};
+
 /** Merges state changes, severity changes, and action history into a single newest-first list. */
 export const mergeTimelineEntries = (
   stateChangeEntries: StateChangeEntry[],
@@ -160,9 +170,12 @@ export const mergeTimelineEntries = (
   actionEntries: EpisodeActionHistoryEntry[]
 ): TimelineEntry[] => {
   const actionItems: TimelineEntry[] = actionEntries.map((entry) => ({ kind: 'action', entry }));
-  return [...stateChangeEntries, ...severityChangeEntries, ...actionItems].sort((a, b) =>
-    getEntryTimestamp(b).localeCompare(getEntryTimestamp(a))
-  );
+  return [...stateChangeEntries, ...severityChangeEntries, ...actionItems].sort((a, b) => {
+    const timestampComparison = getEntryTimestamp(b).localeCompare(getEntryTimestamp(a));
+    return timestampComparison !== 0
+      ? timestampComparison
+      : KIND_PRIORITY[a.kind] - KIND_PRIORITY[b.kind];
+  });
 };
 
 export const formatTimestamp = (iso: string): string =>
