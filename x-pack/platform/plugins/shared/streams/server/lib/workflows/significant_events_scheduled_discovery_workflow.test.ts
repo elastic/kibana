@@ -9,35 +9,60 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   getManagedWorkflowDefinition,
+  SIGEVENTS_DETECTION_WORKFLOW_ID,
   SIGEVENTS_DISCOVERY_WORKFLOW_ID,
   SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
   SIGEVENTS_TRIAGE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import {
-  DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
-  DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
-  DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
-  DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
-  DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
-} from '../../../common/constants';
+import { parse } from 'yaml';
 import { createSignificantEventsScheduledDiscoveryWorkflowService } from './significant_events_scheduled_discovery_workflow';
 
-const getWorkflowYaml = (id: string, values: Record<string, unknown>): string => {
+interface ParsedWorkflowStep {
+  name: string;
+  type: string;
+  status?: string;
+  if?: string;
+  condition?: string;
+  'max-iterations'?: number;
+  with?: Record<string, unknown>;
+  steps?: ParsedWorkflowStep[];
+}
+
+interface ParsedWorkflowInput {
+  name: string;
+}
+
+interface ParsedWorkflowTrigger {
+  type: string;
+  with?: { every?: string };
+  inputs?: ParsedWorkflowInput[];
+}
+
+interface ParsedWorkflow {
+  enabled: boolean;
+  triggers: ParsedWorkflowTrigger[];
+  steps: ParsedWorkflowStep[];
+}
+
+const getParsedWorkflowYaml = (id: string, values: Record<string, unknown>): ParsedWorkflow => {
   const definition = getManagedWorkflowDefinition(id);
   if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
     throw new Error(`Managed workflow definition ${id} is missing a yamlTemplate`);
   }
-  return definition.yamlTemplate(values);
+  return parse(definition.yamlTemplate(values)) as ParsedWorkflow;
 };
 
-const getStaticWorkflowYaml = (id: string): string => {
+const getParsedStaticWorkflowYaml = (id: string): ParsedWorkflow => {
   const definition = getManagedWorkflowDefinition(id);
   if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
     throw new Error(`Managed workflow definition ${id} is missing yaml`);
   }
-  return definition.yaml;
+  return parse(definition.yaml) as ParsedWorkflow;
 };
+
+const findStep = (steps: ParsedWorkflowStep[], name: string): ParsedWorkflowStep | undefined =>
+  steps.find((step) => step.name === name);
 
 const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => ({
   getWorkflow: jest.fn().mockResolvedValue({
@@ -59,9 +84,16 @@ const createMockManagedWorkflowsClient = () => ({
 });
 
 describe('scheduled Significant Events managed workflows', () => {
-  it('registers the detection workflow as dynamic and restorable', () => {
-    const definition = getManagedWorkflowDefinition(SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID);
+  it.each([
+    ['detection', SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID],
+    ['review', SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID],
+  ])('registers the %s workflow as dynamic and restorable', (_label, id) => {
+    const definition = getManagedWorkflowDefinition(id);
 
+    // 'dynamic'/'restorable' is what lets the reconciliation service below
+    // install/enable/disable/uninstall these per space; 'static'/'enforced'
+    // (used by the always-on detection/discovery/triage workflows) would
+    // make them installed everywhere and impossible to turn off per space.
     expect(definition?.management).toEqual({
       lifecycle: 'dynamic',
       versionStrategy: 'auto',
@@ -69,75 +101,95 @@ describe('scheduled Significant Events managed workflows', () => {
     });
   });
 
-  it('registers the review workflow as dynamic and restorable', () => {
-    const definition = getManagedWorkflowDefinition(SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID);
+  it('wires the detection interval into both the trigger cadence and the lookback, clamped to a 30m floor', () => {
+    const belowFloor = getParsedWorkflowYaml(SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
+      detectionIntervalMinutes: 5,
+    });
+    const aboveFloor = getParsedWorkflowYaml(SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
+      detectionIntervalMinutes: 45,
+    });
 
-    expect(definition?.management).toEqual({
-      lifecycle: 'dynamic',
-      versionStrategy: 'auto',
-      enablement: 'restorable',
+    expect(belowFloor.enabled).toBe(false);
+    expect(belowFloor.triggers).toEqual(
+      expect.arrayContaining([{ type: 'scheduled', with: { every: '5m' } }])
+    );
+    const belowFloorStep = findStep(belowFloor.steps, 'detect');
+    expect(belowFloorStep?.with).toEqual({
+      'workflow-id': SIGEVENTS_DETECTION_WORKFLOW_ID,
+      inputs: { lookback: 'now-30m' },
+    });
+
+    expect(aboveFloor.triggers).toEqual(
+      expect.arrayContaining([{ type: 'scheduled', with: { every: '45m' } }])
+    );
+    const aboveFloorStep = findStep(aboveFloor.steps, 'detect');
+    expect(aboveFloorStep?.with).toEqual({
+      'workflow-id': SIGEVENTS_DETECTION_WORKFLOW_ID,
+      inputs: { lookback: 'now-45m' },
     });
   });
 
-  it('renders detection disabled by default at the configured cadence', () => {
-    const yaml = getWorkflowYaml(SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
-      detectionIntervalMinutes: DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
+  it('wires each review config value into its own drain-loop input, not a sibling one', () => {
+    const parsed = getParsedWorkflowYaml(SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
+      reviewIntervalMinutes: 20,
+      discoveryBatchSize: 7,
+      triageBatchSize: 11,
+      maxReviewPasses: 6,
     });
 
-    expect(yaml).toContain('enabled: false');
-    expect(yaml).toContain(`every: "${DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES}m"`);
-    expect(yaml).toContain('workflow-id: "system-significant-events-detection"');
-    expect(yaml).toContain(
-      `lookback: "now-${DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES}m"`
+    expect(parsed.enabled).toBe(false);
+    expect(parsed.triggers).toEqual(
+      expect.arrayContaining([{ type: 'scheduled', with: { every: '20m' } }])
     );
-  });
 
-  it('renders review disabled by default with bounded drain loop and scheduled child inputs', () => {
-    const yaml = getWorkflowYaml(SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
-      reviewIntervalMinutes: DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
-      discoveryBatchSize: DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
-      triageBatchSize: DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
-      maxReviewPasses: DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
+    const drainLoop = findStep(parsed.steps, 'run_review_until_drained');
+    expect(drainLoop?.type).toBe('while');
+    expect(drainLoop?.['max-iterations']).toBe(6);
+    // The loop must re-check both children every pass, or a child that errors
+    // out (rather than just reporting no remaining work) could spin forever.
+    expect(drainLoop?.condition).toBe(
+      '${{ steps.discover.error != null or steps.triage.error != null or steps.discover.output.hasRemaining == true or steps.triage.output.hasRemaining == true }}'
+    );
+
+    const discover = findStep(drainLoop?.steps ?? [], 'discover');
+    expect(discover?.with).toEqual({
+      'workflow-id': SIGEVENTS_DISCOVERY_WORKFLOW_ID,
+      inputs: { detectionBatchMax: 7 },
     });
 
-    expect(yaml).toContain('enabled: false');
-    expect(yaml).toContain(`every: "${DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES}m"`);
-    expect(yaml).toContain('type: while');
-    expect(yaml).toContain(
-      'condition: "${{ steps.discover.error != null or steps.triage.error != null or steps.discover.output.hasRemaining == true or steps.triage.output.hasRemaining == true }}"'
-    );
-    expect(yaml).toContain(`max-iterations: ${DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES}`);
-    expect(yaml).toContain('workflow-id: "system-significant-events-discovery"');
-    expect(yaml).toContain(
-      `detectionBatchMax: ${DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE}`
-    );
-    expect(yaml).toContain('workflow-id: "system-significant-events-triage"');
-    expect(yaml).toContain(`discoveryBatchMax: ${DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE}`);
+    const triage = findStep(drainLoop?.steps ?? [], 'triage');
+    expect(triage?.with).toEqual({
+      'workflow-id': SIGEVENTS_TRIAGE_WORKFLOW_ID,
+      inputs: { discoveryBatchMax: 11 },
+    });
   });
 
-  it('always completes discovery no-work runs as success and exposes scheduled output stats', () => {
-    const yaml = getStaticWorkflowYaml(SIGEVENTS_DISCOVERY_WORKFLOW_ID);
+  it.each([
+    ['discovery', SIGEVENTS_DISCOVERY_WORKFLOW_ID, 'output_no_detections'],
+    ['triage', SIGEVENTS_TRIAGE_WORKFLOW_ID, 'output_no_discoveries'],
+  ])(
+    '%s always completes no-work runs as success and reports queue stats, so the scheduled drain loop can rely on hasRemaining instead of run status',
+    (_label, id, noWorkStepName) => {
+      const parsed = getParsedStaticWorkflowYaml(id);
 
-    expect(yaml).not.toContain('completeNoWorkAsSuccess');
-    expect(yaml).toContain('name: output_no_detections');
-    expect(yaml).not.toContain('name: exit_no_detections');
-    expect(yaml).not.toContain('status: cancelled');
-    expect(yaml).toContain('name: output_result');
-    expect(yaml).toContain('hasRemaining');
-    expect(yaml).toContain('queueEmpty');
-  });
+      const triggerInputs = parsed.triggers[0]?.inputs ?? [];
+      expect(triggerInputs.some((input) => input.name === 'completeNoWorkAsSuccess')).toBe(false);
 
-  it('always completes triage no-work runs as success and exposes scheduled output stats', () => {
-    const yaml = getStaticWorkflowYaml(SIGEVENTS_TRIAGE_WORKFLOW_ID);
+      const noWorkStep = findStep(parsed.steps, noWorkStepName);
+      expect(noWorkStep?.type).toBe('workflow.output');
+      expect(noWorkStep?.status).not.toBe('cancelled');
+      expect(noWorkStep?.with?.noWork).toBe(true);
 
-    expect(yaml).not.toContain('completeNoWorkAsSuccess');
-    expect(yaml).toContain('name: output_no_discoveries');
-    expect(yaml).not.toContain('name: exit_no_discoveries');
-    expect(yaml).not.toContain('status: cancelled');
-    expect(yaml).toContain('name: output_result');
-    expect(yaml).toContain('hasRemaining');
-    expect(yaml).toContain('queueEmpty');
-  });
+      // No step anywhere in this workflow should cancel the run on no-work.
+      expect(parsed.steps.some((step) => step.status === 'cancelled')).toBe(false);
+
+      const resultStep = findStep(parsed.steps, 'output_result');
+      expect(resultStep?.with).toMatchObject({
+        hasRemaining: expect.stringContaining('compute_queue_stats.output.hasRemaining'),
+        queueEmpty: expect.stringContaining('compute_queue_stats.output.queueEmpty'),
+      });
+    }
+  );
 });
 
 describe('SignificantEventsScheduledDiscoveryWorkflowService', () => {
