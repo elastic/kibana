@@ -17,7 +17,8 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import type { PartialTheme } from '@elastic/charts';
-import { Chart, Partition, Settings, PartitionLayout, LIGHT_THEME } from '@elastic/charts';
+import { Chart, Partition, Settings, PartitionLayout } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 import { useDetectionRulesByIntegration } from '../../../../hooks/use_get_detection_rules_by_integration';
 import { useIntegrationDisplayNames } from '../../../../hooks/use_integration_display_names';
@@ -27,6 +28,7 @@ import { createIntegrationStatusMapFromSets } from '../create_integration_status
 
 export const AllRuleCoveragePanel: React.FC = () => {
   const { euiTheme } = useEuiTheme();
+  const baseTheme = useElasticChartsTheme();
 
   const { getDetectionRules } = useSiemReadinessApi();
 
@@ -113,9 +115,9 @@ export const AllRuleCoveragePanel: React.FC = () => {
 
   const chartBaseTheme = useMemo(
     () => ({
-      ...LIGHT_THEME,
+      ...baseTheme,
       colors: {
-        ...LIGHT_THEME.colors,
+        ...baseTheme.colors,
         vizColors: [
           euiTheme.colors.vis.euiColorVis1,
           euiTheme.colors.vis.euiColorVis2,
@@ -123,7 +125,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
         ],
       },
     }),
-    [euiTheme]
+    [baseTheme, euiTheme]
   );
 
   const themeOverrides: PartialTheme = {
@@ -280,8 +282,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
                     {
                       groupByRollup: (d: (typeof DONUT_CHART_DATA)[0]) => 'Rules',
                       shape: {
-                        fillColor:
-                          chartBaseTheme.partition?.sectorLineStroke || euiTheme.colors.lightShade,
+                        fillColor: euiTheme.colors.backgroundBasePlain,
                       },
                     },
                     {
