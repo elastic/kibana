@@ -114,7 +114,7 @@ const startServer = async (
 
       try {
         const body = await started
-          .httpStart!.asScoped(req)
+          .httpStart!.self.asScoped(req)
           .fetch<DepthResponse>(`/self/depth/${req.params.remaining - 1}`);
 
         return res.ok({ body });
@@ -149,7 +149,7 @@ const startServer = async (
     async (context, req, res) => {
       try {
         const response = await started
-          .httpStart!.asScoped(req)
+          .httpStart!.self.asScoped(req)
           .fetch<{ url: string; host?: string }>('/self/target_url', { asResponse: true });
 
         return res.ok({
