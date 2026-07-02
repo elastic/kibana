@@ -9,9 +9,7 @@
 
 import fetch, { FetchError } from 'node-fetch';
 import type { RequestInit, Response } from 'node-fetch';
-import { createHash } from 'node:crypto';
 import pRetry, { AbortError } from 'p-retry';
-import semver from 'semver';
 import type { Logger } from '@kbn/core/server';
 import type {
   KibanaVersionsManifest,
@@ -20,15 +18,17 @@ import type {
   TemplatesCatalog,
 } from '@kbn/workflows-library';
 import {
-  KibanaVersionsManifestConsumptionSchema,
+  KibanaVersionsManifestLenientSchema,
   parseTemplateYaml,
   TemplateParseError,
-  TemplatesCatalogConsumptionSchema,
+  TemplatesCatalogLenientSchema,
 } from '@kbn/workflows-library';
 import { ZodError } from '@kbn/zod/v4';
 
 import { LibraryFetchError, LibraryNotFoundError } from './errors';
-import { LibraryCache, type LibraryHealth } from './library_cache';
+import { LibraryCache } from './library_cache';
+import { LibrarySource } from './library_source';
+import { resolveVersionId } from './resolve_version_id';
 
 /**
  * Default CDN URL the Workflow Template Library fetches its catalog from when
@@ -45,15 +45,6 @@ const DEFAULT_RETRY_OPTIONS = { retries: 3, factor: 2, minTimeout: 200 };
  * (see {@link DEFAULT_RETRY_OPTIONS}) still apply on top.
  */
 const DEFAULT_REQUEST_TIMEOUT_MS = 10_000;
-/**
- * Upper bounds (bytes) on upstream response sizes. Sized to reject only
- * disproportionate / hostile responses, not legitimately large catalogs or
- * template bodies — responses are buffered fully in memory before parsing, so
- * this caps the memory a single fetch can cost. The catalog (up to 1000 rows)
- * gets a larger allowance than a single template body.
- */
-const DEFAULT_MAX_CATALOG_BYTES = 25 * 1024 * 1024;
-const DEFAULT_MAX_BODY_BYTES = 5 * 1024 * 1024;
 
 export interface LibraryFetcherRetryOptions {
   retries?: number;
@@ -81,8 +72,8 @@ export interface LibraryFetcherDeps {
   requestTimeoutMs?: number;
   /**
    * Override the maximum accepted response sizes in bytes (defaults
-   * {@link DEFAULT_MAX_CATALOG_BYTES} for catalog/manifest JSON and
-   * {@link DEFAULT_MAX_BODY_BYTES} for template bodies).
+   * {@link LibrarySource.MAX_CATALOG_BYTES} for catalog/manifest JSON and
+   * {@link LibrarySource.MAX_BODY_BYTES} for template bodies).
    */
   maxCatalogBytes?: number;
   maxBodyBytes?: number;
@@ -109,13 +100,12 @@ type FetchResult<T> = { status: 'fresh'; payload: T; etag?: string } | { status:
  * Errors are wrapped in {@link LibraryFetchError} with a typed `reason` so
  * route handlers can branch without inspecting messages.
  */
-export class LibraryFetcher {
-  private readonly cache: LibraryCache;
+export class LibraryFetcher extends LibrarySource {
   private readonly etags = new Map<string, string>();
   private refreshing?: Promise<void>;
 
   constructor(private readonly deps: LibraryFetcherDeps) {
-    this.cache = new LibraryCache(deps.ttlMs);
+    super(new LibraryCache(deps.ttlMs, 'http'));
   }
 
   async listTemplates(): Promise<Template[]> {
@@ -167,10 +157,6 @@ export class LibraryFetcher {
     }
   }
 
-  getHealth(): LibraryHealth {
-    return this.cache.getHealth();
-  }
-
   private async getCatalog(): Promise<TemplatesCatalog> {
     await this.ensureFresh();
     if (!this.cache.catalog) {
@@ -205,7 +191,11 @@ export class LibraryFetcher {
       const manifestResult = await this.fetchKibanaVersionsManifest();
       let versionId = this.cache.versionId;
       if (manifestResult.status === 'fresh') {
-        versionId = this.resolveVersionId(manifestResult.payload);
+        versionId = resolveVersionId(
+          this.deps.kibanaVersion,
+          this.deps.isServerless,
+          manifestResult.payload
+        );
         this.cache.setVersionId(versionId);
       }
       if (!versionId) {
@@ -230,41 +220,16 @@ export class LibraryFetcher {
     }
   }
 
-  /**
-   * Resolves which per-Kibana-version directory id to fetch from based on the
-   * runtime's own Kibana semver and deployment mode.
-   *
-   * - Serverless deployments always resolve to {@link KibanaVersionsManifest.latest}
-   *   (`/v1/main/`) — serverless runs Kibana@HEAD and the `main` catalog
-   *   tracks its semver.
-   * - Stack deployments match against each manifest entry's explicit
-   *   `kibana` semver, matching the same minor (`~9.5.0` = `9.5.x`,
-   *   patch-independent) — order-independent, unlike a caret range.
-   * - Unrecognized runtime versions fall back to `manifest.latest` so dev
-   *   builds against Kibana@HEAD still get a working catalog.
-   */
-  private resolveVersionId(manifest: KibanaVersionsManifest): string {
-    if (this.deps.isServerless) {
-      return manifest.latest;
-    }
-    for (const entry of manifest.versions) {
-      if (semver.satisfies(this.deps.kibanaVersion, `~${entry.kibana}`)) {
-        return entry.id;
-      }
-    }
-    return manifest.latest;
-  }
-
   private async fetchKibanaVersionsManifest(): Promise<FetchResult<KibanaVersionsManifest>> {
     const url = this.buildUrl('kibana-versions.json');
-    // Loosened consumption schema: tolerate unknown fields from a newer catalog.
-    return this.fetchJson<KibanaVersionsManifest>(url, KibanaVersionsManifestConsumptionSchema);
+    // Lenient schema: tolerate unknown fields from a newer catalog.
+    return this.fetchJson<KibanaVersionsManifest>(url, KibanaVersionsManifestLenientSchema);
   }
 
   private async fetchTemplatesCatalog(versionId: string): Promise<FetchResult<TemplatesCatalog>> {
     const url = this.buildUrl(`${encodeURIComponent(versionId)}/catalogs/templates.json`);
-    // Loosened consumption schema: tolerate unknown fields from a newer catalog.
-    return this.fetchJson<TemplatesCatalog>(url, TemplatesCatalogConsumptionSchema);
+    // Lenient schema: tolerate unknown fields from a newer catalog.
+    return this.fetchJson<TemplatesCatalog>(url, TemplatesCatalogLenientSchema);
   }
 
   /**
@@ -278,7 +243,7 @@ export class LibraryFetcher {
   private async fetchTemplateBody(row: Template): Promise<TemplateBody> {
     const url = this.buildUrl(row.definitionUrl);
     const text = await this.fetchText(url);
-    assertContentHashMatches(row, text, url);
+    this.assertContentHashMatches(row, text, url);
     try {
       // Passthrough: keep the typed metadata, the full parsed workflow body, and
       // the raw YAML. No field enumeration so nothing is silently dropped.
@@ -312,7 +277,7 @@ export class LibraryFetcher {
     schema: { parse: (input: unknown) => T }
   ): Promise<FetchResult<T>> {
     const result = await this.requestWithRetry(url, {
-      maxBytes: this.deps.maxCatalogBytes ?? DEFAULT_MAX_CATALOG_BYTES,
+      maxBytes: this.deps.maxCatalogBytes ?? LibrarySource.MAX_CATALOG_BYTES,
     });
     if (result.status === 'unchanged') {
       return { status: 'unchanged' };
@@ -349,7 +314,7 @@ export class LibraryFetcher {
   private async fetchText(url: string): Promise<string> {
     const result = await this.requestWithRetry(url, {
       useEtag: false,
-      maxBytes: this.deps.maxBodyBytes ?? DEFAULT_MAX_BODY_BYTES,
+      maxBytes: this.deps.maxBodyBytes ?? LibrarySource.MAX_BODY_BYTES,
     });
     if (result.status === 'unchanged') {
       // Defensive: with useEtag=false this branch is unreachable.
@@ -464,30 +429,6 @@ async function doRequest(url: string, init: RequestInit): Promise<Response> {
     throw error;
   }
   throw new AbortError(error);
-}
-
-/**
- * Integrity guard against list/detail drift and corruption: the fetched body
- * bytes must hash to the `contentHash` recorded on the catalog row. The catalog
- * generator (`elastic/workflows` `build-catalog.mjs`) computes
- * `sha256:<hex>` over the exact raw YAML file it also publishes at
- * `definitionUrl`, so a Kibana-side hash over the fetched text matches
- * deterministically. Because the hash covers the whole file (including the
- * `template-metadata` slug/version), a match also proves the body describes the
- * template that was listed — no separate slug/version comparison is needed.
- */
-function assertContentHashMatches(row: Template, text: string, url: string): void {
-  const actual = `sha256:${createHash('sha256').update(text, 'utf8').digest('hex')}`;
-  // `digest('hex')` is lowercase; the catalog schema accepts case-insensitive
-  // hex, so normalize the row hash before comparing.
-  if (actual !== row.contentHash.toLowerCase()) {
-    throw new LibraryFetchError(
-      `Template body at ${url} failed its integrity check ` +
-        `(catalog: ${row.contentHash}, body: ${actual}).`,
-      'integrity',
-      url
-    );
-  }
 }
 
 function isFetchSystemError(err: unknown): err is FetchError {
