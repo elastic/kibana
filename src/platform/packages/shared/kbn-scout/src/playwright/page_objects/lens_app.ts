@@ -199,7 +199,7 @@ export class LensApp {
     const selectedButton = this.page.locator(
       '[data-test-subj^="lnsXY_axisSide_groups_"][aria-pressed="true"]'
     );
-    await expect(selectedButton).toBeVisible();
+    await selectedButton.waitFor({ state: 'visible' });
     const text = (await selectedButton.innerText()).trim();
     if (!text) {
       throw new Error('Axis side button text not yet rendered');
@@ -214,7 +214,7 @@ export class LensApp {
     const selectedButton = this.page.locator(
       '[data-test-subj^="lns_barOrientation_"][aria-pressed="true"]'
     );
-    await expect(selectedButton).toBeVisible();
+    await selectedButton.waitFor({ state: 'visible' });
     return (await selectedButton.innerText()).trim();
   }
 
