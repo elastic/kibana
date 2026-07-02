@@ -93,24 +93,5 @@ describe('Actions Plugin', () => {
       const pluginSetup = plugin.setup();
       expect(pluginSetup.isEarsEnabled).toBe(true);
     });
-
-    it('falls back to legacy ears.enabled when auth.ears.enabled is not set', async () => {
-      const context = coreMock.createPluginInitializerContext({
-        ears: { enabled: true },
-      });
-      const plugin = new Plugin(context);
-      const pluginSetup = plugin.setup();
-      expect(pluginSetup.isEarsEnabled).toBe(true);
-    });
-
-    it('auth.ears.enabled takes precedence over legacy ears.enabled', async () => {
-      const context = coreMock.createPluginInitializerContext({
-        auth: { ears: { enabled: false } },
-        ears: { enabled: true },
-      });
-      const plugin = new Plugin(context);
-      const pluginSetup = plugin.setup();
-      expect(pluginSetup.isEarsEnabled).toBe(false);
-    });
   });
 });

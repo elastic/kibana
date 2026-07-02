@@ -60,8 +60,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
     // recipient_allowlist is not exposed because it may contain sensitive information
     email: { domain_allowlist: true, recipient_allowlist: false, services: { enabled: true } },
     webhook: { ssl: { pfx: { enabled: true } } },
-    auth: { ears: { enabled: true } },
-    ears: { enabled: true }, // legacy config
+    auth: { ears: { enabled: true, enableExperimental: true } },
   },
 };
 

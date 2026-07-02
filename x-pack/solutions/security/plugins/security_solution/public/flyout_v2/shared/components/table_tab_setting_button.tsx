@@ -90,16 +90,18 @@ export const TableTabSettingButton = ({
       <EuiPopover
         aria-label={LABEL}
         button={
-          <EuiButtonIcon
-            aria-label={LABEL}
-            onClick={onClick}
-            iconType="gear"
-            size="m"
-            css={css`
-              border: 1px solid ${euiTheme.colors.backgroundLightText};
-              margin-left: -5px;
-            `}
-          />
+          <EuiToolTip content={LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              aria-label={LABEL}
+              onClick={onClick}
+              iconType="gear"
+              size="m"
+              css={css`
+                border: 1px solid ${euiTheme.colors.backgroundLightText};
+                margin-left: -5px;
+              `}
+            />
+          </EuiToolTip>
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}

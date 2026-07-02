@@ -23,6 +23,8 @@ import type {
   AsCodeRuntimeBaseField,
   AsCodeFieldSettings,
   AsCodeDataViewSpec,
+  AsCodeSavedDataView,
+  AsCodeSavedFieldSettings,
 } from '@kbn/as-code-data-views-schema';
 
 /**
@@ -36,14 +38,17 @@ import type {
  * @param fieldAttrs Map of field name → `{ customLabel, customDescription }` from DataViewSpec
  * @returns `field_settings` map, or `undefined` when there is nothing to persist
  */
-export function fromStoredFields(
+export function fromStoredFields<IncludePopularity extends boolean = false>(
   runtimeFields: DataViewSpec['runtimeFieldMap'] = {},
   fieldFormats: DataViewSpec['fieldFormats'] = {},
-  fieldAttrs: DataViewSpec['fieldAttrs'] = {}
-): AsCodeDataViewSpec['field_settings'] {
+  fieldAttrs: DataViewSpec['fieldAttrs'] = {},
+  includePopularity: IncludePopularity = false as IncludePopularity
+): IncludePopularity extends false
+  ? AsCodeDataViewSpec['field_settings']
+  : AsCodeSavedDataView['field_settings'] {
   const fieldSettings: AsCodeDataViewSpec['field_settings'] = {};
   new Set([...Object.keys(fieldFormats), ...Object.keys(fieldAttrs)]).forEach((name) => {
-    fieldSettings[name] = getCommonProperties(name, fieldAttrs, fieldFormats);
+    fieldSettings[name] = getCommonProperties(name, fieldAttrs, fieldFormats, includePopularity);
   });
 
   for (const [name, runtimeField] of Object.entries(runtimeFields)) {
@@ -80,8 +85,9 @@ export function fromStoredFields(
 function getCommonProperties(
   name: string,
   fieldAttrs: NonNullable<DataViewSpec['fieldAttrs']>,
-  fieldFormats: NonNullable<DataViewSpec['fieldFormats']>
-): AsCodeFieldSettings {
+  fieldFormats: NonNullable<DataViewSpec['fieldFormats']>,
+  includePopularity: boolean
+): AsCodeFieldSettings | AsCodeSavedFieldSettings {
   const fieldAttr = fieldAttrs[name];
   const format = fieldFormats[name];
 
@@ -90,5 +96,9 @@ function getCommonProperties(
     ...(fieldAttr &&
       'customDescription' in fieldAttr && { custom_description: fieldAttr.customDescription }),
     ...(format?.id && { format: { type: format.id, params: format.params } }),
+    ...(includePopularity &&
+      fieldAttr &&
+      'count' in fieldAttr &&
+      fieldAttr.count !== undefined && { popularity: fieldAttr.count }),
   };
 }

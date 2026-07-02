@@ -12,6 +12,7 @@ import { useOriginalAlertIds } from './use_original_alert_ids';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { fetchQueryAlerts } from '../../../detections/containers/detection_engine/alerts/api';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
+import type { IdentityFields } from '../../document_details/shared/utils';
 
 const TERMS_AGG_SIZE = 200;
 
@@ -33,30 +34,38 @@ interface AttackEntitiesListsAggregations {
   unique_hosts_by_euid?: { buckets: TermsBucketWithTopHits[] };
 }
 
-function extractEntityIdentifiersFromBuckets(
+export interface AttackEntityListEntry {
+  identityFields: IdentityFields;
+  sampleSource: Record<string, unknown>;
+}
+
+function extractEntityEntriesFromBuckets(
   euidApi: EntityStoreEuidApi | undefined,
   buckets: TermsBucketWithTopHits[] | undefined,
   entityType: 'user' | 'host'
-) {
+): AttackEntityListEntry[] {
   if (!buckets || !Array.isArray(buckets)) {
     return [];
   }
-  const result: Record<string, string>[] = [];
+  const result: AttackEntityListEntry[] = [];
   for (const b of buckets) {
     const hit = b.sample?.hits?.hits?.[0];
     const source = hit?._source;
     if (source && typeof source === 'object' && !Array.isArray(source)) {
       const identityFields = euidApi?.euid?.getEntityIdentifiersFromDocument(entityType, source);
       if (identityFields != null) {
-        result.push(identityFields);
+        result.push({
+          identityFields,
+          sampleSource: source as Record<string, unknown>,
+        });
       }
     }
   }
   return result;
 }
 export interface UseAttackEntitiesListsResult {
-  userEntityIdentifiers: Record<string, string>[];
-  hostEntityIdentifiers: Record<string, string>[];
+  userEntityEntries: AttackEntityListEntry[];
+  hostEntityEntries: AttackEntityListEntry[];
   loading: boolean;
   error: boolean;
 }
@@ -119,12 +128,12 @@ export const useAttackEntitiesLists = (): UseAttackEntitiesListsResult => {
   }, [query, setQuery]);
 
   return useMemo(() => {
-    const userEntityIdentifiers = extractEntityIdentifiersFromBuckets(
+    const userEntityEntries = extractEntityEntriesFromBuckets(
       euidApi ?? undefined,
       data?.aggregations?.unique_users_by_euid?.buckets,
       'user'
     );
-    const hostEntityIdentifiers = extractEntityIdentifiersFromBuckets(
+    const hostEntityEntries = extractEntityEntriesFromBuckets(
       euidApi ?? undefined,
       data?.aggregations?.unique_hosts_by_euid?.buckets,
       'host'
@@ -132,8 +141,8 @@ export const useAttackEntitiesLists = (): UseAttackEntitiesListsResult => {
     const error = !loading && data === undefined && originalAlertIds.length > 0;
 
     return {
-      userEntityIdentifiers,
-      hostEntityIdentifiers,
+      userEntityEntries,
+      hostEntityEntries,
       loading,
       error,
     };

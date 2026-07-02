@@ -46,7 +46,7 @@ function LanguageSelectorUI({ security, core, closePopover }: Props) {
     modalRef.current = core.overlays.openModal(
       toMountPoint(
         <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
-          <LanguageModal closeModal={closeModal} />
+          <LanguageModal closeModal={closeModal} analytics={core.analytics} />
         </UserProfilesKibanaProvider>,
         core
       ),
@@ -61,7 +61,6 @@ function LanguageSelectorUI({ security, core, closePopover }: Props) {
   return (
     <EuiContextMenuItem
       icon="globe"
-      size="s"
       onClick={() => {
         openModal();
         closePopover();

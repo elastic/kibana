@@ -19,6 +19,7 @@ import type {
   ReportWorkflowExecutionsCancelledActionParams,
   ReportWorkflowRunCancelledActionParams,
   ReportWorkflowRunInitiatedActionParams,
+  ReportWorkflowRunResumedActionParams,
   ReportWorkflowStepTestRunInitiatedActionParams,
   ReportWorkflowTestRunInitiatedActionParams,
   WorkflowExecutionEventTypes,
@@ -112,6 +113,7 @@ export interface WorkflowsTelemetryEventsMap {
   [WorkflowExecutionEventTypes.WorkflowRunInitiated]: ReportWorkflowRunInitiatedActionParams;
   [WorkflowExecutionEventTypes.WorkflowRunCancelled]: ReportWorkflowRunCancelledActionParams;
   [WorkflowExecutionEventTypes.WorkflowExecutionsCancelled]: ReportWorkflowExecutionsCancelledActionParams;
+  [WorkflowExecutionEventTypes.WorkflowRunResumed]: ReportWorkflowRunResumedActionParams;
   [WorkflowUIEventTypes.WorkflowListViewed]: ReportWorkflowListViewedActionParams;
   [WorkflowUIEventTypes.WorkflowDetailViewed]: ReportWorkflowDetailViewedActionParams;
   [WorkflowUIEventTypes.WorkflowCreateOpened]: ReportWorkflowCreateOpenedActionParams;

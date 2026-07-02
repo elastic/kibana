@@ -174,11 +174,9 @@ const renderList = (options?: { item?: typeof defaultWorkflow }) =>
 
 function expectControlDisabled(testId: string, disabled: boolean): void {
   const el = screen.getByTestId(testId);
-  if (disabled) {
-    expect(el).toBeDisabled();
-  } else {
-    expect(el).not.toBeDisabled();
-  }
+  const isDisabled = el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true';
+
+  expect(isDisabled).toBe(disabled);
 }
 
 /** Clone / export / delete live in the collapsed “All actions” popover when there are >2 actions. */
@@ -283,6 +281,36 @@ describe('Authorization matrix', () => {
       expectControlDisabled('deleteWorkflowAction', expectDeleteDisabled);
     }
   );
+
+  it('disables the delete row action for managed workflows', async () => {
+    setKibanaCapabilities({
+      createWorkflow: true,
+      updateWorkflow: true,
+      deleteWorkflow: true,
+      executeWorkflow: true,
+    });
+    renderList({ item: createWorkflowListItem({ id: 'managed-wf', managed: true }) });
+
+    await openFirstRowCollapsedActions();
+
+    expect(screen.getByTestId('deleteWorkflowAction')).toBeDisabled();
+  });
+
+  it('explains why managed workflows cannot be deleted', async () => {
+    setKibanaCapabilities({
+      createWorkflow: true,
+      updateWorkflow: true,
+      deleteWorkflow: true,
+      executeWorkflow: true,
+    });
+    renderList({ item: createWorkflowListItem({ id: 'managed-wf', managed: true }) });
+
+    await openFirstRowCollapsedActions();
+    const deleteAction = screen.getByTestId('deleteWorkflowAction');
+    await userEvent.hover(deleteAction.parentElement ?? deleteAction);
+
+    expect(await screen.findByText('Managed workflows cannot be deleted')).toBeInTheDocument();
+  });
 
   it('disables the enabled switch when the workflow is invalid even if update is granted', () => {
     setKibanaCapabilities({

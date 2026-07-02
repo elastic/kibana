@@ -13,6 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { TraceWaterfall } from '.';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
+import { FETCHER_OPERATION_IDS } from '../../../hooks/fetcher_operation_ids';
 import { Loading } from './loading';
 import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 import { useGetServiceBadgeHrefFromCore } from './use_get_service_badge_href_from_core';
@@ -28,6 +29,7 @@ export function FullTraceWaterfallRenderer({
   onNodeClick,
   onErrorClick,
   core,
+  ebt,
   ...scrollProps
 }: Props) {
   useEffectOnce(() => {
@@ -48,7 +50,8 @@ export function FullTraceWaterfallRenderer({
         },
       });
     },
-    [rangeFrom, rangeTo, traceId]
+    [rangeFrom, rangeTo, traceId],
+    { operationId: FETCHER_OPERATION_IDS.FETCH_FULL_TRACE_WATERFALL }
   );
 
   if (isPending(status)) {
@@ -80,6 +83,7 @@ export function FullTraceWaterfallRenderer({
       showLegend
       serviceName={serviceName}
       onErrorClick={onErrorClick}
+      ebt={ebt}
       getServiceBadgeHref={getServiceBadgeHref}
       agentMarks={data.agentMarks}
       showCriticalPathControl

@@ -7,8 +7,10 @@
 
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { useShouldShowAnomalyUi } from '../../../../hooks/use_should_show_anomaly_ui';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
@@ -27,8 +29,9 @@ import { ChartType, getTimeSeriesColor } from '../helper/get_timeseries_color';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { OpenInDiscover } from '../../links/discover_links/open_in_discover';
-import { useLicenseContext } from '../../../../context/license/use_license_context';
+import { APM_CHART_EBT_ELEMENTS } from '../ebt_constants';
 import { OpenAnomalies } from '../../links/machine_learning_links/open_anomalies';
+import { useAnomalyThreshold } from '../../../../hooks/use_anomaly_threshold';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -59,7 +62,6 @@ export const errorRateI18n = i18n.translate('xpack.apm.errorRate.tip', {
     "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
 });
 export function FailedTransactionRateChart({ height, showAnnotations = true, kuery }: Props) {
-  const license = useLicenseContext();
   const {
     urlParams: { transactionName },
   } = useLegacyUrlParams();
@@ -82,6 +84,8 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
 
   const { environment } = useEnvironmentsContext();
 
+  const shouldShowAnomalyUi = useShouldShowAnomalyUi();
+  const { anomalyThreshold } = useAnomalyThreshold();
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
     AnomalyDetectorType.txFailureRate
   );
@@ -188,7 +192,6 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
             <EuiFlexItem grow={false}>
               <OpenAnomalies
                 dataTestSubj="apmFailedTransactionRateChartOpenAnomalies"
-                hasValidMlLicense={license?.getFeature('ml').isAvailable}
                 mlJobId={preferredAnomalyTimeseries?.jobId}
                 detectorType={AnomalyDetectorType.txFailureRate}
               />
@@ -211,6 +214,9 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
                   transactionType,
                   sortDirection: 'DESC',
                 }}
+                ebt={{
+                  element: APM_CHART_EBT_ELEMENTS.FAILED_TRANSACTION_RATE,
+                }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -227,13 +233,14 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
         yDomain={{ min: 0, max: 1 }}
         customTheme={comparisonChartTheme}
         anomalyTimeseries={
-          preferredAnomalyTimeseries
+          shouldShowAnomalyUi && !!preferredAnomalyTimeseries
             ? {
                 ...preferredAnomalyTimeseries,
                 color: previousPeriodColor,
               }
             : undefined
         }
+        anomalyThreshold={anomalyThreshold}
       />
     </EuiPanel>
   );

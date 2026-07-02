@@ -12,6 +12,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
+import { useSyntheticsDataViewIndexPatterns } from '../hooks/use_synthetics_data_view_index_patterns';
 
 interface MonitorErrorsCountProps {
   from: string;
@@ -25,6 +26,7 @@ export const MonitorErrorsCount = ({ from, to, id }: MonitorErrorsCountProps) =>
   } = useKibana<ClientPluginsStart>().services;
   const { euiTheme } = useEuiTheme();
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
+  const dataTypesIndexPatterns = useSyntheticsDataViewIndexPatterns();
 
   const time = useMemo(() => ({ from, to }), [from, to]);
 
@@ -38,6 +40,7 @@ export const MonitorErrorsCount = ({ from, to, id }: MonitorErrorsCountProps) =>
       align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}
+      dataTypesIndexPatterns={dataTypesIndexPatterns}
       attributes={[
         {
           time,

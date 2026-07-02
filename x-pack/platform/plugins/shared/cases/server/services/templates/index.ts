@@ -15,14 +15,14 @@ import type {
 } from '@kbn/core/server';
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { v4 } from 'uuid';
-import { load as parseYaml } from 'js-yaml';
+import { parse as parseYaml } from 'yaml';
 import type {
   CreateTemplateInput,
   ParsedTemplate,
   Template,
   UpdateTemplateInput,
 } from '../../../common/types/domain/template/v1';
-import { toFieldNames } from './utils';
+import { toFieldNames, trimFieldDefaults } from './utils';
 import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 import type {
   TemplatesFindRequest,
@@ -36,6 +36,17 @@ export class TemplatesService {
       savedObjectsSerializer: ISavedObjectsSerializer;
       esClient: ElasticsearchClient;
       namespace: string;
+      /**
+       * Bound, parameterless callback that asks the cases-analytics v2
+       * subsystem to recompute and persist this space's runtime field map.
+       * Fire-and-forget — never awaited; never throws past this service.
+       *
+       * Called at the tail of every template create / update / delete. The
+       * cases client factory binds this to the current request's space + SO
+       * client. When v2 is disabled the bound function is a no-op (see
+       * `V2_NOOP_DATA_VIEW_REFRESHER`).
+       */
+      refreshAnalyticsV2DataView: () => void;
     }
   ) {}
 
@@ -327,7 +338,8 @@ export class TemplatesService {
     author: string,
     id: string = v4()
   ): Promise<SavedObject<Template>> {
-    const parsedDefinition = parseYaml(input.definition) as ParsedTemplate['definition'];
+    const normalizedDefinition = trimFieldDefaults(input.definition);
+    const parsedDefinition = parseYaml(normalizedDefinition) as ParsedTemplate['definition'];
 
     const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
       CASE_TEMPLATE_SAVED_OBJECT,
@@ -335,7 +347,7 @@ export class TemplatesService {
         templateVersion: 1,
         isLatest: true,
         deletedAt: null,
-        definition: input.definition,
+        definition: normalizedDefinition,
         name: parsedDefinition.name,
         owner: input.owner,
         templateId: v4(),
@@ -348,6 +360,10 @@ export class TemplatesService {
       } as Template,
       { refresh: true, id }
     );
+
+    // Tell cases-analytics v2 to recompute the per-space runtime field map.
+    // Fire-and-forget; failures are caught + logged inside the v2 service.
+    this.dependencies.refreshAnalyticsV2DataView();
 
     return templateSavedObject;
   }
@@ -362,14 +378,15 @@ export class TemplatesService {
       throw Boom.notFound(`Template with id ${templateId} not found`);
     }
 
-    const parsedDefinition = parseYaml(input.definition) as ParsedTemplate['definition'];
+    const normalizedDefinition = trimFieldDefaults(input.definition);
+    const parsedDefinition = parseYaml(normalizedDefinition) as ParsedTemplate['definition'];
 
     const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
       CASE_TEMPLATE_SAVED_OBJECT,
       {
         templateVersion: currentTemplate.attributes.templateVersion + 1,
         isLatest: true,
-        definition: input.definition,
+        definition: normalizedDefinition,
         name: parsedDefinition.name,
         owner: input.owner,
         templateId: currentTemplate.attributes.templateId,
@@ -382,7 +399,7 @@ export class TemplatesService {
         usageCount: currentTemplate.attributes.usageCount,
         lastUsedAt: currentTemplate.attributes.lastUsedAt,
         isEnabled: input.isEnabled ?? currentTemplate.attributes.isEnabled ?? true,
-      },
+      } as Template,
       {
         refresh: true,
       }
@@ -400,6 +417,10 @@ export class TemplatesService {
       ],
       { refresh: true }
     );
+
+    // Update may shift `fieldNames` (different field set, renamed fields,
+    // changed types). Tell v2 to refresh.
+    this.dependencies.refreshAnalyticsV2DataView();
 
     return templateSavedObject;
   }
@@ -486,5 +507,10 @@ export class TemplatesService {
       })),
       { refresh: true }
     );
+
+    // Refresh the per-space runtime field map even on soft-delete: keeps
+    // the propagation hook wired so future changes to the template field
+    // collection reach the data view without a code change.
+    this.dependencies.refreshAnalyticsV2DataView();
   }
 }

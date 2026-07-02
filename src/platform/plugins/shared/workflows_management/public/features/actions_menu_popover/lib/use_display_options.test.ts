@@ -43,9 +43,24 @@ describe('buildDisplayOptions', () => {
   };
 
   it('shows Add step + Commands sections when no search is active', () => {
-    const result = buildDisplayOptions(base);
+    const result = buildDisplayOptions({ ...base, options: [makeAction('a', 'A')] });
     expect(groupLabels(result)).toEqual(['Add step', 'Commands']);
-    expect(dataKinds(result)).toEqual(['command', 'command']);
+    expect(dataKinds(result)).toEqual(['action', 'command', 'command']);
+  });
+
+  it('hides Add step section when no actions match the search', () => {
+    const result = buildDisplayOptions({ ...base, options: [], searchTerm: 'zzz' });
+    expect(groupLabels(result)).not.toContain('Add step');
+  });
+
+  it('hides Add step section in Steps: mode when no actions match', () => {
+    const result = buildDisplayOptions({
+      ...base,
+      options: [],
+      searchTerm: `${STEPS_PREFIX}zzz`,
+    });
+    expect(groupLabels(result)).not.toContain('Add step');
+    expect(result).toHaveLength(0);
   });
 
   it('returns action items directly when inside a sub-group', () => {
@@ -123,6 +138,22 @@ describe('buildDisplayOptions', () => {
       const cmds = result.filter((o) => o.data?.menuItem?.kind === 'command');
       expect(cmds).toHaveLength(1);
       expect(cmds[0].label).toBe('Collapse all');
+    });
+
+    it('matches commands by description when label does not include the term', () => {
+      const commands: EditorCommand[] = [
+        ...mockCommands,
+        {
+          id: 'toggleEditorMode',
+          label: 'Toggle graph editor',
+          description: 'Switch between YAML and graph view',
+          iconType: 'visGraph',
+        },
+      ];
+      const result = buildDisplayOptions({ ...base, commands, searchTerm: 'yaml' });
+      const cmds = result.filter((o) => o.data?.menuItem?.kind === 'command');
+      expect(cmds).toHaveLength(1);
+      expect(cmds[0].label).toBe('Toggle graph editor');
     });
 
     it('shows jump entries when search matches step names', () => {

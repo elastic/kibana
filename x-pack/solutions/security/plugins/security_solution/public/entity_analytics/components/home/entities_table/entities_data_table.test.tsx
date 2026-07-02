@@ -14,6 +14,7 @@ import { TestProviders } from '../../../../common/mock';
 import { useFetchGridData } from './hooks/use_fetch_grid_data';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { EntityURLStateResult } from './hooks/use_entity_url_state';
@@ -27,17 +28,22 @@ import {
 const mockUseFetchGridData = jest.mocked(useFetchGridData);
 const mockUseInvestigateInTimeline = jest.mocked(useInvestigateInTimeline);
 const mockUseUserPrivileges = jest.mocked(useUserPrivileges);
+const mockUseAlertsPrivileges = jest.mocked(useAlertsPrivileges);
 const mockUseGlobalTime = jest.mocked(useGlobalTime);
 const mockUseKibana = jest.mocked(useKibana);
 
-const capturedProps: { externalCustomRenderers?: CustomCellRenderer } = {};
+const capturedProps: { externalCustomRenderers?: CustomCellRenderer; columns?: string[] } = {};
 
 jest.mock('@kbn/unified-data-table', () => {
   const actual = jest.requireActual('@kbn/unified-data-table');
   return {
     ...actual,
-    UnifiedDataTable: (props: { externalCustomRenderers?: CustomCellRenderer }) => {
+    UnifiedDataTable: (props: {
+      externalCustomRenderers?: CustomCellRenderer;
+      columns?: string[];
+    }) => {
       capturedProps.externalCustomRenderers = props.externalCustomRenderers;
+      capturedProps.columns = props.columns;
       return <div data-test-subj="unifiedDataTable" />;
     },
   };
@@ -52,6 +58,7 @@ jest.mock('@kbn/expandable-flyout', () => ({
 
 jest.mock('../../../../common/hooks/timeline/use_investigate_in_timeline');
 jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../../common/containers/use_global_time');
 jest.mock('./hooks/use_fetch_grid_data');
 jest.mock('./hooks/use_styles', () => ({
@@ -71,7 +78,7 @@ jest.mock('react-use/lib/useLocalStorage', () => ({
       return [{ columns: {} }, jest.fn()];
     }
     if (key.includes('columns')) {
-      return [['entity.name', 'entity.id', 'entity.source'], jest.fn()];
+      return [['entity.name', 'entity.id', 'entity.source', 'alerts'], jest.fn()];
     }
     return [initial, jest.fn()];
   }),
@@ -154,7 +161,13 @@ describe('EntitiesDataTable', () => {
 
     mockUseUserPrivileges.mockReturnValue({
       timelinePrivileges: { crud: true, read: true },
+      alertsPrivileges: { alerts: { read: true, edit: false, legacyUpdate: false } },
     } as unknown as ReturnType<typeof useUserPrivileges>);
+
+    mockUseAlertsPrivileges.mockReturnValue({
+      loading: false,
+      hasIndexRead: true,
+    } as unknown as ReturnType<typeof useAlertsPrivileges>);
 
     mockUseGlobalTime.mockReturnValue({
       setQuery: jest.fn(),
@@ -291,6 +304,45 @@ describe('EntitiesDataTable', () => {
       expect(getByText('Okta')).toBeInTheDocument();
       expect(queryByText('okta')).not.toBeInTheDocument();
       expect(getByTestId('entitySourceValue-more')).toHaveTextContent('+1');
+    });
+  });
+
+  describe('alerts column privilege', () => {
+    it('includes the alerts column when the user has alerts read access', () => {
+      const state = createMockState();
+      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+
+      renderWithProviders(state);
+
+      expect(capturedProps.columns).toContain('alerts');
+    });
+
+    it('hides the alerts column when the user has no RBAC alerts read access', () => {
+      mockUseUserPrivileges.mockReturnValue({
+        timelinePrivileges: { crud: true, read: true },
+        alertsPrivileges: { alerts: { read: false, edit: false, legacyUpdate: false } },
+      } as unknown as ReturnType<typeof useUserPrivileges>);
+
+      const state = createMockState();
+      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+
+      renderWithProviders(state);
+
+      expect(capturedProps.columns).not.toContain('alerts');
+    });
+
+    it('hides the alerts column when the user has no index-level alerts read access', () => {
+      mockUseAlertsPrivileges.mockReturnValue({
+        loading: false,
+        hasIndexRead: false,
+      } as unknown as ReturnType<typeof useAlertsPrivileges>);
+
+      const state = createMockState();
+      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+
+      renderWithProviders(state);
+
+      expect(capturedProps.columns).not.toContain('alerts');
     });
   });
 });

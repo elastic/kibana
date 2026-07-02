@@ -180,6 +180,9 @@ export function SloItemActions({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.slo.sloItemActions.popoverAriaLabel', {
+        defaultMessage: 'SLO item actions',
+      })}
       anchorPosition="downLeft"
       button={btnProps ? <IconPanel>{btn}</IconPanel> : btn}
       panelPaddingSize="m"
@@ -187,7 +190,6 @@ export function SloItemActions({
       isOpen={isActionsPopoverOpen}
     >
       <EuiContextMenuPanel
-        size="m"
         items={[
           <EuiContextMenuItem
             key="view"

@@ -11,13 +11,10 @@ import { useSelector } from 'react-redux';
 
 import { signalIndexOutdatedSelector } from '../../../../data_view_manager/redux/selectors';
 import { useSignalIndexName } from '../../../../data_view_manager/hooks/use_signal_index_name';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
 import { useAlertsPrivileges } from './use_alerts_privileges';
-import { sourcererSelectors } from '../../../../common/store';
-import type { State } from '../../../../common/store';
 
 type Func = () => Promise<void>;
 
@@ -43,25 +40,8 @@ export const useSignalIndex = (): ReturnSignalIndex => {
   const { addError } = useAppToasts();
   const { hasIndexRead } = useAlertsPrivileges();
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const oldSignalIndexMappingOutdated = useSelector((state: State) => {
-    return sourcererSelectors.signalIndexMappingOutdated(state);
-  });
-  const experimentalSignalIndexMappingOutdated = useSelector(signalIndexOutdatedSelector);
-
-  const signalIndexMappingOutdated = newDataViewPickerEnabled
-    ? experimentalSignalIndexMappingOutdated
-    : oldSignalIndexMappingOutdated;
-
-  const oldSignalIndexName = useSelector((state: State) => {
-    return sourcererSelectors.signalIndexName(state);
-  });
-  const experimentalSignalIndexName = useSignalIndexName();
-
-  const signalIndexName = newDataViewPickerEnabled
-    ? experimentalSignalIndexName
-    : oldSignalIndexName;
+  const signalIndexMappingOutdated = useSelector(signalIndexOutdatedSelector);
+  const signalIndexName = useSignalIndexName();
 
   useEffect(() => {
     let isSubscribed = true;

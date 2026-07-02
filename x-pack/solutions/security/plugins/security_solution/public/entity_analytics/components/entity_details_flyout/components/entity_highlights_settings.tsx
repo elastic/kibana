@@ -7,16 +7,17 @@
 
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
+  EuiButtonIcon,
+  EuiContextMenu,
   EuiContextMenuItem,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
-  EuiContextMenu,
   EuiPopover,
-  EuiButtonIcon,
-  EuiText,
   EuiPopoverTitle,
+  EuiSwitch,
+  EuiText,
   EuiTextTruncate,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -152,19 +153,29 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
                       </EuiFlexItem>
 
                       <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          aria-label={i18n.translate(
+                        <EuiToolTip
+                          content={i18n.translate(
                             'xpack.securitySolution.flyout.entityDetails.highlights.anonymizationArialLabel',
                             {
                               defaultMessage: 'Anonymization',
                             }
                           )}
-                          data-test-subj="anonymizationSettings"
-                          iconType="gear"
-                          onClick={showAnonymizationModal}
-                          size="s"
-                          color="text"
-                        />
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            aria-label={i18n.translate(
+                              'xpack.securitySolution.flyout.entityDetails.highlights.anonymizationArialLabel',
+                              {
+                                defaultMessage: 'Anonymization',
+                              }
+                            )}
+                            data-test-subj="anonymizationSettings"
+                            iconType="gear"
+                            onClick={showAnonymizationModal}
+                            size="s"
+                            color="text"
+                          />
+                        </EuiToolTip>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
@@ -221,17 +232,27 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
   return (
     <EuiPopover
       button={
-        <EuiButtonIcon
-          aria-label={i18n.translate(
+        <EuiToolTip
+          content={i18n.translate(
             'xpack.securitySolution.flyout.entityDetails.highlights.openMenuAriaLabel',
             {
               defaultMessage: 'Entity highlights settings menu',
             }
           )}
-          iconType="boxesVertical"
-          onClick={openPopover}
-          disabled={isLoading}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.entityDetails.highlights.openMenuAriaLabel',
+              {
+                defaultMessage: 'Entity highlights settings menu',
+              }
+            )}
+            iconType="boxesVertical"
+            onClick={openPopover}
+            disabled={isLoading}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
@@ -243,7 +264,6 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
           width: 280px;
         `}
         initialPanelId={0}
-        size="m"
         panels={panels}
       />
       {isAnonymizationModalVisible && (

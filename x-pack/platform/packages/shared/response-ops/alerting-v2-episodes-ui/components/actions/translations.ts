@@ -309,26 +309,6 @@ export const ASSIGNEE_FLYOUT_SUGGEST_ERROR_TITLE = i18n.translate(
   }
 );
 
-export const ASSIGNEE_FLYOUT_SAVE_SUCCESS = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.saveSuccess',
-  {
-    defaultMessage: 'Assignee updated.',
-  }
-);
-
-export const ASSIGNEE_FLYOUT_SAVE_ERROR_TITLE = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.saveErrorTitle',
-  {
-    defaultMessage: 'Could not update assignee',
-  }
-);
-
-export const getAssigneeFlyoutSubtitle = (episodeId: string) =>
-  i18n.translate('xpack.alertingV2.episodes.assignees.flyout.subtitle', {
-    defaultMessage: 'Episode: {episodeId}',
-    values: { episodeId },
-  });
-
 export const ASSIGNEE_FLYOUT_TITLE = i18n.translate(
   'xpack.alertingV2.episodes.assignees.flyout.title',
   {

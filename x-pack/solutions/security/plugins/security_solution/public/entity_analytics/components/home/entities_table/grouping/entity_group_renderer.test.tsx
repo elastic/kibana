@@ -11,7 +11,7 @@ import type { RawBucket } from '@kbn/grouping';
 import { createGroupPanelRenderer, createGroupStatsRenderer } from './entity_group_renderer';
 import type { EntitiesGroupingAggregation, TargetMetadataMap } from './use_fetch_grouped_data';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
-import { ENTITY_GROUPING_OPTIONS } from '../constants';
+import { ENTITY_GROUPING_OPTIONS, TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT } from '../constants';
 import { TestProviders } from '../../../../../common/mock';
 
 const mockOpenRightPanel = jest.fn();
@@ -155,7 +155,7 @@ describe('createGroupPanelRenderer', () => {
 
       render(<>{element}</>);
 
-      expect(screen.getByLabelText('Open entity details')).toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT)).toBeInTheDocument();
     });
 
     it('hides expand button when metadata is not available', () => {
@@ -167,7 +167,7 @@ describe('createGroupPanelRenderer', () => {
 
       render(<>{element}</>);
 
-      expect(screen.queryByLabelText('Open entity details')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT)).not.toBeInTheDocument();
       expect(screen.getByText('fallback-entity-id')).toBeInTheDocument();
     });
 
@@ -180,7 +180,7 @@ describe('createGroupPanelRenderer', () => {
         <>{rendererBefore(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket)}</>
       );
       expect(screen.getByText('target-id')).toBeInTheDocument();
-      expect(screen.queryByLabelText('Open entity details')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT)).not.toBeInTheDocument();
 
       // Phase 2: metadata arrived — new renderer shows target name + flyout button
       const metadata: TargetMetadataMap = new Map([
@@ -198,7 +198,7 @@ describe('createGroupPanelRenderer', () => {
       rerender(<>{rendererAfter(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket)}</>);
       expect(screen.getByText('alice-target')).toBeInTheDocument();
       expect(screen.queryByText('target-id')).not.toBeInTheDocument();
-      expect(screen.getByLabelText('Open entity details')).toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT)).toBeInTheDocument();
     });
   });
 

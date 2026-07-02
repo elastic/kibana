@@ -49,7 +49,8 @@
     "@kbn/scout",
     "@kbn/search-api-panels",
     "@kbn/usage-collection-plugin",
-    "@kbn/analytics"
+    "@kbn/analytics",
+    "@kbn/datemath"
   ],
   "exclude": [
     "target/**/*"

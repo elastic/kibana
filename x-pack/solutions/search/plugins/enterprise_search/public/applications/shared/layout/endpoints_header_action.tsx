@@ -38,7 +38,14 @@ export const EndpointsHeaderAction: React.FC<React.PropsWithChildren<{}>> = ({ c
         </EuiFlexGroup>
       </EuiHeaderLinks>
       {open && (
-        <EuiFlyout onClose={() => setOpen(false)} size={'s'}>
+        <EuiFlyout
+          aria-label={i18n.translate(
+            'xpack.enterpriseSearch.pageTemplate.endpointsFlyout.ariaLabel',
+            { defaultMessage: 'Endpoints & API keys' }
+          )}
+          onClose={() => setOpen(false)}
+          size={'s'}
+        >
           <KibanaWiredConnectionDetailsProvider>
             <ConnectionDetailsFlyoutContent />
           </KibanaWiredConnectionDetailsProvider>

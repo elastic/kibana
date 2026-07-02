@@ -171,57 +171,6 @@ export const eventComment: EventAttachmentUI = {
   version: 'WzQ3LDFc',
 };
 
-export const hostIsolationComment = (overrides?: Record<string, unknown>): AttachmentUI => {
-  return {
-    type: AttachmentType.actions,
-    comment: 'I just isolated the host!',
-    id: 'isolate-comment-id',
-    actions: {
-      targets: [
-        {
-          hostname: 'host1',
-          endpointId: '001',
-        },
-      ],
-      type: 'isolate',
-    },
-    createdAt: basicCreatedAt,
-    createdBy: elasticUser,
-    owner: SECURITY_SOLUTION_OWNER,
-    pushedAt: null,
-    pushedBy: null,
-    updatedAt: null,
-    updatedBy: null,
-    version: 'WzQ3LDFc',
-    ...overrides,
-  };
-};
-
-export const hostReleaseComment: () => AttachmentUI = () => {
-  return {
-    type: AttachmentType.actions,
-    comment: 'I just released the host!',
-    id: 'isolate-comment-id',
-    actions: {
-      targets: [
-        {
-          hostname: 'host1',
-          endpointId: '001',
-        },
-      ],
-      type: 'unisolate',
-    },
-    createdAt: basicCreatedAt,
-    createdBy: elasticUser,
-    owner: SECURITY_SOLUTION_OWNER,
-    pushedAt: null,
-    pushedBy: null,
-    updatedAt: null,
-    updatedBy: null,
-    version: 'WzQ3LDFc',
-  };
-};
-
 export const externalReferenceAttachment: ExternalReferenceAttachmentUI = {
   type: AttachmentType.externalReference,
   id: 'external-reference-comment-id',
@@ -350,7 +299,6 @@ export const basicCaseNumericValueFeatures: SingleCaseMetricsFeature[] = [
   CaseMetricsFeature.ALERTS_COUNT,
   CaseMetricsFeature.ALERTS_USERS,
   CaseMetricsFeature.ALERTS_HOSTS,
-  CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
   CaseMetricsFeature.CONNECTORS,
 ];
 
@@ -369,12 +317,6 @@ export const basicCaseMetrics: SingleCaseMetrics = {
     users: {
       total: 1,
       values: [{ name: 'Jon', count: 12 }],
-    },
-  },
-  actions: {
-    isolateHost: {
-      isolate: { total: 5 },
-      unisolate: { total: 3 },
     },
   },
   connectors: { total: 1 },
@@ -977,24 +919,6 @@ export const getEventUserAction = (
       type: AttachmentType.event,
       eventId: 'event-id-1',
       index: 'index-id-1',
-      owner: SECURITY_SOLUTION_OWNER,
-    },
-  },
-  ...overrides,
-});
-
-export const getHostIsolationUserAction = (
-  overrides?: Record<string, unknown>
-): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
-  ...getUserAction(UserActionTypes.comment, UserActionActions.create),
-  id: 'isolate-action-id',
-  type: UserActionTypes.comment,
-  commentId: 'isolate-comment-id',
-  payload: {
-    comment: {
-      type: AttachmentType.actions,
-      comment: 'a comment',
-      actions: { targets: [], type: 'test' },
       owner: SECURITY_SOLUTION_OWNER,
     },
   },

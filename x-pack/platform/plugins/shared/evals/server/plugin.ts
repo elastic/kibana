@@ -28,6 +28,8 @@ import type {
 } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { DatasetService } from './storage/dataset_service';
+import { EvaluationScoreService } from './storage/evaluation_score_service';
+import { evaluationsDataStreamDefinition } from './storage/scores_index_template';
 
 export class EvalsPlugin
   implements
@@ -37,6 +39,7 @@ export class EvalsPlugin
   private readonly config: EvalsConfig;
   private readonly isServerless: boolean;
   private datasetService?: DatasetService;
+  private evaluationScoreService?: EvaluationScoreService;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
@@ -54,7 +57,7 @@ export class EvalsPlugin
     }
 
     this.logger.info('Setting up Evals plugin');
-    this.datasetService = new DatasetService(this.logger, this.isServerless);
+    coreSetup.dataStreams.registerDataStream(evaluationsDataStreamDefinition);
 
     coreSetup.savedObjects.registerType(evalsRemoteKibanaConfigSavedObjectType);
     encryptedSavedObjects.registerType({
@@ -66,12 +69,13 @@ export class EvalsPlugin
     coreSetup.http.registerRouteHandlerContext<EvalsRequestHandlerContext, 'evals'>(
       'evals',
       async () => {
-        if (!this.datasetService) {
-          throw new Error('DatasetService has not been initialized');
+        if (!this.datasetService || !this.evaluationScoreService) {
+          throw new Error('Evals storage services have not been initialized');
         }
 
         return {
           datasetService: this.datasetService,
+          evaluationScoreService: this.evaluationScoreService,
         };
       }
     );
@@ -126,9 +130,41 @@ export class EvalsPlugin
     return {};
   }
 
-  start(_core: CoreStart, _plugins: EvalsStartDependencies): EvalsPluginStart {
+  start(coreStart: CoreStart, _plugins: EvalsStartDependencies): EvalsPluginStart {
+    if (!this.config.enabled) {
+      return {};
+    }
+
+    this.datasetService = new DatasetService(
+      this.logger,
+      coreStart.elasticsearch.client.asInternalUser,
+      this.isServerless
+    );
+    this.evaluationScoreService = new EvaluationScoreService(this.logger, coreStart.dataStreams);
+
+    // Fire-and-forget backfill of the denormalized `examples_count` for datasets
+    // created before the field existed. Idempotent and a no-op once complete (and
+    // on fresh/empty deployments), so it is safe to run on every start. Only runs
+    // when the plugin is enabled, since we early-return above otherwise.
+    this.datasetService
+      .getClient()
+      .backfillDatasetCounts()
+      .then(({ updated }) => {
+        if (updated > 0) {
+          this.logger.info(`Backfilled examples_count for ${updated} evaluation dataset(s)`);
+        }
+      })
+      .catch((error) => {
+        this.logger.warn(
+          `Failed to backfill evaluation dataset example counts: ${
+            error instanceof Error ? error.message : error
+          }`
+        );
+      });
+
     return {
       datasetService: this.datasetService,
+      evaluationScoreService: this.evaluationScoreService,
     };
   }
 

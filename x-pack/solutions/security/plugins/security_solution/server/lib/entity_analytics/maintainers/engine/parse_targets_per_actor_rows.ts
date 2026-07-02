@@ -8,7 +8,8 @@
 import type { Logger } from '@kbn/logging';
 import type { EntityRelationshipKey } from '@kbn/entity-store/common/domain/definitions/common_fields';
 
-import type { ProcessedEngineRecord, BucketTargetByThresholdConfig } from './types';
+import type { EntityRelationshipRecord, BucketTargetByThresholdConfig } from './types';
+import { entityTypeFromEuid } from './types';
 import { ENGINE_COLUMNS } from './columns';
 
 interface EsqlColumn {
@@ -79,10 +80,10 @@ export const parseTargetsPerActorRows = (
   values: unknown[][],
   config: ParseConfig,
   logger: Logger
-): ProcessedEngineRecord[] => {
+): EntityRelationshipRecord[] => {
   warnIfOverrideColumnsMissing(columns, config, logger);
 
-  return values.map((row): ProcessedEngineRecord => {
+  return values.map((row): EntityRelationshipRecord => {
     const record: Record<string, unknown> = {};
     columns.forEach((col, idx) => {
       record[col.name] = row[idx];
@@ -91,7 +92,7 @@ export const parseTargetsPerActorRows = (
     const actorRaw = record[ENGINE_COLUMNS.actor];
     const actorUserId = actorRaw != null ? String(actorRaw) : null;
 
-    // TODO(follow-up): entityType hardcoded to 'user' — use actorEntityType from config.
+    // TODO(#266748): entityType hardcoded to 'user' — use actorEntityType from config.
     if (config.kind === 'bucketed') {
       const { aboveThresholdRelationship: above, belowThresholdRelationship: below } =
         config.bucketTargetByThreshold;
@@ -99,7 +100,7 @@ export const parseTargetsPerActorRows = (
       const belowCol = ENGINE_COLUMNS.bucketBelow(below);
       return {
         entityId: actorUserId,
-        entityType: 'user' as const,
+        entityType: entityTypeFromEuid(actorUserId),
         relationships: {
           [above]: toStringArray(record[aboveCol]),
           [below]: toStringArray(record[belowCol]),
@@ -110,7 +111,7 @@ export const parseTargetsPerActorRows = (
     const flatCol = ENGINE_COLUMNS.flat(config.relationshipKey);
     return {
       entityId: actorUserId,
-      entityType: 'user' as const,
+      entityType: entityTypeFromEuid(actorUserId),
       relationships: {
         [config.relationshipKey]: toStringArray(record[flatCol]),
       },

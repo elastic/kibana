@@ -204,6 +204,15 @@ describe('WorkflowApi', () => {
         version: VERSION,
       });
     });
+
+    it('should include managed filter when provided', async () => {
+      await api.getAggs({ fields: ['tags'], managed: 'all' });
+
+      expect(http.get).toHaveBeenCalledWith('/api/workflows/aggs', {
+        query: { fields: ['tags'], managed: 'all' },
+        version: VERSION,
+      });
+    });
   });
 
   describe('getConnectors', () => {
@@ -233,6 +242,24 @@ describe('WorkflowApi', () => {
 
       expect(http.get).toHaveBeenCalledWith('/internal/workflows/config', {
         version: '1',
+      });
+    });
+  });
+
+  describe('searchTriggerEvents', () => {
+    it('should call POST /internal/workflows/trigger_events/_search with body', async () => {
+      const params = {
+        kql: 'eventId: "e1"',
+        from: '2025-01-01',
+        to: '2025-12-31',
+        page: 2,
+        size: 25,
+      };
+      await api.searchTriggerEvents(params);
+
+      expect(http.post).toHaveBeenCalledWith('/internal/workflows/trigger_events/_search', {
+        body: JSON.stringify(params),
+        version: INTERNAL_VERSION,
       });
     });
   });
@@ -284,7 +311,16 @@ describe('WorkflowApi', () => {
 
   describe('getWorkflowExecutions', () => {
     it('should call GET /api/workflows/workflow/{id}/executions with query', async () => {
-      const params = { page: 1, size: 10 };
+      const params = {
+        page: 1,
+        size: 10,
+        startedAfter: 'now-1w',
+        startedBefore: 'now',
+        finishedAfter: '2026-05-01T00:00:00.000Z',
+        finishedBefore: '2026-05-14T00:00:00.000Z',
+        sortField: 'finishedAt' as const,
+        sortOrder: 'desc' as const,
+      };
       await api.getWorkflowExecutions('wf-1', params);
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows/workflow/wf-1/executions', {
@@ -388,6 +424,33 @@ describe('WorkflowApi', () => {
       expect(http.get).toHaveBeenCalledWith('/api/workflows/executions/exec-1/children', {
         version: VERSION,
       });
+    });
+  });
+
+  describe('restoreWorkflowVersion', () => {
+    it('should call POST /internal/workflows/workflow/{id}/history/{eventId}/restore', async () => {
+      const signal = new AbortController().signal;
+      await api.restoreWorkflowVersion('wf-1', 'evt-previous', { signal });
+
+      expect(http.post).toHaveBeenCalledWith(
+        '/internal/workflows/workflow/wf-1/history/evt-previous/restore',
+        {
+          version: INTERNAL_VERSION,
+          signal,
+        }
+      );
+    });
+
+    it('should encode workflow id and event id', async () => {
+      await api.restoreWorkflowVersion('id/with/slashes', 'event/with/slashes');
+
+      expect(http.post).toHaveBeenCalledWith(
+        '/internal/workflows/workflow/id%2Fwith%2Fslashes/history/event%2Fwith%2Fslashes/restore',
+        {
+          version: INTERNAL_VERSION,
+          signal: undefined,
+        }
+      );
     });
   });
 });

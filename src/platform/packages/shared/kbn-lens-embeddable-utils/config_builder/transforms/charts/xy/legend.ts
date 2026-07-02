@@ -9,19 +9,18 @@
 
 import { LegendLayout, type XYLegendValue } from '@kbn/chart-expressions-common';
 import type { XYVisualizationState } from '@kbn/lens-common';
-import type { XYConfig } from '../../../schema';
+import type {
+  XYConfig,
+  XYLegendOutsideHorizontal,
+  XYLegendOutsideVertical,
+  XYLegendInside,
+  XYLegendStatistic,
+  XYLegendSize,
+} from '../../../schema';
 import { legendSizeCompat } from '../legend_sizes';
 import { getReversibleMappings, stripUndefined } from '../utils';
-import type {
-  HorizontalOutsideLayoutLegend,
-  LegendStatistic,
-  VerticalOutsideLayoutLegend,
-  LegendSize as LegendSizeType,
-  InsidePosition,
-  InsideLayoutLegend,
-} from './types';
 
-const legendStatisticCompat = getReversibleMappings<LegendStatistic, XYLegendValue>([
+const legendStatisticCompat = getReversibleMappings<XYLegendStatistic, XYLegendValue>([
   // Unchanged
   ['total', 'total'],
   ['count', 'count'],
@@ -90,7 +89,7 @@ function getLegendTruncation(legend: XYConfig['legend']):
     : undefined;
 }
 
-function getOutsideLegendSize(legend: XYConfig['legend']): LegendSizeType | undefined {
+function getOutsideLegendSize(legend: XYConfig['legend']): XYLegendSize | undefined {
   return legend && 'size' in legend ? legend.size : undefined;
 }
 
@@ -168,11 +167,13 @@ function isLegendInside(legend: XYVisualizationState['legend']): boolean {
   );
 }
 
-function getLegendAlignment(legend: XYVisualizationState['legend']) {
+function getLegendAlignment(
+  legend: XYVisualizationState['legend']
+): Pick<XYLegendInside, 'position'> {
   if (!legend.verticalAlignment && !legend.horizontalAlignment) {
     return {};
   }
-  const position: InsidePosition = `${legend.verticalAlignment ?? 'top'}_${
+  const position: XYLegendInside['position'] = `${legend.verticalAlignment ?? 'top'}_${
     legend.horizontalAlignment ?? 'right'
   }`;
   return {
@@ -180,7 +181,9 @@ function getLegendAlignment(legend: XYVisualizationState['legend']) {
   };
 }
 
-function getLegendLayout(legend: XYVisualizationState['legend']) {
+function getLegendLayout(
+  legend: XYVisualizationState['legend']
+): XYLegendInside | XYLegendOutsideHorizontal | XYLegendOutsideVertical {
   const { max_lines, enabled } = getApiLegendTruncate(legend);
 
   if (isLegendInside(legend)) {
@@ -195,19 +198,18 @@ function getLegendLayout(legend: XYVisualizationState['legend']) {
       },
       ...(legend.floatingColumns ? { columns: legend.floatingColumns } : {}),
       ...getLegendAlignment(legend),
-    } satisfies InsideLayoutLegend;
+    } satisfies XYLegendInside;
   }
 
   const isListLayout = isOutsideListLegendLayoutState(legend);
 
-  const baseOutside = stripUndefined({
-    placement: 'outside' as const,
-    size: legendSizeCompat.toAPI(legend.legendSize),
-    position: legend.position ?? DEFAULT_LEGEND_POSITON,
-  });
+  const position = legend.position ?? DEFAULT_LEGEND_POSITON;
+  const isVerticalPosition = ['left', 'right'].includes(position);
 
-  return {
-    ...baseOutside,
+  return stripUndefined({
+    placement: 'outside',
+    position,
+    size: isVerticalPosition ? legendSizeCompat.toAPI(legend.legendSize) : undefined,
     layout: isListLayout
       ? {
           type: 'list',
@@ -219,7 +221,7 @@ function getLegendLayout(legend: XYVisualizationState['legend']) {
             max_lines,
           }),
         },
-  } satisfies HorizontalOutsideLayoutLegend | VerticalOutsideLayoutLegend;
+  }) satisfies XYLegendOutsideHorizontal | XYLegendOutsideVertical;
 }
 
 function getApiLegendTruncate(
@@ -238,9 +240,9 @@ function getApiLegendTruncate(
   };
 }
 
-function convertSeriesHeaderToAPIFormat(legend: XYVisualizationState['legend']): {
-  series_header?: { text?: string; visible?: boolean };
-} {
+function convertSeriesHeaderToAPIFormat(
+  legend: XYVisualizationState['legend']
+): Pick<XYLegendInside, 'series_header'> {
   const { title, isTitleVisible } = legend;
   if (isTitleVisible === false) {
     return { series_header: stripUndefined({ visible: false, text: undefined }) };
@@ -256,7 +258,7 @@ function convertSeriesHeaderToAPIFormat(legend: XYVisualizationState['legend']):
 
 export function convertLegendToAPIFormat(
   legend: XYVisualizationState['legend']
-): Pick<XYConfig, 'legend'> | {} {
+): Pick<XYConfig, 'legend'> {
   const visibility = !legend.isVisible ? 'hidden' : legend.showSingleSeries ? 'auto' : 'visible';
   const statistics = legend.legendStats?.length
     ? legend.legendStats.map((stat) => legendStatisticCompat.toAPI(stat))
@@ -264,11 +266,11 @@ export function convertLegendToAPIFormat(
 
   return {
     legend: stripUndefined({
-      visibility,
-      statistics,
       ...convertSeriesHeaderToAPIFormat(legend),
       ...getLegendAlignment(legend),
       ...getLegendLayout(legend),
+      visibility,
+      statistics,
     }),
-  };
+  } satisfies Pick<XYConfig, 'legend'>;
 }

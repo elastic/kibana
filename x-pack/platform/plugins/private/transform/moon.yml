@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/es-ui-shared-plugin'
   - '@kbn/discover-plugin'
+  - '@kbn/discover-utils'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/core-http-browser'
@@ -94,6 +95,8 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/core-http-common'
   - '@kbn/cps'
+  - '@kbn/core-ui-settings-server-mocks'
+  - '@kbn/task-manager-plugin'
 tags:
   - plugin
   - prod

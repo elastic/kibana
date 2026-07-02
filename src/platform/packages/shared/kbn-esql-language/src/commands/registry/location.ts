@@ -22,6 +22,7 @@ const commandOptionNameToLocation: Record<string, Location> = {
   'inline stats': Location.STATS,
   by: Location.STATS_BY,
   'limit:by': Location.LIMIT_BY,
+  'change_point:by': Location.CHANGE_POINT_BY,
   enrich: Location.ENRICH,
   with: Location.ENRICH_WITH,
   dissect: Location.DISSECT,

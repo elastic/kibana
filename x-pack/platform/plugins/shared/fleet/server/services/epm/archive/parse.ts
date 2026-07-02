@@ -136,6 +136,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'discovery',
   'var_groups',
   'deprecated',
+  'provider_permissions',
 ] as const;
 
 const registryInputProps = Object.values(RegistryInputKeys);
@@ -771,6 +772,30 @@ export function parseTopLevelElasticsearchEntry(elasticsearch?: Record<string, a
   }
 
   // @ts-expect-error upgrade typescript v5.1.6
+  if (expandedElasticsearch?.index_mode) {
+    // @ts-expect-error upgrade typescript v5.1.6
+    parsedElasticsearchEntry.index_mode = expandedElasticsearch.index_mode;
+  }
+
+  // @ts-expect-error upgrade typescript v5.1.6
+  if (expandedElasticsearch?.source_mode) {
+    // @ts-expect-error upgrade typescript v5.1.6
+    parsedElasticsearchEntry.source_mode = expandedElasticsearch.source_mode;
+  }
+
+  // @ts-expect-error upgrade typescript v5.1.6
+  if (expandedElasticsearch?.dynamic_dataset) {
+    // @ts-expect-error upgrade typescript v5.1.6
+    parsedElasticsearchEntry.dynamic_dataset = expandedElasticsearch.dynamic_dataset;
+  }
+
+  // @ts-expect-error upgrade typescript v5.1.6
+  if (expandedElasticsearch?.dynamic_namespace) {
+    // @ts-expect-error upgrade typescript v5.1.6
+    parsedElasticsearchEntry.dynamic_namespace = expandedElasticsearch.dynamic_namespace;
+  }
+
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.index_template?.mappings) {
     parsedElasticsearchEntry['index_template.mappings'] = expandDottedEntries(
       // @ts-expect-error upgrade typescript v5.1.6
@@ -785,6 +810,7 @@ export function parseTopLevelElasticsearchEntry(elasticsearch?: Record<string, a
       expandedElasticsearch.index_template.settings
     );
   }
+
   return parsedElasticsearchEntry;
 }
 

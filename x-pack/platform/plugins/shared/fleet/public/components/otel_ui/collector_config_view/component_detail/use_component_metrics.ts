@@ -29,7 +29,7 @@ interface UseComponentMetricsResult {
   error?: Error;
 }
 
-const METRICS_INDEX = 'metrics-*';
+const METRICS_INDEX = 'metrics-collectortelemetry.otel-*';
 
 interface MetricDefinition {
   field: string;

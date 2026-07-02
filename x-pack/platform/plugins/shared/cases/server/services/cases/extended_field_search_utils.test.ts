@@ -15,6 +15,8 @@ import {
   resolveFieldLabelSearch,
   buildFieldLabelRuntimeMappings,
   buildFieldLabelExistsClauses,
+  buildAllExtendedFieldValuesRuntimeMapping,
+  EF_ALL_VALUES_FIELD,
 } from './extended_field_search_utils';
 
 describe('resolveExtendedFieldFilters', () => {
@@ -362,13 +364,6 @@ describe('resolveExtendedFieldFilters', () => {
 });
 
 describe('parseDateFilterToRange', () => {
-  it('parses MM/DD/YYYY to a full-day UTC range', () => {
-    expect(parseDateFilterToRange('01/01/2024')).toEqual({
-      gte: '2024-01-01T00:00:00.000Z',
-      lt: '2024-01-02T00:00:00.000Z',
-    });
-  });
-
   it('parses YYYY-MM-DD to a full-day UTC range', () => {
     expect(parseDateFilterToRange('2024-01-01')).toEqual({
       gte: '2024-01-01T00:00:00.000Z',
@@ -389,30 +384,26 @@ describe('parseDateFilterToRange', () => {
     expect(parseDateFilterToRange('2024/01/01')).toBeUndefined();
   });
 
-  it('returns undefined for out-of-range month or day', () => {
-    expect(parseDateFilterToRange('13/01/2024')).toBeUndefined();
-    expect(parseDateFilterToRange('00/01/2024')).toBeUndefined();
+  it('returns undefined for MM/DD/YYYY format (only ISO accepted)', () => {
+    expect(parseDateFilterToRange('01/01/2024')).toBeUndefined();
+    expect(parseDateFilterToRange('12/31/2024')).toBeUndefined();
+  });
+
+  it('returns undefined for out-of-range month or day in ISO format', () => {
+    expect(parseDateFilterToRange('2024-13-01')).toBeUndefined();
+    expect(parseDateFilterToRange('2024-00-01')).toBeUndefined();
   });
 
   it('returns undefined for invalid day-of-month in February (non-leap year)', () => {
-    expect(parseDateFilterToRange('02/29/2023')).toBeUndefined();
-    expect(parseDateFilterToRange('02/30/2023')).toBeUndefined();
-    expect(parseDateFilterToRange('02/31/2023')).toBeUndefined();
     expect(parseDateFilterToRange('2023-02-29')).toBeUndefined();
     expect(parseDateFilterToRange('2023-02-30')).toBeUndefined();
   });
 
   it('returns undefined for invalid day-of-month in February (leap year)', () => {
-    expect(parseDateFilterToRange('02/30/2024')).toBeUndefined();
-    expect(parseDateFilterToRange('02/31/2024')).toBeUndefined();
     expect(parseDateFilterToRange('2024-02-30')).toBeUndefined();
   });
 
   it('accepts valid leap day in February (leap year)', () => {
-    expect(parseDateFilterToRange('02/29/2024')).toEqual({
-      gte: '2024-02-29T00:00:00.000Z',
-      lt: '2024-03-01T00:00:00.000Z',
-    });
     expect(parseDateFilterToRange('2024-02-29')).toEqual({
       gte: '2024-02-29T00:00:00.000Z',
       lt: '2024-03-01T00:00:00.000Z',
@@ -420,10 +411,6 @@ describe('parseDateFilterToRange', () => {
   });
 
   it('returns undefined for invalid day-of-month in 30-day months', () => {
-    expect(parseDateFilterToRange('04/31/2024')).toBeUndefined();
-    expect(parseDateFilterToRange('06/31/2024')).toBeUndefined();
-    expect(parseDateFilterToRange('09/31/2024')).toBeUndefined();
-    expect(parseDateFilterToRange('11/31/2024')).toBeUndefined();
     expect(parseDateFilterToRange('2024-04-31')).toBeUndefined();
     expect(parseDateFilterToRange('2024-06-31')).toBeUndefined();
     expect(parseDateFilterToRange('2024-09-31')).toBeUndefined();
@@ -431,22 +418,22 @@ describe('parseDateFilterToRange', () => {
   });
 
   it('accepts valid last day of 30-day months', () => {
-    expect(parseDateFilterToRange('04/30/2024')).toEqual({
+    expect(parseDateFilterToRange('2024-04-30')).toEqual({
       gte: '2024-04-30T00:00:00.000Z',
       lt: '2024-05-01T00:00:00.000Z',
     });
-    expect(parseDateFilterToRange('11/30/2024')).toEqual({
+    expect(parseDateFilterToRange('2024-11-30')).toEqual({
       gte: '2024-11-30T00:00:00.000Z',
       lt: '2024-12-01T00:00:00.000Z',
     });
   });
 
   it('accepts valid day 31 in 31-day months', () => {
-    expect(parseDateFilterToRange('01/31/2024')).toEqual({
+    expect(parseDateFilterToRange('2024-01-31')).toEqual({
       gte: '2024-01-31T00:00:00.000Z',
       lt: '2024-02-01T00:00:00.000Z',
     });
-    expect(parseDateFilterToRange('12/31/2024')).toEqual({
+    expect(parseDateFilterToRange('2024-12-31')).toEqual({
       gte: '2024-12-31T00:00:00.000Z',
       lt: '2025-01-01T00:00:00.000Z',
     });
@@ -454,7 +441,7 @@ describe('parseDateFilterToRange', () => {
 });
 
 describe('buildExtendedFieldRuntimeMappings', () => {
-  it('builds keyword runtime field that auto-detects JSON arrays', () => {
+  it('skips runtime mapping for SELECT_BASIC (uses flattened field directly)', () => {
     const mappings = buildExtendedFieldRuntimeMappings([
       [
         {
@@ -467,13 +454,7 @@ describe('buildExtendedFieldRuntimeMappings', () => {
       ],
     ]);
 
-    const src = (mappings.ef_priority_as_keyword.script as { source: string })?.source ?? '';
-    expect(src).toContain('params._source');
-    expect(src).toContain('priority_as_keyword');
-    // Auto-detect: if value starts with '[', split as array; otherwise emit plain
-    expect(src).toContain("raw.startsWith('[')");
-    expect(src).toContain('emit(raw)');
-    expect(src).not.toContain('?.');
+    expect(mappings).toEqual({});
   });
 
   it('builds long runtime field for integer type', () => {
@@ -522,7 +503,7 @@ describe('buildExtendedFieldRuntimeMappings', () => {
     });
   });
 
-  it('builds date runtime field as keyword type that emits the raw ISO string', () => {
+  it('skips runtime mapping for DATE_PICKER (uses flattened field directly)', () => {
     const mappings = buildExtendedFieldRuntimeMappings([
       [
         {
@@ -535,33 +516,7 @@ describe('buildExtendedFieldRuntimeMappings', () => {
       ],
     ]);
 
-    expect(mappings.ef_due_date_as_date.type).toBe('keyword');
-    const src = (mappings.ef_due_date_as_date.script as { source: string })?.source ?? '';
-    expect(src).toContain('emit(raw)');
-    expect(src).not.toContain('SimpleDateFormat');
-  });
-
-  it('builds DATE_PICKER runtime field as keyword type that emits the raw ISO string', () => {
-    const mappings = buildExtendedFieldRuntimeMappings([
-      [
-        {
-          storageKey: 'start_date_as_date',
-          value: '01/01/2024',
-          esType: 'date',
-          control: 'DATE_PICKER',
-          templateVersions: [{ id: 'tmpl-a', version: 1 }],
-        },
-      ],
-    ]);
-
-    expect(mappings.ef_start_date_as_date.type).toBe('keyword');
-
-    const src = (mappings.ef_start_date_as_date.script as { source: string })?.source ?? '';
-    expect(src).toContain('params._source');
-    expect(src).toContain('start_date_as_date');
-    expect(src).toContain('emit(raw)');
-    expect(src).not.toContain('SimpleDateFormat');
-    expect(src).not.toContain('?.');
+    expect(mappings).toEqual({});
   });
 
   it('builds USER_PICKER runtime field that extracts name values from {uid,name} objects', () => {
@@ -609,7 +564,7 @@ describe('buildExtendedFieldRuntimeMappings', () => {
     expect(src).not.toContain('?.');
   });
 
-  it('builds multiple runtime fields from multiple groups', () => {
+  it('only builds runtime fields for controls that need scripts, skips flattened-optimizable controls', () => {
     const mappings = buildExtendedFieldRuntimeMappings([
       [
         {
@@ -631,12 +586,46 @@ describe('buildExtendedFieldRuntimeMappings', () => {
       ],
     ]);
 
-    expect(Object.keys(mappings)).toEqual(['ef_priority_as_keyword', 'ef_effort_as_integer']);
+    expect(Object.keys(mappings)).toEqual(['ef_effort_as_integer']);
+  });
+
+  it('builds runtime mapping for INPUT_TEXT (needs substring matching)', () => {
+    const mappings = buildExtendedFieldRuntimeMappings([
+      [
+        {
+          storageKey: 'summary_as_keyword',
+          value: 'test',
+          esType: 'keyword',
+          control: 'INPUT_TEXT',
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
+        },
+      ],
+    ]);
+
+    expect(mappings).toHaveProperty('ef_summary_as_keyword');
+    expect(mappings.ef_summary_as_keyword.type).toBe('keyword');
+  });
+
+  it('builds runtime mapping for TEXTAREA (needs substring matching)', () => {
+    const mappings = buildExtendedFieldRuntimeMappings([
+      [
+        {
+          storageKey: 'notes_as_keyword',
+          value: 'deploy',
+          esType: 'keyword',
+          control: 'TEXTAREA',
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
+        },
+      ],
+    ]);
+
+    expect(mappings).toHaveProperty('ef_notes_as_keyword');
+    expect(mappings.ef_notes_as_keyword.type).toBe('keyword');
   });
 });
 
 describe('buildExtendedFieldFilterClauses', () => {
-  it('builds a scoped bool.filter clause for a single keyword field', () => {
+  it('builds a scoped bool.filter clause for a single keyword field using flattened path', () => {
     const clauses = buildExtendedFieldFilterClauses([
       [
         {
@@ -653,7 +642,7 @@ describe('buildExtendedFieldFilterClauses', () => {
       {
         bool: {
           filter: [
-            { term: { ef_priority_as_keyword: { value: 'high' } } },
+            { term: { 'cases.extended_fields.priority_as_keyword': 'high' } },
             {
               bool: {
                 minimum_should_match: 1,
@@ -681,6 +670,80 @@ describe('buildExtendedFieldFilterClauses', () => {
         },
       },
     ]);
+  });
+
+  it('builds wildcard query for INPUT_TEXT control via runtime field', () => {
+    const clauses = buildExtendedFieldFilterClauses([
+      [
+        {
+          storageKey: 'summary_as_keyword',
+          value: 'some changes',
+          esType: 'keyword',
+          control: 'INPUT_TEXT',
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
+        },
+      ],
+    ]);
+
+    expect(clauses[0]?.bool?.filter).toBeDefined();
+    const filterArray = clauses[0]!.bool!.filter as estypes.QueryDslQueryContainer[];
+    expect(filterArray[0]).toEqual({
+      wildcard: {
+        ef_summary_as_keyword: {
+          value: '*some changes*',
+          case_insensitive: true,
+        },
+      },
+    });
+  });
+
+  it('builds wildcard query for TEXTAREA control via runtime field', () => {
+    const clauses = buildExtendedFieldFilterClauses([
+      [
+        {
+          storageKey: 'notes_as_keyword',
+          value: 'deploy',
+          esType: 'keyword',
+          control: 'TEXTAREA',
+          templateVersions: [{ id: 'tmpl-b', version: 1 }],
+        },
+      ],
+    ]);
+
+    expect(clauses[0]?.bool?.filter).toBeDefined();
+    const filterArray = clauses[0]!.bool!.filter as estypes.QueryDslQueryContainer[];
+    expect(filterArray[0]).toEqual({
+      wildcard: {
+        ef_notes_as_keyword: {
+          value: '*deploy*',
+          case_insensitive: true,
+        },
+      },
+    });
+  });
+
+  it('escapes wildcard characters in INPUT_TEXT filter value', () => {
+    const clauses = buildExtendedFieldFilterClauses([
+      [
+        {
+          storageKey: 'summary_as_keyword',
+          value: 'test*value?here',
+          esType: 'keyword',
+          control: 'INPUT_TEXT',
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
+        },
+      ],
+    ]);
+
+    const filterArray = clauses[0]!.bool!.filter as estypes.QueryDslQueryContainer[];
+    expect(filterArray[0]).toEqual({
+      wildcard: {
+        ef_summary_as_keyword: {
+          value: '*test\\*value\\?here*',
+          case_insensitive: true,
+        },
+      },
+    });
   });
 
   it('builds term queries with numeric value for integer fields', () => {
@@ -824,7 +887,7 @@ describe('buildExtendedFieldFilterClauses', () => {
     ]);
   });
 
-  it('builds range query for DATE_PICKER using MM/DD/YYYY input', () => {
+  it('drops DATE_PICKER filter when value is MM/DD/YYYY (non-ISO)', () => {
     const clauses = buildExtendedFieldFilterClauses([
       [
         {
@@ -837,48 +900,10 @@ describe('buildExtendedFieldFilterClauses', () => {
       ],
     ]);
 
-    expect(clauses).toEqual([
-      {
-        bool: {
-          filter: [
-            {
-              range: {
-                ef_start_date_as_date: {
-                  gte: '2024-01-01T00:00:00.000Z',
-                  lt: '2024-01-02T00:00:00.000Z',
-                },
-              },
-            },
-            {
-              bool: {
-                minimum_should_match: 1,
-                should: [
-                  {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            'cases.template.id': 'tmpl-a',
-                          },
-                        },
-                        {
-                          term: {
-                            'cases.template.version': 1,
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      },
-    ]);
+    expect(clauses).toHaveLength(0);
   });
 
-  it('builds range query for DATE_PICKER using YYYY-MM-DD input', () => {
+  it('builds range query for DATE_PICKER using YYYY-MM-DD input on flattened path', () => {
     const clauses = buildExtendedFieldFilterClauses([
       [
         {
@@ -897,7 +922,7 @@ describe('buildExtendedFieldFilterClauses', () => {
           filter: [
             {
               range: {
-                ef_start_date_as_date: {
+                'cases.extended_fields.start_date_as_date': {
                   gte: '2024-01-01T00:00:00.000Z',
                   lt: '2024-01-02T00:00:00.000Z',
                 },
@@ -1054,7 +1079,7 @@ describe('buildExtendedFieldFilterClauses', () => {
     expect(clauses[0]).toEqual({
       bool: {
         filter: [
-          { term: { ef_priority_as_keyword: { value: 'high' } } },
+          { term: { 'cases.extended_fields.priority_as_keyword': 'high' } },
           {
             bool: {
               minimum_should_match: 1,
@@ -1084,7 +1109,7 @@ describe('buildExtendedFieldFilterClauses', () => {
     expect(clauses[1]).toEqual({
       bool: {
         filter: [
-          { term: { ef_region_as_keyword: { value: 'emea' } } },
+          { term: { 'cases.extended_fields.region_as_keyword': 'emea' } },
           {
             bool: {
               minimum_should_match: 1,
@@ -1243,7 +1268,7 @@ describe('buildExtendedFieldFilterClauses', () => {
     expect(clauses[0]).toEqual({
       bool: {
         filter: [
-          { term: { ef_priority_as_keyword: { value: 'high' } } },
+          { term: { 'cases.extended_fields.priority_as_keyword': 'high' } },
           {
             bool: {
               minimum_should_match: 1,
@@ -1333,10 +1358,15 @@ describe('buildExtendedFieldFilterClauses', () => {
     const clause = clauses[0];
     expect(clause?.bool?.filter).toBeDefined();
 
-    const filterArray = clause!.bool!.filter as Array<{
+    const filterArray = clause!.bool!.filter as estypes.QueryDslQueryContainer[];
+    // SELECT control uses flattened path
+    expect(filterArray[0]).toEqual({
+      term: { 'cases.extended_fields.priority_as_keyword': 'high' },
+    });
+
+    const templateFilter = filterArray[1] as {
       bool?: { should?: unknown[]; minimum_should_match?: number };
-    }>;
-    const templateFilter = filterArray[1];
+    };
 
     expect(templateFilter?.bool?.should).toHaveLength(3);
     expect(templateFilter?.bool?.minimum_should_match).toBe(1);
@@ -1540,7 +1570,7 @@ describe('resolveFieldLabelSearch', () => {
 });
 
 describe('buildFieldLabelRuntimeMappings', () => {
-  it('builds runtime mappings for resolved label filters', () => {
+  it('skips runtime mappings for controls that use flattened field directly', () => {
     const mappings = buildFieldLabelRuntimeMappings([
       {
         storageKey: 'priority_as_keyword',
@@ -1550,11 +1580,10 @@ describe('buildFieldLabelRuntimeMappings', () => {
       },
     ]);
 
-    expect(mappings).toHaveProperty('ef_priority_as_keyword');
-    expect(mappings.ef_priority_as_keyword.type).toBe('keyword');
+    expect(mappings).toEqual({});
   });
 
-  it('builds DATE_PICKER runtime field as keyword type', () => {
+  it('skips runtime mapping for DATE_PICKER (uses flattened field directly)', () => {
     const mappings = buildFieldLabelRuntimeMappings([
       {
         storageKey: 'start_date_as_date',
@@ -1564,12 +1593,39 @@ describe('buildFieldLabelRuntimeMappings', () => {
       },
     ]);
 
-    expect(mappings.ef_start_date_as_date.type).toBe('keyword');
+    expect(mappings).toEqual({});
+  });
+
+  it('builds runtime mappings for CHECKBOX_GROUP', () => {
+    const mappings = buildFieldLabelRuntimeMappings([
+      {
+        storageKey: 'components_as_keyword',
+        esType: 'keyword',
+        control: 'CHECKBOX_GROUP',
+        templateVersions: [{ id: 'tmpl-a', version: 1 }],
+      },
+    ]);
+
+    expect(mappings).toHaveProperty('ef_components_as_keyword');
+    expect(mappings.ef_components_as_keyword.type).toBe('keyword');
+  });
+
+  it('builds runtime mappings for USER_PICKER', () => {
+    const mappings = buildFieldLabelRuntimeMappings([
+      {
+        storageKey: 'reviewers_as_keyword',
+        esType: 'keyword',
+        control: 'USER_PICKER',
+        templateVersions: [{ id: 'tmpl-c', version: 1 }],
+      },
+    ]);
+
+    expect(mappings).toHaveProperty('ef_reviewers_as_keyword');
   });
 });
 
 describe('buildFieldLabelExistsClauses', () => {
-  it('builds exists + template-scoped clause for a single label filter', () => {
+  it('builds exists clause on flattened path for non-script controls', () => {
     const clauses = buildFieldLabelExistsClauses([
       {
         storageKey: 'priority_as_keyword',
@@ -1583,7 +1639,7 @@ describe('buildFieldLabelExistsClauses', () => {
       {
         bool: {
           filter: [
-            { exists: { field: 'ef_priority_as_keyword' } },
+            { exists: { field: 'cases.extended_fields.priority_as_keyword' } },
             {
               bool: {
                 should: [
@@ -1605,7 +1661,20 @@ describe('buildFieldLabelExistsClauses', () => {
     ]);
   });
 
-  it('builds multiple clauses for multiple label filters', () => {
+  it('builds exists clause on runtime field for script-required controls', () => {
+    const clauses = buildFieldLabelExistsClauses([
+      {
+        storageKey: 'components_as_keyword',
+        esType: 'keyword',
+        control: 'CHECKBOX_GROUP',
+        templateVersions: [{ id: 'tmpl-a', version: 1 }],
+      },
+    ]);
+
+    expect(clauses[0]).toHaveProperty('bool.filter.0.exists.field', 'ef_components_as_keyword');
+  });
+
+  it('builds multiple clauses for multiple label filters using correct field paths', () => {
     const clauses = buildFieldLabelExistsClauses([
       {
         storageKey: 'priority_as_keyword',
@@ -1622,8 +1691,14 @@ describe('buildFieldLabelExistsClauses', () => {
     ]);
 
     expect(clauses).toHaveLength(2);
-    expect(clauses[0]).toHaveProperty('bool.filter.0.exists.field', 'ef_priority_as_keyword');
-    expect(clauses[1]).toHaveProperty('bool.filter.0.exists.field', 'ef_region_as_keyword');
+    expect(clauses[0]).toHaveProperty(
+      'bool.filter.0.exists.field',
+      'cases.extended_fields.priority_as_keyword'
+    );
+    expect(clauses[1]).toHaveProperty(
+      'bool.filter.0.exists.field',
+      'cases.extended_fields.region_as_keyword'
+    );
   });
 
   it('includes multiple template versions in OR logic', () => {
@@ -1648,5 +1723,72 @@ describe('buildFieldLabelExistsClauses', () => {
 
   it('returns empty array for empty input', () => {
     expect(buildFieldLabelExistsClauses([])).toEqual([]);
+  });
+});
+
+describe('buildAllExtendedFieldValuesRuntimeMapping', () => {
+  it('returns a mapping with the ef_all_values field', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+
+    expect(mappings).toHaveProperty([EF_ALL_VALUES_FIELD]);
+    expect(mappings[EF_ALL_VALUES_FIELD].type).toBe('keyword');
+  });
+
+  it('generates a Painless script that reads from _source', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+    const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
+
+    expect(src).toContain('params._source');
+  });
+
+  it('generates a Painless script that iterates extended_fields entries', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+    const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
+
+    expect(src).toContain('ef.entrySet()');
+    expect(src).toContain('extended_fields');
+  });
+
+  it('generates a Painless script that lowercases and splits on whitespace', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+    const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
+
+    expect(src).toContain('toLowerCase(Locale.ROOT)');
+    expect(src).toContain('emit(t)');
+  });
+
+  it('generates a Painless script that strips JSON punctuation', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+    const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
+
+    expect(src).toContain('replaceAll');
+  });
+
+  it('does not use optional chaining (?.) in the Painless script', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+    const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
+
+    expect(src).not.toContain('?.');
+  });
+
+  it('extracts USER_PICKER names via regex before falling back to tokenization', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+    const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
+
+    expect(src).toContain('"name":"([^"]*)"');
+  });
+
+  it('uses = as a word separator in the fallback tokenization', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+    const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
+
+    expect(src).toContain('\\s,=');
+  });
+
+  it('guards against non-Map ef values with instanceof check', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+    const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
+
+    expect(src).toContain('instanceof Map');
   });
 });

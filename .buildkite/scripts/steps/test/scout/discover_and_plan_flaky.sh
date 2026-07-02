@@ -15,6 +15,13 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
+
+# This step only runs Node scripts and `playwright --list` (manifest generation,
+# config discovery, flaky run-order planning); it never serves the Kibana UI, so
+# skip building the dev-mode shared webpack bundles (monaco, ui-shared-deps)
+# during bootstrap.
+export KBN_BOOTSTRAP_NO_PREBUILT=true
+
 .buildkite/scripts/bootstrap.sh
 
 # `SCOUT_DISCOVERY_TARGET` is computed at pipeline-generation time from the
@@ -30,6 +37,7 @@ echo "--- Discover Playwright Configs (target=$SCOUT_DISCOVERY_TARGET)"
 node scripts/scout discover-playwright-configs --include-custom-servers --target "$SCOUT_DISCOVERY_TARGET" --save
 cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
 buildkite-agent artifact upload "scout_playwright_configs.json"
+upload_tmp_artifact scout_playwright_configs.json scout_playwright_configs.json "$BUILDKITE_BUILD_ID"
 
 echo '--- Plan and upload Scout flaky steps'
 ts-node .buildkite/pipelines/flaky_tests/pick_scout_flaky_run_order.ts

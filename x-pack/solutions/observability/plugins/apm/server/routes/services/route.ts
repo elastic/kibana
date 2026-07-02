@@ -56,6 +56,8 @@ import type { ServiceTransactionDetailedStatPeriodsResponse } from './get_servic
 import { getServiceTransactionDetailedStatsPeriods } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
 import type { ServiceAgentResponse } from './get_service_agent';
 import { getServiceAgent } from './get_service_agent';
+import type { ServiceMixedIngestionResponse } from './get_service_mixed_ingestion';
+import { getServiceMixedIngestion } from './get_service_mixed_ingestion';
 import type { ServiceDependenciesResponse } from './get_service_dependencies';
 import { getServiceDependencies } from './get_service_dependencies';
 import type { ServiceDependenciesBreakdownResponse } from './get_service_dependencies_breakdown';
@@ -79,6 +81,7 @@ import type { ServiceTransactionTypesResponse } from './get_service_transaction_
 import { getServiceTransactionTypes } from './get_service_transaction_types';
 import type { ServiceThroughputResponse } from './get_throughput';
 import { getThroughput } from './get_throughput';
+import { getServiceHasSystemMetrics } from './get_service_has_system_metrics';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -303,6 +306,32 @@ const serviceAgentRoute = createApmServerRoute({
     });
 
     return apmServiceAgent;
+  },
+});
+
+const serviceMixedIngestionRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/mixed_ingestion',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([environmentRt, kueryRt, rangeRt]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<ServiceMixedIngestionResponse> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { environment, kuery, start, end } = params.query;
+
+    return getServiceMixedIngestion({
+      serviceName,
+      apmEventClient,
+      start,
+      end,
+      environment,
+      kuery,
+    });
   },
 });
 
@@ -998,12 +1027,31 @@ const serviceSlosRoute = createApmServerRoute({
   },
 });
 
+const serviceHasSystemMetricsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/has_system_metrics',
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: t.intersection([environmentRt, rangeRt]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<{ hasSystemMetrics: boolean }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const {
+      path: { serviceName },
+      query: { environment, start, end },
+    } = resources.params;
+
+    return getServiceHasSystemMetrics({ apmEventClient, serviceName, environment, start, end });
+  },
+});
+
 export const serviceRouteRepository = {
   ...servicesRoute,
   ...servicesDetailedStatisticsRoute,
   ...serviceMetadataDetailsRoute,
   ...serviceMetadataIconsRoute,
   ...serviceAgentRoute,
+  ...serviceMixedIngestionRoute,
   ...serviceTransactionTypesRoute,
   ...serviceNodeMetadataRoute,
   ...serviceAnnotationsRoute,
@@ -1018,4 +1066,5 @@ export const serviceRouteRepository = {
   ...serviceAlertsRoute,
   ...serviceAnomalyScoreRoute,
   ...serviceSlosRoute,
+  ...serviceHasSystemMetricsRoute,
 };

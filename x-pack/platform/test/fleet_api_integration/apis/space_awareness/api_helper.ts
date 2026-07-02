@@ -45,6 +45,9 @@ import type {
   GetSettingsResponse,
   PutSettingsRequest,
   CreateAgentlessPolicyResponse,
+  GetAgentlessPolicyResponse,
+  ListAgentlessPoliciesRequest,
+  ListAgentlessPoliciesResponse,
   PutDownloadSourceRequest,
 } from '@kbn/fleet-plugin/common/types';
 import type {
@@ -150,6 +153,35 @@ export class SpaceTestApiClient {
       .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .send();
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+
+  async getAgentlessPolicy(
+    policyId: string,
+    spaceId?: string
+  ): Promise<GetAgentlessPolicyResponse> {
+    const res = await this.supertest
+      .get(`${this.getBaseUrl(spaceId)}/api/fleet/agentless_policies/${policyId}`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx');
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+
+  async listAgentlessPolicies(
+    query: ListAgentlessPoliciesRequest['query'] = {},
+    spaceId?: string
+  ): Promise<ListAgentlessPoliciesResponse> {
+    const res = await this.supertest
+      .get(`${this.getBaseUrl(spaceId)}/api/fleet/agentless_policies`)
+      .query(query)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx');
 
     expectStatusCode200(res);
 
@@ -788,6 +820,19 @@ export class SpaceTestApiClient {
   async postStandaloneApiKey(name: string, spaceId?: string) {
     const res = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/internal/fleet/create_standalone_agent_api_key`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx')
+      .set('elastic-api-version', '1')
+      .send({ name });
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+
+  async postManagedOtlpApiKey(name: string, spaceId?: string) {
+    const res = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/internal/fleet/create_managed_otlp_api_key`)
       .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .set('elastic-api-version', '1')

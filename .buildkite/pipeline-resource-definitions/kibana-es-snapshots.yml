@@ -26,6 +26,11 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_snapshots/build.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/es_snapshots/build.yml
+            cleanup_sparse_state: true
       provider_settings:
         build_branches: false
         build_pull_requests: false
@@ -91,6 +96,11 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_snapshots/promote.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/es_snapshots/promote.yml
+            cleanup_sparse_state: true
       provider_settings:
         build_branches: false
         build_pull_requests: false
@@ -134,6 +144,7 @@ spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
         SCOUT_REPORTER_ENABLED: 'true'
       allow_rebuilds: true
@@ -141,6 +152,11 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_snapshots/verify.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/es_snapshots/verify.yml
+            cleanup_sparse_state: true
       provider_settings:
         build_branches: false
         build_pull_requests: false

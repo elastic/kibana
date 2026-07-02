@@ -28,7 +28,8 @@ import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { TransactionTypeSelect } from './transaction_type_select';
-import { RED_METRICS_CHART_ELEMENT, RedMetricsChartActions } from './red_metrics_chart_actions';
+import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
+import { RedMetricsChartActions } from './red_metrics_chart_actions';
 
 type ErrorRate =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>;
@@ -63,6 +64,8 @@ export function FailedTransactionChart({
   customAlertEvaluationThreshold,
   threshold,
   ruleTypeId,
+  compact,
+  showAlertAnnotations,
 }: {
   alert: TopAlert;
   transactionType?: string;
@@ -82,6 +85,10 @@ export function FailedTransactionChart({
   customAlertEvaluationThreshold?: number;
   threshold?: ReactElement;
   ruleTypeId?: ApmRuleType;
+  /** When true, hide the threshold side panel even if `threshold` is provided. */
+  compact?: boolean;
+  /** When set, overrides the default annotation behavior (which is keyed off `threshold`). */
+  showAlertAnnotations?: boolean;
 }) {
   const {
     services: { uiSettings },
@@ -146,7 +153,8 @@ export function FailedTransactionChart({
   const alertAnnotations = useGetChartAlertAnnotations({
     alert,
     dateFormat,
-    showAnnotations: !!threshold,
+    showAnnotations: showAlertAnnotations ?? !!threshold,
+    showThresholdAnnotation: !!threshold,
     customAlertEvaluationThreshold,
     normalizeThreshold: (value) => value / 100,
   });
@@ -202,19 +210,19 @@ export function FailedTransactionChart({
                   }}
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
-                  element={RED_METRICS_CHART_ELEMENT.FAILED_TRANSACTION_RATE}
+                  element={APM_CHART_EBT_ELEMENTS.FAILED_TRANSACTION_RATE}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="m">
-          {!!threshold && (
+          {!!threshold && !compact && (
             <EuiFlexItem style={{ minWidth: THRESHOLD_SIDEBAR_MIN_WIDTH }} grow={1}>
               {threshold}
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={!!threshold ? 5 : undefined}>
+          <EuiFlexItem grow={!!threshold && !compact ? 5 : undefined}>
             <TimeseriesChart
               id="errorRate"
               height={200}

@@ -25,13 +25,7 @@ import { EMPTY } from 'rxjs';
 import { useCurrentAttributes } from '../../../app_plugin/shared/edit_on_the_fly/use_current_attributes';
 import { useESQLEditorContext } from './esql_editor_context';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
-import {
-  onActiveDataChange,
-  useLensDispatch,
-  useLensSelector,
-  selectCanEditTextBasedQuery,
-  selectSearchSessionId,
-} from '../../../state_management';
+import { useLensSelector, selectSearchSessionId } from '../../../state_management';
 import type { ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { getSuggestions } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { useESQLVariables } from '../../../app_plugin/shared/edit_on_the_fly/use_esql_variables';
@@ -97,7 +91,6 @@ export function ESQLEditor({
 
   const { visualizationMap, datasourceMap } = useEditorFrameService();
   const { visualization } = useLensSelector((state) => state.lens);
-  const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
   // Updated when the workspace kicks off a new search (manual refresh, auto-refresh,
   // or when chart requests run under a new session). Used as an effect dependency to
   // re-fetch the ES|QL results grid for the last submitted query.
@@ -144,29 +137,17 @@ export function ESQLEditor({
   const { esqlVariables } = useFetchContext({ uuid: panelId, parentApi });
   const esqlQueryStats = useESQLQueryStats(isTextBasedLanguage, lensAdapters?.requests);
 
-  const dispatch = useLensDispatch();
-
-  // Update activeData and column limit indicator when chart data finishes loading
+  // Update column limit indicator when chart data finishes loading
   const isDataLoading = useObservable(dataLoading$ ?? EMPTY);
 
   useEffect(() => {
-    if (isDataLoading !== false) {
-      return;
-    }
-
+    if (isDataLoading !== false) return;
     const activeData = getActiveDataFromDatatable(layerId, lensAdaptersRef.current?.tables?.tables);
-
     const table = activeData?.[layerId];
     if (table) {
-      // there are cases where a query can return a big amount of columns
-      // at this case we don't suggest all columns in a table but the first `MAX_NUM_OF_COLUMNS`
       setSuggestsLimitedColumns(table.columns.length >= MAX_NUM_OF_COLUMNS);
     }
-
-    if (Object.keys(activeData).length > 0) {
-      dispatch(onActiveDataChange({ activeData }));
-    }
-  }, [isDataLoading, dispatch, layerId]);
+  }, [isDataLoading, layerId]);
 
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
@@ -275,8 +256,7 @@ export function ESQLEditor({
     adHocDataViews,
   ]);
 
-  // Early exit if it's not in TextBased mode or the editor should be hidden
-  if (!isTextBasedLanguage || !canEditTextBasedQuery || !isOfAggregateQueryType(query)) {
+  if (!isOfAggregateQueryType(query)) {
     return null;
   }
 

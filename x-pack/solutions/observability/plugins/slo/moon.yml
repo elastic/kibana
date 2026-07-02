@@ -100,7 +100,9 @@ dependsOn:
   - '@kbn/core-application-browser'
   - '@kbn/core-theme-browser'
   - '@kbn/ebt-tools'
+  - '@kbn/ebt-click'
   - '@kbn/alerting-rule-utils'
+  - '@kbn/apm-utils'
   - '@kbn/discover-shared-plugin'
   - '@kbn/server-route-repository-client'
   - '@kbn/response-ops-alerts-table'
@@ -133,6 +135,9 @@ dependsOn:
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/agent-builder-browser'
   - '@kbn/core-analytics-browser'
+  - '@kbn/core-spaces-common'
+  - '@kbn/inspector-plugin'
+  - '@kbn/core-feature-flags-server'
 tags:
   - plugin
   - prod

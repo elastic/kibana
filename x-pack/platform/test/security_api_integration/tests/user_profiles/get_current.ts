@@ -8,7 +8,8 @@
 import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 import { expect } from 'expect';
 import type { Cookie } from 'tough-cookie';
-import { parse as parseCookie } from 'tough-cookie';
+
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -34,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username: testUserName, password: testUserPassword },
         })
         .expect(200);
-      return parseCookie(response.headers['set-cookie'][0])!;
+      return findSessionCookie(response.headers['set-cookie']);
     }
 
     before(async () => {
@@ -375,6 +376,26 @@ export default function ({ getService }: FtrProviderContext) {
         }
       `);
       expect(userWithProfileId.profile_uid).toBeUndefined(); // The /me endpoint is only applicable with an active session
+    });
+
+    it('returns 404 with basic auth when es-security-runas-user header is present', async () => {
+      const authHeaderValue = `Basic ${Buffer.from(`${testUserName}:${testUserPassword}`).toString(
+        'base64'
+      )}`;
+
+      await supertestWithoutAuth
+        .get('/internal/security/user_profile')
+        .set('Authorization', authHeaderValue)
+        .set('es-security-runas-user', testUserName)
+        .expect(404);
+    });
+
+    it('returns 404 with API key when es-security-runas-user header is present', async () => {
+      await supertestWithoutAuth
+        .get('/internal/security/user_profile')
+        .set('Authorization', `apikey ${apiKey.encoded}`)
+        .set('es-security-runas-user', testUserName)
+        .expect(404);
     });
   });
 }

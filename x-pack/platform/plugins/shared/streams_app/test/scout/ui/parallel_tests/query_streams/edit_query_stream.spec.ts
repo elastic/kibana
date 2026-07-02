@@ -44,7 +44,7 @@ test.describe('Query streams - Edit query stream', { tag: tags.stateful.classic 
     await disableQueryStreams(kbnClient);
   });
 
-  test("should support editing an existing query stream's ES|QL query from the partitioning tab", async ({
+  test("should support editing an existing query stream's ES|QL query from the overview tab", async ({
     pageObjects,
     esClient,
   }) => {
@@ -52,7 +52,7 @@ test.describe('Query streams - Edit query stream', { tag: tags.stateful.classic 
     await pageObjects.streams.gotoPartitioningTab('logs.ecs');
     await pageObjects.streams.selectChildStreamType('Query');
     await pageObjects.streams.clickQueryStreamLink(QUERY_STREAM_NAME);
-    await pageObjects.streams.clickQueryStreamDetailsTab('advanced');
+    await pageObjects.streams.clickQueryStreamDetailsTab('overview');
     await pageObjects.streams.clickQueryStreamDetailsEditQueryButton();
     await expect(pageObjects.streams.queryStreamFlyout).toBeVisible();
     await expect(
@@ -60,8 +60,13 @@ test.describe('Query streams - Edit query stream', { tag: tags.stateful.classic 
         .getByTestId('streamsEsqlEditor')
         .getByTestId('kibanaCodeEditor')
     ).toBeVisible();
-    const editorValue = await pageObjects.streams.kibanaMonacoEditor.getCodeEditorValue();
-    expect(editorValue).toBe(INITIAL_ESQL_QUERY);
+    await pageObjects.streams.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
+    // Monaco's model can briefly hold an empty string after the editor mounts.
+    // Poll the value so we don't race the React props -> editor instance update.
+    await expect(async () => {
+      const editorValue = await pageObjects.streams.kibanaMonacoEditor.getCodeEditorValue();
+      expect(editorValue).toBe(INITIAL_ESQL_QUERY);
+    }).toPass({ timeout: 30_000 });
     const UPDATED_ESQL_QUERY = 'FROM $.logs.ecs | WHERE host.name == "host-2"';
     await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue(UPDATED_ESQL_QUERY);
     await pageObjects.streams.saveFlyoutQueryStreamEdit();

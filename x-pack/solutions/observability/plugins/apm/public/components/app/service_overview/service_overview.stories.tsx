@@ -8,20 +8,25 @@
 import type { StoryFn, Meta } from '@storybook/react';
 import React from 'react';
 import { ServiceOverview } from '.';
-import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { APMServiceContextValue } from '../../../context/apm_service/apm_service_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { mockApmApiCallResponse } from '../../../services/rest/call_apm_api_spy';
+import { mockApmApiCallResponse } from '../../../services/rest/storybook_mock_http';
 
 const stories: Meta<{}> = {
   title: 'app/ServiceOverview',
   component: ServiceOverview,
+  parameters: {
+    routePath:
+      '/services/testServiceName/overview?environment=ENVIRONMENT_ALL&rangeFrom=now-15m&rangeTo=now',
+    serviceContextValue: {
+      serviceName: 'testServiceName',
+      transactionType: 'type',
+      transactionTypeStatus: FETCH_STATUS.SUCCESS,
+      transactionTypes: ['type'],
+    } as unknown as APMServiceContextValue,
+  },
   decorators: [
     (StoryComponent) => {
-      const serviceName = 'testServiceName';
-      const transactionType = 'type';
-      const transactionTypeStatus = FETCH_STATUS.SUCCESS;
-
       mockApmApiCallResponse(
         `GET /api/apm/services/{serviceName}/annotation/search 2023-10-31`,
         () => ({ annotations: [] })
@@ -33,21 +38,7 @@ const stories: Meta<{}> = {
         serviceDependencies: [],
       }));
 
-      const serviceContextValue = {
-        serviceName,
-        transactionType,
-        transactionTypeStatus,
-        transactionTypes: ['type'],
-      } as unknown as APMServiceContextValue;
-
-      return (
-        <MockApmPluginStorybook
-          routePath="/services/${serviceName}/overview?environment=ENVIRONMENT_ALL&rangeFrom=now-15m&rangeTo=now"
-          serviceContextValue={serviceContextValue}
-        >
-          <StoryComponent />
-        </MockApmPluginStorybook>
-      );
+      return <StoryComponent />;
     },
   ],
 };

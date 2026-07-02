@@ -8,24 +8,26 @@
 import { schema } from '@kbn/config-schema';
 import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import { i18n } from '@kbn/i18n';
-import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 
-export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
+export const registerUISettings = ({
+  uiSettings,
+}: {
+  uiSettings: UiSettingsServiceSetup;
+}): void => {
   uiSettings.register({
-    [AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID]: {
-      description: i18n.translate(
-        'xpack.agentContextLayer.uiSettings.experimentalFeatures.description',
-        {
-          defaultMessage:
-            'Turns on preview Agent Context Layer behavior, including Semantic Metadata Layer (SML).',
-        }
-      ),
-      name: i18n.translate('xpack.agentContextLayer.uiSettings.experimentalFeatures.name', {
-        defaultMessage: 'Agent Context Layer: Experimental Features',
+    [CONTEXT_ENGINE_ENABLED_SETTING_ID]: {
+      name: i18n.translate('xpack.agentContextLayer.uiSettings.contextEngine.name', {
+        defaultMessage: 'Context Engine',
+      }),
+      description: i18n.translate('xpack.agentContextLayer.uiSettings.contextEngine.description', {
+        defaultMessage: 'Enables the Context Engine.',
       }),
       schema: schema.boolean(),
       value: false,
-      technicalPreview: true,
+      experimental: true,
+      requiresPageReload: false,
+      readonly: false,
     },
   });
 };

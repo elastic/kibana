@@ -67,20 +67,20 @@ Sequential lane (`tests/`):
 
 ```bash
 # ESS
-npx playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
 
 # Serverless
-npx playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep serverless-observability
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep serverless-observability
 ```
 
 Parallel lane (`parallel_tests/`):
 
 ```bash
 # ESS
-npx playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel.playwright.config.ts --project=local --grep stateful-classic
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel.playwright.config.ts --project=local --grep stateful-classic
 
 # Serverless
-npx playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel.playwright.config.ts --project=local --grep serverless-observability
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel.playwright.config.ts --project=local --grep serverless-observability
 ```
 
 Or via the Scout CLI:

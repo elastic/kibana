@@ -11,6 +11,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
@@ -131,25 +132,37 @@ export const AddToDashboard = ({
       ) : (
         <EuiPopover
           button={
-            <EuiButtonIcon
-              color="text"
-              data-test-subj="syntheticsEmbeddablePanelWrapperButton"
-              iconType="boxesVertical"
-              onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.synthetics.embeddablePanelWrapper.shareButtonAriaLabel',
                 {
                   defaultMessage: 'Add to dashboard',
                 }
               )}
-              isLoading={isLoading}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                color="text"
+                data-test-subj="syntheticsEmbeddablePanelWrapperButton"
+                iconType="boxesVertical"
+                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                aria-label={i18n.translate(
+                  'xpack.synthetics.embeddablePanelWrapper.shareButtonAriaLabel',
+                  {
+                    defaultMessage: 'Add to dashboard',
+                  }
+                )}
+                isLoading={isLoading}
+              />
+            </EuiToolTip>
           }
           isOpen={isPopoverOpen}
           closePopover={closePopover}
+          aria-label={i18n.translate('xpack.synthetics.addToDashboard.popoverAriaLabel', {
+            defaultMessage: 'Add to dashboard menu',
+          })}
         >
           <EuiContextMenuPanel
-            size="s"
             items={[
               <EuiContextMenuItem
                 key="share"

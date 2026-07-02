@@ -17,16 +17,13 @@ import { generateSpanStacktraceData } from '../fixtures/synthtrace/generate_span
 import { otelSendotlp } from '../fixtures/synthtrace/otel_sendotlp';
 import { adserviceEdot } from '../fixtures/synthtrace/adservice_edot';
 import { mobileServices } from '../fixtures/synthtrace/mobile_services';
-import { awsLambda } from '../fixtures/synthtrace/aws_lambda';
 import { azureFunctions } from '../fixtures/synthtrace/azure_functions';
-import {
-  metricsServices,
-  setupOtelNativeJavaMetrics,
-} from '../fixtures/synthtrace/metrics_services';
+import { ingestApmMetricsFixtures } from '../../shared';
 import { testData } from '../fixtures';
 import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
 import { distributedTrace } from '../fixtures/synthtrace/distributed_trace';
 import { serviceMapMultiEnv } from '../fixtures/synthtrace/service_map_multi_env';
+import { infrastructure } from '../fixtures/synthtrace/infrastructure';
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
@@ -43,17 +40,24 @@ globalSetupHook(
       from: new Date(testData.START_DATE).getTime(),
       to: new Date(testData.END_DATE).getTime(),
     });
+    const infrastructureDataGenerator = infrastructure({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
 
     await apmSynthtraceEsClient.index(opbeansDataGenerator);
+    await apmSynthtraceEsClient.index(infrastructureDataGenerator);
     await apmSynthtraceEsClient.index(servicesDataFromTheLast24Hours());
 
-    // Generate service map multi-environment data for embeddable tests
-    // Use current time range so the service map shows data in the default "last 15 minutes" view
+    // Generate service map multi-environment data for embeddable tests.
+    // Include future timestamps so delayed cloud/serverless shards still
+    // have data in relative "now" ranges when the spec finally runs.
     const now = Date.now();
     const fifteenMinutesAgo = now - 15 * 60 * 1000;
+    const twentyFourHoursFromNow = now + 24 * 60 * 60 * 1000;
     const serviceMapMultiEnvData = serviceMapMultiEnv({
       from: fifteenMinutesAgo,
-      to: now,
+      to: twentyFourHoursFromNow,
     });
     await apmSynthtraceEsClient.index(serviceMapMultiEnvData);
     log.info('Service map multi-environment data indexed');
@@ -97,14 +101,6 @@ globalSetupHook(
     await apmSynthtraceEsClient.index(mobileData);
     log.info('Mobile services data indexed');
 
-    // Generate AWS Lambda service data for cold start chart tests
-    const awsLambdaData = awsLambda({
-      from: new Date(testData.START_DATE).getTime(),
-      to: new Date(testData.END_DATE).getTime(),
-    });
-    await apmSynthtraceEsClient.index(awsLambdaData);
-    log.info('AWS Lambda service data indexed');
-
     // Generate Azure Functions service data for cold start chart tests
     const azureFunctionsData = azureFunctions({
       from: new Date(testData.START_DATE).getTime(),
@@ -113,19 +109,10 @@ globalSetupHook(
     await apmSynthtraceEsClient.index(azureFunctionsData);
     log.info('Azure Functions service data indexed');
 
-    const metricsData = metricsServices({
-      from: new Date(testData.START_DATE).getTime(),
-      to: new Date(testData.END_DATE).getTime(),
-    });
-    await apmSynthtraceEsClient.index(metricsData);
-    log.info('Metrics services data indexed');
-
-    await setupOtelNativeJavaMetrics(
-      esClient,
-      new Date(testData.START_DATE).getTime(),
-      new Date(testData.END_DATE).getTime()
-    );
-    log.info('OTel-native Java metrics bulk-indexed into .otel-* indices');
+    // Shared APM metrics dataset (classic + OTel synth metrics, AWS Lambda
+    // transactions fixture, OTel-native Java bulk-indexed metrics). Single
+    // source of truth for both UI and API Scout suites.
+    await ingestApmMetricsFixtures({ apmSynthtraceEsClient, esClient, log });
 
     log.info('Cleaning up APM ML indices before running the APM tests');
     const jobs = await esClient.ml.getJobs();

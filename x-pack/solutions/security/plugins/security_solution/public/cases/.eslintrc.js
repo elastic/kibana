@@ -81,9 +81,16 @@ const RESTRICTED_IMPORTS_PATHS = [
   },
 ];
 
+// Strip GIT_DIR / GIT_WORK_TREE so the pre-commit hook's env vars don't
+// cause `show-toplevel` to return __dirname instead of the repo root.
+const gitEnv = { ...process.env };
+delete gitEnv.GIT_DIR;
+delete gitEnv.GIT_WORK_TREE;
+
 const ROOT_DIR = execSync('git rev-parse --show-toplevel', {
   encoding: 'utf8',
   cwd: __dirname,
+  env: gitEnv,
 }).trim();
 
 const ROOT_CLIMB_STRING = path.relative(__dirname, ROOT_DIR); // i.e. '../../..'

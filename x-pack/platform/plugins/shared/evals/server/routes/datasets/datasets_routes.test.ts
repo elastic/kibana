@@ -89,14 +89,13 @@ const buildRouteSetup = ({
   };
 
   const mockCoreContext = coreMock.createRequestHandlerContext();
-  const esClient = mockCoreContext.elasticsearch.client.asCurrentUser;
   datasetService.getClient.mockReturnValue(datasetClient);
   const context = coreMock.createCustomRequestHandlerContext({
     core: mockCoreContext,
     evals: { datasetService } as any,
   });
 
-  return { handler, context, logger, datasetClient, datasetService, esClient };
+  return { handler, context, logger, datasetClient, datasetService };
 };
 
 describe('dataset routes', () => {
@@ -125,7 +124,7 @@ describe('dataset routes', () => {
 
   describe('GET /internal/evals/datasets', () => {
     it('returns dataset listings with pagination', async () => {
-      const { handler, context, datasetClient, datasetService, esClient } = buildRouteSetup({
+      const { handler, context, datasetClient, datasetService } = buildRouteSetup({
         registerRoute: registerListDatasetsRoute,
         method: 'get',
         path: EVALS_DATASETS_URL,
@@ -143,13 +142,51 @@ describe('dataset routes', () => {
 
       const response = await handler(context as any, request, kibanaResponseFactory);
 
-      expect(datasetService.getClient).toHaveBeenCalledWith(esClient);
-      expect(datasetClient.list).toHaveBeenCalledWith({ page: 2, perPage: 5 });
+      expect(datasetService.getClient).toHaveBeenCalledWith();
+      expect(datasetClient.list).toHaveBeenCalledWith({
+        page: 2,
+        perPage: 5,
+        search: undefined,
+        sortField: undefined,
+        sortOrder: undefined,
+      });
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
         datasets: [{ ...dataset, examples_count: 3 }],
         total: 1,
       });
+    });
+
+    it('passes search and sort params to the client', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerListDatasetsRoute,
+        method: 'get',
+        path: EVALS_DATASETS_URL,
+      });
+      datasetClient.list.mockResolvedValueOnce({ datasets: [], total: 0 });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: EVALS_DATASETS_URL,
+        query: {
+          page: 1,
+          per_page: 25,
+          search: 'kibana',
+          sort_field: 'name',
+          sort_order: 'asc',
+        },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(datasetClient.list).toHaveBeenCalledWith({
+        page: 1,
+        perPage: 25,
+        search: 'kibana',
+        sortField: 'name',
+        sortOrder: 'asc',
+      });
+      expect(response.status).toBe(200);
     });
 
     it('returns 500 when listing fails', async () => {
@@ -937,7 +974,6 @@ describe('dataset routes', () => {
       ];
 
       const mockCoreContext = coreMock.createRequestHandlerContext();
-      const esClient = mockCoreContext.elasticsearch.client.asCurrentUser;
       const datasetClient = { list: jest.fn() };
       const datasetService = { getClient: jest.fn().mockReturnValue(datasetClient) };
       const context = coreMock.createCustomRequestHandlerContext({
@@ -945,7 +981,7 @@ describe('dataset routes', () => {
         evals: { datasetService } as any,
       });
 
-      return { handler, context, logger, datasetClient, esClient };
+      return { handler, context, logger, datasetClient };
     };
 
     it('returns 501 when destination is remote but encryption is not configured', async () => {

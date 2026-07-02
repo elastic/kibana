@@ -37,7 +37,8 @@ export const FleetServerHostSelect: React.FunctionComponent<FleetServerHostSelec
         };
       }),
       {
-        icon: <EuiIcon type="plus" size="m" color="primary" aria-hidden={true} />,
+        prepend: <EuiIcon type="plus" size="m" color="primary" aria-hidden={true} />,
+        showIndicator: false,
         inputDisplay: (
           <FormattedMessage
             id="xpack.fleet.fleetServerSetup.addFleetServerHostBtn"

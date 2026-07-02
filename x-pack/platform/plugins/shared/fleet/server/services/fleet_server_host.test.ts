@@ -254,6 +254,20 @@ describe('create', () => {
       )
     ).rejects.toThrow(`Fleet server host needs encrypted saved object api key to be set`);
   });
+
+  it('should throw FleetError when given an invalid id', async () => {
+    const soClientMock = getMockedSoClient();
+    const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+    await expect(
+      fleetServerHostService.create(
+        soClientMock,
+        esClientMock,
+        { name: 'Test', host_urls: [], is_default: false, is_preconfigured: false },
+        { id: '../bad-id' }
+      )
+    ).rejects.toThrow('id is not valid');
+  });
 });
 
 describe('delete fleetServerHost', () => {
@@ -427,5 +441,79 @@ describe('bulkGet', () => {
 
     expect(esoClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
     expect(hosts).toEqual([]);
+  });
+});
+
+describe('update', () => {
+  const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+
+  function mockGetPreconfiguredHost(overrides: Record<string, unknown> = {}) {
+    const esoClient = getMockedEncryptedSoClient();
+    esoClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: 'private-fleet-server',
+      type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+      references: [],
+      attributes: {
+        name: 'Private Fleet Server',
+        host_urls: ['https://private.fleet.aws.elastic.cloud:443'],
+        is_default: false,
+        is_preconfigured: true,
+        allow_edit: ['is_default'],
+        ...overrides,
+      },
+    } as any);
+    return esoClient;
+  }
+
+  beforeEach(() => {
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+    mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+      canEncrypt: true,
+    } as any);
+  });
+
+  it('should throw when updating a non-allow_edit field on a preconfigured host', async () => {
+    const soClient = getMockedSoClient();
+    mockGetPreconfiguredHost();
+
+    await expect(
+      fleetServerHostService.update(soClient, esClientMock, 'private-fleet-server', {
+        host_urls: ['https://attacker.example.com:443'],
+      })
+    ).rejects.toThrow(
+      'Preconfigured Fleet Server host private-fleet-server host_urls cannot be updated outside of the Kibana config file.'
+    );
+  });
+
+  it('should throw when updating allow_edit itself on a preconfigured host', async () => {
+    const soClient = getMockedSoClient();
+    mockGetPreconfiguredHost();
+
+    await expect(
+      fleetServerHostService.update(soClient, esClientMock, 'private-fleet-server', {
+        allow_edit: ['host_urls', 'is_default'],
+      } as any)
+    ).rejects.toThrow(
+      'Preconfigured Fleet Server host private-fleet-server allow_edit cannot be updated outside of the Kibana config file.'
+    );
+  });
+
+  it('should not throw FleetServerHostUnauthorizedError when updating an allow_edit field', async () => {
+    const soClient = getMockedSoClient({ findHosts: true });
+    mockGetPreconfiguredHost({ is_default: false });
+    soClient.update.mockResolvedValue({ id: 'private-fleet-server', attributes: {} } as any);
+    (agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts as jest.Mock).mockResolvedValue(
+      undefined
+    );
+
+    const result = fleetServerHostService.update(soClient, esClientMock, 'private-fleet-server', {
+      is_default: true,
+    });
+
+    // Should not be rejected with the preconfigured field auth error
+    await expect(result).rejects.not.toThrow(
+      'Preconfigured Fleet Server host private-fleet-server is_default cannot be updated outside of the Kibana config file.'
+    );
   });
 });

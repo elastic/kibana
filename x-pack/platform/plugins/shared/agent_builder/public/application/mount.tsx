@@ -13,8 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { AgentBuilderUiClickTelemetry } from './agent_builder_ui_click_telemetry';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { AgentBuilderRoutes } from './routes';
 import type { AgentBuilderInternalService } from '../services';
 import type { AgentBuilderStartDependencies } from '../types';
@@ -22,7 +21,7 @@ import { AgentBuilderServicesContext } from './context/agent_builder_services_co
 import { ActiveSpaceProvider } from './context/active_space_context';
 import { PageWrapper } from './page_wrapper';
 import { AppLeaveContext, type OnAppLeave } from './context/app_leave_context';
-import { SendMessageProvider } from './context/send_message/send_message_context';
+import { StreamingProvider } from './context/streaming/streaming_context';
 
 export const mountApp = async ({
   core,
@@ -53,21 +52,19 @@ export const mountApp = async ({
           <I18nProvider>
             <QueryClientProvider client={queryClient}>
               <AgentBuilderServicesContext.Provider value={services}>
-                <AgentBuilderUiClickTelemetry>
-                  <ActiveSpaceProvider spaceId={activeSpaceId}>
-                    <AppLeaveContext.Provider value={onAppLeave}>
-                      <RedirectAppLinks coreStart={core}>
-                        <PageWrapper>
-                          <Router history={history}>
-                            <SendMessageProvider>
-                              <AgentBuilderRoutes />
-                            </SendMessageProvider>
-                          </Router>
-                        </PageWrapper>
-                      </RedirectAppLinks>
-                    </AppLeaveContext.Provider>
-                  </ActiveSpaceProvider>
-                </AgentBuilderUiClickTelemetry>
+                <ActiveSpaceProvider spaceId={activeSpaceId}>
+                  <AppLeaveContext.Provider value={onAppLeave}>
+                    <RedirectAppLinks coreStart={core}>
+                      <PageWrapper>
+                        <Router history={history}>
+                          <StreamingProvider>
+                            <AgentBuilderRoutes />
+                          </StreamingProvider>
+                        </Router>
+                      </PageWrapper>
+                    </RedirectAppLinks>
+                  </AppLeaveContext.Provider>
+                </ActiveSpaceProvider>
               </AgentBuilderServicesContext.Provider>
             </QueryClientProvider>
           </I18nProvider>

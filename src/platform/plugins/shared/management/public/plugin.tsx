@@ -83,7 +83,7 @@ export class ManagementPlugin
             title: mgmtApp.title,
             path: mgmtApp.basePath,
             keywords: mgmtApp.keywords,
-            ...(mgmtApp.visibleIn ? { visibleIn: mgmtApp.visibleIn } : {}),
+            visibleIn: mgmtApp.visibleIn ?? ['globalSearch', 'projectSideNav'],
           })),
       }));
 
@@ -170,9 +170,19 @@ export class ManagementPlugin
               const [, ...trailingBreadcrumbs] = newBreadcrumbs;
               deps.serverless.setBreadcrumbs(trailingBreadcrumbs);
             } else {
-              coreStart.chrome.setBreadcrumbs(newBreadcrumbs, {
-                project: { value: newBreadcrumbs, absolute: true },
-              });
+              const chromeStyle = coreStart.chrome.getChromeStyle();
+              if (chromeStyle === 'project') {
+                // Project chrome (solution spaces): the navigation tree provides "Stack Management > App".
+                // Management apps provide breadcrumbs as [Stack Management, App, ...details].
+                // We drop the first two and append the rest to the nav tree path.
+                const [, , ...trailingBreadcrumbs] = newBreadcrumbs;
+                coreStart.chrome.setBreadcrumbs([], {
+                  project: { value: trailingBreadcrumbs },
+                });
+              } else {
+                // Classic chrome: use full breadcrumb trail as-is
+                coreStart.chrome.setBreadcrumbs(newBreadcrumbs);
+              }
             }
           },
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,

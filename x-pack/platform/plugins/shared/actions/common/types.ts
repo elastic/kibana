@@ -33,6 +33,8 @@ export interface ActionType {
   validate?: {
     params: PublicValidatorType;
   };
+  description?: string;
+  isExperimental?: boolean;
 }
 
 export enum InvalidEmailReason {

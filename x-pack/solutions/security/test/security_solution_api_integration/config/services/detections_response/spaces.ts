@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { DEFAULT_SPACE_ID, getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
+import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 // TODO: Refactor and move this code to the spaces plugin's common folder
 
 /**

@@ -62,10 +62,10 @@ describe('Telemetry Schema Checks', () => {
     expect(keysWithNonDefaultDescriptions).toHaveLength(EXPECTED_COUNT);
     expect(keysWithNonDefaultDescriptions).toEqual([
       'accessibility:disableAnimations',
+      'agentBuilder:bashSupport',
       'agentBuilder:experimentalFeatures',
       'agentBuilder:externalMcp',
       'agentBuilder:navEnabled',
-      'agentContextLayer:experimentalFeatures',
       'ai:anonymizationSettings',
       'aiAssistant:preferredAIAssistantType',
       'aiAssistant:preferredChatExperience',

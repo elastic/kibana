@@ -126,3 +126,9 @@ export const QueryStream: {
 QueryStream.Definition.is = (
   stream: BaseStream.Model['Definition']
 ): stream is QueryStream.Definition => 'query' in stream;
+
+// Optimized implementation for GetResponse check - avoids full DeepStrict Zod parse
+QueryStream.GetResponse.is = (
+  response: BaseStream.Model['GetResponse']
+): response is QueryStream.GetResponse =>
+  'type' in response.stream && response.stream.type === 'query';

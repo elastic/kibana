@@ -31,7 +31,7 @@ describe('ruleSourceImporter', () => {
     ruleAssetsClientMock = createPrebuiltRuleAssetsClientMock();
     ruleAssetsClientMock.fetchLatestAssets.mockResolvedValue([{}]);
     ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([]);
-    ruleAssetsClientMock.fetchAssetsByVersion.mockResolvedValue([]);
+    ruleAssetsClientMock.fetchAssetsByVersion.mockResolvedValue({ assets: [] });
     ruleAssetsClientMock.fetchDeprecatedRules.mockResolvedValue([]);
     ruleObjectsClientMock = createPrebuiltRuleObjectsClientMock();
     ruleObjectsClientMock.fetchInstalledRulesByIds.mockResolvedValue([]);
@@ -138,9 +138,9 @@ describe('ruleSourceImporter', () => {
 
     beforeEach(() => {
       rule = { rule_id: 'validated-rule', version: 1 } as ValidatedRuleToImport;
-      ruleAssetsClientMock.fetchAssetsByVersion.mockResolvedValue([
-        getPrebuiltRuleMock({ rule_id: 'rule-1' }),
-      ]);
+      ruleAssetsClientMock.fetchAssetsByVersion.mockResolvedValue({
+        assets: [getPrebuiltRuleMock({ rule_id: 'rule-1' })],
+      });
       ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([
         getPrebuiltRuleMock({ rule_id: 'rule-1' }),
         getPrebuiltRuleMock({ rule_id: 'rule-2' }),
@@ -171,7 +171,7 @@ describe('ruleSourceImporter', () => {
       };
 
       ruleAssetsClientMock.fetchLatestVersions.mockReset().mockResolvedValue([]);
-      ruleAssetsClientMock.fetchAssetsByVersion.mockReset().mockResolvedValue([]);
+      ruleAssetsClientMock.fetchAssetsByVersion.mockReset().mockResolvedValue({ assets: [] });
       ruleAssetsClientMock.fetchDeprecatedRules.mockReset().mockResolvedValue([
         {
           rule_id: deprecatedRuleToImport.rule_id,

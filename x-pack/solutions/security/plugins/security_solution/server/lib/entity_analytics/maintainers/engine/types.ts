@@ -94,7 +94,7 @@ export interface CustomActorBinding {
  * whether the config uses the default ES|QL builder or supplies its own
  * override (Step 1 composite-agg discovery always uses these).
  */
-interface BaseRelationshipIntegrationFields {
+interface RelationshipIntegrationBase {
   /** Unique machine-readable identifier, e.g. 'elastic_defend'. */
   id: string;
   /** Human-readable name used in log messages. */
@@ -135,6 +135,36 @@ interface BaseRelationshipIntegrationFields {
    * and Step 2 EUID expression describe the same actor — they cannot drift.
    */
   customActor?: CustomActorBinding;
+  /**
+   * When true, the engine validates each derived target EUID against the entity
+   * index before writing, filtering out any IDs that have no matching entity
+   * document. Use this for `kind: 'override'` raw_identifiers-based maintainers
+   * (e.g. administers) whose targets are inferred from free-text fields like
+   * `raw_identifiers.host.name` — a field value does not guarantee an entity
+   * exists. Log-based maintainers (accesses, communicates_with) derive targets
+   * from real ECS host/user identity fields that extraction already indexed, so
+   * the extra round-trip is unnecessary for them.
+   *
+   * Default (false/undefined): no validation, existing behavior preserved.
+   */
+  validateTargetIds?: boolean;
+  /**
+   * When true, the engine omits its default `@timestamp >= now-30d` lookback
+   * filter from both Step 1 (composite agg) and Step 2 (ES|QL wrapper).
+   *
+   * The lookback is a *log-index* assumption: log-based maintainers only care
+   * about recent events, and a 30-day window bounds the scan. But configs whose
+   * `indexPattern` targets the **entity index** (`.entities.v2.latest`) read
+   * one snapshot doc per entity, whose `@timestamp` tracks the transform's
+   * write time, not event recency — applying the lookback there silently drops
+   * entities the maintainer must process. Such configs set this flag and rely
+   * on their own freshness gate instead (e.g. an `entity.lifecycle.last_seen`
+   * watermark in `compositeAggAdditionalFilters` / the override query).
+   *
+   * Default (false/undefined): the lookback is applied, preserving existing
+   * log-based maintainer behavior.
+   */
+  disableLookbackWindow?: boolean;
 }
 
 /**
@@ -182,7 +212,7 @@ interface StandardBuilderFields {
  * is also the entity.relationships key the parser writes to.
  */
 export interface StandardRelationshipIntegrationConfig
-  extends BaseRelationshipIntegrationFields,
+  extends RelationshipIntegrationBase,
     StandardBuilderFields {
   kind: 'standard';
   relationshipKey: EntityRelationshipKey;
@@ -195,7 +225,7 @@ export interface StandardRelationshipIntegrationConfig
  * `relationshipKey` is required.
  */
 export interface BucketedRelationshipIntegrationConfig
-  extends BaseRelationshipIntegrationFields,
+  extends RelationshipIntegrationBase,
     StandardBuilderFields {
   kind: 'bucketed';
   bucketTargetByThreshold: BucketTargetByThresholdConfig;
@@ -222,7 +252,7 @@ export interface BucketedRelationshipIntegrationConfig
  * described at the top of this file (backticks for dotted-numeric or
  * reserved-word segments — see the Azure override for an example).
  */
-export interface OverrideRelationshipIntegrationConfig extends BaseRelationshipIntegrationFields {
+export interface OverrideRelationshipIntegrationConfig extends RelationshipIntegrationBase {
   kind: 'override';
   relationshipKey: EntityRelationshipKey;
   esqlQueryOverride: (namespace: string) => string;
@@ -249,13 +279,38 @@ export type RelationshipIntegrationConfig =
   | OverrideRelationshipIntegrationConfig;
 
 /**
- * Output record from the generic postprocessor.
- * Each relationship's targets are stored as optimistic EUIDs computed in the ES|QL layer.
+ * Output record from the relationship-maintainer postprocessor.
+ *
+ * `entityType` is currently fixed to `'user'` because every shipped config
+ * computes its actor EUID via `getEuidEvaluation('user', …)` and the engine
+ * hardcodes `'user'` at every producer/builder site. Broadening to
+ * `'user' | 'host' | 'service'` is tracked under the actorEntityType
+ * follow-up (#266748). Agents/engineers implementing #266748 should change
+ * **all** of these sites in lockstep — `grep -rn "266748"` from the
+ * `maintainers/` root surfaces them:
+ *
+ *   1. `engine/types.ts` (this file) — widen `entityType` here and add
+ *      `actorEntityType` to `RelationshipIntegrationConfig`.
+ *   2. `engine/build_actor_discovery_query.ts` — Step 1 user-EUID existence
+ *      filter is parameterized on entity type.
+ *   3. `engine/build_targets_per_actor_query.ts` — Step 2 actor EVAL uses
+ *      `getEuidEvaluation('user', …)`; thread the configured type through.
+ *   4. `engine/parse_targets_per_actor_rows.ts` — drop the `'user' as const`
+ *      on the produced records.
+ *   5. `engine/update_entities.ts` — drop `type: 'user'` on the
+ *      `bulkUpdateEntity` payload.
+ *
+ * Step 1 of the customActor presence-gate fix already derives actor *fields*
+ * from `customActor.fields`; #266748 is what derives the actor *entity type*.
  */
-export interface ProcessedEngineRecord {
+export function entityTypeFromEuid(euid: string | null): 'user' | 'host' | 'service' {
+  return euid?.split(':')[0] as 'user' | 'host' | 'service';
+}
+
+export interface EntityRelationshipRecord {
   /** Full EUID with type prefix, e.g. "user:alice@okta". Null if actor eval failed. */
   entityId: string | null;
-  entityType: 'user';
+  entityType: 'user' | 'host' | 'service';
   /**
    * relType → euid[]
    * e.g. { communicates_with: ['host:D3F5C9B9-...', 'user:bob@corp'] }

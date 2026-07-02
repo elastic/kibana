@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { VisualizationAttachment } from '@kbn/agent-builder-common/attachments';
 import { type AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { AgentBuilderStartDependencies } from '../../../types';
+import { getVisualizationDimensionsFromLensConfig } from '../tools/esql/shared/get_visualization_dimensions';
 
 const LazyVisualizeLens = React.lazy(() =>
   import('../tools/esql/visualize_lens').then((m) => ({ default: m.VisualizeLens }))
@@ -35,6 +36,10 @@ export const createVisualizationAttachmentDefinition = ({
           });
     },
     getIcon: () => 'lensApp',
+    getMaxWidth: (attachment) =>
+      getVisualizationDimensionsFromLensConfig(
+        attachment.data.visualization as Record<string, unknown>
+      ).width,
     renderInlineContent: ({ attachment, screenContext }, callbacks) => {
       const timeRange = attachment.data.time_range ?? screenContext?.time_range;
 

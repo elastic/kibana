@@ -498,69 +498,71 @@ const xyStylingSchema = schema.object(
 );
 
 /**
+ * Legend schema variants
+ */
+const xyLegendOutsideHorizontalSchema = schema.object(
+  {
+    ...sharedLegendSchema,
+    placement: schema.maybe(schema.literal('outside')),
+    layout: schema.maybe(schema.oneOf([gridLayout, listLayout])),
+    position: schema.maybe(schema.oneOf([schema.literal('top'), schema.literal('bottom')])),
+  },
+  {
+    meta: {
+      id: 'xyLegendOutsideHorizontal',
+      title: 'Outside horizontal',
+      description: 'Outside legend positioned horizontal (top/bottom) of the chart',
+    },
+  }
+);
+
+const xyLegendOutsideVerticalSchema = schema.object(
+  {
+    ...sharedLegendSchema,
+    placement: schema.maybe(schema.literal('outside')),
+    layout: schema.maybe(gridLayout),
+    position: schema.maybe(schema.oneOf([schema.literal('left'), schema.literal('right')])),
+    size: legendSizeSchema,
+  },
+  {
+    meta: {
+      id: 'xyLegendOutsideVertical',
+      title: 'Outside vertical',
+      description: 'Outside legend positioned vertical (left/right) of the chart',
+    },
+  }
+);
+
+const xyLegendInsideSchema = schema.object(
+  {
+    ...sharedLegendSchema,
+    placement: schema.literal('inside'),
+    layout: schema.maybe(gridLayout),
+    columns: schema.maybe(
+      schema.number({ min: 1, max: 5, meta: { description: 'Number of legend columns' } })
+    ),
+    position: schema.maybe(
+      cornerPositionSchema({
+        meta: { description: 'Legend position inside the chart' },
+      })
+    ),
+  },
+  {
+    meta: {
+      id: 'xyLegendInside',
+      title: 'Inside',
+      description: 'Inside legend',
+    },
+  }
+);
+
+/**
  * Shared settings that apply to the entire XY chart visualization
  */
 const xySharedSettings = {
   legend: schema.maybe(
     schema.oneOf(
-      [
-        // Outside legend, position: top/bottom (supports both Grid and List layout)
-        schema.object(
-          {
-            ...sharedLegendSchema,
-            placement: schema.maybe(schema.literal('outside')),
-            layout: schema.maybe(schema.oneOf([gridLayout, listLayout])),
-            position: schema.maybe(schema.oneOf([schema.literal('top'), schema.literal('bottom')])),
-          },
-          {
-            meta: {
-              id: 'xyLegendOutsideHorizontal',
-              title: 'Outside horizontal',
-              description: 'Outside legend positioned horizontal (top/bottom) of the chart',
-            },
-          }
-        ),
-        // Outside legend, position: left/right (supports only Grid layout)
-        schema.object(
-          {
-            ...sharedLegendSchema,
-            placement: schema.maybe(schema.literal('outside')),
-            layout: schema.maybe(gridLayout),
-            position: schema.maybe(schema.oneOf([schema.literal('left'), schema.literal('right')])),
-            size: legendSizeSchema,
-          },
-          {
-            meta: {
-              id: 'xyLegendOutsideVertical',
-              title: 'Outside vertical',
-              description: 'Outside legend positioned vertical (left/right) of the chart',
-            },
-          }
-        ),
-        // Inside legend
-        schema.object(
-          {
-            ...sharedLegendSchema,
-            placement: schema.literal('inside'),
-            layout: schema.maybe(gridLayout),
-            columns: schema.maybe(
-              schema.number({ min: 1, max: 5, meta: { description: 'Number of legend columns' } })
-            ),
-            position: schema.maybe(
-              cornerPositionSchema({
-                meta: { description: 'Legend position inside the chart' },
-              })
-            ),
-          },
-          {
-            meta: {
-              id: 'xyLegendInside',
-              title: 'Inside',
-              description: 'Inside legend',
-            },
-          }
-        ),
-      ],
+      [xyLegendOutsideHorizontalSchema, xyLegendOutsideVerticalSchema, xyLegendInsideSchema],
       {
         meta: {
           id: 'xyLegend',
@@ -955,7 +957,13 @@ const annotationManualRange = schema.object(
 const annotationLayerByValueSchema = schema.object(
   {
     ...ignoringGlobalFiltersSchemaRaw,
-    ...dataSourceSchema,
+    // A by-value annotation layer does not require its own data source: manual
+    // point-in-time/range annotations carry no field references and the Lens XY
+    // renderer resolves the data view by falling back to the chart's data layers.
+    // When omitted, the data view is re-derived from the sibling data layers when
+    // converting back to Lens state. See
+    // x-pack/.../lens/public/visualizations/xy/persistence.ts.
+    data_source: schema.maybe(dataSourceSchema.data_source),
     type: schema.literal('annotations'),
     events: schema.arrayOf(
       schema.oneOf([annotationQuery, annotationManualEvent, annotationManualRange]),
@@ -1103,3 +1111,9 @@ export type LayerTypeNoESQL =
   | ReferenceLineLayerTypeNoESQL
   | AnnotationLayerType;
 export type XYLayer = LayerTypeNoESQL | LayerTypeESQL;
+
+export type XYLegendOutsideHorizontal = TypeOf<typeof xyLegendOutsideHorizontalSchema>;
+export type XYLegendOutsideVertical = TypeOf<typeof xyLegendOutsideVerticalSchema>;
+export type XYLegendInside = TypeOf<typeof xyLegendInsideSchema>;
+export type XYLegendStatistic = TypeOf<typeof statisticsSchema>;
+export type XYLegendSize = TypeOf<typeof legendSizeSchema>;

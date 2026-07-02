@@ -65,19 +65,6 @@ export class DashboardMarkdownPlugin
       savedObjectType: MARKDOWN_SAVED_OBJECT_TYPE,
       savedObjectName: APP_NAME,
       getIconForSavedObject: () => APP_ICON,
-      getSavedObjects: async (searchRequest) => {
-        const { markdownClient } = await import('./async_services');
-        const result = await markdownClient.search({ ...searchRequest });
-        return result.markdowns.map(({ id, data, meta }) => {
-          return {
-            type: MARKDOWN_SAVED_OBJECT_TYPE,
-            id,
-            attributes: data,
-            ...meta,
-            references: [],
-          };
-        });
-      },
     });
 
     setupLegacyVis(core.getStartServices, expressions, visualizations);

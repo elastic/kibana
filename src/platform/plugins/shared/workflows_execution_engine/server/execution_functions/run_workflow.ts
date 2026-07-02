@@ -14,13 +14,23 @@ import {
   isEventDrivenWorkflowTriggerSource,
   isTerminalStatus,
 } from '@kbn/workflows';
+import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
+import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued_workflow_run_at_task_start';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import type { WorkflowsMeteringService } from '../metering';
-import type { WorkflowsExecutionEnginePluginStart } from '../types';
+import type {
+  InternalResumeWorkflowExecution,
+  WorkflowsExecutionEnginePluginStart,
+} from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
+
+export interface RunWorkflowResult {
+  /** Dormant queued `workflow:run` tasks must be deleted by Task Manager after handling. */
+  shouldDeleteTask?: boolean;
+}
 
 export async function runWorkflow({
   workflowRunId,
@@ -32,6 +42,7 @@ export async function runWorkflow({
   dependencies,
   workflowsExecutionEngine,
   meteringService,
+  internalResumeWorkflowExecution,
 }: {
   workflowRunId: string;
   spaceId: string;
@@ -42,7 +53,8 @@ export async function runWorkflow({
   dependencies: ContextDependencies;
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   meteringService?: WorkflowsMeteringService;
-}): Promise<void> {
+  internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
+}): Promise<RunWorkflowResult | void> {
   // Span for setup/initialization phase
   const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
   const {
@@ -78,6 +90,27 @@ export async function runWorkflow({
       void meteringService.reportWorkflowExecution(execution, dependencies.cloudSetup);
     }
     return;
+  }
+
+  const handledQueuedRun = await handleQueuedWorkflowRunAtTaskStart({
+    execution,
+    workflowRunId,
+    workflowExecutionRepository,
+    logger,
+  });
+  if (handledQueuedRun) {
+    await handlePostExecutionLoop({
+      workflowRunId,
+      spaceId,
+      logger,
+      fakeRequest,
+      workflowExecutionRepository,
+      internalResumeWorkflowExecution,
+      workflowTaskManager,
+      meteringService,
+      cloudSetup: dependencies.cloudSetup,
+    });
+    return { shouldDeleteTask: true };
   }
 
   const triggeredBy = execution.triggeredBy;
@@ -160,24 +193,15 @@ export async function runWorkflow({
     });
   }
 
-  // Report metering after execution completes and state is flushed.
-  // This is fire-and-forget: the metering service handles retries and
-  // will no-op for non-terminal states (e.g., WAITING for resume).
-  if (meteringService) {
-    try {
-      const finalExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-        workflowRunId,
-        spaceId
-      );
-      if (finalExecution) {
-        void meteringService.reportWorkflowExecution(finalExecution, dependencies.cloudSetup);
-      }
-    } catch (err) {
-      logger.warn(
-        `Failed to fetch execution for metering (execution=${workflowRunId}): ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
-    }
-  }
+  await handlePostExecutionLoop({
+    workflowRunId,
+    spaceId,
+    logger,
+    fakeRequest,
+    workflowExecutionRepository,
+    internalResumeWorkflowExecution,
+    workflowTaskManager,
+    meteringService,
+    cloudSetup: dependencies.cloudSetup,
+  });
 }

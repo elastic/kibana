@@ -147,9 +147,13 @@
 # metrics. Minimum is 100ms. Defaults to 5000ms.
 #ops.interval: 5000
 
-# Specifies locale to be used for all localizable strings, dates and number formats.
-# Supported languages are the following: English (default) "en", Chinese "zh-CN", Japanese "ja-JP", French "fr-FR", German "de-DE".
-#i18n.locale: "en"
+# Specifies the available locales in the user profile settings.
+#i18n.locales: ["en", "fr-FR", "ja-JP", "zh-CN", "de-DE"]
+
+# Specifies the default locale to be used for all localizable strings, dates and number formats.
+# User profile settings allow users to customize their display language. This setting determines the default locale when no user settings are specified.
+# Supported languages are the following: English "en" (default), Chinese "zh-CN", Japanese "ja-JP", French "fr-FR", German "de-DE".
+#i18n.defaultLocale: "en"
 
 # =================== Frequently used (Optional)===================
 

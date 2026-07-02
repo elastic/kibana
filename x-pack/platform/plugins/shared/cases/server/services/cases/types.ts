@@ -19,7 +19,14 @@ import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 
 export interface GetCaseIdsByAlertIdArgs {
   alertId: string;
+  /**
+   * Authorization + owner filter scoped to the legacy `cases-comments` saved object type.
+   */
   filter?: KueryNode;
+  /**
+   * Authorization + owner filter scoped to the unified `cases-attachments` saved object type.
+   */
+  unifiedFilter?: KueryNode;
 }
 
 export interface PushedArgs {

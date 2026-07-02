@@ -50,6 +50,7 @@ export class CustomLinksPage {
     await saveButton.waitFor({ state: 'visible' });
     await expect(saveButton).toBeEnabled();
     await saveButton.click();
+    await saveButton.waitFor({ state: 'hidden' });
   }
 
   async clickDelete() {
@@ -57,6 +58,7 @@ export class CustomLinksPage {
       timeout: EXTENDED_TIMEOUT,
     });
     await this.page.getByTestId('apmDeleteButtonDeleteButton').click();
+    await this.page.getByTestId('apmDeleteButtonDeleteButton').waitFor({ state: 'hidden' });
   }
 
   async getEditCustomLinkButton() {

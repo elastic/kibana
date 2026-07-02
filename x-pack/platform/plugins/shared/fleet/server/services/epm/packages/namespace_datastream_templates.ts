@@ -19,23 +19,31 @@ import {
   getNamespaceTemplatePriority,
 } from '../elasticsearch/template/template';
 import { isUserSettingsTemplate } from '../elasticsearch/template/utils';
-import { getRegistryDataStreamAssetBaseName } from '../../../../common/services';
+import {
+  getRegistryDataStreamAssetBaseName,
+  dataStreamUsesOtelInput,
+} from '../../../../common/services';
 import { MAX_CONCURRENT_COMPONENT_TEMPLATES } from '../../../constants';
-import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../common/constants';
 import { throwIfAborted } from '../../../tasks/utils';
+import type { PackageInfo } from '../../../../common/types';
 
 import { updateEsAssetReferences } from './es_assets_reference';
 import { getInstalledPackageWithAssets, getInstallation } from './get';
 
 /**
- * Returns true if any of the data stream's streams use the OTel collector input type
- * AND OTel integrations are enabled. Mirrors the check in `installTemplateForDataStream`.
+ * Returns true if any of the data stream's streams effectively use the OTel collector input
+ * type AND OTel integrations are enabled. Resolves named inputs so that a stream referencing
+ * an input by name (e.g. `otel_logs`) is correctly identified as OTel when its backing input
+ * has `type: otelcol`.
  */
-function isOtelDataStream(dataStream: RegistryDataStream): boolean {
+function isOtelDataStream(
+  dataStream: RegistryDataStream,
+  packageInfo: Pick<PackageInfo, 'policy_templates'>
+): boolean {
   const experimentalFeature = appContextService.getExperimentalFeatures();
   return (
     !!experimentalFeature?.enableOtelIntegrations &&
-    (dataStream?.streams || []).some((stream) => stream.input === OTEL_COLLECTOR_INPUT_TYPE)
+    dataStreamUsesOtelInput(packageInfo, dataStream)
   );
 }
 
@@ -203,6 +211,7 @@ async function createNamespaceTemplatesForPackage({
   soClient,
   esClient,
   packageName,
+  packageInfo,
   dataStreams,
   namespaces,
   logContext,
@@ -211,6 +220,7 @@ async function createNamespaceTemplatesForPackage({
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   packageName: string;
+  packageInfo: Pick<PackageInfo, 'policy_templates'>;
   dataStreams: RegistryDataStream[];
   namespaces: string[];
   logContext: string;
@@ -226,7 +236,7 @@ async function createNamespaceTemplatesForPackage({
     dataStreams,
     async (dataStream) => {
       if (abortController) throwIfAborted(abortController);
-      const isOtelInputType = isOtelDataStream(dataStream);
+      const isOtelInputType = isOtelDataStream(dataStream, packageInfo);
       const templateName = getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType);
       const baseTemplate = await fetchBaseTemplate(
         esClient,
@@ -295,6 +305,7 @@ async function deleteNamespaceTemplatesForPackage({
   soClient,
   esClient,
   packageName,
+  packageInfo,
   dataStreams,
   namespaces,
   logContext,
@@ -303,6 +314,7 @@ async function deleteNamespaceTemplatesForPackage({
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   packageName: string;
+  packageInfo: Pick<PackageInfo, 'policy_templates'>;
   dataStreams: RegistryDataStream[];
   namespaces: string[];
   logContext: string;
@@ -320,7 +332,7 @@ async function deleteNamespaceTemplatesForPackage({
       if (abortController) throwIfAborted(abortController);
       const templateName = getRegistryDataStreamAssetBaseName(
         dataStream,
-        isOtelDataStream(dataStream)
+        isOtelDataStream(dataStream, packageInfo)
       );
       for (const namespace of namespaces) {
         const nsName = generateNamespaceTemplateName(templateName, namespace);
@@ -377,11 +389,13 @@ export async function handleNamespaceTemplateRestoreAfterPackageInstall({
   soClient,
   esClient,
   packageName,
+  packageInfo,
   dataStreams,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   packageName: string;
+  packageInfo: Pick<PackageInfo, 'policy_templates'>;
   dataStreams: RegistryDataStream[];
 }) {
   if (dataStreams.length === 0) {
@@ -401,6 +415,7 @@ export async function handleNamespaceTemplateRestoreAfterPackageInstall({
     soClient,
     esClient,
     packageName,
+    packageInfo,
     dataStreams,
     namespaces,
     logContext: 'handleNamespaceTemplateRestoreAfterPackageInstall',
@@ -474,6 +489,7 @@ export async function syncNamespaceTemplates({
       soClient,
       esClient,
       packageName,
+      packageInfo,
       dataStreams,
       namespaces: addedNamespaces,
       logContext: 'syncNamespaceTemplates',
@@ -490,6 +506,7 @@ export async function syncNamespaceTemplates({
       soClient,
       esClient,
       packageName,
+      packageInfo,
       dataStreams,
       namespaces: removedNamespaces,
       logContext: 'syncNamespaceTemplates',

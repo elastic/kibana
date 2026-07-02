@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { partition } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
+import type { MSearchIn, MSearchResult } from '@kbn/content-management-plugin/common';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { CanAddNewPanel } from '@kbn/presentation-publishing';
 import { apiHasType } from '@kbn/presentation-publishing';
@@ -29,6 +30,8 @@ import {
   usageCollection,
 } from '../kibana_services';
 import { getAddFromLibraryType, useAddFromLibraryTypes } from './registry';
+import { SEARCH_ROUTE_PATH } from '../../common/constants';
+import type { SearchLibraryResponseType } from '../../server/search_route/types';
 
 const runAddTelemetry = (
   parent: unknown,
@@ -54,9 +57,6 @@ export interface AddFromLibraryContentProps {
 
 export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps) => {
   const libraryTypes = useAddFromLibraryTypes();
-  const [typesWithoutCM, typesWithCM] = useMemo(() => {
-    return partition(libraryTypes, (type) => Boolean(type.getSavedObjects));
-  }, [libraryTypes]);
 
   const onChoose: SavedObjectFinderProps['onChoose'] = useCallback(
     async (
@@ -85,26 +85,33 @@ export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps)
     <SavedObjectFinder
       id="embeddableAddPanel"
       services={{
-        contentClient: contentManagement.client,
+        contentClient: {
+          ...contentManagement.client,
+          mSearch: async (input: MSearchIn): Promise<MSearchResult<any>> => {
+            try {
+              const result = (await core.http.post(SEARCH_ROUTE_PATH, {
+                body: JSON.stringify({
+                  type: input.contentTypes.map(({ contentTypeId }) => contentTypeId),
+                  ...(input.query.text && { search: `${input.query.text}*` }),
+                  limit: input.query.limit,
+                  tags: input.query.tags,
+                }),
+              })) as SearchLibraryResponseType;
+              return { hits: result.hits, pagination: { total: result.total } };
+            } catch (e) {
+              return { hits: [], pagination: { total: 0 } };
+            }
+          },
+        } as ContentClient,
         savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
         uiSettings: core.uiSettings,
       }}
       onChoose={onChoose}
-      savedObjectMetaData={typesWithCM}
+      savedObjectMetaData={libraryTypes}
       showFilter={true}
       noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
         defaultMessage: 'No matching objects found.',
       })}
-      extraItems={{
-        metaData: typesWithoutCM,
-        get: async (searchRequest) => {
-          const { perPage, ...rest } = searchRequest;
-          const getPromises = typesWithoutCM.map(({ getSavedObjects }) =>
-            getSavedObjects!({ ...rest, per_page: perPage })
-          );
-          return (await Promise.all(getPromises)).flat();
-        },
-      }}
       getTooltipText={(item) => {
         return item.managed
           ? i18n.translate('embeddableApi.addPanel.managedPanelTooltip', {

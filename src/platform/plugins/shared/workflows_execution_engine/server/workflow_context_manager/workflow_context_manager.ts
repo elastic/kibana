@@ -18,13 +18,17 @@ import {
   type StepContext,
   type WorkflowContext,
 } from '@kbn/workflows';
-import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { StepExecutionMetadata, WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
+import {
+  callKibanaApi,
+  type CallKibanaApiParams,
+  type CallKibanaApiResult,
+} from '../lib/call_kibana_api';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
 import { buildStepExecutionId, isTemplateExpression } from '../utils';
 import { isSerializedError } from '../utils/errors';
@@ -232,26 +236,6 @@ export class WorkflowContextManager {
     );
   }
 
-  public readContextPath(propertyPath: string): { pathExists: boolean; value: unknown } {
-    const propertyPathSegments = parseJsPropertyAccess(propertyPath);
-    let result: unknown = this.getContext();
-
-    for (const segment of propertyPathSegments) {
-      if (result === null || result === undefined || typeof result !== 'object') {
-        return { pathExists: false, value: undefined }; // Path not found in context
-      }
-
-      const resultAsRecord = result as Record<string, unknown>;
-      if (!(segment in resultAsRecord)) {
-        return { pathExists: false, value: undefined }; // Path not found in context
-      }
-
-      result = resultAsRecord[segment];
-    }
-
-    return { pathExists: true, value: result };
-  }
-
   /**
    * Get the Elasticsearch client for internal actions
    * This client is already user-scoped if fakeRequest was available during initialization
@@ -276,6 +260,29 @@ export class WorkflowContextManager {
    */
   public getCoreStart(): CoreStart {
     return this.coreStart;
+  }
+
+  /**
+   * Calls a Kibana API route on the running Kibana instance, using the workflow's fake
+   * request for authentication and propagating event-chain headers so the receiving handler
+   * keeps the same chain-depth context.
+   *
+   * The transport (currently `fetch`) is an implementation detail; the public surface is
+   * intentionally narrow so it can be swapped to an in-process call later without affecting
+   * callers. Throws on non-2xx responses.
+   */
+  public async callKibanaApi<T = unknown>(
+    params: CallKibanaApiParams
+  ): Promise<CallKibanaApiResult<T>> {
+    return callKibanaApi<T>(
+      {
+        fakeRequest: this.fakeRequest,
+        coreStart: this.coreStart,
+        cloudSetup: this.dependencies.cloudSetup,
+        workflowRunId: this.workflowExecutionState.getWorkflowExecution().id,
+      },
+      params
+    );
   }
 
   /**

@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { type Streams, isRoot, isDraftStream, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
-import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { RedirectTo } from '../../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
@@ -19,39 +18,37 @@ import { Wrapper } from './wrapper';
 import { MissingDataStreamCallout } from './missing_data_stream_callout';
 import { PendingRootDataStreamCallout } from './pending_root_data_stream_callout';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
-import { WiredAdvancedView } from './advanced_view/wired_advanced_view';
 import { StreamDetailDataQuality } from '../../../stream_data_quality';
 import { StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { WiredStreamBadge } from '../../../stream_badges';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
+import { LifecycleTabLabel } from './lifecycle_tab_label_with_actions';
+import { StreamDetailCanvas } from '../stream_detail_canvas';
 
 const wiredStreamManagementSubTabs = [
   'overview',
   'partitioning',
   'processing',
   'schema',
-  'retention',
-  'advanced',
+  'lifecycle',
   'significantEvents',
   'dataQuality',
   'attachments',
+  'canvas',
 ] as const;
 
 type WiredStreamManagementSubTab = (typeof wiredStreamManagementSubTabs)[number];
 
 const tabRedirects: Record<string, { newTab: WiredStreamManagementSubTab }> = {
+  advanced: { newTab: 'overview' },
   schemaEditor: { newTab: 'schema' },
-  lifecycle: { newTab: 'retention' },
+  retention: { newTab: 'lifecycle' },
   route: { newTab: 'partitioning' },
   enrich: { newTab: 'processing' },
 };
-function isValidManagementSubTab(
-  value: string,
-  overviewPageEnabled: boolean
-): value is WiredStreamManagementSubTab {
-  if (value === 'overview' && !overviewPageEnabled) {
-    return false;
-  }
+function isValidManagementSubTab(value: string): value is WiredStreamManagementSubTab {
   return wiredStreamManagementSubTabs.includes(value as WiredStreamManagementSubTab);
 }
 
@@ -63,17 +60,22 @@ export function WiredStreamDetailManagement({
   refreshDefinition: () => void;
 }) {
   const {
+    core: { notifications },
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
+  const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
-
-  const {
-    features: { overviewPage },
-  } = useStreamsPrivileges();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
     refreshDefinition,
   });
+  const {
+    features: { canvas },
+  } = useStreamsPrivileges();
 
   if (!definition.privileges.view_index_metadata) {
     return (
@@ -169,19 +171,15 @@ export function WiredStreamDetailManagement({
   }
 
   const tabs = {
-    ...(overviewPage.enabled
-      ? {
-          overview: {
-            content: <StreamOverview />,
-            label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
-              defaultMessage: 'Overview',
-            }),
-          },
-        }
-      : {}),
+    overview: {
+      content: <StreamOverview />,
+      label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
+        defaultMessage: 'Overview',
+      }),
+    },
     ...(!isDraft
       ? {
-          retention: {
+          lifecycle: {
             content: (
               <StreamDetailLifecycle
                 definition={definition}
@@ -189,19 +187,13 @@ export function WiredStreamDetailManagement({
               />
             ),
             label: (
-              <EuiToolTip
-                position="top"
-                content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
-                  defaultMessage:
-                    'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
-                })}
-              >
-                <span data-test-subj="retentionTab" tabIndex={0}>
-                  {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-                    defaultMessage: 'Retention',
-                  })}
-                </span>
-              </EuiToolTip>
+              <LifecycleTabLabel
+                definition={definition}
+                showActions={tab === 'lifecycle'}
+                indexTemplateName={`${definition.stream.name}@stream`}
+                notifications={notifications}
+                share={share}
+              />
             ),
           },
         }
@@ -254,23 +246,17 @@ export function WiredStreamDetailManagement({
         defaultMessage: 'Attachments',
       }),
     },
-    ...otherTabs,
-    ...(definition.privileges.manage
+    ...(canvas.enabled
       ? {
-          advanced: {
-            content: (
-              <WiredAdvancedView
-                definition={definition}
-                refreshDefinition={refreshDefinition}
-                isDraft={isDraft}
-              />
-            ),
-            label: i18n.translate('xpack.streams.streamDetailView.advancedTab', {
-              defaultMessage: 'Advanced',
+          canvas: {
+            content: <StreamDetailCanvas streamName={definition.stream.name} />,
+            label: i18n.translate('xpack.streams.streamDetailView.canvasTab', {
+              defaultMessage: 'Canvas',
             }),
           },
         }
       : {}),
+    ...otherTabs,
   };
 
   const redirectConfig = tabRedirects[tab];
@@ -283,27 +269,25 @@ export function WiredStreamDetailManagement({
     );
   }
 
-  if (tab === 'overview' && !overviewPage.enabled) {
-    const fallbackTab = isDraft ? 'partitioning' : 'retention';
-    return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: fallbackTab } }} />
-    );
+  if (isValidManagementSubTab(tab)) {
+    if (tab === 'canvas' && !canvas.enabled) {
+      return (
+        <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
+      );
+    }
+
+    return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 
-  if (isDraft && (tab === 'retention' || tab === 'dataQuality')) {
+  if (isDraft && (tab === 'lifecycle' || tab === 'dataQuality')) {
     return (
       <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />
     );
-  }
-
-  if (isValidManagementSubTab(tab, overviewPage.enabled)) {
-    return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 
   if (isLoading) {
     return null;
   }
 
-  const defaultTab = overviewPage.enabled ? 'overview' : isDraft ? 'partitioning' : 'retention';
-  return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: defaultTab } }} />;
+  return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />;
 }

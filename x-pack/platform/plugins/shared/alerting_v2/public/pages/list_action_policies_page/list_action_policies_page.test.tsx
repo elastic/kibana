@@ -8,10 +8,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { I18nProvider } from '@kbn/i18n-react';
-import { MemoryRouter } from 'react-router-dom';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { ListActionPoliciesPage } from './list_action_policies_page';
 
 const mockNavigateToUrl = jest.fn();
@@ -25,6 +24,7 @@ const mockSnoozeActionPolicy = jest.fn();
 const mockUnsnoozeActionPolicy = jest.fn();
 const mockSettingsClientGet = jest.fn();
 const mockUseFetchWorkflow = jest.fn();
+const mockBulkGet = jest.fn();
 
 jest.mock('../../application/breadcrumb_context', () => ({
   useSetBreadcrumbs: () => jest.fn(),
@@ -47,6 +47,9 @@ jest.mock('@kbn/core-di-browser', () => ({
           get: mockSettingsClientGet,
         },
       };
+    }
+    if (token === 'userProfile') {
+      return { bulkGet: mockBulkGet };
     }
 
     return {};
@@ -146,11 +149,6 @@ jest.mock('../../components/action_policy/details_flyout/action_policy_details_f
   ),
 }));
 
-const createQueryClient = () =>
-  new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',
   version: 'WzEsMV0=',
@@ -162,36 +160,31 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   groupBy: null,
   tags: null,
   groupingMode: null,
-  throttle: { strategy: undefined, interval: undefined },
+  throttle: { strategy: undefined, interval: null },
   snoozedUntil: null,
   auth: {
     owner: 'elastic',
     createdByUser: false,
   },
   createdBy: 'elastic_profile_uid',
-  createdByUsername: 'elastic',
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedBy: 'elastic_profile_uid',
-  updatedByUsername: 'elastic',
   updatedAt: '2026-01-02T03:04:05.000Z',
   ...overrides,
 });
 
 const renderPage = () =>
   render(
-    <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter>
-        <I18nProvider>
-          <ListActionPoliciesPage />
-        </I18nProvider>
-      </MemoryRouter>
-    </QueryClientProvider>
+    <ListPageTestProviders>
+      <ListActionPoliciesPage />
+    </ListPageTestProviders>
   );
 
 describe('ListActionPoliciesPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    mockBulkGet.mockResolvedValue([]);
     mockSettingsClientGet.mockReturnValue('[mock formatted date]');
     mockGetUrlForApp.mockImplementation((_appId: string, { path }: { path: string }) => {
       return `/app/workflows${path}`;
@@ -213,6 +206,24 @@ describe('ListActionPoliciesPage', () => {
       isError: false,
       error: null,
     });
+  });
+
+  it('renders the experimental badge in the page header', () => {
+    renderPage();
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Action Policies');
+    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+  });
+
+  it('navigates to create action policy when the create button is clicked', async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.click(screen.getByTestId('createActionPolicyButton'));
+
+    expect(mockNavigateToUrl).toHaveBeenCalledWith(
+      '/app/management/alertingV2/action_policies/create'
+    );
   });
 
   it('formats updatedAt using the user date format setting', () => {

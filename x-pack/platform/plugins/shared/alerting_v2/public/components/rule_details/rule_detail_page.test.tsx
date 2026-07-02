@@ -39,6 +39,17 @@ jest.mock('../../hooks/use_delete_rule', () => ({
   useDeleteRule: () => ({ mutate: mockDeleteRule, isLoading: false }),
 }));
 
+const mockOpenEditFlyout = jest.fn();
+const mockOpenCloneFlyout = jest.fn();
+jest.mock('../../hooks/use_compose_discover_flyout', () => ({
+  useComposeDiscoverFlyout: () => ({
+    flyout: null,
+    openCreateFlyout: jest.fn(),
+    openEditFlyout: mockOpenEditFlyout,
+    openCloneFlyout: mockOpenCloneFlyout,
+  }),
+}));
+
 jest.mock('./rule_header_description', () => ({
   RuleTitleWithBadges: () => <div data-test-subj="ruleTitleWithBadges">mocked-title</div>,
   RuleHeaderDescription: () => <div data-test-subj="ruleHeaderDescription" />,
@@ -51,6 +62,10 @@ jest.mock('./sidebar/rule_sidebar', () => ({
       <div data-test-subj="ruleMetadataSection">metadata</div>
     </div>
   ),
+}));
+
+jest.mock('./overview', () => ({
+  RuleOverviewSection: () => <div data-test-subj="ruleOverviewSectionMock">overview</div>,
 }));
 
 jest.mock('./rule_details_actions_menu', () => ({
@@ -72,7 +87,10 @@ const baseRule: RuleApiResponse = {
   metadata: { name: 'Test Signal Rule', tags: ['prod', 'infra'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
-  evaluation: { query: { base: 'FROM logs-* | STATS count() BY host.name' } },
+  query: {
+    format: 'standalone',
+    breach: { query: 'FROM logs-* | STATS count() BY host.name' },
+  },
   createdBy: 'alice@example.com',
   createdAt: '2026-03-01T12:00:00.000Z',
   updatedBy: 'bob@example.com',
@@ -112,12 +130,10 @@ describe('RuleDetailPage', () => {
     expect(screen.getByTestId('openEditRuleFlyoutButton')).toBeInTheDocument();
   });
 
-  it('renders edit button with correct href', () => {
+  it('opens the edit flyout when edit button is clicked', () => {
     renderPage(baseRule);
-    expect(screen.getByTestId('openEditRuleFlyoutButton')).toHaveAttribute(
-      'href',
-      '/app/management/alertingV2/rules/edit/rule-1'
-    );
+    fireEvent.click(screen.getByTestId('openEditRuleFlyoutButton'));
+    expect(mockOpenEditFlyout).toHaveBeenCalledWith(baseRule);
   });
 
   it('opens delete confirmation from actions menu', () => {
@@ -132,7 +148,7 @@ describe('RuleDetailPage', () => {
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(mockDeleteRule).toHaveBeenCalledWith(
-      'rule-1',
+      { id: 'rule-1', name: 'Test Signal Rule' },
       expect.objectContaining({
         onSuccess: expect.any(Function),
       })

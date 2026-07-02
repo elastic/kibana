@@ -7,6 +7,7 @@
 
 import { unset } from 'lodash';
 
+import type { SavedObjectsBulkResponse } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AttachmentService } from '.';
@@ -16,10 +17,8 @@ import {
   externalReferenceAttachmentSO,
   externalReferenceAttachmentSOAttributes,
   externalReferenceAttachmentSOAttributesWithoutRefs,
-  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
   persistableStateAttachmentAttributes,
-  persistableStateAttachmentAttributesWithoutInjectedId,
 } from '../../attachment_framework/mocks';
 import { createAlertAttachment, createUserAttachment } from './test_utils';
 import { createErrorSO, createSOFindResponse } from '../test_utils';
@@ -36,16 +35,29 @@ const createAttachmentServiceConfig = (attachmentsEnabled = false): ConfigType =
 describe('AttachmentService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
-  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
   let service: AttachmentService;
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new AttachmentService({
       log: mockLogger,
-      persistableStateAttachmentTypeRegistry,
       unsecuredSavedObjectsClient,
       config: createAttachmentServiceConfig(),
+    });
+    // Default `bulkGet` mock used by `resolveAttachmentSavedObjectTypes` (called
+    // by `update`/`bulkUpdate`) so tests that don't care about SO-type
+    // resolution always route to the unified bucket. Tests that need different
+    // routing override this.
+    unsecuredSavedObjectsClient.bulkGet.mockImplementation((objects) => {
+      const requests = objects as Array<{ id: string; type: string }>;
+      const savedObjects = requests.map(({ id, type }) =>
+        type === CASE_ATTACHMENT_SAVED_OBJECT
+          ? { ...createUserAttachment(), id, type }
+          : { ...createErrorSO(type), id }
+      );
+      return Promise.resolve({
+        saved_objects: savedObjects as unknown as SavedObjectsBulkResponse['saved_objects'],
+      });
     });
   });
 
@@ -235,7 +247,6 @@ describe('AttachmentService', () => {
     it('when enabled, create writes to CASE_ATTACHMENT_SAVED_OBJECT with unified attributes', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -270,6 +281,69 @@ describe('AttachmentService', () => {
       );
     });
 
+    it('when enabled, unified file create round-trips: extracts `attachmentId` to refs on write and re-injects it on the response', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+
+      const fileMetadata = {
+        files: [
+          {
+            name: 'screenshot',
+            extension: 'png',
+            mimeType: 'image/png',
+            created: '2024-01-01T00:00:00.000Z',
+          },
+        ],
+        soType: 'file' as const,
+      };
+
+      const fileAttrs = {
+        type: 'file' as const,
+        attachmentId: 'file-id-1',
+        metadata: fileMetadata,
+        owner: SECURITY_SOLUTION_OWNER,
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'u', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      };
+
+      // SO-client `create` is what the production extractor would have written:
+      // `attachmentId` left on attributes AND mirrored into references.
+      unsecuredSavedObjectsClient.create.mockResolvedValue({
+        id: '1',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+        attributes: fileAttrs,
+        references: [{ id: 'file-id-1', name: 'attachmentId', type: 'file' }],
+      });
+
+      const result = await serviceWithFlagOn.create({
+        attributes: fileAttrs,
+        references: [],
+        id: '1',
+      });
+
+      const writeCall = unsecuredSavedObjectsClient.create.mock.calls[0];
+      expect(writeCall[0]).toBe(CASE_ATTACHMENT_SAVED_OBJECT);
+      const writtenRefs =
+        (writeCall[2] as { references?: Array<{ name: string }> }).references ?? [];
+      expect(writtenRefs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'file-id-1', name: 'attachmentId', type: 'file' }),
+        ])
+      );
+
+      // Response shape preserves the unified `attachmentId` for downstream callers.
+      expect(result.attributes).toEqual(
+        expect.objectContaining({ type: 'file', attachmentId: 'file-id-1' })
+      );
+    });
+
     it('when disabled, create writes to CASE_COMMENT_SAVED_OBJECT with legacy attributes', async () => {
       unsecuredSavedObjectsClient.create.mockResolvedValue(createUserAttachment());
 
@@ -289,7 +363,6 @@ describe('AttachmentService', () => {
     it('when enabled, bulkCreate writes to CASE_ATTACHMENT_SAVED_OBJECT', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -329,7 +402,6 @@ describe('AttachmentService', () => {
     it('when enabled, bulkUpdate accepts partial attributes for push metadata only', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -386,7 +458,6 @@ describe('AttachmentService', () => {
     it('when enabled, bulkUpdate throws for typed patches without owner when requestWithoutType is false', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -432,9 +503,12 @@ describe('AttachmentService', () => {
       const unifiedEndpointAttrs = {
         type: 'security.endpoint',
         attachmentId: 'sec-endpoint-1',
+        // Post-lift wire shape: analyst comment lives on `data.content`, metadata
+        // carries only the machine-derived facts (`command`, `targets`). The legacy
+        // round-trip lowers `data.content` back into `externalReferenceMetadata.comment`.
+        data: { content: 'isolated by op' },
         metadata: {
           command: 'isolate',
-          comment: 'isolated by op',
           targets: [
             {
               endpointId: 'endpoint-1',
@@ -475,7 +549,6 @@ describe('AttachmentService', () => {
         const [soType, persistedAttributes] = unsecuredSavedObjectsClient.create.mock.calls[0];
         expect(soType).toBe(CASE_COMMENT_SAVED_OBJECT);
         expectNoUnifiedOrphans(persistedAttributes);
-        // Sanity: the payload was actually converted to legacy externalReference shape.
         expect(persistedAttributes).toEqual(
           expect.objectContaining({
             type: 'externalReference',
@@ -509,14 +582,14 @@ describe('AttachmentService', () => {
       });
 
       it('update strips attachmentId/metadata/data when writing unified payload to cases-comments', async () => {
-        // `update` first resolves the SO type via `resolveAttachmentSavedObjectType`,
-        // which probes `cases-attachments` then falls back to `cases-comments`.
-        // Simulate the legacy-only state: 404 on the unified type, hit on the legacy type.
-        unsecuredSavedObjectsClient.get.mockImplementation((type: string) => {
-          if (type === CASE_ATTACHMENT_SAVED_OBJECT) {
-            return Promise.reject(Object.assign(new Error('Not found'), { statusCode: 404 }));
-          }
-          return Promise.resolve(createUserAttachment());
+        // `update` resolves the SO type via `resolveAttachmentSavedObjectTypes`,
+        // which probes both types in a single `bulkGet`. Mock it so id '1' 404s
+        // on the unified type and hits on the legacy type.
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            { ...createErrorSO(CASE_ATTACHMENT_SAVED_OBJECT), id: '1' },
+            { ...createUserAttachment(), id: '1', type: CASE_COMMENT_SAVED_OBJECT },
+          ] as unknown as SavedObjectsBulkResponse['saved_objects'],
         });
 
         unsecuredSavedObjectsClient.update.mockResolvedValue(createUserAttachment());
@@ -540,6 +613,15 @@ describe('AttachmentService', () => {
       });
 
       it('bulkUpdate strips attachmentId/metadata/data when writing unified payload to cases-comments', async () => {
+        // `bulkUpdate` resolves SO types via a single `bulkGet`. Mock it so id "1"
+        // 404s on the unified type and hits on the legacy type.
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            { ...createErrorSO(CASE_ATTACHMENT_SAVED_OBJECT), id: '1' },
+            { ...createUserAttachment(), id: '1', type: CASE_COMMENT_SAVED_OBJECT },
+          ] as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
+
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [createUserAttachment()],
         });
@@ -572,21 +654,26 @@ describe('AttachmentService', () => {
   describe('update', () => {
     const soClientRes = {
       id: '1',
-      attributes: persistableStateAttachmentAttributesWithoutInjectedId,
+      attributes: persistableStateAttachmentAttributes,
       references: [],
       version: 'test',
       type: 'cases-comments',
     };
 
     beforeEach(() => {
-      unsecuredSavedObjectsClient.get.mockImplementation((type: string, id: string) => {
-        if (type === CASE_ATTACHMENT_SAVED_OBJECT) {
-          return Promise.reject(Object.assign(new Error('Not found'), { statusCode: 404 }));
-        }
-        if (type === CASE_COMMENT_SAVED_OBJECT) {
-          return Promise.resolve(createUserAttachment());
-        }
-        return Promise.reject(new Error('Unknown type'));
+      // `update` resolves the SO type via `resolveAttachmentSavedObjectTypes`
+      // (a single `bulkGet`). Route every id to the legacy bucket so the
+      // existing tests exercise the legacy update path.
+      unsecuredSavedObjectsClient.bulkGet.mockImplementation((objects) => {
+        const requests = objects as Array<{ id: string; type: string }>;
+        const savedObjects = requests.map(({ id, type }) =>
+          type === CASE_COMMENT_SAVED_OBJECT
+            ? { ...createUserAttachment(), id, type }
+            : { ...createErrorSO(type), id }
+        );
+        return Promise.resolve({
+          saved_objects: savedObjects as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
       });
     });
 
@@ -705,22 +792,42 @@ describe('AttachmentService', () => {
   describe('bulkUpdate', () => {
     const soClientRes = {
       id: '1',
-      attributes: persistableStateAttachmentAttributesWithoutInjectedId,
+      attributes: persistableStateAttachmentAttributes,
       references: [],
       version: 'test',
       type: 'cases-comments',
     };
 
+    beforeEach(() => {
+      // `bulkUpdate` resolves the SO type via `resolveAttachmentSavedObjectTypes`
+      // (a single `bulkGet`). Route every id to the legacy bucket so the
+      // existing bulkUpdate tests exercise the legacy update path. Tests that
+      // need different routing override this.
+      unsecuredSavedObjectsClient.bulkGet.mockImplementation((objects) => {
+        const requests = objects as Array<{ id: string; type: string }>;
+        const savedObjects = requests.map(({ id, type }) =>
+          type === CASE_COMMENT_SAVED_OBJECT
+            ? { ...createUserAttachment(), id, type }
+            : { ...createErrorSO(type), id }
+        );
+        return Promise.resolve({
+          saved_objects: savedObjects as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
+      });
+    });
+
     it('should inject the references to the attributes correctly (persistable state)', async () => {
       unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
-          soClientRes,
+          { ...soClientRes, id: '1' },
           {
             ...soClientRes,
+            id: '2',
             attributes: externalReferenceAttachmentSOAttributesWithoutRefs,
           },
           {
             ...soClientRes,
+            id: '3',
             attributes: externalReferenceAttachmentESAttributes,
           },
         ],
@@ -748,9 +855,9 @@ describe('AttachmentService', () => {
 
       expect(res).toEqual({
         saved_objects: [
-          { ...soClientRes, attributes: persistableStateAttachmentAttributes },
-          { ...soClientRes, attributes: externalReferenceAttachmentSOAttributes },
-          { ...soClientRes, attributes: externalReferenceAttachmentESAttributes },
+          { ...soClientRes, id: '1', attributes: persistableStateAttachmentAttributes },
+          { ...soClientRes, id: '2', attributes: externalReferenceAttachmentSOAttributes },
+          { ...soClientRes, id: '3', attributes: externalReferenceAttachmentESAttributes },
         ],
       });
     });
@@ -819,9 +926,17 @@ describe('AttachmentService', () => {
         );
       });
 
-      it('throws when the request is missing the attributes.rule.name', async () => {
+      it('throws when the request is missing the attributes.rule.name (legacy bucket)', async () => {
         const invalidAttachment = createAlertAttachment();
         unset(invalidAttachment, 'attributes.rule.name');
+
+        // Force the legacy write path by resolving id '1' to cases-comments.
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            { ...createErrorSO(CASE_ATTACHMENT_SAVED_OBJECT), id: '1' },
+            { ...createAlertAttachment(), id: '1', type: CASE_COMMENT_SAVED_OBJECT },
+          ] as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
 
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [createAlertAttachment()],
@@ -862,6 +977,236 @@ describe('AttachmentService', () => {
         expect(persistedAttributes).not.toHaveProperty('foo');
       });
     });
+
+    describe('per-attachment SO type resolution', () => {
+      // `bulkUpdate` always probes each id and writes to the bucket that owns
+      // it, independent of the `cases.attachments.enabled` flag. Only the
+      // fallback bucket for unknown ids is FF-derived (covered separately).
+      const unifiedCommentAttrs = {
+        type: 'comment',
+        data: { content: 'hello' },
+        owner: SECURITY_SOLUTION_OWNER,
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'u', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      } as const;
+
+      // Mock `bulkGet` so that ids in `unifiedIds` resolve to the unified bucket
+      // and ids in `legacyIds` resolve to the legacy bucket. Anything else is a
+      // not-found error in both buckets.
+      const mockResolveByBucket = (legacyIds: string[], unifiedIds: string[]) => {
+        unsecuredSavedObjectsClient.bulkGet.mockImplementation((objects) => {
+          const requests = objects as Array<{ id: string; type: string }>;
+          const savedObjects = requests.map(({ id, type }) => {
+            if (type === CASE_ATTACHMENT_SAVED_OBJECT && unifiedIds.includes(id)) {
+              return { ...createUserAttachment(), id, type };
+            }
+            if (type === CASE_COMMENT_SAVED_OBJECT && legacyIds.includes(id)) {
+              return { ...createUserAttachment(), id, type };
+            }
+            return { ...createErrorSO(type), id };
+          });
+          return Promise.resolve({
+            saved_objects: savedObjects as unknown as SavedObjectsBulkResponse['saved_objects'],
+          });
+        });
+      };
+
+      it('resolves all SO types in a single bulkGet round trip', async () => {
+        mockResolveByBucket(['legacy-id'], ['unified-id']);
+        unsecuredSavedObjectsClient.bulkUpdate
+          .mockResolvedValueOnce({
+            saved_objects: [
+              {
+                id: 'unified-id',
+                type: CASE_ATTACHMENT_SAVED_OBJECT,
+                attributes: unifiedCommentAttrs,
+                references: [],
+                version: 'v2',
+              },
+            ],
+          })
+          .mockResolvedValueOnce({
+            saved_objects: [{ ...createUserAttachment(), id: 'legacy-id' }],
+          });
+
+        await service.bulkUpdate({
+          comments: [
+            { savedObjectId: 'unified-id', updatedAttributes: unifiedCommentAttrs },
+            {
+              savedObjectId: 'legacy-id',
+              updatedAttributes: createUserAttachment().attributes,
+            },
+          ],
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
+        const [bulkGetRequest] = unsecuredSavedObjectsClient.bulkGet.mock.calls[0];
+        expect(bulkGetRequest).toEqual([
+          { id: 'unified-id', type: CASE_ATTACHMENT_SAVED_OBJECT },
+          { id: 'unified-id', type: CASE_COMMENT_SAVED_OBJECT },
+          { id: 'legacy-id', type: CASE_ATTACHMENT_SAVED_OBJECT },
+          { id: 'legacy-id', type: CASE_COMMENT_SAVED_OBJECT },
+        ]);
+      });
+
+      it('writes to both buckets when ids resolve to different SOs', async () => {
+        mockResolveByBucket(['legacy-id'], ['unified-id']);
+        unsecuredSavedObjectsClient.bulkUpdate
+          .mockResolvedValueOnce({
+            saved_objects: [
+              {
+                id: 'unified-id',
+                type: CASE_ATTACHMENT_SAVED_OBJECT,
+                attributes: unifiedCommentAttrs,
+                references: [],
+                version: 'v2',
+              },
+            ],
+          })
+          .mockResolvedValueOnce({
+            saved_objects: [{ ...createUserAttachment(), id: 'legacy-id' }],
+          });
+
+        const res = await service.bulkUpdate({
+          comments: [
+            {
+              savedObjectId: 'unified-id',
+              updatedAttributes: unifiedCommentAttrs,
+            },
+            {
+              savedObjectId: 'legacy-id',
+              updatedAttributes: createUserAttachment().attributes,
+            },
+          ],
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(2);
+        const [unifiedCall, legacyCall] = unsecuredSavedObjectsClient.bulkUpdate.mock.calls;
+        expect(unifiedCall[0]).toEqual([
+          expect.objectContaining({ type: CASE_ATTACHMENT_SAVED_OBJECT, id: 'unified-id' }),
+        ]);
+        expect(legacyCall[0]).toEqual([
+          expect.objectContaining({ type: CASE_COMMENT_SAVED_OBJECT, id: 'legacy-id' }),
+        ]);
+
+        expect(res.saved_objects).toHaveLength(2);
+        expect(res.saved_objects[0].id).toBe('unified-id');
+        expect(res.saved_objects[0].type).toBe(CASE_ATTACHMENT_SAVED_OBJECT);
+        expect(res.saved_objects[1].id).toBe('legacy-id');
+        expect(res.saved_objects[1].type).toBe(CASE_COMMENT_SAVED_OBJECT);
+      });
+
+      it('issues a single bulkUpdate when every id lives in cases-comments', async () => {
+        mockResolveByBucket(['legacy-id'], []);
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [{ ...createUserAttachment(), id: 'legacy-id' }],
+        });
+
+        await service.bulkUpdate({
+          comments: [
+            {
+              savedObjectId: 'legacy-id',
+              updatedAttributes: createUserAttachment().attributes,
+            },
+          ],
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
+        const [requests] = unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0];
+        expect(requests).toEqual([
+          expect.objectContaining({ type: CASE_COMMENT_SAVED_OBJECT, id: 'legacy-id' }),
+        ]);
+      });
+
+      it('issues a single bulkUpdate when every id lives in cases-attachments', async () => {
+        mockResolveByBucket([], ['unified-1', 'unified-2']);
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'unified-1',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              attributes: unifiedCommentAttrs,
+              references: [],
+              version: 'v2',
+            },
+            {
+              id: 'unified-2',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              attributes: unifiedCommentAttrs,
+              references: [],
+              version: 'v2',
+            },
+          ],
+        });
+
+        await service.bulkUpdate({
+          comments: [
+            { savedObjectId: 'unified-1', updatedAttributes: unifiedCommentAttrs },
+            { savedObjectId: 'unified-2', updatedAttributes: unifiedCommentAttrs },
+          ],
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
+        const [requests] = unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0];
+        expect(requests).toEqual([
+          expect.objectContaining({ type: CASE_ATTACHMENT_SAVED_OBJECT, id: 'unified-1' }),
+          expect.objectContaining({ type: CASE_ATTACHMENT_SAVED_OBJECT, id: 'unified-2' }),
+        ]);
+      });
+
+      it('defaults to cases-attachments for unknown ids when attachments FF is on', async () => {
+        const serviceWithFlagOn = new AttachmentService({
+          log: mockLogger,
+          unsecuredSavedObjectsClient,
+          config: createAttachmentServiceConfig(true),
+        });
+        mockResolveByBucket([], []);
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'missing-id',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              attributes: unifiedCommentAttrs,
+              references: [],
+              version: 'v2',
+            },
+          ],
+        });
+
+        await serviceWithFlagOn.bulkUpdate({
+          comments: [{ savedObjectId: 'missing-id', updatedAttributes: unifiedCommentAttrs }],
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
+        const [requests] = unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0];
+        expect(requests).toEqual([
+          expect.objectContaining({ type: CASE_ATTACHMENT_SAVED_OBJECT, id: 'missing-id' }),
+        ]);
+      });
+
+      it('defaults to cases-comments for unknown ids when attachments FF is off', async () => {
+        mockResolveByBucket([], []);
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [{ ...createUserAttachment(), id: 'missing-id' }],
+        });
+
+        await service.bulkUpdate({
+          comments: [
+            { savedObjectId: 'missing-id', updatedAttributes: createUserAttachment().attributes },
+          ],
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
+        const [requests] = unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0];
+        expect(requests).toEqual([
+          expect.objectContaining({ type: CASE_COMMENT_SAVED_OBJECT, id: 'missing-id' }),
+        ]);
+      });
+    });
   });
 
   describe('bulkDelete', () => {
@@ -888,18 +1233,12 @@ describe('AttachmentService', () => {
   });
 
   describe('find', () => {
-    it('uses a single paginated find call when feature flag is enabled', async () => {
-      const serviceWithFlagOn = new AttachmentService({
-        log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
-        unsecuredSavedObjectsClient,
-        config: createAttachmentServiceConfig(true),
-      });
+    it('uses a single paginated find call across both legacy and unified SO types', async () => {
       unsecuredSavedObjectsClient.find.mockResolvedValue(
         createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
       );
 
-      await serviceWithFlagOn.find({
+      await service.find({
         mode: 'legacy',
         options: {
           page: 1,
@@ -917,44 +1256,9 @@ describe('AttachmentService', () => {
       );
     });
 
-    it('queries only legacy SO type when feature flag is disabled', async () => {
-      unsecuredSavedObjectsClient.find.mockResolvedValue(
-        createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
-      );
-
-      await service.find({ mode: 'legacy' });
-
-      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: CASE_COMMENT_SAVED_OBJECT,
-        })
-      );
-    });
-
-    it('queries both legacy and unified comment SO types when feature flag is enabled', async () => {
-      const serviceWithFlagOn = new AttachmentService({
-        log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
-        unsecuredSavedObjectsClient,
-        config: createAttachmentServiceConfig(true),
-      });
-      unsecuredSavedObjectsClient.find.mockResolvedValue(
-        createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
-      );
-
-      await serviceWithFlagOn.find({ mode: 'legacy' });
-
-      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT],
-        })
-      );
-    });
-
     it('transforms unified comment find results to legacy output', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -1114,20 +1418,27 @@ describe('AttachmentService', () => {
       `);
     });
 
-    it('returns the expected total', async () => {
-      const total = 3;
-
-      unsecuredSavedObjectsClient.find.mockResolvedValue(
-        createSOFindResponse(
-          Array(total).fill({ ...createUserAttachment({ foo: 'bar' }), score: 0 })
+    it('always sums legacy + unified counts and excludes `file` from the unified type filter', async () => {
+      unsecuredSavedObjectsClient.find
+        .mockResolvedValueOnce(
+          createSOFindResponse(Array(2).fill({ ...createUserAttachment({ foo: 'bar' }), score: 0 }))
         )
-      );
+        .mockResolvedValueOnce(
+          createSOFindResponse(Array(3).fill({ ...createUserAttachment({ foo: 'bar' }), score: 0 }))
+        );
 
       const res = await service.countPersistableStateAndExternalReferenceAttachments({
         caseId: 'test-id',
       });
 
-      expect(res).toBe(total);
+      expect(res).toBe(5);
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(2);
+
+      const unifiedCallArgs = unsecuredSavedObjectsClient.find.mock.calls[1][0];
+      expect(unifiedCallArgs.type).toBe('cases-attachments');
+
+      const filterAsString = JSON.stringify(unifiedCallArgs.filter);
+      expect(filterAsString).not.toMatch(/"value":\s*"file"/);
     });
   });
 });

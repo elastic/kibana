@@ -75,10 +75,8 @@ export const registerUpsertDatasetRoute = ({
           }
 
           const { name, description, examples } = request.body;
-          const coreContext = await context.core;
           const evalsContext = await context.evals;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
-          const datasetClient = evalsContext.datasetService.getClient(esClient);
+          const datasetClient = evalsContext.datasetService.getClient();
           const upsertResult = await datasetClient.upsert(name, description, examples);
 
           return response.ok({

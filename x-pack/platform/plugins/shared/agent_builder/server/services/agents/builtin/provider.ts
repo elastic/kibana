@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { AgentType, createAgentNotFoundError } from '@kbn/agent-builder-common';
 import type { BuiltInAgentDefinition, AgentConfigContext } from '@kbn/agent-builder-server/agents';
 import type { BuiltinAgentRegistry } from './registry';
-import type { AgentProviderFn, ReadonlyAgentProvider } from '../agent_source';
+import type { AgentProviderFn, GetAgentOptions, ReadonlyAgentProvider } from '../agent_source';
 import type { InternalAgentDefinition } from '../agent_registry';
 import { AgentAvailabilityCache } from './availability_cache';
 
@@ -43,7 +43,7 @@ const registryToProvider = ({
     has: (agentId: string) => {
       return registry.has(agentId);
     },
-    get: (agentId: string) => {
+    get: (agentId: string, _opts?: GetAgentOptions) => {
       const definition = registry.get(agentId);
       if (!definition) {
         throw createAgentNotFoundError({ agentId });
@@ -82,9 +82,13 @@ export const toInternalDefinition = async ({
       enable_elastic_capabilities: configuration.enable_elastic_capabilities ?? true,
     },
     type: AgentType.chat,
-    visibility: undefined,
+    access_control: undefined,
     created_by: undefined,
     readonly: true,
+    permissions: {
+      update_agent: false,
+      update_access_control: false,
+    },
     isAvailable: async (ctx) => {
       if (definition.availability) {
         return availabilityCache.getOrCompute(definition.id, definition.availability, ctx);

@@ -26,3 +26,7 @@ export const PREBUILT_RULES_UPGRADE_REVIEW_CONCURRENCY = 3;
  * Related issue: https://github.com/elastic/kibana/issues/241656
  */
 export const PREBUILT_RULES_INSTALLATION_REVIEW_CONCURRENCY = 5;
+
+// Maximum number of prebuilt rules processed per iteration of the install
+// and upgrade loops.
+export const PREBUILT_RULE_BATCH_SIZE = 100;

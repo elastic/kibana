@@ -24,10 +24,10 @@ export function useMenuHeaderStyle() {
 
     position: sticky;
     top: 0;
-    z-index: 1;
-    padding: ${euiTheme.size.base} var(--horizontal-padding) ${euiTheme.size.xs}
+    z-index: calc(${euiTheme.levels.content} + 1);
+    padding: ${euiTheme.size.base} var(--horizontal-padding) ${euiTheme.size.xxs}
       var(--horizontal-padding);
     margin: 0 1px;
-    height: var(--secondary-menu-header-height);
+    min-height: var(--secondary-menu-header-height);
   `;
 }

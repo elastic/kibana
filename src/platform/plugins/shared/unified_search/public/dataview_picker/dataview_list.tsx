@@ -131,6 +131,7 @@ export function DataViewsList({
       {...selectableProps}
       listProps={{
         truncationProps: MIDDLE_TRUNCATION_PROPS,
+        paddingSize: 's',
         ...(selectableProps?.listProps ? selectableProps.listProps : undefined),
       }}
       data-test-subj="indexPattern-switcher"
@@ -141,6 +142,7 @@ export function DataViewsList({
         label: name ? name : title,
         value: id,
         checked: id === currentDataViewId ? 'on' : undefined,
+        'data-test-subj': `dataView-${name ? name : title}`,
         append: managed ? (
           <EuiBadge color="hollow" data-test-subj={`dataViewItemManagedBadge-${name}`}>
             {strings.editorAndPopover.managed.getManagedDataviewLabel()}
