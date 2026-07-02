@@ -10,8 +10,12 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import { bulkUpdateDocuments } from './bulk_update_documents';
+import {
+  ConcurrencySlotOccupyingExecutionStatuses,
+  ExecutionStatus,
+  NonTerminalExecutionStatuses,
+} from '@kbn/workflows';
+import { bulkUpdateDocuments, resolveVersions } from './bulk_update_documents';
 import type { DocumentVersionsById, EsDocumentVersion } from './document_version';
 import { getDocumentsById } from './get_doc_by_id';
 import { resolveWriteIndex } from './resolve_write_index';
@@ -198,6 +202,7 @@ export class WorkflowExecutionRepository {
    */
   public async updateWorkflowExecution(
     workflowExecution: Partial<EsWorkflowExecution>,
+    options: { refresh?: boolean | 'wait_for' } = {},
     providedVersions?: DocumentVersionsById
   ): Promise<DocumentVersionsById> {
     const id = workflowExecution.id;
@@ -211,7 +216,7 @@ export class WorkflowExecutionRepository {
         },
       ],
       entityName: 'workflow execution',
-      refresh: true,
+      refresh: options.refresh ?? false,
       idRequiredMessage: 'Workflow execution ID is required for update',
     });
   }
@@ -356,9 +361,8 @@ export class WorkflowExecutionRepository {
   }
 
   /**
-   * Retrieves non-terminal workflow execution IDs by concurrency group key.
-   * For cancel-in-progress strategy, we need to cancel any non-terminal executions (PENDING, RUNNING, etc.)
-   * to make room for new executions.
+   * Retrieves concurrency-slot IDs by concurrency group key (excludes persisted `queued` backlog).
+   * Cancel-in-progress and drop strategies only consider executions that occupy a concurrency slot.
    *
    * Only returns execution IDs (not full documents) for efficiency, as we only need IDs for cancellation.
    * Results are sorted by createdAt ascending (oldest first).
@@ -380,7 +384,7 @@ export class WorkflowExecutionRepository {
       { term: { spaceId } },
       {
         terms: {
-          status: NonTerminalExecutionStatuses,
+          status: ConcurrencySlotOccupyingExecutionStatuses,
         },
       },
     ];
@@ -400,14 +404,123 @@ export class WorkflowExecutionRepository {
           filter: filterClauses,
         },
       },
-      _source: ['id'],
-      sort: [{ createdAt: { order: 'asc' } }],
-      size: Math.min(size, 10000),
+      _source: ['id'], // Only fetch ID field for efficiency
+      sort: [
+        { createdAt: { order: 'asc' } },
+        { id: { order: 'asc' } }, // Tie-break for determinism when createdAt collides; not chronological order
+      ],
+      size: Math.min(size, 10000), // Cap at ES default max_result_window for validation
     });
 
     return response.hits.hits
       .map((hit) => hit._source?.id ?? hit._id)
       .filter((id): id is string => id !== undefined);
+  }
+
+  /**
+   * Counts workflow executions in a concurrency group constrained to explicit statuses (filter context).
+   */
+  public async countExecutionsByConcurrencyGroupAndStatuses(
+    concurrencyGroupKey: string,
+    spaceId: string,
+    statuses: readonly ExecutionStatus[],
+    excludeExecutionId?: string
+  ): Promise<number> {
+    const filterClauses: Array<Record<string, unknown>> = [
+      { term: { concurrencyGroupKey } },
+      { term: { spaceId } },
+      { terms: { status: statuses } },
+    ];
+    if (excludeExecutionId) {
+      filterClauses.push({
+        bool: {
+          must_not: [{ term: { id: excludeExecutionId } }],
+        },
+      });
+    }
+    const response = await this.esClient.count({
+      index: this.dataStreamName,
+      query: {
+        bool: {
+          filter: filterClauses,
+        },
+      },
+    });
+
+    return response.count;
+  }
+
+  /**
+   * Oldest queued execution id for FIFO promotion (FIFO by createdAt ascending).
+   */
+  public async getOldestQueuedExecutionIdByConcurrencyGroup(
+    concurrencyGroupKey: string,
+    spaceId: string
+  ): Promise<string | null> {
+    const response = await this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
+      index: this.dataStreamName,
+      size: 1,
+      query: {
+        bool: {
+          filter: [
+            { term: { concurrencyGroupKey } },
+            { term: { spaceId } },
+            { term: { status: ExecutionStatus.QUEUED } },
+          ],
+        },
+      },
+      _source: ['id'],
+      sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
+    });
+    const hit = response.hits.hits[0];
+    const id = hit?._source?.id ?? hit?._id;
+    return typeof id === 'string' ? id : null;
+  }
+
+  /**
+   * CAS: promoted `queued` → `pending` only when the document still carries `queued` status.
+   */
+  public async tryCasPromoteQueuedWorkflowExecutionToPending(params: {
+    workflowExecutionId: string;
+    spaceId: string;
+  }): Promise<boolean> {
+    const versions = await resolveVersions({
+      esClient: this.esClient,
+      dataStreamName: this.dataStreamName,
+      entityName: 'workflow execution',
+      ids: [params.workflowExecutionId],
+    });
+
+    if (params.workflowExecutionId in versions) {
+      const version = versions[params.workflowExecutionId];
+      const response = await this.esClient.update({
+        index: version.index,
+        id: params.workflowExecutionId,
+        if_seq_no: version.seqNo,
+        if_primary_term: version.primaryTerm,
+        // Near-real-time search must see this doc as PENDING before the next
+        // drain loop iteration counts slot occupancy; otherwise max:1 can double-promote.
+        refresh: 'wait_for',
+        script: {
+          lang: 'painless',
+          source: `
+            if (ctx._source.status == params.queuedStatus && ctx._source.spaceId == params.spaceId) {
+              ctx._source.status = params.pendingStatus;
+            } else {
+              ctx.op = 'noop';
+            }
+          `,
+          params: {
+            queuedStatus: ExecutionStatus.QUEUED,
+            pendingStatus: ExecutionStatus.PENDING,
+            spaceId: params.spaceId,
+          },
+        },
+      });
+      return response.result === 'updated';
+    }
+
+    return false;
   }
 
   /**

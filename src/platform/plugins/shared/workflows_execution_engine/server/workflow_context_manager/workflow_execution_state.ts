@@ -12,6 +12,7 @@ import type {
   EsWorkflowStepExecution,
   WorkflowTokenUsage,
 } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
 import type { EsDocumentVersion } from '../repositories/document_version';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { sumTokenUsage } from '../utils';
@@ -295,22 +296,32 @@ export class WorkflowExecutionState {
     const changes = this.workflowDocumentChanges;
     this.workflowDocumentChanges = undefined;
 
-    const id = this.workflowExecution.id;
-
     // Pass the cached version when we have one (undefined on the cold path);
     // the repository resolves fresh when it is absent.
     const providedVersions = this.workflowExecutionVersion
-      ? { [id]: this.workflowExecutionVersion }
+      ? { [this.workflowExecution.id]: this.workflowExecutionVersion }
       : undefined;
 
+    const queueConcurrencyStrategy =
+      this.workflowExecution.workflowDefinition?.settings?.concurrency?.strategy === 'queue';
+    const refreshForQueueDrainAfterTerminal =
+      Boolean(this.workflowExecution.concurrencyGroupKey) &&
+      queueConcurrencyStrategy &&
+      isTerminalStatus(this.workflowExecution.status);
+
     const versions = await this.workflowExecutionRepository.updateWorkflowExecution(
-      { ...changes, id },
+      {
+        ...changes,
+        id: this.workflowExecution.id,
+      },
+      refreshForQueueDrainAfterTerminal ? { refresh: 'wait_for' } : {},
       providedVersions
     );
 
     // Refresh the cache from the write response; keep the previous value if
     // the response did not include it (should not happen on success).
-    this.workflowExecutionVersion = versions?.[id] ?? this.workflowExecutionVersion;
+    this.workflowExecutionVersion =
+      versions?.[this.workflowExecution.id] ?? this.workflowExecutionVersion;
   }
 
   private createStep(step: CreateStepInput) {

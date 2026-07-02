@@ -28,11 +28,13 @@ const mockResolveExecutionsWriteIndex = jest
 const mockResolveStepExecutionsWriteIndex = jest
   .fn()
   .mockResolvedValue('.ds-.workflows-step-executions-2026.06.22-000001');
+const mockGetWorkflowExecutionById = jest.fn().mockResolvedValue(null);
 jest.mock('./repositories/workflow_execution_repository', () => ({
   WorkflowExecutionRepository: jest.fn().mockImplementation(() => ({
     bulkCreateWorkflowExecutions: mockBulkCreateWorkflowExecutions,
     createWorkflowExecution: mockCreateWorkflowExecution,
     resolveWriteIndex: mockResolveExecutionsWriteIndex,
+    getWorkflowExecutionById: mockGetWorkflowExecutionById,
   })),
 }));
 jest.mock('./repositories/step_execution_repository', () => ({

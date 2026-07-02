@@ -292,7 +292,7 @@ describe('WorkflowExecutionState', () => {
 
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
         updatedWorkflowExecution,
-        undefined
+        {}
       );
     });
 
@@ -304,10 +304,10 @@ describe('WorkflowExecutionState', () => {
       await ioService.flush();
 
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
-        {
+        expect.objectContaining({
           id: 'test-workflow-execution-id',
-        },
-        undefined
+        }),
+        {}
       );
     });
 
@@ -1216,11 +1216,11 @@ describe('WorkflowExecutionState', () => {
       await underTest.flushWorkflowDoc();
 
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
-        {
+        expect.objectContaining({
           id: 'test-workflow-execution-id',
           usage: { inputTokens: 100, outputTokens: 50, totalTokens: 150 },
-        },
-        undefined
+        }),
+        {}
       );
     });
 

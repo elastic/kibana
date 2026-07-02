@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
+import {
+  ConcurrencySlotOccupyingExecutionStatuses,
+  ExecutionStatus,
+  NonTerminalExecutionStatuses,
+} from '@kbn/workflows';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
@@ -20,6 +24,7 @@ describe('WorkflowExecutionRepository', () => {
     create: jest.Mock;
     update: jest.Mock;
     search: jest.Mock;
+    count: jest.Mock;
     get: jest.Mock;
     mget: jest.Mock;
     bulk: jest.Mock;
@@ -36,6 +41,7 @@ describe('WorkflowExecutionRepository', () => {
       }),
       update: jest.fn(),
       search: jest.fn(),
+      count: jest.fn(),
       get: jest.fn(),
       mget: jest.fn(),
       bulk: jest.fn(),
@@ -676,7 +682,7 @@ describe('WorkflowExecutionRepository', () => {
   });
 
   describe('getRunningExecutionsByConcurrencyGroup', () => {
-    it('should query for non-terminal execution IDs by concurrency group key', async () => {
+    it('should query for concurrency-slot execution IDs by concurrency group key', async () => {
       const mockExecutions = [
         {
           _id: 'exec-1',
@@ -707,14 +713,14 @@ describe('WorkflowExecutionRepository', () => {
               { term: { spaceId: 'default' } },
               {
                 terms: {
-                  status: NonTerminalExecutionStatuses,
+                  status: ConcurrencySlotOccupyingExecutionStatuses,
                 },
               },
             ],
           },
         },
         _source: ['id'],
-        sort: [{ createdAt: { order: 'asc' } }],
+        sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
         size: 5000,
       });
 
@@ -748,7 +754,7 @@ describe('WorkflowExecutionRepository', () => {
               { term: { spaceId: 'default' } },
               {
                 terms: {
-                  status: NonTerminalExecutionStatuses,
+                  status: ConcurrencySlotOccupyingExecutionStatuses,
                 },
               },
               {
@@ -760,7 +766,7 @@ describe('WorkflowExecutionRepository', () => {
           },
         },
         _source: ['id'],
-        sort: [{ createdAt: { order: 'asc' } }],
+        sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
         size: 5000,
       });
     });
@@ -1357,6 +1363,90 @@ describe('WorkflowExecutionRepository', () => {
 
       expect(result.results).toEqual(['exec-a', 'exec-b']);
       expect(result.nextSearchAfter).toBeUndefined();
+    });
+  });
+
+  describe('countExecutionsByConcurrencyGroupAndStatuses', () => {
+    it('issues _count with the same bool filter query and returns count', async () => {
+      esClient.count.mockResolvedValue({ count: 4 });
+
+      const result = await repository.countExecutionsByConcurrencyGroupAndStatuses(
+        'group-a',
+        'default',
+        [ExecutionStatus.PENDING, ExecutionStatus.RUNNING],
+        'exclude-id'
+      );
+
+      expect(esClient.count).toHaveBeenCalledWith({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        query: {
+          bool: {
+            filter: [
+              { term: { concurrencyGroupKey: 'group-a' } },
+              { term: { spaceId: 'default' } },
+              { terms: { status: [ExecutionStatus.PENDING, ExecutionStatus.RUNNING] } },
+              {
+                bool: {
+                  must_not: [{ term: { id: 'exclude-id' } }],
+                },
+              },
+            ],
+          },
+        },
+      });
+      expect(esClient.search).not.toHaveBeenCalled();
+      expect(result).toBe(4);
+    });
+  });
+
+  describe('getOldestQueuedExecutionIdByConcurrencyGroup', () => {
+    it('searches for the oldest queued execution with stable FIFO sort', async () => {
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [{ _id: 'exec-oldest', _source: { id: 'exec-oldest' } }],
+        },
+      });
+
+      const result = await repository.getOldestQueuedExecutionIdByConcurrencyGroup(
+        'group-a',
+        'default'
+      );
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        size: 1,
+        query: {
+          bool: {
+            filter: [
+              { term: { concurrencyGroupKey: 'group-a' } },
+              { term: { spaceId: 'default' } },
+              { term: { status: ExecutionStatus.QUEUED } },
+            ],
+          },
+        },
+        _source: ['id'],
+        sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
+      });
+      expect(result).toBe('exec-oldest');
+    });
+  });
+
+  describe('tryCasPromoteQueuedWorkflowExecutionToPending', () => {
+    it('uses refresh wait_for so search-based slot counts observe pending before the next drain iteration', async () => {
+      esClient.update.mockResolvedValue({ result: 'updated' });
+
+      await repository.tryCasPromoteQueuedWorkflowExecutionToPending({
+        workflowExecutionId: 'exec-1',
+        spaceId: 'default',
+      });
+
+      expect(esClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: WORKFLOWS_EXECUTIONS_INDEX,
+          id: 'exec-1',
+          refresh: 'wait_for',
+        })
+      );
     });
   });
 });
