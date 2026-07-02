@@ -16,6 +16,7 @@ import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_
 import { setAlertTagsStepDefinition } from './set_alert_tags_step/set_alert_tags_step';
 import { setAttackTagsStepDefinition } from './set_attack_tags_step/set_attack_tags_step';
 import { assignAlertStepDefinition } from './assign_alert_step/assign_alert_step';
+import { assignAttackStepDefinition } from './assign_attack_step/assign_attack_step';
 import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
 import {
   REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
@@ -44,13 +45,13 @@ describe('registerWorkflowSteps (server)', () => {
     } as ExperimentalFeatures);
 
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      assignAlertStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       setAlertStatusStepDefinition
     );
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       setAlertTagsStepDefinition
-    );
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
-      assignAlertStepDefinition
     );
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(5);
     // getStartServices is called once eagerly to create the shared memoized promise
@@ -76,16 +77,17 @@ describe('registerWorkflowSteps (server)', () => {
       publicAttacksApiEnabled: true,
     } as ExperimentalFeatures);
 
-    const [loader1, loader2, step3, step4, step5, step6, step7] =
+    const [loader1, loader2, step3, step4, step5, step6, step7, step8] =
       workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => arg);
 
     await expect((loader1 as StepLoader)()).resolves.toBe(renderAlertNarrativeStepDefinition);
     await expect((loader2 as StepLoader)()).resolves.toBe(buildAlertEntityGraphStepDefinition);
-    expect(step3).toBe(setAlertStatusStepDefinition);
-    expect(step4).toBe(setAlertTagsStepDefinition);
-    expect(step5).toBe(assignAlertStepDefinition);
-    expect(step6).toBe(setAttackTagsStepDefinition);
+    expect(step3).toBe(assignAlertStepDefinition);
+    expect(step4).toBe(setAlertStatusStepDefinition);
+    expect(step5).toBe(setAlertTagsStepDefinition);
+    expect(step6).toBe(assignAttackStepDefinition);
     expect(step7).toBe(setAttackStatusStepDefinition);
+    expect(step8).toBe(setAttackTagsStepDefinition);
   });
 
   it('async loader returns undefined when feature flag is disabled', async () => {
@@ -96,16 +98,17 @@ describe('registerWorkflowSteps (server)', () => {
       publicAttacksApiEnabled: true,
     } as ExperimentalFeatures);
 
-    const [loader1, loader2, step3, step4, step5, step6, step7] =
+    const [loader1, loader2, step3, step4, step5, step6, step7, step8] =
       workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => arg);
 
     await expect((loader1 as StepLoader)()).resolves.toBeUndefined();
     await expect((loader2 as StepLoader)()).resolves.toBeUndefined();
-    expect(step3).toBe(setAlertStatusStepDefinition);
-    expect(step4).toBe(setAlertTagsStepDefinition);
-    expect(step5).toBe(assignAlertStepDefinition);
-    expect(step6).toBe(setAttackTagsStepDefinition);
+    expect(step3).toBe(assignAlertStepDefinition);
+    expect(step4).toBe(setAlertStatusStepDefinition);
+    expect(step5).toBe(setAlertTagsStepDefinition);
+    expect(step6).toBe(assignAttackStepDefinition);
     expect(step7).toBe(setAttackStatusStepDefinition);
+    expect(step8).toBe(setAttackTagsStepDefinition);
   });
 
   it('checks the feature flag exactly once even when both loaders resolve', async () => {
@@ -125,5 +128,20 @@ describe('registerWorkflowSteps (server)', () => {
       REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
       REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT
     );
+  });
+
+  it('does not register assignAttackStepDefinition when publicAttacksApiEnabled is false', () => {
+    const { core } = buildCoreMock(true);
+    const workflowsExtensions = createWorkflowsExtensionsMock();
+
+    registerWorkflowSteps(workflowsExtensions, core, {
+      publicAttacksApiEnabled: false,
+    } as ExperimentalFeatures);
+
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(5);
+    const registeredSteps = workflowsExtensions.registerStepDefinition.mock.calls.map(
+      ([arg]) => arg
+    );
+    expect(registeredSteps).not.toContain(assignAttackStepDefinition);
   });
 });

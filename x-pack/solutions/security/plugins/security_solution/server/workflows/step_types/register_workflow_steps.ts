@@ -14,6 +14,7 @@ import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_
 import { setAlertTagsStepDefinition } from './set_alert_tags_step/set_alert_tags_step';
 import { setAttackTagsStepDefinition } from './set_attack_tags_step/set_attack_tags_step';
 import { assignAlertStepDefinition } from './assign_alert_step/assign_alert_step';
+import { assignAttackStepDefinition } from './assign_attack_step/assign_attack_step';
 import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
 import {
   REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
@@ -49,12 +50,13 @@ export const registerWorkflowSteps = (
     return buildAlertEntityGraphStepDefinition;
   });
 
+  workflowsExtensions.registerStepDefinition(assignAlertStepDefinition);
   workflowsExtensions.registerStepDefinition(setAlertStatusStepDefinition);
   workflowsExtensions.registerStepDefinition(setAlertTagsStepDefinition);
-  workflowsExtensions.registerStepDefinition(assignAlertStepDefinition);
 
   if (experimentalFeatures.publicAttacksApiEnabled) {
-    workflowsExtensions.registerStepDefinition(setAttackTagsStepDefinition);
+    workflowsExtensions.registerStepDefinition(assignAttackStepDefinition);
     workflowsExtensions.registerStepDefinition(setAttackStatusStepDefinition);
+    workflowsExtensions.registerStepDefinition(setAttackTagsStepDefinition);
   }
 };
