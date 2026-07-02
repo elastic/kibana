@@ -41054,7 +41054,8 @@ paths:
               ],
               "layout": "horizontal"
             }'
-        - lang: Create a links library item - Console
+        - label: Create a links library item - Console
+          lang: Console
           source: |
             POST kbn:/api/links
             {
@@ -82547,14 +82548,12 @@ components:
                   type: boolean
                 ref_id:
                   description: The unique identifier of the links library item.
-                  maxLength: 300
                   title: Reference ID
                   type: string
                 title:
-                  description: The library item title.
+                  description: The panel title.
                   type: string
               required:
-                - title
                 - ref_id
               title: By reference
               type: object
