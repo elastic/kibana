@@ -21,7 +21,10 @@ import { getRunningProcessesTool } from '.';
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 const mockContext = {
   logger: mockLogger,
-  runContext: { conversationId: 'conv-test-1', runId: 'run-test-1' },
+  runContext: {
+    runId: 'run-test-1',
+    stack: [{ type: 'agent', agentId: 'test-agent', conversationId: 'conv-test-1' }],
+  },
 } as unknown as ToolHandlerContext;
 
 function assertStandardReturn(result: unknown) {
