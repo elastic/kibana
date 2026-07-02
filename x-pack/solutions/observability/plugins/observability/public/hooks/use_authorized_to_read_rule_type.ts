@@ -46,7 +46,9 @@ export const useAuthorizedToReadRuleType = (): UseAuthorizedToReadRuleTypeResult
     authorizedToReadRuleForAlert,
   } = useGetRuleTypesPermissions({ http, toasts });
 
-  // Wrap with undefined safety so callers can pass alert.fields[FIELD] directly.
+  // The shared hook requires a non-undefined ruleTypeId. Callers that read from
+  // alert.fields[FIELD] get string | undefined from TypeScript, so this wrapper
+  // absorbs the undefined check so they don't have to guard it at every call site.
   const authorizedToReadRuleType = useCallback<AuthorizedToReadRuleType>(
     (ruleTypeId, consumer) =>
       Boolean(ruleTypeId && authorizedToReadRuleTypeFromHook(ruleTypeId, consumer)),
