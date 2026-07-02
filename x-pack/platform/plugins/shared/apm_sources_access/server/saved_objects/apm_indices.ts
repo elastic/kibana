@@ -51,11 +51,11 @@ export const apmIndicesSavedObjectDefinition: SavedObjectsType = {
         create: schema.object({
           apmIndices: schema.maybe(
             schema.object({
-              error: schema.maybe(createApmIndexStringSchema('error')),
-              onboarding: schema.maybe(createApmIndexStringSchema('onboarding')),
-              span: schema.maybe(createApmIndexStringSchema('span')),
-              transaction: schema.maybe(createApmIndexStringSchema('transaction')),
-              metric: schema.maybe(createApmIndexStringSchema('metric')),
+              error: schema.maybe(createApmIndexStringSchema()),
+              onboarding: schema.maybe(createApmIndexStringSchema()),
+              span: schema.maybe(createApmIndexStringSchema()),
+              transaction: schema.maybe(createApmIndexStringSchema()),
+              metric: schema.maybe(createApmIndexStringSchema()),
             })
           ),
           isSpaceAware: schema.maybe(schema.boolean()),
