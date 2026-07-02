@@ -125,22 +125,14 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
   test.afterAll(async ({ apiServices, esClient }) => {
     if (!ruleId) return;
 
-    try {
-      await esClient.deleteByQuery({
-        index: ALERTS_INDEX_PATTERN,
-        refresh: true,
-        conflicts: 'proceed',
-        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
-      });
-    } catch {
-      // Continue cleanup even if alert deletion fails
-    }
+    await esClient.deleteByQuery({
+      index: ALERTS_INDEX_PATTERN,
+      refresh: true,
+      conflicts: 'proceed',
+      query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+    });
 
-    try {
-      await apiServices.alerting.rules.delete(ruleId);
-    } catch {
-      // Continue cleanup even if rule deletion fails
-    }
+    await apiServices.alerting.rules.delete(ruleId);
   });
 
   test('snoozes an active alert for 1 hour via the row action menu and the snooze badge appears', async ({
