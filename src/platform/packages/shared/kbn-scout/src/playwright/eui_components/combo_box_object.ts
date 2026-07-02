@@ -15,9 +15,6 @@ import { expect } from '@playwright/test';
 const INPUT_WRAPPER_TEST_SUBJ = 'comboBoxInput';
 const SEARCH_INPUT_TEST_SUBJ = 'comboBoxSearchInput';
 
-// Escapes a label for an exact-text RegExp match (mirrors the proven EuiComboBoxWrapper).
-const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
 /**
  * Kibana-specific extension of {@link EuiComboBoxObject}.
  *
@@ -77,19 +74,21 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
   }
 
   /**
-   * Type `value` to filter the options, then select the matching one.
+   * Type `value` to filter the options, then select the first match by keyboard.
    *
    * Use this for the many Kibana combo boxes whose option list is **filterable,
    * virtualized, or backed by a suggestions API** — the option is not rendered
    * in the DOM until the search term is typed, so the base
    * {@link setSelectedOptions} (which never types) times out looking for it.
    *
-   * Selection mirrors the proven pre-helper `EuiComboBoxWrapper`: type to filter,
-   * then click the exact-text match. When several options share the same exact
-   * text (e.g. a seeded SLO name repeated across local runs) it falls back to
-   * keyboard selection of the highlighted match — duplicate-tolerant and free of
-   * the nth-methods banned in `kbn-scout`. If `create` is set and no option
-   * matches within `timeout`, the typed value is committed via `onCreateOption`.
+   * Selection is keyboard-based (`ArrowDown` + `Enter`) on purpose: while the
+   * input has a search value EUI middle-truncates the rendered option text
+   * (`EuiTextTruncate`, e.g. `by…es`) and drops the option `title`, so the
+   * option's text / title / accessible name are all unreliable to match on.
+   * Keyboard selection of the highlighted match sidesteps that entirely (this is
+   * how the pre-helper combo-box utilities selected filtered options). If `create`
+   * is set and no option renders within `timeout`, the typed value is committed
+   * via `onCreateOption` (Enter).
    */
   async searchAndSelect(
     value: string,
@@ -98,15 +97,11 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
     await this.inputWrapper.click();
     await this.searchField.fill(value);
 
-    // Match on the option's visible text (exact, trimmed) — mirrors the proven
-    // EuiComboBoxWrapper. Do NOT match on the accessible name: EUI renders a type
-    // icon/badge inside the option, so its accessible name is not exactly the label
-    // (e.g. "bytes Number"), and an exact-name match would find nothing.
-    const option = this.optionsList().locator('.euiComboBoxOption', {
-      hasText: new RegExp(`^\\s*${escapeRegExp(value)}\\s*$`),
-    });
+    // Wait for the filtered list to render at least one real option. Gating on the
+    // presence of an option (not on its text) is truncation-proof — see above.
+    const options = this.optionsList().getByRole('option');
     try {
-      await expect.poll(() => option.count(), { timeout }).toBeGreaterThan(0);
+      await expect.poll(() => options.count(), { timeout }).toBeGreaterThan(0);
     } catch (error) {
       if (!create) {
         throw error;
@@ -118,13 +113,8 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
       return;
     }
 
-    if ((await option.count()) === 1) {
-      await option.click();
-    } else {
-      // Duplicate exact matches — keyboard-select the highlighted one.
-      await this.searchField.press('ArrowDown');
-      await this.searchField.press('Enter');
-    }
+    await this.searchField.press('ArrowDown');
+    await this.searchField.press('Enter');
     await this.searchField.blur();
   }
 
