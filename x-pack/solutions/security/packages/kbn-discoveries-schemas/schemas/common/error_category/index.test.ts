@@ -13,6 +13,7 @@ const ALL_CATEGORIES: ErrorCategory[] = [
   'cluster_health',
   'concurrent_conflict',
   'connector_error',
+  'context_length_exceeded',
   'interrupted',
   'network_error',
   'permission_error',
@@ -28,8 +29,8 @@ const ALL_CATEGORIES: ErrorCategory[] = [
 ];
 
 describe('ERROR_CATEGORIES', () => {
-  it('contains exactly 16 categories', () => {
-    expect(Object.keys(ERROR_CATEGORIES)).toHaveLength(16);
+  it('contains exactly 17 categories', () => {
+    expect(Object.keys(ERROR_CATEGORIES)).toHaveLength(17);
   });
 
   it('has keys that match their values', () => {

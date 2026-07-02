@@ -28,6 +28,8 @@
     "@kbn/logging-mocks",
     "@kbn/rule-data-utils",
     "@kbn/discoveries-schemas",
+    "@kbn/security-plugin",
+    "@kbn/security-solution-features",
     "@kbn/spaces-plugin",
     "@kbn/utility-types",
     "@kbn/workflows",
