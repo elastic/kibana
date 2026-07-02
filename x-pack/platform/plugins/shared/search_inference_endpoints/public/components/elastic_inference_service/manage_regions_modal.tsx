@@ -24,6 +24,7 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -235,7 +236,8 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
                 defaultMessage: 'All models may not be available in all regions',
               })}
               color="primary"
-              iconType="iInCircle"
+              iconType="info"
+              announceOnMount={false}
               onDismiss={() => setIsCallOutDismissed(true)}
               data-test-subj="manageRegionsCallout"
             >
@@ -396,10 +398,8 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
                             </EuiText>
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
-                            <EuiButtonIcon
-                              iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
-                              onClick={() => handleToggleExpand(zone.zoneId)}
-                              aria-label={
+                            <EuiToolTip
+                              content={
                                 isExpanded
                                   ? i18n.translate(
                                       'xpack.searchInferenceEndpoints.manageRegions.collapseZone',
@@ -416,8 +416,31 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
                                       }
                                     )
                               }
-                              data-test-subj={`manageRegionsZoneToggle-${zone.zoneId}`}
-                            />
+                              disableScreenReaderOutput
+                            >
+                              <EuiButtonIcon
+                                iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
+                                onClick={() => handleToggleExpand(zone.zoneId)}
+                                aria-label={
+                                  isExpanded
+                                    ? i18n.translate(
+                                        'xpack.searchInferenceEndpoints.manageRegions.collapseZone',
+                                        {
+                                          defaultMessage: 'Collapse {zone}',
+                                          values: { zone: zone.displayName },
+                                        }
+                                      )
+                                    : i18n.translate(
+                                        'xpack.searchInferenceEndpoints.manageRegions.expandZone',
+                                        {
+                                          defaultMessage: 'Expand {zone}',
+                                          values: { zone: zone.displayName },
+                                        }
+                                      )
+                                }
+                                data-test-subj={`manageRegionsZoneToggle-${zone.zoneId}`}
+                              />
+                            </EuiToolTip>
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </EuiFlexItem>
