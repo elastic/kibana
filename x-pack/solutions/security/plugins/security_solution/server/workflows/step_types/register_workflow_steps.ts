@@ -14,10 +14,12 @@ import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_
 import { setAlertTagsStepDefinition } from './set_alert_tags_step/set_alert_tags_step';
 import { assignAlertStepDefinition } from './assign_alert_step/assign_alert_step';
 import { assignAttackStepDefinition } from './assign_attack_step/assign_attack_step';
+import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
 import {
   REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
   REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
 } from '../../../common/constants';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
@@ -54,5 +56,6 @@ export const registerWorkflowSteps = (
 
   if (experimentalFeatures.publicAttacksApiEnabled) {
     workflowsExtensions.registerStepDefinition(assignAttackStepDefinition);
+    workflowsExtensions.registerStepDefinition(setAttackStatusStepDefinition);
   }
 };
