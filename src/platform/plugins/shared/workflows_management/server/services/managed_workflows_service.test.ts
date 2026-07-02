@@ -696,7 +696,7 @@ describe('ManagedWorkflowsService', () => {
       expect(indexedDocument.yaml).toContain('enabled: true');
     });
 
-    it('reinstalls when only managed workflow selector visibility changes', async () => {
+    it('does not reinstall when only managed workflow selector visibility changes', async () => {
       const definition = createDefinition({ visibleInSelectors: ['rule_action'] });
       mockManagedWorkflowDefinitions = [definition];
       const { crudService, service } = createService();
@@ -712,13 +712,7 @@ describe('ManagedWorkflowsService', () => {
 
       await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
 
-      expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenCalledWith(
-        WORKFLOW_ID,
-        SPACE_ID,
-        expect.objectContaining({
-          document: expect.objectContaining({ managedVisibleInSelectors: ['rule_action'] }),
-        })
-      );
+      expect(crudService.writeWorkflowDocumentWithOcc).not.toHaveBeenCalled();
     });
 
     it('skips on_adopt updates during the startup window', async () => {
