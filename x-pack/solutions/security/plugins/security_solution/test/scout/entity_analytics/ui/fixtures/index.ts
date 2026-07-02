@@ -6,11 +6,7 @@
  */
 
 import { spaceTest as baseSpaceTest, createLazyPageObject } from '@kbn/scout-security';
-import type {
-  SecurityTestFixtures,
-  SecurityPageObjects,
-  ScoutPage,
-} from '@kbn/scout-security';
+import type { SecurityTestFixtures, SecurityPageObjects, ScoutPage } from '@kbn/scout-security';
 import { EntityCasesPage } from './page_objects/entity_cases_page';
 
 interface SecuritySolutionTestFixtures extends SecurityTestFixtures {
