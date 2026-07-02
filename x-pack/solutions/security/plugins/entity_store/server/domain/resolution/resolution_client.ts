@@ -197,7 +197,7 @@ export class ResolutionClient {
     }
 
     const { sources, docIds } = await this.fetchAndValidateEntities([targetId, ...entityIds]);
-    this.validateSameEntityType(sources);
+    this.assertSingleEntityType(sources);
 
     const targetEntity = sources.get(targetId)!;
     const targetResolvedTo = getFieldValue(targetEntity, RESOLVED_TO_FIELD);
