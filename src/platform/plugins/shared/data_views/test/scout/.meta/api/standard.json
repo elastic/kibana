@@ -1,5 +1,5 @@
 {
-  "sha1": "3a5c2e18fc2166c80faab065b74d6b57a2edd316",
+  "sha1": "48e3aff44e7878406e6d7b90ac496430bb021257",
   "tests": [
     {
       "id": "6a1a7d28753a6bb-37b3571f127ad93",
@@ -2591,6 +2591,76 @@
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/existing_indices_route/response.spec.ts",
         "line": 46,
         "column": 12
+      }
+    },
+    {
+      "id": "c5d1b61ef00886d-30f8a2b9622c659",
+      "title": "Data Views feature controls indexPatterns all privileges expose save and management capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 31,
+        "column": 10
+      }
+    },
+    {
+      "id": "c5d1b61ef00886d-33df3c5cb64c8ed",
+      "title": "Data Views feature controls indexPatterns read privileges expose management without save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 46,
+        "column": 10
+      }
+    },
+    {
+      "id": "c5d1b61ef00886d-aaea5e8560ea4ca",
+      "title": "Data Views feature controls users without indexPatterns privileges cannot access data view management",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 61,
+        "column": 10
+      }
+    },
+    {
+      "id": "c5d1b61ef00886d-02e3af5dcce4cdf",
+      "title": "Data Views feature controls space with Data Views enabled exposes indexPatterns management capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 76,
+        "column": 10
+      }
+    },
+    {
+      "id": "c5d1b61ef00886d-b59fa2d95a9637b",
+      "title": "Data Views feature controls space with Data Views disabled hides indexPatterns management capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 92,
+        "column": 10
       }
     },
     {

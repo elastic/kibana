@@ -60,21 +60,23 @@ export const SaveControls: FC<SaveControlsProps> = ({ onClick }) => {
   return (
     <EuiPopover
       button={
-        <EuiButtonIcon
-          aria-label={SAVE_CHANGES}
-          size="s"
-          iconSize="m"
-          display="base"
-          color="primary"
-          iconType="save"
-          data-test-subj={TEST_IDS.SAVE_CONTROL}
-          onClick={onClick}
-          onFocus={openPendingChangesPopover}
-          onBlur={closePendingChangesPopover}
-          onMouseOver={openPendingChangesPopover}
-          onMouseOut={closePendingChangesPopover}
-          disabled={!hasPendingChanges}
-        />
+        <EuiToolTip content={SAVE_CHANGES} disableScreenReaderOutput>
+          <EuiButtonIcon
+            aria-label={SAVE_CHANGES}
+            size="s"
+            iconSize="m"
+            display="base"
+            color="primary"
+            iconType="save"
+            data-test-subj={TEST_IDS.SAVE_CONTROL}
+            onClick={onClick}
+            onFocus={openPendingChangesPopover}
+            onBlur={closePendingChangesPopover}
+            onMouseOver={openPendingChangesPopover}
+            onMouseOut={closePendingChangesPopover}
+            disabled={!hasPendingChanges}
+          />
+        </EuiToolTip>
       }
       isOpen={pendingChangesPopoverOpen}
       anchorPosition="upCenter"

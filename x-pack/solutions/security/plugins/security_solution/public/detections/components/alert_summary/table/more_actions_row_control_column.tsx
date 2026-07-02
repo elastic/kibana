@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { i18n } from '@kbn/i18n';
 import { flattenObject } from '@kbn/object-utils';
@@ -53,12 +53,14 @@ export const MoreActionsRowControlColumn = memo(
 
     const button = useMemo(
       () => (
-        <EuiButtonIcon
-          aria-label={MORE_ACTIONS_BUTTON_ARIA_LABEL}
-          data-test-subj={MORE_ACTIONS_BUTTON_TEST_ID}
-          iconType="boxesVertical"
-          onClick={togglePopover}
-        />
+        <EuiToolTip content={MORE_ACTIONS_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+          <EuiButtonIcon
+            aria-label={MORE_ACTIONS_BUTTON_ARIA_LABEL}
+            data-test-subj={MORE_ACTIONS_BUTTON_TEST_ID}
+            iconType="boxesVertical"
+            onClick={togglePopover}
+          />
+        </EuiToolTip>
       ),
       [togglePopover]
     );
@@ -96,6 +98,7 @@ export const MoreActionsRowControlColumn = memo(
 
     return (
       <EuiPopover
+        aria-label={MORE_ACTIONS_BUTTON_ARIA_LABEL}
         button={button}
         closePopover={togglePopover}
         isOpen={isPopoverOpen}

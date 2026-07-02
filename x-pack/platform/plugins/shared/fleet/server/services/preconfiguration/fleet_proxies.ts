@@ -104,31 +104,29 @@ async function createOrUpdatePreconfiguredFleetProxies(
           fleetServerHostService.listAllForProxyId(id),
           outputService.listAllForProxyId(id),
         ]);
-        if (
-          fleetServerHosts.some((host) => host.is_default) ||
-          outputs.some((output) => output.is_default || output.is_default_monitoring)
-        ) {
-          await agentPolicyService.bumpAllAgentPolicies(esClient);
-        } else {
-          await pMap(
-            outputs,
-            (output) => agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id),
-            {
-              concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
-            }
-          );
-          await pMap(
-            fleetServerHosts,
-            (fleetServerHost) =>
-              agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(
-                esClient,
-                fleetServerHost.id
-              ),
-            {
-              concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
-            }
-          );
-        }
+        await pMap(
+          outputs,
+          (output) =>
+            agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id, {
+              isDefault: output.is_default,
+              isDefaultMonitoring: output.is_default_monitoring,
+            }),
+          {
+            concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
+          }
+        );
+        await pMap(
+          fleetServerHosts,
+          (fleetServerHost) =>
+            agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(
+              esClient,
+              fleetServerHost.id,
+              { isDefault: fleetServerHost.is_default }
+            ),
+          {
+            concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
+          }
+        );
       }
     })
   );

@@ -57,11 +57,7 @@ export const RowControlCell = ({
 
         if (tooltipContent) {
           return (
-            <EuiToolTip
-              anchorClassName="unifiedDataTable__rowControl"
-              content={tooltipContent}
-              delay="long"
-            >
+            <EuiToolTip anchorClassName="unifiedDataTable__rowControl" content={tooltipContent}>
               {control}
             </EuiToolTip>
           );

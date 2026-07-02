@@ -29,6 +29,7 @@ describe('TabbedContent', () => {
     createItem,
     onChanged,
     onEBTEvent,
+    onTabLimitReached,
     disableRenderContent = false,
   }: {
     initialItems: TabbedContentProps['items'];
@@ -38,6 +39,7 @@ describe('TabbedContent', () => {
     createItem?: TabbedContentProps['createItem'];
     onChanged: TabbedContentProps['onChanged'];
     onEBTEvent: TabbedContentProps['onEBTEvent'];
+    onTabLimitReached?: TabbedContentProps['onTabLimitReached'];
     disableRenderContent?: boolean;
   }) => {
     const [{ managedItems, managedSelectedItemId }, setState] = useState<{
@@ -64,6 +66,7 @@ describe('TabbedContent', () => {
           });
         }}
         onEBTEvent={onEBTEvent}
+        onTabLimitReached={onTabLimitReached}
         onClearRecentlyClosed={jest.fn()}
         renderContent={
           !disableRenderContent
@@ -158,6 +161,47 @@ describe('TabbedContent', () => {
     expect(onEBTEvent).not.toHaveBeenCalledWith(
       expect.objectContaining({ eventName: 'tabSelectRecentlyClosed' })
     );
+  });
+
+  it('calls onTabLimitReached when restoring a group exceeds the max tab limit', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    const initialItems = [
+      { id: 'tab1', label: 'Tab 1' },
+      { id: 'tab2', label: 'Tab 2' },
+    ];
+    const onChanged = jest.fn();
+    const onEBTEvent = jest.fn();
+    const onTabLimitReached = jest.fn();
+    const createItem = jest.fn(() => NEW_TAB);
+
+    const closedAt = Date.now() - 60_000;
+    const recentlyClosedItems = [
+      { id: 'closed1', label: 'Closed Tab 1', closedAt },
+      { id: 'closed2', label: 'Closed Tab 2', closedAt },
+    ];
+
+    render(
+      <TabsWrapper
+        initialItems={initialItems}
+        initialSelectedItemId={initialItems[0].id}
+        recentlyClosedItems={recentlyClosedItems}
+        maxItemsCount={initialItems.length + 1}
+        createItem={createItem}
+        onChanged={onChanged}
+        onEBTEvent={onEBTEvent}
+        onTabLimitReached={onTabLimitReached}
+      />
+    );
+
+    await user.click(screen.getByTestId('unifiedTabs_tabsBarMenuButton'));
+    await user.click(screen.getByText('2 tabs'));
+    await user.click(await screen.findByTestId('unifiedTabs_tabsMenu_restoreAllTabs'));
+
+    await waitFor(() => {
+      expect(onTabLimitReached).toHaveBeenCalledWith(1);
+    });
+
+    expect(onChanged).toHaveBeenCalled();
   });
 
   it('can create a new tab and sends tabCreated EBT event', async () => {

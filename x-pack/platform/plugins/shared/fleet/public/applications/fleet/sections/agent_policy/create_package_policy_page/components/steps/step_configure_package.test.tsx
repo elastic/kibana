@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
@@ -32,7 +32,7 @@ describe('StepConfigurePackage', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   const render = (isAgentlessSelected = false) => {
-    const validationResults = validatePackagePolicy(packagePolicy, packageInfo, load);
+    const validationResults = validatePackagePolicy(packagePolicy, packageInfo, parse);
 
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
@@ -298,7 +298,7 @@ describe('StepConfigurePackage', () => {
     });
 
     const editPackagePolicy = { ...packagePolicy, supports_agentless: false };
-    const validationResults = validatePackagePolicy(editPackagePolicy, packageInfo, load);
+    const validationResults = validatePackagePolicy(editPackagePolicy, packageInfo, parse);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={packageInfo}
@@ -398,7 +398,7 @@ describe('StepConfigurePackage', () => {
     ];
 
     const editPackagePolicy = { ...packagePolicy, supports_agentless: false };
-    const validationResults = validatePackagePolicy(editPackagePolicy, packageInfo, load);
+    const validationResults = validatePackagePolicy(editPackagePolicy, packageInfo, parse);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={packageInfo}
@@ -565,7 +565,7 @@ describe('StepConfigurePackage with multiple inputs of same type but different i
   });
 
   it('should render both input panels with their respective titles', async () => {
-    const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, load);
+    const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, parse);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={otelPackageInfo}
@@ -587,7 +587,7 @@ describe('StepConfigurePackage with multiple inputs of same type but different i
   });
 
   it('should render two separate input panels with independent stream toggles, not mixed', async () => {
-    const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, load);
+    const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, parse);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={otelPackageInfo}
@@ -711,7 +711,7 @@ describe('isSingleInputAndStreams behavior', () => {
     mockUpdatePackagePolicy.mockClear();
   });
 
-  it('should render title without toggle switch when feature flag is on, single policy template, single input, and single stream', async () => {
+  it('should render toggle switch when feature flag is on, single policy template, single input, and single stream', async () => {
     ExperimentalFeaturesService.init({
       ...allowedExperimentalValues,
       enableSimplifiedAgentlessUX: true,
@@ -720,7 +720,7 @@ describe('isSingleInputAndStreams behavior', () => {
     const validationResults = validatePackagePolicy(
       singleInputPackagePolicy,
       singleInputPackageInfo,
-      load
+      parse
     );
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
@@ -733,10 +733,9 @@ describe('isSingleInputAndStreams behavior', () => {
     );
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('PackagePolicy.InputStreamConfig.title')).toBeInTheDocument();
       expect(
-        renderResult.queryByTestId('PackagePolicy.InputStreamConfig.Switch')
-      ).not.toBeInTheDocument();
+        renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch')
+      ).toBeInTheDocument();
     });
   });
 
@@ -749,7 +748,7 @@ describe('isSingleInputAndStreams behavior', () => {
     const validationResults = validatePackagePolicy(
       singleInputPackagePolicy,
       singleInputPackageInfo,
-      load
+      parse
     );
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
@@ -890,7 +889,7 @@ describe('isSingleInputAndStreams behavior', () => {
       ],
     };
 
-    const validationResults = validatePackagePolicy(multiInputPolicy, multiInputPackageInfo, load);
+    const validationResults = validatePackagePolicy(multiInputPolicy, multiInputPackageInfo, parse);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={multiInputPackageInfo}
@@ -1012,7 +1011,7 @@ describe('isSingleInputAndStreams behavior', () => {
     const validationResults = validatePackagePolicy(
       multiTemplatePolicy,
       multiTemplatePackageInfo,
-      load
+      parse
     );
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
@@ -1061,7 +1060,7 @@ describe('isSingleInputAndStreams behavior', () => {
     const validationResults = validatePackagePolicy(
       singleInputPackagePolicy,
       deprecatedTemplatePackageInfo,
-      load
+      parse
     );
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy

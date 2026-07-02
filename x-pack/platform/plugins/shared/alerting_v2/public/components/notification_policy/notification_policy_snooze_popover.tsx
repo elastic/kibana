@@ -58,16 +58,23 @@ export const NotificationPolicySnoozePopover = ({
       </EuiButton>
     </EuiToolTip>
   ) : (
-    <EuiButtonIcon
-      iconType="bell"
-      color="text"
-      aria-label={i18n.translate('xpack.alertingV2.notificationPolicy.snooze.ariaLabel', {
+    <EuiToolTip
+      content={i18n.translate('xpack.alertingV2.notificationPolicy.snooze.ariaLabel', {
         defaultMessage: 'Snooze notification policy',
       })}
-      onClick={togglePopover}
-      isLoading={isLoading}
-      isDisabled={isDisabled}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="bell"
+        color="text"
+        aria-label={i18n.translate('xpack.alertingV2.notificationPolicy.snooze.ariaLabel', {
+          defaultMessage: 'Snooze notification policy',
+        })}
+        onClick={togglePopover}
+        isLoading={isLoading}
+        isDisabled={isDisabled}
+      />
+    </EuiToolTip>
   );
 
   return (

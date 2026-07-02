@@ -18,6 +18,10 @@ import { displayedAssetTypesLookup } from '../../../../common/constants';
 
 import type { SimpleSOAssetAttributes } from '../../../types';
 
+type DisplayableSOAssetAttributes = SimpleSOAssetAttributes & {
+  name?: string;
+};
+
 const getKibanaLinkForESAsset = (type: ElasticsearchAssetType, id: string): string => {
   switch (type) {
     case 'index':
@@ -48,9 +52,8 @@ export async function getBulkAssets(
   soTypeRegistry: ISavedObjectTypeRegistry,
   assetIds: AssetSOObject[]
 ) {
-  const { resolved_objects: resolvedObjects } = await soClient.bulkResolve<SimpleSOAssetAttributes>(
-    assetIds
-  );
+  const { resolved_objects: resolvedObjects } =
+    await soClient.bulkResolve<DisplayableSOAssetAttributes>(assetIds);
   const types: Record<string, SavedObjectsType | undefined> = {};
 
   const res: SimpleSOAssetType[] = resolvedObjects
@@ -88,7 +91,10 @@ export async function getBulkAssets(
         }
       }
 
-      const title = types[obj.type]?.management?.getTitle?.(obj) ?? obj.attributes?.title;
+      const title =
+        types[obj.type]?.management?.getTitle?.(obj) ??
+        obj.attributes?.title ??
+        obj.attributes?.name;
 
       return {
         id: obj.id,

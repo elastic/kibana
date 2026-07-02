@@ -1,5 +1,5 @@
 {
-  "sha1": "b1ab54e6f45c419e6036a8bc7009ef933112c9ef",
+  "sha1": "b829f38b23269b9a6159fe151b1d28466f88683b",
   "tests": [
     {
       "id": "b2eaaaa0cf33c26-d5cddc6b883a994",
@@ -172,7 +172,7 @@
     {
       "id": "fedda44db506679-b402fd1accda876",
       "title": "Workflow execution concurrency control cancel-in-progress strategy cancels previous executions and completes the latest",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -191,14 +191,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/concurrency_control.spec.ts",
-        "line": 110,
+        "line": 111,
         "column": 14
       }
     },
     {
       "id": "fedda44db506679-f33c86dd5c9b2b6",
       "title": "Workflow execution concurrency control drop strategy drops new executions until there is an already running execution",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -217,8 +217,34 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/concurrency_control.spec.ts",
-        "line": 142,
+        "line": 143,
         "column": 14
+      }
+    },
+    {
+      "id": "88880ed74902ffd-ddaea7aa387b906",
+      "title": "Hard delete TOCTOU race condition hard delete during a concurrent run should not orphan the execution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/hard_delete_race_condition.spec.ts",
+        "line": 95,
+        "column": 12
       }
     },
     {

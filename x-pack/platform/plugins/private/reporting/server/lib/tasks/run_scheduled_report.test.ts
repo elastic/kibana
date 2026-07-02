@@ -987,7 +987,7 @@ describe('Run Scheduled Report Task', () => {
       await task.init(mockTaskManager, emailNotificationService);
       const taskInstance = {
         id: 'task-id',
-        runAt: new Date('2025-06-04T00:00:00Z'),
+        runAt: new Date('2025-06-04T10:00:00Z'),
         params: { id: 'report-so-id', jobtype: 'test1' },
       };
       const byteSize = 2097152; // 2MB
@@ -1042,17 +1042,17 @@ describe('Run Scheduled Report Task', () => {
           cc: undefined,
           spaceId: 'default',
           to: ['test1@test.com'],
-          subject: 'Scheduled Report: Test Report - 2025-06-04T00:00:00.000Z',
+          subject: 'Scheduled Report: Test Report - 2025-06-04T10:00:00.000Z',
           message: `
                 # Your report is ready
 
                 - title: Test Report
-                - filename: Test Report\\-2025\\-06\\-04T00:00:00\\.000Z\\.pdf
+                - filename: Test Report\\-2025\\-06\\-04T10:00:00\\.000Z\\.pdf
                 - objectType: test
-                - date: 2025\\-06\\-04T00:00:00\\.000Z
+                - date: 2025\\-06\\-04T10:00:00\\.000Z
                 `,
         },
-        filename: 'Test Report-2025-06-04T00:00:00.000Z.pdf',
+        filename: 'Test Report-2025-06-04T10:00:00.000Z.pdf',
         id: '290357209345723095',
         index: '.reporting-fantastic',
         relatedObject: {

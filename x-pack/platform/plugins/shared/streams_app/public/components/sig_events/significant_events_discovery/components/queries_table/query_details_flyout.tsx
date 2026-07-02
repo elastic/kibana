@@ -31,6 +31,7 @@ import {
   EuiText,
   EuiTextArea,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -160,12 +161,14 @@ export function QueryDetailsFlyout({
             <EuiPopover
               aria-label={ACTIONS_BUTTON_ARIA_LABEL}
               button={
-                <EuiButtonIcon
-                  data-test-subj="queriesTableQueryDetailsFlyoutActionsButton"
-                  iconType="boxesVertical"
-                  aria-label={ACTIONS_BUTTON_ARIA_LABEL}
-                  onClick={() => setIsActionsPopoverOpen((value) => !value)}
-                />
+                <EuiToolTip content={ACTIONS_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    data-test-subj="queriesTableQueryDetailsFlyoutActionsButton"
+                    iconType="boxesVertical"
+                    aria-label={ACTIONS_BUTTON_ARIA_LABEL}
+                    onClick={() => setIsActionsPopoverOpen((value) => !value)}
+                  />
+                </EuiToolTip>
               }
               isOpen={isActionsPopoverOpen}
               closePopover={() => setIsActionsPopoverOpen(false)}
@@ -206,12 +209,14 @@ export function QueryDetailsFlyout({
             </EuiPopover>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="queriesTableQueryDetailsFlyoutCloseButton"
-              iconType="cross"
-              aria-label={CLOSE_BUTTON_ARIA_LABEL}
-              onClick={onClose}
-            />
+            <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj="queriesTableQueryDetailsFlyoutCloseButton"
+                iconType="cross"
+                aria-label={CLOSE_BUTTON_ARIA_LABEL}
+                onClick={onClose}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </FlyoutToolbarHeader>
 

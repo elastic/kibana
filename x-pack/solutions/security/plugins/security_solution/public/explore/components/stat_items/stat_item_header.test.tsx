@@ -18,13 +18,13 @@ describe('StatItemHeader', () => {
     const { getByRole } = render(
       <StatItemHeader onToggle={mockOnToggle} isToggleExpanded={true} />
     );
-    expect(getByRole('button')).toHaveAttribute('title', 'Open');
+    expect(getByRole('button')).toHaveAttribute('aria-label', 'Open');
   });
 
   it('renders collapse button', () => {
     const { getByRole } = render(
       <StatItemHeader onToggle={mockOnToggle} isToggleExpanded={false} />
     );
-    expect(getByRole('button')).toHaveAttribute('title', 'Closed');
+    expect(getByRole('button')).toHaveAttribute('aria-label', 'Closed');
   });
 });

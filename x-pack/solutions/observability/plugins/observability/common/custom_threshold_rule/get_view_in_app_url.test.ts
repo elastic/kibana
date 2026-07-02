@@ -75,6 +75,42 @@ describe('getViewInAppUrl', () => {
     );
   });
 
+  it('should extend the time range with the lookback window', () => {
+    const mockDateNow = jest
+      .spyOn(global.Date, 'now')
+      .mockImplementation(() => new Date('2026-01-01T00:00:00.000Z').valueOf());
+
+    const args: GetViewInAppUrlArgs = {
+      logsLocator,
+      startedAt,
+      endedAt,
+      timeSize: 7,
+      timeUnit: 'd',
+    };
+
+    expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
+    expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
+      {
+        dataset: undefined,
+        dataViewSpec: undefined,
+        timeRange: {
+          // startedAt - 7d * 20 = 2023-12-07 - 140d = 2023-07-20
+          from: '2023-07-20T16:30:15.403Z',
+          // endedAt + 7d * 20 = 2023-12-07 + 140d = 2024-04-25
+          to: '2024-04-25T20:30:15.403Z',
+        },
+        filters: [],
+        query: {
+          query: '',
+          language: 'kuery',
+        },
+      },
+      {}
+    );
+
+    mockDateNow.mockRestore();
+  });
+
   it('should call getRedirectUrl with only count filter', () => {
     const args: GetViewInAppUrlArgs = {
       metrics: [

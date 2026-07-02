@@ -509,6 +509,36 @@ describe('AgentlessConnectorsInfraService', () => {
 
       expect(result).toBe(fakeAgentPolicy);
     });
+
+    test.each([
+      ['microsoft_teams', 'teams'],
+      ['mssql', 'microsoft_sql'],
+      ['s3', 'amazon_s3'],
+    ])(
+      'maps service_type "%s" to policy_template "%s" (issue #266539)',
+      async (serviceType, expectedPolicyTemplate) => {
+        const testConnector = {
+          id: '000000006',
+          name: 'Test Agentless Connector',
+          service_type: serviceType,
+          is_deleted: false,
+        };
+
+        const fakeAgentPolicy = { id: 'agent-policy-006' } as AgentPolicy;
+        agentlessPoliciesService.createAgentlessPolicy.mockResolvedValue(fakeAgentPolicy);
+
+        await service.deployConnector(testConnector);
+
+        expect(agentlessPoliciesService.createAgentlessPolicy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            policy_template: expectedPolicyTemplate,
+            inputs: expect.objectContaining({
+              [`${expectedPolicyTemplate}-connectors-py`]: expect.anything(),
+            }),
+          })
+        );
+      }
+    );
   });
   describe('removeDeployment', () => {
     const packagePolicyId = 'this-is-package-policy-id';

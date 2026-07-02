@@ -39,7 +39,7 @@ export function registerWorkflowAgentBuilderIntegration({
 
   registerValidateWorkflowTool(agentBuilder, api);
   registerGetStepDefinitionsTool(agentBuilder, api);
-  registerGetTriggerDefinitionsTool(agentBuilder);
+  registerGetTriggerDefinitionsTool(agentBuilder, api);
   registerGetConnectorsTool(agentBuilder, api);
   registerGetExamplesTool(agentBuilder);
 

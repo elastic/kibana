@@ -21,6 +21,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 interface PromptModalProps {
   prompt: string;
@@ -29,6 +31,7 @@ interface PromptModalProps {
 
 export const PromptModal: React.FC<PromptModalProps> = ({ prompt, onClose }) => {
   const modalTitleId = useGeneratedHtmlId({ prefix: 'promptModal' });
+  const usageTracker = useUsageTracker();
 
   return (
     <EuiModal onClose={onClose} aria-labelledby={modalTitleId} maxWidth={600}>
@@ -61,7 +64,14 @@ export const PromptModal: React.FC<PromptModalProps> = ({ prompt, onClose }) => 
         </EuiButtonEmpty>
         <EuiCopy textToCopy={prompt}>
           {(copy) => (
-            <EuiButton onClick={copy} fill data-test-subj="promptModalCopyBtn">
+            <EuiButton
+              onClick={() => {
+                usageTracker.click(AnalyticsEvents.claudeCliPromptCopied);
+                copy();
+              }}
+              fill
+              data-test-subj="promptModalCopyBtn"
+            >
               {i18n.translate('xpack.gettingStarted.promptModal.copy', {
                 defaultMessage: 'Copy to clipboard',
               })}

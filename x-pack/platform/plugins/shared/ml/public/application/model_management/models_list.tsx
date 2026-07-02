@@ -20,6 +20,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   type EuiSearchBarProps,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
@@ -305,9 +306,8 @@ export const ModelsList: FC<Props> = ({
           return null;
         }
         return (
-          <EuiButtonIcon
-            onClick={toggleDetails.bind(null, item)}
-            aria-label={
+          <EuiToolTip
+            content={
               itemIdToExpandedRowMap[item.model_id]
                 ? i18n.translate('xpack.ml.trainedModels.modelsList.collapseRow', {
                     defaultMessage: 'Collapse',
@@ -316,10 +316,24 @@ export const ModelsList: FC<Props> = ({
                     defaultMessage: 'Expand',
                   })
             }
-            iconType={
-              itemIdToExpandedRowMap[item.model_id] ? 'chevronSingleDown' : 'chevronSingleRight'
-            }
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              onClick={toggleDetails.bind(null, item)}
+              aria-label={
+                itemIdToExpandedRowMap[item.model_id]
+                  ? i18n.translate('xpack.ml.trainedModels.modelsList.collapseRow', {
+                      defaultMessage: 'Collapse',
+                    })
+                  : i18n.translate('xpack.ml.trainedModels.modelsList.expandRow', {
+                      defaultMessage: 'Expand',
+                    })
+              }
+              iconType={
+                itemIdToExpandedRowMap[item.model_id] ? 'chevronSingleDown' : 'chevronSingleRight'
+              }
+            />
+          </EuiToolTip>
         );
       },
       'data-test-subj': 'mlModelsTableRowDetailsToggle',

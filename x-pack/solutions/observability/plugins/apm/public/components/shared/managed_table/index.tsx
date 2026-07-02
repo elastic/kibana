@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
   RIGHT_ALIGNMENT,
   type EuiBasicTableColumn,
 } from '@elastic/eui';

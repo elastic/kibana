@@ -7,7 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopoverTitle, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopoverTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 
 interface ClosablePopoverTitleProps {
   children: JSX.Element;
@@ -25,17 +31,27 @@ export const ClosablePopoverTitle = ({
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem data-test-subj={dataTestSubj}>{children}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="cross"
-            color="danger"
-            aria-label={i18n.translate(
+          <EuiToolTip
+            content={i18n.translate(
               'xpack.triggersActionsUI.common.expressionItems.components.closablePopoverTitle.closeLabel',
               {
                 defaultMessage: 'Close',
               }
             )}
-            onClick={() => onClose()}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="cross"
+              color="danger"
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.common.expressionItems.components.closablePopoverTitle.closeLabel',
+                {
+                  defaultMessage: 'Close',
+                }
+              )}
+              onClick={() => onClose()}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopoverTitle>

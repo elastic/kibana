@@ -65,6 +65,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       spanCompression: `${ELASTIC_DOCS}solutions/observability/apm/spans`,
       transactionSampling: `${ELASTIC_DOCS}solutions/observability/apm/transaction-sampling`,
       indexLifecycleManagement: `${ELASTIC_DOCS}solutions/observability/apm/index-lifecycle-management`,
+      metricsUi: `${ELASTIC_DOCS}solutions/observability/apm/metrics-ui`,
     },
     canvas: {
       guide: `${ELASTIC_DOCS}explore-analyze/visualize/canvas`,
@@ -843,6 +844,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     ingest: {
       append: `${ELASTIC_DOCS}reference/enrich-processor/append-processor`,
+      cef: `${ELASTIC_DOCS}reference/enrich-processor/cef-processor`,
       bytes: `${ELASTIC_DOCS}reference/enrich-processor/bytes-processor`,
       circle: `${ELASTIC_DOCS}reference/enrich-processor/ingest-circle-processor`,
       community: `${ELASTIC_DOCS}reference/enrich-processor/community-id-processor`,

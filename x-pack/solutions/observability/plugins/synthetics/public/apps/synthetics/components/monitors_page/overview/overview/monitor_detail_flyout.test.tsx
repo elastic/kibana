@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import * as reduxHooks from 'react-redux';
 import { render } from '../../../../utils/testing/rtl_helpers';
 import { fireEvent } from '@testing-library/react';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
@@ -16,6 +17,7 @@ import * as monitorDetailLocator from '../../../../hooks/use_monitor_detail_loca
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
+import { getMonitorAction } from '../../../../state';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 
@@ -133,6 +135,49 @@ describe('Monitor Detail Flyout', () => {
     );
 
     expect(getByRole('progressbar'));
+  });
+
+  it('does not dispatch getMonitorAction before the active space resolves', () => {
+    // Simulate `useKibanaSpace` (which is the only `useFetcher` consumer in
+    // this component) still loading — `space` is undefined across renders.
+    // Previously the flyout would dispatch `getMonitorAction.get` without
+    // `spaceId`, hit the active space, and 404 for cross-space monitors.
+    // The retry that fires once `space` resolves was then silently dropped
+    // by the `takeLeading` saga while the first call was still in flight,
+    // leaving the 404 in Redux state forever.
+    const previousFetcherImpl = useFetcherMock.getMockImplementation();
+    useFetcherMock.mockReturnValue({
+      data: undefined,
+      loading: true,
+      refetch: jest.fn(),
+    });
+
+    const mockDispatch = jest.fn();
+    jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
+
+    try {
+      render(
+        <MonitorDetailFlyout
+          configId="cross-space-monitor"
+          id="cross-space-monitor"
+          location="US East"
+          locationId="us-east"
+          spaces={['team-a']}
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />
+      );
+
+      const getMonitorCalls = mockDispatch.mock.calls.filter(
+        ([action]) => action?.type === getMonitorAction.get.type
+      );
+      expect(getMonitorCalls).toHaveLength(0);
+    } finally {
+      if (previousFetcherImpl) {
+        useFetcherMock.mockImplementation(previousFetcherImpl);
+      }
+    }
   });
 
   it('renders details for fetch success', () => {

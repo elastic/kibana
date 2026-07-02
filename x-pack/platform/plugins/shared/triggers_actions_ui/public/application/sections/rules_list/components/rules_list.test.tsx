@@ -540,7 +540,7 @@ describe('rules_list ', () => {
       fireEvent.mouseOver(await within(durationColumnHeader).findByText('Info'));
 
       await waitFor(() =>
-        expect(screen.getByRole('tooltip')).toHaveTextContent(
+        expect(screen.getByRole('tooltip', { hidden: true })).toHaveTextContent(
           'The length of time it took for the rule to run (mm:ss).'
         )
       );
@@ -668,7 +668,7 @@ describe('rules_list ', () => {
 
     it('Select P95', async () => {
       renderWithProviders(<RulesList />);
-      const percentilePopoverButton = await screen.findByTitle('select percentile');
+      const percentilePopoverButton = await screen.findByLabelText('select percentile');
       fireEvent.click(percentilePopoverButton);
 
       await screen.findAllByTestId('percentileSelectablePopover-selectable');
@@ -698,7 +698,7 @@ describe('rules_list ', () => {
 
     it('Click column to sort by P95', async () => {
       renderWithProviders(<RulesList />);
-      const percentilePopoverButton = await screen.findByTitle('select percentile');
+      const percentilePopoverButton = await screen.findByLabelText('select percentile');
       fireEvent.click(percentilePopoverButton);
       await screen.findAllByTestId('percentileSelectablePopover-selectable');
       const options = screen.getAllByRole('option');

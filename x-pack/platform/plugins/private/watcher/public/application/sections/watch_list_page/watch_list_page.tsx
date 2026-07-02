@@ -210,6 +210,9 @@ export const WatchListPage = () => {
       closePopover={() => setIsPopOverOpen(false)}
       panelPaddingSize="none"
       anchorPosition="downCenter"
+      aria-label={i18n.translate('xpack.watcher.sections.watchList.createWatchPopoverAriaLabel', {
+        defaultMessage: 'Create watch',
+      })}
     >
       <EuiContextMenuPanel
         items={[WATCH_TYPES.THRESHOLD, WATCH_TYPES.JSON].map((watchType: string) => {
@@ -414,7 +417,7 @@ export const WatchListPage = () => {
                 { defaultMessage: 'Edit' }
               );
               return (
-                <EuiToolTip content={label} delay="long">
+                <EuiToolTip content={label}>
                   <EuiButtonIcon
                     isDisabled={watch.isSystemWatch}
                     aria-label={i18n.translate(
@@ -440,7 +443,7 @@ export const WatchListPage = () => {
                 { defaultMessage: 'Delete' }
               );
               return (
-                <EuiToolTip content={label} delay="long">
+                <EuiToolTip content={label}>
                   <EuiButtonIcon
                     isDisabled={watch.isSystemWatch}
                     aria-label={i18n.translate(

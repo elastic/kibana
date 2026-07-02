@@ -101,11 +101,19 @@ const PreconfiguredOutputBaseSchema = {
 };
 
 export const PreconfiguredOutputsSchema = schema.arrayOf(
-  schema.oneOf([
-    schema.object({ ...ElasticSearchSchema }).extends(PreconfiguredOutputBaseSchema),
-    schema.object({ ...LogstashSchema }).extends(PreconfiguredOutputBaseSchema),
-    schema.object({ ...KafkaSchema }).extends(PreconfiguredOutputBaseSchema),
-    schema.object({ ...RemoteElasticSearchSchema }).extends(PreconfiguredOutputBaseSchema),
+  schema.discriminatedUnion('type', [
+    schema.object({ ...ElasticSearchSchema }).extends(PreconfiguredOutputBaseSchema, {
+      meta: { id: 'preconfigured_output_elasticsearch' },
+    }),
+    schema
+      .object({ ...LogstashSchema })
+      .extends(PreconfiguredOutputBaseSchema, { meta: { id: 'preconfigured_output_logstash' } }),
+    schema
+      .object({ ...KafkaSchema })
+      .extends(PreconfiguredOutputBaseSchema, { meta: { id: 'preconfigured_output_kafka' } }),
+    schema.object({ ...RemoteElasticSearchSchema }).extends(PreconfiguredOutputBaseSchema, {
+      meta: { id: 'preconfigured_output_remote_elasticsearch' },
+    }),
   ]),
   { defaultValue: [], validate: validatePreconfiguredOutputs, maxSize: 100 }
 );

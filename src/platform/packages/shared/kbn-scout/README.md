@@ -553,7 +553,7 @@ If the servers are already running, you can execute tests independently using on
 2. **Command Line**: Use the following command:
 
 ```bash
-npx playwright test --config <plugin-path>/test/scout/ui/playwright.config.ts --project local
+node scripts/playwright test --config <plugin-path>/test/scout/ui/playwright.config.ts --project local
 ```
 
 - **`--project`**: Specifies the test target as `local` ( `ech` or `mki` for Cloud targets, see below).
@@ -585,14 +585,14 @@ node scripts/scout run-tests \
 **Using Playwright CLI:**
 
 ```bash
-npx playwright test \
+node scripts/playwright test \
   --project=ech \
   --grep=stateful-classic \
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
 ```bash
-npx playwright test \
+node scripts/playwright test \
   --project=mki \
   --grep=serverless-observability_complete \
   --config <plugin-path>/test/scout/ui/playwright.config.ts

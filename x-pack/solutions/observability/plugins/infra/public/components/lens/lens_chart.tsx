@@ -152,7 +152,6 @@ export const LensChart = React.memo(
       lens
     ) : (
       <EuiToolTip
-        delay="regular"
         content={React.cloneElement(toolTip, {
           formula,
         })}

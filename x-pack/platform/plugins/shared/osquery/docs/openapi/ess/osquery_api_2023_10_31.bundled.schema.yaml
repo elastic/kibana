@@ -609,9 +609,8 @@ components:
     ECSMapping:
       additionalProperties:
         $ref: '#/components/schemas/ECSMappingItem'
-      description: >-
-        Map osquery results columns or static values to Elastic Common Schema
-        (ECS) fields
+      description: Map osquery results columns or static values to Elastic Common
+        Schema (ECS) fields
       example:
         host.uptime:
           field: total_seconds
@@ -883,8 +882,7 @@ components:
       nullable: true
       type: integer
     Platform:
-      description: >-
-        Restricts the query to a specified platform. The default is all
+      description: Restricts the query to a specified platform. The default is all
         platforms. To specify multiple platforms, use commas. For example,
         `linux,darwin`.
       example: linux,darwin
@@ -938,10 +936,9 @@ components:
     Shards:
       additionalProperties:
         type: number
-      description: >-
-        An object with shard configuration for policies included in the pack.
-        For each policy, set the shard configuration to a percentage (1–100) of
-        target hosts.
+      description: An object with shard configuration for policies included in the
+        pack. For each policy, set the shard configuration to a percentage
+        (1–100) of target hosts.
       example:
         policy_id: 50
       type: object
@@ -1039,9 +1036,8 @@ components:
       type: object
       properties: {}
     Version:
-      description: >-
-        Uses the Osquery versions greater than or equal to the specified version
-        string.
+      description: Uses the Osquery versions greater than or equal to the specified
+        version string.
       example: 1.0.0
       type: string
     VersionOrUndefined:

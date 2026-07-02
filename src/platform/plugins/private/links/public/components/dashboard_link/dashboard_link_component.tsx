@@ -160,7 +160,6 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
         content: tooltipMessage,
         position: layout === LINKS_VERTICAL_LAYOUT ? 'right' : 'bottom',
         repositionOnScroll: true,
-        delay: 'long',
         'data-test-subj': `${testId}--tooltip`,
       }}
       iconType={link.error ? 'warning' : undefined}

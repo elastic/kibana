@@ -21,6 +21,7 @@ import {
   useEuiTheme,
   EuiBadge,
   EuiFlexGrid,
+  EuiSearchBar,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -143,11 +144,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
   const suggestedPackagesRef = useRef<HTMLDivElement | null>(null);
   const searchResultsRef = useRef<HTMLDivElement | null>(null);
-  const [integrationSearch, setIntegrationSearch] = useState(searchParams.get('search') ?? '');
+  const [integrationSearch, setIntegrationSearch] = useState(
+    parseSearchQuery(searchParams.get('search'))
+  );
   const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
-    const searchParam = searchParams.get('search') ?? '';
+    const searchParam = parseSearchQuery(searchParams.get('search'));
     if (integrationSearch === searchParam) return;
     const entries: Record<string, string> = Object.fromEntries(searchParams.entries());
     if (integrationSearch) {
@@ -399,4 +402,17 @@ function scrollIntoViewWithOffset(element: HTMLElement, offset = 0) {
     behavior: 'smooth',
     top: element.getBoundingClientRect().top - document.body.getBoundingClientRect().top - offset,
   });
+}
+
+function parseSearchQuery(searchQuery: string | null) {
+  if (searchQuery === null) {
+    return '';
+  }
+
+  try {
+    EuiSearchBar.Query.parse(searchQuery ?? '');
+    return searchQuery;
+  } catch {
+    return '';
+  }
 }

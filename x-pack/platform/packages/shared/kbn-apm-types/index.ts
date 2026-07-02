@@ -8,6 +8,7 @@
 export * from './es_fields';
 export type * from './es_schemas_raw';
 export type * from './es_schemas_ui';
+export * from './src/environment_filter_values';
 export type * from './src/span_links';
 export type * from './src/errors';
 export type * from './src/traces';

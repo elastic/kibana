@@ -14,6 +14,7 @@ import React, { Suspense } from 'react';
 import { isTriggerType } from '@kbn/workflows';
 import { PopoverItems } from './popover_items';
 import * as i18n from '../../../common/translations';
+import { withTooltip } from '../../shared/ui/with_tooltip';
 import { triggerSchemas } from '../../trigger_schemas';
 
 interface WorkflowsTriggersListProps {
@@ -61,23 +62,29 @@ function getTriggerIconType(triggerType: string): string | React.ComponentType {
   return DEFAULT_TRIGGER_ICON;
 }
 
-function getTriggerLabel(triggerType: string): string {
+export function getTriggerLabel(triggerType: string): string {
   const definition = triggerSchemas.getTriggerDefinition(triggerType);
   return definition?.title ?? capitalize(triggerType);
 }
 
-function TriggerIcon({ triggerType }: { triggerType: string }) {
+const triggerIconAnchorStyle = css({
+  display: 'inline-flex',
+  alignItems: 'center',
+  lineHeight: 0,
+});
+
+export function TriggerIcon({ triggerType }: { triggerType: string }) {
   const icon = getTriggerIconType(triggerType);
   const label = getTriggerLabel(triggerType);
-  if (typeof icon === 'string') {
-    return <EuiIcon type={icon} size="m" title={label} />;
-  }
-  const IconComponent = icon;
-  return (
-    <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-      <EuiIcon type={IconComponent} size="m" title={label} />
-    </Suspense>
-  );
+  const iconNode =
+    typeof icon === 'string' ? (
+      <EuiIcon type={icon} size="m" title={label} />
+    ) : (
+      <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+        <EuiIcon type={icon} size="m" title={label} />
+      </Suspense>
+    );
+  return <span css={triggerIconAnchorStyle}>{withTooltip(iconNode, label)}</span>;
 }
 
 export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) => {

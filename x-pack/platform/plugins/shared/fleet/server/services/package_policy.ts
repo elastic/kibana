@@ -26,7 +26,7 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import semverGt from 'semver/functions/gt';
 
 import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
@@ -54,6 +54,8 @@ import {
   hasMultipleEnabledPolicyTemplates,
   getInputEffectiveName,
   getRegistryStreamWithDataStreamForInputType,
+  validateFleetSavedObjectId,
+  syncDataStreamTypeFromVar,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -228,7 +230,6 @@ import { getInputsWithIds } from './package_policies/get_input_with_ids';
 import { runWithCache } from './epm/packages/cache';
 import {
   getAgentVersionsForVersionSpecificPolicies,
-  hasAgentVersionCondition,
   hasAgentVersionConditionInInputTemplate,
 } from './utils/version_specific_policies';
 import { recompileInputsWithAgentVersion } from './agent_policies/package_policies_to_agent_inputs';
@@ -469,6 +470,30 @@ const extractPackagePolicyVars = (
   }
 };
 
+function validateAgentlessForPackagePolicy(
+  packagePolicy: { supports_agentless?: boolean | null; inputs: NewPackagePolicyInput[] },
+  agentPolicy: { supports_agentless?: boolean | null } | undefined,
+  pkgInfo: PackageInfo | undefined
+): void {
+  const isAgentless = Boolean(agentPolicy?.supports_agentless || packagePolicy.supports_agentless);
+
+  if (pkgInfo) {
+    canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
+  }
+
+  if (isAgentless && pkgInfo && !isAgentlessIntegration(pkgInfo)) {
+    throw new PackagePolicyValidationError(
+      `Package "${pkgInfo.name}" does not support agentless deployment mode`
+    );
+  }
+
+  validateDeploymentModesForInputs(
+    packagePolicy.inputs,
+    isAgentless ? 'agentless' : 'default',
+    pkgInfo
+  );
+}
+
 class PackagePolicyClientImpl implements PackagePolicyClient {
   protected getLogger(...childContextPaths: string[]): Logger {
     return appContextService.getLogger().get('PackagePolicyClient', ...childContextPaths);
@@ -493,6 +518,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     request?: KibanaRequest
   ): Promise<PackagePolicy> {
     const logger = this.getLogger('create');
+
+    validateFleetSavedObjectId(options?.id);
 
     logger.debug(
       () =>
@@ -530,6 +557,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     this.keepPolicyIdInSync(packagePolicy);
 
+    syncDataStreamTypeFromVar(packagePolicy);
     await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
 
     let enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
@@ -566,13 +594,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         validateReusableIntegrationsAndSpaceAwareness(enrichedPackagePolicy, agentPolicies);
       }
 
-      validateDeploymentModesForInputs(
-        packagePolicy.inputs,
-        agentPolicy?.supports_agentless || packagePolicy.supports_agentless
-          ? 'agentless'
-          : 'default',
-        basePkgInfo
-      );
+      validateAgentlessForPackagePolicy(packagePolicy, agentPolicy, basePkgInfo);
     }
 
     if (
@@ -652,7 +674,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
     validatePackagePolicyOrThrow(enrichedPackagePolicy, pkgInfo);
-    canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
     if (await isSecretStorageEnabled(esClient, soClient)) {
       const secretsRes = await extractAndWriteSecrets({
@@ -776,7 +797,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         enrichedPackagePolicy.policy_ids,
         {
           user: options?.user,
-          hasAgentVersionConditions: hasAgentVersionCondition(pkgInfo, assetsMap),
         }
       );
     }
@@ -874,7 +894,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       user?: AuthenticatedUser;
       removeProtectionFn?: (policyId: string) => undefined | boolean;
       asyncDeploy?: boolean;
-      hasAgentVersionConditions?: boolean;
     } = {}
   ) {
     return runWithCache(() =>
@@ -887,7 +906,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             removeProtection: options.removeProtectionFn
               ? options.removeProtectionFn(policyId)
               : undefined,
-            hasAgentVersionConditions: options?.hasAgentVersionConditions,
           }),
         {
           concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
@@ -947,6 +965,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
 
       this.keepPolicyIdInSync(packagePolicy);
+      syncDataStreamTypeFromVar(packagePolicy);
       await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
     });
 
@@ -1019,7 +1038,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         let inputs = getInputsWithIds(packagePolicy, packagePolicyId, undefined, pkgInfo);
 
         validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-        canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
+
+        for (const policyId of agentPolicyIdsOfPackagePolicy) {
+          validateAgentlessForPackagePolicy(
+            packagePolicy,
+            agentPoliciesIndexById[policyId],
+            pkgInfo
+          );
+        }
 
         inputs = pkgInfo
           ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs, assetsMap)
@@ -1121,14 +1147,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await this.bumpAgentPoliciesRevision({ soClient, esClient }, [...agentPolicyIds], {
         user: options?.user,
         asyncDeploy: options?.asyncDeploy,
-        hasAgentVersionConditions: packageInfos
-          .values()
-          .some((pkgInfo) =>
-            hasAgentVersionCondition(
-              pkgInfo,
-              packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!
-            )
-          ),
       });
     }
     logger.debug(`Created new package policies`);
@@ -1612,7 +1630,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicyUpdate,
     });
     validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-    canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
     if (await isSecretStorageEnabled(esClient, soClient)) {
       const secretsRes = await extractAndUpdateSecrets({
@@ -1654,12 +1671,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         validateReusableIntegrationsAndSpaceAwareness(packagePolicy, [agentPolicy]);
       }
 
-      // Validate that if supports_agentless is true, the package actually supports agentless
-      if (packagePolicy.supports_agentless && !isAgentlessIntegration(pkgInfo)) {
-        throw new PackagePolicyValidationError(
-          `Package "${pkgInfo.name}" does not support agentless deployment mode`
-        );
-      }
+      validateAgentlessForPackagePolicy(packagePolicy, agentPolicy, pkgInfo);
 
       // Validate that global_data_tags is only set on agentless package policies
       if (
@@ -1670,14 +1682,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           '`global_data_tags` can only be set on agentless integration policies'
         );
       }
-
-      validateDeploymentModesForInputs(
-        packagePolicy.inputs,
-        agentPolicy?.supports_agentless || packagePolicy.supports_agentless
-          ? 'agentless'
-          : 'default',
-        pkgInfo
-      );
     }
 
     // Handle component template/mappings updates for experimental features, e.g. synthetic source
@@ -1813,7 +1817,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             (!assignedInOldPolicy && assignedInNewPolicy)
           );
         },
-        hasAgentVersionConditions: hasAgentVersionCondition(pkgInfo, assetsMap),
       }
     );
 
@@ -1883,6 +1886,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     if (!oldPackagePolicies || oldPackagePolicies.length === 0) {
       throw new PackagePolicyNotFoundError('Package policy not found');
     }
+
+    const agentPolicyIds = new Set(packagePolicyUpdates.flatMap((p) => p.policy_ids ?? []));
+    const agentPoliciesForBulkUpdate = await agentPolicyService.getByIds(soClient, [
+      ...agentPolicyIds,
+    ]);
+    const agentPoliciesIndexByIdForBulkUpdate = indexBy('id', agentPoliciesForBulkUpdate);
 
     const packageInfos = await getPackageInfoForPackagePolicies(
       packagePolicyUpdates,
@@ -2039,7 +2048,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
 
         validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-        canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
+
+        for (const policyId of packagePolicy.policy_ids ?? []) {
+          validateAgentlessForPackagePolicy(
+            packagePolicy,
+            agentPoliciesIndexByIdForBulkUpdate[policyId],
+            pkgInfo
+          );
+        }
 
         if (secretStorageEnabled) {
           const secretsRes = await extractAndUpdateSecrets({
@@ -2221,14 +2237,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
           return removeProtection;
         },
-        hasAgentVersionConditions: packageInfos
-          .values()
-          .some((pkgInfo) =>
-            hasAgentVersionCondition(
-              pkgInfo,
-              packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!
-            )
-          ),
       }
     ).finally(() => {
       logger.debug(`bumping of revision for associated agent policies done`);
@@ -2520,47 +2528,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       const agentPolicies = await agentPolicyService.getByIds(soClient, uniquePolicyIdsR);
 
-      let packageInfos: Map<string, PackageInfo> | undefined;
-      let packageInfosandAssetsMap:
-        | Map<string, { assetsMap: PackagePolicyAssetsMap; pkgInfo: PackageInfo }>
-        | undefined;
-
-      if (appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
-        const agentPoliciesWithPackagePolicies = await agentPolicyService.getByIds(
-          soClient,
-          uniquePolicyIdsR,
-          { withPackagePolicies: true }
-        );
-        const packagePoliciesToCheck = agentPoliciesWithPackagePolicies.flatMap(
-          (agentPolicy) => agentPolicy.package_policies || []
-        );
-
-        packageInfos = await getPackageInfoForPackagePolicies(
-          packagePoliciesToCheck,
-          soClient,
-          true
-        );
-        packageInfosandAssetsMap = await getPkgInfoAssetsMap({
-          logger,
-          packageInfos: [...packageInfos.values()],
-          savedObjectsClient: soClient,
-        });
-      }
-
       await this.bumpAgentPoliciesRevision(
         { soClient, esClient },
         agentPolicies.map((p) => p.id),
         {
           user: options?.user,
           removeProtectionFn: (policyId) => agentPoliciesWithEndpointPackagePolicies.has(policyId),
-          hasAgentVersionConditions: packageInfos
-            ?.values()
-            .some((pkgInfo) =>
-              hasAgentVersionCondition(
-                pkgInfo,
-                packageInfosandAssetsMap?.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!
-              )
-            ),
         }
       );
     }
@@ -3216,6 +3189,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             ...policy,
             attributes: {
               ...previousRevision?.attributes,
+              inputs_for_versions: previousRevision?.attributes.inputs_for_versions ?? {},
               revision: (policy?.attributes.revision ?? 0) + 1, // Bump revision
               latest_revision: true,
             },
@@ -3545,7 +3519,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
 }
 
 function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: PackageInfo) {
-  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, load);
+  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, parse);
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
       .map(([key, value]) => {
@@ -3843,6 +3817,14 @@ function _compilePackageStream(
 
   const datasetPath = packageDataStream.path;
   const templateVars = Object.assign({}, vars, input.vars, stream.vars);
+
+  // Inject data_stream.dataset for composable integrations: the dataset is fixed by the
+  // integration (not user-configurable) so it is absent from stream.vars, but input-package
+  // HBS templates reference {{data_stream.dataset}} and need the value to render correctly.
+  if (!templateVars['data_stream.dataset']) {
+    templateVars['data_stream.dataset'] = { value: stream.data_stream.dataset, type: 'text' };
+  }
+
   const metaVars = getMetaVariables(pkgInfo, input, streamIn, agentVersion);
 
   if (streamFromPkg.template_paths?.length) {
@@ -4288,7 +4270,7 @@ export function updatePackageInputs(
     vars,
   };
 
-  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, load);
+  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, parse);
 
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
@@ -4473,7 +4455,7 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
                   }, new val '${JSON.stringify(stream?.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value)}'`
               );
             throw new PackagePolicyValidationError(
-              i18n.translate('xpack.fleet.updatePackagePolicy.datasetCannotBeModified', {
+              i18n.translate('xpack.fleet.updatePackagePolicy.dataStreamTypeCannotBeModified', {
                 defaultMessage:
                   'Package policy data stream type cannot be modified for input only packages, please create a new package policy.',
               })

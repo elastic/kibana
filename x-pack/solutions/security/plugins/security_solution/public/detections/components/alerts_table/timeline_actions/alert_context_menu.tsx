@@ -351,6 +351,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
           <EuiPopover
             id="singlePanel"
+            aria-label={ariaLabel}
             button={button}
             isOpen={isPopoverOpen}
             closePopover={closePopover}

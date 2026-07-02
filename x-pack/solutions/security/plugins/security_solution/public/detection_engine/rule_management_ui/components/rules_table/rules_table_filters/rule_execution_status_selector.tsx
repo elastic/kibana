@@ -95,6 +95,7 @@ const RuleExecutionStatusSelectorComponent = ({
       }}
       panelPaddingSize="none"
       repositionOnScroll
+      aria-label={i18n.RULE_EXECUTION_STATUS_FILTER}
     >
       <EuiSelectable
         aria-label={i18n.RULE_EXECUTION_STATUS_FILTER}

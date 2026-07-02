@@ -37,7 +37,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover:rowHeightOption': 0, // single line
   };
   const kibanaServer = getService('kibanaServer');
-  const esArchiver = getService('esArchiver');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
   const security = getService('security');
@@ -48,9 +47,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
-      );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);

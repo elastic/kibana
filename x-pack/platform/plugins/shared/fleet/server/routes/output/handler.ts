@@ -107,11 +107,10 @@ export const putOutputHandler: RequestHandler<
     ensureNoDuplicateSecrets(outputUpdate);
     await outputService.update(soClient, esClient, request.params.outputId, outputUpdate);
     const output = await outputService.get(request.params.outputId);
-    if (output.is_default || output.is_default_monitoring) {
-      await agentPolicyService.bumpAllAgentPolicies(esClient);
-    } else {
-      await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id);
-    }
+    await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id, {
+      isDefault: output.is_default,
+      isDefaultMonitoring: output.is_default_monitoring,
+    });
 
     const body: GetOneOutputResponse = {
       item: output,
@@ -142,9 +141,10 @@ export const postOutputHandler: RequestHandler<
   validateOutputSslPaths(newOutput);
   ensureNoDuplicateSecrets(newOutput);
   const output = await outputService.create(soClient, esClient, newOutput, { id });
-  if (output.is_default || output.is_default_monitoring) {
-    await agentPolicyService.bumpAllAgentPolicies(esClient);
-  }
+  await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id, {
+    isDefault: output.is_default,
+    isDefaultMonitoring: output.is_default_monitoring,
+  });
 
   const body: GetOneOutputResponse = {
     item: output,

@@ -7,6 +7,8 @@
 
 import https from 'https';
 
+import { escapeQuotes } from '@kbn/es-query';
+
 import type { ElasticsearchClient, LogMeta, SavedObjectsClientContract } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
@@ -494,7 +496,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     const { items: enrollmentApiKeys } = await listEnrollmentApiKeys(esClient, {
       perPage: SO_SEARCH_LIMIT,
       showInactive: true,
-      kuery: `policy_id:"${policy.id}"`,
+      kuery: `policy_id:"${escapeQuotes(policy.id)}"`,
     });
 
     if (!enrollmentApiKeys.length) {

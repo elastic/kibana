@@ -11,7 +11,7 @@ import type {
   EuiContextMenuPanelItemDescriptor,
   EuiTableComputedColumnType,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { CaseUI } from '../../containers/types';
@@ -225,16 +225,21 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
         key={`case-action-popover-${theCase.id}`}
         data-test-subj={`case-action-popover-${theCase.id}`}
         button={
-          <EuiButtonIcon
-            onClick={togglePopover}
-            iconType="boxesVertical"
-            aria-label={i18n.ACTIONS_BUTTON_ARIA_LABEL(theCase.title)}
-            color="text"
-            key={`case-action-popover-button-${theCase.id}`}
-            data-test-subj={`case-action-popover-button-${theCase.id}`}
-            disabled={disableActions}
-            buttonRef={buttonRef}
-          />
+          <EuiToolTip
+            content={i18n.ACTIONS_BUTTON_ARIA_LABEL(theCase.title)}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              onClick={togglePopover}
+              iconType="boxesVertical"
+              aria-label={i18n.ACTIONS_BUTTON_ARIA_LABEL(theCase.title)}
+              color="text"
+              key={`case-action-popover-button-${theCase.id}`}
+              data-test-subj={`case-action-popover-button-${theCase.id}`}
+              disabled={disableActions}
+              buttonRef={buttonRef}
+            />
+          </EuiToolTip>
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}

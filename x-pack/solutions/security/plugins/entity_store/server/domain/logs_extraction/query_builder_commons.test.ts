@@ -29,7 +29,6 @@ import {
   buildPaginationSection,
   buildPostStatsLogicalToColumnMap,
   buildSetFieldsByCondition,
-  castSrcType,
   extractPaginationParams,
   fieldsToKeep,
   hasFieldEvaluations,
@@ -63,10 +62,10 @@ describe('buildExtractionSourceClause', () => {
   it('should always use inclusive >= lower bound on @timestamp regardless of cursor', () => {
     const withCursor = buildExtractionSourceClause({
       ...baseParams,
-      logsPageCursorStart: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: '1' },
+      logsPageCursorStart: { timestampCursor: '2024-01-01T00:00:00.000Z' },
     });
     expect(withCursor).toContain('FROM logs-*, metrics-*');
-    expect(withCursor).toContain('METADATA _index, _id');
+    expect(withCursor).not.toContain('METADATA');
     expect(withCursor).toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
     expect(withCursor).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME("2024-01-02T00:00:00.000Z")`);
     expect(withCursor).toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
@@ -101,27 +100,35 @@ describe('aggregationStats', () => {
     );
   });
 
-  it('should emit collect_values aggregation using TOP and MV_DEDUPE', () => {
+  it('should emit collect_values aggregation using VALUES for CCS (no merge step)', () => {
     const field: EntityField = {
       source: 'tags',
       destination: 'tags',
       mapping: { type: 'keyword' },
-      retention: { operation: 'collect_values', maxLength: 10 },
+      retention: { operation: 'collect_values' },
     };
-    expect(aggregationStats([field], false)).toBe(
-      'tags = MV_DEDUPE(TOP(TO_STRING(tags), 10)) WHERE TO_STRING(tags) IS NOT NULL'
-    );
+    expect(aggregationStats([field], false)).toBe('tags = VALUES(TO_STRING(tags))');
   });
 
-  it('should use the standard not-null guard for normalized entity.source aggregation', () => {
+  it('should emit collect_values aggregation using VALUES for main pipeline', () => {
+    const field: EntityField = {
+      source: 'tags',
+      destination: 'tags',
+      mapping: { type: 'keyword' },
+      retention: { operation: 'collect_values' },
+    };
+    expect(aggregationStats([field], true)).toBe('recent.tags = VALUES(TO_STRING(tags))');
+  });
+
+  it('should use VALUES for normalized entity.source aggregation', () => {
     const field: EntityField = {
       source: 'entity.source',
       destination: 'entity.source',
       mapping: { type: 'keyword' },
-      retention: { operation: 'collect_values', maxLength: 50 },
+      retention: { operation: 'collect_values' },
     };
     expect(aggregationStats([field], false)).toBe(
-      'entity.source = MV_DEDUPE(TOP(TO_STRING(entity.source), 50)) WHERE TO_STRING(entity.source) IS NOT NULL'
+      'entity.source = VALUES(TO_STRING(entity.source))'
     );
   });
 
@@ -148,8 +155,9 @@ describe('aggregationStats', () => {
       destination: 'b',
       retention: { operation: 'prefer_oldest_value' },
     };
+    // Fields without explicit mapping.type default to TO_STRING
     expect(aggregationStats([a, b], false)).toBe(
-      `a = LAST(a, ${TIMESTAMP_FIELD}) WHERE a IS NOT NULL,\n b = FIRST(b, ${TIMESTAMP_FIELD}) WHERE b IS NOT NULL`
+      `a = LAST(TO_STRING(a), ${TIMESTAMP_FIELD}) WHERE TO_STRING(a) IS NOT NULL,\n b = FIRST(TO_STRING(b), ${TIMESTAMP_FIELD}) WHERE TO_STRING(b) IS NOT NULL`
     );
   });
 
@@ -160,6 +168,37 @@ describe('aggregationStats', () => {
       retention: { operation: 'not_a_real_operation' },
     } as unknown as EntityField;
     expect(() => aggregationStats([invalidField])).toThrow('unknown field operation');
+  });
+
+  describe('managed × allowAPIUpdate matrix', () => {
+    // The 2×2 matrix: managed retention controls ESQL inclusion; allowAPIUpdate is orthogonal.
+    it('log-derived allowAPIUpdate:false — field is included in STATS (normal log field)', () => {
+      const field = keywordField({ allowAPIUpdate: false });
+      expect(aggregationStats([field], false)).toContain('host.name');
+    });
+
+    it('log-derived allowAPIUpdate:true — field is included in STATS (API-updatable + from logs)', () => {
+      const field = keywordField({ allowAPIUpdate: true });
+      expect(aggregationStats([field], false)).toContain('host.name');
+    });
+
+    it('managed allowAPIUpdate:false — field is excluded from STATS (maintainer-written)', () => {
+      const field = keywordField({ retention: { operation: 'managed' }, allowAPIUpdate: false });
+      expect(aggregationStats([field], false)).toBe('');
+    });
+
+    it('managed allowAPIUpdate:true — field is excluded from STATS (pure API-only)', () => {
+      const field = keywordField({ retention: { operation: 'managed' }, allowAPIUpdate: true });
+      expect(aggregationStats([field], false)).toBe('');
+    });
+
+    it('allowAPIUpdate alone does not affect STATS output', () => {
+      const withoutAPIUpdate = keywordField({ allowAPIUpdate: false });
+      const withAPIUpdate = keywordField({ allowAPIUpdate: true });
+      expect(aggregationStats([withoutAPIUpdate], false)).toBe(
+        aggregationStats([withAPIUpdate], false)
+      );
+    });
   });
 });
 
@@ -182,32 +221,23 @@ describe('fieldsToKeep', () => {
     ];
     expect(fieldsToKeep(definitionFields, ['id'])).toBe('name,\nid');
   });
-});
 
-describe('castSrcType', () => {
-  const baseField = (mapping?: { type: string }): EntityField => ({
-    source: 'field.path',
-    destination: 'dest',
-    mapping,
-    retention: { operation: 'prefer_newest_value' },
-  });
-
-  it.each([
-    ['keyword', 'TO_STRING(field.path)'],
-    ['date', 'TO_DATETIME(field.path)'],
-    ['boolean', 'TO_BOOLEAN(field.path)'],
-    ['long', 'TO_LONG(field.path)'],
-    ['integer', 'TO_INTEGER(field.path)'],
-    ['float', 'TO_DOUBLE(field.path)'],
-    ['ip', 'TO_IP(field.path)'],
-    ['scaled_float', 'field.path'],
-  ] as const)('should wrap source for mapping type %s', (type, expected) => {
-    expect(castSrcType(baseField({ type }))).toBe(expected);
-  });
-
-  it('should return raw source when mapping type is unknown or missing', () => {
-    expect(castSrcType(baseField({ type: 'object' }))).toBe('field.path');
-    expect(castSrcType(baseField(undefined))).toBe('field.path');
+  it('should omit managed fields from KEEP patterns', () => {
+    const definitionFields: EntityField[] = [
+      {
+        source: 'a',
+        destination: 'included.field',
+        retention: { operation: 'prefer_newest_value' },
+      },
+      {
+        source: 'b',
+        destination: 'skipped.field',
+        retention: { operation: 'managed' },
+      },
+    ];
+    const result = fieldsToKeep(definitionFields, []);
+    expect(result).toContain('included*');
+    expect(result).not.toContain('skipped*');
   });
 });
 
@@ -275,9 +305,9 @@ describe('buildFieldEvaluations', () => {
 
     expect(fragment.startsWith('| EVAL ')).toBe(true);
     expect(fragment).toContain('entity.source = CASE(');
-    expect(fragment).toContain('_src_entity_source0 = MV_FIRST(event.module)');
-    expect(fragment).toContain('_src_entity_source1 = MV_FIRST(event.dataset)');
-    expect(fragment).toContain('_src_entity_source2 = MV_FIRST(data_stream.dataset)');
+    expect(fragment).toContain('_src_entity_source0 = MV_FIRST(TO_STRING(event.module))');
+    expect(fragment).toContain('_src_entity_source1 = MV_FIRST(TO_STRING(event.dataset))');
+    expect(fragment).toContain('_src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset))');
     expect(fragment).toContain('NULL');
   });
 
@@ -293,7 +323,7 @@ describe('buildFieldEvaluations', () => {
 describe('buildSetFieldsByCondition', () => {
   it('should build CASE-based EVAL for literal and source-backed values', () => {
     const spec: SetFieldsByCondition = {
-      condition: { always: true },
+      condition: { always: {} },
       fields: {
         'entity.namespace': USER_ENTITY_NAMESPACE.Local,
         'entity.name': { source: 'user.name' },
@@ -309,7 +339,7 @@ describe('buildSetFieldsByCondition', () => {
 
   it('should build CONCAT for composition field values', () => {
     const spec: SetFieldsByCondition = {
-      condition: { field: 'event.kind' },
+      condition: { field: 'event.kind', exists: true },
       fields: {
         'custom.key': { composition: { fields: ['host.id', 'user.name'], sep: '|' } },
       },
@@ -363,7 +393,7 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
       { entityFields: postStatsSampleFields, useRecentDataPrefix: true }
     );
     expect(fragment).toBe(
-      '| EVAL recent.entity.name = CASE((`recent.entity.namespace` == "local"), TO_STRING(recent.user.name), recent.entity.name)'
+      '| EVAL recent.entity.name = CASE((TO_STRING(recent.entity.namespace) == "local"), TO_STRING(recent.user.name), recent.entity.name)'
     );
   });
 
@@ -376,7 +406,7 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
       { entityFields: postStatsSampleFields, useRecentDataPrefix: false }
     );
     expect(fragment).toBe(
-      '| EVAL entity.name = CASE((`entity.namespace` == "local"), TO_STRING(user.name), entity.name)'
+      '| EVAL entity.name = CASE((TO_STRING(entity.namespace) == "local"), TO_STRING(user.name), entity.name)'
     );
   });
 
@@ -394,7 +424,7 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
       { entityFields: postStatsSampleFields, useRecentDataPrefix: true }
     );
     expect(fragment).toBe(
-      '| EVAL recent.entity.name = CASE((`recent.entity.namespace` == "local" AND NOT(`recent.user.name` IS NULL)), TO_STRING(recent.user.name), recent.entity.name)'
+      '| EVAL recent.entity.name = CASE((TO_STRING(recent.entity.namespace) == "local" AND TO_STRING(recent.user.name) IS NOT NULL), TO_STRING(recent.user.name), recent.entity.name)'
     );
   });
 });
@@ -463,6 +493,24 @@ describe('statsFieldDestinations', () => {
     expect(dest.has('event.kind')).toBe(true);
     expect(dest.has('user.name')).toBe(true);
     expect(dest.has('entity.name')).toBe(true);
+  });
+
+  it('should exclude managed fields from the destination set', () => {
+    const fields: EntityField[] = [
+      {
+        source: 'a',
+        destination: 'included.field',
+        retention: { operation: 'prefer_newest_value' },
+      },
+      {
+        source: 'b',
+        destination: 'skipped.field',
+        retention: { operation: 'managed' },
+      },
+    ];
+    const dest = statsFieldDestinations(fields);
+    expect(dest.has('included.field')).toBe(true);
+    expect(dest.has('skipped.field')).toBe(false);
   });
 });
 

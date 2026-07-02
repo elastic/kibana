@@ -16,6 +16,10 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/publi
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { CloudConnectedPluginStart } from '@kbn/cloud-connect-plugin/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
@@ -34,6 +38,7 @@ export interface AppPluginStartDependencies {
   serverless?: ServerlessPluginStart;
   cloud?: CloudStart;
   cloudConnect?: CloudConnectedPluginStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 export interface AppPluginSetupDependencies {
@@ -45,6 +50,13 @@ export interface AppPluginSetupDependencies {
   management: ManagementSetup;
   share: SharePluginSetup;
   serverless?: ServerlessPluginSetup;
+  usageCollection?: UsageCollectionSetup;
+}
+
+export interface AppUsageTracker {
+  click: (eventName: string | string[]) => void;
+  count: (eventName: string | string[]) => void;
+  load: (eventName: string | string[]) => void;
 }
 
 export type AppServicesContext = CoreStart & AppPluginStartDependencies;

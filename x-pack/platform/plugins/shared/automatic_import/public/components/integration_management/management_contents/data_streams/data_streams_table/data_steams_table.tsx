@@ -238,7 +238,7 @@ export const DataStreamsTable = ({
       <EuiBasicTable<DataStreamResponse>
         items={sortedItems}
         columns={dataStreamColumns}
-        tableLayout="auto"
+        tableLayout="fixed"
         tableCaption={i18n.DATA_STREAMS_TITLE}
         sorting={sorting}
         onChange={onTableChange}

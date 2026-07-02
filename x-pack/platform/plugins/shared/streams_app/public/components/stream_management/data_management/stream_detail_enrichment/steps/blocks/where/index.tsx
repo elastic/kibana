@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -159,16 +160,26 @@ export const WhereBlock = (props: StepConfigurationProps) => {
                       margin-left: -${euiTheme.size.xxs};
                     `}
                   >
-                    <EuiButtonIcon
-                      iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
-                      onClick={toggle}
-                      aria-label={i18n.translate(
+                    <EuiToolTip
+                      content={i18n.translate(
                         'xpack.streams.streamDetailView.managementTab.enrichment.toggleNestedStepsButtonAriaLabel',
                         {
                           defaultMessage: 'Toggle nested steps',
                         }
                       )}
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+                        onClick={toggle}
+                        aria-label={i18n.translate(
+                          'xpack.streams.streamDetailView.managementTab.enrichment.toggleNestedStepsButtonAriaLabel',
+                          {
+                            defaultMessage: 'Toggle nested steps',
+                          }
+                        )}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 ) : null}
                 <EuiFlexItem

@@ -54,7 +54,6 @@ export function getAgentsColumns({
             content={i18n.translate('xpack.apm.agentExplorerTable.viewAgentInstances', {
               defaultMessage: 'Toggle agent instances view',
             })}
-            delay="long"
           >
             <EuiButtonIcon
               size="xs"

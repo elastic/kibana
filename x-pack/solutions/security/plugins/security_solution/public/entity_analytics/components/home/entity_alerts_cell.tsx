@@ -101,8 +101,10 @@ export const EntityAlertsCell: React.FC<{
     return undefined;
   }, [euidApi?.euid, entityType, entityRecord]);
 
+  const queryEnabled = Boolean(signalIndexName && entityName && entityType);
   const {
     data,
+    isLoading,
     isFetching,
     refetch: refetchQuery,
   } = useQuery({
@@ -140,7 +142,7 @@ export const EntityAlertsCell: React.FC<{
         throw err;
       }
     },
-    enabled: Boolean(signalIndexName && entityName && entityType),
+    enabled: queryEnabled,
     staleTime: Infinity,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
@@ -162,7 +164,8 @@ export const EntityAlertsCell: React.FC<{
 
   const { navigateTo } = useNavigation();
 
-  if (!data) return <EuiLoadingSpinner size="m" />;
+  if (isLoading && queryEnabled) return <EuiLoadingSpinner size="m" />;
+  if (!data) return null;
 
   const alertsData = parseAlertsData(data);
   const alertStats = getFormattedAlertStats(alertsData, euiTheme);

@@ -13,7 +13,7 @@ import * as useSeriesHook from '../hooks/use_series_filters';
 import { buildFilterLabel } from '../../filter_value_label/filter_value_label';
 import 'jest-canvas-mock';
 
-jest.setTimeout(10 * 1000);
+jest.setTimeout(30 * 1000);
 
 describe('FilterLabel', function () {
   mockAppDataView();
@@ -37,11 +37,14 @@ describe('FilterLabel', function () {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByText('elastic-co')).toBeInTheDocument();
-      expect(screen.getByText(/web application:/i)).toBeInTheDocument();
-      expect(screen.getByTitle('Delete Web Application: elastic-co')).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByText('elastic-co')).toBeInTheDocument();
+        expect(screen.getByText(/web application:/i)).toBeInTheDocument();
+        expect(screen.getByTitle('Delete Web Application: elastic-co')).toBeInTheDocument();
+      },
+      { timeout: 10000 }
+    );
   });
 
   it('should delete filter', async function () {

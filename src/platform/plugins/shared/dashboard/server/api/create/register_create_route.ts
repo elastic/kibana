@@ -8,7 +8,7 @@
  */
 
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { once } from 'lodash';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
@@ -21,7 +21,8 @@ import { writeErrorHandler } from '../write_error_handler';
 export function registerCreateRoute(
   router: VersionedRouter<RequestHandlerContext>,
   usageCounter: UsageCounter | undefined,
-  isDashboardAppRequest: boolean
+  isDashboardAppRequest: boolean,
+  logger: Logger
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const createRoute = router.post({
@@ -35,7 +36,7 @@ export function registerCreateRoute(
   // Route is registered during setup and before all plugins have registered embeddable schemas.
   // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
   const getCachedDashboardStateSchema = once(() => {
-    return getDashboardStateSchema(isDashboardAppRequest);
+    return getDashboardStateSchema(false);
   });
 
   createRoute.addVersion(
@@ -70,7 +71,7 @@ export function registerCreateRoute(
           );
           return res.created({ body: result });
         } catch (e) {
-          return writeErrorHandler(e, res);
+          return writeErrorHandler(e, res, logger, req);
         }
       })
   );

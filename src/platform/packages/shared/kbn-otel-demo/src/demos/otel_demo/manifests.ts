@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
 import type { DemoManifestGenerator, ManifestOptions } from '../../types';
 
 import { HTTP_OTLP_SERVICES, getFlagdConfig } from './config';
@@ -420,7 +420,7 @@ export const otelDemoManifests: DemoManifestGenerator = {
           ...finalEnv,
           OTEL_EXPORTER_OTLP_ENDPOINT: `http://otel-collector:${otlpPort}`,
           OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: 'cumulative',
-          OTEL_RESOURCE_ATTRIBUTES: `service.namespace=${demoId},deployment.environment=${demoId},deployment.environment.name=${demoId}`,
+          OTEL_RESOURCE_ATTRIBUTES: `service.namespace=${demoId},deployment.environment.name=${demoId}`,
           OTEL_SERVICE_NAME: svc.name,
         };
       }
@@ -470,6 +470,6 @@ export const otelDemoManifests: DemoManifestGenerator = {
       });
     }
 
-    return manifests.map((m) => yaml.dump(m)).join('---\n');
+    return manifests.map((m) => stringify(m)).join('---\n');
   },
 };

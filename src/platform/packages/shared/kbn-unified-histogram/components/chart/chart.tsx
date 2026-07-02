@@ -268,20 +268,24 @@ export function UnifiedHistogramChart({
   const actions: IconButtonGroupProps['buttons'] = [];
 
   if (canEditVisualizationOnTheFly) {
+    const editLabel = i18n.translate('unifiedHistogram.editVisualizationButton', {
+      defaultMessage: 'Edit visualization',
+    });
     actions.push({
-      label: i18n.translate('unifiedHistogram.editVisualizationButton', {
-        defaultMessage: 'Edit visualization',
-      }),
+      label: editLabel,
+      toolTipContent: editLabel,
       iconType: 'pencil',
       isDisabled: isFlyoutVisible,
       'data-test-subj': 'unifiedHistogramEditFlyoutVisualization',
       onClick: () => setIsFlyoutVisible(true),
     });
   } else if (onEditVisualization) {
+    const editLabel = i18n.translate('unifiedHistogram.editVisualizationButton', {
+      defaultMessage: 'Edit visualization',
+    });
     actions.push({
-      label: i18n.translate('unifiedHistogram.editVisualizationButton', {
-        defaultMessage: 'Edit visualization',
-      }),
+      label: editLabel,
+      toolTipContent: editLabel,
       iconType: 'lensApp',
       'data-test-subj': 'unifiedHistogramEditVisualization',
       onClick: onEditVisualization,
@@ -289,10 +293,12 @@ export function UnifiedHistogramChart({
   }
 
   if (canSaveVisualization) {
+    const saveLabel = i18n.translate('unifiedHistogram.saveVisualizationButton', {
+      defaultMessage: 'Save visualization to dashboard',
+    });
     actions.push({
-      label: i18n.translate('unifiedHistogram.saveVisualizationButton', {
-        defaultMessage: 'Save visualization to dashboard',
-      }),
+      label: saveLabel,
+      toolTipContent: saveLabel,
       iconType: 'dashboardApp',
       'data-test-subj': 'unifiedHistogramSaveVisualization',
       onClick: () => setIsSaveModalVisible(true),

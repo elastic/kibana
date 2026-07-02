@@ -34,6 +34,8 @@ describe(
     let ruleName: string;
     let packId: string;
     let packName: string;
+    let loadedPackQueries: Record<string, { schedule_id?: string }>;
+    let loadedMultiQueryPackQueries: Record<string, { schedule_id?: string }>;
     const packData = packFixture();
     const multiQueryPackData = multiQueryPackFixture();
     before(() => {
@@ -43,10 +45,12 @@ describe(
       loadPack(packData).then((data) => {
         packId = data.saved_object_id;
         packName = data.name;
+        loadedPackQueries = data.queries;
       });
       loadPack(multiQueryPackData).then((data) => {
         multiQueryPackId = data.saved_object_id;
         multiQueryPackName = data.name;
+        loadedMultiQueryPackQueries = data.queries;
       });
       loadRule().then((data) => {
         ruleId = data.id;
@@ -191,11 +195,13 @@ describe(
 
       cy.getBySel('ruleEditSubmitButton').click();
       cy.wait('@saveRuleSingleQuery', { timeout: 15000 }).should(({ request }) => {
+        const queryId = Object.keys(packData.queries)[0];
         const oneQuery = [
           {
             interval: 3600,
             query: 'select * from uptime;',
-            id: Object.keys(packData.queries)[0],
+            id: queryId,
+            schedule_id: loadedPackQueries[queryId].schedule_id,
           },
         ];
         expect(request.body.response_actions[0].params.queries).to.deep.equal(oneQuery);
@@ -231,22 +237,26 @@ describe(
 
       cy.contains('Save changes').click();
       cy.wait('@saveRuleMultiQuery', { timeout: 15000 }).should(({ request }) => {
+        const queryIds = Object.keys(multiQueryPackData.queries);
         const threeQueries = [
           {
             interval: 3600,
             query: 'SELECT * FROM memory_info;',
             platform: 'linux',
-            id: Object.keys(multiQueryPackData.queries)[0],
+            id: queryIds[0],
+            schedule_id: loadedMultiQueryPackQueries[queryIds[0]].schedule_id,
           },
           {
             interval: 3600,
             query: 'SELECT * FROM system_info;',
-            id: Object.keys(multiQueryPackData.queries)[1],
+            id: queryIds[1],
+            schedule_id: loadedMultiQueryPackQueries[queryIds[1]].schedule_id,
           },
           {
             interval: 10,
             query: 'select opera_extensions.* from users join opera_extensions using (uid);',
-            id: Object.keys(multiQueryPackData.queries)[2],
+            id: queryIds[2],
+            schedule_id: loadedMultiQueryPackQueries[queryIds[2]].schedule_id,
           },
         ];
         expect(request.body.response_actions[0].params.queries).to.deep.equal(threeQueries);

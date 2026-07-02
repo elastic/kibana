@@ -922,6 +922,7 @@ export default function (providerContext: FtrProviderContext) {
           is_protected: false,
           space_ids: ['default'],
           supports_agentless: false,
+          has_agent_version_conditions: false,
           min_agent_version: null,
           package_agent_version_conditions: null,
         });
@@ -1434,6 +1435,9 @@ export default function (providerContext: FtrProviderContext) {
           package_policies: [],
           is_protected: false,
           space_ids: ['default'],
+          has_agent_version_conditions: false,
+          min_agent_version: null,
+          package_agent_version_conditions: null,
         });
       });
 
@@ -1494,6 +1498,9 @@ export default function (providerContext: FtrProviderContext) {
           package_policies: [],
           is_protected: false,
           space_ids: ['default'],
+          has_agent_version_conditions: false,
+          min_agent_version: null,
+          package_agent_version_conditions: null,
         });
       });
 
@@ -1656,6 +1663,9 @@ export default function (providerContext: FtrProviderContext) {
           monitoring_enabled: ['logs', 'metrics'],
           inactivity_timeout: 1209600,
           space_ids: ['default'],
+          has_agent_version_conditions: false,
+          min_agent_version: null,
+          package_agent_version_conditions: null,
         });
 
         const listResponseAfterUpdate = await fetchPackageList();
@@ -1721,6 +1731,9 @@ export default function (providerContext: FtrProviderContext) {
               },
             },
           },
+          has_agent_version_conditions: false,
+          min_agent_version: null,
+          package_agent_version_conditions: null,
         });
       });
 
@@ -1837,6 +1850,9 @@ export default function (providerContext: FtrProviderContext) {
               percentage: 10,
             },
           ],
+          has_agent_version_conditions: false,
+          min_agent_version: null,
+          package_agent_version_conditions: null,
         });
       });
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { uniqBy } from 'lodash';
+
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { DashboardState } from '../../types';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
@@ -79,11 +81,9 @@ export const transformDashboardIn = (
 
   return {
     attributes,
-    references: [
-      ...tagReferences,
-      ...panelReferences,
-      ...controlGroupReferences,
-      ...searchSourceReferences,
-    ],
+    references: uniqBy(
+      [...tagReferences, ...panelReferences, ...controlGroupReferences, ...searchSourceReferences],
+      'name'
+    ),
   };
 };

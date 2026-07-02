@@ -15,7 +15,6 @@ const SAVED_SEARCH_WITH_FILTERS_NAME = 'test saved search with filters';
 const SAVED_SEARCH_ESQL = 'test saved search ES|QL';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
@@ -37,9 +36,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover unsaved changes notification indicator', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );

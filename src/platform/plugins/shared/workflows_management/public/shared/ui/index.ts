@@ -20,3 +20,4 @@ export {
   getSaveWorkflowTooltipContent,
 } from './workflow_action_buttons/get_workflow_tooltip_content';
 export { FormattedRelativeEnhanced } from './formatted_relative_enhanced/formatted_relative_enhanced';
+export { withTooltip } from './with_tooltip';

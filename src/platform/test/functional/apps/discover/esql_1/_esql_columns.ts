@@ -17,7 +17,6 @@ const SAVED_SEARCH_TRANSFORMATIONAL_INITIAL_COLUMNS = 'transformationalInitialCo
 const SAVED_SEARCH_TRANSFORMATIONAL_CUSTOM_COLUMNS = 'transformationalCustomColumns';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const dataGrid = getService('dataGrid');
@@ -42,9 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
-      );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await common.navigateToApp('discover');

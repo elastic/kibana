@@ -101,3 +101,72 @@ export const SCOUT_UNIFIED_CONFIG_PATH_REGEX = new RegExp(
 
 // Scout CI
 export const SCOUT_CI_CONFIG_PATH = path.resolve(REPO_ROOT, '.buildkite', 'scout_ci_config.yml');
+
+// Selective testing — patterns used by the Scout selective-testing resolver.
+
+/**
+ * Documentation-only files inside Scout test scopes that should be ignored when
+ * deciding whether a PR's diff is "Scout tests only". A README or markdown change
+ * next to a Playwright config is noise — it must not block the fast path nor
+ * schedule any Playwright config to run.
+ */
+export const SCOUT_TESTS_ONLY_IGNORE_PATTERNS: readonly string[] = [
+  '**/README*',
+  '**/*.md',
+  '**/CHANGELOG*',
+];
+
+/**
+ * Path globs that uniquely identify a Scout test scope — i.e. a directory
+ * containing a Playwright config and its co-located tests/fixtures/helpers.
+ *
+ * A "scope" is `<package-root>/test/(scout|scout_<custom>)/(api|ui)`, owning at
+ * most two configs:
+ *   - <scope>/playwright.config.ts          (single-thread, tests under tests/)
+ *   - <scope>/parallel.playwright.config.ts (parallel, tests under parallel_tests/)
+ *
+ * The `.meta/(api|ui)` variant covers auto-generated manifests that belong to
+ * the matching scope. Both patterns derive their `(api|ui)` and `scout(_*,)`
+ * segments from `SCOUT_TEST_CATEGORIES` and the same brace-expansion idiom used
+ * by `SCOUT_CONFIG_MANIFEST_PATH_GLOB` so they all stay in sync.
+ */
+export const SCOUT_TESTS_ONLY_SCOPE_GLOBS: readonly string[] = [
+  `**/test/scout{_*,}/{${SCOUT_TEST_CATEGORIES.join(',')}}/**`,
+  `**/test/scout{_*,}/.meta/{${SCOUT_TEST_CATEGORIES.join(',')}}/**`,
+];
+
+/**
+ * Captures `<prefix>/test/(scout|scout_<custom>)/(api|ui)/<rest?>` and the
+ * `.meta/` variant `<prefix>/test/(scout|scout_<custom>)/.meta/(api|ui)/<rest?>`.
+ *
+ * Capture groups: 1=prefix, 2=scoutDir, 3=category (api|ui), 4=rest (optional).
+ * The category alternation is derived from `SCOUT_TEST_CATEGORIES` for parity
+ * with the rest of this file.
+ */
+export const SCOUT_TEST_SCOPE_PATTERN = new RegExp(
+  `^(.+?)\\/test\\/(scout(?:_[^/]+)?)\\/(?:\\.meta\\/)?(${SCOUT_TEST_CATEGORIES.join(
+    '|'
+  )})(?:\\/(.*))?$`
+);
+
+/**
+ * Files whose modification invalidates Scout selective testing entirely:
+ * any change here forces a full Scout suite run regardless of the diff's
+ * other contents.
+ */
+export const CRITICAL_FILES_SCOUT: readonly string[] = [
+  'package.json',
+  'yarn.lock',
+  'tsconfig.json',
+  '.node-version',
+  '.nvmrc',
+  'src/setup_node_env/**/*',
+  'packages/kbn-babel-preset/**/*',
+  'src/platform/packages/shared/kbn-repo-info/**/*',
+  'src/platform/packages/shared/kbn-scout/**/*',
+  'src/platform/packages/private/kbn-scout-reporting/**/*',
+  'scripts/scout.js',
+  '.buildkite/scripts/steps/test/scout/**/*',
+  '.buildkite/pipeline-utils/affected-packages/**/*.{ts,js,sh}',
+  '.buildkite/pipeline-utils/ci-stats/**/*.{ts,js}',
+];

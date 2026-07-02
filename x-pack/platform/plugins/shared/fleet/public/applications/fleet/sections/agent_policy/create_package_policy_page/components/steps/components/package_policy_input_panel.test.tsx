@@ -35,9 +35,12 @@ jest.mock('../../../single_page_layout/hooks/setup_technology', () => {
 
 const useAgentlessMock = useAgentless as jest.MockedFunction<typeof useAgentless>;
 
+const mockParse = () => ({});
+
 describe('shouldShowStreamsByDefault', () => {
   it('should return true if a datastreamId is provided and contained in the input', () => {
     const res = shouldShowStreamsByDefault(
+      mockParse,
       {} as any,
       [],
       {
@@ -55,6 +58,7 @@ describe('shouldShowStreamsByDefault', () => {
 
   it('should return false if a datastreamId is provided but not contained in the input', () => {
     const res = shouldShowStreamsByDefault(
+      mockParse,
       {} as any,
       [],
       {
@@ -72,6 +76,7 @@ describe('shouldShowStreamsByDefault', () => {
 
   it('should return false if a datastreamId is provided but the input is disabled', () => {
     const res = shouldShowStreamsByDefault(
+      mockParse,
       {} as any,
       [],
       {
@@ -760,7 +765,7 @@ describe('PackagePolicyInputPanel', () => {
       });
     });
 
-    it('should render title without toggle switch when isSingleInputAndStreams is true', async () => {
+    it('should render toggle switch when isSingleInputAndStreams is true', async () => {
       const simpleStreams: RegistryStreamWithDataStream[] = [
         {
           input: 'logfile',
@@ -814,11 +819,8 @@ describe('PackagePolicyInputPanel', () => {
       );
       await waitFor(() => {
         expect(
-          renderResult.getByTestId('PackagePolicy.InputStreamConfig.title')
+          renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch')
         ).toBeInTheDocument();
-        expect(
-          renderResult.queryByTestId('PackagePolicy.InputStreamConfig.Switch')
-        ).not.toBeInTheDocument();
       });
     });
 
@@ -1074,7 +1076,7 @@ describe('PackagePolicyInputPanel', () => {
       streams: [packagePolicyInput.streams[0]],
     } as NewPackagePolicyInput;
 
-    it('should render title without toggle switch when isSingleInputAndStreams is true', async () => {
+    it('should render toggle switch when isSingleInputAndStreams is true', async () => {
       renderResult = testRenderer.render(
         <PackagePolicyInputPanel
           packageInfo={mockPackageInfo}
@@ -1088,11 +1090,8 @@ describe('PackagePolicyInputPanel', () => {
       );
       await waitFor(() => {
         expect(
-          renderResult.getByTestId('PackagePolicy.InputStreamConfig.title')
+          renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch')
         ).toBeInTheDocument();
-        expect(
-          renderResult.queryByTestId('PackagePolicy.InputStreamConfig.Switch')
-        ).not.toBeInTheDocument();
       });
     });
 

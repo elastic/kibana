@@ -21,6 +21,7 @@ import type {
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
 import {
+  BROWSER_CONSOLE_ERRORS_ATTACHMENT,
   SCOUT_REPORT_OUTPUT_ROOT,
   ScoutTestRunConfigCategory,
   ScoutTestTarget,
@@ -158,6 +159,12 @@ export class ScoutPlaywrightReporter implements Reporter {
     if (result) {
       testProps.status = result.status;
       testProps.duration = result.duration;
+      const consoleErrors = result.attachments
+        .find((a) => a.name === BROWSER_CONSOLE_ERRORS_ATTACHMENT)
+        ?.body?.toString('utf-8');
+      if (consoleErrors) {
+        testProps.console_errors = consoleErrors;
+      }
     }
 
     return testProps;

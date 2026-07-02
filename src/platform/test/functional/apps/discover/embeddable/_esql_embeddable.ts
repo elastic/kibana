@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const filterBar = getService('filterBar');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
@@ -28,9 +27,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover ES|QL embeddable', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );

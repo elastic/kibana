@@ -13,6 +13,7 @@ export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
 export const UNSAVED_CHANGES_NOTIFICATION = 'split-button-notification-indicator';
 
 import expect from '@kbn/expect';
+import { DASHBOARD_APP_ID } from '@kbn/deeplinks-analytics';
 import { FtrService } from '../ftr_provider_context';
 import type { CommonPageObject } from './common_page';
 
@@ -61,8 +62,6 @@ export class DashboardPageObject extends FtrService {
     ? 'src/platform/test/functional/fixtures/kbn_archiver/ccs/dashboard/legacy/legacy.json'
     : 'src/platform/test/functional/fixtures/kbn_archiver/dashboard/legacy/legacy.json';
 
-  public readonly APP_ID = 'dashboards';
-
   async initTests({ kibanaIndex = this.kibanaIndex, defaultIndex = this.logstashIndex } = {}) {
     this.log.debug('load kibana index with visualizations and log data');
     await this.kibanaServer.savedObjects.cleanStandardList();
@@ -72,7 +71,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async navigateToApp() {
-    await this.common.navigateToApp(this.APP_ID);
+    await this.common.navigateToApp(DASHBOARD_APP_ID);
   }
 
   public async navigateToAppFromAppsMenu() {
@@ -216,8 +215,17 @@ export class DashboardPageObject extends FtrService {
    */
   public async onDashboardLandingPage() {
     this.log.debug(`onDashboardLandingPage`);
-    const currentUrl = await this.browser.getCurrentUrl();
-    return currentUrl.includes('dashboards#/list');
+    let currentUrl = await this.browser.getCurrentUrl();
+
+    // wait for dashboard route redirect to complete
+    if (currentUrl.includes(DASHBOARD_APP_ID) && !currentUrl.includes('#')) {
+      await this.retry.waitFor('dashboard route redirect to complete', async () => {
+        currentUrl = await this.browser.getCurrentUrl();
+        return currentUrl.includes('#');
+      });
+    }
+
+    return currentUrl.includes(`${DASHBOARD_APP_ID}#/list`);
   }
 
   public async expectExistsDashboardLandingPage() {
@@ -236,7 +244,7 @@ export class DashboardPageObject extends FtrService {
     );
   }
 
-  public async gotoDashboardLandingPage(ignorePageLeaveWarning = true) {
+  public async gotoDashboardLandingPage() {
     this.log.debug('gotoDashboardLandingPage');
     if (await this.onDashboardLandingPage()) return;
 
@@ -244,12 +252,6 @@ export class DashboardPageObject extends FtrService {
       ? 'breadcrumb breadcrumb-deepLinkId-dashboards'
       : 'breadcrumb dashboardListingBreadcrumb first';
     await this.testSubjects.click(breadcrumbLink);
-    const warning = await this.testSubjects.exists('confirmModalTitleText');
-    if (warning) {
-      await this.testSubjects.click(
-        ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
-      );
-    }
     await this.expectExistsDashboardLandingPage();
   }
 

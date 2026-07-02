@@ -139,7 +139,6 @@ export const PresentationPanelTitle = ({
       <EuiToolTip
         title={panelTitle}
         content={panelDescription}
-        delay="regular"
         position="top"
         anchorProps={{
           'data-test-subj': 'embeddablePanelTooltipAnchor',

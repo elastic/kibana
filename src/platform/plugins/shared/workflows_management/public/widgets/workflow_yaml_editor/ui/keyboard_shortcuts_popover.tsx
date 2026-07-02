@@ -86,7 +86,7 @@ export function KeyboardShortcutsPopover() {
       anchorPosition="upRight"
       panelPaddingSize="none"
       button={
-        <EuiToolTip content={label} delay="long" disableScreenReaderOutput>
+        <EuiToolTip content={label} disableScreenReaderOutput>
           <EuiButtonIcon
             size="xs"
             iconType="keyboard"

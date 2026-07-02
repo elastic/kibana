@@ -21,7 +21,9 @@ target
 .idea
 .claude/*.local.json
 .claude/worktrees/
-.cursor
+/.cursor/*
+!/.cursor/hooks.json
+!/.cursor/hooks/
 !x-pack/solutions/security/.cursor
 !x-pack/solutions/security/test/security_solution_cypress/.cursor/
 .windsurf

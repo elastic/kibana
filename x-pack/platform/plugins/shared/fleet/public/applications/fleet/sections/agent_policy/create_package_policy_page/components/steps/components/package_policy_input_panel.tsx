@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, memo, useMemo, useCallback } from 'react';
+import React, { useState, memo, useMemo, useCallback, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,8 +34,10 @@ import type {
   RegistryVarsEntry,
 } from '../../../../../../types';
 import type { PackagePolicyInputValidationResults } from '../../../services';
+import type { YamlParseFn } from '../../../services';
 import { hasInvalidButRequiredVar, countValidationErrors, isAdvancedVar } from '../../../services';
 import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
+import { useYaml } from '../../../../../../../../services';
 import {
   DATA_STREAM_USE_APM_VAR,
   shouldIncludeUseAPMVar,
@@ -61,6 +63,7 @@ const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
 `;
 
 export const shouldShowStreamsByDefault = (
+  parse: YamlParseFn,
   packageInput: RegistryInput,
   packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string; type: string } }>,
   packagePolicyInput: NewPackagePolicyInput,
@@ -71,11 +74,12 @@ export const shouldShowStreamsByDefault = (
   }
 
   return (
-    hasInvalidButRequiredVar(packageInput.vars, packagePolicyInput.vars) ||
+    hasInvalidButRequiredVar(parse, packageInput.vars, packagePolicyInput.vars) ||
     packageInputStreams.some(
       (stream) =>
         stream.enabled &&
         hasInvalidButRequiredVar(
+          parse,
           stream.vars,
           packagePolicyInput.streams.find(
             (pkgStream) => stream.data_stream.dataset === pkgStream.data_stream.dataset
@@ -193,17 +197,35 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       isAgentlessEnabled,
       onSelectionsChange: (update) => updatePackagePolicyInput(update),
     });
-    // Showing streams toggle state
-    const [isShowingStreams, setIsShowingStreams] = useState<boolean>(
-      () =>
-        (isSingleInputAndStreams && packageInfo.type !== 'input') ||
-        shouldShowStreamsByDefault(
-          packageInput,
-          packageInputStreams,
-          packagePolicyInput,
-          defaultDataStreamId
-        )
-    );
+    const yaml = useYaml();
+    // Showing streams toggle state (initialized once when yaml loads so we can validate)
+    const [isShowingStreams, setIsShowingStreams] = useState<boolean>(false);
+    const isShowingStreamsInitialized = useRef(false);
+    useEffect(() => {
+      // Only initialize once — we must not re-evaluate after the user fills in required
+      // fields, or the streams section would collapse as each field becomes valid.
+      if (yaml && !isShowingStreamsInitialized.current) {
+        isShowingStreamsInitialized.current = true;
+        setIsShowingStreams(
+          (isSingleInputAndStreams && packageInfo.type !== 'input') ||
+            shouldShowStreamsByDefault(
+              yaml.parse,
+              packageInput,
+              packageInputStreams,
+              packagePolicyInput,
+              defaultDataStreamId
+            )
+        );
+      }
+    }, [
+      yaml,
+      packageInput,
+      packageInputStreams,
+      packagePolicyInput,
+      defaultDataStreamId,
+      isSingleInputAndStreams,
+      packageInfo.type,
+    ]);
 
     // Hide registry variables based on `hide_in_deployment_modes` value
     const hideRegistryVars = useCallback(
@@ -386,28 +408,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       <>
         {/* Header / input-level toggle */}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          {isSingleInputAndStreams ? (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h3
-                      data-test-subj="PackagePolicy.InputStreamConfig.title"
-                      style={
-                        isDeprecatedInput ? { color: theme.euiTheme.colors.textSubdued } : undefined
-                      }
-                    >
-                      {packageInput.title || packageInput.type}
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-                {inputReleaseBadge && <EuiFlexItem grow={false}>{inputReleaseBadge}</EuiFlexItem>}
-                {migrationTooltip}
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-              {showTopLevelDescription && topLevelDescription}
-            </EuiFlexItem>
-          ) : (
+          {
             <EuiFlexItem grow={false}>
               <EuiSwitch
                 data-test-subj="PackagePolicy.InputStreamConfig.Switch"
@@ -464,7 +465,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               <EuiSpacer size="s" />
               {showTopLevelDescription && topLevelDescription}
             </EuiFlexItem>
-          )}
+          }
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
               {/* Bubble up deprecation warning when collapsed and input has deprecated features */}
@@ -497,7 +498,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   </EuiText>
                 </EuiFlexItem>
               ) : null}
-              {(!isSingleInputAndStreams || packageInfo.type === 'input') && (
+              {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     color={hasErrors ? 'danger' : 'primary'}
@@ -523,7 +524,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     }
                   </EuiButtonEmpty>
                 </EuiFlexItem>
-              )}
+              }
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -550,7 +551,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               varGroups={inputVarGroups}
               varGroupSelections={inputVarGroupSelections}
               onVarGroupSelectionChange={handleInputVarGroupSelectionChange}
-              showDescriptionColumn={!isSingleInputAndStreams}
               streamAdvancedVars={consolidatedStreamAdvancedVars}
               sections={packageInput.sections}
             />
@@ -577,7 +577,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     hasStreamToggle={hasStreamToggle}
                     packagePolicyInputStream={packagePolicyInputStream!}
                     inputPolicyTemplate={packagePolicyInput.policy_template}
-                    showDescriptionColumn={!isSingleInputAndStreams}
                     isUpgrade={isUpgrade}
                     updatePackagePolicyInputStream={(
                       updatedStream: Partial<PackagePolicyInputStream>

@@ -670,7 +670,7 @@ export const oauthCallbackRoute = (
           }
 
           return respondWithError(res, {
-            details: GENERIC_OAUTH_ERROR,
+            details: err instanceof Error ? err.message : GENERIC_OAUTH_ERROR,
             statusCode: getErrorStatusCode(err),
             connectorId: stateConnectorId,
             returnUrl: kibanaReturnUrl,

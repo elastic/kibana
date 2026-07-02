@@ -40,3 +40,28 @@ The `oas_docs/output` folder contains the final resulting Kibana OpenAPI bundles
 ## Bundling commands
 
 Besides the scripts in the `oas_docs/scripts` folder, there is an `oas_docs/makefile` to simplify the workflow. Use `make help` to see available commands.
+
+## Dashboards & Visualizations — temporary external hosting (tech preview)
+
+> **⚠️ Temporary setup** — see [#266195](https://github.com/elastic/kibana/issues/266195) for the GA revert checklist.
+
+The Dashboards and Visualizations APIs are in **technical preview**. While in tech preview they are hosted externally at https://elastic.github.io/as-code-docs/ because Bump.sh cannot render their schemas at this time.
+
+### How the two pipelines differ
+
+| | Bump.sh pipeline (`make api-docs`) | External pipeline (`make api-docs-overlay-external`) |
+|---|---|---|
+| Dashboards & Visualizations content | Redirect-only shells (links to external docs) | Full schemas |
+| Output | `output/kibana.yaml` / `output/kibana.serverless.yaml` | `output/kibana.external.yaml` |
+| Run by CI | ✅ | ❌ manual only |
+
+### Keeping external docs in sync
+
+**Every time** the Dashboards or Visualizations API schemas change, the external docs must be manually regenerated and pushed. Otherwise the externally hosted docs will silently drift from the actual API.
+
+Runbook:
+```bash
+cd oas_docs
+make api-docs-overlay-external   # regenerates output/kibana.external.yaml
+# copy output/kibana.external.yaml to the elastic/as-code-docs repo and publish
+```

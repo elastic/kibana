@@ -10,7 +10,7 @@
 import path from 'path';
 import fs from 'fs';
 
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import deepmerge from 'deepmerge';
 
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -140,7 +140,7 @@ function buildBaseProjectConfig(
   pkg: Package,
   kibanaJsonc: PackageManifestBaseFields
 ): MoonProjectConfig {
-  const projectConfig: MoonProjectConfig = yaml.load(projectConfigTemplate) as any;
+  const projectConfig: MoonProjectConfig = parse(projectConfigTemplate) as any;
   const mainOwner = Array.isArray(kibanaJsonc.owner) ? kibanaJsonc.owner[0] : kibanaJsonc.owner;
   projectConfig.id = pkg.name;
   projectConfig.layer = MOON_CONST.PROJECT_LAYER_UNKNOWN; // we currently don't make use of this
@@ -348,7 +348,7 @@ function applyDevOverrides(projectConfig: MoonProjectConfig, devOverridesPath: s
 
   logger.info(`Applying development overrides from ${path.relative(REPO_ROOT, devOverridesPath)}`);
   try {
-    const devOverrides = yaml.load(readFile(devOverridesPath)) as Partial<MoonProjectConfig>;
+    const devOverrides = parse(readFile(devOverridesPath));
     return deepmerge(projectConfig, devOverrides, {
       arrayMerge: (target, source) => target.concat(source),
     });

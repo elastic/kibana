@@ -1,5 +1,5 @@
 {
-  "sha1": "8ce8b1eef79e0444240648f5dfd94ef6e83784f4",
+  "sha1": "5dcbcdd8d9d97b22e3293377ac44f725be5ec0de",
   "tests": [
     {
       "id": "f4c048e25988cb5-605d7a7bf19c60f",
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 62,
+        "line": 89,
         "column": 9
       }
     },
@@ -29,7 +29,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 102,
+        "line": 129,
         "column": 9
       }
     },
@@ -45,7 +45,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 116,
+        "line": 143,
         "column": 9
       }
     },
@@ -61,7 +61,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 130,
+        "line": 157,
         "column": 9
       }
     },
@@ -77,7 +77,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 145,
+        "line": 172,
         "column": 9
       }
     },
@@ -93,7 +93,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 160,
+        "line": 187,
         "column": 9
       }
     },
@@ -109,7 +109,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 173,
+        "line": 200,
         "column": 9
       }
     },
@@ -125,7 +125,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 200,
+        "line": 227,
         "column": 9
       }
     },
@@ -228,7 +228,7 @@
     {
       "id": "a01812d3d8d03d1-6edec65fe06717b",
       "title": "Infrastructure Inventory - Onboarding Renders no data page and redirects to onboarding page when no data is present",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -237,7 +237,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/no_data_inventory.spec.ts",
-        "line": 22,
+        "line": 23,
         "column": 9
       }
     }
