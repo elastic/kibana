@@ -37,9 +37,7 @@ describe('buildSearchAttacksParams', () => {
   });
 
   it('preserves other search params when translating ids', () => {
-    expect(
-      buildSearchAttacksParams({ ids: ['id-1'], size: 10, sort: ['@timestamp'] })
-    ).toEqual({
+    expect(buildSearchAttacksParams({ ids: ['id-1'], size: 10, sort: ['@timestamp'] })).toEqual({
       size: 10,
       sort: ['@timestamp'],
       query: {
