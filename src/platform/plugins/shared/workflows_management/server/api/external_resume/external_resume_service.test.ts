@@ -253,6 +253,26 @@ describe('resumeWorkflowExecutionExternallyWithInput', () => {
     expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['api-key-id'] });
   });
 
+  it('rejects bare waitForInput GET resume with no schema field query params', async () => {
+    await expect(
+      resumeWorkflowExecutionExternallyViaGet(workflowsService, {
+        executionId: 'exec-1',
+        spaceId: 'default',
+        apiKey: ENCODED_API_KEY,
+        query: { apiKey: ENCODED_API_KEY },
+      })
+    ).rejects.toEqual(
+      new ExternalResumeError(
+        'Query-param resume requires at least one schema field; use the form link instead.',
+        400
+      )
+    );
+
+    const engine = await workflowsService.getWorkflowsExecutionEngine();
+    expect(engine.resumeWorkflowExecution).not.toHaveBeenCalled();
+    expect(invalidateAsInternalUser).not.toHaveBeenCalled();
+  });
+
   it('rejects waitForInput GET resume when required schema fields are missing', async () => {
     workflowsService.getWorkflowExecution.mockResolvedValue({
       id: 'exec-1',

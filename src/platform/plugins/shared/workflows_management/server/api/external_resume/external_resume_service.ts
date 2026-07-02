@@ -105,10 +105,15 @@ export async function resumeWorkflowExecutionExternallyViaGet(
 
   if (stepExecution.stepType === 'waitForInput') {
     const schema = getStepInputSchema(stepExecution.input);
-    const validatedInput = parseExternalResumeFormSubmission(
-      getExternalResumeInputFromQuery(query),
-      schema
-    );
+    const queryInput = getExternalResumeInputFromQuery(query);
+    if (Object.keys(queryInput).length === 0) {
+      throw new ExternalResumeError(
+        'Query-param resume requires at least one schema field; use the form link instead.',
+        400
+      );
+    }
+
+    const validatedInput = parseExternalResumeFormSubmission(queryInput, schema);
 
     return resumeWorkflowExecutionWithResolvedContext(workflowsService, {
       authenticatedApiKeyId,
