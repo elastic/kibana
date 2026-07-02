@@ -33,6 +33,9 @@
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-http-browser",
     "@kbn/core-test-helpers-kbn-server",
-    "@kbn/es-mappings"
+    "@kbn/es-mappings",
+    "@kbn/inference-common",
+    "@kbn/zod",
+    "@kbn/es-types"
   ]
 }
