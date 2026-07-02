@@ -69,9 +69,13 @@ const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListPr
       {options.map((option, index) => (
         <PanelListItem
           key={`${option.start}-${option.end}-${index}`}
+          // Stable selector: a natural-language `label` when present, otherwise the
+          // option's `start`-`end` bounds (its identity — see `key` above and the
+          // dedupe-by-`start|end` invariant). Never the displayed label, which shifts
+          // with `timePrecision` and would make the selector config-dependent.
           data-test-subj={toTestSubj(
             'dateRangePickerPresetItem',
-            option.label ?? getOptionDisplayLabel(option, { timePrecision })
+            option.label ?? `${option.start}-${option.end}`
           )}
           onClick={() => handleSelect(option)}
           suffix={showShorthand ? getOptionShorthand(option) ?? undefined : undefined}
