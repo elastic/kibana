@@ -101533,6 +101533,15 @@ components:
             type: string
           maxItems: 100
           type: array
+        namespace_customization_settings:
+          additionalProperties:
+            additionalProperties: false
+            type: object
+            properties:
+              ilm_policy:
+                type: string
+          description: Per-namespace managed settings (e.g. ILM policy) for this package. Keyed by namespace name.
+          type: object
       title: update_package_request
       type: object
     Kibana_HTTP_APIs_update_package_response:
