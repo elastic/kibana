@@ -25,16 +25,6 @@ export const toWorkflowChangeHistorySnapshot = (yaml: string): WorkflowChangeHis
   workflow: { yaml },
 });
 
-export const getWorkflowYamlFromSnapshot = (snapshot: unknown): string => {
-  if (!snapshot || typeof snapshot !== 'object') {
-    return '';
-  }
-
-  const workflow = (snapshot as { workflow?: { yaml?: unknown } }).workflow;
-
-  return typeof workflow?.yaml === 'string' ? workflow.yaml : '';
-};
-
 export const mapWorkflowHistoryItemToListItem = (
   item: WorkflowHistoryItem,
   { isCurrent }: MapWorkflowHistoryItemOptions = {}
