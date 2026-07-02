@@ -56,7 +56,7 @@ export const recentlyAccessedExtension: DashboardNavExtension<
     config: {
       max: DEFAULT_MAX_RECENT_ITEMS,
       heading: i18n.translate('dashboard.navExtensions.recentlyAccessed.heading', {
-        defaultMessage: 'Recently viewed Dashboards',
+        defaultMessage: 'Recently viewed',
       }),
     },
   },
