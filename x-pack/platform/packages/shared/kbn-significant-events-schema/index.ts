@@ -78,6 +78,10 @@ export {
   type KnowledgeIndicator,
   type SignificantEvent,
   type SignificantEventStatus,
+  type SignificantEventsTuningConfig,
+  type TuningConfigFieldBounds,
+  DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+  SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
   type SignificantEventInvestigation,
   type InvestigationHypothesis,
   type InvestigationState,
@@ -88,6 +92,8 @@ export {
   discoverySchema,
   significantEventSchema,
   significantEventStatusSchema,
+  significantEventsTuningConfigSchema,
+  validateSignificantEventsTuningConfig,
   significantEventInvestigationSchema,
   investigationStateSchema,
 } from './src/significant_events';
@@ -112,3 +118,5 @@ export {
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
 } from './src/inference_feature_ids';
+
+export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';
