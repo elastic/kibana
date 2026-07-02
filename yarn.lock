@@ -2331,10 +2331,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@116.3.1":
-  version "116.3.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-116.3.1.tgz#cf695035027b14af41c332145cfc254ae9675c05"
-  integrity sha512-ebTqz2p2iv4MmKjwPPA7fBAMzk8ZgC2mWjmY8O7wJEjxRn+gh5XsYjd/yutZgdhG9pAdVFrlVQwcOBubR2/8pg==
+"@elastic/eui@116.5.0":
+  version "116.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-116.5.0.tgz#0240c84dd03b56fbfd709080c34d04cc45e3cc0e"
+  integrity sha512-AiS+0rlGUoDskGXS9eB8JAq17A8zOCjVObWhJSkUoa9ft5YLn4eV3jttJ2NSf2xzn/R0hhEI8vKTjkTgV36HkA==
   dependencies:
     "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
@@ -9352,6 +9352,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/significant-events-plugin@link:x-pack/platform/plugins/shared/significant_events":
+  version "0.0.0"
+  uid ""
+
 "@kbn/significant-events-schema@link:x-pack/platform/packages/shared/kbn-significant-events-schema":
   version "0.0.0"
   uid ""
@@ -10029,6 +10033,10 @@
   uid ""
 
 "@kbn/workflows-extensions@link:src/platform/plugins/shared/workflows_extensions":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows-library@link:src/platform/packages/shared/kbn-workflows-library":
   version "0.0.0"
   uid ""
 
@@ -17825,11 +17833,6 @@ bl@^5.0.0:
     inherits "^2.0.4"
     readable-stream "^3.4.0"
 
-blob-polyfill@9.0.20240710:
-  version "9.0.20240710"
-  resolved "https://registry.yarnpkg.com/blob-polyfill/-/blob-polyfill-9.0.20240710.tgz#2ef075a207311ea327704f04dc4a98cbefe4143b"
-  integrity sha512-DPUO/EjNANCgSVg0geTy1vmUpu5hhp9tV2F7xUSTUd1jwe4XpwupGB+lt5PhVUqpqAk+zK1etqp6Pl/HVf71Ug==
-
 blob-util@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/blob-util/-/blob-util-2.0.2.tgz#3b4e3c281111bb7f11128518006cdc60b403a1eb"
@@ -17925,24 +17928,24 @@ bowser@^2.11.0:
   integrity sha512-AlcaJBi/pqqJBIQ8U9Mcpc9i8Aqxn88Skv5d+xBX006BY5u8N3mGLHa5Lgppa7L/HfwgwLgZ6NYs+Ag6uUmJRA==
 
 brace-expansion@^1.1.7:
-  version "1.1.14"
-  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-1.1.14.tgz#d9de602370d91347cd9ddad1224d4fd701eb348b"
-  integrity sha512-MWPGfDxnyzKU7rNOW9SP/c50vi3xrmrua/+6hfPbCS2ABNWfx24vPidzvC7krjU/RTo235sV776ymlsMtGKj8g==
+  version "1.1.15"
+  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-1.1.15.tgz#a6d90d54067236e5f42570a3b7378d594d9b7738"
+  integrity sha512-EwOCDEex4quD37XhqM3omwtMoJjr//isUZz1JopUNWms+4Z2ViyM/k1YIRePpoVNnQhENnxtFjLaxNHrT7xIUg==
   dependencies:
     balanced-match "^1.0.0"
     concat-map "0.0.1"
 
 brace-expansion@^2.0.1, brace-expansion@^2.0.2:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-2.0.3.tgz#0493338bdd58e319b1039c67cf7ee439892c01d9"
-  integrity sha512-MCV/fYJEbqx68aE58kv2cA/kiky1G8vux3OR6/jbS+jIMe/6fJWa0DTzJU7dqijOWYwHi1t29FlfYI9uytqlpA==
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-2.1.1.tgz#c68b1c4111c76aae3a6fba55d496cee10c39dad8"
+  integrity sha512-WR1cURNjuvBLMZBMbqM0UoE+WAfdUcEV1ccD8PVBVOI+Z3ND4+SZbN8RsfT2bMuG1qwz5RFvPukSZm5fF2D5eA==
   dependencies:
     balanced-match "^1.0.0"
 
 brace-expansion@^5.0.2, brace-expansion@^5.0.5:
-  version "5.0.6"
-  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-5.0.6.tgz#ec68fe0a641a29d8711579caf641d05bae1f2285"
-  integrity sha512-kLpxurY4Z4r9sgMsyG0Z9uzsBlgiU/EFKhj/h91/8yHu0edo7XuixOIH3VcJ8kkxs6/jPzoI6U9Vj3WqbMQ94g==
+  version "5.0.7"
+  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-5.0.7.tgz#1b0e46965b479dad65af737b4a02790a05498337"
+  integrity sha512-7oFy703dxfY3/NLxC1fh2SUCQ0H9rmAY+5EpDVfXjUTTs+HEwR2nYaqLv+GWcTsumwxPfiz6CzCNkwXwBUwqCA==
   dependencies:
     balanced-match "^4.0.2"
 
