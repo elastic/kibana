@@ -11,8 +11,29 @@ import { ALERT_NAMESPACE, EVENT_KIND } from '@kbn/rule-data-utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { TableTab as SharedTableTab, type TableTabItem } from './base_table_tab';
+import { TableFieldValueCell, type OpenFlyoutLinkRenderer } from './table_field_value_cell';
 import { TABLE_TAB_TEST_ID } from '../components/test_ids';
 import { TableFieldNameCell } from '../components/table_field_name_cell';
+import { OpenFlyoutLink } from '../components/open_flyout_link';
+import {
+  EVENT_URL_FIELD_NAME,
+  LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
+  REFERENCE_URL_FIELD_NAME,
+  RULE_REFERENCE_FIELD_NAME,
+  SIGNAL_RULE_NAME_FIELD_NAME,
+} from '../../../timelines/components/timeline/body/renderers/constants';
+import { renderUrl } from '../../../timelines/components/timeline/body/renderers/formatted_field_helpers';
+import { PortOrServiceNameLink } from '../../../common/components/links';
+import { PORT_NAMES } from '../../../explore/network/components/port/helpers';
+import { INDICATOR_REFERENCE } from '../../../../common/cti/constants';
+
+// Fields rendered as external links (no flyout): the value is a URL.
+const URL_FIELD_NAMES: readonly string[] = [
+  EVENT_URL_FIELD_NAME,
+  REFERENCE_URL_FIELD_NAME,
+  RULE_REFERENCE_FIELD_NAME,
+  INDICATOR_REFERENCE,
+];
 import { EventKind } from '../../document/main/constants/event_kinds';
 import { TableTabSettingButton } from '../components/table_tab_setting_button';
 import { FLYOUT_STORAGE_KEYS } from '../../document/main/constants/local_storage';
@@ -136,6 +157,76 @@ export const TableTab = memo(({ hit, renderCellActions, scopeId = '' }: TableTab
     [hit.flattened]
   );
 
+  // The rule flyout is keyed by rule UUID, not the displayed rule name. `OpenFlyoutLink`
+  // uses a single `value` as both the shown text and the flyout target, so for rule name
+  // fields we substitute the UUID as the target and keep the name as the text. When no
+  // UUID is present we render plain text to avoid opening a rule flyout with an invalid id.
+  const ruleUuid = useMemo(() => {
+    const raw = hit.flattened['kibana.alert.rule.uuid'] ?? hit.flattened['signal.rule.id'] ?? null;
+    const resolved = Array.isArray(raw) ? raw[0] : raw;
+    return resolved != null ? String(resolved) : null;
+  }, [hit.flattened]);
+
+  const isRuleNameField = useCallback(
+    (field: string) =>
+      field === SIGNAL_RULE_NAME_FIELD_NAME || field === LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
+    []
+  );
+
+  // v2 link renderer: resolves each value to the right link.
+  // - Port fields render as external links (IANA port lookup).
+  // - URL fields render as external links to the URL value.
+  // - The rule name field opens the rule flyout keyed by UUID (shown as the name).
+  // - Everything else goes through the new flyout system (host, ip, ...), which passes
+  //   unsupported fields through as plain text.
+  const renderFlyoutLink = useCallback<OpenFlyoutLinkRenderer>(
+    ({ field, value, hit: linkHit, children }) => {
+      if (PORT_NAMES.includes(field)) {
+        return <PortOrServiceNameLink portOrServiceName={value}>{children}</PortOrServiceNameLink>;
+      }
+      if (URL_FIELD_NAMES.includes(field)) {
+        return <>{renderUrl({ value })}</>;
+      }
+      if (isRuleNameField(field)) {
+        if (ruleUuid == null) {
+          return <>{children}</>;
+        }
+        return (
+          <OpenFlyoutLink field={field} value={ruleUuid} hit={linkHit}>
+            {children}
+          </OpenFlyoutLink>
+        );
+      }
+      return (
+        <OpenFlyoutLink field={field} value={value} hit={linkHit}>
+          {children}
+        </OpenFlyoutLink>
+      );
+    },
+    [isRuleNameField, ruleUuid]
+  );
+
+  // Render values through the shared value cell in v2 (OpenFlyoutLink) mode. Uses the raw
+  // (un-stringified) value so multi-value fields render one link per value.
+  const renderValue = useCallback(
+    (field: string) => {
+      const raw = hit.flattened[field];
+      const values = raw == null ? [] : Array.isArray(raw) ? raw.map(String) : [String(raw)];
+      if (values.length === 0) {
+        return '';
+      }
+      return (
+        <TableFieldValueCell
+          field={field}
+          values={values}
+          hit={hit}
+          renderFlyoutLink={renderFlyoutLink}
+        />
+      );
+    },
+    [hit, renderFlyoutLink]
+  );
+
   const toolsRight = useMemo(
     () => [
       <TableTabSettingButton
@@ -163,6 +254,7 @@ export const TableTab = memo(({ hit, renderCellActions, scopeId = '' }: TableTab
         pinnedFields={tableTabState.pinnedFields}
         onPinField={onPinField}
         renderFieldName={renderFieldName}
+        renderValue={renderValue}
         highlightedFields={highlightedFieldNames}
         renderCellActions={renderCellActions}
         scopeId={scopeId}

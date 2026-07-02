@@ -70,7 +70,9 @@ export const useTabs = <T extends string>({
 
   // Sync to initialTabId changes during the render phase (no post-paint flash).
   // This covers URL-driven panels where `path?.tab` changes when `openRightPanel`
-  // is called by the parent component.
+  // is called by the parent component. This sync intentionally does not write to
+  // localStorage — only an explicit `setSelectedTabId` call persists the choice, so
+  // URL-driven navigation never overwrites the user's stored tab preference.
   const prevInitialTabIdRef = useRef(initialTabId);
   if (prevInitialTabIdRef.current !== initialTabId) {
     prevInitialTabIdRef.current = initialTabId;

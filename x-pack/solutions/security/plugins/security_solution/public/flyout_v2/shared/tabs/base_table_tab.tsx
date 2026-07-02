@@ -7,7 +7,11 @@
 
 import type { ReactElement, ReactNode } from 'react';
 import React, { memo, useMemo } from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type {
+  EuiBasicTableColumn,
+  EuiTableComputedColumnType,
+  EuiTableFieldDataColumnType,
+} from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiInMemoryTable,
@@ -105,11 +109,15 @@ export const TableTab = memo(
     const columns = useMemo<Array<EuiBasicTableColumn<TableTabItem>>>(() => {
       const cols: Array<EuiBasicTableColumn<TableTabItem>> = [];
 
+      // Pinning imposes a fixed order (pinned first), so column sorting is disabled
+      // whenever `onPinField` is set. Gate the per-column `sortable` flags on the same
+      // condition so the table never advertises a sort affordance it won't honor.
+      const sortingEnabled = !onPinField;
+
       if (onPinField) {
-        cols.push({
+        const pinColumn: EuiTableComputedColumnType<TableTabItem> = {
           width: '32px',
           name: '',
-          sortable: false,
           render: (item: TableTabItem) => {
             const isPinned = pinnedFields?.includes(item.field) ?? false;
             return (
@@ -126,20 +134,22 @@ export const TableTab = memo(
               </EuiToolTip>
             );
           },
-        } as unknown as EuiBasicTableColumn<TableTabItem>);
+        };
+        cols.push(pinColumn);
       }
 
-      cols.push({
-        field: 'field' as const,
+      const fieldColumn: EuiTableFieldDataColumnType<TableTabItem> = {
+        field: 'field',
         name: i18n.translate('xpack.securitySolution.flyout.shared.table.fieldColumnLabel', {
           defaultMessage: 'Field',
         }),
-        sortable: true,
+        sortable: sortingEnabled,
         width: fieldColumnWidth,
         render: (fieldName: string) => (renderFieldName ? renderFieldName(fieldName) : fieldName),
-      });
+      };
+      cols.push(fieldColumn);
 
-      cols.push({
+      const valueColumn: EuiTableComputedColumnType<TableTabItem> = {
         name: i18n.translate('xpack.securitySolution.flyout.shared.table.valueColumnLabel', {
           defaultMessage: 'Value',
         }),
@@ -157,8 +167,9 @@ export const TableTab = memo(
           }
           return content;
         },
-        sortable: (item: TableTabItem) => stringifyValue(item.value),
-      } as EuiBasicTableColumn<TableTabItem>);
+        sortable: sortingEnabled ? (item: TableTabItem) => stringifyValue(item.value) : undefined,
+      };
+      cols.push(valueColumn);
 
       return cols;
     }, [
