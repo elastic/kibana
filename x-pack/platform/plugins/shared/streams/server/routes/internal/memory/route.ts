@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { i18n } from '@kbn/i18n';
 import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { notFound, serverUnavailable } from '@hapi/boom';
@@ -561,21 +562,35 @@ const getMemoryWorkflowsEnabledRoute = createServerRoute({
   options: { access: 'internal', summary: 'Get enabled state of all memory workflows' },
   security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.read] } },
   params: z.object({}),
-  handler: async ({ request, server, getScopedClients }): Promise<{ enabled: boolean }> => {
+  handler: async ({
+    request,
+    server,
+    getScopedClients,
+  }): Promise<{
+    enabled: boolean;
+    workflows: Array<{ id: string; enabled: boolean }>;
+  }> => {
     const { licensing, uiSettingsClient } = await getScopedClients({ request });
     await assertMemoryEnabled({ server, licensing, uiSettingsClient });
 
     const wfMgmt = server.workflowsManagement;
     if (!wfMgmt) {
-      return { enabled: false };
+      return {
+        enabled: false,
+        workflows: MEMORY_WORKFLOW_IDS.map((id) => ({ id, enabled: false })),
+      };
     }
 
     const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-    const workflows = await Promise.all(
+    const fetchedWorkflows = await Promise.all(
       MEMORY_WORKFLOW_IDS.map((id) => wfMgmt.management.getWorkflow(id, spaceId))
     );
-    const enabled = workflows.every((w) => w?.enabled === true);
-    return { enabled };
+    const workflows = MEMORY_WORKFLOW_IDS.map((id, index) => ({
+      id,
+      enabled: fetchedWorkflows[index]?.enabled === true,
+    }));
+    const enabled = workflows.every((workflow) => workflow.enabled);
+    return { enabled, workflows };
   },
 });
 
@@ -630,11 +645,17 @@ const setMemoryWorkflowsEnabledRoute = createServerRoute({
         request
       );
       if (result.enabled !== enabled) {
-        const detail = result.validationErrors.length
-          ? `: ${result.validationErrors.join('; ')}`
-          : '';
+        const validationDetail = result.validationErrors.join('; ');
         failures.push(
-          `"${managedWorkflowId}" could not be ${enabled ? 'enabled' : 'disabled'}${detail}`
+          validationDetail
+            ? i18n.translate('xpack.streams.memory.workflowUpdateFailedWithDetailErrorMessage', {
+                defaultMessage: 'Could not update workflow "{workflowId}": {detail}',
+                values: { workflowId: managedWorkflowId, detail: validationDetail },
+              })
+            : i18n.translate('xpack.streams.memory.workflowUpdateFailedErrorMessage', {
+                defaultMessage: 'Could not update workflow "{workflowId}"',
+                values: { workflowId: managedWorkflowId },
+              })
         );
       }
     }

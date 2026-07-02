@@ -228,7 +228,10 @@ export const useMemoryWorkflowsEnabled = () => {
   const { core } = useKibana();
   return useQuery({
     queryKey: memoryKeys.workflowsEnabled,
-    queryFn: () => core.http.get<{ enabled: boolean }>(`${MEMORY_BASE}/_workflows/enabled`),
+    queryFn: () =>
+      core.http.get<{ enabled: boolean; workflows: Array<{ id: string; enabled: boolean }> }>(
+        `${MEMORY_BASE}/_workflows/enabled`
+      ),
   });
 };
 
