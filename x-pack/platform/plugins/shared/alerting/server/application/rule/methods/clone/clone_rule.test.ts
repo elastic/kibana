@@ -123,11 +123,6 @@ describe('clone', () => {
       await rulesClient.clone({
         id: disabledRule.id,
         newId: 'cloned-rule',
-        data: {
-          name: disabledRule.attributes.name,
-          enabled: false,
-          schedule: disabledRule.attributes.schedule,
-        },
       });
 
       const createdAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1] as RuleDomain;
@@ -188,11 +183,6 @@ describe('clone', () => {
       await rulesClient.clone({
         id: enabledRule.id,
         newId: 'cloned-rule',
-        data: {
-          name: enabledRule.attributes.name,
-          enabled: true,
-          schedule: enabledRule.attributes.schedule,
-        },
       });
 
       const createdAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1] as RuleDomain;
@@ -245,11 +235,6 @@ describe('clone', () => {
       await rulesClient.clone({
         id: baseRule.id,
         newId: 'cloned-rule',
-        data: {
-          name: baseRule.attributes.name,
-          enabled: false,
-          schedule: baseRule.attributes.schedule,
-        },
       });
 
       expect(validateScheduleLimit).not.toHaveBeenCalled();
@@ -279,11 +264,6 @@ describe('clone', () => {
       await rulesClient.clone({
         id: baseRule.id,
         newId: 'cloned-rule',
-        data: {
-          name: baseRule.attributes.name,
-          enabled: true,
-          schedule: baseRule.attributes.schedule,
-        },
       });
 
       expect(validateScheduleLimit).toHaveBeenCalledWith(
@@ -301,11 +281,6 @@ describe('clone', () => {
         rulesClient.clone({
           id: baseRule.id,
           newId: 'cloned-rule',
-          data: {
-            name: baseRule.attributes.name,
-            enabled: true,
-            schedule: baseRule.attributes.schedule,
-          },
         })
       ).rejects.toThrow(/circuit breaker/i);
 
@@ -366,7 +341,6 @@ describe('clone', () => {
       const res = await rulesClient.clone({
         id: 'test-rule',
         newId: 'test-rule-2',
-        data: { name: 'My rule', enabled: false, schedule: { interval: '10s' } },
       });
 
       expect(res.actions).toEqual([
@@ -392,7 +366,6 @@ describe('clone', () => {
       await rulesClient.clone({
         id: 'test-rule',
         newId: 'test-rule-2',
-        data: { name: 'My rule', enabled: false, schedule: { interval: '10s' } },
       });
       const results = unsecuredSavedObjectsClient.create.mock.calls[0][1] as RuleDomain;
 

@@ -141,13 +141,6 @@ describe('cloneRuleRoute', () => {
     expect(rulesClient.clone).toHaveBeenCalledWith({
       id: '1',
       newId: undefined,
-      data: {
-        enabled: true,
-        name: 'abc',
-        schedule: {
-          interval: '10s',
-        },
-      },
     });
 
     expect(res.ok).toHaveBeenCalled();
