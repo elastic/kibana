@@ -182,7 +182,10 @@ export class LibraryBundleReader implements LibrarySource {
     const file = this.resolveBodyPath(root, definitionUrl);
     const text = await this.readFileOrThrow(file);
     try {
-      const { metadata, body, raw } = parseTemplateYaml(text);
+      // Lenient parse for parity with the HTTP path: tolerate unknown
+      // `template-metadata` fields (top-level and nested `install`) from a
+      // newer bundle so a listed template doesn't 503 on open.
+      const { metadata, body, raw } = parseTemplateYaml(text, { lenient: true });
       return { metadata, body, raw };
     } catch (err) {
       if (err instanceof TemplateParseError) {

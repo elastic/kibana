@@ -19,7 +19,9 @@ jest.mock('./library_fetcher');
 jest.mock('./library_bundle_reader');
 
 const MockedLibraryFetcher = LibraryFetcher as jest.MockedClass<typeof LibraryFetcher>;
-const MockedLibraryBundleReader = LibraryBundleReader as jest.MockedClass<typeof LibraryBundleReader>;
+const MockedLibraryBundleReader = LibraryBundleReader as jest.MockedClass<
+  typeof LibraryBundleReader
+>;
 
 const baseRow: Template = {
   slug: 'placeholder',
