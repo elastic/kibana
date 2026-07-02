@@ -131,10 +131,9 @@ export function ApmEmbeddableContext({
     OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
     OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
   );
-  const callApmApi = createCallApmApiV2(deps.coreStart, {
-    cpsManager: isCpsEnabled ? deps.pluginsStart.cps?.cpsManager : undefined,
-  });
-  setApmInternalServices({ callApmApi });
+  const cpsManager = isCpsEnabled ? deps.pluginsStart.cps?.cpsManager : undefined;
+  const callApmApi = createCallApmApiV2(deps.coreStart, { cpsManager });
+  setApmInternalServices({ callApmApi, cpsManager });
 
   return (
     <I18nProvider>

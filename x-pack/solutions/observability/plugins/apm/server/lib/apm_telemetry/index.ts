@@ -13,7 +13,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
-import type { APMUsage } from '@kbn/apm-types';
+import type { APMUsage } from './types';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
