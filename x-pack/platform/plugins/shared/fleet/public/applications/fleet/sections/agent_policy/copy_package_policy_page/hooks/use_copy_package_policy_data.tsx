@@ -27,7 +27,7 @@ import { agentlessPolicyToPackagePolicy } from '../../../../../../../common/serv
 export function useCopyPackagePolicyData(
   packagePolicyId: string,
   { isAgentless }: { isAgentless: boolean }
-): { item?: PackagePolicy; isLoading: boolean } {
+): { item?: PackagePolicy; isLoading: boolean; isError: boolean; error: unknown } {
   const packagePolicyQuery = useGetOnePackagePolicyQuery(packagePolicyId, {
     enabled: !isAgentless,
   });
@@ -51,8 +51,18 @@ export function useCopyPackagePolicyData(
   );
 
   if (isAgentless) {
-    return { item: agentlessPolicyQuery.data, isLoading: agentlessPolicyQuery.isLoading };
+    return {
+      item: agentlessPolicyQuery.data,
+      isLoading: agentlessPolicyQuery.isLoading,
+      isError: agentlessPolicyQuery.isError,
+      error: agentlessPolicyQuery.error,
+    };
   }
 
-  return { item: packagePolicyQuery.data?.item, isLoading: packagePolicyQuery.isLoading };
+  return {
+    item: packagePolicyQuery.data?.item,
+    isLoading: packagePolicyQuery.isLoading,
+    isError: packagePolicyQuery.isError,
+    error: packagePolicyQuery.error,
+  };
 }

@@ -79,7 +79,7 @@ describe('useCopyPackagePolicyData', () => {
     expect(useGetOnePackagePolicyQuery).toHaveBeenCalledWith('agentless-1', { enabled: false });
   });
 
-  it('returns no item and stops loading when the agentless read fails', async () => {
+  it('surfaces the error (no item, not loading) when the agentless read fails', async () => {
     jest.mocked(sendGetAgentlessPolicy).mockRejectedValue(new Error('boom'));
 
     // Use a distinct id so this doesn't hit the react-query cache from the success case above.
@@ -88,8 +88,11 @@ describe('useCopyPackagePolicyData', () => {
       useCopyPackagePolicyData('agentless-failure', { isAgentless: true })
     );
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    // The page relies on `isError` to render an error state instead of an infinite spinner.
+    await waitFor(() => expect(result.current.isError).toBe(true));
 
+    expect(result.current.isLoading).toBe(false);
     expect(result.current.item).toBeUndefined();
+    expect(result.current.error).toEqual(new Error('boom'));
   });
 });
