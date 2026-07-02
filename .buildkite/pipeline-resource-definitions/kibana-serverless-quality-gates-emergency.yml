@@ -20,6 +20,11 @@ spec:
     spec:
       repository: elastic/kibana
       pipeline_file: ./.buildkite/pipelines/quality-gates/emergency/pipeline.emergency.kibana-tests.yaml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - ./.buildkite/pipelines/quality-gates/emergency/pipeline.emergency.kibana-tests.yaml
+            cleanup_sparse_state: true
       provider_settings:
         trigger_mode: none
       teams:
