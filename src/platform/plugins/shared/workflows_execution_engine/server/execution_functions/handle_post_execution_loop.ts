@@ -10,6 +10,7 @@
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { isSyncParentInvocation, isTerminalStatus } from '@kbn/workflows';
+import { drainConcurrencyQueueSlots } from '../concurrency/concurrency_queue_drainer';
 import type { WorkflowsMeteringService } from '../metering';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { InternalResumeWorkflowExecution } from '../types';
@@ -46,6 +47,29 @@ export async function handlePostExecutionLoop({
       );
       return null;
     });
+
+  if (finalExecution && isTerminalStatus(finalExecution.status)) {
+    const concurrency = finalExecution.workflowDefinition?.settings?.concurrency;
+    const groupKey = finalExecution.concurrencyGroupKey;
+    if (concurrency?.strategy === 'queue' && groupKey && workflowTaskManager) {
+      try {
+        await drainConcurrencyQueueSlots({
+          workflowExecutionRepository,
+          workflowTaskManager,
+          logger,
+          spaceId,
+          concurrencyGroupKey: groupKey,
+          concurrencySettings: concurrency,
+        });
+      } catch (drainErr) {
+        logger.debug(
+          `Concurrency queue drain after terminal failed for execution ${workflowRunId}: ${
+            drainErr instanceof Error ? drainErr.message : String(drainErr)
+          }`
+        );
+      }
+    }
+  }
 
   if (
     internalResumeWorkflowExecution &&
