@@ -58,6 +58,7 @@ export const ExecutionHistorySearchBar = ({
 }: ExecutionHistorySearchBarProps) => {
   const [searchInput, setSearchInput] = useState('');
   const [ruleSearchInput, setRuleSearchInput] = useState('');
+  const [debouncedRuleSearch, setDebouncedRuleSearch] = useState('');
 
   useDebounce(
     () => {
@@ -67,10 +68,18 @@ export const ExecutionHistorySearchBar = ({
     [onSearchChange, searchInput]
   );
 
+  useDebounce(
+    () => {
+      setDebouncedRuleSearch(ruleSearchInput);
+    },
+    SEARCH_DEBOUNCE_MS,
+    [ruleSearchInput]
+  );
+
   const { data: rulesData, isFetching: isFetchingRules } = useFetchRules({
     page: 1,
     perPage: RULE_FILTER_MAX_RESULTS,
-    search: ruleSearchInput.trim() || undefined,
+    search: debouncedRuleSearch.trim() || undefined,
   });
 
   const ruleOptions = (rulesData?.items ?? []).map((r) => ({
