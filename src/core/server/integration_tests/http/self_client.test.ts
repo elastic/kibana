@@ -26,7 +26,11 @@ import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { createConfigService } from '@kbn/core-http-server-mocks';
-import type { HttpService, InternalHttpServiceStart } from '@kbn/core-http-server-internal';
+import type {
+  HttpConfigType,
+  HttpService,
+  InternalHttpServiceStart,
+} from '@kbn/core-http-server-internal';
 import { createInternalHttpService } from '../utilities';
 
 interface DepthResponse {
@@ -51,11 +55,120 @@ const originalHeaders = global.Headers;
 const originalRequest = global.Request;
 const originalResponse = global.Response;
 
-describe('Http self client', () => {
-  let server: HttpService;
-  let httpStart: InternalHttpServiceStart;
-  let supertest: Supertest.Agent;
+const startServer = async (
+  serverConfig: Partial<HttpConfigType> = { port: TEST_PORT }
+): Promise<{
+  server: HttpService;
+  httpStart: InternalHttpServiceStart;
+  supertest: Supertest.Agent;
+}> => {
+  const server = createInternalHttpService({
+    logger: loggingSystemMock.create(),
+    configService: createConfigService({
+      server: serverConfig,
+    }),
+  });
+  await server.preboot({
+    context: contextServiceMock.createPrebootContract(),
+    docLinks: docLinksServiceMock.createSetupContract(),
+  });
 
+  const { server: innerServer, createRouter } = await server.setup(setupDeps);
+  const router = createRouter('/');
+  const supertest = Supertest(innerServer.listener);
+  const started = { httpStart: null as InternalHttpServiceStart | null };
+
+  router.get(
+    {
+      path: '/self/path_safety',
+      security: routeSecurity,
+      validate: false,
+    },
+    async (context, req, res) => {
+      try {
+        await started.httpStart!.self.asScoped(req).fetch('/\\evil.com/steal');
+      } catch (error) {
+        return res.ok({ body: { error: (error as Error).message } });
+      }
+
+      return res.ok({ body: { error: null } });
+    }
+  );
+
+  router.get(
+    {
+      path: '/self/depth/{remaining}',
+      security: routeSecurity,
+      validate: {
+        params: schema.object({
+          remaining: schema.number({ min: 0 }),
+        }),
+      },
+    },
+    async (context, req, res) => {
+      if (req.params.remaining === 0) {
+        return res.ok({
+          body: { depth: req.headers['x-kbn-self-call-depth'] },
+        });
+      }
+
+      try {
+        const body = await started
+          .httpStart!.asScoped(req)
+          .fetch<DepthResponse>(`/self/depth/${req.params.remaining - 1}`);
+
+        return res.ok({ body });
+      } catch (error) {
+        return res.ok({ body: { error: (error as Error).message } });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/self/target_url',
+      security: routeSecurity,
+      validate: false,
+    },
+    (_context, req, res) => {
+      return res.ok({
+        body: {
+          url: req.url.href,
+          host: req.headers.host,
+        },
+      });
+    }
+  );
+
+  router.get(
+    {
+      path: '/self/resolve_target',
+      security: routeSecurity,
+      validate: false,
+    },
+    async (context, req, res) => {
+      try {
+        const response = await started
+          .httpStart!.asScoped(req)
+          .fetch<{ url: string; host?: string }>('/self/target_url', { asResponse: true });
+
+        return res.ok({
+          body: {
+            url: response.request.url,
+          },
+        });
+      } catch (error) {
+        return res.ok({ body: { error: (error as Error).message } });
+      }
+    }
+  );
+
+  started.httpStart = await server.start();
+
+  return { server, httpStart: started.httpStart, supertest };
+};
+
+describe('Http self client', () => {
   beforeAll(() => {
     global.fetch = nodeFetch as unknown as typeof global.fetch;
     global.Headers = NodeFetchHeaders as unknown as typeof global.Headers;
@@ -70,92 +183,82 @@ describe('Http self client', () => {
     global.Response = originalResponse;
   });
 
-  beforeEach(async () => {
-    server = createInternalHttpService({
-      logger: loggingSystemMock.create(),
-      configService: createConfigService({
-        server: { port: TEST_PORT },
-      }),
-    });
-    await server.preboot({
-      context: contextServiceMock.createPrebootContract(),
-      docLinks: docLinksServiceMock.createSetupContract(),
+  describe('path safety and depth limits', () => {
+    let server: HttpService;
+    let supertest: Supertest.Agent;
+
+    beforeEach(async () => {
+      ({ server, supertest } = await startServer());
     });
 
-    const { server: innerServer, createRouter } = await server.setup(setupDeps);
-    const router = createRouter('/');
-    supertest = Supertest(innerServer.listener);
+    afterEach(async () => {
+      await server.stop();
+      http.globalAgent.destroy();
+      https.globalAgent.destroy();
+    });
 
-    router.get(
-      {
-        path: '/self/path_safety',
-        security: routeSecurity,
-        validate: false,
-      },
-      async (context, req, res) => {
-        try {
-          await httpStart.self.asScoped(req).fetch('/\\evil.com/steal');
-        } catch (error) {
-          return res.ok({ body: { error: (error as Error).message } });
-        }
+    it('rejects authority-like backslash paths before making a self call', async () => {
+      const response = await supertest.get('/self/path_safety').expect(200);
 
-        return res.ok({ body: { error: null } });
-      }
-    );
+      expect(response.body.error).toContain('Invalid self HTTP path "/\\evil.com/steal"');
+    });
 
-    router.get(
-      {
-        path: '/self/depth/{remaining}',
-        security: routeSecurity,
-        validate: {
-          params: schema.object({
-            remaining: schema.number({ min: 0 }),
-          }),
-        },
-      },
-      async (context, req, res) => {
-        if (req.params.remaining === 0) {
-          return res.ok({
-            body: { depth: req.headers['x-kbn-self-call-depth'] },
-          });
-        }
+    it('increments self-call depth across recursive self requests', async () => {
+      const response = await supertest.get('/self/depth/3').expect(200);
 
-        try {
-          const body = await httpStart.self
-            .asScoped(req)
-            .fetch<DepthResponse>(`/self/depth/${req.params.remaining - 1}`);
+      expect(response.body).toEqual({ depth: '3' });
+    });
 
-          return res.ok({ body });
-        } catch (error) {
-          return res.ok({ body: { error: (error as Error).message } });
-        }
-      }
-    );
+    it('rejects recursive self requests after the depth limit is reached', async () => {
+      const response = await supertest.get('/self/depth/5').expect(200);
 
-    httpStart = await server.start();
+      expect(response.body.error).toContain('maximum depth 4 was reached');
+    });
   });
 
-  afterEach(async () => {
-    await server.stop();
-    http.globalAgent.destroy();
-    https.globalAgent.destroy();
-  });
+  describe('selfHttp target resolution', () => {
+    let server: HttpService;
+    let supertest: Supertest.Agent;
 
-  it('rejects authority-like backslash paths before making a self call', async () => {
-    const response = await supertest.get('/self/path_safety').expect(200);
+    afterEach(async () => {
+      await server.stop();
+      http.globalAgent.destroy();
+      https.globalAgent.destroy();
+    });
 
-    expect(response.body.error).toContain('Invalid self HTTP path "/\\evil.com/steal"');
-  });
+    it('uses publicBaseUrl when target is auto and publicBaseUrl is configured', async () => {
+      ({ server, supertest } = await startServer({
+        port: TEST_PORT,
+        publicBaseUrl: `http://localhost:${TEST_PORT}`,
+        selfHttp: { target: 'auto' },
+      }));
 
-  it('increments self-call depth across recursive self requests', async () => {
-    const response = await supertest.get('/self/depth/3').expect(200);
+      const response = await supertest.get('/self/resolve_target').expect(200);
 
-    expect(response.body).toEqual({ depth: '3' });
-  });
+      expect(response.body.url).toBe(`http://localhost:${TEST_PORT}/self/target_url`);
+    });
 
-  it('rejects recursive self requests after the depth limit is reached', async () => {
-    const response = await supertest.get('/self/depth/5').expect(200);
+    it('uses local server info when target is auto and publicBaseUrl is absent', async () => {
+      ({ server, supertest } = await startServer({
+        port: TEST_PORT,
+        selfHttp: { target: 'auto' },
+      }));
 
-    expect(response.body.error).toContain('maximum depth 4 was reached');
+      const response = await supertest.get('/self/resolve_target').expect(200);
+
+      expect(response.body.url).toBe(`http://localhost:${TEST_PORT}/self/target_url`);
+    });
+
+    it('ignores publicBaseUrl when target is local', async () => {
+      ({ server, supertest } = await startServer({
+        port: TEST_PORT,
+        publicBaseUrl: 'http://external.example',
+        selfHttp: { target: 'local' },
+      }));
+
+      const response = await supertest.get('/self/resolve_target').expect(200);
+
+      expect(response.body.url).toBe(`http://localhost:${TEST_PORT}/self/target_url`);
+    });
   });
 });

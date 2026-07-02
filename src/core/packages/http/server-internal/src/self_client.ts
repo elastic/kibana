@@ -31,6 +31,18 @@ const SELF_CALL_HEADER = 'x-kbn-self-call';
 const SELF_CALL_DEPTH_HEADER = 'x-kbn-self-call-depth';
 const KIBANA_VERSION_HEADER = 'kbn-version';
 
+const FORWARDED_REQUEST_HEADER_NAMES = new Set([
+  'accept',
+  'accept-encoding',
+  'accept-language',
+  'content-type',
+  'origin',
+  'referer',
+  'user-agent',
+  'x-elastic-product-origin',
+  'x-kbn-context',
+]);
+
 interface HttpSelfClientParams {
   readonly basePath: IBasePath;
   readonly authRequestHeaders: IAuthHeadersStorage;
@@ -156,6 +168,9 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     const headers = new Headers();
 
     addHeaders(headers, this.params.authRequestHeaders.get(this.request));
+    if (options.forwardRequestHeaders) {
+      addHeaders(headers, getForwardedRequestHeaders(this.request));
+    }
     addHeaders(headers, options.headers);
 
     headers.set(KIBANA_VERSION_HEADER, this.params.kibanaVersion);
@@ -258,6 +273,22 @@ const parseDepth = (value: string | string[] | undefined): number => {
   const rawValue = Array.isArray(value) ? value[0] : value;
   const depth = Number(rawValue ?? 0);
   return Number.isFinite(depth) && depth > 0 ? Math.floor(depth) : 0;
+};
+
+const isForwardableRequestHeader = (name: string): boolean => {
+  const normalizedName = name.toLowerCase();
+  return (
+    !isProtectedHeader(normalizedName) &&
+    (FORWARDED_REQUEST_HEADER_NAMES.has(normalizedName) || normalizedName.startsWith('sec-'))
+  );
+};
+
+const getForwardedRequestHeaders = (request: KibanaRequest): HttpSelfFetchHeaders => {
+  return Object.fromEntries(
+    Object.entries(request.headers).filter(
+      ([name, value]) => value !== undefined && isForwardableRequestHeader(name)
+    )
+  ) as HttpSelfFetchHeaders;
 };
 
 const isProtectedHeader = (name: string) => {

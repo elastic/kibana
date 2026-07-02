@@ -65,6 +65,11 @@ export interface HttpSelfFetchOptions<TRequestBody = unknown> {
   body?: TRequestBody | string | null;
   /** Non-auth, non-Core-owned headers to send with the request. */
   headers?: HttpSelfFetchHeaders;
+  /**
+   * When `true`, forwards a Core-owned allowlist of safe headers from the incoming
+   * request. Protected routing, auth, and Core-owned headers are never forwarded.
+   */
+  forwardRequestHeaders?: boolean;
   /** API version string used to populate the `elastic-api-version` header. */
   version?: ApiVersion;
   /** Abort signal for cancelling the outbound request. */

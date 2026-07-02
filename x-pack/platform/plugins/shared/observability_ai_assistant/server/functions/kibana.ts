@@ -5,34 +5,9 @@
  * 2.0.
  */
 
-import type { HttpSelfFetchHeaders, HttpSelfFetchQuery, KibanaRequest } from '@kbn/core/server';
+import type { HttpSelfFetchQuery, KibanaRequest } from '@kbn/core/server';
 import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
-
-const forwardedHeaderNames = new Set([
-  'accept',
-  'accept-encoding',
-  'accept-language',
-  'content-type',
-  'origin',
-  'referer',
-  'user-agent',
-  'x-elastic-product-origin',
-  'x-kbn-context',
-]);
-
-const isForwardedHeader = (name: string): boolean => {
-  const normalizedName = name.toLowerCase();
-  return forwardedHeaderNames.has(normalizedName) || normalizedName.startsWith('sec-');
-};
-
-const getForwardedHeaders = (request: KibanaRequest): HttpSelfFetchHeaders => {
-  return Object.fromEntries(
-    Object.entries(request.headers).filter(([name, value]) => {
-      return value !== undefined && isForwardedHeader(name);
-    })
-  ) as HttpSelfFetchHeaders;
-};
 
 const getAccess = (pathname: string): 'public' | 'internal' => {
   return pathname === '/internal' || pathname.startsWith('/internal/') ? 'internal' : 'public';
@@ -88,7 +63,7 @@ export function registerKibanaFunction({
         query: query as HttpSelfFetchQuery | undefined,
         body,
         signal,
-        headers: getForwardedHeaders(request),
+        forwardRequestHeaders: true,
         access: getAccess(pathname),
         asResponse: true,
       } as const;

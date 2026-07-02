@@ -89,10 +89,7 @@ describe('kibana tool', () => {
       query: { type: 'dashboard' },
       body: { foo: 'bar' },
       signal,
-      headers: {
-        'content-type': 'application/json',
-        origin: 'https://attacker.example',
-      },
+      forwardRequestHeaders: true,
       access: 'public',
       asResponse: true,
     });
@@ -138,7 +135,7 @@ describe('kibana tool', () => {
     );
   });
 
-  it('forwards safe request headers without protected routing or auth headers', async () => {
+  it('opts into Core safe request header forwarding for self calls', async () => {
     const { handler, fetch } = registerFunction({
       headers: {
         accept: 'application/json',
@@ -166,15 +163,7 @@ describe('kibana tool', () => {
     expect(fetch).toHaveBeenCalledWith(
       '/api/status',
       expect.objectContaining({
-        headers: {
-          accept: 'application/json',
-          'accept-language': 'en-US',
-          origin: 'https://origin.example',
-          referer: 'https://origin.example/app/home',
-          'sec-fetch-site': 'same-origin',
-          'x-elastic-product-origin': 'observability',
-          'x-kbn-context': '%7B%7D',
-        },
+        forwardRequestHeaders: true,
       })
     );
   });

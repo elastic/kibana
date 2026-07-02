@@ -182,4 +182,37 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(result.response).toBeInstanceOf(Response);
     expect(result.request).toBeInstanceOf(Request);
   });
+
+  it('forwards safe request headers when forwardRequestHeaders is enabled', async () => {
+    const { self } = createClient();
+    const request = createRequest({
+      headers: {
+        accept: 'application/json',
+        authorization: 'Bearer attacker',
+        cookie: 'sid=attacker',
+        host: 'attacker.example',
+        origin: 'https://origin.example',
+        referer: 'https://origin.example/app/home',
+        'sec-fetch-site': 'same-origin',
+        'x-elastic-internal-origin': 'attacker',
+        'x-elastic-product-origin': 'observability',
+        'x-kbn-context': '%7B%7D',
+      },
+    });
+
+    await self.asScoped(request).fetch('/api/status', { forwardRequestHeaders: true });
+
+    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(outboundRequest.headers.get('accept')).toBe('application/json');
+    expect(outboundRequest.headers.get('origin')).toBe('https://origin.example');
+    expect(outboundRequest.headers.get('referer')).toBe('https://origin.example/app/home');
+    expect(outboundRequest.headers.get('sec-fetch-site')).toBe('same-origin');
+    expect(outboundRequest.headers.get('x-elastic-product-origin')).toBe('observability');
+    expect(outboundRequest.headers.get('x-kbn-context')).toBe('%7B%7D');
+    expect(outboundRequest.headers.get('authorization')).toBe('Bearer scoped');
+    expect(outboundRequest.headers.get('cookie')).toBeNull();
+    expect(outboundRequest.headers.get('host')).toBeNull();
+    expect(outboundRequest.headers.get('x-elastic-internal-origin')).toBeNull();
+    expect(outboundRequest.headers.get('user-agent')).toBe('KibanaSelfHttpClient/9.9.9');
+  });
 });
