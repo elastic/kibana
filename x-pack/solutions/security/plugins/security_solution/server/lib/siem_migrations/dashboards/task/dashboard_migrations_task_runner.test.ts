@@ -41,7 +41,7 @@ describe('DashboardMigrationTaskRunner', () => {
   });
 
   describe('prepareTaskInput', () => {
-    it('enriches relevant lookup resources with runtime mapping fields', async () => {
+    it('should enrich relevant lookup resources with runtime mapping fields', async () => {
       const getMapping = jest.fn().mockResolvedValue({
         lookup_default_panel_lookup: {
           mappings: {

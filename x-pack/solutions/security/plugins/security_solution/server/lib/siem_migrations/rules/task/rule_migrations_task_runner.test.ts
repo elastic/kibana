@@ -111,7 +111,7 @@ describe('RuleMigrationTaskRunner', () => {
   });
 
   describe('prepareTaskInput', () => {
-    it('enriches relevant lookup resources with runtime mapping fields', async () => {
+    it('should enrich relevant lookup resources with runtime mapping fields', async () => {
       const migrationRule = {
         id: 'rule-1',
         original_rule: { vendor: 'splunk' },
@@ -159,7 +159,7 @@ describe('RuleMigrationTaskRunner', () => {
       expect(mockGetResources).toHaveBeenCalledWith(migrationRule.original_rule);
     });
 
-    it('does not fetch resources for unsupported vendors', async () => {
+    it('should not fetch resources for unsupported vendors', async () => {
       const migrationRule = {
         id: 'rule-1',
         original_rule: { vendor: 'elastic' },

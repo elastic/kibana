@@ -25,7 +25,7 @@ describe('lookup resource mappings', () => {
   });
 
   describe('getRuntimeMappingFields', () => {
-    it('returns sorted runtime mapping fields', () => {
+    it('should return sorted runtime mapping fields', () => {
       expect(
         getRuntimeMappingFields({
           runtime: {
@@ -39,7 +39,7 @@ describe('lookup resource mappings', () => {
       ]);
     });
 
-    it('flattens composite runtime fields', () => {
+    it('should flatten composite runtime fields', () => {
       expect(
         getRuntimeMappingFields({
           runtime: {
@@ -60,7 +60,7 @@ describe('lookup resource mappings', () => {
   });
 
   describe('enrichLookupResourcesWithMappings', () => {
-    it('adds runtime fields to lookup resources by lookup index name', async () => {
+    it('should add runtime fields to lookup resources by lookup index name', async () => {
       const resources: MigrationResources = {
         lookup: [
           { type: 'lookup', name: 'threat_intel_ip', content: 'lookup_default_threat_intel_ip' },
@@ -113,7 +113,7 @@ describe('lookup resource mappings', () => {
       });
     });
 
-    it('skips lookups with empty content and leaves missing mappings unchanged', async () => {
+    it('should skip lookups with empty content and leave missing mappings unchanged', async () => {
       const resources: MigrationResources = {
         lookup: [
           { type: 'lookup', name: 'empty_lookup', content: '' },
@@ -127,7 +127,7 @@ describe('lookup resource mappings', () => {
       ).resolves.toEqual(resources);
     });
 
-    it('returns original resources when mapping lookup fails', async () => {
+    it('should return original resources when mapping lookup fails', async () => {
       const resources: MigrationResources = {
         lookup: [{ type: 'lookup', name: 'threat_intel_ip', content: 'lookup_default_threat' }],
       };
