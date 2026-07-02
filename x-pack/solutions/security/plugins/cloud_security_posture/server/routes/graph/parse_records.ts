@@ -1154,7 +1154,6 @@ interface RelationshipGroup {
   actorEntityType: string | null | undefined;
   actorEntitySubType: string | null | undefined;
   actorEntityName: string | string[] | null | undefined;
-  actorHostIps: Set<string>;
   actorsDocData: Set<string>;
   relationship: string;
   targetType: string | null;
@@ -1260,7 +1259,6 @@ export const regroupRelationships = (
             actorEntityType: record.actorEntityType,
             actorEntitySubType: record.actorEntitySubType,
             actorEntityName: record.actorEntityName,
-            actorHostIps: new Set(),
             actorsDocData: new Set(),
             relationship: record.relationship,
             targetType: targetEntry.type,
@@ -1287,7 +1285,6 @@ export const regroupRelationships = (
           filterDocDataToIds(record.targetDocData, new Set(targetEntry.ids)),
           { dropEmpty: true }
         );
-        addValuesToSet(group.actorHostIps, record.actorHostIps, { dropEmpty: false });
       }
     }
   }
@@ -1310,14 +1307,18 @@ export const regroupRelationships = (
     const targetHostIps = [
       ...new Set(targetIds.flatMap((id) => enrichmentMap.get(id)?.hostIps ?? [])),
     ];
-    const actorHostIps = [...group.actorHostIps];
 
-    // Resolve the actor name per actor from the entity store rather than from the row-level
-    // MV_FIRST(actorEntityName): when a STATS row merges several same-type actors, MV_FIRST picks
-    // only one actor's name, which would mislabel the other actors' nodes after partitioning.
+    // Resolve actor name and host IPs per actor from the entity store rather than from the
+    // row-level MV_FIRST(actorEntityName) / VALUES(actorHostIps): when a STATS row merges several
+    // same-type actors, those row-level values cover ALL merged actors, which would mislabel /
+    // leak IPs across the nodes produced when the row is partitioned by target set. Resolving
+    // per-actor keeps each node scoped to its own actors (consistent with targetHostIps).
     const actorNames = actorIds
       .map((id) => enrichmentMap.get(id)?.name)
       .filter((n): n is string => n != null);
+    const actorHostIps = [
+      ...new Set(actorIds.flatMap((id) => enrichmentMap.get(id)?.hostIps ?? [])),
+    ];
 
     // relationshipNodeId drives rel(...) node ID in parse_records.ts.
     // Single actor: "entity.id-relationship" (unchanged format, no test regression).

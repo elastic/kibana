@@ -1610,7 +1610,6 @@
         }
       },
       "user": { "name": "platform-admin-role", "id": "platform-admin-role" },
-      "host": { "ip": ["10.0.3.1"] },
       "event": { "ingested": "2024-09-01T12:00:00.000Z" }
     }
   }
@@ -1637,7 +1636,6 @@
         }
       },
       "user": { "name": "security-admin-group", "id": "security-admin-group" },
-      "host": { "ip": ["10.0.3.2"] },
       "event": { "ingested": "2024-09-01T12:00:00.000Z" }
     }
   }
@@ -1659,7 +1657,6 @@
         "type": "User"
       },
       "user": { "name": "app-team-lead", "id": "app-team-lead" },
-      "host": { "ip": ["10.0.3.3"] },
       "event": { "ingested": "2024-09-01T12:00:00.000Z" }
     }
   }
@@ -1681,7 +1678,6 @@
         "type": "User"
       },
       "user": { "name": "db-team-lead", "id": "db-team-lead" },
-      "host": { "ip": ["10.0.3.4"] },
       "event": { "ingested": "2024-09-01T12:00:00.000Z" }
     }
   }

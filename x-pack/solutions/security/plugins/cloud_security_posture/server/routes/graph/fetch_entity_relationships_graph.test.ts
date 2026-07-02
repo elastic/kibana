@@ -479,11 +479,23 @@ describe('regroupRelationships', () => {
     const enrichmentMap = new Map<string, EntityEnrichmentFields>([
       [
         'svc:a',
-        { type: 'Service', subType: 'lambda', name: 'Svc A', engineType: 'ecs', hostIps: [] },
+        {
+          type: 'Service',
+          subType: 'lambda',
+          name: 'Svc A',
+          engineType: 'ecs',
+          hostIps: ['10.0.0.1'],
+        },
       ],
       [
         'svc:b',
-        { type: 'Service', subType: 'lambda', name: 'Svc B', engineType: 'ecs', hostIps: [] },
+        {
+          type: 'Service',
+          subType: 'lambda',
+          name: 'Svc B',
+          engineType: 'ecs',
+          hostIps: ['10.0.0.2'],
+        },
       ],
       ['host:x', { type: 'Host', subType: 'ec2', name: 'X', engineType: 'ecs', hostIps: [] }],
       ['host:y', { type: 'Host', subType: 'ec2', name: 'Y', engineType: 'ecs', hostIps: [] }],
@@ -495,7 +507,9 @@ describe('regroupRelationships', () => {
       // MV_FIRST would pick only 'Svc A' for the whole row; each split node must still get its own
       // enriched name rather than inheriting this single value.
       actorEntityName: 'Svc A',
-      actorHostIps: null,
+      // Row-level VALUES(actorHostIps) covers both actors; each split node must resolve only its
+      // own IPs from enrichment rather than inheriting this union.
+      actorHostIps: ['10.0.0.1', '10.0.0.2'],
       actorDocData: ['{"id":"svc:a"}', '{"id":"svc:b"}'],
       relationship: 'communicates_with',
       targetIds: ['host:x', 'host:y'],
@@ -512,11 +526,13 @@ describe('regroupRelationships', () => {
     const byActor = new Map(result.map((g) => [g.actorIds.sort().join(','), g]));
     expect(byActor.get('svc:a')!.targetIds).toEqual(['host:x']);
     expect(byActor.get('svc:a')!.relationshipNodeId).toBe('svc:a-communicates_with');
-    // Each split node keeps its OWN name (not the row-level MV_FIRST name).
+    // Each split node keeps its OWN name and host IPs (not the row-level MV_FIRST/VALUES union).
     expect(byActor.get('svc:a')!.actorEntityName).toBe('Svc A');
+    expect(byActor.get('svc:a')!.actorHostIps).toEqual(['10.0.0.1']);
     expect(byActor.get('svc:b')!.targetIds).toEqual(['host:y']);
     expect(byActor.get('svc:b')!.relationshipNodeId).toBe('svc:b-communicates_with');
     expect(byActor.get('svc:b')!.actorEntityName).toBe('Svc B');
+    expect(byActor.get('svc:b')!.actorHostIps).toEqual(['10.0.0.2']);
   });
 
   it('empty-string actorDocData and targetDocData are not added to the doc-data sets', () => {
