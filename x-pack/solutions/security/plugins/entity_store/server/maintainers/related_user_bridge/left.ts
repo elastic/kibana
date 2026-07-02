@@ -54,7 +54,7 @@ const buildIdentityPrefilter = (seed: SeedEntity): object[] => {
   const source = seed.source;
   const should: object[] = [];
 
-  for (const field of ['user.id', 'user.email', 'user.name', 'user.domain']) {
+  for (const field of ['user.id', 'user.email', 'user.name']) {
     const values = getFieldStringValues(source, field);
     if (values.length > 0) {
       should.push({ terms: { [field]: values } });
