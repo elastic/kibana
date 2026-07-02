@@ -92,6 +92,7 @@ import {
 } from './canvas/constants';
 import type { DestinationNodeData, PipelineNodeData, SourceNodeData } from './canvas/types';
 import {
+  AttachedRoutingFlyoutContext,
   DestinationFlyoutContext,
   EdgeHopsContext,
   EdgeRoutingFlyoutContext,
@@ -247,6 +248,10 @@ function StreamsCanvasInner() {
   // preloaded with that pipeline (rather than the pipeline picker); null = closed.
   const [pipelineNodeName, setPipelineNodeName] = useState<string | null>(null);
   const [routingNodeFlyoutOpen, setRoutingNodeFlyoutOpen] = useState(false);
+  // Clicking the attached-routing tab on an already-configured destination
+  // opens the opinionated routing flyout on its applied summary (view/edit the
+  // existing condition), distinct from the destination flyout its body opens.
+  const [attachedRoutingFlyoutOpen, setAttachedRoutingFlyoutOpen] = useState(false);
   // "Opinionated routing": the destination node whose "Add routing with
   // inheritance" context-menu action opened the routing flyout; null = closed.
   const [inheritanceRoutingNodeId, setInheritanceRoutingNodeId] = useState<string | null>(null);
@@ -278,6 +283,10 @@ function StreamsCanvasInner() {
 
   const openSourceFlyout = useCallback((sourceName: string) => {
     setFlyoutSource(sourceName);
+  }, []);
+
+  const openAttachedRoutingFlyout = useCallback(() => {
+    setAttachedRoutingFlyoutOpen(true);
   }, []);
 
   // Undo / redo (see useCanvasHistory). recordHistory() is called at the start
@@ -1197,7 +1206,8 @@ function StreamsCanvasInner() {
 
   return (
     <DestinationFlyoutContext.Provider value={openDestinationFlyout}>
-      <SourceFlyoutContext.Provider value={openSourceFlyout}>
+      <AttachedRoutingFlyoutContext.Provider value={openAttachedRoutingFlyout}>
+        <SourceFlyoutContext.Provider value={openSourceFlyout}>
         <PipelineFlyoutContext.Provider value={openPipelineFlyout}>
           <EdgeRoutingFlyoutContext.Provider value={openEdgeRoutingFlyout}>
             <EdgeSegmentsContext.Provider value={segmentRegistry}>
@@ -1466,6 +1476,14 @@ function StreamsCanvasInner() {
                     onApply={() => setRoutingNodeFlyoutOpen(false)}
                   />
                 ) : null}
+                {attachedRoutingFlyoutOpen ? (
+                  <CreateRoutingFlyout
+                    opinionated
+                    initialStep="applied"
+                    onClose={() => setAttachedRoutingFlyoutOpen(false)}
+                    onApply={() => setAttachedRoutingFlyoutOpen(false)}
+                  />
+                ) : null}
                 {inheritanceRoutingNodeId !== null ? (
                   <CreateRoutingFlyout
                     opinionated
@@ -1477,7 +1495,8 @@ function StreamsCanvasInner() {
             </EdgeSegmentsContext.Provider>
           </EdgeRoutingFlyoutContext.Provider>
         </PipelineFlyoutContext.Provider>
-      </SourceFlyoutContext.Provider>
+        </SourceFlyoutContext.Provider>
+      </AttachedRoutingFlyoutContext.Provider>
     </DestinationFlyoutContext.Provider>
   );
 }

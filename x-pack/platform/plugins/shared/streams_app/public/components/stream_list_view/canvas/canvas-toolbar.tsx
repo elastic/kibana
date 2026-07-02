@@ -9,17 +9,14 @@
 // Source/Destination palette (drag or click-to-place), and the "..." overflow
 // menu holding Cleanup.
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
-  EuiPopover,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -103,7 +100,6 @@ export interface CanvasControlsProps {
 export function CanvasControls({
   placementType,
   onActivatePlacement,
-  onCleanup,
   canvasMode,
   onChangeMode,
   onUndo,
@@ -112,9 +108,6 @@ export function CanvasControls({
   canRedo,
 }: CanvasControlsProps) {
   const { euiTheme } = useEuiTheme();
-  // Overflow ("...") menu anchored at the end of the toolbar, holding lower-use
-  // canvas actions like Cleanup (auto-layout).
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toolButton = (
     iconType: IconType,
@@ -223,44 +216,6 @@ export function CanvasControls({
           />
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>{verticalRule}</EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            isOpen={isMenuOpen}
-            closePopover={() => setIsMenuOpen(false)}
-            anchorPosition="upRight"
-            panelPaddingSize="none"
-            button={
-              <EuiButtonIcon
-                iconType="boxesVertical"
-                color="text"
-                size="s"
-                aria-label={i18n.translate('xpack.streams.streamsCanvas.moreActions', {
-                  defaultMessage: 'More canvas actions',
-                })}
-                onClick={() => setIsMenuOpen((open) => !open)}
-              />
-            }
-          >
-            <EuiContextMenuPanel
-              items={[
-                <EuiContextMenuItem
-                  key="cleanup"
-                  icon="sparkles"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    onCleanup();
-                  }}
-                >
-                  {i18n.translate('xpack.streams.streamsCanvas.cleanup', {
-                    defaultMessage: 'Cleanup',
-                  })}
-                </EuiContextMenuItem>,
-              ]}
-            />
-          </EuiPopover>
-        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );

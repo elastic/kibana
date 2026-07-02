@@ -215,12 +215,6 @@ const TABS = [
     }),
   },
   {
-    id: 'routing',
-    label: i18n.translate('xpack.streams.destinationFlyout.tab.routing', {
-      defaultMessage: 'Routing',
-    }),
-  },
-  {
     id: 'attachments',
     label: i18n.translate('xpack.streams.destinationFlyout.tab.attachments', {
       defaultMessage: 'Attachments',

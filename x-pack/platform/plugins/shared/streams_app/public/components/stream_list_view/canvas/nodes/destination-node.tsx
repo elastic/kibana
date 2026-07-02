@@ -10,7 +10,7 @@
 // card-within-a-card) and is fully draggable; clicking is handled at the canvas
 // level (onNodeClick).
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useContext, useState } from 'react';
 import { Handle, Position, useNodeConnections, useReactFlow, type NodeProps } from '@xyflow/react';
 import {
   EuiBadge,
@@ -42,6 +42,7 @@ import {
   configuredDestinationData,
   unconfiguredDestinationData,
 } from '../node-data';
+import { AttachedRoutingFlyoutContext } from '../contexts';
 
 function DestinationTitle({ title, icon }: { title: string; icon: string }) {
   const { euiTheme } = useEuiTheme();
@@ -343,6 +344,7 @@ function ConfiguredDestinationContents({
 }) {
   const { euiTheme } = useEuiTheme();
   const raiseOnHoverClassName = useRaiseOnHoverClassName();
+  const openAttachedRoutingFlyout = useContext(AttachedRoutingFlyoutContext);
 
   if (data.attachedRouting) {
     return (
@@ -358,7 +360,24 @@ function ConfiguredDestinationContents({
           border-radius: ${euiTheme.border.radius.medium};
         `} ${raiseOnHoverClassName}`}
       >
+        {/*
+          The routing tab (branch glyph) opens the opinionated routing flyout on
+          its applied summary — the last screen of the create-with-inheritance
+          flow — rather than the destination flyout. Stop propagation so the
+          canvas-level onNodeClick (which opens the destination flyout for the
+          body) doesn't also fire. The card stays draggable: drag runs off
+          mousedown, this only intercepts the click.
+        */}
         <div
+          role="button"
+          tabIndex={0}
+          aria-label={i18n.translate('xpack.streams.streamsCanvas.openAttachedRouting', {
+            defaultMessage: 'Open routing conditions',
+          })}
+          onClick={(event) => {
+            event.stopPropagation();
+            openAttachedRoutingFlyout();
+          }}
           className={css`
             display: flex;
             align-items: center;
@@ -366,6 +385,7 @@ function ConfiguredDestinationContents({
             padding: 0 ${euiTheme.size.base};
             background-color: ${euiTheme.colors.backgroundBaseSubdued};
             border-right: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+            cursor: pointer;
 
             .euiIcon {
               transform: rotate(90deg);

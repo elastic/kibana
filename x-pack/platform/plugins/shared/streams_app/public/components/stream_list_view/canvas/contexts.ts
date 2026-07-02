@@ -20,6 +20,11 @@ export const PipelineFlyoutContext = createContext<(edgeId: string) => void>(noo
 // "Add step" menu. Applying it splices a routing node into that edge (mirroring
 // the pipeline-on-edge flow).
 export const EdgeRoutingFlyoutContext = createContext<(edgeId: string) => void>(noop);
+// Opens the opinionated "routing with inheritance" flyout for an EXISTING
+// attached-routing tab on a destination node, showing the applied condition
+// (the last screen of the create flow). Clicking the tab glyph on a destination
+// that carries an attached route triggers this.
+export const AttachedRoutingFlyoutContext = createContext<() => void>(noop);
 
 // Per-edge "bridge" hop points (where this edge's horizontal run crosses another
 // edge's vertical run). Computed centrally so each edge can draw arcs over the
