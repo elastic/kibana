@@ -146,22 +146,20 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
   });
 
   it('maps successfulIds to result items with rule_id and version', async () => {
-    const preAssignedId = 'test-uuid-123';
-    (uuidv4 as jest.Mock).mockReturnValueOnce(preAssignedId);
-
     const params = { ...getCreateRulesSchemaMock(), version: 3, rule_id: 'my-rule' };
 
-    rulesClient.bulkCreateRules.mockResolvedValue({
-      successfulIds: [preAssignedId],
+    rulesClient.bulkCreateRules.mockImplementation(async ({ rules: inputRules }) => ({
+      successfulIds: inputRules.map((r) => r.options.id),
       errors: [],
-      total: 1,
-    });
+      total: inputRules.length,
+    }));
 
     const result = await detectionRulesClient.bulkCreatePrebuiltRules({ rules: [params] });
 
+    const passedId = rulesClient.bulkCreateRules.mock.calls[0][0].rules[0].options.id;
     expect(result.results).toEqual([
       {
-        id: preAssignedId,
+        id: passedId,
         rule_id: 'my-rule',
         version: 3,
       },
