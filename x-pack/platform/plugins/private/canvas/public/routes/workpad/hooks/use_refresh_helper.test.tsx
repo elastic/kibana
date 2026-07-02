@@ -15,6 +15,7 @@ import { WorkpadRoutingContext } from '../workpad_routing_context';
 const mockDispatch = jest.fn();
 const mockGetState = jest.fn();
 const refreshAction = { type: 'refreshWorkpad' };
+const fetchAllRenderablesAction = { type: 'fetchAllRenderables' };
 
 jest.mock('react-redux', () => ({
   useDispatch: () => mockDispatch,
@@ -23,6 +24,10 @@ jest.mock('react-redux', () => ({
 
 jest.mock('../../../state/actions/workpad', () => ({
   refreshWorkpad: () => refreshAction,
+}));
+
+jest.mock('../../../state/actions/elements', () => ({
+  fetchAllRenderables: () => fetchAllRenderablesAction,
 }));
 
 const getMockedContext = (context: any) =>
@@ -61,6 +66,45 @@ describe('useRefreshHelper', () => {
     expect(mockDispatch).toHaveBeenCalledWith(refreshAction);
   });
 
+  test('only performs a structural refresh at most once per minute', () => {
+    let now = 0;
+    const dateNow = jest.spyOn(Date, 'now').mockImplementation(() => now);
+    const context = getMockedContext({
+      refreshInterval: 5_000,
+    });
+    const state = {
+      transient: {
+        inFlight: false,
+      },
+    };
+
+    mockGetState.mockReturnValue(state);
+
+    const { rerender } = renderHook(useRefreshHelper, { wrapper: getContextWrapper(context) });
+    const advanceRefreshCycle = (expectedAction: { type: string }) => {
+      state.transient.inFlight = true;
+      rerender();
+      state.transient.inFlight = false;
+      rerender();
+
+      now += context.refreshInterval;
+      jest.advanceTimersByTime(context.refreshInterval);
+      expect(mockDispatch).toHaveBeenLastCalledWith(expectedAction);
+    };
+
+    now += context.refreshInterval;
+    jest.advanceTimersByTime(context.refreshInterval);
+    expect(mockDispatch).toHaveBeenLastCalledWith(refreshAction);
+
+    for (let cycle = 0; cycle < 11; cycle++) {
+      advanceRefreshCycle(fetchAllRenderablesAction);
+    }
+
+    advanceRefreshCycle(refreshAction);
+
+    dateNow.mockRestore();
+  });
+
   test('cancels a timer when inflight is active', () => {
     const context = getMockedContext({
       refreshInterval: 100,
@@ -80,7 +124,7 @@ describe('useRefreshHelper', () => {
 
     state.transient.inFlight = true;
 
-    rerender(useRefreshHelper);
+    rerender();
 
     jest.runAllTimers();
     expect(mockDispatch).not.toHaveBeenCalled();

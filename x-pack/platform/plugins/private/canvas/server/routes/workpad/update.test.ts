@@ -94,6 +94,7 @@ describe('PUT workpad', () => {
     const structuresIndex = putCalls.findIndex(
       (call: any) => call[0].path === `${API_ROUTE_WORKPAD_STRUCTURES}/{id}`
     );
+    expect(structuresIndex).toBeGreaterThanOrEqual(0);
     const structuresHandler = putResults[structuresIndex].value.addVersion.mock.calls[0][1];
 
     const { id } = workpad;

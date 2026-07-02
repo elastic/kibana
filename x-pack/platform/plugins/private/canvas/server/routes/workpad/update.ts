@@ -19,6 +19,25 @@ import { catchErrorHandler } from '../catch_error_handler';
 
 const AssetsRecordSchema = schema.recordOf(schema.string(), WorkpadAssetSchema);
 
+const toUpdateResponse = (updatedWorkpad?: { attributes?: Record<string, unknown> }) => {
+  const timestamp = updatedWorkpad?.attributes?.['@timestamp'];
+
+  return typeof timestamp === 'string' ? { ...okResponse, '@timestamp': timestamp } : okResponse;
+};
+
+const createUpdateWorkpadHandler = () =>
+  catchErrorHandler(async (context, request, response) => {
+    const canvasContext = await context.canvas;
+    const updatedWorkpad = await canvasContext.workpad.update(
+      request.params.id,
+      request.body as CanvasWorkpad
+    );
+
+    return response.ok({
+      body: toUpdateResponse(updatedWorkpad),
+    });
+  });
+
 export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
   // TODO: This route is likely deprecated and everything is using the workpad_structures
@@ -54,20 +73,7 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
           },
         },
       },
-      catchErrorHandler(async (context, request, response) => {
-        const canvasContext = await context.canvas;
-        const updatedWorkpad = await canvasContext.workpad.update(
-          request.params.id,
-          request.body as CanvasWorkpad
-        );
-
-        return response.ok({
-          // Return the server-stamped @timestamp so the client can sync it into
-          // state and avoid treating its own save as an external change on the
-          // next auto-refresh.
-          body: { ...okResponse, '@timestamp': updatedWorkpad.attributes['@timestamp'] },
-        });
-      })
+      createUpdateWorkpadHandler()
     );
 
   router.versioned
@@ -100,20 +106,7 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
           },
         },
       },
-      catchErrorHandler(async (context, request, response) => {
-        const canvasContext = await context.canvas;
-        const updatedWorkpad = await canvasContext.workpad.update(
-          request.params.id,
-          request.body as CanvasWorkpad
-        );
-
-        return response.ok({
-          // Return the server-stamped @timestamp so the client can sync it into
-          // state and avoid treating its own save as an external change on the
-          // next auto-refresh.
-          body: { ...okResponse, '@timestamp': updatedWorkpad.attributes['@timestamp'] },
-        });
-      })
+      createUpdateWorkpadHandler()
     );
 }
 
