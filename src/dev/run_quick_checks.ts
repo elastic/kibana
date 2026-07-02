@@ -355,7 +355,6 @@ export function buildPipelineAnnotation(failedChecks: CheckResult[]): string {
 
 function annotateFailures(failedChecks: CheckResult[]): void {
   if (process.env.CI !== 'true' || failedChecks.length === 0) {
-    console.log(buildPipelineAnnotation(failedChecks));
     return;
   }
 
