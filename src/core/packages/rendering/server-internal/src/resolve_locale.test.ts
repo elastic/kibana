@@ -172,6 +172,20 @@ describe('resolveLocale', () => {
       expect(result.locale).toBe('fr-FR');
     });
 
+    it('still resolves from Accept-Language when allowLocaleCookie is false', () => {
+      // The Accept-Language step is independent of the cookie toggle: disabling
+      // the cookie only stops Kibana from reading/writing KBN_LOCALE, it does
+      // not disable browser-language detection. This is what makes anonymous /
+      // signed-out pages render in the browser's language when cookies are off.
+      const result = resolveLocale(
+        baseArgs({
+          allowLocaleCookie: false,
+          request: buildRequest({ acceptLanguage: 'ja-JP,en;q=0.5' }),
+        })
+      );
+      expect(result.locale).toBe('ja-JP');
+    });
+
     it('falls through to configLocale when picker is disabled (i18n.locales is empty)', () => {
       const result = resolveLocale(
         baseArgs({
