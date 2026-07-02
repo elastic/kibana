@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import SCHEDULED_DETECTION_YAML from './scheduled_detection.yaml';
+import SCHEDULED_REVIEW_YAML from './scheduled_review.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
 
 export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID =
   'system-significant-events-scheduled-detection';
 export const SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID =
   'system-significant-events-scheduled-review';
-
-const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID = 'system-significant-events-detection';
-const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID = 'system-significant-events-discovery';
-const SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID = 'system-significant-events-triage';
 
 export interface SignificantEventsScheduledDetectionWorkflowTemplateValues
   extends ManagedWorkflowTemplateValues {
@@ -40,40 +38,26 @@ const SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT = {
 const getDetectionLookbackMinutes = (detectionIntervalMinutes: number) =>
   Math.max(30, detectionIntervalMinutes);
 
+// yamlTemplate values are substituted into the static yaml files above via
+// exact-token replacement, since values (e.g. batch sizes) are needed at
+// workflow-install time rather than at workflow-run time and so can't be
+// expressed with the engine's own `${{ }}` / `{{ }}` runtime templating.
+const renderTemplate = (template: string, values: Record<string, string | number>): string =>
+  Object.entries(values).reduce(
+    (yaml, [token, value]) => yaml.split(token).join(String(value)),
+    template
+  );
+
 export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   pluginId: 'streams',
   version: 1,
   billable: false,
-  yamlTemplate: ({ detectionIntervalMinutes }) => `version: "1"
-name: "Significant Events Scheduled Detection"
-description: "Runs Significant Events detection on a schedule for the current space."
-enabled: false
-tags:
-  - observability
-  - streams
-  - significant-events
-  - scheduled
-  - detection
-settings:
-  timeout: "10m"
-  concurrency:
-    key: "significant-events-scheduled-detection"
-    strategy: drop
-    max: 1
-triggers:
-  - type: scheduled
-    with:
-      every: "${detectionIntervalMinutes}m"
-  - type: manual
-steps:
-  - name: detect
-    type: workflow.execute
-    with:
-      workflow-id: "${SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID}"
-      inputs:
-        lookback: "now-${getDetectionLookbackMinutes(detectionIntervalMinutes)}m"
-`,
+  yamlTemplate: ({ detectionIntervalMinutes }) =>
+    renderTemplate(SCHEDULED_DETECTION_YAML, {
+      __DETECTION_INTERVAL_MINUTES__: detectionIntervalMinutes,
+      __DETECTION_LOOKBACK_MINUTES__: getDetectionLookbackMinutes(detectionIntervalMinutes),
+    }),
   management: SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<SignificantEventsScheduledDetectionWorkflowTemplateValues>;
 
@@ -82,59 +66,12 @@ export const SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW = {
   pluginId: 'streams',
   version: 1,
   billable: false,
-  yamlTemplate: ({
-    reviewIntervalMinutes,
-    discoveryBatchSize,
-    triageBatchSize,
-    maxReviewPasses,
-  }) => `version: "1"
-name: "Significant Events Scheduled Review"
-description: "Runs bounded Significant Events discovery and triage passes on a schedule for the current space."
-enabled: false
-tags:
-  - observability
-  - streams
-  - significant-events
-  - scheduled
-  - review
-settings:
-  timeout: "40m"
-  concurrency:
-    key: "significant-events-scheduled-review"
-    strategy: drop
-    max: 1
-  on-failure:
-    continue: true
-triggers:
-  - type: scheduled
-    with:
-      every: "${reviewIntervalMinutes}m"
-  - type: manual
-steps:
-  - name: run_review_until_drained
-    type: while
-    condition: "\${{ steps.discover.error != null or steps.triage.error != null or steps.discover.output.hasRemaining == true or steps.triage.output.hasRemaining == true }}"
-    max-iterations: ${maxReviewPasses}
-    iteration-on-failure:
-      continue: true
-    steps:
-      - name: discover
-        type: workflow.execute
-        with:
-          workflow-id: "${SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID}"
-          inputs:
-            detectionBatchMax: ${discoveryBatchSize}
-        on-failure:
-          continue: true
-
-      - name: triage
-        type: workflow.execute
-        with:
-          workflow-id: "${SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID}"
-          inputs:
-            discoveryBatchMax: ${triageBatchSize}
-        on-failure:
-          continue: true
-`,
+  yamlTemplate: ({ reviewIntervalMinutes, discoveryBatchSize, triageBatchSize, maxReviewPasses }) =>
+    renderTemplate(SCHEDULED_REVIEW_YAML, {
+      __REVIEW_INTERVAL_MINUTES__: reviewIntervalMinutes,
+      __MAX_REVIEW_PASSES__: maxReviewPasses,
+      __DISCOVERY_BATCH_SIZE__: discoveryBatchSize,
+      __TRIAGE_BATCH_SIZE__: triageBatchSize,
+    }),
   management: SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<SignificantEventsScheduledReviewWorkflowTemplateValues>;
