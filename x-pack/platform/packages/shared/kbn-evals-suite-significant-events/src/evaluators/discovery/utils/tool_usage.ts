@@ -6,10 +6,7 @@
  */
 
 import type { ConverseStep } from '@kbn/evals';
-import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common';
-
-export const TOOL_ID_EXECUTE_ESQL = platformCoreTools.executeEsql;
-export const TOOL_ID_KI_SEARCH = platformStreamsSigEventsTools.searchKnowledgeIndicators;
+import { platformCoreTools } from '@kbn/agent-builder-common';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
@@ -51,7 +48,7 @@ export function summarizeEsqlGrounding(steps: ConverseStep[]): EsqlGroundingSumm
   let noOfToolCallsWithResults = 0;
 
   for (const step of steps) {
-    if (step.type !== 'tool_call' || step.tool_id !== TOOL_ID_EXECUTE_ESQL) {
+    if (step.type !== 'tool_call' || step.tool_id !== platformCoreTools.executeEsql) {
       continue;
     }
     noOfToolCalls++;

@@ -6,12 +6,12 @@
  */
 
 import type { ConverseStep } from '@kbn/evals';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import { confirmedEvidencesEvaluator } from './confirmed_evidences';
-import { TOOL_ID_EXECUTE_ESQL } from '../../utils/tool_usage';
 
 const esqlStep: ConverseStep = {
   type: 'tool_call',
-  tool_id: TOOL_ID_EXECUTE_ESQL,
+  tool_id: platformCoreTools.executeEsql,
   tool_call_id: 'e1',
   params: { query: 'FROM logs' },
   results: [{ type: 'esql_results', data: { values: [['x']] } }],

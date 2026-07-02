@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
-  TOOL_ID_EXECUTE_ESQL,
-  TOOL_ID_KI_SEARCH,
-  extractToolCallIds,
-} from '../../utils/tool_usage';
+import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common';
+import { extractToolCallIds } from '../../utils/tool_usage';
+
+const { executeEsql: TOOL_ID_EXECUTE_ESQL } = platformCoreTools;
+const { searchKnowledgeIndicators: TOOL_ID_KI_SEARCH } = platformStreamsSigEventsTools;
 import type { DiscoveryJudgeEvaluator } from '../../types';
 
 export const createToolUsageEvaluator = (): DiscoveryJudgeEvaluator => ({

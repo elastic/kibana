@@ -6,13 +6,11 @@
  */
 
 import type { ConverseStep } from '@kbn/evals';
-import {
-  TOOL_ID_EXECUTE_ESQL,
-  TOOL_ID_KI_SEARCH,
-  getToolCallCount,
-  extractToolCallIds,
-  summarizeEsqlGrounding,
-} from './tool_usage';
+import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common';
+import { getToolCallCount, extractToolCallIds, summarizeEsqlGrounding } from './tool_usage';
+
+const TOOL_ID_EXECUTE_ESQL = platformCoreTools.executeEsql;
+const TOOL_ID_KI_SEARCH = platformStreamsSigEventsTools.searchKnowledgeIndicators;
 
 const steps: ConverseStep[] = [
   { type: 'reasoning', reasoning: 'plan' },
