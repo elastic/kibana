@@ -9,7 +9,6 @@
 
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import type { ValueFormatConfig } from '@kbn/lens-common';
-import type { LensApiMetricOperation } from '../../schema/metric_ops';
 
 describe('Format Transforms', () => {
   describe('fromFormatAPIToLensState', () => {
@@ -19,8 +18,8 @@ describe('Format Transforms', () => {
 
     describe('number and percent formats', () => {
       it('should transform number format with defaults', () => {
-        const input: LensApiMetricOperation['format'] = {
-          type: 'number',
+        const input = {
+          type: 'number' as const,
           decimals: 2,
           compact: false,
         };
@@ -31,8 +30,8 @@ describe('Format Transforms', () => {
       });
 
       it('should transform percent format with custom decimals', () => {
-        const input: LensApiMetricOperation['format'] = {
-          type: 'percent',
+        const input = {
+          type: 'percent' as const,
           decimals: 1,
           compact: false,
         };
@@ -43,8 +42,8 @@ describe('Format Transforms', () => {
       });
 
       it('should include suffix when provided', () => {
-        const input: LensApiMetricOperation['format'] = {
-          type: 'number',
+        const input = {
+          type: 'number' as const,
           suffix: ' units',
           decimals: 2,
           compact: false,
@@ -56,8 +55,8 @@ describe('Format Transforms', () => {
       });
 
       it('should include compact when provided', () => {
-        const input: LensApiMetricOperation['format'] = {
-          type: 'number',
+        const input = {
+          type: 'number' as const,
           compact: true,
           decimals: 2,
         };
@@ -70,8 +69,8 @@ describe('Format Transforms', () => {
 
     describe('bytes and bits formats', () => {
       it('should transform bytes format', () => {
-        const input: LensApiMetricOperation['format'] = {
-          type: 'bytes',
+        const input = {
+          type: 'bytes' as const,
           decimals: 1,
         };
         expect(fromFormatAPIToLensState(input)).toEqual({
@@ -81,8 +80,8 @@ describe('Format Transforms', () => {
       });
 
       it('should transform bits format with suffix', () => {
-        const input: LensApiMetricOperation['format'] = {
-          type: 'bits',
+        const input = {
+          type: 'bits' as const,
           suffix: '/s',
           decimals: 2,
         };
@@ -93,12 +92,12 @@ describe('Format Transforms', () => {
       });
     });
 
-    describe('duration format', () => {
-      it('should transform duration format', () => {
-        const input: LensApiMetricOperation['format'] = {
-          type: 'duration',
-          from: 'ms',
-          to: 's',
+    describe('duration format — GA enums', () => {
+      it('should transform duration format with short units', () => {
+        const input = {
+          type: 'duration' as const,
+          from: 'ms' as const,
+          to: 's' as const,
         };
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'duration',
@@ -111,10 +110,10 @@ describe('Format Transforms', () => {
       });
 
       it('should include suffix in duration format', () => {
-        const input: LensApiMetricOperation['format'] = {
-          type: 'duration',
-          from: 'ms',
-          to: 's',
+        const input = {
+          type: 'duration' as const,
+          from: 'ms' as const,
+          to: 's' as const,
           suffix: ' elapsed',
         };
         expect(fromFormatAPIToLensState(input)).toEqual({
@@ -128,11 +127,11 @@ describe('Format Transforms', () => {
         });
       });
 
-      it('should transform friendly approximate duration format', () => {
-        const input: LensApiMetricOperation['format'] = {
-          type: 'duration',
-          from: 's',
-          to: 'humanize',
+      it('should transform `auto-approximate` to humanize Lens state', () => {
+        const input = {
+          type: 'duration' as const,
+          from: 's' as const,
+          to: 'auto-approximate' as const,
         };
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'duration',
@@ -144,11 +143,11 @@ describe('Format Transforms', () => {
         });
       });
 
-      it('should transform friendly precise duration format', () => {
-        const input: LensApiMetricOperation['format'] = {
-          type: 'duration',
-          from: 'ms',
-          to: 'humanizePrecise',
+      it('should transform `auto` to humanizePrecise Lens state', () => {
+        const input = {
+          type: 'duration' as const,
+          from: 'ms' as const,
+          to: 'auto' as const,
         };
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'duration',
@@ -160,11 +159,27 @@ describe('Format Transforms', () => {
         });
       });
 
+      it('should transform `min` input unit', () => {
+        const input = {
+          type: 'duration' as const,
+          from: 'min' as const,
+          to: 'auto-approximate' as const,
+        };
+        expect(fromFormatAPIToLensState(input)).toEqual({
+          id: 'duration',
+          params: {
+            decimals: 2,
+            fromUnit: 'minutes',
+            toUnit: 'humanize',
+          },
+        });
+      });
+
       it('should transform fine-grained DSL input units', () => {
-        const input: LensApiMetricOperation['format'] = {
-          type: 'duration',
-          from: 'us',
-          to: 'ms',
+        const input = {
+          type: 'duration' as const,
+          from: 'us' as const,
+          to: 'ms' as const,
         };
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'duration',
@@ -177,10 +192,60 @@ describe('Format Transforms', () => {
       });
     });
 
+    describe('duration format — legacy strings (backward compat)', () => {
+      it('should pass through legacy verbose from unit', () => {
+        const input = {
+          type: 'duration' as const,
+          from: 'seconds',
+          to: 'humanize',
+        };
+        expect(fromFormatAPIToLensState(input)).toEqual({
+          id: 'duration',
+          params: {
+            decimals: 2,
+            fromUnit: 'seconds',
+            toUnit: 'humanize',
+          },
+        });
+      });
+
+      it('should pass through legacy `asMinutes` to unit', () => {
+        const input = {
+          type: 'duration' as const,
+          from: 'milliseconds',
+          to: 'asMinutes',
+        };
+        expect(fromFormatAPIToLensState(input)).toEqual({
+          id: 'duration',
+          params: {
+            decimals: 2,
+            fromUnit: 'milliseconds',
+            toUnit: 'asMinutes',
+          },
+        });
+      });
+
+      it('should pass through legacy `m` for minutes', () => {
+        const input = {
+          type: 'duration' as const,
+          from: 'm',
+          to: 'humanizePrecise',
+        };
+        expect(fromFormatAPIToLensState(input)).toEqual({
+          id: 'duration',
+          params: {
+            decimals: 2,
+            fromUnit: 'm',
+            toUnit: 'humanizePrecise',
+          },
+        });
+      });
+    });
+
     describe('custom format', () => {
       it('should transform custom format', () => {
-        const input: LensApiMetricOperation['format'] = {
-          type: 'custom',
+        const input = {
+          type: 'custom' as const,
           pattern: '$0,0.00',
         };
         expect(fromFormatAPIToLensState(input)).toEqual({
@@ -251,7 +316,7 @@ describe('Format Transforms', () => {
     });
 
     describe('duration format', () => {
-      it('should transform duration format', () => {
+      it('should transform duration format to GA enum names', () => {
         const input: ValueFormatConfig = {
           id: 'duration',
           params: {
@@ -280,11 +345,11 @@ describe('Format Transforms', () => {
         expect(fromFormatLensStateToAPI(input)).toEqual({
           type: 'duration',
           from: 's',
-          to: 'humanize',
+          to: 'auto-approximate',
         });
       });
 
-      it('should transform friendly approximate duration format', () => {
+      it('should convert Lens `humanize` state to `auto-approximate`', () => {
         const input: ValueFormatConfig = {
           id: 'duration',
           params: {
@@ -297,11 +362,11 @@ describe('Format Transforms', () => {
         expect(fromFormatLensStateToAPI(input)).toEqual({
           type: 'duration',
           from: 's',
-          to: 'humanize',
+          to: 'auto-approximate',
         });
       });
 
-      it('should transform friendly precise duration format', () => {
+      it('should convert Lens `humanizePrecise` state to `auto`', () => {
         const input: ValueFormatConfig = {
           id: 'duration',
           params: {
@@ -313,7 +378,23 @@ describe('Format Transforms', () => {
         expect(fromFormatLensStateToAPI(input)).toEqual({
           type: 'duration',
           from: 'ms',
-          to: 'humanizePrecise',
+          to: 'auto',
+        });
+      });
+
+      it('should convert Lens `asMinutes` state to `min`', () => {
+        const input: ValueFormatConfig = {
+          id: 'duration',
+          params: {
+            decimals: 2,
+            fromUnit: 'minutes',
+            toUnit: 'asMinutes',
+          },
+        };
+        expect(fromFormatLensStateToAPI(input)).toEqual({
+          type: 'duration',
+          from: 'min',
+          to: 'min',
         });
       });
 
@@ -328,18 +409,33 @@ describe('Format Transforms', () => {
         expect(fromFormatLensStateToAPI(input)).toEqual({
           type: 'duration',
           from: 's',
-          to: 'humanizePrecise',
+          to: 'auto',
         });
       });
 
-      it('should round-trip friendly duration formats', () => {
-        const apiFormat: LensApiMetricOperation['format'] = {
-          type: 'duration',
-          from: 's',
-          to: 'humanizePrecise',
+      it('should round-trip GA duration formats', () => {
+        const apiFormat = {
+          type: 'duration' as const,
+          from: 's' as const,
+          to: 'auto' as const,
         };
         const lensFormat = fromFormatAPIToLensState(apiFormat);
         expect(fromFormatLensStateToAPI(lensFormat)).toEqual(apiFormat);
+      });
+
+      it('should normalize legacy input to GA output on round-trip', () => {
+        // Legacy input uses verbose string; output always uses GA enum names
+        const legacyApiFormat = {
+          type: 'duration' as const,
+          from: 'seconds',
+          to: 'humanize',
+        };
+        const lensFormat = fromFormatAPIToLensState(legacyApiFormat);
+        expect(fromFormatLensStateToAPI(lensFormat)).toEqual({
+          type: 'duration',
+          from: 's',
+          to: 'auto-approximate',
+        });
       });
     });
 

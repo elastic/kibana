@@ -9,7 +9,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { LENS_FORMAT_NUMBER_DECIMALS_DEFAULT, LENS_FORMAT_COMPACT_DEFAULT } from './constants';
-import { dslDurationFormatSchema, esqlDurationFormatSchema } from './duration_units';
+import {
+  dslDurationFormatSchema,
+  esqlDurationFormatSchema,
+  legacyDurationFormatSchema,
+} from './duration_units';
 
 const numericFormatSchema = schema.object(
   {
@@ -115,9 +119,18 @@ const customFormatSchema = schema.object(
 
 /**
  * Format configuration for DSL-based visualizations.
+ * Accepts both GA short-form enums and legacy free-form strings for the `duration` type.
+ * The strict GA schema is validated first; legacy strings are accepted as a fallback
+ * while `asCode.useGASchemas` is disabled (default during Tech Preview).
  */
 export const formatTypeSchema = schema.oneOf(
-  [numericFormatSchema, byteFormatSchema, dslDurationFormatSchema, customFormatSchema],
+  [
+    numericFormatSchema,
+    byteFormatSchema,
+    dslDurationFormatSchema,
+    legacyDurationFormatSchema,
+    customFormatSchema,
+  ],
   {
     meta: {
       id: 'formatType',
@@ -129,9 +142,16 @@ export const formatTypeSchema = schema.oneOf(
 
 /**
  * Format configuration for ES|QL-based visualizations.
+ * Accepts both GA short-form enums and legacy free-form strings for the `duration` type.
  */
 export const esqlFormatTypeSchema = schema.oneOf(
-  [numericFormatSchema, byteFormatSchema, esqlDurationFormatSchema, customFormatSchema],
+  [
+    numericFormatSchema,
+    byteFormatSchema,
+    esqlDurationFormatSchema,
+    legacyDurationFormatSchema,
+    customFormatSchema,
+  ],
   {
     meta: {
       id: 'esqlFormatType',
