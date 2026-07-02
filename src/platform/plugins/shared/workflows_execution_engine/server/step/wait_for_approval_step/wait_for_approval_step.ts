@@ -17,7 +17,7 @@ import type { WaitForApprovalGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
   buildWaitForApprovalResumeLinks,
-  hasExternalApprovalChannels,
+  hasExternalHitlChannels,
   sendWaitForApprovalNotifications,
 } from './send_wait_for_approval_notifications';
 import type { ConnectorExecutor } from '../../connector_executor';
@@ -92,7 +92,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
     };
 
     const channels = withConfig?.channels;
-    if (hasExternalApprovalChannels(channels)) {
+    if (hasExternalHitlChannels(channels)) {
       const execution = this.workflowRuntime.getWorkflowExecution();
       const spaceId = this.dependencies.spaceId ?? execution.spaceId;
       if (!spaceId) {

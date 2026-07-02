@@ -9,19 +9,19 @@
 
 import {
   buildWaitForApprovalResumeLinks,
-  hasExternalApprovalChannels,
+  hasExternalHitlChannels,
   sendWaitForApprovalNotifications,
 } from './send_wait_for_approval_notifications';
 
 describe('send_wait_for_approval_notifications', () => {
-  describe('hasExternalApprovalChannels', () => {
+  describe('hasExternalHitlChannels', () => {
     it('returns false when channels are omitted', () => {
-      expect(hasExternalApprovalChannels(undefined)).toBe(false);
+      expect(hasExternalHitlChannels(undefined)).toBe(false);
     });
 
     it('returns true when slack webhook connector config is present', () => {
       expect(
-        hasExternalApprovalChannels({
+        hasExternalHitlChannels({
           slack: { 'connector-id': 'slack-1' },
         })
       ).toBe(true);
@@ -29,7 +29,7 @@ describe('send_wait_for_approval_notifications', () => {
 
     it('returns true when slack_api channel config is present', () => {
       expect(
-        hasExternalApprovalChannels({
+        hasExternalHitlChannels({
           slack_api: { 'connector-id': 'slack-api-1', channels: ['C0123'] },
         })
       ).toBe(true);

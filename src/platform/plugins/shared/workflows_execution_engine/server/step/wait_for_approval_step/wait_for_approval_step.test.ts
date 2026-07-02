@@ -12,7 +12,7 @@ import type { WaitForApprovalGraphNode } from '@kbn/workflows/graph';
 import type { ExecutionError } from '@kbn/workflows/server';
 import {
   buildWaitForApprovalResumeLinks,
-  hasExternalApprovalChannels,
+  hasExternalHitlChannels,
   sendWaitForApprovalNotifications,
 } from './send_wait_for_approval_notifications';
 import { WaitForApprovalStepImpl } from './wait_for_approval_step';
@@ -34,7 +34,7 @@ const mockCreateExternalResumeApiKey = jest.requireMock('@kbn/workflows/server')
   .createExternalResumeApiKey as jest.Mock;
 
 jest.mock('./send_wait_for_approval_notifications', () => ({
-  hasExternalApprovalChannels: jest.fn().mockReturnValue(false),
+  hasExternalHitlChannels: jest.fn().mockReturnValue(false),
   buildWaitForApprovalResumeLinks: jest.fn().mockReturnValue({
     approveUrl: 'https://kibana/approve',
     rejectUrl: 'https://kibana/reject',
@@ -42,7 +42,7 @@ jest.mock('./send_wait_for_approval_notifications', () => ({
   sendWaitForApprovalNotifications: jest.fn(),
 }));
 
-const mockHasExternalApprovalChannels = jest.mocked(hasExternalApprovalChannels);
+const mockHasExternalHitlChannels = jest.mocked(hasExternalHitlChannels);
 const mockBuildWaitForApprovalResumeLinks = buildWaitForApprovalResumeLinks as jest.Mock;
 const mockSendWaitForApprovalNotifications = sendWaitForApprovalNotifications as jest.Mock;
 
@@ -56,7 +56,7 @@ describe('WaitForApprovalStepImpl', () => {
   let dependencies: ContextDependencies;
 
   beforeEach(() => {
-    mockHasExternalApprovalChannels.mockReturnValue(false);
+    mockHasExternalHitlChannels.mockReturnValue(false);
     mockBuildWaitForApprovalResumeLinks.mockClear();
     mockSendWaitForApprovalNotifications.mockClear();
     mockCreateExternalResumeApiKey.mockClear();
@@ -143,7 +143,7 @@ describe('WaitForApprovalStepImpl', () => {
   });
 
   it('mints an API key and sends notifications when channels are configured', async () => {
-    mockHasExternalApprovalChannels.mockReturnValue(true);
+    mockHasExternalHitlChannels.mockReturnValue(true);
     node.configuration = {
       ...node.configuration,
       with: {
@@ -300,7 +300,7 @@ describe('WaitForApprovalStepImpl', () => {
   });
 
   it('uses workflow execution spaceId when dependencies.spaceId is missing', async () => {
-    mockHasExternalApprovalChannels.mockReturnValue(true);
+    mockHasExternalHitlChannels.mockReturnValue(true);
     node.configuration = {
       ...node.configuration,
       with: {

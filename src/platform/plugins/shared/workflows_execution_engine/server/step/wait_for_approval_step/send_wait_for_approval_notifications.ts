@@ -33,9 +33,6 @@ export function hasExternalHitlChannels(
   return hasSlack || hasSlackApi;
 }
 
-/** @deprecated Use {@link hasExternalHitlChannels} */
-export const hasExternalApprovalChannels = hasExternalHitlChannels;
-
 export function buildWaitForApprovalResumeLinks({
   kibanaUrl,
   spaceId,
