@@ -38324,6 +38324,12 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        allow_edit:
+                          items:
+                            maxLength: 100
+                            type: string
+                          maxItems: 100
+                          type: array
                         host_urls:
                           items:
                             type: string
@@ -38507,6 +38513,12 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                allow_edit:
+                  items:
+                    maxLength: 100
+                    type: string
+                  maxItems: 100
+                  type: array
                 host_urls:
                   items:
                     type: string
@@ -38630,6 +38642,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      allow_edit:
+                        items:
+                          maxLength: 100
+                          type: string
+                        maxItems: 100
+                        type: array
                       host_urls:
                         items:
                           type: string
@@ -38898,6 +38916,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      allow_edit:
+                        items:
+                          maxLength: 100
+                          type: string
+                        maxItems: 100
+                        type: array
                       host_urls:
                         items:
                           type: string
@@ -39087,6 +39111,12 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                allow_edit:
+                  items:
+                    maxLength: 100
+                    type: string
+                  maxItems: 100
+                  type: array
                 host_urls:
                   items:
                     type: string
@@ -39202,6 +39232,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      allow_edit:
+                        items:
+                          maxLength: 100
+                          type: string
+                        maxItems: 100
+                        type: array
                       host_urls:
                         items:
                           type: string
@@ -70264,13 +70300,14 @@ paths:
                 - waiting_for_input
                 - waiting_for_child
                 - running
+                - queued
                 - completed
                 - failed
                 - cancelled
                 - timed_out
                 - skipped
               type: string
-            maxItems: 10
+            maxItems: 11
             type: array
         - description: Filter by execution type.
           in: query
