@@ -68,19 +68,24 @@ const makeNotifications = () => ({
   },
 });
 
-const makeAgentBuilder = (convId?: string) => ({
-  events: {
-    ui: {
-      activeConversation$: {
-        subscribe: jest.fn((cb: (v: { id: string } | undefined) => void) => {
-          if (convId) cb({ id: convId });
-          return { unsubscribe: jest.fn() };
-        }),
+const makeAgentBuilder = (convId?: string) => {
+  let emitConversation: (v: { id: string | undefined } | undefined) => void = () => {};
+  return {
+    events: {
+      ui: {
+        activeConversation$: {
+          subscribe: jest.fn((cb: (v: { id: string | undefined } | undefined) => void) => {
+            emitConversation = cb;
+            if (convId) cb({ id: convId });
+            return { unsubscribe: jest.fn() };
+          }),
+        },
       },
     },
-  },
-  addAttachment: jest.fn(),
-});
+    addAttachment: jest.fn(),
+    emitConversation: (v: { id: string | undefined } | undefined) => emitConversation(v),
+  };
+};
 
 const emit = (service: AiRuleCreationService & { _subject: Subject<unknown> }, payload: object) => {
   (service as unknown as { _subject: Subject<unknown> })._subject.next(payload);
@@ -191,6 +196,32 @@ describe('createAiRuleCreationHandler', () => {
       expect(notifications.toasts.addWarning).toHaveBeenCalled();
       expect(notifications.toasts.addDanger).not.toHaveBeenCalled();
       expect(service.clearSaving).toHaveBeenCalled();
+    });
+
+    it('links origin even when the conversation closes while the save is in flight', async () => {
+      let resolveCreate!: (rule: RuleResponse) => void;
+      mockCreateRule.mockImplementation(
+        () => new Promise<RuleResponse>((resolve) => (resolveCreate = resolve))
+      );
+      const service = makeService();
+      const agentBuilder = makeAgentBuilder('conv-1');
+      const updateOrigin = jest.fn().mockResolvedValue(undefined);
+
+      createAiRuleCreationHandler({
+        aiRuleCreation: service,
+        notifications: makeNotifications() as never,
+        agentBuilder: agentBuilder as never,
+      });
+
+      emit(service as never, { rule: makeRule(), updateOrigin });
+      await flush();
+
+      // Chat closes mid-save: activeConversation$ emits an empty change.
+      agentBuilder.emitConversation({ id: undefined });
+      resolveCreate(savedRule);
+      await flush();
+
+      expect(updateOrigin).toHaveBeenCalledWith('saved-id-1');
     });
 
     it('does not call updateOrigin when convId is absent', async () => {

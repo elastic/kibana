@@ -98,6 +98,10 @@ export const createAiRuleCreationHandler = ({
       }
 
       try {
+        // Capture at request time, not after the await: closing the chat while the API call is
+        // in flight emits `null` on activeConversation$, which would skip origin linking for a
+        // conversation that existed when the user clicked save.
+        const convId = activeConversationId;
         let saved: RuleResponse;
         const savedRuleId = rule.id;
         const isUpdate = !!savedRuleId;
@@ -127,8 +131,6 @@ export const createAiRuleCreationHandler = ({
 
         const targetAttachmentId = attachmentId ?? SECURITY_RULE_ATTACHMENT_ID;
 
-        const convId = activeConversationId;
-
         securitySolutionQueryClient.invalidateQueries(['POST', RULE_MANAGEMENT_RULES_URL_SEARCH], {
           exact: false,
         });
@@ -149,6 +151,9 @@ export const createAiRuleCreationHandler = ({
           });
         }
 
+        // No `origin` here: the framework upserts input attachments by id and preserves the
+        // existing record's origin (prepare_conversation.ts update branch ignores input.origin),
+        // so `updateOrigin` below is the only channel that can set it.
         agentBuilder?.addAttachment({
           id: targetAttachmentId,
           type: SecurityAgentBuilderAttachments.rule,
@@ -161,9 +166,8 @@ export const createAiRuleCreationHandler = ({
 
         // Link the freshly-created card to its saved rule via `origin`, and do it LAST: the
         // framework `updateOrigin` callback persists the origin AND invalidates the conversation,
-        // re-fetching server state. Running it after `addAttachment` (which pushes an origin-less
-        // client record) ensures the invalidate is authoritative, so the card durably flips to
-        // "Update" in-session. `origin` is the reload-safe source of truth for the button.
+        // re-fetching server state, so the card durably flips to "Update" in-session. `origin`
+        // is the reload-safe source of truth for the button.
         if (convId && !isUpdate && updateOrigin) {
           try {
             await updateOrigin(saved.id);
