@@ -11,7 +11,7 @@ surfaces can consume one implementation.
 - **`VisualizeESQL`** — renders an ES|QL query result by suggesting a Lens config.
 - **`VisualizeVega`** — renders a Vega/Vega-Lite spec via the visualize embeddable.
 - **`InlineVisualization`** — dispatches to the Lens or Vega renderer based on `renderer`.
-- **`getVisualizationDimensionsFromConfig` / `getVisualizationDimensionsFromChartType`** —
+- **`getVisualizationDimensionsFromLensConfig` / `getVisualizationDimensionsFromChartType`** —
   recommended container sizing helpers.
 
 The Vega renderer pulls `@kbn/embeddable-plugin` and `@kbn/presentation-util-plugin`,

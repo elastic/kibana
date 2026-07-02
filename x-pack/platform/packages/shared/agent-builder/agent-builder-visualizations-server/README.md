@@ -5,7 +5,7 @@ Builder. It builds a visualization config for the renderer chosen by the caller
 (Lens or Vega — the agent decides and passes `renderer` to the
 `create_visualization` tool):
 
-- `lens/` — the Lens engine (`buildVisualizationConfig`): chart-type selection,
+- `lens/` — the Lens engine (`buildLensConfig`): chart-type selection,
   schemas, prompts, and palettes.
 - `vega/` — the Vega-Lite engine (`buildVegaConfig`): authors and normalizes a
   Vega-Lite spec for requests Lens cannot express.

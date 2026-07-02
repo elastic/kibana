@@ -17,7 +17,7 @@ import {
 } from '@kbn/agent-builder-visualizations-common';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
-  buildVisualizationConfig,
+  buildLensConfig,
   buildVegaConfig,
   type VisualizationConfig,
 } from '@kbn/agent-builder-visualizations-server';
@@ -174,7 +174,7 @@ Ground first: make sure the target index exists and every field you reference is
             ? JSON.stringify(parsedExistingConfig)
             : undefined;
           const { selectedChartType, validatedConfig, esqlQuery, timeRange } =
-            await buildVisualizationConfig({
+            await buildLensConfig({
               nlQuery,
               index,
               chartType,

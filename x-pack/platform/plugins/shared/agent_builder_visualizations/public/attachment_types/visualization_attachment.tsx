@@ -14,7 +14,7 @@ import type {
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { type AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import {
-  getVisualizationDimensionsFromConfig,
+  getVisualizationDimensionsFromLensConfig,
   InlineVisualization,
   type VisualizationServices,
 } from '@kbn/agent-builder-visualizations';
@@ -45,7 +45,7 @@ export const createVisualizationAttachmentDefinition = (
     getIcon: () => 'lensApp',
     getMaxWidth: (attachment) => {
       const { data } = attachment;
-      return getVisualizationDimensionsFromConfig(data.visualization as Record<string, unknown>)
+      return getVisualizationDimensionsFromLensConfig(data.visualization as Record<string, unknown>)
         .width;
     },
     renderInlineContent: ({ attachment, screenContext }, callbacks) => {

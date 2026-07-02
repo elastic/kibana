@@ -6,7 +6,7 @@
  */
 
 import {
-  buildVisualizationConfig,
+  buildLensConfig,
   buildVegaConfig,
   type VisualizationConfig,
 } from '@kbn/agent-builder-visualizations-server';
@@ -65,7 +65,7 @@ const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string
  *
  * Builds inline visualization panel content from natural language / ES|QL using
  * Kibana plumbing (model provider, ES client, the visualization builders). It
- * resolves to a Lens panel (`buildVisualizationConfig`) or, when the caller asks
+ * resolves to a Lens panel (`buildLensConfig`) or, when the caller asks
  * for Vega, a `vega` panel carrying a serialized Vega-Lite spec in its config
  * (`buildVegaConfig`), and returns it to the core through the type-agnostic
  * {@link PanelContentAttempt} contract.
@@ -132,7 +132,7 @@ export const createVisPanelResolver = ({
           ? (existingPanel?.config as VisualizationConfig)
           : undefined;
 
-      const result = await buildVisualizationConfig({
+      const result = await buildLensConfig({
         nlQuery,
         index,
         chartType,

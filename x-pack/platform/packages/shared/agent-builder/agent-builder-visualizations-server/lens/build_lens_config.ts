@@ -16,7 +16,7 @@ import { guessChartType } from './guess_chart_type';
 import { getSchemaForChartType } from './schemas';
 import type { VisualizationConfig } from './types';
 
-export interface BuildVisualizationConfigParams {
+export interface BuildLensConfigParams {
   nlQuery: string;
   index?: string;
   chartType?: SupportedChartType;
@@ -31,14 +31,14 @@ export interface BuildVisualizationConfigParams {
   esClient: IScopedClusterClient;
 }
 
-interface BuildVisualizationConfigResult {
+interface BuildLensConfigResult {
   selectedChartType: SupportedChartType;
   validatedConfig: VisualizationConfig;
   esqlQuery: string;
   timeRange?: { from: string; to: string };
 }
 
-export const buildVisualizationConfig = async ({
+export const buildLensConfig = async ({
   nlQuery,
   index,
   chartType,
@@ -51,7 +51,7 @@ export const buildVisualizationConfig = async ({
   logger,
   events,
   esClient,
-}: BuildVisualizationConfigParams): Promise<BuildVisualizationConfigResult> => {
+}: BuildLensConfigParams): Promise<BuildLensConfigResult> => {
   let selectedChartType: SupportedChartType = chartType || SupportedChartType.Metric;
 
   if (!chartType) {

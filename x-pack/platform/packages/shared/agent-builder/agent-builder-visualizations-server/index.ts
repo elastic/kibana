@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { buildVisualizationConfig } from './lens/build_visualization_config';
+export { buildLensConfig } from './lens/build_lens_config';
 export { getChartTypeSelectionPromptContent } from './lens/chart_type_guidance';
 export type { VisualizationConfig } from './lens/types';
 export { buildVegaConfig } from './vega';

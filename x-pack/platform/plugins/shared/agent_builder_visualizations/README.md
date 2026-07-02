@@ -32,7 +32,7 @@ passing Kibana services explicitly via `VisualizationServices`.
 - `@kbn/agent-builder-visualizations-common` — attachment schema and shared
   types (the `renderer` discriminator, `VisualizationAttachmentData`, etc.).
 - `@kbn/agent-builder-visualizations-server` — the Lens and Vega-Lite generation
-  engines (`buildVisualizationConfig`, `buildVegaConfig`).
+  engines (`buildLensConfig`, `buildVegaConfig`).
 - `@kbn/agent-builder-visualizations` — the browser render components
   (`InlineVisualization`, Lens and Vega renderers).
 

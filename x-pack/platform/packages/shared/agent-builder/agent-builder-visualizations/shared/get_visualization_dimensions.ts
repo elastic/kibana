@@ -67,7 +67,7 @@ const getGaugeDimensions = (shape: GaugeShape | undefined): VisualizationDimensi
  * Derives visualization dimensions from a raw lens config object.
  * Used by VisualizeLens where the full config (including gauge shape) is available.
  */
-export const getVisualizationDimensionsFromConfig = (
+export const getVisualizationDimensionsFromLensConfig = (
   lensConfig: Record<string, unknown>
 ): VisualizationDimensions => {
   const chartType = lensConfig.type as string | undefined;

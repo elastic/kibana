@@ -12,7 +12,7 @@ import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server'
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { createVisualizationGraph } from './graph_lens';
-import { buildVisualizationConfig } from './build_visualization_config';
+import { buildLensConfig } from './build_lens_config';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   validateEsqlQuery: jest.fn(),
@@ -46,7 +46,7 @@ const createMockLogger = (): Logger =>
     warn: jest.fn(),
   } as unknown as Logger);
 
-describe('buildVisualizationConfig', () => {
+describe('buildLensConfig', () => {
   const events = {} as ToolEventEmitter;
   const esClient = { asCurrentUser: {} } as IScopedClusterClient;
   const modelProvider = {
@@ -76,7 +76,7 @@ describe('buildVisualizationConfig', () => {
   });
 
   const run = (esql?: string) =>
-    buildVisualizationConfig({
+    buildLensConfig({
       nlQuery: 'count of logs',
       chartType: SupportedChartType.Metric, // pass a chartType so guessChartType is skipped
       esql,
