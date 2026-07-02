@@ -419,4 +419,63 @@ describe('deleteOrphanedMultipleIsolatedAssets', () => {
     const [deletedObjects] = mockBulkDelete.mock.calls[0];
     expect(deletedObjects).toHaveLength(totalOrphans);
   });
+
+  it('batches multiple assets of the same type into a single find() call', async () => {
+    const orphan1 = 'uuid-orphan-tag-1';
+    const orphan2 = 'uuid-orphan-tag-2';
+    mockFind.mockResolvedValueOnce(
+      makeFindResult([
+        { id: orphan1, type: KibanaSavedObjectType.tag, originId: 'tag-a' },
+        { id: orphan2, type: KibanaSavedObjectType.tag, originId: 'tag-b' },
+      ])
+    );
+
+    const iterator = makeArchiveIterator([makeTagAsset('tag-a'), makeTagAsset('tag-b')]);
+    await deleteOrphanedMultipleIsolatedAssets({
+      kibanaAssetsArchiveIterator: iterator,
+      installedPkg: undefined,
+      spaceId: 'default',
+      logger: mockLogger,
+    });
+
+    // Both tag assets should be handled in a single find() call, not two.
+    expect(mockFind).toHaveBeenCalledTimes(1);
+    expect(mockBulkDelete).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        { id: orphan1, type: KibanaSavedObjectType.tag },
+        { id: orphan2, type: KibanaSavedObjectType.tag },
+      ]),
+      expect.anything()
+    );
+  });
+
+  it('passes fields: [] to find() to avoid fetching unnecessary attributes', async () => {
+    const iterator = makeArchiveIterator([makeTagAsset('my-tag')]);
+    await deleteOrphanedMultipleIsolatedAssets({
+      kibanaAssetsArchiveIterator: iterator,
+      installedPkg: undefined,
+      spaceId: 'default',
+      logger: mockLogger,
+    });
+
+    expect(mockFind).toHaveBeenCalledWith(expect.objectContaining({ fields: [] }));
+  });
+
+  it('logs a warning and continues when find() throws, without propagating the error', async () => {
+    const findError = new Error('ES search failed');
+    mockFind.mockRejectedValueOnce(findError);
+
+    const iterator = makeArchiveIterator([makeTagAsset('my-tag')]);
+    await expect(
+      deleteOrphanedMultipleIsolatedAssets({
+        kibanaAssetsArchiveIterator: iterator,
+        installedPkg: undefined,
+        spaceId: 'default',
+        logger: mockLogger,
+      })
+    ).resolves.toBeUndefined();
+
+    expect(mockBulkDelete).not.toHaveBeenCalled();
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('ES search failed'));
+  });
 });

@@ -346,35 +346,63 @@ export async function deleteOrphanedMultipleIsolatedAssets({
   });
 
   const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
-  const orphansToDelete: Array<{ id: string; type: string }> = [];
 
+  // Collect all multiple-isolated-type asset ids from the archive in one pass,
+  // grouped by SO type so we can issue batched OR-joined search requests below
+  // instead of one find() per asset.
+  const assetIdsByType = new Map<string, string[]>();
   await kibanaAssetsArchiveIterator(async ({ asset }) => {
     if (!MULTIPLE_ISOLATED_KIBANA_SO_TYPES.has(asset.type)) return;
-
-    for (let page = 1, fetched = 0; ; page++) {
-      const findResult = await internalSoClient.find<Record<string, unknown>>({
-        type: asset.type,
-        search: buildOriginSearchQuery(asset.type, asset.id),
-        rootSearchFields: ['_id', 'originId'],
-        perPage: 100,
-        page,
-        namespaces: [spaceId],
-      });
-
-      for (const foundObj of findResult.saved_objects) {
-        // A genuine orphan always has a UUID id with originId === asset.id.
-        // An object whose raw _id === asset.id (no originId) is a legitimately
-        // shared package/user object — matching it only by _id risks deleting
-        // another package's or a user's tag with the same archive id.
-        if (foundObj.originId === asset.id && !trackedIds.has(foundObj.id)) {
-          orphansToDelete.push({ id: foundObj.id, type: foundObj.type });
-        }
-      }
-
-      fetched += findResult.saved_objects.length;
-      if (findResult.saved_objects.length === 0 || fetched >= findResult.total) break;
-    }
+    const ids = assetIdsByType.get(asset.type) ?? [];
+    ids.push(asset.id);
+    assetIdsByType.set(asset.type, ids);
   });
+
+  if (assetIdsByType.size === 0) return;
+
+  const SEARCH_BATCH_SIZE = 100;
+  const orphansToDelete: Array<{ id: string; type: string }> = [];
+
+  for (const [assetType, assetIds] of assetIdsByType) {
+    for (const idsBatch of chunk(assetIds, SEARCH_BATCH_SIZE)) {
+      const searchQuery = idsBatch.map((id) => buildOriginSearchQuery(assetType, id)).join(' | ');
+      const batchIdSet = new Set(idsBatch);
+
+      try {
+        for (let page = 1, fetched = 0; ; page++) {
+          const findResult = await internalSoClient.find<Record<string, unknown>>({
+            type: assetType,
+            search: searchQuery,
+            rootSearchFields: ['_id', 'originId'],
+            fields: [],
+            perPage: 100,
+            page,
+            namespaces: [spaceId],
+          });
+
+          for (const foundObj of findResult.saved_objects) {
+            // A genuine orphan always has a UUID id with originId pointing to one of the
+            // archive asset ids. An object whose raw _id matches an asset id (no originId)
+            // is a legitimately shared package/user object and must not be deleted.
+            if (
+              foundObj.originId !== undefined &&
+              batchIdSet.has(foundObj.originId) &&
+              !trackedIds.has(foundObj.id)
+            ) {
+              orphansToDelete.push({ id: foundObj.id, type: foundObj.type });
+            }
+          }
+
+          fetched += findResult.saved_objects.length;
+          if (findResult.saved_objects.length === 0 || fetched >= findResult.total) break;
+        }
+      } catch (err) {
+        logger.warn(
+          `[Fleet] Error searching for orphaned saved objects of type '${assetType}' in space '${spaceId}': ${err.message}`
+        );
+      }
+    }
+  }
 
   if (!orphansToDelete.length) return;
 
