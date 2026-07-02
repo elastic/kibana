@@ -271,6 +271,17 @@ describe('AppHeaderView', () => {
     await waitFor(() => expect(screen.queryByText('Second app')).not.toBeInTheDocument());
   });
 
+  describe('padding', () => {
+    it('resolves bleed "m" to the 16px EUI paddingSize breakout', () => {
+      renderAppHeader(<AppHeaderView title="Dashboard" sticky={false} padding={{ bleed: 'm' }} />);
+
+      const root = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root);
+      expect(root).toHaveStyleRule('padding-inline', '16px');
+      expect(root).toHaveStyleRule('margin-top', '-16px');
+      expect(root).toHaveStyleRule('margin-inline', '-16px');
+    });
+  });
+
   describe('borderless flag', () => {
     it('renders a bottom border by default', () => {
       renderAppHeader(<AppHeaderView title="Dashboard" />);
