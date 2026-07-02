@@ -8,8 +8,8 @@
  */
 
 import type { ObjectScope } from '@elastic/eui-test-helpers';
-import type { KbnComboBoxObject } from '../../../../eui_components/combo_box_object';
 import type { Page } from '@playwright/test';
+import type { KbnComboBoxObject } from '../../../../eui_components/combo_box_object';
 import type { RunA11yScanOptions } from '../../../../utils';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
 

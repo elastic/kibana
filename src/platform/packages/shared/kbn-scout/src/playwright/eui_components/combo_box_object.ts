@@ -90,8 +90,8 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
 
     const option = this.optionsList().getByRole('option', { name: value, exact: false });
     try {
-      await option.first().waitFor({ state: 'visible', timeout });
-      await option.first().click();
+      await option.waitFor({ state: 'visible', timeout });
+      await option.click();
     } catch (error) {
       if (!create) {
         throw error;
@@ -110,7 +110,7 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
   async getAvailableOptions(): Promise<string[]> {
     await this.inputWrapper.click();
     const options = this.optionsList().getByRole('option');
-    await options.first().waitFor({ state: 'visible' });
+    await expect.poll(() => options.count()).toBeGreaterThan(0);
     return options.allInnerTexts();
   }
 }

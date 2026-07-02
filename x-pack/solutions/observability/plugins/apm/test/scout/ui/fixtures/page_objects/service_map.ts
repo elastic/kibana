@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { type KbnComboBoxObject, type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+import {
+  type KbnComboBoxObject,
+  type KibanaUrl,
+  type Locator,
+  type ScoutPage,
+} from '@kbn/scout-oblt';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
 import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT, SERVICE_OPBEANS_JAVA } from '../constants';
 

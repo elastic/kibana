@@ -8,10 +8,10 @@
  */
 
 import type { ObjectScope } from '@elastic/eui-test-helpers';
-import { KbnComboBoxObject } from '../../../../eui_components/combo_box_object';
 import { subj } from '@kbn/test-subj-selector';
 import type { Page, TestInfo } from '@playwright/test';
 import { test as base } from '@playwright/test';
+import { KbnComboBoxObject } from '../../../../eui_components/combo_box_object';
 import type { ScoutPage } from '.';
 import { attachBrowserConsoleErrors, collectBrowserConsoleErrors } from './browser_console_errors';
 import type { PathOptions } from '../../../../../common/services/kibana_url';

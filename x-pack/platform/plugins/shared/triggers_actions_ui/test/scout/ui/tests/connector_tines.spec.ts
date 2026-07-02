@@ -358,7 +358,7 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator('tines-webhookSelector')).toHaveClass(
       /euiComboBox-isDisabled/
     );
-    expect(await webhookCombo.getSelectedOptions()).toEqual([]);
+    expect(await webhookCombo.getSelectedOptions()).toStrictEqual([]);
   });
 
   test('keeps the Run button disabled when story+webhook are set but JSON is missing', async ({

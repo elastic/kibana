@@ -2785,6 +2785,14 @@ paths:
         content:
           application/json:
             examples:
+              conversePublicRequestExample:
+                description: Example request to create a public conversation
+                value:
+                  access_control:
+                    access_mode: public
+                  agent_id: elastic-ai-agent
+                  connector_id: my-connector-id
+                  input: What is Elasticsearch?
               converseRequestExample:
                 description: Example request to send a message to the agent as a part of the conversation
                 value:
@@ -2807,6 +2815,19 @@ paths:
                     - local
                     - task_manager
                   type: string
+                access_control:
+                  additionalProperties: false
+                  description: '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.'
+                  type: object
+                  properties:
+                    access_mode:
+                      description: Access mode to apply when creating a new conversation. Set to public to make the conversation visible to other users who can access the underlying agent. This setting is ignored when continuing an existing conversation.
+                      enum:
+                        - private
+                        - public
+                      type: string
+                  required:
+                    - access_mode
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -2967,6 +2988,8 @@ paths:
                 converseResponseExample:
                   description: Example response containing the chain of events representing a conversation with the agent
                   value:
+                    access_control:
+                      access_mode: private
                     conversation_id: 696ccd6d-4bff-4b26-a62e-522ccf2dcd16
                     response:
                       message: Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease.
@@ -2998,13 +3021,20 @@ paths:
               -H "Content-Type: application/json" \
               -d '{
                 "input": "What is Elasticsearch?",
-                "agent_id": "elastic-ai-agent"}'
+                "agent_id": "elastic-ai-agent",
+                "access_control": {
+                  "access_mode": "public"
+                }
+              }'
         - lang: Console
           source: |
             POST kbn://api/agent_builder/converse
             {
               "input": "What is Elasticsearch?",
-              "agent_id": "elastic-ai-agent"
+              "agent_id": "elastic-ai-agent",
+              "access_control": {
+                "access_mode": "public"
+              }
             }
       x-state: Added in 9.2.0
       x-metaTags:
@@ -3211,6 +3241,13 @@ paths:
         content:
           application/json:
             examples:
+              converseAsyncPublicRequestExample:
+                description: Example request to create a public conversation
+                value:
+                  access_control:
+                    access_mode: public
+                  agent_id: elastic-ai-agent
+                  input: Hello
               converseAsyncRequestExample:
                 description: Example request to send a message to the agent as a part of the conversation
                 value:
@@ -3233,6 +3270,19 @@ paths:
                     - local
                     - task_manager
                   type: string
+                access_control:
+                  additionalProperties: false
+                  description: '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.'
+                  type: object
+                  properties:
+                    access_mode:
+                      description: Access mode to apply when creating a new conversation. Set to public to make the conversation visible to other users who can access the underlying agent. This setting is ignored when continuing an existing conversation.
+                      enum:
+                        - private
+                        - public
+                      type: string
+                  required:
+                    - access_mode
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -3425,6 +3475,13 @@ paths:
                             response:
                               message: Hello! How can I help you today?
                       event: round_complete
+                    - data:
+                        data:
+                          access_control:
+                            access_mode: private
+                          conversation_id: c250305b-1929-4248-b568-b9e3f065fda5
+                          title: Hello
+                      event: conversation_created
           description: Indicates a successful response
       summary: Send chat message (streaming)
       tags:
@@ -6902,6 +6959,127 @@ paths:
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/alerting/rule/{rule_id}/alert/{alert_id}/_snooze:
+    post:
+      operationId: post-alerting-rule-rule-id-alert-alert-id-snooze
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The identifier for the rule.
+          in: path
+          name: rule_id
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+        - description: The identifier for the alert.
+          in: path
+          name: alert_id
+          required: true
+          schema:
+            maxLength: 1000
+            type: string
+        - description: Set to `true` to validate that the specified alert exists. If a `400` error is returned, the specified alert does not exist. Defaults to `true`.
+          in: query
+          name: validate_alerts_existence
+          required: false
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                condition_operator:
+                  description: Logical operator applied to the conditions array. "any" expires the snooze when at least one condition is met; "all" requires every condition to be met. When conditions are provided but this field is omitted, defaults to "any".
+                  enum:
+                    - any
+                    - all
+                  type: string
+                conditions:
+                  description: 'One or more conditions that, when met, automatically expire the snooze. Supported types: `field_change`, `severity_change`, `severity_equals`.'
+                  items:
+                    anyOf:
+                      - additionalProperties: false
+                        description: Expires the snooze when the value of the specified alert field changes.
+                        type: object
+                        properties:
+                          field:
+                            description: The alert field to watch, written as a dot-notation path. When the value of the specified alert field changes, the snooze expires
+                            maxLength: 1000
+                            type: string
+                          type:
+                            enum:
+                              - field_change
+                            type: string
+                        required:
+                          - type
+                          - field
+                      - additionalProperties: false
+                        description: Expires the snooze when the severity of the specified alert changes.
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - severity_change
+                            type: string
+                        required:
+                          - type
+                      - additionalProperties: false
+                        description: Expires the snooze when the severity of the specified alert equals a target level.
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - severity_equals
+                            type: string
+                          value:
+                            description: 'The target severity level: critical, high, medium, low, or info.'
+                            enum:
+                              - critical
+                              - high
+                              - medium
+                              - low
+                              - info
+                            type: string
+                        required:
+                          - type
+                          - value
+                  maxItems: 10
+                  type: array
+                expires_at:
+                  description: The datetime at which the snooze expires, in ISO 8601 format (`YYYY-MM-DDTHH:mm:ss.sssZ`). When omitted, the snooze persists indefinitely unless manually removed or a defined condition is met.
+                  maxLength: 30
+                  type: string
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates the specified rule or alert doesn't exist.
+      summary: Snooze an alert
+      tags:
+        - alerting
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{rule_id}/alert/{alert_id}/_snooze</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute:
     post:
       operationId: post-alerting-rule-rule-id-alert-alert-id-unmute
@@ -6944,6 +7122,53 @@ paths:
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/alerting/rule/{rule_id}/alert/{alert_id}/_unsnooze:
+    post:
+      operationId: post-alerting-rule-rule-id-alert-alert-id-unsnooze
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The identifier for the rule.
+          in: path
+          name: rule_id
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+        - description: The identifier for the alert.
+          in: path
+          name: alert_id
+          required: true
+          schema:
+            maxLength: 1000
+            type: string
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates the specified rule or alert doesn't exist.
+      summary: Unsnooze an alert
+      tags:
+        - alerting
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{rule_id}/alert/{alert_id}/_unsnooze</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}:
@@ -7080,7 +7305,8 @@ paths:
           required: false
           schema:
             type: string
-        - in: query
+        - description: 'Filters the returned rules by the consumer (Kibana application) that owns them, for example: `siem`, `apm`, `infrastructure`.'
+          in: query
           name: filter_consumers
           required: false
           schema:
@@ -28877,6 +29103,168 @@ paths:
         - content: Kibana
           name: product_name
   /api/fleet/agentless_policies:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agentless_policies</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List agentless policies
+      operationId: get-fleet-agentless-policies
+      parameters:
+        - description: Page number. Defaults to `1`.
+          in: query
+          name: page
+          required: false
+          schema:
+            type: number
+        - description: Number of results per page. Defaults to `20`.
+          in: query
+          name: perPage
+          required: false
+          schema:
+            type: number
+        - description: Field to sort results by. Defaults to `updated_at`.
+          in: query
+          name: sortField
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+        - description: Sort order, ascending or descending. Defaults to `desc`.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            enum:
+              - desc
+              - asc
+            type: string
+        - description: 'A KQL query string to filter results. Filtering is restricted to the following fields: `name`, `namespace`, `package.name`.'
+          in: query
+          name: kuery
+          required: false
+          schema:
+            maxLength: 4096
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                listAgentlessPoliciesResponseExample:
+                  description: Example response for listing agentless policies
+                  value:
+                    items:
+                      - created_at: '2025-11-06T18:27:43.541Z'
+                        created_by: test_user
+                        description: test
+                        id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                        inputs:
+                          ESS Billing-cel:
+                            enabled: true
+                            streams:
+                              ess_billing.billing:
+                                enabled: true
+                              ess_billing.credits:
+                                enabled: false
+                            vars:
+                              api_key:
+                                id: QY1sWpoBbWcMW-edr0Ee
+                                isSecretRef: true
+                              organization_id: '1234'
+                              url: https://billing.elastic-cloud.com
+                        name: ess_billing-1
+                        namespace: default
+                        package:
+                          name: ess_billing
+                          title: Elasticsearch Service Billing
+                          version: 1.6.0
+                        updated_at: '2025-11-06T18:27:43.541Z'
+                        updated_by: test_user
+                      - cloud_connector:
+                          cloud_connector_id: aws-connector-67890
+                          enabled: true
+                        created_at: '2025-11-06T18:27:43.541Z'
+                        created_by: test_user
+                        description: CSPM integration for AWS with cloud connector
+                        id: aws-policy-12345
+                        inputs:
+                          cspm-cloudbeat/cis_aws:
+                            enabled: true
+                        name: cspm-aws-policy
+                        namespace: default
+                        package:
+                          name: cloud_security_posture
+                          title: Cloud Security Posture Management
+                          version: 3.1.1
+                        updated_at: '2025-11-06T18:27:43.541Z'
+                        updated_by: test_user
+                        vars:
+                          deployment: aws
+                          posture: cspm
+                    page: 1
+                    perPage: 20
+                    total: 2
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy'
+                    maxItems: 10000
+                    type: array
+                  page:
+                    type: number
+                  perPage:
+                    type: number
+                  total:
+                    type: number
+                required:
+                  - items
+                  - total
+                  - page
+                  - perPage
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Get agentless policies
+      tags:
+        - Fleet agentless policies
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
     post:
       description: |-
         **Spaces method and path for this operation:**
@@ -29250,6 +29638,7 @@ paths:
           name: policyId
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: Force delete the policy even if the policy is managed.
           in: query
@@ -29340,6 +29729,122 @@ paths:
       tags:
         - Fleet agentless policies
       x-state: Experimental; added in 9.3.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agentless_policies/{policyId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get an agentless policy by ID
+      operationId: get-fleet-agentless-policies-policyid
+      parameters:
+        - description: The ID of the agentless policy to retrieve.
+          in: path
+          name: policyId
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getAgentlessPolicyResponseExample:
+                  description: Example response for getting an agentless policy by ID
+                  value:
+                    item:
+                      created_at: '2025-11-06T18:27:43.541Z'
+                      created_by: test_user
+                      description: test
+                      id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      inputs:
+                        ESS Billing-cel:
+                          enabled: true
+                          streams:
+                            ess_billing.billing:
+                              enabled: true
+                              vars:
+                                hide_sensitive: true
+                                http_client_timeout: 30s
+                                lookbehind: 365
+                                tags:
+                                  - forwarded
+                                  - billing
+                            ess_billing.credits:
+                              enabled: false
+                          vars:
+                            api_key:
+                              id: QY1sWpoBbWcMW-edr0Ee
+                              isSecretRef: true
+                            organization_id: '1234'
+                            url: https://billing.elastic-cloud.com
+                      name: ess_billing-1
+                      namespace: default
+                      package:
+                        name: ess_billing
+                        title: Elasticsearch Service Billing
+                        version: 1.6.0
+                      updated_at: '2025-11-06T18:27:43.541Z'
+                      updated_by: test_user
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy_response'
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
+      summary: Get an agentless policy
+      tags:
+        - Fleet agentless policies
+      x-state: Experimental; added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -38766,6 +39271,12 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        allow_edit:
+                          items:
+                            maxLength: 100
+                            type: string
+                          maxItems: 100
+                          type: array
                         host_urls:
                           items:
                             type: string
@@ -38949,6 +39460,12 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                allow_edit:
+                  items:
+                    maxLength: 100
+                    type: string
+                  maxItems: 100
+                  type: array
                 host_urls:
                   items:
                     type: string
@@ -39072,6 +39589,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      allow_edit:
+                        items:
+                          maxLength: 100
+                          type: string
+                        maxItems: 100
+                        type: array
                       host_urls:
                         items:
                           type: string
@@ -39340,6 +39863,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      allow_edit:
+                        items:
+                          maxLength: 100
+                          type: string
+                        maxItems: 100
+                        type: array
                       host_urls:
                         items:
                           type: string
@@ -39529,6 +40058,12 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                allow_edit:
+                  items:
+                    maxLength: 100
+                    type: string
+                  maxItems: 100
+                  type: array
                 host_urls:
                   items:
                     type: string
@@ -39644,6 +40179,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      allow_edit:
+                        items:
+                          maxLength: 100
+                          type: string
+                        maxItems: 100
+                        type: array
                       host_urls:
                         items:
                           type: string
@@ -61361,6 +61902,7 @@ paths:
                           type: user
                         user:
                           name: jdoe
+                    entity_type: user
                     group_size: 2
                     target:
                       '@timestamp': '2026-04-10T08:30:00.000Z'
@@ -61468,6 +62010,7 @@ paths:
                   description: The entities were successfully linked to the target entity.
                   summary: Entities linked
                   value:
+                    entity_type: user
                     linked:
                       - user:jdoe@example.com
                       - user:j.doe@example.com
@@ -61485,6 +62028,13 @@ paths:
                     error: Bad Request
                     message: Cannot link entities of different types
                     statusCode: 400
+                notFoundExample:
+                  description: One or more of the specified entity identifiers were not found.
+                  summary: Entities not found
+                  value:
+                    error: Bad Request
+                    message: 'Entities not found: [user:nonexistent@example.com, user:also-nonexistent@example.com]'
+                    statusCode: 400
                 selfLinkExample:
                   description: Cannot link an entity to itself.
                   summary: Self-link error
@@ -61493,18 +62043,6 @@ paths:
                     message: Cannot link entity 'user:jane.doe@example.com' to itself.
                     statusCode: 400
           description: Bad request.
-        '404':
-          content:
-            application/json:
-              examples:
-                notFoundExample:
-                  description: One or more of the specified entity identifiers were not found.
-                  summary: Entities not found
-                  value:
-                    error: Not Found
-                    message: 'Entities not found: [user:nonexistent@example.com, user:also-nonexistent@example.com]'
-                    statusCode: 404
-          description: Entities not found.
       summary: Link entities
       tags:
         - Security entity store
@@ -61577,23 +62115,31 @@ paths:
                   description: The entities were successfully removed from their resolution group.
                   summary: Entities unlinked
                   value:
+                    entity_type: user
                     skipped: []
                     unlinked:
                       - user:jdoe@example.com
                       - user:j.doe@example.com
           description: Indicates a successful response.
-        '404':
+        '400':
           content:
             application/json:
               examples:
+                mixedTypesExample:
+                  description: All entities in a resolution group must be of the same type.
+                  summary: Mixed entity types
+                  value:
+                    error: Bad Request
+                    message: 'All entities must be of the same type. Found types: [user, host]'
+                    statusCode: 400
                 notFoundExample:
                   description: One or more of the specified entity identifiers were not found.
                   summary: Entities not found
                   value:
-                    error: Not Found
+                    error: Bad Request
                     message: 'Entities not found: [user:nonexistent@example.com]'
-                    statusCode: 404
-          description: Entities not found.
+                    statusCode: 400
+          description: Bad request.
       summary: Unlink entities
       tags:
         - Security entity store
@@ -70701,13 +71247,14 @@ paths:
                 - waiting_for_input
                 - waiting_for_child
                 - running
+                - queued
                 - completed
                 - failed
                 - cancelled
                 - timed_out
                 - skipped
               type: string
-            maxItems: 10
+            maxItems: 11
             type: array
         - description: Filter by execution type.
           in: query
