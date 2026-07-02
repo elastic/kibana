@@ -31,6 +31,7 @@ import { resolveCeAttachItems } from './services/ce/execute_ce_attach_items';
 import type { CeService } from './services/ce/types';
 import { registerContextEngineWorkflowSteps } from './workflow_steps';
 import { corpusEntryCeType } from './ce_types/corpus_entry';
+import { buildIndexAttachment, buildDeleteAttachment } from './start_contract';
 
 export class ContextEnginePlugin
   implements
@@ -197,48 +198,20 @@ export class ContextEnginePlugin
       },
       getTypeDefinition: ceService.getTypeDefinition,
       resolveCeAttachItems: (params) => resolveCeAttachItems({ ...params, ce: ceService }),
-      indexAttachment: async (params) => {
-        const soClient = savedObjects.getScopedClient(params.request, {
-          ...(params.includedHiddenTypes?.length
-            ? { includedHiddenTypes: params.includedHiddenTypes }
-            : {}),
-        });
-        const spaceId =
-          params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
-        const base = {
-          originId: params.originId,
-          attachmentType: params.attachmentType,
-          action: params.action,
-          spaces: [spaceId],
-          esClient: elasticsearch.client.asInternalUser,
-          savedObjectsClient: soClient,
-          logger: this.logger.get('ce'),
-        };
-        if (params.content !== undefined) {
-          return ceService.indexAttachment({ ...base, content: params.content });
-        }
-        return ceService.indexAttachment({ ...base, force: params.force });
-      },
-      deleteAttachment: async (params) => {
-        const soClient = savedObjects.getScopedClient(params.request, {
-          ...(params.includedHiddenTypes?.length
-            ? { includedHiddenTypes: params.includedHiddenTypes }
-            : {}),
-        });
-        const spaceId =
-          params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
-        return ceService.deleteAttachment({
-          originId: params.originId,
-          attachmentType: params.attachmentType,
-          spaces: [spaceId],
-          esClient: elasticsearch.client.asInternalUser,
-          savedObjectsClient: soClient,
-          logger: this.logger.get('ce'),
-          ...(params.ingestionMethod !== undefined
-            ? { ingestionMethod: params.ingestionMethod }
-            : {}),
-        });
-      },
+      indexAttachment: buildIndexAttachment({
+        ceService,
+        elasticsearch,
+        savedObjects,
+        spaces,
+        logger: this.logger.get('ce'),
+      }),
+      deleteAttachment: buildDeleteAttachment({
+        ceService,
+        elasticsearch,
+        savedObjects,
+        spaces,
+        logger: this.logger.get('ce'),
+      }),
     };
 
     this.startContract = startContract;

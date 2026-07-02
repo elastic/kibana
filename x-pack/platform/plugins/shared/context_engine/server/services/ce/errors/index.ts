@@ -10,3 +10,4 @@ export { CeResultWindowExceededError } from './ce_result_window_exceeded_error';
 export { CeAuthzEnumerationIncompleteError } from './ce_authz_enumeration_incomplete_error';
 export { CeCorpusTooLargeError } from './ce_corpus_too_large_error';
 export { CeUnregisteredTypeError } from './ce_unregistered_type_error';
+export { CePermissionsConflictError } from './ce_permissions_conflict_error';

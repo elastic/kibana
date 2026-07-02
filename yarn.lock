@@ -6401,6 +6401,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dag-layout@link:src/platform/packages/shared/kbn-dag-layout":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dashboard-markdown@link:src/platform/plugins/shared/dashboard_markdown":
   version "0.0.0"
   uid ""
@@ -6422,6 +6426,10 @@
   uid ""
 
 "@kbn/dashboards-selector@link:src/platform/packages/shared/dashboards/dashboards-selector":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-federation-plugin@link:x-pack/platform/plugins/private/data_federation":
   version "0.0.0"
   uid ""
 

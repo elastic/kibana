@@ -19,5 +19,7 @@ export const MAX_CE_TITLE_LENGTH = 1024;
 export const MAX_CE_CONTENT_LENGTH = 50_000;
 export const MAX_CE_TAG_LENGTH = 100;
 export const MAX_CE_TAGS_PER_DOCUMENT = 100;
+export const MAX_CE_PERMISSIONS_NAME_LENGTH = 512;
+export const MAX_CE_PERMISSIONS_ENTRIES = 100;
 // Cross-space guard may miss entries beyond this limit — see findByOriginAcrossSpaces.
 export const MAX_ENTRIES_PER_ORIGIN = 1000;

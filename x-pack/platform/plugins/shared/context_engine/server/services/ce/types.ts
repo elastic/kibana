@@ -422,6 +422,12 @@ export interface CeIndexAttachmentContentMode {
    * indexer will stamp `now`.
    */
   createdAt?: string;
+  /**
+   * Caller-supplied permissions to stamp on the written entries, used only
+   * when `attachmentType` has no `getPermissions` hook. Conflicts with a
+   * hook-backed type — see {@link CePermissionsConflictError}.
+   */
+  permissions?: CePermissions;
 }
 
 /**

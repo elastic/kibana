@@ -343,6 +343,67 @@ steps:
     with:
       message: "{{ inputs.message }}"`;
 
+/**
+ * Multi-step workflow (5 console steps) used to verify graph view behaviour.
+ * Paired with `getBrokenGraphWorkflowYaml` which introduces a YAML syntax
+ * error that shows the "YAML has errors" callout.
+ */
+export const getMultiStepGraphWorkflowYaml = (name: string) => `
+name: ${name}
+description: Multi-step workflow for graph recovery test
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: step_1
+    type: console
+    with:
+      message: "Step 1 output"
+  - name: step_2
+    type: console
+    with:
+      message: "Step 2 output"
+  - name: step_3
+    type: console
+    with:
+      message: "Step 3 output"
+  - name: step_4
+    type: console
+    with:
+      message: "Step 4 output"
+  - name: step_5
+    type: console
+    with:
+      message: "Step 5 output"
+`;
+
+/**
+ * Broken variant of `getMultiStepGraphWorkflowYaml`: contains only step_1 in
+ * the steps array plus an unclosed flow sequence at the root level.
+ *
+ * The unclosed bracket (`broken_field: [unclosed bracket`) makes
+ * YAML.parseDocument report a parse error (isYamlSyntaxValid → false →
+ * warning callout shown). Note: an undefined YAML alias (*ref) does NOT
+ * produce errors in the yaml package — only doc.warnings — so it cannot be
+ * used here.
+ *
+ * This YAML should always be paired with getMultiStepGraphWorkflowYaml as the
+ * "before" and "after" states in the graph recovery regression test.
+ */
+export const getBrokenGraphWorkflowYaml = (name: string) => `
+name: ${name}
+description: Multi-step workflow for graph recovery test
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: step_1
+    type: console
+    with:
+      message: "Step 1 output"
+broken_field: [unclosed bracket
+`;
+
 export const getWorkflowWithEventInputYaml = (name: string) => `
 name: ${name}
 description: Workflow with event and inputs logging

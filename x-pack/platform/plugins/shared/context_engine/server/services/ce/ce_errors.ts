@@ -20,4 +20,5 @@ export {
   CeAuthzEnumerationIncompleteError,
   CeCorpusTooLargeError,
   CeUnregisteredTypeError,
+  CePermissionsConflictError,
 } from './errors';

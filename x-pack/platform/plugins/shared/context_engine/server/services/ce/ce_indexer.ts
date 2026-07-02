@@ -26,7 +26,7 @@ import type {
 } from './types';
 import { createCeStorage, ceIndexName } from './ce_storage';
 import { isNotFoundError } from './ce_service';
-import { CeUnregisteredTypeError } from './ce_errors';
+import { CeUnregisteredTypeError, CePermissionsConflictError } from './ce_errors';
 
 export interface CeIndexerDeps {
   registry: CeTypeRegistry;
@@ -176,6 +176,7 @@ class CeIndexerImpl implements CeIndexer {
         contextLogger,
         entries: params.content!,
         createdAt: params.createdAt,
+        requestedPermissions: params.permissions,
       });
       return;
     }
@@ -336,6 +337,7 @@ class CeIndexerImpl implements CeIndexer {
     contextLogger,
     entries,
     createdAt,
+    requestedPermissions,
   }: {
     originId: string;
     attachmentType: string;
@@ -345,6 +347,7 @@ class CeIndexerImpl implements CeIndexer {
     contextLogger: Logger;
     entries: CeEntry[];
     createdAt?: string;
+    requestedPermissions?: CePermissions;
   }): Promise<void> {
     const originUri = `${attachmentType}://${originId}`;
     if (entries.length === 0) {
@@ -391,12 +394,15 @@ class CeIndexerImpl implements CeIndexer {
         definition,
         originId,
         context,
+        requestedPermissions,
       });
     } catch (error) {
+      const reason =
+        error instanceof CePermissionsConflictError
+          ? `caller-supplied permissions conflict with type '${definition?.id ?? attachmentType}'`
+          : `type '${definition?.id ?? attachmentType}' getPermissions threw`;
       this.logger.warn(
-        `CE indexer: type '${
-          definition?.id ?? attachmentType
-        }' getPermissions threw for origin '${originId}' — aborting content-mode write to avoid producing un-gated entries: ${
+        `CE indexer: ${reason} for origin '${originId}' — aborting content-mode write to avoid producing un-gated entries: ${
           (error as Error).message
         }`
       );
@@ -425,56 +431,49 @@ class CeIndexerImpl implements CeIndexer {
 
   /**
    * Resolve the {@link CePermissions} to stamp on every entry for an
-   * origin. Called **once per origin** before any ES mutation, so a hook
-   * failure can abort the write without leaving the origin in a
-   * half-deleted state.
+   * origin. Called **once per origin** before any ES mutation
    *
-   * - Registered type with `getPermissions` → the hook's result is used
-   *   (with arrays defensively defaulted to `[]` so the stored document
-   *   always has fully-shaped inner arrays). **A throw is propagated**
-   *   to the caller — see below.
-   * - Registered type without `getPermissions` → empty `CePermissions`.
-   *   This is an explicit opt-in by the CE type author signalling that
-   *   the data is space-readable.
-   * - Unregistered type (`definition === undefined`) → empty
-   *   `CePermissions`. Only reachable via content-mode writes;
-   *   origin-mode rejects unregistered types upstream via
-   *   {@link CeUnregisteredTypeError}. The warn line announcing the
-   *   namespace is emitted by `indexManualEntries` once per process per
-   *   type so this helper can stay quiet on the hot path.
-   *
-   * **Fail-closed on `getPermissions` throw.** When `getPermissions`
-   * throws, the error propagates before any ES mutation. Callers see this:
-   *
-   * - Origin-mode crawler: the task runner logs and reschedules on the
-   *   next crawl tick. The origin keeps its previous entries intact (the
-   *   throw lands before `deleteEntries` runs — see `indexAttachment`).
-   * - Workflow step: surfaced as a step `error` result.
-   * - HTTP upsert route: bubbles to a 500.
-   *
-   * The trade-off is intentional: a transient blip becomes a visible
-   * write failure rather than an invisible privilege escalation.
+   * - If only a hook is present, it wins.
+   * - If only `requestedPermissions` is supplied, they are used.
+   * - If both a hook is present AND `requestedPermissions` are supplied, an error is thrown.
+   * - If neither, permissions are left empty.
    */
   private async resolvePermissionsForOrigin({
     definition,
     originId,
     context,
+    requestedPermissions,
   }: {
     definition: CeTypeDefinition | undefined;
     originId: string;
     context: CeContext;
+    requestedPermissions?: CePermissions;
   }): Promise<CePermissions> {
-    if (!definition || !definition.getPermissions) {
-      return { kibana: { privileges: [] }, elasticsearch: { indices: [] } };
+    if (definition && definition.getPermissions) {
+      if (requestedPermissions) {
+        throw new CePermissionsConflictError(
+          `attachmentType '${definition.id}' derives permissions via getPermissions() and does not accept a caller-supplied 'permissions' value for origin '${originId}'.`
+        );
+      }
+
+      // Intentionally NOT wrapped in try/catch — see fail-closed note in
+      // the JSDoc. Logging here is the caller's job (so origin-mode and
+      // content-mode can frame the failure with their own context).
+      const result = await definition.getPermissions(originId, context);
+      return {
+        kibana: { privileges: result.kibana?.privileges ?? [] },
+        elasticsearch: { indices: result.elasticsearch?.indices ?? [] },
+      };
     }
-    // Intentionally NOT wrapped in try/catch — see fail-closed note in
-    // the JSDoc. Logging here is the caller's job (so origin-mode and
-    // content-mode can frame the failure with their own context).
-    const result = await definition.getPermissions(originId, context);
-    return {
-      kibana: { privileges: result.kibana?.privileges ?? [] },
-      elasticsearch: { indices: result.elasticsearch?.indices ?? [] },
-    };
+
+    if (requestedPermissions) {
+      return {
+        kibana: { privileges: requestedPermissions.kibana?.privileges ?? [] },
+        elasticsearch: { indices: requestedPermissions.elasticsearch?.indices ?? [] },
+      };
+    }
+
+    return { kibana: { privileges: [] }, elasticsearch: { indices: [] } };
   }
 
   private buildIndexOp({
@@ -579,7 +578,9 @@ class CeIndexerImpl implements CeIndexer {
       }
     } catch (error) {
       this.logger.error(
-        `CE indexer: failed to index CE data for origin '${originId}': ${(error as Error).message}`
+        `CE indexer: failed to index CE data for origin '${originId}': ${
+          (error as Error).message
+        }`
       );
       throw error;
     }

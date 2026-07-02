@@ -27,7 +27,7 @@ pageLoadAssetSize:
   console: 31191
   contentConnectors: 33014
   contentManagement: 8350
-  contextEngine: 8828
+  contextEngine: 10146
   controls: 10300
   core: 606422
   cps: 9209
@@ -36,6 +36,7 @@ pageLoadAssetSize:
   dashboard: 20000
   dashboardMarkdown: 8661
   data: 496646
+  dataFederation: 7106
   dataQuality: 11469
   datasetQuality: 49315
   dataUsage: 8743

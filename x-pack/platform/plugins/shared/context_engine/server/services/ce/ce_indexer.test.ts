@@ -10,11 +10,12 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { createCeIndexer } from './ce_indexer';
 import { createCeStorage, ceIndexName } from './ce_storage';
-import { CeUnregisteredTypeError } from './ce_errors';
+import { CeUnregisteredTypeError, CePermissionsConflictError } from './ce_errors';
 import type {
   CeEntry,
   CeIndexerContentParams,
   CeIndexerOriginParams,
+  CePermissions,
   CeTypeDefinition,
 } from './types';
 
@@ -530,7 +531,9 @@ describe('createCeIndexer', () => {
         )
       ).rejects.toThrow('Connection refused');
 
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('failed to index CE data'));
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('failed to index CE data')
+      );
     });
 
     describe('manual-entry protection (origin mode)', () => {
@@ -540,7 +543,9 @@ describe('createCeIndexer', () => {
         (createCeStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
 
         const getCeData = jest.fn();
-        const registry = createMockRegistry(createMockCeTypeDefinition({ id: 'lens', getCeData }));
+        const registry = createMockRegistry(
+          createMockCeTypeDefinition({ id: 'lens', getCeData })
+        );
         const logger = createMockLogger();
         const esClient = createMockEsClient();
         // hasManualEntry returns true
@@ -586,7 +591,9 @@ describe('createCeIndexer', () => {
           entries: [{ type: 'lens', title: 'Forced', content: 'c' }],
         };
         const getCeData = jest.fn().mockResolvedValue(ceData);
-        const registry = createMockRegistry(createMockCeTypeDefinition({ id: 'lens', getCeData }));
+        const registry = createMockRegistry(
+          createMockCeTypeDefinition({ id: 'lens', getCeData })
+        );
         const logger = createMockLogger();
         const esClient = createMockEsClient();
         (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
@@ -613,7 +620,9 @@ describe('createCeIndexer', () => {
 
       it('delete action proceeds regardless of manual entries', async () => {
         const getCeData = jest.fn();
-        const registry = createMockRegistry(createMockCeTypeDefinition({ id: 'lens', getCeData }));
+        const registry = createMockRegistry(
+          createMockCeTypeDefinition({ id: 'lens', getCeData })
+        );
         const logger = createMockLogger();
         const esClient = createMockEsClient();
         (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
@@ -641,7 +650,9 @@ describe('createCeIndexer', () => {
         (createCeStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
 
         const getCeData = jest.fn();
-        const registry = createMockRegistry(createMockCeTypeDefinition({ id: 'lens', getCeData }));
+        const registry = createMockRegistry(
+          createMockCeTypeDefinition({ id: 'lens', getCeData })
+        );
         const logger = createMockLogger();
         const esClient = createMockEsClient();
         (esClient.count as jest.Mock).mockRejectedValue(
@@ -678,7 +689,9 @@ describe('createCeIndexer', () => {
           entries: [{ type: 'lens', title: 'T', content: 'c' }],
         };
         const getCeData = jest.fn().mockResolvedValue(ceData);
-        const registry = createMockRegistry(createMockCeTypeDefinition({ id: 'lens', getCeData }));
+        const registry = createMockRegistry(
+          createMockCeTypeDefinition({ id: 'lens', getCeData })
+        );
         const logger = createMockLogger();
         const esClient = createMockEsClient();
         (esClient.count as jest.Mock).mockRejectedValue(
@@ -1058,6 +1071,142 @@ describe('createCeIndexer', () => {
           { term: { 'origin.uri': 'lens://att-delete-with-content' } },
           { term: { ingestion_method: 'crawled' } },
         ]);
+      });
+
+      it.each<{
+        name: string;
+        registered: boolean;
+        requestedPermissions?: CePermissions;
+        expectedPermissions: CePermissions;
+      }>([
+        {
+          name: 'registered, no getPermissions hook + requestedPermissions supplied → stamps the requested permissions',
+          registered: true,
+          requestedPermissions: {
+            kibana: { privileges: [] },
+            elasticsearch: { indices: [{ name: 'my-index' }, { name: 'my-data-stream' }] },
+          },
+          expectedPermissions: {
+            kibana: { privileges: [] },
+            elasticsearch: { indices: [{ name: 'my-index' }, { name: 'my-data-stream' }] },
+          },
+        },
+        {
+          name: 'registered, no getPermissions hook + requestedPermissions omitted → stamps empty permissions',
+          registered: true,
+          expectedPermissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
+        },
+        {
+          name: 'unregistered type + requestedPermissions supplied → stamps the requested permissions',
+          registered: false,
+          requestedPermissions: {
+            kibana: { privileges: [] },
+            elasticsearch: { indices: [{ name: 'my-index' }] },
+          },
+          expectedPermissions: {
+            kibana: { privileges: [] },
+            elasticsearch: { indices: [{ name: 'my-index' }] },
+          },
+        },
+      ])(
+        'content mode: $name',
+        async ({ registered, requestedPermissions, expectedPermissions }) => {
+          const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+          const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+          (createCeStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+          const registry = registered
+            ? createMockRegistry(createMockCeTypeDefinition({ id: 'corpus_entry' }))
+            : createMockRegistry(undefined);
+          const logger = createMockLogger();
+          const esClient = createMockEsClient();
+          const indexer = createCeIndexer({ registry, logger });
+
+          await indexer.indexAttachment({
+            ...createContentIndexerParams({
+              originId: 'att-1',
+              attachmentType: 'corpus_entry',
+              action: 'create',
+              esClient,
+              content: [{ type: 'corpus_entry', title: 'T', content: 'c' }],
+            }),
+            ...(requestedPermissions !== undefined ? { permissions: requestedPermissions } : {}),
+          });
+
+          const ops = bulkMock.mock.calls[0][0].operations;
+          expect(ops[0].index.document.permissions).toEqual(expectedPermissions);
+        }
+      );
+
+      it('content mode: getPermissions hook exists + requestedPermissions supplied → throws CePermissionsConflictError before any ES mutation', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createCeStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const getPermissions = jest.fn().mockReturnValue({
+          kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+          elasticsearch: { indices: [] },
+        });
+        const registry = createMockRegistry(
+          createMockCeTypeDefinition({ id: 'lens', getPermissions })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createCeIndexer({ registry, logger });
+
+        await expect(
+          indexer.indexAttachment({
+            ...createContentIndexerParams({
+              originId: 'att-conflict',
+              attachmentType: 'lens',
+              action: 'create',
+              esClient,
+              content: [{ type: 'lens', title: 'T', content: 'c' }],
+            }),
+            permissions: {
+              kibana: { privileges: [] },
+              elasticsearch: { indices: [{ name: 'spoofed-index' }] },
+            },
+          })
+        ).rejects.toBeInstanceOf(CePermissionsConflictError);
+
+        expect(getPermissions).not.toHaveBeenCalled();
+        expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+        expect(bulkMock).not.toHaveBeenCalled();
+      });
+
+      it('content mode: getPermissions hook exists + requestedPermissions omitted → hook wins (unchanged behavior)', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createCeStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const getPermissions = jest.fn().mockReturnValue({
+          kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+          elasticsearch: { indices: [] },
+        });
+        const registry = createMockRegistry(
+          createMockCeTypeDefinition({ id: 'lens', getPermissions })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createCeIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createContentIndexerParams({
+            originId: 'att-hook-wins',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+            content: [{ type: 'lens', title: 'T', content: 'c' }],
+          })
+        );
+
+        expect(getPermissions).toHaveBeenCalledTimes(1);
+        const ops = bulkMock.mock.calls[0][0].operations;
+        expect(ops[0].index.document.permissions).toEqual({
+          kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+          elasticsearch: { indices: [] },
+        });
       });
     });
 
