@@ -157,7 +157,7 @@ export class TaskScheduling {
         ? agent.currentTraceparent
         : '';
     const modifiedTasks = await Promise.all(
-      taskInstances.map(async (taskInstance, i) => {
+      taskInstances.map(async (taskInstance, i, arr) => {
         const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
           ...omit(options, 'apiKey', 'request'),
           taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
@@ -165,10 +165,10 @@ export class TaskScheduling {
         const enabled = modifiedTask.enabled ?? true;
         let scheduling: Partial<{ runAt: Date; scheduledAt: Date }> = {};
         if (enabled) {
-          // Run the first task now. Run all other tasks a random number of ms in the future,
-          // with a maximum of 5 minutes or the task interval, whichever is smaller.
+          // Run now if there is only a single task.
+          // Otherwise add jitter to avoid them firing together.
           scheduling =
-            i === 0
+            arr.length === 1
               ? { runAt: new Date(), scheduledAt: new Date() }
               : addJitter(modifiedTask.schedule?.interval) ?? {};
         }
@@ -216,11 +216,11 @@ export class TaskScheduling {
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) => !task.enabled,
-      map: (task, i) => {
+      map: (task, i, arr) => {
         if (runSoon) {
-          // Run the first task now. Run all other tasks a random number of ms in the future,
-          // with a maximum of 5 minutes or the task interval, whichever is smaller.
-          return i === 0
+          // Run now if there is only a single task.
+          // Otherwise add jitter to avoid them firing together.
+          return arr.length === 1
             ? { ...task, enabled: true, runAt: new Date(), scheduledAt: new Date() }
             : { ...task, enabled: true, ...addJitter(task.schedule?.interval ?? '0s') };
         }
@@ -252,9 +252,9 @@ export class TaskScheduling {
 
   /**
    * Bulk updates schedules for tasks by ids.
-   * Only tasks with `idle` status will be updated, as for the tasks which have `running` status,
-   * `schedule` and `runAt` will be recalculated after task run finishes
-   *
+   * Only tasks with `idle` status will be updated. Running tasks are skipped even when
+   * `regenerateApiKey` is provided, because their `schedule` and `runAt` are recalculated after
+   * the task run finishes.
    * @param {string[]} taskIds  - list of task ids
    * @param {IntervalSchedule | RruleSchedule} schedule  - new schedule
    * @returns {Promise<BulkUpdateTaskResult>}
@@ -264,12 +264,20 @@ export class TaskScheduling {
     schedule: IntervalSchedule | RruleSchedule,
     options?: ApiKeyOptions
   ): Promise<BulkUpdateTaskResult> {
+    const shouldRegenerateApiKey = options?.regenerateApiKey === true;
+
     return retryableBulkUpdate({
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
-      filter: (task) => task.status === TaskStatus.Idle && !isEqual(task.schedule, schedule),
+      filter: (task) =>
+        task.status === TaskStatus.Idle &&
+        (shouldRegenerateApiKey || !isEqual(task.schedule, schedule)),
       map: (task) => {
+        if (isEqual(task.schedule, schedule)) {
+          return task;
+        }
+
         const newRunAtInMs = calculateNextRunAtFromSchedule({
           schedule,
           startDate: task.scheduledAt,

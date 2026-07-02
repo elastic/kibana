@@ -13,7 +13,7 @@ import { BuilderRecoveryForm } from './recovery_condition_step';
 import { BuilderStateProvider } from '../builder_state_context';
 import type { ThresholdFormValues } from './form_types';
 import { Comparator, DEFAULT_THRESHOLD_FORM_VALUES } from './form_types';
-import type { ComposeFormValues } from '../../compose_form_types';
+import type { FormValues } from '../../../../form/types';
 import type { ComposeDiscoverState } from '../../types';
 import { createInitialState } from '../../use_compose_discover_state';
 
@@ -22,12 +22,12 @@ const makeBuilderState = (overrides: Partial<ThresholdFormValues> = {}): Thresho
   ...overrides,
 });
 
-const BASE_COMPOSE_VALUES: ComposeFormValues = {
-  kind: 'signal',
+const BASE_COMPOSE_VALUES: FormValues = {
+  kind: 'alert',
   metadata: { name: 'Test rule', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: '' },
+  query: { format: 'composed', base: '', breach: { segment: '' } },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
   artifacts: [],
@@ -45,7 +45,7 @@ const Wrapper: React.FC<{
   onBuilderStateChange: (s: ThresholdFormValues) => void;
   children: React.ReactNode;
 }> = ({ builderState, onBuilderStateChange, children }) => {
-  const form = useForm<ComposeFormValues>({ defaultValues: BASE_COMPOSE_VALUES });
+  const form = useForm<FormValues>({ defaultValues: BASE_COMPOSE_VALUES });
 
   return (
     <IntlProvider locale="en">

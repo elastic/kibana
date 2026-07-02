@@ -5,97 +5,67 @@
  * 2.0.
  */
 
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import {
-  getDashboardsById,
-  searchRelatedDashboard,
-  type Dashboard,
-} from './search_related_dashboards';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { resolveDashboardsByIds, searchRelatedDashboard } from './search_related_dashboards';
 
-interface SearchDashboardsContext {
-  onResults: (dashboards: Dashboard[]) => void;
-  search: {
-    query?: string;
-    per_page: number;
-  };
-  trigger: { id: string };
-}
+const DASHBOARD_ID = 'dashboard-1';
+const DASHBOARD_TITLE = 'Dashboard 1';
+const MISSING_DASHBOARD_ID = 'missing-dashboard';
 
-interface GetDashboardsByIdContext {
-  ids: string[];
-  onResults: (dashboards: Dashboard[]) => void;
-  trigger: { id: string };
-}
+const search = jest.fn(async () => ({
+  total: 1,
+  dashboards: [{ id: DASHBOARD_ID, data: { title: DASHBOARD_TITLE }, meta: {} }],
+}));
 
-const dashboard: Dashboard = {
-  id: 'dashboard-1',
-  title: 'Dashboard 1',
-};
+const findByIds = jest.fn(async (ids: string[]) =>
+  ids.map((id) =>
+    id === DASHBOARD_ID
+      ? { id, status: 'success', attributes: { title: DASHBOARD_TITLE } }
+      : { id, status: 'error', notFound: true, error: new Error('not found') }
+  )
+);
+
+const findDashboardsService = jest.fn(async () => ({
+  search,
+  findById: jest.fn(),
+  findByIds,
+  findByTitle: jest.fn(),
+}));
+
+const dashboard = { findDashboardsService } as unknown as DashboardStart;
 
 describe('search related dashboards', () => {
-  const searchExecute = jest.fn((context: SearchDashboardsContext) => {
-    context.onResults([dashboard]);
-  });
-  const getDashboardsByIdsExecute = jest.fn((context: GetDashboardsByIdContext) => {
-    context.onResults([dashboard]);
-  });
-  const getAction = jest.fn((actionId: string) => {
-    if (actionId === 'getDashboardsByIdsAction') {
-      return Promise.resolve({ execute: getDashboardsByIdsExecute });
-    }
-
-    return Promise.resolve({ execute: searchExecute });
-  });
-  const uiActions = { getAction } as unknown as UiActionsStart;
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('searches dashboards with the dashboard search action', async () => {
-    const result = await searchRelatedDashboard(uiActions, { search: 'error rate', perPage: 25 });
+  it('searches dashboards via findDashboardsService().search', async () => {
+    const result = await searchRelatedDashboard(dashboard, { search: 'error rate', perPage: 25 });
 
-    expect(result).toEqual([dashboard]);
-    expect(getAction).toHaveBeenCalledWith('searchDashboardAction');
-    expect(searchExecute).toHaveBeenCalledWith({
-      onResults: expect.any(Function),
-      search: {
-        query: 'error rate',
-        per_page: 25,
-      },
-      trigger: { id: 'searchDashboards' },
-    });
+    expect(result).toEqual([{ id: DASHBOARD_ID, title: DASHBOARD_TITLE }]);
+    expect(search).toHaveBeenCalledWith({ query: 'error rate', per_page: 25 });
   });
 
   it('uses the default page size when searching dashboards', async () => {
-    await searchRelatedDashboard(uiActions);
+    await searchRelatedDashboard(dashboard);
 
-    expect(searchExecute).toHaveBeenCalledWith({
-      onResults: expect.any(Function),
-      search: {
-        query: undefined,
-        per_page: 100,
-      },
-      trigger: { id: 'searchDashboards' },
-    });
+    expect(search).toHaveBeenCalledWith({ query: undefined, per_page: 100 });
   });
 
-  it('gets dashboards by id with the dashboard ids action', async () => {
-    const result = await getDashboardsById(uiActions, ['dashboard-1']);
+  it('partitions resolved and missing dashboards by id', async () => {
+    const result = await resolveDashboardsByIds(dashboard, [DASHBOARD_ID, MISSING_DASHBOARD_ID]);
 
-    expect(result).toEqual([dashboard]);
-    expect(getAction).toHaveBeenCalledWith('getDashboardsByIdsAction');
-    expect(getDashboardsByIdsExecute).toHaveBeenCalledWith({
-      onResults: expect.any(Function),
-      ids: ['dashboard-1'],
-      trigger: { id: 'getDashboardsById' },
+    expect(result).toEqual({
+      resolved: [{ id: DASHBOARD_ID, title: DASHBOARD_TITLE }],
+      missing: [{ id: MISSING_DASHBOARD_ID, notFound: true }],
     });
+    expect(findByIds).toHaveBeenCalledWith([DASHBOARD_ID, MISSING_DASHBOARD_ID]);
   });
 
   it('does not fetch dashboards when there are no ids', async () => {
-    const result = await getDashboardsById(uiActions, []);
+    const result = await resolveDashboardsByIds(dashboard, []);
 
-    expect(result).toEqual([]);
-    expect(getAction).not.toHaveBeenCalled();
+    expect(result).toEqual({ resolved: [], missing: [] });
+    expect(findDashboardsService).not.toHaveBeenCalled();
   });
 });

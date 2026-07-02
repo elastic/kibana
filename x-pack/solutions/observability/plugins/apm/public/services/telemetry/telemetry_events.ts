@@ -93,6 +93,32 @@ const serviceMapDagreLayoutFallbackEventType: TelemetryEvent = {
   },
 };
 
+const serviceMapAddedToDashboardEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SERVICE_MAP_ADDED_TO_DASHBOARD,
+  schema: {
+    new_dashboard: {
+      type: 'boolean',
+      _meta: { description: 'True if a new dashboard was created vs adding to existing' },
+    },
+    has_service_name: {
+      type: 'boolean',
+      _meta: { description: 'True if a service.name filter was attached' },
+    },
+    has_kuery: {
+      type: 'boolean',
+      _meta: { description: 'True if any KQL filter (URL/Controls/pills) was attached' },
+    },
+    view_filter_count: {
+      type: 'integer',
+      _meta: { description: 'Number of view-filter chips (alerts/SLO/connection/anomaly)' },
+    },
+    sync_with_dashboard_filters: {
+      type: 'boolean',
+      _meta: { description: 'True if the panel follows the dashboard global filters' },
+    },
+  },
+};
+
 const metricsCalloutDateRangeSelectedEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.METRICS_CALLOUT_DATE_RANGE_SELECTED,
   schema: {
@@ -129,6 +155,24 @@ const metricsCalloutLoadedEventType: TelemetryEvent = {
   },
 };
 
+const serviceFlyoutViewedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SERVICE_FLYOUT_VIEWED,
+  schema: {
+    tabId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The service flyout tab shown when viewed',
+      },
+    },
+    source: {
+      type: 'keyword',
+      _meta: {
+        description: 'Where the flyout was opened from',
+      },
+    },
+  },
+};
+
 export const apmTelemetryEventBasedTypes = [
   searchQuerySubmittedEventType,
   sloOverviewFlyoutViewedEventType,
@@ -136,6 +180,8 @@ export const apmTelemetryEventBasedTypes = [
   sloOverviewFlyoutStatusFilteredEventType,
   sloInfoShownEventType,
   serviceMapDagreLayoutFallbackEventType,
+  serviceMapAddedToDashboardEventType,
   metricsCalloutDateRangeSelectedEventType,
   metricsCalloutLoadedEventType,
+  serviceFlyoutViewedEventType,
 ];

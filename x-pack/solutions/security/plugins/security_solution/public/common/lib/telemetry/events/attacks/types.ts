@@ -21,8 +21,13 @@ export enum AttacksEventTypes {
   ExpandedViewTabClicked = 'Attacks Expanded View Tab Clicked',
   ScheduleFlyoutOpened = 'Attacks Schedule Flyout Opened',
   ScheduleDetailsFlyoutOpened = 'Attacks Schedule Details Flyout Opened',
+  SettingsFlyoutOpened = 'Attacks Settings Flyout Opened',
+  GenerateClicked = 'Attacks Generate Clicked',
   FeaturePromotionCalloutAction = 'Attacks Feature Promotion Callout Action',
   WorkflowRunTriggered = 'Attacks Workflow Run Triggered',
+  TypeFilterChanged = 'Attacks Type Filter Changed',
+  TourCalloutAction = 'Attacks Tour Callout Action',
+  TourStepAction = 'Attacks Tour Step Action',
 }
 
 interface AttacksTableSortChangedParams {
@@ -53,6 +58,14 @@ export interface AttacksActionBaseParams {
 
 interface AttacksScheduleFlyoutOpenedParams {
   source: 'attacks_page_header' | 'attacks_page_empty_state';
+}
+
+interface AttacksSettingsFlyoutOpenedParams {
+  source: 'attacks_page_header';
+}
+
+interface AttacksGenerateClickedParams {
+  source: 'attacks_page_header';
 }
 
 interface AttacksScheduleDetailsFlyoutOpenedParams {
@@ -89,6 +102,19 @@ interface AttacksFeaturePromotionCalloutActionParams {
   action: 'view_attacks' | 'hide';
 }
 
+interface AttacksTypeFilterChangedParams {
+  types: string[];
+}
+
+interface AttacksTourCalloutActionParams {
+  action: 'view' | 'start_tour' | 'view_docs' | 'dismiss';
+}
+
+interface AttacksTourStepActionParams {
+  action: 'advance' | 'dismiss' | 'finish';
+  step: number;
+}
+
 export interface AttacksTelemetryEventsMap {
   [AttacksEventTypes.TableSortChanged]: AttacksTableSortChangedParams;
   [AttacksEventTypes.ViewOptionChanged]: AttacksViewOptionChangedParams;
@@ -102,9 +128,14 @@ export interface AttacksTelemetryEventsMap {
   [AttacksEventTypes.DetailsFlyoutOpened]: AttacksDetailsFlyoutOpenedParams;
   [AttacksEventTypes.ExpandedViewTabClicked]: AttacksExpandedViewTabClickedParams;
   [AttacksEventTypes.ScheduleFlyoutOpened]: AttacksScheduleFlyoutOpenedParams;
+  [AttacksEventTypes.SettingsFlyoutOpened]: AttacksSettingsFlyoutOpenedParams;
+  [AttacksEventTypes.GenerateClicked]: AttacksGenerateClickedParams;
   [AttacksEventTypes.ScheduleDetailsFlyoutOpened]: AttacksScheduleDetailsFlyoutOpenedParams;
   [AttacksEventTypes.FeaturePromotionCalloutAction]: AttacksFeaturePromotionCalloutActionParams;
   [AttacksEventTypes.WorkflowRunTriggered]: AttacksActionBaseParams;
+  [AttacksEventTypes.TypeFilterChanged]: AttacksTypeFilterChangedParams;
+  [AttacksEventTypes.TourCalloutAction]: AttacksTourCalloutActionParams;
+  [AttacksEventTypes.TourStepAction]: AttacksTourStepActionParams;
 }
 
 export interface AttacksTelemetryEvent {

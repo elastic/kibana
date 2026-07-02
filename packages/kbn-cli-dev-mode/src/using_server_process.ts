@@ -36,7 +36,6 @@ export function usingServerProcess<T>(
         nodeOptions: [
           ...process.execArgv,
           ...(ACTIVE_INSPECT_FLAG ? [`${ACTIVE_INSPECT_FLAG}=${process.debugPort + 1}`] : []),
-          '--disallow-code-generation-from-strings',
         ],
         env: {
           ...process.env,

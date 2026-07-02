@@ -27,6 +27,7 @@ import type {
   CaseAssignees,
   CaseCustomFields,
 } from '../../../common/types/domain';
+import type { CasesActivityV2WriterContract } from '../../cases_analytics_v2';
 import type {
   UserActionPersistedAttributes,
   UserActionSavedObjectTransformed,
@@ -39,6 +40,14 @@ import type {
   UserActionFindRequest,
 } from '../../../common/types/api';
 import type { ObservablesActionType } from '../../../common/types/domain/user_action/observables/v1';
+import type {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+} from '../../../common/constants';
+
+export type AttachmentSavedObjectType =
+  | typeof CASE_COMMENT_SAVED_OBJECT
+  | typeof CASE_ATTACHMENT_SAVED_OBJECT;
 
 export interface BuilderParameters {
   title: {
@@ -130,6 +139,7 @@ export interface CommonArguments {
   caseId: string;
   owner: string;
   savedObjectId?: string;
+  savedObjectType?: AttachmentSavedObjectType;
   connectorId?: string;
   action?: UserActionAction;
 }
@@ -173,7 +183,13 @@ export interface ServiceContext {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   savedObjectsSerializer: ISavedObjectsSerializer;
   auditLogger: AuditLogger;
-  isCasesAttachmentsEnabled?: boolean;
+  /**
+   * Cases-analytics v2 activity writer. Real implementation when v2 is
+   * enabled, `V2_NOOP_ACTIVITY_WRITER` otherwise — every call site stays
+   * unconditional (no `if (writer)` guards). Captured at factory time so
+   * the user-actions service is oblivious to v2's start lifecycle.
+   */
+  analyticsV2ActivityWriter: CasesActivityV2WriterContract;
 }
 
 export interface PushTimeFrameInfo {
@@ -273,28 +289,33 @@ export interface UserActionsStatsAggsResult {
   nonDeletedCommentUpdates: {
     doc_count: number;
     comments: {
-      doc_count: number;
-      byCommentId: {
-        buckets: Array<{
-          key: string;
+      buckets: Record<
+        string,
+        {
           doc_count: number;
-          reverse: {
-            doc_count: number;
-            hasDelete: {
+          byCommentId: {
+            buckets: Array<{
+              key: string;
               doc_count: number;
-            };
-            updates: {
-              doc_count: number;
-              byCommentType: {
-                buckets: Array<{
-                  key: string;
+              reverse: {
+                doc_count: number;
+                hasDelete: {
                   doc_count: number;
-                }>;
+                };
+                updates: {
+                  doc_count: number;
+                  byCommentType: {
+                    buckets: Array<{
+                      key: string;
+                      doc_count: number;
+                    }>;
+                  };
+                };
               };
-            };
+            }>;
           };
-        }>;
-      };
+        }
+      >;
     };
   };
 }
@@ -379,7 +400,12 @@ export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
 export interface BulkCreateAttachmentUserAction
   extends Omit<CommonUserActionArgs, 'owner'>,
     IndexRefresh {
-  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequestV2 }>;
+  attachments: Array<{
+    id: string;
+    owner: string;
+    attachment: AttachmentRequestV2;
+    savedObjectType?: AttachmentSavedObjectType;
+  }>;
 }
 
 export type CreateUserActionArgs<T extends keyof BuilderParameters> = {

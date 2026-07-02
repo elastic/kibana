@@ -65,6 +65,7 @@ dependsOn:
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/licensing-types'
   - '@kbn/kql'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

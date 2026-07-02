@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type KeyboardEvent, type ChangeEvent, useRef, useEffect, useCallback } from 'react';
+import React, {
+  type KeyboardEvent,
+  type ChangeEvent,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+} from 'react';
 
 import { css } from '@emotion/react';
 import {
@@ -33,6 +40,7 @@ import { useSelectTextPartsWithArrowKeys } from './hooks/use_select_text_parts_w
 import { useInputHintText } from './hooks/use_input_hint_text';
 import { inputControlTexts } from './translations';
 import { DateRangeValueDisplay } from './date_range_value_display';
+import { applyPartModification } from './parse/modify_range_parts';
 import type { RangePart } from './parse/parse_range_parts';
 import { parseDisplayParts, parseInputParts } from './parse/parse_range_parts';
 
@@ -90,16 +98,10 @@ export function DateRangePickerControl() {
     inputRef,
     isActive: isEditing && !wasClearedRef.current,
     initialSelection: 'none',
-    // TODO this is simply increasing/decreasing integers,
-    // ideally we could make this "smart" so it knows what's being modified e.g. day of the month
-    onModifyPart: ({ text: currentText, part, action }) => {
-      const value = parseInt(part.text, 10);
-      if (isNaN(value)) return undefined;
-      const nextValue = action === 'increase' ? value + 1 : value - 1;
-      // Values below 1 not useful, so return
-      if (nextValue < 1) return undefined;
-      const newText =
-        currentText.substring(0, part.start) + String(nextValue) + currentText.substring(part.end);
+    rangeType: timeRange.type,
+    onModifyPart: ({ text: currentText, part, parts, action }) => {
+      const newText = applyPartModification(currentText, part, action, parts);
+      if (newText === undefined) return undefined;
       setText(newText);
       onInputChange?.(newText);
       return newText;
@@ -115,7 +117,7 @@ export function DateRangePickerControl() {
   };
 
   /** Handle selecting specific parts when focusing the input */
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isEditing || !inputRef.current) return;
 
     const clickedPart = clickedDisplayPartRef.current;
@@ -123,7 +125,7 @@ export function DateRangePickerControl() {
 
     if (!clickedPart) return;
 
-    const inputParts = parseInputParts(text).filter((part) => part.navigable);
+    const inputParts = parseInputParts(text, timeRange.type).filter((part) => part.navigable);
     const displayParts = parseDisplayParts(displayText);
     const target = findCorrespondingInputPart(inputParts, clickedPart, displayParts);
 
@@ -137,7 +139,7 @@ export function DateRangePickerControl() {
       });
       return () => cancelAnimationFrame(requestId);
     }
-  }, [displayText, inputRef, isEditing, text]);
+  }, [displayText, inputRef, isEditing, text, timeRange.type]);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;

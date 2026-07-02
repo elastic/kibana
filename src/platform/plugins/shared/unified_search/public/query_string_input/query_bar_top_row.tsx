@@ -67,6 +67,7 @@ import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
 import { NoDataPopover } from './no_data_popover';
+import { EsqlApproximationToggle } from './esql_approximation_toggle';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { shallowEqual } from '../utils/shallow_equal';
 import { FilterBarToggleButton } from '../filter_bar/filter_bar_toggle_button';
@@ -251,12 +252,22 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   enableResourceBrowser?: ESQLEditorProps['enableResourceBrowser'];
   useBackgroundSearchButton?: boolean;
   /**
-   * Opt-in to the new DateRangePicker. The new picker is shown only when both
-   * this prop is `true` and the `unifiedSearch.newDateRangePickerEnabled` feature
-   * flag is enabled. When the feature flag is disabled, the legacy
-   * EuiSuperDatePicker is always used regardless of this prop.
+   * Whether to use the new DateRangePicker. Defaults to `true`; pass `false`
+   * to opt out and keep the legacy EuiSuperDatePicker. The new picker is shown
+   * only when this resolves to `true` *and* the
+   * `unifiedSearch.newDateRangePickerEnabled` feature flag is enabled — when
+   * the flag is disabled, the legacy picker is always used.
    */
   enableDateRangePicker?: boolean;
+  /**
+   * When provided, renders the ES|QL approximate execution toggle (bolt icon) before the date picker.
+   */
+  esqlApproximation?: {
+    useApproximation: boolean;
+    onChange: (useApproximation: boolean) => void;
+    additionalText?: string;
+    disabled?: boolean;
+  };
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -336,6 +347,7 @@ export const QueryBarTopRow = React.memo(
       showDatePicker = true,
       showAutoRefreshOnly = false,
       showSubmitButton = true,
+      enableDateRangePicker = true,
     } = props;
 
     const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
@@ -389,7 +401,7 @@ export const QueryBarTopRow = React.memo(
     } = kibana.services;
 
     const shouldUseLegacyTimePicker =
-      !props.enableDateRangePicker ||
+      !enableDateRangePicker ||
       !kibana.services.featureFlags?.getBooleanValue(DATE_RANGE_PICKER_FEATURE_FLAG, true);
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
@@ -809,9 +821,19 @@ export const QueryBarTopRow = React.memo(
       } else {
         const noTimeFieldNameDisabled =
           typeof isDisabled === 'object' && isDisabled.display !== undefined;
+        // Visualize-style consumers request auto-refresh-only mode via
+        // `showAutoRefreshOnly` + `!showDatePicker`. The legacy picker rendered a
+        // read-only date display while still letting users operate the auto-refresh
+        // controls. The new picker has no read-only mode, so we disable it here —
+        // but that also removes access to auto-refresh, a temporary regression.
+        // TODO: add a `readOnly` prop to the new picker so auto-refresh stays
+        // operable, and use it instead of `disabled` for this case.
+        const autoRefreshOnlyDisabled = Boolean(showAutoRefreshOnly && !showDatePicker);
+        const pickerDisabled =
+          Boolean(props.isDisabled) || noTimeFieldNameDisabled || autoRefreshOnlyDisabled;
         datePicker = (
           <>
-            {noTimeFieldNameDisabled && (
+            {(noTimeFieldNameDisabled || autoRefreshOnlyDisabled) && (
               // Hidden sibling so FTR tests can detect the disabled state via
               // testSubjects.existOrFail('kbnQueryBar-datePicker-disabled'), matching
               // the span the legacy picker renders inside its isDisabled.display node.
@@ -820,12 +842,14 @@ export const QueryBarTopRow = React.memo(
             <DateRangePicker
               className="kbnQueryBar__datePicker"
               value={
-                noTimeFieldNameDisabled ? strings.getDisabledDatePickerLabel() : dateRangeValue
+                noTimeFieldNameDisabled || autoRefreshOnlyDisabled
+                  ? strings.getDisabledDatePickerLabel()
+                  : dateRangeValue
               }
               onChange={onDateRangeChange}
               onInputChange={onDateRangeInputChange}
               isInvalid={isDateRangeInvalid}
-              disabled={props.isDisabled || noTimeFieldNameDisabled}
+              disabled={pickerDisabled}
               width="auto"
               compressed
               collapsed={isMobile || isQueryInputFocused}
@@ -876,7 +900,10 @@ export const QueryBarTopRow = React.memo(
               isLoading={isSendingToBackground}
               isDisabled={!canSendToBackground}
               onClick={onClickSendToBackground}
-              title={strings.getSendToBackgroundLabel()}
+              tooltipProps={{
+                content: strings.getSendToBackgroundLabel(),
+                disableScreenReaderOutput: true,
+              }}
               aria-label={strings.getSendToBackgroundLabel()}
               iconType="backgroundTask"
               data-test-subj="queryCancelButton-secondary-button"
@@ -887,19 +914,21 @@ export const QueryBarTopRow = React.memo(
 
       if (submitButtonIconOnly) {
         return (
-          <EuiButtonIcon
-            iconType="cross"
-            aria-label={buttonLabelCancel}
-            onClick={onClickCancelButton}
-            size="s"
-            data-test-subj="queryCancelButton"
-            color="text"
-            display="base"
-            isLoading={isCancelling}
-            isDisabled={isCancelling}
-          >
-            {buttonLabelCancel}
-          </EuiButtonIcon>
+          <EuiToolTip content={buttonLabelCancel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="cross"
+              aria-label={buttonLabelCancel}
+              onClick={onClickCancelButton}
+              size="s"
+              data-test-subj="queryCancelButton"
+              color="text"
+              display="base"
+              isLoading={isCancelling}
+              isDisabled={isCancelling}
+            >
+              {buttonLabelCancel}
+            </EuiButtonIcon>
+          </EuiToolTip>
         );
       }
 
@@ -971,7 +1000,10 @@ export const QueryBarTopRow = React.memo(
             isLoading={isSendingToBackground}
             isDisabled={!canSendToBackground}
             onClick={onClickSendToBackground}
-            title={strings.getSendToBackgroundLabel()}
+            tooltipProps={{
+              content: strings.getSendToBackgroundLabel(),
+              disableScreenReaderOutput: true,
+            }}
             aria-label={strings.getSendToBackgroundLabel()}
             data-test-subj="querySubmitButton-secondary-button"
           />
@@ -1019,6 +1051,14 @@ export const QueryBarTopRow = React.memo(
               {shouldRenderESQLUi ? (
                 <>
                   {shouldRenderUpdateButton() ? button : null}
+                  {props.esqlApproximation && (
+                    <EsqlApproximationToggle
+                      useApproximation={props.esqlApproximation.useApproximation}
+                      onChange={props.esqlApproximation.onChange}
+                      additionalText={props.esqlApproximation.additionalText}
+                      disabled={props.esqlApproximation.disabled}
+                    />
+                  )}
                   {shouldRenderDatePicker() ? renderDatePicker() : null}
                 </>
               ) : (
@@ -1278,6 +1318,14 @@ export const QueryBarTopRow = React.memo(
                 {renderQueryInput()}
                 {props.renderQueryInputAppend?.()}
                 {shouldShowDatePickerAsBadge() && props.filterBar}
+                {props.esqlApproximation && (
+                  <EsqlApproximationToggle
+                    useApproximation={props.esqlApproximation.useApproximation}
+                    onChange={props.esqlApproximation.onChange}
+                    additionalText={props.esqlApproximation.additionalText}
+                    disabled={props.esqlApproximation.disabled}
+                  />
+                )}
                 {renderDatePickerWithUpdateBtn()}
               </EuiFlexGroup>
               {!shouldShowDatePickerAsBadge() && props.filterBar}

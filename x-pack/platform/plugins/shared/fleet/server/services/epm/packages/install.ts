@@ -19,7 +19,7 @@ import type {
   KibanaRequest,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-types';
 import { addSpanLabels } from '@kbn/apm-utils';
@@ -68,6 +68,7 @@ import {
 } from '../../../constants';
 import { licenseService } from '../..';
 import { appContextService } from '../../app_context';
+import { AUTO_INSTALL_CONTENT_PACKAGES_TASK_ID } from '../../../tasks/auto_install_content_packages_task';
 import * as Registry from '../registry';
 import {
   setPackageInfo,
@@ -590,7 +591,7 @@ async function installPackageFromRegistry({
       );
     }
 
-    return await installPackageWithStateMachine({
+    const result = await installPackageWithStateMachine({
       pkgName,
       pkgVersion,
       installSource,
@@ -613,6 +614,23 @@ async function installPackageFromRegistry({
       installedAsDependencyOf,
       skipDependencyCheck,
     });
+
+    // After a successful, user-initiated (non-automatic) non-content-package install, trigger an
+    // immediate content pack autodiscovery run so users see content packs appear quickly rather
+    // than waiting for the next scheduled interval. Guard against re-triggering from the task's
+    // own content-pack installs (automaticInstall=true, type='content').
+    if (!result.error && !automaticInstall && packageInfo.type !== 'content') {
+      appContextService
+        .getTaskManagerStart()
+        ?.runSoon(AUTO_INSTALL_CONTENT_PACKAGES_TASK_ID)
+        .catch((e) =>
+          logger.debug(
+            `[AutoInstallContentPackagesTask] runSoon trigger after install failed (non-critical): ${e.message}`
+          )
+        );
+    }
+
+    return result;
   } catch (e) {
     sendEventWithLatestState(
       telemetryEvent,
@@ -1362,7 +1380,8 @@ export const saveKibanaAssetsRefs = async (
   assetRefs: KibanaAssetReference[] | null,
   spaceId: string,
   saveAsAdditionnalSpace = false,
-  append = false
+  append = false,
+  typesToReplace: string[] = []
 ) => {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
@@ -1405,8 +1424,9 @@ export const saveKibanaAssetsRefs = async (
 
         let spaceAssetRefs = assetRefs !== null ? assetRefs : [];
         if (append && installation) {
-          const existingSpaceRefs =
-            installation.attributes?.additional_spaces_installed_kibana?.[spaceId] ?? [];
+          const existingSpaceRefs = (
+            installation.attributes?.additional_spaces_installed_kibana?.[spaceId] ?? []
+          ).filter((r) => !typesToReplace.includes(r.type));
           spaceAssetRefs = uniqBy(
             [...spaceAssetRefs, ...existingSpaceRefs],
             (asset) => asset.id + asset.type
@@ -1430,10 +1450,10 @@ export const saveKibanaAssetsRefs = async (
 
       let newAssetRefs = assetRefs !== null ? assetRefs : [];
       if (append && installation) {
-        newAssetRefs = uniqBy(
-          [...newAssetRefs, ...(installation.attributes.installed_kibana ?? [])],
-          (asset) => asset.id + asset.type
+        const existingRefs = (installation.attributes.installed_kibana ?? []).filter(
+          (r) => !typesToReplace.includes(r.type)
         );
+        newAssetRefs = uniqBy([...newAssetRefs, ...existingRefs], (asset) => asset.id + asset.type);
       }
 
       return savedObjectsClient.update<Installation>(

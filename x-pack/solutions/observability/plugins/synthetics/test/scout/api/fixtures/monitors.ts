@@ -45,14 +45,15 @@ export async function addMonitor(
     savedObjectType?: string;
     id?: string;
     statusCode?: number;
+    spaceId?: string;
   } = {}
 ) {
-  const { gettingStarted, savedObjectType, id, statusCode = 200 } = opts;
+  const { gettingStarted, savedObjectType, id, statusCode = 200, spaceId } = opts;
   const qs: string[] = [];
   if (gettingStarted) qs.push('gettingStarted=true');
   if (savedObjectType) qs.push(`savedObjectType=${savedObjectType}`);
   if (id) qs.push(`id=${id}`);
-  const path = `api/synthetics/monitors${qs.length ? `?${qs.join('&')}` : ''}`;
+  const path = `${monitorsPath(spaceId)}${qs.length ? `?${qs.join('&')}` : ''}`;
 
   const res = await apiClient.post(path, {
     headers: { ...headers, 'elastic-api-version': PUBLIC_API_VERSION },
@@ -388,6 +389,31 @@ export async function bulkResetMonitors(
   const res = await apiClient.post(`${base}internal/synthetics/monitors/_bulk_reset`, {
     headers,
     body: { ids },
+    responseType: 'json',
+  });
+  expect(res).toHaveStatusCode(statusCode);
+  return res;
+}
+
+/**
+ * `PUT /api/synthetics/monitors/_bulk_update` — partial-update many monitors in
+ * one request. Each `updates` entry carries its own `{ id, attributes }` patch,
+ * so a single request can apply a different change per monitor. Public versioned
+ * route, so we send `elastic-api-version` like the other monitor helpers; the
+ * internal-origin header set by `mergeSyntheticsApiHeaders` is what actually lets
+ * the versioned router resolve the call without per-call version negotiation.
+ */
+export async function bulkUpdateMonitors(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  body: { updates: Array<{ id: string; attributes: Record<string, unknown> }> },
+  opts: { spaceId?: string; statusCode?: number } = {}
+) {
+  const { spaceId, statusCode = 200 } = opts;
+  const path = `${monitorsPath(spaceId)}/_bulk_update`;
+  const res = await apiClient.put(path, {
+    headers: withPublicApiVersion(headers),
+    body,
     responseType: 'json',
   });
   expect(res).toHaveStatusCode(statusCode);

@@ -130,6 +130,32 @@ describe('buildWorkflowContext', () => {
       expect(context.execution.executedBy).toBe('system');
       expect(context.execution.triggeredBy).toBe('scheduled');
     });
+
+    it('should expose accumulated token usage so it is queryable via {{ execution.usage }}', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        usage: { inputTokens: 45305, outputTokens: 289, totalTokens: 45594 },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.execution.usage).toEqual({
+        inputTokens: 45305,
+        outputTokens: 289,
+        totalTokens: 45594,
+      });
+    });
+
+    it('should leave execution.usage undefined when no step reported usage', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        usage: undefined,
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.execution.usage).toBeUndefined();
+    });
   });
 
   describe('input default values', () => {
@@ -151,6 +177,62 @@ describe('buildWorkflowContext', () => {
 
       expect(context.inputs).toEqual({
         inputWithDefault: 'defaultValue',
+      });
+    });
+
+    it('should leave templated default input values raw when inputs are not provided', () => {
+      setInputsSchema({
+        properties: {
+          inputWithDefault: { type: 'string', default: '{{ consts.default_input }}' },
+        },
+      });
+
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        workflowDefinition: {
+          ...baseExecution.workflowDefinition,
+          consts: {
+            default_input: 'renderedValue',
+          },
+        },
+        context: {
+          inputs: {},
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.inputs).toEqual({
+        inputWithDefault: '{{ consts.default_input }}',
+      });
+    });
+
+    it('should leave provided templated input values raw', () => {
+      setInputsSchema({
+        properties: {
+          inputWithDefault: { type: 'string', default: 'defaultValue' },
+        },
+      });
+
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        workflowDefinition: {
+          ...baseExecution.workflowDefinition,
+          consts: {
+            default_input: 'renderedValue',
+          },
+        },
+        context: {
+          inputs: {
+            inputWithDefault: '{{ consts.default_input }}',
+          },
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.inputs).toEqual({
+        inputWithDefault: '{{ consts.default_input }}',
       });
     });
 

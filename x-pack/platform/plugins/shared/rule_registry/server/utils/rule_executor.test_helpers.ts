@@ -74,7 +74,7 @@ export const createDefaultAlertExecutorOptions = <
     snoozeSchedule: [],
   },
   params,
-  spaceId: 'SPACE_ID',
+  spaceId: 'space-id',
   services: {
     alertFactory: alertsMock.createRuleExecutorServices<InstanceState, InstanceContext>()
       .alertFactory,

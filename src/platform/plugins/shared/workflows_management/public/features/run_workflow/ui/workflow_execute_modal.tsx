@@ -38,7 +38,10 @@ import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { WorkflowExecuteHistoricalForm } from './workflow_execute_historical_form';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
-import { getWorkflowExecuteModalGlobalStyles } from './workflow_execute_modal_global_styles';
+import {
+  getWorkflowExecuteModalGlobalStyles,
+  WORKFLOW_EXECUTE_MODAL_TABLE_GRID_FULLSCREEN_CLASS,
+} from './workflow_execute_modal_global_styles';
 import {
   ensureSelectedTriggerTabVisible,
   getFallbackTriggerTab,
@@ -123,7 +126,37 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     const [executionInput, setExecutionInput] = useState<string>('');
     const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
     const [eventTriggerTableSelectionCount, setEventTriggerTableSelectionCount] = useState(0);
-    const [isEventGridFullScreen, setIsEventGridFullScreen] = useState(false);
+    const [isTableGridFullScreen, setIsTableGridFullScreen] = useState(false);
+
+    const exitTableGridFullScreen = useCallback(() => {
+      setIsTableGridFullScreen(false);
+    }, []);
+
+    const handleModalClose = useCallback(() => {
+      if (isTableGridFullScreen) {
+        exitTableGridFullScreen();
+        return;
+      }
+      onClose();
+    }, [exitTableGridFullScreen, isTableGridFullScreen, onClose]);
+
+    useEffect(() => {
+      if (!isTableGridFullScreen) {
+        return;
+      }
+
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key !== 'Escape') {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        exitTableGridFullScreen();
+      };
+
+      window.addEventListener('keydown', handleKeyDown, true);
+      return () => window.removeEventListener('keydown', handleKeyDown, true);
+    }, [exitTableGridFullScreen, isTableGridFullScreen]);
 
     const { euiTheme } = useEuiTheme();
 
@@ -144,6 +177,22 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         setExecutionInputErrors(
           i18n.translate('workflows.workflowExecuteModal.eventSelectionRequired', {
             defaultMessage: 'Select a trigger event row to use as the run input.',
+          })
+        );
+        return;
+      }
+      if (selectedTrigger === 'alert' && trimmed === '') {
+        setExecutionInputErrors(
+          i18n.translate('workflows.workflowExecuteModal.alertSelectionRequired', {
+            defaultMessage: 'Select one or more alerts to use as the run input.',
+          })
+        );
+        return;
+      }
+      if (selectedTrigger === 'index' && trimmed === '') {
+        setExecutionInputErrors(
+          i18n.translate('workflows.workflowExecuteModal.documentSelectionRequired', {
+            defaultMessage: 'Select one or more documents to use as the run input.',
           })
         );
         return;
@@ -218,10 +267,11 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     }, [shouldAutoRun, onSubmit, onClose]);
 
     useEffect(() => {
-      if (selectedTrigger !== 'event' && isEventGridFullScreen) {
-        setIsEventGridFullScreen(false);
+      const tableGridTriggers: WorkflowTriggerTab[] = ['alert', 'index', 'event'];
+      if (!tableGridTriggers.includes(selectedTrigger) && isTableGridFullScreen) {
+        setIsTableGridFullScreen(false);
       }
-    }, [selectedTrigger, isEventGridFullScreen]);
+    }, [selectedTrigger, isTableGridFullScreen]);
 
     useEffect(() => {
       setSelectedTrigger((current) => {
@@ -302,14 +352,19 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         };
 
     const isFillHeightTriggerBody =
+      selectedTrigger === 'alert' ||
+      selectedTrigger === 'index' ||
       selectedTrigger === 'event' ||
       selectedTrigger === 'manual' ||
       selectedTrigger === 'historical';
 
+    const isHitTableTriggerTab =
+      selectedTrigger === 'alert' || selectedTrigger === 'index' || selectedTrigger === 'event';
+
     const runIsDisabled =
       !canExecuteWorkflow ||
       Boolean(executionInputErrors) ||
-      (selectedTrigger === 'event' && executionInput.trim() === '') ||
+      (isHitTableTriggerTab && executionInput.trim() === '') ||
       (selectedTrigger === 'event' && eventTriggerTableSelectionCount > 1);
 
     const renderRunWorkflowButton = () => (
@@ -329,13 +384,13 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         <Global styles={getWorkflowExecuteModalGlobalStyles(euiTheme)} />
         <EuiModal
           className={
-            isEventGridFullScreen
-              ? 'workflowExecuteModal workflowExecuteModal--eventGridFullScreen'
+            isTableGridFullScreen
+              ? `workflowExecuteModal ${WORKFLOW_EXECUTE_MODAL_TABLE_GRID_FULLSCREEN_CLASS}`
               : 'workflowExecuteModal'
           }
           aria-labelledby={modalTitleId}
           maxWidth={false}
-          onClose={onClose}
+          onClose={handleModalClose}
           style={{ width: '1200px', height: '100vh' }}
           data-test-subj="workflowExecuteModal"
         >
@@ -370,7 +425,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                 min-height: 0;
               `}
             >
-              {!isEventGridFullScreen ? (
+              {!isTableGridFullScreen ? (
                 <EuiFlexItem
                   data-test-subj="workflowExecuteModalTriggerTabs"
                   grow={false}
@@ -516,7 +571,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                   flex-direction: column;
                   background-color: ${euiTheme.colors.backgroundBaseSubdued};
                   padding: ${euiTheme.size.m} ${euiTheme.size.l}
-                    ${selectedTrigger === 'event' ? 0 : euiTheme.size.m};
+                    ${selectedTrigger === 'event' || isTableGridFullScreen ? 0 : euiTheme.size.m};
                 `}
               >
                 {selectedTrigger === 'alert' && (
@@ -526,6 +581,8 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                     errors={executionInputErrors}
                     setErrors={setExecutionInputErrors}
                     racQueriesEnabled={hasAlertRacAccess}
+                    isTableGridFullScreen={isTableGridFullScreen}
+                    onTableGridFullScreenChange={setIsTableGridFullScreen}
                   />
                 )}
                 {selectedTrigger === 'manual' && (
@@ -542,6 +599,8 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                     setValue={handleInputChange}
                     errors={executionInputErrors}
                     setErrors={setExecutionInputErrors}
+                    isTableGridFullScreen={isTableGridFullScreen}
+                    onTableGridFullScreenChange={setIsTableGridFullScreen}
                   />
                 )}
                 {selectedTrigger === 'event' && (
@@ -554,7 +613,8 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                     onTriggerEventTableSelectionCountChange={
                       handleEventTriggerTableSelectionCountChange
                     }
-                    onEventGridFullScreenChange={setIsEventGridFullScreen}
+                    isTableGridFullScreen={isTableGridFullScreen}
+                    onTableGridFullScreenChange={setIsTableGridFullScreen}
                     onOpenManualTab={() => handleChangeTrigger('manual')}
                   />
                 )}

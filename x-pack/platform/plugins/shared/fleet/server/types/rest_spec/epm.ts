@@ -110,6 +110,8 @@ export const EsAssetReferenceSchema = schema.object(
     ]),
     deferred: schema.maybe(schema.boolean()),
     version: schema.maybe(schema.string()),
+    customDataStreamOriginDataset: schema.maybe(schema.string()),
+    customDataStreamOriginType: schema.maybe(schema.string()),
   },
   { meta: { id: 'es_asset_reference' } }
 );
@@ -329,6 +331,7 @@ export const InstalledPackageSchema = schema.object(
       }),
       { maxSize: 10000 }
     ),
+    rolledBack: schema.maybe(schema.boolean()),
   },
   { meta: { id: 'installed_package' } }
 );
@@ -625,7 +628,7 @@ export const GetInstalledPackagesRequestSchema = {
           schema.literal('metrics'),
           schema.literal('traces'),
           schema.literal('synthetics'),
-          schema.literal('profiling'),
+          schema.literal('profiles'),
         ],
         { meta: { description: 'Filter by data stream type' } }
       )
@@ -662,7 +665,7 @@ export const GetDataStreamsRequestSchema = {
           schema.literal('metrics'),
           schema.literal('traces'),
           schema.literal('synthetics'),
-          schema.literal('profiling'),
+          schema.literal('profiles'),
         ],
         { meta: { description: 'Filter by data stream type' } }
       )
@@ -1085,7 +1088,7 @@ export const CreateCustomIntegrationRequestSchema = {
             schema.literal('metrics'),
             schema.literal('traces'),
             schema.literal('synthetics'),
-            schema.literal('profiling'),
+            schema.literal('profiles'),
           ]),
         }),
         { maxSize: 10 }

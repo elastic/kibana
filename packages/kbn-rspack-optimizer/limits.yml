@@ -125,6 +125,7 @@ pageLoadAssetSize:
   navigation: 10081
   newsfeed: 9707
   noDataPage: 630
+  notificationCenter: 332
   observability: 3614
   observabilityAgentBuilder: 679
   observabilityAIAssistant: 1967
@@ -180,6 +181,7 @@ pageLoadAssetSize:
   shared-packages: 3079800
   shared-plugins: 12276963
   shared-solution-packages: 184340
+  significant_events: 295
   slo: 19531
   snapshotRestore: 16909
   spaces: 22966

@@ -228,8 +228,17 @@ export const agentlessPolicyRouteService = {
   getCreatePath: () => {
     return AGENTLESS_POLICIES_ROUTES.CREATE_PATTERN;
   },
+  getListPath: () => {
+    return AGENTLESS_POLICIES_ROUTES.LIST_PATTERN;
+  },
+  getInfoPath: (policyId: string) => {
+    return AGENTLESS_POLICIES_ROUTES.GET_PATTERN.replace('{policyId}', policyId);
+  },
   getDeletePath: (policyId: string) => {
     return AGENTLESS_POLICIES_ROUTES.DELETE_PATTERN.replace('{policyId}', policyId);
+  },
+  getBulkThroughputPath: () => {
+    return AGENTLESS_POLICIES_ROUTES.BULK_THROUGHPUT_PATTERN;
   },
 };
 
@@ -370,7 +379,6 @@ export const agentRouteService = {
   postGenerateAgentsReport: () => AGENT_API_ROUTES.GENERATE_REPORT_PATTERN,
   getAgentEffectiveConfig: (agentId: string) =>
     AGENT_API_ROUTES.EFFECTIVE_CONFIG_PATTERN.replace('{agentId}', agentId),
-  getCollectorGroupsPath: () => AGENT_API_ROUTES.COLLECTOR_GROUPS_PATTERN,
 };
 
 export const outputRoutesService = {

@@ -13,7 +13,10 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { useYaml } from '../../../../../../services';
 
-import { getDefaultPresetForEsOutput } from '../../../../../../../common/services/output_helpers';
+import {
+  getDefaultPresetForEsOutput,
+  isOtelExporterOutput,
+} from '../../../../../../../common/services/output_helpers';
 
 import type {
   KafkaOutput,
@@ -21,6 +24,7 @@ import type {
   NewLogstashOutput,
   NewOutput,
   NewRemoteElasticsearchOutput,
+  OtelExporterOutput,
 } from '../../../../../../../common/types/models';
 
 import {
@@ -249,14 +253,16 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     isDisabled('config_yaml')
   );
 
+  const otelOutput = output && isOtelExporterOutput(output) ? output : undefined;
+
   const otelExporterConfigInput = useInput(
-    (output as NewElasticsearchOutput)?.otel_exporter_config_yaml ?? '',
+    otelOutput?.otel_exporter_config_yaml ?? '',
     validateYamlConfigFn,
     isDisabled('otel_exporter_config_yaml')
   );
 
   const otelDisableBeatsauthInput = useSwitchInput(
-    (output as NewElasticsearchOutput)?.otel_disable_beatsauth ?? false,
+    otelOutput?.otel_disable_beatsauth ?? false,
     isDisabled('otel_disable_beatsauth')
   );
 
@@ -278,12 +284,18 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   // ES output's host URL is restricted to default in serverless
   const isServerless = cloud?.isServerlessEnabled;
   const isEditingRemoteEsOutput = output?.type === outputType.RemoteElasticsearch;
+
   // When editing a remote ES output, the saved hosts belong to the remote ES input,
   // not the regular ES input. Use the default output hosts instead.
-  const elasticsearchUrlDefaultValue =
-    isEditingRemoteEsOutput || (isServerless && !output?.hosts)
-      ? defaultOutput?.hosts || []
-      : output?.hosts || [];
+  // For an existing ES output (incl. the PrivateLink output) always show that output's own
+  // hosts; only fall back to the default when creating a new output in serverless.
+  const elasticsearchUrlDefaultValue = isEditingRemoteEsOutput
+    ? defaultOutput?.hosts || []
+    : output?.hosts?.length
+    ? output.hosts
+    : isServerless
+    ? defaultOutput?.hosts || []
+    : [];
   const elasticsearchUrlDisabled = isServerless || isDisabled('hosts');
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',
@@ -776,6 +788,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       return (
         remoteElasticsearchUrlsValid &&
         additionalYamlConfigValid &&
+        otelExporterConfigValid &&
         nameInputValid &&
         sslCertificateAuthoritiesValid &&
         sslCertificateValid &&
@@ -883,6 +896,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       }
 
       const proxyIdValue = proxyIdInput.value !== '' ? proxyIdInput.value : null;
+
+      const otelExporterParams: OtelExporterOutput = {
+        otel_exporter_config_yaml: otelExporterConfigInput.value || null,
+        otel_disable_beatsauth: otelDisableBeatsauthInput.value ?? null,
+      };
 
       const payload: NewOutput = (() => {
         const parseIntegerIfStringDefined = (value: string | undefined): number | undefined => {
@@ -1070,6 +1088,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               is_default_monitoring: defaultMonitoringOutputInput.value,
               preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
+              ...otelExporterParams,
               service_token: serviceTokenInput.value || undefined,
               kibana_api_key: kibanaAPIKeyInput.value || undefined,
               ...(secrets ? { secrets } : {}),
@@ -1097,8 +1116,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               is_default_monitoring: defaultMonitoringOutputInput.value,
               preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
-              otel_exporter_config_yaml: otelExporterConfigInput.value || null,
-              otel_disable_beatsauth: otelDisableBeatsauthInput.value ?? null,
+              ...otelExporterParams,
               ca_trusted_fingerprint: caTrustedFingerprintInput.value,
               proxy_id: proxyIdValue,
               write_to_logs_streams: writeToStreams.value,

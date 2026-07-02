@@ -37,7 +37,7 @@ import type {
   PackagePolicy,
   PostPackagePolicyPostCreateCallback,
   PostPackagePolicyDeleteCallback,
-  UpdatePackagePolicy,
+  UpdatePackagePolicyWithId,
   AssetsMap,
 } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
@@ -752,7 +752,7 @@ describe('Package policy service', () => {
       expect(result.supports_cloud_connector).toBe(false);
     });
 
-    it('should set hasAgentVersionConditions in bumpRevision when package has agent version condition', async () => {
+    it('should call bumpRevision when package has agent version condition', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
 
@@ -789,9 +789,7 @@ describe('Package policy service', () => {
         expect.anything(),
         expect.anything(),
         'test',
-        expect.objectContaining({
-          hasAgentVersionConditions: true,
-        })
+        expect.not.objectContaining({ hasAgentVersionConditions: expect.anything() })
       );
     });
 
@@ -836,7 +834,7 @@ describe('Package policy service', () => {
       );
     });
 
-    it('should set hasAgentVersionConditions in bumpRevision when package has agent version condition in hbs template', async () => {
+    it('should call bumpRevision when package has agent version condition in hbs template', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
 
@@ -877,9 +875,7 @@ describe('Package policy service', () => {
         expect.anything(),
         expect.anything(),
         'test',
-        expect.objectContaining({
-          hasAgentVersionConditions: true,
-        })
+        expect.not.objectContaining({ hasAgentVersionConditions: expect.anything() })
       );
     });
 
@@ -2385,6 +2381,109 @@ describe('Package policy service', () => {
       expect(inputs[0].streams[0].compiled_stream).toEqual({
         type: 'log',
         data_stream: { dataset: 'other.integration_dataset' },
+        paths: ['/var/log/app.log'],
+      });
+    });
+
+    it('should inject data_stream.dataset into templateVars when absent from stream vars (composable integration)', async () => {
+      const pkgInfo = {
+        name: 'dsvarpkg',
+        version: '1.0.0',
+        type: 'integration',
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'dsvarpkg.customds',
+            path: 'customds',
+            streams: [
+              {
+                input: 'log',
+                template_path: 'stream_ds.yml',
+              },
+            ],
+          },
+        ],
+        policy_templates: [{ inputs: [{ type: 'log' }] }],
+      } as unknown as PackageInfo;
+
+      const inputs = await _compilePackagePolicyInputs(
+        pkgInfo,
+        {},
+        [
+          {
+            type: 'log',
+            enabled: true,
+            streams: [
+              {
+                id: 'stream-composable-no-dataset-var',
+                data_stream: { dataset: 'dsvarpkg.customds', type: 'logs' },
+                enabled: true,
+                vars: {
+                  paths: { value: ['/var/log/app.log'], type: 'text' },
+                  // data_stream.dataset intentionally absent — composable integration case
+                },
+              },
+            ],
+          },
+        ],
+        ASSETS_MAP_FIXTURES
+      );
+
+      expect(inputs[0].streams[0].compiled_stream).toEqual({
+        type: 'log',
+        data_stream: { dataset: 'dsvarpkg.customds' },
+        paths: ['/var/log/app.log'],
+      });
+    });
+
+    it('should not overwrite data_stream.dataset in templateVars when already present in stream vars', async () => {
+      const pkgInfo = {
+        name: 'dsvarpkg',
+        version: '1.0.0',
+        type: 'integration',
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'dsvarpkg.customds',
+            path: 'customds',
+            streams: [
+              {
+                input: 'log',
+                template_path: 'stream_ds.yml',
+              },
+            ],
+          },
+        ],
+        policy_templates: [{ inputs: [{ type: 'log' }] }],
+      } as unknown as PackageInfo;
+
+      const inputs = await _compilePackagePolicyInputs(
+        pkgInfo,
+        {},
+        [
+          {
+            type: 'log',
+            enabled: true,
+            streams: [
+              {
+                id: 'stream-existing-dataset-var',
+                data_stream: { dataset: 'dsvarpkg.customds', type: 'logs' },
+                enabled: true,
+                vars: {
+                  paths: { value: ['/var/log/app.log'], type: 'text' },
+                  'data_stream.dataset': { value: 'user.custom_dataset', type: 'text' },
+                },
+              },
+            ],
+          },
+        ],
+        ASSETS_MAP_FIXTURES
+      );
+
+      // stream.data_stream.dataset is 'dsvarpkg.customds' but the user-set var should win
+      expect(inputs[0].streams[0].compiled_stream).toEqual({
+        type: 'log',
+        data_stream: { dataset: 'user.custom_dataset' },
         paths: ['/var/log/app.log'],
       });
     });
@@ -4258,6 +4357,108 @@ describe('Package policy service', () => {
         ).rejects.toThrowError(/Input tcp in test is not allowed for deployment mode 'agentless'/);
       });
     });
+
+    describe('bumpRevision option', () => {
+      beforeEach(() => {
+        mockAgentPolicyService.bumpRevision.mockReset();
+        jest.mocked(licenseService.hasAtLeast).mockReturnValue(true);
+      });
+
+      const generateAttributes = (overrides: Record<string, unknown> = {}) => ({
+        name: 'test-package-policy',
+        description: '',
+        namespace: 'default',
+        enabled: true,
+        revision: 1,
+        policy_ids: ['test-agent-policy-1', 'test-agent-policy-2'],
+        package: {
+          name: 'test',
+          title: 'Test',
+          version: '0.9.0',
+        },
+        inputs: [],
+        ...overrides,
+      });
+
+      const generateSO = (overrides: Record<string, unknown> = {}) => ({
+        id: 'existing-package-policy',
+        type: 'ingest-package-policies',
+        references: [],
+        version: '1.0.0',
+        attributes: generateAttributes(overrides),
+      });
+
+      const policyIds = ['test-agent-policy-1', 'test-agent-policy-2'];
+
+      const setupSOClientMocks = (
+        savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>
+      ) => {
+        savedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [generateSO({ policy_ids: policyIds })],
+        });
+        savedObjectsClient.get.mockResolvedValue(generateSO({ policy_ids: policyIds }));
+        savedObjectsClient.update.mockResolvedValue(generateSO({ policy_ids: policyIds }));
+      };
+
+      const callUpdate = async (
+        savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>,
+        elasticsearchClient: ElasticsearchClientMock,
+        options?: { bumpRevision?: boolean }
+      ) => {
+        await packagePolicyService.update(
+          savedObjectsClient,
+          elasticsearchClient,
+          generateSO().id,
+          generateAttributes({ policy_ids: policyIds }),
+          options
+        );
+      };
+
+      it('bumps associated agent policy revisions by default', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        setupSOClientMocks(savedObjectsClient);
+
+        await callUpdate(savedObjectsClient, elasticsearchClient);
+
+        expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledTimes(policyIds.length);
+      });
+
+      it('bumps associated agent policy revisions when bumpRevision is true', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        setupSOClientMocks(savedObjectsClient);
+
+        await callUpdate(savedObjectsClient, elasticsearchClient, { bumpRevision: true });
+
+        expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledTimes(policyIds.length);
+      });
+
+      it('does not bump associated agent policy revisions when bumpRevision is false', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        setupSOClientMocks(savedObjectsClient);
+
+        await callUpdate(savedObjectsClient, elasticsearchClient, { bumpRevision: false });
+
+        expect(mockAgentPolicyService.bumpRevision).not.toHaveBeenCalled();
+      });
+
+      it('still bumps the package policy own revision when bumpRevision is false', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        setupSOClientMocks(savedObjectsClient);
+
+        await callUpdate(savedObjectsClient, elasticsearchClient, { bumpRevision: false });
+
+        expect(savedObjectsClient.update).toHaveBeenCalledWith(
+          expect.anything(),
+          generateSO().id,
+          expect.objectContaining({ revision: 2 }),
+          expect.anything()
+        );
+      });
+    });
   });
 
   describe('bulkUpdate', () => {
@@ -5249,7 +5450,10 @@ describe('Package policy service', () => {
           id: 'asdb1',
         }),
       ];
-      const testedPackagePolicies = packagePoliciesSO.map((so) => so.attributes);
+      const testedPackagePolicies = packagePoliciesSO.map((so) => ({
+        ...so.attributes,
+        id: so.id,
+      }));
 
       const totalPolicyIds = packagePoliciesSO.reduce(
         (count, policy) => count + policy.attributes.policy_ids.length,
@@ -5293,7 +5497,7 @@ describe('Package policy service', () => {
       const callPackagePolicyServiceBulkUpdate = async (
         savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>,
         elasticsearchClient: ElasticsearchClientMock,
-        packagePolicies: UpdatePackagePolicy[]
+        packagePolicies: UpdatePackagePolicyWithId[]
       ) => {
         await packagePolicyService.bulkUpdate(
           savedObjectsClient,
@@ -5445,7 +5649,10 @@ describe('Package policy service', () => {
           }),
         ];
 
-        const nonEndpointTestedPolicies = nonEndpointPoliciesSO.map((so) => so.attributes);
+        const nonEndpointTestedPolicies = nonEndpointPoliciesSO.map((so) => ({
+          ...so.attributes,
+          id: so.id,
+        }));
 
         setupSOClientMocks(savedObjectsClient, nonEndpointPoliciesSO);
 
@@ -5483,8 +5690,12 @@ describe('Package policy service', () => {
           }),
         ];
         const mixedTestedPolicies = [
-          { ...mixedPoliciesSO[0].attributes, policy_ids: [] }, // endpoint policy IDs removed
-          { ...mixedPoliciesSO[1].attributes, policy_ids: ['test-agent-policy-2'] }, // not-endpoint unchanged
+          { ...mixedPoliciesSO[0].attributes, id: mixedPoliciesSO[0].id, policy_ids: [] }, // endpoint policy IDs removed
+          {
+            ...mixedPoliciesSO[1].attributes,
+            id: mixedPoliciesSO[1].id,
+            policy_ids: ['test-agent-policy-2'],
+          }, // not-endpoint unchanged
         ];
 
         setupSOClientMocks(savedObjectsClient, mixedPoliciesSO);
@@ -12708,6 +12919,7 @@ describe('Package policy service', () => {
               policy_ids: ['12345'],
               enabled: true,
               inputs: [],
+              inputs_for_versions: {},
               package: { name: 'system', title: 'System', version: '2.2.0' },
               revision: 4,
               latest_revision: true,
@@ -12733,6 +12945,7 @@ describe('Package policy service', () => {
               policy_ids: ['6789'],
               enabled: true,
               inputs: [],
+              inputs_for_versions: {},
               package: { name: 'system', title: 'System', version: '2.2.0' },
               revision: 4,
               latest_revision: true,
@@ -12950,6 +13163,7 @@ describe('Package policy service', () => {
                 policy_ids: ['12345'],
                 enabled: true,
                 inputs: [],
+                inputs_for_versions: {},
                 package: { name: 'system', title: 'System', version: '2.2.0' },
                 revision: 4,
                 latest_revision: true,
@@ -12984,6 +13198,7 @@ describe('Package policy service', () => {
                 policy_ids: ['6789'],
                 enabled: true,
                 inputs: [],
+                inputs_for_versions: {},
                 package: { name: 'system', title: 'System', version: '2.2.0' },
                 revision: 4,
                 latest_revision: true,
@@ -13400,13 +13615,6 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
     appContextService.stop();
   });
 
-  const pkgInfo = {
-    name: 'custom_logs',
-    title: 'Custom Logs',
-    version: '1.0.0',
-    type: 'input',
-  } as any as PackageInfo;
-
   const createInputPkgPolicy = (opts: { namespace: string; dataset: string }) => {
     const { namespace, dataset } = opts;
     return {
@@ -13463,29 +13671,8 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
       _validateRestrictedFieldsNotModifiedOrThrow({
         oldPackagePolicy,
         packagePolicyUpdate: oldPackagePolicy,
-        pkgInfo,
       })
     ).not.toThrow();
-  });
-
-  it('should throw if namespace is modified', () => {
-    const oldPackagePolicy = createInputPkgPolicy({
-      namespace: 'default',
-      dataset: 'custom_logs.logs',
-    });
-    const newPackagePolicy = createInputPkgPolicy({
-      namespace: 'new-namespace',
-      dataset: 'custom_logs.logs',
-    });
-    expect(() =>
-      _validateRestrictedFieldsNotModifiedOrThrow({
-        oldPackagePolicy,
-        packagePolicyUpdate: newPackagePolicy,
-        pkgInfo,
-      })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"Package policy namespace cannot be modified for input only packages, please create a new package policy."`
-    );
   });
 
   it('should throw if dataset is modified', () => {
@@ -13501,14 +13688,13 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
       _validateRestrictedFieldsNotModifiedOrThrow({
         oldPackagePolicy,
         packagePolicyUpdate: newPackagePolicy,
-        pkgInfo,
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Package policy dataset cannot be modified for input only packages, please create a new package policy."`
+      `"Package policy dataset cannot be modified, please create a new package policy."`
     );
   });
 
-  it('should not throw if dataset is modified but package is integration package', () => {
+  it('should throw if dataset is modified for integration package', () => {
     const oldPackagePolicy = createInputPkgPolicy({
       namespace: 'default',
       dataset: 'custom_logs.logs',
@@ -13521,7 +13707,35 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
       _validateRestrictedFieldsNotModifiedOrThrow({
         oldPackagePolicy,
         packagePolicyUpdate: newPackagePolicy,
-        pkgInfo: { ...pkgInfo, type: 'integration' },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Package policy dataset cannot be modified, please create a new package policy."`
+    );
+  });
+
+  it('should not throw if stream has no dataset var', () => {
+    const oldPackagePolicy = {
+      ...createInputPkgPolicy({ namespace: 'default', dataset: 'custom_logs.logs' }),
+      inputs: [
+        {
+          type: 'logfile',
+          policy_template: 'logs',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'logs', dataset: 'custom_logs.logs' },
+              vars: {},
+              id: 'logfile-custom_logs.logs-1',
+            },
+          ],
+        },
+      ],
+    };
+    expect(() =>
+      _validateRestrictedFieldsNotModifiedOrThrow({
+        oldPackagePolicy,
+        packagePolicyUpdate: oldPackagePolicy,
       })
     ).not.toThrow();
   });
@@ -13553,10 +13767,9 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
       _validateRestrictedFieldsNotModifiedOrThrow({
         oldPackagePolicy: makePolicyWithType('logs'),
         packagePolicyUpdate: makePolicyWithType('metrics'),
-        pkgInfo,
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Package policy data stream type cannot be modified for input only packages, please create a new package policy."`
+      `"Package policy data stream type cannot be modified, please create a new package policy."`
     );
   });
 
@@ -13587,7 +13800,6 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
       _validateRestrictedFieldsNotModifiedOrThrow({
         oldPackagePolicy: makePolicyWithType('logs'),
         packagePolicyUpdate: makePolicyWithType('logs'),
-        pkgInfo,
       })
     ).not.toThrow();
   });

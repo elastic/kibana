@@ -44,8 +44,11 @@ dependsOn:
   - '@kbn/connector-specs'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/management-settings-ids'
+  - '@kbn/core-spaces-common'
   - '@kbn/agent-context-layer-plugin'
   - '@kbn/actions-plugin'
+  - '@kbn/logging-mocks'
+  - '@kbn/triggers-actions-ui-plugin'
 tags:
   - plugin
   - prod

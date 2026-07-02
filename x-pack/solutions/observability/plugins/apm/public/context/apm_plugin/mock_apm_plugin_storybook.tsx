@@ -169,8 +169,10 @@ export const storybookTelemetry: ITelemetryClient = {
   reportSloOverviewFlyoutStatusFiltered: () => {},
   reportSloInfoShown: () => {},
   reportServiceMapDagreLayoutFallback: () => {},
+  reportServiceMapAddedToDashboard: () => {},
   reportMetricsCalloutDateRangeSelected: () => {},
   reportMetricsCalloutLoaded: () => {},
+  reportServiceFlyoutViewed: () => {},
 };
 
 const mockUnifiedSearchBar = {
