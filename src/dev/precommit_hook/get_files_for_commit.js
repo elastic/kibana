@@ -31,8 +31,6 @@ export async function getFilesForCommit(gitRef, options = {}) {
     .split('\n')
     // Ignore blank lines
     .filter((line) => line.trim().length > 0)
-    // git diff --name-status outputs lines with two OR three parts
-    // separated by a tab character
     .map((line) => line.trim().split('\t'))
     .map(([statusSymbol, ...paths]) => {
       const status = {
@@ -40,13 +38,10 @@ export async function getFilesForCommit(gitRef, options = {}) {
         M: 'modified',
         R: 'renamed',
         D: 'deleted',
-        '??': 'untracked',
-      }[statusSymbol];
+        C: 'copied',
+        '?': 'untracked',
+      }[statusSymbol[0]];
 
-      // the status is always in the first column
-      // .. If the file is edited the line will only have two columns
-      // .. If the file is renamed it will have three columns
-      // .. In any case, the last column is the CURRENT path to the file
       return new File(paths[paths.length - 1], status);
     });
 
