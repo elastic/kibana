@@ -40,15 +40,13 @@ export const createStatusCorrectnessEvaluator = (
     }
 
     const events = output?.significantEvents ?? [];
-    const statusSummary = events
-      .map((e) => {
-        const confirmedCount = (e.evidences ?? []).filter((ev) => ev.confirmed === true).length;
-        return (
-          `${e.discovery_slug}: status=${e.status}, criticality=${e.criticality}, ` +
-          `confidence=${e.confidence}, confirmedEvidenceCount=${confirmedCount}`
-        );
-      })
-      .join('; ');
+    const eventsSummary = events.map((e) => ({
+      slug: e.discovery_slug,
+      status: e.status,
+      criticality: e.criticality,
+      confidence: e.confidence,
+      confirmedEvidenceCount: (e.evidences ?? []).filter((ev) => ev.confirmed === true).length,
+    }));
 
     const criteria: EvaluationCriterion[] = [
       {
@@ -57,7 +55,7 @@ export const createStatusCorrectnessEvaluator = (
         text:
           `${STATUS_DECISION_RUBRIC}\n\n` +
           `Expected outcome: ${expectedGroundTruth}. ` +
-          `The discovery judge agent returned: [${statusSummary || 'none'}]. ` +
+          `The discovery judge agent returned: ${JSON.stringify(eventsSummary)}. ` +
           `PASS only if each discovery's returned status matches the expected outcome (match by title/content, not by exact slug) AND is justified by the event's ` +
           `evidence, criticality, and the gates above. An over-escalation, under-escalation, or ` +
           `constraint violation is a FAIL even if it is "close".`,

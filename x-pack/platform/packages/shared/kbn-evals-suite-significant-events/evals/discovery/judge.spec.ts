@@ -9,9 +9,7 @@ import { SIGEVENTS_JUDGE_AGENT_ID } from '@kbn/streams-plugin/server';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
 import type { Discovery } from '@kbn/significant-events-schema';
-import type { GcsConfig } from '../../src/data_generators/replay';
 import {
-  listAvailableSnapshots,
   replayIntoManagedStream,
   SIGEVENTS_SNAPSHOT_RUN,
   SIGEVENTS_WIRED_ROOTS,
@@ -26,10 +24,9 @@ import { evaluate } from '../../src/evaluate';
 import {
   getActiveDatasets,
   MANAGED_STREAM_SEARCH_PATTERN,
-  resolveScenarioSnapshotSource,
-  snapshotCatalogKey,
   snapshotSourceKey,
 } from '../../src/datasets';
+import { buildAvailableSnapshotsBySource } from '../shared';
 import type { DiscoveryJudgeScenario } from '../../src/datasets';
 import { createJudgeEvaluators } from '../../src/evaluators/discovery';
 import { parseSignificantEvents } from '../../src/evaluators/discovery/utils/parse_agent_output';
@@ -49,22 +46,13 @@ evaluate.describe(
       await kbnClient.uiSettings.update({ 'observability:streamsEnableSignificantEvents': true });
       log.info('Enabled significant events UI setting');
 
-      const uniqueCatalogSources = new Map<string, GcsConfig>();
-      for (const dataset of activeDatasets) {
-        for (const scenario of dataset.discoveryJudge) {
-          const source = resolveScenarioSnapshotSource({
-            scenarioId: scenario.input.scenario_id,
-            datasetGcs: dataset.gcs,
-            snapshotSource: scenario.snapshot_source,
-          });
-          uniqueCatalogSources.set(snapshotCatalogKey(source.gcs), source.gcs);
-        }
-      }
-
-      for (const [catalogSourceKey, gcs] of uniqueCatalogSources.entries()) {
-        const availableSnapshots = await listAvailableSnapshots(esClient, log, gcs);
-        availableSnapshotsBySource.set(catalogSourceKey, new Set(availableSnapshots));
-      }
+      const snapshots = await buildAvailableSnapshotsBySource(
+        activeDatasets,
+        (dataset) => dataset.discoveryJudge,
+        esClient,
+        log
+      );
+      snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
     });
 
     for (const dataset of activeDatasets) {

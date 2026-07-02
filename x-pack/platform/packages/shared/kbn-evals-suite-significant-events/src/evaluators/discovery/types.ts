@@ -14,9 +14,14 @@ export interface AgentOutputBase {
   traceId?: string | null;
 }
 
-/** Common per-scenario expectations shared by every discovery example's `output`. */
+/**
+ * Common per-scenario expectations shared by every discovery example's `output`.
+ * `criteria` is required because every concrete scenario type defines it, and
+ * `createScenarioCriteriaLlmEvaluator` silently falls back to `[]` when it is absent —
+ * making it required surfaces missing criteria as a type error rather than a silent no-op.
+ */
 export interface ExampleOutputBase {
-  criteria?: EvaluationCriterion[];
+  criteria: EvaluationCriterion[];
 }
 
 export interface InvestigatorAgentOutput extends AgentOutputBase {

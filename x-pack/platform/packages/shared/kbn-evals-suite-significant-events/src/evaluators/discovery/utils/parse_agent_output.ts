@@ -10,7 +10,7 @@ import type { Discovery, SignificantEvent } from '@kbn/significant-events-schema
 /**
  * The discovery investigator/judge agents have no emit tool and no enforced `structured_output` on
  * the public converse API, so (per their instructions) they return their result as a single JSON
- * object in the final assistant `message`. These helpers recover that array. Conformance of each
+ * object in the final agent message. These helpers recover that array. Conformance of each
  * item is graded separately by the `schema_validity` evaluator, so parsing casts loosely and returns
  * `[]` when the message is missing or not valid JSON.
  */
@@ -38,7 +38,7 @@ function tryParseJsonObject(candidate: string): Record<string, unknown> | undefi
 }
 
 /**
- * Extract the first top-level JSON object from an assistant message. Scans all ```json fenced
+ * Extract the first top-level JSON object from an agent message. Scans all ```json fenced
  * blocks in order and returns the first that parses as a valid JSON object, falling back to the
  * raw message. This prevents a preamble code fence (e.g. a tool-call example) from shadowing the
  * actual JSON payload when it appears later in the message.

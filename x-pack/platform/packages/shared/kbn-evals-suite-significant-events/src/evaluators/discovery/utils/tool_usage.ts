@@ -6,10 +6,10 @@
  */
 
 import type { ConverseStep } from '@kbn/evals';
+import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common';
 
-/** Discovery agent tool ids, duplicated as strings to avoid a dependency on @kbn/agent-builder-common. */
-export const TOOL_ID_EXECUTE_ESQL = 'platform.core.execute_esql';
-export const TOOL_ID_KI_SEARCH = 'platform.streams.sig_events.ki_search';
+export const TOOL_ID_EXECUTE_ESQL = platformCoreTools.executeEsql;
+export const TOOL_ID_KI_SEARCH = platformStreamsSigEventsTools.searchKnowledgeIndicators;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
