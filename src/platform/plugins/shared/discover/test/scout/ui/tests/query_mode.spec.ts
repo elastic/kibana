@@ -26,7 +26,11 @@
 
 import { expect } from '@kbn/scout/ui';
 import type { ScoutTestFixtures } from '@kbn/scout';
-import { clearStoredQueryMode, getStoredQueryMode } from '../fixtures/common/helpers';
+import {
+  clearStoredQueryMode,
+  getStoredQueryMode,
+  waitForStoredQueryMode,
+} from '../fixtures/common/helpers';
 import { spaceTest } from '../fixtures/common';
 
 type QueryMode = 'classic' | 'esql';
@@ -116,6 +120,8 @@ for (const defaultMode of QUERY_MODES) {
             // Guarantee a real switch into `targetMode`, then verify it was stored.
             await ensureTransitionInto(pageObjects, defaultMode, targetMode);
             await switchToMode(pageObjects, targetMode);
+            // The mode is persisted asynchronously, so wait for the persistence before asserting.
+            await waitForStoredQueryMode(page, targetMode);
             expect(await getStoredQueryMode(page)).toBe(targetMode);
 
             // Reload and confirm the persisted mode is restored.
