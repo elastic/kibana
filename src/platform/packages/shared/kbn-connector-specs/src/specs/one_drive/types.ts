@@ -37,7 +37,6 @@ export const SearchInputSchema = lazySchema(() =>
             'Required for the first page; re-pass the same value alongside pageToken for subsequent pages.'
         ),
       top: z
-        .number()
         .int()
         .min(1)
         .max(200)
@@ -77,7 +76,6 @@ export const GetItemChildrenInputSchema = lazySchema(() =>
           'root of the drive. Use item IDs from search or a previous getItemChildren call.'
       ),
     top: z
-      .number()
       .int()
       .min(1)
       .max(200)

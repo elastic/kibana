@@ -64,11 +64,6 @@ Get file metadata
 
 Get file content
 :   Download the content of a file from OneDrive. For text files (`.txt`, `.md`, `.csv`, `.json`), the connector returns a plain UTF-8 string. For binary files (PDFs, `.docx`, `.xlsx`, images), the connector returns base64-encoded content. The response includes an `encoding` field (`utf-8` or `base64`) and a `mimeType` field.
-
-    ::::{warning}
-    Large files and binary formats produce very large payloads. Only use this action when you have a plan to process the data, for example through an Elasticsearch ingest pipeline attachment processor.
-    ::::
-
     - `itemId` (required): ID of the file to download. Use item IDs returned by search or Get item children. For shared or recent items with a `remoteItem`, use `remoteItem.id`.
     - `driveId` (optional): Drive ID that owns the item. Required for shared or recent items that have a `remoteItem` — use `remoteItem.parentReference.driveId`. Omit for items from your own drive.
 

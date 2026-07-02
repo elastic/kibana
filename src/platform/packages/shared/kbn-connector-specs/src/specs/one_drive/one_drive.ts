@@ -211,9 +211,7 @@ export const OneDrive: ConnectorSpec = {
         'base64-encoded. Check the `encoding` field in the response ("utf-8" or "base64") and the ' +
         '`mimeType` field to know how to interpret the `content` field. ' +
         'For items from listSharedWithMe or listRecentFiles that have a remoteItem property: ' +
-        'pass remoteItem.id as itemId and remoteItem.parentReference.driveId as driveId. ' +
-        'WARNING: Large files and binary formats produce very large payloads. Only call this when ' +
-        'you have a plan to process the data (e.g. via an Elasticsearch ingest pipeline attachment processor).',
+        'pass remoteItem.id as itemId and remoteItem.parentReference.driveId as driveId.',
       input: GetFileContentInputSchema,
       handler: async (ctx, input: GetFileContentInput) => {
         const itemUrl = input.driveId
@@ -333,12 +331,11 @@ export const OneDrive: ConnectorSpec = {
     '### Authentication',
     'Requires OAuth 2.0 Authorization Code flow with tenant-specific Microsoft Entra ID URLs.',
     'The user must supply the authorization URL and token URL with their Azure AD tenant ID.',
-    'Required scopes: Files.Read.All, offline_access, User.Read.',
     '',
     '### Common gotchas',
     '- Item IDs are stable within a drive but are not portable across drives or tenants.',
-    '- `@microsoft.graph.downloadUrl` fields in responses are time-limited pre-authenticated URLs.',
-    '- The Graph API uses delta tokens for efficient change tracking — not exposed here yet.',
+    '- `@microsoft.graph.downloadUrl` fields in responses are time-limited pre-authenticated URLs — ' +
+      "do not cache or reuse them; always re-fetch metadata to get a fresh URL when it's needed.",
   ].join('\n'),
 };
 
