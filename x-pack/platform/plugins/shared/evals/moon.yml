@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/features-plugin'
   - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/inference-plugin'
   - '@kbn/management-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/storage-adapter'
@@ -44,6 +45,9 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/es-mappings'
+  - '@kbn/inference-common'
+  - '@kbn/zod'
+  - '@kbn/es-types'
 tags:
   - plugin
   - prod
