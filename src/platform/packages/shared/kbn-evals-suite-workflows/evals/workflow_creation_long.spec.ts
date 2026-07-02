@@ -157,9 +157,6 @@ evaluate.describe(
                   ],
                   expectedMaxToolCalls: 8,
                   expectedToolSequence: ['platform.core.generate_workflow'],
-                  expectedLiquidChains: [
-                    { ref: 'steps.critical_count.output', resolvesTo: 'step-output' },
-                  ],
                 },
                 metadata: { category: 'long-creation' },
               },

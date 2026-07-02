@@ -799,9 +799,18 @@ interface RawStep {
   foreach?: unknown;
   condition?: unknown;
   steps?: RawStep[];
+  else?: RawStep[];
+  cases?: Array<{ steps?: RawStep[] } & Record<string, unknown>>;
+  default?: RawStep[];
+  branches?: Array<{ steps?: RawStep[] } & Record<string, unknown>>;
   with?: unknown;
   [key: string]: unknown;
 }
+
+// Keys on a step that hold nested step arrays. Excluded from string scraping so
+// their Liquid refs aren't flattened into the parent step's foreach context —
+// each branch/case body must be walked separately with the correct context.
+const STEP_CONTAINER_KEYS = new Set(['steps', 'else', 'cases', 'default', 'branches']);
 
 const walkStepsForLiquid = (
   steps: RawStep[],
@@ -810,9 +819,8 @@ const walkStepsForLiquid = (
 ): void => {
   for (const step of steps) {
     const strings: string[] = [];
-    // Pull strings from everything except the nested `steps` array.
     for (const [key, value] of Object.entries(step)) {
-      if (key === 'steps') continue;
+      if (STEP_CONTAINER_KEYS.has(key)) continue;
       collectStringsFromValue(value, strings);
     }
 
@@ -828,12 +836,33 @@ const walkStepsForLiquid = (
     }
     if (refs.length > 0) visit(refs, ctx);
 
+    const isForeach = step.type === 'foreach';
+    const nextCtx: LiquidValidationContext = isForeach
+      ? { ...ctx, foreachStack: [...ctx.foreachStack, step.name ?? 'foreach'] }
+      : ctx;
+
     if (Array.isArray(step.steps) && step.steps.length > 0) {
-      const isForeach = step.type === 'foreach';
-      const nextCtx: LiquidValidationContext = isForeach
-        ? { ...ctx, foreachStack: [...ctx.foreachStack, step.name ?? 'foreach'] }
-        : ctx;
       walkStepsForLiquid(step.steps, nextCtx, visit);
+    }
+    if (Array.isArray(step.else) && step.else.length > 0) {
+      walkStepsForLiquid(step.else, ctx, visit);
+    }
+    if (Array.isArray(step.default) && step.default.length > 0) {
+      walkStepsForLiquid(step.default, ctx, visit);
+    }
+    if (Array.isArray(step.cases)) {
+      for (const c of step.cases) {
+        if (c && Array.isArray(c.steps) && c.steps.length > 0) {
+          walkStepsForLiquid(c.steps, ctx, visit);
+        }
+      }
+    }
+    if (Array.isArray(step.branches)) {
+      for (const b of step.branches) {
+        if (b && Array.isArray(b.steps) && b.steps.length > 0) {
+          walkStepsForLiquid(b.steps, ctx, visit);
+        }
+      }
     }
   }
 };

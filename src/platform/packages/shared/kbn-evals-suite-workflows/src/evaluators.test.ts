@@ -849,6 +849,59 @@ steps:
     expect(result.score).toBe(1);
   });
 
+  it('tracks foreach context through a nested if/else branch', async () => {
+    const yaml = `name: Test
+triggers:
+  - type: alert
+steps:
+  - name: outer
+    type: foreach
+    foreach: "{{ event.alerts }}"
+    steps:
+      - name: gate
+        type: if
+        condition: "\${{ foreach.item.severity == \\"high\\" }}"
+        steps:
+          - name: log_high
+            type: console
+            with:
+              message: "{{ foreach.item.id }}"
+        else:
+          - name: log_other
+            type: console
+            with:
+              message: "{{ foreach.item.severity }}"`;
+    const result = await evaluateYaml(yaml);
+    expect(result.score).toBe(1);
+  });
+
+  it('tracks foreach context through a nested switch case', async () => {
+    const yaml = `name: Test
+triggers:
+  - type: alert
+steps:
+  - name: outer
+    type: foreach
+    foreach: "{{ event.alerts }}"
+    steps:
+      - name: route
+        type: switch
+        cases:
+          - case: "critical"
+            steps:
+              - name: page
+                type: console
+                with:
+                  message: "{{ foreach.item.id }}"
+        default:
+          - name: log_default
+            type: console
+            with:
+              message: "{{ foreach.item.severity }}"`;
+    const result = await evaluateYaml(yaml);
+    expect(result.score).toBe(1);
+  });
+
   it('counts mixed valid + invalid references and returns a partial score', async () => {
     const yaml = `name: Test
 triggers:
