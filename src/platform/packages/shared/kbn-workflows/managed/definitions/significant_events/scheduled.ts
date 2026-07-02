@@ -124,7 +124,6 @@ steps:
           workflow-id: "${SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID}"
           inputs:
             detectionBatchMax: ${discoveryBatchSize}
-            completeNoWorkAsSuccess: true
         on-failure:
           continue: true
 
@@ -134,7 +133,6 @@ steps:
           workflow-id: "${SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID}"
           inputs:
             discoveryBatchMax: ${triageBatchSize}
-            completeNoWorkAsSuccess: true
         on-failure:
           continue: true
 `,

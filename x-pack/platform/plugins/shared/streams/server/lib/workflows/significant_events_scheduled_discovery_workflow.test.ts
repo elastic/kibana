@@ -111,36 +111,29 @@ describe('scheduled Significant Events managed workflows', () => {
     expect(yaml).toContain(
       `detectionBatchMax: ${DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE}`
     );
-    expect(yaml).toContain('completeNoWorkAsSuccess: true');
     expect(yaml).toContain('workflow-id: "system-significant-events-triage"');
     expect(yaml).toContain(`discoveryBatchMax: ${DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE}`);
   });
 
-  it('keeps discovery no-work cancellation as the default and exposes scheduled output stats', () => {
+  it('always completes discovery no-work runs as success and exposes scheduled output stats', () => {
     const yaml = getStaticWorkflowYaml(SIGEVENTS_DISCOVERY_WORKFLOW_ID);
 
-    expect(yaml).toContain('name: completeNoWorkAsSuccess');
-    expect(yaml).toContain('default: false');
+    expect(yaml).not.toContain('completeNoWorkAsSuccess');
     expect(yaml).toContain('name: output_no_detections');
-    expect(yaml).toContain('inputs.completeNoWorkAsSuccess');
-    expect(yaml).toContain('name: exit_no_detections');
-    expect(yaml).toContain('not inputs.completeNoWorkAsSuccess');
-    expect(yaml).toContain('status: cancelled');
+    expect(yaml).not.toContain('name: exit_no_detections');
+    expect(yaml).not.toContain('status: cancelled');
     expect(yaml).toContain('name: output_result');
     expect(yaml).toContain('hasRemaining');
     expect(yaml).toContain('queueEmpty');
   });
 
-  it('keeps triage no-work cancellation as the default and exposes scheduled output stats', () => {
+  it('always completes triage no-work runs as success and exposes scheduled output stats', () => {
     const yaml = getStaticWorkflowYaml(SIGEVENTS_TRIAGE_WORKFLOW_ID);
 
-    expect(yaml).toContain('name: completeNoWorkAsSuccess');
-    expect(yaml).toContain('default: false');
+    expect(yaml).not.toContain('completeNoWorkAsSuccess');
     expect(yaml).toContain('name: output_no_discoveries');
-    expect(yaml).toContain('inputs.completeNoWorkAsSuccess');
-    expect(yaml).toContain('name: exit_no_discoveries');
-    expect(yaml).toContain('not inputs.completeNoWorkAsSuccess');
-    expect(yaml).toContain('status: cancelled');
+    expect(yaml).not.toContain('name: exit_no_discoveries');
+    expect(yaml).not.toContain('status: cancelled');
     expect(yaml).toContain('name: output_result');
     expect(yaml).toContain('hasRemaining');
     expect(yaml).toContain('queueEmpty');
