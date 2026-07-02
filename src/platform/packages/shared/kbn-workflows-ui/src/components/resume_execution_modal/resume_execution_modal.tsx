@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -18,20 +17,27 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { CodeEditor, monaco } from '@kbn/code-editor';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { StepContext } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { z } from '@kbn/zod/v4';
-import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import {
   useWorkflowsMonacoTheme,
   WORKFLOWS_MONACO_EDITOR_THEME,
-} from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
+} from '../../hooks/use_workflows_monaco_theme';
+
+export interface ContextOverrideData {
+  stepContext: Partial<StepContext>;
+  schema: z.ZodType;
+  /** Original JSON Schema (avoids lossy Zod → JSON Schema round-trip for Monaco validation) */
+  rawJsonSchema?: JsonModelSchemaType;
+}
 
 const DEFAULT_SCHEMA = z.object({}).catchall(z.unknown());
 const SCHEMA_URI = 'inmemory://schemas/resume-execution-json-editor-schema';
@@ -64,6 +70,8 @@ export interface ResumeExecutionModalProps {
   initialcontextOverride?: ContextOverrideData;
   onSubmit?: (params: { stepInputs: Record<string, unknown> }) => void;
   onClose: () => void;
+  /** When true, renders the submit button as a "Run" button (success color, play icon) instead of "Resume" */
+  useRunButton?: boolean;
 }
 
 export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
@@ -71,10 +79,30 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
   initialcontextOverride,
   onSubmit,
   onClose,
+  useRunButton = false,
 }) => {
-  const styles = useMemoCss(componentStyles);
   useWorkflowsMonacoTheme();
+  const { euiTheme, colorMode, modifications, highContrastMode } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
+
+  const descriptionStyle = useMemo(
+    () =>
+      css({
+        ...euiFontSize({ euiTheme, colorMode, modifications, highContrastMode }, 's'),
+        fontWeight: 'normal',
+      }),
+    [euiTheme, colorMode, modifications, highContrastMode]
+  );
+
+  const modalBodyStyle = useMemo(
+    () =>
+      css({
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+        borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
+        borderBottom: `1px solid ${euiTheme.colors.borderBasePlain}`,
+      }),
+    [euiTheme]
+  );
 
   const [inputsJson, setInputsJson] = useState<string>(
     initialcontextOverride?.stepContext != null
@@ -158,7 +186,7 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
                 defaultMessage="Provide action"
               />
             </EuiFlexItem>
-            <EuiFlexItem css={styles.description}>
+            <EuiFlexItem css={descriptionStyle}>
               {resumeMessage ?? (
                 <FormattedMessage
                   id="workflowsManagement.resumeExecutionModal.description"
@@ -169,7 +197,7 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
-      <EuiModalBody css={styles.modalBody}>
+      <EuiModalBody css={modalBodyStyle}>
         <CodeEditor
           languageId="json"
           value={inputsJson}
@@ -206,31 +234,24 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
         <EuiButton
           onClick={handleSubmit}
           disabled={!isResumePayloadValid}
-          color="warning"
-          iconType="check"
+          color={useRunButton ? 'success' : 'warning'}
+          iconType={useRunButton ? 'play' : 'check'}
           size="s"
           data-test-subj="workflowSubmitResume"
         >
-          <FormattedMessage
-            id="workflowsManagement.resumeExecutionModal.resumeBtn"
-            defaultMessage="Resume"
-          />
+          {useRunButton ? (
+            <FormattedMessage
+              id="workflowsManagement.resumeExecutionModal.runBtn"
+              defaultMessage="Run"
+            />
+          ) : (
+            <FormattedMessage
+              id="workflowsManagement.resumeExecutionModal.resumeBtn"
+              defaultMessage="Resume"
+            />
+          )}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
   );
-};
-
-const componentStyles = {
-  description: (euiThemeContext: UseEuiTheme) =>
-    css({
-      ...euiFontSize(euiThemeContext, 's'),
-      fontWeight: 'normal',
-    }),
-  modalBody: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
-      borderBottom: `1px solid ${euiTheme.colors.borderBasePlain}`,
-    }),
 };

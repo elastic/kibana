@@ -8,8 +8,10 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
-import { generateSampleFromJsonSchema } from './generate_sample_from_json_schema';
-import { INPUT_STRING_PLACEHOLDER } from '../consts/placeholders';
+import {
+  generateSampleFromJsonSchema,
+  INPUT_STRING_PLACEHOLDER,
+} from './generate_sample_from_json_schema';
 
 describe('generateSampleFromJsonSchema', () => {
   describe('default values', () => {
