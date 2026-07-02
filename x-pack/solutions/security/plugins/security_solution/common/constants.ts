@@ -508,7 +508,7 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   // dataset version so each upgrade re-surfaces the callout. Bump the suffix when
   // `MITRE_ATTACK_VERSION` changes.
   MITRE_VERSION_UPGRADED_CALLOUT:
-    'securitySolution.rulesManagementPage.mitreVersionUpgradedCallout.v19.1',
+    'securitySolution.rulesManagementPage.mitreVersionUpgradedCallout.v18.1',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
