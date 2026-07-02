@@ -17,12 +17,14 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  euiTextTruncate,
   EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelativeTime } from '@kbn/i18n-react';
 import type { InvestigationHypothesis, InvestigationState } from '@kbn/significant-events-schema';
 import type { InvestigationOutputProps, InvestigationStatus } from './types';
 
@@ -112,25 +114,9 @@ const buildFinalResultsMarkdown = (state: InvestigationState): string | undefine
 
 const HYPOTHESIS_STATUS_ICON: Record<InvestigationHypothesis['status'], string> = {
   investigating: 'clock',
-  dismissed: 'cross',
-  confirmed: 'checkInCircleFilled',
+  dismissed: 'dashedCircle',
+  confirmed: 'checkCircle',
 };
-
-const HYPOTHESIS_STATUS_COLOR: Record<
-  InvestigationHypothesis['status'],
-  'subdued' | 'success' | 'default'
-> = {
-  investigating: 'subdued',
-  dismissed: 'subdued',
-  confirmed: 'success',
-};
-
-const truncatedTitleCss = css`
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  min-width: 0;
-`;
 
 const HypothesisRow: React.FC<{ hypothesis: InvestigationHypothesis }> = ({ hypothesis }) => {
   const { candidate, confidence, status, reason } = hypothesis;
@@ -149,27 +135,35 @@ const HypothesisRow: React.FC<{ hypothesis: InvestigationHypothesis }> = ({ hypo
             ) : (
               <EuiIcon
                 type={HYPOTHESIS_STATUS_ICON[status]}
-                color={HYPOTHESIS_STATUS_COLOR[status]}
+                color="text"
                 data-test-subj={`investigationOutputHypothesisStatus-${status}`}
                 aria-hidden={true}
               />
             )}
           </EuiFlexItem>
-          <EuiFlexItem css={truncatedTitleCss}>
-            <EuiText size="s" color={HYPOTHESIS_STATUS_COLOR[status]} css={truncatedTitleCss}>
-              <strong>{candidate}</strong>
+          <EuiFlexItem grow={true}>
+            <EuiText size="xs" color="text">
+              <strong>
+                {i18n.translate('xpack.investigationOutput.hypothesis', {
+                  defaultMessage: 'Hypothesis:',
+                })}
+              </strong>{' '}
+              <span>{candidate}</span>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow" data-test-subj="investigationOutputConfidenceBadge">
-              <FormattedMessage
-                id="xpack.investigationOutput.hypothesisConfidenceBadgeLabel"
-                defaultMessage="{confidence, number, percent}"
-                values={{ confidence }}
-              />
-            </EuiBadge>
-          </EuiFlexItem>
         </EuiFlexGroup>
+      }
+      extraAction={
+        <EuiBadge
+          color={status === 'confirmed' ? 'success' : 'hollow'}
+          data-test-subj="investigationOutputConfidenceBadge"
+        >
+          <FormattedMessage
+            id="xpack.investigationOutput.hypothesisConfidenceBadgeLabel"
+            defaultMessage="{confidence, number, percent}"
+            values={{ confidence }}
+          />
+        </EuiBadge>
       }
     >
       <EuiText size="xs" color="subdued">
@@ -199,50 +193,75 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
   const hypotheses = state?.hypotheses ?? [];
   const finalResultsMarkdown = state ? buildFinalResultsMarkdown(state) : undefined;
   const header = getHeader(status, state);
+  const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj="investigationOutput">
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiPanel
+      hasBorder
+      paddingSize="none"
+      data-test-subj="investigationOutput"
+      css={css`
+        padding-bottom: ${euiTheme.size.base};
+      `}
+    >
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        css={css`
+          padding: ${euiTheme.size.base};
+        `}
+      >
         <EuiFlexItem grow={false}>
           {header.spinner ? (
             <EuiLoadingSpinner size="m" data-test-subj="investigationOutputLoadingSpinner" />
           ) : (
-            <EuiIcon type={header.icon} color={header.color} aria-hidden={true} />
+            <EuiIcon type={header.icon} size="m" color={header.color} aria-hidden={true} />
           )}
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="xs">
+        <EuiFlexItem grow={true}>
+          <EuiTitle size="xxs">
             <h3>{header.title}</h3>
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
 
       {error && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText
-            size="s"
-            color={status === 'unavailable' ? 'warning' : 'danger'}
-            data-test-subj="investigationOutputError"
-          >
-            <p>{error}</p>
-          </EuiText>
-        </>
+        <EuiText
+          size="s"
+          color={status === 'unavailable' ? 'warning' : 'danger'}
+          data-test-subj="investigationOutputError"
+          css={css`
+            padding: 0 ${euiTheme.size.base};
+          `}
+        >
+          <p>{error}</p>
+        </EuiText>
       )}
 
       {state?.summary && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>{state.summary}</p>
-          </EuiText>
-        </>
+        <EuiMarkdownFormat
+          textSize="s"
+          color="subdued"
+          css={css`
+            padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
+          `}
+        >
+          {state.summary}
+        </EuiMarkdownFormat>
       )}
 
       <EuiSpacer size="s" />
 
       {hypotheses.length === 0 ? (
-        <EuiText size="s" color="subdued" data-test-subj="investigationOutputNoHypotheses">
+        <EuiText
+          size="s"
+          color="subdued"
+          data-test-subj="investigationOutputNoHypotheses"
+          css={css`
+            padding: 0 ${euiTheme.size.base};
+          `}
+        >
           <p>
             {status === 'running'
               ? i18n.translate('xpack.investigationOutput.noHypothesesYetDescription', {
@@ -254,26 +273,39 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
           </p>
         </EuiText>
       ) : (
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="s"
-          data-test-subj="investigationOutputHypotheses"
-        >
-          {hypotheses.map((hypothesis) => (
-            <EuiFlexItem key={hypothesis.candidate} grow={false}>
-              <HypothesisRow hypothesis={hypothesis} />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+        <EuiPanel hasShadow={false} color="subdued" paddingSize="none">
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="none"
+            data-test-subj="investigationOutputHypotheses"
+          >
+            {hypotheses.map((hypothesis, i) => (
+              <EuiFlexItem
+                key={hypothesis.candidate}
+                grow={false}
+                css={css`
+                  border-top: ${i === 0 ? euiTheme.border.thin : 'none'};
+                  border-bottom: ${euiTheme.border.thin};
+                  padding: ${euiTheme.size.s} ${euiTheme.size.m};
+                `}
+              >
+                <HypothesisRow hypothesis={hypothesis} />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiPanel>
       )}
 
       {finalResultsMarkdown && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiMarkdownFormat textSize="s" data-test-subj="investigationOutputFinalResults">
-            {finalResultsMarkdown}
-          </EuiMarkdownFormat>
-        </>
+        <EuiMarkdownFormat
+          textSize="s"
+          data-test-subj="investigationOutputFinalResults"
+          css={css`
+            padding: ${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.base};
+          `}
+        >
+          {finalResultsMarkdown}
+        </EuiMarkdownFormat>
       )}
     </EuiPanel>
   );

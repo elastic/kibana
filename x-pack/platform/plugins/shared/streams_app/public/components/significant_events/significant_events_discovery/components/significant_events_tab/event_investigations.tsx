@@ -70,7 +70,7 @@ const InvestigationRow = ({ investigation }: { investigation: SignificantEventIn
         <InvestigationOutput status={status} state={state} error={error} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
+        <EuiText size="xs" color="subdued" textAlign="right">
           {formatTimestamp(startedAt)}
           {status === 'running'
             ? ` · ${getRunningDurationText(duration)}`
@@ -91,7 +91,7 @@ export const EventInvestigations = ({ event }: EventInvestigationsProps) => {
   const investigations = event.investigations ?? [];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
           <h3>{SECTION_TITLE}</h3>
