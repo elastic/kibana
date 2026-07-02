@@ -90,8 +90,13 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
 
     const option = this.optionsList().getByRole('option', { name: value, exact: false });
     try {
-      await option.waitFor({ state: 'visible', timeout });
-      await option.click();
+      // Wait via `count()` (not `option.click()`): with `exact: false` a substring — e.g. a
+      // seeded SLO name repeated across local runs — can match multiple options, and `click()`
+      // would throw under Playwright strict mode. Select the highlighted match with the keyboard
+      // instead: duplicate-tolerant, and free of the nth-methods banned in kbn-scout.
+      await expect.poll(() => option.count(), { timeout }).toBeGreaterThan(0);
+      await this.searchField.press('ArrowDown');
+      await this.searchField.press('Enter');
     } catch (error) {
       if (!create) {
         throw error;
@@ -109,8 +114,11 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
    */
   async getAvailableOptions(): Promise<string[]> {
     await this.inputWrapper.click();
-    const options = this.optionsList().getByRole('option');
-    await expect.poll(() => options.count()).toBeGreaterThan(0);
-    return options.allInnerTexts();
+    const optionsList = this.optionsList();
+    // Wait for the dropdown to open, then read whatever options it holds. Waiting on the
+    // list container (rather than polling the option count) avoids burning the full timeout
+    // when a combo legitimately has no available options.
+    await optionsList.waitFor({ state: 'visible' });
+    return optionsList.getByRole('option').allInnerTexts();
   }
 }

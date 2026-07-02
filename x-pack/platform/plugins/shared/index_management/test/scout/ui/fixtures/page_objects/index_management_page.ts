@@ -95,10 +95,6 @@ export class IndexManagement extends AbstractPageObject {
     await this.page.testSubj.locator('nextButton').click();
   }
 
-  async setComboBox(testSubject: string, value: string) {
-    await this.page.components.comboBox(testSubject).setSelectedOptions([value]);
-  }
-
   async changeMappingsEditorTab(tab: 'fields' | 'advancedOptions' | 'templates') {
     const tabMap = {
       fields: 'fieldsTab',
