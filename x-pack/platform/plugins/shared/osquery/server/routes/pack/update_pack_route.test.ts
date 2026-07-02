@@ -1488,9 +1488,10 @@ describe('updatePackRoute', () => {
     it('does not let two queries collide on one schedule_id when a stale `id` is reused', async () => {
       // Konrad review #3: a stale/duplicate client-supplied `id` (here `q2`
       // lies that its id is `q1`) must not make both queries inherit the same
-      // stored `schedule_id`. Each stored row is consumable once: `q1` keeps
-      // its own id (matched by map key first), and the impostor `q2` mints a
-      // fresh schedule_id instead of stealing `q1`'s.
+      // stored `schedule_id`. Each stored row is consumable once: `q1` is
+      // processed first and claims its own id, so `q2`'s stale claim on the
+      // same id misses and it mints a fresh schedule_id instead of stealing
+      // `q1`'s.
       const currentSO = {
         ...basePackSO,
         attributes: {
@@ -1545,11 +1546,12 @@ describe('updatePackRoute', () => {
       expect(q1.schedule_id).not.toBe(q2.schedule_id);
     });
 
-    it('reserves a query`s own id before honoring another query`s rename claim on it', async () => {
-      // Order-independence: even if the impostor (`other`, claiming id `q1`)
-      // is processed, the real `q1` must not lose its schedule_id. Pass 1
-      // reserves `q1` for the query whose own map key is `q1`; the rename
-      // claimant only gets unreserved rows.
+    it('honors an explicit rename `id` claim over another query`s own map key, regardless of order', async () => {
+      // Explicit rename intent (`id`) is resolved before the map-key
+      // fallback. Here `other` claims id `q1` (a genuine rename), while a
+      // separate `q1` entry in the same save has no special claim beyond
+      // its own map key — so `other` wins the stored row and `q1` is left
+      // to mint a fresh schedule_id.
       const currentSO = {
         ...basePackSO,
         attributes: {
@@ -1576,7 +1578,7 @@ describe('updatePackRoute', () => {
         body: {
           queries: {
             other: { id: 'q1', query: 'SELECT 2', interval: 60 }, // claims q1's id
-            q1: { id: 'q1', query: 'SELECT 1', interval: 60 }, // the real q1
+            q1: { id: 'q1', query: 'SELECT 1', interval: 60 }, // also claims q1's id
           },
         },
       });
@@ -1586,11 +1588,60 @@ describe('updatePackRoute', () => {
 
       expect(mockResponse.badRequest).not.toHaveBeenCalled();
       const written = getWrittenQueries(mockClient);
-      const realQ1 = written.find((q) => q.id === 'q1')!;
+      const q1 = written.find((q) => q.id === 'q1')!;
       const other = written.find((q) => q.id === 'other')!;
-      // The real q1 keeps its schedule_id; the impostor does not steal it.
-      expect(realQ1.schedule_id).toBe('sid-q1');
-      expect(other.schedule_id).not.toBe('sid-q1');
+      // The first id-claimant (`other`) wins the stored row; `q1` mints fresh.
+      expect(other.schedule_id).toBe('sid-q1');
+      expect(q1.schedule_id).not.toBe('sid-q1');
+    });
+
+    it('rename plus name reuse does not misattribute schedule_id (regression)', async () => {
+      // A single save renames `old-name` -> `new-name` (payload carries
+      // id: 'old-name') while also adding a brand-new query that reuses the
+      // freed map key `old-name` (no id). The rename must win: `new-name`
+      // keeps the original schedule_id, and the new `old-name` query gets a
+      // fresh, different one.
+      const currentSO = {
+        ...basePackSO,
+        attributes: {
+          ...basePackSO.attributes,
+          queries: [
+            {
+              id: 'old-name',
+              name: 'old-name',
+              query: 'SELECT 1',
+              interval: 60,
+              schedule_id: 'sched-to-preserve',
+              start_date: '2025-01-01T00:00:00.000Z',
+            },
+          ],
+        },
+      };
+      const mockClient = buildMockSavedObjectsClient(currentSO);
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      setupRoute(true);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: {
+          queries: {
+            'old-name': { query: 'SELECT 2', interval: 60 }, // new query reusing the freed name
+            'new-name': { id: 'old-name', query: 'SELECT 1', interval: 60 }, // the rename
+          },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      const written = getWrittenQueries(mockClient);
+      const renamed = written.find((q) => q.id === 'new-name')!;
+      const reused = written.find((q) => q.id === 'old-name')!;
+      expect(renamed.schedule_id).toBe('sched-to-preserve');
+      expect(reused.schedule_id).toEqual(expect.any(String));
+      expect(reused.schedule_id).not.toBe(renamed.schedule_id);
     });
   });
 });

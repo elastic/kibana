@@ -179,15 +179,17 @@ export interface PreservableQueryFields {
  * same stored `id`) would let both inherit the same `schedule_id`, collapsing
  * two queries onto one scheduled-history join key.
  *
- * Two passes make the result independent of object key order:
- *  1. Reserve a stored row for the outgoing query that matches by its own map
- *     key (the normal case — stored key === query id). This guarantees a query
- *     never loses its own `schedule_id` to an impostor that claimed its id.
- *  2. Match the remainder by the client-supplied `id` (re-pairs a renamed query
- *     whose map key changed) against rows not already reserved.
+ * Two passes make the result independent of object key order, with explicit
+ * rename intent taking precedence over the map-key default:
+ *  1. Reserve a stored row for the outgoing query that carries a matching
+ *     client-supplied `id` (explicit rename intent). This guarantees a renamed
+ *     query keeps its `schedule_id` even if another outgoing query
+ *     simultaneously reuses its old map key.
+ *  2. Match the remainder by their own map key (the normal case — stored key
+ *     === query id) against rows not already reserved.
  *
- * An outgoing query with no resolved match is absent from the result; the caller
- * mints a fresh `schedule_id` for it.
+ * An outgoing query with no resolved match is absent from the result; the
+ * caller mints a fresh `schedule_id` for it.
  */
 export const resolvePreservedQueries = (
   outgoingQueries: Record<string, PackQueryInput>,
@@ -208,18 +210,18 @@ export const resolvePreservedQueries = (
     return acc;
   };
 
-  // Pass 1: queries matching by their own map key.
-  const byMapKey = Object.keys(outgoingQueries).reduce<Record<string, PreservableQueryFields>>(
-    (acc, queryKey) => claim(acc, queryKey, queryKey),
+  // Pass 1: queries matching by the client-supplied `id` (explicit rename intent).
+  const byId = Object.entries(outgoingQueries).reduce<Record<string, PreservableQueryFields>>(
+    (acc, [queryKey, queryData]) => claim(acc, queryKey, queryData.id),
     {}
   );
 
-  // Pass 2: remaining queries matched by the client-supplied `id` (rename).
-  return Object.entries(outgoingQueries)
-    .filter(([queryKey]) => !byMapKey[queryKey])
+  // Pass 2: remaining queries matched by their own map key.
+  return Object.keys(outgoingQueries)
+    .filter((queryKey) => !byId[queryKey])
     .reduce<Record<string, PreservableQueryFields>>(
-      (acc, [queryKey, queryData]) => claim(acc, queryKey, queryData.id),
-      byMapKey
+      (acc, queryKey) => claim(acc, queryKey, queryKey),
+      byId
     );
 };
 
