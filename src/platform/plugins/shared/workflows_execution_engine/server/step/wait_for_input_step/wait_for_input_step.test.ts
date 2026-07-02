@@ -232,7 +232,7 @@ describe('WaitForInputStepImpl', () => {
       expect(mockStepExecutionRuntime.setInput).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
-          externalResumeApiKeyId: 'api-key-id',
+          _hitlApiKeyId: 'api-key-id',
           message: 'Please approve',
         })
       );
@@ -257,7 +257,7 @@ describe('WaitForInputStepImpl', () => {
 
       expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith(
         expect.objectContaining({
-          externalResumeApiKeyId: 'api-key-id',
+          _hitlApiKeyId: 'api-key-id',
         })
       );
     });

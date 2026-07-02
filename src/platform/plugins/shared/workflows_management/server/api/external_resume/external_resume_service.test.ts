@@ -64,7 +64,7 @@ describe('resumeWorkflowExecutionExternally', () => {
           stepType: 'waitForApproval',
           status: ExecutionStatus.WAITING_FOR_INPUT,
           input: {
-            externalResumeApiKeyId: 'api-key-id',
+            _hitlApiKeyId: 'api-key-id',
           },
         } as unknown as WorkflowStepExecutionDto,
       ],
@@ -141,7 +141,7 @@ describe('resumeWorkflowExecutionExternally', () => {
           stepType: 'waitForApproval',
           status: ExecutionStatus.WAITING_FOR_INPUT,
           input: {
-            externalResumeApiKeyId: 'different-api-key-id',
+            _hitlApiKeyId: 'different-api-key-id',
           },
         } as unknown as WorkflowStepExecutionDto,
       ],
@@ -218,7 +218,7 @@ describe('resumeWorkflowExecutionExternallyWithInput', () => {
           stepType: 'waitForInput',
           status: ExecutionStatus.WAITING_FOR_INPUT,
           input: {
-            externalResumeApiKeyId: 'api-key-id',
+            _hitlApiKeyId: 'api-key-id',
             schema: {
               type: 'object',
               properties: {
@@ -284,7 +284,7 @@ describe('resumeWorkflowExecutionExternallyWithInput', () => {
           stepType: 'waitForInput',
           status: ExecutionStatus.WAITING_FOR_INPUT,
           input: {
-            externalResumeApiKeyId: 'api-key-id',
+            _hitlApiKeyId: 'api-key-id',
             schema: {
               type: 'object',
               properties: {
@@ -379,7 +379,7 @@ describe('getExternalResumeFormPage', () => {
           stepType: 'waitForInput',
           status: ExecutionStatus.WAITING_FOR_INPUT,
           input: {
-            externalResumeApiKeyId: 'api-key-id',
+            _hitlApiKeyId: 'api-key-id',
             message: 'Please respond',
             schema: {
               type: 'object',

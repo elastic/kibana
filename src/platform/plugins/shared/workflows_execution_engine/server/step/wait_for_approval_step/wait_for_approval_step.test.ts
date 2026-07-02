@@ -160,7 +160,7 @@ describe('WaitForApprovalStepImpl', () => {
     expect(mockCreateExternalResumeApiKey).toHaveBeenCalled();
     expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith(
       expect.objectContaining({
-        externalResumeApiKeyId: 'api-key-id',
+        _hitlApiKeyId: 'api-key-id',
       })
     );
     expect(mockBuildWaitForApprovalResumeLinks).toHaveBeenCalledWith(
@@ -186,7 +186,7 @@ describe('WaitForApprovalStepImpl', () => {
     expect(mockStepExecutionRuntime.setInput).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        externalResumeApiKeyId: 'api-key-id',
+        _hitlApiKeyId: 'api-key-id',
       })
     );
     expect(mockSendWaitForApprovalNotifications).toHaveBeenCalled();
@@ -210,7 +210,7 @@ describe('WaitForApprovalStepImpl', () => {
 
     expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith(
       expect.objectContaining({
-        externalResumeApiKeyId: 'api-key-id',
+        _hitlApiKeyId: 'api-key-id',
       })
     );
   });
@@ -246,7 +246,7 @@ describe('WaitForApprovalStepImpl', () => {
 
     mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
     (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
-      input: { externalResumeApiKeyId: 'api-key-id' },
+      input: { _hitlApiKeyId: 'api-key-id' },
     };
     mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
       id: 'exec-abc',
@@ -310,7 +310,7 @@ describe('WaitForApprovalStepImpl', () => {
       mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
       (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
         startedAt: '2025-06-01T12:00:00.000Z',
-        input: { externalResumeApiKeyId: 'api-key-id' },
+        input: { _hitlApiKeyId: 'api-key-id' },
       };
       mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
         id: 'exec-abc',

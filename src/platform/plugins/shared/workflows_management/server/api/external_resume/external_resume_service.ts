@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus, isHitlWaitStepType } from '@kbn/workflows';
+import { ExecutionStatus, HITL_API_KEY_ID_INPUT_FIELD, isHitlWaitStepType } from '@kbn/workflows';
 import type { ResumeWorkflowExecutionResponseDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
   WorkflowExecutionInvalidStatusError,
@@ -334,11 +334,11 @@ function getExternalResumeStepExecution(
 }
 
 export function getExternalResumeApiKeyId(input: unknown): string | undefined {
-  if (input == null || typeof input !== 'object' || !('externalResumeApiKeyId' in input)) {
+  if (input == null || typeof input !== 'object' || !(HITL_API_KEY_ID_INPUT_FIELD in input)) {
     return undefined;
   }
 
-  const apiKeyId = (input as { externalResumeApiKeyId?: unknown }).externalResumeApiKeyId;
+  const apiKeyId = (input as Record<string, unknown>)[HITL_API_KEY_ID_INPUT_FIELD];
   return typeof apiKeyId === 'string' && apiKeyId.length > 0 ? apiKeyId : undefined;
 }
 

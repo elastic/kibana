@@ -9,6 +9,9 @@
 
 export const DEFAULT_WAIT_FOR_INPUT_TIMEOUT = '72h' as const;
 
+/** Internal `stepExecution.input` field storing the external HITL resume API key id. */
+export const HITL_API_KEY_ID_INPUT_FIELD = '_hitlApiKeyId' as const;
+
 /** Workflow context path: `context.hitl.externalFormLink`. */
 export const HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY = 'externalFormLink' as const;
 

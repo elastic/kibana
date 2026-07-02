@@ -11,6 +11,7 @@ import {
   DEFAULT_WAIT_FOR_APPROVAL_APPROVE_LABEL,
   DEFAULT_WAIT_FOR_APPROVAL_REJECT_LABEL,
   DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
+  HITL_API_KEY_ID_INPUT_FIELD,
   WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
 } from '@kbn/workflows';
 import type { WaitForApprovalGraphNode } from '@kbn/workflows/graph';
@@ -108,7 +109,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
         timeout,
       });
 
-      stepInput.externalResumeApiKeyId = apiKey.id;
+      stepInput[HITL_API_KEY_ID_INPUT_FIELD] = apiKey.id;
       this.stepExecutionRuntime.setInput(stepInput);
 
       await this.sendExternalNotifications({

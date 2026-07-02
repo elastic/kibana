@@ -9,6 +9,7 @@
 
 import {
   DEFAULT_WAIT_FOR_INPUT_TIMEOUT,
+  HITL_API_KEY_ID_INPUT_FIELD,
   HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
 } from '@kbn/workflows';
@@ -101,7 +102,7 @@ export class WaitForInputStepImpl implements NodeImplementation {
         timeout,
       });
 
-      stepInput.externalResumeApiKeyId = apiKey.id;
+      stepInput[HITL_API_KEY_ID_INPUT_FIELD] = apiKey.id;
       this.stepExecutionRuntime.setInput(stepInput);
 
       const kibanaUrl = getKibanaUrl(this.dependencies.coreStart, this.dependencies.cloudSetup);

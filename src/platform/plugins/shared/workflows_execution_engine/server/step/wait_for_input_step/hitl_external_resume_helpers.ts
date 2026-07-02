@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { HITL_API_KEY_ID_INPUT_FIELD } from '@kbn/workflows';
 import { createExternalResumeApiKey } from '@kbn/workflows/server';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { ContextDependencies } from '../../workflow_context_manager/types';
@@ -47,11 +48,11 @@ export async function invalidateHitlExternalResumeApiKeyIfPresent({
   workflowLogger: IWorkflowEventLogger;
 }): Promise<void> {
   const input = stepExecutionRuntime.stepExecution?.input;
-  if (input == null || typeof input !== 'object' || !('externalResumeApiKeyId' in input)) {
+  if (input == null || typeof input !== 'object' || !(HITL_API_KEY_ID_INPUT_FIELD in input)) {
     return;
   }
 
-  const apiKeyId = (input as { externalResumeApiKeyId?: unknown }).externalResumeApiKeyId;
+  const apiKeyId = (input as Record<string, unknown>)[HITL_API_KEY_ID_INPUT_FIELD];
   if (typeof apiKeyId !== 'string' || apiKeyId.length === 0) {
     return;
   }
