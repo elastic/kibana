@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaResponseFactory } from '@kbn/core/server';
+import type { KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { ExternalResumeError } from '../../external_resume/external_resume_error';
 import {
   renderExternalResumeErrorPage,
@@ -36,6 +37,14 @@ export const EXTERNAL_RESUME_POST_ROUTE_OPTIONS = {
   xsrfRequired: false,
 } as const;
 
+const EXTERNAL_RESUME_UNEXPECTED_ERROR_MESSAGE = i18n.translate(
+  'workflowsManagement.externalResume.unexpectedError',
+  {
+    defaultMessage:
+      'Unable to submit response. Please try again or request a new link from the workflow owner.',
+  }
+);
+
 export function htmlOk(response: KibanaResponseFactory, body: string) {
   return response.ok({
     body,
@@ -45,16 +54,20 @@ export function htmlOk(response: KibanaResponseFactory, body: string) {
   });
 }
 
-export function handleExternalResumeError(response: KibanaResponseFactory, error: unknown) {
+export function handleExternalResumeError(
+  response: KibanaResponseFactory,
+  error: unknown,
+  logger?: Logger
+) {
   if (error instanceof ExternalResumeError) {
     return htmlError(response, error.statusCode, error.message);
   }
 
-  const message =
-    error instanceof Error
-      ? error.message
-      : 'An unexpected error occurred while resuming the workflow.';
-  return htmlError(response, 500, message);
+  logger?.debug(
+    () => `External resume failed: ${error instanceof Error ? error.message : String(error)}`
+  );
+
+  return htmlError(response, 400, EXTERNAL_RESUME_UNEXPECTED_ERROR_MESSAGE);
 }
 
 function htmlError(response: KibanaResponseFactory, statusCode: number, message: string) {

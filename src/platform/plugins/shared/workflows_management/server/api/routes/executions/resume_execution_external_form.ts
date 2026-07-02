@@ -22,7 +22,7 @@ import { executionIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerExternalResumeFormRoute(deps: RouteDependencies) {
-  const { router, api, spaces } = deps;
+  const { router, api, spaces, logger } = deps;
 
   router.versioned
     .get({
@@ -65,7 +65,7 @@ export function registerExternalResumeFormRoute(deps: RouteDependencies) {
 
           return htmlOk(response, body);
         } catch (error) {
-          return handleExternalResumeError(response, error);
+          return handleExternalResumeError(response, error, logger);
         }
       })
     );

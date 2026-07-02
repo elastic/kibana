@@ -24,7 +24,7 @@ import { executionIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit } = deps;
+  const { router, api, spaces, audit, logger } = deps;
 
   router.versioned
     .post({
@@ -86,14 +86,14 @@ export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies
             executionId: request.params.executionId,
             error,
           });
-          return handleExternalResumeError(response, error);
+          return handleExternalResumeError(response, error, logger);
         }
       })
     );
 }
 
 export function registerExternalResumeExecutionGetRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit } = deps;
+  const { router, api, spaces, audit, logger } = deps;
 
   router.versioned
     .get({
@@ -162,7 +162,7 @@ export function registerExternalResumeExecutionGetRoute(deps: RouteDependencies)
             executionId: request.params.executionId,
             error,
           });
-          return handleExternalResumeError(response, error);
+          return handleExternalResumeError(response, error, logger);
         }
       })
     );
