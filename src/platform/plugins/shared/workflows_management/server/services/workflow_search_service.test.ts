@@ -174,7 +174,7 @@ describe('WorkflowSearchService', () => {
           size: 20,
           page: 1,
           managedFilter: 'all',
-          availableInSelector: 'rule_action',
+          visibilityContext: 'selector:rule_action',
         },
         'default'
       );
@@ -184,7 +184,7 @@ describe('WorkflowSearchService', () => {
         bool: {
           should: [
             { bool: { must_not: [{ term: { managed: true } }] } },
-            { term: { managedVisibleInSelectors: 'rule_action' } },
+            { term: { managedVisibilityContexts: 'selector:rule_action' } },
           ],
           minimum_should_match: 1,
         },

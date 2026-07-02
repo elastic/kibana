@@ -56,11 +56,11 @@ const querySchema = schema.object({
       meta: { description: 'Filter by managed status. Defaults to "unmanaged".' },
     })
   ),
-  availableInSelector: schema.maybe(
-    schema.oneOf([schema.literal('rule_action')], {
+  visibilityContext: schema.maybe(
+    schema.oneOf([schema.literal('selector:rule_action')], {
       meta: {
         description:
-          'When managed workflows are included, only return managed workflows available in this selector.',
+          'When managed workflows are included, only return managed workflows visible in this context.',
       },
     })
   ),
@@ -114,7 +114,10 @@ export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependen
             }),
           });
         } catch (error) {
-          return handleRouteError(response, error);
+          return handleRouteError(
+            response,
+            error instanceof Error ? error : new Error(String(error))
+          );
         }
       })
     );
@@ -128,7 +131,7 @@ function prepareParams({
   tags,
   query,
   managed,
-  availableInSelector,
+  visibilityContext,
   sortField,
   sortOrder,
 }: TypeOf<typeof querySchema>): GetWorkflowsParams {
@@ -140,7 +143,7 @@ function prepareParams({
     createdBy: createdBy != null && !Array.isArray(createdBy) ? [createdBy] : createdBy,
     tags: tags != null && !Array.isArray(tags) ? [tags] : tags,
     managedFilter: managed,
-    availableInSelector,
+    visibilityContext,
     sortField,
     sortOrder,
   };

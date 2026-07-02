@@ -95,10 +95,10 @@ describe('transformStorageDocumentToWorkflowDto', () => {
   });
 
   it('does not expose internal managed selector visibility metadata', () => {
-    const source = makeSource({ managedVisibleInSelectors: ['rule_action'] });
+    const source = makeSource({ managedVisibilityContexts: ['selector:rule_action'] });
     const result = transformStorageDocumentToWorkflowDto('wf-1', source);
 
-    expect(result).not.toHaveProperty('managedVisibleInSelectors');
+    expect(result).not.toHaveProperty('managedVisibilityContexts');
   });
 });
 

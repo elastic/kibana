@@ -57,7 +57,7 @@ export interface WorkflowSelectorConfig {
   hideViewWorkflowLink?: boolean;
   // When true (default), the selected workflow's name is displayed in the search input.
   showSelectedInSearch?: boolean;
-  availableInSelector?: WorkflowsSearchParams['availableInSelector'];
+  visibilityContext?: WorkflowsSearchParams['visibilityContext'];
 
   // Error Messages
   errorMessages?: {

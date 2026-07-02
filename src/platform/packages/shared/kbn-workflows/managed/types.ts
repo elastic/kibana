@@ -15,6 +15,10 @@ export interface ManagedWorkflowManagement {
 
 export type ManagedWorkflowSelector = 'rule_action';
 
+export interface ManagedWorkflowVisibility {
+  selectors?: readonly ManagedWorkflowSelector[];
+}
+
 export interface ManagedWorkflowTemplateValues {
   [key: string]: unknown;
 }
@@ -36,6 +40,6 @@ export type ManagedWorkflowDefinition<
   pluginId: string;
   version: number;
   billable: boolean;
-  visibleInSelectors?: readonly ManagedWorkflowSelector[];
+  visibility?: ManagedWorkflowVisibility;
   management: ManagedWorkflowManagement;
 } & ManagedWorkflowDefinitionSource<TValues>;

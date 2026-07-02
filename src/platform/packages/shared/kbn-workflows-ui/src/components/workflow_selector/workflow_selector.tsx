@@ -81,8 +81,8 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     size: 1000,
     page: 1,
     query: '',
-    ...(finalConfig.availableInSelector && canReadManagedWorkflow
-      ? { managed: 'all' as const, availableInSelector: finalConfig.availableInSelector }
+    ...(finalConfig.visibilityContext && canReadManagedWorkflow
+      ? { managed: 'all' as const, visibilityContext: finalConfig.visibilityContext }
       : {}),
   });
 

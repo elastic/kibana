@@ -37,16 +37,16 @@ const ES_SORT_FIELDS: Record<WorkflowSortField, string> = {
   enabled: 'enabled',
 };
 
-const buildAvailableInSelectorFilter = (
+const buildVisibilityContextFilter = (
   managedFilter: GetWorkflowsParams['managedFilter'],
-  availableInSelector: GetWorkflowsParams['availableInSelector']
+  visibilityContext: GetWorkflowsParams['visibilityContext']
 ): estypes.QueryDslQueryContainer | null => {
-  if (!availableInSelector) {
+  if (!visibilityContext) {
     return null;
   }
 
   if (managedFilter === 'managed') {
-    return { term: { managedVisibleInSelectors: availableInSelector } };
+    return { term: { managedVisibilityContexts: visibilityContext } };
   }
 
   if (managedFilter === 'all') {
@@ -54,7 +54,7 @@ const buildAvailableInSelectorFilter = (
       bool: {
         should: [
           { bool: { must_not: [{ term: { managed: true } }] } },
-          { term: { managedVisibleInSelectors: availableInSelector } },
+          { term: { managedVisibilityContexts: visibilityContext } },
         ],
         minimum_should_match: 1,
       },
@@ -167,7 +167,7 @@ export class WorkflowSearchService {
       tags,
       query,
       managedFilter,
-      availableInSelector,
+      visibilityContext,
       sortField,
       sortOrder = 'asc',
     } = params;
@@ -191,12 +191,12 @@ export class WorkflowSearchService {
     if (query) {
       must.push(buildWorkflowTextSearchClause(query));
     }
-    const availableInSelectorFilter = buildAvailableInSelectorFilter(
+    const visibilityContextFilter = buildVisibilityContextFilter(
       resolvedManagedFilter,
-      availableInSelector
+      visibilityContext
     );
-    if (availableInSelectorFilter) {
-      must.push(availableInSelectorFilter);
+    if (visibilityContextFilter) {
+      must.push(visibilityContextFilter);
     }
 
     const esSort = sortField
@@ -403,10 +403,10 @@ export class WorkflowSearchService {
       }));
     } catch (error) {
       if (!isIndexNotFoundError(error)) {
-        this.deps.logger.error('Failed to get execution history stats', error);
+        this.deps.logger.error(`Failed to get execution history stats: ${String(error)}`);
       } else {
         this.deps.logger.warn(
-          `Executions index not found when fetching execution history stats: ${error.message}`
+          `Executions index not found when fetching execution history stats: ${String(error)}`
         );
       }
       return [];

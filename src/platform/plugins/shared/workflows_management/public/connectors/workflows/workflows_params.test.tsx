@@ -195,7 +195,7 @@ describe('WorkflowsParamsFields', () => {
           page: 1,
           query: '',
           managed: 'all',
-          availableInSelector: 'rule_action',
+          visibilityContext: 'selector:rule_action',
         })
       );
     });
@@ -226,7 +226,7 @@ describe('WorkflowsParamsFields', () => {
     const [params] = mockWorkflowApi.getWorkflows.mock.calls[0];
     expect(params).toMatchObject({ size: 1000, page: 1, query: '' });
     expect(params).not.toHaveProperty('managed');
-    expect(params).not.toHaveProperty('availableInSelector');
+    expect(params).not.toHaveProperty('visibilityContext');
   });
 
   test('should handle workflow selection', async () => {

@@ -225,7 +225,7 @@ describe('Workflow routes', () => {
     it('should pass selector availability to api.getWorkflows', async () => {
       mockApi.getWorkflows.mockResolvedValue({ workflows: [], total: 0 });
       const request = httpServerMock.createKibanaRequest({
-        query: { managed: 'all', availableInSelector: 'rule_action' },
+        query: { managed: 'all', visibilityContext: 'selector:rule_action' },
       });
       (request as any).authzResult = {
         [WorkflowsManagementApiActions.read]: true,
@@ -239,7 +239,7 @@ describe('Workflow routes', () => {
       expect(mockApi.getWorkflows).toHaveBeenCalledWith(
         expect.objectContaining({
           managedFilter: 'all',
-          availableInSelector: 'rule_action',
+          visibilityContext: 'selector:rule_action',
         }),
         'default-space',
         { includeExecutionHistory: false, includeManagedExecutionHistory: false }

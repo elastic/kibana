@@ -80,7 +80,7 @@ const createDefinition = (
     pluginId?: string;
     version?: number;
     billable?: boolean;
-    visibleInSelectors?: ManagedWorkflowDefinition['visibleInSelectors'];
+    visibility?: ManagedWorkflowDefinition['visibility'];
     yaml?: string;
     management?: Partial<ManagedWorkflowManagement>;
   } = {}
@@ -89,7 +89,7 @@ const createDefinition = (
   pluginId: overrides.pluginId ?? PLUGIN_ID,
   version: overrides.version ?? 1,
   billable: overrides.billable ?? false,
-  visibleInSelectors: overrides.visibleInSelectors,
+  visibility: overrides.visibility,
   yaml: overrides.yaml ?? workflowYaml(),
   management: {
     ...defaultManagement,
@@ -136,7 +136,7 @@ const createWorkflowSource = (overrides: Partial<WorkflowProperties> = {}): Work
   managedTemplateValues: null,
   originManagedWorkflowId: WORKFLOW_ID,
   lifecycle: 'static',
-  managedVisibleInSelectors: [],
+  managedVisibilityContexts: [],
   deleted_at: null,
   valid: true,
   created_at: '2024-01-01T00:00:00.000Z',
@@ -468,7 +468,7 @@ describe('ManagedWorkflowsService', () => {
     });
 
     it('persists managed workflow selector visibility metadata', async () => {
-      const definition = createDefinition({ visibleInSelectors: ['rule_action'] });
+      const definition = createDefinition({ visibility: { selectors: ['rule_action'] } });
       mockManagedWorkflowDefinitions = [definition];
       const { crudService, service } = createService();
       crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
@@ -476,7 +476,7 @@ describe('ManagedWorkflowsService', () => {
       await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
 
       const indexedDocument = getIndexedDocument(crudService);
-      expect(indexedDocument.managedVisibleInSelectors).toEqual(['rule_action']);
+      expect(indexedDocument.managedVisibilityContexts).toEqual(['selector:rule_action']);
     });
 
     it('sets document.version to 1 on managed create when versioning is enabled', async () => {

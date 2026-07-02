@@ -20,6 +20,9 @@ export const EXAMPLE_MANAGED_WORKFLOW = {
   pluginId: 'workflowsExtensionsExample',
   version: 1,
   billable: false,
+  visibility: {
+    selectors: ['rule_action'],
+  },
   yamlTemplate: ({ recipient }) => `name: Example Greeting - ${recipient}
 enabled: true
 triggers:

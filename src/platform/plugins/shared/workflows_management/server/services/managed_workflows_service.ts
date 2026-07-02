@@ -681,7 +681,7 @@ export class ManagedWorkflowsService {
       managedTemplateValues: managedTemplateValues as Record<string, unknown> | null,
       originManagedWorkflowId: definition.id,
       lifecycle: definition.management.lifecycle,
-      managedVisibleInSelectors: [...(definition.visibleInSelectors ?? [])],
+      managedVisibilityContexts: this.getManagedVisibilityContexts(definition),
       managedVersion: definition.version,
     };
 
@@ -793,5 +793,9 @@ export class ManagedWorkflowsService {
     next: ManagedWorkflowTemplateValues | null
   ): boolean {
     return JSON.stringify(existing ?? null) === JSON.stringify(next ?? null);
+  }
+
+  private getManagedVisibilityContexts(definition: ManagedWorkflowDefinition): string[] {
+    return [...(definition.visibility?.selectors ?? []).map((selector) => `selector:${selector}`)];
   }
 }

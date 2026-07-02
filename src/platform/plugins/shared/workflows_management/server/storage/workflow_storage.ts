@@ -44,7 +44,7 @@ const storageSettings = {
       managedTemplateValues: types.object({ enabled: false }),
       originManagedWorkflowId: types.keyword({}),
       lifecycle: types.keyword({}),
-      managedVisibleInSelectors: types.keyword({}),
+      managedVisibilityContexts: types.keyword({}),
       updated_at: types.date({}), // We sort by this
       // Non-searchable fields (stored but not indexed)
       yaml: types.text({ index: false }),
@@ -78,7 +78,7 @@ export interface WorkflowProperties {
   managedTemplateValues?: Record<string, unknown> | null;
   originManagedWorkflowId?: string | null;
   lifecycle?: 'static' | 'dynamic' | null;
-  managedVisibleInSelectors?: string[];
+  managedVisibilityContexts?: string[];
   deleted_at: Date | null;
   valid: boolean;
   created_at: string;
