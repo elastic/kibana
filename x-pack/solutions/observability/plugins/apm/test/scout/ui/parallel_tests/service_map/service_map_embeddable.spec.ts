@@ -21,6 +21,7 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let dataViewId: string;
+    let savedDashboardId: string | undefined;
 
     test.beforeAll(async ({ apiServices }) => {
       const { data } = await apiServices.dataViews.create({
@@ -36,10 +37,20 @@ test.describe(
       await uiSettings.set({ defaultIndex: dataViewId });
     });
 
-    test.afterAll(async ({ apiServices, uiSettings }) => {
+    test.afterAll(async ({ apiServices, uiSettings, kbnClient, log }) => {
       await uiSettings.unset('defaultIndex');
       if (dataViewId) {
         await apiServices.dataViews.delete(dataViewId);
+      }
+      if (savedDashboardId) {
+        await kbnClient.savedObjects
+          .delete({ type: 'dashboard', id: savedDashboardId })
+          .catch((error) => {
+            // A 404 is expected if the dashboard was never persisted; surface anything else.
+            if (error?.status !== 404) {
+              log.warning(`Failed to delete dashboard saved object: ${error?.message}`);
+            }
+          });
       }
     });
 
@@ -169,19 +180,22 @@ test.describe(
         expect(horizontalFill).toBeGreaterThan(0.95);
       });
 
-      await test.step('click on a service node and verify popover contents', async () => {
-        await pageObjects.serviceMapPage.openServiceNodePopover(SERVICE_MAP_TEST_SERVICE);
+      await test.step('click on a service node and verify flyout contents', async () => {
+        await pageObjects.serviceMapPage.openServiceNodeFlyout(SERVICE_MAP_TEST_SERVICE);
 
-        await expect(pageObjects.serviceMapPage.serviceMapPopoverContent).toBeVisible({
+        await expect(pageObjects.serviceFlyoutPage.flyout).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
-        await expect(pageObjects.serviceMapPage.serviceMapPopoverTitle).toHaveText(
-          SERVICE_MAP_TEST_SERVICE
-        );
-        await expect(pageObjects.serviceMapPage.serviceMapServiceDetailsButton).toBeVisible();
+        await expect(pageObjects.serviceFlyoutPage.title).toHaveText(SERVICE_MAP_TEST_SERVICE);
+        await expect(pageObjects.serviceFlyoutPage.actions).toBeVisible();
+        await pageObjects.serviceFlyoutPage.expectChartsRendered([
+          'latency',
+          'throughput',
+          'failedTransactionRate',
+        ]);
 
         await page.keyboard.press('Escape');
-        await expect(pageObjects.serviceMapPage.serviceMapPopoverTitle).toBeHidden();
+        await expect(pageObjects.serviceFlyoutPage.flyout).toBeHidden();
       });
 
       await test.step('click on a service map edge and verify popover contents', async () => {
@@ -310,6 +324,9 @@ test.describe(
         // error toast and keeps the dashboard dirty; assert success instead.
         await expect(page.getByTestId('errorToastMessage')).toBeHidden();
         await expect(page).toHaveURL(/\/app\/dashboards#\/view\//);
+
+        const dashboardUrlMatch = page.url().match(/\/view\/([^/?]+)/);
+        savedDashboardId = dashboardUrlMatch?.[1];
 
         await pageObjects.dashboard.waitForPanelsToLoad(1);
         expect(await pageObjects.dashboard.getPanelCount()).toBe(1);

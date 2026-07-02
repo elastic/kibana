@@ -21,6 +21,12 @@ export {
   builtInTriggerDefinitions,
   getBuiltInTriggerDefinition,
 } from './spec/builtin_trigger_definitions';
+export {
+  builtinWorkflowInputDefinitions,
+  builtinWorkflowInputDefinitionRefValuesForZod,
+  KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
+  mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema,
+} from './spec/builtin_workflow_input_definitions';
 export type {
   BaseTriggerDefinition,
   TriggerDocumentation,
@@ -47,6 +53,7 @@ export * from './common/privileges';
 export * from './common/utils';
 export * from './common/step_types';
 export * from './definition';
+export * from './graph_layout';
 export * from './common/elasticsearch_request_builder';
 export * from './common/kibana_request_builder';
 export * from './server/constants';

@@ -70,16 +70,7 @@ const offset = (
 ): DateOffset => (roundTo ? { count, unit, roundTo } : { count, unit });
 
 const assertSubset = (range: TimeRange, expected: Partial<CheckedFields>) => {
-  if (expected.start !== undefined) expect(range.start).toBe(expected.start);
-  if (expected.end !== undefined) expect(range.end).toBe(expected.end);
-  if (expected.type !== undefined) expect(range.type).toEqual(expected.type);
-  if (expected.isNaturalLanguage !== undefined) {
-    expect(range.isNaturalLanguage).toBe(expected.isNaturalLanguage);
-  }
-  if (expected.isInvalid !== undefined) expect(range.isInvalid).toBe(expected.isInvalid);
-  // `startOffset` / `endOffset` are nullable, so presence is keyed on the property existing.
-  if ('startOffset' in expected) expect(range.startOffset).toEqual(expected.startOffset);
-  if ('endOffset' in expected) expect(range.endOffset).toEqual(expected.endOffset);
+  expect(range).toMatchObject(expected);
 };
 
 const runCorpus = (rows: CorpusRow[]) =>

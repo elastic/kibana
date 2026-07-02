@@ -13,7 +13,10 @@ export type {
   ProcessorSuggestionsResponse,
 } from './ingest_processor_suggestions';
 
-export { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from './feature_flags';
+export {
+  STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
+  STREAMS_SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG,
+} from './feature_flags';
 
 export {
   STREAMS_TIERED_FEATURES,
@@ -41,8 +44,6 @@ export {
   extractMessagesFromField,
 } from './pattern_extraction_helpers';
 
-export type { SigEventsTuningConfig } from './sig_events_tuning_config';
-export { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from './sig_events_tuning_config';
 export {
   SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
   SIGNIFICANT_EVENT_SML_TYPE,

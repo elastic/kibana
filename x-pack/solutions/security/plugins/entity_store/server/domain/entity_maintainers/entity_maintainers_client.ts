@@ -36,6 +36,7 @@ import type {
 import { EntityMaintainerTaskStatus } from '../../tasks/entity_maintainers/types';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { CRUDClient } from '../crud';
+import { EntityMetadataClient } from '../entity_metadata';
 import { createMaintainerTelemetryClient } from '../../tasks/entity_maintainers/maintainer_telemetry_client';
 
 interface TaskSnapshot {
@@ -73,6 +74,7 @@ interface SyncExecutionContext {
   esClient: ElasticsearchClient;
   cpsEsClient: ElasticsearchClient;
   crudClient: CRUDClient;
+  entityMetadataClient: EntityMetadataClient;
 }
 
 export class EntityMaintainersClient {
@@ -226,6 +228,50 @@ export class EntityMaintainersClient {
     }
   }
 
+  public async stopAll(request: KibanaRequest): Promise<void> {
+    this.logger.debug('Stopping all entity maintainer tasks');
+    const tasks = entityMaintainersRegistry.getAll();
+    const results = await Promise.allSettled(tasks.map(({ id }) => this.stop(id, request)));
+    const failures = results
+      .map((r, i) => ({ result: r, id: tasks[i].id }))
+      .filter(
+        (x): x is { result: PromiseRejectedResult; id: string } => x.result.status === 'rejected'
+      );
+    if (failures.length > 0) {
+      failures.forEach(({ result, id }) => {
+        this.logger.error(`Failed to stop entity maintainer task: ${id}`, { error: result.reason });
+      });
+      throw new Error(
+        `Failed to stop ${failures.length} of ${tasks.length} entity maintainer tasks: ${failures
+          .map(({ id }) => id)
+          .join(', ')}`
+      );
+    }
+  }
+
+  public async startAll(request: KibanaRequest): Promise<void> {
+    this.logger.debug('Starting all entity maintainer tasks');
+    const tasks = entityMaintainersRegistry.getAll();
+    const results = await Promise.allSettled(tasks.map(({ id }) => this.start(id, request)));
+    const failures = results
+      .map((r, i) => ({ result: r, id: tasks[i].id }))
+      .filter(
+        (x): x is { result: PromiseRejectedResult; id: string } => x.result.status === 'rejected'
+      );
+    if (failures.length > 0) {
+      failures.forEach(({ result, id }) => {
+        this.logger.error(`Failed to start entity maintainer task: ${id}`, {
+          error: result.reason,
+        });
+      });
+      throw new Error(
+        `Failed to start ${failures.length} of ${tasks.length} entity maintainer tasks: ${failures
+          .map(({ id }) => id)
+          .join(', ')}`
+      );
+    }
+  }
+
   public async removeAll(): Promise<void> {
     this.logger.debug('Removing all entity maintainer tasks');
     try {
@@ -324,6 +370,11 @@ export class EntityMaintainersClient {
       esClient,
       namespace: status.metadata.namespace,
     });
+    const entityMetadataClient = new EntityMetadataClient({
+      logger: this.logger,
+      esClient: this.coreStart.elasticsearch.client.asInternalUser,
+      namespace: status.metadata.namespace,
+    });
     const abortController = new AbortController();
     const logger = this.logger.get(taskId);
 
@@ -336,6 +387,7 @@ export class EntityMaintainersClient {
       esClient,
       cpsEsClient,
       crudClient,
+      entityMetadataClient,
     };
   }
 }
