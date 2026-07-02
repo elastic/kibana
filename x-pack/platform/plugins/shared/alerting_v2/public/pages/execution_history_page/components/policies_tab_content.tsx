@@ -10,12 +10,7 @@ import {
   EuiBadge,
   EuiBadgeGroup,
   EuiBasicTable,
-  EuiCallOut,
   EuiLink,
-  EuiListGroup,
-  EuiListGroupItem,
-  EuiPopover,
-  EuiPopoverTitle,
   EuiSpacer,
   EuiText,
   type CriteriaWithPagination,
@@ -34,129 +29,11 @@ import { FilteredEmptyState, PoliciesEmptyState } from './empty_state';
 import { ExecutionHistoryErrorState } from './error_state';
 import { NewEventsBanner } from './new_events_banner';
 import { TruncatedCallout } from './truncated_callout';
+import { RulesCell } from './rules_cell';
 
 const DEFAULT_PER_PAGE = 100;
 const DEFAULT_OUTCOME: PolicyExecutionOutcomeFilter = 'all';
 const MAX_VISIBLE_RULES = 3;
-const RULE_BADGE_MAX_WIDTH = 200;
-
-const OverflowPopover = ({
-  hiddenRules,
-  notShownCount,
-  onRuleClick,
-}: {
-  hiddenRules: PolicyExecutionHistoryItem['rules'];
-  notShownCount: number;
-  onRuleClick: (ruleId: string) => void;
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const total = hiddenRules.length + notShownCount;
-  return (
-    <EuiPopover
-      isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
-      panelPaddingSize="none"
-      anchorPosition="downCenter"
-      button={
-        <EuiBadge
-          color="hollow"
-          onClick={() => setIsOpen((v) => !v)}
-          onClickAriaLabel={i18n.translate(
-            'xpack.alertingV2.executionHistory.columns.rules.overflowAria',
-            {
-              defaultMessage: 'Show {count, plural, one {# more rule} other {# more rules}}',
-              values: { count: total },
-            }
-          )}
-        >
-          {`+${total}`}
-        </EuiBadge>
-      }
-    >
-      <EuiPopoverTitle paddingSize="s">
-        {i18n.translate('xpack.alertingV2.executionHistory.columns.rules.overflowTitle', {
-          defaultMessage: 'More rules',
-        })}
-      </EuiPopoverTitle>
-      <div css={{ maxHeight: 320, overflowY: 'auto', minWidth: 240 }}>
-        <EuiListGroup maxWidth={false}>
-          {hiddenRules.map((rule) => (
-            <EuiListGroupItem
-              key={rule.id}
-              iconType="bell"
-              wrapText
-              label={rule.name ?? rule.id}
-              onClick={() => {
-                setIsOpen(false);
-                onRuleClick(rule.id);
-              }}
-            />
-          ))}
-        </EuiListGroup>
-        {notShownCount > 0 && (
-          <EuiCallOut
-            size="s"
-            iconType="warning"
-            color="warning"
-            title={i18n.translate(
-              'xpack.alertingV2.executionHistory.columns.rules.overflowNotShown',
-              {
-                defaultMessage:
-                  '{count, plural, one {# more rule not shown} other {# more rules not shown}}. Use the rule filter to narrow.',
-                values: { count: notShownCount },
-              }
-            )}
-          />
-        )}
-      </div>
-    </EuiPopover>
-  );
-};
-
-const RulesCell = ({
-  rules,
-  totalRuleCount,
-  activeRuleId,
-  onRuleClick,
-}: {
-  rules: PolicyExecutionHistoryItem['rules'];
-  totalRuleCount: number;
-  activeRuleId: string | null;
-  onRuleClick: (ruleId: string) => void;
-}) => {
-  if (totalRuleCount === 0) return null;
-  const visible = rules.slice(0, MAX_VISIBLE_RULES);
-  const hiddenRules = rules.slice(MAX_VISIBLE_RULES);
-  const notShownCount = totalRuleCount - rules.length;
-  const overflowCount = hiddenRules.length + notShownCount;
-  return (
-    <EuiBadgeGroup gutterSize="xs">
-      {visible.map((rule) => {
-        const isActive = rule.id === activeRuleId;
-        const label = rule.name ?? rule.id;
-        return (
-          <EuiBadge
-            key={rule.id}
-            color={isActive ? 'primary' : 'hollow'}
-            iconType="bell"
-            onClick={() => onRuleClick(rule.id)}
-            onClickAriaLabel={label}
-            css={{ maxWidth: `${RULE_BADGE_MAX_WIDTH}px` }}
-          >
-            {label}
-          </EuiBadge>
-        );
-      })}
-      {overflowCount > 0 && (
-        <OverflowPopover
-          hiddenRules={hiddenRules}
-          notShownCount={notShownCount}
-          onRuleClick={onRuleClick}
-        />
-      )}
-    </EuiBadgeGroup>
-  );
-};
 
 const buildColumns = (
   onPolicyClick: (policyId: string) => void,
@@ -200,6 +77,7 @@ const buildColumns = (
     render: (item: PolicyExecutionHistoryItem) => (
       <RulesCell
         rules={item.rules}
+        maxVisibleRules={MAX_VISIBLE_RULES}
         totalRuleCount={item.totalRuleCount}
         activeRuleId={activeRuleId}
         onRuleClick={onRuleClick}
@@ -391,3 +269,4 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
     </>
   );
 };
+
