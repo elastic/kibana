@@ -20,6 +20,7 @@ function makeMockClient(): jest.Mocked<IRulesManagementClient> {
     createRule: jest.fn().mockResolvedValue(undefined),
     updateRule: jest.fn().mockResolvedValue(undefined),
     bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+    findOwnedRuleIds: jest.fn().mockResolvedValue([]),
   };
 }
 
@@ -153,6 +154,21 @@ describe('DualCleanupRulesAdapter', () => {
       const adapter = new DualCleanupRulesAdapter(primary, legacy, logger);
 
       await expect(adapter.bulkDeleteRules(['id-1'])).rejects.toThrow('primary failed');
+    });
+  });
+
+  describe('findOwnedRuleIds', () => {
+    it('delegates to the primary client', async () => {
+      const primary = makeMockClient();
+      const legacy = makeMockClient();
+      primary.findOwnedRuleIds.mockResolvedValueOnce(['r-1', 'r-2']);
+      const adapter = new DualCleanupRulesAdapter(primary, legacy, logger);
+
+      const ids = await adapter.findOwnedRuleIds('my-stream');
+
+      expect(ids).toEqual(['r-1', 'r-2']);
+      expect(primary.findOwnedRuleIds).toHaveBeenCalledWith('my-stream');
+      expect(legacy.findOwnedRuleIds).not.toHaveBeenCalled();
     });
   });
 });

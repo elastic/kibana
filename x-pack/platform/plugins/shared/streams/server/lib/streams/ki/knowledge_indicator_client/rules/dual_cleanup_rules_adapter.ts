@@ -63,6 +63,10 @@ export class DualCleanupRulesAdapter implements IRulesManagementClient {
     }
   }
 
+  async findOwnedRuleIds(streamName: string): Promise<string[]> {
+    return this.primary.findOwnedRuleIds(streamName);
+  }
+
   private async cleanupLegacyRule(id: string): Promise<void> {
     try {
       await this.legacy.bulkDeleteRules([id]);

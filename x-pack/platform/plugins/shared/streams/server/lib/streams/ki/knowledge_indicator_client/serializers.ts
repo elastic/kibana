@@ -57,7 +57,7 @@ export function toStoredFeature(
   const slug = normalizeFeatureSlug(feature.id);
   return {
     '@timestamp': timestamp,
-    id: computeFeatureUuid({ id: slug, stream_name: streamName, type: feature.type }),
+    id: computeFeatureUuid({ id: slug, stream_name: streamName }),
     type: KI_TYPE_FEATURE,
     title: feature.title,
     description: feature.description,

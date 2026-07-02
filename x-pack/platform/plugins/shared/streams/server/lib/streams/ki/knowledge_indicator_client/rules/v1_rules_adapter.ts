@@ -16,6 +16,8 @@ import {
   type UpdateRuleBody,
 } from './rules_management_client';
 
+const FIND_PAGE_SIZE = 500;
+
 /**
  * Wraps the v1 RulesClient to implement IRulesManagementClient.
  * This is the default (flag OFF) path.
@@ -71,5 +73,28 @@ export class RulesAdapterV1 implements IRulesManagementClient {
         }
         throw error;
       });
+  }
+
+  async findOwnedRuleIds(streamName: string): Promise<string[]> {
+    const ids: string[] = [];
+    let page = 1;
+    while (true) {
+      const result = await this.rulesClient.find({
+        options: {
+          consumers: [STREAMS_RULE_CONSUMER],
+          ruleTypeIds: [STREAMS_ESQL_RULE_TYPE_ID],
+          filter: `alert.attributes.tags: "${streamName}"`,
+          fields: ['id'],
+          perPage: FIND_PAGE_SIZE,
+          page,
+        },
+      });
+      for (const rule of result.data) {
+        ids.push(rule.id);
+      }
+      if (ids.length >= result.total) break;
+      page++;
+    }
+    return ids;
   }
 }

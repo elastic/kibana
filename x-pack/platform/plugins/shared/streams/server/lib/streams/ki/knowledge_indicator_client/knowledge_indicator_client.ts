@@ -127,13 +127,17 @@ export class KnowledgeIndicatorClient {
       ruleUnbacked?: RuleUnbackedFilter;
       queryIds?: string[];
       minSeverityScore?: number;
+      includeExpired?: boolean;
     }
   ): Promise<QueryLink[]> {
     return this.reader.getQueryLinks(streamNames, filters);
   }
 
-  getStreamToQueryLinksMap(streamNames: string[]): Promise<Record<string, QueryLink[]>> {
-    return this.reader.getStreamToQueryLinksMap(streamNames);
+  getStreamToQueryLinksMap(
+    streamNames: string[],
+    options?: { includeExpired?: boolean }
+  ): Promise<Record<string, QueryLink[]>> {
+    return this.reader.getStreamToQueryLinksMap(streamNames, options);
   }
 
   bulkGetQueriesByIds(stream: string, ids: string[]): Promise<QueryLink[]> {
@@ -232,5 +236,11 @@ export class KnowledgeIndicatorClient {
     queryIds: string[]
   ): Promise<{ demoted: number }> {
     return this.orchestrator.demoteQueries(definition, queryIds);
+  }
+
+  reconcileStream(
+    definition: Streams.all.Definition
+  ): Promise<{ tombstoned: number; orphanRulesDeleted: number }> {
+    return this.orchestrator.reconcileStream(definition);
   }
 }
