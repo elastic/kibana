@@ -11,9 +11,7 @@ import { outputType } from './output';
 
 // Query-param hint appended to the integration-policy edit/copy links from agentless surfaces.
 // It lets the edit/copy pages select the agentless read/write API before their first read, since
-// the route only carries the `packagePolicyId` (shared with agent-based policies). Used as
-// `?isAgentless=true`. Provisional detect-before-read mechanism — see the task4 "consume new API"
-// follow-ups.
+// the route only carries the `packagePolicyId` (shared with agent-based policies).
 export const IS_AGENTLESS_QUERY_PARAM = 'isAgentless';
 
 export const AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT = 3600;

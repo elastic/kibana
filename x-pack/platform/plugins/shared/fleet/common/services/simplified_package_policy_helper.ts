@@ -130,11 +130,8 @@ export function formatInputs(
       enabled: isInputAllowed ? input.enabled : false,
       vars: formatVars(input.vars),
       // Mirror the read path (`simplifiedPackagePolicytoNewPackagePolicy`, where a
-      // disallowed input forces its streams off): keep the stream enablement the
-      // write emits consistent with what a subsequent read produces, so a
-      // load→save round trip is idempotent regardless of how many streams the
-      // source happened to list. For `default` mode `isInputAllowed` is always
-      // true, so this is a no-op there.
+      // disallowed input forces its streams off)
+      // For `default` mode `isInputAllowed` is always true, so this is a no-op there.
       streams: formatStreams(input.streams, isInputAllowed),
       ...(input.condition !== undefined ? { condition: input.condition } : {}),
     };
@@ -362,9 +359,7 @@ type AgentlessPolicyInput = NewPackagePolicy & {
  *
  * Pass `packageInfo` whenever it is available so the agentless input allow-check
  * (`isInputAllowedForDeploymentMode`) uses the same package-template-aware logic as
- * the read path ({@link agentlessPolicyToPackagePolicy}). Without it the check falls
- * back to the coarse `AGENTLESS_DISABLED_INPUTS` blocklist, which can disagree with
- * the read path and make a load→save round trip non-idempotent.
+ * the read path ({@link agentlessPolicyToPackagePolicy}).
  */
 export const toNewAgentlessPolicy = (
   packagePolicy: AgentlessPolicyInput,
@@ -409,11 +404,6 @@ export const toNewAgentlessPolicy = (
  * (as returned by the GET/LIST agentless API, with simplified object-style `inputs`)
  * back into the full {@link NewPackagePolicy} shape that the shared edit/copy form
  * components and `validatePackagePolicy` expect (array-based `inputs`).
- *
- * Reuses {@link simplifiedPackagePolicytoNewPackagePolicy} — the same converter create
- * uses — so the GET -> form -> PUT round trip is lossless on the agentless-relevant
- * fields (composing this with {@link toNewAgentlessPolicy} is a no-op when the user
- * makes no edits).
  *
  * `packageInfo` must be loaded for `agentlessPolicy.package.version` (the form fetches
  * it from the EPM/registry API). For multi-template packages, pass `policyTemplate` so
