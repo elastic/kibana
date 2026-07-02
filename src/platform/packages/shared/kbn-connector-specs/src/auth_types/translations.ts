@@ -355,3 +355,48 @@ export const GCP_SERVICE_ACCOUNT_SCOPE_HELP_TEXT = i18n.translate(
       'OAuth scope for the access token. Defaults to https://www.googleapis.com/auth/cloud-platform.',
   }
 );
+
+export const KUBERNETES_AUTH_LABEL = i18n.translate('connectorSpecs.kubernetesAuth.label', {
+  defaultMessage: 'Service account token',
+});
+
+export const KUBERNETES_AUTH_TOKEN_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesAuth.token.label',
+  {
+    defaultMessage: 'Token',
+  }
+);
+
+export const KUBERNETES_AUTH_TOKEN_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.kubernetesAuth.token.requiredMessage',
+  {
+    defaultMessage: 'A service account bearer token is required.',
+  }
+);
+
+export const KUBERNETES_AUTH_CA_LABEL = i18n.translate('connectorSpecs.kubernetesAuth.ca.label', {
+  defaultMessage: 'Cluster CA certificate (PEM)',
+});
+
+export const KUBERNETES_AUTH_CA_HELP_TEXT = i18n.translate(
+  'connectorSpecs.kubernetesAuth.ca.helpText',
+  {
+    defaultMessage:
+      'Paste the PEM-encoded certificate authority used to verify the API server. Leave empty to rely on the system trust store or to disable verification.',
+  }
+);
+
+export const KUBERNETES_AUTH_VERIFICATION_MODE_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesAuth.verificationMode.label',
+  {
+    defaultMessage: 'Verification mode',
+  }
+);
+
+export const KUBERNETES_AUTH_VERIFICATION_MODE_HELP_TEXT = i18n.translate(
+  'connectorSpecs.kubernetesAuth.verificationMode.helpText',
+  {
+    defaultMessage:
+      'How to verify the API server TLS certificate. "full" verifies the certificate and hostname, "certificate" verifies the certificate only, and "none" disables verification (not recommended).',
+  }
+);
