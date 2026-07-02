@@ -23,6 +23,15 @@ export const configSchema = schema.object({
       taskTimeout: schema.duration({ defaultValue: '30s' }),
     }),
   }),
+  // Base URL of the Elastic relay-service used to connect external apps (e.g. Slack)
+  // to significant events. Server-only (never exposed to the browser). When unset,
+  // the connect routes return a "not configured" error.
+  relayService: schema.maybe(
+    schema.object({
+      url: schema.string(),
+      headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    })
+  ),
 });
 
 export type StreamsConfig = TypeOf<typeof configSchema>;

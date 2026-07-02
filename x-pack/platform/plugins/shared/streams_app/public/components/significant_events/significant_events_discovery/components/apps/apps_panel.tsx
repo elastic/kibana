@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -16,23 +16,57 @@ import {
   type IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ConfluenceLogo } from './confluence_logo';
+import { useAbortController } from '@kbn/react-hooks';
+import { useKibana } from '../../../../../hooks/use_kibana';
 
 interface App {
   id: string;
   name: string;
   icon: IconType;
   connected: boolean;
+  // Marks the apps whose "Connect" button is wired to a real flow. Others render
+  // a placeholder button until their flow is implemented.
+  connector?: 'slack';
 }
 
 // App names are proper nouns and are intentionally not translated.
 const APPS: App[] = [
-  { id: 'slack', name: 'Slack', icon: 'logoSlack', connected: false },
-  { id: 'github', name: 'GitHub', icon: 'logoGithub', connected: true },
-  { id: 'confluence', name: 'Confluence', icon: ConfluenceLogo, connected: false },
+  { id: 'slack', name: 'Slack', icon: 'logoSlack', connected: false, connector: 'slack' },
+  { id: 'github', name: 'GitHub', icon: 'logoGithub', connected: false },
 ];
 
 export const AppsPanel = () => {
+  const {
+    core: { notifications },
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
+  const { signal } = useAbortController();
+  const [connectingId, setConnectingId] = useState<string | null>(null);
+
+  const handleConnectSlack = useCallback(async () => {
+    setConnectingId('slack');
+    try {
+      const { authorizeUrl } = await streamsRepositoryClient.fetch(
+        'POST /internal/streams/apps/slack/connect',
+        { signal }
+      );
+      window.open(authorizeUrl, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      notifications.toasts.addError(error instanceof Error ? error : new Error(String(error)), {
+        title: i18n.translate(
+          'xpack.streams.significantEventsDiscovery.settings.apps.connectErrorTitle',
+          { defaultMessage: 'Failed to start the Slack connection' }
+        ),
+      });
+    } finally {
+      setConnectingId(null);
+    }
+  }, [notifications.toasts, signal, streamsRepositoryClient]);
+
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
       <EuiPanel hasShadow={false} color="subdued">
@@ -58,6 +92,14 @@ export const AppsPanel = () => {
                       <EuiFlexItem grow={false}>
                         <EuiText size="s">
                           <strong>{app.name}</strong>
+                          {!app.connector && (
+                            <EuiText size="s" color="subdued">
+                              {i18n.translate(
+                                'xpack.streams.significantEventsDiscovery.settings.apps.disabledStatus',
+                                { defaultMessage: 'Not available' }
+                              )}
+                            </EuiText>
+                          )}
                         </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -81,6 +123,9 @@ export const AppsPanel = () => {
                       <EuiButton
                         size="s"
                         data-test-subj={`streams-settings-apps-connect-${app.id}`}
+                        isLoading={connectingId === app.id}
+                        onClick={app.connector === 'slack' ? handleConnectSlack : undefined}
+                        disabled={!app.connector}
                       >
                         {i18n.translate(
                           'xpack.streams.significantEventsDiscovery.settings.apps.connectButton',
