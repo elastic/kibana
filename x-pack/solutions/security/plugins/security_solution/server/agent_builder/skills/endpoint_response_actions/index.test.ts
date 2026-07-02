@@ -14,6 +14,8 @@ import {
   UNISOLATE_TOOL_ID,
   GET_ENDPOINT_STATUS_TOOL_ID,
   LIST_ENDPOINTS_TOOL_ID,
+  RUNNING_PROCESSES_TOOL_ID,
+  SCAN_TOOL_ID,
 } from '.';
 
 describe('createEndpointResponseActionsSkill', () => {
@@ -46,15 +48,17 @@ describe('createEndpointResponseActionsSkill', () => {
   });
 
   describe('getInlineTools', () => {
-    it('returns exactly 4 inline tools (list_endpoints, isolate_host, unisolate_host, get_endpoint_status)', async () => {
+    it('returns exactly 6 inline tools (list_endpoints, isolate_host, unisolate_host, get_endpoint_status, running_processes, scan)', async () => {
       const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
       const inlineTools = await skill.getInlineTools?.();
-      expect(inlineTools).toHaveLength(4);
+      expect(inlineTools).toHaveLength(6);
       const toolIds = (inlineTools ?? []).map((t) => t.id);
       expect(toolIds).toContain(LIST_ENDPOINTS_TOOL_ID);
       expect(toolIds).toContain(ISOLATE_TOOL_ID);
       expect(toolIds).toContain(UNISOLATE_TOOL_ID);
       expect(toolIds).toContain(GET_ENDPOINT_STATUS_TOOL_ID);
+      expect(toolIds).toContain(RUNNING_PROCESSES_TOOL_ID);
+      expect(toolIds).toContain(SCAN_TOOL_ID);
     });
 
     it('satisfies the 7-tool hard cap enforced by validateSkillDefinition', async () => {

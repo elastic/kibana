@@ -19,7 +19,10 @@ import { RUNNING_PROCESSES_TOOL_ID } from '../..';
 import { getRunningProcessesTool } from '.';
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
-const mockContext = { logger: mockLogger } as unknown as ToolHandlerContext;
+const mockContext = {
+  logger: mockLogger,
+  runContext: { conversationId: 'conv-test-1', runId: 'run-test-1' },
+} as unknown as ToolHandlerContext;
 
 function assertStandardReturn(result: unknown) {
   if (!isToolHandlerStandardReturn(result as ToolHandlerReturn)) {
@@ -83,7 +86,11 @@ describe('getRunningProcessesTool', () => {
     const result = await tool.handler({ hostName: 'my-host' }, mockContext);
 
     expect(mockResponseActionsClient.runningProcesses).toHaveBeenCalledWith(
-      { endpoint_ids: ['agent-123'], comment: 'Running processes requested via AI agent: my-host' },
+      {
+        endpoint_ids: ['agent-123'],
+        comment:
+          'Running processes requested via AI agent: my-host [AI agent conversation: conv-test-1]',
+      },
       { hosts: { 'agent-123': { name: 'my-host' } } }
     );
     // The action is attributed to the initiating analyst, not the system user.

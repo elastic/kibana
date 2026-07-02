@@ -13,6 +13,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { UNISOLATE_TOOL_ID } from '../..';
+import { buildResponseActionComment } from '../types';
 
 const unisolateHostSchema = z.object({
   hostName: z.string().min(1).describe('The hostname of the endpoint to un-isolate.'),
@@ -31,7 +32,7 @@ export const unisolateHostTool = (
     type: ToolType.builtin,
     description: `Un-isolates a host by its hostname. Re-establishes network connectivity on an endpoint that was previously isolated. The action is dispatched through the Elastic Defend Response Actions service.`,
     schema: unisolateHostSchema,
-    handler: async (params, { logger, request }) => {
+    handler: async (params, { logger, request, runContext }) => {
       try {
         const hostName = params.hostName as string;
         const comment = params.comment as string | undefined;
@@ -80,7 +81,11 @@ export const unisolateHostTool = (
         const actionDetails = await responseActionsClient.release(
           {
             endpoint_ids: endpointIds,
-            comment: comment ?? `Un-isolated via AI agent: ${hostName}`,
+            comment: buildResponseActionComment(
+              `Un-isolated via AI agent: ${hostName}`,
+              runContext,
+              comment
+            ),
           },
           { hosts: { [endpointIds[0]]: { name: hostName } } }
         );
