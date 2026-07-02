@@ -830,6 +830,36 @@ describe('RenderingService', () => {
         expect(result.headers).not.toHaveProperty('set-cookie');
       });
 
+      it('still resolves the locale from Accept-Language when allowLocaleCookie is false, without setting a cookie', async () => {
+        mockRenderingSetupDeps.i18n.allowLocaleCookie = false;
+        await service.preboot(mockRenderingPrebootDeps);
+        const { render } = await service.setup(mockRenderingSetupDeps);
+
+        mockRenderingSetupDeps.i18n.getAvailableLocales.mockReturnValueOnce([
+          { id: 'en', label: 'English' },
+          { id: 'fr-FR', label: 'French' },
+        ]);
+        mockRenderingSetupDeps.i18n.getTranslationHashes.mockReturnValueOnce({
+          en: 'MOCK_HASH',
+          'fr-FR': 'MOCK_FR_HASH',
+        });
+        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as jest.Mock).mockReturnValueOnce(
+          false
+        );
+
+        const { body: content, headers } = await render(
+          createKibanaRequest({ headers: { 'accept-language': 'fr-FR,en;q=0.5' } }),
+          uiSettings
+        );
+        const dom = load(content);
+        const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+        expect(data.i18n.translationsUrl).toEqual(
+          '/mock-server-basepath/translations/MOCK_FR_HASH/fr-FR.json'
+        );
+        expect(headers).not.toHaveProperty('set-cookie');
+      });
+
       afterEach(() => {
         mockRenderingSetupDeps.i18n.allowLocaleCookie = true;
       });
