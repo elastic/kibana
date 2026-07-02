@@ -36,6 +36,14 @@ import { i18n } from '@kbn/i18n';
 
 import { SelectCursorIcon } from './select_cursor_icon';
 
+// Icon-only filter buttons should be square (32px) rather than the default
+// text-sized width, so we strip the horizontal padding.
+const iconFilterButtonClassName = css`
+  width: 32px;
+  padding-left: 0;
+  padding-right: 0;
+`;
+
 const SAMPLE_MESSAGES = [
   `2024-10-30 14:25:20 ERROR MySQL Query execution failed: "INSERT INTO users (name, email) VALUES ('John Doe', 'john@example.com')", Error Code: 1062, Duplicate entry 'john@example.com' for key 'email_UNIQUE'`,
   `2024-11-01 10:15:32 ERROR PostgreSQL Query execution failed: "INSERT INTO employees (id, name) VALUES (1, 'Alice')", Error Code: 23505, Duplicate key value violates unique constraint 'employees_pkey'`,
@@ -268,6 +276,7 @@ function PopulatedLeftPanelBody() {
           <EuiFlexItem grow={false}>
             <EuiFilterGroup compressed>
               <EuiFilterButton
+                className={iconFilterButtonClassName}
                 iconType={SelectCursorIcon}
                 hasActiveFilters
                 aria-label={i18n.translate('xpack.streams.createPipelineFlyout.select', {
@@ -275,6 +284,7 @@ function PopulatedLeftPanelBody() {
                 })}
               />
               <EuiFilterButton
+                className={iconFilterButtonClassName}
                 iconType="editorCodeBlock"
                 aria-label={i18n.translate('xpack.streams.createPipelineFlyout.codeEditor', {
                   defaultMessage: 'Code editor',

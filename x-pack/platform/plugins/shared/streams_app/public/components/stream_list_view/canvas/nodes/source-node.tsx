@@ -10,7 +10,15 @@
 
 import React, { memo } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type { SourceFlowNode, SourceNodeData } from '../types';
@@ -20,6 +28,9 @@ import {
   useAnchorHandleClassName,
   useRaiseOnHoverClassName,
 } from '../node-styles';
+
+// Default heading icon when a source doesn't specify its own logo.
+const DEFAULT_SOURCE_ICON = 'logoElastic';
 
 // Also used by the placement-preview "shadow" node, which passes
 // `interactive={false}` so the translucent preview doesn't get the hover raise.
@@ -39,7 +50,7 @@ export function SourceNodeContents({
     <EuiPanel
       element={isClickable ? 'button' : 'div'}
       hasShadow
-      paddingSize="m"
+      paddingSize="none"
       onClick={
         isClickable
           ? (event: React.MouseEvent) => {
@@ -53,39 +64,52 @@ export function SourceNodeContents({
         flex-direction: column;
         gap: ${euiTheme.size.xs};
         width: 204px;
+        padding: ${euiTheme.size.m};
         text-align: left;
         ${isClickable ? 'cursor: pointer;' : ''}
         border-radius: ${euiTheme.border.radius.medium};
       `} ${interactive ? raiseOnHoverClassName : ''}`}
     >
-      <div
-        className={css`
-          display: flex;
-          flex-direction: column;
-        `}
-      >
-        <EuiText
-          size="xs"
+      {/* Heading: a small logo badge (subtle circle) alongside the source name. */}
+      <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+        <EuiFlexItem grow={false}>
+          <div
+            className={css`
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              padding: 2px;
+              border-radius: 50%;
+              background-color: ${euiTheme.colors.backgroundBaseSubdued};
+            `}
+          >
+            <EuiIcon type={data.icon ?? DEFAULT_SOURCE_ICON} size="s" />
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem
           className={css`
-            font-weight: ${euiTheme.font.weight.semiBold};
-            color: ${euiTheme.colors.textParagraph};
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            min-width: 0;
           `}
         >
-          {data.title}
-        </EuiText>
-        <EuiText size="xs" color="subdued">
-          {data.subtitle}
-        </EuiText>
-      </div>
-      <EuiFlexGroup
-        gutterSize="s"
-        responsive={false}
-        alignItems="center"
-        justifyContent="spaceBetween"
-      >
+          <EuiText
+            size="xs"
+            className={css`
+              font-weight: ${euiTheme.font.weight.semiBold};
+              color: ${euiTheme.colors.textParagraph};
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            `}
+          >
+            {data.title}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiText size="xs" color="subdued">
+        {data.subtitle}
+      </EuiText>
+      {/* Stats: throughput and health, grouped together on the left. */}
+      <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
             {data.rate}
@@ -93,7 +117,12 @@ export function SourceNodeContents({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiHealth color="success">
-            <EuiText size="xs">
+            <EuiText
+              size="xs"
+              className={css`
+                color: ${euiTheme.colors.textSuccess};
+              `}
+            >
               {i18n.translate('xpack.streams.streamsCanvas.healthy', {
                 defaultMessage: 'Healthy',
               })}

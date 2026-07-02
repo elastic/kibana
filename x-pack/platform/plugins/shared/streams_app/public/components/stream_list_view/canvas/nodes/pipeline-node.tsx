@@ -13,70 +13,90 @@ import React, { memo } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { PipelineNodeIcon } from '../../pipeline_node_icon';
 import type { PipelineFlowNode, PipelineNodeData } from '../types';
 import { inflateClassName, useAnchorHandleClassName, useRaiseOnHoverClassName } from '../node-styles';
+
+const statTextClassName = (color: string) => css`
+  font-size: 10px;
+  line-height: 12px;
+  color: ${color};
+`;
 
 function PipelineNodeContents({ data }: { data: PipelineNodeData }) {
   const { euiTheme } = useEuiTheme();
   const raiseOnHoverClassName = useRaiseOnHoverClassName();
 
-  const stats = [data.eps, data.latency].filter(Boolean).join('・');
-
-  // The "Big" pipeline node from the design: a horizontal card that always shows
-  // the pipeline icon alongside its name and throughput/latency stats.
+  // The inline pipeline node from the design: a compact pill holding the
+  // processor icon and its throughput/latency stats, with the pipeline name
+  // shown as a small badge floating just above the pill.
   return (
-    <EuiPanel
-      hasShadow
-      paddingSize="none"
+    <div
       className={`${css`
-        display: flex;
-        gap: ${euiTheme.size.s};
-        align-items: center;
-        justify-content: center;
-        width: 120px;
-        min-width: 120px;
-        padding: 6px ${euiTheme.size.s};
+        position: relative;
+        display: inline-flex;
         cursor: pointer;
         border-radius: ${euiTheme.border.radius.small};
       `} ${raiseOnHoverClassName}`}
     >
-      <EuiIcon type={PipelineNodeIcon} size="s" color={euiTheme.colors.textParagraph} />
-      <div
+      <EuiPanel
+        hasShadow
+        paddingSize="none"
         className={css`
           display: flex;
-          flex: 1 0 0;
-          min-width: 0;
-          flex-direction: column;
-          align-items: flex-start;
+          gap: ${euiTheme.size.s};
+          align-items: center;
+          justify-content: center;
+          padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+          border-radius: ${euiTheme.border.radius.small};
+        `}
+      >
+        <EuiIcon type="processor" size="m" color={euiTheme.colors.textParagraph} />
+        <div
+          className={css`
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            white-space: nowrap;
+          `}
+        >
+          {data.eps ? (
+            <EuiText className={statTextClassName(euiTheme.colors.textSubdued)}>{data.eps}</EuiText>
+          ) : null}
+          {data.latency ? (
+            <EuiText className={statTextClassName(euiTheme.colors.textSubdued)}>
+              {data.latency}
+            </EuiText>
+          ) : null}
+        </div>
+      </EuiPanel>
+      {/* Pipeline name badge, centered just above the pill. */}
+      <div
+        className={css`
+          position: absolute;
+          top: -17px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2px ${euiTheme.size.xs};
+          border-radius: ${euiTheme.border.radius.small};
+          background-color: ${euiTheme.colors.backgroundBaseSubdued};
           white-space: nowrap;
         `}
       >
         <EuiText
-          size="xs"
           className={css`
-            color: ${euiTheme.colors.textParagraph};
+            font-size: 9px;
+            line-height: 12px;
             font-weight: ${euiTheme.font.weight.semiBold};
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
+            color: ${euiTheme.colors.textParagraph};
           `}
         >
           {data.title}
         </EuiText>
-        {stats ? (
-          <EuiText
-            className={css`
-              font-size: 9px;
-              line-height: 12px;
-              color: ${euiTheme.colors.textSubdued};
-            `}
-          >
-            {stats}
-          </EuiText>
-        ) : null}
       </div>
-    </EuiPanel>
+    </div>
   );
 }
 

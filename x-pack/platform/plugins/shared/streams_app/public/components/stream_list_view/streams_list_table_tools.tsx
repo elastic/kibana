@@ -5,26 +5,14 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
 } from '@elastic/eui';
-import { FILTERS_BUTTON_LABEL, YAML_BUTTON_LABEL } from './translations';
-
-const FILTER_OPTIONS = [
-  {
-    value: 'all',
-    label: i18n.translate('xpack.streams.streamsListTableTools.filters.allLabel', {
-      defaultMessage: 'All',
-    }),
-  },
-];
+import { YAML_BUTTON_LABEL } from './translations';
 
 const DEFAULT_NEW_BUTTON_LABEL = i18n.translate(
   'xpack.streams.streamsListTableTools.newButtonLabel',
@@ -53,46 +41,8 @@ export function StreamsListTableTools({
   newButtonIconType = 'plus',
   newButtonDisabled = false,
 }: StreamsListTableToolsProps) {
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [filterValue, setFilterValue] = useState('all');
-
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          isOpen={isFiltersOpen}
-          closePopover={() => setIsFiltersOpen(false)}
-          anchorPosition="downLeft"
-          panelPaddingSize="none"
-          button={
-            <EuiButton
-              size="s"
-              color="text"
-              iconType="arrowDown"
-              iconSide="right"
-              onClick={() => setIsFiltersOpen((open) => !open)}
-              data-test-subj="streamsListFiltersButton"
-            >
-              {FILTERS_BUTTON_LABEL}
-            </EuiButton>
-          }
-        >
-          <EuiContextMenuPanel
-            items={FILTER_OPTIONS.map((option) => (
-              <EuiContextMenuItem
-                key={option.value}
-                icon={filterValue === option.value ? 'check' : 'empty'}
-                onClick={() => {
-                  setFilterValue(option.value);
-                  setIsFiltersOpen(false);
-                }}
-              >
-                {option.label}
-              </EuiContextMenuItem>
-            ))}
-          />
-        </EuiPopover>
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
           size="s"

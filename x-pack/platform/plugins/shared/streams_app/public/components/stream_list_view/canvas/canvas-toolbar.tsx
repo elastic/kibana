@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { useReactFlow } from '@xyflow/react';
 import { i18n } from '@kbn/i18n';
 import { SelectCursorIcon } from '../select_cursor_icon';
 import { HandCursorIcon } from '../hand_cursor_icon';
@@ -201,7 +202,7 @@ export function CanvasControls({
         <EuiFlexItem grow={false}>
           <PaletteButton
             type="source"
-            iconType="dashedCircle"
+            iconType="plus"
             label={i18n.translate('xpack.streams.streamsCanvas.addSource', {
               defaultMessage: 'Source',
             })}
@@ -213,7 +214,7 @@ export function CanvasControls({
         <EuiFlexItem grow={false}>
           <PaletteButton
             type="destination"
-            iconType="package"
+            iconType="plus"
             label={i18n.translate('xpack.streams.streamsCanvas.addDestination', {
               defaultMessage: 'Destination',
             })}
@@ -261,6 +262,99 @@ export function CanvasControls({
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
+    </EuiPanel>
+  );
+}
+
+// The vertical zoom controls pinned to the bottom-right of the canvas: zoom in,
+// zoom out, a divider, then fit-to-screen. Matches the design mockup — a white,
+// subtly-bordered rounded panel with 12px icons in 12px/8px padded cells.
+function ZoomButton({
+  iconType,
+  label,
+  onClick,
+  hasTopBorder = false,
+}: {
+  iconType: IconType;
+  label: string;
+  onClick: () => void;
+  hasTopBorder?: boolean;
+}) {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={onClick}
+      className={css`
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: ${euiTheme.size.m} ${euiTheme.size.s};
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        color: ${euiTheme.colors.textParagraph};
+        ${hasTopBorder
+          ? `border-top: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};`
+          : ''}
+        &:hover {
+          background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        }
+        .euiIcon {
+          inline-size: 12px;
+          block-size: 12px;
+        }
+      `}
+    >
+      <EuiIcon type={iconType} />
+    </button>
+  );
+}
+
+export function CanvasZoomControls() {
+  const { euiTheme } = useEuiTheme();
+  const { zoomIn, zoomOut, fitView } = useReactFlow();
+
+  return (
+    <EuiPanel
+      hasShadow={false}
+      hasBorder
+      paddingSize="none"
+      className={css`
+        position: absolute;
+        right: 24px;
+        bottom: 24px;
+        z-index: 5;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow: hidden;
+        border-radius: ${euiTheme.border.radius.medium};
+      `}
+    >
+      <ZoomButton
+        iconType="plusCircle"
+        label={i18n.translate('xpack.streams.streamsCanvas.zoomIn', {
+          defaultMessage: 'Zoom in',
+        })}
+        onClick={() => zoomIn()}
+      />
+      <ZoomButton
+        iconType="minusCircle"
+        label={i18n.translate('xpack.streams.streamsCanvas.zoomOut', {
+          defaultMessage: 'Zoom out',
+        })}
+        onClick={() => zoomOut()}
+      />
+      <ZoomButton
+        iconType="crosshairs"
+        label={i18n.translate('xpack.streams.streamsCanvas.fitToScreen', {
+          defaultMessage: 'Fit to screen',
+        })}
+        onClick={() => fitView({ padding: 0.2, duration: 400 })}
+        hasTopBorder
+      />
     </EuiPanel>
   );
 }

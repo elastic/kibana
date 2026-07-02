@@ -8,12 +8,18 @@
 // The inline routing node (a branch glyph) and the draggable "puck" at the end
 // of a freshly-created, not-yet-wired routing branch.
 
-import React, { memo } from 'react';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import React, { memo, useEffect } from 'react';
+import {
+  Handle,
+  Position,
+  useNodeConnections,
+  useUpdateNodeInternals,
+  type NodeProps,
+} from '@xyflow/react';
+import { EuiHorizontalRule, EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import type { RoutingFlowNode } from '../types';
+import type { RoutingBranch, RoutingFlowNode, RoutingNodeData } from '../types';
 import {
   hiddenHandleClassName,
   inflateClassName,
@@ -21,52 +27,151 @@ import {
   useRaiseOnHoverClassName,
 } from '../node-styles';
 
+// A routing node shows one labelled row per line exiting it. Labels and traffic
+// percentages come from the node data when seeded; otherwise a "routing-N"
+// label is generated for each exit line.
+function resolveRoutingBranches(data: RoutingNodeData, exitCount: number): RoutingBranch[] {
+  const seeded = data.branches;
+  const count = exitCount || seeded?.length || 1;
+  return Array.from({ length: count }, (_, index) => ({
+    label:
+      seeded?.[index]?.label ??
+      i18n.translate('xpack.streams.streamsCanvas.routingBranchLabel', {
+        defaultMessage: 'routing-{index}',
+        values: { index: index + 1 },
+      }),
+    percentage: seeded?.[index]?.percentage,
+  }));
+}
+
 // A routing node placed inline on a connector (created by applying a routing
-// condition from the connector's "Add step" menu). It mirrors the small inline
-// pipeline node — a white, subtly bordered panel with a shadow — but carries a
-// primary "branch" glyph rotated 90° as the routing cue.
-function RoutingNodeContents() {
+// condition from the connector's "Add step" menu). A "branch" glyph cell sits on
+// the left, and each line exiting the node is listed as a labelled row (with an
+// optional traffic-share percentage) on the right, separated by dividers. Each
+// row carries its own source handle (`branch-N`) so its connector anchors to
+// that row.
+function RoutingNodeContents({
+  branches,
+  anchorHandleClassName,
+}: {
+  branches: RoutingBranch[];
+  anchorHandleClassName: string;
+}) {
   const { euiTheme } = useEuiTheme();
   const raiseOnHoverClassName = useRaiseOnHoverClassName();
   return (
-    <div
-      className={css`
-        position: relative;
+    <EuiPanel
+      hasShadow
+      paddingSize="none"
+      className={`${css`
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-      `}
+        align-items: stretch;
+        cursor: pointer;
+        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+        border-radius: ${euiTheme.border.radius.small};
+      `} ${raiseOnHoverClassName}`}
     >
-      <EuiPanel
-        hasShadow
-        paddingSize="m"
-        className={`${css`
+      <div
+        className={css`
           display: flex;
           align-items: center;
           justify-content: center;
-          cursor: pointer;
-          border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
-          border-radius: ${euiTheme.border.radius.small};
+          width: 40px;
+          padding: ${euiTheme.size.s} ${euiTheme.size.m};
+          border-right: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
 
           .euiIcon {
             transform: rotate(90deg);
           }
-        `} ${raiseOnHoverClassName}`}
+        `}
       >
         <EuiIcon type="branch" size="m" color="primary" />
-      </EuiPanel>
-    </div>
+      </div>
+      <div
+        className={css`
+          display: flex;
+          flex-direction: column;
+          gap: ${euiTheme.size.xxs};
+          min-width: 80px;
+          padding: ${euiTheme.size.xs} 0;
+        `}
+      >
+        {branches.map((branch, index) => (
+          <React.Fragment key={index}>
+            {index > 0 ? <EuiHorizontalRule margin="none" /> : null}
+            <div
+              className={css`
+                position: relative;
+                display: flex;
+                align-items: center;
+                gap: ${euiTheme.size.xs};
+                padding: 0 6px;
+              `}
+            >
+              <EuiText
+                className={css`
+                  flex: 1 1 auto;
+                  min-width: 0;
+                  font-size: 10.5px;
+                  line-height: ${euiTheme.size.base};
+                  font-weight: ${euiTheme.font.weight.semiBold};
+                  color: ${euiTheme.colors.textParagraph};
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                `}
+              >
+                {branch.label}
+              </EuiText>
+              {branch.percentage ? (
+                <EuiText
+                  className={css`
+                    flex-shrink: 0;
+                    width: 24px;
+                    font-size: 9px;
+                    line-height: ${euiTheme.size.m};
+                    color: ${euiTheme.colors.textSubdued};
+                    text-align: right;
+                  `}
+                >
+                  {branch.percentage}
+                </EuiText>
+              ) : null}
+              <Handle
+                type="source"
+                id={`branch-${index}`}
+                position={Position.Right}
+                className={anchorHandleClassName}
+              />
+            </div>
+          </React.Fragment>
+        ))}
+      </div>
+    </EuiPanel>
   );
 }
 
-export const RoutingNode = memo((_props: NodeProps<RoutingFlowNode>) => {
+export const RoutingNode = memo(({ id, data }: NodeProps<RoutingFlowNode>) => {
   const anchorHandleClassName = useAnchorHandleClassName();
+  const updateNodeInternals = useUpdateNodeInternals();
+  // One row (with its own source handle) per line exiting the node.
+  const outgoing = useNodeConnections({ handleType: 'source' });
+  const branches = resolveRoutingBranches(data, outgoing.length);
+  // The per-row source handles are rendered dynamically, so React Flow must be
+  // told to re-measure them whenever their count changes; otherwise the
+  // `branch-N` handles aren't registered and connectors fall back to the node
+  // origin instead of anchoring to their row. Re-measure again on the next
+  // frame so late layout (fonts, the node entry animation) can't leave the
+  // handle bounds stale and detach the connectors from their row anchors.
+  useEffect(() => {
+    updateNodeInternals(id);
+    const raf = requestAnimationFrame(() => updateNodeInternals(id));
+    return () => cancelAnimationFrame(raf);
+  }, [id, branches.length, updateNodeInternals]);
   return (
     <div className={inflateClassName}>
       <Handle type="target" position={Position.Left} className={anchorHandleClassName} />
-      <RoutingNodeContents />
-      <Handle type="source" position={Position.Right} className={anchorHandleClassName} />
+      <RoutingNodeContents branches={branches} anchorHandleClassName={anchorHandleClassName} />
     </div>
   );
 });

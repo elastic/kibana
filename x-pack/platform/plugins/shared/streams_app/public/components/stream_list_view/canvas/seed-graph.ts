@@ -16,7 +16,7 @@
 
 import type { Edge, Node } from '@xyflow/react';
 import { routingData } from './node-data';
-import type { DestinationNodeData, PipelineNodeData, SourceNodeData } from './types';
+import type { DestinationNodeData, PipelineNodeData, RoutingBranch, SourceNodeData } from './types';
 
 // Approximate rendered heights of each node type. Edges attach at a node's
 // vertical CENTER (its handle), so we position nodes by the center line of
@@ -34,12 +34,12 @@ function srcNode(id: string, x: number, cy: number, d: SourceNodeData): Node {
 function pipeNode(id: string, x: number, cy: number, d: PipelineNodeData): Node {
   return { id, type: 'pipeline', position: { x, y: cy - NODE_HEIGHT.pipeline / 2 }, data: d };
 }
-function routeNode(id: string, x: number, cy: number): Node {
+function routeNode(id: string, x: number, cy: number, branches?: RoutingBranch[]): Node {
   return {
     id,
     type: 'routing',
     position: { x, y: cy - NODE_HEIGHT.routing / 2 },
-    data: routingData(),
+    data: { ...routingData(), ...(branches ? { branches } : {}) },
   };
 }
 function dstNode(id: string, x: number, cy: number, d: DestinationNodeData): Node {
@@ -48,8 +48,14 @@ function dstNode(id: string, x: number, cy: number, d: DestinationNodeData): Nod
 function dst(title: string, meta: string, storage?: 'external'): DestinationNodeData {
   return { title, mode: 'configured', meta, status: 'Good', ...(storage ? { storage } : {}) };
 }
-function seedEdge(source: string, target: string): Edge {
-  return { id: `e-${source}-${target}`, source, target, type: 'pipelineRouting' };
+function seedEdge(source: string, target: string, sourceHandle?: string): Edge {
+  return {
+    id: `e-${source}-${target}`,
+    source,
+    target,
+    type: 'pipelineRouting',
+    ...(sourceHandle ? { sourceHandle } : {}),
+  };
 }
 
 // Columns: sources(0) → parse(300) → enrich(580) → route(860) →
@@ -72,16 +78,19 @@ export const initialNodes: Node[] = [
     title: 'AWS CloudWatch',
     subtitle: 'Logs · Push via Firehose',
     rate: '11.9k/s',
+    icon: 'logoAWS',
   }),
   srcNode('src-k8s', 0, 760, {
     title: 'Kubernetes',
     subtitle: 'Container logs · Elastic Agent',
     rate: '24.3k/s',
+    icon: 'logoKubernetes',
   }),
   srcNode('src-nginx', 0, 1270, {
     title: 'NGINX',
     subtitle: 'Access logs · Filebeat',
     rate: '8.2k/s',
+    icon: 'logoNginx',
   }),
 
   // ── Parse / decode (one per source) ───────────────────────────────────
@@ -111,9 +120,20 @@ export const initialNodes: Node[] = [
   pipeNode('pipe-geoip', 580, 1270, { title: 'GeoIP enrich', eps: '8.2k eps', latency: '27ms' }),
 
   // ── Routing branches (the only fan-out nodes; centered in their band) ──
-  routeNode('route-severity', 860, 180),
-  routeNode('route-k8s', 860, 760),
-  routeNode('route-nginx', 860, 1270),
+  routeNode('route-severity', 860, 180, [
+    { label: 'routing-1', percentage: '60%' },
+    { label: 'routing-2', percentage: '30%' },
+    { label: 'routing-3', percentage: '10%' },
+  ]),
+  routeNode('route-k8s', 860, 760, [
+    { label: 'routing-1', percentage: '55%' },
+    { label: 'routing-2', percentage: '35%' },
+    { label: 'routing-3', percentage: '10%' },
+  ]),
+  routeNode('route-nginx', 860, 1270, [
+    { label: 'routing-1', percentage: '70%' },
+    { label: 'routing-2', percentage: '30%' },
+  ]),
 
   // ── Post-route transforms (each on its branch's row) ───────────────────
   pipeNode('pipe-pii', 1140, 40, { title: 'Redact PII', eps: '2.1k eps', latency: '18ms' }),
@@ -146,24 +166,24 @@ export const initialEdges: Edge[] = [
   seedEdge('src-cloudwatch', 'pipe-parse-cw'),
   seedEdge('pipe-parse-cw', 'pipe-cw-enrich'),
   seedEdge('pipe-cw-enrich', 'route-severity'),
-  seedEdge('route-severity', 'pipe-pii'), // top branch
+  seedEdge('route-severity', 'pipe-pii', 'branch-0'), // top branch
   seedEdge('pipe-pii', 'dst-security'),
-  seedEdge('route-severity', 'dst-cloudwatch'), // middle branch
-  seedEdge('route-severity', 'pipe-cw-errors'), // bottom branch
+  seedEdge('route-severity', 'dst-cloudwatch', 'branch-1'), // middle branch
+  seedEdge('route-severity', 'pipe-cw-errors', 'branch-2'), // bottom branch
   seedEdge('pipe-cw-errors', 'dst-cw-alerts'),
   // Kubernetes: parse → trim → route → container, (extract metrics → metrics), archive
   seedEdge('src-k8s', 'pipe-k8s-parse'),
   seedEdge('pipe-k8s-parse', 'pipe-k8s-trim'),
   seedEdge('pipe-k8s-trim', 'route-k8s'),
-  seedEdge('route-k8s', 'dst-k8s'), // top branch
-  seedEdge('route-k8s', 'pipe-k8s-metrics'), // middle branch
+  seedEdge('route-k8s', 'dst-k8s', 'branch-0'), // top branch
+  seedEdge('route-k8s', 'pipe-k8s-metrics', 'branch-1'), // middle branch
   seedEdge('pipe-k8s-metrics', 'dst-k8s-metrics'),
-  seedEdge('route-k8s', 'dst-archive'), // bottom branch
+  seedEdge('route-k8s', 'dst-archive', 'branch-2'), // bottom branch
   // NGINX: GROK → GeoIP → route → access, (tag bots → bots)
   seedEdge('src-nginx', 'pipe-nginx-grok'),
   seedEdge('pipe-nginx-grok', 'pipe-geoip'),
   seedEdge('pipe-geoip', 'route-nginx'),
-  seedEdge('route-nginx', 'dst-nginx'), // top branch
-  seedEdge('route-nginx', 'pipe-nginx-bots'), // bottom branch
+  seedEdge('route-nginx', 'dst-nginx', 'branch-0'), // top branch
+  seedEdge('route-nginx', 'pipe-nginx-bots', 'branch-1'), // bottom branch
   seedEdge('pipe-nginx-bots', 'dst-nginx-bots'),
 ];

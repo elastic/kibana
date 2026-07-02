@@ -41,7 +41,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Background,
   ConnectionLineType,
-  Controls,
   getNodesBounds,
   MarkerType,
   reconnectEdge,
@@ -117,7 +116,7 @@ import { nodeTypes } from './canvas/nodes/node-types';
 import { SourceNodeContents } from './canvas/nodes/source-node';
 import { UnconfiguredDestinationContents } from './canvas/nodes/destination-node';
 import { edgeTypes } from './canvas/edges/pipeline-routing-edge';
-import { CanvasControls } from './canvas/canvas-toolbar';
+import { CanvasControls, CanvasZoomControls } from './canvas/canvas-toolbar';
 import { useCanvasHistory } from './canvas/use-canvas-history';
 import { useCanvasShortcuts } from './canvas/use-canvas-shortcuts';
 import { useCanvasSelection } from './canvas/use-canvas-selection';
@@ -463,6 +462,7 @@ function StreamsCanvasInner() {
             {
               id: `${routingNodeId}-${targetEdge.target}`,
               source: routingNodeId,
+              sourceHandle: 'branch-0',
               target: targetEdge.target,
               type: 'pipelineRouting',
             },
@@ -472,6 +472,7 @@ function StreamsCanvasInner() {
             {
               id: `routing-${routingNodeId}-${endpointNodeId}`,
               source: routingNodeId,
+              sourceHandle: 'branch-1',
               target: endpointNodeId,
               type: 'pipelineRouting',
               reconnectable: false,
@@ -1285,10 +1286,10 @@ function StreamsCanvasInner() {
                       proOptions={{ hideAttribution: true }}
                     >
                       <Background gap={GRID_SIZE} />
-                      <Controls showInteractive={false} showFitView={false} />
                       {/* Minimap hidden for now — re-enable by uncommenting:
           <CanvasMinimap hoveredFlow={hoveredFlow} /> */}
                     </ReactFlow>
+                    <CanvasZoomControls />
                     {placementType && shadowPosition ? (
                       <ShadowNode type={placementType} position={shadowPosition} />
                     ) : null}

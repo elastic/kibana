@@ -14,6 +14,8 @@ export interface SourceNodeData {
   title: string;
   subtitle: string;
   rate: string;
+  /** EUI icon type shown in the heading badge (e.g. a source logo). */
+  icon?: string;
   [key: string]: unknown;
 }
 
@@ -38,7 +40,16 @@ export interface PipelineNodeData {
   [key: string]: unknown;
 }
 
+export interface RoutingBranch {
+  /** Label shown for this exit line, e.g. "routing-1". */
+  label: string;
+  /** Optional share of traffic routed down this branch, e.g. "60%". */
+  percentage?: string;
+}
+
 export interface RoutingNodeData {
+  /** One entry per line exiting the routing node. */
+  branches?: RoutingBranch[];
   [key: string]: unknown;
 }
 

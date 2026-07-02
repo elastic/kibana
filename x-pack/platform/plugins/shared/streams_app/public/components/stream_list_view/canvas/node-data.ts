@@ -27,6 +27,7 @@ export function sourceData(): SourceNodeData {
       defaultMessage: 'Logs · Push via Firehose',
     }),
     rate: '11.9k/s',
+    icon: 'logoAWS',
   };
 }
 

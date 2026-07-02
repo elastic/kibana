@@ -282,18 +282,40 @@ function ConfiguredDestinationContents({
 }) {
   const { euiTheme } = useEuiTheme();
   const raiseOnHoverClassName = useRaiseOnHoverClassName();
+  // Footer metadata (throughput/latency): "Fine print (small)" — 10.5px / 16px.
+  const metaTextClassName = css`
+    font-size: 10.5px;
+    line-height: ${euiTheme.size.base};
+    color: ${euiTheme.colors.textSubdued};
+  `;
   return (
     <EuiPanel
       hasShadow
-      paddingSize="s"
+      paddingSize="none"
       className={`${css`
+        display: flex;
+        flex-direction: column;
+        gap: ${euiTheme.size.s};
+        padding: ${euiTheme.size.m};
         min-width: 211px;
         text-align: left;
         cursor: pointer;
         border-radius: ${euiTheme.border.radius.medium};
       `} ${raiseOnHoverClassName}`}
     >
-      <DestinationTitle title={data.title} icon="package" />
+      <EuiText
+        size="xs"
+        className={css`
+          font-weight: ${euiTheme.font.weight.semiBold};
+          line-height: ${euiTheme.size.base};
+          color: ${euiTheme.colors.textParagraph};
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        `}
+      >
+        {data.title}
+      </EuiText>
       {isConnected ? (
         <EuiFlexGroup
           gutterSize="s"
@@ -302,16 +324,14 @@ function ConfiguredDestinationContents({
           justifyContent="spaceBetween"
         >
           <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {data.meta}
-            </EuiText>
+            <EuiText className={metaTextClassName}>{data.meta}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBadge color="success">{data.status}</EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EuiText size="xs" color="subdued">
+        <EuiText className={metaTextClassName}>
           {i18n.translate('xpack.streams.streamsCanvas.dataNotFlowingIn', {
             defaultMessage: 'Data not flowing in',
           })}

@@ -51,7 +51,6 @@ import {
   filterCollapsedStreamRows,
   getLegacyLogsStatus,
 } from './utils';
-import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { DataQualityColumn } from './data_quality_column';
 import { DestinationActionsIcon } from './destination_actions_icon';
@@ -85,10 +84,6 @@ import {
   FAILURE_STORE_PERMISSIONS_ERROR,
   INGESTION_COLUMN_HEADER,
   STORAGE_COLUMN_HEADER,
-  STREAM_TYPE_FILTER_LABEL,
-  STREAM_TYPE_CLASSIC_LABEL,
-  STREAM_TYPE_WIRED_LABEL,
-  STREAM_TYPE_QUERY_LABEL,
   DATA_QUALITY_FILTER_LABEL,
   DATA_QUALITY_GOOD_LABEL,
   DATA_QUALITY_DEGRADED_LABEL,
@@ -107,13 +102,6 @@ import {
 } from '../stream_badges';
 import { getDestinationMockMetadata } from './destination_mock_metadata';
 
-const datePickerStyle = css`
-  .euiFormControlLayout,
-  .euiSuperDatePicker button,
-  .euiButton {
-    height: 40px;
-  }
-`;
 
 /**
  * Prototype tags row shown under the destination name (internal/external,
@@ -258,7 +246,6 @@ export function StreamsTreeTable({
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedQualities, setSelectedQualities] = useState<string[]>([]);
 
-  const handleTypeFilterChange = useCallback((keys: string[]) => setSelectedTypes(keys), []);
   const handleQualityFilterChange = useCallback((keys: string[]) => setSelectedQualities(keys), []);
 
   const { privilegeMap, hasFailureStoreAccess } = React.useMemo(() => {
@@ -568,21 +555,7 @@ export function StreamsTreeTable({
                   onChange={handleQualityFilterChange}
                 />
               )}
-              <FilterGroup
-                label={STREAM_TYPE_FILTER_LABEL}
-                options={[
-                  { key: 'classic', label: STREAM_TYPE_CLASSIC_LABEL },
-                  { key: 'wired', label: STREAM_TYPE_WIRED_LABEL },
-                  { key: 'query', label: STREAM_TYPE_QUERY_LABEL },
-                ]}
-                onChange={handleTypeFilterChange}
-              />
             </EuiFilterGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <div className={datePickerStyle}>
-              <StreamsAppSearchBar showDatePicker />
-            </div>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <StreamsListTableTools newButtonLabel={NEW_DESTINATION_BUTTON_LABEL} />

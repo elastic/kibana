@@ -11,7 +11,7 @@ export const STREAMS_LIST_TABS = ['canvas', 'sources', 'pipelines', 'destination
 
 export type StreamsListTab = (typeof STREAMS_LIST_TABS)[number];
 
-export const DEFAULT_STREAMS_LIST_TAB: StreamsListTab = 'destinations';
+export const DEFAULT_STREAMS_LIST_TAB: StreamsListTab = 'canvas';
 
 export const STREAMS_LIST_TAB_LABELS: Record<StreamsListTab, string> = {
   canvas: i18n.translate('xpack.streams.streamsListView.tabs.canvas', {

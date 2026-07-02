@@ -109,7 +109,7 @@ export const NEW_DESTINATION_BUTTON_LABEL = i18n.translate(
 );
 
 export const YAML_BUTTON_LABEL = i18n.translate('xpack.streams.streamsTreeTable.yamlButtonLabel', {
-  defaultMessage: 'YAML',
+  defaultMessage: 'See YAML',
 });
 
 export const FILTERS_BUTTON_LABEL = i18n.translate(
