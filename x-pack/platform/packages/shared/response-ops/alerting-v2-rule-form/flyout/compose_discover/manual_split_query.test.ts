@@ -48,9 +48,7 @@ describe('manual split query helpers', () => {
 
   it('enterManualSplitQuery pre-populates a STATS + WHERE split like unified Apply', () => {
     const query = enterManualSplitQuery(
-      unifiedComposed(
-        'FROM logs-*\n| STATS count = COUNT(*) BY host.name\n| WHERE count > 100'
-      )
+      unifiedComposed('FROM logs-*\n| STATS count = COUNT(*) BY host.name\n| WHERE count > 100')
     );
 
     expect(query).toEqual({

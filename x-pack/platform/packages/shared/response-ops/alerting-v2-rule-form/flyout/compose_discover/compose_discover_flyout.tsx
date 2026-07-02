@@ -48,7 +48,12 @@ import {
 import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { QuerySandboxFlyout } from './query_sandbox_flyout';
 import { isAlertTabDisabled } from './compose_discover_tabs';
-import { RULE_BUILDER_REGISTRY, BuilderStateProvider, parseDiscoverQueryForBuilder, type BuilderState } from './rule_builder';
+import {
+  RULE_BUILDER_REGISTRY,
+  BuilderStateProvider,
+  parseDiscoverQueryForBuilder,
+  type BuilderState,
+} from './rule_builder';
 import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
 import { isBuilderConditionStepId } from './types';
 import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
