@@ -1732,6 +1732,67 @@ describe('WorkflowPipelineMonitor', () => {
 
       expect(alertRetrievalStep).not.toHaveTextContent('Security - Attack discovery - Skill');
     });
+
+    // Regression: the always-on gate completes DURING the Generation phase, before
+    // the real generate step's tracking entry is indexed. In that window the
+    // Generation phase contains ONLY the completed gate sub-step (the running
+    // generation placeholder is suppressed because the gate already occupies the
+    // 'generate_discoveries' pipeline phase). The phase must still render as RUNNING
+    // rather than prematurely showing a green checkmark off the gate alone.
+    const stepsWithGateOnly: StepExecutionWithLink[] = [
+      createMockStep({
+        executionTimeMs: 100,
+        finishedAt: '2024-01-01T00:00:00.100Z',
+        id: 'step-retrieval',
+        pipelinePhase: 'retrieve_alerts',
+        status: ExecutionStatus.COMPLETED,
+        stepId: 'retrieve_alerts',
+        topologicalIndex: 0,
+        workflowId: 'workflow-retrieval',
+        workflowName: 'Default Alert Retrieval',
+        workflowRunId: 'run-retrieval',
+      }),
+      createMockStep({
+        executionTimeMs: 21000,
+        finishedAt: '2024-01-01T00:00:21.100Z',
+        id: 'step-gate',
+        pipelinePhase: 'generate_discoveries',
+        startedAt: '2024-01-01T00:00:00.100Z',
+        status: ExecutionStatus.COMPLETED,
+        stepId: 'gate',
+        topologicalIndex: 1,
+        workflowId: 'workflow-gate',
+        workflowName: 'Security - Attack discovery - Skill',
+        workflowRunId: 'run-gate',
+      }),
+      createMockStep({
+        id: 'step-validate',
+        startedAt: '',
+        status: ExecutionStatus.PENDING,
+        stepId: 'validate_discoveries',
+        topologicalIndex: 2,
+        workflowId: 'workflow-validation',
+        workflowRunId: 'run-validation',
+      }),
+    ];
+
+    it('shows the Generation phase as RUNNING when only the completed gate is present', () => {
+      render(
+        <TestProviders>
+          <WorkflowPipelineMonitor {...defaultProps} stepExecutions={stepsWithGateOnly} />
+        </TestProviders>
+      );
+
+      const generationStep = document.querySelectorAll('.euiStep')[1];
+
+      // RUNNING maps to 'loading' which renders a spinner in the phase indicator
+      expect(generationStep.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+
+      // It must NOT show a completed checkmark in the phase indicator
+      expect(
+        generationStep.querySelector('.euiStepNumber [data-euiicon-type="check"]')
+      ).not.toBeInTheDocument();
+    });
   });
 
   describe('persistence step filtering', () => {
@@ -2869,6 +2930,56 @@ describe('WorkflowPipelineMonitor', () => {
         );
 
         expect(screen.getByText(/total/i)).toBeInTheDocument();
+      });
+
+      it('excludes the generation-phase gate (skill) entry from the combined alerts count badge', () => {
+        const pipelineDataWithGateEntry: PipelineDataResponse = {
+          alert_retrieval: [
+            {
+              alerts: ['alert-1', 'alert-2', 'alert-3', 'alert-4', 'alert-5'],
+              alerts_context_count: 5,
+              extraction_strategy: 'default_esql',
+              workflow_run_id: 'run-legacy',
+            },
+            {
+              alerts: Array.from({ length: 75 }, (_, i) => `alert-${i}`),
+              alerts_context_count: 75,
+              extraction_strategy: 'custom_workflow',
+              workflow_run_id: 'run-custom',
+            },
+            {
+              // The generation-phase gate (skill) entry is merged into alert_retrieval so its
+              // sub-step badge resolves, but it must NOT inflate the combined alert retrieval count.
+              alerts: Array.from({ length: 75 }, (_, i) => `alert-${i}`),
+              alerts_context_count: 75,
+              extraction_strategy: 'skill',
+              workflow_run_id: 'run-gate',
+            },
+          ],
+          combined_alerts: {
+            alerts: ['alert-1', 'alert-2'],
+            alerts_context_count: 80,
+          },
+          generation: {
+            attack_discoveries: [],
+            execution_uuid: 'exec-uuid',
+            replacements: {},
+          },
+          validated_discoveries: null,
+        };
+
+        render(
+          <TestProviders>
+            <WorkflowPipelineMonitor
+              {...defaultProps}
+              onViewData={jest.fn()}
+              pipelineData={pipelineDataWithGateEntry}
+              stepExecutions={completedMultiRetrievalWithGenerationStarted}
+            />
+          </TestProviders>
+        );
+
+        expect(screen.getByTestId('combinedAlertsCountBadge')).toHaveTextContent('80 alerts');
       });
 
       it('does NOT render "Inspect combined alerts" when combined_alerts is null', () => {

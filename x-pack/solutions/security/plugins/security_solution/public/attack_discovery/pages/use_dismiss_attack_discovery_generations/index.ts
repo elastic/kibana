@@ -64,10 +64,14 @@ export const useDismissAttackDiscoveryGeneration = () => {
         ['GET', ATTACK_DISCOVERY_GENERATIONS]
       );
 
+      // NOTE: `setQueriesData` matches by partial key, so this updater also runs
+      // against the single-generation query (`useGetAttackDiscoveryGeneration`),
+      // whose cached value is a bare `AttackDiscoveryGeneration` with no
+      // `generations` array. Only transform entries that are the list response.
       queryClient.setQueriesData<GetAttackDiscoveryGenerationsResponse>(
         ['GET', ATTACK_DISCOVERY_GENERATIONS],
         (current) =>
-          current == null
+          current == null || !Array.isArray(current.generations)
             ? current
             : {
                 ...current,

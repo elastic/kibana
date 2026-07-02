@@ -413,5 +413,86 @@ describe('useDismissAttackDiscoveryGeneration', () => {
         getStatus(queryClient.getQueryData(['GET', ATTACK_DISCOVERY_GENERATIONS]), 'gen1')
       ).toBe('succeeded');
     });
+
+    describe('when a single-generation query is cached under the same key prefix', () => {
+      // The single-generation hook (`useGetAttackDiscoveryGeneration`) caches a
+      // bare `AttackDiscoveryGeneration` (no `generations` array) under the key
+      // `['GET', ATTACK_DISCOVERY_GENERATIONS, executionUuid]`, which is matched
+      // by the partial-key `setQueriesData` call in the dismiss mutation.
+      const singleGenerationKey = ['GET', ATTACK_DISCOVERY_GENERATIONS, 'gen1'];
+
+      beforeEach(() => {
+        queryClient.setQueryData(singleGenerationKey, {
+          connector_id: 'connector1',
+          discoveries: 0,
+          execution_uuid: 'gen1',
+          start: '2026-06-27T00:00:00.000Z',
+          status: 'started',
+        });
+      });
+
+      it('marks the list generation as dismissed', async () => {
+        mockHttpFetch.mockReturnValue(new Promise(() => {})); // never resolves
+
+        const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), { wrapper });
+
+        act(() => {
+          result.current.mutate({ executionUuid: 'gen1' });
+        });
+
+        await waitFor(() =>
+          expect(
+            getStatus(queryClient.getQueryData(['GET', ATTACK_DISCOVERY_GENERATIONS]), 'gen1')
+          ).toBe('dismissed')
+        );
+      });
+
+      it('does not throw / enter an error state during the optimistic update', async () => {
+        mockHttpFetch.mockReturnValue(new Promise(() => {})); // never resolves
+
+        const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), { wrapper });
+
+        act(() => {
+          result.current.mutate({ executionUuid: 'gen1' });
+        });
+
+        await waitFor(() => expect(result.current.isLoading).toBe(true));
+        expect(result.current.isError).toBe(false);
+      });
+
+      it('does not surface an error toast during the optimistic update', async () => {
+        mockHttpFetch.mockReturnValue(new Promise(() => {})); // never resolves
+
+        const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), { wrapper });
+
+        act(() => {
+          result.current.mutate({ executionUuid: 'gen1' });
+        });
+
+        await waitFor(() =>
+          expect(
+            getStatus(queryClient.getQueryData(['GET', ATTACK_DISCOVERY_GENERATIONS]), 'gen1')
+          ).toBe('dismissed')
+        );
+        expect(mockAddError).not.toHaveBeenCalled();
+      });
+
+      it('leaves the single-generation query untouched', async () => {
+        mockHttpFetch.mockReturnValue(new Promise(() => {})); // never resolves
+
+        const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), { wrapper });
+
+        act(() => {
+          result.current.mutate({ executionUuid: 'gen1' });
+        });
+
+        await waitFor(() =>
+          expect(
+            (queryClient.getQueryData(singleGenerationKey) as { status: string } | undefined)
+              ?.status
+          ).toBe('started')
+        );
+      });
+    });
   });
 });
