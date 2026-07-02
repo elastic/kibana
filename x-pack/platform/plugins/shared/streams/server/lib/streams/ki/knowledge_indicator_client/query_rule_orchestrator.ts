@@ -8,12 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { QueryLink, StreamQuery } from '@kbn/significant-events-schema';
 import { deriveQueryType, hasSameEsql } from '@kbn/streams-schema';
-import {
-  isDurable,
-  isExpirable,
-  isExpired,
-  QUERY_TYPE_STATS,
-} from '@kbn/significant-events-schema';
+import { isExpirable, isExpired, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { computeRuleId } from '../helpers/compute_rule_id';
 import { installQueries, uninstallQueries } from './rule_orchestration';
@@ -406,14 +401,9 @@ export class QueryRuleOrchestrator {
 
       const candidateIds = links
         .filter((link) => {
-          if (isExpirable(link)) {
-            if (isExpired(link.expires_at)) {
-              return true;
-            }
-
-            return link.query.features?.some(({ id }) => !liveSlugs.has(id));
-          }
-          return isDurable(link);
+          if (!isExpirable(link)) return false;
+          if (isExpired(link.expires_at)) return true;
+          return link.query.features?.some(({ id }) => !liveSlugs.has(id));
         })
         .map((link) => link.query.id);
 

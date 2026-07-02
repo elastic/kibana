@@ -109,7 +109,7 @@ export function toStoredQuery(
       severity_score: query.severity_score,
       rule_backed: ruleBacked,
       rule_id: ruleId,
-      features: query.features,
+      features: query.features?.map((feat) => ({ ...feat, id: normalizeFeatureSlug(feat.id) })),
     },
     ...(includeEmbedding && embedding ? { search_embedding: embedding } : {}),
   };
