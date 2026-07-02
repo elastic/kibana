@@ -73,6 +73,7 @@ async function expectRerenderOnDataLoader(
         query$: BehaviorSubject<Query | AggregateQuery | undefined>;
         timeRange$: BehaviorSubject<TimeRange | undefined>;
         esqlVariables$: BehaviorSubject<ESQLControlVariable[] | undefined>;
+        isApproximate$: BehaviorSubject<boolean | undefined>;
       } & LensOverrides
     >;
     internalApiOverrides?: Partial<LensInternalApi>;
@@ -427,11 +428,10 @@ describe('Data Loader', () => {
       },
       undefined,
       {
-        parentApiOverrides: createUnifiedSearchApi(
-          { query: '', language: 'kuery' },
-          [],
-          { from: 'now-7d', to: 'now' }
-        ),
+        parentApiOverrides: createUnifiedSearchApi({ query: '', language: 'kuery' }, [], {
+          from: 'now-7d',
+          to: 'now',
+        }),
       }
     );
   });
