@@ -27,7 +27,7 @@ const createContext = (overrides: Partial<ApiEndpointContext> = {}): ApiEndpoint
 describe('API_ENDPOINTS', () => {
   describe('getUrl', () => {
     describe('Elasticsearch URL', () => {
-      it('returns the Elasticsearch URL unchanged on non-Serverless deployments', () => {
+      it('uses the managed Elasticsearch-compatible bulk endpoint when the managed URL is available on non-Serverless deployments', () => {
         expect(
           getEndpoint('elasticsearch').getUrl(
             createContext({
@@ -36,10 +36,10 @@ describe('API_ENDPOINTS', () => {
               managedOtlpServiceUrl: 'https://otlp.example.com:443',
             })
           )
-        ).toBe('https://es.example.com');
+        ).toBe('https://otlp.example.com:443/_es/_bulk');
       });
 
-      it('trims trailing slashes from the Elasticsearch URL fallback', () => {
+      it('trims trailing slashes from the Elasticsearch URL fallback before appending the bulk path', () => {
         expect(
           getEndpoint('elasticsearch').getUrl(
             createContext({
@@ -47,10 +47,10 @@ describe('API_ENDPOINTS', () => {
               elasticsearchUrl: 'https://es.example.com//',
             })
           )
-        ).toBe('https://es.example.com');
+        ).toBe('https://es.example.com/_bulk');
       });
 
-      it('uses the managed Elasticsearch-compatible endpoint on Serverless', () => {
+      it('uses the managed Elasticsearch-compatible bulk endpoint on Serverless', () => {
         expect(
           getEndpoint('elasticsearch').getUrl(
             createContext({
@@ -59,10 +59,10 @@ describe('API_ENDPOINTS', () => {
               managedOtlpServiceUrl: 'https://otlp.example.com:443',
             })
           )
-        ).toBe('https://otlp.example.com:443/_es');
+        ).toBe('https://otlp.example.com:443/_es/_bulk');
       });
 
-      it('trims trailing slashes from the managed URL before appending the managed Elasticsearch-compatible path', () => {
+      it('trims trailing slashes from the managed URL before appending the managed Elasticsearch-compatible bulk path', () => {
         expect(
           getEndpoint('elasticsearch').getUrl(
             createContext({
@@ -71,31 +71,31 @@ describe('API_ENDPOINTS', () => {
               managedOtlpServiceUrl: 'https://otlp.example.com:443//',
             })
           )
-        ).toBe('https://otlp.example.com:443/_es');
+        ).toBe('https://otlp.example.com:443/_es/_bulk');
       });
 
-      it('falls back to the Elasticsearch URL on Serverless when the managed URL is missing', () => {
+      it('falls back to the Elasticsearch bulk URL when the managed URL is missing', () => {
         expect(
           getEndpoint('elasticsearch').getUrl(
             createContext({
-              isServerless: true,
+              isServerless: false,
               elasticsearchUrl: 'https://es.example.com',
               managedOtlpServiceUrl: undefined,
             })
           )
-        ).toBe('https://es.example.com');
+        ).toBe('https://es.example.com/_bulk');
       });
 
-      it('falls back to the Elasticsearch URL on Serverless when the managed URL is blank', () => {
+      it('falls back to the Elasticsearch bulk URL when the managed URL is blank', () => {
         expect(
           getEndpoint('elasticsearch').getUrl(
             createContext({
-              isServerless: true,
+              isServerless: false,
               elasticsearchUrl: 'https://es.example.com',
               managedOtlpServiceUrl: '   ',
             })
           )
-        ).toBe('https://es.example.com');
+        ).toBe('https://es.example.com/_bulk');
       });
 
       it('returns undefined when no Elasticsearch URL can be derived', () => {

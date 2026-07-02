@@ -31,7 +31,6 @@ const normalizeEndpointUrl = (url?: string): string | undefined => {
   const trimmedUrl = url?.trim();
   return trimmedUrl ? trimTrailingSlashes(trimmedUrl) : undefined;
 };
-const MANAGED_ELASTICSEARCH_COMPATIBLE_PATH = '/_es';
 
 export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
   {
@@ -79,13 +78,15 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
       defaultMessage: 'Elasticsearch',
     }),
     euiIconType: 'logoElasticsearch',
-    getUrl: ({ isServerless, managedOtlpServiceUrl, elasticsearchUrl }) => {
+    getUrl: ({ managedOtlpServiceUrl, elasticsearchUrl }) => {
       const managedUrl = normalizeEndpointUrl(managedOtlpServiceUrl);
 
-      if (isServerless && managedUrl) {
-        return `${managedUrl}${MANAGED_ELASTICSEARCH_COMPATIBLE_PATH}`;
+      if (managedUrl) {
+        return `${managedUrl}/_es/_bulk`;
       }
-      return normalizeEndpointUrl(elasticsearchUrl);
+      const fallbackUrl = normalizeEndpointUrl(elasticsearchUrl);
+
+      return fallbackUrl ? `${fallbackUrl}/_bulk` : undefined;
     },
   },
 ];

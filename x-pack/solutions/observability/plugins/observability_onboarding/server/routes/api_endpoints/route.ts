@@ -43,6 +43,7 @@ function hasRequiredPrivileges(
     isManagedOtlpServiceAvailable,
     isServerless,
     managedOtlpPrwEndpointEnabled,
+    isManagedElasticsearchEndpointAvailable,
   }: ApiKeyFactoryContext,
   esClient: ElasticsearchClient
 ): Promise<boolean> {
@@ -56,7 +57,9 @@ function hasRequiredPrivileges(
         ? hasApiKeyPrivileges(esClient, { application: [APM_EVENT_WRITE_APPLICATION] })
         : hasApiKeyPrivileges(esClient, { index: [INDEX_PROMETHEUS_REMOTE_WRITE] });
     case ApiEndpointId.Elasticsearch:
-      return hasLogMonitoringPrivileges(esClient, true);
+      return isManagedElasticsearchEndpointAvailable
+        ? hasApiKeyPrivileges(esClient, { application: [APM_EVENT_WRITE_APPLICATION] })
+        : hasLogMonitoringPrivileges(esClient, true);
   }
 }
 
@@ -123,11 +126,13 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     const managedOtlpPrwEndpointEnabled =
       (await featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED, false)) &&
       Boolean(managedOtlpServiceUrl);
+    const isManagedElasticsearchEndpointAvailable = Boolean(managedOtlpServiceUrl);
 
     const apiKeyFactoryContext: ApiKeyFactoryContext = {
       isManagedOtlpServiceAvailable,
       isServerless,
       managedOtlpPrwEndpointEnabled,
+      isManagedElasticsearchEndpointAvailable,
     };
 
     const hasPrivileges = await hasRequiredPrivileges(
