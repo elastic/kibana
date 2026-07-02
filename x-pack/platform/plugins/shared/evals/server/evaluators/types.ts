@@ -31,12 +31,18 @@ export interface EvaluatorResult {
   }>;
 }
 
+export interface ReferenceDataField {
+  type: string;
+  required: boolean;
+  description: string;
+}
+
 export interface EvaluatorDefinition {
   name: string;
   version: string;
   kind: 'llm' | 'code';
   description: string;
-  supportedInputs: Array<'trace' | 'reference_data'>;
+  referenceDataSchema?: Record<string, ReferenceDataField>;
   evaluate(ctx: EvaluatorContext): Promise<EvaluatorResult>;
 }
 

@@ -25,7 +25,6 @@ describe('GET /internal/evals/evaluators', () => {
         version: '1.0.0',
         kind: 'llm',
         description: 'Groundedness evaluator',
-        supportedInputs: ['trace', 'reference_data'],
         evaluate: jest.fn(),
       },
       {
@@ -33,7 +32,6 @@ describe('GET /internal/evals/evaluators', () => {
         version: '1.0.0',
         kind: 'code',
         description: 'Latency evaluator',
-        supportedInputs: ['trace'],
         evaluate: jest.fn(),
       },
       {
@@ -41,7 +39,6 @@ describe('GET /internal/evals/evaluators', () => {
         version: '1.0.0',
         kind: 'code',
         description: 'Input tokens evaluator',
-        supportedInputs: ['trace'],
         evaluate: jest.fn(),
       },
       {
@@ -49,7 +46,6 @@ describe('GET /internal/evals/evaluators', () => {
         version: '1.0.0',
         kind: 'code',
         description: 'Output tokens evaluator',
-        supportedInputs: ['trace'],
         evaluate: jest.fn(),
       },
       {
@@ -57,7 +53,6 @@ describe('GET /internal/evals/evaluators', () => {
         version: '1.0.0',
         kind: 'code',
         description: 'Tool calls evaluator',
-        supportedInputs: ['trace'],
         evaluate: jest.fn(),
       },
       {
@@ -65,7 +60,13 @@ describe('GET /internal/evals/evaluators', () => {
         version: '1.0.0',
         kind: 'llm',
         description: 'Correctness evaluator',
-        supportedInputs: ['trace', 'reference_data'],
+        referenceDataSchema: {
+          expected: {
+            type: 'string',
+            required: true,
+            description: 'The expected ground truth response to compare against.',
+          },
+        },
         evaluate: jest.fn(),
       },
     ],
@@ -120,7 +121,23 @@ describe('GET /internal/evals/evaluators', () => {
       version: '1.0.0',
       kind: 'llm',
       description: 'Groundedness evaluator',
-      supported_inputs: ['trace', 'reference_data'],
+    });
+
+    const correctnessEval = response.payload.evaluators.find(
+      (e: { name: string }) => e.name === 'correctness'
+    );
+    expect(correctnessEval).toEqual({
+      name: 'correctness',
+      version: '1.0.0',
+      kind: 'llm',
+      description: 'Correctness evaluator',
+      reference_data_schema: {
+        expected: {
+          type: 'string',
+          required: true,
+          description: 'The expected ground truth response to compare against.',
+        },
+      },
     });
   });
 

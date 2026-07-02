@@ -97,6 +97,24 @@ export const registerEvaluateRoute = ({
           });
         }
 
+        for (const { definition } of resolvedEvaluators) {
+          if (!definition.referenceDataSchema) {
+            continue;
+          }
+          for (const [field, fieldDef] of Object.entries(definition.referenceDataSchema)) {
+            if (
+              fieldDef.required &&
+              (referenceData?.[field] == null || `${referenceData[field]}`.trim().length === 0)
+            ) {
+              return response.badRequest({
+                body: {
+                  message: `reference_data.${field} is required for evaluator "${definition.name}"`,
+                },
+              });
+            }
+          }
+        }
+
         const coreContext = await context.core;
         const traceAccessor = createTraceAccessor({
           traceId,

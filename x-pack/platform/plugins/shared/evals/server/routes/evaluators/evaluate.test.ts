@@ -30,7 +30,6 @@ describe('POST /internal/evals/_evaluate', () => {
     version,
     kind,
     description: `${name} evaluator`,
-    supportedInputs: ['trace'],
     evaluate,
   });
 
@@ -233,6 +232,43 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(response.status).toBe(400);
     expect(response.payload).toEqual({
       message: 'connector_id is required for llm evaluator "groundedness"',
+    });
+  });
+
+  it('returns 400 when required reference_data fields are missing', async () => {
+    const correctness: EvaluatorDefinition = {
+      ...buildEvaluator({ name: 'correctness', kind: 'llm' }),
+      referenceDataSchema: {
+        expected: {
+          type: 'string',
+          required: true,
+          description: 'The expected ground truth response to compare against.',
+        },
+      },
+    };
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([correctness]),
+      inferenceStart: {
+        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+      } as unknown as InferenceServerStart,
+    });
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: {
+            traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }],
+          },
+          evaluators: [{ name: 'correctness', connector_id: 'connector-1' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.payload).toEqual({
+      message: 'reference_data.expected is required for evaluator "correctness"',
     });
   });
 

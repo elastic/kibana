@@ -96,6 +96,36 @@ describe('correctness evaluator', () => {
     ]);
   });
 
+  it('throws when referenceData.expected is missing', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { esClient } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    await expect(
+      correctnessEvaluator.evaluate({
+        trace: traceAccessor,
+        referenceData: {},
+        inferenceClient: { prompt: jest.fn() } as unknown as BoundInferenceClient,
+        log: logger,
+      })
+    ).rejects.toThrow('reference_data.expected is required for correctness evaluator');
+  });
+
+  it('throws when referenceData.expected is an empty string', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { esClient } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    await expect(
+      correctnessEvaluator.evaluate({
+        trace: traceAccessor,
+        referenceData: { expected: '   ' },
+        inferenceClient: { prompt: jest.fn() } as unknown as BoundInferenceClient,
+        log: logger,
+      })
+    ).rejects.toThrow('reference_data.expected is required for correctness evaluator');
+  });
+
   it('registers correctness in the evaluator registry', () => {
     const registry = createEvaluatorRegistry();
 

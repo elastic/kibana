@@ -343,6 +343,32 @@ describe('trace groundedness evaluator integration', () => {
     ]);
   });
 
+  it('returns 400 when correctness evaluator is called without reference_data.expected', async () => {
+    const { handler, context } = setupRoute({
+      esqlQuery: createMockEsqlQuery({ hasToolEvidence: true }),
+      prompt: jest.fn(),
+    });
+
+    const response = await handler(
+      context,
+      {
+        body: {
+          subject: {
+            mode: 'single-turn',
+            traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }],
+          },
+          evaluators: [{ name: 'correctness', connector_id: 'connector-1' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.payload).toEqual({
+      message: 'reference_data.expected is required for evaluator "correctness"',
+    });
+  });
+
   it('enforces manage privilege in evaluator evaluate route security config', async () => {
     const router = httpServiceMock.createRouter();
     const versionedRouter = router.versioned as MockedVersionedRouter;

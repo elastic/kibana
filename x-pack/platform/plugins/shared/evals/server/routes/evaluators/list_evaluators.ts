@@ -42,7 +42,9 @@ export const registerListEvaluatorsRoute = ({
           version: evaluator.version,
           kind: evaluator.kind,
           description: evaluator.description,
-          supported_inputs: evaluator.supportedInputs,
+          ...(evaluator.referenceDataSchema
+            ? { reference_data_schema: evaluator.referenceDataSchema }
+            : {}),
         }));
 
         return response.ok({

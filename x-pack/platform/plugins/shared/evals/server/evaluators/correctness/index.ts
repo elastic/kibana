@@ -33,7 +33,13 @@ export const correctnessEvaluator: EvaluatorDefinition = {
   version: '1.0.0',
   kind: 'llm',
   description: 'Measures factuality, relevance, and sequence accuracy against expected output.',
-  supportedInputs: ['trace', 'reference_data'],
+  referenceDataSchema: {
+    expected: {
+      type: 'string',
+      required: true,
+      description: 'The expected ground truth response to compare against.',
+    },
+  },
   async evaluate({ trace, referenceData, inferenceClient, log }) {
     if (!inferenceClient) {
       throw new Error('Inference client is required for correctness evaluator');
@@ -41,25 +47,7 @@ export const correctnessEvaluator: EvaluatorDefinition = {
 
     const groundTruthResponse = referenceData?.expected;
     if (groundTruthResponse == null || `${groundTruthResponse}`.trim().length === 0) {
-      return {
-        scores: [
-          {
-            name: 'factuality',
-            label: 'unavailable',
-            explanation: 'reference_data.expected is required for correctness evaluator',
-          },
-          {
-            name: 'relevance',
-            label: 'unavailable',
-            explanation: 'reference_data.expected is required for correctness evaluator',
-          },
-          {
-            name: 'sequence_accuracy',
-            label: 'unavailable',
-            explanation: 'reference_data.expected is required for correctness evaluator',
-          },
-        ],
-      };
+      throw new Error('reference_data.expected is required for correctness evaluator');
     }
 
     const chatEvidence = await extractChatEvidence(trace, log);
