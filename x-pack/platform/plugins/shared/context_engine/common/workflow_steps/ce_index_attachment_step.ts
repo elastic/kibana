@@ -188,8 +188,7 @@ export const contextEngineAddEntryStepCommonDefinition: CommonStepDefinition<
   description: i18n.translate(
     'xpack.contextEngine.workflowSteps.contextEngineAddEntry.description',
     {
-      defaultMessage:
-        'Add or remove an entry in the Context Engine using caller-supplied entries.',
+      defaultMessage: 'Add or remove an entry in the Context Engine using caller-supplied entries.',
     }
   ),
   documentation: {

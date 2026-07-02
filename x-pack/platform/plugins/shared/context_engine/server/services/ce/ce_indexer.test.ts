@@ -531,9 +531,7 @@ describe('createCeIndexer', () => {
         )
       ).rejects.toThrow('Connection refused');
 
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('failed to index CE data')
-      );
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('failed to index CE data'));
     });
 
     describe('manual-entry protection (origin mode)', () => {
@@ -543,9 +541,7 @@ describe('createCeIndexer', () => {
         (createCeStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
 
         const getCeData = jest.fn();
-        const registry = createMockRegistry(
-          createMockCeTypeDefinition({ id: 'lens', getCeData })
-        );
+        const registry = createMockRegistry(createMockCeTypeDefinition({ id: 'lens', getCeData }));
         const logger = createMockLogger();
         const esClient = createMockEsClient();
         // hasManualEntry returns true
@@ -591,9 +587,7 @@ describe('createCeIndexer', () => {
           entries: [{ type: 'lens', title: 'Forced', content: 'c' }],
         };
         const getCeData = jest.fn().mockResolvedValue(ceData);
-        const registry = createMockRegistry(
-          createMockCeTypeDefinition({ id: 'lens', getCeData })
-        );
+        const registry = createMockRegistry(createMockCeTypeDefinition({ id: 'lens', getCeData }));
         const logger = createMockLogger();
         const esClient = createMockEsClient();
         (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
@@ -620,9 +614,7 @@ describe('createCeIndexer', () => {
 
       it('delete action proceeds regardless of manual entries', async () => {
         const getCeData = jest.fn();
-        const registry = createMockRegistry(
-          createMockCeTypeDefinition({ id: 'lens', getCeData })
-        );
+        const registry = createMockRegistry(createMockCeTypeDefinition({ id: 'lens', getCeData }));
         const logger = createMockLogger();
         const esClient = createMockEsClient();
         (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
@@ -650,9 +642,7 @@ describe('createCeIndexer', () => {
         (createCeStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
 
         const getCeData = jest.fn();
-        const registry = createMockRegistry(
-          createMockCeTypeDefinition({ id: 'lens', getCeData })
-        );
+        const registry = createMockRegistry(createMockCeTypeDefinition({ id: 'lens', getCeData }));
         const logger = createMockLogger();
         const esClient = createMockEsClient();
         (esClient.count as jest.Mock).mockRejectedValue(
@@ -689,9 +679,7 @@ describe('createCeIndexer', () => {
           entries: [{ type: 'lens', title: 'T', content: 'c' }],
         };
         const getCeData = jest.fn().mockResolvedValue(ceData);
-        const registry = createMockRegistry(
-          createMockCeTypeDefinition({ id: 'lens', getCeData })
-        );
+        const registry = createMockRegistry(createMockCeTypeDefinition({ id: 'lens', getCeData }));
         const logger = createMockLogger();
         const esClient = createMockEsClient();
         (esClient.count as jest.Mock).mockRejectedValue(

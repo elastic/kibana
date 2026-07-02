@@ -16,8 +16,7 @@ const buildDeps = ({ spaceFromRequest }: { spaceFromRequest?: string } = {}) => 
   const ceService = {
     indexAttachment: jest.fn().mockResolvedValue(undefined),
     deleteAttachment: jest.fn().mockResolvedValue(undefined),
-  } as unknown as jest.Mocked<Pick<CeService, 'indexAttachment' | 'deleteAttachment'>> &
-    CeService;
+  } as unknown as jest.Mocked<Pick<CeService, 'indexAttachment' | 'deleteAttachment'>> & CeService;
   const soClient = {};
   const savedObjects = {
     getScopedClient: jest.fn().mockReturnValue(soClient),

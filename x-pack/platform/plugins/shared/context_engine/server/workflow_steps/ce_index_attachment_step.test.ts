@@ -485,9 +485,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
 
       const result = await definition.handler(context as any);
 
-      expect(security.authz.actions.api.get).toHaveBeenCalledWith(
-        apiPrivileges.writeContextEngine
-      );
+      expect(security.authz.actions.api.get).toHaveBeenCalledWith(apiPrivileges.writeContextEngine);
       expect(security.authz.checkPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(request);
       const checkPrivileges =
         security.authz.checkPrivilegesDynamicallyWithRequest.mock.results[0].value;
@@ -670,9 +668,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
     const buildEndToEndHarness = (registeredType: CeTypeDefinition) => {
       const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
       const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
-      jest
-        .spyOn(ceStorage, 'createCeStorage')
-        .mockReturnValue({ getClient: getClientMock } as any);
+      jest.spyOn(ceStorage, 'createCeStorage').mockReturnValue({ getClient: getClientMock } as any);
 
       const registry = createCeTypeRegistry();
       registry.register(registeredType);

@@ -578,9 +578,7 @@ class CeIndexerImpl implements CeIndexer {
       }
     } catch (error) {
       this.logger.error(
-        `CE indexer: failed to index CE data for origin '${originId}': ${
-          (error as Error).message
-        }`
+        `CE indexer: failed to index CE data for origin '${originId}': ${(error as Error).message}`
       );
       throw error;
     }
