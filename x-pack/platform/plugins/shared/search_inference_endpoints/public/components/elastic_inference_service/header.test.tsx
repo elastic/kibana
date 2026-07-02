@@ -6,13 +6,23 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, fireEvent } from '@testing-library/react';
 import { ElasticInferenceServiceModelsHeader } from './header';
 import { useKibana } from '../../hooks/use_kibana';
 import { docLinks } from '../../../common/doc_links';
 import { INFERENCE_PREFERENCES_FEATURE_FLAG_ID } from '../../../common/constants';
 
 jest.mock('../../hooks/use_kibana');
+jest.mock('./manage_regions_modal', () => ({
+  ManageRegionsModal: ({ onClose }: { onClose: () => void }) => (
+    <div data-test-subj="mockManageRegionsModal">
+      <button onClick={onClose} data-test-subj="mockManageRegionsClose">
+        Close
+      </button>
+    </div>
+  ),
+}));
+
 const mockUseKibana = useKibana as jest.Mock;
 
 const mockUiSettings = (inferencePreferencesEnabled: boolean) => ({
@@ -106,6 +116,30 @@ describe('ElasticInferenceServiceModelsHeader', () => {
       await waitFor(() => {
         expect(queryByText('View Cloud usage')).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Manage regions button', () => {
+    it('renders the Manage regions button', () => {
+      const { getByTestId } = render(<ElasticInferenceServiceModelsHeader />);
+      expect(getByTestId('eisManageRegionsButton')).toBeInTheDocument();
+    });
+
+    it('opens the ManageRegionsModal when Manage regions button is clicked', () => {
+      const { getByTestId, queryByTestId } = render(<ElasticInferenceServiceModelsHeader />);
+      expect(queryByTestId('mockManageRegionsModal')).not.toBeInTheDocument();
+
+      fireEvent.click(getByTestId('eisManageRegionsButton'));
+      expect(getByTestId('mockManageRegionsModal')).toBeInTheDocument();
+    });
+
+    it('closes the ManageRegionsModal when modal calls onClose', () => {
+      const { getByTestId, queryByTestId } = render(<ElasticInferenceServiceModelsHeader />);
+      fireEvent.click(getByTestId('eisManageRegionsButton'));
+      expect(getByTestId('mockManageRegionsModal')).toBeInTheDocument();
+
+      fireEvent.click(getByTestId('mockManageRegionsClose'));
+      expect(queryByTestId('mockManageRegionsModal')).not.toBeInTheDocument();
     });
   });
 });

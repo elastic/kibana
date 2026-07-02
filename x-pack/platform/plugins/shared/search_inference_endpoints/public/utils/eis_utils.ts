@@ -11,7 +11,12 @@ import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { type EisInferenceEndpoint, EisModelStatus } from '../../common/types';
+import {
+  type EisInferenceEndpoint,
+  EisModelStatus,
+  type AvailabilityRegions,
+  type CspRegion,
+} from '../../common/types';
 import {
   isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
@@ -306,3 +311,51 @@ export function getModelDeprecatedMessage(deprecatedFormattedDate: string | null
         }
       );
 }
+
+/** Map from CSP identifier to human-readable cloud provider name. */
+export const CSP_DISPLAY_NAMES: Record<string, string> = {
+  aws: 'Amazon Web Services (AWS)',
+  azure: 'Microsoft Azure',
+  gcp: 'Google Cloud Platform (GCP)',
+};
+
+const isAvailabilityRegions = (value: unknown): value is AvailabilityRegions => {
+  if (!value || typeof value !== 'object') return false;
+  const v = value as Record<string, unknown>;
+  return Array.isArray(v.regions) && Array.isArray(v.geos);
+};
+
+const isCspRegion = (value: unknown): value is CspRegion => {
+  if (!value || typeof value !== 'object') return false;
+  const v = value as Record<string, unknown>;
+  return typeof v.csp === 'string' && typeof v.region === 'string';
+};
+
+/**
+ * Aggregates all unique CSP regions from EIS endpoint `availability_regions` metadata.
+ * The returned list is deduplicated (by csp+region key) and sorted alphabetically.
+ */
+export const getAvailableRegions = (endpoints: EisInferenceEndpoint[]): CspRegion[] => {
+  const seen = new Set<string>();
+  const result: CspRegion[] = [];
+
+  for (const ep of endpoints) {
+    if (!ep.metadata) continue;
+    const raw = (ep.metadata as Record<string, unknown>).availability_regions;
+    if (!isAvailabilityRegions(raw)) continue;
+
+    for (const r of raw.regions) {
+      if (!isCspRegion(r)) continue;
+      const key = `${r.csp}::${r.region}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        result.push(r);
+      }
+    }
+  }
+
+  return result.sort((a, b) => {
+    const cspCmp = a.csp.localeCompare(b.csp);
+    return cspCmp !== 0 ? cspCmp : a.region.localeCompare(b.region);
+  });
+};

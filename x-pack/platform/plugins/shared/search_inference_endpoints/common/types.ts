@@ -22,6 +22,30 @@ export const APIRoutes = {
   REGION_POLICY: '/internal/search_inference_endpoints/region_policy',
 } as const;
 
+export interface CspRegion {
+  csp: string;
+  region: string;
+}
+
+export interface RegionPolicyBody {
+  allowed_regions?: CspRegion[];
+  allowed_geos?: string[];
+  fallback_region?: CspRegion;
+}
+
+export interface RegionPolicyResponse {
+  region_policy: RegionPolicyBody;
+  created_at: string;
+  created_by?: string;
+  updated_at?: string;
+  updated_by?: string;
+}
+
+export interface AvailabilityRegions {
+  regions: CspRegion[];
+  geos: string[];
+}
+
 export interface InferenceConnectorsResponse {
   connectors: InferenceConnector[];
 }

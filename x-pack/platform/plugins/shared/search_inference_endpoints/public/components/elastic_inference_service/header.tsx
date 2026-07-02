@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { isInferencePreferencesEnabled } from '../../feature_flag';
+import { ManageRegionsModal } from './manage_regions_modal';
 
 export const ElasticInferenceServiceModelsHeader = () => {
   const {
@@ -21,6 +22,8 @@ export const ElasticInferenceServiceModelsHeader = () => {
   const showManageRegions = isInferencePreferencesEnabled(uiSettings);
 
   const [billingUrl, setBillingUrl] = useState<string>();
+  const [isManageRegionsOpen, setIsManageRegionsOpen] = useState(false);
+
   useEffect(() => {
     if (cloud?.isCloudEnabled && cloud?.getPrivilegedUrls) {
       cloud.getPrivilegedUrls().then((urls) => {
@@ -32,69 +35,73 @@ export const ElasticInferenceServiceModelsHeader = () => {
   }, [cloud]);
 
   return (
-    <EuiPageTemplate.Header
-      data-test-subj="eisModelsPageHeader"
-      pageTitle={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.header', {
-        defaultMessage: 'Elastic Inference Service',
-      })}
-      description={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.description', {
-        defaultMessage: 'Manage models and endpoints for Elastic Inference Service',
-      })}
-      paddingSize="none"
-      bottomBorder={true}
-      rightSideItems={[
-        ...(cloud?.isCloudEnabled && billingUrl
-          ? [
-              <EuiButton
-                data-test-subj="searchInferenceEndpointsElasticInferenceServiceModelsHeaderViewCloudUsageButton"
-                href={billingUrl}
-                target="_blank"
-                iconType="external"
-                aria-label={i18n.translate(
-                  'xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.ariaLabel',
-                  {
-                    defaultMessage: 'Click to go Cloud usage details',
-                  }
-                )}
-              >
-                {i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button', {
-                  defaultMessage: 'View Cloud usage',
-                })}
-              </EuiButton>,
-            ]
-          : []),
-        <EuiButtonEmpty
-          iconType="documentation"
-          aria-label={i18n.translate(
-            'xpack.searchInferenceEndpoints.eisModelsPage.header.documentation.ariaLabel',
-            {
-              defaultMessage: 'Click to go Elastic Inference Service documentation',
-            }
-          )}
-          href={docLinks.elasticInferenceService}
-          iconSide="left"
-          target="_blank"
-          data-test-subj="eis_documentation"
-        >
-          {i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.documentationButton', {
-            defaultMessage: 'Documentation',
-          })}
-        </EuiButtonEmpty>,
-        ...(showManageRegions
-          ? [
-              <EuiButton
-                data-test-subj="eisManageRegionsButton"
-                iconType="plusInCircle"
-                onClick={() => {}}
-              >
-                {i18n.translate(
-                  'xpack.searchInferenceEndpoints.eisModelsPage.manageRegions.button',
-                  { defaultMessage: 'Manage regions' }
-                )}
-              </EuiButton>,
-            ]
-          : []),
-      ]}
-    />
+    <>
+      <EuiPageTemplate.Header
+        data-test-subj="eisModelsPageHeader"
+        pageTitle={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.header', {
+          defaultMessage: 'Elastic Inference Service',
+        })}
+        description={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.description', {
+          defaultMessage: 'Manage models and endpoints for Elastic Inference Service',
+        })}
+        paddingSize="none"
+        bottomBorder={true}
+        rightSideItems={[
+          ...(cloud?.isCloudEnabled && billingUrl
+            ? [
+                <EuiButton
+                  data-test-subj="searchInferenceEndpointsElasticInferenceServiceModelsHeaderViewCloudUsageButton"
+                  href={billingUrl}
+                  target="_blank"
+                  iconType="external"
+                  aria-label={i18n.translate(
+                    'xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.ariaLabel',
+                    {
+                      defaultMessage: 'Click to go Cloud usage details',
+                    }
+                  )}
+                >
+                  {i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button', {
+                    defaultMessage: 'View Cloud usage',
+                  })}
+                </EuiButton>,
+              ]
+            : []),
+          ...(showManageRegions
+            ? [
+                <EuiButtonEmpty
+                  iconType="gear"
+                  onClick={() => setIsManageRegionsOpen(true)}
+                  data-test-subj="eisManageRegionsButton"
+                >
+                  {i18n.translate(
+                    'xpack.searchInferenceEndpoints.eisModelsPage.manageRegionsButton',
+                    { defaultMessage: 'Manage regions' }
+                  )}
+                </EuiButtonEmpty>,
+              ]
+            : []),
+          <EuiButtonEmpty
+            iconType="documentation"
+            aria-label={i18n.translate(
+              'xpack.searchInferenceEndpoints.eisModelsPage.header.documentation.ariaLabel',
+              {
+                defaultMessage: 'Click to go Elastic Inference Service documentation',
+              }
+            )}
+            href={docLinks.elasticInferenceService}
+            iconSide="left"
+            target="_blank"
+            data-test-subj="eis_documentation"
+          >
+            {i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.documentationButton', {
+              defaultMessage: 'Documentation',
+            })}
+          </EuiButtonEmpty>,
+        ]}
+      />
+
+      {isManageRegionsOpen && <ManageRegionsModal onClose={() => setIsManageRegionsOpen(false)} />}
+    </>
   );
 };
