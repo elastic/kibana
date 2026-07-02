@@ -143,6 +143,15 @@ export function buildOverviewStepExecutionFromContext(
     };
   }
 
+  const cancellationReason = (workflowExecution as { cancellationReason?: string })
+    .cancellationReason;
+  if (workflowExecution.status === ExecutionStatus.SKIPPED && cancellationReason) {
+    contextData = {
+      ...contextData,
+      skipReason: cancellationReason,
+    };
+  }
+
   return {
     id: '__overview',
     stepId: 'Overview',
