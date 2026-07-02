@@ -69,7 +69,7 @@ const anomaliesBadgeHealthCss = css`
 
 type OverviewQuery = TypeOf<ApmRoutes, '/services/{serviceName}/overview'>['query'];
 
-function toAnomalyOverviewQuery(query: OverviewQuery) {
+function toAnomalyOverviewQuery(query: OverviewQuery): OverviewQuery {
   return {
     ...query,
     kuery: '',
@@ -108,6 +108,7 @@ export function AnomaliesBadge({
   navigateOnClick,
 }: AnomaliesBadgeProps) {
   const apmRouter = useApmRouter();
+
   const apmPluginContext = useApmPluginContext();
   const navigateToUrl = apmPluginContext?.core?.application?.navigateToUrl;
 
@@ -128,7 +129,7 @@ export function AnomaliesBadge({
       : undefined;
 
   const onClick =
-    href && navigateOnClick
+    href && navigateOnClick && navigateToUrl
       ? (e: React.MouseEvent | React.KeyboardEvent) => {
           navigateToUrl(href);
         }
