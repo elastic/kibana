@@ -186,10 +186,7 @@ describe('normalizeVegaSpec', () => {
         facet: { field: 'ext', type: 'nominal' },
         spec: {
           data: { values: [{ a: 1 }] },
-          layer: [
-            { mark: 'bar' },
-            { data: { url: 'https://example.com/y.json' }, mark: 'rule' },
-          ],
+          layer: [{ mark: 'bar' }, { data: { url: 'https://example.com/y.json' }, mark: 'rule' }],
         },
       };
 

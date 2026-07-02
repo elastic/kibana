@@ -173,7 +173,10 @@ describe('buildEsqlEditContext', () => {
   });
 
   it('formats multiple existing queries as per-layer context', () => {
-    const result = buildEsqlEditContext('add a trend line', ['FROM a | STATS x', 'FROM b | STATS y']);
+    const result = buildEsqlEditContext('add a trend line', [
+      'FROM a | STATS x',
+      'FROM b | STATS y',
+    ]);
 
     expect(result).toContain('Existing esql queries from multiple layers:');
     expect(result).toContain('Layer 1: "FROM a | STATS x"');

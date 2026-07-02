@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  buildLensConfig,
-  buildVegaConfig,
-} from '@kbn/agent-builder-visualizations-server';
+import { buildLensConfig, buildVegaConfig } from '@kbn/agent-builder-visualizations-server';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -52,9 +49,7 @@ describe('createVisPanelResolver', () => {
   });
 
   it('creates Lens panel content for create requests', async () => {
-    mockedBuildLensConfig.mockResolvedValue(
-      createBuildLensConfigResult({ type: 'metric' })
-    );
+    mockedBuildLensConfig.mockResolvedValue(createBuildLensConfigResult({ type: 'metric' }));
 
     const resolveVisPanel = createVisPanelResolver({
       logger,
@@ -86,9 +81,7 @@ describe('createVisPanelResolver', () => {
   });
 
   it('passes the existing Lens config when editing a Lens panel', async () => {
-    mockedBuildLensConfig.mockResolvedValue(
-      createBuildLensConfigResult({ type: 'line' })
-    );
+    mockedBuildLensConfig.mockResolvedValue(createBuildLensConfigResult({ type: 'line' }));
 
     const resolveVisPanel = createVisPanelResolver({
       logger,
@@ -147,9 +140,7 @@ describe('createVisPanelResolver', () => {
   });
 
   it('defaults to Lens when renderer is omitted on a create request', async () => {
-    mockedBuildLensConfig.mockResolvedValue(
-      createBuildLensConfigResult({ type: 'metric' })
-    );
+    mockedBuildLensConfig.mockResolvedValue(createBuildLensConfigResult({ type: 'metric' }));
 
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 

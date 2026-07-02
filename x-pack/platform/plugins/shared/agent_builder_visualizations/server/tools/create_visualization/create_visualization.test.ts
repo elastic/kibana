@@ -8,10 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
-import {
-  buildLensConfig,
-  buildVegaConfig,
-} from '@kbn/agent-builder-visualizations-server';
+import { buildLensConfig, buildVegaConfig } from '@kbn/agent-builder-visualizations-server';
 import { createVisualizationTool } from './create_visualization';
 
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
