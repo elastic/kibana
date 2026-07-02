@@ -384,7 +384,7 @@ describe('Data Loader', () => {
     );
   });
 
-  it('should propagate useApproximation from parent API to search context', async () => {
+  it('should propagate isApproximate from parent API to search context', async () => {
     await expectRerenderOnDataLoader(
       async ({ internalApi }) => {
         await waitForValue(
@@ -395,7 +395,7 @@ describe('Data Loader', () => {
         const params = internalApi.expressionParams$.getValue()!;
         expect(params.searchContext).toEqual(
           expect.objectContaining({
-            useApproximation: true,
+            isApproximate: true,
           })
         );
 
@@ -403,12 +403,12 @@ describe('Data Loader', () => {
       },
       undefined,
       {
-        parentApiOverrides: { useApproximation$: new BehaviorSubject<boolean | undefined>(true) },
+        parentApiOverrides: { isApproximate$: new BehaviorSubject<boolean | undefined>(true) },
       }
     );
   });
 
-  it('should handle undefined useApproximation from parent API', async () => {
+  it('should handle undefined isApproximate from parent API', async () => {
     await expectRerenderOnDataLoader(
       async ({ internalApi }) => {
         await waitForValue(
@@ -419,7 +419,7 @@ describe('Data Loader', () => {
         const params = internalApi.expressionParams$.getValue()!;
         expect(params.searchContext).toEqual(
           expect.objectContaining({
-            useApproximation: undefined,
+            isApproximate: undefined,
           })
         );
 

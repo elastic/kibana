@@ -103,9 +103,9 @@ export function LayerPanel(props: LayerPanelProps) {
       ? parentApi?.esqlVariables$
       : new BehaviorSubject(undefined)
   );
-  const useApproximation = useStateFromPublishingSubject(
+  const isApproximate = useStateFromPublishingSubject(
     apiPublishesApproximation(parentApi)
-      ? parentApi?.useApproximation$
+      ? parentApi?.isApproximate$
       : new BehaviorSubject(undefined)
   );
 
@@ -899,7 +899,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 indexPatterns: dataViews.indexPatterns,
                 activeData: layerVisualizationConfigProps.activeData,
                 esqlVariables,
-                useApproximation: useApproximation ?? undefined,
+                isApproximate: isApproximate ?? undefined,
                 dataSectionExtra: !isFullscreen &&
                   openDimension.isComplete &&
                   activeVisualization.DimensionEditorDataExtraComponent && (

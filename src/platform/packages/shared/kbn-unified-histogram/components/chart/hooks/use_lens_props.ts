@@ -22,7 +22,7 @@ export type LensProps = Pick<
   | 'timeRange'
   | 'attributes'
   | 'esqlVariables'
-  | 'useApproximation'
+  | 'isApproximate'
   | 'noPadding'
   | 'searchSessionId'
   | 'executionContext'
@@ -52,7 +52,7 @@ export const useLensProps = ({
           searchSessionId: fetchParams.searchSessionId,
           timeRange: fetchParams.timeRange,
           esqlVariables: fetchParams.esqlVariables,
-          useApproximation: fetchParams.useApproximation,
+          isApproximate: fetchParams.isApproximate,
           attributes,
           onLoad,
           lastReloadRequestTime: fetchParams.lastReloadRequestTime,
@@ -82,7 +82,7 @@ export const getLensProps = ({
   timeRange,
   attributes,
   esqlVariables,
-  useApproximation,
+  isApproximate,
   onLoad,
   lastReloadRequestTime,
 }: {
@@ -90,7 +90,7 @@ export const getLensProps = ({
   timeRange: TimeRange;
   attributes: TypedLensByValueInput['attributes'];
   esqlVariables: ESQLControlVariable[] | undefined;
-  useApproximation?: boolean;
+  isApproximate?: boolean;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
   lastReloadRequestTime?: number;
 }): LensProps => ({
@@ -99,7 +99,7 @@ export const getLensProps = ({
   timeRange,
   attributes,
   esqlVariables,
-  useApproximation,
+  isApproximate,
   noPadding: true,
   searchSessionId,
   executionContext: {

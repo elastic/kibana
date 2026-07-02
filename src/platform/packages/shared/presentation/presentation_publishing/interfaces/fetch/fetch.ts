@@ -78,7 +78,7 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
     timeslice: of(undefined),
     esqlVariables: of(undefined),
     projectRouting: of(undefined),
-    useApproximation: of(undefined),
+    isApproximate: of(undefined),
   };
 
   const sectionId$ =
@@ -124,7 +124,7 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
   }
 
   if (apiHasParentApi(api) && apiPublishesApproximation(api.parentApi)) {
-    observables.useApproximation = api.parentApi.useApproximation$;
+    observables.isApproximate = api.parentApi.isApproximate$;
   }
 
   return combineLatest(observables);
@@ -195,7 +195,7 @@ export const useFetchContext = (api: unknown): FetchContext => {
       timeslice: typeApi?.timeRange$?.value ? undefined : typeApi?.parentApi?.timeslice$?.value,
       isReload: false,
       projectRouting: undefined,
-      useApproximation: undefined,
+      isApproximate: undefined,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

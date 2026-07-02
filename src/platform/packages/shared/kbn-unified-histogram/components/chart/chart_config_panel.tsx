@@ -37,7 +37,7 @@ export function ChartConfigPanel({
   isPlainRecord,
   query,
   onSuggestionContextEdit,
-  useApproximation,
+  isApproximate: approximation,
 }: {
   services: UnifiedHistogramServices;
   visContext: UnifiedHistogramVisContext;
@@ -49,17 +49,17 @@ export function ChartConfigPanel({
   isPlainRecord?: boolean;
   query?: Query | AggregateQuery;
   onSuggestionContextEdit: (suggestion: UnifiedHistogramSuggestionContext | undefined) => void;
-  useApproximation?: boolean;
+  isApproximate?: boolean;
 }) {
   const [editLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
   const previousAdapters = useRef<Record<string, Datatable> | undefined>(undefined);
   const previousQuery = useRef<Query | AggregateQuery | undefined>(undefined);
 
-  const useApproximation$ = useRef(new BehaviorSubject<boolean | undefined>(useApproximation));
+  const approximation$ = useRef(new BehaviorSubject<boolean | undefined>(undefined));
   useEffect(() => {
-    useApproximation$.current.next(useApproximation);
-  }, [useApproximation]);
-  const editorParentApi = useRef({ useApproximation$: useApproximation$.current });
+    approximation$.current.next(approximation);
+  }, [approximation]);
+  const editorParentApi = useRef({ isApproximate$: approximation$.current });
 
   const updatePanelState = useCallback<
     ComponentProps<EditLensConfigPanelComponent>['updatePanelState']

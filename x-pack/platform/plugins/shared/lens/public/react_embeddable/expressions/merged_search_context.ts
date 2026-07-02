@@ -27,7 +27,7 @@ export interface MergedSearchContext {
   disableWarningToasts: boolean;
   esqlVariables?: ESQLControlVariable[];
   projectRouting?: ProjectRouting;
-  useApproximation?: boolean;
+  isApproximate?: boolean;
 }
 
 export function getMergedSearchContext(
@@ -38,14 +38,14 @@ export function getMergedSearchContext(
     timeRange,
     esqlVariables,
     projectRouting,
-    useApproximation,
+    isApproximate,
   }: {
     filters?: Filter[];
     query?: Query | AggregateQuery;
     timeRange?: TimeRange;
     esqlVariables?: ESQLControlVariable[];
     projectRouting?: ProjectRouting;
-    useApproximation?: boolean;
+    isApproximate?: boolean;
   },
   customTimeRange$: PublishingSubject<TimeRange | undefined>,
   parentApi: unknown,
@@ -78,7 +78,7 @@ export function getMergedSearchContext(
     filters: injectFilterReferences(attributes.state.filters || [], attributes.references),
     disableWarningToasts: true,
     projectRouting,
-    useApproximation,
+    isApproximate,
   };
   // Prepend query and filters from dashboard to the visualization ones
   if (query) {
