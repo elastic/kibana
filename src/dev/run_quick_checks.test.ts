@@ -30,22 +30,22 @@ describe('buildFailureAnnotation', () => {
         'The following quick-check(s) failed. Run them locally to reproduce and fix:',
         '',
         '<details>',
-        '<summary>❌ /.buildkite/scripts/steps/checks/i18n.sh (ran in 12s)</summary>',
+        '<summary>❌ .buildkite/scripts/steps/checks/i18n.sh (ran in 12s)</summary>',
         '',
         '```',
         'Found 2 i18n errors',
         '```',
         '</details>',
         '',
-        'Reproduce locally:',
+        'To reproduce locally:',
         '```',
-        `node scripts/quick_checks --checks ${REPO_ROOT}/.buildkite/scripts/steps/checks/i18n.sh`,
+        `node scripts/quick_checks --checks .buildkite/scripts/steps/checks/i18n.sh`,
         '```',
       ].join('\n')
     );
   });
 
-  it('creates an annotation covering multiple failed checks', () => {
+  it('creates an annotation for multiple failed checks', () => {
     const failedChecks = [
       {
         success: false,
@@ -63,15 +63,15 @@ describe('buildFailureAnnotation', () => {
 
     const annotation = buildPipelineAnnotation(failedChecks);
 
-    expect(annotation).toContain('**❌ 2 quick-checks failed**');
+    expect(annotation).toContain('## ❌ 2 quick-check(s) failed');
     expect(annotation).toContain(
-      '<summary>❌ /.buildkite/scripts/steps/checks/i18n.sh (ran in 12s)</summary>'
+      '<summary>❌ .buildkite/scripts/steps/checks/i18n.sh (ran in 12s)</summary>'
     );
     expect(annotation).toContain(
-      '<summary>❌ /.buildkite/scripts/steps/checks/licenses.sh (ran in 500ms)</summary>'
+      '<summary>❌ .buildkite/scripts/steps/checks/licenses.sh (ran in 500ms)</summary>'
     );
     expect(annotation).toContain(
-      `node scripts/quick_checks --checks ${REPO_ROOT}/.buildkite/scripts/steps/checks/i18n.sh,${REPO_ROOT}/.buildkite/scripts/steps/checks/licenses.sh`
+      `node scripts/quick_checks --checks .buildkite/scripts/steps/checks/i18n.sh,.buildkite/scripts/steps/checks/licenses.sh`
     );
   });
 
@@ -94,7 +94,7 @@ describe('buildFailureAnnotation', () => {
     expect(annotation).toContain('line 59');
   });
 
-  it('does not truncate output at or under the line limit', () => {
+  it('does not truncate output within the line limit', () => {
     const lines = Array.from({ length: 50 }, (_, i) => `line ${i}`);
     const failedChecks = [
       {
