@@ -10,11 +10,14 @@
 import { freeze, produce } from 'immer';
 
 import type {
+  ColorByValueNamedPaletteType,
   ColorByValueStep,
   ColorByValueType,
   ColorMappingCategoricalType,
   ColorMappingType,
 } from './color';
+
+type ColorByValueRangeType = Extract<ColorByValueType, { type: 'dynamic' }>;
 import { allColoringTypeSchema, colorByValueStepsSchema, AUTO_COLOR, NO_COLOR } from './color';
 
 describe('Color Schema', () => {
@@ -78,10 +81,10 @@ describe('Color Schema', () => {
       });
     });
 
-    describe.each<ColorByValueType['range']>(['absolute', 'percentage'])(
+    describe.each<ColorByValueRangeType['range']>(['absolute', 'percentage'])(
       'range type - %s',
       (range) => {
-        const baseConfig = freeze<ColorByValueType>({
+        const baseConfig = freeze<ColorByValueRangeType>({
           type: 'dynamic',
           range,
           steps: [
@@ -207,6 +210,49 @@ describe('Color Schema', () => {
         });
       }
     );
+
+    describe('colorByValueNamedPalette schema', () => {
+      it('applies default bounds for a minimal config', () => {
+        const input = {
+          type: 'dynamic_palette',
+          palette: 'status',
+        };
+
+        const validated = allColoringTypeSchema.validate(input);
+        expect(validated).toEqual({
+          type: 'dynamic_palette',
+          palette: 'status',
+          open_above: true,
+          open_below: false,
+        });
+      });
+
+      it.each<[string, Pick<ColorByValueNamedPaletteType, 'open_below' | 'open_above'>]>([
+        ['closed on both ends', { open_below: false, open_above: false }],
+        ['open above only', { open_below: false, open_above: true }],
+        ['open below only', { open_below: true, open_above: false }],
+        ['open on both ends', { open_below: true, open_above: true }],
+      ])('validates explicit bounds - %s', (_, bounds) => {
+        const input: ColorByValueNamedPaletteType = {
+          type: 'dynamic_palette',
+          palette: 'temperature',
+          ...bounds,
+        };
+
+        const validated = allColoringTypeSchema.validate(input);
+        expect(validated).toEqual(input);
+      });
+
+      describe('validation errors', () => {
+        it('throws when the palette name is missing', () => {
+          const input = {
+            type: 'dynamic_palette',
+          };
+
+          expect(() => allColoringTypeSchema.validate(input)).toThrow();
+        });
+      });
+    });
   });
 
   describe('staticColor schema', () => {
