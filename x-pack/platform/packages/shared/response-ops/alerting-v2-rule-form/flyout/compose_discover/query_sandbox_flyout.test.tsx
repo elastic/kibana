@@ -10,7 +10,7 @@ import { render, act } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
-import type { RuleQuery } from '../../form/types';
+import type { ComposedQuery, RuleQuery } from '../../form/types';
 import { getBreachQuery, getRecoverQuery } from '../../form/utils/query_helpers';
 import { QuerySandboxFlyout, type QuerySandboxFlyoutProps } from './query_sandbox_flyout';
 
@@ -35,7 +35,7 @@ jest.mock('../../form/contexts/rule_form_context', () => ({
 const mockColumns: never[] = [];
 const mockRows: never[] = [];
 const mockRun = jest.fn();
-const mockUseQueryExecution = jest.fn(() => ({
+const mockUseQueryExecution = jest.fn((_params: unknown) => ({
   columns: mockColumns,
   rows: mockRows,
   totalRowCount: 0,
@@ -74,7 +74,7 @@ const standaloneQuery = (breach = 'FROM test-index | LIMIT 10'): RuleQuery => ({
   breach: { query: breach },
 });
 
-const composedQuery = (): RuleQuery => ({
+const composedQuery = (): ComposedQuery => ({
   format: 'composed',
   base: 'FROM test-index',
   breach: { segment: '| WHERE cpu > 70' },
