@@ -21,17 +21,17 @@ const FIELD_ALERT_IDS = 'kibana.alert.attack_discovery.alert_ids' as const;
 export interface InsightsSectionProps {
   /** The raw attack document hit. */
   hit: DataTableRecord;
-  /** Optional callback to open the entities left panel. Forwarded to EntitiesOverview. */
-  onOpenEntitiesLeftPanel?: () => void;
-  /** Optional callback to open the correlations left panel. Forwarded to CorrelationsOverview. */
-  onOpenCorrelationsLeftPanel?: () => void;
+  /** Optional callback to show the related entities. Forwarded to EntitiesOverview. */
+  onShowEntities?: () => void;
+  /** Optional callback to show the related alerts. Forwarded to CorrelationsOverview. */
+  onShowCorrelations?: () => void;
 }
 
 /**
  * Insights section for the attack flyout. Renders entities and correlations panels.
  */
 export const InsightsSection = memo(
-  ({ hit, onOpenEntitiesLeftPanel, onOpenCorrelationsLeftPanel }: InsightsSectionProps) => {
+  ({ hit, onShowEntities, onShowCorrelations }: InsightsSectionProps) => {
     const expanded = useExpandSection({
       storageKey: STORAGE_KEY,
       title: KEY,
@@ -59,8 +59,8 @@ export const InsightsSection = memo(
         gutterSize="s"
         data-test-subj={INSIGHTS_SECTION_TEST_ID}
       >
-        <EntitiesOverview alertIds={alertIds} onOpenLeftPanel={onOpenEntitiesLeftPanel} />
-        <CorrelationsOverview alertIds={alertIds} onOpenLeftPanel={onOpenCorrelationsLeftPanel} />
+        <EntitiesOverview alertIds={alertIds} onShowEntities={onShowEntities} />
+        <CorrelationsOverview alertIds={alertIds} onShowCorrelations={onShowCorrelations} />
       </ExpandableSection>
     );
   }

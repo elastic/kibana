@@ -15,23 +15,23 @@ import { INSIGHTS_CORRELATIONS_TEST_ID } from '../constants/test_ids';
 export interface CorrelationsOverviewProps {
   /** Alert IDs belonging to the attack; the count is displayed as related alerts. */
   alertIds: string[];
-  /** Optional callback to open the correlations left panel. When undefined, the title renders as plain text. */
-  onOpenLeftPanel?: () => void;
+  /** Optional callback to show the related alerts. When undefined, the title renders as plain text. */
+  onShowCorrelations?: () => void;
 }
 
 /**
  * Correlation section for the attack flyout. Renders the related alerts count.
  */
 export const CorrelationsOverview: React.FC<CorrelationsOverviewProps> = memo(
-  ({ alertIds, onOpenLeftPanel }) => {
+  ({ alertIds, onShowCorrelations }) => {
     const { euiTheme } = useEuiTheme();
     const relatedAlertsCount = alertIds.length;
 
     const link = useMemo(
       () =>
-        onOpenLeftPanel
+        onShowCorrelations
           ? {
-              callback: onOpenLeftPanel,
+              callback: onShowCorrelations,
               tooltip: (
                 <FormattedMessage
                   id="xpack.securitySolution.flyoutV2.attack.overview.insights.correlationsLinkTooltip"
@@ -40,7 +40,7 @@ export const CorrelationsOverview: React.FC<CorrelationsOverviewProps> = memo(
               ),
             }
           : undefined,
-      [onOpenLeftPanel]
+      [onShowCorrelations]
     );
 
     return (

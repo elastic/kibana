@@ -23,23 +23,23 @@ import { INSIGHTS_ENTITIES_TEST_ID } from '../constants/test_ids';
 export interface EntitiesOverviewProps {
   /** Alert IDs belonging to the attack, used to query entity cardinality. */
   alertIds: string[];
-  /** Optional callback to open the entities left panel. When undefined, the title renders as plain text. */
-  onOpenLeftPanel?: () => void;
+  /** Optional callback to show the related entities. When undefined, the title renders as plain text. */
+  onShowEntities?: () => void;
 }
 
 /**
  * Entities section for the attack flyout. Renders related users and hosts counts.
  */
 export const EntitiesOverview: React.FC<EntitiesOverviewProps> = memo(
-  ({ alertIds, onOpenLeftPanel }) => {
+  ({ alertIds, onShowEntities }) => {
     const { euiTheme } = useEuiTheme();
     const { relatedUsers, relatedHosts, loading } = useAttackEntitiesCounts(alertIds);
 
     const link = useMemo(
       () =>
-        onOpenLeftPanel
+        onShowEntities
           ? {
-              callback: onOpenLeftPanel,
+              callback: onShowEntities,
               tooltip: (
                 <FormattedMessage
                   id="xpack.securitySolution.flyoutV2.attack.overview.insights.entitiesLinkTooltip"
@@ -48,7 +48,7 @@ export const EntitiesOverview: React.FC<EntitiesOverviewProps> = memo(
               ),
             }
           : undefined,
-      [onOpenLeftPanel]
+      [onShowEntities]
     );
 
     return (

@@ -48,8 +48,8 @@ export const OverviewTab = memo(() => {
       <EuiHorizontalRule margin="m" />
       <InsightsSection
         hit={hit}
-        onOpenEntitiesLeftPanel={openEntitiesLeftPanel}
-        onOpenCorrelationsLeftPanel={openCorrelationsLeftPanel}
+        onShowEntities={openEntitiesLeftPanel}
+        onShowCorrelations={openCorrelationsLeftPanel}
       />
     </EuiPanel>
   );

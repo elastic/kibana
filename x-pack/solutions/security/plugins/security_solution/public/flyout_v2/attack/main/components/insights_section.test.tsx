@@ -98,29 +98,22 @@ describe('InsightsSection (v2)', () => {
     );
   });
 
-  it('forwards onOpenEntitiesLeftPanel to EntitiesOverview', () => {
-    const onOpenEntitiesLeftPanel = jest.fn();
-    render(
-      <InsightsSection hit={buildHit(['a'])} onOpenEntitiesLeftPanel={onOpenEntitiesLeftPanel} />
-    );
+  it('forwards onShowEntities to EntitiesOverview', () => {
+    const onShowEntities = jest.fn();
+    render(<InsightsSection hit={buildHit(['a'])} onShowEntities={onShowEntities} />);
 
     expect(mockedEntitiesOverview).toHaveBeenCalledWith(
-      expect.objectContaining({ onOpenLeftPanel: onOpenEntitiesLeftPanel }),
+      expect.objectContaining({ onShowEntities }),
       expect.anything()
     );
   });
 
-  it('forwards onOpenCorrelationsLeftPanel to CorrelationsOverview', () => {
-    const onOpenCorrelationsLeftPanel = jest.fn();
-    render(
-      <InsightsSection
-        hit={buildHit(['a'])}
-        onOpenCorrelationsLeftPanel={onOpenCorrelationsLeftPanel}
-      />
-    );
+  it('forwards onShowCorrelations to CorrelationsOverview', () => {
+    const onShowCorrelations = jest.fn();
+    render(<InsightsSection hit={buildHit(['a'])} onShowCorrelations={onShowCorrelations} />);
 
     expect(mockedCorrelationsOverview).toHaveBeenCalledWith(
-      expect.objectContaining({ onOpenLeftPanel: onOpenCorrelationsLeftPanel }),
+      expect.objectContaining({ onShowCorrelations }),
       expect.anything()
     );
   });

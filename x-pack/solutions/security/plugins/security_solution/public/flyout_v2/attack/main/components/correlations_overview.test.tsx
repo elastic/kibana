@@ -75,7 +75,7 @@ describe('CorrelationsOverview (v2)', () => {
     expect(screen.getByText('3')).toBeInTheDocument();
   });
 
-  it('renders the title as plain text when onOpenLeftPanel is not provided', () => {
+  it('renders the title as plain text when onShowCorrelations is not provided', () => {
     renderWithEui(<CorrelationsOverview alertIds={['alert-1']} />);
 
     expect(screen.getByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleText`)).toBeInTheDocument();
@@ -84,15 +84,15 @@ describe('CorrelationsOverview (v2)', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('renders the title as a link when onOpenLeftPanel is provided', () => {
-    const onOpenLeftPanel = jest.fn();
+  it('renders the title as a link when onShowCorrelations is provided', () => {
+    const onShowCorrelations = jest.fn();
     renderWithEui(
-      <CorrelationsOverview alertIds={['alert-1']} onOpenLeftPanel={onOpenLeftPanel} />
+      <CorrelationsOverview alertIds={['alert-1']} onShowCorrelations={onShowCorrelations} />
     );
 
     const link = screen.getByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleLink`);
     expect(link).toBeInTheDocument();
     link.click();
-    expect(onOpenLeftPanel).toHaveBeenCalledTimes(1);
+    expect(onShowCorrelations).toHaveBeenCalledTimes(1);
   });
 });
