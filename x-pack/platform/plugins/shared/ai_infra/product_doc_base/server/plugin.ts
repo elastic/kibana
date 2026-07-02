@@ -106,6 +106,7 @@ export class ProductDocBasePlugin
       taskManager,
       auditService: core.security.audit,
       packageInstaller,
+      esClient: core.elasticsearch.client.asInternalUser,
     });
 
     this.internalServices = {
@@ -116,11 +117,11 @@ export class ProductDocBasePlugin
       licensing,
       taskManager,
     };
-    documentationManager.updateAll().catch((err) => {
-      this.logger.error(`Error scheduling product documentation updateAll task: ${err.message}`);
-    });
-    documentationManager.updateSecurityLabsAll().catch((err) => {
-      this.logger.error(`Error scheduling Security Labs update task: ${err.message}`);
+
+    documentationManager.ensureDefaultProductDocumentation().catch((err) => {
+      this.logger.error(
+        `Error ensuring product documentation for default inference ID: ${err.message}`
+      );
     });
     return {
       management: {
