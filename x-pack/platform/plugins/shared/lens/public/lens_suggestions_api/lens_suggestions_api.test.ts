@@ -105,8 +105,9 @@ describe('suggestionsApi', () => {
     };
     suggestionsApi({ context, dataView, datasourceMap, visualizationMap });
     const calledContext = (
-      datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField.mock
-        .calls[0][0] as { initialContext: typeof context }
+      datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField.mock.calls[0][0] as {
+        initialContext: typeof context;
+      }
     ).initialContext;
     expect(calledContext.textBasedColumns).toEqual(textBasedQueryColumns);
     expect(calledContext.textBasedColumns).not.toContainEqual(approxColumn);
