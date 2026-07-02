@@ -121,27 +121,6 @@ describe('getQuickFixesForMessage', () => {
       expect(result).toEqual([]);
     });
 
-    it('does not suggest conversions that are not backed by inline casts', async () => {
-      const queryString = 'FROM logs-* | WHERE message IS NOT NULL';
-
-      const result = await getQuickFixesForMessage({
-        queryString,
-        message: {
-          code: 'columnTypeConflict',
-          data: {
-            columnName: 'message',
-            types: ['text'],
-          },
-          location: {
-            min: queryString.indexOf('message'),
-            max: queryString.indexOf('message') + 'message'.length,
-          },
-        },
-      });
-
-      expect(result).toEqual([]);
-    });
-
     it('inserts an EVAL conversion before the command with the conflicting column', async () => {
       const queryString = 'FROM logs-* | WHERE message IS NOT NULL';
 
@@ -161,6 +140,12 @@ describe('getQuickFixesForMessage', () => {
       });
 
       expect(result).toEqual([
+        {
+          title: 'Convert message to text',
+          fixedText: `FROM logs-*
+  | EVAL message = TO_TEXT(message)
+  | WHERE message IS NOT NULL`,
+        },
         {
           title: 'Convert message to keyword',
           fixedText: `FROM logs-*

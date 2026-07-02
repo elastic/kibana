@@ -12,7 +12,13 @@ import {
   type KnowledgeIndicatorClientDeps,
 } from './knowledge_indicator_client';
 import { computeFeatureUuid } from '@kbn/significant-events-schema';
-import { type StoredFeatureKnowledgeIndicator, type StoredTombstone } from '../data_stream';
+import {
+  type StoredFeatureKnowledgeIndicator,
+  type StoredQueryKnowledgeIndicator,
+  type StoredTombstone,
+} from '../data_stream';
+import type { SignificantEventsAlertingContext } from '../../../significant_events/alerting/significant_events_alerting_context';
+import { ALERTS_READER_V1 } from '../../../significant_events/alerting/alerts_reader';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
 
 jest.mock('../../../significant_events/latest_source_query', () => {
@@ -77,6 +83,16 @@ function createComputedFeatureDoc(): StoredFeatureKnowledgeIndicator {
   });
 }
 
+function createAlertingContext(
+  rulesManagementClient: SignificantEventsAlertingContext['rulesClient']
+): SignificantEventsAlertingContext {
+  return {
+    alertingV2Active: false,
+    alertsReader: ALERTS_READER_V1,
+    rulesClient: rulesManagementClient,
+  };
+}
+
 function makeClient(): {
   client: KnowledgeIndicatorClient;
   create: jest.Mock;
@@ -91,15 +107,19 @@ function makeClient(): {
   const deps: KnowledgeIndicatorClientDeps = {
     dataStreamClient,
     esClient: {} as KnowledgeIndicatorClientDeps['esClient'],
-    rulesManagementClient: {
-      createRule: jest.fn().mockResolvedValue(undefined),
-      updateRule: jest.fn().mockResolvedValue(undefined),
-      bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
-    },
     soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
     logger,
   };
-  const client = new KnowledgeIndicatorClient(deps);
+  const rulesManagementClient = {
+    createRule: jest.fn().mockResolvedValue(undefined),
+    updateRule: jest.fn().mockResolvedValue(undefined),
+    bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+  };
+  const client = new KnowledgeIndicatorClient(
+    deps,
+    true,
+    createAlertingContext(rulesManagementClient)
+  );
   return { client, create, runEsql: executeAndDecodeSource as jest.Mock, logger };
 }
 
@@ -538,15 +558,19 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
     const deps: KnowledgeIndicatorClientDeps = {
       dataStreamClient,
       esClient: { search } as unknown as KnowledgeIndicatorClientDeps['esClient'],
-      rulesManagementClient: {
-        createRule: jest.fn().mockResolvedValue(undefined),
-        updateRule: jest.fn().mockResolvedValue(undefined),
-        bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
-      },
       soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
       logger,
     };
-    const client = new KnowledgeIndicatorClient(deps);
+    const rulesManagementClient = {
+      createRule: jest.fn().mockResolvedValue(undefined),
+      updateRule: jest.fn().mockResolvedValue(undefined),
+      bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+    };
+    const client = new KnowledgeIndicatorClient(
+      deps,
+      true,
+      createAlertingContext(rulesManagementClient)
+    );
     return { client, runEsql: executeAndDecodeSource as jest.Mock, search };
   }
 
@@ -696,5 +720,146 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
     });
 
     expect(hits).toHaveLength(0);
+  });
+});
+
+function createQueryDoc(
+  overrides: Partial<StoredQueryKnowledgeIndicator> = {}
+): StoredQueryKnowledgeIndicator {
+  return {
+    '@timestamp': '2026-01-01T00:00:00.000Z',
+    id: 'query-1',
+    type: KI_TYPE_QUERY,
+    'stream.name': STREAM,
+    title: 'Error query',
+    description: 'desc',
+    query: {
+      esql: 'FROM logs-app | WHERE error == true',
+      query_type: 'match',
+      rule_backed: false,
+      rule_id: 'rule-abc',
+    },
+    ...overrides,
+  };
+}
+
+describe('KnowledgeIndicatorClient.keepAlivePersistentIndicators', () => {
+  const LAST_REFRESHED_BEFORE = '2026-06-01T00:00:00.000Z';
+
+  it('re-emits durable features with a fresh @timestamp and no expires_at', async () => {
+    const { client, create, runEsql } = makeClient();
+    const durableFeature = createFeatureDoc();
+    runEsql.mockResolvedValueOnce({ hits: [durableFeature] });
+
+    const result = await client.keepAlivePersistentIndicators(STREAM, {
+      lastRefreshedBefore: LAST_REFRESHED_BEFORE,
+    });
+
+    expect(result).toEqual({ refreshed: 1 });
+    expect(create).toHaveBeenCalledTimes(1);
+    const [{ documents }] = create.mock.calls[0];
+    expect(documents).toHaveLength(1);
+    const written = documents[0] as StoredFeatureKnowledgeIndicator;
+    expect(written.id).toBe(durableFeature.id);
+    expect(written.type).toBe(KI_TYPE_FEATURE);
+    expect(written.expires_at).toBeUndefined();
+    expect(written['@timestamp']).not.toBe(durableFeature['@timestamp']);
+    expect(written.feature).toEqual(durableFeature.feature);
+  });
+
+  it('preserves excluded marker on durable excluded features', async () => {
+    const { client, create, runEsql } = makeClient();
+    const durableExcluded = createFeatureDoc({ excluded: true });
+    runEsql.mockResolvedValueOnce({ hits: [durableExcluded] });
+
+    await client.keepAlivePersistentIndicators(STREAM, {
+      lastRefreshedBefore: LAST_REFRESHED_BEFORE,
+    });
+
+    const [{ documents }] = create.mock.calls[0];
+    const written = documents[0] as StoredFeatureKnowledgeIndicator;
+    expect(written.excluded).toBe(true);
+    expect(written.expires_at).toBeUndefined();
+  });
+
+  it('keeps alive an excluded managed feature, preserving excluded and rolling expires_at forward with @timestamp', async () => {
+    const { client, create, runEsql } = makeClient();
+    const managedExpiresAt = '2026-07-01T00:00:00.000Z';
+    const excludedManaged = createFeatureDoc({ excluded: true, expires_at: managedExpiresAt });
+    runEsql.mockResolvedValueOnce({ hits: [excludedManaged] });
+
+    const result = await client.keepAlivePersistentIndicators(STREAM, {
+      lastRefreshedBefore: LAST_REFRESHED_BEFORE,
+    });
+
+    expect(result).toEqual({ refreshed: 1 });
+    const [{ documents }] = create.mock.calls[0];
+    const written = documents[0] as StoredFeatureKnowledgeIndicator;
+    expect(written.excluded).toBe(true);
+    expect(written['@timestamp']).not.toBe(excludedManaged['@timestamp']);
+    // expires_at is TTL-bearing, so it rolls forward with the refreshed
+    // @timestamp rather than preserving the now-stale original value.
+    const { expires_at: rolledExpiresAt } = written;
+    expect(rolledExpiresAt).toBeDefined();
+    expect(rolledExpiresAt).not.toBe(managedExpiresAt);
+    const ttlMs =
+      new Date(rolledExpiresAt ?? 0).getTime() - new Date(written['@timestamp']).getTime();
+    expect(ttlMs).toBeCloseTo(30 * 24 * 60 * 60 * 1000, -4);
+  });
+
+  it('re-emits durable queries with a fresh @timestamp, no expires_at, and preserves rule_backed/rule_id', async () => {
+    const { client, create, runEsql } = makeClient();
+    const durableQuery = createQueryDoc({
+      query: {
+        esql: 'FROM logs-app | WHERE error == true',
+        query_type: 'match',
+        rule_backed: true,
+        rule_id: 'rule-xyz',
+      },
+    });
+    runEsql.mockResolvedValueOnce({ hits: [durableQuery] });
+
+    const result = await client.keepAlivePersistentIndicators(STREAM, {
+      lastRefreshedBefore: LAST_REFRESHED_BEFORE,
+    });
+
+    expect(result).toEqual({ refreshed: 1 });
+    const [{ documents }] = create.mock.calls[0];
+    expect(documents).toHaveLength(1);
+    const written = documents[0] as StoredQueryKnowledgeIndicator;
+    expect(written.id).toBe(durableQuery.id);
+    expect(written.type).toBe(KI_TYPE_QUERY);
+    expect(written.expires_at).toBeUndefined();
+    expect(written['@timestamp']).not.toBe(durableQuery['@timestamp']);
+    expect(written.query.rule_backed).toBe(true);
+    expect(written.query.rule_id).toBe('rule-xyz');
+  });
+
+  it('is a no-op when fetchLatestRevisions returns nothing', async () => {
+    const { client, create, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    const result = await client.keepAlivePersistentIndicators(STREAM, {
+      lastRefreshedBefore: LAST_REFRESHED_BEFORE,
+    });
+
+    expect(result).toEqual({ refreshed: 0 });
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('includes the durable-or-excluded predicate and olderThan in the postGrouping WHERE passed to ES|QL', async () => {
+    const { client, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await client.keepAlivePersistentIndicators(STREAM, {
+      lastRefreshedBefore: LAST_REFRESHED_BEFORE,
+    });
+
+    expect(runEsql).toHaveBeenCalledTimes(1);
+    const query = runEsql.mock.calls[0][1] as { print: () => string };
+    const printed = query.print();
+    expect(printed).toContain('expires_at IS NULL');
+    expect(printed).toMatch(/excluded ==/i);
+    expect(printed).toContain(LAST_REFRESHED_BEFORE);
   });
 });
