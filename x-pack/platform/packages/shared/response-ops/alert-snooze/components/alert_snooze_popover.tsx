@@ -58,6 +58,7 @@ export const AlertSnoozePopover = ({ onApply, dataConditionTypes }: AlertSnoozeP
 
   return (
     <EuiPopover
+      aria-label={i18n.PANEL_TITLE}
       button={triggerElement}
       isOpen={isOpen}
       closePopover={closePopover}

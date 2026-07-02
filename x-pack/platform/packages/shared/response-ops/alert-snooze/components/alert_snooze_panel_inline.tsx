@@ -48,13 +48,13 @@ export const AlertSnoozePanelInline = ({
   const stickyHeaderStyle: React.CSSProperties = {
     position: 'sticky',
     top: 0,
-    zIndex: 1,
+    zIndex: Number(euiTheme.levels.content) + 1,
     background: euiTheme.colors.emptyShade,
   };
   const stickyFooterStyle: React.CSSProperties = {
     position: 'sticky',
     bottom: 0,
-    zIndex: 1,
+    zIndex: Number(euiTheme.levels.content) + 1,
     background: euiTheme.colors.emptyShade,
     padding: '8px',
   };

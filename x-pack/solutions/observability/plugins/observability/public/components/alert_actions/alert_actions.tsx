@@ -185,6 +185,7 @@ export function AlertActions(
         grow={parentAlert ? false : undefined}
       >
         <EuiPopover
+          aria-label={actionsToolTip}
           anchorPosition="rightCenter"
           button={
             <EuiToolTip content={actionsToolTip} disableScreenReaderOutput>
