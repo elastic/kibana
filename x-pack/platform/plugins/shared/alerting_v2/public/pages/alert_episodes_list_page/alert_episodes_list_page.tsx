@@ -499,6 +499,7 @@ export const AlertEpisodesListPage = () => {
                     onUpdateRowHeight={setRowHeight}
                     configRowHeight={rowHeight}
                     customBulkActions={customBulkActions}
+                    hideDefaultBulkActions
                     rowAdditionalLeadingControls={rowAdditionalLeadingControls}
                     visibleRowLeadingControls={3}
                     enableComparisonMode={false}

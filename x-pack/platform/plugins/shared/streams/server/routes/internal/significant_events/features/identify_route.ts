@@ -7,12 +7,11 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
+import { getStreamSamplingSource, getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import {
-  getStreamSamplingSource,
-  getStreamTypeFromDefinition,
-  STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-} from '@kbn/streams-schema';
+  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+} from '@kbn/significant-events-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
@@ -66,16 +65,16 @@ const identifyInferredFeaturesRoute = createServerRoute({
       .optional(),
   }),
   handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
+    const scopedClients = await getScopedClients({ request });
     const {
       scopedClusterClient,
-      getKnowledgeIndicatorClient,
       streamsClient,
       inferenceClient,
       soClient,
       tuningConfig,
       licensing,
       uiSettingsClient,
-    } = await getScopedClients({ request });
+    } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -102,12 +101,12 @@ const identifyInferredFeaturesRoute = createServerRoute({
         ? Promise.resolve(connectorIdOverride)
         : resolveConnectorForFeature({
             searchInferenceEndpoints: server.searchInferenceEndpoints,
-            featureId: STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+            featureId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
             featureName: 'knowledge indicator extraction',
             request,
           }),
       streamsClient.getStream(streamName),
-      getKnowledgeIndicatorClient(),
+      scopedClients.getKnowledgeIndicatorClient(),
     ]);
 
     const streamType = getStreamTypeFromDefinition(stream);
@@ -121,8 +120,8 @@ const identifyInferredFeaturesRoute = createServerRoute({
           connectorId,
           metadata: {
             connectorTelemetry: {
-              pluginId: STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-              aggregateBy: STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+              pluginId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+              aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
             },
           },
         }),
@@ -216,13 +215,8 @@ const identifyComputedFeaturesRoute = createServerRoute({
       .optional(),
   }),
   handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
-    const {
-      scopedClusterClient,
-      getKnowledgeIndicatorClient,
-      streamsClient,
-      licensing,
-      uiSettingsClient,
-    } = await getScopedClients({ request });
+    const scopedClients = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient, licensing, uiSettingsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -232,7 +226,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
     const { start = now - MS_PER_DAY, end = now, runId = uuidv4() } = params.body ?? {};
 
     const [kiClient, stream] = await Promise.all([
-      getKnowledgeIndicatorClient(),
+      scopedClients.getKnowledgeIndicatorClient(),
       streamsClient.getStream(streamName),
     ]);
 
@@ -295,13 +289,12 @@ const shouldIdentifyRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getKnowledgeIndicatorClient, licensing, uiSettingsClient } = await getScopedClients({
-      request,
-    });
+    const scopedClients = await getScopedClients({ request });
+    const { licensing, uiSettingsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const kiClient = await getKnowledgeIndicatorClient();
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     return shouldIdentifyFeatures({
       kiClient,
       streamName: params.path.streamName,

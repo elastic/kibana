@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export type { ChangeHistoryScope } from './change_history_scope';
 export type { ChangeHistoryListItem } from './change_history_list_item';
 export type { ChangeHistoryDetail } from './change_history_detail';
 export type {
@@ -23,7 +24,10 @@ export type {
   ChangeHistorySupports,
 } from './change_history_features';
 export type { ChangeHistoryLabels } from './change_history_labels';
-export type { RestoreChangeParams } from './restore_change_params';
+export type {
+  RestoreChangeParams,
+  ChangeHistoryRestoreTelemetryParams,
+} from './restore_change_params';
 export type {
   ChangeHistoryHttpClient,
   ChangeHistoryHttpGetOptions,
