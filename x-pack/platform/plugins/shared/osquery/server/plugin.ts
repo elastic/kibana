@@ -51,8 +51,8 @@ import { createActionService } from './handlers/action/create_action_service';
 import { reconcileScheduleIdsToWire } from './lib/backfill_schedule_ids';
 import {
   RECONCILE_TASK_TYPE,
-  buildReconcileTaskSchedule,
   buildReconcileRunResult,
+  scheduleReconcileTask,
 } from './lib/reconcile_schedule_ids_task';
 import { checkResponseActionAuthz } from './lib/check_response_action_authz';
 import { SchemaService } from './lib/schema_service';
@@ -200,11 +200,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
           // we do not want to wait for it
         });
 
-        plugins.taskManager
-          ?.ensureScheduled(buildReconcileTaskSchedule(new Date()))
-          .catch((err) => {
-            this.logger.warn(`Failed to schedule reconcileScheduleIdsToWire task: ${err.message}`);
-          });
+        await scheduleReconcileTask(plugins.taskManager, this.logger, new Date());
 
         if (registerIngestCallback) {
           registerIngestCallback(

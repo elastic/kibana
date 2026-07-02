@@ -11,7 +11,22 @@
  * one-shot + re-arm contracts are pure, independently unit-testable units
  * (see `reconcile_schedule_ids_task.test.ts`) rather than closures buried in
  * plugin wiring.
+ *
+ * Startup contract: on every `start()`, the plugin awaits
+ * `taskManager.removeIfExists(RECONCILE_TASK_TYPE)` before calling
+ * `ensureScheduled(buildReconcileTaskSchedule(...))`. The removal is
+ * 404-tolerant, so a fresh install is a no-op; on an upgraded deployment it
+ * clears any stale recurring schedule (and stale `state.completed`) left by
+ * an earlier version, so `ensureScheduled` always schedules a clean
+ * `runAt`-only single-run instance rather than 409-ing against the old one.
+ * This makes the task single-run *per Kibana boot*: it re-arms once on every
+ * boot, which is intended — the reconciler is idempotent and diff-gated, so
+ * a re-run on an already-in-sync deployment is a cheap no-op that also
+ * repairs any wire drift accrued since the last boot.
  */
+
+import type { Logger } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 // Persisted Task Manager task-type id. Kept historically named
 // `backfillScheduleIds` so existing scheduled tasks are not orphaned across an
@@ -49,3 +64,24 @@ export const buildReconcileRunResult = (hadFailures: boolean, now: Date) =>
         runAt: new Date(now.getTime() + RECONCILE_RETRY_DELAY_MS),
       }
     : { state: { completed: true } };
+
+/**
+ * Startup entry point: enforces the remove-then-reschedule ordering described
+ * in the module doc above. The removal MUST be awaited before scheduling —
+ * otherwise `ensureScheduled` 409s against a stale pre-existing instance and
+ * silently keeps its old (possibly recurring) schedule. Failures from either
+ * step are caught and logged as a warning rather than thrown, so a Task
+ * Manager hiccup never fails plugin startup.
+ */
+export const scheduleReconcileTask = async (
+  taskManager: TaskManagerStartContract | undefined,
+  logger: Logger,
+  now: Date
+): Promise<void> => {
+  try {
+    await taskManager?.removeIfExists(RECONCILE_TASK_TYPE);
+    await taskManager?.ensureScheduled(buildReconcileTaskSchedule(now));
+  } catch (err) {
+    logger.warn(`Failed to schedule reconcileScheduleIdsToWire task: ${err.message}`);
+  }
+};

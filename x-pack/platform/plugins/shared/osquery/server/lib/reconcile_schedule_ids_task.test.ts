@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
   RECONCILE_TASK_TYPE,
   buildReconcileTaskSchedule,
   buildReconcileRunResult,
+  scheduleReconcileTask,
 } from './reconcile_schedule_ids_task';
 
 describe('buildReconcileTaskSchedule (one-shot reconcile task registration)', () => {
@@ -49,5 +52,69 @@ describe('buildReconcileRunResult (single-run re-arm contract)', () => {
     expect(result.state).toEqual({ completed: false });
     expect(result.runAt).toBeInstanceOf(Date);
     expect((result.runAt as Date).getTime()).toBeGreaterThan(now.getTime());
+  });
+});
+
+describe('scheduleReconcileTask (remove-then-reschedule startup contract)', () => {
+  const now = new Date('2026-06-25T00:00:00.000Z');
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+  });
+
+  it('awaits removeIfExists before calling ensureScheduled, so a stale instance is cleared first', async () => {
+    const taskManager = taskManagerMock.createStart();
+    const callOrder: string[] = [];
+    taskManager.removeIfExists.mockImplementation(async () => {
+      callOrder.push('removeIfExists');
+    });
+    taskManager.ensureScheduled.mockImplementation(async () => {
+      callOrder.push('ensureScheduled');
+
+      return buildReconcileTaskSchedule(now) as never;
+    });
+
+    await scheduleReconcileTask(taskManager, logger, now);
+
+    expect(callOrder).toEqual(['removeIfExists', 'ensureScheduled']);
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith(RECONCILE_TASK_TYPE);
+    expect(taskManager.ensureScheduled).toHaveBeenCalledWith(buildReconcileTaskSchedule(now));
+  });
+
+  it('is a clean no-op on a fresh install: removeIfExists resolves and ensureScheduled still runs with the runAt-only schedule', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.removeIfExists.mockResolvedValue(undefined);
+
+    await scheduleReconcileTask(taskManager, logger, now);
+
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith(RECONCILE_TASK_TYPE);
+    const scheduled = taskManager.ensureScheduled.mock.calls[0][0];
+    expect(scheduled.runAt).toBe(now);
+    expect(scheduled).not.toHaveProperty('schedule');
+  });
+
+  it('catches a rejected removeIfExists and logs a warning instead of throwing', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.removeIfExists.mockRejectedValue(new Error('boom'));
+
+    await expect(scheduleReconcileTask(taskManager, logger, now)).resolves.toBeUndefined();
+
+    expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to schedule reconcileScheduleIdsToWire task: boom')
+    );
+  });
+
+  it('catches a rejected ensureScheduled and logs a warning instead of throwing', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.removeIfExists.mockResolvedValue(undefined);
+    taskManager.ensureScheduled.mockRejectedValue(new Error('boom'));
+
+    await expect(scheduleReconcileTask(taskManager, logger, now)).resolves.toBeUndefined();
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to schedule reconcileScheduleIdsToWire task: boom')
+    );
   });
 });
