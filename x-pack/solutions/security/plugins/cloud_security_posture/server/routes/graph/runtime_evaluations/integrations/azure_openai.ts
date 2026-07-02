@@ -32,13 +32,13 @@ export const azure_openaiEvaluations = {
       esql: `| EVAL
   user.id = CASE(
     user.id IS NOT NULL, user.id,
-    data_stream.dataset == "azure.open_ai" AND azure.open_ai.category == "Audit", azure.open_ai.properties.object_id,
+    data_stream.dataset == "azure_openai.logs" AND azure.open_ai.category == "Audit", azure.open_ai.properties.object_id,
     null
   ),
   host.ip = CASE(
     host.ip IS NOT NULL, host.ip,
-    data_stream.dataset == "azure.open_ai" AND azure.open_ai.category == "GatewayLogs", source.ip,
-    data_stream.dataset == "azure.open_ai" AND azure.open_ai.category == "RequestResponse", azure.open_ai.caller_ip_address,
+    data_stream.dataset == "azure_openai.logs" AND azure.open_ai.category == "GatewayLogs", source.ip,
+    data_stream.dataset == "azure_openai.logs" AND azure.open_ai.category == "RequestResponse", azure.open_ai.caller_ip_address,
     null
   )`,
     },
@@ -48,8 +48,8 @@ export const azure_openaiEvaluations = {
       esql: `| EVAL
   event.action = CASE(
     event.action IS NOT NULL, event.action,
-    data_stream.dataset == "azure.open_ai" AND azure.open_ai.category IN ("Audit", "RequestResponse"), azure.open_ai.operation_name,
-    data_stream.dataset == "azure.open_ai" AND azure.open_ai.category == "GatewayLogs", azure.open_ai.properties.operation_id,
+    data_stream.dataset == "azure_openai.logs" AND azure.open_ai.category IN ("Audit", "RequestResponse"), azure.open_ai.operation_name,
+    data_stream.dataset == "azure_openai.logs" AND azure.open_ai.category == "GatewayLogs", azure.open_ai.properties.operation_id,
     null
   )`,
     },
@@ -59,16 +59,16 @@ export const azure_openaiEvaluations = {
       esql: `| EVAL
   service.target.id = CASE(
     service.target.id IS NOT NULL, service.target.id,
-    data_stream.dataset == "azure.open_ai" AND azure.open_ai.category == "Audit", azure.resource.id,
-    data_stream.dataset == "azure.open_ai" AND azure.open_ai.category == "RequestResponse", azure.open_ai.properties.model_deployment_name,
-    data_stream.dataset == "azure.open_ai" AND azure.open_ai.category == "GatewayLogs", azure.open_ai.properties.backend_request_body.model,
+    data_stream.dataset == "azure_openai.logs" AND azure.open_ai.category == "Audit", azure.resource.id,
+    data_stream.dataset == "azure_openai.logs" AND azure.open_ai.category == "RequestResponse", azure.open_ai.properties.model_deployment_name,
+    data_stream.dataset == "azure_openai.logs" AND azure.open_ai.category == "GatewayLogs", azure.open_ai.properties.backend_request_body.model,
     null
   ),
   service.target.name = CASE(
     service.target.name IS NOT NULL, service.target.name,
-    data_stream.dataset == "azure.open_ai" AND azure.open_ai.category == "Audit", azure.resource.name,
-    data_stream.dataset == "azure.open_ai" AND azure.open_ai.category == "RequestResponse", azure.open_ai.properties.model_name,
-    data_stream.dataset == "azure.open_ai" AND azure.open_ai.category == "GatewayLogs", azure.open_ai.properties.backend_response_body.model,
+    data_stream.dataset == "azure_openai.logs" AND azure.open_ai.category == "Audit", azure.resource.name,
+    data_stream.dataset == "azure_openai.logs" AND azure.open_ai.category == "RequestResponse", azure.open_ai.properties.model_name,
+    data_stream.dataset == "azure_openai.logs" AND azure.open_ai.category == "GatewayLogs", azure.open_ai.properties.backend_response_body.model,
     null
   )`,
     },
