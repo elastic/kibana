@@ -1,0 +1,1 @@
+export { updateConnectorRoute } from './update';

@@ -1,0 +1,6 @@
+import type { EventTypeOpts } from '@kbn/core/public';
+import { type Connector, type Scope } from '../../../common/analytics';
+export interface InsightResponse extends Connector, Scope {
+    '@timestamp': string;
+}
+export declare const insightResponseEventSchema: EventTypeOpts<InsightResponse>;

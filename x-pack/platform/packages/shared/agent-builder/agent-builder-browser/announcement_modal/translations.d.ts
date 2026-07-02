@@ -1,0 +1,18 @@
+export type AgentBuilderAnnouncementVariant = '1a' | '1b' | '2a';
+export declare const MODAL_TITLE: string;
+export declare const INTRO: string;
+export declare const FEATURE_TAKES_ACTION_TITLE: string;
+export declare const FEATURE_TAKES_ACTION_BODY: string;
+export declare const FEATURE_CONNECTS_TOOLS_TITLE: string;
+export declare const FEATURE_CONNECTS_TOOLS_BODY: string;
+export declare const FEATURE_ITERATES_TITLE: string;
+export declare const FEATURE_ITERATES_BODY: string;
+export declare const IMPORTANT_NOTES_TITLE: string;
+export declare const NOTE_REPLACES_LEGACY_AGENTS: string;
+export declare const NOTE_REPLACES_LEGACY_AGENTS_LEARN_MORE: string;
+export declare const NOTE_HISTORY_UNTOUCHED: string;
+export declare const NOTE_REVERT_IN_SETTINGS: string;
+export declare const NOTE_CONTACT_ADMIN: string;
+export declare const REVERT_BUTTON: string;
+export declare const RELEASE_NOTES_BUTTON: string;
+export declare const USE_AI_AGENT_BUTTON: string;

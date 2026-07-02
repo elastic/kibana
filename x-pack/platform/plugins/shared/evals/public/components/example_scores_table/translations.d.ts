@@ -1,0 +1,16 @@
+export declare const COLUMN_EXAMPLE_ID: string;
+export declare const COLUMN_EVALUATOR_SCORES: string;
+export declare const COLUMN_INPUT: string;
+export declare const COLUMN_OUTPUT: string;
+export declare const COLUMN_TRACE: string;
+export declare const NO_EVALUATOR_SCORES: string;
+export declare const SCORE_NOT_AVAILABLE: string;
+export declare const EMPTY_TABLE_MESSAGE: string;
+export declare const TABLE_CAPTION: string;
+export declare const getTraceButtonAriaLabel: (traceId: string) => string;
+export declare const getRepetitionPaginationAriaLabel: (exampleId: string) => string;
+export declare const EVALUATOR_EXPLANATION: string;
+export declare const EVALUATOR_METADATA: string;
+export declare const EVALUATOR_VIEW_TRACE: string;
+export declare const getEvaluatorViewTraceAriaLabel: (evaluatorName: string) => string;
+export declare const getEvaluatorAccordionAriaLabel: (evaluatorName: string) => string;

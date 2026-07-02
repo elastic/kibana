@@ -1,0 +1,24 @@
+import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { InferenceClient, AnonymizationRule, InferenceCallbacks } from '@kbn/inference-common';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ActionsClientProvider } from '../types';
+import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
+import type { InferenceAnonymizationOptions } from './anonymization_options';
+import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
+import type { TokenUsageLogger } from '../token_usage';
+export declare function createInferenceClient({ request, namespace, actions, logger, anonymizationRulesPromise, regexWorker, esClient, replacementsEsClient, endpointIdCache, callbacks, anonymization, tokenUsageLogger, isTokenUsageTrackingEnabled, }: {
+    request: KibanaRequest;
+    namespace: string;
+    logger: Logger;
+    actions: ActionsClientProvider;
+    anonymizationRulesPromise: Promise<AnonymizationRule[]>;
+    regexWorker: RegexWorkerService;
+    esClient: ElasticsearchClient;
+    replacementsEsClient?: ElasticsearchClient;
+    endpointIdCache: InferenceEndpointIdCache;
+    callbacks?: InferenceCallbacks;
+    anonymization?: InferenceAnonymizationOptions;
+    tokenUsageLogger?: TokenUsageLogger;
+    isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+}): InferenceClient;
