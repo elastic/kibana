@@ -568,7 +568,18 @@ const RiskInputsTabContent = <T extends EntityType>({
         </>
       )}
 
-      <RiskScoreTimeline
+      {showTimeline && entityId !== undefined && (
+        <RiskScoreTimeline
+          entityType={entityType}
+          entityId={entityId}
+          from={historyFrom}
+          to={HISTORY_RANGE_TO}
+          scoreType="base"
+          selectedTimestamp={selectedTimestamp}
+          onPointSelect={setSelectedTimestamp}
+          onRangeChange={onHistoryRangeChange}
+        />
+      )}
         entityType={entityType}
         entityId={entityId || 'unknown'}
         from={historyFrom}
