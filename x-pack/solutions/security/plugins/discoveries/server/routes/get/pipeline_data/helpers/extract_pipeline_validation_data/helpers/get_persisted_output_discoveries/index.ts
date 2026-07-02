@@ -17,16 +17,14 @@ import { PersistDiscoveriesStepTypeId } from '../../../../../../../../common/ste
  * index. Custom validation workflows may transform discoveries before
  * persisting, so this captures those changes.
  *
- * `persisted_discoveries` is the set queried back by `validateAttackDiscoveries`,
- * which re-fetches the pre-existing duplicates ALONGSIDE the newly-created
- * discoveries. We subtract the persist step's `duplicates_dropped_count` so the
- * returned length reflects only the discoveries this execution newly stored
- * (mirrors `getValidationStepDiscoveries`); otherwise the validation badge would
- * count pre-existing discoveries from earlier runs.
+ * `validateAttackDiscoveries` de-duplicates on write (bulk `create`) and
+ * returns ONLY the genuinely-new discoveries created this run, so
+ * `persisted_discoveries` already contains exactly the net-new set — no
+ * subtraction or slicing is needed here.
  *
- * @returns The net-new persisted discoveries (possibly empty after dedup), or
- * `null` if the persist step is absent or its output lacks a
- * `persisted_discoveries` array.
+ * @returns The net-new persisted discoveries (possibly empty when everything
+ * was a duplicate), or `null` if the persist step is absent or its output lacks
+ * a `persisted_discoveries` array.
  */
 export const getPersistedOutputDiscoveries = ({
   execution,
@@ -42,7 +40,7 @@ export const getPersistedOutputDiscoveries = ({
   );
 
   const persistOutput = persistStep?.output as
-    | { duplicates_dropped_count?: unknown; persisted_discoveries?: unknown }
+    | { persisted_discoveries?: unknown }
     | undefined
     | null;
 
@@ -50,14 +48,5 @@ export const getPersistedOutputDiscoveries = ({
     return null;
   }
 
-  const persistedDiscoveries = persistOutput.persisted_discoveries as AttackDiscoveryApiAlert[];
-
-  const duplicatesDroppedCount =
-    typeof persistOutput?.duplicates_dropped_count === 'number'
-      ? persistOutput.duplicates_dropped_count
-      : 0;
-
-  const newCount = Math.max(0, persistedDiscoveries.length - duplicatesDroppedCount);
-
-  return persistedDiscoveries.slice(0, newCount);
+  return persistOutput.persisted_discoveries as AttackDiscoveryApiAlert[];
 };

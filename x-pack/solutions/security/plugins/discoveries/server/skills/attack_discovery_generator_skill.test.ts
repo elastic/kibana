@@ -271,8 +271,12 @@ describe('attackDiscoveryGeneratorSkill', () => {
       expect(attackDiscoveryGeneratorSkill.content).toContain('Default to keeping every candidate');
     });
 
-    it('documents the Mode C keep_alert_ids decision field', () => {
-      expect(attackDiscoveryGeneratorSkill.content).toContain('`keep_alert_ids`');
+    it('documents the Mode C remove_alert_ids decision field', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('`remove_alert_ids`');
+    });
+
+    it('does NOT document the legacy keep_alert_ids decision field', () => {
+      expect(attackDiscoveryGeneratorSkill.content).not.toContain('`keep_alert_ids`');
     });
 
     it('documents the Mode C added_alert_ids decision field', () => {
@@ -301,14 +305,16 @@ describe('attackDiscoveryGeneratorSkill', () => {
       );
     });
 
-    it('applies the recall-first, default-to-INCLUDE rule to added_alert_ids', () => {
+    it('applies the recall-first bias to the positive added_alert_ids list', () => {
       expect(attackDiscoveryGeneratorSkill.content).toContain(
-        'recall-first, default-to-INCLUDE rule to `added_alert_ids`'
+        '`added_alert_ids` is a positive list of net-new alerts'
       );
     });
 
-    it('states corroboration is never a reason to drop an alert (guardrail b)', () => {
-      expect(attackDiscoveryGeneratorSkill.content).toContain('NEVER a reason to drop an alert');
+    it('states corroboration is never a reason to remove or drop an alert (guardrail b)', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'NEVER a reason to add an alert to `remove_alert_ids`'
+      );
     });
 
     it('forbids the Mode C gate from echoing candidate alert bytes (Constraint B)', () => {

@@ -172,7 +172,7 @@ describe('getPersistedOutputDiscoveries', () => {
         },
         {
           output: {
-            duplicates_dropped_count: 1,
+            duplicates_dropped_count: 0,
             persisted_discoveries: [mockDiscovery, mockDiscoveryTwo],
           },
           stepType: 'security.attack-discovery.persistDiscoveries',
@@ -182,17 +182,15 @@ describe('getPersistedOutputDiscoveries', () => {
 
     const result = getPersistedOutputDiscoveries({ execution });
 
-    // persisted_discoveries holds existing + new (length 2); one is a pre-existing
-    // duplicate, so the net-new count is 1.
-    expect(result).toHaveLength(1);
+    // persisted_discoveries already contains only net-new discoveries.
+    expect(result).toEqual([mockDiscovery, mockDiscoveryTwo]);
   });
 
-  it('subtracts duplicates_dropped_count so the result reflects only the net-new (stored) discoveries', () => {
-    // Real-world scenario: validateAttackDiscoveries queries back the pre-existing
-    // duplicates PLUS the newly-created discoveries, so `persisted_discoveries`
-    // contains 8 (5 pre-existing + 3 new). The badge must reflect the 3 truly-new
-    // (stored) discoveries, NOT the full re-queried set.
-    const persistedDiscoveries = Array.from({ length: 8 }, (_, idx) => ({
+  it('returns persisted_discoveries as-is (they are already the net-new set)', () => {
+    // validateAttackDiscoveries drops duplicates on write and returns only the
+    // genuinely-new discoveries, so no subtraction/slicing is applied here even
+    // when duplicates_dropped_count is non-zero.
+    const persistedDiscoveries = Array.from({ length: 3 }, (_, idx) => ({
       ...mockDiscovery,
       id: `discovery-${idx}`,
     }));
@@ -211,6 +209,33 @@ describe('getPersistedOutputDiscoveries', () => {
 
     const result = getPersistedOutputDiscoveries({ execution });
 
-    expect(result).toHaveLength(3);
+    expect(result).toEqual(persistedDiscoveries);
+  });
+
+  it('surfaces the genuinely-new discovery regardless of its position in the array', () => {
+    // Regression: previously a positional .slice() would drop the net-new
+    // discovery whenever it did not appear first. The net-new discovery here is
+    // last, but it must still be surfaced.
+    const newDiscovery: AttackDiscoveryApiAlert = {
+      ...mockDiscovery,
+      id: 'net-new',
+      title: 'NET NEW DISCOVERY',
+    };
+
+    const execution = {
+      stepExecutions: [
+        {
+          output: {
+            duplicates_dropped_count: 0,
+            persisted_discoveries: [newDiscovery],
+          },
+          stepType: 'security.attack-discovery.persistDiscoveries',
+        },
+      ],
+    } as unknown as WorkflowExecutionDto;
+
+    const result = getPersistedOutputDiscoveries({ execution });
+
+    expect(result?.map((discovery) => discovery.id)).toContain('net-new');
   });
 });

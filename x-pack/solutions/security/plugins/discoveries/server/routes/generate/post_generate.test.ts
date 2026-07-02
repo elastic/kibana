@@ -29,6 +29,31 @@ jest.mock('uuid', () => ({
   v4: jest.fn(() => 'test-execution-uuid'),
 }));
 
+/**
+ * Authorized-by-default authz mock: `hasAllRequested` is true so the route's
+ * up-front workflow-execution authorization pre-check resolves. (Unauthorized
+ * 403 assertions are added in a later bead.)
+ */
+const createAuthorizedAuthzMock = () => ({
+  actions: { api: { get: (privilege: string) => `api:${privilege}` } },
+  checkPrivilegesWithRequest: () => ({
+    atSpace: async () => ({ hasAllRequested: true, privileges: { kibana: [] } }),
+  }),
+});
+
+/**
+ * Unauthorized authz mock: `hasAllRequested` is false so the route's up-front
+ * workflow-execution authorization pre-check throws
+ * `WorkflowExecutionAuthorizationError`, which the handler converts to an HTTP
+ * 403.
+ */
+const createUnauthorizedAuthzMock = () => ({
+  actions: { api: { get: (privilege: string) => `api:${privilege}` } },
+  checkPrivilegesWithRequest: () => ({
+    atSpace: async () => ({ hasAllRequested: false, privileges: { kibana: [] } }),
+  }),
+});
+
 const mockExecuteGenerationWorkflow = jest.fn().mockResolvedValue(undefined);
 const mockResolveApiConfig = jest.fn();
 
@@ -111,7 +136,7 @@ describe('registerGenerateRoute', () => {
           }),
         }),
       },
-      security: {},
+      security: { authz: createAuthorizedAuthzMock() },
     };
 
     mockGetStartServices = jest.fn().mockResolvedValue({
@@ -863,6 +888,110 @@ describe('registerGenerateRoute', () => {
         core: Promise.resolve({
           featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
         }),
+      };
+      const getHandler = setVersionHandler();
+
+      registerGenerateRoute(mockRouter, mockLogger, {
+        analytics: mockAnalytics,
+        getEventLogIndex: mockGetEventLogIndex,
+        getEventLogger: mockGetEventLogger,
+        getStartServices: mockGetStartServices,
+      });
+
+      await getHandler()(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          execution_uuid: 'test-execution-uuid',
+        },
+      });
+    });
+  });
+
+  describe('workflow-execution authorization', () => {
+    const validBody = {
+      alerts_index_pattern: '.alerts-security.alerts-default',
+      api_config: {
+        action_type_id: '.gen-ai',
+        connector_id: 'test-connector',
+      },
+      type: 'attack_discovery',
+    };
+
+    const mockContext = {
+      core: Promise.resolve({
+        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+      }),
+    };
+
+    const setVersionHandler = () => {
+      let versionHandler: Function | undefined;
+
+      (mockRouter.versioned.post as jest.Mock).mockReturnValue({
+        addVersion: jest.fn((config, handler) => {
+          versionHandler = handler;
+        }),
+      });
+
+      return () => getVersionHandler(versionHandler);
+    };
+
+    it('returns 403 when the caller is unauthorized to execute workflows', async () => {
+      mockPluginsStart.security.authz = createUnauthorizedAuthzMock();
+      mockRequest.body = validBody;
+
+      const mockResponse = {
+        badRequest: jest.fn(),
+        customError: jest.fn(),
+        forbidden: jest.fn((obj) => obj),
+        ok: jest.fn(),
+      };
+      const getHandler = setVersionHandler();
+
+      registerGenerateRoute(mockRouter, mockLogger, {
+        analytics: mockAnalytics,
+        getEventLogIndex: mockGetEventLogIndex,
+        getEventLogger: mockGetEventLogger,
+        getStartServices: mockGetStartServices,
+      });
+
+      await getHandler()(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.forbidden).toHaveBeenCalled();
+    });
+
+    it('does not start the generation pipeline when the caller is unauthorized', async () => {
+      mockPluginsStart.security.authz = createUnauthorizedAuthzMock();
+      mockRequest.body = validBody;
+
+      const mockResponse = {
+        badRequest: jest.fn(),
+        customError: jest.fn(),
+        forbidden: jest.fn((obj) => obj),
+        ok: jest.fn(),
+      };
+      const getHandler = setVersionHandler();
+
+      registerGenerateRoute(mockRouter, mockLogger, {
+        analytics: mockAnalytics,
+        getEventLogIndex: mockGetEventLogIndex,
+        getEventLogger: mockGetEventLogger,
+        getStartServices: mockGetStartServices,
+      });
+
+      await getHandler()(mockContext, mockRequest, mockResponse);
+
+      expect(mockExecuteGenerationWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('returns 200 with execution_uuid when the caller is authorized', async () => {
+      mockRequest.body = validBody;
+
+      const mockResponse = {
+        badRequest: jest.fn(),
+        customError: jest.fn(),
+        forbidden: jest.fn(),
+        ok: jest.fn((obj) => obj),
       };
       const getHandler = setVersionHandler();
 

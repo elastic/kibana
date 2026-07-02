@@ -19,13 +19,15 @@ export interface PipelineGateData {
 /**
  * Extracts the badge/inspect data for a generation-phase gate (skill) run.
  *
- * The gate returns a DECISION (ids only): `keep_alert_ids` for the candidates it
- * kept and `added_alert_ids` for the net-new alerts it retrieved itself. The
- * accurate count of alerts the gate fed into generation is therefore the sum of
- * both id sets (B1). The gate never emits raw alert strings, so `alerts` is empty
- * here; the caller (`get_pipeline_data`) attaches the real alerts passed to
- * generation — the generate step's `input.alerts` — to this entry so its inspect
- * shows exactly what generation received.
+ * The gate returns a DECISION (ids only): `remove_alert_ids` for the candidates
+ * it dropped and `added_alert_ids` for the net-new alerts it retrieved itself.
+ * Keep is `candidates − removed`, but the candidate count is not recoverable from
+ * the gate decision alone, so this interim count reports only the net-new
+ * additions the gate can positively enumerate. The authoritative count is
+ * resolved by the caller (`get_pipeline_data`), which attaches the real alerts
+ * passed to generation — the generate step's `input.alerts` — and overrides both
+ * `alerts` and `alerts_context_count` on this entry. The gate never emits raw
+ * alert strings, so `alerts` is empty here.
  *
  * Returns `null` when the execution is not a gate decision or when the gate has
  * not completed yet — callers fall back to standard alert extraction in that case.
@@ -42,7 +44,7 @@ export const extractPipelineGateData = ({
 
     return {
       alerts: [],
-      alerts_context_count: decision.keepAlertIds.length + decision.addedAlertIds.length,
+      alerts_context_count: decision.addedAlertIds.length,
       extraction_strategy: 'skill',
     };
   } catch {

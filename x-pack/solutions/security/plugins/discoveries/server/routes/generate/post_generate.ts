@@ -17,6 +17,11 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { createTracedLogger } from '@kbn/discoveries/impl/lib/create_traced_logger';
 import { validateRequest } from '@kbn/discoveries/impl/attack_discovery/generation/validate_request';
+import {
+  assertAuthorizedToExecuteWorkflows,
+  WorkflowExecutionAuthorizationError,
+} from '@kbn/discoveries/impl/attack_discovery/generation/assert_authorized_to_execute_workflows';
+import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
 import type { DiscoveriesPluginStartDeps } from '../../types';
 import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../constants';
 import { assertWorkflowsEnabled } from '../../lib/assert_workflows_enabled';
@@ -123,6 +128,27 @@ export const registerGenerateRoute = (
             request,
           });
 
+          const { pluginsStart } = await getStartServices();
+          const { authz } = pluginsStart.security;
+          const spaceId = getSpaceId({ request, spaces: pluginsStart.spaces?.spacesService });
+
+          // This route-level authorization check is intentionally REDUNDANT for
+          // security: the authoritative guard lives inside executeGenerationWorkflow
+          // (assertAuthorizedToExecuteWorkflows) and protects ALL four AD 2.0
+          // surfaces. Because this handler is fire-and-forget (it returns 200 with
+          // execution_uuid before the pipeline runs), we call the SAME library
+          // up-front (awaited) here solely to convert what would otherwise be an
+          // asynchronous failure into a synchronous HTTP 403 for unauthorized ad
+          // hoc callers.
+          try {
+            await assertAuthorizedToExecuteWorkflows({ authz, request, spaceId });
+          } catch (authzError) {
+            if (authzError instanceof WorkflowExecutionAuthorizationError) {
+              return response.forbidden({ body: { message: authzError.message } });
+            }
+            throw authzError;
+          }
+
           tracedLogger.info(`Starting Attack discovery ${type} pipeline via generation workflow`);
           tracedLogger.debug(
             () =>
@@ -142,15 +168,16 @@ export const registerGenerateRoute = (
             alertsIndexPattern,
             analytics,
             apiConfig: resolvedApiConfig,
+            authz,
             checkIntegrity:
               workflowsManagementApi != null
-                ? async ({ logger: checkLogger, spaceId }) => {
-                    const { pluginsStart } = await getStartServices();
+                ? async ({ logger: checkLogger, spaceId: checkSpaceId }) => {
+                    const { pluginsStart: startDeps } = await getStartServices();
                     return checkManagedWorkflowIntegrity({
                       analytics,
                       logger: checkLogger,
-                      spaceId,
-                      workflowsExtensions: pluginsStart.workflowsExtensions,
+                      spaceId: checkSpaceId,
+                      workflowsExtensions: startDeps.workflowsExtensions,
                     });
                   }
                 : undefined,
