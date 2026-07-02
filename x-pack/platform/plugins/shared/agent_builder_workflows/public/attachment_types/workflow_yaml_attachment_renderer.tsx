@@ -15,7 +15,7 @@ import type {
   CanvasRenderCallbacks,
 } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
-import { CodeEditor, type monaco } from '@kbn/code-editor';
+import { CodeEditor } from '@kbn/code-editor';
 import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
@@ -23,7 +23,7 @@ import {
   useWorkflowsApi,
   useWorkflowsCapabilities,
   useWorkflowsMonacoTheme,
-  WORKFLOWS_MONACO_EDITOR_THEME,
+  WORKFLOW_READ_ONLY_MONACO_OPTIONS,
   type WorkflowApi,
 } from '@kbn/workflows-ui';
 import type { QueryClient } from '@kbn/react-query';
@@ -107,40 +107,6 @@ const saveWorkflow = async ({
     });
     return undefined;
   }
-};
-
-const READONLY_EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
-  theme: WORKFLOWS_MONACO_EDITOR_THEME,
-  minimap: { enabled: false },
-  automaticLayout: true,
-  lineNumbers: 'on',
-  glyphMargin: true,
-  scrollBeyondLastLine: false,
-  folding: true,
-  showFoldingControls: 'mouseover',
-  tabSize: 2,
-  lineNumbersMinChars: 2,
-  insertSpaces: true,
-  fontSize: 14,
-  lineHeight: 23,
-  renderWhitespace: 'none',
-  roundedSelection: false,
-  guides: { indentation: true },
-  wordWrap: 'on',
-  wordWrapColumn: 80,
-  wrappingIndent: 'indent',
-  padding: {
-    top: 24,
-    bottom: 16,
-  },
-  readOnly: true,
-  domReadOnly: true,
-  contextmenu: false,
-  lightbulb: { enabled: false },
-  quickSuggestions: false,
-  suggestOnTriggerCharacters: false,
-  hover: { enabled: false },
-  parameterHints: { enabled: false },
 };
 
 const WorkflowYamlCanvasContent: React.FC<{
@@ -322,7 +288,7 @@ const WorkflowYamlCanvasContent: React.FC<{
       <CodeEditor
         languageId="yaml"
         value={attachment.data.yaml}
-        options={READONLY_EDITOR_OPTIONS}
+        options={WORKFLOW_READ_ONLY_MONACO_OPTIONS}
       />
     </div>
   );

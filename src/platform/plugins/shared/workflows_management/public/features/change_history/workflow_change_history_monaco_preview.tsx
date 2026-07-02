@@ -15,7 +15,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import type { ChangeHistoryDiffTelemetry } from '@kbn/change-history-ui';
 import { monaco } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { useWorkflowsMonacoTheme } from '@kbn/workflows-ui';
+import { useWorkflowsMonacoTheme, WORKFLOW_READ_ONLY_MONACO_OPTIONS } from '@kbn/workflows-ui';
 import { applyWorkflowYamlValidationToEditor } from './apply_workflow_yaml_validation_to_editor';
 import type { WorkflowChangeHistoryCompareIndicator } from './get_workflow_change_history_compare_indicator';
 import {
@@ -33,7 +33,6 @@ import {
 import type { WorkflowChangeHistoryCompareMode } from './workflow_change_history_preview_settings_popover';
 import { WorkflowChangeHistoryPreviewSettingsPopover } from './workflow_change_history_preview_settings_popover';
 import { navigateToErrorPosition } from '../../widgets/workflow_yaml_editor/lib/utils';
-import { WORKFLOW_READ_ONLY_MONACO_OPTIONS } from '../../widgets/workflow_yaml_editor/lib/workflow_monaco_layout_options';
 import { clearWorkflowYamlComputationCache } from '../validate_workflow_yaml/lib/workflow_yaml_computation_cache';
 import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 

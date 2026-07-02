@@ -20,6 +20,7 @@ import type { YamlValidationResult } from '../validate_workflow_yaml/model/types
 jest.mock('@kbn/workflows-ui', () => ({
   useWorkflowsMonacoTheme: jest.fn(),
   WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
+  WORKFLOW_READ_ONLY_MONACO_OPTIONS: { folding: true },
 }));
 
 jest.mock('../../widgets/workflow_yaml_editor/lib/utils', () => ({
