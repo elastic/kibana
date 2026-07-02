@@ -19,6 +19,7 @@ import type {
 import { DATASET_VAR_NAME, DATA_STREAM_TYPE_VAR_NAME } from '../constants';
 import type { RegistryVarGroup } from '../types/models/package_spec';
 import type { NewAgentlessPolicy } from '../types/rest_spec/agentless_policy';
+import type { AgentlessPolicy } from '../types/models/agentless_policy';
 
 import { PackagePolicyValidationError } from '../errors';
 
@@ -119,16 +120,22 @@ export function formatInputs(
       acc = {};
     }
 
+    const isInputAllowed = isInputAllowedForDeploymentMode(
+      input,
+      supportsAgentless ? 'agentless' : 'default',
+      packageInfo
+    );
+
     acc[inputId] = {
-      enabled: isInputAllowedForDeploymentMode(
-        input,
-        supportsAgentless ? 'agentless' : 'default',
-        packageInfo
-      )
-        ? input.enabled
-        : false,
+      enabled: isInputAllowed ? input.enabled : false,
       vars: formatVars(input.vars),
-      streams: formatStreams(input.streams),
+      // Mirror the read path (`simplifiedPackagePolicytoNewPackagePolicy`, where a
+      // disallowed input forces its streams off): keep the stream enablement the
+      // write emits consistent with what a subsequent read produces, so a
+      // load→save round trip is idempotent regardless of how many streams the
+      // source happened to list. For `default` mode `isInputAllowed` is always
+      // true, so this is a no-op there.
+      streams: formatStreams(input.streams, isInputAllowed),
       ...(input.condition !== undefined ? { condition: input.condition } : {}),
     };
 
@@ -153,13 +160,16 @@ export function formatVars(vars: NewPackagePolicy['inputs'][number]['vars']) {
   }, {} as SimplifiedVars);
 }
 
-function formatStreams(streams: NewPackagePolicy['inputs'][number]['streams']) {
+function formatStreams(
+  streams: NewPackagePolicy['inputs'][number]['streams'],
+  isInputAllowed: boolean = true
+) {
   return streams.reduce((acc, stream) => {
     if (!acc) {
       acc = {};
     }
     acc[stream.data_stream.dataset] = {
-      enabled: stream.enabled,
+      enabled: isInputAllowed === false ? false : stream.enabled,
       vars: formatVars(stream.vars),
       ...(stream.condition !== undefined ? { condition: stream.condition } : {}),
     };
@@ -349,10 +359,17 @@ type AgentlessPolicyInput = NewPackagePolicy & {
  * payload leak-proof as `NewPackagePolicy` evolves — any new/unknown property
  * (e.g. `overrides`, `elasticsearch`, `is_managed`) is dropped instead of being
  * silently sent and potentially rejected by the server.
+ *
+ * Pass `packageInfo` whenever it is available so the agentless input allow-check
+ * (`isInputAllowedForDeploymentMode`) uses the same package-template-aware logic as
+ * the read path ({@link agentlessPolicyToPackagePolicy}). Without it the check falls
+ * back to the coarse `AGENTLESS_DISABLED_INPUTS` blocklist, which can disagree with
+ * the read path and make a load→save round trip non-idempotent.
  */
 export const toNewAgentlessPolicy = (
   packagePolicy: AgentlessPolicyInput,
-  varGroups?: RegistryVarGroup[]
+  varGroups?: RegistryVarGroup[],
+  packageInfo?: PackageInfo
 ): NewAgentlessPolicy => {
   const targetCsp = detectTargetCsp(packagePolicy, varGroups);
 
@@ -369,7 +386,7 @@ export const toNewAgentlessPolicy = (
     ]),
     package: omit(packagePolicy.package, 'title'),
     id: packagePolicy.id ? String(packagePolicy.id) : undefined,
-    inputs: formatInputs(packagePolicy.inputs, true),
+    inputs: formatInputs(packagePolicy.inputs, true, packageInfo),
     vars: formatVars(packagePolicy.vars),
     ...(packagePolicy.supports_cloud_connector && {
       cloud_connector: {
@@ -384,5 +401,53 @@ export const toNewAgentlessPolicy = (
           }),
       },
     }),
+  };
+};
+
+/**
+ * Inverse of {@link toNewAgentlessPolicy}: expand a clean {@link AgentlessPolicy}
+ * (as returned by the GET/LIST agentless API, with simplified object-style `inputs`)
+ * back into the full {@link NewPackagePolicy} shape that the shared edit/copy form
+ * components and `validatePackagePolicy` expect (array-based `inputs`).
+ *
+ * Reuses {@link simplifiedPackagePolicytoNewPackagePolicy} — the same converter create
+ * uses — so the GET -> form -> PUT round trip is lossless on the agentless-relevant
+ * fields (composing this with {@link toNewAgentlessPolicy} is a no-op when the user
+ * makes no edits).
+ *
+ * `packageInfo` must be loaded for `agentlessPolicy.package.version` (the form fetches
+ * it from the EPM/registry API). For multi-template packages, pass `policyTemplate` so
+ * the converter selects the right template — it is not carried on the API response.
+ */
+export const agentlessPolicyToPackagePolicy = (
+  agentlessPolicy: AgentlessPolicy,
+  packageInfo: PackageInfo,
+  options?: { policyTemplate?: string }
+): NewPackagePolicy => {
+  const { cloud_connector: cloudConnector } = agentlessPolicy;
+
+  const simplified: SimplifiedPackagePolicy = {
+    name: agentlessPolicy.name,
+    namespace: agentlessPolicy.namespace ?? 'default',
+    description: agentlessPolicy.description,
+    // Agentless deployments are not attached to a user-managed agent policy.
+    policy_ids: [],
+    inputs: agentlessPolicy.inputs as SimplifiedInputs,
+    vars: agentlessPolicy.vars as SimplifiedVars | undefined,
+    var_group_selections: agentlessPolicy.var_group_selections,
+    global_data_tags: agentlessPolicy.global_data_tags,
+    additional_datastreams_permissions: agentlessPolicy.additional_datastreams_permissions,
+    supports_agentless: true,
+    supports_cloud_connector: Boolean(cloudConnector?.enabled),
+    cloud_connector_id: cloudConnector?.cloud_connector_id ?? null,
+  };
+
+  const packagePolicy = simplifiedPackagePolicytoNewPackagePolicy(simplified, packageInfo, {
+    policyTemplate: options?.policyTemplate,
+  });
+
+  return {
+    ...packagePolicy,
+    id: agentlessPolicy.id,
   };
 };

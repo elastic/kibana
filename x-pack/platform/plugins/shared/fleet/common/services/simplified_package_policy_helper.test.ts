@@ -7,6 +7,7 @@
 
 import type { NewPackagePolicy, PackageInfo } from '../../server/types';
 import { PackagePolicyValidationError } from '../errors';
+import type { AgentlessPolicy } from '../types/models/agentless_policy';
 
 import nginxPackageInfo from '../../server/services/package_policies/fixtures/package_info/nginx_1.5.0.json';
 
@@ -15,6 +16,7 @@ import {
   packagePolicyToSimplifiedPackagePolicy,
   generateInputId,
   toNewAgentlessPolicy,
+  agentlessPolicyToPackagePolicy,
 } from './simplified_package_policy_helper';
 
 jest.mock('./cloud_connectors', () => ({
@@ -768,6 +770,183 @@ describe('toNewAgentlessPolicy', () => {
       toNewAgentlessPolicy(policy, varGroups);
 
       expect(detectTargetCsp).toHaveBeenCalledWith(policy, varGroups);
+    });
+  });
+});
+
+describe('agentlessPolicyToPackagePolicy', () => {
+  const baseAgentlessPolicy = (overrides: Partial<AgentlessPolicy> = {}): AgentlessPolicy =>
+    ({
+      id: 'agentless-1',
+      name: 'my-agentless',
+      namespace: 'default',
+      description: 'a description',
+      package: { name: 'nginx', title: 'Nginx', version: '1.5.0' },
+      inputs: {},
+      created_at: '2026-06-30T00:00:00.000Z',
+      created_by: 'elastic',
+      updated_at: '2026-06-30T00:00:00.000Z',
+      updated_by: 'elastic',
+      ...overrides,
+    } as AgentlessPolicy);
+
+  it('expands the agentless policy into the full package policy form shape', () => {
+    const result = agentlessPolicyToPackagePolicy(
+      baseAgentlessPolicy(),
+      nginxPackageInfo as unknown as PackageInfo
+    );
+
+    expect(result.id).toBe('agentless-1');
+    expect(result.name).toBe('my-agentless');
+    expect(result.namespace).toBe('default');
+    expect(result.description).toBe('a description');
+    expect(result.supports_agentless).toBe(true);
+    // No user-managed agent policy is attached to an agentless deployment.
+    expect(result.policy_ids).toEqual([]);
+    // Inputs are expanded back to the array shape the form components expect.
+    expect(Array.isArray(result.inputs)).toBe(true);
+    expect(result.package).toEqual({ name: 'nginx', title: 'Nginx', version: '1.5.0' });
+  });
+
+  it('defaults the namespace when the policy has none', () => {
+    const result = agentlessPolicyToPackagePolicy(
+      baseAgentlessPolicy({ namespace: undefined }),
+      nginxPackageInfo as unknown as PackageInfo
+    );
+
+    expect(result.namespace).toBe('default');
+  });
+
+  it('preserves global_data_tags and additional_datastreams_permissions', () => {
+    const result = agentlessPolicyToPackagePolicy(
+      baseAgentlessPolicy({
+        global_data_tags: [{ name: 'team', value: 'fleet' }],
+        additional_datastreams_permissions: ['logs-test-123'],
+      }),
+      nginxPackageInfo as unknown as PackageInfo
+    );
+
+    expect(result.global_data_tags).toEqual([{ name: 'team', value: 'fleet' }]);
+    expect(result.additional_datastreams_permissions).toEqual(['logs-test-123']);
+  });
+
+  describe('cloud_connector', () => {
+    it('maps an enabled connector to supports_cloud_connector + cloud_connector_id', () => {
+      const result = agentlessPolicyToPackagePolicy(
+        baseAgentlessPolicy({ cloud_connector: { enabled: true, cloud_connector_id: 'cc-1' } }),
+        nginxPackageInfo as unknown as PackageInfo
+      );
+
+      expect(result.supports_cloud_connector).toBe(true);
+      expect(result.cloud_connector_id).toBe('cc-1');
+    });
+
+    it('treats a null connector as disabled', () => {
+      const result = agentlessPolicyToPackagePolicy(
+        baseAgentlessPolicy({ cloud_connector: null }),
+        nginxPackageInfo as unknown as PackageInfo
+      );
+
+      expect(result.supports_cloud_connector).toBe(false);
+      expect(result.cloud_connector_id).toBeNull();
+    });
+
+    it('treats an absent connector as disabled', () => {
+      const result = agentlessPolicyToPackagePolicy(
+        baseAgentlessPolicy(),
+        nginxPackageInfo as unknown as PackageInfo
+      );
+
+      expect(result.supports_cloud_connector).toBe(false);
+    });
+  });
+
+  describe('round trip with toNewAgentlessPolicy (load then save is a no-op)', () => {
+    // Build a realistic simplified GET payload by running the create-side
+    // converters first, so the fixture matches the actual wire format rather
+    // than being hand-authored.
+    const buildGetResponse = (): AgentlessPolicy => {
+      const fullPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'nginx-1',
+          namespace: 'default',
+          policy_ids: [],
+          supports_agentless: true,
+          inputs: {
+            'nginx-logfile': {
+              streams: {
+                'nginx.error': { vars: { tags: ['test', 'nginx-error'] } },
+              },
+            },
+          },
+        },
+        nginxPackageInfo as unknown as PackageInfo
+      );
+
+      const requestBody = toNewAgentlessPolicy(
+        { ...fullPackagePolicy, id: 'agentless-1' },
+        undefined,
+        nginxPackageInfo as unknown as PackageInfo
+      );
+
+      return {
+        id: 'agentless-1',
+        name: requestBody.name,
+        namespace: requestBody.namespace,
+        description: requestBody.description,
+        package: { ...requestBody.package, title: 'Nginx' },
+        inputs: requestBody.inputs,
+        vars: requestBody.vars,
+        global_data_tags: requestBody.global_data_tags,
+        cloud_connector: null,
+        created_at: '2026-06-30T00:00:00.000Z',
+        created_by: 'elastic',
+        updated_at: '2026-06-30T00:00:00.000Z',
+        updated_by: 'elastic',
+      } as AgentlessPolicy;
+    };
+
+    it('round-trips the agentless-relevant fields unchanged', () => {
+      const getResponse = buildGetResponse();
+
+      // Same request body produced when the GET payload is mapped to the form
+      // and immediately mapped back to a PUT body without edits.
+      const expectedRequestBody = toNewAgentlessPolicy(
+        {
+          ...simplifiedPackagePolicytoNewPackagePolicy(
+            {
+              name: 'nginx-1',
+              namespace: 'default',
+              policy_ids: [],
+              supports_agentless: true,
+              inputs: {
+                'nginx-logfile': {
+                  streams: {
+                    'nginx.error': { vars: { tags: ['test', 'nginx-error'] } },
+                  },
+                },
+              },
+            },
+            nginxPackageInfo as unknown as PackageInfo
+          ),
+          id: 'agentless-1',
+        },
+        undefined,
+        nginxPackageInfo as unknown as PackageInfo
+      );
+
+      const roundTripped = toNewAgentlessPolicy(
+        agentlessPolicyToPackagePolicy(getResponse, nginxPackageInfo as unknown as PackageInfo),
+        undefined,
+        nginxPackageInfo as unknown as PackageInfo
+      );
+
+      expect(roundTripped.inputs).toEqual(expectedRequestBody.inputs);
+      expect(roundTripped.vars).toEqual(expectedRequestBody.vars);
+      expect(roundTripped.name).toBe(expectedRequestBody.name);
+      expect(roundTripped.namespace).toBe(expectedRequestBody.namespace);
+      expect(roundTripped.package).toEqual(expectedRequestBody.package);
+      expect(roundTripped.id).toBe('agentless-1');
     });
   });
 });
