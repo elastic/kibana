@@ -27,6 +27,7 @@ const MANAGEMENT = {
 } as const;
 
 export const ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW = {
+  billable: false,
   id: ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
@@ -117,6 +118,7 @@ steps:
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW = {
+  billable: false,
   id: ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
@@ -356,6 +358,7 @@ steps:
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW = {
+  billable: false,
   id: ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
@@ -444,6 +447,7 @@ steps:
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ATTACK_DISCOVERY_GENERATION_WORKFLOW = {
+  billable: false,
   id: ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
@@ -575,6 +579,7 @@ steps:
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ATTACK_DISCOVERY_VALIDATE_WORKFLOW = {
+  billable: false,
   id: ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
@@ -695,6 +700,7 @@ steps:
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW = {
+  billable: false,
   id: ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
@@ -898,6 +904,7 @@ steps:
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW = {
+  billable: false,
   id: ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
