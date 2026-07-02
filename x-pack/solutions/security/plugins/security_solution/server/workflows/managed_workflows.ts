@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import {
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   type ManagedWorkflowTemplateValuesForId,
@@ -33,6 +34,7 @@ type SecurityManagedWorkflowsClient = Awaited<
 
 const SPACE_SAVED_OBJECT_TYPE = 'space';
 const DEFAULT_SPACE_ID = 'default';
+const INSTALL_ALL_SPACES_CONCURRENCY = 10;
 
 /**
  * Reads the six `alertAnalysisWorkflow*` uiSettings from an already space-scoped
@@ -182,8 +184,9 @@ export const installSecurityAlertAnalysisWorkflowForAllSpaces = async ({
   const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(workflowsExtensions);
   const spaceIds = await getAllSpaceIds(coreStart);
 
-  await Promise.all(
-    spaceIds.map(async (spaceId) => {
+  await pMap(
+    spaceIds,
+    async (spaceId) => {
       try {
         const settings = await readSecurityAlertAnalysisWorkflowSettingsForSpace({
           coreStart,
@@ -199,7 +202,8 @@ export const installSecurityAlertAnalysisWorkflowForAllSpaces = async ({
           error,
         });
       }
-    })
+    },
+    { concurrency: INSTALL_ALL_SPACES_CONCURRENCY }
   );
 };
 

@@ -236,6 +236,40 @@ describe('managed workflows', () => {
       });
     });
 
+    it('bounds concurrent installs when there are many spaces', async () => {
+      const spaceCount = 24;
+      const coreStart = coreMock.createStart();
+      const spaceRepo = coreStart.savedObjects.createInternalRepository(['space']);
+      (spaceRepo.find as jest.Mock).mockResolvedValue({
+        saved_objects: Array.from({ length: spaceCount }, (_, index) => ({ id: `space-${index}` })),
+      });
+      const uiSettingsClient = { get: jest.fn().mockResolvedValue(true) };
+      (coreStart.uiSettings.asScopedToClient as jest.Mock).mockReturnValue(uiSettingsClient);
+
+      const workflowsExtensions = workflowsExtensionsMock.createStart();
+      const managed = createManagedClient();
+      let active = 0;
+      let maxActive = 0;
+      managed.getWorkflowStatus.mockImplementation(async () => {
+        active += 1;
+        maxActive = Math.max(maxActive, active);
+        await new Promise((resolve) => setTimeout(resolve, 1));
+        active -= 1;
+        return { status: 'missing' };
+      });
+      workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
+
+      await installSecurityAlertAnalysisWorkflowForAllSpaces({
+        coreStart,
+        workflowsExtensions,
+        logger: loggerMock.create(),
+      });
+
+      // spaceCount named spaces plus the implicit 'default' space.
+      expect(managed.getWorkflowStatus).toHaveBeenCalledTimes(spaceCount + 1);
+      expect(maxActive).toBeLessThanOrEqual(10);
+    });
+
     it('logs a warning and does not throw when a space fails to install', async () => {
       const uiSettingsClient = { get: jest.fn().mockResolvedValue(true) };
       const coreStart = setUpSingleSpace(uiSettingsClient);
