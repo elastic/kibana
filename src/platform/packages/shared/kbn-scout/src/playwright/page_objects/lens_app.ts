@@ -508,26 +508,54 @@ export class LensApp {
 
   /** Reads color-stop values and colors from the currently open palette panel. */
   async getPaletteColorStops() {
-    const stopInputs = await this.page
-      .locator('[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]')
-      .all();
-    const colorAnchors = await this.page.testSubj.locator('euiColorPickerAnchor').all();
+    const palettePanel = this.page.testSubj.locator('lns-palettePanelFlyout');
+    const stopInputsLocator = palettePanel.locator(
+      '[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]'
+    );
+    const colorAnchorsLocator = palettePanel.locator('[data-test-subj="euiColorPickerAnchor"]');
 
-    const colorStops = [];
-    for (let i = 0; i < stopInputs.length; i++) {
-      const input = stopInputs[i];
-      const colorAnchor = colorAnchors[i];
-      colorStops.push({
-        stop: await input.getAttribute('value'),
-        color:
-          colorAnchor != null
-            ? normalizeComputedColor(
-                await colorAnchor.evaluate((node) => getComputedStyle(node).backgroundColor)
-              )
-            : undefined,
-      });
-    }
+    const readColorStops = async () => {
+      const stopInputs = await stopInputsLocator.all();
+      const colorAnchors = await colorAnchorsLocator.all();
 
-    return colorStops;
+      const colorStops = [];
+      for (let i = 0; i < stopInputs.length; i++) {
+        const input = stopInputs[i];
+        const colorAnchor = colorAnchors[i];
+        colorStops.push({
+          stop: await input.getAttribute('value'),
+          color:
+            colorAnchor != null
+              ? normalizeComputedColor(
+                  await colorAnchor.evaluate((node) => getComputedStyle(node).backgroundColor)
+                )
+              : undefined,
+        });
+      }
+
+      return colorStops;
+    };
+
+    let prevColorStopsJson: string | null = null;
+    await expect
+      .poll(
+        async () => {
+          const stopCount = await stopInputsLocator.count();
+          if (stopCount === 0) {
+            return false;
+          }
+
+          const colorStopsJson = JSON.stringify(await readColorStops());
+          if (prevColorStopsJson === colorStopsJson) {
+            return true;
+          }
+          prevColorStopsJson = colorStopsJson;
+          return false;
+        },
+        { intervals: [500], timeout: 20_000 }
+      )
+      .toBe(true);
+
+    return readColorStops();
   }
 }

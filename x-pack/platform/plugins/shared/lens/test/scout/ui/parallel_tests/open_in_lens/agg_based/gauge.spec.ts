@@ -114,14 +114,13 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.stateful
 
     await dimensions[0].click();
     await lens.openPalettePanel();
-    await expect
-      .poll(async () => lens.getPaletteColorStops(), { timeout: 20_000 })
-      .toStrictEqual([
-        { stop: '0', color: 'rgba(0, 104, 55, 1)' },
-        { stop: '10000', color: 'rgba(183, 224, 117, 1)' },
-        { stop: '20000', color: 'rgba(253, 191, 111, 1)' },
-        { stop: '30000', color: 'rgba(165, 0, 38, 1)' },
-        { stop: '15000000000', color: undefined },
-      ]);
+    const colorStops = await lens.getPaletteColorStops();
+    expect(colorStops).toStrictEqual([
+      { stop: '0', color: 'rgba(0, 104, 55, 1)' },
+      { stop: '10000', color: 'rgba(183, 224, 117, 1)' },
+      { stop: '20000', color: 'rgba(253, 191, 111, 1)' },
+      { stop: '30000', color: 'rgba(165, 0, 38, 1)' },
+      { stop: '15000000000', color: undefined },
+    ]);
   });
 });
