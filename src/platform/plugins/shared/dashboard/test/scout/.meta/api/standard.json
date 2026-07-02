@@ -1,5 +1,5 @@
 {
-  "sha1": "4ff3fdb457f2c498633998c9ee1d85deba7be146",
+  "sha1": "a93c5019b8fd0bfd99dd4111590dd1272156e19b",
   "tests": [
     {
       "id": "65fe2f541b6ad11-864f48536870f42",
@@ -678,8 +678,8 @@
       }
     },
     {
-      "id": "b501cf6f250d502-08eab243cab0998",
-      "title": "dashboards - upsert authorization - does not apply state changes when access mode update fails",
+      "id": "b501cf6f250d502-bb5e2dd4c7a9ce3",
+      "title": "dashboards - upsert does not apply state changes when access mode update fails",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -725,7 +725,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
-        "line": 263,
+        "line": 262,
         "column": 10
       }
     },
@@ -751,7 +751,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
-        "line": 308,
+        "line": 307,
         "column": 10
       }
     }
