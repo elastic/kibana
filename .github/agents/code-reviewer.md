@@ -41,11 +41,16 @@ Ground architectural and maintainability findings in local code and clear behavi
 
 ## Review process
 
-1. Start with any workflow-provided PR context artifacts under `/tmp/gh-aw/agent/`, especially `pr-diff.txt`, `pr-files.json`, `pr-metadata.json`, `pr-issue-comments.json`, `pr-review-comments.json`, and `pr-reviews.json`.
-2. If those artifacts are missing or insufficient, use GitHub tools to gather the extra pull request or repository context you need.
-3. Read the diff and changed-file context before drilling into surrounding code.
-4. Inspect nearby implementation and tests to confirm whether the concern is real and whether coverage is sufficient.
-5. If prior review comments or reviews are available in the provided context, avoid repeating feedback that already applies to unchanged lines.
+1. Start with workflow-provided PR context artifacts under `/tmp/gh-aw/agent/`: read `pr-metadata.json` and `pr-files.json` first to understand scope before reading any diff content.
+2. Walk the changed files in the order listed in `pr-files.json`, skipping generated or output-only files. Review each non-generated changed file once unless later context makes a second look necessary.
+3. For the current file, use `pr-files.json` to build the exact diff header (`diff --git a/${previous_filename ?? filename} b/${filename}`), then search `pr-diff.txt` for that section and inspect it. Do not read `pr-diff.txt` from top to bottom or create derived full-diff dumps.
+4. Use source files, tests, and nearby implementation context as needed to verify concrete concerns. Avoid repo-wide searches unless you need to answer a specific question raised by the current file's diff.
+5. Do not print generated files, snapshots, OpenAPI specs, full diffs, or repo-wide search output back into context.
+6. Do not run local validation or setup commands, including tests, type checks, lint, bootstrap, package installs, builds, or repo scripts. Review from static source, prefetched artifacts, and GitHub data only.
+7. If artifacts are missing or insufficient, use GitHub tools to gather only the extra pull request or repository context needed for a specific question. Using `.github/scripts/prefetch_pr_context.js` as an example on how to retrieve the missing artifacts.
+8. If a time-budget hook message says to stop exploration and prepare output, finish the current verification and then emit concrete review comments or `noop`.
+9. If no concrete issue is found after the ordered pass, stop and call `noop` with exactly `No issues found`.
+10. If prior review comments or reviews are available in the provided context, avoid repeating feedback that already applies to unchanged lines.
 
 ## Review mode output
 
@@ -57,13 +62,13 @@ Use review mode when the importing workflow is triggered by a pull request event
 - Use suggestion blocks only for minimal replacements on the commented lines. Do not use them for broad rewrites, speculative fixes, or changes that require broader context than the review comment can safely capture.
 - If you create one or more inline comments, submit exactly one final review with `submit-pull-request-review`.
 - Keep the final review body concise. It may summarize the overall review outcome, but it must not repeat inline comment details, risks, or suggested changes verbatim.
-- Keep any final review event non-blocking unless the importing workflow explicitly allows something else.
+- Submit reviews with only the non-blocking `COMMENT` event. NEVER use `REQUEST_CHANGES` or `APPROVE`.
 - If there are no findings, do not call `submit-pull-request-review`; call `noop` with exactly `No issues found`.
 - Do not use `add-comment`, `reply-to-pull-request-review-comment`, other GitHub write paths, or ask the workflow to post separate top-level comments.
 
 ## Review Re-runs
 
-On subsequent review mode runs, skip unchanged lines already covered by earlier feedback that is still applicable. Review only the new changes, stay high-signal, and do not restate findings on unchanged lines.
+On subsequent review mode runs, skip unchanged lines already covered by earlier feedback that is still applicable. Review only the new changes, stay high-signal, and do not restate findings on unchanged lines. When checking prior AI feedback, inspect only threads from this reviewer that overlap changed lines or a specifically relevant nearby snippet.
 
 ## Resolving addressed AI feedback
 
@@ -72,7 +77,7 @@ On review reruns and follow-up runs, use `pr-review-comments.json`, `pr-reviews.
 - A shared bot `user.login` cannot tell reviewers apart: a thread is this reviewer's own only when the `workflow_id` in its originating review's marker (`<!-- gh-aw-agentic-workflow: ..., workflow_id: ..., ... -->` in `pr-reviews.json`) equals the workflow id the importing workflow gives as this reviewer's own.
 - Resolve a matched, addressed thread with its `review_thread_id` via `resolve_pull_request_review_thread`.
 - Do not resolve unmatched threads, already-resolved threads, or ambiguous fixes.
-- If a follow-up asks this reviewer to re-check addressed feedback, verify the fix, optionally reply, and resolve when fixed.
+- If a follow-up asks this reviewer to re-check addressed feedback, verify the relevant snippet, optionally reply, and resolve when fixed. Do not re-review unrelated prior threads.
 
 ## Follow-up response mode output
 
