@@ -257,7 +257,7 @@ export const getRunStepDefinition = ({
             discovery_count: 0,
             execution_uuid: executionUuid,
             status: 'completed' as const,
-``          },
+          },
         };
       } catch (error) {
         context.logger.error(
