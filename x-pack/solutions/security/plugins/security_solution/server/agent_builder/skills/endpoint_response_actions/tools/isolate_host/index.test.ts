@@ -14,6 +14,7 @@ import {
 } from '@kbn/agent-builder-server/tools';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 
+import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
 import { ISOLATE_TOOL_ID } from '../..';
@@ -64,6 +65,26 @@ describe('isolateHostTool', () => {
       tool = isolateHostTool(mockEndpointAppContextService);
     });
 
+    it('returns insufficient_privileges and does not dispatch when caller lacks canIsolateHost', async () => {
+      mockEndpointAppContextService.getEndpointAuthz = jest
+        .fn()
+        .mockResolvedValue(getEndpointAuthzInitialStateMock({ canIsolateHost: false }));
+
+      const mockResponseActionsClient = { isolate: jest.fn() };
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => mockResponseActionsClient
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const result = await tool.handler({ hostName: 'my-host' }, mockContext);
+
+      const results = assertStandardReturn(result);
+      expect(results[0].type).toBe(ToolResultType.error);
+      const data = results[0].data as Record<string, unknown>;
+      expect(data.error).toBe('insufficient_privileges');
+      expect(data.privilege).toBe('canIsolateHost');
+      expect(mockResponseActionsClient.isolate).not.toHaveBeenCalled();
+    });
+
     it('returns found: false with reason endpoint_not_found when no agent matches', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({ agents: [] }),
@@ -73,6 +94,7 @@ describe('isolateHostTool', () => {
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
       try {
@@ -99,6 +121,7 @@ describe('isolateHostTool', () => {
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
       try {
@@ -153,6 +176,7 @@ describe('isolateHostTool', () => {
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
         () => mockResponseActionsClient
@@ -224,6 +248,7 @@ describe('isolateHostTool', () => {
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
         () => mockResponseActionsClient
@@ -255,6 +280,7 @@ describe('isolateHostTool', () => {
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
       try {
@@ -302,6 +328,7 @@ describe('isolateHostTool', () => {
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
         () => mockResponseActionsClient

@@ -67,6 +67,7 @@ describe('getEndpointStatusTool', () => {
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
       try {
@@ -96,6 +97,7 @@ describe('getEndpointStatusTool', () => {
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
       try {
@@ -139,6 +141,7 @@ describe('getEndpointStatusTool', () => {
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
       mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
         () => mockMetadataService
@@ -196,6 +199,7 @@ describe('getEndpointStatusTool', () => {
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
       mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
         () => mockMetadataService
@@ -249,6 +253,7 @@ describe('getEndpointStatusTool', () => {
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
       mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
         () => mockMetadataService
@@ -302,6 +307,7 @@ describe('getEndpointStatusTool', () => {
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
       mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
         () => mockMetadataService
@@ -336,6 +342,7 @@ describe('getEndpointStatusTool', () => {
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
       try {
@@ -375,6 +382,7 @@ describe('getEndpointStatusTool', () => {
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
       mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
         () => mockMetadataService

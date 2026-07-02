@@ -129,6 +129,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: innerMockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as typeof mockEndpointAppContextService.getInternalFleetServices;
 
       // Mock metadata service to return empty data (index not found)
@@ -207,6 +208,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentServiceInner,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as typeof mockEndpointAppContextService.getInternalFleetServices;
 
       // Mock metadata service to return valid data

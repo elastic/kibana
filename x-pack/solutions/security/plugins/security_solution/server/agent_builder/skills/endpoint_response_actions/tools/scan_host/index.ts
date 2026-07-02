@@ -9,11 +9,11 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { escapeKuery } from '@kbn/es-query';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { SCAN_TOOL_ID } from '../..';
-import { buildResponseActionComment } from '../types';
+import { buildResponseActionComment, insufficientPrivilegesResult } from '../types';
 
 const scanHostSchema = z.object({
   hostName: z.string().min(1).describe('The hostname of the endpoint to scan for malware.'),
@@ -43,12 +43,22 @@ export const scanHostTool = (
     type: ToolType.builtin,
     description: `Scans a file or folder path on a host for malware using the endpoint's existing Elastic Defend policy. The action is dispatched through the Elastic Defend Response Actions service. Requires explicit analyst confirmation before dispatch.`,
     schema: scanHostSchema,
-    handler: async (params, { logger, request, runContext }) => {
+    handler: async (params, { logger, request, runContext, spaceId }) => {
       try {
         const hostName = params.hostName as string;
         const path = params.path as string;
         const comment = params.comment as string | undefined;
-        const spaceId = DEFAULT_SPACE_ID;
+
+        // The internal response-actions client runs as an automated, unsecured
+        // client and skips the per-user privilege checks the HTTP route enforces
+        // via `withEndpointAuthz({ all: ['canWriteScanOperations'] })`. Assert
+        // the caller's privilege here so reaching the skill via chat cannot
+        // bypass endpoint RBAC.
+        const authz = await endpointAppContextService.getEndpointAuthz(request);
+        if (!authz.canWriteScanOperations) {
+          return insufficientPrivilegesResult('canWriteScanOperations');
+        }
+
         // Attribute the action to the initiating analyst (falls back to the
         // default system user when the current user cannot be resolved) so the
         // Response Actions audit trail records who requested it, not `elastic`.
@@ -60,11 +70,13 @@ export const scanHostTool = (
         });
 
         // The response actions API needs endpoint_ids, not host names.
+        // `hostName` is user/LLM-controlled, so escape it before interpolating
+        // into the KQL expression.
         const fleetServices = endpointAppContextService.getInternalFleetServices(spaceId);
         const agent = fleetServices.agent;
         const agents = await agent.listAgents({
           showInactive: true,
-          kuery: `local_metadata.host.name: ${hostName}`,
+          kuery: `local_metadata.host.name: ${escapeKuery(hostName)}`,
           page: 1,
           perPage: 1,
         });
@@ -87,6 +99,11 @@ export const scanHostTool = (
         }
 
         const endpointIds = agents.agents.map((a) => a.id);
+
+        // Reject hosts that live in a different space than the caller's active
+        // space — resolving/dispatching against the default space's agents would
+        // otherwise let a caller act on hosts outside their space.
+        await fleetServices.ensureInCurrentSpace({ agentIds: endpointIds });
 
         const actionDetails = await responseActionsClient.scan(
           {

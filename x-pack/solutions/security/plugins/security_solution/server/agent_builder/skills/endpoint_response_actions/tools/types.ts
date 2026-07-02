@@ -7,6 +7,8 @@
 
 import type { RunContext } from '@kbn/agent-builder-server';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
+import { getToolResultId } from '@kbn/agent-builder-server/tools';
+import { ToolResultType } from '@kbn/agent-builder-common';
 
 /**
  * Builds the comment recorded on a dispatched response action so its entry in
@@ -28,6 +30,31 @@ export function buildResponseActionComment(
   const base = analystComment ?? defaultComment;
   const correlationId = getAgentFromRunContext(runContext)?.conversationId ?? runContext.runId;
   return correlationId ? `${base} [AI agent conversation: ${correlationId}]` : base;
+}
+
+/**
+ * Standard tool result returned when the caller lacks the endpoint privilege
+ * required to dispatch a response action. The agent-dispatched path reuses the
+ * platform's internal (automated) response-actions client, which does not run
+ * the per-user privilege checks the HTTP routes enforce — so each tool must
+ * assert the caller's endpoint authz (via `getEndpointAuthz(request)`) itself
+ * and return this when the privilege is absent, mirroring the route's
+ * `withEndpointAuthz(...)` gate.
+ */
+export function insufficientPrivilegesResult(privilege: string) {
+  return {
+    results: [
+      {
+        tool_result_id: getToolResultId(),
+        type: ToolResultType.error as const,
+        data: {
+          error: 'insufficient_privileges' as const,
+          privilege,
+          message: `Insufficient privileges: this action requires the '${privilege}' endpoint privilege. Ask an administrator to grant it, or perform the action from the Security UI.`,
+        },
+      },
+    ],
+  };
 }
 
 /**

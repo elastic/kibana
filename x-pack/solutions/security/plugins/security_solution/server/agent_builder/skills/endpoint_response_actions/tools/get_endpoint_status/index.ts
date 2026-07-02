@@ -9,7 +9,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { escapeKuery } from '@kbn/es-query';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
@@ -51,17 +51,18 @@ export const getEndpointStatusTool = (
     type: ToolType.builtin,
     description: `Retrieves the current status of a host by its hostname, including whether it is isolated, its last seen time, and online/offline status.`,
     schema: getEndpointStatusSchema,
-    handler: async (params, { logger }) => {
+    handler: async (params, { logger, spaceId }) => {
       try {
         const hostName = params.hostName as string;
-        const spaceId = DEFAULT_SPACE_ID;
 
-        // Resolve hostname to endpoint IDs via fleet agent service
+        // Resolve hostname to endpoint IDs via fleet agent service.
+        // `hostName` is user/LLM-controlled, so escape it before interpolating
+        // into the KQL expression.
         const fleetServices = endpointAppContextService.getInternalFleetServices(spaceId);
         const agentClient = fleetServices.agent;
         const agents = await agentClient.listAgents({
           showInactive: true,
-          kuery: `local_metadata.host.name: ${hostName}`,
+          kuery: `local_metadata.host.name: ${escapeKuery(hostName)}`,
           page: 1,
           perPage: 1,
         });
@@ -80,6 +81,11 @@ export const getEndpointStatusTool = (
 
         const agent = agents.agents[0];
         const agentId = agent.id;
+
+        // Ensure the resolved agent belongs to the caller's active space before
+        // reporting on it, so a hostname collision cannot leak status from a
+        // host in another space.
+        await fleetServices.ensureInCurrentSpace({ agentIds: [agentId] });
 
         // Get detailed status from endpoint metadata service
         const metadataService = endpointAppContextService.getEndpointMetadataService(spaceId);
