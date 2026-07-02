@@ -8,16 +8,42 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useActiveSolutionNavId } from '@kbn/core-chrome-browser-hooks';
+import { of } from 'rxjs';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useActiveSolution } from './use_active_solution';
 
-jest.mock('@kbn/core-chrome-browser-hooks', () => ({
-  useActiveSolutionNavId: jest.fn(),
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: jest.fn(),
 }));
 
+const mockUseKibana = jest.mocked(useKibana);
+
+function mockActiveSolutionNavId(solutionNavId: string | null) {
+  mockUseKibana.mockReturnValue({
+    services: {
+      chrome: {
+        getActiveSolutionNavId$: () => of(solutionNavId),
+        getActiveSolutionNavId: () => solutionNavId,
+      },
+    },
+  } as unknown as ReturnType<typeof useKibana>);
+}
+
 describe('useActiveSolution', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('returns undefined in classic-nav mode (no active solution)', () => {
-    jest.mocked(useActiveSolutionNavId).mockReturnValue(null);
+    mockActiveSolutionNavId(null);
+
+    const { result } = renderHook(() => useActiveSolution());
+
+    expect(result.current).toBeUndefined();
+  });
+
+  it('returns undefined when chrome is not available in the Kibana context', () => {
+    mockUseKibana.mockReturnValue({ services: {} } as unknown as ReturnType<typeof useKibana>);
 
     const { result } = renderHook(() => useActiveSolution());
 
@@ -25,7 +51,7 @@ describe('useActiveSolution', () => {
   });
 
   it('passes through the security solution id as-is', () => {
-    jest.mocked(useActiveSolutionNavId).mockReturnValue('security');
+    mockActiveSolutionNavId('security');
 
     const { result } = renderHook(() => useActiveSolution());
 
@@ -33,7 +59,7 @@ describe('useActiveSolution', () => {
   });
 
   it('maps the observability project id ("oblt") to the catalog vocabulary', () => {
-    jest.mocked(useActiveSolutionNavId).mockReturnValue('oblt');
+    mockActiveSolutionNavId('oblt');
 
     const { result } = renderHook(() => useActiveSolution());
 
@@ -41,7 +67,7 @@ describe('useActiveSolution', () => {
   });
 
   it('maps the search project id ("es") to the catalog vocabulary', () => {
-    jest.mocked(useActiveSolutionNavId).mockReturnValue('es');
+    mockActiveSolutionNavId('es');
 
     const { result } = renderHook(() => useActiveSolution());
 

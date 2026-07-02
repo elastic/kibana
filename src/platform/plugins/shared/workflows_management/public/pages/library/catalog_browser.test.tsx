@@ -9,11 +9,20 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { of } from 'rxjs';
 import type { Template } from '@kbn/workflows-library';
 import { LibraryCatalogBrowserPage } from './catalog_browser';
 import { WorkflowsDeepLinks } from '../../deep_links';
-import { createStartServicesMock } from '../../mocks';
+import { createStartServicesMock, type StartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
+
+// The page redirects away unless the library tech-preview global uiSetting is on.
+function buildEnabledServices(): StartServicesMock {
+  const services = createStartServicesMock();
+  services.settings.globalClient.get.mockReturnValue(true);
+  services.settings.globalClient.get$.mockReturnValue(of(true));
+  return services;
+}
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
@@ -33,8 +42,8 @@ jest.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () =>
 }));
 
 describe('LibraryCatalogBrowserPage', () => {
-  it('renders the catalog browser', () => {
-    const services = createStartServicesMock();
+  it('renders the catalog browser when the library is enabled', () => {
+    const services = buildEnabledServices();
 
     render(<LibraryCatalogBrowserPage />, { wrapper: getTestProvider({ services }) });
 
@@ -42,7 +51,7 @@ describe('LibraryCatalogBrowserPage', () => {
   });
 
   it('navigates to the template detail route via the library deep link when a template is selected', () => {
-    const services = createStartServicesMock();
+    const services = buildEnabledServices();
 
     render(<LibraryCatalogBrowserPage />, { wrapper: getTestProvider({ services }) });
     fireEvent.click(screen.getByTestId('mockCatalogBrowserSelectButton'));

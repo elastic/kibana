@@ -48,6 +48,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(({ slug }) => {
         title={i18n.translate('workflows.library.templateDetail.errorTitle', {
           defaultMessage: 'Unable to load this template',
         })}
+        announceOnMount
       />
     );
   }

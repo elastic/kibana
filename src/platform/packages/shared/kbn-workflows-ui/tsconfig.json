@@ -18,12 +18,13 @@
     "@kbn/core-http-browser",
     "@kbn/core-application-browser",
     "@kbn/core-ui-settings-browser",
-    "@kbn/core-chrome-browser-hooks",
     "@kbn/zod",
     "@kbn/data-views-plugin",
     "@kbn/monaco",
     "@kbn/code-editor",
     "@kbn/use-observable",
     "@kbn/connector-specs",
+    "@kbn/workflows-extensions",
+    "@kbn/triggers-actions-ui-plugin",
   ]
 }

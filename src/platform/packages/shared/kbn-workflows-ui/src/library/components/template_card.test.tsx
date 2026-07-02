@@ -15,6 +15,7 @@ import { TemplateCard } from './template_card';
 jest.mock('@kbn/connector-specs/icons', () => ({
   ConnectorIconsMap: new Map(),
 }));
+jest.mock('../../context/workflows_ui_services');
 
 const template: Template = {
   slug: 'ip-reputation-check',

@@ -17,6 +17,7 @@ import { useCatalog } from '../hooks/use_catalog';
 jest.mock('@kbn/connector-specs/icons', () => ({
   ConnectorIconsMap: new Map(),
 }));
+jest.mock('../../context/workflows_ui_services');
 
 jest.mock('../hooks/use_catalog', () => ({
   useCatalog: jest.fn(),
@@ -25,6 +26,8 @@ jest.mock('../hooks/use_catalog', () => ({
 jest.mock('../hooks/use_active_solution', () => ({
   useActiveSolution: jest.fn(),
 }));
+
+const renderBrowser = (onSelect = jest.fn()) => render(<CatalogBrowser onSelect={onSelect} />);
 
 const buildTemplate = (overrides: Partial<Template> = {}): Template => ({
   slug: 'ip-reputation-check',
@@ -63,7 +66,7 @@ describe('CatalogBrowser', () => {
   it('shows a centered loading spinner while the catalog is fetching', () => {
     mockCatalogState({ isLoading: true });
 
-    render(<CatalogBrowser onSelect={jest.fn()} />);
+    renderBrowser();
 
     expect(document.querySelector('[data-test-subj="workflowLibraryLoading"]')).toBeInTheDocument();
   });
@@ -72,7 +75,7 @@ describe('CatalogBrowser', () => {
     const refetch = jest.fn();
     mockCatalogState({ isError: true, refetch });
 
-    render(<CatalogBrowser onSelect={jest.fn()} />);
+    renderBrowser();
 
     const retryButton = screen.getByTestId('workflowLibraryRetryButton');
     fireEvent.click(retryButton);
@@ -82,7 +85,7 @@ describe('CatalogBrowser', () => {
   it('shows an empty-catalog message when there are no templates at all', () => {
     mockCatalogState({ templates: [], allTemplates: [] });
 
-    render(<CatalogBrowser onSelect={jest.fn()} />);
+    renderBrowser();
 
     expect(
       document.querySelector('[data-test-subj="workflowLibraryEmptyCatalog"]')
@@ -93,7 +96,7 @@ describe('CatalogBrowser', () => {
     const template = buildTemplate();
     mockCatalogState({ templates: [], allTemplates: [template] });
 
-    render(<CatalogBrowser onSelect={jest.fn()} />);
+    renderBrowser();
 
     expect(
       document.querySelector('[data-test-subj="workflowLibraryNoMatches"]')
@@ -104,7 +107,7 @@ describe('CatalogBrowser', () => {
     const templates = [buildTemplate({ slug: 'a' }), buildTemplate({ slug: 'b', name: 'Other' })];
     mockCatalogState({ templates, allTemplates: templates });
 
-    render(<CatalogBrowser onSelect={jest.fn()} />);
+    renderBrowser();
 
     expect(
       document.querySelector('[data-test-subj="workflow-library-template-card-a"]')
@@ -119,7 +122,7 @@ describe('CatalogBrowser', () => {
     mockCatalogState({ templates: [template], allTemplates: [template] });
     const onSelect = jest.fn();
 
-    render(<CatalogBrowser onSelect={onSelect} />);
+    renderBrowser(onSelect);
     fireEvent.click(screen.getByText('IP Reputation Check'));
 
     expect(onSelect).toHaveBeenCalledWith(template);
@@ -130,7 +133,7 @@ describe('CatalogBrowser', () => {
     const templates = [buildTemplate({ solutions: ['security'] })];
     mockCatalogState({ templates, allTemplates: templates });
 
-    render(<CatalogBrowser onSelect={jest.fn()} />);
+    renderBrowser();
 
     const solutionSelect = screen.getByTestId('workflowLibrarySolutionFilter') as HTMLSelectElement;
     expect(solutionSelect).toBeDisabled();
