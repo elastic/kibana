@@ -917,7 +917,7 @@ steps:
             type: ai.agent
             agent-id: "elastic-ai-agent"
             connector-id: "{{ consts.connector_id }}"
-            create-conversation: "{{ consts.create_conversation }}"
+            create-conversation: "${{ consts.create_conversation }}"
             on-failure:
               retry:
                 max-attempts: 3

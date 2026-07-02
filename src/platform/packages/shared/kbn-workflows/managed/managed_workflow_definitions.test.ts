@@ -157,6 +157,28 @@ describe('managedWorkflowDefinitions', () => {
     expect(workflow.consts.auto_close_confidence_score_max_threshold).toBe(0.9);
   });
 
+  it('renders create-conversation with the type-preserving template form', () => {
+    // Regression: a plain `{{ }}` template always renders to a string, so
+    // `createConversation: false` would render as the string "false" (truthy in
+    // JS), silently defeating the "Create conversation" toggle. Only `${{ }}`
+    // preserves the boolean type through the workflow templating engine.
+    const renderedYaml = SECURITY_ALERT_VALIDATION_WORKFLOW.yamlTemplate({
+      workflowEnabled: true,
+      autoCloseEnabled: true,
+      autoCloseConfidenceScoreMinThreshold: 0.85,
+      autoCloseConfidenceScoreMaxThreshold: 1.0,
+      connectorId: '',
+      createConversation: false,
+    });
+
+    const workflow = parse(renderedYaml) as { steps: unknown[] };
+    const agentStep = findStepByName(workflow.steps, 'onechat_runAgent_step') as {
+      'create-conversation': string;
+    };
+
+    expect(agentStep['create-conversation']).toBe('${{ consts.create_conversation }}');
+  });
+
   it('confidence score schema uses the same 0-1 scale as the auto-close thresholds', () => {
     // Regression: the LLM schema maximum must stay on the same scale as the threshold
     // consts (0-1) so the auto-close condition comparison is valid. If maximum drifts
