@@ -362,15 +362,29 @@ export function registerPutDataStreamFailureStore({
         // Configure failure store for each data stream
         const promises = dataStreams.map(async (dataStreamName) => {
           // "Inherit" should leave the data stream with the same effective failure store the
-          // index template provides. Elasticsearch does not re-apply a template's
-          // `data_stream_options` to an existing data stream when the data stream-level options
-          // are deleted (it would end up disabled), so — matching the Streams plugin — we
-          // simulate the template and re-apply its resolved failure store explicitly.
+          // index template provides, without leaving an explicit data stream-level override that
+          // the UI would then read as a user choice.
           if (inheritFailureStore) {
             const simulateResponse = await client.asCurrentUser.indices.simulateIndexTemplate({
               name: dataStreamName,
             });
             const failureStorePayload = resolveTemplateFailureStore(simulateResponse);
+
+            // When the template leaves the failure store disabled (or defines none), delete the
+            // data stream-level options instead of writing `{ enabled: false }`. This keeps the
+            // effective state disabled regardless of whether Elasticsearch re-applies the template
+            // on delete, while removing the explicit override so the data stream is (and reads as)
+            // truly inherited. When the template enables the failure store we must re-apply its
+            // resolved options explicitly, because Elasticsearch does not re-apply a template's
+            // `data_stream_options` to an existing data stream when the options are removed.
+            if (failureStorePayload.enabled === false) {
+              const { headers } = await client.asCurrentUser.indices.deleteDataStreamOptions(
+                { name: dataStreamName },
+                { meta: true }
+              );
+              return headers;
+            }
+
             const { headers } = await client.asCurrentUser.indices.putDataStreamOptions(
               { name: dataStreamName, failure_store: failureStorePayload },
               { meta: true }

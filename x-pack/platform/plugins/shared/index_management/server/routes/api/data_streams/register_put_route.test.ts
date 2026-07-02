@@ -14,6 +14,7 @@ import { registerPutDataLifecycle, registerPutDataStreamFailureStore } from './r
 describe('registerPutDataStreamFailureStore', () => {
   let router: RouterMock;
   let updateDataStreamOptions: jest.Mock;
+  let deleteDataStreamOptions: jest.Mock;
 
   const setupRouter = (configOverrides = {}) => {
     router = new RouterMock();
@@ -28,6 +29,7 @@ describe('registerPutDataStreamFailureStore', () => {
 
     registerPutDataStreamFailureStore(mockDependencies);
     updateDataStreamOptions = router.getMockESApiFn('indices.putDataStreamOptions');
+    deleteDataStreamOptions = router.getMockESApiFn('indices.deleteDataStreamOptions');
   };
 
   beforeEach(() => {
@@ -128,7 +130,7 @@ describe('registerPutDataStreamFailureStore', () => {
     });
   });
 
-  it('should disable the failure store when inheriting from a template without failure store', async () => {
+  it('should delete the data stream options when inheriting from a template without failure store', async () => {
     const simulateIndexTemplate = router.getMockESApiFn('indices.simulateIndexTemplate');
     simulateIndexTemplate.mockResolvedValue({ template: {} });
 
@@ -138,17 +140,38 @@ describe('registerPutDataStreamFailureStore', () => {
       body: { dataStreams: ['test-stream'], dsFailureStore: false, inheritFailureStore: true },
     };
 
-    updateDataStreamOptions.mockResolvedValue({ success: true });
+    deleteDataStreamOptions.mockResolvedValue({ success: true });
 
     await router.runRequest(mockRequest);
 
-    expect(updateDataStreamOptions).toHaveBeenCalledWith(
-      {
-        name: 'test-stream',
-        failure_store: { enabled: false },
+    // The template leaves the failure store disabled, so inheriting removes the explicit override
+    // instead of writing `{ enabled: false }`, keeping the data stream truly inherited.
+    expect(deleteDataStreamOptions).toHaveBeenCalledWith({ name: 'test-stream' }, { meta: true });
+    expect(updateDataStreamOptions).not.toHaveBeenCalled();
+  });
+
+  it('should delete the data stream options when inheriting from a template that disables the failure store', async () => {
+    const simulateIndexTemplate = router.getMockESApiFn('indices.simulateIndexTemplate');
+    simulateIndexTemplate.mockResolvedValue({
+      template: {
+        data_stream_options: {
+          failure_store: { enabled: false },
+        },
       },
-      { meta: true }
-    );
+    });
+
+    const mockRequest: RequestMock = {
+      method: 'put',
+      path: addBasePath('/data_streams/configure_failure_store'),
+      body: { dataStreams: ['test-stream'], dsFailureStore: false, inheritFailureStore: true },
+    };
+
+    deleteDataStreamOptions.mockResolvedValue({ success: true });
+
+    await router.runRequest(mockRequest);
+
+    expect(deleteDataStreamOptions).toHaveBeenCalledWith({ name: 'test-stream' }, { meta: true });
+    expect(updateDataStreamOptions).not.toHaveBeenCalled();
   });
 
   it('should handle requests without custom retention period', async () => {

@@ -673,14 +673,11 @@ export const useEditDataLifecycle = ({
           }
 
           if (failedData.inheritLifecycle) {
-            // "Inherit" means removing the explicit data stream-level override so ES falls back to
-            // the index template configuration (deleteDataStreamOptions). Writing resolved values
-            // back via putDataStreamOptions would instead create an explicit override.
-            //
-            // Note: Elasticsearch re-materializes the template's `data_stream_options` into the
-            // data stream's `_options` after the delete, so we cannot assert that the `_options`
-            // marker is gone afterwards — inheritance is determined by comparing against the
-            // template, not by the mere presence of `_options`.
+            // "Inherit" delegates to the server (`inheritFailureStore`), which resolves the
+            // template and either deletes the data stream-level options (when the template leaves
+            // the failure store disabled) or re-applies the template's resolved options (when the
+            // template enables it). Deleting on the disabled case removes the explicit override so
+            // the data stream reads as inherited rather than as an explicit disable.
             const del = await updateDSFailureStore([dataStream.name], {
               dsFailureStore: false,
               inheritFailureStore: true,

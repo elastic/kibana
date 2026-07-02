@@ -119,6 +119,15 @@ const resolveTemplateLifecycle = (
       : dataStream.matchesFailureStoreClusterPattern === true;
 
   const inheritFailed = (() => {
+    // An explicit `enabled: false` override (from the data stream `_options`) means the user
+    // deliberately disabled the failure store, so it is never inherited. This is reliable because
+    // "inherit" removes the override (deleteDataStreamOptions) rather than writing
+    // `{ enabled: false }`, so an explicit disabled option can only come from an explicit user
+    // choice — even when the index template also leaves the failure store disabled.
+    if (dataStream.failureStoreSettings?.enabled === false) {
+      return false;
+    }
+
     // When Elasticsearch reports the failure store retention is determined by the default
     // failures retention (`default_failures_retention`) rather than by `data_stream_configuration`,
     // there is no explicit data stream override and the failure store is inherited — regardless of

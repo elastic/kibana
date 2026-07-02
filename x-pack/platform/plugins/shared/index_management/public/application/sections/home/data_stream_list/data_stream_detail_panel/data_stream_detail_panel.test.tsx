@@ -132,6 +132,75 @@ describe('DataStreamDetailPanel', () => {
       });
     });
 
+    it('does not mark an explicitly disabled failure store as inherited', async () => {
+      const dataStream = createMockDataStream({
+        // Explicit `_options` override (the user disabled it), even though the template also
+        // leaves the failure store disabled: it must read as an explicit choice, not inherited.
+        failureStoreEnabled: false,
+        failureStoreSettings: { enabled: false },
+      });
+
+      mockUseLoadDataStream.mockReturnValue({
+        data: dataStream,
+        isLoading: false,
+        error: null,
+        resendRequest: jest.fn(),
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
+
+      // Template loads but defines no failure store.
+      mockSendRequest.mockResolvedValue({
+        data: {
+          name: 'indexTemplate',
+          template: { lifecycle: { enabled: true } },
+          _kbnMeta: { hasDatastream: true },
+        },
+      } as any);
+
+      const { getByTestId } = renderWithI18n(
+        <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('failedIngestLifecycleDetail')).toHaveTextContent('Disabled');
+      });
+      expect(getByTestId('failedIngestLifecycleDetail')).not.toHaveTextContent('Inherited');
+    });
+
+    it('marks a failure store disabled via inheritance as inherited', async () => {
+      const dataStream = createMockDataStream({
+        // No explicit `_options` override: the disabled state comes from inheriting a template
+        // that leaves the failure store disabled, so it must read as inherited.
+        failureStoreEnabled: false,
+        failureStoreSettings: undefined,
+      });
+
+      mockUseLoadDataStream.mockReturnValue({
+        data: dataStream,
+        isLoading: false,
+        error: null,
+        resendRequest: jest.fn(),
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
+
+      // Template loads but defines no failure store.
+      mockSendRequest.mockResolvedValue({
+        data: {
+          name: 'indexTemplate',
+          template: { lifecycle: { enabled: true } },
+          _kbnMeta: { hasDatastream: true },
+        },
+      } as any);
+
+      const { getByTestId } = renderWithI18n(
+        <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('failedIngestLifecycleDetail')).toHaveTextContent('Inherited');
+      });
+      expect(getByTestId('failedIngestLifecycleDetail')).toHaveTextContent('Disabled');
+    });
   });
 
   describe('failed ingest lifecycle retention', () => {
