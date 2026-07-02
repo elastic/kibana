@@ -456,7 +456,7 @@ const NonIlmLifecycleSummary = ({
       size="s"
       data-test-subj="dataLifecycleSummaryAddDownsampleStep"
       onClick={() => dslSummary.onAddDownsampleStep?.()}
-      disabled={isAddDownsampleStepDisabled || isExternalFlyoutOpen}
+      disabled={isAddDownsampleStepDisabled || isExternalFlyoutOpen || isDataPhaseEditing}
     >
       {addDownsampleStepButtonLabel}
     </EuiButton>

@@ -339,6 +339,16 @@ describe('LifecycleSummary', () => {
       expect(screen.getByTestId('dataLifecycleSummaryAddDownsampleStep')).toBeDisabled();
     });
 
+    it('should disable "Add downsample step" button while the data phases flyout is open', () => {
+      const definition = createDslDefinition('60d', [{ after: '10d', fixed_interval: '1h' }]);
+
+      renderWithSync(
+        <LifecycleSummary definition={definition} isMetricsStream isDataPhaseFlyoutOpen />
+      );
+
+      expect(screen.getByTestId('dataLifecycleSummaryAddDownsampleStep')).toBeDisabled();
+    });
+
     it('should render DSL lifecycle with infinite retention', () => {
       const definition = createDslDefinition(undefined);
 
