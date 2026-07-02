@@ -34,7 +34,7 @@ export function CollapseSetting({
           size: { base },
         },
       }) => ({
-        padding: `0 ${base} ${base} ${base}`,
+        paddingBottom: base,
       })}
     >
       <EuiFormRow
