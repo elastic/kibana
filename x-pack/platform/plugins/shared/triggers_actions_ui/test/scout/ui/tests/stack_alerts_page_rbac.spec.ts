@@ -12,41 +12,23 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 /**
- * RBAC behavior of the Stack alerts page row actions.
+ * RBAC tests for the Stack alerts page.
  *
- * The "modify" row actions (Acknowledge, Mark as untracked, Mute/Unmute, Edit
- * tags) are gated on whether the user can modify alerts. For the Stack alerts
- * page that is derived from the `stackAlertsOnly` feature: its `all` privilege
- * grants the RAC `alert:all` / `rule:mute_alerts` privileges and exposes an
- * explicit `write` UI capability, while its `read` privilege only grants alert
- * read. The `write` capability is what `useCanModifyAlerts` reads and passes to
- * the alerts table, so:
- *  - a `stackAlertsOnly: all` user (no rule-create authorization) still sees the
- *    modify actions, purely because of the `write` capability, and
- *  - a `stackAlertsOnly: read` user sees the table and the view-only actions but
- *    none of the modify actions.
+ * Covers three privilege axes:
+ *  - Modify actions (ack/untrack/mute/tags): gated on `stackAlertsOnly.write` capability.
+ *  - "View rule details" row action: gated on per-rule-type read authorization.
+ *  - Rule stats, "Manage Rules" button, and rule-name link: gated on rule-read.
  *
- * The read-only view actions ("View rule details", "View alert details") are
- * always available and are asserted for both personas as a control.
- *
- * The header rule stats (rule count, disabled/snoozed/errors, and the "Manage
- * Rules" button) and the rule-name link are gated separately, on rule-read
- * authorization: a `stackAlertsOnly` user (alerts only, no rule read) does not
- * see the stats and the rule name renders as plain text, while a
- * `stackAlerts: read` ("Stack Rules") user sees the stats and a clickable rule
- * name. Stack alerts have no standalone alert-details page, so the rule-name
- * gating is also asserted in the alert-details flyout opened from the table.
+ * Stack alerts has no standalone alert-details page; rule-name gating is also
+ * verified in the flyout.
  */
 const STACK_ALERTS_PATH = '/app/management/insightsAndAlerting/triggersActionsAlerts';
 
-// Write alias for the Stack alerts-as-data index. Kibana provisions it at boot,
-// so the alert document can be indexed straight into it.
 const STACK_ALERTS_INDEX = '.alerts-stack.alerts-default';
 const STACK_ALERTS_INDEX_PATTERN = '.alerts-stack.alerts-*';
 
-// Index-threshold is registered under the `stackAlertsOnly` feature (consumers
-// `stackAlerts` + `alerts`), so an alert with the `alerts` consumer is readable
-// by a `stackAlertsOnly` user and shows on the page (a non-SIEM rule type).
+// .index-threshold is in the stackAlertsOnly feature (consumers stackAlerts + alerts),
+// so a stackAlertsOnly user can see this alert.
 const RULE_TYPE_ID = '.index-threshold';
 const RULE_CONSUMER = 'alerts';
 const RULE_NAME = 'Scout Stack Alerts RBAC index threshold';
@@ -56,28 +38,22 @@ const TABLE_LOADING_SUBJ = 'internalAlertsPageLoading';
 const ROW_ACTIONS_MORE_SUBJ = 'alertsTableRowActionMore';
 const ACTIONS_MENU_SUBJ = 'alertsTableActionsMenu';
 
-const VIEW_ACTION_SUBJS = ['viewRuleDetails', 'viewAlertDetailsFlyout'];
+// Always visible; not gated on any privilege.
+const VIEW_ACTION_SUBJS = ['viewAlertDetailsFlyout'];
 const MODIFY_ACTION_SUBJS = ['acknowledge-alert', 'untrackAlert', 'editTags'];
 
-// Row action that links to the rule behind the alert.
+// Gated on rule-read; hidden for stackAlertsOnly, visible for stackAlerts:read.
 const VIEW_RULE_DETAILS_SUBJ = 'viewRuleDetails';
-// Page-header rule stats and the "Manage Rules" link, rendered by `useRuleStats`.
 const MANAGE_RULES_SUBJ = 'manageRulesPageButton';
 const RULE_STAT_SUBJS = ['statRuleCount', 'statDisabled', 'statMuted', 'statErrors'];
 
-// The rule-name cell renders as a link to the rule details page only when the
-// user can read the alert's rule; otherwise it is plain text.
 const RULE_NAME_LINK_SUBJ = 'alertRuleNameLink';
 const RULE_NAME_TEXT_SUBJ = 'alertRuleName';
-// Scope rule-name assertions to the single ingested alert's row.
 const ruleNameLinkInRow = (page: ScoutPage) =>
   page.locator(`[data-gridcell-row-index="0"] [data-test-subj="${RULE_NAME_LINK_SUBJ}"]`);
 const ruleNameTextInRow = (page: ScoutPage) =>
   page.locator(`[data-gridcell-row-index="0"] [data-test-subj="${RULE_NAME_TEXT_SUBJ}"]`);
 
-// Stack alerts have no standalone alert-details page; the alert-details surface is
-// the flyout opened from the alerts table, whose overview tab reuses the same
-// gated rule-name cell. Scope flyout rule-name assertions to the overview panel.
 const FLYOUT_OVERVIEW_PANEL_SUBJ = 'alertFlyoutOverviewTabPanel';
 const ROW_EXPAND_SUBJ = 'expand-event';
 const flyoutRuleNameLink = (page: ScoutPage) =>
@@ -89,29 +65,23 @@ const flyoutRuleNameText = (page: ScoutPage) =>
     `[data-test-subj="${FLYOUT_OVERVIEW_PANEL_SUBJ}"] [data-test-subj="${RULE_NAME_TEXT_SUBJ}"]`
   );
 
-// `stackAlertsOnly: all` grants alert:all + rule:mute_alerts and the `write` UI
-// capability, but NO rule-create authorization — so any modify actions shown are
-// attributable to the `write` capability alone.
-// The filter controls issue a `field_caps` call against `.alerts-*` which
-// requires a base index read privilege (not covered by RAC alerting privileges
-// alone). Adding it here isolates the RBAC behavior under test.
+// ES read on .alerts-* is needed for the filter controls' field_caps call,
+// which isn't covered by RAC alerting privileges alone.
 const ALERTS_INDEX_PRIVILEGES = [{ names: ['.alerts-*'], privileges: ['read'] }];
 
+// alert:all + rule:mute_alerts + write UI capability; no rule-read.
 const STACK_ALERTS_ONLY_ALL_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: ALERTS_INDEX_PRIVILEGES },
   kibana: [{ base: [], feature: { stackAlertsOnly: ['all'] }, spaces: ['*'] }],
 };
 
-// `stackAlertsOnly: read` grants alert read (so the table renders) but no write
-// capability and no rule read/create authorization.
+// alert:read only; no write capability, no rule-read.
 const STACK_ALERTS_ONLY_READ_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: ALERTS_INDEX_PRIVILEGES },
   kibana: [{ base: [], feature: { stackAlertsOnly: ['read'] }, spaces: ['*'] }],
 };
 
-// `stackAlerts: read` (the "Stack Rules" feature) grants rule read, which is what
-// unlocks the header rule stats. Used to assert the stats appear for a rule-read
-// user (the counterpart of the `stackAlertsOnly` personas above, which cannot).
+// alert:read + rule:read; unlocks rule stats, rule-name links, and View rule details.
 const STACK_RULES_READ_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
   kibana: [{ base: [], feature: { stackAlerts: ['read'] }, spaces: ['*'] }],
@@ -156,8 +126,7 @@ test.describe(
       }
     });
 
-    // The first navigation compiles the alerts app bundle in dev mode; give the
-    // tests ample budget (a no-op against the pre-built distributable in CI).
+    // Extra budget for first-run dev-mode bundle compilation (no-op in CI).
     test.beforeEach(() => {
       test.setTimeout(180_000);
     });
@@ -174,16 +143,6 @@ test.describe(
         .catch(() => {});
     });
 
-    /**
-     * Navigates to the Stack alerts page and opens the row actions kebab for the
-     * single ingested alert, retrying navigation until the alert is queryable
-     * (alerts-as-data reads can lag behind the `refresh: 'wait_for'` index).
-     */
-    /**
-     * Navigates to the Stack alerts page and waits for the alerts table to finish
-     * loading, retrying until the ingested alert is queryable (alerts-as-data
-     * reads can lag behind the `refresh: 'wait_for'` index).
-     */
     const gotoLoadedAlertsTable = async (page: ScoutPage, kbnUrl: KibanaUrl) => {
       await expect(async () => {
         await page.goto(kbnUrl.get(STACK_ALERTS_PATH), {
@@ -199,10 +158,6 @@ test.describe(
       }).toPass({ timeout: 90_000, intervals: [3_000] });
     };
 
-    /**
-     * Opens the alert-details flyout for the ingested alert's row and waits for
-     * the overview tab (which renders the rule-name cell) to be visible.
-     */
     const openAlertDetailsFlyout = async (page: ScoutPage) => {
       await page
         .locator(`[data-gridcell-row-index="0"] [data-test-subj="${ROW_EXPAND_SUBJ}"]`)
@@ -248,6 +203,10 @@ test.describe(
         }
       });
 
+      await test.step('hides "View rule details" (no rule-read)', async () => {
+        await expect(page.testSubj.locator(VIEW_RULE_DETAILS_SUBJ)).toBeHidden();
+      });
+
       await test.step('shows the modify actions', async () => {
         for (const subj of MODIFY_ACTION_SUBJS) {
           await expect(page.testSubj.locator(subj)).toBeVisible();
@@ -269,6 +228,10 @@ test.describe(
         }
       });
 
+      await test.step('hides "View rule details" (no rule-read)', async () => {
+        await expect(page.testSubj.locator(VIEW_RULE_DETAILS_SUBJ)).toBeHidden();
+      });
+
       await test.step('hides the modify actions', async () => {
         for (const subj of MODIFY_ACTION_SUBJS) {
           await expect(page.testSubj.locator(subj)).toBeHidden();
@@ -281,10 +244,6 @@ test.describe(
       page,
       kbnUrl,
     }) => {
-      // The header rule stats (rule count, disabled/snoozed/errors, and the
-      // "Manage Rules" button) and the rule-name link are gated on rule-read
-      // authorization. A `stackAlertsOnly: read` user can read alerts but not
-      // rules, so both must be hidden even though the page itself loads.
       await browserAuth.loginWithCustomRole(STACK_ALERTS_ONLY_READ_ROLE);
       await gotoLoadedAlertsTable(page, kbnUrl);
 
@@ -312,9 +271,6 @@ test.describe(
       page,
       kbnUrl,
     }) => {
-      // A `stackAlerts: read` (Stack Rules) user has rule-read authorization, so
-      // the header rule stats, the "Manage Rules" button, and the rule-name link
-      // are rendered.
       await browserAuth.loginWithCustomRole(STACK_RULES_READ_ROLE);
       await gotoLoadedAlertsTable(page, kbnUrl);
 
