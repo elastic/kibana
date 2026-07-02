@@ -220,6 +220,7 @@ export class LensApp {
     const stopsLocator = this.page.locator(
       '[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]'
     );
+    // Gate .all() behind a retrying count assertion.
     await expect(stopsLocator).toHaveCount(expectedCount);
 
     const stops = await stopsLocator.all();
