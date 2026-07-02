@@ -397,9 +397,7 @@ export const openAnalyzerForFirstAlertInTimeline = () => {
 };
 
 export const clickAlertsHistogramLegend = (ruleName: string) => {
-  cy.get(ALERTS_HISTOGRAM)
-    .find(ALERTS_HISTOGRAM_SERIES)
-    .should('contain.text', ruleName);
+  cy.get(ALERTS_HISTOGRAM).find(ALERTS_HISTOGRAM_SERIES).should('contain.text', ruleName);
 
   recurse(
     () => {
