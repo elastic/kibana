@@ -97,6 +97,7 @@ export async function resumeWorkflowExecutionExternallyViaGet(
 
     return resumeWorkflowExecutionWithResolvedContext(workflowsService, {
       authenticatedApiKeyId,
+      stepExecutionId: stepExecution.id,
       executionId,
       spaceId,
       input: { approved: parseApprovedQueryParam(query.approved) },
@@ -117,6 +118,7 @@ export async function resumeWorkflowExecutionExternallyViaGet(
 
     return resumeWorkflowExecutionWithResolvedContext(workflowsService, {
       authenticatedApiKeyId,
+      stepExecutionId: stepExecution.id,
       executionId,
       spaceId,
       input: validatedInput,
@@ -147,6 +149,7 @@ export async function resumeWorkflowExecutionExternallyWithInput(
 
   return resumeWorkflowExecutionWithResolvedContext(workflowsService, {
     authenticatedApiKeyId,
+    stepExecutionId: stepExecution.id,
     executionId,
     spaceId,
     input: validatedInput,
@@ -268,11 +271,13 @@ async function resumeWorkflowExecutionWithResolvedContext(
   workflowsService: WorkflowsService,
   {
     authenticatedApiKeyId,
+    stepExecutionId,
     executionId,
     spaceId,
     input,
   }: {
     authenticatedApiKeyId: string;
+    stepExecutionId: string;
     executionId: string;
     spaceId: string;
     input: Record<string, unknown>;
@@ -281,6 +286,15 @@ async function resumeWorkflowExecutionWithResolvedContext(
   const coreStart = await workflowsService.getCoreStart();
   const workflowsExecutionEngine = await workflowsService.getWorkflowsExecutionEngine();
   const resumedBy = `api_key:${authenticatedApiKeyId}`;
+
+  const claimed = await workflowsService.claimHitlStepForExternalResume(
+    stepExecutionId,
+    resumedBy,
+    spaceId
+  );
+  if (!claimed) {
+    throw new ExternalResumeError('This workflow response link is no longer valid', 409);
+  }
 
   try {
     const result = await workflowsExecutionEngine.resumeWorkflowExecution(

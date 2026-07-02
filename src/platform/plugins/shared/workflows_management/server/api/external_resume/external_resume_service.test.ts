@@ -34,6 +34,7 @@ describe('resumeWorkflowExecutionExternally', () => {
     getCoreStart: jest.fn(),
     getWorkflowExecution: jest.fn(),
     getWorkflowsExecutionEngine: jest.fn(),
+    claimHitlStepForExternalResume: jest.fn(),
   } as unknown as jest.Mocked<WorkflowsService>;
 
   beforeEach(() => {
@@ -54,11 +55,13 @@ describe('resumeWorkflowExecutionExternally', () => {
       },
     });
     workflowsService.getCoreStart.mockResolvedValue(coreStart);
+    workflowsService.claimHitlStepForExternalResume.mockResolvedValue(true);
     workflowsService.getWorkflowExecution.mockResolvedValue({
       id: 'exec-1',
       status: ExecutionStatus.WAITING_FOR_INPUT,
       stepExecutions: [
         {
+          id: 'step-exec-1',
           workflowRunId: 'exec-1',
           stepId: 'request-approval',
           stepType: 'waitForApproval',
@@ -86,7 +89,16 @@ describe('resumeWorkflowExecutionExternally', () => {
       includeInput: true,
     });
 
+    expect(workflowsService.claimHitlStepForExternalResume).toHaveBeenCalledWith(
+      'step-exec-1',
+      'api_key:api-key-id',
+      'default'
+    );
+
     const engine = await workflowsService.getWorkflowsExecutionEngine();
+    const claimOrder = workflowsService.claimHitlStepForExternalResume.mock.invocationCallOrder[0];
+    const resumeOrder = engine.resumeWorkflowExecution.mock.invocationCallOrder[0];
+    expect(claimOrder).toBeLessThan(resumeOrder);
     expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
       'exec-1',
       'default',
@@ -96,6 +108,25 @@ describe('resumeWorkflowExecutionExternally', () => {
     );
 
     expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['api-key-id'] });
+  });
+
+  it('rejects when the waiting step was already claimed', async () => {
+    workflowsService.claimHitlStepForExternalResume.mockResolvedValue(false);
+
+    await expect(
+      resumeWorkflowExecutionExternally(workflowsService, {
+        approved: true,
+        executionId: 'exec-1',
+        spaceId: 'default',
+        apiKey: ENCODED_API_KEY,
+      })
+    ).rejects.toEqual(
+      new ExternalResumeError('This workflow response link is no longer valid', 409)
+    );
+
+    const engine = await workflowsService.getWorkflowsExecutionEngine();
+    expect(engine.resumeWorkflowExecution).not.toHaveBeenCalled();
+    expect(invalidateAsInternalUser).not.toHaveBeenCalled();
   });
 
   it('rejects when API key authentication fails', async () => {
@@ -188,6 +219,7 @@ describe('resumeWorkflowExecutionExternallyWithInput', () => {
     getCoreStart: jest.fn(),
     getWorkflowExecution: jest.fn(),
     getWorkflowsExecutionEngine: jest.fn(),
+    claimHitlStepForExternalResume: jest.fn(),
   } as unknown as jest.Mocked<WorkflowsService>;
 
   beforeEach(() => {
@@ -208,11 +240,13 @@ describe('resumeWorkflowExecutionExternallyWithInput', () => {
       },
     });
     workflowsService.getCoreStart.mockResolvedValue(coreStart);
+    workflowsService.claimHitlStepForExternalResume.mockResolvedValue(true);
     workflowsService.getWorkflowExecution.mockResolvedValue({
       id: 'exec-1',
       status: ExecutionStatus.WAITING_FOR_INPUT,
       stepExecutions: [
         {
+          id: 'step-exec-1',
           workflowRunId: 'exec-1',
           stepId: 'request-input',
           stepType: 'waitForInput',
@@ -243,6 +277,11 @@ describe('resumeWorkflowExecutionExternallyWithInput', () => {
     });
 
     const engine = await workflowsService.getWorkflowsExecutionEngine();
+    expect(workflowsService.claimHitlStepForExternalResume).toHaveBeenCalledWith(
+      'step-exec-1',
+      'api_key:api-key-id',
+      'default'
+    );
     expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
       'exec-1',
       'default',
@@ -316,6 +355,11 @@ describe('resumeWorkflowExecutionExternallyWithInput', () => {
     });
 
     const engine = await workflowsService.getWorkflowsExecutionEngine();
+    expect(workflowsService.claimHitlStepForExternalResume).toHaveBeenCalledWith(
+      'step-exec-1',
+      'api_key:api-key-id',
+      'default'
+    );
     expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
       'exec-1',
       'default',
@@ -331,6 +375,7 @@ describe('resumeWorkflowExecutionExternallyWithInput', () => {
       status: ExecutionStatus.WAITING_FOR_INPUT,
       stepExecutions: [
         {
+          id: 'step-exec-1',
           workflowRunId: 'exec-1',
           stepId: 'request-input',
           stepType: 'waitForInput',
@@ -366,6 +411,11 @@ describe('resumeWorkflowExecutionExternallyWithInput', () => {
     });
 
     const engine = await workflowsService.getWorkflowsExecutionEngine();
+    expect(workflowsService.claimHitlStepForExternalResume).toHaveBeenCalledWith(
+      'step-exec-1',
+      'api_key:api-key-id',
+      'default'
+    );
     expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
       'exec-1',
       'default',
@@ -389,6 +439,11 @@ describe('resumeWorkflowExecutionExternallyWithInput', () => {
     });
 
     const engine = await workflowsService.getWorkflowsExecutionEngine();
+    expect(workflowsService.claimHitlStepForExternalResume).toHaveBeenCalledWith(
+      'step-exec-1',
+      'api_key:api-key-id',
+      'default'
+    );
     expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
       'exec-1',
       'default',
