@@ -107,21 +107,20 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
   const [appliedRuleQuery, setAppliedRuleQuery] = useState('');
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(RULE_ATTACHMENTS_PER_PAGE);
-  const [pendingAttachRuleIds, setPendingAttachRuleIds] = useState<string[]>([]);
-  const [pendingDetachRuleIds, setPendingDetachRuleIds] = useState<string[]>([]);
+  const [selectedRuleIds, setSelectedRuleIds] = useState<string[]>([]);
   const [bulkSelection, setBulkSelection] = useState<RuleAttachmentBulkSelection | null>(null);
-  const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<'attach' | 'detach' | null>(null);
   const [isUpdatingRuleAttachments, setIsUpdatingRuleAttachments] = useState(false);
   const confirmModalTitleId = useGeneratedHtmlId();
   const normalizedRuleQuery = appliedRuleQuery.trim();
 
   // EuiBasicTable calls onSelectionChange([]) before onChange when the page/sort/size changes
-  // (via its internal clearSelection). This ref captures the pending lists as of the last render
+  // (via its internal clearSelection). This ref captures selectedRuleIds as of the last render
   // so onTableChange can restore them, discarding that spurious callback.
-  const pendingListsRef = useRef({ attach: pendingAttachRuleIds, detach: pendingDetachRuleIds });
-  pendingListsRef.current = { attach: pendingAttachRuleIds, detach: pendingDetachRuleIds };
+  const selectedRuleIdsRef = useRef(selectedRuleIds);
+  selectedRuleIdsRef.current = selectedRuleIds;
   const canEditRules = application.capabilities.securitySolution?.crud !== false;
-  const changedRulesCount = pendingAttachRuleIds.length + pendingDetachRuleIds.length;
+  const selectedRulesCount = selectedRuleIds.length;
 
   const showRuleAttachmentError = useCallback(
     (title: string, error: RuleAttachmentError) => {
@@ -194,22 +193,9 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
       });
     },
     onSuccess: ({ attachedRuleIds, ruleIds }, action) => {
-      const matchingRuleIds = [...attachedRuleIds, ...ruleIds];
       setBulkSelection({ query: normalizedRuleQuery, attachedRuleIds, ruleIds });
 
-      if (action === 'select') {
-        setPendingAttachRuleIds((currentRuleIds) => [...new Set([...currentRuleIds, ...ruleIds])]);
-        setPendingDetachRuleIds((currentRuleIds) =>
-          currentRuleIds.filter((ruleId) => !matchingRuleIds.includes(ruleId))
-        );
-      } else {
-        setPendingAttachRuleIds((currentRuleIds) =>
-          currentRuleIds.filter((ruleId) => !matchingRuleIds.includes(ruleId))
-        );
-        setPendingDetachRuleIds((currentRuleIds) => [
-          ...new Set([...currentRuleIds, ...attachedRuleIds]),
-        ]);
-      }
+      setSelectedRuleIds(action === 'select' ? [...new Set([...attachedRuleIds, ...ruleIds])] : []);
     },
     onError: (error) => {
       showRuleAttachmentError(
@@ -224,17 +210,23 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
     },
   });
 
-  const updateMutation = useMutation<UpdateRuleAttachmentsResult, RuleAttachmentError>({
-    mutationFn: async () => {
+  const updateMutation = useMutation<
+    UpdateRuleAttachmentsResult,
+    RuleAttachmentError,
+    'attach' | 'detach'
+  >({
+    mutationFn: async (action) => {
       return updateAlertAnalysisWorkflowRuleAttachments({
         http,
-        attachRuleIds: pendingAttachRuleIds,
-        detachRuleIds: pendingDetachRuleIds,
+        attachRuleIds: action === 'attach' ? selectedRuleIds : [],
+        detachRuleIds: action === 'detach' ? selectedRuleIds : [],
       });
     },
-    onSuccess: (response: UpdateRuleAttachmentsResult) => {
-      const pendingAttachRuleIdsSetForCache = new Set(pendingAttachRuleIds);
-      const pendingDetachRuleIdsSetForCache = new Set(pendingDetachRuleIds);
+    onSuccess: (response: UpdateRuleAttachmentsResult, action) => {
+      const attachRuleIds = action === 'attach' ? selectedRuleIds : [];
+      const detachRuleIds = action === 'detach' ? selectedRuleIds : [];
+      const attachRuleIdsSetForCache = new Set(attachRuleIds);
+      const detachRuleIdsSetForCache = new Set(detachRuleIds);
 
       queryClient.setQueryData<RuleAttachmentStats>(
         [...RULE_ATTACHMENT_STATS_QUERY_KEY, normalizedRuleQuery],
@@ -244,8 +236,8 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                 ...currentStats,
                 attached: getNextAttachedCount({
                   attached: currentStats.attached,
-                  attachCount: pendingAttachRuleIds.length,
-                  detachCount: pendingDetachRuleIds.length,
+                  attachCount: attachRuleIds.length,
+                  detachCount: detachRuleIds.length,
                   total: currentStats.total,
                 }),
               }
@@ -259,16 +251,16 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                 ...currentPage,
                 attached: getNextAttachedCount({
                   attached: currentPage.attached,
-                  attachCount: pendingAttachRuleIds.length,
-                  detachCount: pendingDetachRuleIds.length,
+                  attachCount: attachRuleIds.length,
+                  detachCount: detachRuleIds.length,
                   total: currentPage.total,
                 }),
                 rules: currentPage.rules.map((rule) => {
-                  if (pendingAttachRuleIdsSetForCache.has(rule.id)) {
+                  if (attachRuleIdsSetForCache.has(rule.id)) {
                     return { ...rule, attached: true };
                   }
 
-                  if (pendingDetachRuleIdsSetForCache.has(rule.id)) {
+                  if (detachRuleIdsSetForCache.has(rule.id)) {
                     return { ...rule, attached: false };
                   }
 
@@ -285,39 +277,38 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                 ...currentSelection,
                 attached: getNextAttachedCount({
                   attached: currentSelection.attached,
-                  attachCount: pendingAttachRuleIds.length,
-                  detachCount: pendingDetachRuleIds.length,
+                  attachCount: attachRuleIds.length,
+                  detachCount: detachRuleIds.length,
                   total: currentSelection.total,
                 }),
                 selectable: getNextAttachedCount({
                   attached: currentSelection.selectable,
-                  attachCount: pendingDetachRuleIds.length,
-                  detachCount: pendingAttachRuleIds.length,
+                  attachCount: detachRuleIds.length,
+                  detachCount: attachRuleIds.length,
                   total: currentSelection.total,
                 }),
                 attachedRuleIds: [
                   ...new Set([
                     ...currentSelection.attachedRuleIds.filter(
-                      (ruleId) => !pendingDetachRuleIdsSetForCache.has(ruleId)
+                      (ruleId) => !detachRuleIdsSetForCache.has(ruleId)
                     ),
-                    ...pendingAttachRuleIds,
+                    ...attachRuleIds,
                   ]),
                 ],
                 ruleIds: [
                   ...new Set([
                     ...currentSelection.ruleIds.filter(
-                      (ruleId) => !pendingAttachRuleIdsSetForCache.has(ruleId)
+                      (ruleId) => !attachRuleIdsSetForCache.has(ruleId)
                     ),
-                    ...pendingDetachRuleIds,
+                    ...detachRuleIds,
                   ]),
                 ],
               }
             : currentSelection
       );
 
-      setIsConfirmModalVisible(false);
-      setPendingAttachRuleIds([]);
-      setPendingDetachRuleIds([]);
+      setConfirmAction(null);
+      setSelectedRuleIds([]);
       setBulkSelection(null);
       queryClient.invalidateQueries({ queryKey: RULE_ATTACHMENT_STATS_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: RULE_ATTACHMENTS_QUERY_KEY });
@@ -348,61 +339,42 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
   const hasRuleAttachmentError = statsQuery.isError || ruleAttachmentsQuery.isError;
   const stats = hasRuleAttachmentError ? undefined : statsQuery.data ?? ruleAttachmentsQuery.data;
   const totalRules = stats?.total ?? 0;
-  const attachedRules = stats?.attached ?? 0;
-  const selectableRules = Math.max(totalRules - attachedRules, 0);
   const isLoadingPreview =
     !hasRuleAttachmentError && (statsQuery.isLoading || ruleAttachmentsQuery.isFetching);
   const pageRules = useMemo(
     () => (hasRuleAttachmentError ? [] : ruleAttachmentsQuery.data?.rules ?? []),
     [hasRuleAttachmentError, ruleAttachmentsQuery.data?.rules]
   );
-  const pendingAttachRuleIdsSet = useMemo(
-    () => new Set(pendingAttachRuleIds),
-    [pendingAttachRuleIds]
-  );
-  const pendingDetachRuleIdsSet = useMemo(
-    () => new Set(pendingDetachRuleIds),
-    [pendingDetachRuleIds]
-  );
-  const getRuleDesiredAttached = useCallback(
-    ({ attached, id }: Pick<RuleAttachmentSummary, 'attached' | 'id'>) =>
-      pendingAttachRuleIdsSet.has(id) ? true : pendingDetachRuleIdsSet.has(id) ? false : attached,
-    [pendingAttachRuleIdsSet, pendingDetachRuleIdsSet]
-  );
-  const selectedPageRules = useMemo(
-    () => pageRules.filter((rule) => getRuleDesiredAttached(rule)),
-    [getRuleDesiredAttached, pageRules]
+  const selectedRuleIdsSet = useMemo(() => new Set(selectedRuleIds), [selectedRuleIds]);
+  // EuiBasicTable only accepts `selected` items that are also in the current page's `items`, and
+  // calls onSelectionChange to correct anything else — so the visible selection must be scoped to
+  // the current page even though selectedRuleIds itself can span every matching page.
+  const selectedPageItems = useMemo(
+    () => pageRules.filter((rule) => selectedRuleIdsSet.has(rule.id)),
+    [pageRules, selectedRuleIdsSet]
   );
   const isCurrentBulkSelectionAllSelected = useMemo(() => {
     if (!bulkSelection || bulkSelection.query !== normalizedRuleQuery) {
       return false;
     }
 
-    return (
-      bulkSelection.ruleIds.every((ruleId) => pendingAttachRuleIdsSet.has(ruleId)) &&
-      bulkSelection.attachedRuleIds.every((ruleId) => !pendingDetachRuleIdsSet.has(ruleId))
+    return [...bulkSelection.attachedRuleIds, ...bulkSelection.ruleIds].every((ruleId) =>
+      selectedRuleIdsSet.has(ruleId)
     );
-  }, [bulkSelection, normalizedRuleQuery, pendingAttachRuleIdsSet, pendingDetachRuleIdsSet]);
+  }, [bulkSelection, normalizedRuleQuery, selectedRuleIdsSet]);
   const isCurrentPageAllSelected = useMemo(
     () =>
       totalRules > 0 &&
       totalRules === pageRules.length &&
-      pageRules.every((rule) => getRuleDesiredAttached(rule)),
-    [getRuleDesiredAttached, pageRules, totalRules]
+      pageRules.every((rule) => selectedRuleIdsSet.has(rule.id)),
+    [pageRules, selectedRuleIdsSet, totalRules]
   );
-  const isAllMatchingRulesSelected =
-    isCurrentBulkSelectionAllSelected ||
-    isCurrentPageAllSelected ||
-    (totalRules > 0 && attachedRules === totalRules && pendingDetachRuleIds.length === 0);
+  const isAllMatchingRulesSelected = isCurrentBulkSelectionAllSelected || isCurrentPageAllSelected;
   const bulkSelectionButtonAction: BulkSelectionAction = isAllMatchingRulesSelected
     ? 'deselect'
     : 'select';
   const bulkSelectionButtonDisabled =
-    !canEditRules ||
-    totalRules === 0 ||
-    statsQuery.isLoading ||
-    hasRuleAttachmentError ||
-    (!isAllMatchingRulesSelected && selectableRules === 0 && pendingDetachRuleIds.length === 0);
+    !canEditRules || totalRules === 0 || statsQuery.isLoading || hasRuleAttachmentError;
   const { first: firstRuleOnPage, last: lastRuleOnPage } = getShowingRulesRange({
     page,
     perPage,
@@ -447,6 +419,32 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
             </EuiBadge>
           ),
       },
+      {
+        field: 'attached',
+        name: i18n.translate(
+          'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentWorkflowActionColumnLabel',
+          {
+            defaultMessage: 'Workflow action',
+          }
+        ),
+        width: '140px',
+        render: (attached: boolean) =>
+          attached ? (
+            <EuiBadge color="success">
+              <FormattedMessage
+                id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentAttachedBadgeLabel"
+                defaultMessage="Attached"
+              />
+            </EuiBadge>
+          ) : (
+            <EuiBadge color="hollow">
+              <FormattedMessage
+                id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentNotAttachedBadgeLabel"
+                defaultMessage="Not attached"
+              />
+            </EuiBadge>
+          ),
+      },
     ],
     []
   );
@@ -455,10 +453,9 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
     ({ page: tablePage }: CriteriaWithPagination<RuleAttachmentSummary>) => {
       if (tablePage) {
         // EuiBasicTable.onPageChange calls clearSelection() → onSelectionChange([]) before
-        // calling onChange, so by the time we get here the pending lists have been corrupted.
-        // Restore them from the ref, which holds their values as of the last render.
-        setPendingAttachRuleIds(pendingListsRef.current.attach);
-        setPendingDetachRuleIds(pendingListsRef.current.detach);
+        // calling onChange, so by the time we get here the selection has been corrupted.
+        // Restore it from the ref, which holds its value as of the last render.
+        setSelectedRuleIds(selectedRuleIdsRef.current);
         setPage(tablePage.index + 1);
         setPerPage(tablePage.size);
       }
@@ -579,8 +576,8 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                   >
                     <FormattedMessage
                       id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentSelectedRulesLabel"
-                      defaultMessage="Changed {changedRulesCount, plural, one {# rule} other {# rules}}"
-                      values={{ changedRulesCount }}
+                      defaultMessage="Selected {selectedRulesCount, plural, one {# rule} other {# rules}}"
+                      values={{ selectedRulesCount }}
                     />
                   </EuiText>
                 </EuiFlexItem>
@@ -596,8 +593,8 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                     {bulkSelectionButtonAction === 'select' ? (
                       <FormattedMessage
                         id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentSelectAllButtonLabel"
-                        defaultMessage="Select all {selectableRules, plural, one {# rule} other {# rules}}"
-                        values={{ selectableRules }}
+                        defaultMessage="Select all {totalRules, plural, one {# rule} other {# rules}}"
+                        values={{ totalRules }}
                       />
                     ) : (
                       <FormattedMessage
@@ -610,37 +607,54 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     data-test-subj="alertAnalysisWorkflowRuleAttachmentClearSelectionButton"
-                    disabled={changedRulesCount === 0}
+                    disabled={selectedRulesCount === 0}
                     iconType="cross"
                     onClick={() => {
-                      setPendingAttachRuleIds([]);
-                      setPendingDetachRuleIds([]);
+                      setSelectedRuleIds([]);
                       setBulkSelection(null);
                     }}
                     size="s"
                   >
                     <FormattedMessage
                       id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentClearSelectionButtonLabel"
-                      defaultMessage="Reset changes"
+                      defaultMessage="Clear selection"
                     />
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="alertAnalysisWorkflowRuleAttachmentAttachButton"
-                disabled={!canEditRules || changedRulesCount === 0}
-                isLoading={updateMutation.isLoading}
-                onClick={() => setIsConfirmModalVisible(true)}
-                size="s"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentAttachButtonLabel"
-                  defaultMessage="Update {changedRulesCount, plural, one {# rule} other {# rules}}"
-                  values={{ changedRulesCount }}
-                />
-              </EuiButton>
+              <EuiFlexGroup gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="alertAnalysisWorkflowRuleAttachmentAttachButton"
+                    disabled={!canEditRules || selectedRulesCount === 0}
+                    isLoading={updateMutation.isLoading}
+                    onClick={() => setConfirmAction('attach')}
+                    size="s"
+                  >
+                    <FormattedMessage
+                      id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentAttachWorkflowButtonLabel"
+                      defaultMessage="Attach workflow"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="alertAnalysisWorkflowRuleAttachmentDetachButton"
+                    color="warning"
+                    disabled={!canEditRules || selectedRulesCount === 0}
+                    isLoading={updateMutation.isLoading}
+                    onClick={() => setConfirmAction('detach')}
+                    size="s"
+                  >
+                    <FormattedMessage
+                      id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentDetachWorkflowButtonLabel"
+                      defaultMessage="Detach workflow"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiHorizontalRule margin="s" />
@@ -669,52 +683,53 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
             selection={{
               selectable: () => canEditRules,
               onSelectionChange: (selectedRules: RuleAttachmentSummary[]) => {
+                // Only merge the CURRENT page's checked state into selectedRuleIds, leaving any
+                // ids selected on other pages (e.g. via "Select all") untouched.
                 const selectedPageRuleIds = new Set(selectedRules.map(({ id }) => id));
-                const nextPendingAttachRuleIds = new Set(pendingAttachRuleIds);
-                const nextPendingDetachRuleIds = new Set(pendingDetachRuleIds);
 
-                pageRules.forEach(({ attached, id }) => {
-                  const shouldAttach = selectedPageRuleIds.has(id);
+                setSelectedRuleIds((currentSelectedRuleIds) => {
+                  const nextSelectedRuleIds = new Set(currentSelectedRuleIds);
 
-                  if (shouldAttach === attached) {
-                    nextPendingAttachRuleIds.delete(id);
-                    nextPendingDetachRuleIds.delete(id);
-                  } else if (shouldAttach) {
-                    nextPendingAttachRuleIds.add(id);
-                    nextPendingDetachRuleIds.delete(id);
-                  } else {
-                    nextPendingAttachRuleIds.delete(id);
-                    nextPendingDetachRuleIds.add(id);
-                  }
+                  pageRules.forEach(({ id }) => {
+                    if (selectedPageRuleIds.has(id)) {
+                      nextSelectedRuleIds.add(id);
+                    } else {
+                      nextSelectedRuleIds.delete(id);
+                    }
+                  });
+
+                  return [...nextSelectedRuleIds];
                 });
-
-                setPendingAttachRuleIds([...nextPendingAttachRuleIds]);
-                setPendingDetachRuleIds([...nextPendingDetachRuleIds]);
               },
-              selected: selectedPageRules,
+              selected: selectedPageItems,
             }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isConfirmModalVisible && (
+      {confirmAction && (
         <EuiConfirmModal
           data-test-subj="alertAnalysisWorkflowRuleAttachmentConfirmModal"
           aria-labelledby={confirmModalTitleId}
-          title={i18n.translate(
-            'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalTitle',
-            {
-              defaultMessage: 'Update rule attachments?',
-            }
-          )}
+          title={
+            confirmAction === 'attach'
+              ? i18n.translate(
+                  'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalAttachTitle',
+                  { defaultMessage: 'Attach the workflow?' }
+                )
+              : i18n.translate(
+                  'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalDetachTitle',
+                  { defaultMessage: 'Detach the workflow?' }
+                )
+          }
           titleProps={{ id: confirmModalTitleId }}
           onCancel={() => {
             if (!isUpdatingRuleAttachments) {
-              setIsConfirmModalVisible(false);
+              setConfirmAction(null);
             }
           }}
           onConfirm={() => {
             setIsUpdatingRuleAttachments(true);
-            updateMutation.mutate();
+            updateMutation.mutate(confirmAction);
           }}
           cancelButtonText={i18n.translate(
             'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalCancelButtonLabel',
@@ -722,25 +737,45 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
               defaultMessage: 'Cancel',
             }
           )}
-          confirmButtonText={i18n.translate(
-            'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalConfirmButtonLabel',
-            {
-              defaultMessage: 'Update {changedRulesCount, plural, one {# rule} other {# rules}}',
-              values: { changedRulesCount },
-            }
-          )}
-          buttonColor="primary"
+          confirmButtonText={
+            confirmAction === 'attach'
+              ? i18n.translate(
+                  'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalAttachConfirmButtonLabel',
+                  {
+                    defaultMessage:
+                      'Attach workflow to {selectedRulesCount, plural, one {# rule} other {# rules}}',
+                    values: { selectedRulesCount },
+                  }
+                )
+              : i18n.translate(
+                  'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalDetachConfirmButtonLabel',
+                  {
+                    defaultMessage:
+                      'Detach workflow from {selectedRulesCount, plural, one {# rule} other {# rules}}',
+                    values: { selectedRulesCount },
+                  }
+                )
+          }
+          buttonColor={confirmAction === 'attach' ? 'primary' : 'warning'}
           defaultFocusedButton="confirm"
           confirmButtonDisabled={isUpdatingRuleAttachments}
           isLoading={isUpdatingRuleAttachments}
         >
           <EuiText size="s">
             <p>
-              <FormattedMessage
-                id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalDescription"
-                defaultMessage="This will update the alert analysis workflow attachment state for {changedRulesCount, plural, one {# rule} other {# rules}}."
-                values={{ changedRulesCount }}
-              />
+              {confirmAction === 'attach' ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalAttachDescription"
+                  defaultMessage="This will attach the alert analysis workflow to {selectedRulesCount, plural, one {# rule} other {# rules}}."
+                  values={{ selectedRulesCount }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalDetachDescription"
+                  defaultMessage="This will detach the alert analysis workflow from {selectedRulesCount, plural, one {# rule} other {# rules}}."
+                  values={{ selectedRulesCount }}
+                />
+              )}
             </p>
             {isUpdatingRuleAttachments && (
               <EuiFlexGroup

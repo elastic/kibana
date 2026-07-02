@@ -7,13 +7,15 @@
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '../../../../common/lib/kibana';
 import {
+  ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE,
+  ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE,
 } from './api';
 import { AlertAnalysisWorkflowRuleAttachmentSection } from './alert_analysis_workflow_rule_attachment_section';
@@ -45,7 +47,7 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
     coreStart.http.fetch.mockImplementation(async (...args: unknown[]) => {
       const [path, options] = args as [
         string,
-        { method?: string; query?: Record<string, unknown> }
+        { method?: string; query?: Record<string, unknown>; body?: string }
       ];
 
       if (path === ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE) {
@@ -56,6 +58,22 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
         const page = (options?.query?.page as number) ?? 1;
         const rules = page === 1 ? PAGE_1_RULES : PAGE_2_RULES;
         return { page, perPage: PER_PAGE, total: TOTAL_RULES, attached: ATTACHED_RULES, rules };
+      }
+
+      if (path === ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE) {
+        return {
+          total: TOTAL_RULES,
+          attached: ATTACHED_RULES,
+          selectable: TOTAL_RULES - ATTACHED_RULES,
+          attachedRuleIds: PAGE_1_RULES.map((rule) => rule.id),
+          ruleIds: PAGE_2_RULES.map((rule) => rule.id),
+        };
+      }
+
+      if (path === ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE) {
+        const body = options?.body ? JSON.parse(options.body) : {};
+        const updated = (body.attachRuleIds?.length ?? 0) + (body.detachRuleIds?.length ?? 0);
+        return { matched: updated, updated };
       }
 
       return {};
@@ -83,29 +101,181 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
     );
   };
 
-  it('navigating to page 2 does not create pending changes when no rules were manually selected', async () => {
+  const getRowCheckbox = (ruleId: string) => screen.getByTestId(`checkboxSelectRow-${ruleId}`);
+
+  const getLastUpdateRequestBody = () => {
+    const calls = coreStart.http.fetch.mock.calls as unknown as Array<[string, { body?: string }]>;
+    const call = [...calls]
+      .reverse()
+      .find(([path]) => path === ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE);
+
+    if (!call) {
+      throw new Error('Expected an update request to have been made');
+    }
+
+    const [, options] = call;
+    return JSON.parse(options?.body ?? '{}');
+  };
+
+  beforeEach(() => {
+    coreStart.http.fetch.mockClear();
+  });
+
+  it('navigating to page 2 does not create spurious selection', async () => {
     renderComponent();
 
-    // Wait for page 1 to load — all 5 rules are attached so all rows appear selected
     await waitFor(() => {
       expect(screen.getByText('Rule 1')).toBeInTheDocument();
     });
 
-    // Confirm no pending changes on page 1
-    expect(screen.getByText('Changed 0 rules')).toBeInTheDocument();
+    // Nothing is selected on page 1, even though every rule on this page is attached.
+    expect(screen.getByText('Selected 0 rules')).toBeInTheDocument();
     expect(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentAttachButton')).toBeDisabled();
+    expect(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentDetachButton')).toBeDisabled();
 
-    // Navigate to page 2 via the EUI pagination next button
     const nextPageButton = screen.getByTestId('pagination-button-next');
     await userEvent.click(nextPageButton);
 
-    // Wait for page 2 to render
     await waitFor(() => {
       expect(screen.getByText('Rule 6')).toBeInTheDocument();
     });
 
-    // The key assertion: navigating pages must not create spurious pending changes
-    expect(screen.getByText('Changed 0 rules')).toBeInTheDocument();
+    // Navigating pages must not create spurious selection.
+    expect(screen.getByText('Selected 0 rules')).toBeInTheDocument();
     expect(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentAttachButton')).toBeDisabled();
+    expect(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentDetachButton')).toBeDisabled();
+  });
+
+  it('preserves a manually selected row when navigating away and back', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('Rule 1')).toBeInTheDocument();
+    });
+
+    await userEvent.click(getRowCheckbox('p1-rule-1'));
+    expect(screen.getByText('Selected 1 rule')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('pagination-button-next'));
+    await waitFor(() => {
+      expect(screen.getByText('Rule 6')).toBeInTheDocument();
+    });
+
+    // The page-1 selection survives navigating to page 2, even though page 2 shows nothing checked.
+    expect(screen.getByText('Selected 1 rule')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('pagination-button-previous'));
+    await waitFor(() => {
+      expect(screen.getByText('Rule 1')).toBeInTheDocument();
+    });
+
+    expect(getRowCheckbox('p1-rule-1')).toBeChecked();
+    expect(screen.getByText('Selected 1 rule')).toBeInTheDocument();
+  });
+
+  it('shows the workflow action state independently of row selection', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('Rule 1')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Workflow action')).toBeInTheDocument();
+    // Page 1 rules are all attached...
+    expect(screen.getAllByText('Attached')).toHaveLength(PAGE_1_RULES.length);
+    // ...but none of the checkboxes are pre-checked, since selection is decoupled from state.
+    PAGE_1_RULES.forEach((rule) => {
+      expect(getRowCheckbox(rule.id)).not.toBeChecked();
+    });
+
+    await userEvent.click(screen.getByTestId('pagination-button-next'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Rule 6')).toBeInTheDocument();
+    });
+
+    expect(screen.getAllByText('Not attached')).toHaveLength(PAGE_2_RULES.length);
+  });
+
+  it('attaches the workflow to the selected rules', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('Rule 1')).toBeInTheDocument();
+    });
+
+    await userEvent.click(getRowCheckbox('p1-rule-1'));
+    await userEvent.click(getRowCheckbox('p1-rule-2'));
+
+    expect(screen.getByText('Selected 2 rules')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentAttachButton'));
+    await userEvent.click(
+      within(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentConfirmModal')).getByText(
+        'Attach workflow to 2 rules'
+      )
+    );
+
+    await waitFor(() => {
+      expect(getLastUpdateRequestBody()).toEqual({
+        attachRuleIds: ['p1-rule-1', 'p1-rule-2'],
+        detachRuleIds: [],
+        dryRun: false,
+      });
+    });
+  });
+
+  it('detaches the workflow from the selected rules', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('Rule 1')).toBeInTheDocument();
+    });
+
+    await userEvent.click(getRowCheckbox('p1-rule-3'));
+
+    await userEvent.click(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentDetachButton'));
+    await userEvent.click(
+      within(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentConfirmModal')).getByText(
+        'Detach workflow from 1 rule'
+      )
+    );
+
+    await waitFor(() => {
+      expect(getLastUpdateRequestBody()).toEqual({
+        attachRuleIds: [],
+        detachRuleIds: ['p1-rule-3'],
+        dryRun: false,
+      });
+    });
+  });
+
+  it('selects all matching rules across pages and attaches the workflow to them', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('Rule 1')).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentSelectAllButton'));
+
+    await waitFor(() => {
+      expect(screen.getByText(`Selected ${TOTAL_RULES} rules`)).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentAttachButton'));
+    await userEvent.click(
+      within(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentConfirmModal')).getByText(
+        `Attach workflow to ${TOTAL_RULES} rules`
+      )
+    );
+
+    await waitFor(() => {
+      const body = getLastUpdateRequestBody();
+      expect(body.detachRuleIds).toEqual([]);
+      expect(new Set(body.attachRuleIds)).toEqual(
+        new Set([...PAGE_1_RULES.map((rule) => rule.id), ...PAGE_2_RULES.map((rule) => rule.id)])
+      );
+    });
   });
 });
