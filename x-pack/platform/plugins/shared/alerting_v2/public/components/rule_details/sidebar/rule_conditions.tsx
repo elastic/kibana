@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import {
   getBreachEsqlQuery,
@@ -94,45 +94,42 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
     ...(isAlertMode && !isSummary
       ? [
           {
-            title: i18n.translate('xpack.alertingV2.ruleDetails.recovery', {
-              defaultMessage: 'Recovery',
-            }),
-            description: recoveryQuery ? (
-              <>
-                {i18n.translate('xpack.alertingV2.ruleDetails.recoveryCustom', {
-                  defaultMessage: 'Custom',
-                })}
-                <EuiSpacer size="s" />
-                <EuiText size="xs">
-                  <strong>
-                    {i18n.translate('xpack.alertingV2.ruleDetails.recoveryCondition', {
-                      defaultMessage: 'Recovery condition',
-                    })}
-                  </strong>
-                </EuiText>
-                <EuiSpacer size="xs" />
-                <EuiCodeBlock
-                  language="esql"
-                  isCopyable
-                  paddingSize="s"
-                  data-test-subj="alertingV2RuleDetailsRecoveryCondition"
-                >
-                  {recoveryQuery}
-                </EuiCodeBlock>
-              </>
-            ) : (
-              i18n.translate('xpack.alertingV2.ruleDetails.recoveryDefault', {
-                defaultMessage: 'Default',
-              })
-            ),
-            'data-test-subj': 'alertingV2RuleDetailsRecovery',
-          },
-          {
             title: i18n.translate('xpack.alertingV2.ruleDetails.alertDelay', {
               defaultMessage: 'Alert delay',
             }),
             description: formatAlertDelay(rule.state_transition),
             'data-test-subj': 'alertingV2RuleDetailsAlertDelay',
+          },
+          {
+            title: i18n.translate('xpack.alertingV2.ruleDetails.recovery', {
+              defaultMessage: 'Recovery',
+            }),
+            description:
+              rule.recovery_strategy === 'query'
+                ? i18n.translate('xpack.alertingV2.ruleDetails.recoveryCustom', {
+                    defaultMessage: 'Custom',
+                  })
+                : i18n.translate('xpack.alertingV2.ruleDetails.recoveryDefault', {
+                    defaultMessage: 'Default',
+                  }),
+            'data-test-subj': 'alertingV2RuleDetailsRecovery',
+          },
+          {
+            title: i18n.translate('xpack.alertingV2.ruleDetails.recoveryCondition', {
+              defaultMessage: 'Recovery condition',
+            }),
+            description: recoveryQuery ? null : EMPTY_VALUE,
+            'data-test-subj': 'alertingV2RuleDetailsRecoveryCondition',
+            fullWidthContent: recoveryQuery ? (
+              <EuiCodeBlock
+                language="esql"
+                isCopyable
+                paddingSize="s"
+                data-test-subj="alertingV2RuleDetailsRecoveryConditionQuery"
+              >
+                {recoveryQuery}
+              </EuiCodeBlock>
+            ) : null,
           },
           {
             title: i18n.translate('xpack.alertingV2.ruleDetails.recoveryDelay', {
@@ -177,7 +174,7 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
         {getBreachEsqlQuery(rule.query) || EMPTY_VALUE}
       </EuiCodeBlock>
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
 
       <RuleDetailsTable items={conditionItems} />
     </>

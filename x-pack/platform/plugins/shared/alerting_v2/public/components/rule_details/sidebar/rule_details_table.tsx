@@ -7,12 +7,20 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiTable, EuiTableBody, EuiTableRow, EuiTableRowCell } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTable,
+  EuiTableBody,
+  EuiTableRow,
+  EuiTableRowCell,
+} from '@elastic/eui';
 
 export interface RuleDetailsTableItem {
   title: ReactNode;
-  description: ReactNode;
+  description?: ReactNode;
   'data-test-subj'?: string;
+  fullWidthContent?: ReactNode;
 }
 
 export interface RuleDetailsTableProps {
@@ -36,16 +44,32 @@ export const RuleDetailsTable: React.FunctionComponent<RuleDetailsTableProps> = 
       }}
     >
       <EuiTableBody>
-        {items.map((item, index) => (
-          <EuiTableRow key={index}>
-            <EuiTableRowCell width={TITLE_COLUMN_WIDTH}>
-              <strong>{item.title}</strong>
-            </EuiTableRowCell>
-            <EuiTableRowCell data-test-subj={item['data-test-subj']}>
-              {item.description}
-            </EuiTableRowCell>
-          </EuiTableRow>
-        ))}
+        {items.map((item, index) =>
+          item.fullWidthContent ? (
+            <EuiTableRow key={index}>
+              <EuiTableRowCell colSpan={2} valign="top" data-test-subj={item['data-test-subj']}>
+                <div css={{ paddingBlock: 4 }}>
+                  <EuiFlexGroup gutterSize="none" alignItems="baseline" responsive={false}>
+                    <EuiFlexItem grow={false} css={{ width: TITLE_COLUMN_WIDTH }}>
+                      <strong>{item.title}</strong>
+                    </EuiFlexItem>
+                    <EuiFlexItem>{item.description}</EuiFlexItem>
+                  </EuiFlexGroup>
+                  {item.fullWidthContent}
+                </div>
+              </EuiTableRowCell>
+            </EuiTableRow>
+          ) : (
+            <EuiTableRow key={index}>
+              <EuiTableRowCell width={TITLE_COLUMN_WIDTH}>
+                <strong>{item.title}</strong>
+              </EuiTableRowCell>
+              <EuiTableRowCell data-test-subj={item['data-test-subj']}>
+                {item.description}
+              </EuiTableRowCell>
+            </EuiTableRow>
+          )
+        )}
       </EuiTableBody>
     </EuiTable>
   );

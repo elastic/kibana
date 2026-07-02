@@ -58,14 +58,14 @@ export const RuleMetadata: React.FunctionComponent = () => {
 
   return (
     <>
-      <EuiTitle size="s">
-        <h2>
+      <EuiTitle size="xxs">
+        <h3>
           {i18n.translate('xpack.alertingV2.ruleDetails.metadata', {
             defaultMessage: 'Metadata',
           })}
-        </h2>
+        </h3>
       </EuiTitle>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
       <RuleDetailsTable items={metadataItems} />
     </>

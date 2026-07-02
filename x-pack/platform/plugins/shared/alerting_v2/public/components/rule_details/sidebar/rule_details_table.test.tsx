@@ -50,4 +50,44 @@ describe('RuleDetailsTable', () => {
 
     expect(screen.getByTestId('customDescription')).toHaveTextContent('Custom');
   });
+
+  it('renders a full-width row spanning both columns when fullWidthContent is provided', () => {
+    render(
+      <RuleDetailsTable
+        items={[
+          {
+            title: 'Recovery',
+            description: 'Custom',
+            'data-test-subj': 'recoveryRow',
+            fullWidthContent: <div data-test-subj="recoverySnippet">FROM logs-*</div>,
+          },
+        ]}
+      />
+    );
+
+    const cell = screen.getByTestId('recoveryRow');
+    expect(cell).toHaveAttribute('colspan', '2');
+    expect(cell).toHaveTextContent('Recovery');
+    expect(cell).toHaveTextContent('Custom');
+    expect(screen.getByTestId('recoverySnippet')).toHaveTextContent('FROM logs-*');
+  });
+
+  it('keeps unrelated rows in the normal two-column layout alongside a full-width row', () => {
+    render(
+      <RuleDetailsTable
+        items={[
+          { title: 'Mode', description: 'Alert', 'data-test-subj': 'modeRow' },
+          {
+            title: 'Recovery',
+            description: 'Custom',
+            'data-test-subj': 'recoveryRow',
+            fullWidthContent: <div data-test-subj="recoverySnippet">FROM logs-*</div>,
+          },
+        ]}
+      />
+    );
+
+    expect(screen.getByTestId('modeRow')).not.toHaveAttribute('colspan');
+    expect(screen.getByTestId('recoveryRow')).toHaveAttribute('colspan', '2');
+  });
 });
