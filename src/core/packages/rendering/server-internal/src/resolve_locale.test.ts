@@ -165,6 +165,31 @@ describe('resolveLocale', () => {
       expect(result.locale).toBe('fr-FR');
     });
 
+    it('resolves a bare Accept-Language tag to a configured regional locale', () => {
+      const result = resolveLocale(
+        baseArgs({
+          configuredLocales: ['en', 'fr-FR'],
+          translationHashes: { en: 'h1', 'fr-FR': 'h2' },
+          request: buildRequest({ acceptLanguage: 'fr' }),
+        })
+      );
+      // Bare `fr` falls back to the configured `fr-FR`.
+      expect(result.locale).toBe('fr-FR');
+    });
+
+    it('falls through to configLocale when a bare-tag fallback lacks servable translations', () => {
+      const result = resolveLocale(
+        baseArgs({
+          configuredLocales: ['en', 'fr-FR'],
+          translationHashes: { en: 'h1' }, // 'fr-FR' missing on purpose
+          configLocale: 'en',
+          request: buildRequest({ acceptLanguage: 'fr' }),
+        })
+      );
+      // `fr` resolves to `fr-FR`, but the guard rejects it (no hash).
+      expect(result.locale).toBe('en');
+    });
+
     it('ignores an Accept-Language match that is configured but missing from translationHashes', () => {
       // Edge case: a locale is in i18n.locales (so configuredLocales has it)
       // but translationHashes is missing it (e.g. translation file failed
@@ -337,7 +362,38 @@ describe('pickFromAcceptLanguage', () => {
   });
 
   it('does not fall back to language-only when the regional tag does not match', () => {
+    // Bare-tag fallback only: a region-qualified entry stays strict.
     expect(pickFromAcceptLanguage('fr-CH', ['fr-FR'])).toBeUndefined();
+  });
+
+  it('falls back from a bare tag to a configured regional locale', () => {
+    expect(pickFromAcceptLanguage('fr', ['en', 'fr-FR'])).toBe('fr-FR');
+  });
+
+  it('returns undefined for a bare tag with no configured primary-subtag match', () => {
+    expect(pickFromAcceptLanguage('de', ['en', 'fr-FR'])).toBeUndefined();
+  });
+
+  it('prefers an exact match over a bare-tag fallback within the list', () => {
+    expect(pickFromAcceptLanguage('fr-CA,fr-FR', ['fr-CA', 'fr-FR'])).toBe('fr-CA');
+  });
+
+  it('prefers a higher-weight bare-tag fallback over a lower-weight exact match', () => {
+    // Issue example: `fr` (q=1) resolves via fallback before exact `en-US` (q=0.9).
+    expect(pickFromAcceptLanguage('fr,en-US;q=0.9', ['fr-FR', 'en-US'])).toBe('fr-FR');
+  });
+
+  it('uses a lower-priority exact match only when no bare-tag fallback exists', () => {
+    expect(pickFromAcceptLanguage('fr,en-US;q=0.9', ['en-US'])).toBe('en-US');
+  });
+
+  it('breaks bare-tag ambiguity by configured order', () => {
+    expect(pickFromAcceptLanguage('pt', ['pt-PT', 'pt-BR'])).toBe('pt-PT');
+    expect(pickFromAcceptLanguage('pt', ['pt-BR', 'pt-PT'])).toBe('pt-BR');
+  });
+
+  it('respects q-weight ordering with a bare-tag fallback in play', () => {
+    expect(pickFromAcceptLanguage('de;q=0.9,fr;q=1', ['de-DE', 'fr-FR'])).toBe('fr-FR');
   });
 
   it('skips the wildcard token', () => {
