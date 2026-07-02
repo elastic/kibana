@@ -13,7 +13,7 @@ import {
   EvaluateResponse,
   type EvaluateRequestBodyInput,
 } from '@kbn/evals-common';
-import type { Evaluator, EvaluatorParams, Example, TaskOutput } from '../types';
+import type { Evaluator, EvaluatorKind, EvaluatorParams, Example, TaskOutput } from '../types';
 
 export type MapContextFn<TOutput = TaskOutput> = (params: EvaluatorParams<Example, TOutput>) => {
   trace_id: string;
@@ -50,16 +50,17 @@ export class EvaluatorApiClient {
   toEvaluator(
     evaluatorName: string,
     options: {
+      kind: EvaluatorKind;
       version?: string;
       connectorId?: string;
       mapContext?: MapContextFn;
-    } = {}
+    }
   ): Evaluator {
-    const { version, connectorId, mapContext } = options;
+    const { kind, version, connectorId, mapContext } = options;
 
     return {
       name: evaluatorName,
-      kind: 'LLM',
+      kind,
       evaluate: async (params) => {
         const mapped = (mapContext ?? defaultMapContext)(params);
         try {
@@ -102,7 +103,7 @@ export class EvaluatorApiClient {
   }
 
   toEvaluators(
-    configs: Array<{ name: string; version?: string; connectorId?: string }>,
+    configs: Array<{ name: string; kind: EvaluatorKind; version?: string; connectorId?: string }>,
     options: { mapContext?: MapContextFn } = {}
   ): Evaluator[] {
     const { mapContext } = options;
@@ -133,7 +134,7 @@ export class EvaluatorApiClient {
 
     return configs.map((config) => ({
       name: config.name,
-      kind: 'LLM',
+      kind: config.kind,
       evaluate: async (params) => {
         try {
           const result = await evaluateForTrace(params);
@@ -165,6 +166,7 @@ export class EvaluatorApiClient {
   toSubScoreEvaluators(
     config: {
       name: string;
+      kind: EvaluatorKind;
       version?: string;
       connectorId?: string;
       subScores: Array<{ key: string; evaluatorName: string }>;
@@ -201,7 +203,7 @@ export class EvaluatorApiClient {
 
     return config.subScores.map(({ key, evaluatorName }) => ({
       name: evaluatorName,
-      kind: 'LLM',
+      kind: config.kind,
       evaluate: async (params) => {
         try {
           const result = await evaluateForTrace(params);

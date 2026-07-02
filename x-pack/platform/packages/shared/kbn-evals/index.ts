@@ -73,7 +73,7 @@ export type {
   AgentBuilderClientResponse,
   ConverseStep,
 } from './src/utils/agent_builder_client';
-export type { DefaultEvaluators, ReportDisplayOptions } from './src/types';
+export type { DefaultEvaluators, EvaluatorKind, ReportDisplayOptions } from './src/types';
 export type { EvaluationCriterion, EvaluationCriterionStructured } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
 export type {
