@@ -6,7 +6,7 @@
  */
 
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
-import type { JudgeEvaluationExample, JudgeAgentOutput } from '../../types';
+import type { DiscoveryJudgeEvaluationExample, DiscoveryJudgeAgentOutput } from '../../types';
 
 /** Status decision gates, mirrored from the judge instructions so the LLM grades evidence justification. */
 const STATUS_DECISION_RUBRIC = [
@@ -24,7 +24,7 @@ const STATUS_DECISION_RUBRIC = [
  */
 export const createStatusCorrectnessEvaluator = (
   criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator
-): Evaluator<JudgeEvaluationExample, JudgeAgentOutput> => ({
+): Evaluator<DiscoveryJudgeEvaluationExample, DiscoveryJudgeAgentOutput> => ({
   name: 'status_correctness',
   kind: 'LLM',
   evaluate: async (params) => {
@@ -40,7 +40,15 @@ export const createStatusCorrectnessEvaluator = (
     }
 
     const events = output?.significantEvents ?? [];
-    const statusSummary = events.map((e) => `${e.discovery_slug}=${e.status}`).join(', ');
+    const statusSummary = events
+      .map((e) => {
+        const confirmedCount = (e.evidences ?? []).filter((ev) => ev.confirmed === true).length;
+        return (
+          `${e.discovery_slug}: status=${e.status}, criticality=${e.criticality}, ` +
+          `confidence=${e.confidence}, confirmedEvidenceCount=${confirmedCount}`
+        );
+      })
+      .join('; ');
 
     const criteria: EvaluationCriterion[] = [
       {
@@ -49,7 +57,7 @@ export const createStatusCorrectnessEvaluator = (
         text:
           `${STATUS_DECISION_RUBRIC}\n\n` +
           `Expected outcome: ${expectedGroundTruth}. ` +
-          `The judge returned: [${statusSummary || 'none'}]. ` +
+          `The discovery judge agent returned: [${statusSummary || 'none'}]. ` +
           `PASS only if each discovery's returned status matches the expected outcome (match by title/content, not by exact slug) AND is justified by the event's ` +
           `evidence, criticality, and the gates above. An over-escalation, under-escalation, or ` +
           `constraint violation is a FAIL even if it is "close".`,

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { buildJudgeInput } from './build_agent_input';
+import { buildDiscoveryJudgeInput } from './build_agent_input';
 
-describe('buildJudgeInput', () => {
+describe('buildDiscoveryJudgeInput', () => {
   it('emits the Unreviewed Discoveries section with compact JSON', () => {
-    expect(buildJudgeInput({ discoveries: [{ discovery_slug: 'svc__x-s' }] })).toBe(
+    expect(buildDiscoveryJudgeInput({ discoveries: [{ discovery_slug: 'svc__x-s' }] })).toBe(
       '## Unreviewed Discoveries\n[{"discovery_slug":"svc__x-s"}]'
     );
   });

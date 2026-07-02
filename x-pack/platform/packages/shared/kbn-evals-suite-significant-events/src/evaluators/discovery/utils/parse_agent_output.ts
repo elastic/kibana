@@ -20,29 +20,44 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /**
- * Extract the first top-level JSON object from an assistant message. Tolerates a ```json fenced
- * block or stray prose around the object by slicing between the outermost braces.
+ * Try to parse a JSON object from a text candidate (fenced block content or raw message).
+ * Tolerates stray prose by slicing between the outermost braces.
  */
-function extractJsonObject(message: string): Record<string, unknown> | undefined {
-  if (!message) {
-    return undefined;
-  }
-
-  const fenced = message.match(/```(?:json)?\s*([\s\S]*?)```/i);
-  const candidate = fenced ? fenced[1] : message;
-
+function tryParseJsonObject(candidate: string): Record<string, unknown> | undefined {
   const start = candidate.indexOf('{');
   const end = candidate.lastIndexOf('}');
   if (start === -1 || end === -1 || end < start) {
     return undefined;
   }
-
   try {
     const parsed = JSON.parse(candidate.slice(start, end + 1));
     return isRecord(parsed) ? parsed : undefined;
   } catch {
     return undefined;
   }
+}
+
+/**
+ * Extract the first top-level JSON object from an assistant message. Scans all ```json fenced
+ * blocks in order and returns the first that parses as a valid JSON object, falling back to the
+ * raw message. This prevents a preamble code fence (e.g. a tool-call example) from shadowing the
+ * actual JSON payload when it appears later in the message.
+ */
+function extractJsonObject(message: string): Record<string, unknown> | undefined {
+  if (!message) {
+    return undefined;
+  }
+
+  const fenceRegex = /```(?:json)?\s*([\s\S]*?)```/gi;
+  let match: RegExpExecArray | null;
+  while ((match = fenceRegex.exec(message)) !== null) {
+    const parsed = tryParseJsonObject(match[1]);
+    if (parsed) {
+      return parsed;
+    }
+  }
+
+  return tryParseJsonObject(message);
 }
 
 function parseArrayProperty<T>(message: string, key: string): T[] {

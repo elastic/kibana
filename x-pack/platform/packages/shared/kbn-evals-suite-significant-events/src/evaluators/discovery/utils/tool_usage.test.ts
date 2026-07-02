@@ -9,7 +9,7 @@ import type { ConverseStep } from '@kbn/evals';
 import {
   TOOL_ID_EXECUTE_ESQL,
   TOOL_ID_KI_SEARCH,
-  countToolCalls,
+  getToolCallCount,
   extractToolCallIds,
   summarizeEsqlGrounding,
 } from './tool_usage';
@@ -52,21 +52,24 @@ describe('extractToolCallIds', () => {
   });
 });
 
-describe('countToolCalls', () => {
+describe('getToolCallCount', () => {
   it('counts only tool_call steps', () => {
-    expect(countToolCalls(steps)).toBe(3);
+    expect(getToolCallCount(steps)).toBe(3);
   });
 });
 
 describe('summarizeEsqlGrounding', () => {
   it('counts execute_esql calls and how many returned rows', () => {
-    expect(summarizeEsqlGrounding(steps)).toEqual({ calls: 2, callsWithRows: 1 });
+    expect(summarizeEsqlGrounding(steps)).toEqual({
+      noOfToolCalls: 2,
+      noOfToolCallsWithResults: 1,
+    });
   });
 
   it('reports zero calls when execute_esql was never invoked', () => {
     expect(summarizeEsqlGrounding([{ type: 'tool_call', tool_id: TOOL_ID_KI_SEARCH }])).toEqual({
-      calls: 0,
-      callsWithRows: 0,
+      noOfToolCalls: 0,
+      noOfToolCallsWithResults: 0,
     });
   });
 });

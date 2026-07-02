@@ -45,12 +45,12 @@ export type InvestigatorEvaluator = Evaluator<
   InvestigatorAgentOutput
 >;
 
-export interface JudgeAgentOutput extends AgentOutputBase {
+export interface DiscoveryJudgeAgentOutput extends AgentOutputBase {
   significantEvents: SignificantEvent[];
   inputDiscoveries: Discovery[];
 }
 
-export interface JudgeEvaluationExample {
+export interface DiscoveryJudgeEvaluationExample {
   input: {
     discoveries: Array<Partial<Discovery>>;
   };
@@ -60,4 +60,7 @@ export interface JudgeEvaluationExample {
   metadata: Record<string, unknown> | null;
 }
 
-export type JudgeEvaluator = Evaluator<JudgeEvaluationExample, JudgeAgentOutput>;
+export type DiscoveryJudgeEvaluator = Evaluator<
+  DiscoveryJudgeEvaluationExample,
+  DiscoveryJudgeAgentOutput
+>;

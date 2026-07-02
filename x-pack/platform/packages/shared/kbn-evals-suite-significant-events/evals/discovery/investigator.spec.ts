@@ -8,7 +8,6 @@
 import { SIGEVENTS_INVESTIGATOR_AGENT_ID } from '@kbn/streams-plugin/server';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
-import type { DefaultEvaluators, Evaluator } from '@kbn/evals';
 import type { Detection, Discovery } from '@kbn/significant-events-schema';
 
 import type { GcsConfig } from '../../src/data_generators/replay';
@@ -47,17 +46,8 @@ import type { ContinuationCycle } from '../../src/evaluators/discovery/investiga
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
-/** Standard trace-based cost/latency evaluators (tokens, tool calls, latency). */
-const traceCostEvaluators = (t: DefaultEvaluators['traceBasedEvaluators']): Evaluator[] => [
-  t.inputTokens,
-  t.outputTokens,
-  t.cachedTokens,
-  t.toolCalls,
-  t.latency,
-];
-
 evaluate.describe(
-  'Significant Events Discovery',
+  'Significant Events Discovery - Investigator',
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
@@ -193,6 +183,8 @@ evaluate.describe(
               apiServices,
               log,
             }) => {
+              // Concurrency must remain 1 — this variable is not safe under concurrent tasks.
+              // Raising concurrency requires replacing it with a per-invocation approach or a proper lock.
               let lastReplayedSnapshotKey: string | undefined;
 
               const detectionsByScenario = new Map(
@@ -207,7 +199,7 @@ evaluate.describe(
                   datasets: [
                     {
                       name: `sigevents: Discovery investigator (${dataset.id}) (${source})`,
-                      description: `[${dataset.id}] investigator agent across scenarios (${source})`,
+                      description: `[${dataset.id}] Investigator agent across scenarios (${source})`,
                       examples: collectedExamples.map(({ scenario }) => ({
                         id: scenario.input.scenario_id,
                         input: { ...scenario.input, snapshot_source: scenario.snapshot_source },
@@ -296,7 +288,11 @@ evaluate.describe(
                   ...createInvestigatorEvaluators({
                     criteriaFn: evaluators.criteria.bind(evaluators),
                   }),
-                  ...traceCostEvaluators(evaluators.traceBasedEvaluators),
+                  evaluators.traceBasedEvaluators.inputTokens,
+                  evaluators.traceBasedEvaluators.outputTokens,
+                  evaluators.traceBasedEvaluators.cachedTokens,
+                  evaluators.traceBasedEvaluators.toolCalls,
+                  evaluators.traceBasedEvaluators.latency,
                 ]
               );
             }
@@ -473,9 +469,13 @@ evaluate.describe(
                 },
                 [
                   // Task returns a slug trajectory (not discoveries/steps), so only the continuation
-                  // check applies; trace-based evaluators aggregate cost across all cycles.
+                  // check applies; trace-based evaluators aggregate across all cycles.
                   ...createContinuationEvaluators(),
-                  ...traceCostEvaluators(evaluators.traceBasedEvaluators),
+                  evaluators.traceBasedEvaluators.inputTokens,
+                  evaluators.traceBasedEvaluators.outputTokens,
+                  evaluators.traceBasedEvaluators.cachedTokens,
+                  evaluators.traceBasedEvaluators.toolCalls,
+                  evaluators.traceBasedEvaluators.latency,
                 ]
               );
             }

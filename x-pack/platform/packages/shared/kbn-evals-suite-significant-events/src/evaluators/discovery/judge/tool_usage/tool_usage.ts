@@ -10,9 +10,9 @@ import {
   TOOL_ID_KI_SEARCH,
   extractToolCallIds,
 } from '../../utils/tool_usage';
-import type { JudgeEvaluator } from '../../types';
+import type { DiscoveryJudgeEvaluator } from '../../types';
 
-export const createToolUsageEvaluator = (): JudgeEvaluator => ({
+export const createToolUsageEvaluator = (): DiscoveryJudgeEvaluator => ({
   name: 'trajectory',
   kind: 'CODE',
   evaluate: ({ output }) => {
@@ -22,15 +22,14 @@ export const createToolUsageEvaluator = (): JudgeEvaluator => ({
     // allEvidencesHaveQuery must reflect what the agent actually received.
     const discoveries = output.inputDiscoveries ?? [];
 
-    const allEvidencesHaveQuery =
-      discoveries.length > 0 &&
-      discoveries.every((d) => {
-        const evidences = d.evidences ?? [];
-        return (
-          evidences.length > 0 &&
-          evidences.every((e) => e.esql_query != null && e.esql_query !== '')
-        );
-      });
+    // Does at least one discovery need KI search (no pre-populated queries)?
+    // Per-discovery check avoids falsely routing the entire batch to "both tools required"
+    // when only one of several fully-evidenced discoveries is missing queries.
+    const anyDiscoveryNeedsKiSearch = discoveries.some((d) => {
+      const evidences = d.evidences ?? [];
+      return evidences.length === 0 || evidences.some((e) => e.esql_query == null);
+    });
+    const allEvidencesHaveQuery = discoveries.length > 0 && !anyDiscoveryNeedsKiSearch;
 
     const calledTools = new Set(extractToolCallIds(output.steps ?? []));
     const calledKiSearch = calledTools.has(TOOL_ID_KI_SEARCH);

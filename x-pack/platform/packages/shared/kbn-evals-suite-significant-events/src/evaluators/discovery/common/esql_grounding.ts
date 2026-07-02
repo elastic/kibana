@@ -23,9 +23,11 @@ export function createExecuteEsqlGroundingEvaluator<
     name: 'execute_esql_grounding',
     kind: 'CODE',
     evaluate: ({ output }) => {
-      const { calls, callsWithRows } = summarizeEsqlGrounding(output.steps ?? []);
+      const { noOfToolCalls, noOfToolCallsWithResults } = summarizeEsqlGrounding(
+        output.steps ?? []
+      );
 
-      if (calls === 0) {
+      if (noOfToolCalls === 0) {
         return Promise.resolve({
           score: null,
           label: 'unavailable',
@@ -33,12 +35,12 @@ export function createExecuteEsqlGroundingEvaluator<
         });
       }
 
-      const grounded = callsWithRows > 0;
+      const grounded = noOfToolCallsWithResults > 0;
       return Promise.resolve({
         score: grounded ? 1 : 0,
         explanation: grounded
-          ? `${callsWithRows}/${calls} execute_esql call(s) returned rows`
-          : `All ${calls} execute_esql call(s) returned zero rows — analysis not grounded in data`,
+          ? `${noOfToolCallsWithResults}/${noOfToolCalls} execute_esql call(s) returned rows`
+          : `All ${noOfToolCalls} execute_esql call(s) returned zero rows — analysis not grounded in data`,
       });
     },
   };

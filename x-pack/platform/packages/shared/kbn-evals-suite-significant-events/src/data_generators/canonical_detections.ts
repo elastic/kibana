@@ -7,7 +7,7 @@
 
 import type { Detection } from '@kbn/significant-events-schema';
 
-const CANONICAL_TIMESTAMP = '2024-01-01T00:00:00.000Z';
+const CANONICAL_TIMESTAMP = '2026-01-01T00:00:00.000Z';
 
 export const canonicalDetectionsFromGroundTruth = ({
   streamName,

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { JudgeEvaluator } from '../../types';
+import type { DiscoveryJudgeEvaluator } from '../../types';
 import { summarizeEsqlGrounding } from '../../utils/tool_usage';
 
 /**
  * CODE evaluator: every `promoted` event must carry a `confirmed: true` evidence and the judge must
  * have run `execute_esql` this cycle. Score = valid promoted / promoted; null when none promoted.
  */
-export const confirmedEvidencesEvaluator: JudgeEvaluator = {
+export const confirmedEvidencesEvaluator: DiscoveryJudgeEvaluator = {
   name: 'confirmed_evidences',
   kind: 'CODE',
   evaluate: ({ output }) => {
@@ -28,7 +28,7 @@ export const confirmedEvidencesEvaluator: JudgeEvaluator = {
       });
     }
 
-    const esqlCallCount = summarizeEsqlGrounding(steps ?? []).calls;
+    const esqlCallCount = summarizeEsqlGrounding(steps ?? []).noOfToolCalls;
     // Require at least one execute_esql call per promoted event. A single call shared
     // across all promotions cannot guarantee that each event was individually re-verified.
     const sufficientEsqlCoverage = esqlCallCount >= promoted.length;

@@ -33,18 +33,22 @@ import {
 import type { DiscoveryJudgeScenario } from '../../src/datasets';
 import { createJudgeEvaluators } from '../../src/evaluators/discovery';
 import { parseSignificantEvents } from '../../src/evaluators/discovery/utils/parse_agent_output';
-import { buildJudgeInput } from '../../src/evaluators/discovery/judge/build_agent_input';
+import { buildDiscoveryJudgeInput } from '../../src/evaluators/discovery/judge/build_agent_input';
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
 evaluate.describe(
-  'Significant Events Discovery',
+  'Significant Events Discovery - Judge',
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-    evaluate.beforeAll(async ({ esClient, log }) => {
+    evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
+      // Agent availability is gated on this UI setting (cached per space); enable before any converse.
+      await kbnClient.uiSettings.update({ 'observability:streamsEnableSignificantEvents': true });
+      log.info('Enabled significant events UI setting');
+
       const uniqueCatalogSources = new Map<string, GcsConfig>();
       for (const dataset of activeDatasets) {
         for (const scenario of dataset.discoveryJudge) {
@@ -218,7 +222,7 @@ evaluate.describe(
                       );
                     }
 
-                    const agentInput = buildJudgeInput({ discoveries });
+                    const agentInput = buildDiscoveryJudgeInput({ discoveries });
 
                     if (snapshotKey !== lastReplayedSnapshotKey) {
                       await cleanSignificantEventsDataStreams(esClient, log);

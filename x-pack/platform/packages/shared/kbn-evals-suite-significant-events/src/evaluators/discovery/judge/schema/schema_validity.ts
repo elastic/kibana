@@ -6,7 +6,7 @@
  */
 
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import type { JudgeEvaluator } from '../../types';
+import type { DiscoveryJudgeEvaluator } from '../../types';
 
 const VALID_STATUSES = new Set<SignificantEvent['status']>([
   'promoted',
@@ -32,7 +32,7 @@ function isCriticalityValid(value: unknown): boolean {
  * CODE evaluator: validates required `SigEvent` fields, that `status` is in the allowed set, and
  * that `criticality` (when present) is a number in 0–100. Score = valid_docs / total_docs.
  */
-export const schemaValidityJudgeEvaluator: JudgeEvaluator = {
+export const schemaValidityJudgeEvaluator: DiscoveryJudgeEvaluator = {
   name: 'schema_validity',
   kind: 'CODE',
   evaluate: ({ output }) => {

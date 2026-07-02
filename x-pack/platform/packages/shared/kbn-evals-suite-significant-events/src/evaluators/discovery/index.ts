@@ -13,7 +13,7 @@ export type {
   InvestigatorAgentOutput,
   InvestigatorEvaluationExample,
   InvestigatorEvaluator,
-  JudgeAgentOutput,
-  JudgeEvaluationExample,
-  JudgeEvaluator,
+  DiscoveryJudgeAgentOutput,
+  DiscoveryJudgeEvaluationExample,
+  DiscoveryJudgeEvaluator,
 } from './types';

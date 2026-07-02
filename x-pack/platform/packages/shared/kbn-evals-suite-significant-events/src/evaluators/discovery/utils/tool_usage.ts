@@ -24,12 +24,12 @@ export function extractToolCallIds(steps: ConverseStep[]): string[] {
 }
 
 /** Total number of `tool_call` steps (the agent's tool-call budget usage). */
-export function countToolCalls(steps: ConverseStep[]): number {
+export function getToolCallCount(steps: ConverseStep[]): number {
   return steps.filter((step) => step.type === 'tool_call').length;
 }
 
 /** Whether an `execute_esql` call returned at least one row (`data.values` on a results entry). */
-function executeEsqlReturnedRows(results: unknown[]): boolean {
+function didExecuteEsqlToolReturnRows(results: unknown[]): boolean {
   for (const result of results) {
     if (isRecord(result) && isRecord(result.data) && Array.isArray(result.data.values)) {
       return result.data.values.length > 0;
@@ -40,26 +40,26 @@ function executeEsqlReturnedRows(results: unknown[]): boolean {
 
 export interface EsqlGroundingSummary {
   /** Number of `execute_esql` tool calls. */
-  calls: number;
+  noOfToolCalls: number;
   /** How many of those returned at least one row. */
-  callsWithRows: number;
+  noOfToolCallsWithResults: number;
 }
 
 /** `execute_esql` call count and how many returned rows. */
 export function summarizeEsqlGrounding(steps: ConverseStep[]): EsqlGroundingSummary {
-  let calls = 0;
-  let callsWithRows = 0;
+  let noOfToolCalls = 0;
+  let noOfToolCallsWithResults = 0;
 
   for (const step of steps) {
     if (step.type !== 'tool_call' || step.tool_id !== TOOL_ID_EXECUTE_ESQL) {
       continue;
     }
-    calls++;
+    noOfToolCalls++;
     const results = Array.isArray(step.results) ? step.results : [];
-    if (executeEsqlReturnedRows(results)) {
-      callsWithRows++;
+    if (didExecuteEsqlToolReturnRows(results)) {
+      noOfToolCallsWithResults++;
     }
   }
 
-  return { calls, callsWithRows };
+  return { noOfToolCalls, noOfToolCallsWithResults };
 }

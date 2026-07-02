@@ -8,7 +8,7 @@
 import { selectEvaluators } from '@kbn/evals';
 import { createScenarioCriteriaLlmEvaluator } from '../../scenario_criteria/evaluators';
 import type { CreateScenarioCriteriaLlmEvaluatorOptions } from '../../scenario_criteria/evaluators';
-import type { JudgeEvaluator } from '../types';
+import type { DiscoveryJudgeEvaluator } from '../types';
 import { createExecuteEsqlGroundingEvaluator } from '../common/esql_grounding';
 import { createToolUsageEvaluator } from './tool_usage/tool_usage';
 import {
@@ -21,12 +21,12 @@ import { confirmedEvidencesEvaluator } from './evidences/confirmed_evidences';
 import { createStatusCorrectnessEvaluator } from './status/status_correctness';
 
 /**
- * Factory that creates the full set of evaluators for the judge agent eval suite.
+ * Factory that creates the full set of evaluators for the judge agent eval spec.
  */
 export const createJudgeEvaluators = (
   scenarioCriteria?: CreateScenarioCriteriaLlmEvaluatorOptions
-): JudgeEvaluator[] => {
-  const codeEvaluators: JudgeEvaluator[] = [
+): DiscoveryJudgeEvaluator[] => {
+  const codeEvaluators: DiscoveryJudgeEvaluator[] = [
     schemaValidityJudgeEvaluator,
     createToolUsageEvaluator(),
     createExecuteEsqlGroundingEvaluator(),
