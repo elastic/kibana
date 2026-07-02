@@ -5,7 +5,6 @@ pageLoadAssetSize:
   agentBuilderDashboards: 7786
   agentBuilderPlatform: 18924
   agentBuilderWorkflows: 24405
-  contextEngine: 8828
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
@@ -28,6 +27,7 @@ pageLoadAssetSize:
   console: 31191
   contentConnectors: 33014
   contentManagement: 8350
+  contextEngine: 8828
   controls: 10300
   core: 606422
   cps: 9209
