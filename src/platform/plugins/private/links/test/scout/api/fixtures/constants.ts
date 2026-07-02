@@ -29,17 +29,6 @@ export const EXTERNAL_LINK = {
   },
 };
 
-/** Minimal valid dashboard link object — uses a placeholder destination ID */
-export const DASHBOARD_LINK = {
-  type: 'dashboardLink' as const,
-  destination: 'test-dashboard-id',
-  options: {
-    use_filters: false,
-    use_time_range: false,
-    open_in_new_tab: false,
-  },
-};
-
 /** Minimal valid request body for creating a links library item */
 export const MINIMAL_LINKS_BODY = {
   title: 'Test Links Panel',

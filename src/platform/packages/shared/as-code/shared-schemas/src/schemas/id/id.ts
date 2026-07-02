@@ -9,6 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { isValidId } from './is_valid_id';
+import { MAX_ID_LENGTH } from '../../constants';
 
 export const asCodeIdSchema = schema.string({
   meta: {
@@ -21,4 +22,5 @@ export const asCodeIdSchema = schema.string({
     }
   },
   minLength: 1,
+  maxLength: MAX_ID_LENGTH,
 });

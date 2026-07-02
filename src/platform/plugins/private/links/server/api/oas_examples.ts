@@ -97,7 +97,8 @@ export const createLinksOASOperationObject = {
         `  -d '${JSON.stringify(linksCreateRequestExamples.createLinks.value, null, 2)}'`,
     },
     {
-      lang: 'Create a links library item - Console',
+      label: 'Create a links library item - Console',
+      lang: 'Console',
       source:
         `POST kbn:${LINKS_API_PATH}\n` +
         JSON.stringify(linksCreateRequestExamples.createLinks, null, 2) +

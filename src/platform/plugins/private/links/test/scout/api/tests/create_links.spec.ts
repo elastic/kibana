@@ -13,11 +13,21 @@ import { tags } from '@kbn/scout';
 import {
   apiTest,
   COMMON_HEADERS,
-  DASHBOARD_LINK,
   EXTERNAL_LINK,
   LINKS_API_PATH,
   MINIMAL_LINKS_BODY,
 } from '../fixtures';
+
+/** Minimal valid dashboard link object — uses a placeholder destination ID */
+export const DASHBOARD_LINK = {
+  type: 'dashboardLink' as const,
+  destination: 'test-dashboard-id',
+  options: {
+    use_filters: false,
+    use_time_range: false,
+    open_in_new_tab: false,
+  },
+};
 
 apiTest.describe('links - create', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;

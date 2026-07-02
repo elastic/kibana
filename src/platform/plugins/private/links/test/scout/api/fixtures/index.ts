@@ -12,10 +12,4 @@ import { apiTest as baseApiTest } from '@kbn/scout';
 
 export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
 
-export {
-  COMMON_HEADERS,
-  DASHBOARD_LINK,
-  EXTERNAL_LINK,
-  LINKS_API_PATH,
-  MINIMAL_LINKS_BODY,
-} from './constants';
+export { COMMON_HEADERS, EXTERNAL_LINK, LINKS_API_PATH, MINIMAL_LINKS_BODY } from './constants';
