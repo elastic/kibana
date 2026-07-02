@@ -178,4 +178,14 @@ describe('Stack Alerts Only Feature Privileges', () => {
     expect(allPrivilege?.management?.insightsAndAlerting).toContain('triggersActions');
     expect(readPrivilege?.management?.insightsAndAlerting).toContain('triggersActions');
   });
+
+  test('"all" privilege grants the "write" UI capability for alert-modify actions', () => {
+    expect(allPrivilege?.ui).toContain('show');
+    expect(allPrivilege?.ui).toContain('write');
+  });
+
+  test('"read" privilege grants only the "show" UI capability', () => {
+    expect(readPrivilege?.ui).toContain('show');
+    expect(readPrivilege?.ui).not.toContain('write');
+  });
 });
