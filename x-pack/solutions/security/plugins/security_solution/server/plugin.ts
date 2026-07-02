@@ -297,7 +297,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger,
         isServerless: this.isServerless,
       },
-      this.isServerless
+      this.isServerless,
+      plugins.encryptedSavedObjects?.canEncrypt === true
     ).catch((error) => {
       this.logger.error(`Error registering security tools: ${error}`);
     });
@@ -572,7 +573,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
-    registerCaseAttachments(plugins.cases.attachmentFramework);
+    registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures);
     plugins.cases.attachmentFramework.registerUnified(securityAlertAttachmentType);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {

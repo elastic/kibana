@@ -6,15 +6,16 @@
  */
 
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { registerWorkflowSteps } from './register_workflow_steps';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
 import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_status_step';
 import { setAlertTagsStepDefinition } from './set_alert_tags_step/set_alert_tags_step';
+import { setAttackTagsStepDefinition } from './set_attack_tags_step/set_attack_tags_step';
 import { assignAlertStepDefinition } from './assign_alert_step/assign_alert_step';
 import { assignAttackStepDefinition } from './assign_attack_step/assign_attack_step';
 import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
 
@@ -26,7 +27,7 @@ describe('registerWorkflowSteps (server)', () => {
       publicAttacksApiEnabled: true,
     } as ExperimentalFeatures);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(7);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(8);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       renderAlertNarrativeStepDefinition
     );
@@ -48,6 +49,9 @@ describe('registerWorkflowSteps (server)', () => {
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       setAttackStatusStepDefinition
     );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      setAttackTagsStepDefinition
+    );
   });
 
   it('does not register the attack steps when publicAttacksApiEnabled is false', () => {
@@ -63,5 +67,6 @@ describe('registerWorkflowSteps (server)', () => {
     );
     expect(registeredSteps).not.toContain(assignAttackStepDefinition);
     expect(registeredSteps).not.toContain(setAttackStatusStepDefinition);
+    expect(registeredSteps).not.toContain(setAttackTagsStepDefinition);
   });
 });
