@@ -32,3 +32,15 @@ export const ANOMALIES_TAB_TABLE_TEST_ID = 'entity-anomalies-tab-table' as const
 export const ANOMALIES_TAB_TABLE_GRID_TEST_ID = 'entity-anomalies-tab-table-grid' as const;
 export const ANOMALIES_TABLE_SCORE_COLUMN_TOOLTIP_TEST_ID =
   'entity-anomalies-table-score-column-tooltip' as const;
+export const ANOMALIES_TABLE_ROW_EXPAND_BUTTON_TEST_ID =
+  'entity-anomalies-table-row-expand-button' as const;
+
+// AnomalyExpandedRow — expanded row detail
+export const ANOMALIES_TABLE_EXPANDED_ROW_DESCRIPTION_TEST_ID =
+  'entity-anomalies-table-expanded-row-description' as const;
+
+// AnomalyRowActionsMenu — per-row investigation actions
+export const ANOMALIES_TABLE_ROW_ACTIONS_BUTTON_TEST_ID =
+  'entity-anomalies-table-row-actions-button' as const;
+export const ANOMALIES_TABLE_ROW_ACTION_TEST_ID_PREFIX =
+  'entity-anomalies-table-row-action-' as const;

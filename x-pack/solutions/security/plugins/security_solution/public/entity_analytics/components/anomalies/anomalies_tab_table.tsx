@@ -59,6 +59,7 @@ import {
   ANOMALIES_TAB_TABLE_TEST_ID,
   ANOMALIES_TAB_TABLE_GRID_TEST_ID,
   ANOMALIES_TABLE_SCORE_COLUMN_TOOLTIP_TEST_ID,
+  ANOMALIES_TABLE_ROW_EXPAND_BUTTON_TEST_ID,
 } from './test_ids';
 
 export interface TableChangeEvent {
@@ -142,6 +143,7 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
           return (
             <EuiToolTip content={label} disableScreenReaderOutput>
               <EuiButtonIcon
+                data-test-subj={ANOMALIES_TABLE_ROW_EXPAND_BUTTON_TEST_ID}
                 aria-label={label}
                 aria-expanded={isExpanded}
                 iconType={isExpanded ? 'arrowDown' : 'arrowRight'}

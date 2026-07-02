@@ -11,9 +11,12 @@ import {
   HOST_FLYOUT_ENTITY_ID,
   HOST_FLYOUT_HOST_NAME,
   MOCK_ANOMALY_OVERVIEW_EMPTY,
+  MOCK_ANOMALY_OVERVIEW_FILTERED_BY_CREDENTIAL_ACCESS,
   MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES,
   MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES_NO_TACTICS,
   MOCK_ANOMALY_SUMMARY,
+  MOCK_ANOMALY_SUMMARY_FILTERED_BY_CREDENTIAL_ACCESS,
+  MOCK_ANOMALY_SUMMARY_MULTI_TACTIC,
 } from '@kbn/scout-security/src/playwright/fixtures/test/page_objects/entity_flyout_anomalies_page';
 
 const ANOMALY_OVERVIEW_ROUTE = `**/internal/entity_analytics/entities/host/${HOST_FLYOUT_ENTITY_ID}/anomaly_overview`;
@@ -205,6 +208,232 @@ spaceTest.describe(
         await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesCountLink();
 
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTab).toBeVisible();
+      }
+    );
+
+    spaceTest(
+      'expanding an anomaly row shows the Explainer description',
+      async ({ page, pageObjects }) => {
+        await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES),
+          });
+        });
+        await page.route(ANOMALY_SUMMARY_ROUTE, async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(MOCK_ANOMALY_SUMMARY),
+          });
+        });
+
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
+        await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
+        await pageObjects.entityFlyoutAnomaliesPage.expandAnomalyRow();
+
+        await expect(pageObjects.entityFlyoutAnomaliesPage.expandedRowDescription).toBeVisible();
+      }
+    );
+
+    spaceTest(
+      'anomalies table row actions menu exposes investigation actions',
+      async ({ page, pageObjects }) => {
+        await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES),
+          });
+        });
+        await page.route(ANOMALY_SUMMARY_ROUTE, async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(MOCK_ANOMALY_SUMMARY),
+          });
+        });
+
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
+        await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
+        await pageObjects.entityFlyoutAnomaliesPage.openRowActionsMenu();
+
+        await expect(
+          pageObjects.entityFlyoutAnomaliesPage.getRowAction('add-to-timeline')
+        ).toBeVisible();
+        await expect(
+          pageObjects.entityFlyoutAnomaliesPage.getRowAction('view-in-discover')
+        ).toBeVisible();
+        await expect(
+          pageObjects.entityFlyoutAnomaliesPage.getRowAction('view-in-single-metric-viewer')
+        ).toBeVisible();
+      }
+    );
+
+    spaceTest(
+      'Add to timeline row action opens timeline scoped to the anomaly influencers',
+      async ({ page, pageObjects }) => {
+        await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES),
+          });
+        });
+        await page.route(ANOMALY_SUMMARY_ROUTE, async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(MOCK_ANOMALY_SUMMARY),
+          });
+        });
+        // Backs the row action's record lookup (ml.mlApi.results.anomalySearch) —
+        // returns a raw ES search response since the server proxies it unmodified.
+        await page.route('**/internal/ml/results/anomaly_search', async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      timestamp: 1735689600000,
+                      bucket_span: 900,
+                      influencers: [
+                        {
+                          influencer_field_name: 'host.name',
+                          influencer_field_values: [HOST_FLYOUT_HOST_NAME],
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            }),
+          });
+        });
+        // Backs both the row action's job lookup (ml.mlApi.jobs.jobs) and the table's
+        // own detector-description lookup (useGetInstalledJob), which also hits this
+        // endpoint and reads analysis_config.detectors — must be present or that lookup
+        // throws and the table (and its row actions button) never renders. A match_all
+        // datafeed query is a KNOWN_EMPTY_QUERY, so no extra datafeed filter is added to
+        // the timeline.
+        await page.route('**/internal/ml/jobs/jobs', async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify([
+              {
+                job_id: 'auth_high_count_logon_events_ea',
+                analysis_config: { detectors: [] },
+                datafeed_config: { query: { match_all: {} }, indices: ['logs-*'] },
+              },
+            ]),
+          });
+        });
+
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
+        await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
+        await pageObjects.entityFlyoutAnomaliesPage.openRowActionsMenu();
+        await pageObjects.entityFlyoutAnomaliesPage.getRowAction('add-to-timeline').click();
+
+        await expect(pageObjects.timelinePage.panel).toBeVisible({ timeout: 30000 });
+        await expect(pageObjects.timelinePage.kqlTextarea).toHaveValue(/"host\.name":"test-host"/);
+      }
+    );
+
+    spaceTest(
+      'selecting a MITRE tactic on the Anomalies tab filters anomaly results',
+      async ({ page, pageObjects }) => {
+        await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
+          const body = route.request().postDataJSON() as { threat_tactics?: string[] } | null;
+          const isFiltered = body?.threat_tactics?.includes('Credential Access') ?? false;
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(
+              isFiltered
+                ? MOCK_ANOMALY_OVERVIEW_FILTERED_BY_CREDENTIAL_ACCESS
+                : MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES
+            ),
+          });
+        });
+        await page.route(ANOMALY_SUMMARY_ROUTE, async (route) => {
+          const body = route.request().postDataJSON() as { threat_tactics?: string[] } | null;
+          const isFiltered = body?.threat_tactics?.includes('Credential Access') ?? false;
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(
+              isFiltered
+                ? MOCK_ANOMALY_SUMMARY_FILTERED_BY_CREDENTIAL_ACCESS
+                : MOCK_ANOMALY_SUMMARY_MULTI_TACTIC
+            ),
+          });
+        });
+
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
+        await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
+
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabTableGrid).toContainText(
+          'Unusual Process For a Linux Host'
+        );
+
+        await pageObjects.entityFlyoutAnomaliesPage.selectMitreTactic('Credential Access');
+
+        await expect(pageObjects.entityFlyoutAnomaliesPage.mitreTacticClearChip).toBeVisible();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabTableGrid).not.toContainText(
+          'Unusual Process For a Linux Host'
+        );
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabTableGrid).toContainText(
+          'Spike in Logon Events'
+        );
+      }
+    );
+
+    spaceTest(
+      'clearing the selected MITRE tactic filter restores unfiltered anomaly results',
+      async ({ page, pageObjects }) => {
+        await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
+          const body = route.request().postDataJSON() as { threat_tactics?: string[] } | null;
+          const isFiltered = body?.threat_tactics?.includes('Credential Access') ?? false;
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(
+              isFiltered
+                ? MOCK_ANOMALY_OVERVIEW_FILTERED_BY_CREDENTIAL_ACCESS
+                : MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES
+            ),
+          });
+        });
+        await page.route(ANOMALY_SUMMARY_ROUTE, async (route) => {
+          const body = route.request().postDataJSON() as { threat_tactics?: string[] } | null;
+          const isFiltered = body?.threat_tactics?.includes('Credential Access') ?? false;
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(
+              isFiltered
+                ? MOCK_ANOMALY_SUMMARY_FILTERED_BY_CREDENTIAL_ACCESS
+                : MOCK_ANOMALY_SUMMARY_MULTI_TACTIC
+            ),
+          });
+        });
+
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
+        await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
+        await pageObjects.entityFlyoutAnomaliesPage.selectMitreTactic('Credential Access');
+        await expect(pageObjects.entityFlyoutAnomaliesPage.mitreTacticClearChip).toBeVisible();
+
+        await pageObjects.entityFlyoutAnomaliesPage.clearMitreTacticFilter();
+
+        await expect(pageObjects.entityFlyoutAnomaliesPage.mitreTacticClearChip).toBeHidden();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabTableGrid).toContainText(
+          'Unusual Process For a Linux Host'
+        );
       }
     );
   }

@@ -40,6 +40,19 @@ const ANOMALIES_TAB_TABLE_TEST_ID = 'entity-anomalies-tab-table' as const;
 const ANOMALIES_TAB_TABLE_GRID_TEST_ID = 'entity-anomalies-tab-table-grid' as const;
 const ANOMALIES_TAB_MANAGE_JOBS_BUTTON_TEST_ID = 'entity-anomalies-tab-manage-jobs-button' as const;
 
+// AnomalyTabTableSection — left panel anomalies table row controls
+const ANOMALIES_TABLE_ROW_EXPAND_BUTTON_TEST_ID =
+  'entity-anomalies-table-row-expand-button' as const;
+const ANOMALIES_TABLE_EXPANDED_ROW_DESCRIPTION_TEST_ID =
+  'entity-anomalies-table-expanded-row-description' as const;
+const ANOMALIES_TABLE_ROW_ACTIONS_BUTTON_TEST_ID =
+  'entity-anomalies-table-row-actions-button' as const;
+const ANOMALIES_TABLE_ROW_ACTION_TEST_ID_PREFIX = 'entity-anomalies-table-row-action-' as const;
+
+// MitreTacticDot — attack chain tactic dots and the active-filter "clear" chip
+const MITRE_TACTIC_DOT_TEST_ID_PREFIX = 'mitreTacticDot-' as const;
+const MITRE_TACTIC_CLEAR_CHIP_TEST_ID = 'mitreTacticDotV3HoverChipClear' as const;
+
 // Rison-encoded flyout state constants — host entity panel, entity store v2 disabled
 export const HOST_FLYOUT_ENTITY_ID = 'test-entity-id';
 export const HOST_FLYOUT_HOST_NAME = 'test-host';
@@ -132,6 +145,55 @@ export const MOCK_ANOMALY_SUMMARY = {
   page_size: 10,
 };
 
+/**
+ * Second anomaly summary record, associated with the Initial Access tactic.
+ * Paired with MOCK_ANOMALY_SUMMARY's Credential Access record to exercise
+ * MITRE tactic filtering on the Anomalies tab.
+ */
+const SECOND_TACTIC_ANOMALY = {
+  jobId: 'rare_process_by_host_linux_ea',
+  jobName: 'Unusual Process For a Linux Host',
+  recordId: 'record-2',
+  timestamp: '2025-01-02T00:00:00.000Z',
+  recordScore: 60,
+  actual: [1],
+  typical: [0],
+  baselineValues: ['0'],
+  anomalousValue: 'new process observed',
+  detectorFunction: 'rare',
+  threatTactics: ['Initial Access'],
+  threatTechniques: ['Exploit Public-Facing Application'],
+};
+
+/**
+ * Mock anomaly summary response with records for two distinct MITRE tactics
+ * (Credential Access and Initial Access), used to verify tactic filtering.
+ */
+export const MOCK_ANOMALY_SUMMARY_MULTI_TACTIC = {
+  ...MOCK_ANOMALY_SUMMARY,
+  anomalies: [...MOCK_ANOMALY_SUMMARY.anomalies, SECOND_TACTIC_ANOMALY],
+  total: 2,
+};
+
+/**
+ * Mock anomaly overview response reflecting only the Credential Access tactic,
+ * as returned once the Anomalies tab filters by that tactic.
+ */
+export const MOCK_ANOMALY_OVERVIEW_FILTERED_BY_CREDENTIAL_ACCESS = {
+  ...MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES,
+  totalAnomaliesCount: 3,
+  tacticCounts: { 'Credential Access': 3 },
+};
+
+/**
+ * Mock anomaly summary response containing only the Credential Access record,
+ * as returned once the Anomalies tab filters by that tactic.
+ */
+export const MOCK_ANOMALY_SUMMARY_FILTERED_BY_CREDENTIAL_ACCESS = {
+  ...MOCK_ANOMALY_SUMMARY,
+  total: 1,
+};
+
 export class EntityFlyoutAnomaliesPage {
   // Right panel — host panel header (always rendered; used as page-ready signal)
   public readonly hostPanelHeader: Locator;
@@ -153,6 +215,14 @@ export class EntityFlyoutAnomaliesPage {
   public readonly anomaliesTabTableGrid: Locator;
   public readonly anomaliesTabManageJobsButton: Locator;
   public readonly anomaliesExpandablePanelTitleLink: Locator;
+
+  // Left panel — anomalies table row controls
+  public readonly rowExpandButton: Locator;
+  public readonly expandedRowDescription: Locator;
+  public readonly rowActionsButton: Locator;
+
+  // Left panel — attack chain tactic filter
+  public readonly mitreTacticClearChip: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.hostPanelHeader = this.page.testSubj.locator(HOST_PANEL_HEADER_TEST_ID);
@@ -176,6 +246,12 @@ export class EntityFlyoutAnomaliesPage {
     this.anomaliesTabManageJobsButton = this.page.testSubj.locator(
       ANOMALIES_TAB_MANAGE_JOBS_BUTTON_TEST_ID
     );
+    this.rowExpandButton = this.page.testSubj.locator(ANOMALIES_TABLE_ROW_EXPAND_BUTTON_TEST_ID);
+    this.expandedRowDescription = this.page.testSubj.locator(
+      ANOMALIES_TABLE_EXPANDED_ROW_DESCRIPTION_TEST_ID
+    );
+    this.rowActionsButton = this.page.testSubj.locator(ANOMALIES_TABLE_ROW_ACTIONS_BUTTON_TEST_ID);
+    this.mitreTacticClearChip = this.page.testSubj.locator(MITRE_TACTIC_CLEAR_CHIP_TEST_ID);
   }
 
   async clickAnomaliesTab() {
@@ -186,6 +262,46 @@ export class EntityFlyoutAnomaliesPage {
   async clickAnomaliesCountLink() {
     await this.anomaliesExpandablePanelTitleLink.click();
     await this.anomaliesTab.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Locator for the attack chain dot representing the given MITRE tactic
+   * (e.g. "Credential Access") within the Anomalies tab. Clicking it toggles
+   * that tactic as the tab's active filter.
+   *
+   * Scoped to anomaliesTabAttackChain: when both panels are open, the right
+   * panel's overview also renders a (non-interactive) MITRE chain with the
+   * same per-tactic test-id, so an unscoped locator would match both.
+   */
+  getMitreTacticDot(tactic: string): Locator {
+    return this.anomaliesTabAttackChain.locator(
+      `[data-test-subj="${MITRE_TACTIC_DOT_TEST_ID_PREFIX}${tactic.replace(/\s+/g, '')}"]`
+    );
+  }
+
+  /**
+   * Locator for a row actions menu item by its action key
+   * (e.g. "add-to-timeline", "view-in-discover", "view-in-single-metric-viewer").
+   */
+  getRowAction(actionKey: string): Locator {
+    return this.page.testSubj.locator(`${ANOMALIES_TABLE_ROW_ACTION_TEST_ID_PREFIX}${actionKey}`);
+  }
+
+  async selectMitreTactic(tactic: string) {
+    await this.getMitreTacticDot(tactic).click();
+  }
+
+  async clearMitreTacticFilter() {
+    await this.mitreTacticClearChip.click();
+  }
+
+  async expandAnomalyRow() {
+    await this.rowExpandButton.click();
+    await this.expandedRowDescription.waitFor({ state: 'visible' });
+  }
+
+  async openRowActionsMenu() {
+    await this.rowActionsButton.click();
   }
 
   /**
