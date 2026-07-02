@@ -112,7 +112,7 @@ Poor prompt patterns:
 - "Show CPU" / "Make a chart" / "Display everything" (too vague)
 - Prompts naming fields you have not confirmed exist (e.g. assuming \`system.cpu.total.pct\`, \`transaction.duration.us\`, or \`service.name\` without checking the mapping — these belong to specific integrations that may not be installed)
 
-Always reference real fields from the index mapping; never invent them.
+Always reference real fields from the index mapping.
 
 ## Choosing the Renderer
 
