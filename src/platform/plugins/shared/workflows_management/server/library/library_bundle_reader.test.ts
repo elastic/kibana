@@ -345,7 +345,7 @@ describe('LibraryBundleReader', () => {
     it('reports the bundle source mode and no timestamps before the first read', () => {
       const reader = buildReader(tmpRoot);
 
-      expect(reader.getHealth()).toEqual({ sourceMode: 'bundle' });
+      expect(reader.getHealth()).toEqual({ sourceMode: 'bundle', lastRefreshAt: null });
     });
 
     it('records the load timestamp after the first successful read', async () => {
