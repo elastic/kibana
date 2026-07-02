@@ -67,6 +67,10 @@ export type AnomalySummaryRequestBody = z.infer<typeof AnomalySummaryRequestBody
 
 export const AnomalySummaryEntry = lazySchema(() =>
   z.object({
+    /**
+     * Elasticsearch document ID of the ML anomaly record
+     */
+    recordId: z.string().max(200),
     jobId: z.string().max(150),
     /**
      * Human-readable display name for the ML job (from custom_settings.security_app_display_name)
@@ -176,6 +180,10 @@ export type AnomalyOverviewEntry = z.infer<typeof AnomalyOverviewEntry>;
 
 export const AnomalyOverviewHit = lazySchema(() =>
   z.object({
+    /**
+     * Elasticsearch document ID of the ML anomaly record
+     */
+    recordId: z.string().max(200),
     jobId: z.string().max(150),
     /**
      * Human-readable display name for the ML job

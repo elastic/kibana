@@ -9,7 +9,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { useChangeHistoryList } from './use_change_history_list';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import { TEST_OBJECT_ID } from '../test_utils/change_history_test_fixtures';
-import { createQueryClientWrapper } from '../test_utils/create_query_client_wrapper';
+import { createChangeHistoryHookWrapper } from '../test_utils/create_change_history_hook_wrapper';
 
 describe('useChangeHistoryList', () => {
   it('loads paginated changes and appends on loadMore', async () => {
@@ -33,7 +33,7 @@ describe('useChangeHistoryList', () => {
       getChange: jest.fn(),
     };
 
-    const { wrapper } = createQueryClientWrapper();
+    const { wrapper } = createChangeHistoryHookWrapper({ adapter });
 
     const { result } = renderHook(
       () =>
@@ -96,7 +96,7 @@ describe('useChangeHistoryList', () => {
       getChange: jest.fn(),
     };
 
-    const { wrapper } = createQueryClientWrapper();
+    const { wrapper } = createChangeHistoryHookWrapper({ adapter });
 
     const { result, rerender } = renderHook(
       ({ objectId }) =>
@@ -174,7 +174,7 @@ describe('useChangeHistoryList', () => {
       getChange: jest.fn(),
     };
 
-    const { wrapper } = createQueryClientWrapper();
+    const { wrapper } = createChangeHistoryHookWrapper({ adapter });
 
     const { result } = renderHook(
       () =>
