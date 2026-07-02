@@ -8,7 +8,7 @@
  */
 
 import type { ApiServicesFixture, KbnClient, ScoutParallelWorkerFixtures } from '@kbn/scout';
-import { apiTest as scoutApiTest, spaceTest as spaceBaseTest } from '@kbn/scout';
+import { spaceTest as spaceBaseTest } from '@kbn/scout';
 import type { ScoutSpaceParallelFixture } from '@kbn/scout/src/playwright/fixtures/scope/worker';
 import { WorkflowsApiService } from '../../common/apis/workflows';
 
@@ -19,16 +19,6 @@ export interface WorkflowsApiServicesFixture extends ApiServicesFixture {
 interface WorkflowsWorkerFixtures extends ScoutParallelWorkerFixtures {
   apiServices: WorkflowsApiServicesFixture;
 }
-
-const extendWithWorkflowsApi = (
-  spaceId: string,
-  kbnClient: KbnClient,
-  apiServices: ApiServicesFixture
-): WorkflowsApiServicesFixture => {
-  const extendedApiServices = apiServices as WorkflowsApiServicesFixture;
-  extendedApiServices.workflowsApi = new WorkflowsApiService(spaceId, kbnClient);
-  return extendedApiServices;
-};
 
 export const spaceTest = spaceBaseTest.extend<{}, WorkflowsWorkerFixtures>({
   apiServices: [
@@ -44,25 +34,9 @@ export const spaceTest = spaceBaseTest.extend<{}, WorkflowsWorkerFixtures>({
       },
       use: (extendedApiServices: WorkflowsApiServicesFixture) => Promise<void>
     ) => {
-      await use(extendWithWorkflowsApi(scoutSpace.id, kbnClient, apiServices));
-    },
-    { scope: 'worker' },
-  ],
-});
-
-export const apiTest = scoutApiTest.extend<{}, WorkflowsWorkerFixtures>({
-  apiServices: [
-    async (
-      {
-        apiServices,
-        kbnClient,
-      }: {
-        apiServices: ApiServicesFixture;
-        kbnClient: KbnClient;
-      },
-      use: (extendedApiServices: WorkflowsApiServicesFixture) => Promise<void>
-    ) => {
-      await use(extendWithWorkflowsApi('default', kbnClient, apiServices));
+      const extendedApiServices = apiServices as WorkflowsApiServicesFixture;
+      extendedApiServices.workflowsApi = new WorkflowsApiService(scoutSpace.id, kbnClient);
+      await use(extendedApiServices);
     },
     { scope: 'worker' },
   ],
