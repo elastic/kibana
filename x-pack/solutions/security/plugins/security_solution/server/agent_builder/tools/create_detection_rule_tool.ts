@@ -32,11 +32,7 @@ import type { RuleAttachmentData } from '../attachments/rule';
 
 export const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = securityTool('create_detection_rule');
 
-/**
- * Type guard for the rule attachment. Mirrors `isDashboardAttachment` — it trusts
- * the stored `type` field (only `attachments.add` assigns it, and `update` can't
- * change it) and narrows `data` to {@link RuleAttachmentData} for typed access.
- */
+/** Type guard on the stored `type` field; narrows `data` to {@link RuleAttachmentData}. */
 const isRuleAttachment = (
   attachment: VersionedAttachment
 ): attachment is VersionedAttachment<SecurityAgentBuilderAttachments.rule, RuleAttachmentData> =>
@@ -68,33 +64,24 @@ export const isPlaceholderRuleText = (text: string): boolean => {
 };
 
 interface ResolvedAttachmentTarget {
-  /** The attachment id the rule will be written to. */
   resolvedAttachmentId: string;
   /** Serialized rule text to seed the graph with (query rewrites); undefined for fresh creates. */
   existingRuleText: string | undefined;
-  /** True when a new card must be minted via add(); false when updating an existing card. */
   isNewCard: boolean;
 }
 
 /**
- * Resolve which attachment the rule should be written to, and whether the graph
- * should be seeded with an existing rule (for query rewrites).
- *
- * Three-way decision:
- *  1. attachment_id provided → update that card (query rewrite / explicit re-target).
- *     Fails closed: a hallucinated/stale id, a non-rule target, or a versionless
- *     record throws rather than silently no-op'ing update() or overwriting the wrong
- *     card. Mirrors the dashboards `retrieveLatestVersion` guards.
- *  2. attachment_id absent + an empty placeholder card exists → consume it (the first
- *     create in a conversation opened from a menu/form entry point).
- *  3. attachment_id absent + no placeholder → mint a new id (genuine second create).
+ * Resolve which attachment the rule is written to:
+ *  1. attachment_id given → update that card. Fails closed: a stale/hallucinated id, a
+ *     non-rule target, or a versionless record throws instead of no-op'ing update().
+ *  2. no id + empty placeholder card exists → consume it (first create from a menu/form entry).
+ *  3. no id + no placeholder → mint a new id.
  */
 export const resolveAttachmentTarget = (
   attachments: AttachmentStateManager,
   attachmentId: string | undefined
 ): ResolvedAttachmentTarget => {
   if (attachmentId) {
-    // Branch 1: explicit update.
     const record = attachments.getAttachmentRecord(attachmentId);
     if (!record) {
       throw new Error(`Rule attachment "${attachmentId}" not found`);
@@ -115,14 +102,12 @@ export const resolveAttachmentTarget = (
     };
   }
 
-  // No explicit id — look for an empty placeholder card
   const placeholderRecord = attachments.getAttachmentRecord(SECURITY_RULE_ATTACHMENT_ID);
   const placeholderVersion = placeholderRecord ? getLatestVersion(placeholderRecord) : undefined;
   const placeholderText = (placeholderVersion?.data as Record<string, unknown> | undefined)
     ?.text as string | undefined;
 
   if (placeholderRecord && placeholderText && isPlaceholderRuleText(placeholderText)) {
-    // Branch 2: consume the empty seed (placeholder has no real rule content)
     return {
       resolvedAttachmentId: SECURITY_RULE_ATTACHMENT_ID,
       existingRuleText: undefined,
@@ -130,7 +115,6 @@ export const resolveAttachmentTarget = (
     };
   }
 
-  // Branch 3: mint a new id for a genuinely additional rule
   return {
     resolvedAttachmentId: mintRuleAttachmentId(),
     existingRuleText: undefined,
@@ -311,22 +295,19 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
 
         try {
           const persisted = isNewCard
-            ? // Mint a new card (branch 3)
-              await attachments.add({
+            ? await attachments.add({
                 id: resolvedAttachmentId,
                 type: SecurityAgentBuilderAttachments.rule,
                 data: attachmentData,
                 description: attachmentDescription,
               })
-            : // Update an existing card (branch 1 or branch 2)
-              await attachments.update(resolvedAttachmentId, {
+            : await attachments.update(resolvedAttachmentId, {
                 data: attachmentData,
                 description: attachmentDescription,
               });
 
-          // update() soft-fails to `undefined` if the id vanished (e.g. the card was
-          // deleted during the long agent.invoke() above) — treat that as a hard error
-          // rather than reporting success with no version.
+          // update() returns undefined if the id vanished mid-invoke — fail rather than
+          // report success with no version.
           if (!persisted) {
             throw new Error(`Failed to persist rule attachment "${resolvedAttachmentId}"`);
           }
