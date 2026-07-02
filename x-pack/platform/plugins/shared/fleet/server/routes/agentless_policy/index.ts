@@ -224,7 +224,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: AGENTLESS_POLICIES_ROUTES.UPDATE_PATTERN,
       summary: 'Update an agentless policy',
       description:
-        'Update an agentless policy by ID. Uses full-replace semantics: the policy is rebuilt entirely from the request body, so any omitted optional field (description, vars, global_data_tags, cloud_connector, etc.) is cleared or reset to its default. The integration package name is immutable and the runtime-managed cluster_id is preserved from the existing policy.',
+        'Update an agentless policy by ID. Uses full-replace semantics: the policy is rebuilt entirely from the request body, so any omitted optional field (for example, `description`, `vars`, `global_data_tags`, `cloud_connector`) is cleared or reset to its default. The integration package name is immutable and the runtime-managed `cluster_id` is preserved from the existing policy.',
       options: {
         tags: ['oas-tag:Fleet agentless policies'],
         availability: {
