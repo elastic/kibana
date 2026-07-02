@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createElement } from 'react';
+import type { EuiIconProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   EXCEPTIONS_UI_READ_PRIVILEGES,
@@ -13,6 +15,7 @@ import {
   RULES_UI_READ_PRIVILEGE,
   SECURITY_UI_SHOW_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
+import { AiIcon } from '@kbn/shared-ux-ai-components';
 import { WORKFLOWS_MANAGEMENT_FEATURE_ID, WorkflowsManagementUiActions } from '@kbn/workflows';
 import {
   ALERT_ANALYSIS_WORKFLOW_PATH,
@@ -37,7 +40,6 @@ import {
 import { SecurityPageName } from '../app/types';
 import { benchmarksLink } from '../cloud_security_posture/links';
 import type { LinkItem } from '../common/links';
-import { IconAlertAnalysisWorkflow } from '../common/icons/alert_analysis_workflow';
 import { IconConsoleCloud } from '../common/icons/console_cloud';
 import { IconRollup } from '../common/icons/rollup';
 import { IconDashboards } from '../common/icons/dashboards';
@@ -120,7 +122,8 @@ export const links: LinkItem = {
             'Configure the managed alert analysis workflow that automatically classifies and closes false positive alerts.',
         }
       ),
-      landingIcon: IconAlertAnalysisWorkflow,
+      landingIcon: (props: Omit<EuiIconProps, 'type'>) =>
+        createElement(AiIcon, { iconType: 'sparkles', ...props }),
       path: ALERT_ANALYSIS_WORKFLOW_PATH,
       capabilities: [
         [RULES_UI_READ_PRIVILEGE, RULES_UI_EDIT_PRIVILEGE, WORKFLOWS_MANAGEMENT_UPDATE_PRIVILEGE],

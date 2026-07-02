@@ -24,9 +24,9 @@ import { i18n } from '@kbn/i18n';
 import type { Capabilities } from '@kbn/core/types';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
+import { AiIcon } from '@kbn/shared-ux-ai-components';
 import { WorkflowsManagementUiActions } from '@kbn/workflows';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
-import { IconAlertAnalysisWorkflow } from '../../../../common/icons/alert_analysis_workflow';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { ExperimentalBadge } from '../../../../common/components/experimental_badge';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
@@ -167,7 +167,7 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <IconAlertAnalysisWorkflow size="m" aria-hidden="true" />
+                <AiIcon iconType="sparkles" size="m" aria-hidden="true" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <ExperimentalBadge />
