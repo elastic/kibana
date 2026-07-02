@@ -79,8 +79,7 @@ const getBucketBounds = (
     if (dropPartials) {
       return bucketStart >= from && bucketEnd <= to;
     }
-    // Trailing bucket boundary is inclusive of 'to', matching DSL.
-    return bucketEnd > from && bucketStart <= to;
+    return bucketEnd > from && bucketStart < to;
   });
 
   if (valid.length === 0) return undefined;
@@ -209,15 +208,8 @@ export const getXDomain = (
     !!dropPartials
   );
 
-  const domainMin = dropPartials
-    ? buckets?.min ?? baseDomain.min
-    : Math.min(isUndefined(xValues[0]) ? Infinity : xValues[0], buckets?.min ?? baseDomain.min);
-  const domainMaxValue = dropPartials
-    ? buckets?.max ?? baseDomain.max - baseDomain.minInterval
-    : Math.max(
-        isUndefined(xValues[xValues.length - 1]) ? -Infinity : xValues[xValues.length - 1],
-        buckets?.max ?? baseDomain.max - baseDomain.minInterval
-      );
+  const domainMin = buckets?.min ?? baseDomain.min;
+  const domainMaxValue = buckets?.max ?? baseDomain.max - baseDomain.minInterval;
   const domainMax = hasBars ? domainMaxValue : domainMaxValue + baseDomain.minInterval;
 
   return {

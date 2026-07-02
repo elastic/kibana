@@ -73,7 +73,7 @@ describe('getXDomain', () => {
 
     expect(baseDomain).toEqual({ min: 0, max: 10000, minInterval: ONE_SECOND });
     expect(extendedDomain).toHaveProperty('min', 0);
-    expect(extendedDomain).toHaveProperty('max', 10000);
+    expect(extendedDomain).toHaveProperty('max', 9000);
     expect(extendedDomain).toHaveProperty('minInterval', ADJUSTED_INTERVAL);
   });
 
@@ -134,6 +134,6 @@ describe('getXDomain', () => {
     );
 
     const [gridArg] = getAdjustedIntervalMock.mock.calls[0];
-    expect(gridArg).toEqual([0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]);
+    expect(gridArg).toEqual([0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]);
   });
 });
