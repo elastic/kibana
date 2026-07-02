@@ -1265,8 +1265,6 @@ export function ComposeDiscoverFlyout({
               onNext={handleNext}
               onFinalSubmit={handleFinalSubmit}
               onYamlSave={handleYamlSave}
-              onRequestClose={handleRequestClose}
-              closeSourceRef={closeSourceRef}
             />
 
             {uiState.childOpen && (

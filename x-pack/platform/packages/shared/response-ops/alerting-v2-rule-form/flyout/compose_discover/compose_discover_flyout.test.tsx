@@ -1095,6 +1095,20 @@ describe('ComposeDiscoverFlyout', () => {
       fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
       expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
 
+      const manualSplitQuery: RuleQuery = {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+      };
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(manualSplitQuery);
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
+      expect(screen.queryByTestId('composeDiscoverChildMock')).not.toBeInTheDocument();
+
       clickEditMode('yaml');
       clickEditMode('form');
 
