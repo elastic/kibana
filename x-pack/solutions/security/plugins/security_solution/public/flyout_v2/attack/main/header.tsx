@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { flyoutHeaderBlockStyles } from '../../shared/components/flyout_header_block';
 import { Notes } from '../../shared/components/notes';
@@ -16,6 +16,7 @@ import { Status } from './components/status';
 import { AlertsCount } from './components/alerts_count';
 import { Assignees } from './components/assignees';
 import { HEADER_SUMMARY_PANEL_TEST_ID } from './constants/test_ids';
+import type { TabId, TabType } from './tabs';
 
 export interface HeaderProps {
   /**
@@ -30,6 +31,19 @@ export interface HeaderProps {
    * Called when the user clicks the notes button to open the notes tool flyout.
    */
   onShowNotes: () => void;
+  /**
+   * Tabs to render in the header. Omitted when the header is rendered on its own
+   * (e.g. the Discover doc-viewer integration) where no tab navigation is shown.
+   */
+  tabs?: TabType[];
+  /**
+   * Currently selected tab id.
+   */
+  selectedTabId?: TabId;
+  /**
+   * Callback to change the selected tab.
+   */
+  setSelectedTabId?: (id: TabId) => void;
 }
 
 /**
@@ -39,43 +53,62 @@ export interface HeaderProps {
  * provided by the parent `EuiFlyoutHeader`; the header itself adds no extra
  * panel padding.
  */
-export const Header: FC<HeaderProps> = memo(({ hit, onAttackUpdated, onShowNotes }) => {
-  const documentId = useMemo(() => hit.raw._id ?? '', [hit]);
+export const Header: FC<HeaderProps> = memo(
+  ({ hit, onAttackUpdated, onShowNotes, tabs, selectedTabId, setSelectedTabId }) => {
+    const documentId = useMemo(() => hit.raw._id ?? '', [hit]);
 
-  return (
-    <>
-      <HeaderTitle hit={hit} />
-      <EuiSpacer size="m" />
-      <EuiFlexGroup
-        direction="row"
-        gutterSize="s"
-        responsive={false}
-        wrap
-        data-test-subj={HEADER_SUMMARY_PANEL_TEST_ID}
-      >
-        <EuiFlexItem css={flyoutHeaderBlockStyles}>
-          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-            <EuiFlexItem>
-              <Status hit={hit} onAttackUpdated={onAttackUpdated} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <AlertsCount hit={hit} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem css={flyoutHeaderBlockStyles}>
-          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-            <EuiFlexItem>
-              <Assignees hit={hit} onAttackUpdated={onAttackUpdated} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <Notes documentId={documentId} onShowNotes={onShowNotes} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
-});
+    return (
+      <>
+        <HeaderTitle hit={hit} />
+        <EuiSpacer size="m" />
+        <EuiFlexGroup
+          direction="row"
+          gutterSize="s"
+          responsive={false}
+          wrap
+          data-test-subj={HEADER_SUMMARY_PANEL_TEST_ID}
+        >
+          <EuiFlexItem css={flyoutHeaderBlockStyles}>
+            <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+              <EuiFlexItem>
+                <Status hit={hit} onAttackUpdated={onAttackUpdated} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <AlertsCount hit={hit} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem css={flyoutHeaderBlockStyles}>
+            <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+              <EuiFlexItem>
+                <Assignees hit={hit} onAttackUpdated={onAttackUpdated} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <Notes documentId={documentId} onShowNotes={onShowNotes} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {tabs && tabs.length > 0 && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiTabs size="l" expand>
+              {tabs.map((tab, index) => (
+                <EuiTab
+                  key={index}
+                  onClick={() => setSelectedTabId?.(tab.id)}
+                  isSelected={tab.id === selectedTabId}
+                  data-test-subj={tab['data-test-subj']}
+                >
+                  {tab.name}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+          </>
+        )}
+      </>
+    );
+  }
+);
 
 Header.displayName = 'Header';

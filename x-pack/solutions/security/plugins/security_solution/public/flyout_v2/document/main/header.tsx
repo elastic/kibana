@@ -44,17 +44,18 @@ export interface HeaderProps {
    */
   onShowNotes: () => void;
   /**
-   * Tabs to render in the header.
+   * Tabs to render in the header. Omitted when the header is rendered on its own
+   * (e.g. the Discover doc-viewer integration) where no tab navigation is shown.
    */
-  tabs: TabType[];
+  tabs?: TabType[];
   /**
    * Currently selected tab id.
    */
-  selectedTabId: TabId;
+  selectedTabId?: TabId;
   /**
    * Callback to change the selected tab.
    */
-  setSelectedTabId: (id: TabId) => void;
+  setSelectedTabId?: (id: TabId) => void;
 }
 
 /**
@@ -126,14 +127,14 @@ export const Header: FC<HeaderProps> = memo(
             </EuiFlexGroup>
           </>
         )}
-        {tabs?.length > 0 && (
+        {tabs && tabs.length > 0 && (
           <>
             <EuiSpacer size="s" />
             <EuiTabs size="l" expand>
               {tabs.map((tab, index) => (
                 <EuiTab
                   key={index}
-                  onClick={() => setSelectedTabId(tab.id)}
+                  onClick={() => setSelectedTabId?.(tab.id)}
                   isSelected={tab.id === selectedTabId}
                   data-test-subj={tab['data-test-subj']}
                 >

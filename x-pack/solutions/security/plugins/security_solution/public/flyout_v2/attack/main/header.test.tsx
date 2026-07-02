@@ -7,10 +7,16 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { Header } from './header';
-import { HEADER_SUMMARY_PANEL_TEST_ID } from './constants/test_ids';
+import type { TabType } from './tabs';
+import {
+  HEADER_JSON_TAB_TEST_ID,
+  HEADER_OVERVIEW_TAB_TEST_ID,
+  HEADER_SUMMARY_PANEL_TEST_ID,
+  HEADER_TABLE_TAB_TEST_ID,
+} from './constants/test_ids';
 
 jest.mock('./components/header_title', () => ({
   HeaderTitle: ({ hit }: { hit: DataTableRecord }) => (
@@ -67,6 +73,27 @@ const createMockHit = (overrides: Partial<DataTableRecord> = {}): DataTableRecor
     ...overrides,
   } as DataTableRecord);
 
+const createTabs = (): TabType[] => [
+  {
+    id: 'overview',
+    name: <>{'Overview'}</>,
+    content: <div data-test-subj="overview-content" />,
+    'data-test-subj': HEADER_OVERVIEW_TAB_TEST_ID,
+  },
+  {
+    id: 'table',
+    name: <>{'Table'}</>,
+    content: <div data-test-subj="table-content" />,
+    'data-test-subj': HEADER_TABLE_TAB_TEST_ID,
+  },
+  {
+    id: 'json',
+    name: <>{'JSON'}</>,
+    content: <div data-test-subj="json-content" />,
+    'data-test-subj': HEADER_JSON_TAB_TEST_ID,
+  },
+];
+
 describe('<Header />', () => {
   const mockHit = createMockHit();
   const onAttackUpdated = jest.fn();
@@ -79,6 +106,9 @@ describe('<Header />', () => {
           hit={mockHit}
           onAttackUpdated={onAttackUpdated}
           onShowNotes={onShowNotes}
+          tabs={createTabs()}
+          selectedTabId="overview"
+          setSelectedTabId={jest.fn()}
           {...props}
         />
       </IntlProvider>
@@ -130,5 +160,35 @@ describe('<Header />', () => {
     getByTestId('mockNotes').click();
 
     expect(mockOnShowNotes).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders a tab button for each tab', () => {
+    const { getByTestId } = renderHeader();
+
+    expect(getByTestId(HEADER_OVERVIEW_TAB_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(HEADER_TABLE_TAB_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(HEADER_JSON_TAB_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('marks the selected tab as selected', () => {
+    const { getByTestId } = renderHeader({ selectedTabId: 'table' });
+
+    expect(getByTestId(HEADER_TABLE_TAB_TEST_ID)).toHaveAttribute('aria-selected', 'true');
+    expect(getByTestId(HEADER_OVERVIEW_TAB_TEST_ID)).toHaveAttribute('aria-selected', 'false');
+  });
+
+  it('calls setSelectedTabId with the tab id when a tab is clicked', () => {
+    const setSelectedTabId = jest.fn();
+    const { getByTestId } = renderHeader({ setSelectedTabId });
+
+    fireEvent.click(getByTestId(HEADER_JSON_TAB_TEST_ID));
+
+    expect(setSelectedTabId).toHaveBeenCalledWith('json');
+  });
+
+  it('does not render a tab bar when no tabs are provided', () => {
+    const { queryByTestId } = renderHeader({ tabs: [] });
+
+    expect(queryByTestId(HEADER_OVERVIEW_TAB_TEST_ID)).not.toBeInTheDocument();
   });
 });

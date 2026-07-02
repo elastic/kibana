@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -14,9 +14,12 @@ import { useHistory } from 'react-router-dom';
 import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { NotesDetails } from '../../shared/tools/notes';
+import { useTabs } from '../../shared/hooks/use_tabs';
 import { useKibana } from '../../../common/lib/kibana';
 import { Header } from './header';
-import { OverviewTab } from './tabs/overview_tab';
+import { getTabsDisplayed, validTabIds } from './tabs';
+import type { TabId } from './tabs';
+import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
 
 const FOOTER_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.flyoutV2.attack.footer.placeholder',
@@ -48,6 +51,13 @@ export const AttackFlyout = memo(({ hit, onAttackUpdated }: AttackFlyoutProps) =
   const store = useStore();
   const history = useHistory();
 
+  const { selectedTabId, setSelectedTabId } = useTabs<TabId>({
+    validTabIds,
+    storageKey: FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS,
+  });
+
+  const tabs = useMemo(() => getTabsDisplayed({ hit }), [hit]);
+
   const onShowNotes = useCallback(() => {
     overlays.openSystemFlyout(
       flyoutProviders({
@@ -63,10 +73,17 @@ export const AttackFlyout = memo(({ hit, onAttackUpdated }: AttackFlyoutProps) =
   return (
     <>
       <EuiFlyoutHeader data-test-subj="attack-flyout-header">
-        <Header hit={hit} onAttackUpdated={onAttackUpdated} onShowNotes={onShowNotes} />
+        <Header
+          hit={hit}
+          onAttackUpdated={onAttackUpdated}
+          onShowNotes={onShowNotes}
+          tabs={tabs}
+          selectedTabId={selectedTabId}
+          setSelectedTabId={setSelectedTabId}
+        />
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="attack-flyout-body">
-        <OverviewTab hit={hit} />
+        <div css={{ height: '100%' }}>{tabs.find((tab) => tab.id === selectedTabId)?.content}</div>
       </EuiFlyoutBody>
       <EuiFlyoutFooter data-test-subj="attack-flyout-footer">
         <EuiText>
