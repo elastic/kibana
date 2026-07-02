@@ -91,10 +91,13 @@ const disablesLegend = (legend: unknown): boolean => legend === null || legend =
  * For each legend channel encoded across a layered view on a shared scale (the
  * Vega-Lite default unless `resolve.scale[channel] = "independent"`), if some
  * layers enable the legend while others disable it with `legend: null`/`false`,
- * the disabling entries are dropped. The merged legend is shown either way
- * (that is exactly what Vega does — "Using false") so the rendered result is
- * unchanged; only the warning disappears. Returns a new object when it changes
- * anything; the input is not mutated.
+ * the disabling entries are dropped. A field-encoded channel shows a legend by
+ * default, so a layer that simply omits `legend` counts as enabling it (this is
+ * the common case the model produces — one layer sets `legend: null`, the others
+ * leave it out). The merged legend is shown either way (that is exactly what Vega
+ * does — "Using false") so the rendered result is unchanged; only the warning
+ * disappears. Returns a new object when it changes anything; the input is not
+ * mutated.
  */
 const resolveSharedLegendConflicts = (spec: Record<string, unknown>): Record<string, unknown> => {
   const layers = spec.layer;
@@ -104,10 +107,12 @@ const resolveSharedLegendConflicts = (spec: Record<string, unknown>): Record<str
 
   const scaleResolve = (spec.resolve as { scale?: Record<string, unknown> } | undefined)?.scale;
 
-  const encodingOf = (layer: unknown): Record<string, { legend?: unknown }> | undefined => {
+  const encodingOf = (
+    layer: unknown
+  ): Record<string, { field?: unknown; legend?: unknown }> | undefined => {
     const encoding = (layer as { encoding?: unknown } | null)?.encoding;
     return encoding && typeof encoding === 'object'
-      ? (encoding as Record<string, { legend?: unknown }>)
+      ? (encoding as Record<string, { field?: unknown; legend?: unknown }>)
       : undefined;
   };
 
@@ -116,9 +121,17 @@ const resolveSharedLegendConflicts = (spec: Record<string, unknown>): Record<str
     if (scaleResolve?.[channel] === 'independent') {
       return false;
     }
+    // Only field-encoded channels create a shared scale + legend; constant
+    // `value` encodings do not participate, so they can neither conflict nor be
+    // the "enabled" side of one.
     const defs = layers
       .map((layer) => encodingOf(layer)?.[channel])
-      .filter((def): def is { legend?: unknown } => def != null && 'legend' in def);
+      .filter(
+        (def): def is { field?: unknown; legend?: unknown } =>
+          def != null && typeof def === 'object' && 'field' in def
+      );
+    // An omitted `legend` on a field-encoded channel shows the legend (Vega-Lite
+    // default), so it counts as enabled alongside an explicit non-null legend.
     const hasEnabled = defs.some((def) => !disablesLegend(def.legend));
     const hasDisabled = defs.some((def) => disablesLegend(def.legend));
     return hasEnabled && hasDisabled;

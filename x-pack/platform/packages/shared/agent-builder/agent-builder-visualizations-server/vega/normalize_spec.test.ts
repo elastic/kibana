@@ -179,6 +179,42 @@ describe('normalizeVegaSpec', () => {
       expect(spec).toEqual(snapshot);
     });
 
+    it('drops legend:null when another layer omits legend (default shows it)', () => {
+      // The common model output: one layer disables the legend, the others just
+      // leave it out. An omitted legend defaults to shown, so this still
+      // conflicts on a shared scale and the disabling entry must be dropped.
+      const spec = {
+        layer: [
+          { mark: 'point', encoding: { color: { field: 'ext', type: 'nominal' } } },
+          { mark: 'text', encoding: { color: { field: 'ext', type: 'nominal', legend: null } } },
+        ],
+      };
+      const snapshot = JSON.parse(JSON.stringify(spec));
+
+      const result = normalizeVegaSpec({ spec, esqlQuery: ESQL });
+      const layer = result.layer as LayerEncoding;
+
+      expect(layer[0].encoding.color).toEqual({ field: 'ext', type: 'nominal' });
+      expect(layer[1].encoding.color).toEqual({ field: 'ext', type: 'nominal' });
+      expect(spec).toEqual(snapshot);
+    });
+
+    it('does not treat a constant color value as an enabled legend', () => {
+      // A `color: { value: ... }` constant does not create a scale/legend, so a
+      // single field-encoded layer disabling its own legend is not a conflict.
+      const spec = {
+        layer: [
+          { mark: 'rule', encoding: { color: { value: 'red' } } },
+          { mark: 'line', encoding: { color: { field: 'ext', type: 'nominal', legend: null } } },
+        ],
+      };
+
+      const result = normalizeVegaSpec({ spec, esqlQuery: ESQL });
+      const layer = result.layer as LayerEncoding;
+
+      expect(layer[1].encoding.color.legend).toBeNull();
+    });
+
     it('keeps per-layer legend:null when the color scale is independent', () => {
       const spec = {
         layer: [
