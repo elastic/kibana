@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export enum AlertValidationWorkflowAuditActions {
-  ALERT_VALIDATION_WORKFLOW_SETTINGS_UPDATE = 'alert_validation_workflow_settings_update',
+export enum AlertAnalysisWorkflowAuditActions {
+  ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATE = 'alert_analysis_workflow_settings_update',
 }
 
 export enum AUDIT_TYPE {

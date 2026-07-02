@@ -17,7 +17,7 @@ import {
 } from '@kbn/security-solution-features/constants';
 import * as i18n from './translations';
 import {
-  ALERT_VALIDATION_WORKFLOW_PATH,
+  ALERT_ANALYSIS_WORKFLOW_PATH,
   COVERAGE_OVERVIEW_PATH,
   DE_RULE_HEALTH_PATH,
   DE_SPACE_RULES_HEALTH_PATH,
@@ -45,7 +45,7 @@ import {
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { RulesLandingPage } from './landing';
 import { CoverageOverviewPage } from '../detection_engine/rule_management_ui/pages/coverage_overview';
-import { AlertValidationWorkflowPage } from '../detection_engine/rule_management_ui/pages/alert_validation_workflow';
+import { AlertAnalysisWorkflowPage } from '../detection_engine/rule_management_ui/pages/alert_analysis_workflow';
 import { RuleDetailTabs } from '../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { hasCapabilities } from '../common/lib/capabilities';
@@ -135,10 +135,10 @@ const getRulesSubRoutes = (
           exact: true,
         },
         {
-          path: ALERT_VALIDATION_WORKFLOW_PATH,
+          path: ALERT_ANALYSIS_WORKFLOW_PATH,
           main: withSecurityRoutePageWrapper(
-            AlertValidationWorkflowPage,
-            SecurityPageName.alertValidationWorkflow,
+            AlertAnalysisWorkflowPage,
+            SecurityPageName.alertAnalysisWorkflow,
             { omitSpyRoute: true }
           ),
           exact: true,

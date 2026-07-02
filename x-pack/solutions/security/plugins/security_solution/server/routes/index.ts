@@ -62,8 +62,8 @@ import { registerDataGeneratorRoutes } from './data_generator/register_data_gene
 import { registerInitializationRoutes } from '../lib/initialization';
 import { registerAlertAnalysisRoutes } from '../lib/alert_analysis/routes/register_alert_analysis_routes';
 import { registerAttacksRoutes } from '../lib/detection_engine/routes/attacks/register_attacks_routes';
-import { registerAlertValidationWorkflowSettingsRoutes } from '../workflows/alert_validation_workflow_settings_routes';
-import { registerAlertValidationWorkflowRuleAttachmentRoutes } from '../workflows/alert_validation_workflow_rule_attachment_routes';
+import { registerAlertAnalysisWorkflowSettingsRoutes } from '../workflows/alert_analysis_workflow_settings_routes';
+import { registerAlertAnalysisWorkflowRuleAttachmentRoutes } from '../workflows/alert_analysis_workflow_rule_attachment_routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -169,8 +169,8 @@ export const initRoutes = (
   getFleetManagedIndexTemplatesRoute(router);
 
   registerWorkflowInsightsRoutes(router, config, endpointContext);
-  registerAlertValidationWorkflowSettingsRoutes(router, getStartServices, logger);
-  registerAlertValidationWorkflowRuleAttachmentRoutes(router, getStartServices);
+  registerAlertAnalysisWorkflowSettingsRoutes(router, getStartServices, logger);
+  registerAlertAnalysisWorkflowRuleAttachmentRoutes(router, getStartServices);
 
   registerAssetInventoryRoutes({ router, logger });
 

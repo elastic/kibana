@@ -13,8 +13,8 @@ import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById, TemplatedManagedWorkflowId } from '.';
 import {
   EXAMPLE_MANAGED_WORKFLOW_ID,
-  SECURITY_ALERT_VALIDATION_WORKFLOW,
-  SECURITY_ALERT_VALIDATION_WORKFLOW_ID,
+  SECURITY_ALERT_ANALYSIS_WORKFLOW,
+  SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
 } from './definitions';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
@@ -39,7 +39,7 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
   },
-  [SECURITY_ALERT_VALIDATION_WORKFLOW_ID]: {
+  [SECURITY_ALERT_ANALYSIS_WORKFLOW_ID]: {
     workflowEnabled: true,
     autoCloseEnabled: true,
     autoCloseConfidenceScoreMinThreshold: 0.85,
@@ -136,13 +136,13 @@ describe('managedWorkflowDefinitions', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('contains the Security alert validation workflow', () => {
+  it('contains the Security alert analysis workflow', () => {
     const ids = managedWorkflowDefinitions.map(({ id }) => id);
-    expect(ids).toContain(SECURITY_ALERT_VALIDATION_WORKFLOW_ID);
+    expect(ids).toContain(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID);
   });
 
-  it('renders the Security alert validation workflow with template values', () => {
-    const renderedYaml = SECURITY_ALERT_VALIDATION_WORKFLOW.yamlTemplate({
+  it('renders the Security alert analysis workflow with template values', () => {
+    const renderedYaml = SECURITY_ALERT_ANALYSIS_WORKFLOW.yamlTemplate({
       workflowEnabled: true,
       autoCloseEnabled: false,
       autoCloseConfidenceScoreMinThreshold: 0.7,
@@ -162,7 +162,7 @@ describe('managedWorkflowDefinitions', () => {
     // `createConversation: false` would render as the string "false" (truthy in
     // JS), silently defeating the "Create conversation" toggle. Only `${{ }}`
     // preserves the boolean type through the workflow templating engine.
-    const renderedYaml = SECURITY_ALERT_VALIDATION_WORKFLOW.yamlTemplate({
+    const renderedYaml = SECURITY_ALERT_ANALYSIS_WORKFLOW.yamlTemplate({
       workflowEnabled: true,
       autoCloseEnabled: true,
       autoCloseConfidenceScoreMinThreshold: 0.85,
@@ -184,7 +184,7 @@ describe('managedWorkflowDefinitions', () => {
     // consts (0-1) so the auto-close condition comparison is valid. If maximum drifts
     // back to 100 while thresholds stay at e.g. 0.85, the condition `score <= 1.0`
     // will never be true for any meaningful score.
-    const renderedYaml = SECURITY_ALERT_VALIDATION_WORKFLOW.yamlTemplate({
+    const renderedYaml = SECURITY_ALERT_ANALYSIS_WORKFLOW.yamlTemplate({
       workflowEnabled: true,
       autoCloseEnabled: true,
       autoCloseConfidenceScoreMinThreshold: 0.85,
@@ -212,7 +212,7 @@ describe('managedWorkflowDefinitions', () => {
     // Regression: the condition must reference the threshold consts so that the
     // renderer-injected values are used at runtime. A hardcoded literal would
     // ignore any configured threshold.
-    const renderedYaml = SECURITY_ALERT_VALIDATION_WORKFLOW.yamlTemplate({
+    const renderedYaml = SECURITY_ALERT_ANALYSIS_WORKFLOW.yamlTemplate({
       workflowEnabled: true,
       autoCloseEnabled: true,
       autoCloseConfidenceScoreMinThreshold: 0.85,

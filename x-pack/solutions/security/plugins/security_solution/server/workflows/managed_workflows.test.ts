@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { SECURITY_ALERT_VALIDATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { APP_ID } from '../../common/constants';
 import {
-  ensureSecurityAlertValidationWorkflowInstalled,
+  ensureSecurityAlertAnalysisWorkflowInstalled,
   getAllSpaceIds,
-  getSecurityAlertValidationWorkflowIdForSpace,
+  getSecurityAlertAnalysisWorkflowIdForSpace,
   initSecurityManagedWorkflowsClient,
-  installSecurityAlertValidationWorkflow,
-  installSecurityAlertValidationWorkflowForAllSpaces,
+  installSecurityAlertAnalysisWorkflow,
+  installSecurityAlertAnalysisWorkflowForAllSpaces,
   markSecurityManagedWorkflowsReady,
-  readSecurityAlertValidationWorkflowSettings,
-  readSecurityAlertValidationWorkflowSettingsForSpace,
+  readSecurityAlertAnalysisWorkflowSettings,
+  readSecurityAlertAnalysisWorkflowSettingsForSpace,
   registerSecurityManagedWorkflowOwner,
 } from './managed_workflows';
 
@@ -60,16 +60,16 @@ describe('managed workflows', () => {
     expect(workflowsExtensions.initManagedWorkflowsClient).toHaveBeenCalledWith(APP_ID);
   });
 
-  it('installs the per-space alert validation workflow with template values', async () => {
+  it('installs the per-space alert analysis workflow with template values', async () => {
     const managed = createManagedClient();
 
-    await installSecurityAlertValidationWorkflow({
+    await installSecurityAlertAnalysisWorkflow({
       managedWorkflowsClient: managed,
       spaceId: 'security',
       settings,
     });
 
-    expect(managed.install).toHaveBeenCalledWith(SECURITY_ALERT_VALIDATION_WORKFLOW_ID, {
+    expect(managed.install).toHaveBeenCalledWith(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID, {
       spaceId: 'security',
       workflowIdSuffix: 'security',
       values: settings,
@@ -77,9 +77,9 @@ describe('managed workflows', () => {
     expect(managed.ready).not.toHaveBeenCalled();
   });
 
-  it('builds the per-space alert validation workflow id from the managed id and space id', () => {
-    expect(getSecurityAlertValidationWorkflowIdForSpace('security')).toBe(
-      'system-security-alert-validation-security'
+  it('builds the per-space alert analysis workflow id from the managed id and space id', () => {
+    expect(getSecurityAlertAnalysisWorkflowIdForSpace('security')).toBe(
+      'system-security-alert-analysis-security'
     );
   });
 
@@ -98,7 +98,7 @@ describe('managed workflows', () => {
     expect(managed.install).not.toHaveBeenCalled();
   });
 
-  describe('readSecurityAlertValidationWorkflowSettings', () => {
+  describe('readSecurityAlertAnalysisWorkflowSettings', () => {
     it('reads the six settings from the given uiSettings client', async () => {
       const uiSettingsClient = {
         get: jest
@@ -111,7 +111,7 @@ describe('managed workflows', () => {
           .mockResolvedValueOnce(false),
       };
 
-      const result = await readSecurityAlertValidationWorkflowSettings(uiSettingsClient);
+      const result = await readSecurityAlertAnalysisWorkflowSettings(uiSettingsClient);
 
       expect(result).toEqual({
         workflowEnabled: true,
@@ -124,7 +124,7 @@ describe('managed workflows', () => {
     });
   });
 
-  describe('readSecurityAlertValidationWorkflowSettingsForSpace', () => {
+  describe('readSecurityAlertAnalysisWorkflowSettingsForSpace', () => {
     it('reads settings via a namespace-scoped internal Saved Objects client', async () => {
       const coreStart = coreMock.createStart();
       const uiSettingsClient = {
@@ -139,7 +139,7 @@ describe('managed workflows', () => {
       };
       (coreStart.uiSettings.asScopedToClient as jest.Mock).mockReturnValue(uiSettingsClient);
 
-      const result = await readSecurityAlertValidationWorkflowSettingsForSpace({
+      const result = await readSecurityAlertAnalysisWorkflowSettingsForSpace({
         coreStart,
         spaceId: 'my-space',
       });
@@ -163,18 +163,18 @@ describe('managed workflows', () => {
     });
   });
 
-  describe('ensureSecurityAlertValidationWorkflowInstalled', () => {
+  describe('ensureSecurityAlertAnalysisWorkflowInstalled', () => {
     it('installs the workflow when it is missing', async () => {
       const managed = createManagedClient();
       managed.getWorkflowStatus.mockResolvedValue({ status: 'missing' });
 
-      await ensureSecurityAlertValidationWorkflowInstalled({
+      await ensureSecurityAlertAnalysisWorkflowInstalled({
         managedWorkflowsClient: managed,
         spaceId: 'security',
         settings,
       });
 
-      expect(managed.install).toHaveBeenCalledWith(SECURITY_ALERT_VALIDATION_WORKFLOW_ID, {
+      expect(managed.install).toHaveBeenCalledWith(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID, {
         spaceId: 'security',
         workflowIdSuffix: 'security',
         values: settings,
@@ -185,7 +185,7 @@ describe('managed workflows', () => {
       const managed = createManagedClient();
       managed.getWorkflowStatus.mockResolvedValue({ status: 'disabled' });
 
-      await ensureSecurityAlertValidationWorkflowInstalled({
+      await ensureSecurityAlertAnalysisWorkflowInstalled({
         managedWorkflowsClient: managed,
         spaceId: 'security',
         settings,
@@ -195,7 +195,7 @@ describe('managed workflows', () => {
     });
   });
 
-  describe('installSecurityAlertValidationWorkflowForAllSpaces', () => {
+  describe('installSecurityAlertAnalysisWorkflowForAllSpaces', () => {
     const setUpSingleSpace = (uiSettingsClient: { get: jest.Mock }) => {
       const coreStart = coreMock.createStart();
       // Only the default space; no extra `space` saved objects.
@@ -223,13 +223,13 @@ describe('managed workflows', () => {
       managed.getWorkflowStatus.mockResolvedValue({ status: 'missing' });
       workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
 
-      await installSecurityAlertValidationWorkflowForAllSpaces({
+      await installSecurityAlertAnalysisWorkflowForAllSpaces({
         coreStart,
         workflowsExtensions,
         logger: loggerMock.create(),
       });
 
-      expect(managed.install).toHaveBeenCalledWith(SECURITY_ALERT_VALIDATION_WORKFLOW_ID, {
+      expect(managed.install).toHaveBeenCalledWith(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID, {
         spaceId: 'default',
         workflowIdSuffix: 'default',
         values: settings,
@@ -247,7 +247,7 @@ describe('managed workflows', () => {
       const logger = loggerMock.create();
 
       await expect(
-        installSecurityAlertValidationWorkflowForAllSpaces({
+        installSecurityAlertAnalysisWorkflowForAllSpaces({
           coreStart,
           workflowsExtensions,
           logger,

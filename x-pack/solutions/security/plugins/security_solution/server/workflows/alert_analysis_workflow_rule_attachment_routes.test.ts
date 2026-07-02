@@ -18,13 +18,13 @@ import type {
 } from '../types';
 import type { RuleAlertType } from '../lib/detection_engine/rule_schema';
 import {
-  ALERT_VALIDATION_WORKFLOW_RULE_SELECTION_ROUTE,
-  ALERT_VALIDATION_WORKFLOW_RULE_STATS_ROUTE,
-  ALERT_VALIDATION_WORKFLOW_RULE_UPDATE_ROUTE,
-  ALERT_VALIDATION_WORKFLOW_RULES_ROUTE,
-  registerAlertValidationWorkflowRuleAttachmentRoutes,
-} from './alert_validation_workflow_rule_attachment_routes';
-import { ALERT_VALIDATION_WORKFLOW_SYSTEM_CONNECTOR_ID } from './alert_validation_workflow_rule_attachments';
+  ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE,
+  ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE,
+  ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE,
+  ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE,
+  registerAlertAnalysisWorkflowRuleAttachmentRoutes,
+} from './alert_analysis_workflow_rule_attachment_routes';
+import { ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID } from './alert_analysis_workflow_rule_attachments';
 
 jest.mock(
   '../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client',
@@ -35,13 +35,13 @@ jest.mock(
   })
 );
 
-const WORKFLOW_ID = 'system-security-alert-validation-space-1';
+const WORKFLOW_ID = 'system-security-alert-analysis-space-1';
 
 const createWorkflowAction = (): RuleAlertType['actions'][number] =>
   ({
     actionTypeId: '.workflows',
     group: 'default',
-    id: ALERT_VALIDATION_WORKFLOW_SYSTEM_CONNECTOR_ID,
+    id: ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID,
     params: {
       subAction: 'run',
       subActionParams: {
@@ -54,7 +54,7 @@ const createWorkflowAction = (): RuleAlertType['actions'][number] =>
 const createWorkflowSystemAction = (): NonNullable<RuleAlertType['systemActions']>[number] =>
   ({
     actionTypeId: '.workflows',
-    id: ALERT_VALIDATION_WORKFLOW_SYSTEM_CONNECTOR_ID,
+    id: ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID,
     params: {
       subAction: 'run',
       subActionParams: {
@@ -101,7 +101,7 @@ const createRule = ({
     },
   } as RuleAlertType);
 
-describe('registerAlertValidationWorkflowRuleAttachmentRoutes', () => {
+describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
   let router: RouterMock;
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let getStartServices: jest.MockedFunction<StartServicesAccessor<StartPlugins>>;
@@ -152,7 +152,7 @@ describe('registerAlertValidationWorkflowRuleAttachmentRoutes', () => {
       }),
     } as Partial<jest.Mocked<RulesClient>> as jest.Mocked<RulesClient>;
     actionsClient = {
-      isSystemAction: jest.fn((id: string) => id === ALERT_VALIDATION_WORKFLOW_SYSTEM_CONNECTOR_ID),
+      isSystemAction: jest.fn((id: string) => id === ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID),
     } as Partial<jest.Mocked<ActionsClient>> as jest.Mocked<ActionsClient>;
 
     const securitySolutionContext = {
@@ -190,7 +190,7 @@ describe('registerAlertValidationWorkflowRuleAttachmentRoutes', () => {
         ReturnType<StartServicesAccessor<StartPlugins>>
       >);
 
-    registerAlertValidationWorkflowRuleAttachmentRoutes(
+    registerAlertAnalysisWorkflowRuleAttachmentRoutes(
       router as unknown as SecuritySolutionPluginRouter,
       getStartServices as StartServicesAccessor<StartPlugins>
     );
@@ -201,14 +201,15 @@ describe('registerAlertValidationWorkflowRuleAttachmentRoutes', () => {
       createRule({ id: 'rule-1', actions: [createWorkflowAction()] }),
       createRule({ id: 'rule-2', enabled: false }),
     ]);
-    const handler = router.versioned.getRoute('get', ALERT_VALIDATION_WORKFLOW_RULES_ROUTE)
-      .versions['1'].handler;
+    const handler = router.versioned.getRoute('get', ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE).versions[
+      '1'
+    ].handler;
 
     await handler(
       context,
       createRequest({
         method: 'get',
-        path: ALERT_VALIDATION_WORKFLOW_RULES_ROUTE,
+        path: ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE,
         query: { search: '', page: 1, per_page: 20 },
       }),
       mockResponse
@@ -243,14 +244,14 @@ describe('registerAlertValidationWorkflowRuleAttachmentRoutes', () => {
       createRule({ id: 'rule-1', actions: [createWorkflowAction()] }),
       createRule({ id: 'rule-2' }),
     ]);
-    const handler = router.versioned.getRoute('post', ALERT_VALIDATION_WORKFLOW_RULE_STATS_ROUTE)
+    const handler = router.versioned.getRoute('post', ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE)
       .versions['1'].handler;
 
     await handler(
       context,
       createRequest({
         method: 'post',
-        path: ALERT_VALIDATION_WORKFLOW_RULE_STATS_ROUTE,
+        path: ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE,
         body: { search: '' },
       }),
       mockResponse
@@ -269,16 +270,14 @@ describe('registerAlertValidationWorkflowRuleAttachmentRoutes', () => {
       createRule({ id: 'rule-1', actions: [createWorkflowAction()] }),
       createRule({ id: 'rule-2' }),
     ]);
-    const handler = router.versioned.getRoute(
-      'post',
-      ALERT_VALIDATION_WORKFLOW_RULE_SELECTION_ROUTE
-    ).versions['1'].handler;
+    const handler = router.versioned.getRoute('post', ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE)
+      .versions['1'].handler;
 
     await handler(
       context,
       createRequest({
         method: 'post',
-        path: ALERT_VALIDATION_WORKFLOW_RULE_SELECTION_ROUTE,
+        path: ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE,
         body: { search: '' },
       }),
       mockResponse
@@ -318,14 +317,14 @@ describe('registerAlertValidationWorkflowRuleAttachmentRoutes', () => {
         errors: [],
         total: 1,
       });
-    const handler = router.versioned.getRoute('post', ALERT_VALIDATION_WORKFLOW_RULE_UPDATE_ROUTE)
+    const handler = router.versioned.getRoute('post', ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE)
       .versions['1'].handler;
 
     await handler(
       context,
       createRequest({
         method: 'post',
-        path: ALERT_VALIDATION_WORKFLOW_RULE_UPDATE_ROUTE,
+        path: ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE,
         body: { attachRuleIds: ['rule-1', 'rule-2'], detachRuleIds: ['rule-3'], dryRun: false },
       }),
       mockResponse
@@ -365,14 +364,14 @@ describe('registerAlertValidationWorkflowRuleAttachmentRoutes', () => {
 
   it('returns 404 when the feature flag is disabled', async () => {
     coreStart.featureFlags.getBooleanValue.mockResolvedValue(false);
-    const handler = router.versioned.getRoute('post', ALERT_VALIDATION_WORKFLOW_RULE_STATS_ROUTE)
+    const handler = router.versioned.getRoute('post', ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE)
       .versions['1'].handler;
 
     await handler(
       context,
       createRequest({
         method: 'post',
-        path: ALERT_VALIDATION_WORKFLOW_RULE_STATS_ROUTE,
+        path: ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE,
         body: { search: '' },
       }),
       mockResponse

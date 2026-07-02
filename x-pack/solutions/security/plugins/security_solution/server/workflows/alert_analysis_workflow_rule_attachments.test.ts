@@ -18,18 +18,18 @@ import type { RuleAlertType } from '../lib/detection_engine/rule_schema';
 import type { IPrebuiltRuleAssetsClient } from '../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { bulkEditRules } from '../lib/detection_engine/rule_management/logic/bulk_actions/bulk_edit_rules';
 import {
-  ALERT_VALIDATION_WORKFLOW_SYSTEM_CONNECTOR_ID,
-  createAlertValidationWorkflowRuleAttachmentService,
-  hasAlertValidationWorkflowAction,
-} from './alert_validation_workflow_rule_attachments';
+  ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID,
+  createAlertAnalysisWorkflowRuleAttachmentService,
+  hasAlertAnalysisWorkflowAction,
+} from './alert_analysis_workflow_rule_attachments';
 
-const WORKFLOW_ID = 'system-security-alert-validation-default';
+const WORKFLOW_ID = 'system-security-alert-analysis-default';
 
 const createWorkflowAction = (workflowId = WORKFLOW_ID): RuleAlertType['actions'][number] =>
   ({
     actionTypeId: '.workflows',
     group: 'default',
-    id: ALERT_VALIDATION_WORKFLOW_SYSTEM_CONNECTOR_ID,
+    id: ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID,
     params: {
       subAction: 'run',
       subActionParams: {
@@ -44,7 +44,7 @@ const createWorkflowSystemAction = (
 ): NonNullable<RuleAlertType['systemActions']>[number] =>
   ({
     actionTypeId: '.workflows',
-    id: ALERT_VALIDATION_WORKFLOW_SYSTEM_CONNECTOR_ID,
+    id: ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID,
     params: {
       subAction: 'run',
       subActionParams: {
@@ -112,13 +112,13 @@ const createBulkEditDependencies = () => ({
 describe('alert analysis workflow rule attachments', () => {
   it('detects the exact workflow action on a rule', () => {
     expect(
-      hasAlertValidationWorkflowAction(
+      hasAlertAnalysisWorkflowAction(
         createRule({ id: 'rule-1', actions: [createWorkflowAction()] }),
         WORKFLOW_ID
       )
     ).toBe(true);
     expect(
-      hasAlertValidationWorkflowAction(
+      hasAlertAnalysisWorkflowAction(
         createRule({ id: 'rule-1', actions: [createWorkflowAction('other-workflow')] }),
         WORKFLOW_ID
       )
@@ -127,7 +127,7 @@ describe('alert analysis workflow rule attachments', () => {
 
   it('detects the workflow action when stored as a system action', () => {
     expect(
-      hasAlertValidationWorkflowAction(
+      hasAlertAnalysisWorkflowAction(
         createRule({ id: 'rule-1', systemActions: [createWorkflowSystemAction()] }),
         WORKFLOW_ID
       )
@@ -139,7 +139,7 @@ describe('alert analysis workflow rule attachments', () => {
       createRule({ id: 'rule-1', actions: [createWorkflowAction()] }),
       createRule({ id: 'rule-2' }),
     ]);
-    const service = createAlertValidationWorkflowRuleAttachmentService({
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
       rulesClient,
       workflowId: WORKFLOW_ID,
     });
@@ -163,7 +163,7 @@ describe('alert analysis workflow rule attachments', () => {
       createRule({ id: 'rule-2', enabled: false }),
       createRule({ id: 'rule-1', actions: [createWorkflowAction()] }),
     ]);
-    const service = createAlertValidationWorkflowRuleAttachmentService({
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
       rulesClient,
       workflowId: WORKFLOW_ID,
     });
@@ -190,7 +190,7 @@ describe('alert analysis workflow rule attachments', () => {
       createRule({ id: 'rule-2' }),
       createRule({ id: 'rule-1' }),
     ]);
-    const service = createAlertValidationWorkflowRuleAttachmentService({
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
       rulesClient,
       workflowId: WORKFLOW_ID,
     });
@@ -212,7 +212,7 @@ describe('alert analysis workflow rule attachments', () => {
       createRule({ id: 'rule-2' }),
       createRule({ id: 'rule-3' }),
     ]);
-    const service = createAlertValidationWorkflowRuleAttachmentService({
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
       rulesClient,
       workflowId: WORKFLOW_ID,
     });
@@ -239,7 +239,7 @@ describe('alert analysis workflow rule attachments', () => {
       errors: [],
       total: 1,
     }) as jest.MockedFunction<typeof bulkEditRules>;
-    const service = createAlertValidationWorkflowRuleAttachmentService({
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
       rulesClient: createRulesClient([
         createRule({ id: 'rule-1', actions: [createWorkflowAction()] }),
         missingWorkflowRule,
@@ -306,7 +306,7 @@ describe('alert analysis workflow rule attachments', () => {
 
   it('does not bulk edit rules during dry run', async () => {
     const bulkEditRulesFn = jest.fn() as jest.MockedFunction<typeof bulkEditRules>;
-    const service = createAlertValidationWorkflowRuleAttachmentService({
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
       rulesClient: createRulesClient([
         createRule({ id: 'rule-1', actions: [createWorkflowAction()] }),
         createRule({ id: 'rule-2' }),
@@ -331,7 +331,7 @@ describe('alert analysis workflow rule attachments', () => {
 
   it('does not bulk edit selected rules that already have the workflow action', async () => {
     const bulkEditRulesFn = jest.fn() as jest.MockedFunction<typeof bulkEditRules>;
-    const service = createAlertValidationWorkflowRuleAttachmentService({
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
       rulesClient: createRulesClient([
         createRule({ id: 'rule-1', systemActions: [createWorkflowSystemAction()] }),
       ]),
@@ -363,7 +363,7 @@ describe('alert analysis workflow rule attachments', () => {
       active -= 1;
       return { rules: editedRules, skipped: [], errors: [], total: editedRules.length };
     }) as jest.MockedFunction<typeof bulkEditRules>;
-    const service = createAlertValidationWorkflowRuleAttachmentService({
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
       rulesClient: createRulesClient(rules),
       workflowId: WORKFLOW_ID,
       bulkEditDependencies: createBulkEditDependencies(),
@@ -384,7 +384,7 @@ describe('alert analysis workflow rule attachments', () => {
   });
 
   it('rejects rules that are both attached and detached in the same request', async () => {
-    const service = createAlertValidationWorkflowRuleAttachmentService({
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
       rulesClient: createRulesClient([createRule({ id: 'rule-1' })]),
       workflowId: WORKFLOW_ID,
       bulkEditDependencies: createBulkEditDependencies(),

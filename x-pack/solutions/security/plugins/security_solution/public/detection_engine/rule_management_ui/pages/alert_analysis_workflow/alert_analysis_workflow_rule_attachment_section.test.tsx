@@ -13,10 +13,10 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '../../../../common/lib/kibana';
 import {
-  ALERT_VALIDATION_WORKFLOW_RULE_STATS_ROUTE,
-  ALERT_VALIDATION_WORKFLOW_RULES_ROUTE,
+  ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE,
+  ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE,
 } from './api';
-import { AlertValidationWorkflowRuleAttachmentSection } from './alert_validation_workflow_rule_attachment_section';
+import { AlertAnalysisWorkflowRuleAttachmentSection } from './alert_analysis_workflow_rule_attachment_section';
 
 const PAGE_1_RULES = [
   { id: 'p1-rule-1', name: 'Rule 1', enabled: true, attached: true },
@@ -38,7 +38,7 @@ const TOTAL_RULES = PAGE_1_RULES.length + PAGE_2_RULES.length;
 const ATTACHED_RULES = PAGE_1_RULES.filter((r) => r.attached).length;
 const PER_PAGE = 5;
 
-describe('AlertValidationWorkflowRuleAttachmentSection', () => {
+describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
   const coreStart = coreMock.createStart();
 
   const setupFetchMock = () => {
@@ -48,11 +48,11 @@ describe('AlertValidationWorkflowRuleAttachmentSection', () => {
         { method?: string; query?: Record<string, unknown> }
       ];
 
-      if (path === ALERT_VALIDATION_WORKFLOW_RULE_STATS_ROUTE) {
+      if (path === ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE) {
         return { total: TOTAL_RULES, attached: ATTACHED_RULES };
       }
 
-      if (path === ALERT_VALIDATION_WORKFLOW_RULES_ROUTE) {
+      if (path === ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE) {
         const page = (options?.query?.page as number) ?? 1;
         const rules = page === 1 ? PAGE_1_RULES : PAGE_2_RULES;
         return { page, perPage: PER_PAGE, total: TOTAL_RULES, attached: ATTACHED_RULES, rules };
@@ -77,7 +77,7 @@ describe('AlertValidationWorkflowRuleAttachmentSection', () => {
         client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
       >
         <KibanaContextProvider services={services}>
-          <AlertValidationWorkflowRuleAttachmentSection />
+          <AlertAnalysisWorkflowRuleAttachmentSection />
         </KibanaContextProvider>
       </QueryClientProvider>
     );
@@ -93,7 +93,7 @@ describe('AlertValidationWorkflowRuleAttachmentSection', () => {
 
     // Confirm no pending changes on page 1
     expect(screen.getByText('Changed 0 rules')).toBeInTheDocument();
-    expect(screen.getByTestId('alertValidationWorkflowRuleAttachmentAttachButton')).toBeDisabled();
+    expect(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentAttachButton')).toBeDisabled();
 
     // Navigate to page 2 via the EUI pagination next button
     const nextPageButton = screen.getByTestId('pagination-button-next');
@@ -106,6 +106,6 @@ describe('AlertValidationWorkflowRuleAttachmentSection', () => {
 
     // The key assertion: navigating pages must not create spurious pending changes
     expect(screen.getByText('Changed 0 rules')).toBeInTheDocument();
-    expect(screen.getByTestId('alertValidationWorkflowRuleAttachmentAttachButton')).toBeDisabled();
+    expect(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentAttachButton')).toBeDisabled();
   });
 });

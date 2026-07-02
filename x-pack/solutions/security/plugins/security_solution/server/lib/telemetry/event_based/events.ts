@@ -2076,7 +2076,7 @@ export const LEAD_GENERATION_EXECUTION_EVENT: EventTypeOpts<{
 
 // Telemetry event sent when the alert analysis workflow settings are saved through the
 // dedicated settings page, whether the save succeeds or fails.
-export const ALERT_VALIDATION_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
+export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
   status: 'success' | 'error';
   workflowEnabled: boolean;
   autoCloseEnabled: boolean;
@@ -2085,7 +2085,7 @@ export const ALERT_VALIDATION_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
   autoCloseConfidenceScoreMinThreshold: number;
   autoCloseConfidenceScoreMaxThreshold: number;
 }> = {
-  eventType: 'alert_validation_workflow_settings_updated',
+  eventType: 'alert_analysis_workflow_settings_updated',
   schema: {
     status: {
       type: 'keyword',
@@ -2160,5 +2160,5 @@ export const events = [
   GAP_DETECTED_EVENT,
   ...TRIAL_COMPANION_EVENTS,
   LEAD_GENERATION_EXECUTION_EVENT,
-  ALERT_VALIDATION_WORKFLOW_SETTINGS_UPDATED_EVENT,
+  ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT,
 ];

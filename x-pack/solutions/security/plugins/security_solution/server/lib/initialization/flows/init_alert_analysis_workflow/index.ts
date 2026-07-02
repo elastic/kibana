@@ -7,11 +7,11 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import {
-  MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
-  MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT,
-} from '@kbn/workflows/common/alert_validation_workflow';
+  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
+  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT,
+} from '@kbn/workflows/common/alert_analysis_workflow';
 import {
-  INITIALIZATION_FLOW_INIT_ALERT_VALIDATION_WORKFLOW,
+  INITIALIZATION_FLOW_INIT_ALERT_ANALYSIS_WORKFLOW,
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
 import type {
@@ -21,9 +21,9 @@ import type {
 } from '../../types';
 import type { StartPlugins } from '../../../../plugin';
 import {
-  ensureSecurityAlertValidationWorkflowInstalled,
+  ensureSecurityAlertAnalysisWorkflowInstalled,
   initSecurityManagedWorkflowsClient,
-  readSecurityAlertValidationWorkflowSettings,
+  readSecurityAlertAnalysisWorkflowSettings,
 } from '../../../../workflows/managed_workflows';
 
 // Initialization flows are static objects with no access to the plugin's start-time
@@ -31,14 +31,14 @@ import {
 // `registerWorkflowSteps` captures it for step definitions.
 let getStartServices: CoreSetup<StartPlugins>['getStartServices'] | undefined;
 
-export const registerInitAlertValidationWorkflowFlowDependencies = (
+export const registerInitAlertAnalysisWorkflowFlowDependencies = (
   core: CoreSetup<StartPlugins>
 ): void => {
   getStartServices = core.getStartServices;
 };
 
-export const initAlertValidationWorkflowFlow: InitializationFlowDefinition<null> = {
-  id: INITIALIZATION_FLOW_INIT_ALERT_VALIDATION_WORKFLOW,
+export const initAlertAnalysisWorkflowFlow: InitializationFlowDefinition<null> = {
+  id: INITIALIZATION_FLOW_INIT_ALERT_ANALYSIS_WORKFLOW,
   spaceAware: true,
   runFlow: async (context: InitializationFlowContext): Promise<InitializationFlowResult<null>> => {
     if (!getStartServices) {
@@ -52,8 +52,8 @@ export const initAlertValidationWorkflowFlow: InitializationFlowDefinition<null>
     }
 
     const isEnabled = await coreStart.featureFlags.getBooleanValue(
-      MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
-      MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT
+      MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
+      MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT
     );
     if (!isEnabled) {
       return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
@@ -63,10 +63,10 @@ export const initAlertValidationWorkflowFlow: InitializationFlowDefinition<null>
     const spaceId = securitySolution.getSpaceId();
     const uiSettingsClient = (await context.requestHandlerContext.core).uiSettings.client;
 
-    const settings = await readSecurityAlertValidationWorkflowSettings(uiSettingsClient);
+    const settings = await readSecurityAlertAnalysisWorkflowSettings(uiSettingsClient);
     const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(workflowsExtensions);
 
-    await ensureSecurityAlertValidationWorkflowInstalled({
+    await ensureSecurityAlertAnalysisWorkflowInstalled({
       managedWorkflowsClient,
       spaceId,
       settings,

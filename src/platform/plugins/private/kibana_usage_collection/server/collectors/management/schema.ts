@@ -875,34 +875,33 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Switches the Entity Store Engine to v2',
     },
   },
-  'securitySolution:alertValidationWorkflowEnabled': {
+  'securitySolution:alertAnalysisWorkflowEnabled': {
     type: 'boolean',
     _meta: { description: 'Whether the managed alert analysis workflow is enabled' },
   },
-  'securitySolution:alertValidationWorkflowAutoCloseEnabled': {
+  'securitySolution:alertAnalysisWorkflowAutoCloseEnabled': {
     type: 'boolean',
     _meta: {
-      description:
-        'Auto-close alerts validated as false positives by the alert validation workflow',
+      description: 'Auto-close alerts validated as false positives by the alert analysis workflow',
     },
   },
-  'securitySolution:alertValidationWorkflowAutoCloseConfidenceScoreMinThreshold': {
+  'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMinThreshold': {
     type: 'float',
     _meta: {
       description: 'Minimum false positive confidence score for auto-closing alerts',
     },
   },
-  'securitySolution:alertValidationWorkflowAutoCloseConfidenceScoreMaxThreshold': {
+  'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMaxThreshold': {
     type: 'float',
     _meta: {
       description: 'Maximum false positive confidence score for auto-closing alerts',
     },
   },
-  'securitySolution:alertValidationWorkflowConnectorId': {
+  'securitySolution:alertAnalysisWorkflowConnectorId': {
     type: 'keyword',
     _meta: { description: 'AI connector used by the alert analysis workflow' },
   },
-  'securitySolution:alertValidationWorkflowCreateConversation': {
+  'securitySolution:alertAnalysisWorkflowCreateConversation': {
     type: 'boolean',
     _meta: {
       description: 'Whether the AI agent creates a new conversation per alert analysis',

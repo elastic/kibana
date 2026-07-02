@@ -30,32 +30,32 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
-  fetchAlertValidationWorkflowRuleAttachments,
-  fetchAlertValidationWorkflowRuleAttachmentSelection,
-  fetchAlertValidationWorkflowRuleAttachmentStats,
+  fetchAlertAnalysisWorkflowRuleAttachments,
+  fetchAlertAnalysisWorkflowRuleAttachmentSelection,
+  fetchAlertAnalysisWorkflowRuleAttachmentStats,
   type RuleAttachmentPage,
   type RuleAttachmentSelection,
   type RuleAttachmentStats,
   type RuleAttachmentSummary,
   type UpdateRuleAttachmentsResult,
-  updateAlertValidationWorkflowRuleAttachments,
+  updateAlertAnalysisWorkflowRuleAttachments,
 } from './api';
 
 const RULE_ATTACHMENTS_PER_PAGE = 5;
 
 const RULE_ATTACHMENT_STATS_QUERY_KEY = [
-  'alertValidationWorkflow',
-  'alertValidationWorkflowRuleAttachmentStats',
+  'alertAnalysisWorkflow',
+  'alertAnalysisWorkflowRuleAttachmentStats',
 ] as const;
 
 const RULE_ATTACHMENTS_QUERY_KEY = [
-  'alertValidationWorkflow',
-  'alertValidationWorkflowRuleAttachments',
+  'alertAnalysisWorkflow',
+  'alertAnalysisWorkflowRuleAttachments',
 ] as const;
 
 const RULE_ATTACHMENT_SELECTION_QUERY_KEY = [
-  'alertValidationWorkflow',
-  'alertValidationWorkflowRuleAttachmentSelection',
+  'alertAnalysisWorkflow',
+  'alertAnalysisWorkflowRuleAttachmentSelection',
 ] as const;
 
 type RuleAttachmentError = Error & { body?: { message?: string } };
@@ -98,7 +98,7 @@ const getNextAttachedCount = ({
   total: number;
 }): number => Math.min(Math.max(attached + attachCount - detachCount, 0), total);
 
-export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
+export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
   const {
     services: { application, http, notifications },
   } = useKibana();
@@ -137,7 +137,7 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
     queryKey: [...RULE_ATTACHMENT_STATS_QUERY_KEY, normalizedRuleQuery],
     retry: false,
     queryFn: async () => {
-      return fetchAlertValidationWorkflowRuleAttachmentStats({
+      return fetchAlertAnalysisWorkflowRuleAttachmentStats({
         http,
         search: normalizedRuleQuery,
       });
@@ -145,7 +145,7 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
     onError: (error) => {
       showRuleAttachmentError(
         i18n.translate(
-          'xpack.securitySolution.alertValidationWorkflow.ruleAttachmentStatsErrorMessage',
+          'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentStatsErrorMessage',
           {
             defaultMessage: 'Failed to preview matching detection rules',
           }
@@ -161,7 +161,7 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
     keepPreviousData: true,
     retry: false,
     queryFn: async () => {
-      return fetchAlertValidationWorkflowRuleAttachments({
+      return fetchAlertAnalysisWorkflowRuleAttachments({
         http,
         search: normalizedRuleQuery,
         page,
@@ -171,7 +171,7 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
     onError: (error) => {
       showRuleAttachmentError(
         i18n.translate(
-          'xpack.securitySolution.alertValidationWorkflow.ruleAttachmentListErrorMessage',
+          'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentListErrorMessage',
           {
             defaultMessage: 'Failed to load matching detection rules',
           }
@@ -188,7 +188,7 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
   >({
     mutationKey: [...RULE_ATTACHMENT_SELECTION_QUERY_KEY, normalizedRuleQuery],
     mutationFn: async () => {
-      return fetchAlertValidationWorkflowRuleAttachmentSelection({
+      return fetchAlertAnalysisWorkflowRuleAttachmentSelection({
         http,
         search: normalizedRuleQuery,
       });
@@ -214,7 +214,7 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
     onError: (error) => {
       showRuleAttachmentError(
         i18n.translate(
-          'xpack.securitySolution.alertValidationWorkflow.ruleAttachmentSelectionErrorMessage',
+          'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentSelectionErrorMessage',
           {
             defaultMessage: 'Failed to select matching detection rules',
           }
@@ -226,7 +226,7 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
 
   const updateMutation = useMutation<UpdateRuleAttachmentsResult, RuleAttachmentError>({
     mutationFn: async () => {
-      return updateAlertValidationWorkflowRuleAttachments({
+      return updateAlertAnalysisWorkflowRuleAttachments({
         http,
         attachRuleIds: pendingAttachRuleIds,
         detachRuleIds: pendingDetachRuleIds,
@@ -323,7 +323,7 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: RULE_ATTACHMENTS_QUERY_KEY });
       notifications.toasts.addSuccess(
         i18n.translate(
-          'xpack.securitySolution.alertValidationWorkflow.ruleAttachmentSuccessMessage',
+          'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentSuccessMessage',
           {
             defaultMessage:
               'Updated alert analysis workflow on {updated, plural, one {# rule} other {# rules}}.',
@@ -334,12 +334,9 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
     },
     onError: (error) => {
       showRuleAttachmentError(
-        i18n.translate(
-          'xpack.securitySolution.alertValidationWorkflow.ruleAttachmentErrorMessage',
-          {
-            defaultMessage: 'Failed to update alert analysis workflow on detection rules',
-          }
-        ),
+        i18n.translate('xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentErrorMessage', {
+          defaultMessage: 'Failed to update alert analysis workflow on detection rules',
+        }),
         error
       );
     },
@@ -417,7 +414,7 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
       {
         field: 'name',
         name: i18n.translate(
-          'xpack.securitySolution.alertValidationWorkflow.ruleAttachmentRuleNameColumnLabel',
+          'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentRuleNameColumnLabel',
           {
             defaultMessage: 'Rule',
           }
@@ -427,7 +424,7 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
       {
         field: 'enabled',
         name: i18n.translate(
-          'xpack.securitySolution.alertValidationWorkflow.ruleAttachmentEnabledColumnLabel',
+          'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentEnabledColumnLabel',
           {
             defaultMessage: 'Rule state',
           }
@@ -437,14 +434,14 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
           enabled ? (
             <EuiBadge color="success">
               <FormattedMessage
-                id="xpack.securitySolution.alertValidationWorkflow.ruleAttachmentEnabledBadgeLabel"
+                id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentEnabledBadgeLabel"
                 defaultMessage="Enabled"
               />
             </EuiBadge>
           ) : (
             <EuiBadge color="hollow">
               <FormattedMessage
-                id="xpack.securitySolution.alertValidationWorkflow.ruleAttachmentDisabledBadgeLabel"
+                id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentDisabledBadgeLabel"
                 defaultMessage="Disabled"
               />
             </EuiBadge>
@@ -502,7 +499,7 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
       title={
         <h4>
           <FormattedMessage
-            id="xpack.securitySolution.alertValidationWorkflow.ruleAttachmentTitle"
+            id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentTitle"
             defaultMessage="Detection rules"
           />
         </h4>
@@ -510,7 +507,7 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
       description={
         <p>
           <FormattedMessage
-            id="xpack.securitySolution.alertValidationWorkflow.ruleAttachmentDescription"
+            id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentDescription"
             defaultMessage="Select the detection rules that should run the managed alert analysis workflow. Existing workflow attachments are shown before you apply changes."
           />
         </p>
@@ -521,13 +518,13 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
           <EuiFormRow
             fullWidth
             label={i18n.translate(
-              'xpack.securitySolution.alertValidationWorkflow.ruleAttachmentFilterQueryLabel',
+              'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentFilterQueryLabel',
               {
                 defaultMessage: 'Rule filter',
               }
             )}
             helpText={i18n.translate(
-              'xpack.securitySolution.alertValidationWorkflow.ruleAttachmentFilterQueryHelpText',
+              'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentFilterQueryHelpText',
               {
                 defaultMessage:
                   'Search by rule name. Press Enter to apply. Leave empty to show every rule.',
@@ -536,10 +533,10 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
           >
             <EuiFieldSearch
               fullWidth
-              data-test-subj="alertValidationWorkflowRuleAttachmentQuery"
+              data-test-subj="alertAnalysisWorkflowRuleAttachmentQuery"
               value={ruleQuery}
               placeholder={i18n.translate(
-                'xpack.securitySolution.alertValidationWorkflow.ruleAttachmentFilterQueryPlaceholder',
+                'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentFilterQueryPlaceholder',
                 {
                   defaultMessage: 'Search by rule name',
                 }
@@ -565,10 +562,10 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
                   <EuiText
                     color="subdued"
                     size="s"
-                    data-test-subj="alertValidationWorkflowRuleAttachmentShowingRules"
+                    data-test-subj="alertAnalysisWorkflowRuleAttachmentShowingRules"
                   >
                     <FormattedMessage
-                      id="xpack.securitySolution.alertValidationWorkflow.ruleAttachmentShowingRulesLabel"
+                      id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentShowingRulesLabel"
                       defaultMessage="Showing {firstRuleOnPage}-{lastRuleOnPage} of {totalRules} rules"
                       values={{ firstRuleOnPage, lastRuleOnPage, totalRules }}
                     />
@@ -578,10 +575,10 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
                   <EuiText
                     color="subdued"
                     size="s"
-                    data-test-subj="alertValidationWorkflowRuleAttachmentSelectedRules"
+                    data-test-subj="alertAnalysisWorkflowRuleAttachmentSelectedRules"
                   >
                     <FormattedMessage
-                      id="xpack.securitySolution.alertValidationWorkflow.ruleAttachmentSelectedRulesLabel"
+                      id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentSelectedRulesLabel"
                       defaultMessage="Changed {changedRulesCount, plural, one {# rule} other {# rules}}"
                       values={{ changedRulesCount }}
                     />
@@ -589,7 +586,7 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    data-test-subj="alertValidationWorkflowRuleAttachmentSelectAllButton"
+                    data-test-subj="alertAnalysisWorkflowRuleAttachmentSelectAllButton"
                     disabled={bulkSelectionButtonDisabled}
                     iconType="pagesSelect"
                     isLoading={bulkSelectionMutation.isLoading}
@@ -598,13 +595,13 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
                   >
                     {bulkSelectionButtonAction === 'select' ? (
                       <FormattedMessage
-                        id="xpack.securitySolution.alertValidationWorkflow.ruleAttachmentSelectAllButtonLabel"
+                        id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentSelectAllButtonLabel"
                         defaultMessage="Select all {selectableRules, plural, one {# rule} other {# rules}}"
                         values={{ selectableRules }}
                       />
                     ) : (
                       <FormattedMessage
-                        id="xpack.securitySolution.alertValidationWorkflow.ruleAttachmentDeselectAllButtonLabel"
+                        id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentDeselectAllButtonLabel"
                         defaultMessage="Deselect all"
                       />
                     )}
@@ -612,7 +609,7 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    data-test-subj="alertValidationWorkflowRuleAttachmentClearSelectionButton"
+                    data-test-subj="alertAnalysisWorkflowRuleAttachmentClearSelectionButton"
                     disabled={changedRulesCount === 0}
                     iconType="cross"
                     onClick={() => {
@@ -623,7 +620,7 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
                     size="s"
                   >
                     <FormattedMessage
-                      id="xpack.securitySolution.alertValidationWorkflow.ruleAttachmentClearSelectionButtonLabel"
+                      id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentClearSelectionButtonLabel"
                       defaultMessage="Reset changes"
                     />
                   </EuiButtonEmpty>
@@ -632,14 +629,14 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
-                data-test-subj="alertValidationWorkflowRuleAttachmentAttachButton"
+                data-test-subj="alertAnalysisWorkflowRuleAttachmentAttachButton"
                 disabled={!canEditRules || changedRulesCount === 0}
                 isLoading={updateMutation.isLoading}
                 onClick={() => setIsConfirmModalVisible(true)}
                 size="s"
               >
                 <FormattedMessage
-                  id="xpack.securitySolution.alertValidationWorkflow.ruleAttachmentAttachButtonLabel"
+                  id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentAttachButtonLabel"
                   defaultMessage="Update {changedRulesCount, plural, one {# rule} other {# rules}}"
                   values={{ changedRulesCount }}
                 />
@@ -649,7 +646,7 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
           <EuiHorizontalRule margin="s" />
           <EuiBasicTable
             compressed
-            data-test-subj="alertValidationWorkflowRuleAttachmentTable"
+            data-test-subj="alertAnalysisWorkflowRuleAttachmentTable"
             itemId="id"
             items={pageRules}
             columns={columns}
@@ -664,7 +661,7 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
                 : ruleAttachmentsQuery.data?.total ?? totalRules,
             }}
             tableCaption={i18n.translate(
-              'xpack.securitySolution.alertValidationWorkflow.ruleAttachmentTableCaption',
+              'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentTableCaption',
               {
                 defaultMessage: 'Detection rules matching the alert analysis workflow filter',
               }
@@ -701,10 +698,10 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
       </EuiFlexGroup>
       {isConfirmModalVisible && (
         <EuiConfirmModal
-          data-test-subj="alertValidationWorkflowRuleAttachmentConfirmModal"
+          data-test-subj="alertAnalysisWorkflowRuleAttachmentConfirmModal"
           aria-labelledby={confirmModalTitleId}
           title={i18n.translate(
-            'xpack.securitySolution.alertValidationWorkflow.ruleAttachmentConfirmModalTitle',
+            'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalTitle',
             {
               defaultMessage: 'Update rule attachments?',
             }
@@ -720,13 +717,13 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
             updateMutation.mutate();
           }}
           cancelButtonText={i18n.translate(
-            'xpack.securitySolution.alertValidationWorkflow.ruleAttachmentConfirmModalCancelButtonLabel',
+            'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalCancelButtonLabel',
             {
               defaultMessage: 'Cancel',
             }
           )}
           confirmButtonText={i18n.translate(
-            'xpack.securitySolution.alertValidationWorkflow.ruleAttachmentConfirmModalConfirmButtonLabel',
+            'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalConfirmButtonLabel',
             {
               defaultMessage: 'Update {changedRulesCount, plural, one {# rule} other {# rules}}',
               values: { changedRulesCount },
@@ -740,7 +737,7 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
           <EuiText size="s">
             <p>
               <FormattedMessage
-                id="xpack.securitySolution.alertValidationWorkflow.ruleAttachmentConfirmModalDescription"
+                id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalDescription"
                 defaultMessage="This will update the alert analysis workflow attachment state for {changedRulesCount, plural, one {# rule} other {# rules}}."
                 values={{ changedRulesCount }}
               />
@@ -750,14 +747,14 @@ export const AlertValidationWorkflowRuleAttachmentSection: React.FC = () => {
                 alignItems="center"
                 gutterSize="s"
                 responsive={false}
-                data-test-subj="alertValidationWorkflowRuleAttachmentUpdatingIndicator"
+                data-test-subj="alertAnalysisWorkflowRuleAttachmentUpdatingIndicator"
               >
                 <EuiFlexItem grow={false}>
                   <EuiLoadingSpinner size="l" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <FormattedMessage
-                    id="xpack.securitySolution.alertValidationWorkflow.ruleAttachmentConfirmModalLoadingLabel"
+                    id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalLoadingLabel"
                     defaultMessage="Updating rule attachments..."
                   />
                 </EuiFlexItem>

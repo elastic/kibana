@@ -8,13 +8,12 @@
  */
 
 import { parseDocument } from 'yaml';
-import ALERT_VALIDATION_WORKFLOW_YAML = require('./security_solution_alert_validation_workflow.yaml');
+import ALERT_ANALYSIS_WORKFLOW_YAML = require('./security_solution_alert_analysis_workflow.yaml');
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../types';
 
-export const SECURITY_ALERT_VALIDATION_WORKFLOW_ID = 'system-security-alert-validation';
+export const SECURITY_ALERT_ANALYSIS_WORKFLOW_ID = 'system-security-alert-analysis';
 
-export interface SecurityAlertValidationWorkflowTemplateValues
-  extends ManagedWorkflowTemplateValues {
+export interface SecurityAlertAnalysisWorkflowTemplateValues extends ManagedWorkflowTemplateValues {
   workflowEnabled: boolean;
   autoCloseEnabled: boolean;
   autoCloseConfidenceScoreMinThreshold: number;
@@ -23,15 +22,15 @@ export interface SecurityAlertValidationWorkflowTemplateValues
   createConversation: boolean;
 }
 
-const renderAlertValidationWorkflowYaml = ({
+const renderAlertAnalysisWorkflowYaml = ({
   workflowEnabled,
   autoCloseEnabled,
   autoCloseConfidenceScoreMinThreshold,
   autoCloseConfidenceScoreMaxThreshold,
   connectorId,
   createConversation,
-}: SecurityAlertValidationWorkflowTemplateValues): string => {
-  const document = parseDocument(ALERT_VALIDATION_WORKFLOW_YAML);
+}: SecurityAlertAnalysisWorkflowTemplateValues): string => {
+  const document = parseDocument(ALERT_ANALYSIS_WORKFLOW_YAML);
 
   document.setIn(['enabled'], workflowEnabled);
   document.setIn(['consts', 'auto_close_enabled'], autoCloseEnabled);
@@ -49,15 +48,15 @@ const renderAlertValidationWorkflowYaml = ({
   return document.toString();
 };
 
-export const SECURITY_ALERT_VALIDATION_WORKFLOW = {
-  id: SECURITY_ALERT_VALIDATION_WORKFLOW_ID,
+export const SECURITY_ALERT_ANALYSIS_WORKFLOW = {
+  id: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   pluginId: 'securitySolution',
   version: 1,
   billable: false,
-  yamlTemplate: renderAlertValidationWorkflowYaml,
+  yamlTemplate: renderAlertAnalysisWorkflowYaml,
   management: {
     lifecycle: 'dynamic',
     versionStrategy: 'on_adopt',
     enablement: 'enforced',
   },
-} as const satisfies ManagedWorkflowDefinition<SecurityAlertValidationWorkflowTemplateValues>;
+} as const satisfies ManagedWorkflowDefinition<SecurityAlertAnalysisWorkflowTemplateValues>;

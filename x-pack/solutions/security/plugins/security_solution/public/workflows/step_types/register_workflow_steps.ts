@@ -9,8 +9,8 @@ import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extens
 import type { CoreSetup } from '@kbn/core/public';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import {
-  REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
-  REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
+  REGISTER_ALERT_ANALYSIS_STEPS_FEATURE_FLAG,
+  REGISTER_ALERT_ANALYSIS_STEP_FEATURE_FLAG_DEFAULT,
 } from '../../../common/constants';
 
 /**
@@ -27,8 +27,8 @@ export const registerWorkflowSteps = (
     .getStartServices()
     .then(([coreStart]) =>
       coreStart.featureFlags.getBooleanValue(
-        REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
-        REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT
+        REGISTER_ALERT_ANALYSIS_STEPS_FEATURE_FLAG,
+        REGISTER_ALERT_ANALYSIS_STEP_FEATURE_FLAG_DEFAULT
       )
     );
 

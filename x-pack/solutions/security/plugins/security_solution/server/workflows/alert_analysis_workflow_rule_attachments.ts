@@ -10,10 +10,10 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import type {
-  AlertValidationWorkflowRuleAttachmentService,
+  AlertAnalysisWorkflowRuleAttachmentService,
   RuleAttachmentSelection,
   RuleAttachmentSummary,
-} from '@kbn/workflows/common/alert_validation_workflow';
+} from '@kbn/workflows/common/alert_analysis_workflow';
 import {
   BulkActionEditTypeEnum,
   type BulkActionEditPayload,
@@ -30,8 +30,8 @@ import {
 } from '../lib/detection_engine/rule_management/logic/bulk_actions/bulk_edit_rules';
 import type { IPrebuiltRuleAssetsClient } from '../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 
-export const ALERT_VALIDATION_WORKFLOW_SYSTEM_CONNECTOR_ID = 'system-connector-.workflows';
-const ALERT_VALIDATION_WORKFLOW_ACTION_SUB_ACTION = 'run';
+export const ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID = 'system-connector-.workflows';
+const ALERT_ANALYSIS_WORKFLOW_ACTION_SUB_ACTION = 'run';
 const MAX_RULES_TO_ATTACH = 2000;
 // Detach needs one bulkEdit call per rule (each rule keeps a different remaining action
 // list), so this bounds how many of those run at once instead of firing up to
@@ -53,7 +53,7 @@ interface RuleAttachmentBulkEditDependencies {
   ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
 }
 
-interface AlertValidationWorkflowRuleAttachmentServiceDependencies {
+interface AlertAnalysisWorkflowRuleAttachmentServiceDependencies {
   rulesClient: RulesClient;
   workflowId: string;
   bulkEditDependencies?: RuleAttachmentBulkEditDependencies;
@@ -91,26 +91,26 @@ const getRuleActions = (
   rule: Pick<RuleAlertType, 'actions' | 'systemActions'>
 ): RuleAnyAction[] => [...rule.actions, ...(rule.systemActions ?? [])];
 
-const isAlertValidationWorkflowAction = (action: RuleAnyAction, workflowId: string): boolean => {
+const isAlertAnalysisWorkflowAction = (action: RuleAnyAction, workflowId: string): boolean => {
   const params = action.params as WorkflowRuleActionParams;
 
   return (
-    action.id === ALERT_VALIDATION_WORKFLOW_SYSTEM_CONNECTOR_ID &&
-    params.subAction === ALERT_VALIDATION_WORKFLOW_ACTION_SUB_ACTION &&
+    action.id === ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID &&
+    params.subAction === ALERT_ANALYSIS_WORKFLOW_ACTION_SUB_ACTION &&
     params.subActionParams?.workflowId === workflowId
   );
 };
 
-export const hasAlertValidationWorkflowAction = (
+export const hasAlertAnalysisWorkflowAction = (
   rule: Pick<RuleAlertType, 'actions' | 'systemActions'>,
   workflowId: string
 ): boolean =>
-  getRuleActions(rule).some((action) => isAlertValidationWorkflowAction(action, workflowId));
+  getRuleActions(rule).some((action) => isAlertAnalysisWorkflowAction(action, workflowId));
 
-const createAlertValidationWorkflowAction = (workflowId: string): NormalizedRuleAction => ({
-  id: ALERT_VALIDATION_WORKFLOW_SYSTEM_CONNECTOR_ID,
+const createAlertAnalysisWorkflowAction = (workflowId: string): NormalizedRuleAction => ({
+  id: ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID,
   params: {
-    subAction: ALERT_VALIDATION_WORKFLOW_ACTION_SUB_ACTION,
+    subAction: ALERT_ANALYSIS_WORKFLOW_ACTION_SUB_ACTION,
     subActionParams: {
       workflowId,
       summaryMode: false,
@@ -131,7 +131,7 @@ const toNormalizedRuleAction = (action: RuleAnyAction): NormalizedRuleAction => 
 const createAddWorkflowActionEdit = (workflowId: string): BulkActionEditPayload => ({
   type: BulkActionEditTypeEnum.add_rule_actions,
   value: {
-    actions: [createAlertValidationWorkflowAction(workflowId)],
+    actions: [createAlertAnalysisWorkflowAction(workflowId)],
   },
 });
 
@@ -142,7 +142,7 @@ const createSetWorkflowActionsEdit = (
   type: BulkActionEditTypeEnum.set_rule_actions,
   value: {
     actions: getRuleActions(rule)
-      .filter((action) => !isAlertValidationWorkflowAction(action, workflowId))
+      .filter((action) => !isAlertAnalysisWorkflowAction(action, workflowId))
       .map(toNormalizedRuleAction),
   },
 });
@@ -154,7 +154,7 @@ const toRuleAttachmentSummary = (
   id: rule.id,
   name: rule.name,
   enabled: rule.enabled,
-  attached: hasAlertValidationWorkflowAction(rule, workflowId),
+  attached: hasAlertAnalysisWorkflowAction(rule, workflowId),
 });
 
 const getMatchingRules = async ({
@@ -190,21 +190,21 @@ const getMatchingRules = async ({
 };
 
 const countAttachedRules = (rules: RuleAlertType[], workflowId: string): number => {
-  return rules.filter((rule) => hasAlertValidationWorkflowAction(rule, workflowId)).length;
+  return rules.filter((rule) => hasAlertAnalysisWorkflowAction(rule, workflowId)).length;
 };
 
 const getRulesMissingWorkflowAction = (
   rules: RuleAlertType[],
   workflowId: string
 ): RuleAlertType[] => {
-  return rules.filter((rule) => !hasAlertValidationWorkflowAction(rule, workflowId));
+  return rules.filter((rule) => !hasAlertAnalysisWorkflowAction(rule, workflowId));
 };
 
 const getRulesWithWorkflowAction = (
   rules: RuleAlertType[],
   workflowId: string
 ): RuleAlertType[] => {
-  return rules.filter((rule) => hasAlertValidationWorkflowAction(rule, workflowId));
+  return rules.filter((rule) => hasAlertAnalysisWorkflowAction(rule, workflowId));
 };
 
 const getRulesByIds = async ({
@@ -239,7 +239,7 @@ const getRulesByIds = async ({
 };
 
 const getBulkEditDependencies = (
-  dependencies: AlertValidationWorkflowRuleAttachmentServiceDependencies
+  dependencies: AlertAnalysisWorkflowRuleAttachmentServiceDependencies
 ): RuleAttachmentBulkEditDependencies => {
   if (!dependencies.bulkEditDependencies) {
     throw new Error('Bulk edit dependencies are required to attach the workflow to rules');
@@ -248,9 +248,9 @@ const getBulkEditDependencies = (
   return dependencies.bulkEditDependencies;
 };
 
-export const createAlertValidationWorkflowRuleAttachmentService = (
-  dependencies: AlertValidationWorkflowRuleAttachmentServiceDependencies
-): AlertValidationWorkflowRuleAttachmentService => {
+export const createAlertAnalysisWorkflowRuleAttachmentService = (
+  dependencies: AlertAnalysisWorkflowRuleAttachmentServiceDependencies
+): AlertAnalysisWorkflowRuleAttachmentService => {
   const { rulesClient, workflowId, bulkEditRulesFn = bulkEditRules } = dependencies;
 
   return {

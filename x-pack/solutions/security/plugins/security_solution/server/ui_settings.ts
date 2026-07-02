@@ -11,12 +11,12 @@ import { DEFAULT_EXCLUDED_GAP_REASONS, gapReasonType } from '@kbn/alerting-plugi
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import {
-  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
-  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
-  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,
-  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
-  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION,
-  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE,
@@ -517,7 +517,7 @@ export const initUiSettings = (
         { maxSize: Object.values(gapReasonType).length }
       ),
     },
-    ...getAlertValidationWorkflowSettings(),
+    ...getAlertAnalysisWorkflowSettings(),
     ...getDefaultValueReportSettings(),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
@@ -672,14 +672,14 @@ export const getDefaultColdAndFrozenTiersSettings = (): SettingsConfig => ({
   },
 });
 
-export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
-  [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED]: {
-    name: i18n.translate('xpack.securitySolution.uiSettings.alertValidationWorkflowEnabledLabel', {
+export const getAlertAnalysisWorkflowSettings = (): SettingsConfig => ({
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.alertAnalysisWorkflowEnabledLabel', {
       defaultMessage: 'Enable alert analysis workflow',
     }),
     value: true,
     description: i18n.translate(
-      'xpack.securitySolution.uiSettings.alertValidationWorkflowEnabledDescription',
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowEnabledDescription',
       {
         defaultMessage:
           'When enabled, the managed alert analysis workflow automatically triages incoming alerts.',
@@ -693,19 +693,19 @@ export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
     technicalPreview: true,
     readonly: true,
   },
-  [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED]: {
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED]: {
     name: i18n.translate(
-      'xpack.securitySolution.uiSettings.alertValidationWorkflowAutoCloseEnabledLabel',
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowAutoCloseEnabledLabel',
       {
         defaultMessage: 'Auto-close alerts validated as false positives',
       }
     ),
     value: true,
     description: i18n.translate(
-      'xpack.securitySolution.uiSettings.alertValidationWorkflowAutoCloseEnabledDescription',
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowAutoCloseEnabledDescription',
       {
         defaultMessage:
-          'Automatically closes alerts when the alert validation workflow classifies them as false positives within the configured confidence range.',
+          'Automatically closes alerts when the alert analysis workflow classifies them as false positives within the configured confidence range.',
       }
     ),
     type: 'boolean',
@@ -716,16 +716,16 @@ export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
     technicalPreview: true,
     readonly: true,
   },
-  [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD]: {
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD]: {
     name: i18n.translate(
-      'xpack.securitySolution.uiSettings.alertValidationWorkflowAutoCloseMinThresholdLabel',
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowAutoCloseMinThresholdLabel',
       {
         defaultMessage: 'Auto-close minimum confidence score',
       }
     ),
     value: 0.85,
     description: i18n.translate(
-      'xpack.securitySolution.uiSettings.alertValidationWorkflowAutoCloseMinThresholdDescription',
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowAutoCloseMinThresholdDescription',
       {
         defaultMessage:
           'The lowest false positive confidence score that can automatically close an alert.',
@@ -739,16 +739,16 @@ export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
     technicalPreview: true,
     readonly: true,
   },
-  [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD]: {
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD]: {
     name: i18n.translate(
-      'xpack.securitySolution.uiSettings.alertValidationWorkflowAutoCloseMaxThresholdLabel',
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowAutoCloseMaxThresholdLabel',
       {
         defaultMessage: 'Auto-close maximum confidence score',
       }
     ),
     value: 1,
     description: i18n.translate(
-      'xpack.securitySolution.uiSettings.alertValidationWorkflowAutoCloseMaxThresholdDescription',
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowAutoCloseMaxThresholdDescription',
       {
         defaultMessage:
           'The highest false positive confidence score that can automatically close an alert.',
@@ -762,14 +762,14 @@ export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
     technicalPreview: true,
     readonly: true,
   },
-  [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID]: {
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID]: {
     name: i18n.translate(
-      'xpack.securitySolution.uiSettings.alertValidationWorkflowConnectorIdLabel',
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowConnectorIdLabel',
       { defaultMessage: 'Alert analysis workflow AI connector' }
     ),
     value: '',
     description: i18n.translate(
-      'xpack.securitySolution.uiSettings.alertValidationWorkflowConnectorIdDescription',
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowConnectorIdDescription',
       {
         defaultMessage: 'The AI connector used by the alert analysis workflow to classify alerts.',
       }
@@ -782,14 +782,14 @@ export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
     technicalPreview: true,
     readonly: true,
   },
-  [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION]: {
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION]: {
     name: i18n.translate(
-      'xpack.securitySolution.uiSettings.alertValidationWorkflowCreateConversationLabel',
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowCreateConversationLabel',
       { defaultMessage: 'Create AI conversation per alert analysis' }
     ),
     value: true,
     description: i18n.translate(
-      'xpack.securitySolution.uiSettings.alertValidationWorkflowCreateConversationDescription',
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowCreateConversationDescription',
       {
         defaultMessage:
           'When enabled, the AI agent step creates a new conversation for each alert analysis. Disable to prevent large numbers of conversations from being created.',

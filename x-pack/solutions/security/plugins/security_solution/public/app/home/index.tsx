@@ -22,7 +22,7 @@ import {
   INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
   INITIALIZATION_FLOW_INIT_AI_PROMPTS,
   INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING,
-  INITIALIZATION_FLOW_INIT_ALERT_VALIDATION_WORKFLOW,
+  INITIALIZATION_FLOW_INIT_ALERT_ANALYSIS_WORKFLOW,
 } from '../../../common/api/initialization';
 import { TopValuesPopover } from '../components/top_values_popover/top_values_popover';
 import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
@@ -49,7 +49,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
     INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
     INITIALIZATION_FLOW_INIT_AI_PROMPTS,
     INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING,
-    INITIALIZATION_FLOW_INIT_ALERT_VALIDATION_WORKFLOW,
+    INITIALIZATION_FLOW_INIT_ALERT_ANALYSIS_WORKFLOW,
   ]);
 
   return (

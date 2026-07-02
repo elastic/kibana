@@ -9,15 +9,15 @@ import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mock
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { RouterMock } from '@kbn/core-http-router-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { SECURITY_ALERT_VALIDATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import {
-  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
-  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
-  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,
-  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
-  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION,
-  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
 } from '@kbn/management-settings-ids';
 import type { StartPlugins } from '../plugin';
 import type {
@@ -25,13 +25,13 @@ import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../types';
-import { ALERT_VALIDATION_WORKFLOW_SETTINGS_UPDATED_EVENT } from '../lib/telemetry/event_based/events';
+import { ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT } from '../lib/telemetry/event_based/events';
 import {
-  ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE,
-  registerAlertValidationWorkflowSettingsRoutes,
-} from './alert_validation_workflow_settings_routes';
+  ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
+  registerAlertAnalysisWorkflowSettingsRoutes,
+} from './alert_analysis_workflow_settings_routes';
 
-describe('registerAlertValidationWorkflowSettingsRoutes', () => {
+describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
   let router: RouterMock;
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let getStartServices: jest.MockedFunction<StartServicesAccessor<StartPlugins>>;
@@ -64,7 +64,7 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
   const createRequest = (body?: unknown) =>
     httpServerMock.createKibanaRequest({
       method: body ? 'put' : 'get',
-      path: ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE,
+      path: ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
       body: body as Record<string, unknown>,
     });
 
@@ -100,7 +100,7 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
         undefined,
       ] as unknown as Awaited<ReturnType<StartServicesAccessor<StartPlugins>>>);
 
-    registerAlertValidationWorkflowSettingsRoutes(
+    registerAlertAnalysisWorkflowSettingsRoutes(
       router as unknown as SecuritySolutionPluginRouter,
       getStartServices as unknown as StartServicesAccessor<StartPlugins>,
       loggerMock.create()
@@ -121,7 +121,7 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
     it('returns the current space-scoped settings', async () => {
       mockSettings();
 
-      const handler = router.versioned.getRoute('get', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
+      const handler = router.versioned.getRoute('get', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
         .versions['1'].handler;
 
       await handler(createContext(), createRequest(), mockResponse);
@@ -136,17 +136,17 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
             connectorId: 'connector-abc',
             createConversation: true,
           },
-          workflowId: 'system-security-alert-validation-space-1',
+          workflowId: 'system-security-alert-analysis-space-1',
         },
       });
     });
 
     it('does not install the workflow on GET', async () => {
-      // Installing for the space is handled by the init-alert-validation-workflow
+      // Installing for the space is handled by the init-alert-analysis-workflow
       // initialization flow (server/lib/initialization), not the settings route.
       mockSettings();
 
-      const handler = router.versioned.getRoute('get', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
+      const handler = router.versioned.getRoute('get', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
         .versions['1'].handler;
 
       await handler(createContext(), createRequest(), mockResponse);
@@ -156,7 +156,7 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
 
     it('returns forbidden when the license does not support the feature', async () => {
       hasAtLeast.mockReturnValue(false);
-      const handler = router.versioned.getRoute('get', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
+      const handler = router.versioned.getRoute('get', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
         .versions['1'].handler;
 
       await handler(createContext(), createRequest(), mockResponse);
@@ -177,37 +177,37 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
     };
 
     it('persists settings and installs the per-space managed workflow', async () => {
-      const handler = router.versioned.getRoute('put', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
+      const handler = router.versioned.getRoute('put', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
         .versions['1'].handler;
 
       await handler(createContext(), createRequest(settings), mockResponse);
 
       expect(uiSettingsClient.set).toHaveBeenCalledWith(
-        SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED,
+        SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
         settings.workflowEnabled
       );
       expect(uiSettingsClient.set).toHaveBeenCalledWith(
-        SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,
+        SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED,
         settings.autoCloseEnabled
       );
       expect(uiSettingsClient.set).toHaveBeenCalledWith(
-        SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
+        SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
         settings.autoCloseConfidenceScoreMinThreshold
       );
       expect(uiSettingsClient.set).toHaveBeenCalledWith(
-        SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
+        SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
         settings.autoCloseConfidenceScoreMaxThreshold
       );
       expect(uiSettingsClient.set).toHaveBeenCalledWith(
-        SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
+        SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID,
         settings.connectorId
       );
       expect(uiSettingsClient.set).toHaveBeenCalledWith(
-        SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION,
+        SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
         settings.createConversation
       );
       expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
-        SECURITY_ALERT_VALIDATION_WORKFLOW_ID,
+        SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
         {
           spaceId: 'space-1',
           workflowIdSuffix: 'space-1',
@@ -217,13 +217,13 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
           settings,
-          workflowId: 'system-security-alert-validation-space-1',
+          workflowId: 'system-security-alert-analysis-space-1',
         },
       });
     });
 
     it('logs a successful audit event and reports telemetry on save', async () => {
-      const handler = router.versioned.getRoute('put', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
+      const handler = router.versioned.getRoute('put', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
         .versions['1'].handler;
 
       await handler(createContext(), createRequest(settings), mockResponse);
@@ -232,7 +232,7 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
         expect.objectContaining({ event: expect.objectContaining({ outcome: 'success' }) })
       );
       expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
-        ALERT_VALIDATION_WORKFLOW_SETTINGS_UPDATED_EVENT.eventType,
+        ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT.eventType,
         expect.objectContaining({
           status: 'success',
           workflowEnabled: settings.workflowEnabled,
@@ -245,7 +245,7 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
 
     it('logs a failed audit event and reports telemetry when saving fails', async () => {
       managedWorkflowsClient.install.mockRejectedValue(new Error('boom'));
-      const handler = router.versioned.getRoute('put', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
+      const handler = router.versioned.getRoute('put', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
         .versions['1'].handler;
 
       await handler(createContext(), createRequest(settings), mockResponse);
@@ -254,7 +254,7 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
         expect.objectContaining({ event: expect.objectContaining({ outcome: 'failure' }) })
       );
       expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
-        ALERT_VALIDATION_WORKFLOW_SETTINGS_UPDATED_EVENT.eventType,
+        ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT.eventType,
         expect.objectContaining({ status: 'error' })
       );
       expect(mockResponse.customError).toHaveBeenCalled();
@@ -262,7 +262,7 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
 
     it('does not persist or install when the feature flag is disabled', async () => {
       coreStart.featureFlags.getBooleanValue.mockResolvedValue(false);
-      const handler = router.versioned.getRoute('put', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
+      const handler = router.versioned.getRoute('put', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
         .versions['1'].handler;
 
       await handler(
@@ -282,7 +282,7 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
 
     it('returns forbidden when the license does not support the feature', async () => {
       hasAtLeast.mockReturnValue(false);
-      const handler = router.versioned.getRoute('put', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
+      const handler = router.versioned.getRoute('put', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
         .versions['1'].handler;
 
       await handler(createContext(), createRequest(settings), mockResponse);

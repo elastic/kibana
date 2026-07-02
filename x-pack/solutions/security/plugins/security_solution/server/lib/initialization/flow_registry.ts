@@ -16,7 +16,7 @@ import {
   INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
   INITIALIZATION_FLOW_INIT_AI_PROMPTS,
   INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING,
-  INITIALIZATION_FLOW_INIT_ALERT_VALIDATION_WORKFLOW,
+  INITIALIZATION_FLOW_INIT_ALERT_ANALYSIS_WORKFLOW,
   INITIALIZATION_FLOW_STATUS_ERROR,
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../common/api/initialization';
@@ -31,7 +31,7 @@ import { initPrebuiltRulesFlow } from './flows/init_prebuilt_rules';
 import { initEndpointProtectionFlow } from './flows/init_endpoint_protection';
 import { initAiPromptsFlow } from './flows/init_ai_prompts';
 import { initDetectionRuleMonitoringFlow } from './flows/init_detection_rule_monitoring';
-import { initAlertValidationWorkflowFlow } from './flows/init_alert_validation_workflow';
+import { initAlertAnalysisWorkflowFlow } from './flows/init_alert_analysis_workflow';
 
 // Each flow has a different TPayload type, so `any` is needed to store
 // them in a single map. Type safety is preserved inside each flow definition.
@@ -43,7 +43,7 @@ const flows: Record<InitializationFlowId, InitializationFlowDefinition<any>> = {
   [INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION]: initEndpointProtectionFlow,
   [INITIALIZATION_FLOW_INIT_AI_PROMPTS]: initAiPromptsFlow,
   [INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING]: initDetectionRuleMonitoringFlow,
-  [INITIALIZATION_FLOW_INIT_ALERT_VALIDATION_WORKFLOW]: initAlertValidationWorkflowFlow,
+  [INITIALIZATION_FLOW_INIT_ALERT_ANALYSIS_WORKFLOW]: initAlertAnalysisWorkflowFlow,
 };
 
 interface FlowRunResult {

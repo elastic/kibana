@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ALERT_VALIDATION_WORKFLOW_TITLE = i18n.translate(
-  'xpack.securitySolution.alertValidationWorkflow.title',
+export const ALERT_ANALYSIS_WORKFLOW_TITLE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.title',
   {
     defaultMessage: 'Alert analysis workflow',
   }

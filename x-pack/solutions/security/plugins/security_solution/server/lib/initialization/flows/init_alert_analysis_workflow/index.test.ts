@@ -8,15 +8,15 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
-import { SECURITY_ALERT_VALIDATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
-  INITIALIZATION_FLOW_INIT_ALERT_VALIDATION_WORKFLOW,
+  INITIALIZATION_FLOW_INIT_ALERT_ANALYSIS_WORKFLOW,
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
 import type { InitializationFlowContext } from '../../types';
 import {
-  initAlertValidationWorkflowFlow,
-  registerInitAlertValidationWorkflowFlowDependencies,
+  initAlertAnalysisWorkflowFlow,
+  registerInitAlertAnalysisWorkflowFlowDependencies,
 } from '.';
 
 const createManagedWorkflowsClient = () => ({
@@ -27,7 +27,7 @@ const createManagedWorkflowsClient = () => ({
   execute: jest.fn().mockResolvedValue('mock-execution-id'),
 });
 
-describe('initAlertValidationWorkflowFlow', () => {
+describe('initAlertAnalysisWorkflowFlow', () => {
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let uiSettingsClient: { get: jest.Mock };
   let managedWorkflowsClient: ReturnType<typeof createManagedWorkflowsClient>;
@@ -59,7 +59,7 @@ describe('initAlertValidationWorkflowFlow', () => {
     workflowsExtensions = workflowsExtensionsMock.createStart();
     workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managedWorkflowsClient);
 
-    registerInitAlertValidationWorkflowFlowDependencies({
+    registerInitAlertAnalysisWorkflowFlowDependencies({
       getStartServices: jest
         .fn()
         .mockResolvedValue([coreStart, { workflowsExtensions }, undefined]),
@@ -67,17 +67,15 @@ describe('initAlertValidationWorkflowFlow', () => {
   });
 
   it('has the correct id and is space-aware', () => {
-    expect(initAlertValidationWorkflowFlow.id).toBe(
-      INITIALIZATION_FLOW_INIT_ALERT_VALIDATION_WORKFLOW
-    );
-    expect(initAlertValidationWorkflowFlow.spaceAware).toBe(true);
+    expect(initAlertAnalysisWorkflowFlow.id).toBe(INITIALIZATION_FLOW_INIT_ALERT_ANALYSIS_WORKFLOW);
+    expect(initAlertAnalysisWorkflowFlow.spaceAware).toBe(true);
   });
 
   it('installs the workflow for the space when it is missing', async () => {
-    const result = await initAlertValidationWorkflowFlow.runFlow(createContext());
+    const result = await initAlertAnalysisWorkflowFlow.runFlow(createContext());
 
     expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
-      SECURITY_ALERT_VALIDATION_WORKFLOW_ID,
+      SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
       {
         spaceId: 'space-1',
         workflowIdSuffix: 'space-1',
@@ -97,7 +95,7 @@ describe('initAlertValidationWorkflowFlow', () => {
   it('does not reinstall the workflow when it is already installed', async () => {
     managedWorkflowsClient.getWorkflowStatus.mockResolvedValue({ status: 'intact' });
 
-    await initAlertValidationWorkflowFlow.runFlow(createContext());
+    await initAlertAnalysisWorkflowFlow.runFlow(createContext());
 
     expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
   });
@@ -105,18 +103,18 @@ describe('initAlertValidationWorkflowFlow', () => {
   it('does nothing when the feature flag is disabled', async () => {
     coreStart.featureFlags.getBooleanValue.mockResolvedValue(false);
 
-    const result = await initAlertValidationWorkflowFlow.runFlow(createContext());
+    const result = await initAlertAnalysisWorkflowFlow.runFlow(createContext());
 
     expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
     expect(result).toEqual({ status: INITIALIZATION_FLOW_STATUS_READY, payload: null });
   });
 
   it('does nothing when workflowsExtensions is unavailable', async () => {
-    registerInitAlertValidationWorkflowFlowDependencies({
+    registerInitAlertAnalysisWorkflowFlowDependencies({
       getStartServices: jest.fn().mockResolvedValue([coreStart, {}, undefined]),
     } as never);
 
-    const result = await initAlertValidationWorkflowFlow.runFlow(createContext());
+    const result = await initAlertAnalysisWorkflowFlow.runFlow(createContext());
 
     expect(uiSettingsClient.get).not.toHaveBeenCalled();
     expect(result).toEqual({ status: INITIALIZATION_FLOW_STATUS_READY, payload: null });

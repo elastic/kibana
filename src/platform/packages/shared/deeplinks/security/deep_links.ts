@@ -108,7 +108,7 @@ export enum SecurityPageName {
   coverageOverview = 'coverage-overview',
   notes = 'notes',
   alertSummary = 'alert_summary',
-  alertValidationWorkflow = 'alert_validation_workflow',
+  alertAnalysisWorkflow = 'alert_analysis_workflow',
   configurations = 'configurations',
   configurationsIntegrations = 'configurations-integrations',
   configurationsAiSettings = 'configurations-ai_settings',

@@ -12,38 +12,38 @@ import { i18n } from '@kbn/i18n';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import {
-  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
-  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
-  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,
-  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
-  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION,
-  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
 } from '@kbn/management-settings-ids';
 import {
-  ALERT_VALIDATION_WORKFLOW_API_VERSION,
-  ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE,
-  AlertValidationWorkflowSettings,
-  MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
-  MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT,
-} from '@kbn/workflows/common/alert_validation_workflow';
-import { ALERT_VALIDATION_WORKFLOW_SETTINGS_UPDATED_EVENT } from '../lib/telemetry/event_based/events';
+  ALERT_ANALYSIS_WORKFLOW_API_VERSION,
+  ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
+  AlertAnalysisWorkflowSettings,
+  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
+  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT,
+} from '@kbn/workflows/common/alert_analysis_workflow';
+import { ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT } from '../lib/telemetry/event_based/events';
 import type { SecuritySolutionPluginRouter } from '../types';
 import type { StartPlugins } from '../plugin';
 import {
   AUDIT_CATEGORY,
   AUDIT_OUTCOME,
   AUDIT_TYPE,
-  AlertValidationWorkflowAuditActions,
+  AlertAnalysisWorkflowAuditActions,
 } from './audit';
 import {
-  getSecurityAlertValidationWorkflowIdForSpace,
+  getSecurityAlertAnalysisWorkflowIdForSpace,
   initSecurityManagedWorkflowsClient,
-  installSecurityAlertValidationWorkflow,
-  readSecurityAlertValidationWorkflowSettings,
-  type SecurityAlertValidationWorkflowSettings,
+  installSecurityAlertAnalysisWorkflow,
+  readSecurityAlertAnalysisWorkflowSettings,
+  type SecurityAlertAnalysisWorkflowSettings,
 } from './managed_workflows';
 
-export { ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE };
+export { ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE };
 
 const REQUIRED_PRIVILEGES = [
   'manage_advanced_settings',
@@ -52,26 +52,25 @@ const REQUIRED_PRIVILEGES = [
 ];
 
 const LICENSE_ERROR_MESSAGE = i18n.translate(
-  'xpack.securitySolution.alertValidationWorkflow.settingsRoute.licenseError',
+  'xpack.securitySolution.alertAnalysisWorkflow.settingsRoute.licenseError',
   { defaultMessage: 'Your license does not support this feature.' }
 );
 
-const AlertValidationWorkflowSettingsWithConnectorRequestBody =
-  AlertValidationWorkflowSettings.extend({
-    connectorId: z.string().optional(),
-    workflowEnabled: z.boolean().optional(),
-    createConversation: z.boolean().optional(),
-  }).refine(
-    ({ autoCloseConfidenceScoreMinThreshold, autoCloseConfidenceScoreMaxThreshold }) =>
-      autoCloseConfidenceScoreMinThreshold < autoCloseConfidenceScoreMaxThreshold,
-    {
-      message: 'Minimum confidence score must be lower than maximum confidence score',
-      path: ['autoCloseConfidenceScoreMaxThreshold'],
-    }
-  );
+const AlertAnalysisWorkflowSettingsWithConnectorRequestBody = AlertAnalysisWorkflowSettings.extend({
+  connectorId: z.string().optional(),
+  workflowEnabled: z.boolean().optional(),
+  createConversation: z.boolean().optional(),
+}).refine(
+  ({ autoCloseConfidenceScoreMinThreshold, autoCloseConfidenceScoreMaxThreshold }) =>
+    autoCloseConfidenceScoreMinThreshold < autoCloseConfidenceScoreMaxThreshold,
+  {
+    message: 'Minimum confidence score must be lower than maximum confidence score',
+    path: ['autoCloseConfidenceScoreMaxThreshold'],
+  }
+);
 
-type AlertValidationWorkflowSettingsWithConnectorRequestBodyType = z.infer<
-  typeof AlertValidationWorkflowSettingsWithConnectorRequestBody
+type AlertAnalysisWorkflowSettingsWithConnectorRequestBodyType = z.infer<
+  typeof AlertAnalysisWorkflowSettingsWithConnectorRequestBody
 >;
 
 const toWorkflowSettings = ({
@@ -81,7 +80,7 @@ const toWorkflowSettings = ({
   connectorId,
   workflowEnabled,
   createConversation,
-}: AlertValidationWorkflowSettingsWithConnectorRequestBodyType): SecurityAlertValidationWorkflowSettings => ({
+}: AlertAnalysisWorkflowSettingsWithConnectorRequestBodyType): SecurityAlertAnalysisWorkflowSettings => ({
   autoCloseEnabled,
   autoCloseConfidenceScoreMinThreshold,
   autoCloseConfidenceScoreMaxThreshold,
@@ -90,14 +89,14 @@ const toWorkflowSettings = ({
   createConversation: createConversation ?? true,
 });
 
-export const registerAlertValidationWorkflowSettingsRoutes = (
+export const registerAlertAnalysisWorkflowSettingsRoutes = (
   router: SecuritySolutionPluginRouter,
   getStartServices: StartServicesAccessor<StartPlugins>,
   logger: Logger
 ): void => {
   router.versioned
     .get({
-      path: ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE,
+      path: ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
       access: 'internal',
       security: {
         authz: {
@@ -107,7 +106,7 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
     })
     .addVersion(
       {
-        version: ALERT_VALIDATION_WORKFLOW_API_VERSION,
+        version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
         validate: false,
       },
       async (context, request, response) => {
@@ -122,15 +121,15 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
         );
 
         // Installing the workflow for the space is handled by the
-        // init-alert-validation-workflow initialization flow, which runs the first
+        // init-alert-analysis-workflow initialization flow, which runs the first
         // time the Security Solution app loads in a space (see server/lib/initialization).
-        const settings = await readSecurityAlertValidationWorkflowSettings(uiSettingsClient);
+        const settings = await readSecurityAlertAnalysisWorkflowSettings(uiSettingsClient);
         const spaceId = (await context.securitySolution).getSpaceId();
 
         return response.ok({
           body: {
             settings,
-            workflowId: getSecurityAlertValidationWorkflowIdForSpace(spaceId),
+            workflowId: getSecurityAlertAnalysisWorkflowIdForSpace(spaceId),
           },
         });
       }
@@ -138,7 +137,7 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
 
   router.versioned
     .put({
-      path: ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE,
+      path: ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
       access: 'internal',
       security: {
         authz: {
@@ -148,11 +147,11 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
     })
     .addVersion(
       {
-        version: ALERT_VALIDATION_WORKFLOW_API_VERSION,
+        version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
         validate: {
           request: {
             body: buildRouteValidationWithZod(
-              AlertValidationWorkflowSettingsWithConnectorRequestBody
+              AlertAnalysisWorkflowSettingsWithConnectorRequestBody
             ),
           },
         },
@@ -165,8 +164,8 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
 
         const [coreStart, pluginsStart] = await getStartServices();
         const isEnabled = await coreStart.featureFlags.getBooleanValue(
-          MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
-          MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT
+          MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
+          MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT
         );
 
         if (!isEnabled) {
@@ -190,7 +189,7 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
         const reportSettingsUpdatedEvent = (status: 'success' | 'error') => {
           try {
             coreStart.analytics.reportEvent(
-              ALERT_VALIDATION_WORKFLOW_SETTINGS_UPDATED_EVENT.eventType,
+              ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT.eventType,
               {
                 status,
                 workflowEnabled: settings.workflowEnabled,
@@ -213,34 +212,34 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
             coreStart.savedObjects.getScopedClient(request)
           );
           await uiSettingsClient.set(
-            SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED,
+            SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
             settings.workflowEnabled
           );
           await uiSettingsClient.set(
-            SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,
+            SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED,
             settings.autoCloseEnabled
           );
           await uiSettingsClient.set(
-            SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
+            SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
             settings.autoCloseConfidenceScoreMinThreshold
           );
           await uiSettingsClient.set(
-            SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
+            SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
             settings.autoCloseConfidenceScoreMaxThreshold
           );
           await uiSettingsClient.set(
-            SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
+            SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID,
             settings.connectorId
           );
           await uiSettingsClient.set(
-            SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION,
+            SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
             settings.createConversation
           );
 
           const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(
             workflowsExtensions
           );
-          await installSecurityAlertValidationWorkflow({
+          await installSecurityAlertAnalysisWorkflow({
             managedWorkflowsClient,
             spaceId,
             settings,
@@ -249,7 +248,7 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
           securitySolution.getAuditLogger()?.log({
             message: 'User updated the alert analysis workflow settings',
             event: {
-              action: AlertValidationWorkflowAuditActions.ALERT_VALIDATION_WORKFLOW_SETTINGS_UPDATE,
+              action: AlertAnalysisWorkflowAuditActions.ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATE,
               category: [AUDIT_CATEGORY.DATABASE],
               type: [AUDIT_TYPE.CHANGE],
               outcome: AUDIT_OUTCOME.SUCCESS,
@@ -260,7 +259,7 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
           return response.ok({
             body: {
               settings,
-              workflowId: getSecurityAlertValidationWorkflowIdForSpace(spaceId),
+              workflowId: getSecurityAlertAnalysisWorkflowIdForSpace(spaceId),
             },
           });
         } catch (error) {
@@ -269,7 +268,7 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
           securitySolution.getAuditLogger()?.log({
             message: 'User attempted to update the alert analysis workflow settings',
             event: {
-              action: AlertValidationWorkflowAuditActions.ALERT_VALIDATION_WORKFLOW_SETTINGS_UPDATE,
+              action: AlertAnalysisWorkflowAuditActions.ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATE,
               category: [AUDIT_CATEGORY.DATABASE],
               type: [AUDIT_TYPE.CHANGE],
               outcome: AUDIT_OUTCOME.FAILURE,

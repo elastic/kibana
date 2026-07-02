@@ -12,11 +12,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { RULES_FEATURE_ID } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
-import {
-  ALERT_VALIDATION_WORKFLOW_API_VERSION,
-  ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE,
-} from './api';
-import { AlertValidationWorkflowPage } from '.';
+import { ALERT_ANALYSIS_WORKFLOW_API_VERSION, ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE } from './api';
+import { AlertAnalysisWorkflowPage } from '.';
 
 jest.mock('../../../../common/containers/use_full_screen', () => ({
   useGlobalFullScreen: () => ({
@@ -27,7 +24,7 @@ jest.mock('../../../../common/containers/use_full_screen', () => ({
 
 jest.mock('../../../../common/hooks/use_license');
 
-describe('AlertValidationWorkflowPage', () => {
+describe('AlertAnalysisWorkflowPage', () => {
   const coreStart = coreMock.createStart();
 
   const renderComponent = () => {
@@ -45,7 +42,7 @@ describe('AlertValidationWorkflowPage', () => {
     coreStart.http.fetch.mockImplementation(async (...args: unknown[]) => {
       const [path, options] = args as [string, { method?: string; body?: string } | undefined];
 
-      if (path === ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE) {
+      if (path === ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE) {
         const settings =
           options?.method === 'PUT'
             ? JSON.parse(options.body as string)
@@ -57,7 +54,7 @@ describe('AlertValidationWorkflowPage', () => {
 
         return {
           settings,
-          workflowId: 'system-security-alert-validation-default',
+          workflowId: 'system-security-alert-analysis-default',
         };
       }
 
@@ -73,7 +70,7 @@ describe('AlertValidationWorkflowPage', () => {
     return render(
       <MemoryRouter>
         <TestProviders startServices={createStartServicesMock(coreStart)}>
-          <AlertValidationWorkflowPage />
+          <AlertAnalysisWorkflowPage />
         </TestProviders>
       </MemoryRouter>
     );
@@ -87,21 +84,21 @@ describe('AlertValidationWorkflowPage', () => {
     renderComponent();
 
     expect(await screen.findByText('Alert analysis workflow')).toBeInTheDocument();
-    expect(await screen.findByTestId('alertValidationWorkflowLink')).toHaveAttribute(
+    expect(await screen.findByTestId('alertAnalysisWorkflowLink')).toHaveAttribute(
       'href',
-      '/app/workflows/system-security-alert-validation-default'
+      '/app/workflows/system-security-alert-analysis-default'
     );
 
-    const autoCloseSwitch = await screen.findByTestId('alertValidationWorkflowAutoCloseEnabled');
+    const autoCloseSwitch = await screen.findByTestId('alertAnalysisWorkflowAutoCloseEnabled');
     fireEvent.click(autoCloseSwitch);
 
-    const saveButton = await screen.findByTestId('alertValidationWorkflowSaveButton');
+    const saveButton = await screen.findByTestId('alertAnalysisWorkflowSaveButton');
     fireEvent.click(saveButton);
 
     await waitFor(() => {
-      expect(coreStart.http.fetch).toHaveBeenCalledWith(ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE, {
+      expect(coreStart.http.fetch).toHaveBeenCalledWith(ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE, {
         method: 'PUT',
-        version: ALERT_VALIDATION_WORKFLOW_API_VERSION,
+        version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
         body: JSON.stringify({
           autoCloseEnabled: false,
           autoCloseConfidenceScoreMinThreshold: 0.85,

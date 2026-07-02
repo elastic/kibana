@@ -19,9 +19,9 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import {
-  MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
-  MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT,
-} from '@kbn/workflows/common/alert_validation_workflow';
+  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
+  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT,
+} from '@kbn/workflows/common/alert_analysis_workflow';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
@@ -177,11 +177,11 @@ import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capab
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
 import {
-  installSecurityAlertValidationWorkflowForAllSpaces,
+  installSecurityAlertAnalysisWorkflowForAllSpaces,
   markSecurityManagedWorkflowsReady,
   registerSecurityManagedWorkflowOwner,
 } from './workflows/managed_workflows';
-import { registerInitAlertValidationWorkflowFlowDependencies } from './lib/initialization/flows/init_alert_validation_workflow';
+import { registerInitAlertAnalysisWorkflowFlowDependencies } from './lib/initialization/flows/init_alert_analysis_workflow';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
@@ -866,7 +866,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (plugins.workflowsExtensions) {
       registerWorkflowSteps(plugins.workflowsExtensions, core, experimentalFeatures);
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
-      registerInitAlertValidationWorkflowFlowDependencies(core);
+      registerInitAlertAnalysisWorkflowFlowDependencies(core);
     }
 
     setupAlertsCapabilitiesSwitcher({
@@ -904,12 +904,12 @@ export class Plugin implements ISecuritySolutionPlugin {
       void (async () => {
         try {
           const isEnabled = await core.featureFlags.getBooleanValue(
-            MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
-            MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT
+            MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
+            MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT
           );
 
           if (isEnabled) {
-            await installSecurityAlertValidationWorkflowForAllSpaces({
+            await installSecurityAlertAnalysisWorkflowForAllSpaces({
               coreStart: core,
               workflowsExtensions,
               logger,

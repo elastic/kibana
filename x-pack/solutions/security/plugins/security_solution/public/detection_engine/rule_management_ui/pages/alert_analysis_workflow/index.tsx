@@ -37,25 +37,25 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
 import { extractRulesCapabilities } from '../../../../common/utils/rules_capabilities';
 import {
-  fetchAlertValidationWorkflowSettings,
-  MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
-  MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT,
-  saveAlertValidationWorkflowSettings,
-  type AlertValidationWorkflowSettingsWithConnector,
+  fetchAlertAnalysisWorkflowSettings,
+  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
+  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT,
+  saveAlertAnalysisWorkflowSettings,
+  type AlertAnalysisWorkflowSettingsWithConnector,
 } from './api';
-import { AlertValidationWorkflowRuleAttachmentSection } from './alert_validation_workflow_rule_attachment_section';
+import { AlertAnalysisWorkflowRuleAttachmentSection } from './alert_analysis_workflow_rule_attachment_section';
 import * as translations from './translations';
 
-const ALERT_VALIDATION_WORKFLOW_SETTINGS_QUERY_KEY = [
-  'alertValidationWorkflow',
-  'alertValidationWorkflowSettings',
+const ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY = [
+  'alertAnalysisWorkflow',
+  'alertAnalysisWorkflowSettings',
 ] as const;
 
-type AlertValidationWorkflowSettingsError = Error & { body?: { message?: string } };
+type AlertAnalysisWorkflowSettingsError = Error & { body?: { message?: string } };
 
 const areSettingsEqual = (
-  left: AlertValidationWorkflowSettingsWithConnector | undefined,
-  right: AlertValidationWorkflowSettingsWithConnector | undefined
+  left: AlertAnalysisWorkflowSettingsWithConnector | undefined,
+  right: AlertAnalysisWorkflowSettingsWithConnector | undefined
 ): boolean => {
   return (
     left?.workflowEnabled === right?.workflowEnabled &&
@@ -67,7 +67,7 @@ const areSettingsEqual = (
   );
 };
 
-const getAlertValidationWorkflowAccess = (
+const getAlertAnalysisWorkflowAccess = (
   capabilities: Capabilities,
   isFeatureEnabled: boolean,
   isEnterprise: boolean
@@ -85,27 +85,27 @@ const getAlertValidationWorkflowAccess = (
   };
 };
 
-export const AlertValidationWorkflowPage: React.FC = () => {
+export const AlertAnalysisWorkflowPage: React.FC = () => {
   const {
     services: { application, http, notifications, featureFlags, settings },
   } = useKibana();
   const queryClient = useQueryClient();
   const isEnabled = featureFlags.getBooleanValue(
-    MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
-    MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT
+    MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
+    MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT
   );
   const isEnterprise = useLicense().isEnterprise();
-  const { canAccessPage, canEditAdvancedSettings } = getAlertValidationWorkflowAccess(
+  const { canAccessPage, canEditAdvancedSettings } = getAlertAnalysisWorkflowAccess(
     application.capabilities,
     isEnabled,
     isEnterprise
   );
   const { aiConnectors, isLoading: isLoadingConnectors } = useAIConnectors();
   const { data: savedSettingsResponse, isLoading } = useQuery({
-    queryKey: ALERT_VALIDATION_WORKFLOW_SETTINGS_QUERY_KEY,
+    queryKey: ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY,
     enabled: canAccessPage,
     queryFn: async () => {
-      return fetchAlertValidationWorkflowSettings({ http });
+      return fetchAlertAnalysisWorkflowSettings({ http });
     },
   });
   const savedSettings = savedSettingsResponse?.settings;
@@ -113,7 +113,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
     ? application.getUrlForApp('workflows', { path: `/${savedSettingsResponse.workflowId}` })
     : undefined;
   const [pageSettings, setPageSettings] = useState<
-    AlertValidationWorkflowSettingsWithConnector | undefined
+    AlertAnalysisWorkflowSettingsWithConnector | undefined
   >();
   const isDirty = !areSettingsEqual(pageSettings, savedSettings);
   const isWorkflowEnabled = pageSettings?.workflowEnabled ?? true;
@@ -122,27 +122,27 @@ export const AlertValidationWorkflowPage: React.FC = () => {
     pageSettings.autoCloseConfidenceScoreMinThreshold >=
       pageSettings.autoCloseConfidenceScoreMaxThreshold;
   const thresholdRangeErrorMessage = i18n.translate(
-    'xpack.securitySolution.alertValidationWorkflow.thresholdRangeErrorMessage',
+    'xpack.securitySolution.alertAnalysisWorkflow.thresholdRangeErrorMessage',
     {
       defaultMessage: 'Minimum confidence score must be lower than maximum confidence score.',
     }
   );
   const saveSettingsMutation = useMutation({
-    mutationFn: async (settingsToSave: AlertValidationWorkflowSettingsWithConnector) => {
-      return saveAlertValidationWorkflowSettings({ http, settings: settingsToSave });
+    mutationFn: async (settingsToSave: AlertAnalysisWorkflowSettingsWithConnector) => {
+      return saveAlertAnalysisWorkflowSettings({ http, settings: settingsToSave });
     },
     onSuccess: (response) => {
       setPageSettings(response.settings);
-      queryClient.setQueryData(ALERT_VALIDATION_WORKFLOW_SETTINGS_QUERY_KEY, response);
+      queryClient.setQueryData(ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY, response);
       notifications.toasts.addSuccess(
-        i18n.translate('xpack.securitySolution.alertValidationWorkflow.saveSuccessMessage', {
+        i18n.translate('xpack.securitySolution.alertAnalysisWorkflow.saveSuccessMessage', {
           defaultMessage: 'Alert analysis workflow settings saved',
         })
       );
     },
-    onError: (error: AlertValidationWorkflowSettingsError) => {
+    onError: (error: AlertAnalysisWorkflowSettingsError) => {
       notifications.toasts.addDanger({
-        title: i18n.translate('xpack.securitySolution.alertValidationWorkflow.saveErrorMessage', {
+        title: i18n.translate('xpack.securitySolution.alertAnalysisWorkflow.saveErrorMessage', {
           defaultMessage: 'Failed to save alert analysis workflow settings',
         }),
         text: error?.body?.message ?? error?.message,
@@ -162,14 +162,14 @@ export const AlertValidationWorkflowPage: React.FC = () => {
 
   return (
     <>
-      <SecuritySolutionPageWrapper data-test-subj="alertValidationWorkflowPage">
+      <SecuritySolutionPageWrapper data-test-subj="alertAnalysisWorkflowPage">
         <HeaderPage
-          title={translations.ALERT_VALIDATION_WORKFLOW_TITLE}
+          title={translations.ALERT_ANALYSIS_WORKFLOW_TITLE}
           titleNode={
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="l">
-                  <h1>{translations.ALERT_VALIDATION_WORKFLOW_TITLE}</h1>
+                  <h1>{translations.ALERT_ANALYSIS_WORKFLOW_TITLE}</h1>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -182,17 +182,17 @@ export const AlertValidationWorkflowPage: React.FC = () => {
           }
           subtitle={
             <FormattedMessage
-              id="xpack.securitySolution.alertValidationWorkflow.description"
+              id="xpack.securitySolution.alertAnalysisWorkflow.description"
               defaultMessage="Configure when the managed Security alert analysis workflow automatically closes alerts classified as false positives. {workflowLink}"
               values={{
                 workflowLink: workflowHref ? (
                   <EuiLink
-                    data-test-subj="alertValidationWorkflowLink"
+                    data-test-subj="alertAnalysisWorkflowLink"
                     href={workflowHref}
                     target="_blank"
                   >
                     <FormattedMessage
-                      id="xpack.securitySolution.alertValidationWorkflow.workflowLinkText"
+                      id="xpack.securitySolution.alertAnalysisWorkflow.workflowLinkText"
                       defaultMessage="View workflow"
                     />
                   </EuiLink>
@@ -202,7 +202,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
           }
         />
         {isLoading || !pageSettings ? (
-          <EuiLoadingSpinner data-test-subj="alertValidationWorkflowSettingsLoading" />
+          <EuiLoadingSpinner data-test-subj="alertAnalysisWorkflowSettingsLoading" />
         ) : (
           <>
             <EuiDescribedFormGroup
@@ -210,7 +210,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
               title={
                 <h4>
                   <FormattedMessage
-                    id="xpack.securitySolution.alertValidationWorkflow.workflowEnabledSectionTitle"
+                    id="xpack.securitySolution.alertAnalysisWorkflow.workflowEnabledSectionTitle"
                     defaultMessage="Workflow enabled"
                   />
                 </h4>
@@ -218,7 +218,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
               description={
                 <p>
                   <FormattedMessage
-                    id="xpack.securitySolution.alertValidationWorkflow.workflowEnabledSectionDescription"
+                    id="xpack.securitySolution.alertAnalysisWorkflow.workflowEnabledSectionDescription"
                     defaultMessage="Disabling the managed alert analysis workflow turns it off everywhere it is configured, including for any rules it is attached to."
                   />
                 </p>
@@ -226,14 +226,14 @@ export const AlertValidationWorkflowPage: React.FC = () => {
             >
               <EuiFormRow fullWidth>
                 <EuiSwitch
-                  data-test-subj="alertValidationWorkflowEnabled"
+                  data-test-subj="alertAnalysisWorkflowEnabled"
                   showLabel={false}
                   aria-label={i18n.translate(
-                    'xpack.securitySolution.alertValidationWorkflow.workflowEnabledAriaLabel',
+                    'xpack.securitySolution.alertAnalysisWorkflow.workflowEnabledAriaLabel',
                     { defaultMessage: 'Enable alert analysis workflow' }
                   )}
                   label={i18n.translate(
-                    'xpack.securitySolution.alertValidationWorkflow.workflowEnabledHiddenLabel',
+                    'xpack.securitySolution.alertAnalysisWorkflow.workflowEnabledHiddenLabel',
                     { defaultMessage: 'Enable alert analysis workflow' }
                   )}
                   checked={pageSettings.workflowEnabled ?? true}
@@ -252,7 +252,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
               title={
                 <h4>
                   <FormattedMessage
-                    id="xpack.securitySolution.alertValidationWorkflow.connectorSectionTitle"
+                    id="xpack.securitySolution.alertAnalysisWorkflow.connectorSectionTitle"
                     defaultMessage="AI connector"
                   />
                 </h4>
@@ -260,7 +260,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
               description={
                 <p>
                   <FormattedMessage
-                    id="xpack.securitySolution.alertValidationWorkflow.connectorSectionDescription"
+                    id="xpack.securitySolution.alertAnalysisWorkflow.connectorSectionDescription"
                     defaultMessage="Select the AI connector used to classify alerts as false positives."
                   />
                 </p>
@@ -269,12 +269,12 @@ export const AlertValidationWorkflowPage: React.FC = () => {
               <EuiFormRow
                 fullWidth
                 label={i18n.translate(
-                  'xpack.securitySolution.alertValidationWorkflow.connectorLabel',
+                  'xpack.securitySolution.alertAnalysisWorkflow.connectorLabel',
                   { defaultMessage: 'Connector' }
                 )}
               >
                 <ConnectorSelector
-                  data-test-subj="alertValidationWorkflowConnectorSelector"
+                  data-test-subj="alertAnalysisWorkflowConnectorSelector"
                   connectors={aiConnectors}
                   selectedId={pageSettings.connectorId}
                   isLoading={isLoadingConnectors}
@@ -291,7 +291,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
               title={
                 <h4>
                   <FormattedMessage
-                    id="xpack.securitySolution.alertValidationWorkflow.createConversationSectionTitle"
+                    id="xpack.securitySolution.alertAnalysisWorkflow.createConversationSectionTitle"
                     defaultMessage="Create conversation"
                   />
                 </h4>
@@ -299,7 +299,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
               description={
                 <p>
                   <FormattedMessage
-                    id="xpack.securitySolution.alertValidationWorkflow.createConversationSectionDescription"
+                    id="xpack.securitySolution.alertAnalysisWorkflow.createConversationSectionDescription"
                     defaultMessage="When enabled, the AI agent creates a new conversation for each alert analysis. Disable to prevent large numbers of conversations from accumulating."
                   />
                 </p>
@@ -307,14 +307,14 @@ export const AlertValidationWorkflowPage: React.FC = () => {
             >
               <EuiFormRow fullWidth>
                 <EuiSwitch
-                  data-test-subj="alertValidationWorkflowCreateConversation"
+                  data-test-subj="alertAnalysisWorkflowCreateConversation"
                   showLabel={false}
                   aria-label={i18n.translate(
-                    'xpack.securitySolution.alertValidationWorkflow.createConversationAriaLabel',
+                    'xpack.securitySolution.alertAnalysisWorkflow.createConversationAriaLabel',
                     { defaultMessage: 'Create conversation per alert analysis' }
                   )}
                   label={i18n.translate(
-                    'xpack.securitySolution.alertValidationWorkflow.createConversationHiddenLabel',
+                    'xpack.securitySolution.alertAnalysisWorkflow.createConversationHiddenLabel',
                     { defaultMessage: 'Create conversation per alert analysis' }
                   )}
                   checked={pageSettings.createConversation ?? true}
@@ -333,7 +333,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
               title={
                 <h4>
                   <FormattedMessage
-                    id="xpack.securitySolution.alertValidationWorkflow.autoCloseEnabledLabel"
+                    id="xpack.securitySolution.alertAnalysisWorkflow.autoCloseEnabledLabel"
                     defaultMessage="Auto-close alerts classified as false positives"
                   />
                 </h4>
@@ -341,7 +341,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
               description={
                 <p>
                   <FormattedMessage
-                    id="xpack.securitySolution.alertValidationWorkflow.autoCloseEnabledDescription"
+                    id="xpack.securitySolution.alertAnalysisWorkflow.autoCloseEnabledDescription"
                     defaultMessage="Automatically closes alerts when the alert analysis workflow classifies them as false positives within the configured confidence range."
                   />
                 </p>
@@ -349,16 +349,16 @@ export const AlertValidationWorkflowPage: React.FC = () => {
             >
               <EuiFormRow fullWidth>
                 <EuiSwitch
-                  data-test-subj="alertValidationWorkflowAutoCloseEnabled"
+                  data-test-subj="alertAnalysisWorkflowAutoCloseEnabled"
                   showLabel={false}
                   aria-label={i18n.translate(
-                    'xpack.securitySolution.alertValidationWorkflow.autoCloseEnabledAriaLabel',
+                    'xpack.securitySolution.alertAnalysisWorkflow.autoCloseEnabledAriaLabel',
                     {
                       defaultMessage: 'Auto-close alerts classified as false positives',
                     }
                   )}
                   label={i18n.translate(
-                    'xpack.securitySolution.alertValidationWorkflow.autoCloseEnabledHiddenLabel',
+                    'xpack.securitySolution.alertAnalysisWorkflow.autoCloseEnabledHiddenLabel',
                     {
                       defaultMessage: 'Auto-close alerts classified as false positives',
                     }
@@ -379,7 +379,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
               title={
                 <h4>
                   <FormattedMessage
-                    id="xpack.securitySolution.alertValidationWorkflow.minThresholdLabel"
+                    id="xpack.securitySolution.alertAnalysisWorkflow.minThresholdLabel"
                     defaultMessage="Auto-close minimum confidence score"
                   />
                 </h4>
@@ -387,7 +387,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
               description={
                 <p>
                   <FormattedMessage
-                    id="xpack.securitySolution.alertValidationWorkflow.minThresholdHelpText"
+                    id="xpack.securitySolution.alertAnalysisWorkflow.minThresholdHelpText"
                     defaultMessage="The lowest false positive confidence score that can automatically close an alert."
                   />
                 </p>
@@ -395,7 +395,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
             >
               <EuiFormRow fullWidth isInvalid={isThresholdRangeInvalid}>
                 <EuiFieldNumber
-                  data-test-subj="alertValidationWorkflowMinThreshold"
+                  data-test-subj="alertAnalysisWorkflowMinThreshold"
                   min={0}
                   max={1}
                   step={0.01}
@@ -403,7 +403,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
                   disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
                   isInvalid={isThresholdRangeInvalid}
                   aria-label={i18n.translate(
-                    'xpack.securitySolution.alertValidationWorkflow.minThresholdAriaLabel',
+                    'xpack.securitySolution.alertAnalysisWorkflow.minThresholdAriaLabel',
                     {
                       defaultMessage: 'Auto-close minimum confidence score',
                     }
@@ -422,7 +422,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
               title={
                 <h4>
                   <FormattedMessage
-                    id="xpack.securitySolution.alertValidationWorkflow.maxThresholdLabel"
+                    id="xpack.securitySolution.alertAnalysisWorkflow.maxThresholdLabel"
                     defaultMessage="Auto-close maximum confidence score"
                   />
                 </h4>
@@ -430,7 +430,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
               description={
                 <p>
                   <FormattedMessage
-                    id="xpack.securitySolution.alertValidationWorkflow.maxThresholdHelpText"
+                    id="xpack.securitySolution.alertAnalysisWorkflow.maxThresholdHelpText"
                     defaultMessage="The highest false positive confidence score that can automatically close an alert."
                   />
                 </p>
@@ -442,7 +442,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
                 error={isThresholdRangeInvalid ? thresholdRangeErrorMessage : undefined}
               >
                 <EuiFieldNumber
-                  data-test-subj="alertValidationWorkflowMaxThreshold"
+                  data-test-subj="alertAnalysisWorkflowMaxThreshold"
                   min={0}
                   max={1}
                   step={0.01}
@@ -450,7 +450,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
                   disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
                   isInvalid={isThresholdRangeInvalid}
                   aria-label={i18n.translate(
-                    'xpack.securitySolution.alertValidationWorkflow.maxThresholdAriaLabel',
+                    'xpack.securitySolution.alertAnalysisWorkflow.maxThresholdAriaLabel',
                     {
                       defaultMessage: 'Auto-close maximum confidence score',
                     }
@@ -465,7 +465,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
               </EuiFormRow>
             </EuiDescribedFormGroup>
             <EuiButton
-              data-test-subj="alertValidationWorkflowSaveButton"
+              data-test-subj="alertAnalysisWorkflowSaveButton"
               fill
               disabled={!canEditAdvancedSettings || !isDirty || isThresholdRangeInvalid}
               isLoading={saveSettingsMutation.isLoading}
@@ -476,16 +476,16 @@ export const AlertValidationWorkflowPage: React.FC = () => {
               }}
             >
               <FormattedMessage
-                id="xpack.securitySolution.alertValidationWorkflow.saveButtonLabel"
+                id="xpack.securitySolution.alertAnalysisWorkflow.saveButtonLabel"
                 defaultMessage="Save alert analysis workflow settings"
               />
             </EuiButton>
             <EuiSpacer size="l" />
-            <AlertValidationWorkflowRuleAttachmentSection />
+            <AlertAnalysisWorkflowRuleAttachmentSection />
           </>
         )}
       </SecuritySolutionPageWrapper>
-      <SpyRoute pageName={SecurityPageName.alertValidationWorkflow} />
+      <SpyRoute pageName={SecurityPageName.alertAnalysisWorkflow} />
     </>
   );
 };

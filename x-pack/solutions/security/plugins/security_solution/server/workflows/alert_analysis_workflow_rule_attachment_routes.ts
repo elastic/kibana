@@ -10,44 +10,44 @@ import type { StartServicesAccessor } from '@kbn/core/server';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  ALERT_VALIDATION_WORKFLOW_API_VERSION,
-  ALERT_VALIDATION_WORKFLOW_RULE_SELECTION_ROUTE,
-  ALERT_VALIDATION_WORKFLOW_RULE_STATS_ROUTE,
-  ALERT_VALIDATION_WORKFLOW_RULE_UPDATE_ROUTE,
-  ALERT_VALIDATION_WORKFLOW_RULES_ROUTE,
-  AlertValidationWorkflowRuleAttachmentListRequestQuery,
-  AlertValidationWorkflowRuleAttachmentSelectionRequestBody,
-  AlertValidationWorkflowRuleAttachmentStatsRequestBody,
-  AlertValidationWorkflowRuleAttachmentUpdateRequestBody,
-  MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
-  MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT,
-  type AlertValidationWorkflowRuleAttachmentListRequestQuery as AlertValidationWorkflowRuleAttachmentListRequestQueryType,
-  type AlertValidationWorkflowRuleAttachmentSelectionRequestBody as AlertValidationWorkflowRuleAttachmentSelectionRequestBodyType,
-  type AlertValidationWorkflowRuleAttachmentStatsRequestBody as AlertValidationWorkflowRuleAttachmentStatsRequestBodyType,
-  type AlertValidationWorkflowRuleAttachmentUpdateRequestBody as AlertValidationWorkflowRuleAttachmentUpdateRequestBodyType,
-} from '@kbn/workflows/common/alert_validation_workflow';
+  ALERT_ANALYSIS_WORKFLOW_API_VERSION,
+  ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE,
+  ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE,
+  ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE,
+  ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE,
+  AlertAnalysisWorkflowRuleAttachmentListRequestQuery,
+  AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody,
+  AlertAnalysisWorkflowRuleAttachmentStatsRequestBody,
+  AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody,
+  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
+  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT,
+  type AlertAnalysisWorkflowRuleAttachmentListRequestQuery as AlertAnalysisWorkflowRuleAttachmentListRequestQueryType,
+  type AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody as AlertAnalysisWorkflowRuleAttachmentSelectionRequestBodyType,
+  type AlertAnalysisWorkflowRuleAttachmentStatsRequestBody as AlertAnalysisWorkflowRuleAttachmentStatsRequestBodyType,
+  type AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody as AlertAnalysisWorkflowRuleAttachmentUpdateRequestBodyType,
+} from '@kbn/workflows/common/alert_analysis_workflow';
 import type { StartPlugins } from '../plugin';
 import type { SecuritySolutionPluginRouter, SecuritySolutionRequestHandlerContext } from '../types';
 import { buildSiemResponse } from '../lib/detection_engine/routes/utils';
 import { createPrebuiltRuleAssetsClient } from '../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { getSecurityAlertValidationWorkflowIdForSpace } from './managed_workflows';
-import { createAlertValidationWorkflowRuleAttachmentService } from './alert_validation_workflow_rule_attachments';
+import { getSecurityAlertAnalysisWorkflowIdForSpace } from './managed_workflows';
+import { createAlertAnalysisWorkflowRuleAttachmentService } from './alert_analysis_workflow_rule_attachments';
 
 export {
-  ALERT_VALIDATION_WORKFLOW_RULE_SELECTION_ROUTE,
-  ALERT_VALIDATION_WORKFLOW_RULE_STATS_ROUTE,
-  ALERT_VALIDATION_WORKFLOW_RULE_UPDATE_ROUTE,
-  ALERT_VALIDATION_WORKFLOW_RULES_ROUTE,
+  ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE,
+  ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE,
+  ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE,
+  ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE,
 };
 
-const isAlertValidationWorkflowEnabled = async (
+const isAlertAnalysisWorkflowEnabled = async (
   getStartServices: StartServicesAccessor<StartPlugins>
 ): Promise<boolean> => {
   const [coreStart] = await getStartServices();
 
   return coreStart.featureFlags.getBooleanValue(
-    MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
-    MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT
+    MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
+    MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT
   );
 };
 
@@ -56,9 +56,9 @@ const createReadService = async (context: SecuritySolutionRequestHandlerContext)
   const rulesClient = await ctx.alerting.getRulesClient();
   const spaceId = ctx.securitySolution.getSpaceId();
 
-  return createAlertValidationWorkflowRuleAttachmentService({
+  return createAlertAnalysisWorkflowRuleAttachmentService({
     rulesClient,
-    workflowId: getSecurityAlertValidationWorkflowIdForSpace(spaceId),
+    workflowId: getSecurityAlertAnalysisWorkflowIdForSpace(spaceId),
   });
 };
 
@@ -69,9 +69,9 @@ const createWriteService = async (context: SecuritySolutionRequestHandlerContext
   const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
   const spaceId = ctx.securitySolution.getSpaceId();
 
-  return createAlertValidationWorkflowRuleAttachmentService({
+  return createAlertAnalysisWorkflowRuleAttachmentService({
     rulesClient,
-    workflowId: getSecurityAlertValidationWorkflowIdForSpace(spaceId),
+    workflowId: getSecurityAlertAnalysisWorkflowIdForSpace(spaceId),
     bulkEditDependencies: {
       actionsClient,
       prebuiltRuleAssetClient: createPrebuiltRuleAssetsClient(ctx.core.savedObjects.client),
@@ -82,13 +82,13 @@ const createWriteService = async (context: SecuritySolutionRequestHandlerContext
   });
 };
 
-export const registerAlertValidationWorkflowRuleAttachmentRoutes = (
+export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
   router: SecuritySolutionPluginRouter,
   getStartServices: StartServicesAccessor<StartPlugins>
 ): void => {
   router.versioned
     .get({
-      path: ALERT_VALIDATION_WORKFLOW_RULES_ROUTE,
+      path: ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE,
       access: 'internal',
       security: {
         authz: {
@@ -98,12 +98,10 @@ export const registerAlertValidationWorkflowRuleAttachmentRoutes = (
     })
     .addVersion(
       {
-        version: ALERT_VALIDATION_WORKFLOW_API_VERSION,
+        version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(
-              AlertValidationWorkflowRuleAttachmentListRequestQuery
-            ),
+            query: buildRouteValidationWithZod(AlertAnalysisWorkflowRuleAttachmentListRequestQuery),
           },
         },
       },
@@ -111,7 +109,7 @@ export const registerAlertValidationWorkflowRuleAttachmentRoutes = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          if (!(await isAlertValidationWorkflowEnabled(getStartServices))) {
+          if (!(await isAlertAnalysisWorkflowEnabled(getStartServices))) {
             return response.notFound();
           }
 
@@ -119,7 +117,7 @@ export const registerAlertValidationWorkflowRuleAttachmentRoutes = (
             search,
             page,
             per_page: perPage,
-          } = request.query as AlertValidationWorkflowRuleAttachmentListRequestQueryType;
+          } = request.query as AlertAnalysisWorkflowRuleAttachmentListRequestQueryType;
           const service = await createReadService(context);
           const body = await service.getRuleAttachments({ search, page, perPage });
 
@@ -136,7 +134,7 @@ export const registerAlertValidationWorkflowRuleAttachmentRoutes = (
 
   router.versioned
     .post({
-      path: ALERT_VALIDATION_WORKFLOW_RULE_STATS_ROUTE,
+      path: ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE,
       access: 'internal',
       security: {
         authz: {
@@ -146,12 +144,10 @@ export const registerAlertValidationWorkflowRuleAttachmentRoutes = (
     })
     .addVersion(
       {
-        version: ALERT_VALIDATION_WORKFLOW_API_VERSION,
+        version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(
-              AlertValidationWorkflowRuleAttachmentStatsRequestBody
-            ),
+            body: buildRouteValidationWithZod(AlertAnalysisWorkflowRuleAttachmentStatsRequestBody),
           },
         },
       },
@@ -159,12 +155,12 @@ export const registerAlertValidationWorkflowRuleAttachmentRoutes = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          if (!(await isAlertValidationWorkflowEnabled(getStartServices))) {
+          if (!(await isAlertAnalysisWorkflowEnabled(getStartServices))) {
             return response.notFound();
           }
 
           const { search } =
-            request.body as AlertValidationWorkflowRuleAttachmentStatsRequestBodyType;
+            request.body as AlertAnalysisWorkflowRuleAttachmentStatsRequestBodyType;
           const service = await createReadService(context);
           const body = await service.getRuleAttachmentStats({ search });
 
@@ -181,7 +177,7 @@ export const registerAlertValidationWorkflowRuleAttachmentRoutes = (
 
   router.versioned
     .post({
-      path: ALERT_VALIDATION_WORKFLOW_RULE_SELECTION_ROUTE,
+      path: ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE,
       access: 'internal',
       security: {
         authz: {
@@ -191,11 +187,11 @@ export const registerAlertValidationWorkflowRuleAttachmentRoutes = (
     })
     .addVersion(
       {
-        version: ALERT_VALIDATION_WORKFLOW_API_VERSION,
+        version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
         validate: {
           request: {
             body: buildRouteValidationWithZod(
-              AlertValidationWorkflowRuleAttachmentSelectionRequestBody
+              AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody
             ),
           },
         },
@@ -204,12 +200,12 @@ export const registerAlertValidationWorkflowRuleAttachmentRoutes = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          if (!(await isAlertValidationWorkflowEnabled(getStartServices))) {
+          if (!(await isAlertAnalysisWorkflowEnabled(getStartServices))) {
             return response.notFound();
           }
 
           const { search } =
-            request.body as AlertValidationWorkflowRuleAttachmentSelectionRequestBodyType;
+            request.body as AlertAnalysisWorkflowRuleAttachmentSelectionRequestBodyType;
           const service = await createReadService(context);
           const body = await service.getRuleAttachmentSelection({ search });
 
@@ -226,7 +222,7 @@ export const registerAlertValidationWorkflowRuleAttachmentRoutes = (
 
   router.versioned
     .post({
-      path: ALERT_VALIDATION_WORKFLOW_RULE_UPDATE_ROUTE,
+      path: ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE,
       access: 'internal',
       security: {
         authz: {
@@ -236,12 +232,10 @@ export const registerAlertValidationWorkflowRuleAttachmentRoutes = (
     })
     .addVersion(
       {
-        version: ALERT_VALIDATION_WORKFLOW_API_VERSION,
+        version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(
-              AlertValidationWorkflowRuleAttachmentUpdateRequestBody
-            ),
+            body: buildRouteValidationWithZod(AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody),
           },
         },
       },
@@ -249,12 +243,12 @@ export const registerAlertValidationWorkflowRuleAttachmentRoutes = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          if (!(await isAlertValidationWorkflowEnabled(getStartServices))) {
+          if (!(await isAlertAnalysisWorkflowEnabled(getStartServices))) {
             return response.notFound();
           }
 
           const { attachRuleIds, detachRuleIds, dryRun } =
-            request.body as AlertValidationWorkflowRuleAttachmentUpdateRequestBodyType;
+            request.body as AlertAnalysisWorkflowRuleAttachmentUpdateRequestBodyType;
           const service = await createWriteService(context);
           const body = await service.updateRuleAttachments({
             attachRuleIds,

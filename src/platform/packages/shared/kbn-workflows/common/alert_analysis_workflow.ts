@@ -9,32 +9,32 @@
 
 import { z } from '@kbn/zod/v4';
 
-export const MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG =
-  'securitySolution.managedAlertValidationWorkflowEnabled' as const;
-export const MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT = true as const;
+export const MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG =
+  'securitySolution.managedAlertAnalysisWorkflowEnabled' as const;
+export const MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT = true as const;
 
-export const ALERT_VALIDATION_WORKFLOW_API_VERSION = '1' as const;
+export const ALERT_ANALYSIS_WORKFLOW_API_VERSION = '1' as const;
 
-export const ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE =
-  '/internal/security_solution/alert_validation_workflow/settings' as const;
-export const ALERT_VALIDATION_WORKFLOW_RULES_ROUTE =
-  '/internal/security_solution/alert_validation_workflow/rules' as const;
-export const ALERT_VALIDATION_WORKFLOW_RULE_STATS_ROUTE =
-  '/internal/security_solution/alert_validation_workflow/rules/_stats' as const;
-export const ALERT_VALIDATION_WORKFLOW_RULE_SELECTION_ROUTE =
-  '/internal/security_solution/alert_validation_workflow/rules/_selection' as const;
-export const ALERT_VALIDATION_WORKFLOW_RULE_UPDATE_ROUTE =
-  '/internal/security_solution/alert_validation_workflow/rules/_update' as const;
+export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE =
+  '/internal/security_solution/alert_analysis_workflow/settings' as const;
+export const ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE =
+  '/internal/security_solution/alert_analysis_workflow/rules' as const;
+export const ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE =
+  '/internal/security_solution/alert_analysis_workflow/rules/_stats' as const;
+export const ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE =
+  '/internal/security_solution/alert_analysis_workflow/rules/_selection' as const;
+export const ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE =
+  '/internal/security_solution/alert_analysis_workflow/rules/_update' as const;
 
-export const AlertValidationWorkflowSettings = z.object({
+export const AlertAnalysisWorkflowSettings = z.object({
   autoCloseEnabled: z.boolean(),
   autoCloseConfidenceScoreMinThreshold: z.number().min(0).max(1),
   autoCloseConfidenceScoreMaxThreshold: z.number().min(0).max(1),
 });
 
-export type AlertValidationWorkflowSettings = z.infer<typeof AlertValidationWorkflowSettings>;
+export type AlertAnalysisWorkflowSettings = z.infer<typeof AlertAnalysisWorkflowSettings>;
 
-export const AlertValidationWorkflowSettingsRequestBody = AlertValidationWorkflowSettings.refine(
+export const AlertAnalysisWorkflowSettingsRequestBody = AlertAnalysisWorkflowSettings.refine(
   ({ autoCloseConfidenceScoreMinThreshold, autoCloseConfidenceScoreMaxThreshold }) =>
     autoCloseConfidenceScoreMinThreshold < autoCloseConfidenceScoreMaxThreshold,
   {
@@ -43,41 +43,41 @@ export const AlertValidationWorkflowSettingsRequestBody = AlertValidationWorkflo
   }
 );
 
-export type AlertValidationWorkflowSettingsRequestBody = z.infer<
-  typeof AlertValidationWorkflowSettingsRequestBody
+export type AlertAnalysisWorkflowSettingsRequestBody = z.infer<
+  typeof AlertAnalysisWorkflowSettingsRequestBody
 >;
 
-export interface AlertValidationWorkflowSettingsResponse {
-  settings: AlertValidationWorkflowSettings;
+export interface AlertAnalysisWorkflowSettingsResponse {
+  settings: AlertAnalysisWorkflowSettings;
   workflowId: string;
 }
 
-export const AlertValidationWorkflowRuleAttachmentListRequestQuery = z.object({
+export const AlertAnalysisWorkflowRuleAttachmentListRequestQuery = z.object({
   search: z.string().optional().default(''),
   page: z.coerce.number().int().min(1).optional().default(1),
   per_page: z.coerce.number().int().min(1).max(100).optional().default(20),
 });
 
-export type AlertValidationWorkflowRuleAttachmentListRequestQuery = z.infer<
-  typeof AlertValidationWorkflowRuleAttachmentListRequestQuery
+export type AlertAnalysisWorkflowRuleAttachmentListRequestQuery = z.infer<
+  typeof AlertAnalysisWorkflowRuleAttachmentListRequestQuery
 >;
 
-export const AlertValidationWorkflowRuleAttachmentStatsRequestBody = z.object({
+export const AlertAnalysisWorkflowRuleAttachmentStatsRequestBody = z.object({
   search: z.string().optional().default(''),
 });
 
-export type AlertValidationWorkflowRuleAttachmentStatsRequestBody = z.infer<
-  typeof AlertValidationWorkflowRuleAttachmentStatsRequestBody
+export type AlertAnalysisWorkflowRuleAttachmentStatsRequestBody = z.infer<
+  typeof AlertAnalysisWorkflowRuleAttachmentStatsRequestBody
 >;
 
-export const AlertValidationWorkflowRuleAttachmentSelectionRequestBody =
-  AlertValidationWorkflowRuleAttachmentStatsRequestBody;
+export const AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody =
+  AlertAnalysisWorkflowRuleAttachmentStatsRequestBody;
 
-export type AlertValidationWorkflowRuleAttachmentSelectionRequestBody = z.infer<
-  typeof AlertValidationWorkflowRuleAttachmentSelectionRequestBody
+export type AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody = z.infer<
+  typeof AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody
 >;
 
-export const AlertValidationWorkflowRuleAttachmentUpdateRequestBody = z
+export const AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody = z
   .object({
     attachRuleIds: z.array(z.string()).max(2000).optional().default([]),
     detachRuleIds: z.array(z.string()).max(2000).optional().default([]),
@@ -87,15 +87,15 @@ export const AlertValidationWorkflowRuleAttachmentUpdateRequestBody = z
     message: 'At least one rule update is required',
   });
 
-export type AlertValidationWorkflowRuleAttachmentUpdateRequestBody = z.infer<
-  typeof AlertValidationWorkflowRuleAttachmentUpdateRequestBody
+export type AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody = z.infer<
+  typeof AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody
 >;
 
 export interface RuleAttachmentQuery {
   search: string;
 }
 
-export interface AlertValidationWorkflowRuleAttachmentService {
+export interface AlertAnalysisWorkflowRuleAttachmentService {
   getRuleAttachmentStats(params: RuleAttachmentQuery): Promise<RuleAttachmentStats>;
   getRuleAttachments(params: GetRuleAttachmentsParams): Promise<RuleAttachmentPage>;
   getRuleAttachmentSelection(params: RuleAttachmentQuery): Promise<RuleAttachmentSelection>;

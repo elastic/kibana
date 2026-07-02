@@ -16,8 +16,8 @@ import { assignAlertStepDefinition } from './assign_alert_step/assign_alert_step
 import { assignAttackStepDefinition } from './assign_attack_step/assign_attack_step';
 import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
 import {
-  REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
-  REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
+  REGISTER_ALERT_ANALYSIS_STEPS_FEATURE_FLAG,
+  REGISTER_ALERT_ANALYSIS_STEP_FEATURE_FLAG_DEFAULT,
 } from '../../../common/constants';
 
 /**
@@ -34,8 +34,8 @@ export const registerWorkflowSteps = (
     .getStartServices()
     .then(([coreStart]) =>
       coreStart.featureFlags.getBooleanValue(
-        REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
-        REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT
+        REGISTER_ALERT_ANALYSIS_STEPS_FEATURE_FLAG,
+        REGISTER_ALERT_ANALYSIS_STEP_FEATURE_FLAG_DEFAULT
       )
     );
 

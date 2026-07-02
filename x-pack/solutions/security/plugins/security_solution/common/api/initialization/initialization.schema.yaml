@@ -49,7 +49,7 @@ components:
         - init-endpoint-protection
         - init-ai-prompts
         - init-detection-rule-monitoring
-        - init-alert-validation-workflow
+        - init-alert-analysis-workflow
 
     InitializationFlowsResult:
       type: object
@@ -82,9 +82,9 @@ components:
           oneOf:
             - $ref: '#/components/schemas/InstallDetectionEngineRuleMonitoringAssetsReadyResult'
             - $ref: '#/components/schemas/InitializationFlowErrorResult'
-        init-alert-validation-workflow:
+        init-alert-analysis-workflow:
           oneOf:
-            - $ref: '#/components/schemas/AlertValidationWorkflowReadyResult'
+            - $ref: '#/components/schemas/AlertAnalysisWorkflowReadyResult'
             - $ref: '#/components/schemas/InitializationFlowErrorResult'
 
     CreateListIndicesReadyResult:
@@ -179,7 +179,7 @@ components:
           enum:
             - ready
 
-    AlertValidationWorkflowReadyResult:
+    AlertAnalysisWorkflowReadyResult:
       type: object
       required:
         - status

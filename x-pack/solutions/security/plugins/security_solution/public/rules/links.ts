@@ -15,7 +15,7 @@ import {
 } from '@kbn/security-solution-features/constants';
 import { WORKFLOWS_MANAGEMENT_FEATURE_ID, WorkflowsManagementUiActions } from '@kbn/workflows';
 import {
-  ALERT_VALIDATION_WORKFLOW_PATH,
+  ALERT_ANALYSIS_WORKFLOW_PATH,
   COVERAGE_OVERVIEW_PATH,
   DE_SPACE_RULES_HEALTH_PATH,
   EXCEPTIONS_PATH,
@@ -26,7 +26,7 @@ import {
 } from '../../common/constants';
 import {
   ADD_RULES,
-  ALERT_VALIDATION_WORKFLOW,
+  ALERT_ANALYSIS_WORKFLOW,
   COVERAGE_OVERVIEW,
   CREATE_NEW_RULE,
   DE_SPACE_RULES_HEALTH,
@@ -111,17 +111,17 @@ export const links: LinkItem = {
       ],
     },
     {
-      id: SecurityPageName.alertValidationWorkflow,
-      title: ALERT_VALIDATION_WORKFLOW,
+      id: SecurityPageName.alertAnalysisWorkflow,
+      title: ALERT_ANALYSIS_WORKFLOW,
       description: i18n.translate(
-        'xpack.securitySolution.appLinks.alertValidationWorkflowDescription',
+        'xpack.securitySolution.appLinks.alertAnalysisWorkflowDescription',
         {
           defaultMessage:
             'Configure the managed alert analysis workflow that automatically classifies and closes false positive alerts.',
         }
       ),
       landingIcon: IconAlertAnalysisWorkflow,
-      path: ALERT_VALIDATION_WORKFLOW_PATH,
+      path: ALERT_ANALYSIS_WORKFLOW_PATH,
       capabilities: [
         [RULES_UI_READ_PRIVILEGE, RULES_UI_EDIT_PRIVILEGE, WORKFLOWS_MANAGEMENT_UPDATE_PRIVILEGE],
       ],
@@ -157,7 +157,7 @@ export const links: LinkItem = {
         SecurityPageName.rules,
         SecurityPageName.cloudSecurityPostureBenchmarks,
         SecurityPageName.exceptions,
-        SecurityPageName.alertValidationWorkflow,
+        SecurityPageName.alertAnalysisWorkflow,
       ],
     },
     {
