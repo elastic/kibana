@@ -1,5 +1,5 @@
 {
-  "sha1": "1397120cbbb9a10198cf1db627535ace01f3d3d3",
+  "sha1": "8bb562d62c6b4429ed7233f9b0a778cfe0988156",
   "tests": [
     {
       "id": "9b2dcf397b5bf4d-f3183219f13c400",
@@ -1342,6 +1342,20 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_windows_table.spec.ts",
         "line": 362,
+        "column": 7
+      }
+    },
+    {
+      "id": "37cfed13cf60182-67579dfbe38a40b",
+      "title": "Rule action alerts filter saves a rule with an is-one-of conditional action filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_action_alerts_filter.spec.ts",
+        "line": 153,
         "column": 7
       }
     },

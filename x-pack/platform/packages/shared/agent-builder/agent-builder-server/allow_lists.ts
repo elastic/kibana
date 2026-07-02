@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common/tools';
+import {
+  platformCoreTools,
+  platformCoreCasesTools,
+  platformStreamsSigEventsTools,
+} from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 
 /**
@@ -15,6 +19,8 @@ import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // platform core tools are registered from the agent builder plugin so will trigger a review anyway
   ...Object.values(platformCoreTools),
+  // Cases CRUD tools, registered by the Cases plugin
+  ...Object.values(platformCoreCasesTools),
   // Streams / Significant Events
   ...Object.values(platformStreamsSigEventsTools),
 
@@ -46,8 +52,17 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
+  `${internalNamespaces.security}.add_entities_to_watchlist`,
+  `${internalNamespaces.security}.create_watchlist`,
+  `${internalNamespaces.security}.delete_watchlist`,
   `${internalNamespaces.security}.get_entity`,
+  `${internalNamespaces.security}.list_watchlists`,
+  `${internalNamespaces.security}.remove_entities_from_watchlist`,
   `${internalNamespaces.security}.search_entities`,
+  `${internalNamespaces.security}.update_watchlist`,
+  `${internalNamespaces.security}.list_leads`,
+  `${internalNamespaces.security}.generate_leads`,
+  `${internalNamespaces.security}.dismiss_lead`,
   `${internalNamespaces.security}.pci_scope_discovery`,
   `${internalNamespaces.security}.pci_compliance`,
   `${internalNamespaces.security}.pci_field_mapper`,
@@ -110,6 +125,10 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'data-exploration',
   'visualization-creation',
   'graph-creation',
+  'agent-builder-traces',
+
+  // Platform – Cases
+  'cases-management',
 
   // Platform – Alerting
   'rule-management',
@@ -137,9 +156,11 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'workflow-authoring',
 
   // Security Solution
+  'entity-analytics-leads',
   'find-security-ml-jobs',
   'automatic_troubleshooting',
   'entity-analytics',
+  'manage-watchlists',
   'alert-analysis',
   'detection-rule-edit',
   'recommend-prebuilt-rules',
