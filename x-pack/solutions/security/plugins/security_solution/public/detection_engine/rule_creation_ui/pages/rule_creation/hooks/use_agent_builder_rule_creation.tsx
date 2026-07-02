@@ -341,8 +341,8 @@ export const useAgentBuilderRuleCreation = ({
                 )),
           ruleIdForSync
         );
-      } catch {
-        // ignored
+      } catch (e) {
+        window.console.error('form→chat sync error:', e);
       }
     }, SYNC_DEBOUNCE_MS);
 
