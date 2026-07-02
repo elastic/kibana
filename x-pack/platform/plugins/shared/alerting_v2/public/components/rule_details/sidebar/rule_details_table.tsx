@@ -19,14 +19,18 @@ export interface RuleDetailsTableProps {
   items: RuleDetailsTableItem[];
 }
 
+// Fixed so every RuleDetailsTable instance (rule conditions, metadata) shares
+// the same column widths regardless of its own content.
+const TITLE_COLUMN_WIDTH = 130;
+
 export const RuleDetailsTable: React.FunctionComponent<RuleDetailsTableProps> = ({ items }) => {
   return (
     <EuiTable
       compressed
       css={{
-        tableLayout: 'auto',
+        tableLayout: 'fixed',
         '.euiTableCellContent': {
-          height: 24,
+          minHeight: 24,
           paddingBlock: 0,
         },
       }}
@@ -34,7 +38,7 @@ export const RuleDetailsTable: React.FunctionComponent<RuleDetailsTableProps> = 
       <EuiTableBody>
         {items.map((item, index) => (
           <EuiTableRow key={index}>
-            <EuiTableRowCell>
+            <EuiTableRowCell width={TITLE_COLUMN_WIDTH}>
               <strong>{item.title}</strong>
             </EuiTableRowCell>
             <EuiTableRowCell data-test-subj={item['data-test-subj']}>
