@@ -330,6 +330,7 @@ src/core/packages/test-helpers/so-type-serializer @elastic/kibana-core
 src/core/packages/test-helpers/test-utils @elastic/kibana-core
 src/core/packages/theme/browser @elastic/kibana-core
 src/core/packages/theme/browser-internal @elastic/kibana-core
+src/core/packages/theme/browser-internal-types @elastic/kibana-core
 src/core/packages/theme/browser-mocks @elastic/kibana-core
 src/core/packages/ui-settings/browser @elastic/appex-sharedux
 src/core/packages/ui-settings/browser-internal @elastic/appex-sharedux

@@ -44,7 +44,7 @@ pageLoadAssetSize:
   dataViewManagement: 6250
   dataViews: 66000
   dataVisualizer: 32727
-  developerToolbar: 6503
+  developerToolbar: 6043
   devTools: 8107
   discover: 30501
   discoverEnhanced: 5353
@@ -217,4 +217,3 @@ pageLoadAssetSize:
   workflowsExtensions: 43032
   workflowsManagement: 39968
   workplaceAIApp: 6234
-  
