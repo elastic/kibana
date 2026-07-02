@@ -40,6 +40,11 @@ export interface GenerateVisualizationEsqlParams {
    * only affects the validation run. Defaults to the last 24 hours.
    */
   timeRange?: TimeRange;
+  /**
+   * Renderer-specific guidance appended to the shared ES|QL instructions, e.g.
+   * Vega's stricter time-range-filtering requirements.
+   */
+  extraInstructions?: string;
 }
 
 /**
@@ -59,6 +64,7 @@ export const generateVisualizationEsql = async ({
   logger,
   esClient,
   timeRange,
+  extraInstructions,
 }: GenerateVisualizationEsqlParams): Promise<GeneratedVisualizationEsql> => {
   const response = await generateEsql({
     nlQuery,
@@ -67,7 +73,9 @@ export const generateVisualizationEsql = async ({
     events,
     logger,
     esClient: esClient.asCurrentUser,
-    additionalInstructions: esqlAdditionalInstructions,
+    additionalInstructions: extraInstructions
+      ? `${esqlAdditionalInstructions}\n${extraInstructions}`
+      : esqlAdditionalInstructions,
     ...(timeRange ? { timeRange } : {}),
   });
 

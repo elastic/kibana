@@ -106,6 +106,20 @@ describe('generateVisualizationEsql', () => {
     );
   });
 
+  it('appends renderer-specific extra instructions to the shared ones', async () => {
+    mockedGenerateEsql.mockResolvedValue({ query: 'FROM logs-*' } as Awaited<
+      ReturnType<typeof generateEsql>
+    >);
+
+    await generateVisualizationEsql({ ...params, extraInstructions: 'vega-specific-rules' });
+
+    expect(mockedGenerateEsql).toHaveBeenCalledWith(
+      expect.objectContaining({
+        additionalInstructions: 'esql-instructions\nvega-specific-rules',
+      })
+    );
+  });
+
   it('omits the time range when none is provided', async () => {
     mockedGenerateEsql.mockResolvedValue({ query: 'FROM logs-*' } as Awaited<
       ReturnType<typeof generateEsql>

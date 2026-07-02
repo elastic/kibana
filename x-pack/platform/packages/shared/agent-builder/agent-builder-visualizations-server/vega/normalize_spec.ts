@@ -36,15 +36,40 @@ interface EsqlDataUrl {
 const usesTimeParams = (query: string): boolean =>
   query.includes('?_tstart') || query.includes('?_tend');
 
-/** First date-typed result column, used as the `%timefield%` when one exists. */
+/** First date-typed result column, used as a last-resort `%timefield%`. */
 const findDateColumn = (columns: EsqlEsqlColumnInfo[] | undefined): string | undefined =>
   columns?.find((column) => column.type === 'date' || column.type === 'date_nanos')?.name;
+
+// A source field token: a name that starts with a letter or `@` (so numeric
+// literals like the `75` in `TBUCKET(75, …)` are not mistaken for a field),
+// optionally wrapped in backticks.
+const TIME_FIELD_TOKEN = String.raw`\`?([A-Za-z@][\w.@]*)\`?`;
+// `<time field> >= ?_tstart` (or `>`/`<=`/`<`, and `?_tend`).
+const WHERE_TIME_FIELD = new RegExp(`${TIME_FIELD_TOKEN}\\s*(?:>=|>|<=|<)\\s*\\?_t(?:start|end)`);
+// `BUCKET(<time field>, …)` — the bucketed source field (TBUCKET takes no field).
+const BUCKET_TIME_FIELD = new RegExp(`\\bBUCKET\\s*\\(\\s*${TIME_FIELD_TOKEN}`, 'i');
+
+/**
+ * Extract the raw source time field bound to the time-picker params from the
+ * query text. Kibana's Vega ES|QL renderer binds/filters on this `%timefield%`,
+ * which must be a real source field — never a `BUCKET`/`RENAME`/`EVAL` alias,
+ * because those are result columns, not filterable index fields (see issue
+ * #275519). Prefers the field compared against `?_tstart`/`?_tend` in a `WHERE`
+ * clause, then the field passed to `BUCKET(...)`.
+ */
+const extractSourceTimeField = (query: string): string | undefined =>
+  query.match(WHERE_TIME_FIELD)?.[1] ?? query.match(BUCKET_TIME_FIELD)?.[1];
 
 /**
  * Build the inline ES|QL data url for Kibana's Vega renderer. A `%timefield%` is
  * added only when the query is time-aware, because Kibana's renderer only binds
  * `?_tstart`/`?_tend` when a `%timefield%` is present; without it a time-aware
  * query is sent with unbound params and fails ("Unknown query parameter").
+ *
+ * The timefield is the raw source field the query filters/buckets on, recovered
+ * from the query text rather than from the result columns — a bucketed date
+ * result column is an alias (e.g. `Date`), not a field Kibana can bind a time
+ * range to.
  */
 const buildEsqlDataUrl = ({
   esqlQuery,
@@ -53,7 +78,9 @@ const buildEsqlDataUrl = ({
 }: Pick<NormalizeVegaSpecParams, 'esqlQuery' | 'columns' | 'timefield'>): EsqlDataUrl => {
   const effectiveTimefield =
     timefield ??
-    (usesTimeParams(esqlQuery) ? findDateColumn(columns) ?? DEFAULT_TIMEFIELD : undefined);
+    (usesTimeParams(esqlQuery)
+      ? extractSourceTimeField(esqlQuery) ?? findDateColumn(columns) ?? DEFAULT_TIMEFIELD
+      : undefined);
 
   return {
     '%type%': 'esql',

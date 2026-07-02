@@ -10,6 +10,26 @@ import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 
 /**
+ * Vega-specific ES|QL guidance appended to the shared instructions when
+ * generating the query for a Vega chart.
+ *
+ * Kibana's Vega ES|QL renderer only *filters* rows by the time picker when the
+ * query filters on the raw source time field itself; binding `?_tstart`/`?_tend`
+ * inside `BUCKET(...)` only sets the bucket extent and does NOT drop rows outside
+ * the selected range (see issue #275519). So, unlike Lens (which applies the time
+ * range for us), every time-based Vega query must filter its own rows and must do
+ * so on the original source field — not a `RENAME`/`EVAL`-derived one.
+ */
+export const vegaEsqlAdditionalInstructions = `
+## Vega time-range filtering (required)
+
+This query feeds a Vega chart, whose ES|QL data source only respects the time picker when the query filters rows on the raw source time field. Passing \`?_tstart\`/\`?_tend\` to \`BUCKET(...)\` alone sets the bucket extent but does NOT drop rows outside the selected range.
+
+Therefore, for EVERY time-based chart — time series AND plain metrics/categorical:
+- Always add an explicit row filter on the raw source time field: \`WHERE <time field> >= ?_tstart AND <time field> < ?_tend\`.
+- Use the RAW source time field (e.g. \`@timestamp\`) directly in both that WHERE filter and any \`BUCKET(...)\`. Never filter or bucket on a field produced by \`RENAME\` or \`EVAL\`; the time filter must reference the original source field so Kibana can bind the range to it.`;
+
+/**
  * Describe the result columns of the backing ES|QL query so the model binds
  * encodings to real field names and types instead of guessing.
  */

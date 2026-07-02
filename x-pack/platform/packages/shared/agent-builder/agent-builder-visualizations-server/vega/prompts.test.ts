@@ -6,7 +6,7 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { createAuthorVegaSpecPrompt } from './prompts';
+import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
 
 const systemText = (nlQuery: string): string => {
   const [system] = createAuthorVegaSpecPrompt({ nlQuery, esqlQuery: 'FROM logs-*' });
@@ -52,5 +52,17 @@ describe('createAuthorVegaSpecPrompt', () => {
       chartType: SupportedChartType.XY,
     });
     expect(String((system as [string, string])[1])).toContain('Suggested chart style: "xy"');
+  });
+});
+
+describe('vegaEsqlAdditionalInstructions', () => {
+  it('requires an explicit WHERE time-range filter on the raw source field', () => {
+    expect(vegaEsqlAdditionalInstructions).toContain(
+      'WHERE <time field> >= ?_tstart AND <time field> < ?_tend'
+    );
+    expect(vegaEsqlAdditionalInstructions).toContain('RAW source time field');
+    expect(vegaEsqlAdditionalInstructions).toContain(
+      'Never filter or bucket on a field produced by'
+    );
   });
 });

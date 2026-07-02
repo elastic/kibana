@@ -37,15 +37,16 @@ describe('normalizeVegaSpec', () => {
     });
   });
 
-  it('binds %timefield% to a date result column when the query uses time-picker params', () => {
+  it('binds %timefield% to the source field filtered in WHERE, not a date result column', () => {
     const timeAwareEsql =
-      'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS count = COUNT()';
+      'FROM logs-* | WHERE event.created >= ?_tstart AND event.created < ?_tend | STATS count = COUNT()';
 
     const result = normalizeVegaSpec({
       spec: { mark: 'line' },
       esqlQuery: timeAwareEsql,
+      // A stale/aliased date result column must NOT win over the real WHERE field.
       columns: [
-        { name: 'event.created', type: 'date' },
+        { name: 'Date', type: 'date' },
         { name: 'count', type: 'long' },
       ],
     });
@@ -55,17 +56,58 @@ describe('normalizeVegaSpec', () => {
     });
   });
 
-  it('defaults %timefield% to @timestamp when the time-aware query has no date column', () => {
+  it('binds %timefield% to the bucketed source field, not the bucket alias column', () => {
+    // Regression: a time-series query buckets `@timestamp` under an alias (`Date`).
+    // The alias is a result column, not a filterable index field, so it must not
+    // become the %timefield%; the raw `@timestamp` source field must.
+    const timeSeriesEsql =
+      'FROM logs-* | STATS count = COUNT() BY Date = BUCKET(@timestamp, 75, ?_tstart, ?_tend)';
+
+    const result = normalizeVegaSpec({
+      spec: { mark: 'line' },
+      esqlQuery: timeSeriesEsql,
+      columns: [
+        { name: 'Date', type: 'date' },
+        { name: 'count', type: 'long' },
+      ],
+    });
+
+    expect(result.data).toEqual({
+      url: { '%type%': 'esql', query: timeSeriesEsql, '%timefield%': '@timestamp' },
+    });
+  });
+
+  it('falls back to a date result column only when no source field is in the query', () => {
+    // Time-aware via TBUCKET, which takes no field argument, so nothing to extract.
+    const tbucketEsql =
+      'TS metrics-* | STATS count = COUNT() BY bucket = TBUCKET(75, ?_tstart, ?_tend)';
+
+    const result = normalizeVegaSpec({
+      spec: { mark: 'line' },
+      esqlQuery: tbucketEsql,
+      columns: [
+        { name: 'created_at', type: 'date_nanos' },
+        { name: 'count', type: 'long' },
+      ],
+    });
+
+    expect(result.data).toEqual({
+      url: { '%type%': 'esql', query: tbucketEsql, '%timefield%': 'created_at' },
+    });
+  });
+
+  it('defaults %timefield% to @timestamp when no source field or date column is available', () => {
+    // Time-aware (TBUCKET binds the params) but no field to extract and no date
+    // result column, so the conservative @timestamp default is used.
     const timeAwareEsql =
-      'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend ' +
-      '| STATS count = COUNT() BY hour = DATE_EXTRACT("hour_of_day", @timestamp)';
+      'TS metrics-* | STATS count = COUNT() BY bucket = TBUCKET(75, ?_tstart, ?_tend)';
 
     const result = normalizeVegaSpec({
       spec: { mark: 'bar' },
       esqlQuery: timeAwareEsql,
       columns: [
         { name: 'count', type: 'long' },
-        { name: 'hour', type: 'integer' },
+        { name: 'bucket', type: 'integer' },
       ],
     });
 

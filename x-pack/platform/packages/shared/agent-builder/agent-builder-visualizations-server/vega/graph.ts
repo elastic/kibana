@@ -16,7 +16,7 @@ import { buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
 import { normalizeVegaSpec } from './normalize_spec';
-import { createAuthorVegaSpecPrompt } from './prompts';
+import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
 import {
   GENERATE_ESQL_NODE,
   AUTHOR_SPEC_NODE,
@@ -151,6 +151,9 @@ export const createVegaGraph = async (
           logger,
           esClient,
           timeRange: DEFAULT_VALIDATION_TIME_RANGE,
+          // Vega must filter rows on the raw source time field itself (Kibana
+          // does not do it for us as with Lens); see vegaEsqlAdditionalInstructions.
+          extraInstructions: vegaEsqlAdditionalInstructions,
         });
         if (!generated.query) {
           return {
