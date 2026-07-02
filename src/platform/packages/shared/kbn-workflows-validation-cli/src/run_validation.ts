@@ -13,11 +13,16 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { buildWorkflowSchema } from './build_schema';
 import { discoverExampleFiles } from './discover_examples';
 import type { ExampleResult } from './junit_report';
-import { validateExampleYaml, type ValidationOutcome } from './validate_example';
+import {
+  validateExampleYaml,
+  type ValidationMode,
+  type ValidationOutcome,
+} from './validate_example';
 
 export interface RunOptions {
   readonly rootDir: string;
   readonly log: ToolingLog;
+  readonly mode?: ValidationMode;
 }
 
 export interface RunSummary {
@@ -27,7 +32,11 @@ export interface RunSummary {
   readonly empty: boolean;
 }
 
-export async function runValidation({ rootDir, log }: RunOptions): Promise<RunSummary> {
+export async function runValidation({
+  rootDir,
+  log,
+  mode = 'auto',
+}: RunOptions): Promise<RunSummary> {
   const files = await discoverExampleFiles(rootDir);
   if (files.length === 0) {
     log.warning(`No workflow YAML files found under ${rootDir}`);
@@ -43,7 +52,7 @@ export async function runValidation({ rootDir, log }: RunOptions): Promise<RunSu
   for (const file of files) {
     const relative = Path.relative(rootDir, file);
     const start = process.hrtime.bigint();
-    const outcome = await validateOne(file, schema);
+    const outcome = await validateOne(file, schema, mode);
     const durationSeconds = Number(process.hrtime.bigint() - start) / 1e9;
     results.push({ name: relative, file, durationSeconds, outcome });
     if (outcome.kind === 'ok') {
@@ -61,7 +70,8 @@ export async function runValidation({ rootDir, log }: RunOptions): Promise<RunSu
 
 async function validateOne(
   file: string,
-  schema: ReturnType<typeof buildWorkflowSchema>
+  schema: ReturnType<typeof buildWorkflowSchema>,
+  mode: ValidationMode
 ): Promise<ValidationOutcome> {
   let yaml: string;
   try {
@@ -72,7 +82,7 @@ async function validateOne(
       message: `Failed to read file: ${(error as Error).message}`,
     };
   }
-  return validateExampleYaml(yaml, schema);
+  return validateExampleYaml(yaml, schema, mode);
 }
 
 function describeOutcome(outcome: Exclude<ValidationOutcome, { kind: 'ok' }>): string {
@@ -83,6 +93,8 @@ function describeOutcome(outcome: Exclude<ValidationOutcome, { kind: 'ok' }>): s
       return `  yaml syntax: ${outcome.message}`;
     case 'schema-error':
       return outcome.issues.map((i) => `  ${i.path}: ${i.message}`).join('\n');
+    case 'wrong-type':
+      return `  wrong-type: ${outcome.message}`;
     case 'unexpected-error':
       return `  unexpected: ${outcome.message}`;
   }

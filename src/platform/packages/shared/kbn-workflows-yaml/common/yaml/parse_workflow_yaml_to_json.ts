@@ -13,7 +13,7 @@ import { ZodError } from '@kbn/zod/v4';
 import { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_without_validation';
 import { getYamlDocumentErrors } from './validate_yaml_document';
 import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from '../errors';
-import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../regex';
+import { isDynamicValue, isInstallValue, isLiquidTagValue, isVariableValue } from '../regex';
 import type { ConnectorParamsSchemaResolver } from '../zod/enrich_error_message';
 import { formatZodError } from '../zod/format_zod_error';
 
@@ -67,7 +67,7 @@ export function parseWorkflowYamlToJSON<T extends ZodType>(
       }
 
       const shouldSuppressError =
-        isDynamicValue(value) || isVariableValue(value) || isLiquidTagValue(value);
+        isDynamicValue(value) || isVariableValue(value) || isLiquidTagValue(value) || isInstallValue(value);
 
       // Suppress error if value is a dynamic template, variable value, or Liquid tag
       return !shouldSuppressError;

@@ -68,13 +68,17 @@ import { unassignCaseStepCommonDefinition } from '@kbn/cases-plugin/common/workf
 import { updateCaseStepCommonDefinition } from '@kbn/cases-plugin/common/workflows/steps/update_case';
 import { updateCasesStepCommonDefinition } from '@kbn/cases-plugin/common/workflows/steps/update_cases';
 import { updateObservableStepCommonDefinition } from '@kbn/cases-plugin/common/workflows/steps/update_observable';
+import { pushCasesStepCommonDefinition } from '@kbn/cases-plugin/common/workflows/steps/push_cases';
+import { removeTagsStepCommonDefinition } from '@kbn/cases-plugin/common/workflows/steps/remove_tags';
 
 // security.* steps are registered by the security_solution plugin (group: security, visibility: private).
 // They cannot be imported from a platform package, so we use permissive z.any() placeholders
 // sourced from the approved step definitions list.
 const SECURITY_STEP_IDS = [
+  'security.assignAlert',
   'security.buildAlertEntityGraph',
   'security.renderAlertNarrative',
+  'security.setAlertStatus',
 ] as const;
 
 interface AnyStepDefinition {
@@ -164,6 +168,8 @@ export const getExtensionStepContracts = (): BaseConnectorContract[] => {
     toContract(updateCaseStepCommonDefinition),
     toContract(updateCasesStepCommonDefinition),
     toContract(updateObservableStepCommonDefinition),
+    toContract(pushCasesStepCommonDefinition),
+    toContract(removeTagsStepCommonDefinition),
     // security.* (private plugin — permissive placeholders)
     ...securityPlaceholders,
   ];

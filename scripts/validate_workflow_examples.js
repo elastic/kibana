@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/workflows-examples-cli').runValidateExamplesCli();
+require('@kbn/workflows-validation-cli').runValidateExamplesCli();

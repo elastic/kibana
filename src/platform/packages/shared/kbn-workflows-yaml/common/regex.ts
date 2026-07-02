@@ -55,6 +55,20 @@ export const LIQUID_EXPRESSION_REGEX_GLOBAL = /(\{\{[^}]*\}\}|\{\%[^%]*\%\})/g;
 export const LIQUID_OUTPUT_REGEX_GLOBAL = /\{\{\s*([^}]*?)\s*\}\}/g;
 export const LIQUID_TAG_REGEX_GLOBAL = /\{\%\s*([^%]*?)\s*\%\}/g;
 
+export const INSTALL_VALUE_REGEX = /^__install__\.\w+/;
+
+/**
+ * Checks if a value is an install-time placeholder used in template workflows.
+ * Examples: __install__.myField, __install__.connectorId
+ * These are resolved at install time and must not be validated as their target type.
+ */
+export function isInstallValue(value: unknown): boolean {
+  if (typeof value !== 'string') {
+    return false;
+  }
+  return INSTALL_VALUE_REGEX.test(value);
+}
+
 export const DYNAMIC_VALUE_REGEX = /^\$\{\{\s*\S[\s\S]*\}\}$/;
 
 /**

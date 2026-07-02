@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/workflows-examples-cli",
+  "id": "@kbn/workflows-validation-cli",
   "owner": "@elastic/workflows-eng",
   "group": "platform",
   "visibility": "shared",

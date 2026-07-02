@@ -37,6 +37,7 @@ export {
   VARIABLE_VALUE_REGEX,
   LIQUID_TAG_VALUE_REGEX,
   isDynamicValue,
+  isInstallValue,
   isVariableValue,
   isLiquidTagValue,
 } from './common/regex';

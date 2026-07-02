@@ -52,6 +52,8 @@ const EXPECTED_STEP_TYPE_IDS = new Set([
   'cases.unassignCase',
   'cases.updateCase',
   'cases.updateCases',
+  'cases.pushCases',
+  'cases.removeTags',
   'cases.updateObservable',
   'contextEngine.addEntry',
   'data.aggregate',
@@ -65,8 +67,10 @@ const EXPECTED_STEP_TYPE_IDS = new Set([
   'data.regexReplace',
   'data.stringifyJson',
   'search.rerank',
+  'security.assignAlert', // placeholder: security_solution plugin is private
   'security.buildAlertEntityGraph', // placeholder: security_solution plugin is private
   'security.renderAlertNarrative', // placeholder: security_solution plugin is private
+  'security.setAlertStatus', // placeholder: security_solution plugin is private
 ]);
 
 describe('extension step definitions CLI catalog', () => {

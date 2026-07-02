@@ -10032,10 +10032,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/workflows-examples-cli@link:src/platform/packages/shared/kbn-workflows-examples-cli":
-  version "0.0.0"
-  uid ""
-
 "@kbn/workflows-execution-engine@link:src/platform/plugins/shared/workflows_execution_engine":
   version "0.0.0"
   uid ""
@@ -10053,6 +10049,10 @@
   uid ""
 
 "@kbn/workflows-ui@link:src/platform/packages/shared/kbn-workflows-ui":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows-validation-cli@link:src/platform/packages/shared/kbn-workflows-validation-cli":
   version "0.0.0"
   uid ""
 

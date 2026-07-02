@@ -63,6 +63,8 @@ function renderFailureBody(outcome: Exclude<ValidationOutcome, { kind: 'ok' }>):
         `${outcome.issues.length} schema issue(s)`
       )}">${escapeText(detail)}</failure>\n`;
     }
+    case 'wrong-type':
+      return `      <failure type="wrong-type" message="${escapeAttr(outcome.message)}"/>\n`;
     case 'unexpected-error':
       return `      <failure type="unexpected-error" message="${escapeAttr(outcome.message)}"/>\n`;
   }

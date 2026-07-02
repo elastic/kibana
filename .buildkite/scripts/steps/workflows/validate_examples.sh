@@ -7,7 +7,7 @@ WORKFLOWS_CHECKOUT="$PARENT_DIR/workflows"
 EXAMPLES_SUBPATH="${WORKFLOWS_EXAMPLES_SUBPATH:-examples}"
 JUNIT_OUT="$KIBANA_DIR/target/workflow-examples-junit.xml"
 
-WORKFLOW_SCHEMA_PATH_PATTERN='^(src/platform/packages/shared/kbn-workflows/|src/platform/packages/shared/kbn-workflows-examples-cli/|src/platform/packages/shared/kbn-workflows-yaml/|src/platform/plugins/shared/workflows_management/|\.buildkite/scripts/steps/workflows/)'
+WORKFLOW_SCHEMA_PATH_PATTERN='^(src/platform/packages/shared/kbn-workflows/|src/platform/packages/shared/kbn-workflows-validation-cli/|src/platform/packages/shared/kbn-workflows-yaml/|src/platform/plugins/shared/workflows_management/|\.buildkite/scripts/steps/workflows/)'
 
 report_main_step () {
   echo "--- $1"

@@ -17,7 +17,7 @@ import { renderJUnitXml } from './src/junit_report';
 
 export { runValidation } from './src/run_validation';
 export { validateExampleYaml } from './src/validate_example';
-export type { ValidationOutcome, SchemaIssue } from './src/validate_example';
+export type { ValidationOutcome, ValidationMode, SchemaIssue } from './src/validate_example';
 export { buildWorkflowSchema } from './src/build_schema';
 export { discoverExampleFiles } from './src/discover_examples';
 export { renderJUnitXml } from './src/junit_report';
@@ -29,8 +29,16 @@ export function runValidateExamplesCli(): void {
       const dir = flagsReader.requiredString('dir');
       const rootDir = Path.resolve(dir);
       const junitOutFlag = flagsReader.string('junit-out');
+      const templateFlag = flagsReader.boolean('template');
+      const plainFlag = flagsReader.boolean('plain');
 
-      const summary = await runValidation({ rootDir, log });
+      if (templateFlag && plainFlag) {
+        throw createFailError('--template and --plain are mutually exclusive.');
+      }
+
+      const mode = templateFlag ? 'template' : plainFlag ? 'plain' : 'auto';
+
+      const summary = await runValidation({ rootDir, log, mode });
 
       if (junitOutFlag) {
         const junitPath = Path.resolve(junitOutFlag);
@@ -52,13 +60,22 @@ export function runValidateExamplesCli(): void {
     {
       description:
         'Validate workflow YAML examples (from elastic/workflows or any directory) against the Kibana workflow schema.',
-      usage: 'node scripts/validate_workflow_examples --dir <path> [--junit-out <path>]',
+      usage:
+        'node scripts/validate_workflow_examples --dir <path> [--template|--plain] [--junit-out <path>]',
       flags: {
         string: ['dir', 'junit-out'],
+        boolean: ['template', 'plain'],
         help: `
           --dir            (required) Directory containing workflow YAML examples (.yml/.yaml).
                             The directory is walked recursively; dotfiles and hidden directories
                             are skipped.
+          --template       Validate every YAML as a template workflow (must have a
+                            \`template-metadata\` block). Fails if any file is not a template.
+                            Mutually exclusive with --plain.
+          --plain          Validate every YAML as a plain workflow implementation. Fails if any
+                            file contains a \`template-metadata\` block.
+                            Mutually exclusive with --template.
+                            Default (no flag): auto-detect per file.
           --junit-out      Optional path to write a JUnit XML report (consumed by Buildkite).
         `,
       },
