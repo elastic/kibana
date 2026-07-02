@@ -43,6 +43,7 @@ export interface RecalculateEntityRiskScoreParams {
   idBasedRiskScoringEnabled: boolean;
   logger: Logger;
   alertSampleSizePerShard?: number;
+  collectScores?: boolean;
 }
 
 /**
@@ -60,6 +61,7 @@ export const recalculateEntityRiskScore = async ({
   idBasedRiskScoringEnabled,
   logger,
   alertSampleSizePerShard = 10000,
+  collectScores = false,
 }: RecalculateEntityRiskScoreParams) => {
   const engineConfig = await getConfiguration({
     savedObjectsClient: soClient,
@@ -111,6 +113,7 @@ export const recalculateEntityRiskScore = async ({
     writer,
     idBasedRiskScoringEnabled,
     refresh: 'wait_for',
+    collectScores,
   });
 
   const { scores: resolutionScores } = await runResolutionScoringStep({
@@ -129,6 +132,7 @@ export const recalculateEntityRiskScore = async ({
     writer,
     targetEntityIds: [resolutionTargetId],
     refresh: 'wait_for',
+    collectScores: true,
   });
 
   return {

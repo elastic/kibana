@@ -32,6 +32,8 @@ interface RunResolutionScoringParams {
   writer: Awaited<ReturnType<RiskScoreDataClient['getWriter']>>;
   targetEntityIds?: string[];
   refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
+  /** When true, populate `scores` in the result. Omit for full-population runs. */
+  collectScores?: boolean;
 }
 
 export const runResolutionScoringStep = async ({
@@ -51,6 +53,7 @@ export const runResolutionScoringStep = async ({
   writer,
   targetEntityIds,
   refresh,
+  collectScores,
 }: RunResolutionScoringParams): Promise<ResolutionStepResult> => {
   runLogger.debug(
     `starting phase 2 resolution scoring: page_size=${pageSize}, sample_size=${sampleSize}`
@@ -97,9 +100,11 @@ export const runResolutionScoringStep = async ({
         enabled: idBasedRiskScoringEnabled,
       });
 
-      for (const score of pageScores) {
-        if ((score.related_entities?.length ?? 0) > 0) {
-          newScores[score.id_value] = score.calculated_score_norm;
+      if (collectScores) {
+        for (const score of pageScores) {
+          if ((score.related_entities?.length ?? 0) > 0) {
+            newScores[score.id_value] = score.calculated_score_norm;
+          }
         }
       }
     }

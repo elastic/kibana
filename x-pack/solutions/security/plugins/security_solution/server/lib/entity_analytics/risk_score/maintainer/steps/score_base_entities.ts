@@ -43,6 +43,8 @@ interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
   writer: RiskEngineDataWriter;
   idBasedRiskScoringEnabled: boolean;
   refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
+  /** When true, populate `scores` in the summary. Omit for full-population runs. */
+  collectScores?: boolean;
 }
 
 export interface Phase1BaseScoringSummary extends StepResult {
@@ -144,6 +146,7 @@ export const scoreBaseEntities = async ({
   writer,
   idBasedRiskScoringEnabled,
   refresh,
+  collectScores,
   ...params
 }: ScoreAndPersistBaseEntitiesParams): Promise<Phase1BaseScoringSummary> => {
   let pagesProcessed = 0;
@@ -182,8 +185,10 @@ export const scoreBaseEntities = async ({
       enabled: idBasedRiskScoringEnabled,
     });
 
-    for (const score of inStoreScores) {
-      newScores[score.id_value] = score.calculated_score_norm;
+    if (collectScores) {
+      for (const score of inStoreScores) {
+        newScores[score.id_value] = score.calculated_score_norm;
+      }
     }
   }
 

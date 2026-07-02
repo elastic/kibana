@@ -94,11 +94,12 @@ export const setAssetCriticalityTool = (
   return {
     id: SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
     type: ToolType.builtin,
-    description:
-      'Set or remove the asset criticality level for a security entity' +
-      'Criticality influences risk scoring — entities with higher criticality carry more weight in risk calculations. ' +
-      'Use "unassigned" to remove the current criticality. ' +
-      'Single-record only — bulk or CSV changes belong in the Entity Analytics management UI. ',
+    description: `
+        Set or remove the asset criticality level for a security entity.
+        Criticality influences risk scoring — entities with higher criticality carry more weight in risk calculations.
+        Use "unassigned" to remove the current criticality.
+        Single-record only — bulk or CSV changes belong in the Entity Analytics management UI.
+      `,
     schema,
     tags: ['security', 'entity-analytics', 'asset-criticality'],
     availability: {
@@ -213,6 +214,7 @@ export const setAssetCriticalityTool = (
             getWriter: (ns) => riskScoreDataClient.getWriter({ namespace: ns }),
             idBasedRiskScoringEnabled: true,
             logger,
+            collectScores: true,
           });
           if (entityScore.baseScore) {
             riskScore = {

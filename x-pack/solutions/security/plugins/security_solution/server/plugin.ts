@@ -294,9 +294,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.isServerless,
       this.pluginContext.env.packageInfo.version,
       plugins.encryptedSavedObjects?.canEncrypt === true
-    ).catch((error) => {
-      this.logger.error(`Error registering security tools: ${error}`);
-    });
+    );
     registerAttachments(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
