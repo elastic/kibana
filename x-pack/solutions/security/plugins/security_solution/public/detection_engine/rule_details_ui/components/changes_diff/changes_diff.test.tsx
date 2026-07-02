@@ -57,7 +57,11 @@ describe('RuleChangesDiff', () => {
   it('renders no-diff callout with full rule state for update action with no old_values', () => {
     const item = createRuleChangeHistoryItem({
       action: 'rule_update',
-      rule: { name: 'Updated Rule' } as RuleResponse,
+      rule: {
+        name: 'Updated Rule',
+        created_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-06-01T00:00:00.000Z',
+      } as RuleResponse,
       old_values: null,
     });
 
@@ -67,10 +71,14 @@ describe('RuleChangesDiff', () => {
     expect(getByTestId('ruleChangesHistoryDiff')).toHaveTextContent('Updated Rule');
   });
 
-  it('renders no-diff callout for rule_import action with no old_values', () => {
+  it('renders no-diff callout for rule_import that overwrote a pre-tracking rule (created_at !== updated_at)', () => {
     const item = createRuleChangeHistoryItem({
       action: 'rule_import',
-      rule: { name: 'Imported Rule' } as RuleResponse,
+      rule: {
+        name: 'Imported Rule',
+        created_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-06-01T00:00:00.000Z',
+      } as RuleResponse,
       old_values: null,
     });
 
@@ -79,10 +87,31 @@ describe('RuleChangesDiff', () => {
     expect(getByTestId('ruleChangesHistoryNoDiffCallout')).toBeInTheDocument();
   });
 
+  it('renders insertion without no-diff callout for first-time rule_import (created_at === updated_at)', () => {
+    const item = createRuleChangeHistoryItem({
+      action: 'rule_import',
+      rule: {
+        name: 'Imported Rule',
+        created_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-01-01T00:00:00.000Z',
+      } as RuleResponse,
+      old_values: null,
+    });
+
+    const { getByTestId, queryByTestId } = renderComponent({ item });
+
+    expect(queryByTestId('ruleChangesHistoryNoDiffCallout')).not.toBeInTheDocument();
+    expect(getByTestId('ruleChangesHistoryDiff')).toHaveTextContent('Imported Rule');
+  });
+
   it('renders no-diff callout for rule_revert action with no old_values', () => {
     const item = createRuleChangeHistoryItem({
       action: 'rule_revert',
-      rule: { name: 'Reverted Rule' } as RuleResponse,
+      rule: {
+        name: 'Reverted Rule',
+        created_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-06-01T00:00:00.000Z',
+      } as RuleResponse,
       old_values: null,
     });
 

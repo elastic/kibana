@@ -38,7 +38,10 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
       return { oldSource: '', newSource: '', numOfChangedFields: 0, noDiffAvailable: true };
     }
 
-    const hasNoDiff = EDIT_ACTIONS_REQUIRING_PRIOR_STATE.includes(item.action) && !item.old_values;
+    const hasNoDiff =
+      EDIT_ACTIONS_REQUIRING_PRIOR_STATE.includes(item.action) &&
+      !item.old_values &&
+      new Date(item.rule.created_at).getTime() !== new Date(item.rule.updated_at).getTime();
     const after = Object.fromEntries(
       Object.entries(item.rule).filter(([k]) => !IGNORED_DIFF_FIELDS.has(k))
     );
