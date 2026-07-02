@@ -70,6 +70,10 @@ describe('PackageInstaller', () => {
       productName: 'kibana',
       productVersion: '8.17',
     });
+
+    validateArtifactArchiveMock.mockReturnValue({ valid: true });
+    downloadToDiskMock.mockResolvedValue('/tmp/artifact.zip');
+    openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
   });
 
   afterEach(() => {
