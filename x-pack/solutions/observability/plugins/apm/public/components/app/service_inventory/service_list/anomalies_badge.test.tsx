@@ -8,7 +8,34 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AnomalyDetectorType } from '@kbn/apm-types';
+import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
+import type { AnomaliesBadgeInteractionProps } from './anomalies_badge';
 import { AnomaliesBadge } from './anomalies_badge';
+
+const baseQuery = {
+  environment: 'ENVIRONMENT_ALL',
+  kuery: '',
+  rangeFrom: 'now-15m',
+  rangeTo: 'now',
+  serviceGroup: '',
+  comparisonEnabled: false,
+};
+
+const regularClickProps: AnomaliesBadgeInteractionProps = {
+  serviceName: 'opbeans-java',
+  agentName: 'nodejs',
+  query: baseQuery,
+};
+
+const mobileClickProps: AnomaliesBadgeInteractionProps = {
+  serviceName: 'opbeans-android',
+  agentName: 'android/java',
+  query: baseQuery,
+};
+
+function renderBadge(ui: React.ReactElement) {
+  return render(<MockApmPluginContextWrapper>{ui}</MockApmPluginContextWrapper>);
+}
 
 async function getTooltipText(): Promise<string | null | undefined> {
   const anchor = document.querySelector('.euiToolTipAnchor');
@@ -24,33 +51,54 @@ async function getTooltipText(): Promise<string | null | undefined> {
 
 describe('AnomaliesBadge', () => {
   it('names the anomalous detector in the tooltip when a detectorType is provided', async () => {
-    render(<AnomaliesBadge score={82} detectorType={AnomalyDetectorType.txFailureRate} />);
+    renderBadge(<AnomaliesBadge score={82} detectorType={AnomalyDetectorType.txFailureRate} />);
 
     expect(await getTooltipText()).toBe('Anomaly score (max.): 82.00 - Failed transaction rate');
   });
 
   it('falls back to a score-only tooltip when no detectorType is provided', async () => {
-    render(<AnomaliesBadge score={82} />);
+    renderBadge(<AnomaliesBadge score={82} detectorType={undefined} />);
 
     expect(await getTooltipText()).toBe('Anomaly score (max.): 82.00');
   });
 
   it('shows the unknown tooltip when no score is available', async () => {
-    render(<AnomaliesBadge detectorType={AnomalyDetectorType.txLatency} />);
+    renderBadge(<AnomaliesBadge score={undefined} detectorType={AnomalyDetectorType.txLatency} />);
 
     expect(await getTooltipText()).toBe(
       'No anomaly score is available for the selected time range.'
     );
   });
 
-  it('renders the badge as a link when an href is provided', () => {
-    render(
-      <AnomaliesBadge score={82} detectorType={AnomalyDetectorType.txLatency} href="/some/url" />
+  it('links to the regular service overview with kuery stripped', () => {
+    renderBadge(
+      <AnomaliesBadge
+        score={82}
+        detectorType={AnomalyDetectorType.txLatency}
+        interactionProps={{
+          ...regularClickProps,
+          query: { ...baseQuery, kuery: 'service.name: "foo"' },
+        }}
+      />
     );
 
-    expect(screen.getByTestId('apmAnomaliesBadge').closest('a')).toHaveAttribute(
-      'href',
-      '/some/url'
+    const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
+    expect(href).toContain('/services/opbeans-java/overview');
+    expect(href).not.toContain('foo');
+  });
+
+  it('links to the mobile service overview for a mobile agent', () => {
+    renderBadge(
+      <AnomaliesBadge score={82} detectorType={undefined} interactionProps={mobileClickProps} />
     );
+
+    const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
+    expect(href).toContain('/mobile-services/opbeans-android/overview');
+  });
+
+  it('renders as non-interactive when interactionProps is not provided', () => {
+    renderBadge(<AnomaliesBadge score={82} detectorType={undefined} />);
+
+    expect(screen.getByTestId('apmAnomaliesBadge').closest('a')).toBeNull();
   });
 });

@@ -10,12 +10,17 @@ import { css } from '@emotion/react';
 import { EuiBadge, EuiHealth, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AnomalyDetectorType } from '@kbn/apm-types';
+import type { AgentName } from '@kbn/elastic-agent-utils';
+import type { TypeOf } from '@kbn/typed-react-router-config';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { isMobileAgentName } from '../../../../../common/agent_name';
 import {
   getApmMlDetectorLabel,
   getSeverity,
   getSeverityColor,
 } from '../../../../../common/anomaly_detection';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
+import type { ApmRoutes } from '../../../routing/apm_route_config';
 
 function getI18nLabel(severity: ML_ANOMALY_SEVERITY): string {
   switch (severity) {
@@ -61,15 +66,48 @@ const anomaliesBadgeHealthCss = css`
   align-items: center;
 `;
 
-interface AnomaliesBadgeProps {
-  score?: number;
-  href?: string;
-  detectorType?: AnomalyDetectorType;
+type OverviewQuery = TypeOf<ApmRoutes, '/services/{serviceName}/overview'>['query'];
+
+function toAnomalyOverviewQuery(query: OverviewQuery) {
+  return {
+    ...query,
+    kuery: '',
+  };
 }
 
-export function AnomaliesBadge({ score, href, detectorType }: AnomaliesBadgeProps) {
+export interface AnomaliesBadgeInteractionProps {
+  serviceName: string;
+  agentName: AgentName;
+  /**
+   * Ambient query from the consumer's own route context (rangeFrom/rangeTo/
+   * environment/etc).
+   */
+  query: OverviewQuery;
+}
+
+interface AnomaliesBadgeProps {
+  score: number | undefined;
+  detectorType: AnomalyDetectorType | undefined;
+  interactionProps?: AnomaliesBadgeInteractionProps;
+}
+
+export function AnomaliesBadge({ score, detectorType, interactionProps }: AnomaliesBadgeProps) {
+  const apmRouter = useApmRouter();
   const severity = getSeverity(score);
   const text = formatLabelWithScore(getI18nLabel(severity), score);
+
+  const href =
+    interactionProps && score !== undefined
+      ? apmRouter.link(
+          isMobileAgentName(interactionProps.agentName)
+            ? '/mobile-services/{serviceName}/overview'
+            : '/services/{serviceName}/overview',
+          {
+            path: { serviceName: interactionProps.serviceName },
+            query: toAnomalyOverviewQuery(interactionProps.query),
+          }
+        )
+      : undefined;
 
   const tooltipContent =
     score === undefined
@@ -86,7 +124,7 @@ export function AnomaliesBadge({ score, href, detectorType }: AnomaliesBadgeProp
           values: { score: score.toFixed(2) },
         });
 
-  const interactionProps = href ? { href } : { role: 'img', 'aria-label': text };
+  const roleProps = href ? { href } : { role: 'img', 'aria-label': text };
 
   return (
     <EuiToolTip position="bottom" content={tooltipContent}>
@@ -95,7 +133,7 @@ export function AnomaliesBadge({ score, href, detectorType }: AnomaliesBadgeProp
         color="hollow"
         css={anomaliesBadgeCss}
         data-test-subj="apmAnomaliesBadge"
-        {...interactionProps}
+        {...roleProps}
       >
         <EuiHealth
           textSize="inherit"

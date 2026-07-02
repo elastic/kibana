@@ -204,15 +204,19 @@ export function getServiceColumns({
             width: '6.5em',
             minWidth: '6.5em',
             sortable: true,
-            render: (_, { serviceName, transactionType, anomalyScore, detectorType }) => {
+            render: (
+              _,
+              { serviceName, transactionType, anomalyScore, detectorType, agentName }
+            ) => {
               return (
                 <AnomaliesBadge
                   score={anomalyScore}
                   detectorType={detectorType}
-                  href={link('/services/{serviceName}/overview', {
-                    path: { serviceName },
-                    query: { ...query, transactionType },
-                  })}
+                  interactionProps={
+                    agentName
+                      ? { serviceName, agentName, query: { ...query, transactionType } }
+                      : undefined
+                  }
                 />
               );
             },

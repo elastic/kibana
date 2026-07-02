@@ -8,8 +8,10 @@
 import React, { useEffect } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AnomalyDetectorType, Environment } from '@kbn/apm-types';
+import type { AgentName, AnomalyDetectorType, Environment } from '@kbn/apm-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useServiceSloContext } from '../../../../context/service_slo/use_service_slo_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -19,24 +21,18 @@ import type { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
 import { AnomaliesBadge } from '../../../app/service_inventory/service_list/anomalies_badge';
 
 interface ServiceHeaderBadgesProps {
-  serviceName: string;
-  environment: string;
   start: string;
   end: string;
   onSloClick: () => void;
   alertsTabHref: string;
-  overviewTabHref: string;
   selectedTab: string;
 }
 
 export function ServiceHeaderBadges({
-  serviceName,
-  environment,
   start,
   end,
   onSloClick,
   alertsTabHref,
-  overviewTabHref,
   selectedTab,
 }: ServiceHeaderBadgesProps) {
   const { euiTheme } = useEuiTheme();
@@ -45,6 +41,13 @@ export function ServiceHeaderBadges({
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
   const canReadSlos = !!capabilities.slo?.read;
   const canReadMlJobs = !!capabilities.ml?.canGetJobs;
+
+  const {
+    path: { serviceName },
+    query,
+    query: { environment },
+  } = useApmParams('/services/{serviceName}/*');
+  const { agentName } = useApmServiceContext();
 
   const { mostCriticalSloStatus, sloFetchStatus } = useServiceSloContext();
 
@@ -133,16 +136,10 @@ export function ServiceHeaderBadges({
   // to navigate to, so we render it as non-interactive to avoid a link that
   // "does nothing" (and the related screen-reader confusion).
   const isOnAlertsTab = selectedTab === 'alerts';
-  const isOnOverviewTab = selectedTab === 'overview';
 
   const onAlertsBadgeClick = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.preventDefault();
     navigateToUrl(alertsTabHref);
-  };
-
-  const onAnomaliesBadgeClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
-    e.preventDefault();
-    navigateToUrl(overviewTabHref);
   };
 
   return (
@@ -183,7 +180,9 @@ export function ServiceHeaderBadges({
           <AnomaliesBadge
             score={anomalyData?.anomalyScore}
             detectorType={anomalyData?.detectorType}
-            href={overviewTabHref}
+            interactionProps={
+              agentName ? { serviceName, agentName: agentName as AgentName, query } : undefined
+            }
           />
         </EuiFlexItem>
       )}

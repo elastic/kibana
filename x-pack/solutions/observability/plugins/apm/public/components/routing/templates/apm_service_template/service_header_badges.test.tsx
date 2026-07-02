@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import { ServiceHeaderBadges } from './service_header_badges';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { mockTelemetryClient } from '../../../../services/telemetry/__mocks__/telemetry_client_mock';
@@ -21,6 +22,25 @@ const mockNavigateToUrl = jest.fn();
 const mockUseApmPluginContext = jest.fn();
 jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
   useApmPluginContext: () => mockUseApmPluginContext(),
+}));
+
+jest.mock('../../../../hooks/use_apm_router', () => ({
+  useApmRouter: () => ({
+    link: (path: string, { path: pathParams, query }: any) =>
+      `${path.replace('{serviceName}', pathParams.serviceName)}?${new URLSearchParams(
+        query
+      ).toString()}`,
+  }),
+}));
+
+const mockUseApmParams = jest.fn();
+jest.mock('../../../../hooks/use_apm_params', () => ({
+  useApmParams: () => mockUseApmParams(),
+}));
+
+const mockUseApmServiceContext = jest.fn();
+jest.mock('../../../../context/apm_service/use_apm_service_context', () => ({
+  useApmServiceContext: () => mockUseApmServiceContext(),
 }));
 
 const mockUseFetcher = jest.fn();
@@ -43,14 +63,20 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
+const baseQuery = {
+  environment: 'ENVIRONMENT_ALL',
+  kuery: '',
+  rangeFrom: 'now-15m',
+  rangeTo: 'now',
+  serviceGroup: '',
+  comparisonEnabled: false,
+};
+
 const defaultProps = {
-  serviceName: 'test-service',
-  environment: 'production',
   start: '2026-01-01T00:00:00.000Z',
   end: '2026-01-02T00:00:00.000Z',
   onSloClick: jest.fn(),
   alertsTabHref: '/services/test-service/alerts',
-  overviewTabHref: '/services/test-service/overview',
   selectedTab: 'transactions',
 };
 
@@ -71,6 +97,11 @@ function setupMocks({
   anomalyScore,
   sloFetchStatus = FETCH_STATUS.SUCCESS as string,
   mostCriticalSloStatus = { status: 'healthy' as const, count: 0 },
+  serviceName = 'test-service',
+  // `null` (rather than `undefined`) signals "no agent resolved yet" — using
+  // `undefined` here would trigger this destructuring default even when the
+  // caller explicitly passes `agentName: undefined`.
+  agentName = 'nodejs' as AgentName | null,
 }: {
   isAlertingAvailable?: boolean;
   canReadAlerts?: boolean;
@@ -80,6 +111,8 @@ function setupMocks({
   anomalyScore?: number;
   sloFetchStatus?: string;
   mostCriticalSloStatus?: { status: string; count: number };
+  serviceName?: string;
+  agentName?: AgentName | null;
 } = {}) {
   mockUseApmPluginContext.mockReturnValue({
     core: {
@@ -99,6 +132,13 @@ function setupMocks({
       alerting: isAlertingAvailable ? {} : undefined,
     },
   });
+
+  mockUseApmParams.mockReturnValue({
+    path: { serviceName },
+    query: baseQuery,
+  });
+
+  mockUseApmServiceContext.mockReturnValue({ agentName: agentName ?? undefined });
 
   mockUseServiceSloContext.mockReturnValue({
     mostCriticalSloStatus,
@@ -246,7 +286,7 @@ describe('ServiceHeaderBadges', () => {
     expect(screen.getByText(/Critical \(82\)/)).toBeInTheDocument();
   });
 
-  it('navigates to the overview tab when the anomalies badge is clicked from another tab', () => {
+  it('links the anomalies badge to the service overview tab', () => {
     setupMocks({
       canReadMlJobs: true,
       alertsCount: 0,
@@ -256,24 +296,22 @@ describe('ServiceHeaderBadges', () => {
     });
     renderBadges({ ...defaultProps, selectedTab: 'transactions' });
 
-    const badge = screen.getByTestId('apmAnomaliesBadge');
-    fireEvent.click(badge);
-    expect(mockNavigateToUrl).toHaveBeenCalledWith('/services/test-service/overview');
+    const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
+    expect(href).toContain('/services/test-service/overview');
   });
 
-  it('renders the anomalies badge as non-interactive when already on the overview tab', () => {
+  it('renders the anomalies badge as non-interactive when the agent name is not yet resolved', () => {
     setupMocks({
       canReadMlJobs: true,
       alertsCount: 0,
       anomalyScore: 82,
       mostCriticalSloStatus: { status: 'noSLOs', count: 0 },
       sloFetchStatus: FETCH_STATUS.NOT_INITIATED,
+      agentName: null,
     });
-    renderBadges({ ...defaultProps, selectedTab: 'overview' });
+    renderBadges();
 
-    const badge = screen.getByTestId('apmAnomaliesBadge');
-    fireEvent.click(badge);
-    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+    expect(screen.getByTestId('apmAnomaliesBadge').closest('a')).toBeNull();
   });
 
   it('renders the alerts badge as non-interactive when already on the alerts tab', () => {

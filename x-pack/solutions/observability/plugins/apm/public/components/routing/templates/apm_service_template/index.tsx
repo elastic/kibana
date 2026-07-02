@@ -96,11 +96,6 @@ function TemplateWithContext({
     query,
   });
 
-  const overviewTabHref = router.link('/services/{serviceName}/overview' as const, {
-    path: { serviceName },
-    query,
-  });
-
   useBreadcrumb(
     () => ({
       title,
@@ -186,13 +181,10 @@ function TemplateWithContext({
             ),
             children: (
               <ServiceHeaderBadges
-                serviceName={serviceName}
-                environment={environment}
                 start={start}
                 end={end}
                 onSloClick={onSloClick}
                 alertsTabHref={alertsTabHref}
-                overviewTabHref={overviewTabHref}
                 selectedTab={selectedTab}
               />
             ),
