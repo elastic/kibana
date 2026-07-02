@@ -28,6 +28,13 @@ export interface DestinationNodeData {
   meta?: string;
   status?: string;
   storage?: DestinationStorage;
+  /**
+   * When true, the configured destination renders an attached routing "tab" on
+   * its left (the "opinionated routing" / routing-with-inheritance result). The
+   * tab exposes an `attached-routing` source handle that fans a branch out to a
+   * newly-created destination.
+   */
+  attachedRouting?: boolean;
   [key: string]: unknown;
 }
 

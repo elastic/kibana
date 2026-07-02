@@ -13,18 +13,18 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   EuiFieldText,
+  EuiFilterButton,
+  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
-  EuiRadioGroup,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -167,6 +167,12 @@ const OPERATOR_OPTIONS = [
 ];
 
 const DESTINATION_OPTIONS = [
+  {
+    value: 'new',
+    text: i18n.translate('xpack.streams.createRoutingFlyout.destinationNew', {
+      defaultMessage: 'Send data to new destination',
+    }),
+  },
   {
     value: 'none',
     text: i18n.translate('xpack.streams.createRoutingFlyout.destinationNone', {
@@ -434,7 +440,18 @@ function DataPreviewPanel() {
 }
 
 // State 1 — empty prompt encouraging the user to create a routing.
-function EmptyRoutingPanel({ onCreate }: { onCreate: () => void }) {
+//
+// The `opinionated` variant is the "routing with inheritance" flow reached from
+// a destination node's context menu: it adds an illustration, a description
+// mentioning the inherited destination schema, and a split "Get suggestions"
+// button, matching the opinionated-routing design.
+function EmptyRoutingPanel({
+  onCreate,
+  opinionated = false,
+}: {
+  onCreate: () => void;
+  opinionated?: boolean;
+}) {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup
@@ -445,6 +462,24 @@ function EmptyRoutingPanel({ onCreate }: { onCreate: () => void }) {
         height: fit-content;
       `}
     >
+      {opinionated ? (
+        <EuiFlexItem grow={false}>
+          <div
+            className={css`
+              width: 96px;
+              height: 96px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border: ${euiTheme.border.thin};
+              border-radius: ${euiTheme.border.radius.medium};
+              background-color: ${euiTheme.colors.backgroundBaseSubdued};
+            `}
+          >
+            <EuiIcon type="branch" size="xxl" color="primary" />
+          </div>
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem grow={false}>
         <EuiText
           textAlign="center"
@@ -462,10 +497,15 @@ function EmptyRoutingPanel({ onCreate }: { onCreate: () => void }) {
         </EuiText>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued" textAlign="center">
-          {i18n.translate('xpack.streams.createRoutingFlyout.emptyDescription', {
-            defaultMessage:
-              'Send incoming data to the right destinations based on what it has in common, say, routing logs by service name or severity. Build the rules yourself, or let Elastic suggest an AI-generated starting point based on your data.',
-          })}{' '}
+          {opinionated
+            ? i18n.translate('xpack.streams.createRoutingFlyout.emptyDescriptionInheritance', {
+                defaultMessage:
+                  'Create routing conditions inheriting the selected destination schema. Build the rules yourself, or let Elastic suggest an AI-generated starting point based on your data.',
+              })
+            : i18n.translate('xpack.streams.createRoutingFlyout.emptyDescription', {
+                defaultMessage:
+                  'Send incoming data to the right destinations based on what it has in common, say, routing logs by service name or severity. Build the rules yourself, or let Elastic suggest an AI-generated starting point based on your data.',
+              })}{' '}
           <EuiLink external target="_blank">
             {i18n.translate('xpack.streams.createRoutingFlyout.routingDocs', {
               defaultMessage: 'Routing docs',
@@ -474,11 +514,50 @@ function EmptyRoutingPanel({ onCreate }: { onCreate: () => void }) {
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton iconType="sparkles" size="s" color="primary">
-          {i18n.translate('xpack.streams.createRoutingFlyout.getSuggestions', {
-            defaultMessage: 'Get suggestions based on your data',
-          })}
-        </EuiButton>
+        {opinionated ? (
+          <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="sparkles"
+                size="s"
+                color="primary"
+                fill
+                className={css`
+                  border-top-right-radius: 0;
+                  border-bottom-right-radius: 0;
+                `}
+              >
+                {i18n.translate('xpack.streams.createRoutingFlyout.getSuggestions', {
+                  defaultMessage: 'Get suggestions based on your data',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                color="primary"
+                fill
+                minWidth={0}
+                iconType="arrowDown"
+                className={css`
+                  border-top-left-radius: 0;
+                  border-bottom-left-radius: 0;
+                  border-left: ${euiTheme.border.width.thin} solid
+                    ${euiTheme.colors.emptyShade};
+                `}
+                aria-label={i18n.translate('xpack.streams.createRoutingFlyout.moreSuggestions', {
+                  defaultMessage: 'More suggestion options',
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <EuiButton iconType="sparkles" size="s" color="primary">
+            {i18n.translate('xpack.streams.createRoutingFlyout.getSuggestions', {
+              defaultMessage: 'Get suggestions based on your data',
+            })}
+          </EuiButton>
+        )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued" textAlign="center">
@@ -577,24 +656,27 @@ function ConditionEditorRow({
 function RoutingConditionForm({
   conditions,
   setConditions,
-  routingMode,
-  setRoutingMode,
   destination,
   setDestination,
+  newDestinationName,
+  setNewDestinationName,
+  newDestinationStorage,
+  setNewDestinationStorage,
   onCancel,
   onCreate,
 }: {
   conditions: ConditionRow[];
   setConditions: React.Dispatch<React.SetStateAction<ConditionRow[]>>;
-  routingMode: string;
-  setRoutingMode: (mode: string) => void;
   destination: string;
   setDestination: (destination: string) => void;
+  newDestinationName: string;
+  setNewDestinationName: (name: string) => void;
+  newDestinationStorage: 'local' | 'external';
+  setNewDestinationStorage: (storage: 'local' | 'external') => void;
   onCancel: () => void;
   onCreate: () => void;
 }) {
   const { euiTheme } = useEuiTheme();
-  const radioGroupId = useGeneratedHtmlId({ prefix: 'routingMode' });
 
   const updateCondition = (id: string, patch: Partial<ConditionRow>) => {
     setConditions((current) =>
@@ -616,37 +698,6 @@ function RoutingConditionForm({
             })}
           </h3>
         </EuiTitle>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiForm component="div">
-          <EuiFormRow
-            label={i18n.translate('xpack.streams.createRoutingFlyout.whatShouldHappen', {
-              defaultMessage: 'What should happen to the data?',
-            })}
-          >
-            <EuiRadioGroup
-              compressed
-              options={[
-                {
-                  id: 'route',
-                  label: i18n.translate('xpack.streams.createRoutingFlyout.routeExclusively', {
-                    defaultMessage: 'Route exclusively',
-                  }),
-                },
-                {
-                  id: 'duplicate',
-                  label: i18n.translate('xpack.streams.createRoutingFlyout.duplicate', {
-                    defaultMessage: 'Duplicate',
-                  }),
-                },
-              ]}
-              idSelected={routingMode}
-              onChange={setRoutingMode}
-              name={radioGroupId}
-            />
-          </EuiFormRow>
-        </EuiForm>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
@@ -738,6 +789,62 @@ function RoutingConditionForm({
         </EuiFormRow>
       </EuiFlexItem>
 
+      {destination === 'new' ? (
+        <EuiFlexItem grow={false}>
+          <div
+            className={css`
+              background-color: ${euiTheme.colors.backgroundBaseSubdued};
+              border-radius: ${euiTheme.border.radius.small};
+              padding: ${euiTheme.size.base};
+              display: flex;
+              flex-direction: column;
+              gap: ${euiTheme.size.s};
+            `}
+          >
+            <EuiFilterGroup fullWidth compressed>
+              <EuiFilterButton
+                grow
+                withNext
+                hasActiveFilters={newDestinationStorage === 'local'}
+                onClick={() => setNewDestinationStorage('local')}
+              >
+                {i18n.translate('xpack.streams.createRoutingFlyout.localElasticsearch', {
+                  defaultMessage: 'Local Elasticsearch',
+                })}
+              </EuiFilterButton>
+              <EuiFilterButton
+                grow
+                hasActiveFilters={newDestinationStorage === 'external'}
+                onClick={() => setNewDestinationStorage('external')}
+              >
+                {i18n.translate('xpack.streams.createRoutingFlyout.externalStorage', {
+                  defaultMessage: 'External storage',
+                })}
+              </EuiFilterButton>
+            </EuiFilterGroup>
+            <EuiFormRow
+              fullWidth
+              helpText={i18n.translate('xpack.streams.createRoutingFlyout.newDestinationHelp', {
+                defaultMessage:
+                  "Name your destination or leave to be renamed automatically when connected to a source. This can't be changed after that.",
+              })}
+            >
+              <EuiFieldText
+                fullWidth
+                value={newDestinationName}
+                onChange={(event) => setNewDestinationName(event.target.value)}
+                placeholder={i18n.translate('xpack.streams.createRoutingFlyout.newDestinationName', {
+                  defaultMessage: 'Name',
+                })}
+                aria-label={i18n.translate('xpack.streams.createRoutingFlyout.newDestinationName', {
+                  defaultMessage: 'Name',
+                })}
+              />
+            </EuiFormRow>
+          </div>
+        </EuiFlexItem>
+      ) : null}
+
       {destination === 'none' ? (
         <EuiFlexItem grow={false}>
           <EuiCallOut
@@ -821,13 +928,21 @@ function ConditionValueBadge({ field, value }: { field: string; value: string })
 // State 3 — the applied routing condition summary.
 function AppliedRoutingPanel({
   conditions,
+  destination,
+  newDestinationName,
   onEdit,
 }: {
   conditions: ConditionRow[];
+  destination: string;
+  newDestinationName: string;
   onEdit: () => void;
 }) {
   const { euiTheme } = useEuiTheme();
   const [isWarningVisible, setIsWarningVisible] = useState(true);
+  // When the user chose "Send data to new destination", the summary shows the
+  // named destination instead of the "choose a destination" affordance, and the
+  // "data will be dropped" warning no longer applies.
+  const isNewDestination = destination === 'new';
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -928,28 +1043,46 @@ function AppliedRoutingPanel({
                 })}
               </EuiText>
               <EuiSpacer size="xs" />
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiText
-                    size="xs"
-                    className={css`
-                      font-weight: ${euiTheme.font.weight.bold};
-                      color: ${euiTheme.colors.textHeading};
-                    `}
-                  >
-                    {i18n.translate('xpack.streams.createRoutingFlyout.routeExclusivelyTo', {
-                      defaultMessage: 'ROUTE EXCLUSIVELY TO',
+              {isNewDestination ? (
+                <EuiText
+                  size="s"
+                  className={css`
+                    font-weight: ${euiTheme.font.weight.semiBold};
+                    color: ${euiTheme.colors.textHeading};
+                  `}
+                >
+                  {newDestinationName.trim() ||
+                    i18n.translate('xpack.streams.createRoutingFlyout.newDestinationDefaultName', {
+                      defaultMessage: 'Destination name',
                     })}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty iconType="plusInCircle" size="xs" color="text" flush="both">
-                    {i18n.translate('xpack.streams.createRoutingFlyout.chooseOrCreateDestination', {
-                      defaultMessage: 'Choose or create destination',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                </EuiText>
+              ) : (
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiText
+                      size="xs"
+                      className={css`
+                        font-weight: ${euiTheme.font.weight.bold};
+                        color: ${euiTheme.colors.textHeading};
+                      `}
+                    >
+                      {i18n.translate('xpack.streams.createRoutingFlyout.routeExclusivelyTo', {
+                        defaultMessage: 'ROUTE EXCLUSIVELY TO',
+                      })}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty iconType="plusInCircle" size="xs" color="text" flush="both">
+                      {i18n.translate(
+                        'xpack.streams.createRoutingFlyout.chooseOrCreateDestination',
+                        {
+                          defaultMessage: 'Choose or create destination',
+                        }
+                      )}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
@@ -964,7 +1097,7 @@ function AppliedRoutingPanel({
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          {isWarningVisible ? (
+          {!isNewDestination && isWarningVisible ? (
             <>
               <EuiSpacer size="s" />
               <EuiCallOut
@@ -985,13 +1118,23 @@ function AppliedRoutingPanel({
 
 type RoutingStep = 'empty' | 'form' | 'applied';
 
+export interface RoutingApplyResult {
+  /** True when the user chose "Send data to new destination". */
+  createNewDestination: boolean;
+  /** Name entered for the new destination (may be empty → auto-named). */
+  newDestinationName: string;
+  /** Storage target selected for the new destination. */
+  newDestinationStorage: 'local' | 'external';
+}
+
 export function CreateRoutingFlyout({
   onClose,
   onApply,
   initialStep = 'empty',
+  opinionated = false,
 }: {
   onClose: () => void;
-  onApply?: () => void;
+  onApply?: (result: RoutingApplyResult) => void;
   /**
    * Which step the flyout opens on. Defaults to 'empty' (create from scratch,
    * used by the connector "Add step" flow). Editing an existing routing node on
@@ -999,13 +1142,23 @@ export function CreateRoutingFlyout({
    * edit affordance.
    */
   initialStep?: RoutingStep;
+  /**
+   * "Opinionated routing" variant, opened from a destination node's "Add routing
+   * with inheritance" context-menu action. Shows an illustration, an
+   * inheritance-focused header/description, and a split suggestions button.
+   */
+  opinionated?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
-  const applyAndClose = onApply ?? onClose;
   const titleId = useGeneratedHtmlId({ prefix: 'createRoutingFlyoutTitle' });
   const [step, setStep] = useState<RoutingStep>(initialStep);
-  const [routingMode, setRoutingMode] = useState('route');
-  const [destination, setDestination] = useState('none');
+  // The opinionated ("routing with inheritance") flow creates a new destination
+  // by default; the standard flow starts with no destination set.
+  const [destination, setDestination] = useState(opinionated ? 'new' : 'none');
+  // Config for the "Send data to new destination" option. Held here (rather than
+  // inside the form step) so it survives into the applied summary.
+  const [newDestinationName, setNewDestinationName] = useState('');
+  const [newDestinationStorage, setNewDestinationStorage] = useState<'local' | 'external'>('local');
   const [conditions, setConditions] = useState<ConditionRow[]>(() => [
     makeCondition('event.dataset', 'foo'),
     makeCondition('log.level', 'foo'),
@@ -1021,7 +1174,12 @@ export function CreateRoutingFlyout({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id={titleId}>
-            {initialStep === 'applied'
+            {opinionated
+              ? i18n.translate('xpack.streams.createRoutingFlyout.inheritanceTitle', {
+                  defaultMessage:
+                    'Create routing conditions inheriting the selected destination schema',
+                })
+              : initialStep === 'applied'
               ? i18n.translate('xpack.streams.createRoutingFlyout.editTitle', {
                   defaultMessage: 'Routing conditions',
                 })
@@ -1060,20 +1218,27 @@ export function CreateRoutingFlyout({
             `}
           >
             {step === 'empty' ? (
-              <EmptyRoutingPanel onCreate={() => setStep('form')} />
+              <EmptyRoutingPanel onCreate={() => setStep('form')} opinionated={opinionated} />
             ) : step === 'form' ? (
               <RoutingConditionForm
                 conditions={conditions}
                 setConditions={setConditions}
-                routingMode={routingMode}
-                setRoutingMode={setRoutingMode}
                 destination={destination}
                 setDestination={setDestination}
+                newDestinationName={newDestinationName}
+                setNewDestinationName={setNewDestinationName}
+                newDestinationStorage={newDestinationStorage}
+                setNewDestinationStorage={setNewDestinationStorage}
                 onCancel={() => setStep('empty')}
                 onCreate={() => setStep('applied')}
               />
             ) : (
-              <AppliedRoutingPanel conditions={conditions} onEdit={() => setStep('form')} />
+              <AppliedRoutingPanel
+                conditions={conditions}
+                destination={destination}
+                newDestinationName={newDestinationName}
+                onEdit={() => setStep('form')}
+              />
             )}
           </div>
 
@@ -1093,7 +1258,18 @@ export function CreateRoutingFlyout({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={applyAndClose}>
+              <EuiButton
+                fill
+                onClick={() =>
+                  onApply
+                    ? onApply({
+                        createNewDestination: destination === 'new',
+                        newDestinationName,
+                        newDestinationStorage,
+                      })
+                    : onClose()
+                }
+              >
                 {i18n.translate('xpack.streams.createRoutingFlyout.applyRoutingCondition', {
                   defaultMessage: 'Apply ({count}) routing condition',
                   values: { count: 1 },

@@ -32,6 +32,8 @@ interface CanvasContextMenuProps {
   onClose: () => void;
   onSelectStream: (nodeIds: string[]) => void;
   onDeleteNodes: (nodeIds: string[]) => void;
+  /** Destination-only action: open the "opinionated routing" flyout. */
+  onAddRoutingWithInheritance: (nodeIds: string[]) => void;
 }
 
 export function CanvasContextMenu({
@@ -39,6 +41,7 @@ export function CanvasContextMenu({
   onClose,
   onSelectStream,
   onDeleteNodes,
+  onAddRoutingWithInheritance,
 }: CanvasContextMenuProps) {
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -100,8 +103,10 @@ export function CanvasContextMenu({
     ? [
         <EuiContextMenuItem
           key="add-routing-with-inheritance"
-          // TODO: wire up the "Add routing with inheritance" action in a later step.
-          onClick={onClose}
+          onClick={() => {
+            onAddRoutingWithInheritance(menu.nodeIds);
+            onClose();
+          }}
         >
           <span>
             {i18n.translate('xpack.streams.streamsCanvas.addRoutingWithInheritance', {

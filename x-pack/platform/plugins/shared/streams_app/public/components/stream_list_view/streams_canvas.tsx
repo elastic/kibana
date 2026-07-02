@@ -76,7 +76,7 @@ import { DestinationFlyout } from './destination_flyout';
 import { SourceFlyout } from './source_flyout';
 import { PipelineFlyout } from './pipeline_flyout';
 import { CreatePipelineFlyout } from './create_pipeline_flyout';
-import { CreateRoutingFlyout } from './create_routing_flyout';
+import { CreateRoutingFlyout, type RoutingApplyResult } from './create_routing_flyout';
 import { StreamsListTableTools } from './streams_list_table_tools';
 import { STREAMS_TABLE_SEARCH_ARIA_LABEL } from './translations';
 
@@ -101,6 +101,7 @@ import {
 } from './canvas/contexts';
 import { useEdgeBridges } from './canvas/use-edge-bridges';
 import {
+  configuredDestinationData,
   createNode,
   pipelineData,
   routingData,
@@ -246,6 +247,9 @@ function StreamsCanvasInner() {
   // preloaded with that pipeline (rather than the pipeline picker); null = closed.
   const [pipelineNodeName, setPipelineNodeName] = useState<string | null>(null);
   const [routingNodeFlyoutOpen, setRoutingNodeFlyoutOpen] = useState(false);
+  // "Opinionated routing": the destination node whose "Add routing with
+  // inheritance" context-menu action opened the routing flyout; null = closed.
+  const [inheritanceRoutingNodeId, setInheritanceRoutingNodeId] = useState<string | null>(null);
   // While an end of a connector (or a brand-new connection) is being dragged:
   //   - connectingFromNodeId: the node the drag is anchored to (excluded from the
   //     highlight, since you can't connect a node to itself).
@@ -484,6 +488,78 @@ function StreamsCanvasInner() {
 
     setRoutingFlyoutEdgeId(null);
   }, [routingFlyoutEdgeId, getEdges, getNodes, setNodes, setEdges, recordHistory]);
+
+  // "Opinionated routing" apply (from a destination node's "Add routing with
+  // inheritance" flow): the routing node is rendered as a tab ATTACHED to the
+  // selected destination (not a separate node), and a branch fans out from that
+  // tab to a newly-created destination that inherits the selected one's schema.
+  // Result:
+  //   [ ⑃ | selected destination ]
+  //         └──▶ new destination
+  const applyInheritanceRouting = useCallback(
+    (result: RoutingApplyResult) => {
+      const destinationId = inheritanceRoutingNodeId;
+      if (!destinationId) {
+        setInheritanceRoutingNodeId(null);
+        return;
+      }
+
+      const nodes = getNodes();
+      const selectedDestination = nodes.find((node) => node.id === destinationId);
+      if (!selectedDestination) {
+        setInheritanceRoutingNodeId(null);
+        return;
+      }
+
+      recordHistory();
+
+      const destinationHeight =
+        selectedDestination.measured?.height ?? selectedDestination.height ?? 70;
+      const NEW_DESTINATION_GAP_Y = 100;
+      const NEW_DESTINATION_INDENT_X = 60;
+
+      const newDestinationId = `destination-${Date.now()}`;
+      // The new destination drops below the selected one, indented slightly to
+      // the right so its connector reads as a branch off the attached tab.
+      const newDestinationPosition: XYPosition = {
+        x: selectedDestination.position.x + NEW_DESTINATION_INDENT_X,
+        y: selectedDestination.position.y + destinationHeight + NEW_DESTINATION_GAP_Y,
+      };
+
+      // Flag the selected destination so it grows the attached routing tab, and
+      // add the new destination it fans out to.
+      setNodes((current) =>
+        current
+          .map((node) =>
+            node.id === destinationId
+              ? { ...node, data: { ...node.data, mode: 'configured', attachedRouting: true } }
+              : node
+          )
+          .concat({
+            id: newDestinationId,
+            type: 'destination',
+            position: newDestinationPosition,
+            data: result.createNewDestination
+              ? configuredDestinationData(result.newDestinationName)
+              : configuredDestinationData(),
+          })
+      );
+
+      // Wire the attached tab's branch handle to the new destination.
+      setEdges((current) =>
+        current.concat({
+          id: `${destinationId}-${newDestinationId}`,
+          source: destinationId,
+          sourceHandle: 'attached-routing',
+          target: newDestinationId,
+          type: 'pipelineRouting',
+        })
+      );
+
+      setInheritanceRoutingNodeId(null);
+    },
+    [inheritanceRoutingNodeId, getNodes, setNodes, setEdges, recordHistory]
+  );
 
   // The loose end of a routing connector is a draggable "puck" node. Rather than
   // rely on connecting to a tiny handle, we let the user drag this node and detect
@@ -1159,6 +1235,17 @@ function StreamsCanvasInner() {
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
+                      {/* Vertical separator between the search box and the See YAML button. */}
+                      <div
+                        role="presentation"
+                        className={css`
+                          width: ${euiTheme.border.width.thin};
+                          height: ${euiTheme.size.l};
+                          background-color: ${euiTheme.border.color};
+                        `}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
                       <StreamsListTableTools
                         newButtonIconType={null}
                         newButtonDisabled={!hasChanges}
@@ -1340,6 +1427,9 @@ function StreamsCanvasInner() {
                       onClose={() => setContextMenu(null)}
                       onSelectStream={selectStream}
                       onDeleteNodes={deleteNodes}
+                      onAddRoutingWithInheritance={(nodeIds) =>
+                        setInheritanceRoutingNodeId(nodeIds[0] ?? null)
+                      }
                     />
                   </div>
                 </div>
@@ -1374,6 +1464,13 @@ function StreamsCanvasInner() {
                     initialStep="applied"
                     onClose={() => setRoutingNodeFlyoutOpen(false)}
                     onApply={() => setRoutingNodeFlyoutOpen(false)}
+                  />
+                ) : null}
+                {inheritanceRoutingNodeId !== null ? (
+                  <CreateRoutingFlyout
+                    opinionated
+                    onClose={() => setInheritanceRoutingNodeId(null)}
+                    onApply={applyInheritanceRouting}
                   />
                 ) : null}
               </EdgeHopsContext.Provider>

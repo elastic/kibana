@@ -270,10 +270,9 @@ function ConfiguringDestinationContents({
   );
 }
 
-// A configured destination renders as a SINGLE card (matching the source and
-// pipeline nodes) rather than a card-within-a-card. Clicking is handled at the
-// canvas level via onNodeClick, so the whole card stays draggable.
-function ConfiguredDestinationContents({
+// The title + throughput/latency + status body shared by the plain configured
+// card and the attached-routing variant.
+function ConfiguredDestinationBody({
   data,
   isConnected,
 }: {
@@ -281,7 +280,6 @@ function ConfiguredDestinationContents({
   isConnected: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
-  const raiseOnHoverClassName = useRaiseOnHoverClassName();
   // Footer metadata (throughput/latency): "Fine print (small)" — 10.5px / 16px.
   const metaTextClassName = css`
     font-size: 10.5px;
@@ -289,20 +287,7 @@ function ConfiguredDestinationContents({
     color: ${euiTheme.colors.textSubdued};
   `;
   return (
-    <EuiPanel
-      hasShadow
-      paddingSize="none"
-      className={`${css`
-        display: flex;
-        flex-direction: column;
-        gap: ${euiTheme.size.s};
-        padding: ${euiTheme.size.m};
-        min-width: 211px;
-        text-align: left;
-        cursor: pointer;
-        border-radius: ${euiTheme.border.radius.medium};
-      `} ${raiseOnHoverClassName}`}
-    >
+    <>
       <EuiText
         size="xs"
         className={css`
@@ -337,6 +322,89 @@ function ConfiguredDestinationContents({
           })}
         </EuiText>
       )}
+    </>
+  );
+}
+
+// A configured destination renders as a SINGLE card (matching the source and
+// pipeline nodes) rather than a card-within-a-card. Clicking is handled at the
+// canvas level via onNodeClick, so the whole card stays draggable.
+//
+// When `data.attachedRouting` is set (the opinionated routing-with-inheritance
+// result) the card grows a left routing "tab" — a subdued cell holding the
+// branch glyph, flush against the destination body — so the routing node reads
+// as attached to the destination it was created from.
+function ConfiguredDestinationContents({
+  data,
+  isConnected,
+}: {
+  data: DestinationNodeData;
+  isConnected: boolean;
+}) {
+  const { euiTheme } = useEuiTheme();
+  const raiseOnHoverClassName = useRaiseOnHoverClassName();
+
+  if (data.attachedRouting) {
+    return (
+      <EuiPanel
+        hasShadow
+        paddingSize="none"
+        className={`${css`
+          display: flex;
+          align-items: stretch;
+          overflow: hidden;
+          text-align: left;
+          cursor: pointer;
+          border-radius: ${euiTheme.border.radius.medium};
+        `} ${raiseOnHoverClassName}`}
+      >
+        <div
+          className={css`
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 ${euiTheme.size.base};
+            background-color: ${euiTheme.colors.backgroundBaseSubdued};
+            border-right: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+
+            .euiIcon {
+              transform: rotate(90deg);
+            }
+          `}
+        >
+          <EuiIcon type="branch" size="m" color="primary" />
+        </div>
+        <div
+          className={css`
+            display: flex;
+            flex-direction: column;
+            gap: ${euiTheme.size.s};
+            padding: ${euiTheme.size.m};
+            min-width: 191px;
+          `}
+        >
+          <ConfiguredDestinationBody data={data} isConnected={isConnected} />
+        </div>
+      </EuiPanel>
+    );
+  }
+
+  return (
+    <EuiPanel
+      hasShadow
+      paddingSize="none"
+      className={`${css`
+        display: flex;
+        flex-direction: column;
+        gap: ${euiTheme.size.s};
+        padding: ${euiTheme.size.m};
+        min-width: 211px;
+        text-align: left;
+        cursor: pointer;
+        border-radius: ${euiTheme.border.radius.medium};
+      `} ${raiseOnHoverClassName}`}
+    >
+      <ConfiguredDestinationBody data={data} isConnected={isConnected} />
     </EuiPanel>
   );
 }
@@ -406,6 +474,20 @@ export const DestinationNode = memo(({ id, data }: NodeProps<DestinationFlowNode
         isConnectable={false}
         className={hiddenHandleClassName}
       />
+      {/*
+        Attached-routing branch: when this destination carries an attached
+        routing tab, its second branch fans out from the bottom of that tab to a
+        newly-created destination below.
+      */}
+      {data.mode === 'configured' && data.attachedRouting ? (
+        <Handle
+          type="source"
+          id="attached-routing"
+          position={Position.Bottom}
+          className={anchorHandleClassName}
+          style={{ left: '24px' }}
+        />
+      ) : null}
     </div>
   );
 });
