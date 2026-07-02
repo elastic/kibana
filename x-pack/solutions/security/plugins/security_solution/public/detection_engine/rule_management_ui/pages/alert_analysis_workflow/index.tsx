@@ -43,7 +43,7 @@ import {
   saveAlertAnalysisWorkflowSettings,
   type AlertAnalysisWorkflowSettingsWithConnector,
 } from './api';
-import { AlertAnalysisWorkflowRuleAttachmentSection } from './alert_analysis_workflow_rule_attachment_section';
+import { AlertAnalysisWorkflowRuleAttachmentSection } from './rule_attachment_section';
 import * as translations from './translations';
 
 const ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY = [

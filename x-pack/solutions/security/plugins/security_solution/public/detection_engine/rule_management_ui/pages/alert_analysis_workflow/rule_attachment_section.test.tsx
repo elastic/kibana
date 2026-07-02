@@ -18,7 +18,7 @@ import {
   ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE,
 } from './api';
-import { AlertAnalysisWorkflowRuleAttachmentSection } from './alert_analysis_workflow_rule_attachment_section';
+import { AlertAnalysisWorkflowRuleAttachmentSection } from './rule_attachment_section';
 
 const PAGE_1_RULES = [
   { id: 'p1-rule-1', name: 'Rule 1', enabled: true, attached: true },
