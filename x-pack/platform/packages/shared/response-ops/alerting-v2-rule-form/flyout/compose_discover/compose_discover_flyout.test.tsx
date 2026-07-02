@@ -727,6 +727,12 @@ describe('ComposeDiscoverFlyout', () => {
       });
       fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
 
+      expect(sandboxFlyoutProps?.query).toMatchObject({
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+      });
+
       const manualSplitQuery: RuleQuery = {
         format: 'composed',
         base: 'FROM custom-base',

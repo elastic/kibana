@@ -9,12 +9,55 @@ import { getBreachQuery } from '../../form/utils/query_helpers';
 import { enterManualSplitQuery, exitManualSplitQuery } from './manual_split_query';
 
 describe('manual split query helpers', () => {
-  it('enterManualSplitQuery places the full pipeline in base with an empty alert segment', () => {
+  it('enterManualSplitQuery pre-populates base and alert when the heuristic can split', () => {
     const query = enterManualSplitQuery('FROM logs-* | WHERE count > 100');
 
     expect(query).toEqual({
       format: 'composed',
-      base: 'FROM logs-* | WHERE count > 100',
+      base: 'FROM logs-*',
+      breach: { segment: '| WHERE count > 100' },
+    });
+  });
+
+  it('enterManualSplitQuery pre-populates a WHERE-without-STATS split', () => {
+    const query = enterManualSplitQuery('FROM kbn* | where system.cpu.cores > 5');
+
+    expect(query).toEqual({
+      format: 'composed',
+      base: 'FROM kbn*',
+      breach: { segment: '| where system.cpu.cores > 5' },
+    });
+  });
+
+  it('enterManualSplitQuery places the full pipeline in base when the heuristic cannot isolate a base', () => {
+    const query = enterManualSplitQuery('| WHERE count > 100');
+
+    expect(query).toEqual({
+      format: 'composed',
+      base: '| WHERE count > 100',
+      breach: { segment: '' },
+    });
+  });
+
+  it('enterManualSplitQuery pre-populates a STATS + WHERE split like unified Apply', () => {
+    const query = enterManualSplitQuery(
+      'FROM logs-*\n| STATS count = COUNT(*) BY host.name\n| WHERE count > 100'
+    );
+
+    expect(query).toEqual({
+      format: 'composed',
+      base: 'FROM logs-*\n| STATS count = COUNT(*) BY host.name',
+      breach: { segment: '| WHERE count > 100' },
+    });
+  });
+
+  it('enterManualSplitQuery uses the no_alert_condition fallback like unified Apply', () => {
+    const fullQuery = 'FROM logs-* | STATS count = COUNT(*) BY host.name';
+    const query = enterManualSplitQuery(fullQuery);
+
+    expect(query).toEqual({
+      format: 'composed',
+      base: fullQuery,
       breach: { segment: '' },
     });
   });

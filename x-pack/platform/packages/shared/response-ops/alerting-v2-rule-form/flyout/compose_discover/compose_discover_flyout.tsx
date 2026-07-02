@@ -939,10 +939,9 @@ export function ComposeDiscoverFlyout({
 
   /*
    * Opt in to manual split from the sandbox header button.
-   * Puts the entire current unified query into the base tab and leaves the alert
-   * segment empty — the user defines the split themselves. We intentionally do NOT
-   * run the heuristic here: the heuristic can produce a standalone format (no base)
-   * for queries without a WHERE/STATS, which would leave the base editor blank.
+   * Pre-populates base/alert when the heuristic can split; otherwise puts the
+   * entire unified query into the base tab with an empty alert segment (e.g.
+   * leading-WHERE-only pipelines where the heuristic cannot isolate a base).
    */
   const handleEnableManualSplit = useCallback(() => {
     setSandboxQuery(enterManualSplitQuery(getBreachQuery(sandboxQuery)));
@@ -962,13 +961,9 @@ export function ComposeDiscoverFlyout({
 
   /*
    * Triggered by the split-failed CTA on the form step (sandbox is closed).
-   * Opens the sandbox in manual split mode, placing the full pipeline into the
-   * base tab so the user can manually carve out the alert condition.
-   *
-   * `split_failed` is normally a composed query with an empty base and a non-empty
-   * alert segment; `getBreachQuery` returns that segment as the full pipeline. A
-   * standalone committed query would surface as `no_alert_condition` instead — if
-   * that ever changes, the same helper still places the breach text in `base`.
+   * Opens the sandbox in manual split mode. When the heuristic cannot isolate a
+   * base, the full pipeline is placed in the base tab for the user to carve out
+   * the alert condition manually.
    */
   const handleManualSplitFromForm = useCallback(() => {
     const committedQuery = methods.getValues('query');
@@ -980,6 +975,7 @@ export function ComposeDiscoverFlyout({
 
   const handleSandboxClose = useCallback(() => {
     if (manualSplitUncommittedRef.current) {
+      // Clear manual split before syncing so the next render sees manualSplitEnabled: false.
       dispatch({ type: 'DISABLE_MANUAL_SPLIT' });
       manualSplitUncommittedRef.current = false;
     }
