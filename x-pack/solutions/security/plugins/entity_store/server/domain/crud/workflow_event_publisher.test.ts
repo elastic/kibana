@@ -130,6 +130,7 @@ describe('WorkflowEventPublisher', () => {
           entityId: 'host-1',
           entityType: 'generic',
           doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+          previousCriticality: undefined,
         },
       ]);
 
@@ -146,11 +147,17 @@ describe('WorkflowEventPublisher', () => {
 
     it('does nothing when no target has asset.criticality', async () => {
       publisher.emitAssetCriticalityUpdated([
-        { entityId: 'host-1', entityType: 'generic', doc: { entity: { id: 'host-1' } } },
+        {
+          entityId: 'host-1',
+          entityType: 'generic',
+          doc: { entity: { id: 'host-1' } },
+          previousCriticality: undefined,
+        },
         {
           entityId: 'host-2',
           entityType: 'generic',
           doc: { entity: { id: 'host-2' }, asset: {} },
+          previousCriticality: undefined,
         },
       ]);
 
@@ -164,6 +171,7 @@ describe('WorkflowEventPublisher', () => {
           entityId: 'host-1',
           entityType: 'generic',
           doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+          previousCriticality: undefined,
         },
       ]);
 
@@ -181,6 +189,7 @@ describe('WorkflowEventPublisher', () => {
           entityId: 'host-1',
           entityType: 'generic',
           doc: { entity: { id: 'host-1' }, asset: { criticality: null } },
+          previousCriticality: undefined,
         },
       ]);
 
@@ -197,15 +206,79 @@ describe('WorkflowEventPublisher', () => {
           entityId: 'host-1',
           entityType: 'generic',
           doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+          previousCriticality: undefined,
         },
         {
           entityId: 'host-2',
           entityType: 'generic',
           doc: { entity: { id: 'host-2' }, asset: { criticality: 'low_impact' } },
+          previousCriticality: undefined,
         },
       ]);
 
       expect(emit).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not emit when the new criticality equals a known previous criticality (no-op)', async () => {
+      publisher.emitAssetCriticalityUpdated([
+        {
+          entityId: 'host-1',
+          entityType: 'generic',
+          doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+          previousCriticality: 'high_impact',
+        },
+      ]);
+
+      await flushPromises();
+      expect(emit).not.toHaveBeenCalled();
+    });
+
+    it('does not emit when both the new and previous criticality are explicitly null (no-op)', async () => {
+      publisher.emitAssetCriticalityUpdated([
+        {
+          entityId: 'host-1',
+          entityType: 'generic',
+          doc: { entity: { id: 'host-1' }, asset: { criticality: null } },
+          previousCriticality: null,
+        },
+      ]);
+
+      await flushPromises();
+      expect(emit).not.toHaveBeenCalled();
+    });
+
+    it('emits when the new criticality differs from a known previous criticality', async () => {
+      publisher.emitAssetCriticalityUpdated([
+        {
+          entityId: 'host-1',
+          entityType: 'generic',
+          doc: { entity: { id: 'host-1' }, asset: { criticality: 'low_impact' } },
+          previousCriticality: 'high_impact',
+        },
+      ]);
+
+      expect(emit).toHaveBeenCalledWith(
+        ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID,
+        expect.objectContaining({ criticalityLevel: 'low_impact' })
+      );
+    });
+
+    it('emits when the previous criticality is unknown, even if it happens to match the new value', async () => {
+      // previousCriticality: undefined means "no previous doc / field found", which must
+      // not be conflated with a known previous value of null.
+      publisher.emitAssetCriticalityUpdated([
+        {
+          entityId: 'host-1',
+          entityType: 'generic',
+          doc: { entity: { id: 'host-1' }, asset: { criticality: null } },
+          previousCriticality: undefined,
+        },
+      ]);
+
+      expect(emit).toHaveBeenCalledWith(
+        ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID,
+        expect.objectContaining({ criticalityLevel: null })
+      );
     });
 
     it('logs a single warning when emit fails', async () => {
@@ -215,6 +288,7 @@ describe('WorkflowEventPublisher', () => {
           entityId: 'host-1',
           entityType: 'generic',
           doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+          previousCriticality: undefined,
         },
       ]);
 
@@ -229,6 +303,7 @@ describe('WorkflowEventPublisher', () => {
           entityId: 'host-1',
           entityType: 'generic',
           doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+          previousCriticality: undefined,
         },
       ]);
 
@@ -408,6 +483,42 @@ describe('WorkflowEventPublisher', () => {
       );
     });
 
+    it('looks up previous criticality from previousDocs and suppresses a no-op re-write', async () => {
+      const previousDoc = { asset: { criticality: 'high_impact' } } as Entity;
+      publisher.emitEvents(
+        [
+          {
+            entityId: 'host-1',
+            entityType: 'generic',
+            doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+          },
+        ],
+        new Map([['host-1', previousDoc]])
+      );
+
+      await flushPromises();
+      expect(emit).not.toHaveBeenCalled();
+    });
+
+    it('still emits the asset criticality trigger when previousDocs shows a different value', async () => {
+      const previousDoc = { asset: { criticality: 'low_impact' } } as Entity;
+      publisher.emitEvents(
+        [
+          {
+            entityId: 'host-1',
+            entityType: 'generic',
+            doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+          },
+        ],
+        new Map([['host-1', previousDoc]])
+      );
+
+      expect(emit).toHaveBeenCalledWith(
+        ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID,
+        expect.objectContaining({ criticalityLevel: 'high_impact' })
+      );
+    });
+
     it('emits risk score trigger for targets with entity.risk.calculated_score_norm', async () => {
       publisher.emitEvents(
         [
@@ -514,6 +625,7 @@ describe('WorkflowEventPublisher', () => {
           entityId: 'host-1',
           entityType: 'generic',
           doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+          previousCriticality: undefined,
         },
       ]);
 
@@ -563,11 +675,13 @@ describe('WorkflowEventPublisher', () => {
           entityId: 'host-1',
           entityType: 'generic',
           doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+          previousCriticality: undefined,
         },
         {
           entityId: 'host-2',
           entityType: 'generic',
           doc: { entity: { id: 'host-2' }, asset: { criticality: 'low_impact' } },
+          previousCriticality: undefined,
         },
       ]);
 
@@ -582,6 +696,7 @@ describe('WorkflowEventPublisher', () => {
           entityId: 'host-1',
           entityType: 'generic',
           doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+          previousCriticality: undefined,
         },
       ]);
 
@@ -601,6 +716,7 @@ describe('WorkflowEventPublisher', () => {
           entityId: 'host-1',
           entityType: 'generic',
           doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+          previousCriticality: undefined,
         },
       ]);
 
@@ -622,11 +738,13 @@ describe('WorkflowEventPublisher', () => {
           entityId: 'host-1',
           entityType: 'generic',
           doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+          previousCriticality: undefined,
         },
         {
           entityId: 'host-2',
           entityType: 'generic',
           doc: { entity: { id: 'host-2' }, asset: { criticality: 'low_impact' } },
+          previousCriticality: undefined,
         },
       ]);
 
@@ -648,6 +766,7 @@ describe('WorkflowEventPublisher', () => {
           entityId: 'host-1',
           entityType: 'generic',
           doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+          previousCriticality: undefined,
         },
       ]);
 

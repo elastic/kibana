@@ -114,6 +114,38 @@ describe('CRUDClient', () => {
         );
       });
 
+      it('does not emit when the patched criticality matches the value already stored (idempotent re-write)', async () => {
+        esClient.mget.mockResolvedValue({
+          docs: [{ found: true, _source: { asset: { criticality: 'high_impact' } } }],
+        } as any);
+
+        await clientWithEmit.updateEntity(
+          'generic',
+          { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+          true
+        );
+
+        expect(esClient.mget).toHaveBeenCalledTimes(1);
+        expect(emitWorkflowTriggerEvent).not.toHaveBeenCalled();
+      });
+
+      it('still emits when the patched criticality differs from the value already stored', async () => {
+        esClient.mget.mockResolvedValue({
+          docs: [{ found: true, _source: { asset: { criticality: 'low_impact' } } }],
+        } as any);
+
+        await clientWithEmit.updateEntity(
+          'generic',
+          { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+          true
+        );
+
+        expect(emitWorkflowTriggerEvent).toHaveBeenCalledWith(
+          ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID,
+          expect.objectContaining({ criticalityLevel: 'high_impact' })
+        );
+      });
+
       it('does not emit when asset field is absent from the patch', async () => {
         await clientWithEmit.updateEntity('generic', { entity: { id: 'host-1' } }, true);
 
