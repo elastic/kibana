@@ -108,12 +108,12 @@ export const useAgentBuilderRuleCreation = ({
     return syncRuleIdRef.current ?? existingRuleIdRef.current ?? undefined;
   }, []);
 
-  // Activate form→chat sync while the rule form is open, and reset it on close. Scoping activation
-  // to the page lifetime (rather than to a button click) means nothing leaks if the user never
-  // reaches the form, and writes no-op until a chat sidebar is actually open.
+  // Track sync activation while the rule form is open, and reset it on close. Activation itself
+  // is driven by explicit user actions — the "Add to chat" button, applying a card to the form,
+  // or binding to this rule's card in an open conversation — never by merely visiting the page,
+  // so users who don't touch chat get no background attachment pushes.
   useEffect(() => {
     const subscription = aiRuleCreation.formSyncActive$.subscribe(setIsSyncActive);
-    aiRuleCreation.activateFormSync();
     return () => {
       subscription.unsubscribe();
       aiRuleCreation.deactivateFormSync();
