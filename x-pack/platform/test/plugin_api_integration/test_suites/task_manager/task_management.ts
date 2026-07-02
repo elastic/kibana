@@ -688,15 +688,14 @@ export default function ({ getService }: FtrProviderContext) {
       // wait for the api_key_to_invalidate saved object to be older than the invalidation removalDelay (1s)
       await delay(1000);
 
-      // run the api key invalidation task
-      await supertest
-        .post('/api/invalidate_api_key_task/run_soon')
-        .send({})
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
-
       // api key should be invalidated
       await retry.tryForTime(5 * 60 * 1000, async () => {
+        // run the api key invalidation task
+        await supertest
+          .post('/api/invalidate_api_key_task/run_soon')
+          .send({})
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
         queryResult = await supertest
           .post('/internal/security/api_key/_query')
           .send({})
