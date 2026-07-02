@@ -123,6 +123,8 @@ export const bulkCreatePrebuiltRules = async ({
       },
     });
 
+    // Alerting echoes back the options.id we supplied, so itemById.get() always
+    // resolves. The guards below satisfy TypeScript's Map.get() return type.
     for (const id of successfulIds) {
       const asset = itemById.get(id);
       if (asset) {
