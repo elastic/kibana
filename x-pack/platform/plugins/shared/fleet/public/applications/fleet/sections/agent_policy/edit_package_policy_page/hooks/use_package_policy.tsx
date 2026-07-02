@@ -101,6 +101,13 @@ export function usePackagePolicyWithRelatedData(
   const [loadingError, setLoadingError] = useState<Error>();
 
   const [isUpgrade, setIsUpgrade] = useState<boolean>(options.forceUpgrade ?? false);
+  // `options.isAgentless` is a fast-path hint carried by links we control. When it is missing
+  // (refresh, deep link, or a foreign entry point) we fall back to detecting agentless from the
+  // loaded package policy's own `supports_agentless` flag. That flag is authoritative per policy
+  // instance (dual-mode packages route correctly), and it drives the write path so an agentless
+  // policy is never saved through the package-policy API.
+  const [detectedAgentless, setDetectedAgentless] = useState(false);
+  const isAgentlessPolicy = (options.isAgentless ?? false) || detectedAgentless;
   const yaml = useYaml();
 
   // Form state
@@ -126,7 +133,7 @@ export function usePackagePolicyWithRelatedData(
     // Agentless policies are updated through the agentless API (full-replace PUT), never the
     // package-policy API. `sendUpdateAgentlessPolicy` throws on failure, so normalize the result
     // into the `{ data, error }` shape the caller (`onSubmit`) expects from the package-policy path.
-    if (options.isAgentless) {
+    if (isAgentlessPolicy) {
       const { enableVarGroups } = ExperimentalFeaturesService.get();
       const varGroups =
         enableVarGroups && packageInfo?.var_groups ? packageInfo.var_groups : undefined;
@@ -222,6 +229,12 @@ export function usePackagePolicyWithRelatedData(
 
         if (packagePolicyError) {
           throw packagePolicyError;
+        }
+
+        // Detect an agentless policy that was opened without the `isAgentless` hint, so the save
+        // routes through the agentless API rather than the package-policy API.
+        if (packagePolicyData?.item?.supports_agentless) {
+          setDetectedAgentless(true);
         }
 
         if (packagePolicyData!.item.policy_ids && packagePolicyData!.item.policy_ids.length > 0) {

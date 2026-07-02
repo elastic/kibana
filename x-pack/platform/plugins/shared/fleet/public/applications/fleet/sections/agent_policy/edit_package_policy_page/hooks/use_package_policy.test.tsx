@@ -127,6 +127,42 @@ jest.mock('../../../../../../hooks/use_request', () => ({
         },
       };
     }
+    // An agentless policy instance read through the package-policy API (i.e. the `isAgentless`
+    // hint was dropped). It carries the authoritative per-instance `supports_agentless` flag.
+    if (packagePolicyId === 'agentless-detect') {
+      return {
+        data: {
+          item: {
+            id: 'nginx-1',
+            name: 'nginx-1',
+            namespace: 'default',
+            description: 'Nginx description',
+            package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
+            enabled: true,
+            supports_agentless: true,
+            policy_id: 'agentless-agent-policy-1',
+            policy_ids: ['agentless-agent-policy-1'],
+            inputs: [
+              {
+                type: 'logfile',
+                policy_template: 'nginx',
+                enabled: true,
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: { type: 'logs', dataset: 'nginx.access' },
+                    vars: {
+                      paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
+                    },
+                  },
+                ],
+                vars: undefined,
+              },
+            ],
+          },
+        },
+      };
+    }
   },
   sendGetPackageInfoByKey: jest.fn().mockImplementation((name, version) =>
     Promise.resolve({
@@ -658,6 +694,35 @@ describe('usePackagePolicy - agentless', () => {
     expect(saveResult).toEqual({ data: { item: { id: 'agentless-1' } }, error: null });
     // Never falls back to the package-policy update API for agentless policies.
     expect(sendGetPackageInfoByKey).toHaveBeenCalled();
+  });
+
+  it('detects an agentless policy read without the isAgentless hint and saves through the agentless API', async () => {
+    // Simulates a refresh / deep link / foreign entry point where the `?isAgentless` hint is
+    // absent: the policy is read via the package-policy API, and its per-instance
+    // `supports_agentless` flag must still route the write through the agentless API.
+    jest
+      .mocked(sendUpdateAgentlessPolicy)
+      .mockResolvedValue({ item: { id: 'agentless-detect' } } as any);
+
+    const renderer = createFleetTestRendererMock();
+    const { result } = renderer.renderHook(() =>
+      usePackagePolicyWithRelatedData('agentless-detect', {})
+    );
+    await waitFor(() => expect(result.current.packagePolicy?.name).toBe('nginx-1'));
+
+    // The fast-path agentless read effect must not run when the hint is missing.
+    expect(sendGetAgentlessPolicy).not.toHaveBeenCalled();
+
+    let saveResult: any;
+    await act(async () => {
+      saveResult = await result.current.savePackagePolicy();
+    });
+
+    expect(sendUpdateAgentlessPolicy).toHaveBeenCalledWith(
+      'agentless-detect',
+      expect.objectContaining({ package: expect.objectContaining({ name: 'nginx' }) })
+    );
+    expect(saveResult).toEqual({ data: { item: { id: 'agentless-detect' } }, error: null });
   });
 
   it('normalizes agentless save failures into the { data, error } shape', async () => {
