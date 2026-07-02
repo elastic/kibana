@@ -130,38 +130,63 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
   );
 
   evaluate(
-    'smoke tests: trace-based groundedness',
-    async ({ agentBuilderClient, evaluatorClient, evaluationConnector }) => {
-      const response = await agentBuilderClient.converse({
-        agentId: 'elastic-ai-agent',
-        input: 'What is the current status of the payment service?',
-      });
-      if (!response.traceId) {
-        throw new Error('Agent Builder response is missing traceId');
-      }
+    'smoke tests: trace-based evaluators',
+    async ({ executorClient, agentBuilderClient, evaluatorClient, evaluationConnector }) => {
+      const groundednessEvaluators = evaluatorClient.toEvaluators([
+        { name: 'groundedness', kind: 'LLM', connectorId: 'azure-gpt4_1' },
+      ]);
 
-      const result = await evaluatorClient.evaluate({
-        subject: {
-          mode: 'single-turn',
-          traces: [{ trace_id: response.traceId }],
-        },
-        evaluators: [
-          {
-            name: 'groundedness',
-            connector_id: 'azure-gpt4_1',
-          },
+      const correctnessEvaluators = evaluatorClient.toSubScoreEvaluators({
+        name: 'correctness',
+        kind: 'LLM',
+        connectorId: 'azure-gpt4_1',
+        subScores: [
+          { key: 'factuality', evaluatorName: 'Factuality' },
+          { key: 'relevance', evaluatorName: 'Relevance' },
+          { key: 'sequence_accuracy', evaluatorName: 'Sequence Accuracy' },
         ],
       });
 
-      expect(result.results).toHaveLength(1);
+      const result = await executorClient.runExperiment(
+        {
+          datasets: [
+            {
+              name: 'smoke tests: trace-based evaluators',
+              description:
+                'Verifies trace-based groundedness and correctness evaluators via the evaluator API',
+              examples: [
+                {
+                  input: { prompt: 'What is the current status of the payment service?' },
+                  output: {
+                    expected:
+                      'The status of the payment service is unknown based on the available information.',
+                  },
+                },
+              ],
+            },
+          ],
+          task: async (example) => {
+            const { prompt } = example.input! as { prompt: string };
+            const response = await agentBuilderClient.converse({
+              agentId: 'elastic-ai-agent',
+              input: prompt,
+            });
+            if (!response.traceId) {
+              throw new Error('Agent Builder response is missing traceId');
+            }
+            return { traceId: response.traceId };
+          },
+        },
+        [...groundednessEvaluators, ...correctnessEvaluators]
+      );
 
-      const groundedness = result.results.find((entry) => entry.evaluator.name === 'groundedness');
+      expect(result[0].evaluationRuns.length).toBeGreaterThan(0);
 
-      expect(groundedness?.status).toBe('ok');
+      const groundednessRun = result[0].evaluationRuns.find((r) => r.name === 'groundedness');
+      expect(groundednessRun?.result?.label).toBeDefined();
 
-      const groundednessScore = groundedness?.scores?.[0];
-
-      expect(groundednessScore?.label).toBeDefined();
+      const factualityRun = result[0].evaluationRuns.find((r) => r.name === 'Factuality');
+      expect(factualityRun?.result?.label).toBeDefined();
     }
   );
 
