@@ -196,14 +196,52 @@ export const colorByValuePercentageSchema = colorByValueBaseSchema.extends(
   }
 );
 
+export const colorByValueNamedPaletteSchema = schema.object(
+  {
+    type: schema.literal('dynamic_palette'),
+    palette: schema.string({
+      meta: {
+        description:
+          'The name of the palette to apply across the value range (for example, `status`, `temperature`).',
+      },
+    }),
+    open_below: schema.boolean({
+      defaultValue: false,
+      meta: {
+        description:
+          "When `true`, values below the palette's lowest range use its lowest color instead of being left uncolored. Defaults to `false`.",
+      },
+    }),
+    open_above: schema.boolean({
+      defaultValue: true,
+      meta: {
+        description:
+          "When `true`, values above the palette's highest range use its highest color instead of being left uncolored. Defaults to `true`.",
+      },
+    }),
+  },
+  {
+    meta: {
+      id: 'colorByValuePalette',
+      title: 'Color By Value (Palette)',
+      description: 'Color by value using a named palette applied across the value range.',
+    },
+  }
+);
+
 export const colorByValueSchema = schema.oneOf(
-  [colorByValueAbsoluteSchema, colorByValuePercentageSchema, legacyColorByValueSchema],
+  [
+    colorByValueAbsoluteSchema,
+    colorByValuePercentageSchema,
+    colorByValueNamedPaletteSchema,
+    legacyColorByValueSchema,
+  ],
   {
     meta: {
       id: 'colorByValue',
       title: 'Color By Value',
       description:
-        'Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges.',
+        'Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges and named palettes.',
     },
   }
 );
@@ -387,6 +425,7 @@ export const allColoringTypeSchema = schema.oneOf(
 
 export type StaticColorType = TypeOf<typeof staticColorSchema>;
 export type ColorByValueType = TypeOf<typeof colorByValueSchema>;
+export type ColorByValueNamedPaletteType = TypeOf<typeof colorByValueNamedPaletteSchema>;
 export type ColorByValueAbsolute =
   | TypeOf<typeof colorByValueAbsoluteSchema>
   | TypeOf<typeof legacyColorByValueAbsoluteSchema>;
