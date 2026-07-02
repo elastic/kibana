@@ -180,19 +180,22 @@ test.describe(
         expect(horizontalFill).toBeGreaterThan(0.95);
       });
 
-      await test.step('click on a service node and verify popover contents', async () => {
-        await pageObjects.serviceMapPage.openServiceNodePopover(SERVICE_MAP_TEST_SERVICE);
+      await test.step('click on a service node and verify flyout contents', async () => {
+        await pageObjects.serviceMapPage.openServiceNodeFlyout(SERVICE_MAP_TEST_SERVICE);
 
-        await expect(pageObjects.serviceMapPage.serviceMapPopoverContent).toBeVisible({
+        await expect(pageObjects.serviceFlyoutPage.flyout).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
-        await expect(pageObjects.serviceMapPage.serviceMapPopoverTitle).toHaveText(
-          SERVICE_MAP_TEST_SERVICE
-        );
-        await expect(pageObjects.serviceMapPage.serviceMapServiceDetailsButton).toBeVisible();
+        await expect(pageObjects.serviceFlyoutPage.title).toHaveText(SERVICE_MAP_TEST_SERVICE);
+        await expect(pageObjects.serviceFlyoutPage.actions).toBeVisible();
+        await pageObjects.serviceFlyoutPage.expectChartsRendered([
+          'latency',
+          'throughput',
+          'failedTransactionRate',
+        ]);
 
         await page.keyboard.press('Escape');
-        await expect(pageObjects.serviceMapPage.serviceMapPopoverTitle).toBeHidden();
+        await expect(pageObjects.serviceFlyoutPage.flyout).toBeHidden();
       });
 
       await test.step('click on a service map edge and verify popover contents', async () => {
