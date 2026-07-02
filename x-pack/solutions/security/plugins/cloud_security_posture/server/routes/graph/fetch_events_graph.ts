@@ -413,7 +413,7 @@ FROM ${indexPatterns
     OR service.target.id IS NOT NULL OR service.target.name IS NOT NULL
     OR entity.target.id IS NOT NULL OR entity.target.name IS NOT NULL
 | EVAL  __action_exists = event.action IS NOT NULL
-| EVAL data_stream.dataset = COALESCE(event.dataset, MV_FIRST(SPLIT(_index, "-")))
+| EVAL data_stream.dataset = COALESCE(event.dataset, data_stream.dataset)
 ${buildEnrichmentQuery({ skipColumns: ['host.ip', 'host.target.ip', 'host.target.port'] })}
 ${buildV2ActorResolution()}
 | WHERE event.action IS NOT NULL AND actorEntityId IS NOT NULL
@@ -423,16 +423,18 @@ ${buildSaveSourceFieldsEsql()}
 | MV_EXPAND actorEntityId
 | MV_EXPAND targetEntityId
 ${buildPinnedEsql(pinnedIds)}
-// Create actor and target data - entity object built by TypeScript enrichment
+// sourceFields is nested inside "entity" so these strings are schema-valid as-is.
+// rebuildDocData rewrites doc.entity with enrichment data (reading sourceFields from entity.sourceFields),
+// but if JSON parsing fails it returns the raw string unchanged — which must already pass validation.
 | EVAL actorDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprAsString('id', 'actorEntityId')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
-    ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
+    ${JSON_OBJECT_SEPARATOR}, "\\"entity\\":{", ${buildActorSourceFieldsEsql()}, "}",
   ${JSON_OBJECT_END})
 | EVAL targetDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprAsString('id', 'COALESCE(targetEntityId, "")')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
-    ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
+    ${JSON_OBJECT_SEPARATOR}, "\\"entity\\":{", ${buildTargetSourceFieldsEsql()}, "}",
   ${JSON_OBJECT_END})
 // Map host and source values to enriched contextual data
 | EVAL sourceIps = source.ip

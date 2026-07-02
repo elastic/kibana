@@ -32,13 +32,13 @@ export const azure_ai_foundryEvaluations = {
       esql: `| EVAL
   user.id = CASE(
     user.id IS NOT NULL, user.id,
-    data_stream.dataset == "azure.ai_foundry" AND data_stream.type == "logs" AND azure.ai_foundry.category == "Audit", azure.ai_foundry.properties.object_id,
+    data_stream.dataset == "azure_ai_foundry.logs" AND data_stream.type == "logs" AND azure.ai_foundry.category == "Audit", azure.ai_foundry.properties.object_id,
     null
   ),
   host.ip = CASE(
     host.ip IS NOT NULL, host.ip,
-    data_stream.dataset == "azure.ai_foundry" AND data_stream.type == "logs" AND azure.ai_foundry.category == "GatewayLogs", source.ip,
-    data_stream.dataset == "azure.ai_foundry" AND data_stream.type == "logs" AND azure.ai_foundry.category == "RequestResponse", azure.ai_foundry.caller_ip_address,
+    data_stream.dataset == "azure_ai_foundry.logs" AND data_stream.type == "logs" AND azure.ai_foundry.category == "GatewayLogs", source.ip,
+    data_stream.dataset == "azure_ai_foundry.logs" AND data_stream.type == "logs" AND azure.ai_foundry.category == "RequestResponse", azure.ai_foundry.caller_ip_address,
     null
   )`,
     },
@@ -48,9 +48,9 @@ export const azure_ai_foundryEvaluations = {
       esql: `| EVAL
   event.action = CASE(
     event.action IS NOT NULL, event.action,
-    data_stream.dataset == "azure.ai_foundry" AND data_stream.type == "logs" AND azure.ai_foundry.category == "Audit", azure.ai_foundry.operation_name,
-    data_stream.dataset == "azure.ai_foundry" AND data_stream.type == "logs" AND azure.ai_foundry.category == "RequestResponse", azure.ai_foundry.operation_name,
-    data_stream.dataset == "azure.ai_foundry" AND data_stream.type == "logs" AND azure.ai_foundry.category == "GatewayLogs", azure.ai_foundry.properties.operation_id,
+    data_stream.dataset == "azure_ai_foundry.logs" AND data_stream.type == "logs" AND azure.ai_foundry.category == "Audit", azure.ai_foundry.operation_name,
+    data_stream.dataset == "azure_ai_foundry.logs" AND data_stream.type == "logs" AND azure.ai_foundry.category == "RequestResponse", azure.ai_foundry.operation_name,
+    data_stream.dataset == "azure_ai_foundry.logs" AND data_stream.type == "logs" AND azure.ai_foundry.category == "GatewayLogs", azure.ai_foundry.properties.operation_id,
     null
   )`,
     },
@@ -60,21 +60,21 @@ export const azure_ai_foundryEvaluations = {
       esql: `| EVAL
   service.target.id = CASE(
     service.target.id IS NOT NULL, service.target.id,
-    data_stream.dataset == "azure.ai_foundry" AND data_stream.type == "logs" AND azure.ai_foundry.category == "Audit", azure.resource.id,
-    data_stream.dataset == "azure.ai_foundry" AND data_stream.type == "logs" AND azure.ai_foundry.category == "RequestResponse", azure.ai_foundry.properties.model_deployment_name,
-    data_stream.dataset == "azure.ai_foundry" AND data_stream.type == "logs" AND azure.ai_foundry.category == "GatewayLogs", azure.ai_foundry.properties.backend_request_body.model,
+    data_stream.dataset == "azure_ai_foundry.logs" AND data_stream.type == "logs" AND azure.ai_foundry.category == "Audit", azure.resource.id,
+    data_stream.dataset == "azure_ai_foundry.logs" AND data_stream.type == "logs" AND azure.ai_foundry.category == "RequestResponse", azure.ai_foundry.properties.model_deployment_name,
+    data_stream.dataset == "azure_ai_foundry.logs" AND data_stream.type == "logs" AND azure.ai_foundry.category == "GatewayLogs", azure.ai_foundry.properties.backend_request_body.model,
     null
   ),
   service.target.name = CASE(
     service.target.name IS NOT NULL, service.target.name,
-    data_stream.dataset == "azure.ai_foundry" AND data_stream.type == "logs" AND azure.ai_foundry.category == "Audit", azure.resource.name,
-    data_stream.dataset == "azure.ai_foundry" AND data_stream.type == "logs" AND azure.ai_foundry.category == "RequestResponse", azure.ai_foundry.properties.model_deployment_name,
-    data_stream.dataset == "azure.ai_foundry" AND data_stream.type == "logs" AND azure.ai_foundry.category == "GatewayLogs", azure.ai_foundry.properties.backend_request_body.model,
+    data_stream.dataset == "azure_ai_foundry.logs" AND data_stream.type == "logs" AND azure.ai_foundry.category == "Audit", azure.resource.name,
+    data_stream.dataset == "azure_ai_foundry.logs" AND data_stream.type == "logs" AND azure.ai_foundry.category == "RequestResponse", azure.ai_foundry.properties.model_deployment_name,
+    data_stream.dataset == "azure_ai_foundry.logs" AND data_stream.type == "logs" AND azure.ai_foundry.category == "GatewayLogs", azure.ai_foundry.properties.backend_request_body.model,
     null
   ),
   entity.target.id = CASE(
     entity.target.id IS NOT NULL, entity.target.id,
-    data_stream.dataset == "azure.ai_foundry" AND data_stream.type == "logs" AND azure.ai_foundry.category == "GatewayLogs", azure.ai_foundry.properties.backend_response_body.id,
+    data_stream.dataset == "azure_ai_foundry.logs" AND data_stream.type == "logs" AND azure.ai_foundry.category == "GatewayLogs", azure.ai_foundry.properties.backend_response_body.id,
     null
   )`,
     },

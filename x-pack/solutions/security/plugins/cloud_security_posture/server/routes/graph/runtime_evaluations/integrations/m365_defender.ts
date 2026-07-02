@@ -55,6 +55,7 @@ export const m365_defenderEvaluations = {
   user.name = CASE(
     user.name IS NOT NULL, user.name,
     data_stream.dataset == "m365_defender.event" AND m365_defender.event.initiating_process.account_name IS NOT NULL, m365_defender.event.initiating_process.account_name,
+    data_stream.dataset == "m365_defender.event" AND process.user.name IS NOT NULL, process.user.name,
     data_stream.dataset IN ("m365_defender.alert", "m365_defender.incident") AND process.user.name IS NOT NULL, process.user.name,
     null
   ),
@@ -69,6 +70,7 @@ export const m365_defenderEvaluations = {
       section: "Combined ES|QL \u2014 event action",
       esql: `| EVAL
   event.action = CASE(
+    data_stream.dataset == "m365_defender.alert" AND m365_defender.alert.title IS NOT NULL, m365_defender.alert.title,
     event.action IS NOT NULL, event.action,
     data_stream.dataset == "m365_defender.event" AND m365_defender.event.action.type IS NOT NULL, m365_defender.event.action.type,
     null
@@ -82,14 +84,14 @@ export const m365_defenderEvaluations = {
     host.target.id IS NOT NULL, host.target.id,
     data_stream.dataset == "m365_defender.event" AND event.action IN ("samr-query", "dns-query") AND m365_defender.event.additional_fields.DestinationComputerObjectGuid IS NOT NULL, m365_defender.event.additional_fields.DestinationComputerObjectGuid,
     data_stream.dataset IN ("m365_defender.alert", "m365_defender.incident") AND host.id IS NOT NULL, host.id,
-    data_stream.dataset == "m365_defender.event" AND event.action NOT IN ("samr-query", "dns-query", "logonsuccess", "logonfailed") AND host.id IS NOT NULL, host.id,
+    data_stream.dataset == "m365_defender.event" AND user.name IS NOT NULL AND event.action NOT IN ("samr-query", "dns-query", "logonsuccess", "logonfailed") AND host.id IS NOT NULL, host.id,
     null
   ),
   host.target.name = CASE(
     host.target.name IS NOT NULL, host.target.name,
     data_stream.dataset == "m365_defender.event" AND m365_defender.event.destination.device_name IS NOT NULL, m365_defender.event.destination.device_name,
     data_stream.dataset IN ("m365_defender.alert", "m365_defender.incident") AND host.name IS NOT NULL, host.name,
-    data_stream.dataset == "m365_defender.event" AND event.action NOT IN ("samr-query", "dns-query", "logonsuccess", "logonfailed") AND host.name IS NOT NULL, host.name,
+    data_stream.dataset == "m365_defender.event" AND user.name IS NOT NULL AND event.action NOT IN ("samr-query", "dns-query", "logonsuccess", "logonfailed") AND host.name IS NOT NULL, host.name,
     null
   ),
   host.target.ip = CASE(
