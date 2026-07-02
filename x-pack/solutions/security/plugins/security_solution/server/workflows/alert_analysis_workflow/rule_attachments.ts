@@ -113,7 +113,9 @@ const createAlertAnalysisWorkflowAction = (workflowId: string): NormalizedRuleAc
     subAction: ALERT_ANALYSIS_WORKFLOW_ACTION_SUB_ACTION,
     subActionParams: {
       workflowId,
-      summaryMode: false,
+      // The workflow processes the whole alert batch in one run (it loops over
+      // `event.alerts`), so run it once per rule execution rather than once per alert.
+      summaryMode: true,
     },
   },
 });
