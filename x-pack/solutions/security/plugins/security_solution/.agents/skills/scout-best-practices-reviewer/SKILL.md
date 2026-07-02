@@ -37,7 +37,7 @@ Security Solution tests commonly create resources that require explicit cleanup 
 
 ### Auth and roles
 
-Use Security Solution-specific auth methods — never `loginAsAdmin()`:
+Use Security Solution-specific auth methods rather than `loginAsAdmin()`:
 
 | Role | Method | When to use |
 |------|--------|-------------|
@@ -46,11 +46,15 @@ Use Security Solution-specific auth methods — never `loginAsAdmin()`:
 | Any security role | `browserAuth.loginAsSecurityRole('role_name')` | Generic — any role in `roles.yml` |
 | Custom role | `browserAuth.loginWithCustomRole(roleDescriptor)` | Ad-hoc RBAC with inline descriptors |
 
+Flag `loginAsAdmin()` — prefer the least-privileged role from the table above that still exercises the behaviour under test, since admin masks RBAC regressions and doesn't reflect real usage. Admin is acceptable only when the test genuinely requires it.
+
 Prefer named convenience methods (`loginAsPlatformEngineer`, `loginAsT1Analyst`) over `loginAsSecurityRole('platform_engineer')` for commonly used roles.
 
 ### Tags
 
 Verify the test is tagged for the correct deployment targets. Tags must reflect what the test actually covers — stateful-only, serverless-only, or both. Flag missing tags or tags that don't match the test's actual scope. Available stateful: `tags.stateful.classic`. Available serverless tiers: `security.complete`, `security.essentials`, `security.ease`, `security.all`.
+
+**Choosing serverless tiers.** Default to `security.complete` for functionality that is available across tiers — the common case. Use `security.essentials` or `security.ease` only when the test covers behaviour specific to that tier: a feature that is or isn't available there, or that behaves differently. Don't blanket-tag every tier "to be safe" — pick the narrowest set that's still correct, since each extra tier tag spins up another CI run. Combine multiple serverless tiers only when the feature is genuinely exercised across them. (See `docs/extend/testing/deployment-tags.md`.)
 
 ### API services reuse
 
