@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { WorkflowExecutionAuthorizationError } from '@kbn/discoveries/impl/attack_discovery/generation/assert_authorized_to_execute_workflows';
 
 import { resolveConnectorDetails } from '../../helpers/resolve_connector_details';
 import { resolveDefaultConnectorId } from '../../helpers/resolve_default_connector_id';
@@ -74,6 +75,7 @@ describe('getRunStepDefinition', () => {
       actions: {
         getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
       },
+      security: { authz: {} },
     },
   });
 
@@ -318,6 +320,7 @@ describe('getRunStepDefinition', () => {
         attack_discoveries: handoverDiscoveries,
         discovery_count: 1,
         execution_uuid: 'test-execution-uuid',
+        status: 'completed',
       });
     });
 
@@ -396,6 +399,7 @@ describe('getRunStepDefinition', () => {
         attack_discoveries: null,
         discovery_count: 0,
         execution_uuid: 'test-execution-uuid',
+        status: 'completed',
       });
     });
   });
@@ -408,7 +412,17 @@ describe('getRunStepDefinition', () => {
 
       const result = await stepDefinition.handler(syncMockContext as never);
 
-      expect(result.output).toEqual({ execution_uuid: 'test-execution-uuid' });
+      expect(result.output).toEqual({ execution_uuid: 'test-execution-uuid', status: 'pending' });
+    });
+
+    it('returns status pending when the pipeline exceeds the soft deadline', async () => {
+      mockExecuteGenerationWorkflow.mockReturnValue(new Promise(() => {}));
+
+      const stepDefinition = getStepDefinition();
+
+      const result = await stepDefinition.handler(syncMockContext as never);
+
+      expect(result.output?.status).toBe('pending');
     });
 
     it('omits attack_discoveries when the pipeline exceeds the soft deadline', async () => {
@@ -440,7 +454,16 @@ describe('getRunStepDefinition', () => {
 
       expect(result.output).toEqual({
         execution_uuid: 'test-execution-uuid',
+        status: 'pending',
       });
+    });
+
+    it('returns status pending in async mode', async () => {
+      const stepDefinition = getStepDefinition();
+
+      const result = await stepDefinition.handler(asyncMockContext as never);
+
+      expect(result.output?.status).toBe('pending');
     });
 
     it('does not await executeGenerationWorkflow', async () => {
@@ -675,6 +698,7 @@ describe('getRunStepDefinition', () => {
         attack_discoveries: handoverDiscoveries,
         discovery_count: 1,
         execution_uuid: 'test-execution-uuid',
+        status: 'completed',
       });
     });
   });
@@ -700,6 +724,18 @@ describe('getRunStepDefinition', () => {
 
       expect(result.error).toBeDefined();
       expect(result.error?.message).toBe('Connector not found');
+    });
+
+    it('returns an error when the caller is unauthorized to execute workflows (backstop)', async () => {
+      mockExecuteGenerationWorkflow.mockRejectedValue(
+        new WorkflowExecutionAuthorizationError(['workflowsManagement:execute'])
+      );
+
+      const stepDefinition = getStepDefinition();
+
+      const result = await stepDefinition.handler(syncMockContext as never);
+
+      expect(result.error?.message).toContain('Unauthorized to execute Attack Discovery workflows');
     });
   });
 });

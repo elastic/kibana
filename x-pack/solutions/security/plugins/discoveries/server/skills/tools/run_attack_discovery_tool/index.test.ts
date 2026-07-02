@@ -10,6 +10,7 @@ import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { WorkflowExecutionAuthorizationError } from '@kbn/discoveries/impl/attack_discovery/generation/assert_authorized_to_execute_workflows';
 
 import { RUN_ATTACK_DISCOVERY_TOOL_ID, getRunAttackDiscoveryTool } from '.';
 
@@ -41,6 +42,7 @@ const buildToolDeps = () => ({
           .mockResolvedValue({ get: jest.fn().mockResolvedValue({}) }),
       },
       inference: { getConnectorById: jest.fn() },
+      security: { authz: {} },
     } as unknown,
   }),
   logger: loggingSystemMock.createLogger(),
@@ -52,7 +54,7 @@ const buildContext = (overrides: Partial<ToolHandlerContext> = {}): ToolHandlerC
   callContext: { callSource: 'agent', toolCallId: 'test-tool-call-id', toolId: 'test-tool-id' },
   esClient: elasticsearchClientMock.createScopedClusterClient(),
   events: {} as never,
-  filestore: {} as never,
+  experimentalFeatures: {} as never,
   logger: loggingSystemMock.createLogger(),
   modelProvider: { getDefaultModel: mockGetDefaultModel } as never,
   prompts: {} as never,
@@ -62,6 +64,7 @@ const buildContext = (overrides: Partial<ToolHandlerContext> = {}): ToolHandlerC
   runner: {} as never,
   savedObjectsClient: {} as never,
   skills: {} as never,
+  skillsStore: {} as never,
   spaceId: 'default',
   stateManager: {} as never,
   toolManager: {} as never,
@@ -209,6 +212,7 @@ describe('getRunAttackDiscoveryTool', () => {
       alerts_context_count: 7,
       discovery_count: 3,
       execution_uuid: 'gen-uuid',
+      status: 'completed',
     });
   });
 
@@ -221,6 +225,7 @@ describe('getRunAttackDiscoveryTool', () => {
       alerts_context_count: 0,
       attack_discoveries: null,
       discovery_count: 0,
+      status: 'completed',
     });
   });
 
@@ -240,7 +245,10 @@ describe('getRunAttackDiscoveryTool', () => {
       throw new Error('expected standard tool result, received prompt');
     }
 
-    expect(result.results[0].data).toMatchObject({ execution_uuid: expect.any(String) });
+    expect(result.results[0].data).toMatchObject({
+      execution_uuid: expect.any(String),
+      status: 'pending',
+    });
     expect(result.results[0].data).not.toHaveProperty('attack_discoveries');
 
     jest.useRealTimers();
@@ -254,7 +262,7 @@ describe('getRunAttackDiscoveryTool', () => {
 
     const result = await invokeHandler({ mode: 'async' });
 
-    expect(result.data).toMatchObject({ execution_uuid: expect.any(String) });
+    expect(result.data).toMatchObject({ execution_uuid: expect.any(String), status: 'pending' });
 
     resolvePipeline?.(validationSucceededOutcome);
   });
@@ -279,5 +287,25 @@ describe('getRunAttackDiscoveryTool', () => {
     const result = await invokeHandler({});
 
     expect(result.type).toBe(ToolResultType.error);
+  });
+
+  it('returns an error result when unauthorized to execute workflows (sync mode)', async () => {
+    mockExecuteGenerationWorkflow.mockRejectedValue(
+      new WorkflowExecutionAuthorizationError(['workflowsManagement:execute'])
+    );
+
+    const result = await invokeHandler({});
+
+    expect(result.type).toBe(ToolResultType.error);
+  });
+
+  it('does not surface attack discoveries when unauthorized to execute workflows (sync mode)', async () => {
+    mockExecuteGenerationWorkflow.mockRejectedValue(
+      new WorkflowExecutionAuthorizationError(['workflowsManagement:execute'])
+    );
+
+    const result = await invokeHandler({});
+
+    expect(result.data).not.toHaveProperty('attack_discoveries');
   });
 });

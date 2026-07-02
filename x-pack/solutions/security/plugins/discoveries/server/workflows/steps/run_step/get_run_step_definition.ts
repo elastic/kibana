@@ -125,6 +125,7 @@ export const getRunStepDefinition = ({
           alertsIndexPattern: '.alerts-security.alerts-default',
           analytics,
           apiConfig,
+          authz: pluginsStart.security.authz,
           checkIntegrity:
             workflowsManagementApi != null
               ? async ({ logger: checkLogger, spaceId }: { logger: Logger; spaceId: string }) => {
@@ -171,6 +172,7 @@ export const getRunStepDefinition = ({
           return {
             output: {
               execution_uuid: executionUuid,
+              status: 'pending' as const,
             },
           };
         }
@@ -210,6 +212,7 @@ export const getRunStepDefinition = ({
           return {
             output: {
               execution_uuid: executionUuid,
+              status: 'pending' as const,
             },
           };
         }
@@ -240,6 +243,7 @@ export const getRunStepDefinition = ({
               }>,
               discovery_count: validationResult.generatedCount,
               execution_uuid: generationResult.executionUuid,
+              status: 'completed' as const,
             },
           };
         }
@@ -252,7 +256,8 @@ export const getRunStepDefinition = ({
             attack_discoveries: null,
             discovery_count: 0,
             execution_uuid: executionUuid,
-          },
+            status: 'completed' as const,
+``          },
         };
       } catch (error) {
         context.logger.error(
