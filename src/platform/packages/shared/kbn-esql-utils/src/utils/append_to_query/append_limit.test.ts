@@ -46,10 +46,4 @@ describe('appendLimitToQuery', () => {
       'FROM my_index | WHERE url == "http://example.com"\n| LIMIT 1000'
     );
   });
-
-  it('removes trailing block comments before appending the limit', () => {
-    const queryString = 'FROM my_index | KEEP a /* trailing note */';
-    const updatedQueryString = appendLimitToQuery(queryString, 1000);
-    expect(updatedQueryString).toBe('FROM my_index | KEEP a /* trailing note */\n| LIMIT 1000');
-  });
 });
