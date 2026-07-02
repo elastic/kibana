@@ -334,6 +334,49 @@ describe('ConversationClient', () => {
     });
   });
 
+  describe('findBySource', () => {
+    it('finds a conversation by first-class source in the current space', async () => {
+      const document = createConversationDocument();
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [document],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [document],
+          },
+        });
+
+      const result = await client.findBySource({
+        type: 'slack',
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+
+      expect(result?.id).toBe('conversation-1');
+      expect(mockEsClient.search).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                expect.any(Object),
+                { term: { 'source.type': 'slack' } },
+                {
+                  term: {
+                    'source.external_conversation_id':
+                      'team:T123/channel:C123/thread:1712345678.000100',
+                  },
+                },
+              ],
+            },
+          },
+        })
+      );
+    });
+  });
+
   describe('update', () => {
     it('remains owner-only by default for public conversations', async () => {
       mockEsClient.search.mockResolvedValue({

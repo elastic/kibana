@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
-import { ExecutionStatus } from '@kbn/agent-builder-common';
+import { ExecutionStatus, isRequestAbortedError } from '@kbn/agent-builder-common';
 import { createAgentExecutionClient, type AgentExecutionClient } from '../persistence';
 import {
   handleAgentExecution,
@@ -17,6 +17,8 @@ import {
   type AgentExecutionDeps,
 } from '../execution_runner';
 import { AbortMonitor } from './abort_monitor';
+import { deliverCallback } from '../callback_delivery';
+import { buildChatResponseFromEvents } from '../utils/chat_response';
 
 export interface TaskHandlerDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
@@ -84,24 +86,41 @@ class TaskHandlerImpl implements TaskHandler {
       });
 
       // 5. Subscribe, collect, and write events to the execution document
-      await collectAndWriteEvents({
+      const events = await collectAndWriteEvents({
         events$,
         execution,
         executionClient,
         logger: this.logger,
       });
 
+      await this.deliverSuccessCallbackIfConfigured({ execution, events });
+
       // 6. Mark as completed
       await executionClient.updateStatus(executionId, ExecutionStatus.completed);
     } catch (error) {
-      this.logger.error(`Execution ${executionId} failed: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Execution ${executionId} failed: ${message}`);
 
       try {
-        await executionClient.updateStatus(
-          executionId,
-          ExecutionStatus.failed,
-          serializeExecutionError(error)
-        );
+        let serializedError = serializeExecutionError(error);
+        let terminalStatus = isRequestAbortedError(error)
+          ? ExecutionStatus.aborted
+          : ExecutionStatus.failed;
+        try {
+          await this.deliverErrorCallbackIfConfigured({
+            execution,
+            error: serializedError,
+            status: terminalStatus,
+          });
+        } catch (callbackError) {
+          serializedError = serializeExecutionError(callbackError);
+          terminalStatus = ExecutionStatus.failed;
+        }
+        if (terminalStatus === ExecutionStatus.aborted) {
+          await executionClient.updateStatus(executionId, ExecutionStatus.aborted);
+        } else {
+          await executionClient.updateStatus(executionId, ExecutionStatus.failed, serializedError);
+        }
       } catch (statusError) {
         this.logger.error(
           `Failed to update status for execution ${executionId}: ${statusError.message}`
@@ -121,6 +140,56 @@ class TaskHandlerImpl implements TaskHandler {
     return createAgentExecutionClient({
       logger: this.logger.get('execution-client'),
       esClient: this.deps.elasticsearch.client.asInternalUser,
+    });
+  }
+
+  private async deliverSuccessCallbackIfConfigured({
+    execution,
+    events,
+  }: {
+    execution: Awaited<ReturnType<AgentExecutionClient['get']>>;
+    events: Parameters<typeof buildChatResponseFromEvents>[0];
+  }): Promise<void> {
+    if (!execution?.metadata?.callback_url || !execution.metadata.callback_signing_secret) {
+      return;
+    }
+
+    await deliverCallback({
+      url: execution.metadata.callback_url,
+      secret: execution.metadata.callback_signing_secret,
+      payload: {
+        execution_id: execution.executionId,
+        status: ExecutionStatus.completed,
+        response: buildChatResponseFromEvents(events),
+      },
+    });
+  }
+
+  private async deliverErrorCallbackIfConfigured({
+    execution,
+    error,
+    status,
+  }: {
+    execution: Awaited<ReturnType<AgentExecutionClient['get']>>;
+    error: ReturnType<typeof serializeExecutionError>;
+    status: ExecutionStatus.failed | ExecutionStatus.aborted;
+  }): Promise<void> {
+    if (!execution?.metadata?.callback_url || !execution.metadata.callback_signing_secret) {
+      return;
+    }
+
+    const conversationId =
+      execution.executionMode === 'conversation' ? execution.agentParams.conversationId : undefined;
+
+    await deliverCallback({
+      url: execution.metadata.callback_url,
+      secret: execution.metadata.callback_signing_secret,
+      payload: {
+        execution_id: execution.executionId,
+        ...(conversationId ? { conversation_id: conversationId } : {}),
+        status,
+        error,
+      },
     });
   }
 }

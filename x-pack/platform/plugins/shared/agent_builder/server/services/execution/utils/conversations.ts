@@ -11,6 +11,7 @@ import { of, forkJoin, switchMap } from 'rxjs';
 import type {
   Conversation,
   ConversationAccessControl,
+  ConversationSource,
   RoundCompleteEvent,
   ConversationAction,
 } from '@kbn/agent-builder-common';
@@ -27,7 +28,7 @@ export const createConversation$ = ({
   title$,
   roundCompletedEvents$,
 }: {
-  conversation: Pick<Conversation, 'id' | 'agent_id' | 'access_control'>;
+  conversation: Pick<Conversation, 'id' | 'agent_id' | 'access_control' | 'source'>;
   conversationClient: ConversationClient;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
@@ -42,6 +43,7 @@ export const createConversation$ = ({
         title,
         agent_id: conversation.agent_id,
         access_control: conversation.access_control,
+        source: conversation.source,
         state: roundCompletedEvent.data.conversation_state,
         status: roundCompletedEvent.data.round.status,
         read: false,
@@ -144,17 +146,19 @@ export const getConversation = async ({
   autoCreateConversationWithId = false,
   conversationClient,
   accessControl,
+  source,
 }: {
   agentId: string;
   conversationId: string | undefined;
   autoCreateConversationWithId?: boolean;
   conversationClient: ConversationClient;
   accessControl?: ConversationAccessControl;
+  source?: ConversationSource;
 }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
     return {
-      ...placeholderConversation({ agentId, accessControl }),
+      ...placeholderConversation({ agentId, accessControl, source }),
       operation: 'CREATE',
     };
   }
@@ -176,7 +180,7 @@ export const getConversation = async ({
     };
   } else {
     return {
-      ...placeholderConversation({ conversationId, agentId, accessControl }),
+      ...placeholderConversation({ conversationId, agentId, accessControl, source }),
       operation: 'CREATE',
     };
   }
@@ -186,10 +190,12 @@ export const placeholderConversation = ({
   agentId,
   conversationId,
   accessControl,
+  source,
 }: {
   agentId: string;
   conversationId?: string;
   accessControl?: ConversationAccessControl;
+  source?: ConversationSource;
 }): Conversation => {
   return {
     id: conversationId ?? uuidv4(),
@@ -197,6 +203,7 @@ export const placeholderConversation = ({
     agent_id: agentId,
     access_control: accessControl ?? getDefaultConversationAccessControl(),
     rounds: [],
+    ...(source ? { source } : {}),
     updated_at: new Date().toISOString(),
     created_at: new Date().toISOString(),
     user: {

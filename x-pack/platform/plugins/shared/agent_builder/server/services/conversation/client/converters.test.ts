@@ -489,6 +489,21 @@ describe('conversation model converters', () => {
         access_mode: ConversationAccessControlMode.Public,
       });
     });
+
+    it('deserializes first-class source', () => {
+      const serialized = documentBase();
+      serialized._source!.source = {
+        type: 'slack',
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      };
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.source).toEqual({
+        type: 'slack',
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+    });
   });
 
   describe('toEs', () => {
@@ -675,6 +690,21 @@ describe('conversation model converters', () => {
         access_mode: ConversationAccessControlMode.Public,
       });
     });
+
+    it('serializes first-class source', () => {
+      const conversation = conversationBase();
+      conversation.source = {
+        type: 'slack',
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      };
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.source).toEqual({
+        type: 'slack',
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+    });
   });
 
   describe('createRequestToEs', () => {
@@ -751,6 +781,30 @@ describe('conversation model converters', () => {
 
       expect(serialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Public,
+      });
+    });
+
+    it('serializes first-class source when creating a conversation', () => {
+      const conversation = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [],
+        source: {
+          type: 'slack',
+          external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+        },
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.source).toEqual({
+        type: 'slack',
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       });
     });
   });
