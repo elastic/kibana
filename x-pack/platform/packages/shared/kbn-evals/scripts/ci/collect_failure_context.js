@@ -11,6 +11,7 @@ const {
   MAX_LOG_EXCERPT_CHARS,
   failureLogMetadataKey,
   truncateText,
+  redactSecrets,
 } = require('./failure_context_helpers');
 
 function getMetadata(key) {
@@ -35,9 +36,8 @@ function collectFailureContext({ suiteId, suiteName, failingProjects, buildId, b
   const models = {};
 
   for (const project of failingProjects) {
-    const logExcerpt = truncateText(
-      getMetadata(failureLogMetadataKey(suiteId, project)),
-      MAX_LOG_EXCERPT_CHARS
+    const logExcerpt = redactSecrets(
+      truncateText(getMetadata(failureLogMetadataKey(suiteId, project)), MAX_LOG_EXCERPT_CHARS)
     );
     models[project] = logExcerpt ? { logExcerpt } : {};
   }

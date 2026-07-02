@@ -27,6 +27,7 @@ Rules:
 - Quote "error" verbatim from the excerpts; do not invent errors, file names, line numbers, or causes.
 - Set "location" only if the excerpts show it; otherwise use an empty string.
 - Keep "rootCause" to one short sentence plus one short action.
+- Never reproduce secrets: if a line contains an API key, token, password, or other credential, replace that value with [REDACTED].
 - If the excerpts show no clear error, return {"groups": []}.
 - Output valid JSON only: no prose before or after, no comments, no trailing commas, no code fences.`;
 
@@ -49,6 +50,34 @@ function truncateText(text, maxChars) {
     return value;
   }
   return value.slice(value.length - maxChars);
+}
+
+const REDACTED = '[REDACTED]';
+
+const SECRET_PATTERNS = [
+  // `Authorization: Bearer <token>` / bare `Bearer <token>`
+  [/\bBearer\s+[A-Za-z0-9._~+/-]+=*/gi, REDACTED],
+  // JWTs (three base64url segments separated by dots)
+  [/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, REDACTED],
+  // OpenAI / LiteLLM-style keys (`sk-...`, `sk-proj-...`)
+  [/\bsk-[A-Za-z0-9_-]{16,}/g, REDACTED],
+  // AWS access key ids
+  [/\bAKIA[0-9A-Z]{16}\b/g, REDACTED],
+  // URLs with inline credentials: keep `scheme://`, drop `user:pass@`
+  [/(\b[a-z][a-z0-9+.-]*:\/\/)[^\s/:@]+:[^\s/@]+@/gi, `$1${REDACTED}@`],
+  // Sensitive `key: value` / `key=value` assignments: keep the key + separator
+  [
+    /\b(api[_-]?key|apikey|secret|token|password|passwd|pwd)\b(\s*[:=]\s*)("[^"]*"|'[^']*'|`[^`]*`|\S+)/gi,
+    `$1$2${REDACTED}`,
+  ],
+];
+
+function redactSecrets(text) {
+  let value = String(text ?? '');
+  for (const [pattern, replacement] of SECRET_PATTERNS) {
+    value = value.replace(pattern, replacement);
+  }
+  return value;
 }
 
 function truncateContextJson(context, maxBytes = MAX_CONTEXT_JSON_BYTES) {
@@ -361,6 +390,7 @@ module.exports = {
   resolveTriageModelId,
   failureLogMetadataKey,
   truncateText,
+  redactSecrets,
   truncateContextJson,
   buildTriageUserPrompt,
   buildWeeklyRollupUserPrompt,
