@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test, tags } from '@kbn/scout';
+import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import fs from 'fs';
 import os from 'os';
@@ -31,7 +31,7 @@ const queryName2 = 'Query # 2';
 const queryName3 = 'CSV Export Test';
 let downloadedFilePath: string | null = null;
 
-test.describe('Discover app', { tag: tags.stateful.classic }, () => {
+test.describe('Discover app', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.uiSettings.update(defaultSettings);
   });
@@ -41,7 +41,7 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
     await uiSettings.set({
       'timepicker:timeDefaults': TIME_DEFAULTS,
     });
-    await pageObjects.discover.goto();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
   });
 
   test.afterEach(async () => {
@@ -141,7 +141,7 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
       from: EMPTY_TIME_RANGE_START,
       to: EMPTY_TIME_RANGE_END,
     });
-    await pageObjects.discover.goto();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
     await expect(page.testSubj.locator('discoverNoResultsTimefilter')).toBeVisible();
   });
 
@@ -154,7 +154,7 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
       from: EMPTY_TIME_RANGE_START,
       to: EMPTY_TIME_RANGE_END,
     });
-    await pageObjects.discover.goto();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
 
     await expect(page.testSubj.locator('discoverNoResultsTimefilter')).toBeHidden();

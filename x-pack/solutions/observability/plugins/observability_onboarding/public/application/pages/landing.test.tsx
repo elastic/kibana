@@ -17,6 +17,7 @@ import { MemoryRouter, useLocation } from 'react-router-dom';
 import { CompatRouter } from 'react-router-dom-v5-compat';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
+import { createCallApi } from '../../services/rest/create_call_api';
 import { ObservabilityOnboardingFlow } from '../observability_onboarding_flow';
 import { LandingPage } from './landing';
 
@@ -89,9 +90,11 @@ const renderWithFlag = (enabled: boolean, initialPath: string = '/') => {
   coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled : fallback
   );
+  createCallApi(coreStart);
+  const services = createObservabilityServices(coreStart);
   return render(
     <I18nProvider>
-      <KibanaContextProvider services={coreStart}>
+      <KibanaContextProvider services={services}>
         <MemoryRouter initialEntries={[initialPath]}>
           <CompatRouter>
             <LandingPage />
@@ -107,9 +110,11 @@ const renderLandingWithRouter = (enabled: boolean) => {
   coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled : fallback
   );
+  createCallApi(coreStart);
+  const services = createObservabilityServices(coreStart);
   return render(
     <I18nProvider>
-      <KibanaContextProvider services={coreStart}>
+      <KibanaContextProvider services={services}>
         <MemoryRouter initialEntries={['/']}>
           <CompatRouter>
             <LandingPage />
@@ -126,6 +131,7 @@ const renderFlowAtPath = (enabled: boolean, path: string) => {
   coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled : fallback
   );
+  createCallApi(coreStart);
   const services = createObservabilityServices(coreStart);
   return render(
     <I18nProvider>
@@ -151,6 +157,12 @@ describe('LandingPage', () => {
 
   it('does not render the V2 layout when the flag is off', () => {
     expect(renderWithFlag(false).queryByTestId('addDataPageV2')).not.toBeInTheDocument();
+  });
+
+  it('renders the API endpoints section in the V2 layout', () => {
+    expect(
+      renderWithFlag(true).queryByTestId('observabilityOnboardingApiEndpointTab-elasticsearch')
+    ).toBeInTheDocument();
   });
 });
 

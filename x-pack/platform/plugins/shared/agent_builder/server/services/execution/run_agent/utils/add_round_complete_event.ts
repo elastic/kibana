@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { OperatorFunction } from 'rxjs';
-import { map, merge, share, toArray } from 'rxjs';
+import { map, merge, shareReplay, toArray } from 'rxjs';
 import type {
   RoundCompleteEvent,
   RoundInput,
@@ -119,7 +119,7 @@ export const addRoundCompleteEvent = ({
   getWorkspaceId?: () => string | undefined;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
-    const shared$ = events$.pipe(share());
+    const shared$ = events$.pipe(shareReplay());
     return merge(
       shared$,
       shared$.pipe(
