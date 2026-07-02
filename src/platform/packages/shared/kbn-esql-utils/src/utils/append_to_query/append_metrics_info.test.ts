@@ -37,21 +37,21 @@ describe('buildMetricsInfoQuery', () => {
     expect(buildMetricsInfoQuery('TS INDEX', [])).toBe(`TS INDEX\n | METRICS_INFO`);
   });
 
-  it('add WHERE dimension filter when multiple dimension names', () => {
+  it('adds pre-METRICS_INFO IS NOT NULL filter when multiple dimension names', () => {
     expect(buildMetricsInfoQuery('TS INDEX', ['environment', 'station.name'])).toBe(
-      `TS INDEX\n| WHERE TO_STRING(\`environment\`) IS NOT NULL AND TO_STRING(\`station.name\`) IS NOT NULL | METRICS_INFO | WHERE MV_CONTAINS(dimension_fields, "environment") AND MV_CONTAINS(dimension_fields, "station.name")`
+      `TS INDEX\n| WHERE TO_STRING(\`environment\`) IS NOT NULL AND TO_STRING(\`station.name\`) IS NOT NULL | METRICS_INFO`
     );
   });
 
-  it('adds a single MV_CONTAINS membership filter for one dimension', () => {
+  it('adds pre-METRICS_INFO IS NOT NULL filter for a single dimension', () => {
     expect(buildMetricsInfoQuery('TS INDEX', ['environment'])).toBe(
-      `TS INDEX\n| WHERE TO_STRING(\`environment\`) IS NOT NULL | METRICS_INFO | WHERE MV_CONTAINS(dimension_fields, "environment")`
+      `TS INDEX\n| WHERE TO_STRING(\`environment\`) IS NOT NULL | METRICS_INFO`
     );
   });
 
-  it('escapes quotes and backslashes in the MV_CONTAINS string literal', () => {
+  it('escapes dimension identifiers in the pre-METRICS_INFO IS NOT NULL filter', () => {
     expect(buildMetricsInfoQuery('TS INDEX', ['weird"name', 'back\\slash'])).toBe(
-      `TS INDEX\n| WHERE TO_STRING(\`weird"name\`) IS NOT NULL AND TO_STRING(\`back\\slash\`) IS NOT NULL | METRICS_INFO | WHERE MV_CONTAINS(dimension_fields, "weird\\"name") AND MV_CONTAINS(dimension_fields, "back\\\\slash")`
+      `TS INDEX\n| WHERE TO_STRING(\`weird"name\`) IS NOT NULL AND TO_STRING(\`back\\slash\`) IS NOT NULL | METRICS_INFO`
     );
   });
 
@@ -59,7 +59,35 @@ describe('buildMetricsInfoQuery', () => {
     expect(
       buildMetricsInfoQuery('TS INDEX | WHERE region == eu', ['environment', 'station.name'])
     ).toBe(
-      'TS INDEX | WHERE region == eu\n| WHERE TO_STRING(`environment`) IS NOT NULL AND TO_STRING(`station.name`) IS NOT NULL | METRICS_INFO | WHERE MV_CONTAINS(dimension_fields, "environment") AND MV_CONTAINS(dimension_fields, "station.name")'
+      'TS INDEX | WHERE region == eu\n| WHERE TO_STRING(`environment`) IS NOT NULL AND TO_STRING(`station.name`) IS NOT NULL | METRICS_INFO'
+    );
+  });
+
+  it('appends a caller-supplied postFilter after METRICS_INFO', () => {
+    expect(
+      buildMetricsInfoQuery('TS INDEX', undefined, 'MV_CONTAINS(dimension_fields, "environment")')
+    ).toBe(`TS INDEX\n | METRICS_INFO | WHERE MV_CONTAINS(dimension_fields, "environment")`);
+  });
+
+  it('applies both the pre-METRICS_INFO dimension filter and the postFilter', () => {
+    expect(
+      buildMetricsInfoQuery(
+        'TS INDEX',
+        ['environment'],
+        'MV_CONTAINS(dimension_fields, "environment")'
+      )
+    ).toBe(
+      `TS INDEX\n| WHERE TO_STRING(\`environment\`) IS NOT NULL | METRICS_INFO | WHERE MV_CONTAINS(dimension_fields, "environment")`
+    );
+  });
+
+  it('ignores an empty postFilter', () => {
+    expect(buildMetricsInfoQuery('TS INDEX', [], '')).toBe(`TS INDEX\n | METRICS_INFO`);
+  });
+
+  it('places the postFilter before LIMIT', () => {
+    expect(buildMetricsInfoQuery('TS INDEX | LIMIT 10', undefined, 'foo == 1')).toBe(
+      `TS INDEX\n | METRICS_INFO | WHERE foo == 1 | LIMIT 10`
     );
   });
 
@@ -92,7 +120,7 @@ describe('buildMetricsInfoQuery', () => {
         ['environment', 'station.name']
       )
     ).toBe(
-      `FROM metrics-* | WHERE timestamp > now - 1h\n| WHERE TO_STRING(\`environment\`) IS NOT NULL AND TO_STRING(\`station.name\`) IS NOT NULL | METRICS_INFO | WHERE MV_CONTAINS(dimension_fields, "environment") AND MV_CONTAINS(dimension_fields, "station.name") | LIMIT 100`
+      `FROM metrics-* | WHERE timestamp > now - 1h\n| WHERE TO_STRING(\`environment\`) IS NOT NULL AND TO_STRING(\`station.name\`) IS NOT NULL | METRICS_INFO | LIMIT 100`
     );
   });
 });
