@@ -28,6 +28,8 @@ export function registerGetAllDataSources(router: IRouter): void {
     router.handleLegacyErrors(async (context, _request, response) => {
       const { client } = (await context.core).elasticsearch;
       const dataSourcesClient = new DataSourcesClient(client.asCurrentUser);
+      // ES redacts secret/credential fields before returning them here, replacing
+      // their values with "::es_redacted::", so it's safe to pass the body through as-is.
       const body = await dataSourcesClient.getAll();
       return response.ok({ body });
     })

@@ -34,6 +34,8 @@ export function registerGetDataSourceRoute(router: IRouter): void {
       const { id } = request.params;
       const { client } = (await context.core).elasticsearch;
       const dataSourcesClient = new DataSourcesClient(client.asCurrentUser);
+      // ES redacts secret/credential fields before returning them here, replacing
+      // their values with "::es_redacted::", so it's safe to pass the body through as-is.
       const body = await dataSourcesClient.get(id);
       return response.ok({ body });
     })

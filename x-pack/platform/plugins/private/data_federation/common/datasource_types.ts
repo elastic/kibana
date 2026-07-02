@@ -19,6 +19,8 @@ export interface DataSourceCommon<T extends DataSourceType, S extends {}> {
 
 export type DataSource = S3DataSource | GCSDataSource | AzureDataSource;
 
+// When read back from ES, the secret fields below come redacted (value "::es_redacted::")
+// rather than in plain text, so routes can return them to the caller as-is.
 export type DataSourceWithSecrets =
   | S3DataSourceWithSecrets
   | GCSDataSourceWithSecrets
