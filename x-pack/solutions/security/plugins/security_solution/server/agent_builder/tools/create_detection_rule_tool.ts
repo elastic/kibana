@@ -27,6 +27,7 @@ import {
   SECURITY_RULE_ATTACHMENT_ID,
 } from '../../../common/constants';
 import { getBuildAgent } from '../../lib/detection_engine/ai_rule_creation/agent';
+import { calculateRulesAuthz } from '../../lib/detection_engine/rule_management/authz';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import type { RuleAttachmentData } from '../attachments/rule';
 
@@ -152,7 +153,9 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
     schema: createDetectionRuleSchema,
     tags: ['security', 'detection', 'rule-creation', 'siem'],
     availability: {
-      cacheMode: 'space',
+      // 'none': availability depends on the caller's rule-edit capability, so a per-space
+      // cache would leak one user's result to everyone in the space.
+      cacheMode: 'none',
       handler: async ({ request }) => {
         if (!experimentalFeatures?.aiRuleCreationEnabled) {
           return {
@@ -173,6 +176,19 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
         }
 
         const [coreStart] = await core.getStartServices();
+
+        // Mirror the UI gate (RULES_UI_EDIT_PRIVILEGE): the DE routes enforce authz on save,
+        // but without this a user with agent-builder access and no rule-edit rights could
+        // still invoke generation from chat.
+        const { canEditRules } = await calculateRulesAuthz({ coreStart, request });
+        if (!canEditRules) {
+          return {
+            status: 'unavailable',
+            reason:
+              'The current user does not have the privilege to create or edit detection rules.',
+          };
+        }
+
         const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
         const uiSettingsClient = coreStart.uiSettings.asScopedToClient(savedObjectsClient);
         const isEsqlEnabled = await uiSettingsClient.get<boolean>(ENABLE_ESQL);
