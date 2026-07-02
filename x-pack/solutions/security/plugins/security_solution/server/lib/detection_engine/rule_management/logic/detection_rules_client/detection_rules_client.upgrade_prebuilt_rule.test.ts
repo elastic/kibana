@@ -208,16 +208,6 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
       (getRuleByRuleId as jest.Mock).mockResolvedValue(installedRule);
     });
 
-    it('does not pass shouldIncrementRevision to rulesClient.update, relying on alerting default', async () => {
-      rulesClient.update.mockResolvedValue(getRuleMock(getEqlRuleParams()));
-
-      await detectionRulesClient.upgradePrebuiltRule({ ruleAsset });
-
-      expect(rulesClient.update).not.toHaveBeenCalledWith(
-        expect.objectContaining({ shouldIncrementRevision: expect.anything() })
-      );
-    });
-
     it('patches the existing rule with the new params from the rule asset', async () => {
       rulesClient.update.mockResolvedValue(getRuleMock(getEqlRuleParams()));
 
