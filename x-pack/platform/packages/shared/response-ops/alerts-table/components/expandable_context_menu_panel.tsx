@@ -43,7 +43,7 @@ export const ExpandableContextMenuPanel = ({
   return (
     <ExpandableContextMenuPanelProvider value={{ openPanel, closePanel }}>
       {panelContent ? (
-        panelContent
+        <EuiContextMenuPanel>{panelContent}</EuiContextMenuPanel>
       ) : (
         <EuiContextMenuPanel items={items} data-test-subj={testSubj} />
       )}

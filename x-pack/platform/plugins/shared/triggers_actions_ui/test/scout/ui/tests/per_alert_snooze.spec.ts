@@ -5,9 +5,32 @@
  * 2.0.
  */
 
+import type { KibanaRole } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
+
+/**
+ * Least-privilege role for the snooze flow: alerting `all` on stack rule types
+ * (snooze/unsnooze is a write on the rule instance) plus read on the alerts
+ * index so the rule-details alerts table renders. Deliberately avoids admin so
+ * the suite catches permission regressions for non-admin editors/operators.
+ * Mirrors `alerts_and_actions_role` from the FTR config, minus `actions` (this
+ * rule has no connectors).
+ */
+const SNOOZE_ALERT_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['.alerts-*'], privileges: ['read'] }],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: { stackAlerts: ['all'] },
+      spaces: ['*'],
+    },
+  ],
+};
 
 /**
  * Scout UI tests for the per-alert snooze feature.
@@ -96,7 +119,7 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
   });
 
   test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginWithCustomRole(SNOOZE_ALERT_ROLE);
   });
 
   test.afterAll(async ({ apiServices, esClient }) => {
@@ -128,22 +151,15 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
     await pageObjects.ruleDetailsPage.expectAlertsTabLoaded();
     await pageObjects.ruleDetailsPage.alertsTable.ensureGridVisible();
 
-    // Open the "More actions" kebab menu for the first alert row.
-    await page.testSubj.locator('alertsTableRowActionMore').click();
-    const actionsMenu = page.testSubj.locator('alertsTableActionsMenu');
-    await expect(actionsMenu).toBeVisible();
-
-    // Click the Snooze item — this swaps the menu for the inline snooze panel.
-    await page.testSubj.click('snooze-alert-action-snooze');
-    const snoozePanel = page.testSubj.locator('alertSnoozePanel');
-    await expect(snoozePanel).toBeVisible();
+    // Open the row action menu and swap it for the inline snooze panel.
+    await pageObjects.ruleDetailsPage.openAlertSnoozePanel();
+    await expect(page.testSubj.locator('alertSnoozePanel')).toBeVisible();
 
     // Select the "1h" preset from the Quick snooze duration button group.
-    const durationOptions = page.testSubj.locator('quickSnoozeDurationOptions');
-    await durationOptions.getByText('1h').click();
+    await page.testSubj.locator('quickSnoozeDurationOptions').getByText('1h').click();
 
     // Apply the snooze — triggers an API call followed by a table refresh.
-    await page.testSubj.click('alertSnoozeApplyButton');
+    await pageObjects.ruleDetailsPage.applySnooze();
 
     // After the API call resolves and the table re-fetches snooze state, the
     // bell badge should be visible in the status cell of the row.
@@ -169,23 +185,16 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
     await pageObjects.ruleDetailsPage.expectAlertsTabLoaded();
     await pageObjects.ruleDetailsPage.alertsTable.ensureGridVisible();
 
-    await page.testSubj.locator('alertsTableRowActionMore').click();
-    await expect(page.testSubj.locator('alertsTableActionsMenu')).toBeVisible();
-
-    await page.testSubj.click('snooze-alert-action-snooze');
+    await pageObjects.ruleDetailsPage.openAlertSnoozePanel();
     await expect(page.testSubj.locator('alertSnoozePanel')).toBeVisible();
 
-    // Switch to the "Condition based" tab.
-    await page.testSubj.locator('alertSnoozeTabs').getByText('Condition based').click();
+    await pageObjects.ruleDetailsPage.openConditionBasedSnoozeTab();
 
-    // Add a severity_equals condition (no snapshot fetch required, just existence check).
-    await page.testSubj.click('addDataCondition');
-    await page.testSubj.locator('dataConditionType-dc-1').selectOption('severity_equals');
-    // Value defaults to "critical" — confirm immediately.
-    await page.testSubj.click('confirmDataCondition-dc-1');
+    // Add a severity_equals condition (value defaults to "critical").
+    await pageObjects.ruleDetailsPage.addSeverityDataCondition(1);
 
     // Apply — conditionOperator defaults to 'any' with a single condition.
-    await page.testSubj.click('alertSnoozeApplyButton');
+    await pageObjects.ruleDetailsPage.applySnooze();
 
     await expect(page.testSubj.locator('alertSnoozedBadge')).toBeVisible({
       timeout: ASYNC_TIMEOUT,
@@ -208,29 +217,20 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
     await pageObjects.ruleDetailsPage.expectAlertsTabLoaded();
     await pageObjects.ruleDetailsPage.alertsTable.ensureGridVisible();
 
-    await page.testSubj.locator('alertsTableRowActionMore').click();
-    await expect(page.testSubj.locator('alertsTableActionsMenu')).toBeVisible();
-
-    await page.testSubj.click('snooze-alert-action-snooze');
+    await pageObjects.ruleDetailsPage.openAlertSnoozePanel();
     await expect(page.testSubj.locator('alertSnoozePanel')).toBeVisible();
 
-    await page.testSubj.locator('alertSnoozeTabs').getByText('Condition based').click();
+    await pageObjects.ruleDetailsPage.openConditionBasedSnoozeTab();
 
     // First condition: severity_equals critical (default value).
-    await page.testSubj.click('addDataCondition');
-    await page.testSubj.locator('dataConditionType-dc-1').selectOption('severity_equals');
-    await page.testSubj.click('confirmDataCondition-dc-1');
-
+    await pageObjects.ruleDetailsPage.addSeverityDataCondition(1);
     // Second condition: severity_equals high.
-    await page.testSubj.click('addDataCondition');
-    await page.testSubj.locator('dataConditionType-dc-2').selectOption('severity_equals');
-    await page.testSubj.locator('dataConditionValue-dc-2').selectOption('high');
-    await page.testSubj.click('confirmDataCondition-dc-2');
+    await pageObjects.ruleDetailsPage.addSeverityDataCondition(2, 'high');
 
     // Toggle the logical operator from 'any' to 'all'.
     await page.testSubj.click('logicalOperator');
 
-    await page.testSubj.click('alertSnoozeApplyButton');
+    await pageObjects.ruleDetailsPage.applySnooze();
 
     await expect(page.testSubj.locator('alertSnoozedBadge')).toBeVisible({
       timeout: ASYNC_TIMEOUT,
@@ -253,24 +253,19 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
     await pageObjects.ruleDetailsPage.expectAlertsTabLoaded();
     await pageObjects.ruleDetailsPage.alertsTable.ensureGridVisible();
 
-    await page.testSubj.locator('alertsTableRowActionMore').click();
-    await expect(page.testSubj.locator('alertsTableActionsMenu')).toBeVisible();
-
-    await page.testSubj.click('snooze-alert-action-snooze');
+    await pageObjects.ruleDetailsPage.openAlertSnoozePanel();
     await expect(page.testSubj.locator('alertSnoozePanel')).toBeVisible();
 
-    await page.testSubj.locator('alertSnoozeTabs').getByText('Condition based').click();
+    await pageObjects.ruleDetailsPage.openConditionBasedSnoozeTab();
 
     // Add a time condition and confirm with the default 1 h duration.
     await page.testSubj.click('addTimeCondition');
     await page.testSubj.click('confirmTimeCondition');
 
     // Add a data condition: severity_equals critical.
-    await page.testSubj.click('addDataCondition');
-    await page.testSubj.locator('dataConditionType-dc-1').selectOption('severity_equals');
-    await page.testSubj.click('confirmDataCondition-dc-1');
+    await pageObjects.ruleDetailsPage.addSeverityDataCondition(1);
 
-    await page.testSubj.click('alertSnoozeApplyButton');
+    await pageObjects.ruleDetailsPage.applySnooze();
 
     await expect(page.testSubj.locator('alertSnoozedBadge')).toBeVisible({
       timeout: ASYNC_TIMEOUT,
@@ -302,11 +297,7 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
     });
 
     // Open the actions menu — the Unsnooze item appears for a snoozed alert.
-    await page.testSubj.locator('alertsTableRowActionMore').click();
-    const actionsMenu = page.testSubj.locator('alertsTableActionsMenu');
-    await expect(actionsMenu).toBeVisible();
-
-    await page.testSubj.click('snooze-alert-action-unsnooze');
+    await pageObjects.ruleDetailsPage.unsnoozeAlert();
 
     // After the unsnooze API call resolves and the table re-fetches snooze state,
     // the badge should no longer be visible.
