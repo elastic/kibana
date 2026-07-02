@@ -11,9 +11,7 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG } from '@kbn/as-code-shared-schemas';
-import { apiTest, COMMON_HEADERS, KBN_ARCHIVES } from '../fixtures';
-
-const SEARCH_ENDPOINT = 'api/dashboards';
+import { apiTest, COMMON_HEADERS, DASHBOARD_API_PATH, KBN_ARCHIVES } from '../fixtures';
 
 const buildUrl = (params: Record<string, string | string[] | number | undefined>) => {
   const searchParams = new URLSearchParams();
@@ -29,7 +27,7 @@ const buildUrl = (params: Record<string, string | string[] | number | undefined>
     }
   }
   const query = searchParams.toString();
-  return query ? `${SEARCH_ENDPOINT}?${query}` : SEARCH_ENDPOINT;
+  return query ? `${DASHBOARD_API_PATH}?${query}` : DASHBOARD_API_PATH;
 };
 
 // TODO: Delete this file after asCode.useGaSchemas feature flag is flipped to true and the legacy search endpoint schemas are no longer used
@@ -62,7 +60,7 @@ apiTest.describe('dashboards - search - LEGACY', { tag: tags.deploymentAgnostic 
   });
 
   apiTest('should retrieve a paginated list of dashboards', async ({ apiClient }) => {
-    const response = await apiClient.get(SEARCH_ENDPOINT, {
+    const response = await apiClient.get(DASHBOARD_API_PATH, {
       headers: {
         ...COMMON_HEADERS,
         ...viewerCredentials.apiKeyHeader,
