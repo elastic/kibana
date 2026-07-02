@@ -182,7 +182,7 @@ export class LensApp {
    */
   async activateLayerTab(index: number) {
     const tabsLocator = this.page.locator('[data-test-subj^="unifiedTabs_tab_"]');
-    await expect.poll(async () => (await tabsLocator.count()) > index).toBe(true);
+    await expect.poll(async () => await tabsLocator.count()).toBeGreaterThan(index);
 
     const tabs = await tabsLocator.all();
     const tab = tabs[index];
@@ -220,7 +220,7 @@ export class LensApp {
 
   async setTermsNumberOfValues(value: number) {
     const input = this.page.locator('input[data-test-subj="indexPattern-terms-values"]');
-    await expect(input).toBeVisible();
+    await input.waitFor({ state: 'visible' });
     await input.click();
     await input.fill(`${value}`);
     await this.page.keyboard.press('Tab');
@@ -270,7 +270,7 @@ export class LensApp {
     const editorsLocator = this.page.testSubj.locator(
       `lns-layerPanel-${layerIndex} > ${dimension}`
     );
-    await expect.poll(async () => (await editorsLocator.count()) > dimensionIndex).toBe(true);
+    await expect.poll(async () => await editorsLocator.count()).toBeGreaterThan(dimensionIndex);
 
     const editors = await editorsLocator.all();
     const editor = editors[dimensionIndex];
@@ -351,10 +351,10 @@ export class LensApp {
    */
   async waitForVisualization(chartSubj = 'lnsVisualizationContainer') {
     const workspace = this.page.testSubj.locator('lnsWorkspace');
-    await workspace.waitFor({ state: 'visible', timeout: 30_000 });
+    await workspace.waitFor({ state: 'visible' });
 
     const container = workspace.getByTestId(chartSubj);
-    await container.waitFor({ state: 'visible', timeout: 30_000 });
+    await container.waitFor({ state: 'visible' });
 
     let prevCount: string | null = null;
     await expect
@@ -373,7 +373,7 @@ export class LensApp {
           prevCount = count;
           return false;
         },
-        { timeout: 30_000, intervals: [500] }
+        { intervals: [500] }
       )
       .toBe(true);
   }
@@ -397,7 +397,7 @@ export class LensApp {
   /** Returns visible labels for all dimension triggers inside a dimension panel. */
   private async getDimensionTriggersTexts(dimension: string): Promise<string[]> {
     const triggersLocator = this.page.testSubj.locator(`${dimension} > lns-dimensionTrigger`);
-    await expect.poll(async () => (await triggersLocator.count()) > 0).toBe(true);
+    await expect.poll(async () => await triggersLocator.count()).toBeGreaterThan(0);
 
     const triggers = await triggersLocator.all();
     const texts: string[] = [];
@@ -447,7 +447,7 @@ export class LensApp {
    */
   async hoverOverDimensionButton(index = 0) {
     const triggersLocator = this.getDimensionTriggerLocator();
-    await expect.poll(async () => (await triggersLocator.count()) > index).toBe(true);
+    await expect.poll(async () => await triggersLocator.count()).toBeGreaterThan(index);
 
     const triggers = await triggersLocator.all();
     const trigger = triggers[index];
