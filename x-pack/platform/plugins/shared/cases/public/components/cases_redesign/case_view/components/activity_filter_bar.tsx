@@ -24,50 +24,47 @@ interface ActivityFilterBarProps {
   onUserActionsActivityChanged: (params: UserActivityParams) => void;
 }
 
-export const ActivityFilterBar: React.FC<ActivityFilterBarProps> = ({
-  params,
-  userActionsStats,
-  isLoading,
-  onUserActionsActivityChanged,
-}) => {
-  const handleFilterChange = (type: UserActivityFilter) => {
-    onUserActionsActivityChanged({ ...params, type });
-  };
+export const ActivityFilterBar: React.FC<ActivityFilterBarProps> = React.memo(
+  ({ params, userActionsStats, isLoading, onUserActionsActivityChanged }) => {
+    const handleFilterChange = (type: UserActivityFilter) => {
+      onUserActionsActivityChanged({ ...params, type });
+    };
 
-  const handleOrderChange = (sortOrder: UserActivitySortOrder) => {
-    onUserActionsActivityChanged({ ...params, sortOrder });
-  };
+    const handleOrderChange = (sortOrder: UserActivitySortOrder) => {
+      onUserActionsActivityChanged({ ...params, sortOrder });
+    };
 
-  return (
-    <EuiFlexGroup
-      gutterSize="s"
-      justifyContent="spaceBetween"
-      data-test-subj="case-view-activity-filter-bar"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <FilterActivity
-              type={params.type}
-              onFilterChange={handleFilterChange}
-              userActionsStats={userActionsStats}
-              isLoading={isLoading}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <SortActivity
-              sortOrder={params.sortOrder}
-              onOrderChange={handleOrderChange}
-              isLoading={isLoading}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <SidebarToggleButton />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+    return (
+      <EuiFlexGroup
+        gutterSize="s"
+        justifyContent="spaceBetween"
+        data-test-subj="case-view-activity-filter-bar"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <FilterActivity
+                type={params.type}
+                onFilterChange={handleFilterChange}
+                userActionsStats={userActionsStats}
+                isLoading={isLoading}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SortActivity
+                sortOrder={params.sortOrder}
+                onOrderChange={handleOrderChange}
+                isLoading={isLoading}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <SidebarToggleButton />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
 
 ActivityFilterBar.displayName = 'ActivityFilterBar';

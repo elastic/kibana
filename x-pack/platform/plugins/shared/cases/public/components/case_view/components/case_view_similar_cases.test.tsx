@@ -44,10 +44,10 @@ describe('Case View Page similar cases tab', () => {
   });
 
   it('renders the sidebar toggle button when redesign is enabled', async () => {
-    const { KibanaServices } = jest.requireMock('../../../common/lib/kibana') as {
-      KibanaServices: { getConfig: jest.Mock };
+    const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana') as {
+      useCasesConfig: jest.Mock;
     };
-    KibanaServices.getConfig.mockReturnValue({ casesRedesign: { details: true } });
+    useCasesConfig.mockReturnValue({ detailsRedesignEnabled: true });
 
     renderWithTestingProviders(<CaseViewSimilarCases caseData={caseData} />);
 

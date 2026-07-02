@@ -115,7 +115,7 @@ export const CaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiFlexItem grow={6}>
+      <EuiFlexItem grow={false}>
         <ActivityFilterBar
           params={userActivityQueryParams}
           userActionsStats={userActionsStats}
