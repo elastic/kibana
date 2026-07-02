@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
+import { isValidElement } from 'react';
+import { render } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import { EuiSwitch, EuiToolTip, type EuiThemeComputed } from '@elastic/eui';
 import {
   createReturnFocus,
   getDisplayedItemsAllowedAmount,
@@ -441,6 +444,35 @@ describe('utils', () => {
       expect(result.toolTipProps?.title).toBe('Title');
     });
 
+    it('should disable the item when isLoading is true', () => {
+      const item = { ...baseItem, isLoading: true };
+      const result = mapAppMenuItemToPanelItem(item);
+
+      expect(result.disabled).toBe(true);
+    });
+
+    it('should disable the item when isLoading is true even if disableButton is false', () => {
+      const item = { ...baseItem, isLoading: true, disableButton: false };
+      const result = mapAppMenuItemToPanelItem(item);
+
+      expect(result.disabled).toBe(true);
+    });
+
+    it('should render a spinner icon instead of the iconType when isLoading is true', () => {
+      const item = { ...baseItem, iconType: 'gear' as const, isLoading: true, testId: 'my-item' };
+      const { icon } = mapAppMenuItemToPanelItem(item);
+
+      expect(icon).not.toBe('gear');
+      expect(isValidElement(icon)).toBe(true);
+
+      if (!isValidElement(icon)) {
+        throw new Error('Expected icon to be a React element');
+      }
+
+      const { getByTestId } = render(icon);
+      expect(getByTestId('my-item-loading')).toBeInTheDocument();
+    });
+
     it('should set danger color when isDestructive is true', () => {
       const result = mapAppMenuItemToPanelItem({ ...baseItem, isDestructive: true });
       expect(result.color).toBe('danger');
@@ -520,6 +552,22 @@ describe('utils', () => {
       const result = getPopoverSwitchItems({ switchConfig: defaultSwitch });
 
       expect(result[1].renderItem).toBeDefined();
+    });
+
+    it('should not wrap the switch in a tooltip when no tooltip is provided', () => {
+      const result = getPopoverSwitchItems({ switchConfig: defaultSwitch });
+      const element = result[1].renderItem?.() as ReactElement;
+
+      expect(element.type).toBe(EuiSwitch);
+    });
+
+    it('should wrap the switch in a tooltip when tooltipContent is provided', () => {
+      const result = getPopoverSwitchItems({
+        switchConfig: { ...defaultSwitch, tooltipContent: 'Save changes to enable' },
+      });
+      const element = result[1].renderItem?.() as ReactElement;
+
+      expect(element.type).toBe(EuiToolTip);
     });
   });
 
