@@ -3,7 +3,7 @@ pageLoadAssetSize:
   advancedSettings: 6196
   agentBuilder: 52317
   agentBuilderDashboards: 7786
-  agentBuilderPlatform: 15544
+  agentBuilderPlatform: 18924
   agentBuilderWorkflows: 24405
   agentContextLayer: 8828
   aiAssistantManagementSelection: 11569
@@ -65,7 +65,7 @@ pageLoadAssetSize:
   exploratoryView: 45042
   expressionGauge: 15748
   expressionHeatmap: 20303
-  expressionLegacyMetricVis: 11834
+  expressionLegacyMetricVis: 13800
   expressionMetricVis: 18100
   expressionPartitionVis: 29826
   expressions: 104955
@@ -93,7 +93,7 @@ pageLoadAssetSize:
   inference: 10368
   inferenceWorkflows: 25000
   infra: 56302
-  ingestHub: 14788
+  ingestHub: 12730
   ingestPipelines: 17866
   inputControlVis: 7638
   inspectComponent: 4590
