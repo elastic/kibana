@@ -107,4 +107,20 @@ describe('AlertAnalysisWorkflowPage', () => {
       });
     });
   });
+
+  it('disables saving when the minimum confidence score field is cleared', async () => {
+    renderComponent();
+
+    const minThresholdField = await screen.findByTestId('alertAnalysisWorkflowMinThreshold');
+    fireEvent.change(minThresholdField, { target: { value: '' } });
+
+    const saveButton = await screen.findByTestId('alertAnalysisWorkflowSaveButton');
+    expect(saveButton).toBeDisabled();
+
+    fireEvent.click(saveButton);
+    expect(coreStart.http.fetch).not.toHaveBeenCalledWith(
+      ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
+      expect.objectContaining({ method: 'PUT' })
+    );
+  });
 });

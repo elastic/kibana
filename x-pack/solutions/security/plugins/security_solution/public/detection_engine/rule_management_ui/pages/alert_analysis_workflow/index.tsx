@@ -119,8 +119,10 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
   const isWorkflowEnabled = pageSettings?.workflowEnabled ?? true;
   const isThresholdRangeInvalid =
     pageSettings !== undefined &&
-    pageSettings.autoCloseConfidenceScoreMinThreshold >=
-      pageSettings.autoCloseConfidenceScoreMaxThreshold;
+    !(
+      pageSettings.autoCloseConfidenceScoreMinThreshold <
+      pageSettings.autoCloseConfidenceScoreMaxThreshold
+    );
   const thresholdRangeErrorMessage = i18n.translate(
     'xpack.securitySolution.alertAnalysisWorkflow.thresholdRangeErrorMessage',
     {
