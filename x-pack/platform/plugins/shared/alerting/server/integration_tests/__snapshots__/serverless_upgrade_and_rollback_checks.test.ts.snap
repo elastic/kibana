@@ -5880,13 +5880,24 @@ exports[`Serverless upgrade and rollback checks detect param changes to review f
 Object {
   "$defs": Object {
     "__schema0": Object {
-      "$ref": "#/$defs/__schema1",
-    },
-    "__schema1": Object {
       "minLength": 1,
       "type": "string",
     },
+    "__schema1": Object {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer",
+    },
     "__schema2": Object {
+      "enum": Array [
+        "low",
+        "medium",
+        "high",
+        "critical",
+      ],
+      "type": "string",
+    },
+    "__schema3": Object {
       "additionalProperties": Object {
         "properties": Object {
           "field": Object {
@@ -5911,7 +5922,7 @@ Object {
       "properties": Object {},
       "type": "object",
     },
-    "__schema3": Object {
+    "__schema4": Object {
       "properties": Object {
         "scriptId": Object {
           "type": "string",
@@ -5926,746 +5937,6 @@ Object {
         },
       },
       "type": "object",
-    },
-    "__schema4": Object {
-      "type": "string",
-    },
-  },
-  "allOf": Array [
-    Object {
-      "properties": Object {
-        "author": Object {
-          "items": Object {
-            "type": "string",
-          },
-          "type": "array",
-        },
-        "buildingBlockType": Object {
-          "type": "string",
-        },
-        "description": Object {
-          "minLength": 1,
-          "type": "string",
-        },
-        "exceptionsList": Object {
-          "items": Object {
-            "properties": Object {
-              "id": Object {
-                "minLength": 1,
-                "type": "string",
-              },
-              "list_id": Object {
-                "minLength": 1,
-                "type": "string",
-              },
-              "namespace_type": Object {
-                "enum": Array [
-                  "agnostic",
-                  "single",
-                ],
-                "type": "string",
-              },
-              "type": Object {
-                "enum": Array [
-                  "detection",
-                  "rule_default",
-                  "endpoint",
-                  "endpoint_trusted_apps",
-                  "endpoint_trusted_devices",
-                  "endpoint_events",
-                  "endpoint_host_isolation_exceptions",
-                  "endpoint_blocklists",
-                ],
-                "type": "string",
-              },
-            },
-            "required": Array [
-              "id",
-              "list_id",
-              "type",
-              "namespace_type",
-            ],
-            "type": "object",
-          },
-          "type": "array",
-        },
-        "falsePositives": Object {
-          "items": Object {
-            "type": "string",
-          },
-          "type": "array",
-        },
-        "from": Object {
-          "type": "string",
-        },
-        "immutable": Object {
-          "type": "boolean",
-        },
-        "investigationFields": Object {
-          "anyOf": Array [
-            Object {
-              "properties": Object {
-                "field_names": Object {
-                  "items": Object {
-                    "$ref": "#/$defs/__schema0",
-                  },
-                  "minItems": 1,
-                  "type": "array",
-                },
-              },
-              "required": Array [
-                "field_names",
-              ],
-              "type": "object",
-            },
-            Object {
-              "items": Object {
-                "type": "string",
-              },
-              "type": "array",
-            },
-          ],
-        },
-        "license": Object {
-          "type": "string",
-        },
-        "maxSignals": Object {
-          "default": 100,
-          "maximum": 9007199254740991,
-          "minimum": 1,
-          "type": "integer",
-        },
-        "meta": Object {
-          "additionalProperties": Object {},
-          "properties": Object {},
-          "type": "object",
-        },
-        "namespace": Object {
-          "type": "string",
-        },
-        "note": Object {
-          "type": "string",
-        },
-        "outputIndex": Object {
-          "type": "string",
-        },
-        "references": Object {
-          "items": Object {
-            "type": "string",
-          },
-          "type": "array",
-        },
-        "relatedIntegrations": Object {
-          "items": Object {
-            "properties": Object {
-              "integration": Object {
-                "$ref": "#/$defs/__schema1",
-              },
-              "package": Object {
-                "$ref": "#/$defs/__schema0",
-              },
-              "version": Object {
-                "$ref": "#/$defs/__schema0",
-              },
-            },
-            "required": Array [
-              "package",
-              "version",
-            ],
-            "type": "object",
-          },
-          "type": "array",
-        },
-        "requiredFields": Object {
-          "items": Object {
-            "properties": Object {
-              "ecs": Object {
-                "type": "boolean",
-              },
-              "name": Object {
-                "minLength": 1,
-                "type": "string",
-              },
-              "type": Object {
-                "minLength": 1,
-                "type": "string",
-              },
-            },
-            "required": Array [
-              "name",
-              "type",
-              "ecs",
-            ],
-            "type": "object",
-          },
-          "type": "array",
-        },
-        "responseActions": Object {
-          "items": Object {
-            "oneOf": Array [
-              Object {
-                "properties": Object {
-                  "actionTypeId": Object {
-                    "const": ".osquery",
-                    "type": "string",
-                  },
-                  "params": Object {
-                    "properties": Object {
-                      "ecsMapping": Object {
-                        "$ref": "#/$defs/__schema2",
-                      },
-                      "packId": Object {
-                        "type": "string",
-                      },
-                      "queries": Object {
-                        "items": Object {
-                          "properties": Object {
-                            "ecs_mapping": Object {
-                              "$ref": "#/$defs/__schema2",
-                            },
-                            "id": Object {
-                              "type": "string",
-                            },
-                            "platform": Object {
-                              "type": "string",
-                            },
-                            "query": Object {
-                              "type": "string",
-                            },
-                            "removed": Object {
-                              "type": "boolean",
-                            },
-                            "snapshot": Object {
-                              "type": "boolean",
-                            },
-                            "version": Object {
-                              "type": "string",
-                            },
-                          },
-                          "required": Array [
-                            "id",
-                            "query",
-                          ],
-                          "type": "object",
-                        },
-                        "type": "array",
-                      },
-                      "query": Object {
-                        "type": "string",
-                      },
-                      "savedQueryId": Object {
-                        "type": "string",
-                      },
-                      "timeout": Object {
-                        "type": "number",
-                      },
-                    },
-                    "type": "object",
-                  },
-                },
-                "required": Array [
-                  "actionTypeId",
-                  "params",
-                ],
-                "type": "object",
-              },
-              Object {
-                "properties": Object {
-                  "actionTypeId": Object {
-                    "const": ".endpoint",
-                    "type": "string",
-                  },
-                  "params": Object {
-                    "anyOf": Array [
-                      Object {
-                        "properties": Object {
-                          "command": Object {
-                            "const": "isolate",
-                            "type": "string",
-                          },
-                          "comment": Object {
-                            "type": "string",
-                          },
-                        },
-                        "required": Array [
-                          "command",
-                        ],
-                        "type": "object",
-                      },
-                      Object {
-                        "properties": Object {
-                          "command": Object {
-                            "enum": Array [
-                              "kill-process",
-                              "suspend-process",
-                            ],
-                            "type": "string",
-                          },
-                          "comment": Object {
-                            "type": "string",
-                          },
-                          "config": Object {
-                            "properties": Object {
-                              "field": Object {
-                                "type": "string",
-                              },
-                              "overwrite": Object {
-                                "default": true,
-                                "type": "boolean",
-                              },
-                            },
-                            "required": Array [
-                              "field",
-                            ],
-                            "type": "object",
-                          },
-                        },
-                        "required": Array [
-                          "command",
-                          "config",
-                        ],
-                        "type": "object",
-                      },
-                      Object {
-                        "properties": Object {
-                          "command": Object {
-                            "const": "runscript",
-                            "type": "string",
-                          },
-                          "comment": Object {
-                            "type": "string",
-                          },
-                          "config": Object {
-                            "properties": Object {
-                              "linux": Object {
-                                "$ref": "#/$defs/__schema3",
-                              },
-                              "macos": Object {
-                                "$ref": "#/$defs/__schema3",
-                              },
-                              "windows": Object {
-                                "$ref": "#/$defs/__schema3",
-                              },
-                            },
-                            "type": "object",
-                          },
-                        },
-                        "required": Array [
-                          "command",
-                        ],
-                        "type": "object",
-                      },
-                    ],
-                  },
-                },
-                "required": Array [
-                  "actionTypeId",
-                  "params",
-                ],
-                "type": "object",
-              },
-            ],
-          },
-          "type": "array",
-        },
-        "riskScore": Object {
-          "maximum": 100,
-          "minimum": 0,
-          "type": "integer",
-        },
-        "riskScoreMapping": Object {
-          "items": Object {
-            "properties": Object {
-              "field": Object {
-                "type": "string",
-              },
-              "operator": Object {
-                "const": "equals",
-                "type": "string",
-              },
-              "risk_score": Object {
-                "maximum": 100,
-                "minimum": 0,
-                "type": "integer",
-              },
-              "value": Object {
-                "type": "string",
-              },
-            },
-            "required": Array [
-              "field",
-              "operator",
-              "value",
-            ],
-            "type": "object",
-          },
-          "type": "array",
-        },
-        "ruleId": Object {
-          "type": "string",
-        },
-        "ruleNameOverride": Object {
-          "type": "string",
-        },
-        "ruleSource": Object {
-          "oneOf": Array [
-            Object {
-              "properties": Object {
-                "customizedFields": Object {
-                  "items": Object {
-                    "properties": Object {
-                      "fieldName": Object {
-                        "type": "string",
-                      },
-                    },
-                    "required": Array [
-                      "fieldName",
-                    ],
-                    "type": "object",
-                  },
-                  "type": "array",
-                },
-                "hasBaseVersion": Object {
-                  "type": "boolean",
-                },
-                "isCustomized": Object {
-                  "type": "boolean",
-                },
-                "type": Object {
-                  "const": "external",
-                  "type": "string",
-                },
-              },
-              "required": Array [
-                "type",
-                "isCustomized",
-              ],
-              "type": "object",
-            },
-            Object {
-              "properties": Object {
-                "type": Object {
-                  "const": "internal",
-                  "type": "string",
-                },
-              },
-              "required": Array [
-                "type",
-              ],
-              "type": "object",
-            },
-          ],
-        },
-        "setup": Object {
-          "type": "string",
-        },
-        "severity": Object {
-          "enum": Array [
-            "low",
-            "medium",
-            "high",
-            "critical",
-          ],
-          "type": "string",
-        },
-        "severityMapping": Object {
-          "items": Object {
-            "properties": Object {
-              "field": Object {
-                "type": "string",
-              },
-              "operator": Object {
-                "const": "equals",
-                "type": "string",
-              },
-              "severity": Object {
-                "enum": Array [
-                  "low",
-                  "medium",
-                  "high",
-                  "critical",
-                ],
-                "type": "string",
-              },
-              "value": Object {
-                "type": "string",
-              },
-            },
-            "required": Array [
-              "field",
-              "operator",
-              "severity",
-              "value",
-            ],
-            "type": "object",
-          },
-          "type": "array",
-        },
-        "threat": Object {
-          "items": Object {
-            "properties": Object {
-              "framework": Object {
-                "type": "string",
-              },
-              "tactic": Object {
-                "properties": Object {
-                  "id": Object {
-                    "type": "string",
-                  },
-                  "name": Object {
-                    "type": "string",
-                  },
-                  "reference": Object {
-                    "type": "string",
-                  },
-                },
-                "required": Array [
-                  "id",
-                  "name",
-                  "reference",
-                ],
-                "type": "object",
-              },
-              "technique": Object {
-                "items": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "string",
-                    },
-                    "name": Object {
-                      "type": "string",
-                    },
-                    "reference": Object {
-                      "type": "string",
-                    },
-                    "subtechnique": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "id": Object {
-                            "type": "string",
-                          },
-                          "name": Object {
-                            "type": "string",
-                          },
-                          "reference": Object {
-                            "type": "string",
-                          },
-                        },
-                        "required": Array [
-                          "id",
-                          "name",
-                          "reference",
-                        ],
-                        "type": "object",
-                      },
-                      "type": "array",
-                    },
-                  },
-                  "required": Array [
-                    "id",
-                    "name",
-                    "reference",
-                  ],
-                  "type": "object",
-                },
-                "type": "array",
-              },
-            },
-            "required": Array [
-              "framework",
-              "tactic",
-            ],
-            "type": "object",
-          },
-          "type": "array",
-        },
-        "timelineId": Object {
-          "type": "string",
-        },
-        "timelineTitle": Object {
-          "type": "string",
-        },
-        "timestampOverride": Object {
-          "type": "string",
-        },
-        "timestampOverrideFallbackDisabled": Object {
-          "type": "boolean",
-        },
-        "to": Object {
-          "type": "string",
-        },
-        "version": Object {
-          "maximum": 9007199254740991,
-          "minimum": 1,
-          "type": "integer",
-        },
-      },
-      "required": Array [
-        "author",
-        "description",
-        "falsePositives",
-        "from",
-        "ruleId",
-        "immutable",
-        "outputIndex",
-        "riskScore",
-        "riskScoreMapping",
-        "severity",
-        "severityMapping",
-        "threat",
-        "to",
-        "references",
-        "version",
-        "exceptionsList",
-      ],
-      "type": "object",
-    },
-    Object {
-      "properties": Object {
-        "alertSuppression": Object {
-          "properties": Object {
-            "duration": Object {
-              "properties": Object {
-                "unit": Object {
-                  "enum": Array [
-                    "s",
-                    "m",
-                    "h",
-                  ],
-                  "type": "string",
-                },
-                "value": Object {
-                  "maximum": 9007199254740991,
-                  "minimum": 1,
-                  "type": "integer",
-                },
-              },
-              "required": Array [
-                "value",
-                "unit",
-              ],
-              "type": "object",
-            },
-            "groupBy": Object {
-              "items": Object {
-                "$ref": "#/$defs/__schema4",
-              },
-              "maxItems": 3,
-              "minItems": 1,
-              "type": "array",
-            },
-            "missingFieldsStrategy": Object {
-              "enum": Array [
-                "doNotSuppress",
-                "suppress",
-              ],
-              "type": "string",
-            },
-          },
-          "required": Array [
-            "groupBy",
-          ],
-          "type": "object",
-        },
-        "dataViewId": Object {
-          "type": "string",
-        },
-        "eventCategoryOverride": Object {
-          "type": "string",
-        },
-        "filters": Object {
-          "items": Object {},
-          "type": "array",
-        },
-        "index": Object {
-          "items": Object {
-            "type": "string",
-          },
-          "type": "array",
-        },
-        "language": Object {
-          "const": "eql",
-          "type": "string",
-        },
-        "query": Object {
-          "type": "string",
-        },
-        "tiebreakerField": Object {
-          "type": "string",
-        },
-        "timestampField": Object {
-          "type": "string",
-        },
-        "type": Object {
-          "const": "eql",
-          "type": "string",
-        },
-      },
-      "required": Array [
-        "type",
-        "language",
-        "query",
-      ],
-      "type": "object",
-    },
-  ],
-}
-`;
-
-exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.indicatorRule 1`] = `
-Object {
-  "$defs": Object {
-    "__schema0": Object {
-      "$ref": "#/$defs/__schema1",
-    },
-    "__schema1": Object {
-      "minLength": 1,
-      "type": "string",
-    },
-    "__schema2": Object {
-      "additionalProperties": Object {
-        "properties": Object {
-          "field": Object {
-            "type": "string",
-          },
-          "value": Object {
-            "anyOf": Array [
-              Object {
-                "type": "string",
-              },
-              Object {
-                "items": Object {
-                  "type": "string",
-                },
-                "type": "array",
-              },
-            ],
-          },
-        },
-        "type": "object",
-      },
-      "properties": Object {},
-      "type": "object",
-    },
-    "__schema3": Object {
-      "properties": Object {
-        "scriptId": Object {
-          "type": "string",
-        },
-        "scriptInput": Object {
-          "type": "string",
-        },
-        "timeout": Object {
-          "maximum": 9007199254740991,
-          "minimum": -9007199254740991,
-          "type": "integer",
-        },
-      },
-      "type": "object",
-    },
-    "__schema4": Object {
-      "items": Object {},
-      "type": "array",
     },
     "__schema5": Object {
       "type": "string",
@@ -6799,7 +6070,7 @@ Object {
           "items": Object {
             "properties": Object {
               "integration": Object {
-                "$ref": "#/$defs/__schema1",
+                "$ref": "#/$defs/__schema0",
               },
               "package": Object {
                 "$ref": "#/$defs/__schema0",
@@ -6852,7 +6123,7 @@ Object {
                   "params": Object {
                     "properties": Object {
                       "ecsMapping": Object {
-                        "$ref": "#/$defs/__schema2",
+                        "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
                         "type": "string",
@@ -6861,7 +6132,7 @@ Object {
                         "items": Object {
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/$defs/__schema2",
+                              "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
                               "type": "string",
@@ -6978,13 +6249,13 @@ Object {
                           "config": Object {
                             "properties": Object {
                               "linux": Object {
-                                "$ref": "#/$defs/__schema3",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/$defs/__schema3",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/$defs/__schema3",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -7009,9 +6280,7 @@ Object {
           "type": "array",
         },
         "riskScore": Object {
-          "maximum": 100,
-          "minimum": 0,
-          "type": "integer",
+          "$ref": "#/$defs/__schema1",
         },
         "riskScoreMapping": Object {
           "items": Object {
@@ -7024,9 +6293,7 @@ Object {
                 "type": "string",
               },
               "risk_score": Object {
-                "maximum": 100,
-                "minimum": 0,
-                "type": "integer",
+                "$ref": "#/$defs/__schema1",
               },
               "value": Object {
                 "type": "string",
@@ -7100,13 +6367,7 @@ Object {
           "type": "string",
         },
         "severity": Object {
-          "enum": Array [
-            "low",
-            "medium",
-            "high",
-            "critical",
-          ],
-          "type": "string",
+          "$ref": "#/$defs/__schema2",
         },
         "severityMapping": Object {
           "items": Object {
@@ -7119,13 +6380,7 @@ Object {
                 "type": "string",
               },
               "severity": Object {
-                "enum": Array [
-                  "low",
-                  "medium",
-                  "high",
-                  "critical",
-                ],
-                "type": "string",
+                "$ref": "#/$defs/__schema2",
               },
               "value": Object {
                 "type": "string",
@@ -7307,16 +6562,15 @@ Object {
           ],
           "type": "object",
         },
-        "concurrentSearches": Object {
-          "maximum": 9007199254740991,
-          "minimum": 1,
-          "type": "integer",
-        },
         "dataViewId": Object {
           "type": "string",
         },
+        "eventCategoryOverride": Object {
+          "type": "string",
+        },
         "filters": Object {
-          "$ref": "#/$defs/__schema4",
+          "items": Object {},
+          "type": "array",
         },
         "index": Object {
           "items": Object {
@@ -7324,86 +6578,21 @@ Object {
           },
           "type": "array",
         },
-        "itemsPerSearch": Object {
-          "maximum": 9007199254740991,
-          "minimum": 1,
-          "type": "integer",
-        },
         "language": Object {
-          "enum": Array [
-            "kuery",
-            "lucene",
-          ],
+          "const": "eql",
           "type": "string",
         },
         "query": Object {
           "type": "string",
         },
-        "savedId": Object {
+        "tiebreakerField": Object {
           "type": "string",
         },
-        "threatFilters": Object {
-          "$ref": "#/$defs/__schema4",
-        },
-        "threatIndex": Object {
-          "items": Object {
-            "type": "string",
-          },
-          "type": "array",
-        },
-        "threatIndicatorPath": Object {
-          "type": "string",
-        },
-        "threatLanguage": Object {
-          "enum": Array [
-            "kuery",
-            "lucene",
-          ],
-          "type": "string",
-        },
-        "threatMapping": Object {
-          "items": Object {
-            "properties": Object {
-              "entries": Object {
-                "items": Object {
-                  "properties": Object {
-                    "field": Object {
-                      "$ref": "#/$defs/__schema0",
-                    },
-                    "negate": Object {
-                      "type": "boolean",
-                    },
-                    "type": Object {
-                      "const": "mapping",
-                      "type": "string",
-                    },
-                    "value": Object {
-                      "$ref": "#/$defs/__schema0",
-                    },
-                  },
-                  "required": Array [
-                    "field",
-                    "type",
-                    "value",
-                  ],
-                  "type": "object",
-                },
-                "type": "array",
-              },
-            },
-            "required": Array [
-              "entries",
-            ],
-            "type": "object",
-          },
-          "minItems": 1,
-          "type": "array",
-        },
-        "threatQuery": Object {
+        "timestampField": Object {
           "type": "string",
         },
         "type": Object {
-          "const": "threat_match",
+          "const": "eql",
           "type": "string",
         },
       },
@@ -7411,9 +6600,6 @@ Object {
         "type",
         "language",
         "query",
-        "threatQuery",
-        "threatMapping",
-        "threatIndex",
       ],
       "type": "object",
     },
@@ -7421,17 +6607,28 @@ Object {
 }
 `;
 
-exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.mlRule 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.indicatorRule 1`] = `
 Object {
   "$defs": Object {
     "__schema0": Object {
-      "$ref": "#/$defs/__schema1",
-    },
-    "__schema1": Object {
       "minLength": 1,
       "type": "string",
     },
+    "__schema1": Object {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer",
+    },
     "__schema2": Object {
+      "enum": Array [
+        "low",
+        "medium",
+        "high",
+        "critical",
+      ],
+      "type": "string",
+    },
+    "__schema3": Object {
       "additionalProperties": Object {
         "properties": Object {
           "field": Object {
@@ -7456,7 +6653,7 @@ Object {
       "properties": Object {},
       "type": "object",
     },
-    "__schema3": Object {
+    "__schema4": Object {
       "properties": Object {
         "scriptId": Object {
           "type": "string",
@@ -7472,7 +6669,52 @@ Object {
       },
       "type": "object",
     },
-    "__schema4": Object {
+    "__schema5": Object {
+      "enum": Array [
+        "kuery",
+        "lucene",
+      ],
+      "type": "string",
+    },
+    "__schema6": Object {
+      "items": Object {},
+      "type": "array",
+    },
+    "__schema7": Object {
+      "properties": Object {
+        "entries": Object {
+          "items": Object {
+            "properties": Object {
+              "field": Object {
+                "$ref": "#/$defs/__schema0",
+              },
+              "negate": Object {
+                "type": "boolean",
+              },
+              "type": Object {
+                "const": "mapping",
+                "type": "string",
+              },
+              "value": Object {
+                "$ref": "#/$defs/__schema0",
+              },
+            },
+            "required": Array [
+              "field",
+              "type",
+              "value",
+            ],
+            "type": "object",
+          },
+          "type": "array",
+        },
+      },
+      "required": Array [
+        "entries",
+      ],
+      "type": "object",
+    },
+    "__schema8": Object {
       "type": "string",
     },
   },
@@ -7604,7 +6846,7 @@ Object {
           "items": Object {
             "properties": Object {
               "integration": Object {
-                "$ref": "#/$defs/__schema1",
+                "$ref": "#/$defs/__schema0",
               },
               "package": Object {
                 "$ref": "#/$defs/__schema0",
@@ -7657,7 +6899,7 @@ Object {
                   "params": Object {
                     "properties": Object {
                       "ecsMapping": Object {
-                        "$ref": "#/$defs/__schema2",
+                        "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
                         "type": "string",
@@ -7666,7 +6908,7 @@ Object {
                         "items": Object {
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/$defs/__schema2",
+                              "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
                               "type": "string",
@@ -7783,13 +7025,13 @@ Object {
                           "config": Object {
                             "properties": Object {
                               "linux": Object {
-                                "$ref": "#/$defs/__schema3",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/$defs/__schema3",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/$defs/__schema3",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -7814,9 +7056,7 @@ Object {
           "type": "array",
         },
         "riskScore": Object {
-          "maximum": 100,
-          "minimum": 0,
-          "type": "integer",
+          "$ref": "#/$defs/__schema1",
         },
         "riskScoreMapping": Object {
           "items": Object {
@@ -7829,9 +7069,7 @@ Object {
                 "type": "string",
               },
               "risk_score": Object {
-                "maximum": 100,
-                "minimum": 0,
-                "type": "integer",
+                "$ref": "#/$defs/__schema1",
               },
               "value": Object {
                 "type": "string",
@@ -7905,13 +7143,7 @@ Object {
           "type": "string",
         },
         "severity": Object {
-          "enum": Array [
-            "low",
-            "medium",
-            "high",
-            "critical",
-          ],
-          "type": "string",
+          "$ref": "#/$defs/__schema2",
         },
         "severityMapping": Object {
           "items": Object {
@@ -7924,13 +7156,7 @@ Object {
                 "type": "string",
               },
               "severity": Object {
-                "enum": Array [
-                  "low",
-                  "medium",
-                  "high",
-                  "critical",
-                ],
-                "type": "string",
+                "$ref": "#/$defs/__schema2",
               },
               "value": Object {
                 "type": "string",
@@ -8093,7 +7319,768 @@ Object {
             },
             "groupBy": Object {
               "items": Object {
-                "$ref": "#/$defs/__schema4",
+                "$ref": "#/$defs/__schema8",
+              },
+              "maxItems": 3,
+              "minItems": 1,
+              "type": "array",
+            },
+            "missingFieldsStrategy": Object {
+              "enum": Array [
+                "doNotSuppress",
+                "suppress",
+              ],
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "groupBy",
+          ],
+          "type": "object",
+        },
+        "concurrentSearches": Object {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer",
+        },
+        "dataViewId": Object {
+          "type": "string",
+        },
+        "filters": Object {
+          "$ref": "#/$defs/__schema6",
+        },
+        "index": Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "itemsPerSearch": Object {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer",
+        },
+        "language": Object {
+          "$ref": "#/$defs/__schema5",
+        },
+        "query": Object {
+          "type": "string",
+        },
+        "savedId": Object {
+          "type": "string",
+        },
+        "threatFilters": Object {
+          "$ref": "#/$defs/__schema6",
+        },
+        "threatIndex": Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "threatIndicatorPath": Object {
+          "type": "string",
+        },
+        "threatLanguage": Object {
+          "$ref": "#/$defs/__schema5",
+        },
+        "threatMapping": Object {
+          "items": Object {
+            "$ref": "#/$defs/__schema7",
+          },
+          "minItems": 1,
+          "type": "array",
+        },
+        "threatQuery": Object {
+          "type": "string",
+        },
+        "type": Object {
+          "const": "threat_match",
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "type",
+        "language",
+        "query",
+        "threatQuery",
+        "threatMapping",
+        "threatIndex",
+      ],
+      "type": "object",
+    },
+  ],
+}
+`;
+
+exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.mlRule 1`] = `
+Object {
+  "$defs": Object {
+    "__schema0": Object {
+      "minLength": 1,
+      "type": "string",
+    },
+    "__schema1": Object {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer",
+    },
+    "__schema2": Object {
+      "enum": Array [
+        "low",
+        "medium",
+        "high",
+        "critical",
+      ],
+      "type": "string",
+    },
+    "__schema3": Object {
+      "additionalProperties": Object {
+        "properties": Object {
+          "field": Object {
+            "type": "string",
+          },
+          "value": Object {
+            "anyOf": Array [
+              Object {
+                "type": "string",
+              },
+              Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+            ],
+          },
+        },
+        "type": "object",
+      },
+      "properties": Object {},
+      "type": "object",
+    },
+    "__schema4": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "type": "string",
+        },
+        "scriptInput": Object {
+          "type": "string",
+        },
+        "timeout": Object {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+    "__schema5": Object {
+      "type": "string",
+    },
+  },
+  "allOf": Array [
+    Object {
+      "properties": Object {
+        "author": Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "buildingBlockType": Object {
+          "type": "string",
+        },
+        "description": Object {
+          "minLength": 1,
+          "type": "string",
+        },
+        "exceptionsList": Object {
+          "items": Object {
+            "properties": Object {
+              "id": Object {
+                "minLength": 1,
+                "type": "string",
+              },
+              "list_id": Object {
+                "minLength": 1,
+                "type": "string",
+              },
+              "namespace_type": Object {
+                "enum": Array [
+                  "agnostic",
+                  "single",
+                ],
+                "type": "string",
+              },
+              "type": Object {
+                "enum": Array [
+                  "detection",
+                  "rule_default",
+                  "endpoint",
+                  "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
+                  "endpoint_events",
+                  "endpoint_host_isolation_exceptions",
+                  "endpoint_blocklists",
+                ],
+                "type": "string",
+              },
+            },
+            "required": Array [
+              "id",
+              "list_id",
+              "type",
+              "namespace_type",
+            ],
+            "type": "object",
+          },
+          "type": "array",
+        },
+        "falsePositives": Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "from": Object {
+          "type": "string",
+        },
+        "immutable": Object {
+          "type": "boolean",
+        },
+        "investigationFields": Object {
+          "anyOf": Array [
+            Object {
+              "properties": Object {
+                "field_names": Object {
+                  "items": Object {
+                    "$ref": "#/$defs/__schema0",
+                  },
+                  "minItems": 1,
+                  "type": "array",
+                },
+              },
+              "required": Array [
+                "field_names",
+              ],
+              "type": "object",
+            },
+            Object {
+              "items": Object {
+                "type": "string",
+              },
+              "type": "array",
+            },
+          ],
+        },
+        "license": Object {
+          "type": "string",
+        },
+        "maxSignals": Object {
+          "default": 100,
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer",
+        },
+        "meta": Object {
+          "additionalProperties": Object {},
+          "properties": Object {},
+          "type": "object",
+        },
+        "namespace": Object {
+          "type": "string",
+        },
+        "note": Object {
+          "type": "string",
+        },
+        "outputIndex": Object {
+          "type": "string",
+        },
+        "references": Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "relatedIntegrations": Object {
+          "items": Object {
+            "properties": Object {
+              "integration": Object {
+                "$ref": "#/$defs/__schema0",
+              },
+              "package": Object {
+                "$ref": "#/$defs/__schema0",
+              },
+              "version": Object {
+                "$ref": "#/$defs/__schema0",
+              },
+            },
+            "required": Array [
+              "package",
+              "version",
+            ],
+            "type": "object",
+          },
+          "type": "array",
+        },
+        "requiredFields": Object {
+          "items": Object {
+            "properties": Object {
+              "ecs": Object {
+                "type": "boolean",
+              },
+              "name": Object {
+                "minLength": 1,
+                "type": "string",
+              },
+              "type": Object {
+                "minLength": 1,
+                "type": "string",
+              },
+            },
+            "required": Array [
+              "name",
+              "type",
+              "ecs",
+            ],
+            "type": "object",
+          },
+          "type": "array",
+        },
+        "responseActions": Object {
+          "items": Object {
+            "oneOf": Array [
+              Object {
+                "properties": Object {
+                  "actionTypeId": Object {
+                    "const": ".osquery",
+                    "type": "string",
+                  },
+                  "params": Object {
+                    "properties": Object {
+                      "ecsMapping": Object {
+                        "$ref": "#/$defs/__schema3",
+                      },
+                      "packId": Object {
+                        "type": "string",
+                      },
+                      "queries": Object {
+                        "items": Object {
+                          "properties": Object {
+                            "ecs_mapping": Object {
+                              "$ref": "#/$defs/__schema3",
+                            },
+                            "id": Object {
+                              "type": "string",
+                            },
+                            "platform": Object {
+                              "type": "string",
+                            },
+                            "query": Object {
+                              "type": "string",
+                            },
+                            "removed": Object {
+                              "type": "boolean",
+                            },
+                            "snapshot": Object {
+                              "type": "boolean",
+                            },
+                            "version": Object {
+                              "type": "string",
+                            },
+                          },
+                          "required": Array [
+                            "id",
+                            "query",
+                          ],
+                          "type": "object",
+                        },
+                        "type": "array",
+                      },
+                      "query": Object {
+                        "type": "string",
+                      },
+                      "savedQueryId": Object {
+                        "type": "string",
+                      },
+                      "timeout": Object {
+                        "type": "number",
+                      },
+                    },
+                    "type": "object",
+                  },
+                },
+                "required": Array [
+                  "actionTypeId",
+                  "params",
+                ],
+                "type": "object",
+              },
+              Object {
+                "properties": Object {
+                  "actionTypeId": Object {
+                    "const": ".endpoint",
+                    "type": "string",
+                  },
+                  "params": Object {
+                    "anyOf": Array [
+                      Object {
+                        "properties": Object {
+                          "command": Object {
+                            "const": "isolate",
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                        ],
+                        "type": "object",
+                      },
+                      Object {
+                        "properties": Object {
+                          "command": Object {
+                            "enum": Array [
+                              "kill-process",
+                              "suspend-process",
+                            ],
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                          "config": Object {
+                            "properties": Object {
+                              "field": Object {
+                                "type": "string",
+                              },
+                              "overwrite": Object {
+                                "default": true,
+                                "type": "boolean",
+                              },
+                            },
+                            "required": Array [
+                              "field",
+                            ],
+                            "type": "object",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                          "config",
+                        ],
+                        "type": "object",
+                      },
+                      Object {
+                        "properties": Object {
+                          "command": Object {
+                            "const": "runscript",
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                          "config": Object {
+                            "properties": Object {
+                              "linux": Object {
+                                "$ref": "#/$defs/__schema4",
+                              },
+                              "macos": Object {
+                                "$ref": "#/$defs/__schema4",
+                              },
+                              "windows": Object {
+                                "$ref": "#/$defs/__schema4",
+                              },
+                            },
+                            "type": "object",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                        ],
+                        "type": "object",
+                      },
+                    ],
+                  },
+                },
+                "required": Array [
+                  "actionTypeId",
+                  "params",
+                ],
+                "type": "object",
+              },
+            ],
+          },
+          "type": "array",
+        },
+        "riskScore": Object {
+          "$ref": "#/$defs/__schema1",
+        },
+        "riskScoreMapping": Object {
+          "items": Object {
+            "properties": Object {
+              "field": Object {
+                "type": "string",
+              },
+              "operator": Object {
+                "const": "equals",
+                "type": "string",
+              },
+              "risk_score": Object {
+                "$ref": "#/$defs/__schema1",
+              },
+              "value": Object {
+                "type": "string",
+              },
+            },
+            "required": Array [
+              "field",
+              "operator",
+              "value",
+            ],
+            "type": "object",
+          },
+          "type": "array",
+        },
+        "ruleId": Object {
+          "type": "string",
+        },
+        "ruleNameOverride": Object {
+          "type": "string",
+        },
+        "ruleSource": Object {
+          "oneOf": Array [
+            Object {
+              "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
+                "isCustomized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "isCustomized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
+        },
+        "setup": Object {
+          "type": "string",
+        },
+        "severity": Object {
+          "$ref": "#/$defs/__schema2",
+        },
+        "severityMapping": Object {
+          "items": Object {
+            "properties": Object {
+              "field": Object {
+                "type": "string",
+              },
+              "operator": Object {
+                "const": "equals",
+                "type": "string",
+              },
+              "severity": Object {
+                "$ref": "#/$defs/__schema2",
+              },
+              "value": Object {
+                "type": "string",
+              },
+            },
+            "required": Array [
+              "field",
+              "operator",
+              "severity",
+              "value",
+            ],
+            "type": "object",
+          },
+          "type": "array",
+        },
+        "threat": Object {
+          "items": Object {
+            "properties": Object {
+              "framework": Object {
+                "type": "string",
+              },
+              "tactic": Object {
+                "properties": Object {
+                  "id": Object {
+                    "type": "string",
+                  },
+                  "name": Object {
+                    "type": "string",
+                  },
+                  "reference": Object {
+                    "type": "string",
+                  },
+                },
+                "required": Array [
+                  "id",
+                  "name",
+                  "reference",
+                ],
+                "type": "object",
+              },
+              "technique": Object {
+                "items": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "string",
+                    },
+                    "name": Object {
+                      "type": "string",
+                    },
+                    "reference": Object {
+                      "type": "string",
+                    },
+                    "subtechnique": Object {
+                      "items": Object {
+                        "properties": Object {
+                          "id": Object {
+                            "type": "string",
+                          },
+                          "name": Object {
+                            "type": "string",
+                          },
+                          "reference": Object {
+                            "type": "string",
+                          },
+                        },
+                        "required": Array [
+                          "id",
+                          "name",
+                          "reference",
+                        ],
+                        "type": "object",
+                      },
+                      "type": "array",
+                    },
+                  },
+                  "required": Array [
+                    "id",
+                    "name",
+                    "reference",
+                  ],
+                  "type": "object",
+                },
+                "type": "array",
+              },
+            },
+            "required": Array [
+              "framework",
+              "tactic",
+            ],
+            "type": "object",
+          },
+          "type": "array",
+        },
+        "timelineId": Object {
+          "type": "string",
+        },
+        "timelineTitle": Object {
+          "type": "string",
+        },
+        "timestampOverride": Object {
+          "type": "string",
+        },
+        "timestampOverrideFallbackDisabled": Object {
+          "type": "boolean",
+        },
+        "to": Object {
+          "type": "string",
+        },
+        "version": Object {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer",
+        },
+      },
+      "required": Array [
+        "author",
+        "description",
+        "falsePositives",
+        "from",
+        "ruleId",
+        "immutable",
+        "outputIndex",
+        "riskScore",
+        "riskScoreMapping",
+        "severity",
+        "severityMapping",
+        "threat",
+        "to",
+        "references",
+        "version",
+        "exceptionsList",
+      ],
+      "type": "object",
+    },
+    Object {
+      "properties": Object {
+        "alertSuppression": Object {
+          "properties": Object {
+            "duration": Object {
+              "properties": Object {
+                "unit": Object {
+                  "enum": Array [
+                    "s",
+                    "m",
+                    "h",
+                  ],
+                  "type": "string",
+                },
+                "value": Object {
+                  "maximum": 9007199254740991,
+                  "minimum": 1,
+                  "type": "integer",
+                },
+              },
+              "required": Array [
+                "value",
+                "unit",
+              ],
+              "type": "object",
+            },
+            "groupBy": Object {
+              "items": Object {
+                "$ref": "#/$defs/__schema5",
               },
               "maxItems": 3,
               "minItems": 1,
@@ -8143,13 +8130,24 @@ exports[`Serverless upgrade and rollback checks detect param changes to review f
 Object {
   "$defs": Object {
     "__schema0": Object {
-      "$ref": "#/$defs/__schema1",
-    },
-    "__schema1": Object {
       "minLength": 1,
       "type": "string",
     },
+    "__schema1": Object {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer",
+    },
     "__schema2": Object {
+      "enum": Array [
+        "low",
+        "medium",
+        "high",
+        "critical",
+      ],
+      "type": "string",
+    },
+    "__schema3": Object {
       "additionalProperties": Object {
         "properties": Object {
           "field": Object {
@@ -8174,7 +8172,7 @@ Object {
       "properties": Object {},
       "type": "object",
     },
-    "__schema3": Object {
+    "__schema4": Object {
       "properties": Object {
         "scriptId": Object {
           "type": "string",
@@ -8190,7 +8188,10 @@ Object {
       },
       "type": "object",
     },
-    "__schema4": Object {
+    "__schema5": Object {
+      "type": "string",
+    },
+    "__schema6": Object {
       "type": "string",
     },
   },
@@ -8322,7 +8323,7 @@ Object {
           "items": Object {
             "properties": Object {
               "integration": Object {
-                "$ref": "#/$defs/__schema1",
+                "$ref": "#/$defs/__schema0",
               },
               "package": Object {
                 "$ref": "#/$defs/__schema0",
@@ -8375,7 +8376,7 @@ Object {
                   "params": Object {
                     "properties": Object {
                       "ecsMapping": Object {
-                        "$ref": "#/$defs/__schema2",
+                        "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
                         "type": "string",
@@ -8384,7 +8385,7 @@ Object {
                         "items": Object {
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/$defs/__schema2",
+                              "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
                               "type": "string",
@@ -8501,13 +8502,13 @@ Object {
                           "config": Object {
                             "properties": Object {
                               "linux": Object {
-                                "$ref": "#/$defs/__schema3",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/$defs/__schema3",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/$defs/__schema3",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -8532,9 +8533,7 @@ Object {
           "type": "array",
         },
         "riskScore": Object {
-          "maximum": 100,
-          "minimum": 0,
-          "type": "integer",
+          "$ref": "#/$defs/__schema1",
         },
         "riskScoreMapping": Object {
           "items": Object {
@@ -8547,9 +8546,7 @@ Object {
                 "type": "string",
               },
               "risk_score": Object {
-                "maximum": 100,
-                "minimum": 0,
-                "type": "integer",
+                "$ref": "#/$defs/__schema1",
               },
               "value": Object {
                 "type": "string",
@@ -8623,13 +8620,7 @@ Object {
           "type": "string",
         },
         "severity": Object {
-          "enum": Array [
-            "low",
-            "medium",
-            "high",
-            "critical",
-          ],
-          "type": "string",
+          "$ref": "#/$defs/__schema2",
         },
         "severityMapping": Object {
           "items": Object {
@@ -8642,13 +8633,7 @@ Object {
                 "type": "string",
               },
               "severity": Object {
-                "enum": Array [
-                  "low",
-                  "medium",
-                  "high",
-                  "critical",
-                ],
-                "type": "string",
+                "$ref": "#/$defs/__schema2",
               },
               "value": Object {
                 "type": "string",
@@ -8811,7 +8796,7 @@ Object {
             },
             "groupBy": Object {
               "items": Object {
-                "$ref": "#/$defs/__schema4",
+                "$ref": "#/$defs/__schema6",
               },
               "maxItems": 3,
               "minItems": 1,
@@ -8856,7 +8841,7 @@ Object {
         },
         "newTermsFields": Object {
           "items": Object {
-            "type": "string",
+            "$ref": "#/$defs/__schema5",
           },
           "maxItems": 3,
           "minItems": 1,
@@ -8916,74 +8901,18 @@ exports[`Serverless upgrade and rollback checks detect param changes to review f
 Object {
   "$defs": Object {
     "__schema0": Object {
-      "$ref": "#/$defs/__schema1",
-    },
-    "__schema1": Object {
       "minLength": 1,
       "type": "string",
     },
-    "__schema2": Object {
-      "additionalProperties": Object {
-        "properties": Object {
-          "field": Object {
-            "type": "string",
-          },
-          "value": Object {
-            "anyOf": Array [
-              Object {
-                "type": "string",
-              },
-              Object {
-                "items": Object {
-                  "type": "string",
-                },
-                "type": "array",
-              },
-            ],
-          },
-        },
-        "type": "object",
-      },
-      "properties": Object {},
-      "type": "object",
+    "__schema1": Object {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer",
     },
-    "__schema3": Object {
-      "properties": Object {
-        "scriptId": Object {
-          "type": "string",
-        },
-        "scriptInput": Object {
-          "type": "string",
-        },
-        "timeout": Object {
-          "maximum": 9007199254740991,
-          "minimum": -9007199254740991,
-          "type": "integer",
-        },
-      },
-      "type": "object",
-    },
-    "__schema4": Object {
-      "enum": Array [
-        "kuery",
-        "lucene",
-      ],
+    "__schema10": Object {
       "type": "string",
     },
-    "__schema5": Object {
-      "items": Object {
-        "type": "string",
-      },
-      "type": "array",
-    },
-    "__schema6": Object {
-      "items": Object {},
-      "type": "array",
-    },
-    "__schema7": Object {
-      "type": "string",
-    },
-    "__schema8": Object {
+    "__schema11": Object {
       "properties": Object {
         "duration": Object {
           "properties": Object {
@@ -9009,7 +8938,7 @@ Object {
         },
         "groupBy": Object {
           "items": Object {
-            "$ref": "#/$defs/__schema9",
+            "$ref": "#/$defs/__schema12",
           },
           "maxItems": 3,
           "minItems": 1,
@@ -9027,6 +8956,79 @@ Object {
         "groupBy",
       ],
       "type": "object",
+    },
+    "__schema12": Object {
+      "type": "string",
+    },
+    "__schema2": Object {
+      "enum": Array [
+        "low",
+        "medium",
+        "high",
+        "critical",
+      ],
+      "type": "string",
+    },
+    "__schema3": Object {
+      "additionalProperties": Object {
+        "properties": Object {
+          "field": Object {
+            "type": "string",
+          },
+          "value": Object {
+            "anyOf": Array [
+              Object {
+                "type": "string",
+              },
+              Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+            ],
+          },
+        },
+        "type": "object",
+      },
+      "properties": Object {},
+      "type": "object",
+    },
+    "__schema4": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "type": "string",
+        },
+        "scriptInput": Object {
+          "type": "string",
+        },
+        "timeout": Object {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+    "__schema5": Object {
+      "enum": Array [
+        "kuery",
+        "lucene",
+      ],
+      "type": "string",
+    },
+    "__schema6": Object {
+      "items": Object {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "__schema7": Object {
+      "type": "string",
+    },
+    "__schema8": Object {
+      "items": Object {},
+      "type": "array",
     },
     "__schema9": Object {
       "type": "string",
@@ -9160,7 +9162,7 @@ Object {
           "items": Object {
             "properties": Object {
               "integration": Object {
-                "$ref": "#/$defs/__schema1",
+                "$ref": "#/$defs/__schema0",
               },
               "package": Object {
                 "$ref": "#/$defs/__schema0",
@@ -9213,7 +9215,7 @@ Object {
                   "params": Object {
                     "properties": Object {
                       "ecsMapping": Object {
-                        "$ref": "#/$defs/__schema2",
+                        "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
                         "type": "string",
@@ -9222,7 +9224,7 @@ Object {
                         "items": Object {
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/$defs/__schema2",
+                              "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
                               "type": "string",
@@ -9339,13 +9341,13 @@ Object {
                           "config": Object {
                             "properties": Object {
                               "linux": Object {
-                                "$ref": "#/$defs/__schema3",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/$defs/__schema3",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/$defs/__schema3",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -9370,9 +9372,7 @@ Object {
           "type": "array",
         },
         "riskScore": Object {
-          "maximum": 100,
-          "minimum": 0,
-          "type": "integer",
+          "$ref": "#/$defs/__schema1",
         },
         "riskScoreMapping": Object {
           "items": Object {
@@ -9385,9 +9385,7 @@ Object {
                 "type": "string",
               },
               "risk_score": Object {
-                "maximum": 100,
-                "minimum": 0,
-                "type": "integer",
+                "$ref": "#/$defs/__schema1",
               },
               "value": Object {
                 "type": "string",
@@ -9461,13 +9459,7 @@ Object {
           "type": "string",
         },
         "severity": Object {
-          "enum": Array [
-            "low",
-            "medium",
-            "high",
-            "critical",
-          ],
-          "type": "string",
+          "$ref": "#/$defs/__schema2",
         },
         "severityMapping": Object {
           "items": Object {
@@ -9480,13 +9472,7 @@ Object {
                 "type": "string",
               },
               "severity": Object {
-                "enum": Array [
-                  "low",
-                  "medium",
-                  "high",
-                  "critical",
-                ],
-                "type": "string",
+                "$ref": "#/$defs/__schema2",
               },
               "value": Object {
                 "type": "string",
@@ -9626,25 +9612,25 @@ Object {
         Object {
           "properties": Object {
             "alertSuppression": Object {
-              "$ref": "#/$defs/__schema8",
+              "$ref": "#/$defs/__schema11",
             },
             "dataViewId": Object {
-              "$ref": "#/$defs/__schema7",
+              "$ref": "#/$defs/__schema10",
             },
             "filters": Object {
-              "$ref": "#/$defs/__schema6",
+              "$ref": "#/$defs/__schema8",
             },
             "index": Object {
-              "$ref": "#/$defs/__schema5",
+              "$ref": "#/$defs/__schema6",
             },
             "language": Object {
-              "$ref": "#/$defs/__schema4",
+              "$ref": "#/$defs/__schema5",
             },
             "query": Object {
-              "type": "string",
+              "$ref": "#/$defs/__schema7",
             },
             "savedId": Object {
-              "type": "string",
+              "$ref": "#/$defs/__schema9",
             },
             "type": Object {
               "const": "query",
@@ -9661,25 +9647,25 @@ Object {
         Object {
           "properties": Object {
             "alertSuppression": Object {
-              "$ref": "#/$defs/__schema8",
+              "$ref": "#/$defs/__schema11",
             },
             "dataViewId": Object {
-              "$ref": "#/$defs/__schema7",
+              "$ref": "#/$defs/__schema10",
             },
             "filters": Object {
-              "$ref": "#/$defs/__schema6",
+              "$ref": "#/$defs/__schema8",
             },
             "index": Object {
-              "$ref": "#/$defs/__schema5",
+              "$ref": "#/$defs/__schema6",
             },
             "language": Object {
-              "$ref": "#/$defs/__schema4",
+              "$ref": "#/$defs/__schema5",
             },
             "query": Object {
-              "type": "string",
+              "$ref": "#/$defs/__schema7",
             },
             "savedId": Object {
-              "type": "string",
+              "$ref": "#/$defs/__schema9",
             },
             "type": Object {
               "const": "saved_query",
@@ -9703,74 +9689,18 @@ exports[`Serverless upgrade and rollback checks detect param changes to review f
 Object {
   "$defs": Object {
     "__schema0": Object {
-      "$ref": "#/$defs/__schema1",
-    },
-    "__schema1": Object {
       "minLength": 1,
       "type": "string",
     },
-    "__schema2": Object {
-      "additionalProperties": Object {
-        "properties": Object {
-          "field": Object {
-            "type": "string",
-          },
-          "value": Object {
-            "anyOf": Array [
-              Object {
-                "type": "string",
-              },
-              Object {
-                "items": Object {
-                  "type": "string",
-                },
-                "type": "array",
-              },
-            ],
-          },
-        },
-        "type": "object",
-      },
-      "properties": Object {},
-      "type": "object",
+    "__schema1": Object {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer",
     },
-    "__schema3": Object {
-      "properties": Object {
-        "scriptId": Object {
-          "type": "string",
-        },
-        "scriptInput": Object {
-          "type": "string",
-        },
-        "timeout": Object {
-          "maximum": 9007199254740991,
-          "minimum": -9007199254740991,
-          "type": "integer",
-        },
-      },
-      "type": "object",
-    },
-    "__schema4": Object {
-      "enum": Array [
-        "kuery",
-        "lucene",
-      ],
+    "__schema10": Object {
       "type": "string",
     },
-    "__schema5": Object {
-      "items": Object {
-        "type": "string",
-      },
-      "type": "array",
-    },
-    "__schema6": Object {
-      "items": Object {},
-      "type": "array",
-    },
-    "__schema7": Object {
-      "type": "string",
-    },
-    "__schema8": Object {
+    "__schema11": Object {
       "properties": Object {
         "duration": Object {
           "properties": Object {
@@ -9796,7 +9726,7 @@ Object {
         },
         "groupBy": Object {
           "items": Object {
-            "$ref": "#/$defs/__schema9",
+            "$ref": "#/$defs/__schema12",
           },
           "maxItems": 3,
           "minItems": 1,
@@ -9814,6 +9744,79 @@ Object {
         "groupBy",
       ],
       "type": "object",
+    },
+    "__schema12": Object {
+      "type": "string",
+    },
+    "__schema2": Object {
+      "enum": Array [
+        "low",
+        "medium",
+        "high",
+        "critical",
+      ],
+      "type": "string",
+    },
+    "__schema3": Object {
+      "additionalProperties": Object {
+        "properties": Object {
+          "field": Object {
+            "type": "string",
+          },
+          "value": Object {
+            "anyOf": Array [
+              Object {
+                "type": "string",
+              },
+              Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+            ],
+          },
+        },
+        "type": "object",
+      },
+      "properties": Object {},
+      "type": "object",
+    },
+    "__schema4": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "type": "string",
+        },
+        "scriptInput": Object {
+          "type": "string",
+        },
+        "timeout": Object {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+    "__schema5": Object {
+      "enum": Array [
+        "kuery",
+        "lucene",
+      ],
+      "type": "string",
+    },
+    "__schema6": Object {
+      "items": Object {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "__schema7": Object {
+      "type": "string",
+    },
+    "__schema8": Object {
+      "items": Object {},
+      "type": "array",
     },
     "__schema9": Object {
       "type": "string",
@@ -9947,7 +9950,7 @@ Object {
           "items": Object {
             "properties": Object {
               "integration": Object {
-                "$ref": "#/$defs/__schema1",
+                "$ref": "#/$defs/__schema0",
               },
               "package": Object {
                 "$ref": "#/$defs/__schema0",
@@ -10000,7 +10003,7 @@ Object {
                   "params": Object {
                     "properties": Object {
                       "ecsMapping": Object {
-                        "$ref": "#/$defs/__schema2",
+                        "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
                         "type": "string",
@@ -10009,7 +10012,7 @@ Object {
                         "items": Object {
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/$defs/__schema2",
+                              "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
                               "type": "string",
@@ -10126,13 +10129,13 @@ Object {
                           "config": Object {
                             "properties": Object {
                               "linux": Object {
-                                "$ref": "#/$defs/__schema3",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/$defs/__schema3",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/$defs/__schema3",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -10157,9 +10160,7 @@ Object {
           "type": "array",
         },
         "riskScore": Object {
-          "maximum": 100,
-          "minimum": 0,
-          "type": "integer",
+          "$ref": "#/$defs/__schema1",
         },
         "riskScoreMapping": Object {
           "items": Object {
@@ -10172,9 +10173,7 @@ Object {
                 "type": "string",
               },
               "risk_score": Object {
-                "maximum": 100,
-                "minimum": 0,
-                "type": "integer",
+                "$ref": "#/$defs/__schema1",
               },
               "value": Object {
                 "type": "string",
@@ -10248,13 +10247,7 @@ Object {
           "type": "string",
         },
         "severity": Object {
-          "enum": Array [
-            "low",
-            "medium",
-            "high",
-            "critical",
-          ],
-          "type": "string",
+          "$ref": "#/$defs/__schema2",
         },
         "severityMapping": Object {
           "items": Object {
@@ -10267,13 +10260,7 @@ Object {
                 "type": "string",
               },
               "severity": Object {
-                "enum": Array [
-                  "low",
-                  "medium",
-                  "high",
-                  "critical",
-                ],
-                "type": "string",
+                "$ref": "#/$defs/__schema2",
               },
               "value": Object {
                 "type": "string",
@@ -10413,25 +10400,25 @@ Object {
         Object {
           "properties": Object {
             "alertSuppression": Object {
-              "$ref": "#/$defs/__schema8",
+              "$ref": "#/$defs/__schema11",
             },
             "dataViewId": Object {
-              "$ref": "#/$defs/__schema7",
+              "$ref": "#/$defs/__schema10",
             },
             "filters": Object {
-              "$ref": "#/$defs/__schema6",
+              "$ref": "#/$defs/__schema8",
             },
             "index": Object {
-              "$ref": "#/$defs/__schema5",
+              "$ref": "#/$defs/__schema6",
             },
             "language": Object {
-              "$ref": "#/$defs/__schema4",
+              "$ref": "#/$defs/__schema5",
             },
             "query": Object {
-              "type": "string",
+              "$ref": "#/$defs/__schema7",
             },
             "savedId": Object {
-              "type": "string",
+              "$ref": "#/$defs/__schema9",
             },
             "type": Object {
               "const": "query",
@@ -10448,25 +10435,25 @@ Object {
         Object {
           "properties": Object {
             "alertSuppression": Object {
-              "$ref": "#/$defs/__schema8",
+              "$ref": "#/$defs/__schema11",
             },
             "dataViewId": Object {
-              "$ref": "#/$defs/__schema7",
+              "$ref": "#/$defs/__schema10",
             },
             "filters": Object {
-              "$ref": "#/$defs/__schema6",
+              "$ref": "#/$defs/__schema8",
             },
             "index": Object {
-              "$ref": "#/$defs/__schema5",
+              "$ref": "#/$defs/__schema6",
             },
             "language": Object {
-              "$ref": "#/$defs/__schema4",
+              "$ref": "#/$defs/__schema5",
             },
             "query": Object {
-              "type": "string",
+              "$ref": "#/$defs/__schema7",
             },
             "savedId": Object {
-              "type": "string",
+              "$ref": "#/$defs/__schema9",
             },
             "type": Object {
               "const": "saved_query",
@@ -10490,13 +10477,24 @@ exports[`Serverless upgrade and rollback checks detect param changes to review f
 Object {
   "$defs": Object {
     "__schema0": Object {
-      "$ref": "#/$defs/__schema1",
-    },
-    "__schema1": Object {
       "minLength": 1,
       "type": "string",
     },
+    "__schema1": Object {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer",
+    },
     "__schema2": Object {
+      "enum": Array [
+        "low",
+        "medium",
+        "high",
+        "critical",
+      ],
+      "type": "string",
+    },
+    "__schema3": Object {
       "additionalProperties": Object {
         "properties": Object {
           "field": Object {
@@ -10521,7 +10519,7 @@ Object {
       "properties": Object {},
       "type": "object",
     },
-    "__schema3": Object {
+    "__schema4": Object {
       "properties": Object {
         "scriptId": Object {
           "type": "string",
@@ -10666,7 +10664,7 @@ Object {
           "items": Object {
             "properties": Object {
               "integration": Object {
-                "$ref": "#/$defs/__schema1",
+                "$ref": "#/$defs/__schema0",
               },
               "package": Object {
                 "$ref": "#/$defs/__schema0",
@@ -10719,7 +10717,7 @@ Object {
                   "params": Object {
                     "properties": Object {
                       "ecsMapping": Object {
-                        "$ref": "#/$defs/__schema2",
+                        "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
                         "type": "string",
@@ -10728,7 +10726,7 @@ Object {
                         "items": Object {
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/$defs/__schema2",
+                              "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
                               "type": "string",
@@ -10845,13 +10843,13 @@ Object {
                           "config": Object {
                             "properties": Object {
                               "linux": Object {
-                                "$ref": "#/$defs/__schema3",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/$defs/__schema3",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/$defs/__schema3",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -10876,9 +10874,7 @@ Object {
           "type": "array",
         },
         "riskScore": Object {
-          "maximum": 100,
-          "minimum": 0,
-          "type": "integer",
+          "$ref": "#/$defs/__schema1",
         },
         "riskScoreMapping": Object {
           "items": Object {
@@ -10891,9 +10887,7 @@ Object {
                 "type": "string",
               },
               "risk_score": Object {
-                "maximum": 100,
-                "minimum": 0,
-                "type": "integer",
+                "$ref": "#/$defs/__schema1",
               },
               "value": Object {
                 "type": "string",
@@ -10967,13 +10961,7 @@ Object {
           "type": "string",
         },
         "severity": Object {
-          "enum": Array [
-            "low",
-            "medium",
-            "high",
-            "critical",
-          ],
-          "type": "string",
+          "$ref": "#/$defs/__schema2",
         },
         "severityMapping": Object {
           "items": Object {
@@ -10986,13 +10974,7 @@ Object {
                 "type": "string",
               },
               "severity": Object {
-                "enum": Array [
-                  "low",
-                  "medium",
-                  "high",
-                  "critical",
-                ],
-                "type": "string",
+                "$ref": "#/$defs/__schema2",
               },
               "value": Object {
                 "type": "string",
