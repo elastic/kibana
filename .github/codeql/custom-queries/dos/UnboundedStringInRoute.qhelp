@@ -44,7 +44,28 @@ call.
 <recommendation>
 <p>
 Always specify a maximum length constraint when using string schemas to validate input from
-untrusted sources.
+untrusted sources. The maximum length should be a reasonable limit based on the business
+requirement. Consider these common categories:
+</p>
+<table>
+<tbody>
+<tr><th>Use case</th><th>Suggested max length</th></tr>
+<tr><td>Identifiers (IDs, keys, slugs)</td><td>100-256</td></tr>
+<tr><td>Names, titles</td><td>256-512</td></tr>
+<tr><td>Descriptions, comments</td><td>1,000-10,000</td></tr>
+<tr><td>Search queries, filters</td><td>256-1,024</td></tr>
+<tr><td>Free-text body content</td><td>10,000-100,000</td></tr>
+<tr><td>URLs</td><td>2,048-4,096</td></tr>
+</tbody>
+</table>
+<p>
+<b>Route as a simple proxy to an Elasticsearch API:</b> the max length should match the
+Elasticsearch field limit. For example, keyword fields default to 32,766 bytes.
+</p>
+<p>
+<b>Route with regex validation:</b> a strict max length is critical. Long strings can trigger
+catastrophic backtracking in poorly written patterns, causing the event loop to block for
+seconds or minutes.
 </p>
 <p>
 For <code>@kbn/config-schema</code>, add a <code>maxLength</code> option:
