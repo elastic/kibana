@@ -33,7 +33,6 @@ import type { DiagnosticFormState } from './types';
 import type { ServiceMapDiagnosticResponse } from '../../../../../common/service_map_diagnostic_types';
 import { FORBIDDEN_SERVICE_NAMES } from '../../../../../common/service_map/constants';
 import type { ServiceMapSelection } from '../popover/popover_content';
-import { getApmInternalServices } from '../../../../plugin';
 import { callApmApi as callLegacyApmApi } from '../../../../services/rest/create_call_apm_api';
 
 interface DiagnosticFlyoutProps {
@@ -56,7 +55,6 @@ function checkForForbiddenServiceNames(form: DiagnosticFormState | null): boolea
 }
 
 export function DiagnosticFlyout({ onClose, isOpen, selection }: DiagnosticFlyoutProps) {
-  const { callApmApi } = getApmInternalServices();
   const {
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams(
