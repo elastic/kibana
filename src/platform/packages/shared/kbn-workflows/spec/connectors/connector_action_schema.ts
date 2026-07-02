@@ -12,6 +12,11 @@ import {
   PostMessageSubActionParamsSchema as SlackApiPostMessageParamsSchema,
   ValidChannelIdSubActionParamsSchema as SlackApiValidChannelIdParamsSchema,
 } from '@kbn/connector-schemas/slack_api';
+import {
+  XSOARPlaybooksActionResponseSchema,
+  XSOARRunActionParamsSchema,
+  XSOARRunActionResponseSchema,
+} from '@kbn/connector-schemas/xsoar/schemas/v1';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
@@ -289,6 +294,13 @@ export const ConnectorActionInputSchemas = new Map<string, Record<string, z.ZodS
       test: McpTestParamsSchema,
     },
   ],
+  [
+    '.xsoar',
+    {
+      getPlaybooks: z.object({}),
+      run: XSOARRunActionParamsSchema,
+    },
+  ],
 ]);
 
 /**
@@ -445,6 +457,13 @@ export const ConnectorActionOutputSchemas = new Map<string, Record<string, z.Zod
       listTools: McpListToolsResponseSchema,
       callTool: McpCallToolResponseSchema,
       test: McpTestResponseSchema,
+    },
+  ],
+  [
+    '.xsoar',
+    {
+      getPlaybooks: XSOARPlaybooksActionResponseSchema,
+      run: XSOARRunActionResponseSchema,
     },
   ],
 ]);
