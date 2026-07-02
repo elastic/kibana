@@ -22,11 +22,12 @@ describe('dataset_flyout_initial_values', () => {
     expect(values.settings.format).toBe('');
     expect(values.settings.error_mode).toBe('');
     expect(values.settings.partition_detection).toBe('');
+    expect(values.settings.schema_resolution).toBe('');
+    expect(values.settings.partition_path).toBe('');
+    expect(values.settings.hive_partitioning).toBe('');
     expect(values.settings.schema_sample_size).toBe('');
     expect(values.settings.delimiter).toBe('');
     expect(values.settings.header_row).toBe('');
-    expect(values.settings.optimized_reader).toBe('');
-    expect(values.settings.late_materialization).toBe('');
   });
 
   it('maps list-table item and defaults description to empty string', () => {
@@ -60,15 +61,13 @@ describe('dataset_flyout_initial_values', () => {
       resource: 'r',
       settings: {
         header_row: false,
-        optimized_reader: true,
-        late_materialization: false,
+        hive_partitioning: true,
       },
     };
 
     const result = dataSetToFlyoutFormValues(data);
     expect(result.settings.header_row).toBe('false');
-    expect(result.settings.optimized_reader).toBe('true');
-    expect(result.settings.late_materialization).toBe('false');
+    expect(result.settings.hive_partitioning).toBe('true');
   });
 
   it('maps numeric settings to strings', () => {
@@ -89,5 +88,23 @@ describe('dataset_flyout_initial_values', () => {
     expect(result.settings.max_errors).toBe('10');
     expect(result.settings.max_error_ratio).toBe('0.1');
     expect(result.settings.max_field_size).toBe('0');
+  });
+
+  it('maps new universal settings', () => {
+    const data: DataSetWithName = {
+      name: 'id',
+      data_source: 'source',
+      resource: 'r',
+      settings: {
+        schema_resolution: 'union_by_name',
+        partition_path: '/year={year}/',
+        hive_partitioning: false,
+      },
+    };
+
+    const result = dataSetToFlyoutFormValues(data);
+    expect(result.settings.schema_resolution).toBe('union_by_name');
+    expect(result.settings.partition_path).toBe('/year={year}/');
+    expect(result.settings.hive_partitioning).toBe('false');
   });
 });

@@ -96,6 +96,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Path or identifier for the dataset resource.',
     }),
 
+  settingsFormatRequired: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsFormatRequired', {
+      defaultMessage: 'Format is required.',
+    }),
+
   settingsFormatLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsFormatLabel', {
       defaultMessage: 'Format',
@@ -224,15 +229,49 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Hive',
     }),
 
-  settingsPartitionDetectionTemplate: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPartitionDetectionTemplate', {
-      defaultMessage: 'Template',
-    }),
-
   settingsPartitionDetectionNone: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPartitionDetectionNone', {
       defaultMessage: 'None',
     }),
+
+  settingsSchemaResolutionLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionLabel', {
+      defaultMessage: 'Schema resolution',
+    }),
+
+  settingsSchemaResolutionHelp: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionHelp', {
+      defaultMessage: 'How schemas are reconciled across files when reading a glob.',
+    }),
+
+  settingsSchemaResolutionPlaceholder: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionPlaceholder',
+      {
+        defaultMessage: 'Default',
+      }
+    ),
+
+  settingsSchemaResolutionFirstFileWins: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionFirstFileWins',
+      {
+        defaultMessage: 'First file wins',
+      }
+    ),
+
+  settingsSchemaResolutionStrict: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionStrict', {
+      defaultMessage: 'Strict',
+    }),
+
+  settingsSchemaResolutionUnionByName: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionUnionByName',
+      {
+        defaultMessage: 'Union by name',
+      }
+    ),
 
   settingsPartitionPathLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPartitionPathLabel', {
@@ -241,12 +280,30 @@ export const createDatasetFlyoutStrings = {
 
   settingsPartitionPathHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPartitionPathHelp', {
-      defaultMessage: 'Path pattern used for partition detection.',
+      defaultMessage: 'Explicit path template for partition detection.',
     }),
 
   settingsHivePartitioningLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsHivePartitioningLabel', {
       defaultMessage: 'Hive partitioning',
+    }),
+
+  settingsHivePartitioningPlaceholder: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsHivePartitioningPlaceholder',
+      {
+        defaultMessage: 'Default',
+      }
+    ),
+
+  settingsHivePartitioningEnabled: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsHivePartitioningEnabled', {
+      defaultMessage: 'Enabled',
+    }),
+
+  settingsHivePartitioningDisabled: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsHivePartitioningDisabled', {
+      defaultMessage: 'Disabled',
     }),
 
   settingsDelimiterLabel: () =>
@@ -407,59 +464,6 @@ export const createDatasetFlyoutStrings = {
   settingsMaxFieldSizeInvalid: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMaxFieldSizeInvalid', {
       defaultMessage: 'Must be a non-negative integer.',
-    }),
-
-  settingsSegmentSizeLabel: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSegmentSizeLabel', {
-      defaultMessage: 'Segment size',
-    }),
-
-  settingsSegmentSizeHelp: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSegmentSizeHelp', {
-      defaultMessage: 'Unit a file is divided into for parallel reading, for example 4mb.',
-    }),
-
-  settingsOptimizedReaderLabel: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsOptimizedReaderLabel', {
-      defaultMessage: 'Optimized reader',
-    }),
-
-  settingsOptimizedReaderPlaceholder: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsOptimizedReaderPlaceholder', {
-      defaultMessage: 'Default',
-    }),
-
-  settingsOptimizedReaderEnabled: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsOptimizedReaderEnabled', {
-      defaultMessage: 'Enabled',
-    }),
-
-  settingsOptimizedReaderDisabled: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsOptimizedReaderDisabled', {
-      defaultMessage: 'Disabled',
-    }),
-
-  settingsLateMaterializationLabel: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsLateMaterializationLabel', {
-      defaultMessage: 'Late materialization',
-    }),
-
-  settingsLateMaterializationPlaceholder: () =>
-    i18n.translate(
-      'xpack.dataFederation.createDatasetFlyout.settingsLateMaterializationPlaceholder',
-      {
-        defaultMessage: 'Default',
-      }
-    ),
-
-  settingsLateMaterializationEnabled: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsLateMaterializationEnabled', {
-      defaultMessage: 'Enabled',
-    }),
-
-  settingsLateMaterializationDisabled: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsLateMaterializationDisabled', {
-      defaultMessage: 'Disabled',
     }),
 
   advancedSettingsShow: () =>

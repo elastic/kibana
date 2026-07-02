@@ -24,24 +24,22 @@ export interface DatasetSettingsFile {
   format?: 'parquet' | 'csv' | 'tsv' | 'ndjson' | 'orc';
 
   // Universal
-  partition_detection?: 'auto' | 'hive' | 'template' | 'none';
+  partition_detection?: 'auto' | 'hive' | 'none';
+  schema_resolution?: 'first_file_wins' | 'strict' | 'union_by_name';
+  partition_path?: string;
+  hive_partitioning?: boolean;
 
   // CSV/TSV + NDJSON
   schema_sample_size?: number;
 
-  // CSV/TSV — commonly changed
+  // CSV/TSV — commonly changed (core UI)
   delimiter?: string;
   mode?: 'quoted' | 'escaped' | 'plain';
   header_row?: boolean;
-  null_value?: string;
-  encoding?: string;
-
-  // CSV/TSV — error handling
-  error_mode?: 'fail_fast' | 'skip_row' | 'null_field';
-  max_errors?: number;
-  max_error_ratio?: number;
 
   // CSV/TSV — advanced
+  null_value?: string;
+  encoding?: string;
   quote?: string;
   escape?: string;
   comment?: string;
@@ -50,10 +48,14 @@ export interface DatasetSettingsFile {
   multi_value_syntax?: 'none' | 'brackets';
   max_field_size?: number;
 
-  // NDJSON — advanced
-  segment_size?: string;
+  // CSV/TSV — error handling
+  error_mode?: 'fail_fast' | 'skip_row' | 'null_field';
+  max_errors?: number;
+  max_error_ratio?: number;
 
-  // Parquet — advanced
+  // API-only (recognized by the API, not shown in the UI)
+  target_split_size?: string;
+  segment_size?: string;
   optimized_reader?: boolean;
   late_materialization?: boolean;
 }

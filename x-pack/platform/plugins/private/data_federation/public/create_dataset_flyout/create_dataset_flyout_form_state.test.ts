@@ -18,6 +18,9 @@ describe('create_dataset_flyout_form_state', () => {
       expect(empty()).toEqual({
         format: '',
         partition_detection: '',
+        schema_resolution: '',
+        partition_path: '',
+        hive_partitioning: '',
         schema_sample_size: '',
         delimiter: '',
         mode: '',
@@ -34,9 +37,6 @@ describe('create_dataset_flyout_form_state', () => {
         datetime_format: '',
         multi_value_syntax: '',
         max_field_size: '',
-        segment_size: '',
-        optimized_reader: '',
-        late_materialization: '',
       });
     });
   });
@@ -50,6 +50,28 @@ describe('create_dataset_flyout_form_state', () => {
       expect(
         buildDatasetSettingsFromFormValues({ ...empty(), partition_detection: 'hive' })
       ).toEqual({ partition_detection: 'hive' });
+    });
+
+    it('maps schema_resolution under any format', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), schema_resolution: 'union_by_name' })
+      ).toEqual({ schema_resolution: 'union_by_name' });
+    });
+
+    it('maps partition_path under any format', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), partition_path: '/year={year}/' })
+      ).toEqual({ partition_path: '/year={year}/' });
+    });
+
+    it('converts hive_partitioning boolean form values correctly', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), hive_partitioning: 'false' })
+      ).toEqual({ hive_partitioning: false });
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), hive_partitioning: 'true' })
+      ).toEqual({ hive_partitioning: true });
+      expect(buildDatasetSettingsFromFormValues({ ...empty(), hive_partitioning: '' })).toBeUndefined();
     });
 
     it('ignores format-specific fields when no format is selected', () => {
@@ -77,6 +99,16 @@ describe('create_dataset_flyout_form_state', () => {
       ).toEqual({ format: 'ndjson', schema_sample_size: 10 });
     });
 
+    it('includes datetime_format for ndjson', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'ndjson',
+          datetime_format: 'yyyy-MM-dd',
+        })
+      ).toEqual({ format: 'ndjson', datetime_format: 'yyyy-MM-dd' });
+    });
+
     it('converts header_row boolean form values correctly', () => {
       expect(
         buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', header_row: 'true' })
@@ -87,17 +119,6 @@ describe('create_dataset_flyout_form_state', () => {
       expect(
         buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', header_row: '' })
       ).toEqual({ format: 'csv' });
-    });
-
-    it('converts optimized_reader and late_materialization boolean form values correctly', () => {
-      expect(
-        buildDatasetSettingsFromFormValues({
-          ...empty(),
-          format: 'parquet',
-          optimized_reader: 'false',
-          late_materialization: 'true',
-        })
-      ).toEqual({ format: 'parquet', optimized_reader: false, late_materialization: true });
     });
 
     it('includes max_errors of 0 (valid non-negative)', () => {
@@ -124,6 +145,7 @@ describe('create_dataset_flyout_form_state', () => {
     });
 
     it('excludes CSV-only fields when format is parquet', () => {
+      // parquet has no format-specific fields in the form (API-only)
       const result = buildDatasetSettingsFromFormValues({
         ...empty(),
         format: 'parquet',
@@ -134,10 +156,8 @@ describe('create_dataset_flyout_form_state', () => {
         error_mode: 'skip_row',
         max_errors: '5',
         schema_sample_size: '100',
-        segment_size: '10mb',
-        optimized_reader: 'true',
       });
-      expect(result).toEqual({ format: 'parquet', optimized_reader: true });
+      expect(result).toEqual({ format: 'parquet' });
     });
 
     it('excludes CSV-only fields when format is ndjson', () => {
@@ -146,12 +166,9 @@ describe('create_dataset_flyout_form_state', () => {
         format: 'ndjson',
         delimiter: ',',
         mode: 'quoted',
-        optimized_reader: 'true',
-        late_materialization: 'true',
         schema_sample_size: '50',
-        segment_size: '5mb',
       });
-      expect(result).toEqual({ format: 'ndjson', schema_sample_size: 50, segment_size: '5mb' });
+      expect(result).toEqual({ format: 'ndjson', schema_sample_size: 50 });
     });
   });
 });

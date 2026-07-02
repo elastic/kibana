@@ -83,37 +83,56 @@ describe('CreateDatasetFlyoutSettings', () => {
     expect(getSettingsValue(getByTestId)).toMatchObject({ partition_detection: 'hive' });
   });
 
+  it('shows schema_resolution and hive_partitioning in the advanced section', () => {
+    const { getByTestId } = renderSettings();
+    openAdvanced(getByTestId);
+
+    expect(getByTestId('createDatasetFlyoutSettingsSchemaResolution')).toBeVisible();
+    expect(getByTestId('createDatasetFlyoutSettingsHivePartitioning')).toBeVisible();
+  });
+
   it('shows no format-specific fields when no format is selected', () => {
     const { queryByTestId } = renderSettings();
     // format-specific fields are not in the DOM until a format is chosen
-    expect(queryByTestId('createDatasetFlyoutSettingsDelimiter')).toBeNull();
     expect(queryByTestId('createDatasetFlyoutSettingsSchemaSampleSize')).toBeNull();
+    // API-only fields are never in the DOM
     expect(queryByTestId('createDatasetFlyoutSettingsOptimizedReader')).toBeNull();
+    expect(queryByTestId('createDatasetFlyoutSettingsSegmentSize')).toBeNull();
   });
 
   describe('CSV format', () => {
-    it('shows CSV fields inside the advanced section', () => {
+    it('shows delimiter, mode, and header_row at the top level (core)', () => {
       const { getByTestId } = renderSettings();
 
       fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
         target: { value: 'csv' },
       });
-      openAdvanced(getByTestId);
 
+      // Core fields visible without opening the expander
       expect(getByTestId('createDatasetFlyoutSettingsDelimiter')).toBeVisible();
       expect(getByTestId('createDatasetFlyoutSettingsMode')).toBeVisible();
       expect(getByTestId('createDatasetFlyoutSettingsHeaderRow')).toBeVisible();
-      expect(getByTestId('createDatasetFlyoutSettingsSchemaSampleSize')).toBeVisible();
-      expect(getByTestId('createDatasetFlyoutSettingsMaxErrors')).toBeVisible();
     });
 
-    it('updates a CSV field in form state', () => {
+    it('shows CSV advanced fields inside the advanced section', () => {
       const { getByTestId } = renderSettings();
 
       fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
         target: { value: 'csv' },
       });
       openAdvanced(getByTestId);
+
+      expect(getByTestId('createDatasetFlyoutSettingsSchemaSampleSize')).toBeVisible();
+      expect(getByTestId('createDatasetFlyoutSettingsMaxErrors')).toBeVisible();
+      expect(getByTestId('createDatasetFlyoutSettingsNullValue')).toBeVisible();
+    });
+
+    it('updates a CSV core field in form state', () => {
+      const { getByTestId } = renderSettings();
+
+      fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
+        target: { value: 'csv' },
+      });
       fireEvent.change(getByTestId('createDatasetFlyoutSettingsDelimiter'), {
         target: { value: '|' },
       });
@@ -123,7 +142,7 @@ describe('CreateDatasetFlyoutSettings', () => {
   });
 
   describe('NDJSON format', () => {
-    it('shows schema_sample_size and segment_size inside the advanced section', () => {
+    it('shows schema_sample_size and datetime_format inside the advanced section', () => {
       const { getByTestId } = renderSettings();
 
       fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
@@ -132,21 +151,30 @@ describe('CreateDatasetFlyoutSettings', () => {
       openAdvanced(getByTestId);
 
       expect(getByTestId('createDatasetFlyoutSettingsSchemaSampleSize')).toBeVisible();
-      expect(getByTestId('createDatasetFlyoutSettingsSegmentSize')).toBeVisible();
+      expect(getByTestId('createDatasetFlyoutSettingsDatetimeFormat')).toBeVisible();
+    });
+
+    it('does not show segment_size (API-only)', () => {
+      const { queryByTestId } = renderSettings();
+
+      fireEvent.change(queryByTestId('createDatasetFlyoutSettingsFormat')!, {
+        target: { value: 'ndjson' },
+      });
+
+      expect(queryByTestId('createDatasetFlyoutSettingsSegmentSize')).toBeNull();
     });
   });
 
   describe('Parquet format', () => {
-    it('shows optimized_reader and late_materialization inside the advanced section', () => {
-      const { getByTestId } = renderSettings();
+    it('shows no format-specific fields for parquet (all API-only)', () => {
+      const { queryByTestId } = renderSettings();
 
-      fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
+      fireEvent.change(queryByTestId('createDatasetFlyoutSettingsFormat')!, {
         target: { value: 'parquet' },
       });
-      openAdvanced(getByTestId);
 
-      expect(getByTestId('createDatasetFlyoutSettingsOptimizedReader')).toBeVisible();
-      expect(getByTestId('createDatasetFlyoutSettingsLateMaterialization')).toBeVisible();
+      expect(queryByTestId('createDatasetFlyoutSettingsOptimizedReader')).toBeNull();
+      expect(queryByTestId('createDatasetFlyoutSettingsLateMaterialization')).toBeNull();
     });
   });
 });

@@ -33,10 +33,18 @@ export const datasetSchema = schema.object({
         schema.oneOf([
           schema.literal('auto'),
           schema.literal('hive'),
-          schema.literal('template'),
           schema.literal('none'),
         ])
       ),
+      schema_resolution: schema.maybe(
+        schema.oneOf([
+          schema.literal('first_file_wins'),
+          schema.literal('strict'),
+          schema.literal('union_by_name'),
+        ])
+      ),
+      partition_path: optionalString,
+      hive_partitioning: schema.maybe(schema.boolean()),
       // CSV/TSV + NDJSON
       schema_sample_size: schema.maybe(schema.number({ min: 1 })),
       // CSV/TSV commonly changed
@@ -72,6 +80,8 @@ export const datasetSchema = schema.object({
       // Parquet advanced
       optimized_reader: schema.maybe(schema.boolean()),
       late_materialization: schema.maybe(schema.boolean()),
+      // API-only (not shown in the UI)
+      target_split_size: optionalString,
     })
   ),
 });

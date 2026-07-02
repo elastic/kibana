@@ -13,24 +13,26 @@ export type DatasetFormatFormValue = '' | 'parquet' | 'csv' | 'tsv' | 'ndjson' |
 export type DatasetErrorModeFormValue = '' | 'fail_fast' | 'skip_row' | 'null_field';
 export type DatasetModeFormValue = '' | 'quoted' | 'escaped' | 'plain';
 export type DatasetMultiValueSyntaxFormValue = '' | 'none' | 'brackets';
-export type DatasetPartitionDetectionFormValue = '' | 'auto' | 'hive' | 'template' | 'none';
+export type DatasetPartitionDetectionFormValue = '' | 'auto' | 'hive' | 'none';
+export type DatasetSchemaResolutionFormValue = '' | 'first_file_wins' | 'strict' | 'union_by_name';
 export type DatasetBooleanFormValue = '' | 'true' | 'false';
 
 export interface CreateDatasetSettingsFormValues {
   format: DatasetFormatFormValue;
+  // Universal
   partition_detection: DatasetPartitionDetectionFormValue;
+  schema_resolution: DatasetSchemaResolutionFormValue;
+  partition_path: string;
+  hive_partitioning: DatasetBooleanFormValue;
+  // CSV/TSV + NDJSON
   schema_sample_size: string;
-  // CSV/TSV commonly changed
+  // CSV/TSV core
   delimiter: string;
   mode: DatasetModeFormValue;
   header_row: DatasetBooleanFormValue;
+  // CSV/TSV advanced
   null_value: string;
   encoding: string;
-  // CSV/TSV error handling
-  error_mode: DatasetErrorModeFormValue;
-  max_errors: string;
-  max_error_ratio: string;
-  // CSV/TSV advanced
   quote: string;
   escape: string;
   comment: string;
@@ -38,11 +40,10 @@ export interface CreateDatasetSettingsFormValues {
   datetime_format: string;
   multi_value_syntax: DatasetMultiValueSyntaxFormValue;
   max_field_size: string;
-  // NDJSON advanced
-  segment_size: string;
-  // Parquet advanced
-  optimized_reader: DatasetBooleanFormValue;
-  late_materialization: DatasetBooleanFormValue;
+  // CSV/TSV error handling
+  error_mode: DatasetErrorModeFormValue;
+  max_errors: string;
+  max_error_ratio: string;
 }
 
 export interface CreateDatasetFormValues {
@@ -56,15 +57,15 @@ export interface CreateDatasetFormValues {
 export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFormValues => ({
   format: '',
   partition_detection: '',
+  schema_resolution: '',
+  partition_path: '',
+  hive_partitioning: '',
   schema_sample_size: '',
   delimiter: '',
   mode: '',
   header_row: '',
   null_value: '',
   encoding: '',
-  error_mode: '',
-  max_errors: '',
-  max_error_ratio: '',
   quote: '',
   escape: '',
   comment: '',
@@ -72,9 +73,9 @@ export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFor
   datetime_format: '',
   multi_value_syntax: '',
   max_field_size: '',
-  segment_size: '',
-  optimized_reader: '',
-  late_materialization: '',
+  error_mode: '',
+  max_errors: '',
+  max_error_ratio: '',
 });
 
 const parseOptionalPositiveInteger = (value: string): number | undefined => {
@@ -149,12 +150,17 @@ export const buildDatasetSettingsFromFormValues = (
   const applied: DatasetSettingsFile = {};
 
   if (settings.format) applied.format = settings.format;
+
+  // Universal — applies under every format
   if (settings.partition_detection) applied.partition_detection = settings.partition_detection;
+  if (settings.schema_resolution) applied.schema_resolution = settings.schema_resolution;
+  if (settings.partition_path) applied.partition_path = settings.partition_path;
+  const hivePartitioning = parseBooleanFormValue(settings.hive_partitioning);
+  if (hivePartitioning !== undefined) applied.hive_partitioning = hivePartitioning;
 
   const { format } = settings;
   const isCsvTsv = format === 'csv' || format === 'tsv';
   const isNdjson = format === 'ndjson';
-  const isParquet = format === 'parquet';
 
   if (isCsvTsv) {
     if (settings.delimiter) applied.delimiter = settings.delimiter;
@@ -165,6 +171,11 @@ export const buildDatasetSettingsFromFormValues = (
 
     if (settings.null_value) applied.null_value = settings.null_value;
     if (settings.encoding) applied.encoding = settings.encoding;
+    if (settings.quote) applied.quote = settings.quote;
+    if (settings.escape) applied.escape = settings.escape;
+    if (settings.comment) applied.comment = settings.comment;
+    if (settings.column_prefix) applied.column_prefix = settings.column_prefix;
+    if (settings.multi_value_syntax) applied.multi_value_syntax = settings.multi_value_syntax;
     if (settings.error_mode) applied.error_mode = settings.error_mode;
 
     const maxErrors = parseNonNegativeInteger(settings.max_errors);
@@ -173,13 +184,6 @@ export const buildDatasetSettingsFromFormValues = (
     const maxErrorRatio = parseRatio(settings.max_error_ratio);
     if (maxErrorRatio !== undefined) applied.max_error_ratio = maxErrorRatio;
 
-    if (settings.quote) applied.quote = settings.quote;
-    if (settings.escape) applied.escape = settings.escape;
-    if (settings.comment) applied.comment = settings.comment;
-    if (settings.column_prefix) applied.column_prefix = settings.column_prefix;
-    if (settings.datetime_format) applied.datetime_format = settings.datetime_format;
-    if (settings.multi_value_syntax) applied.multi_value_syntax = settings.multi_value_syntax;
-
     const maxFieldSize = parseNonNegativeInteger(settings.max_field_size);
     if (maxFieldSize !== undefined) applied.max_field_size = maxFieldSize;
   }
@@ -187,18 +191,8 @@ export const buildDatasetSettingsFromFormValues = (
   if (isCsvTsv || isNdjson) {
     const schemaSampleSize = parseOptionalPositiveInteger(settings.schema_sample_size);
     if (schemaSampleSize !== undefined) applied.schema_sample_size = schemaSampleSize;
-  }
 
-  if (isNdjson) {
-    if (settings.segment_size) applied.segment_size = settings.segment_size;
-  }
-
-  if (isParquet) {
-    const optimizedReader = parseBooleanFormValue(settings.optimized_reader);
-    if (optimizedReader !== undefined) applied.optimized_reader = optimizedReader;
-
-    const lateMaterialization = parseBooleanFormValue(settings.late_materialization);
-    if (lateMaterialization !== undefined) applied.late_materialization = lateMaterialization;
+    if (settings.datetime_format) applied.datetime_format = settings.datetime_format;
   }
 
   return Object.keys(applied).length > 0 ? applied : undefined;
