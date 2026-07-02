@@ -319,13 +319,17 @@ export const WorkflowYAMLEditor = ({
     validationErrors,
   });
 
+  const hasAutoOpenedAgentChatRef = useRef(false);
+  const openAgentChatRef = useRef(openAgentChat);
+  openAgentChatRef.current = openAgentChat;
+
   useEffect(() => {
-    if (!isAgentBuilderAvailable) {
+    if (!isAgentBuilderAvailable || hasAutoOpenedAgentChatRef.current) {
       return;
     }
-
-    openAgentChat();
-  }, [isAgentBuilderAvailable, openAgentChat]);
+    hasAutoOpenedAgentChatRef.current = true;
+    openAgentChatRef.current();
+  }, [isAgentBuilderAvailable]);
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
     if (!editorRef.current) {
