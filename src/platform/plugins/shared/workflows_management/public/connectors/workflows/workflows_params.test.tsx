@@ -11,6 +11,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getManagedWorkflowSelectorVisibilityContext } from '@kbn/workflows';
 import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
 import type { WorkflowsActionParams } from './types';
 import WorkflowsParamsFields from './workflows_params';
@@ -195,7 +196,7 @@ describe('WorkflowsParamsFields', () => {
           page: 1,
           query: '',
           managed: 'all',
-          visibilityContext: 'selector:rule_action',
+          visibilityContext: [getManagedWorkflowSelectorVisibilityContext('rule_action')],
         })
       );
     });

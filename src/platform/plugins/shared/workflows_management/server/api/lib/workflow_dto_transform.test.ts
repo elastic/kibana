@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getManagedWorkflowSelectorVisibilityContext } from '@kbn/workflows/managed';
 import {
   transformStorageDocumentToWorkflowDto,
   transformStoragePartialToWorkflowDto,
@@ -95,7 +96,9 @@ describe('transformStorageDocumentToWorkflowDto', () => {
   });
 
   it('does not expose internal managed selector visibility metadata', () => {
-    const source = makeSource({ managedVisibilityContexts: ['selector:rule_action'] });
+    const source = makeSource({
+      managedVisibilityContexts: [getManagedWorkflowSelectorVisibilityContext('rule_action')],
+    });
     const result = transformStorageDocumentToWorkflowDto('wf-1', source);
 
     expect(result).not.toHaveProperty('managedVisibilityContexts');

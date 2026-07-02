@@ -57,10 +57,11 @@ const querySchema = schema.object({
     })
   ),
   visibilityContext: schema.maybe(
-    schema.oneOf([schema.literal('selector:rule_action')], {
+    schema.arrayOf(schema.string(), {
+      maxSize: MAX_ARRAY_PARAM_SIZE,
       meta: {
         description:
-          'When managed workflows are included, only return managed workflows visible in this context.',
+          'When managed workflows are included, only return managed workflows visible in these contexts.',
       },
     })
   ),

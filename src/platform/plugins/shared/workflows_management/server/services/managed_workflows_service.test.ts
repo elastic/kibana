@@ -12,6 +12,10 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { isOccConflictError, OccWriter } from '@kbn/occ';
 import type { WorkflowExecutionEngineModel, WorkflowYaml } from '@kbn/workflows';
+import {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
+} from '@kbn/workflows/managed';
 import type {
   ManagedWorkflowDefinition,
   ManagedWorkflowId,
@@ -36,6 +40,15 @@ jest.mock('@kbn/workflows/managed', () => ({
   getManagedWorkflowDefinition: (id: string) =>
     mockManagedWorkflowDefinitions.find((definition) => definition.id === id),
   getManagedWorkflowDefinitions: () => [...mockManagedWorkflowDefinitions],
+  getManagedWorkflowSelectorVisibilityContext: (selector: string) => `selector:${selector}`,
+  getManagedWorkflowSolutionVisibilityContext: (solution: string) => `solution:${solution}`,
+  getManagedWorkflowVisibilityContexts: (visibility?: {
+    selectors?: string[];
+    solutions?: string[];
+  }) => [
+    ...(visibility?.selectors ?? []).map((selector) => `selector:${selector}`),
+    ...(visibility?.solutions ?? []).map((solution) => `solution:${solution}`),
+  ],
 }));
 
 const PLUGIN_ID = 'testPlugin';
@@ -467,8 +480,10 @@ describe('ManagedWorkflowsService', () => {
       expect(indexedDocument.billable).toBe(true);
     });
 
-    it('persists managed workflow selector visibility metadata', async () => {
-      const definition = createDefinition({ visibility: { selectors: ['rule_action'] } });
+    it('persists managed workflow visibility metadata', async () => {
+      const definition = createDefinition({
+        visibility: { selectors: ['rule_action'], solutions: ['security'] },
+      });
       mockManagedWorkflowDefinitions = [definition];
       const { crudService, service } = createService();
       crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
@@ -476,7 +491,10 @@ describe('ManagedWorkflowsService', () => {
       await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
 
       const indexedDocument = getIndexedDocument(crudService);
-      expect(indexedDocument.managedVisibilityContexts).toEqual(['selector:rule_action']);
+      expect(indexedDocument.managedVisibilityContexts).toEqual([
+        getManagedWorkflowSelectorVisibilityContext('rule_action'),
+        getManagedWorkflowSolutionVisibilityContext('security'),
+      ]);
     });
 
     it('sets document.version to 1 on managed create when versioning is enabled', async () => {

@@ -10,6 +10,10 @@
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
+} from '@kbn/workflows/managed';
 import { buildWorkflowFilters } from '@kbn/workflows/server';
 
 import type { WorkflowSearchDeps } from './types';
@@ -174,7 +178,7 @@ describe('WorkflowSearchService', () => {
           size: 20,
           page: 1,
           managedFilter: 'all',
-          visibilityContext: 'selector:rule_action',
+          visibilityContext: [getManagedWorkflowSelectorVisibilityContext('rule_action')],
         },
         'default'
       );
@@ -184,7 +188,48 @@ describe('WorkflowSearchService', () => {
         bool: {
           should: [
             { bool: { must_not: [{ term: { managed: true } }] } },
-            { term: { managedVisibilityContexts: 'selector:rule_action' } },
+            {
+              terms: {
+                managedVisibilityContexts: [
+                  getManagedWorkflowSelectorVisibilityContext('rule_action'),
+                ],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
+    it('keeps unmanaged workflows and filters managed workflows by multiple visibility contexts', async () => {
+      const { deps, storageClient } = makeDeps();
+      storageClient.search.mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } });
+      const visibilityContext = [
+        getManagedWorkflowSelectorVisibilityContext('rule_action'),
+        getManagedWorkflowSolutionVisibilityContext('security'),
+      ];
+
+      const service = new WorkflowSearchService(deps);
+      await service.getWorkflows(
+        {
+          size: 20,
+          page: 1,
+          managedFilter: 'all',
+          visibilityContext,
+        },
+        'default'
+      );
+
+      const call = storageClient.search.mock.calls[0][0];
+      expect(call.query.bool.must).toContainEqual({
+        bool: {
+          should: [
+            { bool: { must_not: [{ term: { managed: true } }] } },
+            {
+              terms: {
+                managedVisibilityContexts: visibilityContext,
+              },
+            },
           ],
           minimum_should_match: 1,
         },

@@ -346,37 +346,70 @@ export const MY_WORKFLOW: ManagedWorkflowDefinition = {
   billable: false,
   visibility: {
     selectors: ['rule_action'],
+    solutions: ['security'],
   },
   yaml: '...',
   management: { lifecycle: 'static', versionStrategy: 'auto', enablement: 'enforced' },
 };
 ```
 
-The platform persists visibility as namespaced contexts such as `selector:rule_action`. Selectors that opt into managed workflows query with `visibilityContext=selector:rule_action`, which returns:
+The platform persists visibility as namespaced contexts such as `selector:rule_action` and `solution:security`. Selectors that opt into managed workflows query with a matching context, which returns:
 
 - all unmanaged workflows visible to the user
 - only managed workflows whose definition opted into that context
 
-The context naming is intentionally extensible, so future dimensions can use the same mechanism (for example `solution:security`) without adding new selector-specific API fields.
+The context naming is intentionally extensible, so future dimensions can use the same mechanism without adding new selector-specific API fields.
 
-Consumers that render the shared `WorkflowSelector` get this behavior by passing `visibilityContext` in the selector config:
+Consumers that render the shared `WorkflowSelector` get this behavior by passing structured `visibility` in the selector config:
 
 ```tsx
 <WorkflowSelector
   config={{
-    visibilityContext: 'selector:rule_action',
+    visibility: { selector: 'rule_action' },
   }}
   selectedWorkflowId={workflowId}
   onWorkflowChange={setWorkflowId}
 />
 ```
 
-Direct API consumers can pass the same context as a query parameter:
+Solution-scoped selectors can use the same object shape with a different field:
 
 ```ts
+<WorkflowSelector
+  config={{
+    visibility: { solution: 'security' },
+  }}
+  selectedWorkflowId={workflowId}
+  onWorkflowChange={setWorkflowId}
+/>
+```
+
+Selectors can also provide both fields. Managed workflows matching either context are included:
+
+```ts
+<WorkflowSelector
+  config={{
+    visibility: { selector: 'rule_action', solution: 'security' },
+  }}
+  selectedWorkflowId={workflowId}
+  onWorkflowChange={setWorkflowId}
+/>
+```
+
+Direct API consumers can pass one or more flattened contexts as a query parameter:
+
+```ts
+import {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
+} from '@kbn/workflows';
+
 await workflowsApi.getWorkflows({
   managed: 'all',
-  visibilityContext: 'selector:rule_action',
+  visibilityContext: [
+    getManagedWorkflowSelectorVisibilityContext('rule_action'),
+    getManagedWorkflowSolutionVisibilityContext('security'),
+  ],
 });
 ```
 

@@ -27,10 +27,18 @@ import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
+} from '@kbn/workflows';
 import * as i18n from './translations';
 import { WorkflowSelectorEmptyState } from './workflow_selector_empty_state';
 import { getSelectedWorkflowDisabledError, processWorkflowsToOptions } from './workflow_utils';
-import type { WorkflowOption, WorkflowSelectorConfig } from './workflow_utils';
+import type {
+  WorkflowOption,
+  WorkflowSelectorConfig,
+  WorkflowSelectorVisibility,
+} from './workflow_utils';
 import { IconDisabledWorkflow } from '../../assets/icons';
 import { useWorkflows, useWorkflowsCapabilities } from '../../hooks';
 
@@ -56,6 +64,29 @@ const defaultConfig: WorkflowSelectorConfig = {
   showSelectedInSearch: true,
 };
 
+const getVisibilityContext = (
+  visibility: WorkflowSelectorVisibility | undefined
+): string[] | undefined => {
+  if (!visibility) {
+    return undefined;
+  }
+
+  const visibilityContexts = [
+    ...(visibility.selector
+      ? [getManagedWorkflowSelectorVisibilityContext(visibility.selector)]
+      : []),
+    ...(visibility.solution
+      ? [getManagedWorkflowSolutionVisibilityContext(visibility.solution)]
+      : []),
+  ];
+
+  if (visibilityContexts.length === 0) {
+    return undefined;
+  }
+
+  return visibilityContexts;
+};
+
 const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   selectedWorkflowId,
   onWorkflowChange,
@@ -71,6 +102,10 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   const { canReadManagedWorkflow } = useWorkflowsCapabilities();
 
   const finalConfig = useMemo(() => ({ ...defaultConfig, ...config }), [config]);
+  const visibilityContext = useMemo(
+    () => getVisibilityContext(finalConfig.visibility),
+    [finalConfig.visibility]
+  );
 
   // Fetch workflows using the hook
   const {
@@ -81,8 +116,8 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     size: 1000,
     page: 1,
     query: '',
-    ...(finalConfig.visibilityContext && canReadManagedWorkflow
-      ? { managed: 'all' as const, visibilityContext: finalConfig.visibilityContext }
+    ...(visibilityContext && canReadManagedWorkflow
+      ? { managed: 'all' as const, visibilityContext }
       : {}),
   });
 

@@ -840,7 +840,7 @@ export interface WorkflowsSearchParams {
   sortField?: WorkflowSortField;
   sortOrder?: 'asc' | 'desc';
   managed?: 'all' | 'managed' | 'unmanaged';
-  visibilityContext?: 'selector:rule_action';
+  visibilityContext?: string[];
 }
 
 export interface RequestOptions {

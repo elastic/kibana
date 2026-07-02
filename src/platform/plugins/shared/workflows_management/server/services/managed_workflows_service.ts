@@ -13,6 +13,7 @@ import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
+  getManagedWorkflowVisibilityContexts,
   type ManagedWorkflowDefinition,
   type ManagedWorkflowId,
   type ManagedWorkflowTemplateValues,
@@ -796,6 +797,6 @@ export class ManagedWorkflowsService {
   }
 
   private getManagedVisibilityContexts(definition: ManagedWorkflowDefinition): string[] {
-    return [...(definition.visibility?.selectors ?? []).map((selector) => `selector:${selector}`)];
+    return getManagedWorkflowVisibilityContexts(definition.visibility);
   }
 }

@@ -13,11 +13,40 @@ export interface ManagedWorkflowManagement {
   enablement: 'enforced' | 'restorable';
 }
 
-export type ManagedWorkflowSelector = 'rule_action';
+export const MANAGED_WORKFLOW_SELECTORS = ['rule_action'] as const;
+export const MANAGED_WORKFLOW_SOLUTIONS = ['security'] as const;
+
+export type ManagedWorkflowSelector = (typeof MANAGED_WORKFLOW_SELECTORS)[number];
+export type ManagedWorkflowSolution = (typeof MANAGED_WORKFLOW_SOLUTIONS)[number];
+export type ManagedWorkflowSelectorVisibilityContext = `selector:${ManagedWorkflowSelector}`;
+export type ManagedWorkflowSolutionVisibilityContext = `solution:${ManagedWorkflowSolution}`;
+export type ManagedWorkflowVisibilityContext =
+  | ManagedWorkflowSelectorVisibilityContext
+  | ManagedWorkflowSolutionVisibilityContext;
+
+export const getManagedWorkflowSelectorVisibilityContext = <
+  TSelector extends ManagedWorkflowSelector
+>(
+  selector: TSelector
+): `selector:${TSelector}` => `selector:${selector}`;
+
+export const getManagedWorkflowSolutionVisibilityContext = <
+  TSolution extends ManagedWorkflowSolution
+>(
+  solution: TSolution
+): `solution:${TSolution}` => `solution:${solution}`;
 
 export interface ManagedWorkflowVisibility {
   selectors?: readonly ManagedWorkflowSelector[];
+  solutions?: readonly ManagedWorkflowSolution[];
 }
+
+export const getManagedWorkflowVisibilityContexts = (
+  visibility: ManagedWorkflowVisibility | undefined
+): ManagedWorkflowVisibilityContext[] => [
+  ...(visibility?.selectors ?? []).map(getManagedWorkflowSelectorVisibilityContext),
+  ...(visibility?.solutions ?? []).map(getManagedWorkflowSolutionVisibilityContext),
+];
 
 export interface ManagedWorkflowTemplateValues {
   [key: string]: unknown;

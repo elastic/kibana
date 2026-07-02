@@ -45,17 +45,16 @@ const buildVisibilityContextFilter = (
     return null;
   }
 
+  const contextFilter = { terms: { managedVisibilityContexts: visibilityContext } };
+
   if (managedFilter === 'managed') {
-    return { term: { managedVisibilityContexts: visibilityContext } };
+    return contextFilter;
   }
 
   if (managedFilter === 'all') {
     return {
       bool: {
-        should: [
-          { bool: { must_not: [{ term: { managed: true } }] } },
-          { term: { managedVisibilityContexts: visibilityContext } },
-        ],
+        should: [{ bool: { must_not: [{ term: { managed: true } }] } }, contextFilter],
         minimum_should_match: 1,
       },
     };
