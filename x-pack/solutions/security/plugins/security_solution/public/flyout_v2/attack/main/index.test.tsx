@@ -133,7 +133,11 @@ describe('<AttackFlyout />', () => {
     const onAttackUpdated = jest.fn();
     const { getByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={onAttackUpdated} />
+        <AttackFlyout
+          hit={createAttackHit()}
+          attack={mockAttack}
+          onAttackUpdated={onAttackUpdated}
+        />
       </TestProviders>
     );
 
@@ -145,7 +149,11 @@ describe('<AttackFlyout />', () => {
     const onAttackUpdated = jest.fn();
     const { getByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={onAttackUpdated} />
+        <AttackFlyout
+          hit={createAttackHit()}
+          attack={mockAttack}
+          onAttackUpdated={onAttackUpdated}
+        />
       </TestProviders>
     );
 
