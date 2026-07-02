@@ -92,6 +92,10 @@ describe('scanHostTool', () => {
       },
       { hosts: { 'agent-123': { name: 'my-host' } } }
     );
+    // The scan is attributed to the initiating analyst, not the system user.
+    expect(service.getInternalResponseActionsClient).toHaveBeenCalledWith(
+      expect.objectContaining({ username: 'test-analyst' })
+    );
     const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
     expect(data.found).toBe(true);
     expect(data.actionId).toBe('action-scan-1');

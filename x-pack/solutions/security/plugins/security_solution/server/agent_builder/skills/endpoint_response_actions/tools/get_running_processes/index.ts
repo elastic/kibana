@@ -39,13 +39,18 @@ export const getRunningProcessesTool = (
     type: ToolType.builtin,
     description: `Retrieves the list of running processes from a host by its hostname. This is a read-only inspection action dispatched through the Elastic Defend Response Actions service; it does not modify the endpoint.`,
     schema: getRunningProcessesSchema,
-    handler: async (params, { logger }) => {
+    handler: async (params, { logger, request }) => {
       try {
         const hostName = params.hostName as string;
         const comment = params.comment as string | undefined;
         const spaceId = DEFAULT_SPACE_ID;
+        // Attribute the action to the initiating analyst (falls back to the
+        // default system user when the current user cannot be resolved) so the
+        // Response Actions audit trail records who requested it, not `elastic`.
+        const username = endpointAppContextService.getCurrentUsername(request);
         const responseActionsClient = endpointAppContextService.getInternalResponseActionsClient({
           spaceId,
+          username,
           agentType: 'endpoint',
         });
 

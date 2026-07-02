@@ -31,13 +31,18 @@ export const unisolateHostTool = (
     type: ToolType.builtin,
     description: `Un-isolates a host by its hostname. Re-establishes network connectivity on an endpoint that was previously isolated. The action is dispatched through the Elastic Defend Response Actions service.`,
     schema: unisolateHostSchema,
-    handler: async (params, { logger }) => {
+    handler: async (params, { logger, request }) => {
       try {
         const hostName = params.hostName as string;
         const comment = params.comment as string | undefined;
         const spaceId = DEFAULT_SPACE_ID;
+        // Attribute the action to the initiating analyst (falls back to the
+        // default system user when the current user cannot be resolved) so the
+        // Response Actions audit trail records who requested it, not `elastic`.
+        const username = endpointAppContextService.getCurrentUsername(request);
         const responseActionsClient = endpointAppContextService.getInternalResponseActionsClient({
           spaceId,
+          username,
           agentType: 'endpoint',
         });
 
