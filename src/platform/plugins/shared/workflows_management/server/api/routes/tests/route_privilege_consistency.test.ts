@@ -316,6 +316,11 @@ const ROUTE_REQUEST_FIXTURES: Record<string, { params?: any; body?: any; query?:
   },
 };
 
+const PUBLIC_AUTHZ_DISABLED_ROUTES = new Set([
+  'GET:/api/workflows/workflow/{id}/execute',
+  'POST:/api/workflows/workflow/{id}/execute',
+]);
+
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function normalizeIndex(index: string | string[] | undefined): string | undefined {
@@ -597,8 +602,10 @@ describe('Route privilege/ES-operation consistency', () => {
   });
 
   it('should have security config on every route', () => {
-    for (const [, route] of capturedRoutes) {
-      if (route.security?.authz?.enabled !== false) {
+    for (const [routeKey, route] of capturedRoutes) {
+      if (route.security?.authz?.enabled === false) {
+        expect(PUBLIC_AUTHZ_DISABLED_ROUTES.has(routeKey)).toBe(true);
+      } else {
         expect(route.security?.authz?.requiredPrivileges).toBeDefined();
         expect(route.security.authz.requiredPrivileges?.length).toBeGreaterThan(0);
       }
@@ -614,6 +621,7 @@ describe('Route privilege/ES-operation consistency', () => {
           return;
         }
         if (route.security?.authz?.enabled === false) {
+          expect(PUBLIC_AUTHZ_DISABLED_ROUTES.has(routeKey)).toBe(true);
           return;
         }
 

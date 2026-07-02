@@ -34,3 +34,17 @@ export interface WebhookDispatchTaskParams {
   workflowId: string;
   spaceId: string;
 }
+
+export interface WebhookPrepareResult {
+  urlPath: string;
+  authType: 'none' | 'apiKey' | 'basic';
+  apiKey?: {
+    id: string;
+    encoded: string;
+  };
+}
+
+export interface WebhookInvocationResult {
+  invocationId: string;
+  accepted: true;
+}

@@ -8,8 +8,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { BaseEventSchema } from '../common/base_event';
 import { WorkflowInputSchema } from './manual_trigger_schema';
+import { BaseEventSchema } from '../common/base_event';
 
 export const WebhookTriggerAuthNoneSchema = z.object({
   type: z.literal('none'),
@@ -17,10 +17,6 @@ export const WebhookTriggerAuthNoneSchema = z.object({
 
 export const WebhookTriggerAuthApiKeySchema = z.object({
   type: z.literal('apiKey'),
-  /**
-   * Prototype-only: a created workflow can persist the generated key id here.
-   * The encoded secret is returned once by the credential provisioning API.
-   */
   id: z.string().optional(),
 });
 

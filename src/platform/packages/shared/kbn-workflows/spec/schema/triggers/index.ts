@@ -20,7 +20,12 @@ export {
   SCHEDULED_INTERVAL_ERROR,
   SCHEDULED_INTERVAL_PATTERN,
 } from './scheduled_trigger_schema';
-export { WebhookTriggerSchema } from './webhook_trigger_schema';
+export {
+  isWebhookTrigger,
+  WebhookTriggerSchema,
+  type WebhookTrigger,
+  type WebhookTriggerAuth,
+} from './webhook_trigger_schema';
 
 export const TriggerSchema = z.discriminatedUnion('type', [
   AlertRuleTriggerSchema,

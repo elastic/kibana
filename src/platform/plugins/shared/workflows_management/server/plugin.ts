@@ -16,10 +16,10 @@ import type {
 
 import { defineRoutes } from './api/routes';
 import { WorkflowManagementAuditLog } from './api/routes/utils/workflow_audit_logging';
-import { WorkflowsManagementApi } from './api/workflows_management_api';
-import { WorkflowsService } from './api/workflows_management_service';
 import { WORKFLOW_WEBHOOK_DISPATCH_TASK_TYPE } from './api/webhook/constants';
 import type { WebhookDispatchTaskParams } from './api/webhook/types';
+import { WorkflowsManagementApi } from './api/workflows_management_api';
+import { WorkflowsService } from './api/workflows_management_service';
 import { AvailabilityUpdater } from './availability';
 import {
   createManagedWorkflowsSystemApiProvider,

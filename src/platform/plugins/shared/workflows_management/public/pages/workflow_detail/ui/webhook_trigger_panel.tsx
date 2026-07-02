@@ -21,7 +21,7 @@ import {
 import React, { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import type { WorkflowYaml } from '@kbn/workflows';
+import { isWebhookTrigger, type WebhookTrigger, type WorkflowYaml } from '@kbn/workflows';
 import {
   selectWorkflowDefinition,
   selectWorkflowId,
@@ -29,12 +29,9 @@ import {
 import { useKibana } from '../../../hooks/use_kibana';
 import { prepareWebhook, type PrepareWebhookResponse } from '../../../shared/lib/workflows_api';
 
-const getWebhookTrigger = (workflowDefinition: WorkflowYaml | null | undefined) =>
-  workflowDefinition?.triggers?.find((trigger) => trigger.type === 'webhook') as
-    | {
-        auth?: { type: 'none' } | { type: 'apiKey' } | { type: 'basic'; username: string };
-      }
-    | undefined;
+const getWebhookTrigger = (
+  workflowDefinition: WorkflowYaml | null | undefined
+): WebhookTrigger | undefined => workflowDefinition?.triggers?.find(isWebhookTrigger);
 
 const sampleBody = JSON.stringify({ message: 'Hello from webhook' }, null, 2);
 
@@ -77,7 +74,9 @@ export const WebhookTriggerPanel = React.memo(function WebhookTriggerPanel() {
     authType === 'apiKey'
       ? `-H 'Authorization: ApiKey ${prepareResult?.apiKey?.encoded ?? '<api-key>'}'`
       : authType === 'basic'
-      ? `-u '${webhookTrigger.auth?.type === 'basic' ? webhookTrigger.auth.username : '<user>'}:<password>'`
+      ? `-u '${
+          webhookTrigger.auth?.type === 'basic' ? webhookTrigger.auth.username : '<user>'
+        }:<password>'`
       : '';
   const postCurl = webhookUrl
     ? [
