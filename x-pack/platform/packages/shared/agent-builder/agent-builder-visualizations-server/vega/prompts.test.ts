@@ -59,6 +59,22 @@ describe('createAuthorVegaSpecPrompt', () => {
     expect(text).toContain('"title": null');
   });
 
+  it('injects the caller-provided reference-examples block verbatim', () => {
+    const [system] = createAuthorVegaSpecPrompt({
+      nlQuery: 'scatter of latency vs throughput',
+      esqlQuery: 'FROM logs-*',
+      referenceExamples: '\nREFERENCE EXAMPLES:\n### Scatter / bubble plot (encoded size)\n',
+    });
+    const text = String((system as [string, string])[1]);
+
+    expect(text).toContain('REFERENCE EXAMPLES');
+    expect(text).toContain('Scatter / bubble plot (encoded size)');
+  });
+
+  it('omits the reference-examples section when none is provided', () => {
+    expect(systemText('a bar chart of counts by status')).not.toContain('REFERENCE EXAMPLES');
+  });
+
   it('includes the chart-type hint only when one is provided', () => {
     expect(systemText('any chart')).not.toContain('Suggested chart style');
 

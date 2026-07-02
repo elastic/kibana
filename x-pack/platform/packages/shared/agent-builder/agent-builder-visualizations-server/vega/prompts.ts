@@ -58,6 +58,7 @@ export const createAuthorVegaSpecPrompt = ({
   columns,
   existingSpec,
   chartType,
+  referenceExamples,
   additionalContext,
 }: {
   nlQuery: string;
@@ -65,6 +66,12 @@ export const createAuthorVegaSpecPrompt = ({
   columns?: EsqlEsqlColumnInfo[];
   existingSpec?: string;
   chartType?: SupportedChartType;
+  /**
+   * Pre-selected, pre-loaded reference-example block to inject (see
+   * `reference_examples`). Loaded by the caller so only matched examples are
+   * materialized; empty string when nothing matched.
+   */
+  referenceExamples?: string;
   additionalContext?: string;
 }): BaseMessageLike[] => {
   const esqlQueryJson = JSON.stringify(esqlQuery);
@@ -130,7 +137,7 @@ FACETING / SMALL MULTIPLES:
 
 DOTS IN FIELD NAMES:
 - Vega treats an unescaped dot in a field name as nested-object access, but ES|QL columns are flat. For a column whose name contains a dot (e.g. "geo.dest"), backslash-escape every dot in "field" strings ("geo\\.dest") and use bracket access in expressions (datum['geo.dest']).
-
+${referenceExamples ?? ''}
 Your task is to author the visualization specification for the following request:
 
 <user_query>

@@ -18,6 +18,7 @@ import { generateVisualizationEsql } from '../shared/generate_visualization_esql
 import { normalizeVegaSpec } from './normalize_spec';
 import { validateVegaSpec } from './vega_validator';
 import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
+import { formatReferenceExamples, loadReferenceExamples } from './reference_examples';
 import {
   GENERATE_ESQL_NODE,
   AUTHOR_SPEC_NODE,
@@ -222,12 +223,19 @@ export const createVegaGraph = async (
       .filter(Boolean)
       .join('\n');
 
+    // Load only the reference examples whose keywords match this request, so an
+    // unmatched example never materializes its spec body.
+    const referenceExamples = formatReferenceExamples(
+      await loadReferenceExamples(state.nlQuery, state.chartType)
+    );
+
     const prompt = createAuthorVegaSpecPrompt({
       nlQuery: state.nlQuery,
       esqlQuery: state.esqlQuery,
       columns: state.columns,
       existingSpec: state.existingSpec,
       chartType: state.chartType,
+      referenceExamples,
       additionalContext: previousContext
         ? `Previous attempts:\n${previousContext}\n\nReturn a single valid JSON object that fixes the issues above.`
         : undefined,
