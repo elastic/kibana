@@ -269,4 +269,3 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
     </>
   );
 };
-

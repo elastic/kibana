@@ -6,13 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiComboBox,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSelect,
-} from '@elastic/eui';
+import { EuiComboBox, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
@@ -80,9 +74,9 @@ export const ExecutionHistorySearchBar = ({
   });
 
   const ruleOptions = (rulesData?.items ?? []).map((r) => ({
-        key: r.id,
-        label: r.metadata.name,
-        value: { id: r.id, name: r.metadata.name },
+    key: r.id,
+    label: r.metadata.name,
+    value: { id: r.id, name: r.metadata.name },
   }));
 
   const selectedOptions = ruleFilters.map((r) => ({ key: r.id, label: r.name, value: r }));

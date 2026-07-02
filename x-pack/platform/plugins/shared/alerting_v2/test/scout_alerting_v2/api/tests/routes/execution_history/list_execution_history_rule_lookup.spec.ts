@@ -125,7 +125,9 @@ apiTest.describe(
             headers: readerHeaders,
           });
           const ids = new Set(
-            (response.body as ListPolicyExecutionHistoryResponse).items.flatMap((it) => it.rules.map((r) => r.id))
+            (response.body as ListPolicyExecutionHistoryResponse).items.flatMap((it) =>
+              it.rules.map((r) => r.id)
+            )
           );
           return ids.has(RULE_ID_KEPT) && ids.has(RULE_ID_DELETED);
         };

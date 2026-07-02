@@ -241,10 +241,12 @@ describe('action policy events queries', () => {
         // its `should` entries.
         const shoulds = filters.filter(hasBoolShould);
         const mandatoryClause = shoulds.find((queryContainer) =>
-          (queryContainer?.bool?.should as QueryDslQueryContainer[] | undefined)?.some((shouldClause) =>
-            Boolean(
-              shouldClause?.terms && 'kibana.alerting_v2.dispatcher.rule_ids' in (shouldClause.terms as object)
-            )
+          (queryContainer?.bool?.should as QueryDslQueryContainer[] | undefined)?.some(
+            (shouldClause) =>
+              Boolean(
+                shouldClause?.terms &&
+                  'kibana.alerting_v2.dispatcher.rule_ids' in (shouldClause.terms as object)
+              )
           )
         );
 
@@ -257,7 +259,7 @@ describe('action policy events queries', () => {
             { terms: { 'kibana.alerting_v2.dispatcher.rule_ids': ['r1', 'r2'] } },
           ])
         );
-                
+
         const nestedClause = shouldClauses.find((c) => Boolean(c?.nested));
         expect(nestedClause?.nested?.path).toBe('kibana.saved_objects');
       });
@@ -282,7 +284,6 @@ describe('action policy events queries', () => {
         );
 
         const filtersUndefined = filtersOf(buildCountActionPolicyEventsQuery({ ...baseParams }));
-
 
         expect(filtersEmpty.length).toBe(filtersUndefined.length);
       });

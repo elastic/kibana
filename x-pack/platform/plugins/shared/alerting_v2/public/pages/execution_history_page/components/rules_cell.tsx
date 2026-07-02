@@ -1,15 +1,30 @@
-import { EuiBadgeGroup, EuiBadge, EuiCallOut, EuiListGroup, EuiListGroupItem, EuiPopover, EuiPopoverTitle } from "@elastic/eui";
-import { PolicyExecutionHistoryItem } from "@kbn/alerting-v2-schemas";
-import { i18n } from "@kbn/i18n";
-import React, { useState } from "react";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiBadgeGroup,
+  EuiBadge,
+  EuiCallOut,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiPopover,
+  EuiPopoverTitle,
+} from '@elastic/eui';
+import type { PolicyExecutionHistoryItem } from '@kbn/alerting-v2-schemas';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 
 interface Props {
   rules: PolicyExecutionHistoryItem['rules'];
-  maxVisibleRules?: number;  
+  maxVisibleRules?: number;
   totalRuleCount: number;
   activeRuleId: string | null;
   onRuleClick: (ruleId: string) => void;
-};
+}
 
 const RULE_BADGE_MAX_WIDTH = 200;
 
@@ -53,7 +68,6 @@ export const RulesCell = ({
     </EuiBadgeGroup>
   );
 };
-
 
 const OverflowPopover = ({
   hiddenRules,

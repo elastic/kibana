@@ -160,7 +160,9 @@ describe('collectIdsFromEvents', () => {
 
 describe('buildExecutionHistoryItem', () => {
   it('returns null item for null event', () => {
-    expect(buildExecutionHistoryItem(null as unknown as IValidatedEvent, EMPTY_NAME_MAPS)).toEqual(null);
+    expect(buildExecutionHistoryItem(null as unknown as IValidatedEvent, EMPTY_NAME_MAPS)).toEqual(
+      null
+    );
   });
 
   it('returns null when action is not a policy outcome', () => {
@@ -230,7 +232,7 @@ describe('buildExecutionHistoryItem', () => {
 
     expect(historyItem).not.toBeNull();
     expect(historyItem?.policy).toEqual({ id: 'policy-1', name: 'My Policy' });
-    expect(historyItem?.rules).toEqual([{ id: 'rule-a', name: 'My Rule' }]);    
+    expect(historyItem?.rules).toEqual([{ id: 'rule-a', name: 'My Rule' }]);
     expect(historyItem?.workflows).toEqual([{ id: 'wf-1', name: 'My Workflow' }]);
   });
 
@@ -247,7 +249,7 @@ describe('buildExecutionHistoryItem', () => {
 
     const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
     expect(historyItem?.policy.name).toBeNull();
-    expect(historyItem?.rules[0]?.name).toBeNull();    
+    expect(historyItem?.rules[0]?.name).toBeNull();
     expect(historyItem?.workflows[0]?.name).toBeNull();
   });
 

@@ -165,7 +165,12 @@ const mockRuleExecutionFetchResult = (
 
 const mockRulesFetchResult = (
   overrides: Partial<{
-    data: { items: { id: string; metadata: { name: string } }[]; total: number; page: number; perPage: number };
+    data: {
+      items: { id: string; metadata: { name: string } }[];
+      total: number;
+      page: number;
+      perPage: number;
+    };
     isFetching: boolean;
     isError: boolean;
   }> = {}
@@ -223,7 +228,7 @@ describe('ExecutionHistoryPage', () => {
 
     it('renders the outcome filter for the rules tab', () => {
       mockRuleExecutionFetchResult();
-      
+
       renderPage();
 
       expect(screen.getByTestId('ruleExecutionHistoryOutcomeFilter')).toBeInTheDocument();
@@ -241,13 +246,12 @@ describe('ExecutionHistoryPage', () => {
   });
 
   describe('Policies tab', () => {
-
     beforeEach(() => {
       mockRulesFetchResult();
     });
 
     it('shows the 24h time window in the page description', async () => {
-      mockFetchResult();            
+      mockFetchResult();
 
       renderPage();
       await switchToPoliciesTab();
