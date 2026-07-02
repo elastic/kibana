@@ -35,6 +35,19 @@ export function isExternalResumeFormTextareaField(field: FlatFieldSchema): boole
   return field.type == null || !supportedScalarTypes.has(field.type);
 }
 
+function getArrayOfEnumChoices(field: FlatFieldSchema): unknown[] | undefined {
+  if (field.type !== 'array') {
+    return undefined;
+  }
+
+  const itemEnum = field.items?.enum;
+  if (!Array.isArray(itemEnum) || itemEnum.length === 0) {
+    return undefined;
+  }
+
+  return itemEnum;
+}
+
 function buildFieldHtml(name: string, field: FlatFieldSchema, required: Set<string>): string {
   const label = escapeHtml(field.title ?? name);
   const description =
@@ -68,6 +81,24 @@ function buildFieldHtml(name: string, field: FlatFieldSchema, required: Set<stri
           ${description}
           <select id="${escapeHtml(name)}" name="${escapeHtml(name)}"${requiredAttr}>
             <option value="">Select…</option>
+            ${options}
+          </select>
+        </label>`;
+  }
+
+  const arrayEnumChoices = getArrayOfEnumChoices(field);
+  if (arrayEnumChoices) {
+    const options = arrayEnumChoices
+      .map(
+        (choice) =>
+          `<option value="${escapeHtml(String(choice))}">${escapeHtml(String(choice))}</option>`
+      )
+      .join('');
+    return `
+        <label class="field" for="${escapeHtml(name)}">
+          <span class="field-label">${label}${requiredMarker}</span>
+          ${description}
+          <select id="${escapeHtml(name)}" name="${escapeHtml(name)}" multiple${requiredAttr}>
             ${options}
           </select>
         </label>`;
@@ -141,6 +172,16 @@ function parseFieldValue(name: string, field: FlatFieldSchema, raw: unknown): un
       throw new Error(`Invalid number for field "${name}"`);
     }
     return parsed;
+  }
+
+  const arrayEnumChoices = getArrayOfEnumChoices(field);
+  if (arrayEnumChoices) {
+    if (raw == null || raw === '' || (Array.isArray(raw) && raw.length === 0)) {
+      return undefined;
+    }
+
+    const values = Array.isArray(raw) ? raw : [raw];
+    return values.map((value) => String(value));
   }
 
   return String(raw);
