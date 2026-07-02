@@ -5,12 +5,58 @@
  * 2.0.
  */
 
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 const ALERTS_INDEX = '.alerts-security.alerts-default';
 const RISK_INDEX = 'risk-score.risk-score-latest-default';
 const CRITICALITY_INDEX = '.asset-criticality.asset-criticality-default';
+
+/**
+ * Explicit keyword mappings mirroring the real Entity Analytics schema. These are applied only
+ * when the index does not already exist (cold environment where the Risk Engine / asset
+ * criticality was never initialized). Without them, dynamic mapping would type `host.name`,
+ * `id_value`, etc. as `text`, and the enrichment service's `terms` queries — which match exact
+ * keyword values — would silently return nothing, making the enrichment evals non-deterministic.
+ * When the index already exists with its real mapping, we skip creation and reuse it.
+ */
+const RISK_INDEX_MAPPINGS: MappingTypeMapping = {
+  properties: {
+    '@timestamp': { type: 'date' },
+    host: {
+      properties: {
+        name: { type: 'keyword' },
+        risk: {
+          properties: {
+            calculated_level: { type: 'keyword' },
+            calculated_score_norm: { type: 'float' },
+          },
+        },
+      },
+    },
+    user: {
+      properties: {
+        name: { type: 'keyword' },
+        risk: {
+          properties: {
+            calculated_level: { type: 'keyword' },
+            calculated_score_norm: { type: 'float' },
+          },
+        },
+      },
+    },
+  },
+};
+
+const CRITICALITY_INDEX_MAPPINGS: MappingTypeMapping = {
+  properties: {
+    '@timestamp': { type: 'date' },
+    id_field: { type: 'keyword' },
+    id_value: { type: 'keyword' },
+    criticality_level: { type: 'keyword' },
+  },
+};
 
 const GROUNDED_EVAL_TAG = 'alert-triage-eval-seed';
 const ENRICHMENT_EVAL_TAG = 'alert-triage-enrichment-eval-seed';
@@ -61,10 +107,14 @@ const mitreTactic = (tactic: MitreTactic) => [
   },
 ];
 
-const ensureIndexExists = async (esClient: EsClient, index: string): Promise<void> => {
+const ensureIndexExists = async (
+  esClient: EsClient,
+  index: string,
+  mappings: MappingTypeMapping
+): Promise<void> => {
   const exists = await esClient.indices.exists({ index });
   if (!exists) {
-    await esClient.indices.create({ index });
+    await esClient.indices.create({ index, mappings });
   }
 };
 
@@ -208,8 +258,8 @@ export async function seedEnrichmentFixtures({
 }): Promise<SeedResult<SeededEnrichmentFixtures> | undefined> {
   try {
     await Promise.all([
-      ensureIndexExists(esClient, RISK_INDEX),
-      ensureIndexExists(esClient, CRITICALITY_INDEX),
+      ensureIndexExists(esClient, RISK_INDEX, RISK_INDEX_MAPPINGS),
+      ensureIndexExists(esClient, CRITICALITY_INDEX, CRITICALITY_INDEX_MAPPINGS),
     ]);
 
     const now = new Date().toISOString();
