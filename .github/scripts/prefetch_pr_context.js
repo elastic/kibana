@@ -54,7 +54,8 @@ const buildPrDiffFromFiles = (files) =>
     .join('\n')}\n`;
 
 const withoutPatch = (file) => {
-  const { patch, ...fileMetadata } = file;
+  const fileMetadata = { ...file };
+  delete fileMetadata.patch;
   return fileMetadata;
 };
 
@@ -247,6 +248,29 @@ const getPrMetadata = async ({ github, owner, repo, pullNumber }) => {
   };
 };
 
+const fetchReviewThreadComments = async ({ github, threadId }) => {
+  const comments = [];
+  let cursor = '';
+
+  while (true) {
+    const result = await github.graphql(reviewThreadCommentsQuery, {
+      threadId,
+      cursor,
+    });
+    const page = result.node.comments;
+
+    comments.push(...page.nodes);
+
+    if (!page.pageInfo.hasNextPage) {
+      break;
+    }
+
+    cursor = page.pageInfo.endCursor ?? '';
+  }
+
+  return comments;
+};
+
 const fetchReviewThreads = async ({ github, owner, repo, pullNumber }) => {
   const reviewThreads = [];
   let cursor = '';
@@ -277,29 +301,6 @@ const fetchReviewThreads = async ({ github, owner, repo, pullNumber }) => {
   }
 
   return reviewThreads;
-};
-
-const fetchReviewThreadComments = async ({ github, threadId }) => {
-  const comments = [];
-  let cursor = '';
-
-  while (true) {
-    const result = await github.graphql(reviewThreadCommentsQuery, {
-      threadId,
-      cursor,
-    });
-    const page = result.node.comments;
-
-    comments.push(...page.nodes);
-
-    if (!page.pageInfo.hasNextPage) {
-      break;
-    }
-
-    cursor = page.pageInfo.endCursor ?? '';
-  }
-
-  return comments;
 };
 
 const getNullableStartLine = ({ startLine, line }) => (startLine === line ? null : startLine);
