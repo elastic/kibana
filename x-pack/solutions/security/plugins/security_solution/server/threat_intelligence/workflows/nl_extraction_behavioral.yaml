@@ -30,6 +30,14 @@ steps:
       # (see the long comment next to `THREAT_REPORTS_INDEX_PATTERN`).
       index: .kibana-threat-reports
       size: 200
+      # Light iteration list — body_html (~128 KB per doc) is excluded so
+      # this step's output stays well under the workflow engine's 10 MB step
+      # output cap. Full document bodies are fetched per-item by load_full_doc
+      # inside the foreach, after the skip_already_extracted dedup gate (so
+      # already-extracted docs skip without ever fetching their body).
+      _source:
+        - content_fingerprint
+        - severity.score
       query:
         bool:
           must:
@@ -74,6 +82,23 @@ steps:
         type: loop.continue
         if: "steps.check_already_extracted.output.hits.total.value > 0"
 
+      # Fetch the full document body for this item. Runs AFTER skip_already_extracted
+      # so already-extracted docs skip without paying the body fetch cost.
+      # load_pending_reports returns only light fields (content_fingerprint,
+      # severity.score) to keep the batch loader output under the engine's
+      # 10 MB step cap; body consumers below reference
+      # steps.load_full_doc.output.hits.hits[0]._source.content.* instead of
+      # foreach.item._source.content.*.
+      - name: load_full_doc
+        type: elasticsearch.search
+        with:
+          index: "{{ foreach.item._index }}"
+          size: 1
+          query:
+            ids:
+              values:
+                - "{{ foreach.item._id }}"
+
       # Gate: assess whether this report is genuine threat-intelligence.
       # Runs FIRST so we persist the verdict alongside all other extraction fields.
       # OBSERVE-FIRST: verdict is persisted to extracted.gate.* but gates NOTHING.
@@ -95,9 +120,9 @@ steps:
             elastic-api-version: "2023-10-31"
             x-elastic-internal-origin: "kibana"
           body:
-            html: "{{ foreach.item._source.content.body_html }}"
-            text: "{{ foreach.item._source.content.body_text | slice: 0, 30000 }}"
-            title: "{{ foreach.item._source.content.title }}"
+            html: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_html }}"
+            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | slice: 0, 30000 }}"
+            title: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.title }}"
         on-failure:
           # Best-effort, mirroring enrich_taxonomy. A gate failure must not
           # abort the report — fail-open defaults below ensure extraction continues.
@@ -135,8 +160,8 @@ steps:
             # which preserves table rows / headers / lists so IOC values in vendor
             # HTML tables survive extraction. body_text is the fallback — the route
             # uses it when html is absent (STIX, manual ingest, text-only sources).
-            html: "{{ foreach.item._source.content.body_html }}"
-            text: "{{ foreach.item._source.content.body_text }}"
+            html: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_html }}"
+            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
             defang: true
         on-failure:
           # A single oversized or malformed report should not abort the
@@ -162,7 +187,7 @@ steps:
             # Truncate before the LLM call — same 30 KB cap the former
             # `ai.agent` step used. Keeps connector latency predictable on
             # syndicated RSS dumps while preserving advisory signal.
-            text: "{{ foreach.item._source.content.body_text | slice: 0, 30000 }}"
+            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | slice: 0, 30000 }}"
             report_id: "{{ foreach.item._id }}"
         on-failure:
           # Behavior extraction is best-effort, mirroring `enrich_taxonomy`
@@ -197,9 +222,9 @@ steps:
             elastic-api-version: "2023-10-31"
             x-elastic-internal-origin: "kibana"
           body:
-            text: "{{ foreach.item._source.content.body_text | slice: 0, 30000 }}"
+            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | slice: 0, 30000 }}"
             report_id: "{{ foreach.item._id }}"
-            title: "{{ foreach.item._source.content.title }}"
+            title: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.title }}"
         on-failure:
           # Enrichment is best-effort — a stale connector or an over-quota
           # LLM should not block the rest of the extraction pipeline.
@@ -281,7 +306,7 @@ steps:
             elastic-api-version: "2023-10-31"
             x-elastic-internal-origin: "kibana"
           body:
-            text: "{{ foreach.item._source.content.body_text | slice: 0, 30000 }}"
+            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | slice: 0, 30000 }}"
             report_id: "{{ foreach.item._id }}"
         on-failure:
           continue: true
