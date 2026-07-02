@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
@@ -32,6 +33,10 @@ import type { IPrebuiltRuleAssetsClient } from '../lib/detection_engine/prebuilt
 export const ALERT_VALIDATION_WORKFLOW_SYSTEM_CONNECTOR_ID = 'system-connector-.workflows';
 const ALERT_VALIDATION_WORKFLOW_ACTION_SUB_ACTION = 'run';
 const MAX_RULES_TO_ATTACH = 2000;
+// Detach needs one bulkEdit call per rule (each rule keeps a different remaining action
+// list), so this bounds how many of those run at once instead of firing up to
+// MAX_RULES_TO_ATTACH concurrently.
+const DETACH_CONCURRENCY = 10;
 
 interface WorkflowRuleActionParams {
   subAction?: string;
@@ -319,26 +324,28 @@ export const createAlertValidationWorkflowRuleAttachmentService = (
       }
 
       const bulkEditDependencies = getBulkEditDependencies(dependencies);
-      const bulkEditResults = await Promise.all([
-        ...(rulesToAttach.length > 0
-          ? [
-              bulkEditRulesFn({
-                rulesClient,
-                rules: rulesToAttach,
-                actions: [createAddWorkflowActionEdit(workflowId)],
-                ...bulkEditDependencies,
-              } satisfies BulkEditRulesArguments),
-            ]
-          : []),
-        ...rulesToDetach.map((rule) =>
-          bulkEditRulesFn({
-            rulesClient,
-            rules: [rule],
-            actions: [createSetWorkflowActionsEdit(rule, workflowId)],
-            ...bulkEditDependencies,
-          } satisfies BulkEditRulesArguments)
+      const [attachResult, detachResults] = await Promise.all([
+        rulesToAttach.length > 0
+          ? bulkEditRulesFn({
+              rulesClient,
+              rules: rulesToAttach,
+              actions: [createAddWorkflowActionEdit(workflowId)],
+              ...bulkEditDependencies,
+            } satisfies BulkEditRulesArguments)
+          : undefined,
+        pMap(
+          rulesToDetach,
+          (rule) =>
+            bulkEditRulesFn({
+              rulesClient,
+              rules: [rule],
+              actions: [createSetWorkflowActionsEdit(rule, workflowId)],
+              ...bulkEditDependencies,
+            } satisfies BulkEditRulesArguments),
+          { concurrency: DETACH_CONCURRENCY }
         ),
       ]);
+      const bulkEditResults = [...(attachResult ? [attachResult] : []), ...detachResults];
       const errorCount = bulkEditResults.reduce((count, result) => count + result.errors.length, 0);
 
       if (errorCount > 0) {

@@ -349,6 +349,40 @@ describe('alert analysis workflow rule attachments', () => {
     expect(bulkEditRulesFn).not.toHaveBeenCalled();
   });
 
+  it('bounds concurrent bulkEdit calls when detaching many rules', async () => {
+    const ruleCount = 25;
+    const rules = Array.from({ length: ruleCount }, (_, index) =>
+      createRule({ id: `rule-${index}`, actions: [createWorkflowAction()] })
+    );
+    let active = 0;
+    let maxActive = 0;
+    const bulkEditRulesFn = jest.fn().mockImplementation(async ({ rules: editedRules }) => {
+      active += 1;
+      maxActive = Math.max(maxActive, active);
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      active -= 1;
+      return { rules: editedRules, skipped: [], errors: [], total: editedRules.length };
+    }) as jest.MockedFunction<typeof bulkEditRules>;
+    const service = createAlertValidationWorkflowRuleAttachmentService({
+      rulesClient: createRulesClient(rules),
+      workflowId: WORKFLOW_ID,
+      bulkEditDependencies: createBulkEditDependencies(),
+      bulkEditRulesFn,
+    });
+
+    await expect(
+      service.updateRuleAttachments({
+        attachRuleIds: [],
+        detachRuleIds: rules.map(({ id }) => id),
+      })
+    ).resolves.toEqual({
+      matched: ruleCount,
+      updated: ruleCount,
+    });
+    expect(bulkEditRulesFn).toHaveBeenCalledTimes(ruleCount);
+    expect(maxActive).toBeLessThanOrEqual(10);
+  });
+
   it('rejects rules that are both attached and detached in the same request', async () => {
     const service = createAlertValidationWorkflowRuleAttachmentService({
       rulesClient: createRulesClient([createRule({ id: 'rule-1' })]),
