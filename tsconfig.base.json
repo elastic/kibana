@@ -870,6 +870,8 @@
       "@kbn/core-theme-browser/*": ["src/core/packages/theme/browser/*"],
       "@kbn/core-theme-browser-internal": ["src/core/packages/theme/browser-internal"],
       "@kbn/core-theme-browser-internal/*": ["src/core/packages/theme/browser-internal/*"],
+      "@kbn/core-theme-browser-internal-types": ["src/core/packages/theme/browser-internal-types"],
+      "@kbn/core-theme-browser-internal-types/*": ["src/core/packages/theme/browser-internal-types/*"],
       "@kbn/core-theme-browser-mocks": ["src/core/packages/theme/browser-mocks"],
       "@kbn/core-theme-browser-mocks/*": ["src/core/packages/theme/browser-mocks/*"],
       "@kbn/core-ui-settings-browser": ["src/core/packages/ui-settings/browser"],
