@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "test/**/*", "index.ts"],
+  "include": ["common/**/*", "public/**/*", "index.ts"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/kibana-react-plugin",
@@ -18,8 +18,7 @@
     "@kbn/code-editor",
     "@kbn/core-lifecycle-browser",
     "@kbn/presentation-util",
-    "@kbn/shared-ux-utility",
-    "@kbn/scout"
+    "@kbn/shared-ux-utility"
   ],
   "exclude": [
     "target/**/*",

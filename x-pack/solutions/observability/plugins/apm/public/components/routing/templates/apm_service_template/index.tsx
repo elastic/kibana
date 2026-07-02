@@ -11,7 +11,6 @@ import { useHistory, useLocation } from 'react-router-dom';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
-import { useShouldShowAnomalyUi } from '../../../../hooks/use_should_show_anomaly_ui';
 import { isMobileAgentName } from '../../../../../common/agent_name';
 import { ApmIndexSettingsContextProvider } from '../../../../context/apm_index_settings/apm_index_settings_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
@@ -82,8 +81,6 @@ function TemplateWithContext({
 
   const isPendingServiceAgent = !agentName && isPending(serviceAgentStatus);
 
-  const shouldShowAnomalyUi = useShouldShowAnomalyUi();
-
   const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
     useSloOverviewFlyout();
 
@@ -150,13 +147,7 @@ function TemplateWithContext({
           searchBar={
             <>
               {BottomHeaderContent && <BottomHeaderContent />}
-              {customSearchBar ?? (
-                <SearchBar
-                  {...searchBarOptions}
-                  showEnvironmentFilter
-                  showAnomalyThresholdSelector={shouldShowAnomalyUi}
-                />
-              )}
+              {customSearchBar ?? <SearchBar {...searchBarOptions} showEnvironmentFilter />}
             </>
           }
           pageHeader={{

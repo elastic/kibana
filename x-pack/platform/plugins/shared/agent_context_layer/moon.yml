@@ -41,7 +41,6 @@ dependsOn:
   - '@kbn/workflows-extensions'
   - '@kbn/workflows'
   - '@kbn/zod'
-  - '@kbn/es-errors'
 tags:
   - plugin
   - prod

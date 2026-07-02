@@ -29,11 +29,7 @@ export const usePreviousPeriodLabel = () => {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const previousPeriodText = useMemo(() => {
-    const timeComparisonOptions = getComparisonOptions({
-      start,
-      end,
-      showSelectedBoundsOption: false,
-    });
+    const timeComparisonOptions = getComparisonOptions({ start, end });
     const comparisonPeriodText =
       timeComparisonOptions.find((d) => d.value === offset || d.value.endsWith('ms'))?.text ??
       fallbackPreviousPeriodText;

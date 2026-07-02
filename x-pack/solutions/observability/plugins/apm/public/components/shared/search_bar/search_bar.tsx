@@ -14,7 +14,6 @@ import { TimeComparison } from '../time_comparison';
 import { TransactionTypeSelect } from '../transaction_type_select';
 import { UnifiedSearchBar } from '../unified_search_bar';
 import { useSecondaryFiltersWidthStyle } from './use_secondary_filters_width_style';
-import { AnomalyThresholdSelect } from '../anomaly_threshold_select';
 
 interface Props {
   hidden?: boolean;
@@ -24,7 +23,6 @@ interface Props {
   showEnvironmentFilter?: boolean;
   showQueryInput?: boolean;
   showTransactionTypeSelector?: boolean;
-  showAnomalyThresholdSelector?: boolean;
   searchBarPlaceholder?: string;
   searchBarBoolFilter?: QueryDslQueryContainer[];
 }
@@ -36,17 +34,13 @@ export function SearchBar({
   showTimeComparison = false,
   showEnvironmentFilter = false,
   showTransactionTypeSelector = false,
-  showAnomalyThresholdSelector = false,
   showQueryInput = true,
   searchBarPlaceholder,
   searchBarBoolFilter,
 }: Props) {
   const { isMedium } = useBreakpoints();
   const hasSecondaryFilters =
-    showTransactionTypeSelector ||
-    showEnvironmentFilter ||
-    showTimeComparison ||
-    showAnomalyThresholdSelector;
+    showTransactionTypeSelector || showEnvironmentFilter || showTimeComparison;
 
   const { secondaryFiltersWidthStyle, setSearchBarContainerRef } = useSecondaryFiltersWidthStyle({
     isMedium,
@@ -100,12 +94,6 @@ export function SearchBar({
                   <TimeComparison compressed fullWidth />
                 </EuiFlexItem>
               )}
-
-              {showAnomalyThresholdSelector && (
-                <EuiFlexItem>
-                  <AnomalyThresholdSelect compressed fullWidth />
-                </EuiFlexItem>
-              )}
             </EuiFlexGrid>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -129,12 +117,6 @@ export function SearchBar({
             {showTimeComparison && (
               <EuiFlexItem>
                 <TimeComparison compressed fullWidth />
-              </EuiFlexItem>
-            )}
-
-            {showAnomalyThresholdSelector && (
-              <EuiFlexItem>
-                <AnomalyThresholdSelect compressed fullWidth />
               </EuiFlexItem>
             )}
           </EuiFlexGrid>

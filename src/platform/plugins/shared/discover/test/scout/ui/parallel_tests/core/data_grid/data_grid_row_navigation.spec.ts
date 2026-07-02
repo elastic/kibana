@@ -13,7 +13,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../../fixtures/common';
+import { spaceTest } from '@kbn/scout';
 
 const TIME_RANGE = {
   from: '2015-09-21T09:00:00.000Z',

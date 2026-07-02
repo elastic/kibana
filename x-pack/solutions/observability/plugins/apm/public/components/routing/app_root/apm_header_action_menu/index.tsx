@@ -16,7 +16,6 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { SloPopoverAndFlyout } from './slo_popover_flyout';
 import { InspectorHeaderLink } from './inspector_header_link';
-import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 
 export function ApmHeaderActionMenu() {
   const { core, plugins, config, share } = useApmPluginContext();
@@ -26,7 +25,6 @@ export function ApmHeaderActionMenu() {
   const { capabilities } = application;
   const { featureFlags } = config;
   const canReadMlJobs = !!capabilities.ml?.canGetJobs;
-  const canCreateMlJobs = !!capabilities.ml?.canCreateJob;
   const { isAlertingAvailable, canReadAlerts, canSaveAlerts } = getAlertingCapabilities(
     plugins,
     capabilities
@@ -46,8 +44,6 @@ export function ApmHeaderActionMenu() {
 
   return (
     <EuiHeaderLinks gutterSize="xs">
-      {canCreateMlJobs && <AnomalyDetectionSetupLink />}
-
       {featureFlags.storageExplorerAvailable && (
         <EuiHeaderLink
           color="primary"

@@ -8,11 +8,12 @@
 import { EuiCheckbox, EuiFormPrepend, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { useShouldShowAnomalyUi } from '../../../hooks/use_should_show_anomaly_ui';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -30,28 +31,51 @@ export function TimeComparison({
   const history = useHistory();
   const { isSmall, isMedium } = useBreakpoints();
   const {
-    query: { rangeFrom, rangeTo, comparisonEnabled, offset, kuery },
+    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
   } = useAnyOfApmParams('/services', '/dependencies/*', '/services/{serviceName}');
 
-  const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
+  const location = useLocation();
+  const apmRouter = useApmRouter();
+
+  const { anomalyDetectionJobsStatus, anomalyDetectionJobsData } = useAnomalyDetectionJobsContext();
+  const { core } = useApmPluginContext();
   const { preferredEnvironment } = useEnvironmentsContext();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const shouldShowAnomalyUi = useShouldShowAnomalyUi();
+  const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
 
   const comparisonOptions = useMemo(() => {
+    const matchingRoutes = apmRouter.getRoutesToMatch(location.pathname);
+    // Only show the "Expected bounds" option in Overview and Transactions tabs
+    const showExpectedBoundsForThisTab =
+      !matchingRoutes.some((d) => d.path === '/services/{serviceName}/transactions/view') &&
+      matchingRoutes.some(
+        (d) =>
+          d.path === '/services/{serviceName}/overview' ||
+          d.path === '/services/{serviceName}/transactions'
+      );
+
     const timeComparisonOptions = getComparisonOptions({
       start,
       end,
-      showSelectedBoundsOption: shouldShowAnomalyUi,
-      anomalyDetectionSetupState,
-      kuery,
+      showSelectedBoundsOption: showExpectedBoundsForThisTab && canGetJobs,
+      anomalyDetectionJobsStatus,
+      anomalyDetectionJobsData,
       preferredEnvironment,
     });
 
     return timeComparisonOptions;
-  }, [shouldShowAnomalyUi, anomalyDetectionSetupState, start, end, preferredEnvironment, kuery]);
+  }, [
+    canGetJobs,
+    anomalyDetectionJobsStatus,
+    anomalyDetectionJobsData,
+    start,
+    end,
+    preferredEnvironment,
+    apmRouter,
+    location.pathname,
+  ]);
 
   const isSelectedComparisonTypeAvailable = comparisonOptions.some(({ value }) => value === offset);
 

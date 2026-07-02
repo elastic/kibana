@@ -13,7 +13,8 @@ import type { ScoutPage } from '..';
 import { DataGrid } from './data_grid';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
-import { resolveSelector } from '../utils';
+import { DataViewEditorPage } from './data_view_editor_page';
+import { resolveSelector } from '../utils/locator_helper';
 
 const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
 
@@ -107,35 +108,25 @@ export class DiscoverApp {
   }
 
   private async fillAndSubmitDataViewEditor({ name, adHoc = false }: DataViewOptions) {
-    // Minimal inline interaction with the data view editor flyout. The full
-    // `DataViewEditorPage` object lives in the `data_view_editor` plugin, but
-    // `kbn-scout` is a base package and must not depend on a plugin, so the few
-    // steps Discover needs are driven directly here.
-    const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
-    const form = this.page.testSubj.locator('indexPatternEditorForm');
-    const titleInput = this.page.testSubj.locator('createIndexPatternTitleInput');
-    const timestampField = this.page.testSubj.locator('timestampField');
-
-    await flyout.waitFor({ state: 'visible' });
+    const editor = new DataViewEditorPage(this.page);
+    await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
 
     // FTR passes the base name and relies on the editor auto-appending `*` as the
     // user types. Scout sets the title verbatim (`fill`), so append the wildcard
     // here to preserve that contract (`name`, `* will be added automatically`).
-    await titleInput.fill(name.endsWith('*') ? name : `${name}*`);
-    // wait for async title validation to settle before continuing.
-    await form.and(this.page.locator('[data-validation-error="0"]')).waitFor({ state: 'visible' });
+    await editor.setTitle(name.endsWith('*') ? name : `${name}*`);
 
     // wait for timestamp options; default @timestamp applies.
-    await timestampField
+    await editor.timestampField
       .and(this.page.locator('[data-is-loading="0"]'))
       .waitFor({ state: 'visible', timeout: 30_000 });
 
     if (adHoc) {
       await this.page.testSubj.click('exploreIndexPatternButton');
+      await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'hidden' });
     } else {
-      await this.page.testSubj.click('saveIndexPatternButton');
+      await editor.save();
     }
-    await flyout.waitFor({ state: 'hidden' });
 
     await this.waitUntilTabIsLoaded();
   }

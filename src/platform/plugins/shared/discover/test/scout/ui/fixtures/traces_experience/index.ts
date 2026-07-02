@@ -7,44 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createLazyPageObject } from '@kbn/scout';
-import type { DiscoverScoutTestFixtures, DiscoverWorkerFixtures } from '../common';
-import { spaceTest as spaceBaseTest } from '../common';
+import type {
+  PageObjects,
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
+} from '@kbn/scout';
+import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
 import { TracesExperiencePage } from './page_objects';
 
-export interface TracesExperienceTestFixtures extends DiscoverScoutTestFixtures {
-  pageObjects: DiscoverScoutTestFixtures['pageObjects'] & {
+export interface TracesExperienceTestFixtures extends ScoutParallelTestFixtures {
+  pageObjects: PageObjects & {
     tracesExperience: TracesExperiencePage;
   };
 }
 
-export const spaceTest = spaceBaseTest.extend<TracesExperienceTestFixtures, DiscoverWorkerFixtures>(
-  {
-    pageObjects: async (
-      {
-        pageObjects,
-        page,
-      }: {
-        pageObjects: TracesExperienceTestFixtures['pageObjects'];
-        page: TracesExperienceTestFixtures['page'];
-      },
-      use: (pageObjects: TracesExperienceTestFixtures['pageObjects']) => Promise<void>
-    ) => {
-      const extendedPageObjects = {
-        ...pageObjects,
-        tracesExperience: createLazyPageObject(
-          TracesExperiencePage,
-          page,
-          pageObjects.dataGrid,
-          pageObjects.docViewer,
-          pageObjects.discover
-        ),
-      };
-
-      await use(extendedPageObjects);
+export const spaceTest = spaceBaseTest.extend<
+  TracesExperienceTestFixtures,
+  ScoutParallelWorkerFixtures
+>({
+  pageObjects: async (
+    {
+      pageObjects,
+      page,
+    }: {
+      pageObjects: TracesExperienceTestFixtures['pageObjects'];
+      page: TracesExperienceTestFixtures['page'];
     },
-  }
-);
+    use: (pageObjects: TracesExperienceTestFixtures['pageObjects']) => Promise<void>
+  ) => {
+    const extendedPageObjects = {
+      ...pageObjects,
+      tracesExperience: createLazyPageObject(
+        TracesExperiencePage,
+        page,
+        pageObjects.dataGrid,
+        pageObjects.docViewer,
+        pageObjects.discover
+      ),
+    };
+
+    await use(extendedPageObjects);
+  },
+});
 
 export { TRACES, RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE, DEEP_TRACE } from './constants';
 export { setupTracesExperience, teardownTracesExperience } from './setup';

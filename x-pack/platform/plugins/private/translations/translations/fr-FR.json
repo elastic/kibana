@@ -12292,6 +12292,7 @@
     "xpack.apm.columns.euiButtonIcon.deleteLabel": "Supprimer",
     "xpack.apm.columns.euiButtonIcon.editLabel": "Modifier",
     "xpack.apm.comparison.expectedBoundsTitle": "Limites attendues",
+    "xpack.apm.comparison.mlExpectedBoundsDisabledText": "Limites attendues (la détection d'anomalie doit être activée pour l’environnement)",
     "xpack.apm.comparison.mlExpectedBoundsText": "Limites attendues",
     "xpack.apm.componentWithDiagnoseButton.diagnosethisconnectionButton.ariaLabel": "Diagnostiquez cette connexion",
     "xpack.apm.compositeSpanCallsLabel": ", {count} appels, sur une moyenne de {duration}",

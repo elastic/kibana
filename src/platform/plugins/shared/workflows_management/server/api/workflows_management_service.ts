@@ -280,8 +280,7 @@ export class WorkflowsService {
     return getHistoryForWorkflow(
       {
         changeHistoryService: this.changeHistoryService,
-        getWorkflowSource: (workflowId, sid) =>
-          this.crudService.getWorkflowDocumentSource(workflowId, sid, { includeGlobal: true }),
+        getWorkflow: (workflowId, sid) => this.crudService.getWorkflow(workflowId, sid),
         workflowVersioningEnabled: await readWorkflowVersioningEnabled(this.coreStart, this.logger),
       },
       { workflowId: id, spaceId, ...options }

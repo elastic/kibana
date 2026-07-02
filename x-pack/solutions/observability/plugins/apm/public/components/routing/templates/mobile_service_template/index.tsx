@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
-import { useShouldShowAnomalyUi } from '../../../../hooks/use_should_show_anomaly_ui';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmIndexSettingsContextProvider } from '../../../../context/apm_index_settings/apm_index_settings_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
@@ -76,8 +75,6 @@ function TemplateWithContext({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const shouldShowAnomalyUi = useShouldShowAnomalyUi();
-
   const router = useApmRouter();
 
   const tabs = useTabs({ selectedTabKey });
@@ -123,13 +120,7 @@ function TemplateWithContext({
         searchBar={
           <>
             {BottomHeaderContent && <BottomHeaderContent />}
-            {customSearchBar ?? (
-              <MobileSearchBar
-                {...searchBarOptions}
-                showEnvironmentFilter
-                showAnomalyThresholdSelector={shouldShowAnomalyUi}
-              />
-            )}
+            {customSearchBar ?? <MobileSearchBar {...searchBarOptions} />}
           </>
         }
         pageHeader={{

@@ -370,6 +370,12 @@ export class StorageIndexAdapter<
     }
   }
 
+  /**
+   * If a write index already exists and its mappings are stale,
+   * updates the index template and pushes the new mappings.
+   * No-op when no index exists yet (preserving lazy-write semantics)
+   * or when mappings are already up-to-date.
+   */
   private async updateMappingsIfNeeded(): Promise<void> {
     const expectedSchemaVersion = getSchemaVersion(this.storage);
 
@@ -823,7 +829,6 @@ export class StorageIndexAdapter<
       get: this.get,
       existsIndex: this.existsIndex,
       esql: this.esql,
-      reconcileMappings: () => this.updateMappingsIfNeeded(),
     };
   }
 }

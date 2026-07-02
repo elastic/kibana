@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator, ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
+import type { ScoutPage } from '..';
+import { expect } from '..';
+import { DataGrid } from './data_grid';
 
 /**
  * Page object for the unified document viewer flyout that is opened from the
@@ -16,21 +17,10 @@ import { expect } from '@kbn/scout/ui';
  * doc-viewer concerns stay focused.
  */
 export class DocViewer {
-  constructor(private readonly page: ScoutPage) {}
+  private readonly dataGrid: DataGrid;
 
-  private async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
-    const row = this.page.locator(`[data-grid-visible-row-index="${rowIndex}"]`);
-    await row.hover();
-    await row.locator('[data-test-subj="docTableExpandToggleColumn"]').click();
-  }
-
-  private async readFieldTokenLabels(scope: Locator, limit: number): Promise<string[]> {
-    return scope
-      .locator('.kbnFieldIcon svg')
-      .evaluateAll(
-        (icons, max) => icons.slice(0, max).map((icon) => icon.getAttribute('aria-label') ?? ''),
-        limit
-      );
+  constructor(private readonly page: ScoutPage) {
+    this.dataGrid = new DataGrid(page);
   }
 
   async waitForFlyoutOpen() {
@@ -39,7 +29,7 @@ export class DocViewer {
   }
 
   async openAndWaitForFlyout({ rowIndex }: { rowIndex: number }) {
-    await this.openDocumentDetails({ rowIndex });
+    await this.dataGrid.openDocumentDetails({ rowIndex });
     await this.waitForFlyoutOpen();
   }
 
@@ -66,7 +56,7 @@ export class DocViewer {
   async getFieldTokens(limit = 10): Promise<string[]> {
     const flyout = this.page.testSubj.locator('docViewerFlyout');
     await flyout.waitFor({ state: 'visible' });
-    return this.readFieldTokenLabels(flyout, limit);
+    return this.dataGrid.readFieldTokenLabels(flyout, limit);
   }
 
   async getRowActionCount(): Promise<number> {

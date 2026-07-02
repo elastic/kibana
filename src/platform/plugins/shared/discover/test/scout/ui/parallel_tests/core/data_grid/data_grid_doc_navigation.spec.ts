@@ -12,7 +12,8 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../../../fixtures/common';
+import { spaceTest } from '@kbn/scout';
+import { testData } from '../../../fixtures/common';
 
 spaceTest.describe(
   'Discover data grid - document navigation',
