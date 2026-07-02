@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
-
-const HEADER_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.flyoutV2.attack.header.placeholder',
-  { defaultMessage: 'Attack details header' }
-);
-
-const BODY_PLACEHOLDER = i18n.translate('xpack.securitySolution.flyoutV2.attack.body.placeholder', {
-  defaultMessage: 'Attack details body',
-});
+import { useStore } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
+import { flyoutProviders } from '../../shared/components/flyout_provider';
+import { NotesDetails } from '../../shared/tools/notes';
+import { useKibana } from '../../../common/lib/kibana';
+import { Header } from './header';
+import { OverviewTab } from './tabs/overview_tab';
 
 const FOOTER_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.flyoutV2.attack.footer.placeholder',
@@ -30,38 +29,52 @@ export interface AttackFlyoutProps {
    */
   hit: DataTableRecord;
   /**
-   * Callback invoked after attack mutations (status change, assignee update, etc.) to refresh related views.
+   * Callback invoked after attack mutations (status change, assignee update, etc.).
+   * Provided by `AttackFlyoutWrapper`; it refetches the attack document so the
+   * flyout UI reflects the mutation without the user having to close and re-open it,
+   * and notifies the surface that opened the flyout to refresh as well.
    */
   onAttackUpdated: () => void;
 }
 
 /**
- * Skeleton content for the attack flyout (v2). Header, body and footer will be
- * wired in subsequent PRs; for now each section renders a placeholder so the
- * flyout visually opens without errors.
+ * Content for the attack flyout. Receives a fully-resolved `hit` from
+ * `AttackFlyoutWrapper` and renders the header and overview tab. The footer is
+ * wired in a subsequent PR; it currently renders a placeholder.
  */
-export const AttackFlyout = memo(
-  ({ hit: _hit, onAttackUpdated: _onAttackUpdated }: AttackFlyoutProps) => {
-    return (
-      <>
-        <EuiFlyoutHeader data-test-subj="attack-flyout-header">
-          <EuiText>
-            <p>{HEADER_PLACEHOLDER}</p>
-          </EuiText>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody data-test-subj="attack-flyout-body">
-          <EuiText>
-            <p>{BODY_PLACEHOLDER}</p>
-          </EuiText>
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter data-test-subj="attack-flyout-footer">
-          <EuiText>
-            <p>{FOOTER_PLACEHOLDER}</p>
-          </EuiText>
-        </EuiFlyoutFooter>
-      </>
+export const AttackFlyout = memo(({ hit, onAttackUpdated }: AttackFlyoutProps) => {
+  const { services } = useKibana();
+  const { overlays } = services;
+  const store = useStore();
+  const history = useHistory();
+
+  const onShowNotes = useCallback(() => {
+    overlays.openSystemFlyout(
+      flyoutProviders({
+        services,
+        store,
+        history,
+        children: <NotesDetails hit={hit} />,
+      }),
+      defaultToolsFlyoutProperties
     );
-  }
-);
+  }, [history, hit, overlays, services, store]);
+
+  return (
+    <>
+      <EuiFlyoutHeader data-test-subj="attack-flyout-header">
+        <Header hit={hit} onAttackUpdated={onAttackUpdated} onShowNotes={onShowNotes} />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody data-test-subj="attack-flyout-body">
+        <OverviewTab hit={hit} />
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter data-test-subj="attack-flyout-footer">
+        <EuiText>
+          <p>{FOOTER_PLACEHOLDER}</p>
+        </EuiText>
+      </EuiFlyoutFooter>
+    </>
+  );
+});
 
 AttackFlyout.displayName = 'AttackFlyout';

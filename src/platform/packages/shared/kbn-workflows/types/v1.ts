@@ -27,6 +27,8 @@ export enum ExecutionStatus {
   WAITING_FOR_INPUT = 'waiting_for_input',
   WAITING_FOR_CHILD = 'waiting_for_child',
   RUNNING = 'running',
+  /** Persisted concurrency backlog - does not count toward concurrency max until promoted to pending + scheduled */
+  QUEUED = 'queued',
 
   // Done
   COMPLETED = 'completed',
@@ -47,6 +49,16 @@ export const TerminalExecutionStatuses: readonly ExecutionStatus[] = [
 ] as const;
 
 export const NonTerminalExecutionStatuses: readonly ExecutionStatus[] = [
+  ExecutionStatus.PENDING,
+  ExecutionStatus.WAITING,
+  ExecutionStatus.WAITING_FOR_INPUT,
+  ExecutionStatus.WAITING_FOR_CHILD,
+  ExecutionStatus.RUNNING,
+  ExecutionStatus.QUEUED,
+] as const;
+
+/** Workflow executions occupying a concurrency slot (excludes queued backlog). */
+export const ConcurrencySlotOccupyingExecutionStatuses: readonly ExecutionStatus[] = [
   ExecutionStatus.PENDING,
   ExecutionStatus.WAITING,
   ExecutionStatus.WAITING_FOR_INPUT,
@@ -121,6 +133,7 @@ export interface EsWorkflowExecution {
   workflowId: string;
   managed?: boolean;
   managedBy?: string | null;
+  billable?: boolean | null;
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
   isTestRun: boolean;
@@ -171,6 +184,11 @@ export interface EsWorkflowExecution {
    * step reported usage. See {@link WorkflowTokenUsage}.
    */
   usage?: WorkflowTokenUsage;
+  /**
+   * Workflow document version (`_source.version`) captured when the execution was
+   * created.
+   */
+  version?: number;
 }
 
 export interface ProviderInput {
@@ -261,6 +279,10 @@ export interface WorkflowExecutionLogModel {
 export interface WorkflowExecutionDto {
   spaceId: string;
   id: string;
+  managed?: boolean;
+  managedBy?: string | null;
+  originManagedWorkflowId?: string | null;
+  managedVersion?: number | null;
   status: ExecutionStatus;
   isTestRun: boolean;
   startedAt: string;
@@ -282,6 +304,8 @@ export interface WorkflowExecutionDto {
   concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
   /** Aggregated LLM token usage across all `ai.*` steps in this execution. */
   usage?: WorkflowTokenUsage;
+  /** Workflow document version captured at execution start. See {@link EsWorkflowExecution.version}. */
+  version?: number;
 }
 
 export type WorkflowExecutionListItemDto = Omit<
@@ -312,6 +336,7 @@ export const EsWorkflowSchema = z.object({
   enabled: z.boolean(),
   managed: z.boolean().optional(),
   managedBy: z.string().nullable().optional(),
+  billable: z.boolean().nullable().optional(),
   originManagedWorkflowId: z.string().nullable().optional(),
   managedVersion: z.number().nullable().optional(),
   tags: z.array(z.string()),
@@ -323,6 +348,8 @@ export const EsWorkflowSchema = z.object({
   deleted_at: z.date().nullable().default(null),
   yaml: z.string(),
   valid: z.boolean().readonly(),
+  /** Monotonic workflow document version counter (`_source.version`). */
+  version: z.number().optional(),
 });
 
 export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
@@ -437,6 +464,7 @@ export interface WorkflowDetailDto {
   definition: WorkflowYaml | null;
   yaml: string;
   valid: boolean;
+  version?: number;
 }
 
 export interface WorkflowPartialDetailDto extends Partial<WorkflowDetailDto> {
@@ -474,8 +502,10 @@ export interface WorkflowExecutionEngineModel
     | 'yaml'
     | 'managed'
     | 'managedBy'
+    | 'billable'
     | 'originManagedWorkflowId'
     | 'managedVersion'
+    | 'version'
   > {
   isTestRun?: boolean;
   isEphemeral?: boolean;
@@ -547,7 +577,7 @@ export type CompletionFn = () => Promise<
   Array<{ label: string; value: string; detail?: string; documentation?: string }>
 >;
 
-export type StepStabilityLevel = 'stable' | 'beta' | 'tech_preview';
+export type StabilityLevel = 'stable' | 'beta' | 'tech_preview';
 
 export interface BaseConnectorContract {
   type: string;
@@ -560,7 +590,7 @@ export interface BaseConnectorContract {
   /** Documentation URL for this API endpoint */
   documentation?: string | null;
   /** API stability level derived from the OpenAPI `x-state` field */
-  stability?: StepStabilityLevel;
+  stability?: StabilityLevel;
   /** Deprecation metadata for this step type. */
   deprecation?: StepDeprecationInfo;
   examples?: ConnectorExamples;
