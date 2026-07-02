@@ -45,13 +45,11 @@ jest.mock('../../../hooks/use_telemetry', () => ({
 
 // Mock export_workflows module
 const mockExportWorkflows = jest.fn();
-const mockExportSingleWorkflow = jest.fn();
 const mockFindMissingReferencedIds = jest.fn();
 const mockResolveAllReferences = jest.fn();
 
 jest.mock('../../../common/lib/export_workflows', () => ({
   exportWorkflows: (...args: unknown[]) => mockExportWorkflows(...args),
-  exportSingleWorkflow: (...args: unknown[]) => mockExportSingleWorkflow(...args),
   findMissingReferencedIds: (...args: unknown[]) => mockFindMissingReferencedIds(...args),
   resolveAllReferences: (...args: unknown[]) => mockResolveAllReferences(...args),
 }));
@@ -90,17 +88,18 @@ describe('useExportWithReferences', () => {
   });
 
   describe('startExport', () => {
-    it('exports a single workflow as YAML without showing a modal', () => {
+    it('exports a single workflow as YAML via the server (preserves comments)', async () => {
       mockFindMissingReferencedIds.mockReturnValue([]);
+      mockExportWorkflows.mockResolvedValue(1);
 
       const workflow = createMockWorkflow();
       const { result } = renderHook(() => useExportWithReferences({ allWorkflowsMap, onComplete }));
 
-      act(() => {
+      await act(async () => {
         result.current.startExport([workflow]);
       });
 
-      expect(mockExportSingleWorkflow).toHaveBeenCalledWith(workflow);
+      expect(mockExportWorkflows).toHaveBeenCalledWith([workflow], mockApi);
       expect(mockNotifications.toasts.addSuccess).toHaveBeenCalled();
       expect(mockReportWorkflowExported).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -154,20 +153,21 @@ describe('useExportWithReferences', () => {
       expect(result.current.exportModalState?.pendingExport).toEqual([mainWorkflow]);
     });
 
-    it('exports without modal when missing IDs are not found in allWorkflowsMap', () => {
+    it('exports without modal when missing IDs are not found in allWorkflowsMap', async () => {
       mockFindMissingReferencedIds.mockReturnValue(['wf-unknown']);
       // allWorkflowsMap does NOT have 'wf-unknown'
+      mockExportWorkflows.mockResolvedValue(1);
 
       const workflow = createMockWorkflow();
       const { result } = renderHook(() => useExportWithReferences({ allWorkflowsMap, onComplete }));
 
-      act(() => {
+      await act(async () => {
         result.current.startExport([workflow]);
       });
 
       // Should fall through to exportWithoutReferences because missingWorkflows is empty
       expect(result.current.exportModalState).toBeNull();
-      expect(mockExportSingleWorkflow).toHaveBeenCalled();
+      expect(mockExportWorkflows).toHaveBeenCalledWith([workflow], mockApi);
     });
   });
 

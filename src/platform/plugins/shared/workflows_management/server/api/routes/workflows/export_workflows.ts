@@ -69,8 +69,15 @@ export function registerExportWorkflowsRoute(deps: RouteDependencies) {
           workflows.forEach((workflow) => assertCanReadManagedWorkflow(request, workflow));
 
           const entries: WorkflowExportEntry[] = workflows.map((workflow) => {
+            // Prefer the workflow's stored YAML source over re-serializing the
+            // parsed definition. Re-serialization strips YAML comments (both
+            // documentation and temporarily-disabled steps), which teams rely
+            // on when transferring workflows between clusters. Fall back to the
+            // serialized definition only when no stored YAML is available.
             const yaml =
-              typeof workflow.definition === 'object' && workflow.definition !== null
+              typeof workflow.yaml === 'string' && workflow.yaml.length > 0
+                ? workflow.yaml
+                : workflow.definition && typeof workflow.definition === 'object'
                 ? stringifyWorkflowDefinition(workflow.definition)
                 : workflow.yaml;
             return { id: workflow.id, yaml };

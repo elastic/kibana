@@ -33,24 +33,37 @@ export interface WorkflowExportPayload {
 
 /**
  * Generates the export payload for a single workflow without triggering a
- * download. Returns null when the workflow has no definition.
+ * download. When `yaml` is provided (typically fetched from the server export
+ * API), it is used verbatim so YAML comments in the original source are
+ * preserved. Falls back to serializing the parsed definition, which drops
+ * comments — kept as a last-resort path for callers that don't have server
+ * access. Returns null when neither yaml nor a definition is available.
  */
 export const prepareSingleWorkflowExport = (
-  workflow: WorkflowListItemDto
+  workflow: WorkflowListItemDto,
+  yaml?: string
 ): WorkflowExportPayload | null => {
-  if (!workflow.definition) {
+  let content: string;
+  if (typeof yaml === 'string' && yaml.length > 0) {
+    content = yaml;
+  } else if (workflow.definition) {
+    content = stringifyWorkflowDefinition(workflow.definition);
+  } else {
     return null;
   }
-  const yaml = stringifyWorkflowDefinition(workflow.definition);
   const filename = `${sanitizeFilename(workflow.name)}.yml`;
-  return { filename, content: { content: yaml, type: 'text/yaml' } };
+  return { filename, content: { content, type: 'text/yaml' } };
 };
 
 /**
- * Exports a single workflow as a `.yml` file download.
+ * Exports a single workflow as a `.yml` file download. When called without the
+ * optional `yaml` argument, comments in the original YAML source are lost
+ * because the client-side workflow DTO does not carry the raw YAML — prefer
+ * calling `exportWorkflows` (which fetches the YAML from the server) when
+ * comment preservation matters.
  */
-export const exportSingleWorkflow = (workflow: WorkflowListItemDto): void => {
-  const payload = prepareSingleWorkflowExport(workflow);
+export const exportSingleWorkflow = (workflow: WorkflowListItemDto, yaml?: string): void => {
+  const payload = prepareSingleWorkflowExport(workflow, yaml);
   if (payload) {
     downloadFileAs(payload.filename, payload.content);
   }
@@ -61,6 +74,10 @@ export const exportSingleWorkflow = (workflow: WorkflowListItemDto): void => {
  * For multiple workflows, fetches entries from the server and builds
  * a ZIP archive client-side before triggering the download.
  * Returns the number of exported workflows.
+ *
+ * Both paths fetch the raw YAML from the server export API so that any
+ * comments in the original source are preserved. Re-serializing from the
+ * parsed workflow definition would strip them.
  */
 export const exportWorkflows = async (
   workflows: WorkflowListItemDto[],
@@ -71,13 +88,15 @@ export const exportWorkflows = async (
     return 0;
   }
 
+  const ids = exportable.map((w) => w.id);
+  const { entries, manifest } = await api.exportWorkflows({ ids });
+
   if (exportable.length === 1) {
-    exportSingleWorkflow(exportable[0]);
+    const entry = entries.find((e) => e.id === exportable[0].id) ?? entries[0];
+    exportSingleWorkflow(exportable[0], entry?.yaml);
     return 1;
   }
 
-  const ids = exportable.map((w) => w.id);
-  const { entries, manifest } = await api.exportWorkflows({ ids });
   const blob = await generateWorkflowsZip(entries, manifest);
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');

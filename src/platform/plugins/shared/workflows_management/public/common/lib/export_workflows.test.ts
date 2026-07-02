@@ -88,15 +88,60 @@ describe('export_workflows', () => {
       expect(result!.filename).toBe('workflow_export.yml');
     });
 
-    it('should return null when definition is null', () => {
+    it('should return null when definition is null and no yaml provided', () => {
       const result = prepareSingleWorkflowExport(createWorkflow({ definition: null }));
 
       expect(result).toBeNull();
     });
+
+    it('should use the provided yaml verbatim so comments survive the round-trip', () => {
+      const yaml = [
+        '# workflow: transferred between clusters',
+        'name: My Workflow',
+        'enabled: true',
+        'steps:',
+        '  # temporarily disabled',
+        '  # - name: broken',
+        '  #   type: noop',
+        '  - name: ok_step',
+        '    type: noop',
+        '',
+      ].join('\n');
+
+      const result = prepareSingleWorkflowExport(createWorkflow({ name: 'My Workflow' }), yaml);
+
+      expect(result).not.toBeNull();
+      expect(result!.filename).toBe('My_Workflow.yml');
+      expect((result!.content as { content: string }).content).toBe(yaml);
+    });
+
+    it('should return the yaml payload even when definition is null (server-provided)', () => {
+      const yaml = '# comment\nname: Y\n';
+      const result = prepareSingleWorkflowExport(
+        createWorkflow({ name: 'Y', definition: null }),
+        yaml
+      );
+
+      expect(result).not.toBeNull();
+      expect((result!.content as { content: string }).content).toBe(yaml);
+    });
   });
 
   describe('exportSingleWorkflow', () => {
-    it('should call downloadFileAs with .yml extension and yaml content', () => {
+    it('should use the provided yaml verbatim (preserving comments)', () => {
+      exportSingleWorkflow(
+        createWorkflow({ name: 'My Workflow' }),
+        '# top-level comment\nname: My Workflow\nsteps: []\n'
+      );
+
+      expect(mockDownloadFileAs).toHaveBeenCalledTimes(1);
+      const [filename, opts] = mockDownloadFileAs.mock.calls[0];
+      expect(filename).toBe('My_Workflow.yml');
+      expect(opts.type).toBe('text/yaml');
+      expect(opts.content).toContain('# top-level comment');
+    });
+
+    it('should fall back to stringifying the definition when yaml is not provided', () => {
       exportSingleWorkflow(createWorkflow({ name: 'My Workflow' }));
 
       expect(mockDownloadFileAs).toHaveBeenCalledTimes(1);
@@ -106,7 +151,7 @@ describe('export_workflows', () => {
       expect(opts.content).toContain('stringified:');
     });
 
-    it('should no-op when definition is null', () => {
+    it('should no-op when definition is null and no yaml is provided', () => {
       exportSingleWorkflow(createWorkflow({ definition: null }));
 
       expect(mockDownloadFileAs).not.toHaveBeenCalled();
@@ -114,14 +159,21 @@ describe('export_workflows', () => {
   });
 
   describe('exportWorkflows', () => {
-    it('should export single workflow as YAML when array has length 1', async () => {
+    it('should fetch YAML from the server and export a single workflow as .yml', async () => {
       const api = createMockWorkflowApi();
+      api.exportWorkflows.mockResolvedValue({
+        entries: [
+          { id: 'w-1', yaml: '# preserved comment\nname: Test Workflow\nsteps: []' },
+        ],
+        manifest: { exportedCount: 1, exportedAt: '2026-01-01T00:00:00.000Z', version: '1' },
+      });
       const result = await exportWorkflows([createWorkflow()], api);
 
       expect(result).toBe(1);
-      const [filename] = mockDownloadFileAs.mock.calls[0];
+      expect(api.exportWorkflows).toHaveBeenCalledWith({ ids: ['w-1'] });
+      const [filename, opts] = mockDownloadFileAs.mock.calls[0];
       expect(filename).toMatch(/\.yml$/);
-      expect(api.exportWorkflows).not.toHaveBeenCalled();
+      expect(opts.content).toContain('# preserved comment');
     });
 
     it('should fetch entries from API and build ZIP client-side for multiple workflows', async () => {

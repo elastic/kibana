@@ -13,7 +13,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
 import {
-  exportSingleWorkflow,
   exportWorkflows,
   findMissingReferencedIds,
   resolveAllReferences,
@@ -83,7 +82,7 @@ export const useExportWithReferences = ({
       }
       telemetry.reportWorkflowExported({
         workflowCount: workflowsToExport.length,
-        format: 'zip',
+        format: workflowsToExport.length === 1 ? 'yaml' : 'zip',
         referenceResolution,
         error: exportError,
       });
@@ -94,25 +93,9 @@ export const useExportWithReferences = ({
 
   const exportWithoutReferences = useCallback(
     (workflowsToExport: WorkflowListItemDto[]) => {
-      if (workflowsToExport.length === 1) {
-        exportSingleWorkflow(workflowsToExport[0]);
-        notifications?.toasts.addSuccess(
-          i18n.translate('workflows.export.singleSuccess', {
-            defaultMessage: 'Workflow exported successfully.',
-          }),
-          { toastLifeTimeMs: TOAST_LIFE_TIME_MS }
-        );
-        telemetry.reportWorkflowExported({
-          workflowCount: 1,
-          format: 'yaml',
-          referenceResolution: 'none',
-        });
-        onComplete?.();
-      } else {
-        performExport(workflowsToExport, 'none');
-      }
+      performExport(workflowsToExport, 'none');
     },
-    [performExport, notifications, onComplete, telemetry]
+    [performExport]
   );
 
   const startExport = useCallback(

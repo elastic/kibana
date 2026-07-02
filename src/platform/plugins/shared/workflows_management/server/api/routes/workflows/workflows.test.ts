@@ -790,6 +790,49 @@ describe('Workflow routes', () => {
         'Export skipped 1 missing workflow(s): w-missing-1'
       );
     });
+
+    it('should preserve YAML comments when exporting a workflow', async () => {
+      const yamlWithComments = [
+        '# top-level description of this workflow',
+        'name: Commented Workflow',
+        'enabled: true',
+        'steps:',
+        '  # temporarily disabled while we debug the flake',
+        '  # - name: broken_step',
+        '  #   type: noop',
+        '  - name: ok_step',
+        '    type: noop',
+        '',
+      ].join('\n');
+
+      mockApi.getWorkflowsByIds.mockResolvedValue([
+        {
+          id: 'w-commented',
+          name: 'Commented Workflow',
+          yaml: yamlWithComments,
+          definition: {
+            name: 'Commented Workflow',
+            enabled: true,
+            steps: [{ name: 'ok_step', type: 'noop' }],
+          },
+        },
+      ]);
+
+      const request = httpServerMock.createKibanaRequest({ body: { ids: ['w-commented'] } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+      const { body } = (response.ok as jest.Mock).mock.calls[0][0];
+
+      expect(body.entries).toHaveLength(1);
+      expect(body.entries[0].id).toBe('w-commented');
+      expect(body.entries[0].yaml).toContain('# top-level description of this workflow');
+      expect(body.entries[0].yaml).toContain(
+        '# temporarily disabled while we debug the flake'
+      );
+      expect(body.entries[0].yaml).toContain('# - name: broken_step');
+    });
   });
 
   describe('GET:/api/workflows/stats', () => {
