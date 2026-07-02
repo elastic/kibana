@@ -19,9 +19,6 @@ const labels = {
   close: i18n.translate('xpack.agentBuilder.conversationSpine.header.close', {
     defaultMessage: 'Close',
   }),
-  fullscreen: i18n.translate('xpack.agentBuilder.conversationSpine.header.fullscreen', {
-    defaultMessage: 'Toggle fullscreen',
-  }),
 };
 
 /** POC: hide spine relationship badge in the application panel overlay header. */
@@ -29,17 +26,10 @@ const SHOW_SPINE_RELATIONSHIP_BADGE_IN_OVERLAY_HEADER = false;
 
 interface SpineHeaderProps {
   onClose: () => void;
-  isFullscreen: boolean;
-  onToggleFullscreen: () => void;
   headerSlots?: SpineHeaderSlots;
 }
 
-export const SpineHeader: React.FC<SpineHeaderProps> = ({
-  onClose,
-  isFullscreen,
-  onToggleFullscreen,
-  headerSlots,
-}) => {
+export const SpineHeader: React.FC<SpineHeaderProps> = ({ onClose, headerSlots }) => {
   const { euiTheme } = useEuiTheme();
   const { spineState } = useConversationSpineContext();
 
@@ -93,32 +83,16 @@ export const SpineHeader: React.FC<SpineHeaderProps> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={labels.fullscreen} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
-                  aria-label={labels.fullscreen}
-                  color="text"
-                  size="s"
-                  onClick={onToggleFullscreen}
-                  data-test-subj="agentBuilderConversationSpineFullscreen"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={labels.close} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="cross"
-                  aria-label={labels.close}
-                  color="text"
-                  size="s"
-                  onClick={onClose}
-                  data-test-subj="agentBuilderConversationSpineClose"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiToolTip content={labels.close} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="cross"
+              aria-label={labels.close}
+              color="text"
+              size="s"
+              onClick={onClose}
+              data-test-subj="agentBuilderConversationSpineClose"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

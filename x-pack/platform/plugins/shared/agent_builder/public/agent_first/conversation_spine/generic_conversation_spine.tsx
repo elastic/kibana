@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AttachmentsService } from '../../services/attachments/attachements_service';
@@ -28,21 +28,15 @@ export const GenericConversationSpine: React.FC<GenericConversationSpineProps> =
 }) => {
   const { euiTheme } = useEuiTheme();
   const { closeSpine, closeAttachmentPreview, spineState } = useConversationSpineContext();
-  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const onEscape = useCallback(() => {
-    if (isFullscreen) {
-      setIsFullscreen(false);
-      return;
-    }
-
     if (spineState?.attachmentsView.mode === 'attachment') {
       closeAttachmentPreview();
       return;
     }
 
     closeSpine();
-  }, [closeAttachmentPreview, closeSpine, isFullscreen, spineState?.attachmentsView.mode]);
+  }, [closeAttachmentPreview, closeSpine, spineState?.attachmentsView.mode]);
 
   useEscapeKeyHandler(onEscape);
 
@@ -53,17 +47,11 @@ export const GenericConversationSpine: React.FC<GenericConversationSpineProps> =
     min-height: 0;
     height: 100%;
     background: ${euiTheme.colors.backgroundBasePlain};
-    ${isFullscreen ? 'position: fixed; inset: 0; z-index: 1000;' : ''}
   `;
 
   return (
     <div css={rootStyles} data-test-subj="agentWorkspaceConversationSpine">
-      <SpineHeader
-        onClose={closeSpine}
-        isFullscreen={isFullscreen}
-        onToggleFullscreen={() => setIsFullscreen((value) => !value)}
-        headerSlots={headerSlots}
-      />
+      <SpineHeader onClose={closeSpine} headerSlots={headerSlots} />
       <SpineTabs attachmentsService={attachmentsService} additionalTabs={additionalTabs} />
     </div>
   );

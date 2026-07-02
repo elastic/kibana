@@ -7,18 +7,27 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { css, keyframes } from '@emotion/react';
-import { EuiButtonIcon, EuiNotificationBadge, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiNotificationBadge, EuiPopover, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useActiveConversationAttachmentCount } from '../../../hooks/use_active_conversation_attachment_count';
-import { useConversationContext } from '../../../context/conversation/conversation_context';
+import {
+  CART_RAIL_POPOVER_MAX_HEIGHT,
+  CART_RAIL_WIDTH,
+} from '../../../../agent_first/conversation_spine/cart_rail/cart_rail.constants';
+import { CartRailContent } from '../../../../agent_first/conversation_spine/cart_rail/cart_rail_content';
+import { useOptionalCartRailContext } from '../../../../agent_first/conversation_spine/cart_rail/cart_rail_context';
+import { CartRailPanel } from '../../../../agent_first/conversation_spine/cart_rail/cart_rail_panel';
+import { useIsCartRailOpen } from '../../../../agent_first/conversation_spine/cart_rail/use_is_cart_rail_open';
 import {
   registerAgentCartButtonElement,
   subscribeCartPulse,
   subscribeCartReceiving,
 } from '../../../../agent_first/attachment_coordinator/coordinator_bridge';
 import { useOptionalConversationSpineContext } from '../../../../agent_first/conversation_spine/conversation_spine_context';
-import { useCanvasContext } from '../conversation_rounds/round_response/attachments/canvas_context';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { useActiveConversationAttachmentCount } from '../../../hooks/use_active_conversation_attachment_count';
 import { useIsAgentWorkspaceMount } from '../../../hooks/use_navigation';
+import { useCanvasContext } from '../conversation_rounds/round_response/attachments/canvas_context';
 
 const labels = {
   attachments: (count: number) =>
@@ -55,11 +64,17 @@ export const AttachmentCartButton: React.FC = () => {
   const attachmentCount = useActiveConversationAttachmentCount();
   const { isEmbeddedContext } = useConversationContext();
   const { openAttachmentCart } = useCanvasContext();
+  const { attachmentsService } = useAgentBuilderServices();
   const spineContext = useOptionalConversationSpineContext();
+  const cartRailContext = useOptionalCartRailContext();
   const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
+  const isCartRailOpen = useIsCartRailOpen();
   const pulseTimeoutRef = useRef<number | undefined>(undefined);
   const [isPulsing, setIsPulsing] = useState(false);
   const [isReceiving, setIsReceiving] = useState(false);
+
+  const isPopoverMode = isAgentWorkspaceMount && (cartRailContext?.isPopoverMode ?? false);
+  const showCartPopover = isPopoverMode && isCartRailOpen;
 
   const triggerPulse = useCallback(() => {
     window.clearTimeout(pulseTimeoutRef.current);
@@ -118,6 +133,19 @@ export const AttachmentCartButton: React.FC = () => {
     openAttachmentCart(isEmbeddedContext);
   }, [isAgentWorkspaceMount, isEmbeddedContext, spineContext, openAttachmentCart]);
 
+  const closeCartPopover = useCallback(() => {
+    if (!spineContext) {
+      return;
+    }
+
+    if (spineContext.hasAttachments && spineContext.isSpineActive) {
+      spineContext.closeSpine();
+      return;
+    }
+
+    spineContext.closeAttachmentsEmptyOverlay();
+  }, [spineContext]);
+
   const cartIconType = isReceiving ? 'folderOpen' : 'folder';
   const tooltipContent = isAgentWorkspaceMount
     ? labels.pinnedItems
@@ -138,7 +166,22 @@ export const AttachmentCartButton: React.FC = () => {
     animation: ${cartPulse} ${PULSE_DURATION_MS}ms ease-out;
   `;
 
-  return (
+  const cartButton = (
+    <EuiToolTip content={tooltipContent} position="bottom" disableScreenReaderOutput>
+      <EuiButtonIcon
+        color="text"
+        iconType={cartIconType}
+        size="xs"
+        aria-label={ariaLabel}
+        aria-expanded={showCartPopover}
+        data-test-subj="agentBuilderAttachmentCartButton"
+        onClick={handleOpenCart}
+        css={isPulsing ? pulseStyles : undefined}
+      />
+    </EuiToolTip>
+  );
+
+  const cartTrigger = (
     <span
       ref={setButtonWrapperRef}
       css={css`
@@ -146,17 +189,7 @@ export const AttachmentCartButton: React.FC = () => {
         display: inline-flex;
       `}
     >
-      <EuiToolTip content={tooltipContent} position="bottom" disableScreenReaderOutput>
-        <EuiButtonIcon
-          color="text"
-          iconType={cartIconType}
-          size="xs"
-          aria-label={ariaLabel}
-          data-test-subj="agentBuilderAttachmentCartButton"
-          onClick={handleOpenCart}
-          css={isPulsing ? pulseStyles : undefined}
-        />
-      </EuiToolTip>
+      {cartButton}
       {attachmentCount > 0 ? (
         <EuiNotificationBadge
           css={badgeStyles}
@@ -167,5 +200,29 @@ export const AttachmentCartButton: React.FC = () => {
         </EuiNotificationBadge>
       ) : null}
     </span>
+  );
+
+  if (!showCartPopover) {
+    return cartTrigger;
+  }
+
+  return (
+    <EuiPopover
+      isOpen={true}
+      closePopover={closeCartPopover}
+      anchorPosition="downRight"
+      panelPaddingSize="none"
+      panelStyle={{
+        width: CART_RAIL_WIDTH,
+        maxHeight: CART_RAIL_POPOVER_MAX_HEIGHT,
+        overflow: 'hidden',
+      }}
+      button={cartTrigger}
+      data-test-subj="agentBuilderCartRailPopover"
+    >
+      <CartRailPanel isPopoverMode data-test-subj="agentWorkspaceConversationSpineRail">
+        <CartRailContent attachmentsService={attachmentsService} />
+      </CartRailPanel>
+    </EuiPopover>
   );
 };

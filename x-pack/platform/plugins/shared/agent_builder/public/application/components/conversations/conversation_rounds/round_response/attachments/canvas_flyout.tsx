@@ -140,7 +140,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const useApplicationWorkspaceOverlay =
     isAgentWorkspaceMount && canvasState && !canvasState.isSidebar;
 
-  // Agent-first: conversation spine is portaled via ConversationSpineMount.
+  // Agent-first: conversation spine renders in the agent cart rail.
   if (useApplicationWorkspaceOverlay) {
     return null;
   }

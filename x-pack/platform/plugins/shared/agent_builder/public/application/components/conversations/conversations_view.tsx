@@ -12,9 +12,10 @@ import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header/conversation_header';
 import { CanvasProvider } from './conversation_rounds/round_response/attachments/canvas_context';
 import { CanvasFlyout } from './conversation_rounds/round_response/attachments/canvas_flyout';
+import { AgentCartRailPush } from '../../../agent_first/conversation_spine/cart_rail/agent_cart_rail_push';
+import { CartRailProvider } from '../../../agent_first/conversation_spine/cart_rail/cart_rail_context';
+import { useCartRailLayout } from '../../../agent_first/conversation_spine/cart_rail/use_cart_rail_layout';
 import { ConversationSpineProvider } from '../../../agent_first/conversation_spine/conversation_spine_context';
-import { AttachmentsEmptyOverlayMount } from '../../../agent_first/conversation_spine/attachments_empty_overlay_mount';
-import { ConversationSpineMount } from '../../../agent_first/conversation_spine/conversation_spine_mount';
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import {
@@ -26,10 +27,13 @@ import {
 export const AgentBuilderConversationsView: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const { attachmentsService } = useAgentBuilderServices();
+  const { containerRef, isPopoverMode } = useCartRailLayout();
 
   const containerStyles = css`
     display: flex;
     flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
     height: var(--kbn-application--content-height);
     ${conversationBackgroundStyles(euiTheme)}
   `;
@@ -37,9 +41,17 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
   const headerShellStyles = conversationHeaderShellStyles(euiTheme);
   const headerRowStyles = conversationHeaderRowStyles(euiTheme);
 
-  const contentStyles = css`
+  const contentRowStyles = css`
     width: 100%;
     flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: row;
+  `;
+
+  const conversationColumnStyles = css`
+    flex: 1;
+    min-width: 0;
     min-height: 0;
     display: flex;
     justify-content: center;
@@ -50,21 +62,24 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
   return (
     <RoutedConversationsProvider>
       <ConversationSpineProvider>
-        <CanvasProvider>
-          <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
-            <div css={headerShellStyles}>
-              <div css={headerRowStyles}>
-                <ConversationHeader />
+        <CartRailProvider isPopoverMode={isPopoverMode}>
+          <CanvasProvider>
+            <div ref={containerRef} css={containerStyles} data-test-subj="agentBuilderPageConversations">
+              <div css={headerShellStyles}>
+                <div css={headerRowStyles}>
+                  <ConversationHeader />
+                </div>
               </div>
+              <div css={contentRowStyles}>
+                <div css={conversationColumnStyles}>
+                  <Conversation />
+                </div>
+                <AgentCartRailPush attachmentsService={attachmentsService} />
+              </div>
+              <CanvasFlyout attachmentsService={attachmentsService} />
             </div>
-            <div css={contentStyles}>
-              <Conversation />
-            </div>
-            <ConversationSpineMount attachmentsService={attachmentsService} />
-            <AttachmentsEmptyOverlayMount />
-            <CanvasFlyout attachmentsService={attachmentsService} />
-          </div>
-        </CanvasProvider>
+          </CanvasProvider>
+        </CartRailProvider>
       </ConversationSpineProvider>
     </RoutedConversationsProvider>
   );
