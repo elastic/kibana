@@ -89,7 +89,7 @@ The downstream system does **not** understand vendor-specific constructs. It onl
 </example_response>
 `;
 
-export const USER_MESSAGE = `Given the title, description and query of a detection rule below. Create a natural language description of the rule along with details of all its dependencies that were resolved. Use the tool to resolve dependencies as required. Below are also some resources that you can use. These are mostly the lookup index names corresponding to reference sets. Use them as required, if any resources is not present, use the tool to get them.
+export const USER_MESSAGE = `Given the title, description and query of a detection rule below. Create a natural language description of the rule along with details of all its dependencies that were resolved. Below are also some resources(macros and lookups) that you can use.
 
 Title: {title}
 Description: {description}

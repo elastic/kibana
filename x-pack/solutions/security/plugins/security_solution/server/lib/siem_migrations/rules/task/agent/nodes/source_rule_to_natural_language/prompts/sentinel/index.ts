@@ -49,7 +49,6 @@ Microsoft Sentinel watchlists are reference lists used in KQL queries via the \`
 - Include watchlist lookups in the **Lookups** section using the standard syntax:
   \`LOOKUP JOIN to check if value of field \`<source_field>\` [exists / does NOT exist] in the lookup field \`value\` of lookup index "<lookup_index_name>".\`
 - In the **Flattened Detection Logic**, describe the watchlist check as a lookup condition, not as a vendor-specific watchlist call
--
 
 #### Elastic Ecosystem Data Source Mapping
 
