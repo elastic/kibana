@@ -40,6 +40,7 @@ describe('getTriggerHoverContent', () => {
       id === 'cases.updated'
         ? {
             id: 'cases.updated',
+            stability: 'tech_preview' as const,
             title: 'Case updated',
             description: 'Fired when a case is created or updated.',
             eventSchema,
@@ -77,6 +78,7 @@ describe('getTriggerHoverContent', () => {
     });
     const definition = {
       id: 'example.nested',
+      stability: 'tech_preview' as const,
       title: 'Nested example',
       description: 'Trigger with nested event shape.',
       eventSchema,
@@ -98,6 +100,7 @@ describe('getTriggerHoverContent', () => {
       id === 'alerts.severity_high'
         ? {
             id: 'alerts.severity_high',
+            stability: 'tech_preview' as const,
             title: 'High severity alert',
             description: 'Fired when an alert has high severity.',
             eventSchema,
