@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/streams-ai'
   - '@kbn/scout'
   - '@kbn/streams-schema'
+  - '@kbn/significant-events-schema'
   - '@kbn/kibana-api-cli'
   - '@kbn/dev-cli-runner'
   - '@kbn/core'
@@ -35,7 +36,6 @@ dependsOn:
   - '@kbn/ai-tools'
   - '@kbn/std'
   - '@kbn/streamlang'
-  - '@kbn/streams-plugin'
 tags:
   - functional-tests
   - package

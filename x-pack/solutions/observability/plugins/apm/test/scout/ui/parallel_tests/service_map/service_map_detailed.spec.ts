@@ -20,6 +20,8 @@ test.describe(
   'Service map - nodes, edges and popovers',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    test.use({ viewport: { width: 1600, height: 1200 } });
+
     test.beforeEach(async ({ browserAuth, pageObjects: { serviceMapPage } }) => {
       await browserAuth.loginAsViewer();
       await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE, {
@@ -64,30 +66,35 @@ test.describe(
       });
     });
 
-    test('shows popover when clicking on a service node', async ({
-      pageObjects: { serviceMapPage },
+    test('shows flyout when clicking on a service node', async ({
+      pageObjects: { serviceMapPage, serviceFlyoutPage },
     }) => {
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.openServiceNodePopover(SERVICE_OPBEANS_JAVA);
-      await expect(serviceMapPage.serviceMapPopover).toBeVisible();
+      await serviceMapPage.openServiceNodeFlyout(SERVICE_OPBEANS_JAVA);
+      await expect(serviceFlyoutPage.flyout).toBeVisible();
 
-      const popoverTitle = await serviceMapPage.getPopoverTitle();
-      expect(popoverTitle).toContain(SERVICE_OPBEANS_JAVA);
-      await expect(serviceMapPage.serviceMapServiceDetailsButton).toBeVisible();
-      await expect(serviceMapPage.serviceMapFocusMapButton).toBeVisible();
+      const flyoutTitle = await serviceFlyoutPage.getTitle();
+      expect(flyoutTitle).toContain(SERVICE_OPBEANS_JAVA);
+      await expect(serviceFlyoutPage.content).toBeVisible();
+
+      await serviceFlyoutPage.expectChartsRendered([
+        'latency',
+        'throughput',
+        'failedTransactionRate',
+      ]);
     });
 
-    test('dismisses popover when clicking outside', async ({ pageObjects: { serviceMapPage } }) => {
+    test('dismisses service flyout when clicking the close button', async ({
+      pageObjects: { serviceMapPage, serviceFlyoutPage },
+    }) => {
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.openServiceNodePopover(SERVICE_OPBEANS_JAVA);
-      await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
+      await serviceMapPage.openServiceNodeFlyout(SERVICE_OPBEANS_JAVA);
+      await expect(serviceFlyoutPage.flyout).toBeVisible();
 
-      await serviceMapPage.clickFitView();
-      await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.waitForPopoverToBeHidden();
-      await expect(serviceMapPage.serviceMapPopoverContent).toBeHidden();
+      await serviceFlyoutPage.close();
+      await expect(serviceFlyoutPage.flyout).toBeHidden();
     });
 
     test('shows popover when clicking on an edge', async ({ pageObjects: { serviceMapPage } }) => {
@@ -116,55 +123,98 @@ test.describe(
       await expect(serviceMapPage.serviceMapDependencyDetailsButton).toBeVisible();
     });
 
-    test('navigates to Service Details from popover', async ({
+    test('navigates to Discover (traces)', async ({
       page,
-      pageObjects: { serviceMapPage },
+      pageObjects: { serviceMapPage, serviceFlyoutPage, discover, dataGrid },
     }) => {
-      await serviceMapPage.dismissPopoverIfOpen();
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.openServiceNodePopover(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.serviceMapServiceDetailsButton.click();
+      await serviceMapPage.openServiceNodeFlyout(SERVICE_OPBEANS_JAVA);
+
+      await expect(serviceFlyoutPage.flyout).toBeVisible();
+
+      await serviceFlyoutPage.clickAction('openTracesInDiscover');
+
+      await expect(page).toHaveURL(new RegExp(`/app/discover`));
+      await dataGrid.waitForDocTableRendered();
+      expect(await discover.getEsqlQueryValue()).toMatch(new RegExp('traces-'));
+    });
+
+    test('navigates to Discover (logs)', async ({
+      page,
+      pageObjects: { serviceMapPage, serviceFlyoutPage, discover, dataGrid },
+    }) => {
+      await serviceMapPage.clickFitView();
+      await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.openServiceNodeFlyout(SERVICE_OPBEANS_JAVA);
+
+      await expect(serviceFlyoutPage.flyout).toBeVisible();
+
+      await serviceFlyoutPage.clickAction('openLogsInDiscover');
+
+      await expect(page).toHaveURL(new RegExp(`/app/discover`));
+      await dataGrid.waitForDocTableRendered();
+      expect(await discover.getEsqlQueryValue()).toMatch(new RegExp('logs-'));
+    });
+
+    test('navigates to Service Details (alerts) and page loads', async ({
+      page,
+      pageObjects: { serviceMapPage, serviceFlyoutPage },
+    }) => {
+      await serviceMapPage.clickFitView();
+      await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.openServiceNodeFlyout(SERVICE_OPBEANS_JAVA);
+      await expect(serviceFlyoutPage.flyout).toBeVisible();
+
+      await serviceFlyoutPage.clickAction('openAlerts');
+
+      await expect(page).toHaveURL(new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/alerts`));
+      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toBeVisible();
+    });
+
+    test('navigates to SLOs and page loads', async ({
+      page,
+      pageObjects: { serviceMapPage, serviceFlyoutPage },
+    }) => {
+      await serviceMapPage.clickFitView();
+      await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.openServiceNodeFlyout(SERVICE_OPBEANS_JAVA);
+      await expect(serviceFlyoutPage.flyout).toBeVisible();
+
+      await serviceFlyoutPage.clickAction('openSlos');
+
+      await expect(page).toHaveURL(new RegExp(`/app/slos`));
+      await expect(
+        page.getByTestId('slosPage').or(page.getByTestId('sloWelcomePage'))
+      ).toBeVisible();
+    });
+
+    test('navigates to Service Details from flyout title and page loads', async ({
+      page,
+      pageObjects: { serviceMapPage, serviceFlyoutPage },
+    }) => {
+      await serviceMapPage.clickFitView();
+      await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.openServiceNodeFlyout(SERVICE_OPBEANS_JAVA);
+
+      await serviceFlyoutPage.title.click();
 
       await expect(page).toHaveURL(
         new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/overview`)
       );
-      await page.goBack();
-      await serviceMapPage.waitForMapToLoad();
-      await expect(serviceMapPage.serviceMapGraph).toBeVisible();
-    });
-
-    test('navigates to Focus Map from popover', async ({
-      page,
-      pageObjects: { serviceMapPage },
-    }) => {
-      await serviceMapPage.dismissPopoverIfOpen();
-      await serviceMapPage.clickFitView();
-      await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.openServiceNodePopover(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.serviceMapFocusMapButton.click();
-
-      await expect(page).toHaveURL(
-        new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/service-map`)
-      );
-      await serviceMapPage.waitForMapToLoad();
-      await expect(serviceMapPage.serviceMapGraph).toBeVisible();
+      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toBeVisible();
     });
 
     test('navigates to Dependency Details from popover', async ({
       page,
       pageObjects: { serviceMapPage },
     }) => {
-      await serviceMapPage.dismissPopoverIfOpen();
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForNodeToLoad(`>${DEPENDENCY_POSTGRESQL}`);
       await serviceMapPage.openNodePopover(`>${DEPENDENCY_POSTGRESQL}`);
       await serviceMapPage.serviceMapDependencyDetailsButton.click();
 
       await expect(page).toHaveURL(new RegExp(`/app/apm/dependencies/overview`));
-      await page.goBack();
-      await serviceMapPage.waitForMapToLoad();
-      await expect(serviceMapPage.serviceMapGraph).toBeVisible();
     });
   }
 );

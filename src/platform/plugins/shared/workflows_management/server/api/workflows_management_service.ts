@@ -10,11 +10,11 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type {
+  CoreSetup,
   CoreStart,
   ElasticsearchClient,
   KibanaRequest,
   Logger,
-  StartServicesAccessor,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
@@ -75,7 +75,10 @@ import type {
   SearchStepExecutionsParams,
 } from './workflows_management_api';
 
-import type { WorkflowChangesHistoryResponse } from '../../common/lib/workflow_change_history/types';
+import type {
+  RestoreWorkflowVersionResponseDto,
+  WorkflowChangesHistoryResponse,
+} from '../../common/lib/workflow_change_history/types';
 import type { BulkFailureEntry } from '../lib/bulk_id_helpers';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
@@ -92,7 +95,7 @@ import { WorkflowSearchService } from '../services/workflow_search_service';
 import { WorkflowValidationService } from '../services/workflow_validation_service';
 import { createStorage, type WorkflowStorage } from '../storage/workflow_storage';
 import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
-import type { WorkflowsServerPluginStartDeps } from '../types';
+import type { WorkflowsServerPluginSetupDeps, WorkflowsServerPluginStartDeps } from '../types';
 
 export interface SearchExecutionsViewParams {
   query?: estypes.QueryDslQueryContainer;
@@ -146,12 +149,13 @@ export class WorkflowsService {
   private readonly initPromise: Promise<void>;
 
   constructor(
-    startServices: StartServicesAccessor<WorkflowsServerPluginStartDeps>,
+    public readonly core: CoreSetup<WorkflowsServerPluginStartDeps>,
+    public readonly plugins: WorkflowsServerPluginSetupDeps,
     private readonly logger: Logger,
-    kibanaVersion: string
+    public readonly kibanaVersion: string
   ) {
     this.changeHistoryService = new WorkflowChangeHistoryService(logger, kibanaVersion);
-    this.initPromise = this.initialize(startServices);
+    this.initPromise = this.initialize(core);
   }
 
   private async ensureInitialized(): Promise<void> {
@@ -170,8 +174,8 @@ export class WorkflowsService {
     this.logger.warn('Workflows Management: workflow change history is not initialized');
   }
 
-  private async initialize(startServices: StartServicesAccessor<WorkflowsServerPluginStartDeps>) {
-    const [coreStart, pluginsStart] = await startServices();
+  private async initialize(core: CoreSetup<WorkflowsServerPluginStartDeps>) {
+    const [coreStart, pluginsStart] = await core.getStartServices();
     this.coreStart = coreStart;
     this.pluginsStart = pluginsStart;
     this.esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -277,7 +281,8 @@ export class WorkflowsService {
     return getHistoryForWorkflow(
       {
         changeHistoryService: this.changeHistoryService,
-        getWorkflow: (workflowId, sid) => this.crudService.getWorkflow(workflowId, sid),
+        getWorkflowSource: (workflowId, sid) =>
+          this.crudService.getWorkflowDocumentSource(workflowId, sid, { includeGlobal: true }),
         workflowVersioningEnabled: await readWorkflowVersioningEnabled(this.coreStart, this.logger),
       },
       { workflowId: id, spaceId, ...options }
@@ -330,6 +335,16 @@ export class WorkflowsService {
   ): Promise<UpdatedWorkflowResponseDto> {
     await this.ensureInitialized();
     return this.crudService.updateWorkflow(id, workflow, spaceId, request);
+  }
+
+  public async restoreWorkflowVersion(
+    workflowId: string,
+    eventId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<RestoreWorkflowVersionResponseDto> {
+    await this.ensureInitialized();
+    return this.crudService.restoreWorkflowVersion(workflowId, eventId, spaceId, request);
   }
 
   public async deleteWorkflows(
