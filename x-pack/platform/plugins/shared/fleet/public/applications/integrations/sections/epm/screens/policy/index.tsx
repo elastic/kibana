@@ -12,6 +12,7 @@ import { useLocation, useRouteMatch } from 'react-router-dom';
 import { EditPackagePolicyForm } from '../../../../../fleet/sections/agent_policy/edit_package_policy_page';
 import type { EditPackagePolicyFrom } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/types';
 import { useGetOnePackagePolicyQuery, useUIExtension } from '../../../../hooks';
+import { IS_AGENTLESS_QUERY_PARAM } from '../../../../../../../common/constants';
 
 export const Policy = memo(() => {
   const {
@@ -39,10 +40,15 @@ export const Policy = memo(() => {
     from = 'package-edit';
   }
 
+  // Detect-before-read hint: agentless surfaces append `isAgentless=true` so the edit form
+  // reads/writes through the agentless API instead of the package-policy API.
+  const isAgentless = qs.get(IS_AGENTLESS_QUERY_PARAM) === 'true';
+
   return (
     <EditPackagePolicyForm
       packagePolicyId={packagePolicyId}
       from={from}
+      isAgentless={isAgentless}
       forceUpgrade={extensionView?.useLatestPackageVersion}
     />
   );

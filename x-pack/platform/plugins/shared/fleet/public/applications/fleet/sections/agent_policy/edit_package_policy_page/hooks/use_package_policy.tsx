@@ -17,19 +17,27 @@ import type {
 } from '../../../../../../../common/types/rest_spec';
 import {
   sendBulkGetAgentPolicies,
+  sendGetAgentlessPolicy,
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
   sendGetSettings,
+  sendUpdateAgentlessPolicy,
   sendUpdatePackagePolicy,
   sendUpgradePackagePolicyDryRun,
 } from '../../../../hooks';
+import type { RequestError } from '../../../../hooks';
 import type {
   PackagePolicyConfigRecord,
   UpdatePackagePolicy,
   AgentPolicy,
+  NewPackagePolicy,
   PackagePolicy,
   PackageInfo,
 } from '../../../../types';
+import {
+  agentlessPolicyToPackagePolicy,
+  toNewAgentlessPolicy,
+} from '../../../../../../../common/services';
 import {
   type PackagePolicyValidationResults,
   validatePackagePolicy,
@@ -37,6 +45,7 @@ import {
 } from '../../create_package_policy_page/services';
 import type { PackagePolicyFormState } from '../../create_package_policy_page/types';
 import { useYaml } from '../../../../../../services';
+import { ExperimentalFeaturesService } from '../../../../services';
 import { fixApmDurationVars, hasUpgradeAvailable } from '../utils';
 import { prepareInputPackagePolicyDataset } from '../../create_package_policy_page/services/prepare_input_pkg_policy_dataset';
 
@@ -68,6 +77,9 @@ export function usePackagePolicyWithRelatedData(
   packagePolicyId: string,
   options: {
     forceUpgrade?: boolean;
+    // When true, read/write this policy through the agentless API instead of the
+    // package-policy/agent-policy APIs. Driven by the edit page's detect-before-read hint.
+    isAgentless?: boolean;
   }
 ) {
   const [packageInfo, setPackageInfo] = useState<PackageInfo>();
@@ -110,6 +122,29 @@ export function usePackagePolicyWithRelatedData(
         'spaceIds'
       )
     );
+
+    // Agentless policies are updated through the agentless API (full-replace PUT), never the
+    // package-policy API. `sendUpdateAgentlessPolicy` throws on failure, so normalize the result
+    // into the `{ data, error }` shape the caller (`onSubmit`) expects from the package-policy path.
+    if (options.isAgentless) {
+      const { enableVarGroups } = ExperimentalFeaturesService.get();
+      const varGroups =
+        enableVarGroups && packageInfo?.var_groups ? packageInfo.var_groups : undefined;
+      try {
+        const { item } = await sendUpdateAgentlessPolicy(
+          packagePolicyId,
+          toNewAgentlessPolicy(restPackagePolicy as NewPackagePolicy, varGroups)
+        );
+        setFormState('SUBMITTED');
+        return { data: { item }, error: null };
+      } catch (error) {
+        setFormState('SUBMITTED');
+        // `sendRequestForRq` rejects with a `RequestError`; keep the shape aligned with the
+        // package-policy path so callers can read `error.statusCode` (e.g. 409 conflict handling).
+        return { data: undefined, error: error as RequestError };
+      }
+    }
+
     const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
 
     setFormState('SUBMITTED');
@@ -170,6 +205,10 @@ export function usePackagePolicyWithRelatedData(
   // Load the package policy and related data
   useEffect(() => {
     const getData = async () => {
+      // Agentless policies are loaded by the dedicated effect below, through the agentless API.
+      if (options.isAgentless) {
+        return;
+      }
       setIsLoadingData(true);
       setLoadingError(undefined);
       try {
@@ -349,7 +388,69 @@ export function usePackagePolicyWithRelatedData(
       setIsLoadingData(false);
     };
     getData();
-  }, [packagePolicyId, options.forceUpgrade, yaml]);
+  }, [packagePolicyId, options.forceUpgrade, options.isAgentless, yaml]);
+
+  // Load the agentless policy through the agentless API. Deliberately skips the agent-policy bulk
+  // read and the upgrade dry-run: agentless deployments have no user-facing agent policy and no
+  // agentless upgrade flow yet (that stays on the legacy path until the bulk `_upgrade` endpoint).
+  useEffect(() => {
+    // Wait for `yaml` before fetching: the whole load (hydration + validation) needs it, so firing
+    // the GET before it's ready would just throw the result away and cause a second, redundant call
+    // once `yaml` resolves.
+    if (!options.isAgentless || !yaml) {
+      return;
+    }
+    const getAgentlessData = async () => {
+      setIsLoadingData(true);
+      setLoadingError(undefined);
+      setIsUpgrade(false);
+      try {
+        const prerelease = await isPreleaseEnabled();
+
+        const { item: agentlessPolicy } = await sendGetAgentlessPolicy(packagePolicyId);
+
+        const { data: packageData } = await sendGetPackageInfoByKey(
+          agentlessPolicy.package.name,
+          agentlessPolicy.package.version,
+          { prerelease, full: true }
+        );
+
+        if (packageData?.item && yaml) {
+          const hydratedPackagePolicy = agentlessPolicyToPackagePolicy(
+            agentlessPolicy,
+            packageData.item
+          );
+
+          setPackageInfo(packageData.item);
+          setPackagePolicy(hydratedPackagePolicy as UpdatePackagePolicy);
+          // Edit extensions receive the loaded policy as their baseline. Agentless policies carry
+          // no server-only compiled fields at edit time, so the hydrated form policy is the
+          // "original" — enriched with the identifiers/timestamps from the API response.
+          setOriginalPackagePolicy({
+            ...hydratedPackagePolicy,
+            id: agentlessPolicy.id,
+            revision: 1,
+            created_at: agentlessPolicy.created_at,
+            created_by: agentlessPolicy.created_by,
+            updated_at: agentlessPolicy.updated_at,
+            updated_by: agentlessPolicy.updated_by,
+          } as PackagePolicy);
+
+          const newValidationResults = validatePackagePolicy(
+            hydratedPackagePolicy,
+            packageData.item,
+            { safeLoadYaml: yaml.parse, conditionValidator: validateAgentConditionExpression }
+          );
+          setValidationResults(newValidationResults);
+          setFormState(validationHasErrors(newValidationResults) ? 'INVALID' : 'VALID');
+        }
+      } catch (e) {
+        setLoadingError(e);
+      }
+      setIsLoadingData(false);
+    };
+    getAgentlessData();
+  }, [packagePolicyId, options.isAgentless, yaml]);
 
   // Re-run validation when yaml loads (getData may have run before yaml was available)
   useEffect(() => {

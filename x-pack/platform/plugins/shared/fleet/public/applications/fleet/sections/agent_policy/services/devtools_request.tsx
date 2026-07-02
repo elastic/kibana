@@ -81,6 +81,25 @@ export function generateCreateAgentlessPolicyDevToolsRequest(
 }
 
 /**
+ * Generate a request to update an agentless policy that can be used in Kibana Dev tools
+ * @param policyId
+ * @param packagePolicy
+ * @param varGroups
+ * @returns
+ */
+export function generateUpdateAgentlessPolicyDevToolsRequest(
+  policyId: string,
+  packagePolicy: NewPackagePolicy & { force?: boolean; create_dataset_templates?: boolean },
+  varGroups?: RegistryVarGroup[]
+) {
+  return generateKibanaDevToolsRequest(
+    'PUT',
+    agentlessPolicyRouteService.getUpdatePath(policyId),
+    toNewAgentlessPolicy(packagePolicy, varGroups)
+  );
+}
+
+/**
  * Generate a request to update a package policy that can be used in Kibana Dev tools
  * @param packagePolicyId
  * @param packagePolicy
