@@ -218,10 +218,6 @@ async function getApmServices(
         },
       });
 
-      // Wait until all generated transactions are aggregated. Guarding only on
-      // "some latency exists" lets a partially-indexed result through, which then
-      // fails the exact-equality assertions in the test (e.g. latency 3366666.67
-      // when only 3 of 4 transactions have landed).
       const service = res.body.items[0];
       if (
         res.body.items.length === 0 ||
