@@ -9,9 +9,10 @@
 
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, concatMap, of, Subject } from 'rxjs';
+import { BehaviorSubject, concatMap, merge, of, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 import type { EuiFlyoutProps } from '@elastic/eui';
+
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { DashboardState } from '../../common/types';
 import { initializeAccessControlManager } from './access_control_manager';
@@ -46,6 +47,7 @@ import { initializeViewModeManager } from './view_mode_manager';
 import type { DashboardReadResponseBody } from '../../server';
 import { initializePauseFetchManager } from './pause_fetch_manager';
 import type { DashboardChildren } from './layout_manager/types';
+import { initializeHistoryManager } from './history_manager';
 
 export function getDashboardApi({
   creationOptions,
@@ -175,10 +177,26 @@ export function getDashboardApi({
     } satisfies DashboardState;
   }
 
+  const lastSavedState = getLastSavedState(readResult);
+  const anyStateChange$ = merge(
+    settingsManager.internalApi.anyStateChange$,
+    unifiedSearchManager.internalApi.anyStateChange$,
+    layoutManager.internalApi.anyStateChange$,
+    projectRoutingManager?.internalApi.anyStateChange$ ?? of(),
+    approximationManager.internalApi.anyStateChange$
+  );
+
+  const historyManager = initializeHistoryManager({
+    anyStateChange$,
+    lastSavedState,
+    setState,
+    getState,
+  });
+
   const unsavedChangesManager = initializeUnsavedChangesManager({
     viewMode$: viewModeManager.api.viewMode$,
     storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
-    lastSavedState: getLastSavedState(readResult),
+    lastSavedState,
     layoutManager,
     savedObjectId$,
     settingsManager,
@@ -211,13 +229,7 @@ export function getDashboardApi({
     ...timesliceManager.api,
     ...pauseFetchManager.api,
     ...initializeTrackContentfulRender(),
-    // anyStateChange$: merge(
-    //   settingsManager.internalApi.anyStateChange$,
-    //   unifiedSearchManager.internalApi.anyStateChange$,
-    //   layoutManager.internalApi.anyStateChange$,
-    //   ...(projectRoutingManager ? [projectRoutingManager.internalApi.anyStateChange$] : []),
-    //   approximationManager.internalApi.anyStateChange$
-    // ),
+    anyStateChange$,
     executionContext: {
       type: 'dashboard',
       description: settingsManager.api.title$.value,
@@ -323,6 +335,7 @@ export function getDashboardApi({
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const internalApi: DashboardInternalApi = {
+    ...historyManager.api,
     ...layoutManager.internalApi,
     ...unifiedSearchManager.internalApi,
     ...esqlVariablesManager.api,
@@ -358,6 +371,7 @@ export function getDashboardApi({
       projectRoutingManager?.cleanup();
       pauseFetchManager.cleanup();
       trackPanel.cleanup();
+      historyManager.cleanup();
     },
   };
 }
