@@ -36,6 +36,7 @@ paths:
                     traces:
                       type: array
                       minItems: 1
+                      maxItems: 1
                       items:
                         type: object
                         required:
@@ -43,12 +44,14 @@ paths:
                         properties:
                           trace_id:
                             type: string
+                            maxLength: 256
                           reference_data:
                             type: object
                             additionalProperties: true
                 evaluators:
                   type: array
                   minItems: 1
+                  maxItems: 20
                   items:
                     type: object
                     required:
@@ -56,10 +59,13 @@ paths:
                     properties:
                       name:
                         type: string
+                        maxLength: 256
                       version:
                         type: string
+                        maxLength: 64
                       connector_id:
                         type: string
+                        maxLength: 256
       responses:
         '200':
           description: Successful response

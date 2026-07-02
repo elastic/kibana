@@ -19,25 +19,27 @@ import { z, lazySchema } from '@kbn/zod/v4';
 export const EvaluateRequestBody = lazySchema(() =>
   z.object({
     subject: z.object({
-      mode: z.enum(['single-turn', 'multi-turn']).default('single-turn'),
+      mode: z.enum(['single-turn', 'multi-turn']).optional().default('single-turn'),
       traces: z
         .array(
           z.object({
-            trace_id: z.string(),
+            trace_id: z.string().max(256),
             reference_data: z.object({}).catchall(z.unknown()).optional(),
           })
         )
-        .min(1),
+        .min(1)
+        .max(1),
     }),
     evaluators: z
       .array(
         z.object({
-          name: z.string(),
-          version: z.string().optional(),
-          connector_id: z.string().optional(),
+          name: z.string().max(256),
+          version: z.string().max(64).optional(),
+          connector_id: z.string().max(256).optional(),
         })
       )
-      .min(1),
+      .min(1)
+      .max(20),
   })
 );
 export type EvaluateRequestBody = z.infer<typeof EvaluateRequestBody>;
