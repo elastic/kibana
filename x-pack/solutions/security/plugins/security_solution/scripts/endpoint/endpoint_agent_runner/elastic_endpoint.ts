@@ -40,7 +40,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
 
     const activeSpaceId = (await fetchActiveSpace(kbnClient)).id;
 
-    vmName = generateVmName(`dev-${activeSpaceId}`);
+    vmName = generateVmName(`endpoint-${activeSpaceId}`);
 
     log.info(`Creating VM named: ${vmName}`);
 
@@ -53,6 +53,15 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
       useClosestVersionMatch: false,
       disk: '8G',
     });
+
+    // Trigger an alert for this Endpoint
+    try {
+      await hostVm.exec('curl -o /tmp/eicar.com.txt https://secure.eicar.org/eicar.com.txt');
+    } catch (error) {
+      log.warning(
+        `\nAttempted to trigger an alert on host [${hostVm.name}], but failed with: ${error.message}.\nHost, however, should still be functioning as expected\n`
+      );
+    }
 
     log.info(hostVm.info());
   } catch (error) {
