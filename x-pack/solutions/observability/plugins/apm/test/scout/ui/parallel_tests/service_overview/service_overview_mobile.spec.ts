@@ -97,17 +97,13 @@ test.describe(
       });
 
       await test.step('Verify the environment filter is visible in the header', async () => {
-        await expect(page.getByTestId('environmentFilter')).toBeVisible({
+        await expect(serviceDetailsPage.overviewTab.getEnvironmentFilter()).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
       });
 
       await test.step('Selecting an environment updates the environment query param', async () => {
-        const environmentFilter = page.getByTestId('environmentFilter');
-        await environmentFilter.locator('input').click();
-        const optionToSelect = page.getByRole('option', { name: PRODUCTION_ENVIRONMENT });
-        await optionToSelect.waitFor({ state: 'visible' });
-        await optionToSelect.click();
+        await serviceDetailsPage.overviewTab.selectEnvironment(PRODUCTION_ENVIRONMENT);
 
         await page.waitForURL(
           (url) => url.searchParams.get('environment') === PRODUCTION_ENVIRONMENT,

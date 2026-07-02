@@ -22,7 +22,6 @@ interface Props {
   showFilterBar?: boolean;
   showTimeComparison?: boolean;
   showEnvironmentFilter?: boolean;
-  showTransactionTypeSelector?: boolean;
   showQueryInput?: boolean;
   showMobileFilters?: boolean;
   showAnomalyThresholdSelector?: boolean;
@@ -35,7 +34,6 @@ export function MobileSearchBar({
   showFilterBar = false,
   showTimeComparison = false,
   showEnvironmentFilter = false,
-  showTransactionTypeSelector = false,
   showQueryInput = true,
   showMobileFilters = false,
   showAnomalyThresholdSelector = false,
