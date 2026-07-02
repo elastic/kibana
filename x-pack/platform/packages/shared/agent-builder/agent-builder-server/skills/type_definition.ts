@@ -28,6 +28,7 @@ export type SkillsDirectoryStructure = Directory<{
     platform: FileDirectory<{
       'agent-builder': FileDirectory;
       alerting: FileDirectory;
+      cases: FileDirectory;
       dashboard: FileDirectory;
       discover: FileDirectory;
       streams: FileDirectory;
@@ -45,6 +46,7 @@ export type SkillsDirectoryStructure = Directory<{
       endpoint: FileDirectory<{}>;
       ml: FileDirectory<{}>;
       siem_readiness: FileDirectory<{}>;
+      entity_analytics_leads: FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
   }>;
