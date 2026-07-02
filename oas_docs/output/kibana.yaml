@@ -69929,6 +69929,7 @@ paths:
           name: apiKey
           required: true
           schema:
+            maxLength: 1024
             type: string
         - description: Required for waitForApproval. Whether the external actor approved the workflow pause.
           in: query
@@ -69991,6 +69992,7 @@ paths:
           name: apiKey
           required: false
           schema:
+            maxLength: 1024
             type: string
       requestBody:
         content:
@@ -70063,6 +70065,7 @@ paths:
           name: apiKey
           required: true
           schema:
+            maxLength: 1024
             type: string
       responses:
         '200':
