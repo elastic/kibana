@@ -384,6 +384,58 @@ describe('Data Loader', () => {
     );
   });
 
+  it('should propagate useApproximation from parent API to search context', async () => {
+    await expectRerenderOnDataLoader(
+      async ({ internalApi }) => {
+        await waitForValue(
+          internalApi.expressionParams$,
+          (v: unknown) => isObject(v) && 'searchContext' in v
+        );
+
+        const params = internalApi.expressionParams$.getValue()!;
+        expect(params.searchContext).toEqual(
+          expect.objectContaining({
+            useApproximation: true,
+          })
+        );
+
+        return false;
+      },
+      undefined,
+      {
+        parentApiOverrides: { useApproximation$: new BehaviorSubject<boolean | undefined>(true) },
+      }
+    );
+  });
+
+  it('should handle undefined useApproximation from parent API', async () => {
+    await expectRerenderOnDataLoader(
+      async ({ internalApi }) => {
+        await waitForValue(
+          internalApi.expressionParams$,
+          (v: unknown) => isObject(v) && 'searchContext' in v
+        );
+
+        const params = internalApi.expressionParams$.getValue()!;
+        expect(params.searchContext).toEqual(
+          expect.objectContaining({
+            useApproximation: undefined,
+          })
+        );
+
+        return false;
+      },
+      undefined,
+      {
+        parentApiOverrides: createUnifiedSearchApi(
+          { query: '', language: 'kuery' },
+          [],
+          { from: 'now-7d', to: 'now' }
+        ),
+      }
+    );
+  });
+
   it('should call onload after rerender and onData$ call', async () => {
     await expectRerenderOnDataLoader(async ({ parentApi, internalApi, api }) => {
       expect(parentApi.onLoad).toHaveBeenLastCalledWith(true);

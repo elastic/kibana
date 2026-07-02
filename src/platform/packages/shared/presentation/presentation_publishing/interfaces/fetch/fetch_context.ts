@@ -21,6 +21,7 @@ export interface FetchContext {
   timeslice: [number, number] | undefined;
   esqlVariables: ESQLControlVariable[] | undefined;
   projectRouting: ProjectRouting | undefined;
+  useApproximation?: boolean;
 }
 
 export interface ReloadTimeFetchContext extends Omit<FetchContext, 'isReload'> {

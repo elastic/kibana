@@ -207,6 +207,7 @@ export const useDiscoverHistogram = (
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
+  const useApproximation = useAppStateSelector((state) => state.useApproximation);
   const visContext = useCurrentTabSelector((tab) => tab.attributes.visContext);
 
   const getModifiedVisAttributesAccessor = useProfileAccessor('getModifiedVisAttributes');
@@ -229,6 +230,7 @@ export const useDiscoverHistogram = (
       breakdownField,
       timeInterval,
       esqlVariables,
+      useApproximation,
       controlsState: getDefinedControlGroupState(currentTabControlState),
       // visContext should be in sync with current query
       externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
@@ -240,6 +242,7 @@ export const useDiscoverHistogram = (
     currentTabControlState,
     dataView,
     esqlVariables,
+    useApproximation,
     filters,
     inspectorAdapters.requests,
     isEsqlMode,

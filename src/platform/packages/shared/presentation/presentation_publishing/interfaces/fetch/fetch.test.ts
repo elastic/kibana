@@ -378,6 +378,34 @@ describe('onFetchContextChanged', () => {
     });
   });
 
+  describe('useApproximation', () => {
+    test('propagates useApproximation from parent API', async () => {
+      const api = {
+        parentApi: {
+          ...parentApi,
+          useApproximation$: new BehaviorSubject<boolean | undefined>(true),
+        },
+      };
+      const subscription = fetch$(api).subscribe(onFetchMock);
+      await waitFor(() => {
+        expect(onFetchMock).toHaveBeenCalledTimes(1);
+      });
+      const fetchContext = onFetchMock.mock.calls[0][0];
+      expect(fetchContext.useApproximation).toBe(true);
+      subscription.unsubscribe();
+    });
+
+    test('useApproximation is undefined when parent API does not publish it', async () => {
+      const subscription = fetch$({ parentApi }).subscribe(onFetchMock);
+      await waitFor(() => {
+        expect(onFetchMock).toHaveBeenCalledTimes(1);
+      });
+      const fetchContext = onFetchMock.mock.calls[0][0];
+      expect(fetchContext.useApproximation).toBeUndefined();
+      subscription.unsubscribe();
+    });
+  });
+
   describe('filter / variable meta data', () => {
     test('does not receive its own filters', async () => {
       const subscription = fetch$({
