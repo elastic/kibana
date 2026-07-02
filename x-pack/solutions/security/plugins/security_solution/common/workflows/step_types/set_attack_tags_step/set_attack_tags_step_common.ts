@@ -31,12 +31,12 @@ const attackIdsBase = z.object({
 // generation. Follow-up: elastic/security-team#17984.
 export const setAttackTagsInputSchema = z.union([
   attackIdsBase.extend({
-    tags_to_add: z.array(AlertTag).min(1).describe('Tags to add to the specified attacks'),
+    tags_to_add: tagsArray.min(1).describe('Tags to add to the specified attacks'),
     tags_to_remove: tagsArray.default([]).describe('Tags to remove from the specified attacks'),
   }),
   attackIdsBase.extend({
     tags_to_add: tagsArray.default([]).describe('Tags to add to the specified attacks'),
-    tags_to_remove: z.array(AlertTag).min(1).describe('Tags to remove from the specified attacks'),
+    tags_to_remove: tagsArray.min(1).describe('Tags to remove from the specified attacks'),
   }),
 ]);
 
