@@ -31,7 +31,10 @@ export function AlertSubtitle({ alert }: AlertSubtitleProps) {
   const ruleId = alert.fields[ALERT_RULE_UUID];
   const ruleLink = http.basePath.prepend(paths.observability.ruleDetails(ruleId));
   const ruleTypeBreached = getAlertSubtitle(alert.fields[ALERT_RULE_CATEGORY]);
-  const canReadAlertRule = authorizedToReadRuleType(alert.fields[ALERT_RULE_TYPE_ID], alert.fields[ALERT_RULE_CONSUMER]);
+  const canReadAlertRule = authorizedToReadRuleType(
+    alert.fields[ALERT_RULE_TYPE_ID],
+    alert.fields[ALERT_RULE_CONSUMER]
+  );
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">

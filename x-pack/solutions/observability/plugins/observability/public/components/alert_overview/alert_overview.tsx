@@ -75,7 +75,10 @@ export const AlertOverview = memo(
     const alertEnd = alert.fields[ALERT_END];
     const ruleId = get(alert.fields, ALERT_RULE_UUID) ?? null;
 
-    const canReadAlertRule = authorizedToReadRuleType(alertRuleTypeId, alert.fields[ALERT_RULE_CONSUMER]);
+    const canReadAlertRule = authorizedToReadRuleType(
+      alertRuleTypeId,
+      alert.fields[ALERT_RULE_CONSUMER]
+    );
 
     const linkToRule =
       canReadAlertRule && pageId !== RULE_DETAILS_PAGE_ID && ruleId

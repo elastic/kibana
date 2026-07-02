@@ -69,7 +69,10 @@ export function HeaderActions({
 
   const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
 
-  const canReadAlertRule = authorizedToReadRuleType(alert?.fields[ALERT_RULE_TYPE_ID], alert?.fields[ALERT_RULE_CONSUMER]);
+  const canReadAlertRule = authorizedToReadRuleType(
+    alert?.fields[ALERT_RULE_TYPE_ID],
+    alert?.fields[ALERT_RULE_CONSUMER]
+  );
 
   // Attaching an alert to a case requires both reading cases and adding comments
   // to them, so gate the "Add to case" button on those case privileges rather

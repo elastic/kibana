@@ -22,11 +22,7 @@ import {
 } from '@elastic/eui';
 import { EuiFlyout, EuiFlyoutHeader } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
-import {
-  ALERT_RULE_CATEGORY,
-  ALERT_RULE_NAME,
-  ALERT_RULE_UUID,
-} from '@kbn/rule-data-utils';
+import { ALERT_RULE_CATEGORY, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { AlertFieldsTable, ScrollableFlyoutTabbedContent } from '@kbn/alerts-ui-shared';
