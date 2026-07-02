@@ -21938,7 +21938,6 @@
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputPlaceholder": "証明書鍵を指定",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTitle": "クライアントSSL証明書鍵",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTooltip": "この値はシークレットとして保存され、一度保存された値は二度と表示できません。",
-    "xpack.fleet.settings.editOutputFlyout.SSLOptionsDescription": "これらの設定はmTLS接続を設定するときにのみ追加します。",
     "xpack.fleet.settings.editOutputFlyout.streamsLink": "ストリーム",
     "xpack.fleet.settings.editOutputFlyout.syncIntegrationsFormRowLabel": "有効にすると、統合アセットがリモートのElasticsearchクラスターにインストールされます",
     "xpack.fleet.settings.editOutputFlyout.syncIntegrationsSwitchLabel": "統合を同期",

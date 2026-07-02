@@ -21941,7 +21941,6 @@
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputPlaceholder": "指定证书密钥",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTitle": "客户端 SSL 证书密钥",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTooltip": "此值将作为机密存储，意味着一旦保存，将无法再查看该值",
-    "xpack.fleet.settings.editOutputFlyout.SSLOptionsDescription": "仅在设置 mTLS 连接时添加这些设置",
     "xpack.fleet.settings.editOutputFlyout.streamsLink": "数据流",
     "xpack.fleet.settings.editOutputFlyout.syncIntegrationsFormRowLabel": "启用后，集成资产将安装在远程 Elasticsearch 集群上",
     "xpack.fleet.settings.editOutputFlyout.syncIntegrationsSwitchLabel": "同步集成",
