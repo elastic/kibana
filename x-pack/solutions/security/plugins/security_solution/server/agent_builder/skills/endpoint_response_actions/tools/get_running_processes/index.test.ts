@@ -86,6 +86,10 @@ describe('getRunningProcessesTool', () => {
       { endpoint_ids: ['agent-123'], comment: 'Running processes requested via AI agent: my-host' },
       { hosts: { 'agent-123': { name: 'my-host' } } }
     );
+    // The action is attributed to the initiating analyst, not the system user.
+    expect(service.getInternalResponseActionsClient).toHaveBeenCalledWith(
+      expect.objectContaining({ username: 'test-analyst' })
+    );
     const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
     expect(data.found).toBe(true);
     expect(data.actionId).toBe('action-999');

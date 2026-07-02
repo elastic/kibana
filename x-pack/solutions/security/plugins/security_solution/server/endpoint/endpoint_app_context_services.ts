@@ -343,6 +343,16 @@ export class EndpointAppContextService {
     return this.setupDependencies.loggerFactory.get(...contextParts);
   }
 
+  /**
+   * Resolve the username of the currently authenticated user for a request.
+   * Used to attribute actions (e.g. response actions dispatched by an AI agent
+   * skill) to the initiating analyst rather than the default system user, so
+   * the Response Actions audit trail records who requested the action.
+   */
+  public getCurrentUsername(request: KibanaRequest): string | undefined {
+    return this.security?.authc.getCurrentUser(request)?.username;
+  }
+
   public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
     if (!this.startDependencies?.productFeaturesService) {
       throw new EndpointAppContentServicesNotStartedError();
