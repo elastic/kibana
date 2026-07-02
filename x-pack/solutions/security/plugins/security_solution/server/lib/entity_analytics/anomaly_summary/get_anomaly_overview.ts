@@ -176,7 +176,9 @@ export const getEntityAnomalyOverview = async ({
     );
 
     aggs = resp.aggregations as unknown as OverviewAggs | undefined;
-    rawHits = compact(resp.hits.hits.map((h) => h._source));
+    rawHits = compact(
+      resp.hits.hits.map((h) => (h._source ? { ...h._source, _id: h._id } : undefined))
+    );
     const total = resp.hits.total;
     totalAnomaliesCount = total == null ? 0 : typeof total === 'number' ? total : total.value;
   } catch (err) {
@@ -223,6 +225,7 @@ export const getEntityAnomalyOverview = async ({
       : null;
 
     return {
+      recordId: anomaly._id ?? '',
       jobId: anomaly.job_id,
       jobName: jobConfig?.jobName ?? anomaly.job_id,
       timestamp: new Date(anomaly.timestamp).toISOString(),

@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/lens-plugin'
+  - '@kbn/lens-common'
   - '@kbn/security-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/data-views-plugin'
@@ -107,6 +108,10 @@ dependsOn:
   - '@kbn/openapi-generator'
   - '@kbn/workflows-extensions'
   - '@kbn/workflows'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-browser'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/resizable-layout'
   - '@kbn/css-utils'
