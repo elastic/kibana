@@ -104,12 +104,21 @@ predicate schemaBuildStep(DataFlow::Node child, DataFlow::Node parent) {
     child = arg.getALocalSource().(DataFlow::ArrayLiteralNode).getAnElement()
   )
   or
-  // Zod modifier chains carry the schema through: `child.optional()`, `.nullable()`, ...
+  // Zod chains carry the schema through: wrappers (`.optional()`, `.nullable()`, ...) and
+  // string refinements/formats that do NOT bound the maximum length (`.min()`, `.regex()`,
+  // `.trim()`, `.email()`, ...). A `z.string()` with only these in its chain is still
+  // unbounded, so the string must continue to flow to the request-validation sink.
   exists(DataFlow::MethodCallNode m |
     m.getMethodName() =
       [
+        // structural wrappers
         "optional", "nullable", "nullish", "default", "describe", "catch", "brand", "readonly",
-        "refine", "superRefine", "transform", "pipe", "and", "or", "array"
+        "refine", "superRefine", "transform", "pipe", "and", "or", "array",
+        // non-length-bounding string refinements and formats
+        "min", "length", "nonempty", "trim", "toLowerCase", "toUpperCase", "lowercase",
+        "uppercase", "regex", "includes", "startsWith", "endsWith", "email", "url", "uuid",
+        "datetime", "date", "time", "duration", "ip", "cidr", "emoji", "base64", "base64url",
+        "nanoid", "cuid", "cuid2", "ulid"
       ] and
     parent = m and
     child = m.getReceiver()
