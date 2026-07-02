@@ -10,7 +10,7 @@ import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import React from 'react';
 import type { StreamsAppLocator } from '../../common/locators';
 import { useResolvedDefinitionName } from './use_resolved_definition_name';
-import { StreamLinkContent } from './stream_link_content';
+import { REMOTE_SEARCH_TYPE, StreamLinkContent } from './stream_link_content';
 
 export interface DiscoverFlyoutStreamFieldByStreamNameProps {
   streamName: string;
@@ -41,7 +41,7 @@ export function DiscoverFlyoutStreamFieldByStreamName({
         loading={false}
         error={undefined}
         locator={locator}
-        remoteSearchType="ccs"
+        remoteSearchType={cpsHasLinkedProjects ? REMOTE_SEARCH_TYPE.CPS : REMOTE_SEARCH_TYPE.CCS}
         remoteName={remote.remoteName}
       />
     );
@@ -54,7 +54,7 @@ export function DiscoverFlyoutStreamFieldByStreamName({
       loading={loading}
       error={error}
       locator={locator}
-      remoteSearchType={cpsHasLinkedProjects ? 'cps' : undefined}
+      remoteSearchType={cpsHasLinkedProjects ? REMOTE_SEARCH_TYPE.CPS : undefined}
     />
   );
 }
