@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { API_REGISTRIES, apiId, targetSchema } from './registries';
+import { apiRegistries, targetSchema } from '@kbn/elastic-clients-sdk';
 
 const discoverSchema = z.object({
   target: targetSchema,
@@ -38,7 +38,7 @@ Each result includes:
 - \`description\`: a short description of the operation`,
     schema: discoverSchema,
     handler: async ({ target, search }) => {
-      const registry = API_REGISTRIES[target];
+      const registry = apiRegistries[target];
       const needle = search?.toLowerCase().trim();
 
       const results = registry.manifest
@@ -48,11 +48,11 @@ Each result includes:
             entry.name.toLowerCase().includes(needle) ||
             (entry.namespace ?? '').toLowerCase().includes(needle) ||
             entry.description.toLowerCase().includes(needle) ||
-            apiId(entry).toLowerCase().includes(needle)
+            entry.id.toLowerCase().includes(needle)
           );
         })
         .map((entry) => ({
-          api: apiId(entry),
+          api: entry.id,
           name: entry.name,
           namespace: entry.namespace ?? null,
           description: entry.description,

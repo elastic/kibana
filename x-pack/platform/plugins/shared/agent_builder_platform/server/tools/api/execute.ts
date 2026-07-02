@@ -14,7 +14,7 @@ import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { TransportRequestParams } from '@elastic/transport';
 import type { ApiRequest, JsonSchemaObject } from '@kbn/elastic-clients-sdk';
-import { API_REGISTRIES, findApi, targetSchema } from './registries';
+import { apiRegistries, findApi, targetSchema } from '@kbn/elastic-clients-sdk';
 
 /**
  * Issues a Kibana HTTP API call on behalf of the current user.
@@ -88,7 +88,7 @@ export const apiExecuteTool = (): BuiltinToolDefinition<typeof executeSchema> =>
 The response is the raw API response body.`,
     schema: executeSchema,
     handler: async ({ target, api, params = {} }, { esClient, request, logger }) => {
-      const registry = API_REGISTRIES[target];
+      const registry = apiRegistries[target];
       const meta = findApi(registry, api);
       if (meta == null) {
         return {

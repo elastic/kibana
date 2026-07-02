@@ -13,14 +13,8 @@
  */
 
 import type { JsonSchemaObject } from './lib/json_schema';
-import type { KbApiDefinition } from './kb/types';
-import type { FoundIn } from './lib/schema_args';
-import { extractSchemaArgs } from './lib/schema_args';
-import { buildRequestParams as buildEsRequestParams } from './es/request_builder';
-import { buildKibanaRequestParams } from './kb/request-builder';
-import { apiManifest, loadEsApi } from './es/apis';
-import type { EsApiMeta } from './es/apis';
-import { kbApiManifest, loadKbApi } from './kb/apis';
+import { esApiRegistry } from './es/registry';
+import { kbApiRegistry } from './kb/registry';
 
 /** HTTP methods accepted across both the Elasticsearch and Kibana API surfaces. */
 export type ApiHttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD';
@@ -34,15 +28,37 @@ export type ApiHttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD'
  * {@link ApiRegistry.loadApi} to resolve its full definition on demand.
  */
 export interface ApiRegistryMeta {
+  /**
+   * Stable identifier for the operation, unique within a registry's manifest.
+   *
+   * Built from `namespace` and `name`: namespaced operations are rendered as
+   * `"<namespace>.<name>"` (e.g. `"indices.create"`); root-level operations (with no
+   * namespace) use just the name (e.g. `"bulk"`).
+   */
+  readonly id: string;
   /** Operation name (e.g. `"create"`, `"bulk"`). */
   readonly name: string;
   /** Namespace group (e.g. `"indices"`), or `null` for root-level operations. */
   readonly namespace: string | null;
   /** Short, human-readable description of the operation. */
   readonly description: string;
-  /** Stable identifier of the file that holds the full definition; used as the API id. */
+  /** Stable identifier of the file that holds the full definition. */
   readonly namespaceFile: string;
 }
+
+/**
+ * Decorates raw manifest entries with a derived {@link ApiRegistryMeta.id}.
+ *
+ * Used by each target registry to expose an `id` on every manifest entry without
+ * requiring the generated `api-manifest.ts` files to carry it.
+ */
+export const withApiId = <T extends { readonly name: string; readonly namespace: string | null }>(
+  entries: readonly T[]
+): ReadonlyArray<T & { readonly id: string }> =>
+  entries.map((entry) => ({
+    ...entry,
+    id: entry.namespace != null ? `${entry.namespace}.${entry.name}` : entry.name,
+  }));
 
 /**
  * A fully-resolved API definition, including the JSON Schema `input` (when the
@@ -117,137 +133,22 @@ export interface LoadedApi {
  * This is the contract consumed by generic API tooling that needs to discover,
  * document, and execute operations without hard-coding a specific target.
  */
-export interface ApiRegistry {
-  readonly manifest: readonly ApiRegistryMeta[];
-  loadApi: (meta: ApiRegistryMeta) => Promise<LoadedApi>;
+export interface ApiRegistry<M extends ApiRegistryMeta = ApiRegistryMeta> {
+  readonly manifest: readonly M[];
+  loadApi(meta: M): Promise<LoadedApi>;
 }
 
-/** Registry over the Elasticsearch HTTP API surface. */
-export const esApiRegistry: ApiRegistry = {
-  manifest: apiManifest,
-  loadApi: async (meta) => {
-    const def = await loadEsApi(meta as EsApiMeta);
-    return {
-      definition: def as ApiRegistryDefinition,
-      buildRequest: (input): ApiRequest => {
-        const schemaArgs = def.input != null ? extractSchemaArgs(def.input) : [];
-        const p = buildEsRequestParams(def, input, schemaArgs);
-        const req: {
-          method: string;
-          path: string;
-          querystring?: Record<string, unknown>;
-          body?: unknown;
-          bulkBody?: unknown;
-        } = { method: p.method as string, path: p.path as string };
-        if (p.querystring != null) req.querystring = p.querystring as Record<string, unknown>;
-        if (p.bulkBody != null) req.bulkBody = p.bulkBody;
-        else if (p.body != null) req.body = p.body;
-        return req;
-      },
-    };
-  },
-};
-
-/** Registry over the Kibana HTTP API surface. */
-export const kbApiRegistry: ApiRegistry = {
-  manifest: kbApiManifest,
-  loadApi: async (meta) => {
-    const rawDef = await loadKbApi(meta);
-    return {
-      definition: toRegistryDefinition(rawDef),
-      buildRequest: (input): ApiRequest => {
-        const p = buildKibanaRequestParams(rawDef, input);
-        const req: {
-          method: string;
-          path: string;
-          querystring?: Record<string, unknown>;
-          body?: unknown;
-          multipartFields?: Record<string, string>;
-        } = { method: p.method, path: p.path };
-        if (p.querystring != null) req.querystring = p.querystring;
-        if (p.multipartFields != null) req.multipartFields = p.multipartFields;
-        else if (p.body !== undefined) req.body = p.body;
-        return req;
-      },
-    };
-  },
-};
+/** The two backend targets supported by the SDK. */
+export type ApiTarget = 'elasticsearch' | 'kibana';
 
 /**
- * Normalizes a {@link KbApiDefinition} into the unified {@link ApiRegistryDefinition} shape
- * for display purposes (api_manual). The schema keys on `input` use `cliFlag ?? name`.
- */
-function toRegistryDefinition(def: KbApiDefinition): ApiRegistryDefinition {
-  return {
-    name: def.name,
-    namespace: def.namespace,
-    description: def.description,
-    method: def.method,
-    path: def.path,
-    input: buildKbRegistryInput(def),
-  };
-}
-
-/**
- * Builds a JSON Schema object for a Kibana API definition.
+ * A registry keyed by {@link ApiTarget}.
  *
- * Each path, query, and body parameter becomes a property in the schema with
- * the appropriate `x-found-in` annotation and a JSON Schema type.
- *
- * This is a temporary shim until the Kibana API generator emits JSON Schema
- * directly (analogous to what the ES client generator now does).
+ * Use this instead of the individual `esApiRegistry` / `kbApiRegistry` constants.
+ * The target value is the single discriminator for all generic API tooling that
+ * needs to discover, document, and execute operations without hard-coding a backend.
  */
-function buildKbRegistryInput(def: KbApiDefinition): JsonSchemaObject | undefined {
-  const properties: Record<string, Record<string, unknown>> = {};
-  const required: string[] = [];
-
-  const addParam = (
-    key: string,
-    kbType: string | undefined,
-    description: string,
-    foundIn: FoundIn,
-    isRequired: boolean
-  ) => {
-    let jsonType: string;
-    switch (kbType) {
-      case 'boolean':
-        jsonType = 'boolean';
-        break;
-      case 'number':
-        jsonType = 'number';
-        break;
-      case 'array':
-        jsonType = 'array';
-        break;
-      case 'object':
-        jsonType = 'object';
-        break;
-      default:
-        jsonType = 'string';
-    }
-    properties[key] = {
-      type: jsonType,
-      description,
-      'x-found-in': foundIn,
-    };
-    if (isRequired) required.push(key);
-  };
-
-  for (const p of def.pathParams ?? []) {
-    addParam(p.name, 'string', p.description, 'path', p.required);
-  }
-
-  for (const q of def.queryParams ?? []) {
-    addParam(q.cliFlag ?? q.name, q.type, q.description, 'query', q.required === true);
-  }
-
-  for (const b of def.bodyParams ?? []) {
-    addParam(b.cliFlag ?? b.name, b.type, b.description, 'body', b.required === true);
-  }
-
-  if (Object.keys(properties).length === 0) return undefined;
-
-  const schema: JsonSchemaObject = { type: 'object', properties };
-  if (required.length > 0) schema.required = required;
-  return schema;
-}
+export const apiRegistries: Record<ApiTarget, ApiRegistry> = {
+  elasticsearch: esApiRegistry,
+  kibana: kbApiRegistry,
+};

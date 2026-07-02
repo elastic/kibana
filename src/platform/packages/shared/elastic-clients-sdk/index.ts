@@ -12,13 +12,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { z } from '@kbn/zod/v4';
+import type { ApiRegistry, ApiRegistryMeta } from './registry';
+
 export type { JsonSchemaObject } from './lib/json_schema';
 
-export { extractSchemaArgs } from './lib/schema_args';
-export type { SchemaArgDefinition, FoundIn } from './lib/schema_args';
-
-export { esApiRegistry, kbApiRegistry } from './registry';
+export { apiRegistries } from './registry';
 export type {
+  ApiTarget,
   ApiRegistry,
   ApiRegistryMeta,
   ApiRegistryDefinition,
@@ -26,3 +27,18 @@ export type {
   LoadedApi,
   ApiHttpMethod,
 } from './registry';
+
+/**
+ * Zod schema for {@link ApiTarget}.
+ *
+ * Use this as the `target` field in any tool schema that accepts an API target.
+ */
+export const targetSchema = z
+  .enum(['elasticsearch', 'kibana'])
+  .describe(
+    'The backend API target. Use "elasticsearch" to call Elasticsearch HTTP APIs and "kibana" to call Kibana HTTP APIs. '
+  );
+
+/** Resolves a manifest entry from its {@link ApiRegistryMeta.id}. */
+export const findApi = (registry: ApiRegistry, id: string): ApiRegistryMeta | undefined =>
+  registry.manifest.find((meta) => meta.id === id);

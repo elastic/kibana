@@ -11,7 +11,7 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { API_REGISTRIES, findApi, targetSchema } from './registries';
+import { apiRegistries, findApi, targetSchema } from '@kbn/elastic-clients-sdk';
 
 const manualSchema = z.object({
   target: targetSchema,
@@ -40,7 +40,7 @@ Use the \`${platformCoreTools.apiDiscover}\` tool first to find the \`api\` iden
 Then call \`${platformCoreTools.apiExecute}\` with the same \`target\`, \`api\`, and \`params\` from this schema.`,
     schema: manualSchema,
     handler: async ({ target, api }, { logger }) => {
-      const registry = API_REGISTRIES[target];
+      const registry = apiRegistries[target];
       const meta = findApi(registry, api);
       if (meta == null) {
         return {
