@@ -272,10 +272,11 @@ export function getOptionShorthand(option: TimeRangeBoundsOption): string | null
  *    we cannot rely on `!isInvalid` because moment's forgiving parser "validates"
  *    them by matching a fragment and discarding the rest (producing garbage bounds).
  * 2. Otherwise derives re-parseable input text from the bounds: relative offsets
- *    are stripped of the `now` prefix (e.g. "-15m"), absolute bounds are formatted
- *    as readable dates rather than raw ISO, and `timePrecision` is honoured. The
- *    bounds are reproduced verbatim (rounding included) so that re-applying the
- *    text yields exactly the stored range — no unintended rounding change.
+ *    are stripped of the `now` prefix (e.g. "-15m"), and absolute bounds are
+ *    formatted as readable dates rather than raw ISO. Absolute bounds use full
+ *    millisecond precision (not the display `timePrecision`), reproducing the
+ *    bounds verbatim (rounding included) so that re-applying the text yields
+ *    exactly the stored range — no unintended precision or rounding change.
  */
 export function getOptionInputText(option: TimeRangeBoundsOption): string {
   if (option.label && textToTimeRange(option.label).isNaturalLanguage) {
@@ -342,8 +343,9 @@ function boundToRelativeShorthand(bound: string): string | 'now' | null {
  * Converts a date math bound into a user-friendly input fragment.
  * - Relative offsets are stripped of the `now` prefix via `boundToRelativeShorthand`,
  *   keeping any rounding suffix so the range round-trips unchanged.
- * - Absolute ISO bounds are formatted as readable dates (honouring `timePrecision`)
- *   instead of leaking the raw ISO string into the input.
+ * - Absolute ISO bounds are formatted as readable dates at full millisecond
+ *   precision (not the display `timePrecision`), so the range round-trips
+ *   unchanged instead of leaking the raw ISO string into the input.
  * - Rounding-only datemath (e.g. `now/d`) and anything unrecognised pass through as-is.
  */
 function boundToInputFragment(bound: string): { text: string; isNow: boolean } {
