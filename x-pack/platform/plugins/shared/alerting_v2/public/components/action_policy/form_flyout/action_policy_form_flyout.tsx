@@ -16,16 +16,11 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
-import type {
-  CreateActionPolicyData,
-  ActionPolicyResponse,
-  UpdateActionPolicyBody,
-} from '@kbn/alerting-v2-schemas';
+import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { FormProvider } from 'react-hook-form';
 import { ActionPolicyForm } from '../form/action_policy_form';
-import { toCreatePayload, toUpdatePayload } from '../form/form_utils';
 import type { ActionPolicyFormState } from '../form/types';
 import { useActionPolicyForm } from '../form/use_action_policy_form';
 
@@ -35,8 +30,11 @@ const noop = () => {};
 
 interface ActionPolicyFormFlyoutProps {
   onClose: () => void;
-  onSave?: (data: CreateActionPolicyData) => void;
-  onUpdate?: (id: string, data: UpdateActionPolicyBody) => void;
+  /**
+   * Receives the raw form state so the host can create the workflows and build the payload
+   */
+  onSave?: (values: ActionPolicyFormState) => void | Promise<void>;
+  onUpdate?: (id: string, values: ActionPolicyFormState, version: string) => void | Promise<void>;
   isLoading?: boolean;
   initialValues?: ActionPolicyResponse;
 }
@@ -48,14 +46,10 @@ export const ActionPolicyFormFlyout = ({
   isLoading = false,
   initialValues,
 }: ActionPolicyFormFlyoutProps) => {
-  const onSubmitCreate = (values: ActionPolicyFormState) => onSave?.(toCreatePayload(values));
-  const onSubmitUpdate = (id: string, values: ActionPolicyFormState, version: string) =>
-    onUpdate?.(id, toUpdatePayload(values, version));
-
   const { methods, isEditMode, isSubmitEnabled, handleSubmit } = useActionPolicyForm({
     initialValues,
-    onSubmitCreate: onSave ? onSubmitCreate : noop,
-    onSubmitUpdate: onUpdate ? onSubmitUpdate : noop,
+    onSubmitCreate: onSave ?? noop,
+    onSubmitUpdate: onUpdate ?? noop,
   });
 
   return (
