@@ -107,20 +107,23 @@ const OverflowPopover = ({
           defaultMessage: 'More rules',
         })}
       </EuiPopoverTitle>
-      <div css={{ maxHeight: 320, overflowY: 'auto', minWidth: 240 }}>
+      <div css={{ maxHeight: 320, overflowY: 'auto', minWidth: 240, maxWidth: 360 }}>
         <EuiListGroup maxWidth={false}>
-          {hiddenRules.map((rule) => (
-            <EuiListGroupItem
-              key={rule.id}
-              iconType="bell"
-              wrapText
-              label={rule.name ?? rule.id}
-              onClick={() => {
-                setIsOpen(false);
-                onRuleClick(rule.id);
-              }}
-            />
-          ))}
+          {hiddenRules.map((rule) => {
+            const label = rule.name ?? rule.id;
+            return (
+              <EuiListGroupItem
+                key={rule.id}
+                iconType="bell"
+                label={label}
+                title={label}
+                onClick={() => {
+                  setIsOpen(false);
+                  onRuleClick(rule.id);
+                }}
+              />
+            );
+          })}
         </EuiListGroup>
         {notShownCount > 0 && (
           <EuiCallOut
