@@ -24,6 +24,11 @@ spec:
       default_branch: main
       repository: elastic/ci-agent-images
       pipeline_file: vm-images/.buildkite/pipeline.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - vm-images/.buildkite/pipeline.yml
+            cleanup_sparse_state: true
       provider_settings:
         trigger_mode: none
       schedules:
