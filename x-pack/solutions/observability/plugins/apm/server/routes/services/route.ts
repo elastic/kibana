@@ -81,6 +81,7 @@ import type { ServiceTransactionTypesResponse } from './get_service_transaction_
 import { getServiceTransactionTypes } from './get_service_transaction_types';
 import type { ServiceThroughputResponse } from './get_throughput';
 import { getThroughput } from './get_throughput';
+import { getServiceHasSystemMetrics } from './get_service_has_system_metrics';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -1026,6 +1027,24 @@ const serviceSlosRoute = createApmServerRoute({
   },
 });
 
+const serviceHasSystemMetricsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/has_system_metrics',
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: t.intersection([environmentRt, rangeRt]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<{ hasSystemMetrics: boolean }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const {
+      path: { serviceName },
+      query: { environment, start, end },
+    } = resources.params;
+
+    return getServiceHasSystemMetrics({ apmEventClient, serviceName, environment, start, end });
+  },
+});
+
 export const serviceRouteRepository = {
   ...servicesRoute,
   ...servicesDetailedStatisticsRoute,
@@ -1047,4 +1066,5 @@ export const serviceRouteRepository = {
   ...serviceAlertsRoute,
   ...serviceAnomalyScoreRoute,
   ...serviceSlosRoute,
+  ...serviceHasSystemMetricsRoute,
 };

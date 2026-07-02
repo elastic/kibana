@@ -14,11 +14,8 @@ import type {
   ToolAvailabilityResult,
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import {
-  getStreamTypeFromDefinition,
-  type StreamType,
-  upsertStreamQueryRequestSchema,
-} from '@kbn/streams-schema';
+import { getStreamTypeFromDefinition, type StreamType } from '@kbn/streams-schema';
+import { upsertStreamQueryRequestSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { StreamsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -31,6 +28,13 @@ export const STREAMS_CREATE_QUERY_KNOWLEDGE_INDICATOR_TOOL_ID =
 
 const queryInputSchema = upsertStreamQueryRequestSchema.extend({
   id: z.string().optional(),
+  expires_at: z.iso
+    .datetime()
+    .optional()
+    .describe(
+      'Optional expiry deadline (ISO 8601). Provide to create a managed KI that expires at this date. ' +
+        'Omit to create a durable KI with no expiry.'
+    ),
 });
 
 const createQueryKnowledgeIndicatorSchema = z
@@ -111,17 +115,20 @@ export function createQueryKnowledgeIndicatorTool({
       let streamType: StreamType | 'unknown' = 'unknown';
 
       try {
-        const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
-          await getScopedClients({
-            request,
-          });
+        const scopedClients = await getScopedClients({
+          request,
+        });
 
-        await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+        await assertSignificantEventsAccess({
+          server,
+          licensing: scopedClients.licensing,
+          uiSettingsClient: scopedClients.uiSettingsClient,
+        });
 
-        const definition = await streamsClient.getStream(streamName);
+        const definition = await scopedClients.streamsClient.getStream(streamName);
         streamType = getStreamTypeFromDefinition(definition);
 
-        const kiClient = await getKnowledgeIndicatorClient();
+        const kiClient = await scopedClients.getKnowledgeIndicatorClient();
         const { id } = await createQueryKnowledgeIndicatorToolHandler({
           kiClient,
           definition,

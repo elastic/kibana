@@ -12,6 +12,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import type { AppHeaderPadding } from '../types';
+import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 // Single-row bar height, applied to every header (title, tabbed, or back-button-only) so the bar
 // stays a consistent 48px. The symmetric size.s padding leaves a 32px content area, enough for the
@@ -28,6 +29,7 @@ export interface AppHeaderShellProps {
   tabs?: ReactNode;
   sticky?: boolean;
   padding?: AppHeaderPadding;
+  borderless?: boolean;
 }
 
 // Resolves the outer spacing contract: horizontal padding for the scalar values, and the breakout
@@ -60,7 +62,8 @@ const useHeaderStyles = (
   padding: AppHeaderPadding | undefined,
   hasTabs: boolean,
   hasTitleAppend: boolean,
-  hasMetadata: boolean
+  hasMetadata: boolean,
+  borderless: boolean
 ) => {
   const { euiTheme } = useEuiTheme();
 
@@ -97,8 +100,11 @@ const useHeaderStyles = (
         margin-top: -${bleedMargin};
       `}
       background: ${euiTheme.colors.backgroundBasePlain};
-      border-bottom: ${euiTheme.border.thin};
-      margin-bottom: -${euiTheme.border.width.thin};
+      ${!borderless &&
+      css`
+        border-bottom: ${euiTheme.border.thin};
+        margin-bottom: -${euiTheme.border.width.thin};
+      `}
 
       &:hover .titleActionsReveal,
       &:focus-within .titleActionsReveal {
@@ -113,8 +119,11 @@ const useHeaderStyles = (
       gap: ${euiTheme.size.m};
       min-width: 0;
       min-height: ${APPLICATION_TOP_BAR_MIN_HEIGHT_PX}px;
-      padding-block-start: ${paddingBlock};
-      padding-block-end: ${bottomPad(hasTabs || hasMetadata)};
+      ${!hasTitleAppend &&
+      css`
+        padding-block-start: ${paddingBlock};
+        padding-block-end: ${bottomPad(hasTabs || hasMetadata)};
+      `}
     `;
 
     const titleCluster = css`
@@ -147,7 +156,6 @@ const useHeaderStyles = (
       align-items: center;
       flex: 1 1 0;
       min-width: 0;
-      overflow: hidden;
     `;
 
     const trailingSlot = css`
@@ -191,7 +199,7 @@ const useHeaderStyles = (
       metadataRow,
       tabsRow,
     };
-  }, [sticky, padding, euiTheme, hasTabs, hasTitleAppend, hasMetadata]);
+  }, [sticky, padding, euiTheme, hasTabs, hasTitleAppend, hasMetadata, borderless]);
 };
 
 export const AppHeaderShell = React.memo<AppHeaderShellProps>(
@@ -205,12 +213,13 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
     tabs,
     sticky = true,
     padding,
+    borderless = false,
   }) => {
     const hasTitleAppend = titleAppend != null;
-    const styles = useHeaderStyles(sticky, padding, !!tabs, hasTitleAppend, !!metadata);
+    const styles = useHeaderStyles(sticky, padding, !!tabs, hasTitleAppend, !!metadata, borderless);
 
     return (
-      <div css={styles.root} data-test-subj="appHeader">
+      <div css={styles.root} data-test-subj={APP_HEADER_TEST_SUBJECTS.root}>
         <div css={styles.primaryRow}>
           <div css={styles.titleCluster}>
             <div css={styles.titleGroup}>
@@ -228,12 +237,12 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
           {trailing && <div css={styles.trailingSlot}>{trailing}</div>}
         </div>
         {metadata && (
-          <div css={styles.metadataRow} data-test-subj="appHeaderMetadata">
+          <div css={styles.metadataRow} data-test-subj={APP_HEADER_TEST_SUBJECTS.metadata}>
             {metadata}
           </div>
         )}
         {tabs && (
-          <div css={styles.tabsRow} data-test-subj="appHeaderTabs">
+          <div css={styles.tabsRow} data-test-subj={APP_HEADER_TEST_SUBJECTS.tabs}>
             {tabs}
           </div>
         )}
