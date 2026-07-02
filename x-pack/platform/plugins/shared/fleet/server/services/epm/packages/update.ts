@@ -109,7 +109,11 @@ export async function updatePackage(
 
     // Namespaces present in old settings but absent from the new payload — clear their ILM policy
     for (const [namespace, oldNsSettings] of Object.entries(oldSettings)) {
-      if (!(namespace in newNamespaceCustomizationSettings) && oldNsSettings.ilm_policy && !alreadyScheduled.has(namespace)) {
+      if (
+        !(namespace in newNamespaceCustomizationSettings) &&
+        oldNsSettings.ilm_policy &&
+        !alreadyScheduled.has(namespace)
+      ) {
         ilmPolicyChanges.push({ namespace, ilmPolicy: undefined });
       }
     }
