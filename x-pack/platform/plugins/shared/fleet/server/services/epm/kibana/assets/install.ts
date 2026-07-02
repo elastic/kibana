@@ -374,7 +374,7 @@ export async function deleteOrphanedMultipleIsolatedAssets({
             type: assetType,
             search: searchQuery,
             rootSearchFields: ['_id', 'originId'],
-            fields: [],
+            fields: ['name'],
             perPage: 100,
             page,
             namespaces: [spaceId],

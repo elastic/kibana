@@ -449,7 +449,10 @@ describe('deleteOrphanedMultipleIsolatedAssets', () => {
     );
   });
 
-  it('passes fields: [] to find() to avoid fetching unnecessary attributes', async () => {
+  it('passes a non-empty fields array to find() so _source filtering is applied', async () => {
+    // fields: [] is a no-op in core's includedFields() (returns undefined → full source).
+    // A non-empty array triggers actual _source filtering with ROOT_FIELDS always included,
+    // so only the minimal attribute plus root fields (id, originId, type, …) are fetched.
     const iterator = makeArchiveIterator([makeTagAsset('my-tag')]);
     await deleteOrphanedMultipleIsolatedAssets({
       kibanaAssetsArchiveIterator: iterator,
@@ -458,7 +461,9 @@ describe('deleteOrphanedMultipleIsolatedAssets', () => {
       logger: mockLogger,
     });
 
-    expect(mockFind).toHaveBeenCalledWith(expect.objectContaining({ fields: [] }));
+    const [findArgs] = mockFind.mock.calls[0];
+    expect(Array.isArray(findArgs.fields)).toBe(true);
+    expect(findArgs.fields.length).toBeGreaterThan(0);
   });
 
   it('logs a warning and continues when find() throws, without propagating the error', async () => {
