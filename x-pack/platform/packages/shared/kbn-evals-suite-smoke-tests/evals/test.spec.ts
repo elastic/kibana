@@ -132,21 +132,6 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
   evaluate(
     'smoke tests: trace-based evaluators',
     async ({ executorClient, agentBuilderClient, evaluatorClient, evaluationConnector }) => {
-      const groundednessEvaluators = evaluatorClient.toEvaluators([
-        { name: 'groundedness', kind: 'LLM', connectorId: 'azure-gpt4_1' },
-      ]);
-
-      const correctnessEvaluators = evaluatorClient.toSubScoreEvaluators({
-        name: 'correctness',
-        kind: 'LLM',
-        connectorId: 'azure-gpt4_1',
-        subScores: [
-          { key: 'factuality', evaluatorName: 'Factuality' },
-          { key: 'relevance', evaluatorName: 'Relevance' },
-          { key: 'sequence_accuracy', evaluatorName: 'Sequence Accuracy' },
-        ],
-      });
-
       const result = await executorClient.runExperiment(
         {
           datasets: [
@@ -177,7 +162,19 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
             return { traceId: response.traceId };
           },
         },
-        [...groundednessEvaluators, ...correctnessEvaluators]
+        evaluatorClient.toEvaluators([
+          { name: 'groundedness', kind: 'LLM', connectorId: 'azure-gpt4_1' },
+          {
+            name: 'correctness',
+            kind: 'LLM',
+            connectorId: 'azure-gpt4_1',
+            subScores: [
+              { key: 'factuality', evaluatorName: 'Factuality' },
+              { key: 'relevance', evaluatorName: 'Relevance' },
+              { key: 'sequence_accuracy', evaluatorName: 'Sequence Accuracy' },
+            ],
+          },
+        ])
       );
 
       expect(result[0].evaluationRuns.length).toBeGreaterThan(0);
