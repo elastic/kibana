@@ -6,43 +6,115 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { defer, catchError, throwError } from 'rxjs';
-import type { MonoTypeOperatorFunction } from 'rxjs';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import { defer } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
-import { isSSEError } from '@kbn/sse-utils';
+import type { ServerSentEventBase } from '@kbn/sse-utils';
 import { isToolUiEvent } from '@kbn/agent-builder-common';
-import type { ChatEvent, AgentBuilderErrorCode } from '@kbn/agent-builder-common';
-import { createAgentBuilderError } from '@kbn/agent-builder-common';
 import { WorkflowApi } from '@kbn/workflows-ui';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 import {
+  INVESTIGATE_STEP_ID,
   INVESTIGATION_PROGRESS_UI_EVENT,
   investigationStateSchema,
   type InvestigationState,
 } from '@kbn/significant-events-schema';
+import type { InvestigationStatus } from './types';
 
-/** Name of the `investigate` step in `investigation_workflow.yaml` — must stay in sync with it. */
-const INVESTIGATE_STEP_ID = 'investigate';
+/**
+ * How long to wait before re-following the live stream after it errored while the workflow
+ * execution is still running (e.g. the agent execution doesn't exist yet at the very start of
+ * a run, or the follow endpoint's idle/total timeout kicked in mid-run).
+ */
+const REFOLLOW_DELAY_MS = 3000;
+/**
+ * How long to wait between attempts to read the final result while the workflow engine is
+ * still persisting it (its persistence loop flushes every ~500ms after the agent stream ends).
+ */
+const SETTLE_RETRY_DELAY_MS = 1000;
+/** Retry attempts for a terminal-but-output-not-yet-visible execution before giving up. */
+const MAX_SETTLE_ATTEMPTS = 3;
 
-/** Converts SSE-envelope errors emitted by the agent execution follow stream into thrown errors. */
-function unwrapAgentExecutionErrors<T>(): MonoTypeOperatorFunction<T> {
-  return catchError((err) => {
-    if (isSSEError(err)) {
-      return throwError(() =>
-        createAgentBuilderError(err.code as AgentBuilderErrorCode, err.message, err.meta)
-      );
+const COULD_NOT_LOAD_MESSAGE = i18n.translate(
+  'xpack.investigationOutput.couldNotLoadResultErrorMessage',
+  { defaultMessage: "Couldn't load the investigation result." }
+);
+const MISSING_PRIVILEGES_MESSAGE = i18n.translate(
+  'xpack.investigationOutput.missingPrivilegesErrorMessage',
+  { defaultMessage: "You don't have permission to view the investigation result." }
+);
+const FAILED_WITHOUT_DETAILS_MESSAGE = i18n.translate(
+  'xpack.investigationOutput.failedWithoutDetailsErrorMessage',
+  { defaultMessage: 'The investigation did not complete.' }
+);
+
+const httpErrorMessage = (err: Error): string => {
+  const fetchError = err as IHttpFetchError<ResponseErrorBody>;
+  if (fetchError.response?.status === 403 || fetchError.body?.statusCode === 403) {
+    return MISSING_PRIVILEGES_MESSAGE;
+  }
+  return fetchError.body?.message ?? err.message;
+};
+
+type SettledInvestigation =
+  | { status: 'complete'; state: InvestigationState }
+  | { status: 'failed'; error: string }
+  | { status: 'unavailable'; error: string };
+
+/**
+ * Terminal investigation results keyed by execution id. Executions never change once terminal,
+ * so this saves a full-output execution fetch every time a row remounts (each investigation in
+ * a flyout list mounts its own hook, and flyouts are reopened often). `unavailable` results are
+ * deliberately not cached — they may be transient (e.g. a privilege granted later).
+ */
+const MAX_CACHE_ENTRIES = 100;
+const settledInvestigationCache = new Map<string, SettledInvestigation>();
+
+const cacheSettled = (executionId: string, settled: SettledInvestigation): void => {
+  if (settled.status === 'unavailable') {
+    return;
+  }
+  if (settledInvestigationCache.size >= MAX_CACHE_ENTRIES) {
+    const oldestKey = settledInvestigationCache.keys().next().value;
+    if (oldestKey !== undefined) {
+      settledInvestigationCache.delete(oldestKey);
     }
-    return throwError(() => err);
-  });
-}
+  }
+  settledInvestigationCache.set(executionId, settled);
+};
+
+/** Exposed for tests. */
+export const clearSettledInvestigationCache = (): void => {
+  settledInvestigationCache.clear();
+};
+
+/**
+ * Applies a live progress snapshot on top of the previous one. Snapshots are documented to be
+ * complete (never a delta), but that invariant is only enforced by the agent's instructions —
+ * if a snapshot drops a previously reported hypothesis, keep it instead of letting it vanish
+ * from the UI mid-investigation.
+ */
+const applySnapshot = (
+  previous: InvestigationState | undefined,
+  next: InvestigationState
+): InvestigationState => {
+  if (!previous) {
+    return next;
+  }
+  const nextCandidates = new Set(next.hypotheses.map((hypothesis) => hypothesis.candidate));
+  const dropped = previous.hypotheses.filter(
+    (hypothesis) => !nextCandidates.has(hypothesis.candidate)
+  );
+  return dropped.length === 0 ? next : { ...next, hypotheses: [...next.hypotheses, ...dropped] };
+};
 
 export interface UseInvestigationStateResult {
-  /** Latest known investigation state, live while running or persisted once fetched. */
+  /** Latest known investigation state: live snapshots while running, persisted once complete. */
   state?: InvestigationState;
-  /** True while actively following the live stream; false once settled (fetched or errored). */
-  isRunning: boolean;
-  /** Set when the investigation itself failed, or when the result couldn't be loaded/parsed. */
+  status: InvestigationStatus;
+  /** Detail message for the `failed` and `unavailable` statuses. */
   error?: string;
 }
 
@@ -52,16 +124,18 @@ export interface UseInvestigationStateResult {
  * `investigation_progress` `tool_ui` events AND the schema of the `investigate` step's final
  * structured output persisted to the workflow execution document.
  *
- * - While `isRunning` is true, follows the agent execution's live event stream
- *   (`GET /internal/agent_builder/executions/{executionId}/follow`) and treats each event's
- *   payload as the full current state (a snapshot, never a delta).
- * - The caller's `isRunning` flag can lag reality (e.g. a significant event's cached
- *   "still running" state after the agent already finished or failed), and the agent's last
- *   `tool_ui` call isn't guaranteed to equal the final structured output. So on BOTH stream
- *   `error` and stream `complete` — not just when the caller says it's done — this fetches the
- *   persisted final result via `WorkflowApi` and prefers it over the last live value. If that
- *   fetch itself fails (e.g. missing `workflowsManagement:readExecution` privilege, or the step
- *   failed), it degrades to `error` instead of throwing, keeping whatever `state` is already known.
+ * - While the investigation runs, follows the agent execution's live event stream
+ *   (`GET /internal/agent_builder/executions/{executionId}/follow`); each event carries the
+ *   full current state (validated, and reconciled so hypotheses never silently vanish).
+ * - When the stream ends (or the caller already knows the run is over), reads the persisted
+ *   final result via `WorkflowApi` — but only trusts it once the workflow execution itself is
+ *   terminal. A stream error on a still-running execution (the agent execution may not exist
+ *   yet at the very start of a run, or the follow endpoint timed out mid-run) resumes following
+ *   instead of surfacing a false failure, and a just-completed execution whose output hasn't
+ *   been persisted yet is retried briefly instead of being reported as unloadable.
+ * - The investigation *failing* (`failed`, with the step's error) is distinguished from its
+ *   result being *unloadable* (`unavailable`, e.g. missing privileges) — see
+ *   {@link InvestigationStatus}.
  *
  * `executionId` must be the id of the underlying agent execution — the investigation workflow
  * pins this to its own workflow execution id (see `investigation_workflow.yaml`), so the workflow
@@ -71,43 +145,100 @@ export function useInvestigationState({
   http,
   executionId,
   isRunning: isRunningInput,
-  enabled = true,
 }: {
   http: HttpSetup;
   executionId: string | undefined;
   /** Whether the caller believes the investigation is still running. May lag reality. */
   isRunning: boolean;
-  /** Set to false to skip entirely (e.g. no execution to show yet). */
-  enabled?: boolean;
 }): UseInvestigationStateResult {
   const [state, setState] = useState<InvestigationState | undefined>();
-  const [isRunning, setIsRunning] = useState(isRunningInput);
-  const [error, setError] = useState<string | undefined>();
-  const httpRef = useRef(http);
-  httpRef.current = http;
+  const [settled, setSettled] = useState<
+    { status: 'complete' | 'failed' | 'unavailable'; error?: string } | undefined
+  >();
+  const [isFollowing, setIsFollowing] = useState(false);
+  const lastExecutionIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    if (!executionId || !enabled) {
+    if (!executionId) {
+      return;
+    }
+
+    if (lastExecutionIdRef.current !== executionId) {
+      lastExecutionIdRef.current = executionId;
+      setState(undefined);
+    }
+    setSettled(undefined);
+    setIsFollowing(false);
+
+    const cached = settledInvestigationCache.get(executionId);
+    if (cached) {
+      if (cached.status === 'complete') {
+        setState(cached.state);
+        setSettled({ status: 'complete' });
+      } else {
+        setSettled({ status: cached.status, error: cached.error });
+      }
       return;
     }
 
     let cancelled = false;
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
+    let subscription: Subscription | undefined;
+    const abortController = new AbortController();
+    const workflowApi = new WorkflowApi(http);
 
-    const fetchFinal = async () => {
+    const applySettled = (result: SettledInvestigation) => {
+      if (cancelled) {
+        return;
+      }
+      cacheSettled(executionId, result);
+      setIsFollowing(false);
+      if (result.status === 'complete') {
+        setState(result.state);
+        setSettled({ status: 'complete' });
+      } else {
+        setSettled({ status: result.status, error: result.error });
+      }
+    };
+
+    /**
+     * Reads the persisted result off the workflow execution and decides what to do based on the
+     * execution's own status — never on what the caller or the stream believed:
+     * - execution still running + the stream broke (`streamEnded: false`) → resume following;
+     * - execution still running + the stream completed cleanly → the agent is done but the
+     *   engine is still finishing the workflow; poll until it's terminal;
+     * - terminal → report `complete` / `failed` / `unavailable`, retrying briefly when a
+     *   completed execution's output isn't visible yet (persistence-flush race).
+     */
+    const settle = async ({
+      streamEnded,
+      attempt = 0,
+    }: {
+      streamEnded: boolean;
+      attempt?: number;
+    }) => {
       try {
-        const workflowApi = new WorkflowApi(httpRef.current);
         const execution = await workflowApi.getExecution(executionId, { includeOutput: true });
-        const stepExecution = execution.stepExecutions?.find(
-          (step) => step.stepId === INVESTIGATE_STEP_ID
-        );
-
         if (cancelled) {
           return;
         }
 
+        if (!isTerminalStatus(execution.status)) {
+          if (streamEnded) {
+            retryTimer = setTimeout(() => settle({ streamEnded: true }), SETTLE_RETRY_DELAY_MS);
+          } else {
+            setIsFollowing(true);
+            retryTimer = setTimeout(followLive, REFOLLOW_DELAY_MS);
+          }
+          return;
+        }
+
+        const stepExecution = execution.stepExecutions?.find(
+          (step) => step.stepId === INVESTIGATE_STEP_ID
+        );
+
         if (stepExecution?.error) {
-          setError(stepExecution.error.message);
-          setIsRunning(false);
+          applySettled({ status: 'failed', error: stepExecution.error.message });
           return;
         }
 
@@ -115,70 +246,81 @@ export function useInvestigationState({
         const parsed = investigationStateSchema.safeParse(output?.structured_output);
 
         if (parsed.success) {
-          setState(parsed.data);
-          setError(undefined);
-        } else {
-          setError(
-            i18n.translate('xpack.investigationOutput.couldNotLoadResultErrorMessage', {
-              defaultMessage: "Couldn't load the investigation result.",
-            })
-          );
+          applySettled({ status: 'complete', state: parsed.data });
+          return;
         }
-        setIsRunning(false);
+
+        if (execution.status !== ExecutionStatus.COMPLETED) {
+          applySettled({ status: 'failed', error: FAILED_WITHOUT_DETAILS_MESSAGE });
+          return;
+        }
+
+        if (attempt < MAX_SETTLE_ATTEMPTS) {
+          retryTimer = setTimeout(
+            () => settle({ streamEnded, attempt: attempt + 1 }),
+            SETTLE_RETRY_DELAY_MS
+          );
+          return;
+        }
+
+        applySettled({ status: 'unavailable', error: COULD_NOT_LOAD_MESSAGE });
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : String(err));
-          setIsRunning(false);
+          applySettled({
+            status: 'unavailable',
+            error: err instanceof Error ? httpErrorMessage(err) : String(err),
+          });
         }
       }
     };
 
-    if (!isRunningInput) {
-      setIsRunning(false);
-      fetchFinal();
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    setState(undefined);
-    setIsRunning(true);
-    setError(undefined);
-
-    const abortController = new AbortController();
-
-    const subscription = defer(() =>
-      httpRef.current.get(`/internal/agent_builder/executions/${executionId}/follow`, {
-        signal: abortController.signal,
-        asResponse: true,
-        rawResponse: true,
-      })
-    )
-      .pipe(
-        // @ts-expect-error SseEvent mixin issue, see chat_service.ts in agent_builder
-        httpResponseIntoObservable<ChatEvent>(),
-        unwrapAgentExecutionErrors()
+    const followLive = () => {
+      if (cancelled) {
+        return;
+      }
+      setIsFollowing(true);
+      subscription = defer(() =>
+        http.get(`/internal/agent_builder/executions/${executionId}/follow`, {
+          signal: abortController.signal,
+          asResponse: true,
+          rawResponse: true,
+        })
       )
-      .subscribe({
-        next: (event) => {
-          if (isToolUiEvent(event, INVESTIGATION_PROGRESS_UI_EVENT)) {
-            setState(event.data.data as InvestigationState);
-          }
-        },
-        // Stream errored (e.g. the agent execution itself failed) — fall back to the persisted
-        // result rather than surfacing the raw stream error.
-        error: () => fetchFinal(),
-        // The stream completing means the agent execution is done, but its last progress
-        // snapshot may not equal the final structured output — fetch it to be sure.
-        complete: () => fetchFinal(),
-      });
+        .pipe(
+          /** `ChatEvent` doesn't satisfy the SSE event mixin constraint, and only `tool_ui`
+           * events are consumed here — `isToolUiEvent` narrows from this minimal shape. */
+          httpResponseIntoObservable<ServerSentEventBase<string, { data: unknown }>>()
+        )
+        .subscribe({
+          next: (event) => {
+            if (isToolUiEvent(event, INVESTIGATION_PROGRESS_UI_EVENT)) {
+              const parsed = investigationStateSchema.safeParse(event.data.data);
+              if (parsed.success) {
+                setState((previous) => applySnapshot(previous, parsed.data));
+              }
+            }
+          },
+          error: () => settle({ streamEnded: false }),
+          complete: () => settle({ streamEnded: true }),
+        });
+    };
+
+    if (isRunningInput) {
+      followLive();
+    } else {
+      settle({ streamEnded: false });
+    }
 
     return () => {
       cancelled = true;
+      clearTimeout(retryTimer);
       abortController.abort();
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
-  }, [executionId, enabled, isRunningInput]);
+  }, [http, executionId, isRunningInput]);
 
-  return { state, isRunning, error };
+  const status: InvestigationStatus =
+    settled?.status ?? (isFollowing || isRunningInput ? 'running' : 'loading');
+
+  return { state, status, error: settled?.error };
 }

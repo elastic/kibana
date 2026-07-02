@@ -165,11 +165,9 @@ When the investigation completes, summarise the structured output for the user:
 
 | Field | Description |
 |---|---|
-| `contributing_factors` | The root cause narrative |
-| `confidence` | Confidence score 0–1 (higher is more certain) |
-| `evidence_summary` | Key evidence supporting the conclusion |
-| `mechanism` | How the root cause led to the observed symptoms |
-| `alternatives_ruled_out` | Other hypotheses that were considered and eliminated |
+| `summary` | Final narrative summary of the investigation |
+| `hypotheses` | Every candidate cause investigated, each with a `confidence` score 0–1, a `status` (`confirmed`, `dismissed`, or `investigating`), and a `reason` |
+| `conclusion` | Markdown describing the confirmed root cause mechanism and recommended next steps |
 | `gaps_found` | Data or signal gaps that limited the investigation |
 
-Present the findings in plain language. Highlight `contributing_factors` and `evidence_summary` first, then surface `alternatives_ruled_out` and `gaps_found` if they add useful context.
+Present the findings in plain language. Highlight the `confirmed` hypothesis and the `conclusion` first, then surface the `dismissed` hypotheses (with their reasons) and `gaps_found` if they add useful context.

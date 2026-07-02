@@ -10,4 +10,4 @@ export {
   useInvestigationState,
   type UseInvestigationStateResult,
 } from './src/use_investigation_state';
-export type { InvestigationOutputProps } from './src/types';
+export type { InvestigationOutputProps, InvestigationStatus } from './src/types';

@@ -19,6 +19,7 @@
     "@kbn/significant-events-schema",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/workflows",
     "@kbn/workflows-ui",
   ]
 }

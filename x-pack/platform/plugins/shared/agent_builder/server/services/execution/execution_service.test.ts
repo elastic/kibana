@@ -146,6 +146,54 @@ describe('AgentExecutionService', () => {
     });
   });
 
+  describe('executeAgent with a caller-provided executionId', () => {
+    it('throws when an execution with the same id is still active', async () => {
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.running,
+        eventCount: 0,
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request,
+          executionId: 'exec-1',
+          params: {
+            agentId: 'agent-1',
+            nextInput: { message: 'hello' },
+          },
+          useTaskManager: true,
+        })
+      ).rejects.toThrow('Execution with id exec-1 already exists and is still running');
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
+    });
+
+    it('replaces a terminal execution with the same id (e.g. a retried workflow step)', async () => {
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.failed,
+        eventCount: 3,
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        executionId: 'exec-1',
+        params: {
+          agentId: 'agent-1',
+          nextInput: { message: 'hello' },
+        },
+        useTaskManager: true,
+      });
+
+      expect(result.executionId).toBe('exec-1');
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({ executionId: 'exec-1' })
+      );
+    });
+  });
+
   describe('executeAgent (local mode)', () => {
     it('should create an execution document and execute locally', async () => {
       const request = httpServerMock.createKibanaRequest();

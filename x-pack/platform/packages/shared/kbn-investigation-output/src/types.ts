@@ -7,18 +7,21 @@
 
 import type { InvestigationState } from '@kbn/significant-events-schema';
 
+/**
+ * Where an investigation is in its lifecycle, from the point of view of a consumer rendering it:
+ * - `running` — the investigation is still in progress (live progress may be streaming in).
+ * - `loading` — the investigation is over; its persisted result is being fetched.
+ * - `complete` — the investigation finished and its final state is available.
+ * - `failed` — the investigation itself failed (the workflow or its investigate step errored).
+ * - `unavailable` — the investigation may have succeeded, but its result couldn't be
+ *   loaded or parsed (e.g. missing privileges, or an incompatible result format).
+ */
+export type InvestigationStatus = 'running' | 'loading' | 'complete' | 'failed' | 'unavailable';
+
 export interface InvestigationOutputProps {
-  /** Whether the investigation is still running. There is no separate success/failed enum —
-   * once settled, success vs. failure is conveyed entirely by `state` (present, no error) vs.
-   * `error` (present). */
-  isRunning: boolean;
-  /** Current (while running) or final (once settled) investigation state. */
+  status: InvestigationStatus;
+  /** Current (while running) or final (once complete) investigation state. */
   state?: InvestigationState;
-  /** Set when the investigation failed, or its result couldn't be loaded. */
+  /** Detail message for the `failed` and `unavailable` statuses. */
   error?: string;
-  /**
-   * Called when the user asks to see what the investigation did. When omitted, the
-   * component expands an inline panel with extra detail (conclusion, gaps found) instead.
-   */
-  onOpenDetails?: () => void;
 }

@@ -22,6 +22,7 @@ import {
   EuiLoadingSpinner,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -57,6 +58,12 @@ const RESTART_LABEL = i18n.translate(
     defaultMessage: 'Restart investigation',
   }
 );
+const RESTART_INVESTIGATION_TOOLTIP = i18n.translate(
+  'xpack.streams.sigEventsTab.flyout.restartInvestigationTooltip',
+  {
+    defaultMessage: 'This will cancel the running investigation and start a new one.',
+  }
+);
 const CRITICALITY_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.criticalityLabel', {
   defaultMessage: 'Criticality',
 });
@@ -87,17 +94,19 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   // versions that fall outside the time-filtered list query used by the parent table.
   const latestEvent = useMemo(() => lifecycleData?.events.at(-1) ?? event, [lifecycleData, event]);
 
+  const isInvestigationRunning = hasRunningInvestigation(latestEvent);
+
   // Poll lifecycle while a pending investigation is in progress, or briefly after the
   // footer button triggers one (the async workflow step may not have written back yet).
   const [isPollingAfterTrigger, setIsPollingAfterTrigger] = useState(false);
   const triggerPollTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
-    if (hasRunningInvestigation(latestEvent) && isPollingAfterTrigger) {
+    if (isInvestigationRunning && isPollingAfterTrigger) {
       setIsPollingAfterTrigger(false);
       clearTimeout(triggerPollTimeoutRef.current);
     }
-  }, [latestEvent, isPollingAfterTrigger]);
+  }, [isInvestigationRunning, isPollingAfterTrigger]);
 
   useEffect(() => () => clearTimeout(triggerPollTimeoutRef.current), []);
 
@@ -111,7 +120,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
 
   useInterval(
     refetchLifecycle,
-    isPollingAfterTrigger || hasRunningInvestigation(latestEvent) ? RUNNING_POLL_INTERVAL_MS : null
+    isPollingAfterTrigger || isInvestigationRunning ? RUNNING_POLL_INTERVAL_MS : null
   );
 
   useEffect(() => {
@@ -181,19 +190,23 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
             <EuiButtonEmpty onClick={onClose}>{CLOSE_LABEL}</EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="inspect"
-              onClick={() => {
-                if (!isTriggering) triggerInvestigation(latestEvent.event_id);
-              }}
-              isDisabled={isTriggering}
-              isLoading={isTriggering}
-              fill
-              size="s"
-              data-test-subj="sigEventRunInvestigationButton"
+            <EuiToolTip
+              content={isInvestigationRunning ? RESTART_INVESTIGATION_TOOLTIP : undefined}
             >
-              {hasRunningInvestigation(latestEvent) ? RESTART_LABEL : RUN_LABEL}
-            </EuiButton>
+              <EuiButton
+                iconType="inspect"
+                onClick={() => {
+                  if (!isTriggering) triggerInvestigation(latestEvent.event_id);
+                }}
+                isDisabled={isTriggering}
+                isLoading={isTriggering}
+                fill
+                size="s"
+                data-test-subj="sigEventRunInvestigationButton"
+              >
+                {isInvestigationRunning ? RESTART_LABEL : RUN_LABEL}
+              </EuiButton>
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

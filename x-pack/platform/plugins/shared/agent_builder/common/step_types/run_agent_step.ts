@@ -352,7 +352,11 @@ When a schema is provided, the agent's response will be available in \`output.st
 
 Pinning \`execution_id\` to a value the caller already knows (such as the workflow execution id)
 lets the caller follow the agent's live event stream — tool calls, reasoning, and custom UI
-events — before this step returns.`,
+events — before this step returns.
+
+Reusing an id whose previous execution has ended (completed, failed, or aborted) replaces that
+execution — so a retried step (e.g. via \`on-failure: retry\`) works with a pinned id. Only an id
+whose execution is still active is rejected.`,
     ],
   },
   inputSchema: InputSchema,

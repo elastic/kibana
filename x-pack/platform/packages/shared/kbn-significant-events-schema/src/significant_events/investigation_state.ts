@@ -16,16 +16,17 @@ import { MAX_TEXT_LENGTH } from './constants';
  */
 export const INVESTIGATION_PROGRESS_UI_EVENT = 'investigation_progress' as const;
 
-export const INVESTIGATION_HYPOTHESIS_STATUS_OPTIONS = [
-  'investigating',
-  'dismissed',
-  'confirmed',
-] as const;
+/**
+ * Name of the step in `investigation_workflow.yaml` whose structured output holds the final
+ * investigation state. Consumers reading the persisted result off a workflow execution look up
+ * the step execution with this `stepId`. The workflow's sync test asserts the YAML still
+ * declares a step with this name.
+ */
+export const INVESTIGATE_STEP_ID = 'investigate' as const;
 
-export const investigationHypothesisStatusSchema = z.enum(INVESTIGATION_HYPOTHESIS_STATUS_OPTIONS);
-export type InvestigationHypothesisStatus = z.infer<typeof investigationHypothesisStatusSchema>;
+const investigationHypothesisStatusSchema = z.enum(['investigating', 'dismissed', 'confirmed']);
 
-export const investigationHypothesisSchema = z.object({
+const investigationHypothesisSchema = z.object({
   /** The candidate cause under consideration. */
   candidate: z.string().max(MAX_TEXT_LENGTH),
   /** Current confidence in this specific hypothesis. */

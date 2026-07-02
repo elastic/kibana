@@ -9,7 +9,8 @@
 
 import Ajv from 'ajv';
 import { parse } from 'yaml';
-import { investigationStateSchema } from '@kbn/significant-events-schema';
+import { INVESTIGATE_STEP_ID, investigationStateSchema } from '@kbn/significant-events-schema';
+import { z } from '@kbn/zod/v4';
 import { STREAMS_INVESTIGATION_WORKFLOW } from '.';
 
 interface ParsedInvestigationWorkflow {
@@ -17,26 +18,57 @@ interface ParsedInvestigationWorkflow {
 }
 
 /**
+ * Strips keys that intentionally differ between the hand-authored YAML schema and
+ * `z.toJSONSchema(investigationStateSchema)`:
+ * - `$schema` — only emitted by the zod conversion;
+ * - `description` — the YAML carries prompt-facing descriptions the zod schema doesn't;
+ * - `additionalProperties` — zod emits `false` (it strips unknown keys), while the YAML leaves
+ *   it open so the LLM's structured output isn't rejected over stray keys.
+ * Everything else — properties, types, required lists, enums, and min/max constraints — must
+ * match exactly.
+ */
+const normalizeSchema = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.map(normalizeSchema);
+  }
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value)
+        .filter(([key]) => !['$schema', 'description', 'additionalProperties'].includes(key))
+        .map(([key, entry]) => [key, normalizeSchema(entry)])
+    );
+  }
+  return value;
+};
+
+/**
  * The `investigate` step's structured-output schema is hand-authored JSON Schema in the YAML
- * (there's no zod->JSON-Schema conversion for this asset), and must be kept in sync by hand with
+ * (the YAML asset can't import code), and must be kept in sync by hand with
  * `investigationStateSchema` in `@kbn/significant-events-schema` — that's the schema the
- * investigation agent's progress-report tool streams live, so the final structured output must
- * match exactly for the UI to render identically in both cases. This test catches drift between
- * the two by validating the same example payloads against both.
+ * investigation agent's progress-report tool streams live AND the schema the UI uses to parse
+ * the persisted final result, so the structured output must match exactly for the UI to render
+ * it. These tests catch drift structurally (via z.toJSONSchema equality) and behaviorally (the
+ * same example payloads validate identically against both).
  */
 describe('investigation_workflow.yaml structured-output schema stays in sync with investigationStateSchema', () => {
   const parsedYaml = parse(STREAMS_INVESTIGATION_WORKFLOW.yaml) as ParsedInvestigationWorkflow;
-  const investigateStep = parsedYaml.steps.find((step) => step.name === 'investigate');
+  const investigateStep = parsedYaml.steps.find((step) => step.name === INVESTIGATE_STEP_ID);
   const jsonSchema = investigateStep?.with?.schema;
 
   if (!jsonSchema) {
     throw new Error(
-      'Could not find a `schema` on the `investigate` step in investigation_workflow.yaml'
+      `Could not find a \`schema\` on the \`${INVESTIGATE_STEP_ID}\` step in investigation_workflow.yaml`
     );
   }
 
   const ajv = new Ajv();
   const validate = ajv.compile(jsonSchema);
+
+  it('matches z.toJSONSchema(investigationStateSchema) structurally', () => {
+    expect(normalizeSchema(jsonSchema)).toEqual(
+      normalizeSchema(z.toJSONSchema(investigationStateSchema))
+    );
+  });
 
   const validPayload = {
     summary: 'A deploy at 14:02 introduced a connection leak in the checkout service.',
@@ -95,5 +127,12 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
 
     expect(validate(invalidStatus)).toBe(false);
     expect(investigationStateSchema.safeParse(invalidStatus).success).toBe(false);
+  });
+
+  it('rejects an over-length conclusion under both schemas', () => {
+    const oversized = { ...validPayload, conclusion: 'x'.repeat(10_001) };
+
+    expect(validate(oversized)).toBe(false);
+    expect(investigationStateSchema.safeParse(oversized).success).toBe(false);
   });
 });

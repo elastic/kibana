@@ -25,11 +25,8 @@ export {
 } from './constants';
 export {
   INVESTIGATION_PROGRESS_UI_EVENT,
-  INVESTIGATION_HYPOTHESIS_STATUS_OPTIONS,
-  investigationHypothesisStatusSchema,
-  investigationHypothesisSchema,
+  INVESTIGATE_STEP_ID,
   investigationStateSchema,
   type InvestigationHypothesis,
-  type InvestigationHypothesisStatus,
   type InvestigationState,
 } from './investigation_state';

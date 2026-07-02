@@ -16,6 +16,7 @@ import type {
 import { InvestigationOutput, useInvestigationState } from '@kbn/investigation-output';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { isInvestigationRunning } from '../shared/investigation_status';
 
 const SECTION_TITLE = i18n.translate(
   'xpack.streams.sigEventsTab.flyout.investigationsSectionTitle',
@@ -51,26 +52,27 @@ const InvestigationRow = ({ investigation }: { investigation: SignificantEventIn
   const { started_at: startedAt, completed_at: completedAt, workflow_execution_id } = investigation;
   const duration = formatDuration(startedAt, completedAt);
 
-  // `useInvestigationState`'s own `isRunning` is authoritative — it flips to `false` as soon as
-  // the live stream settles and the final result is fetched, which can happen before the next
-  // 5s lifecycle poll updates `completed_at` on the sig-event doc. Using that (rather than the
-  // input flag derived from `completedAt`) avoids showing a stale "running" state over an
-  // already-final result.
-  const { state, error, isRunning } = useInvestigationState({
+  /**
+   * The hook's `status` is authoritative over the doc-derived flag — it settles as soon as the
+   * live stream ends and the final result is fetched, which can happen before the next 5s
+   * lifecycle poll updates `completed_at` on the sig-event doc (and, conversely, it keeps
+   * showing "running" when the doc lags a run that is actually still going).
+   */
+  const { state, error, status } = useInvestigationState({
     http,
     executionId: workflow_execution_id,
-    isRunning: completedAt == null,
+    isRunning: isInvestigationRunning(investigation),
   });
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem grow={false}>
-        <InvestigationOutput isRunning={isRunning} state={state} error={error} />
+        <InvestigationOutput status={status} state={state} error={error} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
           {formatTimestamp(startedAt)}
-          {isRunning
+          {status === 'running'
             ? ` · ${getRunningDurationText(duration)}`
             : completedAt
             ? ` · ${duration}`

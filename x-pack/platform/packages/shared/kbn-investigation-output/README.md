@@ -5,9 +5,9 @@ agent) so it can be embedded anywhere in Kibana — a significant-event flyout, 
 chat panel, etc.
 
 - `InvestigationOutput` — presentational component. Takes no service dependencies; the
-  caller supplies `status`, the final `result` and/or live `progress`, and an optional
-  `onOpenDetails` handler.
-- `useFollowInvestigationProgress` — hook that follows an agent-builder execution's live
-  event stream and surfaces the latest structured progress update reported by the
-  investigation agent, so `InvestigationOutput` can render live progress before the
-  investigation workflow completes.
+  caller supplies a `status` (`running` / `loading` / `complete` / `failed` /
+  `unavailable`), the latest `state`, and an optional `error` detail message.
+- `useInvestigationState` — hook that sources those props for a given execution id: it
+  follows the agent execution's live event stream while the investigation runs (resuming
+  after transient stream failures), and reads the persisted final result off the workflow
+  execution once it is terminal, caching terminal results across remounts.

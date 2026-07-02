@@ -97,19 +97,23 @@ steps:
       # Keep this in sync with investigationStateSchema in @kbn/significant-events-schema
       # (x-pack/platform/packages/shared/kbn-significant-events-schema/src/significant_events/investigation_state.ts)
       # — this is the same schema the investigation_progress_report tool streams live, so the
-      # final structured output here must match exactly.
+      # final structured output here must match exactly. investigation_workflow.test.ts asserts
+      # structural equality between this block and z.toJSONSchema(investigationStateSchema).
       schema:
         type: object
         properties:
           summary:
             type: string
+            maxLength: 10000
           hypotheses:
             type: array
+            maxItems: 50
             items:
               type: object
               properties:
                 candidate:
                   type: string
+                  maxLength: 10000
                 confidence:
                   type: number
                   minimum: 0
@@ -119,12 +123,14 @@ steps:
                   enum: [investigating, dismissed, confirmed]
                 reason:
                   type: string
+                  maxLength: 10000
               required:
                 - candidate
                 - confidence
                 - status
           conclusion:
             type: string
+            maxLength: 10000
           gaps_found:
             type: array
             description: >
@@ -138,6 +144,7 @@ steps:
               finding to what data source is missing and why it matters, not what happened during the incident.
             items:
               type: string
+              maxLength: 10000
         required:
           - summary
           - hypotheses

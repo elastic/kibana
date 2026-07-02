@@ -46,81 +46,102 @@ const finalState: InvestigationState = {
       reason: 'Pool metrics spiked exactly at deploy time.',
     },
   ],
-  conclusion: 'A deploy at 14:02 introduced a connection leak in the checkout service.',
+  conclusion:
+    '## Conclusion\n\nA deploy at 14:02 introduced a connection leak in the checkout service.',
   gaps_found: ['No profiling data available'],
 };
 
 describe('InvestigationOutput', () => {
   it('renders a generic gathering-evidence message and an empty hypotheses placeholder when running with no state yet', () => {
-    renderWithI18n(<InvestigationOutput isRunning />);
+    renderWithI18n(<InvestigationOutput status="running" />);
 
     expect(screen.getByText('Gathering evidence')).toBeInTheDocument();
     expect(screen.getByTestId('investigationOutputNoHypotheses')).toBeInTheDocument();
-    expect(screen.queryByTestId('investigationOutputOpenDetailsButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('investigationOutputFinalResults')).not.toBeInTheDocument();
   });
 
-  it('renders live state while running, including the hypotheses list and their statuses', () => {
-    renderWithI18n(<InvestigationOutput isRunning state={liveState} />);
+  it('renders live state while running, including collapsed hypothesis accordions', () => {
+    renderWithI18n(<InvestigationOutput status="running" state={liveState} />);
 
     expect(screen.getByText('Evaluating 2 hypotheses')).toBeInTheDocument();
     expect(screen.getByText(liveState.summary)).toBeInTheDocument();
     expect(screen.getByText('Network partition')).toBeInTheDocument();
-    expect(screen.getByText('No packet loss observed.')).toBeInTheDocument();
+    // Collapsed by default.
+    expect(screen.getByText('Network partition').closest('button')).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
     expect(screen.getByTestId('investigationOutputHypothesisStatus-dismissed')).toBeInTheDocument();
     expect(screen.getAllByTestId('investigationOutputConfidenceBadge')[0]).toHaveTextContent('10%');
   });
 
-  it('renders the final state once settled, with the confirmed hypothesis and expandable conclusion/gaps', () => {
-    renderWithI18n(<InvestigationOutput isRunning={false} state={finalState} />);
+  it('reveals a hypothesis reason when its accordion is expanded', () => {
+    renderWithI18n(<InvestigationOutput status="running" state={liveState} />);
+
+    fireEvent.click(screen.getByText('Network partition'));
+
+    expect(screen.getByText('No packet loss observed.')).toBeInTheDocument();
+  });
+
+  it('shows a placeholder when a hypothesis has no reason yet', () => {
+    renderWithI18n(<InvestigationOutput status="running" state={liveState} />);
+
+    fireEvent.click(screen.getByText('Connection pool exhaustion after the 14:02 deploy'));
+
+    expect(screen.getByText('No reasoning recorded yet.')).toBeInTheDocument();
+  });
+
+  it('renders the final state with the confirmed hypothesis and the final results appended, always visible', () => {
+    renderWithI18n(<InvestigationOutput status="complete" state={finalState} />);
 
     expect(screen.getByText('Investigation complete')).toBeInTheDocument();
     expect(screen.getByTestId('investigationOutputHypothesisStatus-confirmed')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('investigationOutputOpenDetailsButton'));
-
-    expect(screen.getByText(finalState.conclusion!)).toBeInTheDocument();
-    expect(screen.getByText('No profiling data available')).toBeInTheDocument();
+    const finalResults = screen.getByTestId('investigationOutputFinalResults');
+    expect(finalResults).toBeInTheDocument();
+    expect(finalResults).toHaveTextContent(
+      'A deploy at 14:02 introduced a connection leak in the checkout service.'
+    );
+    expect(finalResults).toHaveTextContent('Gaps found');
+    expect(finalResults).toHaveTextContent('No profiling data available');
   });
 
-  it('renders a loading state when settled but no state or error has arrived yet', () => {
-    renderWithI18n(<InvestigationOutput isRunning={false} />);
+  it('renders a loading state while the persisted result is being fetched', () => {
+    renderWithI18n(<InvestigationOutput status="loading" />);
 
     expect(screen.getByText('Loading investigation result…')).toBeInTheDocument();
     expect(screen.getByTestId('investigationOutputLoadingSpinner')).toBeInTheDocument();
   });
 
-  it('renders the error and does not offer to open details when there is no state to show', () => {
-    renderWithI18n(<InvestigationOutput isRunning={false} error="No connector configured" />);
+  it('renders a failed header with the error detail when the investigation failed', () => {
+    renderWithI18n(<InvestigationOutput status="failed" error="No connector configured" />);
 
     expect(screen.getByText('Investigation failed')).toBeInTheDocument();
     expect(screen.getByText('No connector configured')).toBeInTheDocument();
-    expect(screen.queryByTestId('investigationOutputOpenDetailsButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('investigationOutputFinalResults')).not.toBeInTheDocument();
   });
 
-  it('keeps showing a stale live state alongside an error when the final fetch fails', () => {
+  it('renders a failed header even when stale live state is still shown', () => {
+    renderWithI18n(
+      <InvestigationOutput status="failed" state={liveState} error="The agent timed out." />
+    );
+
+    expect(screen.getByText('Investigation failed')).toBeInTheDocument();
+    expect(screen.getByText('The agent timed out.')).toBeInTheDocument();
+    expect(screen.getByText(liveState.summary)).toBeInTheDocument();
+  });
+
+  it('renders an unavailable header alongside stale live state when the result could not be loaded', () => {
     renderWithI18n(
       <InvestigationOutput
-        isRunning={false}
+        status="unavailable"
         state={liveState}
         error="Couldn't load the investigation result."
       />
     );
 
+    expect(screen.getByText('Investigation result unavailable')).toBeInTheDocument();
     expect(screen.getByText("Couldn't load the investigation result.")).toBeInTheDocument();
-    // Still settled with known state -> treated as complete, not failed, since state is present.
-    expect(screen.getByText('Investigation complete')).toBeInTheDocument();
     expect(screen.getByText(liveState.summary)).toBeInTheDocument();
-  });
-
-  it('delegates to onOpenDetails instead of expanding inline when provided', () => {
-    const onOpenDetails = jest.fn();
-    renderWithI18n(
-      <InvestigationOutput isRunning={false} state={finalState} onOpenDetails={onOpenDetails} />
-    );
-
-    fireEvent.click(screen.getByTestId('investigationOutputOpenDetailsButton'));
-
-    expect(onOpenDetails).toHaveBeenCalledTimes(1);
-    expect(screen.queryByTestId('investigationOutputDetails')).not.toBeInTheDocument();
   });
 });
