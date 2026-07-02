@@ -19,6 +19,8 @@ project:
 dependsOn:
   - '@kbn/config'
   - '@kbn/shared-ux-utility'
+  - '@kbn/core-theme-browser'
+  - '@kbn/ui-theme'
 tags:
   - shared-browser
   - package
