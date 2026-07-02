@@ -1,0 +1,24 @@
+responses:
+  200:
+    description: "Indicates a successful response."
+    content:
+      application/json:
+        examples:
+          uninstallByTypeSuccessExample:
+            summary: "Entity type uninstalled"
+            description: "The entity type's engine and associated resources were removed. Idempotent: returns ok even if the type was not installed."
+            value:
+              ok: true
+          uninstallLastByTypeExample:
+            summary: "Last entity type uninstalled"
+            description: "Uninstalling the last remaining entity type also removes the shared Entity Store resources (global configuration, status/history tasks, entity maintainers) — the same as calling POST /uninstall for all types."
+            value:
+              ok: true
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X DELETE -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+        "${KIBANA_URL}/api/security/entity_store/uninstall/service"
+  - lang: Console
+    source: |
+      DELETE kbn://api/security/entity_store/uninstall/service

@@ -19,7 +19,10 @@ const bodySchema = z.object({
     .array(EntityType)
     .optional()
     .default(ALL_ENTITY_TYPES)
-    .describe('Entity types to uninstall. Defaults to all installed types.'),
+    .describe(
+      'DEPRECATED: use `DELETE /uninstall/{entityType}` to uninstall a single entity type. ' +
+        'Retained for backward compatibility. Entity types to uninstall; defaults to all installed types.'
+    ),
 });
 
 export function registerUninstall(router: EntityStorePluginRouter) {
@@ -29,7 +32,10 @@ export function registerUninstall(router: EntityStorePluginRouter) {
       access: 'public',
       summary: 'Uninstall the Entity Store',
       description:
-        'Uninstall the Entity Store, removing engines and associated resources for the specified entity types.',
+        'Uninstall the Entity Store, removing engines and associated resources for the specified ' +
+        'entity types. To remove a single entity type, use `DELETE /uninstall/{entityType}` instead. ' +
+        'Uninstalling the last remaining entity type (via either endpoint) removes the shared Entity ' +
+        'Store resources as well (global configuration, status/history tasks, entity maintainers).',
       options: {
         tags: ['oas-tag:Security entity store'],
       },

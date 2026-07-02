@@ -6,7 +6,7 @@ responses:
         examples:
           runningStatusExample:
             summary: "Entity Store running"
-            description: "The Entity Store is running with two started engines using default settings."
+            description: "The Entity Store is running with all four engines started. `frequency`, `delay`, and `lookbackPeriod` reflect each engine's effective cadence: Service and Generic use their built-in reduced-cadence defaults (10m and 30m), while Host and User use the shared global default (30s in this example)."
             value:
               status: running
               engines:
@@ -34,6 +34,42 @@ responses:
                   delay: "1m"
                   timeout: "25s"
                   frequency: "30s"
+                  lookbackPeriod: "3h"
+                  fieldHistoryLength: 10
+                  maxLogsPerPage: 40000
+                  maxTimeWindowSize: "15m"
+                  maxLogsPerWindow: 500000
+                  maxLogsPerWindowCapBehavior: "defer"
+                  docsPerSecond: -1
+                  indexPattern: ""
+                  enrichPolicyExecutionInterval: null
+                  timestampField: "@timestamp"
+                  maxPageSearchSize: 10000
+                  lastExecutionTimestamp: "2026-04-10T08:30:00.000Z"
+                - type: service
+                  status: started
+                  filter: ""
+                  delay: "1m"
+                  timeout: "25s"
+                  frequency: "10m"
+                  lookbackPeriod: "3h"
+                  fieldHistoryLength: 10
+                  maxLogsPerPage: 40000
+                  maxTimeWindowSize: "15m"
+                  maxLogsPerWindow: 500000
+                  maxLogsPerWindowCapBehavior: "defer"
+                  docsPerSecond: -1
+                  indexPattern: ""
+                  enrichPolicyExecutionInterval: null
+                  timestampField: "@timestamp"
+                  maxPageSearchSize: 10000
+                  lastExecutionTimestamp: "2026-04-10T08:30:00.000Z"
+                - type: generic
+                  status: started
+                  filter: ""
+                  delay: "1m"
+                  timeout: "25s"
+                  frequency: "30m"
                   lookbackPeriod: "3h"
                   fieldHistoryLength: 10
                   maxLogsPerPage: 40000

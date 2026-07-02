@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout-security/api';
 import { apiTest } from '@kbn/scout-security';
-import { PUBLIC_HEADERS, ENTITY_STORE_TAGS } from '../fixtures/constants';
+import { PUBLIC_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import {
   getStatus,
   installAllEntityTypes,
@@ -67,6 +67,51 @@ apiTest.describe('Entity Store Status API tests', { tag: ENTITY_STORE_TAGS }, ()
           LOG_EXTRACTION_FREQUENCY_DEFAULT;
         expect(engine.frequency).toBe(expectedFrequency);
       }
+    }
+  );
+
+  apiTest(
+    'Should reflect a per-type cadence override set via update/{entityType}',
+    async ({ apiClient }) => {
+      await installAllEntityTypes(apiClient, defaultHeaders);
+
+      const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE_BY_TYPE('user'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: { frequency: '15m', delay: '3m', lookbackPeriod: '6h' } },
+      });
+      expect(update.statusCode).toBe(200);
+
+      const status = await getStatus(apiClient, defaultHeaders);
+      const userEngine = status.body.engines.find((e) => e.type === 'user');
+      expect(userEngine?.frequency).toBe('15m');
+      expect(userEngine?.delay).toBe('3m');
+      expect(userEngine?.lookbackPeriod).toBe('6h');
+
+      // other types keep their own (unrelated) effective cadence
+      const hostEngine = status.body.engines.find((e) => e.type === 'host');
+      expect(hostEngine?.frequency).toBe(LOG_EXTRACTION_FREQUENCY_DEFAULT);
+      const serviceEngine = status.body.engines.find((e) => e.type === 'service');
+      expect(serviceEngine?.frequency).toBe(DEFAULT_LOG_EXTRACTION_OVERRIDES.service.frequency);
+    }
+  );
+
+  apiTest(
+    'Should reject an explicit null cadence value and leave the override unchanged',
+    async ({ apiClient }) => {
+      await installAllEntityTypes(apiClient, defaultHeaders);
+
+      const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE_BY_TYPE('service'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: { frequency: null } },
+      });
+      expect(update.statusCode).toBe(400);
+
+      const status = await getStatus(apiClient, defaultHeaders);
+      const serviceEngine = status.body.engines.find((e) => e.type === 'service');
+      // the null was rejected — service keeps its own built-in default, not the global one
+      expect(serviceEngine?.frequency).toBe(DEFAULT_LOG_EXTRACTION_OVERRIDES.service.frequency);
     }
   );
 

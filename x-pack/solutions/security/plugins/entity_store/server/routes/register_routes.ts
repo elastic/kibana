@@ -7,6 +7,9 @@
 
 import {
   registerInstall,
+  registerInstallByType,
+  registerUpdateByType,
+  registerUninstallByType,
   registerUninstall,
   registerStop,
   registerStart,
@@ -34,9 +37,11 @@ import type { EntityStorePluginRouter } from '../types';
 
 export function registerRoutes(router: EntityStorePluginRouter) {
   registerInstall(router);
+  registerInstallByType(router);
   registerStop(router);
   registerStatus(router);
   registerUninstall(router);
+  registerUninstallByType(router);
   registerForceLogExtraction(router);
   registerForceRemoteExtractToUpdates(router);
   registerForceHistorySnapshot(router);
@@ -48,6 +53,7 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerCRUDDelete(router);
   registerStart(router);
   registerUpdate(router);
+  registerUpdateByType(router);
   registerResolutionLink(router);
   registerResolutionUnlink(router);
   registerResolutionGroup(router);

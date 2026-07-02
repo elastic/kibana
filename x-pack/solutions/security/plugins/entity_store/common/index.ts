@@ -48,8 +48,11 @@ const INTERNAL_BASE_ROUTE = '/internal/security/entity_store';
 export const ENTITY_STORE_ROUTES = {
   public: {
     INSTALL: `${PUBLIC_BASE_ROUTE}/install`,
+    INSTALL_BY_TYPE: `${PUBLIC_BASE_ROUTE}/install/{entityType}`,
     UPDATE: PUBLIC_BASE_ROUTE,
+    UPDATE_BY_TYPE: `${PUBLIC_BASE_ROUTE}/update/{entityType}`,
     UNINSTALL: `${PUBLIC_BASE_ROUTE}/uninstall`,
+    UNINSTALL_BY_TYPE: `${PUBLIC_BASE_ROUTE}/uninstall/{entityType}`,
     STATUS: `${PUBLIC_BASE_ROUTE}/status`,
     START: `${PUBLIC_BASE_ROUTE}/start`,
     STOP: `${PUBLIC_BASE_ROUTE}/stop`,

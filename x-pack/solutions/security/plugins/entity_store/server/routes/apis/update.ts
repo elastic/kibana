@@ -27,7 +27,14 @@ export function registerUpdate(router: EntityStorePluginRouter) {
       path: ENTITY_STORE_ROUTES.public.UPDATE,
       access: 'public',
       summary: 'Update the Entity Store',
-      description: 'Update the Entity Store log extraction configuration.',
+      description:
+        'Update the Entity Store log extraction configuration. This applies to all entity types. ' +
+        'Cadence settings (`frequency`, `delay`, `lookbackPeriod`) can also be set individually per ' +
+        'entity type via `PUT /update/{entityType}`; a value set for a specific type takes ' +
+        'precedence over this shared setting for that type only. Supplying a cadence field here is ' +
+        'a request for the whole store: it applies the new value to every entity type, replacing ' +
+        'any value that type had configured individually (including types with a different default ' +
+        'cadence, such as Service/Generic).',
       options: {
         tags: ['oas-tag:Security entity store'],
       },
@@ -49,11 +56,7 @@ export function registerUpdate(router: EntityStorePluginRouter) {
         },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
-        const {
-          logsExtractionClient,
-          assetManagerClient: assetManager,
-          logger,
-        } = await ctx.entityStore;
+        const { assetManagerClient: assetManager, logger } = await ctx.entityStore;
         logger.debug('Update api called');
 
         const forbidden = await enforceEntityStorePrivileges(
@@ -65,7 +68,7 @@ export function registerUpdate(router: EntityStorePluginRouter) {
         if (forbidden) return forbidden;
 
         try {
-          await logsExtractionClient.updateConfig(req.body.logExtraction);
+          await assetManager.updateGlobalLogExtraction(req, req.body.logExtraction);
         } catch (error) {
           if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
             return res.notFound({ body: { message: 'Entity store is not installed' } });

@@ -6,7 +6,7 @@
  */
 
 import { LogExtractionConfig } from '../saved_objects';
-import { mergeCadenceOverrides } from './cadence_overrides';
+import { mergeCadenceOverrides, getExplicitCadenceFields } from './cadence_overrides';
 
 describe('mergeCadenceOverrides', () => {
   const globalConfig = LogExtractionConfig.parse({
@@ -48,5 +48,30 @@ describe('mergeCadenceOverrides', () => {
     expect(merged.additionalIndexPatterns).toEqual(globalConfig.additionalIndexPatterns);
     expect(merged.docsLimit).toEqual(globalConfig.docsLimit);
     expect(merged.maxLogsPerWindow).toEqual(globalConfig.maxLogsPerWindow);
+  });
+});
+
+describe('getExplicitCadenceFields', () => {
+  it('returns an empty array when params is undefined', () => {
+    expect(getExplicitCadenceFields(undefined)).toEqual([]);
+  });
+
+  it('returns an empty array when no cadence field is present', () => {
+    const params: Record<string, unknown> = { fieldHistoryLength: 20 };
+    expect(getExplicitCadenceFields(params)).toEqual([]);
+  });
+
+  it('returns only the explicitly present cadence fields', () => {
+    expect(getExplicitCadenceFields({ delay: '2m' })).toEqual(['delay']);
+  });
+
+  it('returns all three when all cadence fields are present', () => {
+    expect(
+      getExplicitCadenceFields({ frequency: '5m', delay: '1m', lookbackPeriod: '3h' })
+    ).toEqual(['frequency', 'delay', 'lookbackPeriod']);
+  });
+
+  it('treats an explicit null as present (not the same as absent)', () => {
+    expect(getExplicitCadenceFields({ frequency: null })).toEqual(['frequency']);
   });
 });

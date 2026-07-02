@@ -110,3 +110,16 @@ export const LogExtractionInstallSchema = LogExtractionInstallParams.superRefine
 export const LogExtractionUpdadeSchema = LogExtractionUpdateParams.superRefine(
   validateLogExtractionParams
 );
+
+// Per-entity-type cadence overrides (see #269261): only frequency/delay/lookbackPeriod are
+// configurable per type. All other logExtraction settings remain store-wide only. Shared by
+// both `install/{entityType}` and `update/{entityType}` — a caller can set a value equal to
+// a type's default explicitly, but there is no way to "clear" an override back to the
+// default (no `null`); only real duration values are accepted.
+const CadenceFieldsParams = LogExtractionUpdateParams.pick({
+  frequency: true,
+  delay: true,
+  lookbackPeriod: true,
+});
+
+export const CadenceOverrideSchema = CadenceFieldsParams.superRefine(validateLogExtractionParams);

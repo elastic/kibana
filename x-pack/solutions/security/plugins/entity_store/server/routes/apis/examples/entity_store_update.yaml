@@ -10,6 +10,12 @@ requestBody:
               lookbackPeriod: "6h"
               frequency: "10m"
               fieldHistoryLength: 15
+        appliesFrequencyToAllTypesExample:
+          summary: "Applies a frequency to every entity type"
+          description: "Setting frequency here is a request for the whole store: it applies to every entity type (including types with a different default cadence, such as Service/Generic's reduced cadence, and any value set individually via PUT /update/{entityType}) so all types run at 5 minutes."
+          value:
+            logExtraction:
+              frequency: "5m"
 responses:
   200:
     description: "Indicates a successful response."

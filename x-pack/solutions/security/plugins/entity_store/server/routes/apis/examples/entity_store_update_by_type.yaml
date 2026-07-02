@@ -1,0 +1,74 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        updateByTypeSetCadenceExample:
+          summary: "Set the cadence for a single entity type"
+          description: "Set the Service engine's frequency to 15 minutes. Other entity types and all other log extraction settings are unaffected. There is no way to clear this back to the default — set it explicitly if you want the default value again."
+          value:
+            logExtraction:
+              frequency: "15m"
+responses:
+  200:
+    description: "Indicates a successful response."
+    content:
+      application/json:
+        examples:
+          updateByTypeSuccessExample:
+            summary: "Entity type cadence updated"
+            description: "The entity type's cadence was updated. If frequency changed and the engine is running, its extraction task is rescheduled immediately."
+            value:
+              ok: true
+  400:
+    description: "Bad request."
+    content:
+      application/json:
+        examples:
+          invalidDurationByTypeExample:
+            summary: "Invalid duration parameter"
+            description: "A cadence field has an invalid duration format."
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "[request body]: logExtraction.frequency: must be a valid duration of at least 30 seconds (e.g. 1m, 30s)"
+          nullCadenceValueByTypeExample:
+            summary: "Null is not a valid cadence value"
+            description: "Cadence fields cannot be cleared with null; set the desired duration (including the default, if that's what you want) explicitly."
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "[request body]: logExtraction.frequency: Invalid input: expected string, received null"
+          notInstalledByTypeExample:
+            summary: "Entity type not installed"
+            description: "No engine is installed for the requested entity type."
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "Entity Store engine for type \"service\" is not installed"
+  403:
+    description: "Insufficient privileges."
+    content:
+      application/json:
+        examples:
+          forbiddenByTypeExample:
+            summary: "Insufficient privileges"
+            description: "The user does not have the required Elasticsearch privileges."
+            value:
+              statusCode: 403
+              error: "Forbidden"
+              message: "User 'analyst' has insufficient privileges"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -d '{"logExtraction":{"frequency":"15m"}}' \
+        "${KIBANA_URL}/api/security/entity_store/update/service"
+  - lang: Console
+    source: |
+      PUT kbn://api/security/entity_store/update/service
+      {
+        "logExtraction": {
+          "frequency": "15m"
+        }
+      }

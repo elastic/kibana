@@ -23,6 +23,15 @@ requestBody:
               frequency: "5m"
               delay: "2m"
               fieldHistoryLength: 20
+        installResetsPerTypeCadenceDefaultsExample:
+          summary: "Explicit frequency resets per-type cadence defaults"
+          description: "Install Service and Generic with an explicit frequency of 2 minutes. This is a deliberate request for the whole store and wins over each type's built-in default cadence (Service normally installs at 10m, Generic at 30m); both install at 2m instead."
+          value:
+            entityTypes:
+              - service
+              - generic
+            logExtraction:
+              frequency: "2m"
 responses:
   201:
     description: "Indicates the Entity Store was successfully installed."

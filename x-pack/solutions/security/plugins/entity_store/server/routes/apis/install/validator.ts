@@ -14,7 +14,14 @@ import { LogExtractionInstallSchema } from '../utils/log_extraction_validator';
 const MIN_HISTORY_SNAPSHOT_FREQUENCY_MS = 60 * 60 * 1000; // 1h
 
 export const BodySchema = z.object({
-  entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
+  entityTypes: z
+    .array(EntityType)
+    .optional()
+    .default(ALL_ENTITY_TYPES)
+    .describe(
+      'DEPRECATED: use `POST /install/{entityType}` to install a single entity type. ' +
+        'Retained for backward compatibility; installs all listed types uniformly.'
+    ),
   logExtraction: LogExtractionInstallSchema,
   historySnapshot: HistorySnapshotBodyParams.optional().superRefine(validateHistorySnapshotParams),
 });

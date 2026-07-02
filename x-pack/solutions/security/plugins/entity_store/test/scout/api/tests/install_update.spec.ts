@@ -160,6 +160,42 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
     });
   });
 
+  apiTest(
+    'Update with an explicit frequency resets per-type cadence overrides for every type',
+    async ({ apiClient }) => {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+
+      const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: { frequency: '5m' } },
+      });
+      expect(update.statusCode).toBe(200);
+
+      const status = await apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
+        headers: defaultHeaders,
+        responseType: 'json',
+      });
+      const engines = (status.body as { engines: Array<{ type: string; frequency: string }> })
+        .engines;
+      // Service/Generic's built-in cadence defaults (10m/30m) are cleared; every type now
+      // follows the explicitly requested global frequency uniformly.
+      for (const engine of engines) {
+        expect(engine.frequency).toBe('5m');
+      }
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+    }
+  );
+
   apiTest('install rejects unknown body keys', async ({ apiClient }) => {
     const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,

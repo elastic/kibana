@@ -1,0 +1,75 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        installByTypeDefaultExample:
+          summary: "Install a single entity type with its default cadence"
+          description: "Install the Service engine. If the Entity Store is not installed yet, this bootstraps it for Service only; if it's already installed by other types, only Service is added. Since no cadence fields are supplied, Service uses its built-in default frequency of 10 minutes."
+          value:
+            logExtraction: {}
+        installByTypeCustomCadenceExample:
+          summary: "Install a single entity type with a custom cadence"
+          description: "Install the Service engine with a custom frequency, overriding its built-in 10 minute default for this type only."
+          value:
+            logExtraction:
+              frequency: "5m"
+responses:
+  201:
+    description: "Indicates the entity type was successfully installed."
+    content:
+      application/json:
+        examples:
+          installByTypeSuccessExample:
+            summary: "Entity type installed"
+            description: "The entity type engine was installed and is being started. If the Entity Store was not installed at all, its shared resources were bootstrapped as part of this call."
+            value:
+              ok: true
+  200:
+    description: "Indicates the entity type is already installed."
+    content:
+      application/json:
+        examples:
+          alreadyInstalledByTypeExample:
+            summary: "Already installed"
+            description: "The requested entity type was already installed; no changes were made."
+            value:
+              ok: true
+  400:
+    description: "Bad request."
+    content:
+      application/json:
+        examples:
+          invalidDurationByTypeExample:
+            summary: "Invalid duration parameter"
+            description: "A cadence field has an invalid duration format."
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "[request body]: logExtraction.frequency: must be a valid duration of at least 30 seconds (e.g. 1m, 30s)"
+  403:
+    description: "Insufficient privileges."
+    content:
+      application/json:
+        examples:
+          forbiddenByTypeExample:
+            summary: "Insufficient privileges"
+            description: "The user does not have the required Elasticsearch privileges."
+            value:
+              statusCode: 403
+              error: "Forbidden"
+              message: "User 'analyst' has insufficient privileges"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X POST -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -d '{"logExtraction":{"frequency":"5m"}}' \
+        "${KIBANA_URL}/api/security/entity_store/install/service"
+  - lang: Console
+    source: |
+      POST kbn://api/security/entity_store/install/service
+      {
+        "logExtraction": {
+          "frequency": "5m"
+        }
+      }

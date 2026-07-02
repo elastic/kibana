@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { LogExtractionInstallSchema } from './log_extraction_validator';
+import { LogExtractionInstallSchema, CadenceOverrideSchema } from './log_extraction_validator';
 
 const TestSchema = z.object({ logExtraction: LogExtractionInstallSchema });
 
@@ -57,6 +57,49 @@ describe('LogExtractionInstallParams additionalIndexPatterns', () => {
     if (!result.success) {
       const issue = result.error.issues.find((i) => Array.isArray(i.path) && i.path[2] === 1);
       expect(issue).toBeDefined();
+    }
+  });
+});
+
+describe('CadenceOverrideSchema', () => {
+  // Shared by install/{entityType} and update/{entityType}: only real duration values
+  // are accepted. There is no `null` to clear a field back to the default — callers who
+  // want the default must set it explicitly.
+
+  it('accepts an empty object (no changes)', () => {
+    expect(CadenceOverrideSchema.safeParse({}).success).toBe(true);
+  });
+
+  it('accepts a valid frequency', () => {
+    expect(CadenceOverrideSchema.safeParse({ frequency: '10m' }).success).toBe(true);
+  });
+
+  it('rejects a frequency below 30 seconds', () => {
+    const result = CadenceOverrideSchema.safeParse({ frequency: '10s' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects delay greater than or equal to lookbackPeriod', () => {
+    const result = CadenceOverrideSchema.safeParse({
+      delay: '3h',
+      lookbackPeriod: '3h',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an explicit null value', () => {
+    const result = CadenceOverrideSchema.safeParse({ frequency: null });
+    expect(result.success).toBe(false);
+  });
+
+  it('does not accept additionalIndexPatterns or other non-cadence fields', () => {
+    const result = CadenceOverrideSchema.safeParse({
+      frequency: '10m',
+      additionalIndexPatterns: ['logs-*'],
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).not.toHaveProperty('additionalIndexPatterns');
     }
   });
 });

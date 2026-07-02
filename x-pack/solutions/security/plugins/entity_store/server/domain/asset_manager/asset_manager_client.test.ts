@@ -82,12 +82,16 @@ describe('AssetManagerClient', () => {
     init: jest.Mock;
     update: jest.Mock;
     delete: jest.Mock;
+    findOrThrow: jest.Mock;
   };
   let mockGlobalStateClient: {
     init: jest.Mock;
     findOrThrow: jest.Mock;
     find: jest.Mock;
     delete: jest.Mock;
+  };
+  let mockLogsExtractionClient: {
+    updateConfig: jest.Mock;
   };
 
   beforeEach(() => {
@@ -112,6 +116,7 @@ describe('AssetManagerClient', () => {
       init: jest.fn().mockResolvedValue(undefined),
       update: jest.fn().mockResolvedValue(undefined),
       delete: jest.fn().mockResolvedValue(undefined),
+      findOrThrow: jest.fn(),
     };
 
     mockGlobalStateClient = {
@@ -122,6 +127,10 @@ describe('AssetManagerClient', () => {
       }),
       find: jest.fn().mockResolvedValue(undefined),
       delete: jest.fn().mockResolvedValue(undefined),
+    };
+
+    mockLogsExtractionClient = {
+      updateConfig: jest.fn(),
     };
 
     client = new AssetManagerClient({
@@ -137,7 +146,8 @@ describe('AssetManagerClient', () => {
       } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
       namespace,
       isServerless: false,
-      logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
+      logsExtractionClient:
+        mockLogsExtractionClient as unknown as import('../logs_extraction').LogsExtractionClient,
       security: {} as SecurityPluginStart,
       analytics: {
         reportEvent: jest.fn(),
@@ -425,6 +435,294 @@ describe('AssetManagerClient', () => {
           }),
         })
       );
+    });
+  });
+
+  describe('installByType', () => {
+    it('bootstraps the whole store scoped to this type when the store is not installed', async () => {
+      mockEngineDescriptorClient.getAll.mockResolvedValue([]);
+
+      const installed = await client.installByType({} as KibanaRequest, 'service');
+
+      expect(installed).toBe(true);
+      // shared, store-wide resources are bootstrapped, same as POST /install
+      expect(mockInstallSharedElasticsearchAssets).toHaveBeenCalledTimes(1);
+      expect(mockGlobalStateClient.init).toHaveBeenCalledTimes(1);
+      expect(mockScheduleHistorySnapshotTasks).toHaveBeenCalledTimes(1);
+      expect(mockScheduleStatusReportTask).toHaveBeenCalledTimes(1);
+      // but only the requested type is installed
+      expect(mockEngineDescriptorClient.init).toHaveBeenCalledTimes(1);
+      expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('service', {
+        frequency: '10m',
+        delay: null,
+        lookbackPeriod: null,
+      });
+      expect(mockScheduleExtractEntityTask).toHaveBeenCalledTimes(1);
+      expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'service', frequency: '10m' })
+      );
+    });
+
+    it('applies a caller-supplied cadence override on top of the bootstrap install', async () => {
+      mockEngineDescriptorClient.getAll.mockResolvedValue([]);
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue({
+        type: 'service',
+        status: 'started',
+        logExtractionOverrides: { frequency: '10m', delay: null, lookbackPeriod: null },
+      });
+
+      const installed = await client.installByType({} as KibanaRequest, 'service', {
+        frequency: '5m',
+      });
+
+      expect(installed).toBe(true);
+      expect(mockInstallSharedElasticsearchAssets).toHaveBeenCalledTimes(1);
+      // bootstrap seeds the type default first...
+      expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('service', {
+        frequency: '10m',
+        delay: null,
+        lookbackPeriod: null,
+      });
+      // ...then the caller's override is applied and the task rescheduled accordingly
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('service', {
+        logExtractionOverrides: { frequency: '5m', delay: null, lookbackPeriod: null },
+      });
+      expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'service', frequency: '5m' })
+      );
+    });
+
+    it('does not call updateByType when no cadence override is supplied during bootstrap', async () => {
+      mockEngineDescriptorClient.getAll.mockResolvedValue([]);
+
+      await client.installByType({} as KibanaRequest, 'service');
+
+      // findOrThrow / a logExtractionOverrides update are only used by updateByType;
+      // `start` still calls `update` separately to flip status to STARTED.
+      expect(mockEngineDescriptorClient.findOrThrow).not.toHaveBeenCalled();
+      expect(mockEngineDescriptorClient.update).not.toHaveBeenCalledWith(
+        'service',
+        expect.objectContaining({ logExtractionOverrides: expect.anything() })
+      );
+    });
+
+    it('adds a new type to an already-installed store at its built-in default cadence', async () => {
+      mockEngineDescriptorClient.getAll.mockResolvedValue([
+        { type: 'host', status: 'started', logExtractionOverrides: noOverride },
+      ]);
+
+      const installed = await client.installByType({} as KibanaRequest, 'service');
+
+      expect(installed).toBe(true);
+      // no shared-resource bootstrap needed — the store is already installed
+      expect(mockInstallSharedElasticsearchAssets).not.toHaveBeenCalled();
+      expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('service', {
+        frequency: '10m',
+        delay: null,
+        lookbackPeriod: null,
+      });
+      expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'service', frequency: '10m' })
+      );
+    });
+
+    it('lets a caller-supplied cadence override win over the type default when added to an existing store', async () => {
+      mockEngineDescriptorClient.getAll.mockResolvedValue([
+        { type: 'host', status: 'started', logExtractionOverrides: noOverride },
+      ]);
+
+      await client.installByType({} as KibanaRequest, 'service', { frequency: '5m' });
+
+      expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('service', {
+        frequency: '5m',
+        delay: null,
+        lookbackPeriod: null,
+      });
+      expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'service', frequency: '5m' })
+      );
+    });
+
+    it('is idempotent when the type is already installed', async () => {
+      mockEngineDescriptorClient.getAll.mockResolvedValue([
+        { type: 'service', status: 'started', logExtractionOverrides: { frequency: '10m' } },
+      ]);
+
+      const installed = await client.installByType({} as KibanaRequest, 'service');
+
+      expect(installed).toBe(false);
+      expect(mockEngineDescriptorClient.init).not.toHaveBeenCalled();
+      expect(mockScheduleExtractEntityTask).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateByType', () => {
+    const buildEngine = (overrides: Partial<Record<string, unknown>> = {}) => ({
+      type: 'service',
+      status: 'started',
+      logExtractionOverrides: noOverride,
+      ...overrides,
+    });
+
+    it('propagates a not-found error when the type is not installed', async () => {
+      const notFoundError = new Error('not found');
+      mockEngineDescriptorClient.findOrThrow.mockRejectedValue(notFoundError);
+
+      await expect(
+        client.updateByType({} as KibanaRequest, 'service', { frequency: '5m' })
+      ).rejects.toThrow(notFoundError);
+      expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+    });
+
+    it('persists the merged override and reschedules when frequency changes on a started engine', async () => {
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(buildEngine());
+
+      const result = await client.updateByType({} as KibanaRequest, 'service', {
+        frequency: '15m',
+      });
+
+      expect(result).toEqual({ frequency: '15m', delay: null, lookbackPeriod: null });
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('service', {
+        logExtractionOverrides: { frequency: '15m', delay: null, lookbackPeriod: null },
+      });
+      expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'service', frequency: '15m' })
+      );
+    });
+
+    it('does not reschedule when only delay/lookbackPeriod change', async () => {
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(buildEngine());
+
+      await client.updateByType({} as KibanaRequest, 'service', { delay: '2m' });
+
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('service', {
+        logExtractionOverrides: { frequency: null, delay: '2m', lookbackPeriod: null },
+      });
+      expect(mockScheduleExtractEntityTask).not.toHaveBeenCalled();
+    });
+
+    it('does not reschedule when the engine is stopped, even if frequency changes', async () => {
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(buildEngine({ status: 'stopped' }));
+
+      await client.updateByType({} as KibanaRequest, 'service', { frequency: '15m' });
+
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalled();
+      expect(mockScheduleExtractEntityTask).not.toHaveBeenCalled();
+    });
+
+    it('allows setting a value equal to the global default explicitly (not a clear)', async () => {
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        buildEngine({
+          logExtractionOverrides: { frequency: '10m', delay: null, lookbackPeriod: null },
+        })
+      );
+      mockGlobalStateClient.find.mockResolvedValue({
+        historySnapshot: {},
+        logsExtraction: { frequency: '1m' },
+      });
+
+      const result = await client.updateByType({} as KibanaRequest, 'service', {
+        frequency: '1m',
+      });
+
+      // the override is still set (to '1m'), it is not cleared/removed
+      expect(result).toEqual({ frequency: '1m', delay: null, lookbackPeriod: null });
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('service', {
+        logExtractionOverrides: { frequency: '1m', delay: null, lookbackPeriod: null },
+      });
+      expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'service', frequency: '1m' })
+      );
+    });
+
+    it('leaves untouched override fields as-is', async () => {
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        buildEngine({
+          logExtractionOverrides: { frequency: '10m', delay: '3m', lookbackPeriod: null },
+        })
+      );
+
+      await client.updateByType({} as KibanaRequest, 'service', { lookbackPeriod: '6h' });
+
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('service', {
+        logExtractionOverrides: { frequency: '10m', delay: '3m', lookbackPeriod: '6h' },
+      });
+    });
+  });
+
+  describe('updateGlobalLogExtraction', () => {
+    it('updates the global config and returns it', async () => {
+      const updatedConfig = { frequency: '5m' };
+      mockLogsExtractionClient.updateConfig.mockResolvedValue(updatedConfig);
+      mockEngineDescriptorClient.getAll.mockResolvedValue([]);
+
+      const result = await client.updateGlobalLogExtraction({} as KibanaRequest, {
+        frequency: '5m',
+      });
+
+      expect(result).toBe(updatedConfig);
+      expect(mockLogsExtractionClient.updateConfig).toHaveBeenCalledWith({ frequency: '5m' });
+    });
+
+    it('does not touch per-type overrides when no cadence field is explicit', async () => {
+      mockLogsExtractionClient.updateConfig.mockResolvedValue({ fieldHistoryLength: 20 });
+
+      await client.updateGlobalLogExtraction({} as KibanaRequest, { fieldHistoryLength: 20 });
+
+      expect(mockEngineDescriptorClient.getAll).not.toHaveBeenCalled();
+      expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+      expect(mockScheduleExtractEntityTask).not.toHaveBeenCalled();
+    });
+
+    it('clears the frequency override on every type that has one, and reschedules started types', async () => {
+      mockLogsExtractionClient.updateConfig.mockResolvedValue({ frequency: '5m' });
+      mockEngineDescriptorClient.getAll.mockResolvedValue([
+        {
+          type: 'service',
+          status: 'started',
+          logExtractionOverrides: { frequency: '10m', delay: null, lookbackPeriod: null },
+        },
+        {
+          type: 'generic',
+          status: 'stopped',
+          logExtractionOverrides: { frequency: '30m', delay: null, lookbackPeriod: null },
+        },
+        { type: 'host', status: 'started', logExtractionOverrides: noOverride },
+      ]);
+
+      await client.updateGlobalLogExtraction({} as KibanaRequest, { frequency: '5m' });
+
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('service', {
+        logExtractionOverrides: { frequency: null, delay: null, lookbackPeriod: null },
+      });
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('generic', {
+        logExtractionOverrides: { frequency: null, delay: null, lookbackPeriod: null },
+      });
+      // host had no override to clear, so it's never touched
+      expect(mockEngineDescriptorClient.update).not.toHaveBeenCalledWith('host', expect.anything());
+
+      // only the started type (service) is rescheduled; generic is stopped
+      expect(mockScheduleExtractEntityTask).toHaveBeenCalledTimes(1);
+      expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'service', frequency: '5m' })
+      );
+    });
+
+    it('does not clear delay/lookbackPeriod overrides when only frequency is explicit', async () => {
+      mockLogsExtractionClient.updateConfig.mockResolvedValue({ frequency: '5m' });
+      mockEngineDescriptorClient.getAll.mockResolvedValue([
+        {
+          type: 'service',
+          status: 'started',
+          logExtractionOverrides: { frequency: '10m', delay: '3m', lookbackPeriod: '6h' },
+        },
+      ]);
+
+      await client.updateGlobalLogExtraction({} as KibanaRequest, { frequency: '5m' });
+
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('service', {
+        logExtractionOverrides: { frequency: null, delay: '3m', lookbackPeriod: '6h' },
+      });
     });
   });
 });
