@@ -27,17 +27,27 @@ jest.mock('../components/insights_section', () => ({
     ({
       hit,
       onOpenCorrelationsLeftPanel,
+      onOpenEntitiesLeftPanel,
     }: {
       hit: DataTableRecord;
       onOpenCorrelationsLeftPanel?: () => void;
+      onOpenEntitiesLeftPanel?: () => void;
     }) => (
-      <button
-        type="button"
-        data-test-subj="mock-insights-section"
-        data-hit-id={(hit as { id: string }).id}
-        data-has-on-open-correlations={String(onOpenCorrelationsLeftPanel != null)}
-        onClick={onOpenCorrelationsLeftPanel}
-      />
+      <>
+        <button
+          type="button"
+          data-test-subj="mock-insights-section"
+          data-hit-id={(hit as { id: string }).id}
+          data-has-on-open-correlations={String(onOpenCorrelationsLeftPanel != null)}
+          onClick={onOpenCorrelationsLeftPanel}
+        />
+        <button
+          type="button"
+          data-test-subj="mock-insights-section-entities"
+          data-has-on-open-entities={String(onOpenEntitiesLeftPanel != null)}
+          onClick={onOpenEntitiesLeftPanel}
+        />
+      </>
     )
   ),
 }));
@@ -128,6 +138,26 @@ describe('<OverviewTab />', () => {
     render(<OverviewTab hit={buildHit()} />);
     expect(screen.getByTestId('mock-insights-section')).toHaveAttribute(
       'data-has-on-open-correlations',
+      'false'
+    );
+  });
+
+  it('forwards onShowEntities to InsightsSection as onOpenEntitiesLeftPanel', () => {
+    const onShowEntities = jest.fn();
+    render(<OverviewTab hit={buildHit()} onShowEntities={onShowEntities} />);
+
+    expect(screen.getByTestId('mock-insights-section-entities')).toHaveAttribute(
+      'data-has-on-open-entities',
+      'true'
+    );
+    fireEvent.click(screen.getByTestId('mock-insights-section-entities'));
+    expect(onShowEntities).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not pass onOpenEntitiesLeftPanel when onShowEntities is omitted', () => {
+    render(<OverviewTab hit={buildHit()} />);
+    expect(screen.getByTestId('mock-insights-section-entities')).toHaveAttribute(
+      'data-has-on-open-entities',
       'false'
     );
   });

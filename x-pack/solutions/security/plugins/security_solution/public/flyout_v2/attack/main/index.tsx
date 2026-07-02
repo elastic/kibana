@@ -30,6 +30,7 @@ import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from './tabs/table_tab';
 import { Footer } from './footer';
 import { AttackCorrelationsTool } from '../tools/correlations';
+import { AttackEntitiesTool } from '../tools/entities';
 import { useAttackAlertIds } from './hooks/use_attack_alert_ids';
 
 type AttackFlyoutTabId = 'overview' | 'table' | 'json';
@@ -106,6 +107,18 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
     );
   }, [alertIds, history, hit, overlays, services, store]);
 
+  const onShowEntities = useCallback(() => {
+    overlays.openSystemFlyout(
+      flyoutProviders({
+        services,
+        store,
+        history,
+        children: <AttackEntitiesTool hit={hit} alertIds={alertIds} />,
+      }),
+      defaultToolsFlyoutProperties
+    );
+  }, [alertIds, history, hit, overlays, services, store]);
+
   return (
     <>
       <EuiFlyoutHeader data-test-subj="attack-flyout-header">
@@ -145,7 +158,11 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
             data-test-subj={JSON_TAB_CONTENT_TEST_ID}
           />
         ) : (
-          <OverviewTab hit={hit} onShowCorrelations={onShowCorrelations} />
+          <OverviewTab
+            hit={hit}
+            onShowCorrelations={onShowCorrelations}
+            onShowEntities={onShowEntities}
+          />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter data-test-subj="attack-flyout-footer">

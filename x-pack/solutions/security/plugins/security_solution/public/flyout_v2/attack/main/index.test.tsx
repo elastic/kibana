@@ -42,8 +42,21 @@ jest.mock('./header', () => ({
 }));
 
 jest.mock('./tabs/overview_tab', () => ({
-  OverviewTab: ({ onShowCorrelations }: { onShowCorrelations?: () => void }) => (
-    <button type="button" data-test-subj="mock-overview-tab" onClick={onShowCorrelations} />
+  OverviewTab: ({
+    onShowCorrelations,
+    onShowEntities,
+  }: {
+    onShowCorrelations?: () => void;
+    onShowEntities?: () => void;
+  }) => (
+    <>
+      <button
+        type="button"
+        data-test-subj="mock-overview-tab-correlations"
+        onClick={onShowCorrelations}
+      />
+      <button type="button" data-test-subj="mock-overview-tab-entities" onClick={onShowEntities} />
+    </>
   ),
 }));
 jest.mock('./tabs/table_tab', () => ({
@@ -59,6 +72,10 @@ jest.mock('../../shared/tools/notes', () => ({
 
 jest.mock('../tools/correlations', () => ({
   AttackCorrelationsTool: () => <div data-test-subj="mock-attack-correlations-tool" />,
+}));
+
+jest.mock('../tools/entities', () => ({
+  AttackEntitiesTool: () => <div data-test-subj="mock-attack-entities-tool" />,
 }));
 
 jest.mock('./hooks/use_attack_alert_ids', () => ({
@@ -188,7 +205,33 @@ describe('<AttackFlyout />', () => {
       </TestProviders>
     );
 
-    fireEvent.click(getByTestId('mock-overview-tab'));
+    fireEvent.click(getByTestId('mock-overview-tab-correlations'));
+
+    expect(openSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        ownFocus: false,
+        resizable: true,
+        size: 'm',
+      })
+    );
+  });
+
+  it('opens the Entities tool in a system flyout when the entities action is clicked', () => {
+    const openSystemFlyout = jest.fn();
+    startServices.overlays = {
+      ...startServices.overlays,
+      openSystemFlyout,
+    };
+
+    const { getByTestId } = render(
+      <TestProviders startServices={startServices}>
+        <AttackFlyout hit={createAttackHit()} onAttackUpdated={jest.fn()} />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('mock-overview-tab-entities'));
 
     expect(openSystemFlyout).toHaveBeenCalledTimes(1);
     expect(openSystemFlyout).toHaveBeenCalledWith(

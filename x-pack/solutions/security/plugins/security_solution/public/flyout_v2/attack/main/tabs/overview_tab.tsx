@@ -19,6 +19,8 @@ export interface OverviewTabProps {
   hit: DataTableRecord;
   /** Optional callback to open the Correlations tool flyout. */
   onShowCorrelations?: () => void;
+  /** Optional callback to open the Entities tool flyout. */
+  onShowEntities?: () => void;
 }
 
 /**
@@ -26,13 +28,17 @@ export interface OverviewTabProps {
  * Renders summary, visualizations, and insights sections separated by
  * horizontal rules to match the legacy attack details flyout.
  */
-export const OverviewTab = memo(({ hit, onShowCorrelations }: OverviewTabProps) => (
+export const OverviewTab = memo(({ hit, onShowCorrelations, onShowEntities }: OverviewTabProps) => (
   <div data-test-subj="attack-flyout-overview-tab">
     <AISummarySection hit={hit} />
     <EuiHorizontalRule margin="m" />
     <VisualizationsSection hit={hit} />
     <EuiHorizontalRule margin="m" />
-    <InsightsSection hit={hit} onOpenCorrelationsLeftPanel={onShowCorrelations} />
+    <InsightsSection
+      hit={hit}
+      onOpenCorrelationsLeftPanel={onShowCorrelations}
+      onOpenEntitiesLeftPanel={onShowEntities}
+    />
   </div>
 ));
 
