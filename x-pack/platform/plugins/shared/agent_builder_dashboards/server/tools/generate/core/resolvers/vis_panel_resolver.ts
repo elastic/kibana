@@ -10,7 +10,10 @@ import {
   buildVegaConfig,
   type VisualizationConfig,
 } from '@kbn/agent-builder-visualizations-server';
-import { VEGA_PANEL_TYPE, type VisualizationRenderer } from '@kbn/agent-builder-visualizations-common';
+import {
+  VEGA_VIS_TYPE,
+  type VisualizationRenderer,
+} from '@kbn/agent-builder-visualizations-common';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -42,7 +45,7 @@ const resolveRenderer = (
     if (existingPanel.type === LENS_EMBEDDABLE_TYPE) {
       return 'lens';
     }
-    if (existingPanel.type === VEGA_PANEL_TYPE) {
+    if (existingPanel.type === VEGA_VIS_TYPE) {
       return 'vega';
     }
     return undefined;
@@ -118,7 +121,7 @@ export const createVisPanelResolver = ({
         return {
           type: 'success',
           panelContent: {
-            type: VEGA_PANEL_TYPE,
+            type: VEGA_VIS_TYPE,
             config: { spec },
           },
         };

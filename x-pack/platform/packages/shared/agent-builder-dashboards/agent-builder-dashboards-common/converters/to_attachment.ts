@@ -15,7 +15,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import {
   extractVegaSpecFromSavedVis,
-  VEGA_PANEL_TYPE,
+  VEGA_VIS_TYPE,
 } from '@kbn/agent-builder-visualizations-common';
 import type { AttachmentPanel, DashboardSection as DashboardAttachmentSection } from '../types';
 import type { DashboardAttachmentData } from '../types';
@@ -52,7 +52,7 @@ export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | unde
     const vega = extractVegaSpecFromSavedVis(panel.config);
     if (vega) {
       return {
-        type: VEGA_PANEL_TYPE,
+        type: VEGA_VIS_TYPE,
         id: panel.id ?? '',
         config: { spec: vega.spec, title: vega.title, description: vega.description },
         grid: panel.grid,

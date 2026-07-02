@@ -7,7 +7,7 @@
 
 import type { DashboardState } from '@kbn/dashboard-plugin/server';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
-import { buildVegaSavedVis, VEGA_PANEL_TYPE } from '@kbn/agent-builder-visualizations-common';
+import { buildVegaSavedVis, VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import type { DashboardAttachmentData } from '../types';
 import { attachmentDataToDashboardState } from './from_attachment';
 import { dashboardStateToAttachmentData } from './to_attachment';
@@ -21,7 +21,7 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
       title: 'Dash',
       panels: [
         {
-          type: VEGA_PANEL_TYPE,
+          type: VEGA_VIS_TYPE,
           id: 'p1',
           grid,
           config: { spec: SPEC, title: 'Chart', description: 'Desc' },
@@ -36,7 +36,9 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
         type: VISUALIZE_EMBEDDABLE_TYPE,
         id: 'p1',
         grid,
-        config: { savedVis: buildVegaSavedVis({ spec: SPEC, title: 'Chart', description: 'Desc' }) },
+        config: {
+          savedVis: buildVegaSavedVis({ spec: SPEC, title: 'Chart', description: 'Desc' }),
+        },
       },
     ]);
   });
@@ -48,7 +50,9 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
           type: VISUALIZE_EMBEDDABLE_TYPE,
           id: 'p1',
           grid,
-          config: { savedVis: buildVegaSavedVis({ spec: SPEC, title: 'Chart', description: 'Desc' }) },
+          config: {
+            savedVis: buildVegaSavedVis({ spec: SPEC, title: 'Chart', description: 'Desc' }),
+          },
         },
       ],
     } as unknown as DashboardState;
@@ -57,7 +61,7 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
 
     expect(attachmentData.panels).toEqual([
       {
-        type: VEGA_PANEL_TYPE,
+        type: VEGA_VIS_TYPE,
         id: 'p1',
         grid,
         config: { spec: SPEC, title: 'Chart', description: 'Desc' },
@@ -67,7 +71,7 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
 
   it('round-trips a `vega` attachment panel through dashboard state unchanged', () => {
     const attachmentPanel = {
-      type: VEGA_PANEL_TYPE,
+      type: VEGA_VIS_TYPE,
       id: 'p1',
       grid,
       config: { spec: SPEC, title: 'Chart', description: 'Desc' },

@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-/** `savedVis.type` Kibana's legacy-vis embeddable uses to render a Vega/Vega-Lite spec. */
-export const VEGA_VIS_TYPE = 'vega';
-
 /**
- * Panel `type` for a Vega panel in the (future) dashboard API / attachment shape.
- * This is the target native `vega` embeddable type; until it ships, a temporary
- * converter maps this to the legacy-vis (`visualization`) embeddable for
- * rendering (see `agent-builder-dashboards-common/converters`).
+ * The `vega` type string — both the `savedVis.type` Kibana's legacy-vis
+ * embeddable renders and the panel `type` for a Vega panel in the (future)
+ * dashboard API / attachment shape. Until the native vega embeddable API ships,
+ * a temporary converter maps the attachment shape to the legacy-vis embeddable
+ * (see `agent-builder-dashboards-common/converters`).
  */
-export const VEGA_PANEL_TYPE = 'vega';
+export const VEGA_VIS_TYPE = 'vega';
 
 /**
  * Canonical Vega config carried by Agent Builder attachments. This is the

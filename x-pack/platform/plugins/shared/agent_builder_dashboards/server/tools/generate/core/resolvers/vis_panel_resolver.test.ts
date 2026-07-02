@@ -9,7 +9,7 @@ import {
   buildVisualizationConfig,
   buildVegaConfig,
 } from '@kbn/agent-builder-visualizations-server';
-import { VEGA_PANEL_TYPE } from '@kbn/agent-builder-visualizations-common';
+import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
@@ -136,7 +136,7 @@ describe('createVisPanelResolver', () => {
     expect(result).toEqual({
       type: 'success',
       panelContent: {
-        type: VEGA_PANEL_TYPE,
+        type: VEGA_VIS_TYPE,
         config: { spec },
       },
     });
@@ -181,7 +181,7 @@ describe('createVisPanelResolver', () => {
       renderer: 'lens',
       existingPanel: {
         id: 'panel-1',
-        type: VEGA_PANEL_TYPE,
+        type: VEGA_VIS_TYPE,
         config: { spec: existingSpec },
         grid: { w: 24, h: 12, x: 0, y: 0 },
       },
@@ -190,7 +190,7 @@ describe('createVisPanelResolver', () => {
     expect(result).toEqual({
       type: 'success',
       panelContent: {
-        type: VEGA_PANEL_TYPE,
+        type: VEGA_VIS_TYPE,
         config: { spec: nextSpec },
       },
     });
