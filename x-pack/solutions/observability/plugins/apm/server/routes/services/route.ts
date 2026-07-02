@@ -6,8 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import type { ServiceAnomalyScoreResponse } from '@kbn/apm-api-shared';
 import {
+  rangeRt,
   routeDefinitions,
   type ServiceAgentResponse,
   type ServiceAlertsCountRouteResponse,
@@ -20,15 +20,14 @@ import {
   type ServiceInstancesMetadataDetailsRouteResponse,
   type ServiceMetadataDetails,
   type ServiceMetadataIcons,
+  type ServiceMixedIngestionResponse,
   type ServiceNodeMetadataResponse,
   type ServicesItemsResponse,
   type ServiceSlosResponse,
   type ServiceThroughputRouteResponse,
   type ServiceTransactionDetailedStatPeriodsResponse,
   type ServiceTransactionTypesResponse,
-  type ServiceMixedIngestionResponse,
-  rangeRt,
-  environmentRt,
+  type ServiceAnomalyScoreResponse,
 } from '@kbn/apm-api-shared';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import {
@@ -49,32 +48,33 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getApmSloClient } from '../../lib/helpers/get_apm_slo_client';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
+import { getSloAlertsClient } from '../../lib/helpers/get_slo_alerts_client';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { environmentRt } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { getServiceAnnotations } from './annotations';
-import { getServiceAnomalyScoreForService } from './get_services/get_service_anomaly_score_for_service';
-import { getSloAlertsClient } from '../../lib/helpers/get_slo_alerts_client';
 import { getServiceAgent } from './get_service_agent';
-import { getServiceMixedIngestion } from './get_service_mixed_ingestion';
 import { getServiceDependencies } from './get_service_dependencies';
 import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
+import { getServiceHasSystemMetrics } from './get_service_has_system_metrics';
 import { getServiceInstanceContainerMetadata } from './get_service_instance_container_metadata';
 import { getServiceInstanceMetadataDetails } from './get_service_instance_metadata_details';
 import { getServiceInstancesDetailedStatisticsPeriods } from './get_service_instances/detailed_statistics';
 import { getServiceInstancesMainStatistics } from './get_service_instances/main_statistics';
 import { getServiceMetadataDetails } from './get_service_metadata_details';
 import { getServiceMetadataIcons } from './get_service_metadata_icons';
+import { getServiceMixedIngestion } from './get_service_mixed_ingestion';
 import { getServiceNodeMetadata } from './get_service_node_metadata';
 import { getServiceOverviewContainerMetadata } from './get_service_overview_container_metadata';
 import { getServiceSlos } from './get_service_slos';
 import { getServiceTransactionTypes } from './get_service_transaction_types';
 import { getServicesAlerts } from './get_services/get_service_alerts';
+import { getServiceAnomalyScoreForService } from './get_services/get_service_anomaly_score_for_service';
 import { getServicesItems } from './get_services/get_services_items';
-import { getThroughput } from './get_throughput';
 import { getServiceTransactionDetailedStatsPeriods } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
-import { getServiceHasSystemMetrics } from './get_service_has_system_metrics';
+import { getThroughput } from './get_throughput';
 
 const servicesRoute = createApmServerRoute({
   endpoint: routeDefinitions.services.servicesList.endpoint,
