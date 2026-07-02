@@ -45,6 +45,7 @@ import {
   VegaDebugInspectorViewService,
 } from './visualizations';
 import { ListingTableService } from './listing_table';
+import { LoadingIndicatorService } from './loading_indicator';
 import { ContentListService } from './content_list';
 import { SavedQueryManagementComponentService } from './saved_query_management_component';
 import { KibanaSupertestProvider } from './supertest';
@@ -68,6 +69,7 @@ export const services = {
   snapshots: SnapshotsService,
   failureDebugging: FailureDebuggingProvider,
   listingTable: ListingTableService,
+  loadingIndicator: LoadingIndicatorService,
   contentList: ContentListService,
   dashboardVisualizations: DashboardVisualizationsService,
   dashboardExpect: DashboardExpectService,
