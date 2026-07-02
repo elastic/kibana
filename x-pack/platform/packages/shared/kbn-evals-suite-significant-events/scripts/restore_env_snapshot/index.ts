@@ -11,20 +11,23 @@ import {
   DEFAULT_ENV_SNAPSHOT_LOGS_INDEX,
   VALID_ALERT_INDICES,
   VALID_SYSTEM_INDICES,
+  SIGNIFICANT_EVENTS_DATA_STREAMS,
   GCS_BUCKET,
 } from '../lib/constants';
 
 run(({ log, flags }) => restoreEnvSnapshot({ log, flags }), {
   description: `
-    Restore a Streams/SigEvents environment from a GCS snapshot.
+    Restore a Streams/Significant events environment from a GCS snapshot.
 
     Automates the full restore workflow:
-      1. Restore system indices with rename: snapshot-* → .*
-      2. Ensure system-index aliases (.kibana_streams_*)
-      3. Enable streams via Kibana API
-      4. Replay data indices with timestamp transformation
-      5. Ensure alert-index alias (.alerts-streams.alerts-default)
-      6. Repromote queries (reactivates alerts after restore)
+      1.  Restore plain system indices with rename: snapshot-* → .* (.kibana_streams_tasks)
+      2.  Ensure system-index aliases (.kibana_streams_tasks)
+      3.  Enable streams via Kibana API
+      4.  Restore the significant events data streams (knowledge_indicators, discoveries, detections)
+          by reindexing into each data stream so they are not left as plain indices
+      5.  Replay data indices with timestamp transformation
+      6.  Ensure alert-index alias (.alerts-streams.alerts-default)
+      7.  Repromote queries (resets rule_backed, then re-creates rules after restore)
 
     Prerequisites:
       - Local Elasticsearch running
@@ -48,7 +51,6 @@ run(({ log, flags }) => restoreEnvSnapshot({ log, flags }), {
       'gcs-base-path',
       'logs-index',
       'alert-indices',
-      'system-indices',
     ],
     boolean: ['clean'],
     help: `
@@ -57,12 +59,10 @@ run(({ log, flags }) => restoreEnvSnapshot({ log, flags }), {
       --gcs-base-path         (required) GCS base path to the snapshot repository
       --logs-index            Logs index to replay. (default: ${DEFAULT_ENV_SNAPSHOT_LOGS_INDEX})
       --alert-indices         Alert index to replay. Valid: ${VALID_ALERT_INDICES.join(', ')}
-      --system-indices        .kibana system index pattern to restore. Valid: ${VALID_SYSTEM_INDICES.join(
-        ', '
-      )}
       --clean                 Delete pre-existing (${[
         ...VALID_ALERT_INDICES,
         ...VALID_SYSTEM_INDICES,
+        ...SIGNIFICANT_EVENTS_DATA_STREAMS,
       ].join(
         ', '
       )}) indices before restoring without prompting. Without this flag the script will prompt interactively (or fail in non-TTY environments).

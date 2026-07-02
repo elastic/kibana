@@ -284,7 +284,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       agentBuilderToLangchainIdMap: reverseMap(toolManager.getToolIdMapping()),
       cycleLimit: CYCLE_LIMIT,
       promptManager,
-      eventEmitter: events.emit,
+      eventEmitter,
     }),
     {
       version: 'v2',
