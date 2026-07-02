@@ -9,5 +9,3 @@
 
 export const PAGINATION_DEFAULT_PER_PAGE = 20;
 export const PAGINATION_MAX_SIZE = 1000;
-
-export const AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG = 'asCode.useGASchemas';

@@ -15,19 +15,13 @@ import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { transformDashboardOut } from '../transforms';
-import type {
-  DashboardSearchRequestParams,
-  DashboardSearchResponseBody,
-  LegacyDashboardSearchRequestParams,
-  LegacyDashboardSearchResponseBody,
-} from './types';
+import type { DashboardSearchRequestParams, DashboardSearchResponseBody } from './types';
 
 export async function search(
   requestCtx: RequestHandlerContext,
-  searchParams: DashboardSearchRequestParams | LegacyDashboardSearchRequestParams,
-  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
-  useAsCodeSearchSchemas: boolean
-): Promise<DashboardSearchResponseBody | LegacyDashboardSearchResponseBody> {
+  searchParams: DashboardSearchRequestParams,
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
+): Promise<DashboardSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const normalizeToArray = (value?: string | string[]) => {
     if (value === undefined) return undefined;
@@ -78,10 +72,5 @@ export async function search(
   });
 
   const { total, page, per_page } = soResponse;
-
-  // The dashboard summaries are identical across schemas; only the response envelope differs.
-  // The legacy branch can be removed once the `asCode.useGASchemas` flag is gone.
-  return useAsCodeSearchSchemas
-    ? ({ data: dashboards, meta: { total, page, per_page } } as DashboardSearchResponseBody)
-    : ({ dashboards, page, total } as LegacyDashboardSearchResponseBody);
+  return { data: dashboards, meta: { total, page, per_page } };
 }
