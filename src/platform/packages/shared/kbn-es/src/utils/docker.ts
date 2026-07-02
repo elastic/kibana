@@ -647,8 +647,18 @@ export function resolveEsArgs(
 
     args.forEach((arg) => {
       const [key, ...value] = arg.split('=');
+      const trimmedKey = key.trim();
+      const trimmedValue = value.join('=').trim();
 
-      esArgs.set(key.trim(), value.join('=').trim());
+      if (trimmedKey.startsWith('es.')) {
+        // es.-prefixed settings are JVM system properties, not ES cluster settings.
+        // They must be passed via ES_JAVA_OPTS as -Des.xxx=yyy flags, same as
+        // ES_REFRESH_INTERVAL_OVERRIDE_FLAG. Appending here preserves any existing JVM args.
+        const existing = esArgs.get('ES_JAVA_OPTS') ?? '';
+        esArgs.set('ES_JAVA_OPTS', `${existing} -D${trimmedKey}=${trimmedValue}`.trim());
+      } else {
+        esArgs.set(trimmedKey, trimmedValue);
+      }
     });
   }
 
