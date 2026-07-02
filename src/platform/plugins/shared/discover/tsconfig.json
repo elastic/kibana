@@ -151,7 +151,8 @@
     "@kbn/logging-mocks",
     "@kbn/react-hooks",
     "@kbn/app-header",
-    "@kbn/use-observable"
+    "@kbn/use-observable",
+    "@kbn/esql-language"
   ],
   "exclude": ["target/**/*"]
 }
