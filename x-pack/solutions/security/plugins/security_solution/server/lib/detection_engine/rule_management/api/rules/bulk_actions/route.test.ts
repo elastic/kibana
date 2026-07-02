@@ -886,6 +886,9 @@ describe('Perform bulk action route', () => {
           data: expect.objectContaining({
             params: expect.objectContaining({ exceptionsList: [] }),
           }),
+          changeTracking: expect.objectContaining({
+            action: SecurityRuleChangeTrackingAction.ruleDuplicate,
+          }),
         })
       );
       expect(clients.rulesClient.update).not.toHaveBeenCalled();
