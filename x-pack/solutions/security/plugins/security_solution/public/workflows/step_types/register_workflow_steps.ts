@@ -7,11 +7,11 @@
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { CoreSetup } from '@kbn/core/public';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import {
   REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
   REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
 } from '../../../common/constants';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
@@ -61,6 +61,9 @@ export const registerWorkflowSteps = (
   );
 
   if (experimentalFeatures.publicAttacksApiEnabled) {
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./assign_attack_step/assign_attack_step').then((m) => m.assignAttackStepDefinition)
+    );
     workflowsExtensions.registerStepDefinition(() =>
       import('./set_attack_status_step/set_attack_status_step').then(
         (m) => m.setAttackStatusStepDefinition
