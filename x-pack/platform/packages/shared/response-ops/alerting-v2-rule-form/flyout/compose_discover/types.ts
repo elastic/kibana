@@ -81,7 +81,6 @@ export interface ComposeDiscoverState {
   /**
    * When true the sandbox shows separate base/alert tabs and the heuristic
    * auto-split on Apply is disabled. The user opted in from the unified editor.
-   * Always false in edit mode (tabs are always shown there regardless).
    */
   manualSplitEnabled: boolean;
 }

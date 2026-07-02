@@ -756,7 +756,56 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
     });
 
-    it('does not re-split in edit mode and commits the sandbox structure as-is', () => {
+    it('runs heuristic split and commits the result in edit + alert unified editor', () => {
+      renderFlyout({
+        mode: 'edit',
+        rule: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-*',
+            breach: { segment: '| WHERE count > 100' },
+          },
+          createdBy: 'test',
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedBy: 'test',
+          updatedAt: '2026-01-01T00:00:00Z',
+        },
+      });
+
+      act(() => {
+        mockComposeDiscoverForm.mock.calls[
+          mockComposeDiscoverForm.mock.calls.length - 1
+        ][0].dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 0, isAlert: true });
+      });
+
+      expect(sandboxFlyoutProps).toBeDefined();
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'composed',
+          base: 'FROM logs-* | WHERE count > 200',
+          breach: { segment: '' },
+        });
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      const committed = readCommittedQuery?.();
+      expect(committed?.format).toBe('composed');
+      if (committed?.format !== 'composed') {
+        throw new Error('expected composed query after Apply');
+      }
+      expect(committed.base).toContain('FROM logs-*');
+      expect(committed.breach.segment).toContain('WHERE count > 200');
+    });
+
+    it('does not re-split in edit mode YAML and commits the sandbox structure as-is', () => {
       const editFormValues: FormValues = {
         kind: 'alert',
         metadata: { name: 'Edit rule', enabled: true, description: '', tags: [] },
