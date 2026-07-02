@@ -12,6 +12,8 @@ import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 
+import { WorkflowExecutionAuthorizationError } from '@kbn/discoveries/impl/attack_discovery/generation/assert_authorized_to_execute_workflows';
+
 import { workflowExecutor, type WorkflowExecutorDeps } from '.';
 import { executeGenerationWorkflow } from '../../../routes/generate/helpers';
 
@@ -142,7 +144,7 @@ describe('workflowExecutor', () => {
   const mockGetEventLogger = jest.fn().mockResolvedValue({ logEvent: jest.fn() });
   const mockGetStartServices = jest.fn().mockResolvedValue({
     coreStart: {},
-    pluginsStart: {},
+    pluginsStart: { security: { authz: {} } },
   });
   const mockWorkflowsManagementApi = {} as WorkflowExecutorDeps['workflowsManagementApi'];
 
@@ -357,6 +359,17 @@ describe('workflowExecutor', () => {
 
     expect(mockLogger.error).toHaveBeenCalledWith(
       expect.stringContaining('Generation workflow failure')
+    );
+  });
+
+  it('aborts the scheduled pipeline when the caller is unauthorized to execute workflows (backstop)', async () => {
+    (executeGenerationWorkflow as jest.Mock).mockRejectedValueOnce(
+      new WorkflowExecutionAuthorizationError(['workflowsManagement:execute'])
+    );
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+    await expect(workflowExecutor({ deps, options })).rejects.toBeInstanceOf(
+      WorkflowExecutionAuthorizationError
     );
   });
 
