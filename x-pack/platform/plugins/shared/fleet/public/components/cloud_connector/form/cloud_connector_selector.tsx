@@ -188,10 +188,16 @@ export const CloudConnectorSelector = ({
           typeof connector.vars.external_id?.value === 'string'
             ? connector.vars.external_id.value
             : connector.vars.external_id?.value;
+        const roleArnValue = connector.vars.role_arn?.value;
+        // Only include credential fields when defined — passing roleArn/externalId as
+        // explicit undefined clears input vars and breaks form validation (Save stays disabled).
         setCredentials({
-          roleArn: connector.vars.role_arn?.value,
-          externalId: externalIdValue,
           cloudConnectorId: connector.id,
+          ...(roleArnValue !== undefined && roleArnValue !== '' ? { roleArn: roleArnValue } : {}),
+          ...(externalIdValue !== undefined &&
+          (typeof externalIdValue !== 'string' || externalIdValue !== '')
+            ? { externalId: externalIdValue }
+            : {}),
         });
       } else if (isAzureCloudConnectorVars(connector.vars, provider)) {
         setCredentials({
@@ -250,6 +256,8 @@ export const CloudConnectorSelector = ({
           cloudConnectorVars={flyoutConnector.vars}
           accountType={flyoutConnector.accountType}
           provider={provider}
+          verificationPermissions={flyoutConnector.verification_permissions}
+          verificationStatus={flyoutConnector.verification_status}
           onClose={handleCloseFlyout}
         />
       )}
