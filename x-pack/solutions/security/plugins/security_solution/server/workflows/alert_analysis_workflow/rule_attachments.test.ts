@@ -10,23 +10,23 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import {
   BulkActionEditTypeEnum,
   type BulkActionEditPayload,
-} from '../../common/api/detection_engine/rule_management';
-import type { DetectionRulesAuthz } from '../../common/detection_engine/rule_management/authz';
-import type { PrebuiltRulesCustomizationStatus } from '../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
-import type { MlAuthz } from '../lib/machine_learning/authz';
-import type { RuleAlertType } from '../lib/detection_engine/rule_schema';
-import type { IPrebuiltRuleAssetsClient } from '../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import type { bulkEditRules } from '../lib/detection_engine/rule_management/logic/bulk_actions/bulk_edit_rules';
+} from '../../../common/api/detection_engine/rule_management';
+import type { DetectionRulesAuthz } from '../../../common/detection_engine/rule_management/authz';
+import type { PrebuiltRulesCustomizationStatus } from '../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
+import type { MlAuthz } from '../../lib/machine_learning/authz';
+import type { RuleAlertType } from '../../lib/detection_engine/rule_schema';
+import type { IPrebuiltRuleAssetsClient } from '../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import type { bulkEditRules } from '../../lib/detection_engine/rule_management/logic/bulk_actions/bulk_edit_rules';
 import {
   createAlertAnalysisWorkflowRuleAttachmentService,
   hasAlertAnalysisWorkflowAction,
-} from './alert_analysis_workflow_rule_attachments';
+} from './rule_attachments';
 import {
   createConnectorAction,
   createRule,
   createWorkflowAction as createWorkflowActionFixture,
   createWorkflowSystemAction as createWorkflowSystemActionFixture,
-} from './alert_analysis_workflow_test_fixtures';
+} from './test_fixtures';
 
 const WORKFLOW_ID = 'system-security-alert-analysis-default';
 

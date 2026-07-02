@@ -173,10 +173,10 @@ import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capab
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
 import {
-  installSecurityAlertAnalysisWorkflowForAllSpaces,
   markSecurityManagedWorkflowsReady,
   registerSecurityManagedWorkflowOwner,
 } from './workflows/managed_workflows';
+import { installSecurityAlertAnalysisWorkflowForAllSpaces } from './workflows/alert_analysis_workflow/install';
 import { registerInitAlertAnalysisWorkflowFlowDependencies } from './lib/initialization/flows/init_alert_analysis_workflow';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';

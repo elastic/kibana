@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RuleAlertType } from '../lib/detection_engine/rule_schema';
-import { ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID } from './alert_analysis_workflow_rule_attachments';
+import type { RuleAlertType } from '../../lib/detection_engine/rule_schema';
+import { ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID } from './rule_attachments';
 
 export const createWorkflowAction = (workflowId: string): RuleAlertType['actions'][number] =>
   ({

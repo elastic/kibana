@@ -13,25 +13,25 @@ import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
-} from '../types';
-import type { RuleAlertType } from '../lib/detection_engine/rule_schema';
+} from '../../types';
+import type { RuleAlertType } from '../../lib/detection_engine/rule_schema';
 import {
   ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE,
   registerAlertAnalysisWorkflowRuleAttachmentRoutes,
-} from './alert_analysis_workflow_rule_attachment_routes';
-import { ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID } from './alert_analysis_workflow_rule_attachments';
+} from './rule_attachment_routes';
+import { ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID } from './rule_attachments';
 import {
   createConnectorAction,
   createRule,
   createWorkflowAction as createWorkflowActionFixture,
   createWorkflowSystemAction as createWorkflowSystemActionFixture,
-} from './alert_analysis_workflow_test_fixtures';
+} from './test_fixtures';
 
 jest.mock(
-  '../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client',
+  '../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client',
   () => ({
     createPrebuiltRuleAssetsClient: jest.fn(() => ({
       fetchAssetsByVersion: jest.fn().mockResolvedValue({ assets: [] }),

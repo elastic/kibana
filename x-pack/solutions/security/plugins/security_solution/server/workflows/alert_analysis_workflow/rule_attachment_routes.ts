@@ -23,11 +23,14 @@ import {
   type AlertAnalysisWorkflowRuleAttachmentStatsRequestBody as AlertAnalysisWorkflowRuleAttachmentStatsRequestBodyType,
   type AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody as AlertAnalysisWorkflowRuleAttachmentUpdateRequestBodyType,
 } from '@kbn/workflows/common/alert_analysis_workflow';
-import type { SecuritySolutionPluginRouter, SecuritySolutionRequestHandlerContext } from '../types';
-import { buildSiemResponse } from '../lib/detection_engine/routes/utils';
-import { createPrebuiltRuleAssetsClient } from '../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { getSecurityAlertAnalysisWorkflowIdForSpace } from './managed_workflows';
-import { createAlertAnalysisWorkflowRuleAttachmentService } from './alert_analysis_workflow_rule_attachments';
+import type {
+  SecuritySolutionPluginRouter,
+  SecuritySolutionRequestHandlerContext,
+} from '../../types';
+import { buildSiemResponse } from '../../lib/detection_engine/routes/utils';
+import { createPrebuiltRuleAssetsClient } from '../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import { getSecurityAlertAnalysisWorkflowIdForSpace } from './install';
+import { createAlertAnalysisWorkflowRuleAttachmentService } from './rule_attachments';
 
 export {
   ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE,

@@ -16,11 +16,11 @@ import type {
   InitializationFlowResult,
 } from '../../types';
 import type { StartPlugins } from '../../../../plugin';
+import { initSecurityManagedWorkflowsClient } from '../../../../workflows/managed_workflows';
 import {
   ensureSecurityAlertAnalysisWorkflowInstalled,
-  initSecurityManagedWorkflowsClient,
   readSecurityAlertAnalysisWorkflowSettings,
-} from '../../../../workflows/managed_workflows';
+} from '../../../../workflows/alert_analysis_workflow/install';
 
 // Initialization flows are static objects with no access to the plugin's start-time
 // dependencies, so `setup()` hands this flow `core.getStartServices` once, the same way

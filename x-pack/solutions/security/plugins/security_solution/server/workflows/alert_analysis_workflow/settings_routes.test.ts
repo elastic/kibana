@@ -19,17 +19,17 @@ import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
 } from '@kbn/management-settings-ids';
-import type { StartPlugins } from '../plugin';
+import type { StartPlugins } from '../../plugin';
 import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
-} from '../types';
-import { ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT } from '../lib/telemetry/event_based/events';
+} from '../../types';
+import { ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT } from '../../lib/telemetry/event_based/events';
 import {
   ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
   registerAlertAnalysisWorkflowSettingsRoutes,
-} from './alert_analysis_workflow_settings_routes';
+} from './settings_routes';
 
 describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
   let router: RouterMock;

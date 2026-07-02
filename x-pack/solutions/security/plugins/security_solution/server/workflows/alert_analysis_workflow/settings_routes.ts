@@ -24,18 +24,18 @@ import {
   ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
   AlertAnalysisWorkflowSettings,
 } from '@kbn/workflows/common/alert_analysis_workflow';
-import { ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT } from '../lib/telemetry/event_based/events';
-import type { SecuritySolutionPluginRouter } from '../types';
-import type { StartPlugins } from '../plugin';
-import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../lib/entity_analytics/audit';
+import { ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT } from '../../lib/telemetry/event_based/events';
+import type { SecuritySolutionPluginRouter } from '../../types';
+import type { StartPlugins } from '../../plugin';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../lib/entity_analytics/audit';
+import { initSecurityManagedWorkflowsClient } from '../managed_workflows';
 import { AlertAnalysisWorkflowAuditActions } from './audit';
 import {
   getSecurityAlertAnalysisWorkflowIdForSpace,
-  initSecurityManagedWorkflowsClient,
   installSecurityAlertAnalysisWorkflow,
   readSecurityAlertAnalysisWorkflowSettings,
   type SecurityAlertAnalysisWorkflowSettings,
-} from './managed_workflows';
+} from './install';
 
 export { ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE };
 

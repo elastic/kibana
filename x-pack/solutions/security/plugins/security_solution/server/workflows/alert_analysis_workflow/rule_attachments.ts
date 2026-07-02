@@ -18,17 +18,17 @@ import {
   BulkActionEditTypeEnum,
   type BulkActionEditPayload,
   type NormalizedRuleAction,
-} from '../../common/api/detection_engine/rule_management';
-import type { DetectionRulesAuthz } from '../../common/detection_engine/rule_management/authz';
-import type { PrebuiltRulesCustomizationStatus } from '../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
-import type { MlAuthz } from '../lib/machine_learning/authz';
-import type { RuleAlertType } from '../lib/detection_engine/rule_schema';
-import { findRules } from '../lib/detection_engine/rule_management/logic/search/find_rules';
+} from '../../../common/api/detection_engine/rule_management';
+import type { DetectionRulesAuthz } from '../../../common/detection_engine/rule_management/authz';
+import type { PrebuiltRulesCustomizationStatus } from '../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
+import type { MlAuthz } from '../../lib/machine_learning/authz';
+import type { RuleAlertType } from '../../lib/detection_engine/rule_schema';
+import { findRules } from '../../lib/detection_engine/rule_management/logic/search/find_rules';
 import {
   bulkEditRules,
   type BulkEditRulesArguments,
-} from '../lib/detection_engine/rule_management/logic/bulk_actions/bulk_edit_rules';
-import type { IPrebuiltRuleAssetsClient } from '../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+} from '../../lib/detection_engine/rule_management/logic/bulk_actions/bulk_edit_rules';
+import type { IPrebuiltRuleAssetsClient } from '../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 
 export const ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID = 'system-connector-.workflows';
 const ALERT_ANALYSIS_WORKFLOW_ACTION_SUB_ACTION = 'run';
