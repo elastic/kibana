@@ -114,8 +114,8 @@ export class AlertsTablePage {
       .locator(SUBJ.TABLE_LOADING)
       .waitFor({ state: 'hidden', timeout: 30_000 });
     await Promise.race([
-      this.table.waitFor({ state: 'visible' }),
-      this.noDataState.waitFor({ state: 'visible' }),
+      this.table.waitFor({ state: 'visible', timeout: 30_000 }),
+      this.noDataState.waitFor({ state: 'visible', timeout: 30_000 }),
     ]);
   }
 
@@ -259,6 +259,17 @@ export class AlertsTablePage {
       await button.click().catch(() => {});
     }
     return (allTitles[allTitles.length - 1] ?? '').trim();
+  }
+
+  /**
+   * Counts the muted/snoozed indicator badges (`bellSlash`) currently rendered
+   * in the table. The badge is shown by the alert status cell for every alert
+   * whose instance id is in the rule's muted/snoozed list, so it reflects the
+   * UI treatment of the muted state rather than the raw `kibana.alert.muted`
+   * field.
+   */
+  async getVisibleSnoozedBadgeCount(): Promise<number> {
+    return this.page.testSubj.locator('alertSnoozedBadge').count();
   }
 
   /**
