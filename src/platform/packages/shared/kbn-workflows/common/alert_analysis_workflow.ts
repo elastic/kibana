@@ -47,11 +47,6 @@ export type AlertAnalysisWorkflowSettingsRequestBody = z.infer<
   typeof AlertAnalysisWorkflowSettingsRequestBody
 >;
 
-export interface AlertAnalysisWorkflowSettingsResponse {
-  settings: AlertAnalysisWorkflowSettings;
-  workflowId: string;
-}
-
 export const AlertAnalysisWorkflowRuleAttachmentListRequestQuery = z.object({
   search: z.string().optional().default(''),
   page: z.coerce.number().int().min(1).optional().default(1),

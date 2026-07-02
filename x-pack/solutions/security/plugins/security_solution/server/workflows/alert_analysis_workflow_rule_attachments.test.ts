@@ -18,78 +18,22 @@ import type { RuleAlertType } from '../lib/detection_engine/rule_schema';
 import type { IPrebuiltRuleAssetsClient } from '../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { bulkEditRules } from '../lib/detection_engine/rule_management/logic/bulk_actions/bulk_edit_rules';
 import {
-  ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID,
   createAlertAnalysisWorkflowRuleAttachmentService,
   hasAlertAnalysisWorkflowAction,
 } from './alert_analysis_workflow_rule_attachments';
+import {
+  createConnectorAction,
+  createRule,
+  createWorkflowAction as createWorkflowActionFixture,
+  createWorkflowSystemAction as createWorkflowSystemActionFixture,
+} from './alert_analysis_workflow_test_fixtures';
 
 const WORKFLOW_ID = 'system-security-alert-analysis-default';
 
-const createWorkflowAction = (workflowId = WORKFLOW_ID): RuleAlertType['actions'][number] =>
-  ({
-    actionTypeId: '.workflows',
-    group: 'default',
-    id: ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID,
-    params: {
-      subAction: 'run',
-      subActionParams: {
-        workflowId,
-        summaryMode: false,
-      },
-    },
-  } as RuleAlertType['actions'][number]);
+const createWorkflowAction = (workflowId = WORKFLOW_ID) => createWorkflowActionFixture(workflowId);
 
-const createWorkflowSystemAction = (
-  workflowId = WORKFLOW_ID
-): NonNullable<RuleAlertType['systemActions']>[number] =>
-  ({
-    actionTypeId: '.workflows',
-    id: ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID,
-    params: {
-      subAction: 'run',
-      subActionParams: {
-        workflowId,
-        summaryMode: false,
-      },
-    },
-  } as NonNullable<RuleAlertType['systemActions']>[number]);
-
-const createConnectorAction = (): RuleAlertType['actions'][number] =>
-  ({
-    actionTypeId: '.server-log',
-    group: 'default',
-    id: 'connector-id',
-    params: {
-      message: 'Rule {{rule.name}} matched',
-    },
-    frequency: {
-      summary: false,
-      notifyWhen: 'onActiveAlert',
-      throttle: null,
-    },
-  } as RuleAlertType['actions'][number]);
-
-const createRule = ({
-  id,
-  actions = [],
-  systemActions = [],
-  enabled = true,
-}: {
-  id: string;
-  actions?: RuleAlertType['actions'];
-  systemActions?: RuleAlertType['systemActions'];
-  enabled?: boolean;
-}): RuleAlertType =>
-  ({
-    id,
-    name: `Rule ${id}`,
-    enabled,
-    actions,
-    systemActions,
-    params: {
-      immutable: false,
-    },
-  } as RuleAlertType);
+const createWorkflowSystemAction = (workflowId = WORKFLOW_ID) =>
+  createWorkflowSystemActionFixture(workflowId);
 
 const createRulesClient = (rules: RuleAlertType[]): jest.Mocked<RulesClient> =>
   ({

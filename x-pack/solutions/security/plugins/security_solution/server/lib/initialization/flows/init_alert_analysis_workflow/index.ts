@@ -7,10 +7,6 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import {
-  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
-  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT,
-} from '@kbn/workflows/common/alert_analysis_workflow';
-import {
   INITIALIZATION_FLOW_INIT_ALERT_ANALYSIS_WORKFLOW,
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
@@ -23,6 +19,7 @@ import type { StartPlugins } from '../../../../plugin';
 import {
   ensureSecurityAlertAnalysisWorkflowInstalled,
   initSecurityManagedWorkflowsClient,
+  isAlertAnalysisWorkflowEnabled,
   readSecurityAlertAnalysisWorkflowSettings,
 } from '../../../../workflows/managed_workflows';
 
@@ -51,11 +48,7 @@ export const initAlertAnalysisWorkflowFlow: InitializationFlowDefinition<null> =
       return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
     }
 
-    const isEnabled = await coreStart.featureFlags.getBooleanValue(
-      MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
-      MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT
-    );
-    if (!isEnabled) {
+    if (!(await isAlertAnalysisWorkflowEnabled(coreStart))) {
       return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
     }
 

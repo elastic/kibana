@@ -25,6 +25,12 @@ import {
   registerAlertAnalysisWorkflowRuleAttachmentRoutes,
 } from './alert_analysis_workflow_rule_attachment_routes';
 import { ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID } from './alert_analysis_workflow_rule_attachments';
+import {
+  createConnectorAction,
+  createRule,
+  createWorkflowAction as createWorkflowActionFixture,
+  createWorkflowSystemAction as createWorkflowSystemActionFixture,
+} from './alert_analysis_workflow_test_fixtures';
 
 jest.mock(
   '../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client',
@@ -37,69 +43,9 @@ jest.mock(
 
 const WORKFLOW_ID = 'system-security-alert-analysis-space-1';
 
-const createWorkflowAction = (): RuleAlertType['actions'][number] =>
-  ({
-    actionTypeId: '.workflows',
-    group: 'default',
-    id: ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID,
-    params: {
-      subAction: 'run',
-      subActionParams: {
-        workflowId: WORKFLOW_ID,
-        summaryMode: false,
-      },
-    },
-  } as RuleAlertType['actions'][number]);
+const createWorkflowAction = () => createWorkflowActionFixture(WORKFLOW_ID);
 
-const createWorkflowSystemAction = (): NonNullable<RuleAlertType['systemActions']>[number] =>
-  ({
-    actionTypeId: '.workflows',
-    id: ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID,
-    params: {
-      subAction: 'run',
-      subActionParams: {
-        workflowId: WORKFLOW_ID,
-        summaryMode: false,
-      },
-    },
-  } as NonNullable<RuleAlertType['systemActions']>[number]);
-
-const createConnectorAction = (): RuleAlertType['actions'][number] =>
-  ({
-    actionTypeId: '.server-log',
-    group: 'default',
-    id: 'connector-id',
-    params: {
-      message: 'Rule {{rule.name}} matched',
-    },
-    frequency: {
-      summary: false,
-      notifyWhen: 'onActiveAlert',
-      throttle: null,
-    },
-  } as RuleAlertType['actions'][number]);
-
-const createRule = ({
-  id,
-  actions = [],
-  systemActions = [],
-  enabled = true,
-}: {
-  id: string;
-  actions?: RuleAlertType['actions'];
-  systemActions?: RuleAlertType['systemActions'];
-  enabled?: boolean;
-}): RuleAlertType =>
-  ({
-    id,
-    name: `Rule ${id}`,
-    enabled,
-    actions,
-    systemActions,
-    params: {
-      immutable: false,
-    },
-  } as RuleAlertType);
+const createWorkflowSystemAction = () => createWorkflowSystemActionFixture(WORKFLOW_ID);
 
 describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
   let router: RouterMock;

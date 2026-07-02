@@ -23,22 +23,17 @@ import {
   ALERT_ANALYSIS_WORKFLOW_API_VERSION,
   ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
   AlertAnalysisWorkflowSettings,
-  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
-  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT,
 } from '@kbn/workflows/common/alert_analysis_workflow';
 import { ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT } from '../lib/telemetry/event_based/events';
 import type { SecuritySolutionPluginRouter } from '../types';
 import type { StartPlugins } from '../plugin';
-import {
-  AUDIT_CATEGORY,
-  AUDIT_OUTCOME,
-  AUDIT_TYPE,
-  AlertAnalysisWorkflowAuditActions,
-} from './audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../lib/entity_analytics/audit';
+import { AlertAnalysisWorkflowAuditActions } from './audit';
 import {
   getSecurityAlertAnalysisWorkflowIdForSpace,
   initSecurityManagedWorkflowsClient,
   installSecurityAlertAnalysisWorkflow,
+  isAlertAnalysisWorkflowEnabled,
   readSecurityAlertAnalysisWorkflowSettings,
   type SecurityAlertAnalysisWorkflowSettings,
 } from './managed_workflows';
@@ -163,12 +158,8 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
         }
 
         const [coreStart, pluginsStart] = await getStartServices();
-        const isEnabled = await coreStart.featureFlags.getBooleanValue(
-          MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
-          MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT
-        );
 
-        if (!isEnabled) {
+        if (!(await isAlertAnalysisWorkflowEnabled(coreStart))) {
           return response.notFound();
         }
 

@@ -8,16 +8,3 @@
 export enum AlertAnalysisWorkflowAuditActions {
   ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATE = 'alert_analysis_workflow_settings_update',
 }
-
-export enum AUDIT_TYPE {
-  CHANGE = 'change',
-}
-
-export enum AUDIT_CATEGORY {
-  DATABASE = 'database',
-}
-
-export enum AUDIT_OUTCOME {
-  FAILURE = 'failure',
-  SUCCESS = 'success',
-}

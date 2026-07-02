@@ -19,8 +19,6 @@ import {
   AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody,
   AlertAnalysisWorkflowRuleAttachmentStatsRequestBody,
   AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody,
-  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
-  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT,
   type AlertAnalysisWorkflowRuleAttachmentListRequestQuery as AlertAnalysisWorkflowRuleAttachmentListRequestQueryType,
   type AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody as AlertAnalysisWorkflowRuleAttachmentSelectionRequestBodyType,
   type AlertAnalysisWorkflowRuleAttachmentStatsRequestBody as AlertAnalysisWorkflowRuleAttachmentStatsRequestBodyType,
@@ -30,7 +28,10 @@ import type { StartPlugins } from '../plugin';
 import type { SecuritySolutionPluginRouter, SecuritySolutionRequestHandlerContext } from '../types';
 import { buildSiemResponse } from '../lib/detection_engine/routes/utils';
 import { createPrebuiltRuleAssetsClient } from '../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { getSecurityAlertAnalysisWorkflowIdForSpace } from './managed_workflows';
+import {
+  getSecurityAlertAnalysisWorkflowIdForSpace,
+  isAlertAnalysisWorkflowEnabled,
+} from './managed_workflows';
 import { createAlertAnalysisWorkflowRuleAttachmentService } from './alert_analysis_workflow_rule_attachments';
 
 export {
@@ -40,15 +41,12 @@ export {
   ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE,
 };
 
-const isAlertAnalysisWorkflowEnabled = async (
+const isAlertAnalysisWorkflowFeatureEnabled = async (
   getStartServices: StartServicesAccessor<StartPlugins>
 ): Promise<boolean> => {
   const [coreStart] = await getStartServices();
 
-  return coreStart.featureFlags.getBooleanValue(
-    MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
-    MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT
-  );
+  return isAlertAnalysisWorkflowEnabled(coreStart);
 };
 
 const createReadService = async (context: SecuritySolutionRequestHandlerContext) => {
@@ -109,7 +107,7 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          if (!(await isAlertAnalysisWorkflowEnabled(getStartServices))) {
+          if (!(await isAlertAnalysisWorkflowFeatureEnabled(getStartServices))) {
             return response.notFound();
           }
 
@@ -155,7 +153,7 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          if (!(await isAlertAnalysisWorkflowEnabled(getStartServices))) {
+          if (!(await isAlertAnalysisWorkflowFeatureEnabled(getStartServices))) {
             return response.notFound();
           }
 
@@ -200,7 +198,7 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          if (!(await isAlertAnalysisWorkflowEnabled(getStartServices))) {
+          if (!(await isAlertAnalysisWorkflowFeatureEnabled(getStartServices))) {
             return response.notFound();
           }
 
@@ -243,7 +241,7 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          if (!(await isAlertAnalysisWorkflowEnabled(getStartServices))) {
+          if (!(await isAlertAnalysisWorkflowFeatureEnabled(getStartServices))) {
             return response.notFound();
           }
 

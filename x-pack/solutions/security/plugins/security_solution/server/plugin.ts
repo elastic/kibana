@@ -18,10 +18,6 @@ import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
-import {
-  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
-  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT,
-} from '@kbn/workflows/common/alert_analysis_workflow';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
@@ -178,6 +174,7 @@ import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
 import {
   installSecurityAlertAnalysisWorkflowForAllSpaces,
+  isAlertAnalysisWorkflowEnabled,
   markSecurityManagedWorkflowsReady,
   registerSecurityManagedWorkflowOwner,
 } from './workflows/managed_workflows';
@@ -903,12 +900,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       const { workflowsExtensions } = plugins;
       void (async () => {
         try {
-          const isEnabled = await core.featureFlags.getBooleanValue(
-            MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
-            MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT
-          );
-
-          if (isEnabled) {
+          if (await isAlertAnalysisWorkflowEnabled(core)) {
             await installSecurityAlertAnalysisWorkflowForAllSpaces({
               coreStart: core,
               workflowsExtensions,

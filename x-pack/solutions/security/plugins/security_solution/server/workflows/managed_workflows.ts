@@ -22,6 +22,10 @@ import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
 } from '@kbn/management-settings-ids';
+import {
+  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
+  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT,
+} from '@kbn/workflows/common/alert_analysis_workflow';
 import { APP_ID } from '../../common/constants';
 
 export type SecurityAlertAnalysisWorkflowSettings = ManagedWorkflowTemplateValuesForId<
@@ -33,6 +37,18 @@ type SecurityManagedWorkflowsClient = Awaited<
 
 const SPACE_SAVED_OBJECT_TYPE = 'space';
 const DEFAULT_SPACE_ID = 'default';
+
+/**
+ * Whether the managed alert analysis workflow feature is turned on, per the
+ * `securitySolution.managedAlertAnalysisWorkflowEnabled` feature flag.
+ */
+export const isAlertAnalysisWorkflowEnabled = (
+  coreStart: Pick<CoreStart, 'featureFlags'>
+): Promise<boolean> =>
+  coreStart.featureFlags.getBooleanValue(
+    MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
+    MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT
+  );
 
 /**
  * Reads the six `alertAnalysisWorkflow*` uiSettings from an already space-scoped
