@@ -23,12 +23,18 @@ interface MockData {
   criticalityThrows?: boolean;
 }
 
+interface AlertSearchParams {
+  index: string;
+  query: { bool: { filter: Array<Record<string, unknown>> } };
+}
+
 /**
  * ES client mock that routes `search` by target index: the alerts index returns scored
  * alert hits, the risk-score-latest index returns entity risk docs, and the
- * asset-criticality index returns criticality docs.
+ * asset-criticality index returns criticality docs. The returned `search` jest mock is
+ * exposed so tests can assert on the query sent to the alerts index.
  */
-const createEsClient = (data: MockData): ElasticsearchClient => {
+const createEsClient = (data: MockData): { esClient: ElasticsearchClient; search: jest.Mock } => {
   const search = jest.fn(async (params: { index: string }) => {
     if (params.index.startsWith('risk-score.')) {
       if (data.riskThrows) throw new Error('risk index missing');
@@ -40,7 +46,15 @@ const createEsClient = (data: MockData): ElasticsearchClient => {
     }
     return { hits: { hits: data.alerts } };
   });
-  return { search } as unknown as ElasticsearchClient;
+  return { esClient: { search } as unknown as ElasticsearchClient, search };
+};
+
+/** Returns the query bool.filter clauses sent to the alerts index (first search call). */
+const getAlertQueryFilter = (search: jest.Mock): Array<Record<string, unknown>> => {
+  const call = search.mock.calls.find(([params]) =>
+    (params as AlertSearchParams).index.startsWith('.alerts-security.')
+  );
+  return (call![0] as AlertSearchParams).query.bool.filter;
 };
 
 const defaultArgs = {
@@ -65,31 +79,31 @@ const criticalLateralMovementHit = alertHit('alert-1', {
 describe('prioritizeAlerts', () => {
   describe('field reads via the fields API', () => {
     it('returns the base risk score read from hit.fields', async () => {
-      const esClient = createEsClient({ alerts: [criticalLateralMovementHit] });
+      const { esClient } = createEsClient({ alerts: [criticalLateralMovementHit] });
       const result = await prioritizeAlerts({ ...defaultArgs, esClient });
       expect(result.groups[0].scoreBreakdown.baseRiskScore).toBe(99);
     });
 
     it('returns the severity read from hit.fields', async () => {
-      const esClient = createEsClient({ alerts: [criticalLateralMovementHit] });
+      const { esClient } = createEsClient({ alerts: [criticalLateralMovementHit] });
       const result = await prioritizeAlerts({ ...defaultArgs, esClient });
       expect(result.groups[0].severity).toBe('critical');
     });
 
     it('returns the rule name read from hit.fields', async () => {
-      const esClient = createEsClient({ alerts: [criticalLateralMovementHit] });
+      const { esClient } = createEsClient({ alerts: [criticalLateralMovementHit] });
       const result = await prioritizeAlerts({ ...defaultArgs, esClient });
       expect(result.groups[0].topRuleName).toBe('Remote Service Creation via Named Pipe');
     });
 
     it('returns the top alert id read from hit._id', async () => {
-      const esClient = createEsClient({ alerts: [criticalLateralMovementHit] });
+      const { esClient } = createEsClient({ alerts: [criticalLateralMovementHit] });
       const result = await prioritizeAlerts({ ...defaultArgs, esClient });
       expect(result.groups[0].topAlertId).toBe('alert-1');
     });
 
     it('returns the count of fetched alerts', async () => {
-      const esClient = createEsClient({ alerts: [criticalLateralMovementHit] });
+      const { esClient } = createEsClient({ alerts: [criticalLateralMovementHit] });
       const result = await prioritizeAlerts({ ...defaultArgs, esClient });
       expect(result.totalAlertsFetched).toBe(1);
     });
@@ -104,7 +118,7 @@ describe('prioritizeAlerts', () => {
     ];
 
     it.each(cases)('returns +%s boost for %s tactic', async (_label, tactic, expected) => {
-      const esClient = createEsClient({
+      const { esClient } = createEsClient({
         alerts: [
           alertHit('alert-1', {
             'kibana.alert.risk_score': [50],
@@ -120,7 +134,7 @@ describe('prioritizeAlerts', () => {
 
   describe('status modifier', () => {
     it('returns a -5 modifier for acknowledged alerts', async () => {
-      const esClient = createEsClient({
+      const { esClient } = createEsClient({
         alerts: [
           alertHit('alert-1', {
             'kibana.alert.risk_score': [50],
@@ -138,7 +152,7 @@ describe('prioritizeAlerts', () => {
     });
 
     it('returns a -5 modifier for alerts already in a case', async () => {
-      const esClient = createEsClient({
+      const { esClient } = createEsClient({
         alerts: [
           alertHit('alert-1', {
             'kibana.alert.risk_score': [50],
@@ -154,7 +168,7 @@ describe('prioritizeAlerts', () => {
 
   describe('entity clustering', () => {
     it('collapses alerts sharing a host into one group with the expected alertCount and entityName', async () => {
-      const esClient = createEsClient({
+      const { esClient } = createEsClient({
         alerts: [
           alertHit('alert-a', {
             'kibana.alert.risk_score': [80],
@@ -175,7 +189,7 @@ describe('prioritizeAlerts', () => {
     });
 
     it('merges transitive host/user links into a single group', async () => {
-      const esClient = createEsClient({
+      const { esClient } = createEsClient({
         alerts: [
           alertHit('alert-a', {
             'kibana.alert.risk_score': [70],
@@ -202,7 +216,7 @@ describe('prioritizeAlerts', () => {
 
   describe('entity analytics enrichment', () => {
     it('returns the entity risk boost from the Risk Engine level', async () => {
-      const esClient = createEsClient({
+      const { esClient } = createEsClient({
         alerts: [criticalLateralMovementHit],
         risk: [
           {
@@ -219,7 +233,7 @@ describe('prioritizeAlerts', () => {
     });
 
     it('returns the surfaced entity risk level for the primary entity', async () => {
-      const esClient = createEsClient({
+      const { esClient } = createEsClient({
         alerts: [criticalLateralMovementHit],
         risk: [
           {
@@ -236,7 +250,7 @@ describe('prioritizeAlerts', () => {
     });
 
     it('returns the asset criticality boost from the criticality level', async () => {
-      const esClient = createEsClient({
+      const { esClient } = createEsClient({
         alerts: [criticalLateralMovementHit],
         criticality: [
           {
@@ -253,7 +267,7 @@ describe('prioritizeAlerts', () => {
     });
 
     it('re-sorts groups so a lower-base entity outranks when its risk is higher', async () => {
-      const esClient = createEsClient({
+      const { esClient } = createEsClient({
         alerts: [
           alertHit('alert-low-risk-host', {
             'kibana.alert.risk_score': [50],
@@ -279,7 +293,7 @@ describe('prioritizeAlerts', () => {
     });
 
     it('degrades gracefully to a 0 entity boost when the risk index is unavailable', async () => {
-      const esClient = createEsClient({
+      const { esClient } = createEsClient({
         alerts: [criticalLateralMovementHit],
         riskThrows: true,
         criticalityThrows: true,
@@ -289,13 +303,38 @@ describe('prioritizeAlerts', () => {
     });
 
     it('still returns the alert-only final score when enrichment is unavailable', async () => {
-      const esClient = createEsClient({
+      const { esClient } = createEsClient({
         alerts: [criticalLateralMovementHit],
         riskThrows: true,
         criticalityThrows: true,
       });
       const result = await prioritizeAlerts({ ...defaultArgs, esClient });
       expect(result.groups[0].scoreBreakdown.finalScore).toBe(129);
+    });
+  });
+
+  describe('explicit alertIds selection', () => {
+    it('scores exactly the requested ids, bypassing the workflow_status and time-window filters', async () => {
+      const { esClient, search } = createEsClient({ alerts: [criticalLateralMovementHit] });
+      await prioritizeAlerts({
+        ...defaultArgs,
+        esClient,
+        alertIds: ['alert-1', 'alert-2'],
+      });
+
+      const filter = getAlertQueryFilter(search);
+      expect(filter).toEqual([{ ids: { values: ['alert-1', 'alert-2'] } }]);
+    });
+
+    it('applies the workflow_status and time-window filters when no ids are provided', async () => {
+      const { esClient, search } = createEsClient({ alerts: [criticalLateralMovementHit] });
+      await prioritizeAlerts({ ...defaultArgs, esClient });
+
+      const filter = getAlertQueryFilter(search);
+      const hasIdsClause = filter.some((clause) => 'ids' in clause);
+      const hasRangeClause = filter.some((clause) => 'range' in clause);
+      expect(hasIdsClause).toBe(false);
+      expect(hasRangeClause).toBe(true);
     });
   });
 });

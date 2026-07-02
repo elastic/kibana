@@ -43,7 +43,8 @@ const prioritizeAlertsSchema = z.object({
     .optional()
     .describe(
       'Optional: specific alert IDs to triage (e.g. from an alert attachment or user selection). ' +
-        'When provided, only these alerts are scored. timeWindowHours still applies as a time filter.'
+        'When provided, exactly these alerts are scored regardless of their workflow status or age — ' +
+        'timeWindowHours and workflowStatus are ignored so a selected alert is never silently dropped.'
     ),
 });
 
@@ -120,7 +121,8 @@ Use this skill when:
 - Call \`${ALERT_TRIAGE_TOOL_ID}\` with:
   - \`timeWindowHours\`: how far back to look (default 24h, range 1–168)
   - \`workflowStatus\`: "open" (default) or "open+acknowledged"
-  - \`alertIds\`: optional list of specific alert IDs when the user has a selection
+  - \`alertIds\`: optional list of specific alert IDs when the user has a selection. When set, exactly
+    those alerts are scored regardless of workflow status or age (timeWindowHours/workflowStatus ignored)
 - The tool fetches open/acknowledged alerts sorted by risk score, applies MITRE tactic boosts,
   clusters alerts by shared host or user entities, enriches each group with Entity Analytics
   (entity risk level and asset criticality of the primary entity, when available), and returns
@@ -169,7 +171,8 @@ For each group returned, explain:
 
 **Query**: "Which of these alerts should I look at first?" (with alert attachment)
 - Tool: \`${ALERT_TRIAGE_TOOL_ID}\` (only)
-- Params: \`{ alertIds: ["<id1>", "<id2>", ...], timeWindowHours: 24 }\`
+- Params: \`{ alertIds: ["<id1>", "<id2>", ...] }\`
+- Note: with \`alertIds\`, exactly those alerts are scored regardless of status or age
 
 **Query**: "What alerts should I look at? Prioritize by entity risk where available."
 - Tool: \`${ALERT_TRIAGE_TOOL_ID}\` (only)

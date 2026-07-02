@@ -357,6 +357,8 @@ export const prioritizeAlerts = async ({
 }: AlertTriageParams): Promise<TriageResult> => {
   const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
+  const hasExplicitIds = alertIds != null && alertIds.length > 0;
+
   const workflowShouldClauses =
     workflowStatus === 'open+acknowledged'
       ? [
@@ -365,26 +367,28 @@ export const prioritizeAlerts = async ({
         ]
       : [{ match_phrase: { 'kibana.alert.workflow_status': 'open' } }];
 
-  const filterClauses: Array<Record<string, unknown>> = [
-    {
-      bool: {
-        should: workflowShouldClauses,
-        minimum_should_match: 1,
-      },
-    },
-    {
-      range: {
-        '@timestamp': {
-          gte: `now-${timeWindowHours}h`,
-          lte: 'now',
+  // When the caller supplies explicit alertIds they have already chosen the alerts to triage,
+  // so we score exactly those and skip the queue-status/time-window filters — otherwise a
+  // selected alert that is acknowledged/closed or older than the window would be silently
+  // dropped. The queue-scan path (no ids) applies both filters as usual.
+  const filterClauses: Array<Record<string, unknown>> = hasExplicitIds
+    ? [{ ids: { values: alertIds } }]
+    : [
+        {
+          bool: {
+            should: workflowShouldClauses,
+            minimum_should_match: 1,
+          },
         },
-      },
-    },
-  ];
-
-  if (alertIds != null && alertIds.length > 0) {
-    filterClauses.push({ ids: { values: alertIds } });
-  }
+        {
+          range: {
+            '@timestamp': {
+              gte: `now-${timeWindowHours}h`,
+              lte: 'now',
+            },
+          },
+        },
+      ];
 
   const result = await esClient.search({
     index: alertsIndex,
