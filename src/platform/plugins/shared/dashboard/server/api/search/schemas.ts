@@ -11,7 +11,6 @@ import { schema } from '@kbn/config-schema';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import {
   asCodeMetaSchema,
-  asCodePaginationParamsSchema,
   asCodePaginationResponseMetaSchema,
   getAsCodeTagsSchema,
   PAGINATION_MAX_SIZE,
@@ -33,26 +32,6 @@ export const legacySearchRequestParamsSchema = schema.object({
       },
     })
   ),
-  query: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
-      },
-    })
-  ),
-  tags: getAsCodeTagsSchema(
-    'A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, dashboards matching any of the tag IDs are included.',
-    100
-  ),
-  excluded_tags: getAsCodeTagsSchema(
-    'A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, dashboards matching any of the tag IDs are excluded.',
-    100
-  ),
-});
-
-export const searchRequestParamsSchema = schema.object({
-  ...asCodePaginationParamsSchema.getPropSchemas(),
   query: schema.maybe(
     schema.string({
       meta: {
