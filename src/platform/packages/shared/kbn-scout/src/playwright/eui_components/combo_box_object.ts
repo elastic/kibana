@@ -74,12 +74,19 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
   }
 
   /**
-   * Type `value` to surface a server-side / virtualized suggestion, then click
-   * the matching option. When the option list is backed by a suggestions API,
-   * the option is not in the DOM until the search term is typed (which is why
-   * {@link setSelectedOptions} cannot be used). If `create` is set and no
-   * matching option appears within `timeout`, the typed value is committed via
-   * `onCreateOption` (Enter) — for combos that allow it under empty suggestions.
+   * Type `value` to filter the options, then select the matching one.
+   *
+   * Use this for the many Kibana combo boxes whose option list is **filterable,
+   * virtualized, or backed by a suggestions API** — the option is not rendered
+   * in the DOM until the search term is typed, so the base
+   * {@link setSelectedOptions} (which never types) times out looking for it.
+   *
+   * Selection mirrors the proven pre-helper `EuiComboBoxWrapper`: type to filter,
+   * then click the exact-text match. When several options share the same exact
+   * text (e.g. a seeded SLO name repeated across local runs) it falls back to
+   * keyboard selection of the highlighted match — duplicate-tolerant and free of
+   * the nth-methods banned in `kbn-scout`. If `create` is set and no option
+   * matches within `timeout`, the typed value is committed via `onCreateOption`.
    */
   async searchAndSelect(
     value: string,
@@ -88,20 +95,27 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
     await this.inputWrapper.click();
     await this.searchField.fill(value);
 
-    const option = this.optionsList().getByRole('option', { name: value, exact: false });
+    // Match on option text (EUI drops the option `title` while filtering, so the
+    // base helper's `getByTitle` match does not apply here).
+    const option = this.optionsList().getByRole('option', { name: value, exact: true });
     try {
-      // Wait via `count()` (not `option.click()`): with `exact: false` a substring — e.g. a
-      // seeded SLO name repeated across local runs — can match multiple options, and `click()`
-      // would throw under Playwright strict mode. Select the highlighted match with the keyboard
-      // instead: duplicate-tolerant, and free of the nth-methods banned in kbn-scout.
       await expect.poll(() => option.count(), { timeout }).toBeGreaterThan(0);
-      await this.searchField.press('ArrowDown');
-      await this.searchField.press('Enter');
     } catch (error) {
       if (!create) {
         throw error;
       }
-      // Suggestions can be empty (e.g. serverless under load) — commit the typed value.
+      // No matching option (free-text combo, or empty serverless suggestions) —
+      // commit the typed value via onCreateOption.
+      await this.searchField.press('Enter');
+      await this.searchField.blur();
+      return;
+    }
+
+    if ((await option.count()) === 1) {
+      await option.click();
+    } else {
+      // Duplicate exact matches — keyboard-select the highlighted one.
+      await this.searchField.press('ArrowDown');
       await this.searchField.press('Enter');
     }
     await this.searchField.blur();

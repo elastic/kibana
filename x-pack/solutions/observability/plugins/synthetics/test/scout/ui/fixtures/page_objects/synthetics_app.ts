@@ -128,9 +128,7 @@ export class SyntheticsAppPage {
 
   async fillFirstMonitorDetails({ url, location }: { url: string; location: string }) {
     await this.page.testSubj.fill('urls-input', url);
-    await this.page.components
-      .comboBox('syntheticsServiceLocations')
-      .setSelectedOptions([location]);
+    await this.page.components.comboBox('syntheticsServiceLocations').searchAndSelect(location);
   }
 
   async createBasicMonitorDetails({

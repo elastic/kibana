@@ -284,7 +284,7 @@ export class AgentBuilderApp {
   }
 
   async selectMcpTool(toolName: string) {
-    await this.page.components.comboBox('agentBuilderMcpToolSelect').setSelectedOptions([toolName]);
+    await this.page.components.comboBox('agentBuilderMcpToolSelect').searchAndSelect(toolName);
   }
 
   async waitForMcpToolsToLoad() {

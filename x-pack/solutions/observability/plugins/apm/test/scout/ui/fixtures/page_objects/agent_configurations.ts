@@ -56,7 +56,7 @@ export class AgentConfigurationsPage {
   }
 
   async selectServiceFromDropdown(serviceName: string) {
-    await this.page.components.comboBox('serviceNameComboBox').setSelectedOptions([serviceName]);
+    await this.page.components.comboBox('serviceNameComboBox').searchAndSelect(serviceName);
   }
 
   async selectEnvironment(environmentName: string) {

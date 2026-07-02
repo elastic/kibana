@@ -55,7 +55,8 @@ export class SLOEmbeddable {
 
   /** Selects an SLO instance by name in the configuration flyout. */
   async selectInstance(name: string) {
-    await this.page.components.comboBox('sloInstanceSelector').setSelectedOptions([name]);
+    // Instances are fetched server-side via async/onSearchChange; type to surface the match.
+    await this.page.components.comboBox('sloInstanceSelector').searchAndSelect(name);
   }
 
   /** Switches the configuration flyout to "Grouped SLOs" mode. */

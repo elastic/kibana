@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { EuiComboBoxObject } from '@elastic/eui-test-helpers';
-import type { Locator, ScoutPage } from '@kbn/scout';
+import type { KbnComboBoxObject, Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 type LinksLayoutType = 'horizontal' | 'vertical';
@@ -29,7 +28,7 @@ export class DashboardLinks {
   // Link types
   private readonly dashboardLinkRadioBtn: Locator;
   private readonly externalLinkRadioBtn: Locator;
-  private readonly dashboardLinkComboBox: EuiComboBoxObject;
+  private readonly dashboardLinkComboBox: KbnComboBoxObject;
   private readonly externalLinkInput: Locator;
 
   // Links panel
@@ -195,7 +194,7 @@ export class DashboardLinks {
     await this.dashboardLinkRadioBtn.locator('label[for="dashboardLink"]').click();
 
     // Set destination via combo box
-    await this.dashboardLinkComboBox.setSelectedOptions([destination]);
+    await this.dashboardLinkComboBox.searchAndSelect(destination);
 
     if (linkLabel) {
       await this.linkEditorLabelInput.fill(linkLabel);
