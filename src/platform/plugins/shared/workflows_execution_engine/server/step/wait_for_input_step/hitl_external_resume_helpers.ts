@@ -9,6 +9,7 @@
 
 import { HITL_API_KEY_ID_INPUT_FIELD } from '@kbn/workflows';
 import { createExternalResumeApiKey } from '@kbn/workflows/server';
+import { parseDuration } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { ContextDependencies } from '../../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -34,7 +35,7 @@ export async function mintHitlExternalResumeApiKey({
     stepId,
     workflowId: execution.workflowId,
     spaceId,
-    expiration: timeout,
+    expiration: `${parseDuration(timeout)}ms`,
   });
 }
 
