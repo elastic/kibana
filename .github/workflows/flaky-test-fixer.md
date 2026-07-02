@@ -86,15 +86,16 @@ timeout-minutes: 90
 
 # Flaky Test Fixer
 
-Open a single draft PR with the smallest possible test-side fix for this flaky-test issue. Do not open a PR if either of the following is true: you find an existing open PR with an identical or similar fix (search PRs for ones that reference this issue number in their body, or check the issue timeline for PRs that reference it), or you cannot identify a credible fix.
+Open a single draft PR with the smallest possible test-side fix for this flaky-test issue. Do not open a PR if either of the following is true: you find an existing open PR with an identical or similar fix (search PRs for ones that reference this issue number in their body, or check the issue timeline for PRs that reference it), or you cannot identify a credible fix. Whatever the outcome, always finish by leaving one concise comment on the issue (see "Outcome comment").
 
 ## Steps
 
-1. Read the investigator's comment on the issue for the suspected root cause and proposed fix. If no action is needed, stop.
+1. Read the investigator's comment on the issue for the suspected root cause and proposed fix. If no action is needed, skip to step 6.
 2. Read the failing test and the helpers, fixtures, and page objects it imports.
 3. Apply the smallest test-side patch that addresses the root cause.
 4. Run the test locally until it passes.
 5. Open the PR (see "PR format" below).
+6. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 
 ## PR format
 
@@ -129,3 +130,11 @@ Add the following at the very end of the PR description (and outside of the deta
 > [!NOTE]
 > Created by the Flaky Test Fixer workflow. Share feedback or questions in #appex-qa.
 ```
+
+## Outcome comment
+
+In **every** run, finish by posting exactly one concise comment (1–2 sentences, no preamble, no sign-off) on issue #${{ env.ISSUE_NUMBER }} via the `add-comment` safe output. Match the case:
+
+- **PR opened**: `Opened a draft fix PR (linked to this issue) that <one clause on the change>.` The PR carries `Fixes #${{ env.ISSUE_NUMBER }}`, so don't include a URL.
+- **Existing PR already covers it**: `A fix is already in progress in #<number>, so I didn't open a duplicate.`
+- **No PR opened**: `No fix PR: <one-sentence reason>.` — e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified from the available evidence.
