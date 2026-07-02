@@ -31,7 +31,8 @@ export type SOSecret =
   | {
       id: string;
       hash?: string;
-    };
+    }
+  | null;
 
 // this is used in the top level secret_refs array on package and agent policies
 export interface SecretReference {
