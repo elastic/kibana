@@ -202,6 +202,18 @@ EOF
             - exit_status: "-1"
               limit: 3
 EOF
+
+        # Additive OSS/LiteLLM subject models are exploratory: they emit scores
+        # to the matrix (OSS-facing signal) but must NOT gate the weekly green.
+        # EIS subject models stay hard-gating; only the litellm-* lane is
+        # soft_fail, so a weaker OSS model underperforming doesn't red the
+        # weekly. This is the additive-lane contract, scoped to that lane —
+        # not a blanket soft_fail over gating EIS results.
+        if [[ "$connector_id" == litellm-* ]]; then
+          cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+        soft_fail: true
+EOF
+        fi
       done <<<"$CONNECTOR_IDS"
 
       # Only ping suite owners on the pipeline's default branch (main). Manual rebuilds

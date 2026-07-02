@@ -11,9 +11,18 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
 
 /**
- * Scout stateful config for security-ai-rules evals (Track A + Track B routing).
- * Enables find-security-rules skill registration (`dexAiSkillFindRules`) and
- * Agent Builder experimental UI features used by the routing spec.
+ * Scout stateful config for security-ai-rules evals (Track A + Track B routing)
+ * and the security specs in the Agent Builder suite (find-rules,
+ * recommend-prebuilt-rules). Registers the security Agent Builder skills that
+ * are dark by default and enables the experimental UI features the routing
+ * specs rely on.
+ *
+ * Skill flags enabled here:
+ *   - dexAiSkillFindRules            -> find-security-rules skill
+ *   - dexAiSkillRecommendPrebuiltRules -> recommend-prebuilt-rules skill
+ *     (register_skills.ts gates it on this flag; without it the skill is never
+ *     registered and recommend_prebuilt_rules.spec.ts sees zero
+ *     security.find_prebuilt_rules calls, failing on every model).
  *
  * Usage:
  *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_security_ai_rules
@@ -29,6 +38,7 @@ export const servers: ScoutServerConfig = {
       `--xpack.securitySolution.enableExperimental=${JSON.stringify([
         'aiRuleCreationEnabled',
         'dexAiSkillFindRules',
+        'dexAiSkillRecommendPrebuiltRules',
         'entityAnalyticsEntityStoreV2',
       ])}`,
       `--uiSettings.overrides.securitySolution:entityStoreEnableV2=true`,
