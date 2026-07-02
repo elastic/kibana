@@ -379,13 +379,13 @@ steps:
 
 /**
  * Broken variant of `getMultiStepGraphWorkflowYaml`: contains only step_1 in
- * the steps array plus an undefined YAML alias at the root level.
+ * the steps array plus an unclosed flow sequence at the root level.
  *
- * The undefined alias (*graph_broken_ref) makes YAML.parseDocument report a
- * syntax error (isYamlSyntaxValid → false → warning callout shown).
- * correctYamlSyntax wraps the alias into a string so workflowDefinition is
- * still produced, but only contains step_1 — the partial graph state the
- * bug report describes.
+ * The unclosed bracket (`broken_field: [unclosed bracket`) makes
+ * YAML.parseDocument report a parse error (isYamlSyntaxValid → false →
+ * warning callout shown). Note: an undefined YAML alias (*ref) does NOT
+ * produce errors in the yaml package — only doc.warnings — so it cannot be
+ * used here.
  *
  * This YAML should always be paired with getMultiStepGraphWorkflowYaml as the
  * "before" and "after" states in the graph recovery regression test.
@@ -401,7 +401,7 @@ steps:
     type: console
     with:
       message: "Step 1 output"
-broken_syntax: *graph_broken_ref
+broken_field: [unclosed bracket
 `;
 
 export const getWorkflowWithEventInputYaml = (name: string) => `

@@ -69,9 +69,10 @@ test.describe(
 
       await test.step('introducing a YAML syntax error shows the graph warning callout', async () => {
         // The broken YAML defines only step_1 in the steps array and includes an
-        // undefined YAML alias (*graph_broken_ref) at the root level so that
-        // YAML.parseDocument reports a syntax error — exactly the partial-graph
-        // + callout state the bug report describes.
+        // unclosed flow sequence at the root level so that YAML.parseDocument
+        // reports a syntax error — exactly the partial-graph + callout state
+        // the bug report describes. (Undefined YAML aliases do not produce
+        // errors in doc.errors, only doc.warnings, so they cannot be used.)
         await pageObjects.workflowEditor.setYamlEditorValue(
           getBrokenGraphWorkflowYaml(WORKFLOW_NAME)
         );
