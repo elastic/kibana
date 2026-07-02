@@ -44183,11 +44183,8 @@ paths:
                   description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
                   type: string
                 description:
+                  description: A short description of the markdown library item.
                   type: string
-                hide_border:
-                  type: boolean
-                hide_title:
-                  type: boolean
                 settings:
                   additionalProperties: false
                   description: Display settings for the markdown panel.
@@ -44198,11 +44195,13 @@ paths:
                       description: Open links in a new browser tab.
                       type: boolean
                 title:
+                  description: The markdown library item title.
+                  minLength: 1
                   type: string
               required:
-                - title
                 - content
                 - settings
+                - title
       responses:
         '201':
           content:
@@ -44249,11 +44248,8 @@ paths:
                         description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
                         type: string
                       description:
+                        description: A short description of the markdown library item.
                         type: string
-                      hide_border:
-                        type: boolean
-                      hide_title:
-                        type: boolean
                       settings:
                         additionalProperties: false
                         description: Display settings for the markdown panel.
@@ -44264,11 +44260,13 @@ paths:
                             description: Open links in a new browser tab.
                             type: boolean
                       title:
+                        description: The markdown library item title.
+                        minLength: 1
                         type: string
                     required:
-                      - title
                       - content
                       - settings
+                      - title
                   id:
                     description: The unique ID of the markdown library item, as returned by the create or search endpoints.
                     type: string
@@ -44431,11 +44429,8 @@ paths:
                         description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
                         type: string
                       description:
+                        description: A short description of the markdown library item.
                         type: string
-                      hide_border:
-                        type: boolean
-                      hide_title:
-                        type: boolean
                       settings:
                         additionalProperties: false
                         description: Display settings for the markdown panel.
@@ -44446,11 +44441,13 @@ paths:
                             description: Open links in a new browser tab.
                             type: boolean
                       title:
+                        description: The markdown library item title.
+                        minLength: 1
                         type: string
                     required:
-                      - title
                       - content
                       - settings
+                      - title
                   id:
                     description: The unique ID of the markdown library item, as returned by the create or search endpoints.
                     type: string
@@ -44545,11 +44542,8 @@ paths:
                   description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
                   type: string
                 description:
+                  description: A short description of the markdown library item.
                   type: string
-                hide_border:
-                  type: boolean
-                hide_title:
-                  type: boolean
                 settings:
                   additionalProperties: false
                   description: Display settings for the markdown panel.
@@ -44560,11 +44554,13 @@ paths:
                       description: Open links in a new browser tab.
                       type: boolean
                 title:
+                  description: The markdown library item title.
+                  minLength: 1
                   type: string
               required:
-                - title
                 - content
                 - settings
+                - title
       responses:
         '200':
           content:
@@ -44612,11 +44608,8 @@ paths:
                         description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
                         type: string
                       description:
+                        description: A short description of the markdown library item.
                         type: string
-                      hide_border:
-                        type: boolean
-                      hide_title:
-                        type: boolean
                       settings:
                         additionalProperties: false
                         description: Display settings for the markdown panel.
@@ -44627,11 +44620,13 @@ paths:
                             description: Open links in a new browser tab.
                             type: boolean
                       title:
+                        description: The markdown library item title.
+                        minLength: 1
                         type: string
                     required:
-                      - title
                       - content
                       - settings
+                      - title
                   id:
                     description: The unique ID of the markdown library item, as returned by the create or search endpoints.
                     type: string
@@ -44687,11 +44682,8 @@ paths:
                         description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
                         type: string
                       description:
+                        description: A short description of the markdown library item.
                         type: string
-                      hide_border:
-                        type: boolean
-                      hide_title:
-                        type: boolean
                       settings:
                         additionalProperties: false
                         description: Display settings for the markdown panel.
@@ -44702,11 +44694,13 @@ paths:
                             description: Open links in a new browser tab.
                             type: boolean
                       title:
+                        description: The markdown library item title.
+                        minLength: 1
                         type: string
                     required:
-                      - title
                       - content
                       - settings
+                      - title
                   id:
                     description: The unique ID of the markdown library item, as returned by the create or search endpoints.
                     type: string
