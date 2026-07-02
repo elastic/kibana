@@ -53,7 +53,11 @@ const testConfig: Parameters<typeof createConfigService>[0] = {
       'some-header': 'some-value',
       'referrer-policy': 'strict-origin', // overrides a header that is defined by securityResponseHeaders
     },
-    xsrf: { disableProtection: false, allowlist: [allowlistedTestPath] },
+    xsrf: {
+      disableProtection: false,
+      allowlist: [allowlistedTestPath],
+      allowedSchemes: [],
+    },
     restrictInternalApis: false,
   },
 };
@@ -346,6 +350,126 @@ describe('core lifecycle handlers', () => {
         .query({ [internalProductQueryParam]: 'anything', myValue: 'test' })
         .expect(200, 'ok()');
     });
+  });
+});
+
+describe('xsrf post-auth handler with allowedSchemes (Authorization bypass)', () => {
+  const testPath = '/xsrf/allowed_schemes/test/route';
+  const schemeHeader = 'x-test-auth-scheme';
+
+  let server: HttpService;
+  let innerServer: HttpServerSetup['server'];
+
+  const bootServer = async (allowedSchemes: Array<'apikey' | 'bearer'>) => {
+    const configService = createConfigService({
+      server: {
+        ...testConfig.server,
+        xsrf: {
+          disableProtection: false,
+          allowlist: [],
+          allowedSchemes,
+        },
+      },
+    });
+    server = createInternalHttpService({ configService });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
+    const serverSetup = await server.setup(setupDeps);
+    const { registerAuth } = serverSetup;
+    registerAuth((req, res, toolkit) => {
+      const scheme = req.headers[schemeHeader] as string | undefined;
+      if (scheme == null) {
+        // Authenticated request with no HTTP auth scheme (e.g. session/cookie auth).
+        return toolkit.authenticated({ state: { http_authentication_scheme: null } });
+      }
+      return toolkit.authenticated({ state: { http_authentication_scheme: scheme } });
+    });
+    const router = serverSetup.createRouter('/');
+    router.get(
+      { path: testPath, validate: false, security: { authz: { enabled: false, reason: '' } } },
+      (context, req, res) => res.ok({ body: 'ok' })
+    );
+    router.post(
+      { path: testPath, validate: false, security: { authz: { enabled: false, reason: '' } } },
+      (context, req, res) => res.ok({ body: 'ok' })
+    );
+    innerServer = serverSetup.server;
+    await server.start();
+  };
+
+  afterEach(async () => {
+    await server.stop();
+  });
+
+  it('accepts a POST with apikey scheme and no kbn-xsrf when apikey is allowed', async () => {
+    await bootServer(['apikey', 'bearer']);
+    await supertest(innerServer.listener)
+      .post(testPath)
+      .set(schemeHeader, 'apikey')
+      .expect(200, 'ok');
+  });
+
+  it('accepts a POST with bearer scheme and no kbn-xsrf when bearer is allowed', async () => {
+    await bootServer(['apikey', 'bearer']);
+    await supertest(innerServer.listener)
+      .post(testPath)
+      .set(schemeHeader, 'bearer')
+      .expect(200, 'ok');
+  });
+
+  it('rejects a POST with basic scheme even when apikey and bearer are allowed', async () => {
+    await bootServer(['apikey', 'bearer']);
+    await supertest(innerServer.listener).post(testPath).set(schemeHeader, 'basic').expect(400, {
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Request must contain a kbn-xsrf header.',
+    });
+  });
+
+  it('rejects a POST with no auth scheme (null) when apikey and bearer are allowed', async () => {
+    await bootServer(['apikey', 'bearer']);
+    await supertest(innerServer.listener).post(testPath).expect(400, {
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Request must contain a kbn-xsrf header.',
+    });
+  });
+
+  it('rejects a POST with bearer scheme when only apikey is allowed', async () => {
+    await bootServer(['apikey']);
+    await supertest(innerServer.listener).post(testPath).set(schemeHeader, 'bearer').expect(400, {
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Request must contain a kbn-xsrf header.',
+    });
+  });
+
+  it('rejects a POST with apikey scheme when no schemes are allowed (traditional default)', async () => {
+    await bootServer([]);
+    await supertest(innerServer.listener).post(testPath).set(schemeHeader, 'apikey').expect(400, {
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Request must contain a kbn-xsrf header.',
+    });
+  });
+
+  it('accepts a GET with no kbn-xsrf regardless of scheme (safe-method short-circuit)', async () => {
+    await bootServer(['apikey', 'bearer']);
+    await supertest(innerServer.listener)
+      .get(testPath)
+      .set(schemeHeader, 'basic')
+      .expect(200, 'ok');
+  });
+
+  it('accepts a POST that carries the kbn-xsrf header alongside the bypass config', async () => {
+    await bootServer(['apikey', 'bearer']);
+    await supertest(innerServer.listener)
+      .post(testPath)
+      .set(schemeHeader, 'basic')
+      .set(xsrfHeader, 'anything')
+      .expect(200, 'ok');
   });
 });
 

@@ -280,6 +280,81 @@ test('throws if xsrf.allowlist element does not start with a slash', () => {
   );
 });
 
+describe('xsrf.allowedSchemes', () => {
+  it('rejects schemes outside the apikey/bearer safe set', () => {
+    const httpSchema = config.schema;
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['basic'] } }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[xsrf.allowedSchemes.0]: types that failed validation:
+      - [xsrf.allowedSchemes.0.0]: expected value to equal [apikey]
+      - [xsrf.allowedSchemes.0.1]: expected value to equal [bearer]"
+    `);
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['foo'] } }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[xsrf.allowedSchemes.0]: types that failed validation:
+      - [xsrf.allowedSchemes.0.0]: expected value to equal [apikey]
+      - [xsrf.allowedSchemes.0.1]: expected value to equal [bearer]"
+    `);
+  });
+
+  it('rejects mixed-case values — only the canonical lower-case literals are accepted', () => {
+    const httpSchema = config.schema;
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['ApiKey'] } }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[xsrf.allowedSchemes.0]: types that failed validation:
+      - [xsrf.allowedSchemes.0.0]: expected value to equal [apikey]
+      - [xsrf.allowedSchemes.0.1]: expected value to equal [bearer]"
+    `);
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['BEARER'] } }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[xsrf.allowedSchemes.0]: types that failed validation:
+      - [xsrf.allowedSchemes.0.0]: expected value to equal [apikey]
+      - [xsrf.allowedSchemes.0.1]: expected value to equal [bearer]"
+    `);
+  });
+
+  it('rejects values padded with whitespace — no trimming is applied', () => {
+    const httpSchema = config.schema;
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: [' apikey'] } }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[xsrf.allowedSchemes.0]: types that failed validation:
+      - [xsrf.allowedSchemes.0.0]: expected value to equal [apikey]
+      - [xsrf.allowedSchemes.0.1]: expected value to equal [bearer]"
+    `);
+  });
+
+  it('rejects a scalar string — allowedSchemes must be an array', () => {
+    expect(() =>
+      config.schema.validate({ xsrf: { allowedSchemes: 'apikey' as any } })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[xsrf.allowedSchemes]: could not parse array value from json input"`
+    );
+  });
+
+  it('accepts the canonical apikey and bearer literals unchanged and an empty list', () => {
+    const httpSchema = config.schema;
+    expect(
+      httpSchema.validate({ xsrf: { allowedSchemes: ['apikey', 'bearer'] } }).xsrf.allowedSchemes
+    ).toEqual(['apikey', 'bearer']);
+    expect(
+      httpSchema.validate({ xsrf: { allowedSchemes: ['bearer'] } }).xsrf.allowedSchemes
+    ).toEqual(['bearer']);
+    expect(
+      httpSchema.validate({ xsrf: { allowedSchemes: [] } }, { serverless: true }).xsrf
+        .allowedSchemes
+    ).toEqual([]);
+  });
+
+  it('defaults to apikey and bearer on serverless and empty on traditional', () => {
+    const httpSchema = config.schema;
+    expect(httpSchema.validate({}, { serverless: true }).xsrf.allowedSchemes).toEqual([
+      'apikey',
+      'bearer',
+    ]);
+    expect(httpSchema.validate({}, { traditional: true }).xsrf.allowedSchemes).toEqual([]);
+  });
+});
+
 test('accepts any type of objects for custom headers', () => {
   const httpSchema = config.schema;
   const obj = {
@@ -814,5 +889,20 @@ describe('HttpConfig', () => {
       rawPermissionsPolicyConfig
     );
     expect(httpConfig.restrictInternalApis).toBe(true);
+  });
+
+  it('passes xsrf.allowedSchemes through unchanged (schema guarantees canonical values)', () => {
+    const rawConfig = config.schema.validate({
+      xsrf: { allowedSchemes: ['bearer', 'apikey'] },
+    });
+    const rawCspConfig = cspConfig.schema.validate({});
+    const rawPermissionsPolicyConfig = permissionsPolicyConfig.schema.validate({});
+    const httpConfig = new HttpConfig(
+      rawConfig,
+      rawCspConfig,
+      ExternalUrlConfig.DEFAULT,
+      rawPermissionsPolicyConfig
+    );
+    expect(httpConfig.xsrf.allowedSchemes).toEqual(['bearer', 'apikey']);
   });
 });
