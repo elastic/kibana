@@ -7,7 +7,6 @@
 
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { isEmpty } from 'lodash/fp';
-import type { OriginalRule } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { getEcsMappingNode } from './nodes/ecs_mapping';
 import { getFixQueryErrorsNode } from './nodes/fix_query_errors';
 import { getInlineQueryNode } from './nodes/inline_query';
@@ -103,12 +102,3 @@ const validationRouter = (state: TranslateRuleState) => {
 
   return 'translationResult';
 };
-
-export function getVendorRouter(vendor: OriginalRule['vendor']) {
-  return function qradarConditionalEdge(state: TranslateRuleState): string {
-    if (state.original_rule.vendor === vendor) {
-      return `is_${vendor}`;
-    }
-    return `is_not_${vendor}`;
-  };
-}
