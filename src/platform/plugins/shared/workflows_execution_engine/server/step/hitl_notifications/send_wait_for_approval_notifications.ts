@@ -19,20 +19,6 @@ export interface WaitForApprovalResumeLinks {
   rejectUrl: string;
 }
 
-export function hasExternalHitlChannels(
-  channels: WaitForApprovalChannels | undefined
-): channels is WaitForApprovalChannels {
-  if (!channels) {
-    return false;
-  }
-
-  const hasSlack = Boolean(channels.slack?.['connector-id']);
-  const hasSlackApi =
-    Boolean(channels.slack_api?.['connector-id']) && Boolean(channels.slack_api?.channels?.length);
-
-  return hasSlack || hasSlackApi;
-}
-
 export function buildWaitForApprovalResumeLinks({
   kibanaUrl,
   spaceId,

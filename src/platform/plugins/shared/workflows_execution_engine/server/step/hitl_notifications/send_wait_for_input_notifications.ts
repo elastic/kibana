@@ -12,8 +12,8 @@ import {
   DEFAULT_HITL_INPUT_CHANNEL_MESSAGE,
   DEFAULT_HITL_INPUT_OPEN_FORM_LABEL,
 } from '@kbn/workflows';
+import { hasExternalHitlChannels } from './has_external_hitl_channels';
 import { assertConnectorSucceeded } from './hitl_connector_helpers';
-import { hasExternalHitlChannels } from './send_wait_for_approval_notifications';
 import type { ConnectorExecutor } from '../../connector_executor';
 
 type WaitForInputChannels = NonNullable<NonNullable<WaitForInputStep['with']>['channels']>;

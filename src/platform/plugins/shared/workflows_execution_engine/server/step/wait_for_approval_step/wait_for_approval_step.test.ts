@@ -10,17 +10,17 @@
 import type { WaitForApprovalStep } from '@kbn/workflows';
 import type { WaitForApprovalGraphNode } from '@kbn/workflows/graph';
 import type { ExecutionError } from '@kbn/workflows/server';
-import {
-  buildWaitForApprovalResumeLinks,
-  hasExternalHitlChannels,
-  sendWaitForApprovalNotifications,
-} from './send_wait_for_approval_notifications';
 import { WaitForApprovalStepImpl } from './wait_for_approval_step';
 import type { ConnectorExecutor } from '../../connector_executor';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { ContextDependencies } from '../../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
+import { hasExternalHitlChannels } from '../hitl_notifications/has_external_hitl_channels';
+import {
+  buildWaitForApprovalResumeLinks,
+  sendWaitForApprovalNotifications,
+} from '../hitl_notifications/send_wait_for_approval_notifications';
 
 jest.mock('@kbn/workflows/server', () => ({
   ...jest.requireActual('@kbn/workflows/server'),
@@ -33,8 +33,11 @@ jest.mock('@kbn/workflows/server', () => ({
 const mockCreateExternalResumeApiKey = jest.requireMock('@kbn/workflows/server')
   .createExternalResumeApiKey as jest.Mock;
 
-jest.mock('./send_wait_for_approval_notifications', () => ({
+jest.mock('../hitl_notifications/has_external_hitl_channels', () => ({
   hasExternalHitlChannels: jest.fn().mockReturnValue(false),
+}));
+
+jest.mock('../hitl_notifications/send_wait_for_approval_notifications', () => ({
   buildWaitForApprovalResumeLinks: jest.fn().mockReturnValue({
     approveUrl: 'https://kibana/approve',
     rejectUrl: 'https://kibana/reject',

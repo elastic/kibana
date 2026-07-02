@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { hasExternalHitlChannels } from './has_external_hitl_channels';
 import {
   buildWaitForApprovalResumeLinks,
-  hasExternalHitlChannels,
   sendWaitForApprovalNotifications,
 } from './send_wait_for_approval_notifications';
 

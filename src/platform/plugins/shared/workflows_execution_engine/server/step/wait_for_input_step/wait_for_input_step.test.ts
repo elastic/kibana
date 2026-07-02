@@ -26,11 +26,11 @@ jest.mock('@kbn/workflows/server', () => ({
   }),
 }));
 
-jest.mock('../wait_for_approval_step/send_wait_for_approval_notifications', () => ({
+jest.mock('../hitl_notifications/has_external_hitl_channels', () => ({
   hasExternalHitlChannels: jest.fn().mockReturnValue(false),
 }));
 
-jest.mock('../wait_for_approval_step/send_wait_for_input_notifications', () => ({
+jest.mock('../hitl_notifications/send_wait_for_input_notifications', () => ({
   sendWaitForInputNotifications: jest.fn(),
 }));
 
@@ -38,10 +38,10 @@ const mockCreateExternalResumeApiKey = jest.requireMock('@kbn/workflows/server')
   .createExternalResumeApiKey as jest.Mock;
 
 const { hasExternalHitlChannels } = jest.requireMock(
-  '../wait_for_approval_step/send_wait_for_approval_notifications'
+  '../hitl_notifications/has_external_hitl_channels'
 );
 const { sendWaitForInputNotifications } = jest.requireMock(
-  '../wait_for_approval_step/send_wait_for_input_notifications'
+  '../hitl_notifications/send_wait_for_input_notifications'
 );
 const mockHasExternalHitlChannels = hasExternalHitlChannels as jest.Mock;
 const mockSendWaitForInputNotifications = sendWaitForInputNotifications as jest.Mock;
