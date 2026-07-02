@@ -9,9 +9,10 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiButton,
   EuiButtonEmpty,
   EuiConfirmModal,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiDescribedFormGroup,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -19,6 +20,7 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiPopover,
   EuiSpacer,
   EuiText,
   type CriteriaWithPagination,
@@ -29,6 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../../../common/lib/kibana';
+import { extractRulesCapabilities } from '../../../../common/utils/rules_capabilities';
 import {
   fetchAlertAnalysisWorkflowRuleAttachments,
   fetchAlertAnalysisWorkflowRuleAttachmentSelection,
@@ -107,8 +110,10 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
   // so onTableChange can restore them, discarding that spurious callback.
   const selectedRuleIdsRef = useRef(selectedRuleIds);
   selectedRuleIdsRef.current = selectedRuleIds;
-  const canEditRules = application.capabilities.securitySolution?.crud === true;
+  const canEditRules = extractRulesCapabilities(application.capabilities).rules.edit;
   const selectedRulesCount = selectedRuleIds.length;
+  const [isBulkActionsPopoverOpen, setIsBulkActionsPopoverOpen] = useState(false);
+  const closeBulkActionsPopover = useCallback(() => setIsBulkActionsPopoverOpen(false), []);
 
   const showRuleAttachmentError = useCallback(
     (title: string, error: RuleAttachmentError) => {
@@ -490,6 +495,65 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                     />
                   </EuiText>
                 </EuiFlexItem>
+                {canEditRules && selectedRulesCount > 0 && (
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      data-test-subj="alertAnalysisWorkflowRuleAttachmentBulkActionsPopover"
+                      isOpen={isBulkActionsPopoverOpen}
+                      closePopover={closeBulkActionsPopover}
+                      panelPaddingSize="none"
+                      button={
+                        <EuiButtonEmpty
+                          data-test-subj="alertAnalysisWorkflowRuleAttachmentBulkActionsButton"
+                          size="s"
+                          iconSide="right"
+                          iconType="arrowDown"
+                          flush="left"
+                          isLoading={updateMutation.isLoading}
+                          onClick={() => setIsBulkActionsPopoverOpen((isOpen) => !isOpen)}
+                        >
+                          <FormattedMessage
+                            id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentBulkActionsButtonLabel"
+                            defaultMessage="Bulk actions"
+                          />
+                        </EuiButtonEmpty>
+                      }
+                    >
+                      <EuiContextMenuPanel
+                        items={[
+                          <EuiContextMenuItem
+                            key="attach"
+                            icon="plusInCircle"
+                            data-test-subj="alertAnalysisWorkflowRuleAttachmentAttachAction"
+                            onClick={() => {
+                              closeBulkActionsPopover();
+                              setConfirmAction('attach');
+                            }}
+                          >
+                            <FormattedMessage
+                              id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentAttachWorkflowActionLabel"
+                              defaultMessage="Attach workflow"
+                            />
+                          </EuiContextMenuItem>,
+                          <EuiContextMenuItem
+                            key="detach"
+                            icon="minusInCircle"
+                            data-test-subj="alertAnalysisWorkflowRuleAttachmentRemoveAction"
+                            onClick={() => {
+                              closeBulkActionsPopover();
+                              setConfirmAction('detach');
+                            }}
+                          >
+                            <FormattedMessage
+                              id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentRemoveWorkflowActionLabel"
+                              defaultMessage="Remove workflow"
+                            />
+                          </EuiContextMenuItem>,
+                        ]}
+                      />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     data-test-subj="alertAnalysisWorkflowRuleAttachmentSelectAllButton"
@@ -529,39 +593,6 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                       defaultMessage="Clear selection"
                     />
                   </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="alertAnalysisWorkflowRuleAttachmentAttachButton"
-                    disabled={!canEditRules || selectedRulesCount === 0}
-                    isLoading={updateMutation.isLoading}
-                    onClick={() => setConfirmAction('attach')}
-                    size="s"
-                  >
-                    <FormattedMessage
-                      id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentAttachWorkflowButtonLabel"
-                      defaultMessage="Attach workflow"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="alertAnalysisWorkflowRuleAttachmentDetachButton"
-                    color="warning"
-                    disabled={!canEditRules || selectedRulesCount === 0}
-                    isLoading={updateMutation.isLoading}
-                    onClick={() => setConfirmAction('detach')}
-                    size="s"
-                  >
-                    <FormattedMessage
-                      id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentDetachWorkflowButtonLabel"
-                      defaultMessage="Detach workflow"
-                    />
-                  </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -627,7 +658,7 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                 )
               : i18n.translate(
                   'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalDetachTitle',
-                  { defaultMessage: 'Detach the workflow?' }
+                  { defaultMessage: 'Remove the workflow?' }
                 )
           }
           titleProps={{ id: confirmModalTitleId }}
@@ -660,7 +691,7 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                   'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalDetachConfirmButtonLabel',
                   {
                     defaultMessage:
-                      'Detach workflow from {selectedRulesCount, plural, one {# rule} other {# rules}}',
+                      'Remove workflow from {selectedRulesCount, plural, one {# rule} other {# rules}}',
                     values: { selectedRulesCount },
                   }
                 )
@@ -681,7 +712,7 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
               ) : (
                 <FormattedMessage
                   id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalDetachDescription"
-                  defaultMessage="This will detach the alert analysis workflow from {selectedRulesCount, plural, one {# rule} other {# rules}}."
+                  defaultMessage="This will remove the alert analysis workflow from {selectedRulesCount, plural, one {# rule} other {# rules}}."
                   values={{ selectedRulesCount }}
                 />
               )}

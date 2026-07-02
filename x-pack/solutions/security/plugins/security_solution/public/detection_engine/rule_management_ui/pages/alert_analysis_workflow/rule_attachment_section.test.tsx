@@ -12,6 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '../../../../common/lib/kibana';
+import { RULES_FEATURE_ID } from '../../../../../common/constants';
 import {
   ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE,
@@ -84,6 +85,7 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
       securitySolution: { show: true, crud: true },
+      [RULES_FEATURE_ID]: { read_rules: true, edit_rules: true },
     };
 
     setupFetchMock();
@@ -102,6 +104,23 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
   };
 
   const getRowCheckbox = (ruleId: string) => screen.getByTestId(`checkboxSelectRow-${ruleId}`);
+
+  // Open the "Bulk actions" dropdown and click the attach or remove action. The context-menu
+  // items live inside an EuiPopover panel that keeps `pointer-events: none` until its open
+  // animation finishes (which never happens in jsdom), so skip user-event's pointer check.
+  const bulkActionUser = userEvent.setup({ pointerEventsCheck: 0 });
+  const runBulkAction = async (action: 'attach' | 'remove') => {
+    await bulkActionUser.click(
+      screen.getByTestId('alertAnalysisWorkflowRuleAttachmentBulkActionsButton')
+    );
+    await bulkActionUser.click(
+      screen.getByTestId(
+        action === 'attach'
+          ? 'alertAnalysisWorkflowRuleAttachmentAttachAction'
+          : 'alertAnalysisWorkflowRuleAttachmentRemoveAction'
+      )
+    );
+  };
 
   const getLastUpdateRequestBody = () => {
     const calls = coreStart.http.fetch.mock.calls as unknown as Array<[string, { body?: string }]>;
@@ -128,10 +147,11 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
       expect(screen.getByText('Rule 1')).toBeInTheDocument();
     });
 
-    // Nothing is selected on page 1, even though every rule on this page is attached.
+    // Nothing is selected on page 1, so the bulk actions dropdown is not shown.
     expect(screen.getByText('Selected 0 rules')).toBeInTheDocument();
-    expect(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentAttachButton')).toBeDisabled();
-    expect(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentDetachButton')).toBeDisabled();
+    expect(
+      screen.queryByTestId('alertAnalysisWorkflowRuleAttachmentBulkActionsButton')
+    ).not.toBeInTheDocument();
 
     const nextPageButton = screen.getByTestId('pagination-button-next');
     await userEvent.click(nextPageButton);
@@ -142,8 +162,9 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
 
     // Navigating pages must not create spurious selection.
     expect(screen.getByText('Selected 0 rules')).toBeInTheDocument();
-    expect(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentAttachButton')).toBeDisabled();
-    expect(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentDetachButton')).toBeDisabled();
+    expect(
+      screen.queryByTestId('alertAnalysisWorkflowRuleAttachmentBulkActionsButton')
+    ).not.toBeInTheDocument();
   });
 
   it('preserves a manually selected row when navigating away and back', async () => {
@@ -209,7 +230,7 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
 
     expect(screen.getByText('Selected 2 rules')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentAttachButton'));
+    await runBulkAction('attach');
     await userEvent.click(
       within(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentConfirmModal')).getByText(
         'Attach workflow to 2 rules'
@@ -225,7 +246,7 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
     });
   });
 
-  it('detaches the workflow from the selected rules', async () => {
+  it('removes the workflow from the selected rules', async () => {
     renderComponent();
 
     await waitFor(() => {
@@ -234,10 +255,10 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
 
     await userEvent.click(getRowCheckbox('p1-rule-3'));
 
-    await userEvent.click(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentDetachButton'));
+    await runBulkAction('remove');
     await userEvent.click(
       within(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentConfirmModal')).getByText(
-        'Detach workflow from 1 rule'
+        'Remove workflow from 1 rule'
       )
     );
 
@@ -263,7 +284,7 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
       expect(screen.getByText(`Selected ${TOTAL_RULES} rules`)).toBeInTheDocument();
     });
 
-    await userEvent.click(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentAttachButton'));
+    await runBulkAction('attach');
     await userEvent.click(
       within(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentConfirmModal')).getByText(
         `Attach workflow to ${TOTAL_RULES} rules`
