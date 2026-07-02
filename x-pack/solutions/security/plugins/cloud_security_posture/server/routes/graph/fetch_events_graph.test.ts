@@ -7,7 +7,8 @@
 
 import { createHash } from 'crypto';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { fetchEvents, regroupEvents, enrichEventDocData } from './fetch_events_graph';
+import { fetchEvents } from './fetch_events_graph';
+import { regroupEvents, enrichEventDocData } from './parse_records';
 import type { Logger } from '@kbn/core/server';
 import type { OriginEventId, EsQuery, EventEsqlRow } from './types';
 import { GRAPH_TARGET_EUID_SOURCE_FIELDS } from './constants';

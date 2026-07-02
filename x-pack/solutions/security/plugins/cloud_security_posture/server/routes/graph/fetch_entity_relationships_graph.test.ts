@@ -6,12 +6,12 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { fetchEntityRelationships } from './fetch_entity_relationships_graph';
 import {
-  fetchEntityRelationships,
   regroupRelationships,
   enrichRelationshipDocData,
   enrichEntityRecords,
-} from './fetch_entity_relationships_graph';
+} from './parse_records';
 import type { Logger } from '@kbn/core/server';
 import type { EntityId, RelationshipEsqlRow, EntityRecord } from './types';
 import { hashIds } from './utils';

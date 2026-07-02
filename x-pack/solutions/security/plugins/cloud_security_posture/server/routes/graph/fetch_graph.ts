@@ -8,14 +8,15 @@
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
-import { fetchEvents, regroupEvents, enrichEventDocData } from './fetch_events_graph';
+import { fetchEvents } from './fetch_events_graph';
+import { fetchEntities, fetchEntityRelationships } from './fetch_entity_relationships_graph';
 import {
-  fetchEntities,
-  fetchEntityRelationships,
+  regroupEvents,
+  enrichEventDocData,
   regroupRelationships,
   enrichRelationshipDocData,
   enrichEntityRecords,
-} from './fetch_entity_relationships_graph';
+} from './parse_records';
 import { fetchEntityEnrichment, type EntityEnrichmentFields } from './fetch_entity_enrichment';
 import { checkIfEntitiesIndexExists, addValuesToSet } from './utils';
 import type {
