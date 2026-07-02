@@ -15,12 +15,14 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import type { LensESQLConfig } from './types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import type { Environment } from '../../../../../common/environment_rt';
 import type { ServiceNodeData } from '../../../../../common/service_map';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency_aggregation_type_select';
 import { useServiceHasSystemMetrics } from '../hooks/use_service_has_system_metrics';
@@ -148,6 +150,7 @@ export function ServiceFlyoutOverview({
   onTransactionTypeChange,
 }: ServiceFlyoutOverviewProps) {
   const [latencyAggregationType, setLatencyAggregationType] = useState(LatencyAggregationType.avg);
+  const { core, share } = useApmPluginContext();
   const { dataView } = useAdHocApmDataView();
   const indexes = dataView?.getIndexPattern();
   const hasSystemMetrics = useServiceHasSystemMetrics({
@@ -216,6 +219,19 @@ export function ServiceFlyoutOverview({
             />
           </EuiFlexItem>
         )}
+        <EuiFlexItem>
+          <ServiceFlyoutTransactionsSection
+            http={core.http}
+            notifications={core.notifications}
+            locators={share.url.locators}
+            serviceName={service.id}
+            environment={environment}
+            start={rangeFrom}
+            end={rangeTo}
+            transactionType={transactionType}
+            latencyAggregationType={latencyAggregationType}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </div>
   );
