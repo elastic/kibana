@@ -23,7 +23,7 @@ import { checkRuleExceptionReferences } from '../import/check_rule_exception_ref
 import { findRules } from '../search/find_rules';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 import { getMockRulesAuthz } from '../../__mocks__/authz';
-import { isRuleImportError } from '../import/errors';
+import { createRuleImportErrorObject, isRuleImportError } from '../import/errors';
 
 jest.mock('./methods/import_rule');
 jest.mock('../import/check_rule_exception_references');
@@ -240,6 +240,117 @@ describe('detectionRulesClient.bulkImportRules', () => {
         },
       })
     );
+  });
+
+  it('prebuilt rule without a version is rejected before any lookup', async () => {
+    mockRuleSourceImporter.isPrebuiltRule.mockReturnValue(true);
+    const ruleToImport = { ...getImportRulesSchemaMock(), version: undefined };
+
+    const { responses } = await subject.bulkImportRules({
+      allowMissingConnectorSecrets: false,
+      overwriteRules: false,
+      ruleSourceImporter: mockRuleSourceImporter,
+      rules: [ruleToImport],
+    });
+
+    const errors = responses.filter(isRuleImportError);
+    expect(errors).toHaveLength(1);
+    expect(errors[0].error.ruleId).toBe(ruleToImport.rule_id);
+    expect(errors[0].error.message).toContain('version');
+    expect(findRules).not.toHaveBeenCalled();
+    expect(rulesClient.bulkCreateRules).not.toHaveBeenCalled();
+  });
+
+  it('surfaces an ML authz failure as a per-rule error and skips the rule', async () => {
+    (buildMlAuthz().validateRuleType as jest.Mock).mockResolvedValueOnce({
+      valid: false,
+      message: 'ML auth failed',
+    });
+
+    const { responses } = await subject.bulkImportRules({
+      allowMissingConnectorSecrets: false,
+      overwriteRules: false,
+      ruleSourceImporter: mockRuleSourceImporter,
+      rules: [getImportRulesSchemaMock()],
+    });
+
+    const errors = responses.filter(isRuleImportError);
+    expect(errors).toHaveLength(1);
+    expect(errors[0].error.message).toBe('ML auth failed');
+    expect(findRules).not.toHaveBeenCalled();
+    expect(rulesClient.bulkCreateRules).not.toHaveBeenCalled();
+  });
+
+  it('surfaces exception reference errors while still creating the rule', async () => {
+    const ruleToImport = getImportRulesSchemaMock();
+    (checkRuleExceptionReferences as jest.Mock).mockReturnValueOnce([
+      [
+        createRuleImportErrorObject({
+          ruleId: ruleToImport.rule_id,
+          message: 'missing exception list',
+        }),
+      ],
+      [],
+    ]);
+    rulesClient.bulkCreateRules.mockImplementationOnce(async (args) => ({
+      successfulIds: args.rules.map((r) => (r.options as { id: string }).id),
+      errors: [],
+      total: args.rules.length,
+    }));
+
+    const { responses } = await subject.bulkImportRules({
+      allowMissingConnectorSecrets: false,
+      overwriteRules: false,
+      ruleSourceImporter: mockRuleSourceImporter,
+      rules: [ruleToImport],
+    });
+
+    const errors = responses.filter(isRuleImportError);
+    expect(errors).toHaveLength(1);
+    expect(errors[0].error.message).toBe('missing exception list');
+    expect(responses).toContainEqual({ rule_id: ruleToImport.rule_id });
+  });
+
+  it('overwrite branch: importRule returning an import error is surfaced', async () => {
+    const ruleToImport = { ...getImportRulesSchemaMock(), rule_id: 'existing-rule' };
+    (findRules as jest.Mock).mockResolvedValueOnce({
+      data: [getRuleMock({ ...getQueryRuleParams(), ruleId: 'existing-rule' })],
+    });
+    (importRule as jest.Mock).mockResolvedValueOnce(
+      createRuleImportErrorObject({ ruleId: 'existing-rule', message: 'overwrite failed' })
+    );
+
+    const { responses } = await subject.bulkImportRules({
+      allowMissingConnectorSecrets: false,
+      overwriteRules: true,
+      ruleSourceImporter: mockRuleSourceImporter,
+      rules: [ruleToImport],
+    });
+
+    const errors = responses.filter(isRuleImportError);
+    expect(errors).toHaveLength(1);
+    expect(errors[0].error.ruleId).toBe('existing-rule');
+    expect(errors[0].error.message).toBe('overwrite failed');
+  });
+
+  it('overwrite branch: a thrown importRule error is re-paired to the rule_id', async () => {
+    const ruleToImport = { ...getImportRulesSchemaMock(), rule_id: 'existing-rule' };
+    (findRules as jest.Mock).mockResolvedValueOnce({
+      data: [getRuleMock({ ...getQueryRuleParams(), ruleId: 'existing-rule' })],
+    });
+    (importRule as jest.Mock).mockRejectedValueOnce(new Error('kaboom'));
+
+    const { responses } = await subject.bulkImportRules({
+      allowMissingConnectorSecrets: false,
+      overwriteRules: true,
+      ruleSourceImporter: mockRuleSourceImporter,
+      rules: [ruleToImport],
+    });
+
+    const errors = responses.filter(isRuleImportError);
+    expect(errors).toHaveLength(1);
+    expect(errors[0].error.ruleId).toBe('existing-rule');
+    expect(errors[0].error.message).toBe('kaboom');
   });
 
   it('returns empty result for empty input without calling alerting/findRules', async () => {
