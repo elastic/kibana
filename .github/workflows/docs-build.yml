@@ -2,6 +2,9 @@ name: docs-build
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    paths-ignore:
+      - 'docs/releases/**'
+      - 'docs/changelog/**'
   push:
     branches: [main]
 permissions:
