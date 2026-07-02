@@ -67,7 +67,10 @@ export function parseWorkflowYamlToJSON<T extends ZodType>(
       }
 
       const shouldSuppressError =
-        isDynamicValue(value) || isVariableValue(value) || isLiquidTagValue(value) || isInstallValue(value);
+        isDynamicValue(value) ||
+        isVariableValue(value) ||
+        isLiquidTagValue(value) ||
+        isInstallValue(value);
 
       // Suppress error if value is a dynamic template, variable value, or Liquid tag
       return !shouldSuppressError;
