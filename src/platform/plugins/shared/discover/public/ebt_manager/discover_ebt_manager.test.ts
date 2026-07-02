@@ -133,6 +133,63 @@ describe('DiscoverEBTManager', () => {
       });
 
       expect(coreSetupMock.analytics.registerEventType).toHaveBeenCalledWith({
+        eventType: 'discover_query_performance',
+        schema: {
+          eventName: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'The name of the query performance event that is tracked i.e. discoverFetchAll, discoverFetchMore',
+            },
+          },
+          duration: {
+            type: 'integer',
+            _meta: {
+              description: 'The event duration in milliseconds',
+            },
+          },
+          queryRangeSeconds: {
+            type: 'long',
+            _meta: {
+              description: 'The query time range in seconds',
+            },
+          },
+          phraseQueryCount: {
+            type: 'integer',
+            _meta: {
+              description: 'The number of phrase queries found in the Elasticsearch requests',
+            },
+          },
+          multiMatchTypes: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: 'Multi-match query types found in the Elasticsearch requests',
+              },
+            },
+            _meta: {
+              description: 'Multi-match query types found in the Elasticsearch requests',
+            },
+          },
+          fetchType: {
+            type: 'keyword',
+            _meta: {
+              description: 'The fetch implementation used for the query request',
+              optional: true,
+            },
+          },
+          querySourceCommand: {
+            type: 'keyword',
+            _meta: {
+              description: 'The ES|QL source command used by the query i.e. FROM, TS, PROMQL',
+              optional: true,
+            },
+          },
+        },
+      });
+
+      expect(coreSetupMock.analytics.registerEventType).toHaveBeenCalledWith({
         eventType: 'discover_in_dashboard',
         schema: {
           eventName: {
@@ -999,7 +1056,9 @@ describe('DiscoverEBTManager', () => {
 
       jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
 
-      const tracker = scopedManager.trackQueryPerformanceEvent('testQueryEvent');
+      const tracker = scopedManager.trackQueryPerformanceEvent('testQueryEvent', {
+        esql: 'FROM logs-* | LIMIT 10',
+      });
 
       const requests: InspectedRequest[] = [
         {
@@ -1037,7 +1096,7 @@ describe('DiscoverEBTManager', () => {
           requests,
         },
         {
-          meta: { foo: 'bar' },
+          meta: { fetchType: 'fetchTextBased', foo: 'bar' },
         }
       );
 
@@ -1049,10 +1108,88 @@ describe('DiscoverEBTManager', () => {
         key2: 'phrase_query_count',
         value2: 2, // 1 match_phrase + 1 multi_match type=phrase
         meta: {
+          fetchType: 'fetchTextBased',
           foo: 'bar',
           multi_match_types: ['match_phrase', 'phrase'],
         },
       });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+        'discover_query_performance',
+        {
+          eventName: 'testQueryEvent',
+          duration: 750,
+          queryRangeSeconds: 300,
+          phraseQueryCount: 2,
+          multiMatchTypes: ['match_phrase', 'phrase'],
+          fetchType: 'fetchTextBased',
+          querySourceCommand: 'FROM',
+        }
+      );
+    });
+
+    it('should track PROMQL as a query source command', () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
+
+      const tracker = scopedManager.trackQueryPerformanceEvent('testQueryEvent', {
+        esql: 'PROMQL index=metrics step=1m start=?_tstart end=?_tend (avg(cpu_usage))',
+      });
+
+      tracker.reportEvent({
+        queryRangeSeconds: 300,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+        'discover_query_performance',
+        {
+          eventName: 'testQueryEvent',
+          duration: 750,
+          queryRangeSeconds: 300,
+          phraseQueryCount: 0,
+          multiMatchTypes: [],
+          querySourceCommand: 'PROMQL',
+        }
+      );
+    });
+
+    it('should omit query source command for classic queries', () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
+
+      const tracker = scopedManager.trackQueryPerformanceEvent('testQueryEvent', {
+        language: 'kuery',
+        query: 'message: test',
+      });
+
+      tracker.reportEvent({
+        queryRangeSeconds: 300,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+        'discover_query_performance',
+        {
+          eventName: 'testQueryEvent',
+          duration: 750,
+          queryRangeSeconds: 300,
+          phraseQueryCount: 0,
+          multiMatchTypes: [],
+        }
+      );
     });
 
     it('should avoid re-analyzing the same request multiple times', () => {
@@ -1080,13 +1217,13 @@ describe('DiscoverEBTManager', () => {
         },
       };
 
-      const tracker1 = scopedManager.trackQueryPerformanceEvent('testQueryEvent1');
+      const tracker1 = scopedManager.trackQueryPerformanceEvent('testQueryEvent1', undefined);
       tracker1.reportEvent({
         queryRangeSeconds: 300,
         requests: [request],
       });
 
-      const tracker2 = scopedManager.trackQueryPerformanceEvent('testQueryEvent2');
+      const tracker2 = scopedManager.trackQueryPerformanceEvent('testQueryEvent2', undefined);
       tracker2.reportEvent({
         queryRangeSeconds: 300,
         requests: [request],

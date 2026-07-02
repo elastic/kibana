@@ -329,8 +329,10 @@ export function getDataStateContainer({
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
-            const fetchMoreTracker =
-              scopedEbtManager.trackQueryPerformanceEvent('discoverFetchMore');
+            const fetchMoreTracker = scopedEbtManager.trackQueryPerformanceEvent(
+              'discoverFetchMore',
+              getCurrentTab().appState.query
+            );
 
             // Calculate query range in seconds
             const timeRange = timefilter.getAbsoluteTime();
@@ -469,7 +471,10 @@ export function getDataStateContainer({
           }
 
           const prevAutoRefreshDone = autoRefreshDone;
-          const fetchAllTracker = scopedEbtManager.trackQueryPerformanceEvent('discoverFetchAll');
+          const fetchAllTracker = scopedEbtManager.trackQueryPerformanceEvent(
+            'discoverFetchAll',
+            query
+          );
 
           // Calculate query range in seconds
           const timeRange = timefilter.getAbsoluteTime();

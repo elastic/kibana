@@ -10,6 +10,8 @@
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import { Parser } from '@elastic/esql';
+import { esqlCommandRegistry } from '@kbn/esql-language';
 import {
   getKqlFieldNamesFromExpression,
   isOfAggregateQueryType,
@@ -23,6 +25,14 @@ import {
   CONTEXTUAL_PROFILE_ID,
   CONTEXTUAL_PROFILE_LEVEL,
   CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE,
+  DISCOVER_QUERY_PERFORMANCE_DURATION,
+  DISCOVER_QUERY_PERFORMANCE_EVENT_NAME,
+  DISCOVER_QUERY_PERFORMANCE_EVENT_TYPE,
+  DISCOVER_QUERY_PERFORMANCE_FETCH_TYPE,
+  DISCOVER_QUERY_PERFORMANCE_MULTI_MATCH_TYPES,
+  DISCOVER_QUERY_PERFORMANCE_PHRASE_QUERY_COUNT,
+  DISCOVER_QUERY_PERFORMANCE_QUERY_RANGE_SECONDS,
+  DISCOVER_QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND,
   FIELD_USAGE_EVENT_NAME,
   FIELD_USAGE_EVENT_TYPE,
   QUERY_FIELDS_USAGE_EVENT_TYPE,
@@ -89,6 +99,34 @@ interface ContextualProfileResolvedEventData {
   [CONTEXTUAL_PROFILE_LEVEL]: ContextualProfileLevel;
   [CONTEXTUAL_PROFILE_ID]: string;
 }
+
+interface QueryPerformanceEventData {
+  [DISCOVER_QUERY_PERFORMANCE_EVENT_NAME]: string;
+  [DISCOVER_QUERY_PERFORMANCE_DURATION]: number;
+  [DISCOVER_QUERY_PERFORMANCE_QUERY_RANGE_SECONDS]: number;
+  [DISCOVER_QUERY_PERFORMANCE_PHRASE_QUERY_COUNT]: number;
+  [DISCOVER_QUERY_PERFORMANCE_MULTI_MATCH_TYPES]: string[];
+  [DISCOVER_QUERY_PERFORMANCE_FETCH_TYPE]?: string;
+  [DISCOVER_QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND]?: string;
+}
+
+const getQuerySourceCommand = (query: Query | AggregateQuery | undefined) => {
+  if (!isOfAggregateQueryType(query)) {
+    return undefined;
+  }
+
+  try {
+    const { root, errors } = Parser.parse(query.esql);
+    if (errors.length > 0) {
+      return undefined;
+    }
+
+    const sourceCommandNames = esqlCommandRegistry.getSourceCommandNames();
+    return root.commands.find(({ name }) => sourceCommandNames.includes(name))?.name.toUpperCase();
+  } catch (e) {
+    return undefined;
+  }
+};
 
 export class ScopedDiscoverEBTManager {
   private lastResolvedContextProfiles: {
@@ -375,8 +413,9 @@ export class ScopedDiscoverEBTManager {
     };
   }
 
-  public trackQueryPerformanceEvent(eventName: string) {
+  public trackQueryPerformanceEvent(eventName: string, query: Query | AggregateQuery | undefined) {
     const startTime = window.performance.now();
+    const querySourceCommand = getQuerySourceCommand(query);
     let reported = false;
 
     return {
@@ -391,7 +430,7 @@ export class ScopedDiscoverEBTManager {
         },
         otherEventData?: Omit<PerformanceMetricEvent, 'eventName' | 'duration'>
       ) => {
-        if (reported || !this.reportPerformanceEvent) {
+        if (reported || (!this.reportPerformanceEvent && !this.reportEvent)) {
           return;
         }
 
@@ -402,12 +441,14 @@ export class ScopedDiscoverEBTManager {
           this.queryAnalysisCache.memo(request.id, { context: { request } })
         );
         const mergedAnalysis = mergeMultiMatchAnalyses(queryAnalyses);
+        const phraseQueryCount = mergedAnalysis.typeCounts.get('match_phrase') ?? 0;
+        const fetchType = otherEventData?.meta?.fetchType;
 
-        this.reportPerformanceEvent({
+        this.reportPerformanceEvent?.({
           key1: 'query_range_secs',
           value1: queryRangeSeconds,
           key2: 'phrase_query_count',
-          value2: mergedAnalysis.typeCounts.get('match_phrase') ?? 0,
+          value2: phraseQueryCount,
           ...otherEventData,
           meta: {
             multi_match_types: mergedAnalysis.rawTypes,
@@ -416,6 +457,24 @@ export class ScopedDiscoverEBTManager {
           eventName,
           duration,
         });
+
+        const eventData: QueryPerformanceEventData = {
+          [DISCOVER_QUERY_PERFORMANCE_EVENT_NAME]: eventName,
+          [DISCOVER_QUERY_PERFORMANCE_DURATION]: duration,
+          [DISCOVER_QUERY_PERFORMANCE_QUERY_RANGE_SECONDS]: queryRangeSeconds,
+          [DISCOVER_QUERY_PERFORMANCE_PHRASE_QUERY_COUNT]: phraseQueryCount,
+          [DISCOVER_QUERY_PERFORMANCE_MULTI_MATCH_TYPES]: mergedAnalysis.rawTypes,
+        };
+
+        if (typeof fetchType === 'string') {
+          eventData[DISCOVER_QUERY_PERFORMANCE_FETCH_TYPE] = fetchType;
+        }
+
+        if (querySourceCommand) {
+          eventData[DISCOVER_QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND] = querySourceCommand;
+        }
+
+        this.reportEvent?.(DISCOVER_QUERY_PERFORMANCE_EVENT_TYPE, eventData);
       },
     };
   }

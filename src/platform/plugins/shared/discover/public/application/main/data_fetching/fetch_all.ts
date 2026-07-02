@@ -127,7 +127,8 @@ export function fetchAll(
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
 
     const fetchAllRequestOnlyTracker = scopedEbtManager.trackQueryPerformanceEvent(
-      'discoverFetchAllRequestsOnly'
+      'discoverFetchAllRequestsOnly',
+      query
     );
 
     // Calculate query range in seconds
