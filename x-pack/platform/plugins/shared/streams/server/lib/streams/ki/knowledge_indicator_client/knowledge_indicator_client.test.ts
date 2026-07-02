@@ -782,7 +782,7 @@ describe('KnowledgeIndicatorClient.keepAlivePersistentIndicators', () => {
     expect(written.expires_at).toBeUndefined();
   });
 
-  it('keeps alive an excluded managed feature, preserving excluded and the original expires_at', async () => {
+  it('keeps alive an excluded managed feature, preserving excluded and rolling expires_at forward with @timestamp', async () => {
     const { client, create, runEsql } = makeClient();
     const managedExpiresAt = '2026-07-01T00:00:00.000Z';
     const excludedManaged = createFeatureDoc({ excluded: true, expires_at: managedExpiresAt });
@@ -796,8 +796,15 @@ describe('KnowledgeIndicatorClient.keepAlivePersistentIndicators', () => {
     const [{ documents }] = create.mock.calls[0];
     const written = documents[0] as StoredFeatureKnowledgeIndicator;
     expect(written.excluded).toBe(true);
-    expect(written.expires_at).toBe(managedExpiresAt);
     expect(written['@timestamp']).not.toBe(excludedManaged['@timestamp']);
+    // expires_at is TTL-bearing, so it rolls forward with the refreshed
+    // @timestamp rather than preserving the now-stale original value.
+    const { expires_at: rolledExpiresAt } = written;
+    expect(rolledExpiresAt).toBeDefined();
+    expect(rolledExpiresAt).not.toBe(managedExpiresAt);
+    const ttlMs =
+      new Date(rolledExpiresAt ?? 0).getTime() - new Date(written['@timestamp']).getTime();
+    expect(ttlMs).toBeCloseTo(30 * 24 * 60 * 60 * 1000, -4);
   });
 
   it('re-emits durable queries with a fresh @timestamp, no expires_at, and preserves rule_backed/rule_id', async () => {

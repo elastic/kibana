@@ -302,12 +302,22 @@ export class IndicatorWriter {
       return { refreshed: 0 };
     }
 
+    const now = new Date().toISOString();
+    // Keep `expires_at` in step with the refreshed `@timestamp` if the feature is expiring
+    const rollExpiresAt = (expiresAt?: string): string | undefined =>
+      expiresAt ? computeExpiresAt(now, this.ttlDays) : undefined;
+
     await bulkCreateWithInferenceFallback(this.logger, ({ includeEmbedding }) => {
       const docs: StoredKnowledgeIndicator[] = [];
       for (const doc of latest) {
         if (isStoredFeatureKnowledgeIndicator(doc)) {
           docs.push(
-            toStoredFeature(stream, fromStoredFeature(doc), includeEmbedding, doc.expires_at)
+            toStoredFeature(
+              stream,
+              fromStoredFeature(doc),
+              includeEmbedding,
+              rollExpiresAt(doc.expires_at)
+            )
           );
         } else if (isStoredQueryKnowledgeIndicator(doc)) {
           const link = fromStoredQuery(doc);
@@ -316,7 +326,7 @@ export class IndicatorWriter {
               stream,
               { ...link.query, rule_backed: link.rule_backed, rule_id: link.rule_id },
               includeEmbedding,
-              doc.expires_at
+              rollExpiresAt(doc.expires_at)
             )
           );
         }
