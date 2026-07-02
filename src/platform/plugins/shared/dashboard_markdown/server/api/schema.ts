@@ -13,12 +13,10 @@ import { markdownStateSchema } from '../embeddable/schemas';
 export const markdownLibraryItemSchema = schema.object({
   ...markdownStateSchema.getPropSchemas(),
   // saved object description
-  // saved object description
   description: schema.maybe(
     schema.string({
       meta: { description: 'A short description of the markdown library item.' },
     })
-  ),
   ),
   // saved object title
   title: schema.string({
