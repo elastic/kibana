@@ -9,6 +9,7 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
+import { MAX_HITL_EXTERNAL_RESUME_API_KEY_LENGTH } from '@kbn/workflows';
 import { EXTERNAL_RESUME_API_PATH } from '@kbn/workflows/server';
 import {
   EXTERNAL_RESUME_POST_ROUTE_OPTIONS,
@@ -49,6 +50,7 @@ export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies
             query: schema.object({
               apiKey: schema.maybe(
                 schema.string({
+                  maxLength: MAX_HITL_EXTERNAL_RESUME_API_KEY_LENGTH,
                   meta: {
                     description:
                       'External resume API key credential. Used when Authorization header is not provided.',
@@ -118,6 +120,7 @@ export function registerExternalResumeExecutionGetRoute(deps: RouteDependencies)
             query: schema.object(
               {
                 apiKey: schema.string({
+                  maxLength: MAX_HITL_EXTERNAL_RESUME_API_KEY_LENGTH,
                   meta: { description: 'External resume API key credential.' },
                 }),
                 approved: schema.maybe(

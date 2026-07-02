@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_HITL_GRAPH_NODE_ID_LENGTH } from '../../../common/hitl';
 import {
   DataSetStepSchema,
   ElasticsearchStepSchema,
@@ -50,7 +51,7 @@ export const WaitForInputGraphNodeSchema = GraphNodeSchema.extend({
 export type WaitForInputGraphNode = z.infer<typeof WaitForInputGraphNodeSchema>;
 
 export const WaitForApprovalGraphNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
+  id: z.string().max(MAX_HITL_GRAPH_NODE_ID_LENGTH),
   type: z.literal('waitForApproval'),
   configuration: WaitForApprovalStepSchema,
 });

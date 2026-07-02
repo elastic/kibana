@@ -21,6 +21,11 @@ import {
   HITL_EXTERNAL_CHANNELS_DESCRIPTION,
   HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
+  MAX_HITL_ACTION_LABEL_LENGTH,
+  MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH,
+  MAX_HITL_EXTERNAL_LINK_LENGTH,
+  MAX_HITL_MESSAGE_LENGTH,
+  MAX_HITL_SLACK_CHANNEL_ID_LENGTH,
 } from '../common/hitl';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
@@ -265,9 +270,11 @@ export const WaitForApprovalSlackChannelSchema = z.object({
   'connector-id': z
     .string()
     .min(1)
+    .max(MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH)
     .describe('Slack webhook connector saved object id or name (posts to the webhook channel)'),
   message: z
     .string()
+    .max(MAX_HITL_MESSAGE_LENGTH)
     .optional()
     .describe(
       'Optional notification template. Use {{context.hitl.externalFormLink}} for the external input form link.'
@@ -275,13 +282,18 @@ export const WaitForApprovalSlackChannelSchema = z.object({
 });
 
 export const WaitForApprovalSlackApiChannelSchema = z.object({
-  'connector-id': z.string().min(1).describe('Slack API connector saved object id or name'),
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH)
+    .describe('Slack API connector saved object id or name'),
   channels: z
-    .array(z.string().min(1))
+    .array(z.string().min(1).max(MAX_HITL_SLACK_CHANNEL_ID_LENGTH))
     .min(1)
     .describe('Slack channel ids to post approval actions to'),
   message: z
     .string()
+    .max(MAX_HITL_MESSAGE_LENGTH)
     .optional()
     .describe(
       'Optional notification template. Use {{context.hitl.externalFormLink}} for the external input form link.'
@@ -300,7 +312,11 @@ export const HitlExternalChannelsSchema = WaitForApprovalChannelsSchema;
 
 export const WaitForInputStepInputSchema = z
   .object({
-    message: z.string().optional().describe('Message displayed to the user when waiting for input'),
+    message: z
+      .string()
+      .max(MAX_HITL_MESSAGE_LENGTH)
+      .optional()
+      .describe('Message displayed to the user when waiting for input'),
     schema: JsonModelSchema.optional().describe(
       'JSON Schema describing the expected input payload. Used for validation, autocomplete, and default values in the resume UI'
     ),
@@ -315,9 +331,21 @@ export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
 
 export const WaitForApprovalStepInputSchema = z
   .object({
-    message: z.string().optional().describe('Message displayed to approvers'),
-    approveLabel: z.string().optional().describe('Label for the approve action (default: Approve)'),
-    rejectLabel: z.string().optional().describe('Label for the reject action (default: Decline)'),
+    message: z
+      .string()
+      .max(MAX_HITL_MESSAGE_LENGTH)
+      .optional()
+      .describe('Message displayed to approvers'),
+    approveLabel: z
+      .string()
+      .max(MAX_HITL_ACTION_LABEL_LENGTH)
+      .optional()
+      .describe('Label for the approve action (default: Approve)'),
+    rejectLabel: z
+      .string()
+      .max(MAX_HITL_ACTION_LABEL_LENGTH)
+      .optional()
+      .describe('Label for the reject action (default: Decline)'),
     channels: WaitForApprovalChannelsSchema,
   })
   .optional();
@@ -985,10 +1013,12 @@ const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
 export const WorkflowHitlTemplateContextSchema = z.object({
   [HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY]: z
     .string()
+    .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
     .optional()
     .describe('External waitForInput form URL, available while the step is waiting'),
   [HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY]: z
     .string()
+    .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
     .optional()
     .describe(
       'External GET resume URL with apiKey set. Append `&<field>=<value>` per with.schema.'

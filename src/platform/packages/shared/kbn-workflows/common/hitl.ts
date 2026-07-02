@@ -9,6 +9,33 @@
 
 export const DEFAULT_WAIT_FOR_INPUT_TIMEOUT = '72h' as const;
 
+/** Max length for encoded Elasticsearch API keys in external resume URLs. */
+export const MAX_HITL_EXTERNAL_RESUME_API_KEY_LENGTH = 1024 as const;
+
+/** Max length for connector saved-object id / name in HITL channel config. */
+export const MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH = 512 as const;
+
+/** Max length for Slack channel id in `slack_api` config. */
+export const MAX_HITL_SLACK_CHANNEL_ID_LENGTH = 256 as const;
+
+/** Max length for HITL step messages and channel notification templates. */
+export const MAX_HITL_MESSAGE_LENGTH = 10_240 as const;
+
+/** Max length for approve/reject button labels. */
+export const MAX_HITL_ACTION_LABEL_LENGTH = 256 as const;
+
+/** Max length for `respondedBy` on HITL step output. */
+export const MAX_HITL_RESPONDED_BY_LENGTH = 1024 as const;
+
+/** Max length for external resume / form URLs in template context. */
+export const MAX_HITL_EXTERNAL_LINK_LENGTH = 8192 as const;
+
+/** Max length for workflow graph node ids on HITL step nodes. */
+export const MAX_HITL_GRAPH_NODE_ID_LENGTH = 255 as const;
+
+/** Max length for keys in dynamic waitForInput response records. */
+export const MAX_HITL_RESPONSE_FIELD_KEY_LENGTH = 512 as const;
+
 /** Internal `stepExecution.input` field storing the external HITL resume API key id. */
 export const HITL_API_KEY_ID_INPUT_FIELD = '_hitlApiKeyId' as const;
 
