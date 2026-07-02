@@ -206,8 +206,16 @@ export const WorkflowDetailHeader = React.memo(
         canSaveWorkflow: isCreate ? canCreateWorkflow : canUpdateWorkflow,
         isCreate,
         hasUnsavedChanges,
+        isManagedWorkflow,
       });
-    }, [isExecutionsTab, workflowId, canCreateWorkflow, canUpdateWorkflow, hasUnsavedChanges]);
+    }, [
+      isExecutionsTab,
+      workflowId,
+      canCreateWorkflow,
+      canUpdateWorkflow,
+      hasUnsavedChanges,
+      isManagedWorkflow,
+    ]);
 
     const canSaveWorkflow = useMemo(() => {
       return workflowId ? canUpdateWorkflow : canCreateWorkflow;
