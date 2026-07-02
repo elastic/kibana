@@ -16,9 +16,12 @@ import type { ElasticsearchConfig } from './read_kibana_config';
 import { applyCodeScenario } from './apply_code_scenario';
 import { getCodeScenarioById } from './code_scenarios';
 import { ensureOtelDemoAtVersion, OTEL_DEMO_REPOSITORY, SCS_CACHE_DIR } from './otel_demo_source';
+
 const SCS_REPO_URL = 'https://github.com/elastic/semantic-code-search.git';
 
 const SCS_BIN = path.join(SCS_CACHE_DIR, 'packages', 'cli', 'dist', 'src', 'bin.js');
+// Tracks which version is currently indexed so --version changes trigger a re-index.
+const INDEXED_VERSION_FILE = path.join(SCS_CACHE_DIR, '.indexed-version');
 const CODE_SCENARIO_STATE_PATH = path.join(
   REPO_ROOT,
   'data',
@@ -83,6 +86,19 @@ async function ensureScs(log: ToolingLog): Promise<[string, ...string[]]> {
   }
 
   return ['node', SCS_BIN];
+}
+
+function getIndexedVersion(): string | null {
+  try {
+    return fs.readFileSync(INDEXED_VERSION_FILE, 'utf-8').trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+function setIndexedVersion(version: string): void {
+  fs.mkdirSync(SCS_CACHE_DIR, { recursive: true });
+  fs.writeFileSync(INDEXED_VERSION_FILE, version);
 }
 
 async function chunksIndexHasDocs(esHosts: string, username: string, password: string) {
@@ -155,38 +171,46 @@ export async function seedCodeSearch({
     SCS_ELASTICSEARCH_INFERENCE_ID: '.elser-2-elasticsearch',
   };
 
-  // First run: full clean index. Subsequent runs: no-op (local clone is pinned to a tag,
-  // so there's nothing to pull — the indexed source already matches the deployed version).
-  const alreadyIndexed =
-    !forceReindex &&
-    (await chunksIndexHasDocs(elasticsearch.hosts, elasticsearch.username, elasticsearch.password));
-
-  if (alreadyIndexed) {
-    log.info('Existing code index found — skipping re-index (source is pinned to a tag).');
-    return;
-  }
-
-  if (codeScenarioId) {
-    log.info(
-      `Indexing OTel demo v${version} with code scenario ${codeScenarioId} (--clean). May take several minutes.`
-    );
-  } else if (forceReindex) {
-    log.info(
-      `Re-indexing clean OTel demo v${version} after code scenario reset (--clean). May take several minutes.`
-    );
-  } else {
-    log.info(
-      `No existing code index — indexing OTel demo v${version} (--clean). May take several minutes.`
-    );
-  }
-
-  await execa(
-    exe,
-    [...prefixArgs, 'index', repoDir, '--clean', '--repository', OTEL_DEMO_REPOSITORY],
-    { stdio: 'inherit', env }
+  // Skip re-index only when the same version is already indexed and no re-index is forced
+  // (a code scenario is requested, or one was previously active and must be reset).
+  // If --version changes, force a clean re-index so indexed source matches the deployed demo.
+  const indexedVersion = getIndexedVersion();
+  const hasDocs = await chunksIndexHasDocs(
+    elasticsearch.hosts,
+    elasticsearch.username,
+    elasticsearch.password
   );
 
-  log.info('Code indexing complete. Installing agentic interfaces into Kibana ...');
+  if (!forceReindex && indexedVersion === version && hasDocs) {
+    log.info(`Existing code index found for v${version} — skipping re-index.`);
+  } else {
+    if (codeScenarioId) {
+      log.info(
+        `Indexing OTel demo v${version} with code scenario ${codeScenarioId} (--clean). May take several minutes.`
+      );
+    } else if (forceReindex) {
+      log.info(
+        `Re-indexing clean OTel demo v${version} after code scenario reset (--clean). May take several minutes.`
+      );
+    } else if (indexedVersion && indexedVersion !== version) {
+      log.info(`Version changed (${indexedVersion} → ${version}) — re-indexing with --clean.`);
+    } else {
+      log.info(
+        `No existing code index for v${version} — indexing with --clean. May take several minutes.`
+      );
+    }
+
+    await execa(
+      exe,
+      [...prefixArgs, 'index', repoDir, '--clean', '--repository', OTEL_DEMO_REPOSITORY],
+      { stdio: 'inherit', env }
+    );
+
+    setIndexedVersion(version);
+    log.info('Code indexing complete.');
+  }
+
+  log.info('Installing agentic interfaces into Kibana ...');
 
   await execa(
     exe,

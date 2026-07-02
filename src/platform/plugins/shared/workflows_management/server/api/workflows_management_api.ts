@@ -71,7 +71,10 @@ import type {
   WorkflowsService,
 } from './workflows_management_service';
 import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
-import type { WorkflowChangesHistoryResponse } from '../../common/lib/workflow_change_history/types';
+import type {
+  RestoreWorkflowVersionResponseDto,
+  WorkflowChangesHistoryResponse,
+} from '../../common/lib/workflow_change_history/types';
 import type {
   ProcessedWaitForInputFacets,
   ProcessedWaitForInputFilters,
@@ -402,6 +405,31 @@ export class WorkflowsManagementApi {
       throw new ManagedWorkflowUpdateForbiddenError();
     }
     const result = await this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
+    this.notifySml(id, 'update', request);
+    return result;
+  }
+
+  public async restoreWorkflowVersion(
+    id: string,
+    eventId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<RestoreWorkflowVersionResponseDto> {
+    const originalWorkflow = await this.workflowsService.getWorkflow(id, spaceId);
+    if (!originalWorkflow) {
+      throw new WorkflowNotFoundError(id);
+    }
+
+    if (originalWorkflow.managed === true) {
+      throw new ManagedWorkflowUpdateForbiddenError();
+    }
+
+    const result = await this.workflowsService.restoreWorkflowVersion(
+      id,
+      eventId,
+      spaceId,
+      request
+    );
     this.notifySml(id, 'update', request);
     return result;
   }
@@ -842,7 +870,7 @@ export class WorkflowsManagementApi {
   public async cancelWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
-    request?: KibanaRequest
+    request: KibanaRequest
   ): Promise<void> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId, request);
@@ -850,14 +878,19 @@ export class WorkflowsManagementApi {
 
   public async cancelAllActiveWorkflowExecutions(
     workflowId: string,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<void> {
     const workflow = await this.getWorkflow(workflowId, spaceId);
     if (!workflow) {
       throw new WorkflowNotFoundError(workflowId);
     }
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    return workflowsExecutionEngine.cancelAllActiveWorkflowExecutions({ spaceId, workflowId });
+    return workflowsExecutionEngine.cancelAllActiveWorkflowExecutions({
+      spaceId,
+      workflowId,
+      schedulingRequest: request,
+    });
   }
 
   /**
