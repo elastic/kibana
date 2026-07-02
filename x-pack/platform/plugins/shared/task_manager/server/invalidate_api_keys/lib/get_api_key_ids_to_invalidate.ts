@@ -34,7 +34,7 @@ interface GetApiKeyIdsToInvalidateOpts {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectType: string;
   savedObjectTypesToQuery: SavedObjectTypesToQuery[];
-  logger: Logger;
+  logger?: Logger;
 }
 
 interface GetApiKeysToInvalidateResult {
@@ -58,7 +58,7 @@ export async function getApiKeyIdsToInvalidate({
     // Decrypt the apiKeyId for each pending invalidation SO
     await Promise.all(
       apiKeySOsPendingInvalidation.saved_objects.map(async (apiKeyPendingInvalidationSO) => {
-        logger.info(
+        logger?.info(
           `Decrypting API key pending invalidation saved object ${apiKeyPendingInvalidationSO.id}`
         );
         let decryptedApiKeyPendingInvalidationObject;
@@ -68,16 +68,16 @@ export async function getApiKeyIdsToInvalidate({
               savedObjectType,
               apiKeyPendingInvalidationSO.id
             );
-          logger.info(
+          logger?.info(
             `Decrypted API key pending invalidation saved object ${JSON.stringify(
               decryptedApiKeyPendingInvalidationObject
             )}`
           );
         } catch (err) {
-          logger.info(
+          logger?.info(
             `Error decrypting API key pending invalidation saved object ${apiKeyPendingInvalidationSO.id}`
           );
-          logger.info(err);
+          logger?.info(err);
           if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
             // Already deleted, likely by a concurrent invalidation run - nothing to do.
             return;
