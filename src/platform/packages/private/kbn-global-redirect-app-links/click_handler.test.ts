@@ -262,6 +262,30 @@ describe('createClickHandler', () => {
 
       expect(navigateToUrl).not.toHaveBeenCalled();
     });
+
+    it('when dashboard hash changes on discover pathname', () => {
+      delete (window as any).location;
+      (window as any).location = {
+        href: 'http://example.com/app/discover#/',
+        origin: 'http://example.com',
+        pathname: '/app/discover',
+        search: '',
+        hash: '#/',
+      };
+
+      const link = document.createElement('a');
+      link.href = 'http://example.com/app/discover#/list';
+      getClosestLink.mockReturnValue(link);
+
+      const preventDefault = jest.fn();
+      const interceptedEvent = new MouseEvent('click', { button: 0, cancelable: true });
+      Object.defineProperty(interceptedEvent, 'preventDefault', { value: preventDefault });
+
+      clickHandler(interceptedEvent);
+
+      expect(preventDefault).toHaveBeenCalled();
+      expect(navigateToUrl).toHaveBeenCalledWith('http://example.com/app/dashboards#/list');
+    });
   });
 
   describe('should intercept clicks', () => {

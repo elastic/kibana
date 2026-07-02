@@ -8,6 +8,7 @@
  */
 
 import { getClosestLink } from '@kbn/shared-ux-utility';
+import { resolveCrossAppHashNavigationUrl } from './cross_app_hash_navigation';
 
 /**
  * Creates a click handler that intercepts safe, same-origin <a> clicks and routes via navigateToUrl.
@@ -55,7 +56,14 @@ export function createClickHandler(navigateToUrl: (url: string) => Promise<void>
     const samePathAndSearch =
       url.pathname === window.location.pathname && url.search === window.location.search;
     const hashChanged = url.hash !== '' && url.hash !== window.location.hash;
-    if (samePathAndSearch && hashChanged) return;
+    if (samePathAndSearch && hashChanged) {
+      const crossAppHashUrl = resolveCrossAppHashNavigationUrl(url);
+      if (crossAppHashUrl) {
+        event.preventDefault();
+        navigateToUrl(crossAppHashUrl);
+      }
+      return;
+    }
 
     event.preventDefault();
     navigateToUrl(link.href);

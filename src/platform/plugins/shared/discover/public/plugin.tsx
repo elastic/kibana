@@ -42,6 +42,11 @@ import {
 import { registerFeature } from './plugin_imports/register_feature';
 import type { UrlTracker } from './build_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
+import {
+  getDashboardNavigateHashPath,
+  isDashboardHashPathname,
+  isDiscoverBrowserPath,
+} from './utils/discover_dashboard_hash_collision';
 import { defaultCustomizationContext } from './customizations/defaults';
 import {
   ACTION_ADD_DISCOVER_SESSION_PANEL,
@@ -210,6 +215,21 @@ export class DiscoverPlugin
         historyService.syncHistoryLocations();
         appMounted();
 
+        const discoverHashHistory = historyService.getHistory();
+        const unlistenDashboardHashCollision = discoverHashHistory.listen(({ pathname, search }) => {
+          if (!isDiscoverBrowserPath(window.location.pathname)) {
+            return;
+          }
+
+          if (!isDashboardHashPathname(pathname)) {
+            return;
+          }
+
+          void coreStart.application.navigateToApp('dashboards', {
+            path: getDashboardNavigateHashPath(pathname, search),
+          });
+        });
+
         // dispatch synthetic hash change event to update hash history objects
         // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
         const unlistenParentHistory = this.scopedHistory.listen(() => {
@@ -238,6 +258,7 @@ export class DiscoverPlugin
 
         return () => {
           ebtManager.onDiscoverAppUnmounted();
+          unlistenDashboardHashCollision();
           unlistenParentHistory();
           unmount();
           appUnMounted();

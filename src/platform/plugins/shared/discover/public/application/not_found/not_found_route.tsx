@@ -14,15 +14,31 @@ import { KbnWarningCallout } from '@kbn/ui-callout';
 import { Redirect } from 'react-router-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
+import {
+  getDashboardNavigateHashPath,
+  isDashboardHashPathname,
+  isDiscoverBrowserPath,
+} from '../../utils/discover_dashboard_hash_collision';
 
 let bannerId: string | undefined;
+
+const DASHBOARDS_APP_ID = 'dashboards';
 
 export function NotFoundRoute() {
   const services = useDiscoverServices();
   const { urlForwarding, urlTracker, core, history } = services;
   const currentLocation = history.location.pathname;
+  const isDashboardHashCollision =
+    isDiscoverBrowserPath(window.location.pathname) && isDashboardHashPathname(currentLocation);
 
   useEffect(() => {
+    if (isDashboardHashCollision) {
+      void core.application.navigateToApp(DASHBOARDS_APP_ID, {
+        path: getDashboardNavigateHashPath(currentLocation, history.location.search),
+      });
+      return;
+    }
+
     const path = window.location.hash.substr(1);
     urlTracker.restorePreviousUrl();
     urlForwarding.navigateToLegacyKibanaUrl(path);
@@ -57,7 +73,19 @@ export function NotFoundRoute() {
         core.overlays.banners.remove(bannerId);
       }
     }, 15000);
-  }, [core, history, urlForwarding, urlTracker]);
+  }, [
+    core,
+    currentLocation,
+    history,
+    history.location.search,
+    isDashboardHashCollision,
+    urlForwarding,
+    urlTracker,
+  ]);
+
+  if (isDashboardHashCollision) {
+    return <Redirect to="/" />;
+  }
 
   return <Redirect to={{ pathname: '/', state: { referrer: currentLocation } }} />;
 }
