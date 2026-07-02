@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execFile } from 'child_process';
+import { execFile, execFileSync } from 'child_process';
 import { availableParallelism } from 'os';
 import { isAbsolute, join } from 'path';
 import { existsSync, readdirSync, readFileSync, unlinkSync } from 'fs';
@@ -22,6 +22,7 @@ const buildkiteQuickchecksFolder = join('.buildkite', 'scripts', 'steps', 'check
 const quickChecksList = join(buildkiteQuickchecksFolder, 'quick_checks.json');
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const COLLECT_COMMITS_MARKER_FILE = join(REPO_ROOT, '.collect_commits_marker');
+const MAX_ANNOTATION_OUTPUT_LINES = 50;
 
 interface QuickCheck {
   script: string;
@@ -119,6 +120,7 @@ void run(async ({ log, flagsReader }) => {
   if (failedChecks.length > 0) {
     logger.write(`--- ${failedChecks.length} quick check(s) failed. ❌`);
     logger.write(`See the script(s) marked with ❌ above for details.`);
+    annotateFailures(failedChecks);
     process.exitCode = 1;
   } else if (!commitsWereMade) {
     logger.write('--- All checks passed. ✅');
@@ -300,6 +302,62 @@ function validateScriptPath(scriptPath: string) {
 
 function stripRoot(script: string) {
   return script.replace(REPO_ROOT, '');
+}
+
+export function buildFailureAnnotation(failedChecks: CheckResult[]): string {
+  const sections = failedChecks.map((check) => {
+    const scriptPath = stripRoot(check.script);
+    const runtime = humanizeTime(check.durationMs);
+    const lines = check.output.trim().split('\n');
+    const truncated = lines.length > MAX_ANNOTATION_OUTPUT_LINES;
+    const outputToShow = truncated ? lines.slice(-MAX_ANNOTATION_OUTPUT_LINES) : lines;
+    const output = [
+      ...(truncated ? [`… (truncated, showing last ${MAX_ANNOTATION_OUTPUT_LINES} lines)`] : []),
+      ...outputToShow,
+    ].join('\n');
+
+    return [
+      `<details>`,
+      `<summary>❌ \`${scriptPath}\` (ran in ${runtime})</summary>`,
+      '',
+      '```',
+      output,
+      '```',
+      `</details>`,
+    ].join('\n');
+  });
+
+  // Use the full script path (not stripRoot'd) so the command is directly runnable:
+  // collectScriptsToRun() treats any path starting with '/' as already-absolute.
+  const reproduceScripts = failedChecks.map((check) => check.script).join(',');
+
+  return [
+    `## ❌ ${failedChecks.length} quick-check(s) failed`,
+    '',
+    `The following quick-check(s) failed. Run them locally to reproduce and fix:`,
+    '',
+    ...sections,
+    '',
+    `To reproduce locally:`,
+    '```',
+    `node scripts/quick_checks --checks ${reproduceScripts}`,
+    '```',
+  ].join('\n');
+}
+
+function annotateFailures(failedChecks: CheckResult[]): void {
+  if (process.env.CI !== 'true' || failedChecks.length === 0) {
+    console.log(buildFailureAnnotation(failedChecks));
+    return;
+  }
+
+  try {
+    execFileSync('buildkite-agent', ['annotate', '--style', 'error', '--context', 'quick_checks'], {
+      input: buildFailureAnnotation(failedChecks),
+    });
+  } catch (error) {
+    logger.warning(`Failed to create Buildkite annotation for failed quick checks: ${error}`);
+  }
 }
 
 async function pushCommits(): Promise<void> {
