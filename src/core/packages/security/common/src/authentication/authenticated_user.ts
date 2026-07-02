@@ -100,6 +100,10 @@ export interface AuthenticatedUser extends User {
    *
    * Must be lowercase.
    *
+   * Not to be confused with `BaseAuthenticationProvider.getHTTPAuthenticationScheme()`, which
+   * describes the scheme a provider attaches to outbound requests to Elasticsearch — this field
+   * describes the inbound client request instead.
+   *
    * @example "apikey" | "bearer" | "basic"
    */
   http_authentication_scheme: string | null;

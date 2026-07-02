@@ -1491,8 +1491,6 @@ groups:
         id: settings-xsrf-allowedschemes
         description: |
           `Authorization` header schemes whose non-GET requests skip the `kbn-xsrf` check. Supported values are `apikey` and `bearer`; `basic` and all other schemes always require the header. Default is empty, which keeps the `kbn-xsrf` check for all requests.
-
-          Do not set this if {{kib}} sits behind an authenticating reverse proxy that adds an `Authorization` header to browser requests, since that would let ordinary browser requests bypass the check.
         note: |
           :applies_to: serverless: ga
           In Serverless environments, requests authenticated using `Authorization: ApiKey` or `Authorization: Bearer` headers bypass the `kbn-xsrf` check by default.
@@ -1502,6 +1500,7 @@ groups:
           stack: ga 9.5
           ech: ga
           self: ga
+        warning: "Do not set this if {{kib}} sits behind an authenticating reverse proxy that adds an `Authorization` header to browser requests, since that would let ordinary browser requests bypass the check."
 
   - group: Telemetry settings
     id: telemetry-settings

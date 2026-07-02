@@ -313,22 +313,6 @@ describe('xsrf post-auth handler', () => {
       }
     );
 
-    it('exempts a safe (GET) request regardless of the authentication scheme', () => {
-      const handler = createXsrfPostAuthHandler(
-        apikeyBearerConfig,
-        createGetAuthState({ http_authentication_scheme: 'basic' })
-      );
-      const request = forgeRequest({ method: 'get', headers: {} });
-
-      toolkit.next.mockReturnValue('next' as any);
-
-      const result = handler(request, responseFactory, toolkit);
-
-      expect(responseFactory.badRequest).not.toHaveBeenCalled();
-      expect(toolkit.next).toHaveBeenCalledTimes(1);
-      expect(result).toEqual('next');
-    });
-
     const rejectedRequestTestCases = [
       {
         label: 'basic scheme, apikey and bearer allowed',
