@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiComboBox,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelect,
-  type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
