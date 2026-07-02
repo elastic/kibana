@@ -17,10 +17,10 @@ import type {
   TemplatesCatalog,
 } from '@kbn/workflows-library';
 import {
-  KibanaVersionsManifestConsumptionSchema,
+  KibanaVersionsManifestLenientSchema,
   parseTemplateYaml,
   TemplateParseError,
-  TemplatesCatalogConsumptionSchema,
+  TemplatesCatalogLenientSchema,
 } from '@kbn/workflows-library';
 import { ZodError } from '@kbn/zod/v4';
 
@@ -160,16 +160,16 @@ export class LibraryBundleReader implements LibrarySource {
   private async readManifest(root: string): Promise<KibanaVersionsManifest> {
     const file = path.join(root, VERSIONS_FILE);
     return this.readJson(file, (json) =>
-      // Loosened consumption schema: tolerate unknown fields from a newer bundle.
-      KibanaVersionsManifestConsumptionSchema.parse(json)
+      // Lenient schema: tolerate unknown fields from a newer bundle.
+      KibanaVersionsManifestLenientSchema.parse(json)
     );
   }
 
   private async readCatalog(root: string, versionId: string): Promise<TemplatesCatalog> {
     const file = path.join(root, versionId, 'catalogs', 'templates.json');
     return this.readJson(file, (json) =>
-      // Loosened consumption schema: tolerate unknown fields from a newer bundle.
-      TemplatesCatalogConsumptionSchema.parse(json)
+      // Lenient schema: tolerate unknown fields from a newer bundle.
+      TemplatesCatalogLenientSchema.parse(json)
     );
   }
 
