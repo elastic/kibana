@@ -162,7 +162,7 @@ function createServerlessES({
     esTestConfig.getESServerlessImage()
   );
   const baseArgs = enableCPS
-    ? ['serverless.cross_project.enabled=true', 'remote_cluster_server.enabled=true']
+    ? ['serverless.cross_project.enabled=true', 'remote_cluster_server.enabled=true', 'es.full_project_routing_feature_flag_enabled=true']
     : [];
 
   return {
