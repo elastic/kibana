@@ -126,6 +126,7 @@ export interface RestoreRuleFromHistoryArgs {
 
 export interface BulkCreatePrebuiltRulesArgs {
   rules: PrebuiltRuleAsset[];
+  bulkCount?: number;
 }
 
 export interface BulkCreatePrebuiltRulesResultItem {

@@ -389,7 +389,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
     expect(result.errors[0].error.message).toBe('Conflict');
   });
 
-  it('includes bulkCount in changeTracking metadata', async () => {
+  it('uses caller-provided bulkCount in changeTracking metadata', async () => {
     (throwAuthzError as jest.Mock).mockImplementation(() => {});
 
     const rules = [
@@ -404,12 +404,37 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
       total: 3,
     });
 
+    await detectionRulesClient.bulkCreatePrebuiltRules({ rules, bulkCount: 1000 });
+
+    expect(rulesClient.bulkCreateRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        changeTracking: expect.objectContaining({
+          metadata: { bulkCount: 1000 },
+        }),
+      })
+    );
+  });
+
+  it('falls back to rules.length when bulkCount is not provided', async () => {
+    (throwAuthzError as jest.Mock).mockImplementation(() => {});
+
+    const rules = [
+      { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-1' },
+      { ...getCreateRulesSchemaMock(), version: 2, rule_id: 'rule-2' },
+    ];
+
+    rulesClient.bulkCreateRules.mockResolvedValue({
+      successfulIds: [],
+      errors: [],
+      total: 2,
+    });
+
     await detectionRulesClient.bulkCreatePrebuiltRules({ rules });
 
     expect(rulesClient.bulkCreateRules).toHaveBeenCalledWith(
       expect.objectContaining({
         changeTracking: expect.objectContaining({
-          metadata: { bulkCount: 3 },
+          metadata: { bulkCount: 2 },
         }),
       })
     );
