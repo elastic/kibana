@@ -34,8 +34,10 @@ const ENRICHED_USER_BLOCKED_PROPERTIES_RECORD: Record<
   elastic_cloud_user: true,
   operator: true,
   api_key: true,
-  // http_authentication_scheme: fake enriched requests are never HTTP-credential requests.
-  // Returning undefined (blocked) is safe; the xsrf handler's `!= null` guard covers it.
+  // A fake enriched request is never authenticated via an
+  // `Authorization` header, so the real value would be nullish anyway, and reading back
+  // `undefined` cannot trigger an unintended xsrf bypass: the xsrf handler exempts a request
+  // only when the scheme is non-null and in the configured allowlist.
   http_authentication_scheme: true,
 };
 

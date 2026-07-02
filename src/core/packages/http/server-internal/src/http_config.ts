@@ -42,9 +42,8 @@ const match = (regex: RegExp, errorMsg: string) => (str: string) =>
 // The lower-case set of response headers which are forbidden within `customResponseHeaders`.
 const RESPONSE_HEADER_DENY_LIST = ['location', 'refresh'];
 
-// Auth schemes operators may exempt from the kbn-xsrf check via `server.xsrf.allowedSchemes`.
-// All must be stateless, per-request credentials that cannot carry a browser session. `basic` is
-// intentionally excluded: browsers can cache Basic credentials and replay them cross-origin.
+// Auth schemes that may bypass kbn-xsrf (configured using `server.xsrf.allowedSchemes`).
+// Must be stateless; `basic` is excluded because browsers can cache and replay it cross-origin.
 const xsrfSchemeSchema = schema.oneOf([schema.literal('apikey'), schema.literal('bearer')]);
 
 const validHostName = () => {
@@ -398,10 +397,10 @@ export class HttpConfig implements IHttpConfig {
   public csp: ICspConfig;
   public prototypeHardening: boolean;
   public externalUrl: IExternalUrlConfig;
-  // Literal union, not `string[]`: adding a scheme without updating consumers is a compile error.
   public xsrf: {
     disableProtection: boolean;
     allowlist: string[];
+    // Literal union, not `string[]`: adding a scheme without updating consumers is a compile error.
     allowedSchemes: Array<'apikey' | 'bearer'>;
   };
   public excludeRoutes: string[];

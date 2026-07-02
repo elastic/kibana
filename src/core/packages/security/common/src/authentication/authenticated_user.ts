@@ -93,12 +93,12 @@ export interface AuthenticatedUser extends User {
   api_key?: ApiKeyDescriptor;
 
   /**
-   * The HTTP Authorization scheme used to authenticate the user, lowercased. Set by the HTTP
-   * authentication provider (`HTTPAuthenticationProvider`). `null` when authentication does not
-   * use an Authorization header (session-cookie, PKI, SAML, etc. authenticate through other
-   * mechanisms).
+   * The HTTP Authorization scheme used to authenticate the user, set by the HTTP
+   * authentication provider (`HTTPAuthenticationProvider`).
+   * `null` when authentication does not use an Authorization header
+   * (session-cookie, PKI, SAML, etc. authenticate through other mechanisms).
    *
-   * Must be lowercase; this is required for correct behavior.
+   * Must be lowercase.
    *
    * @example "apikey" | "bearer" | "basic"
    */

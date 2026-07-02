@@ -217,7 +217,7 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
       // We should probably refactor audit logs to avoid using `roles` property for minimally
       // authenticated users and then remove this property altogether and throw for its access.
       roles: [],
-      // Minimally-authenticated users are session-cookie requests, not HTTP-credential requests.
+      // Minimally-authenticated users are authenticated via session cookie, not HTTP credentials.
       http_authentication_scheme: null,
     };
 

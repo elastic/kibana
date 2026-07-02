@@ -133,9 +133,9 @@ describe('HTTPAuthenticationProvider', () => {
           supportedSchemes: new Set(schemes),
         });
 
-        // Every header above is non-lowercase, so this also proves the provider always emits a
-        // lowercase http_authentication_scheme. Core's xsrf handler (lifecycle_handlers.ts) relies
-        // on that contract to skip its own case normalization.
+        // Headers above are passed in as-is and lowercased here because the provider only ever
+        // emits a lowercase http_authentication_scheme; Core's xsrf handler (lifecycle_handlers.ts)
+        // doesn't implement its own case normalization and relies on that contract.
         const scheme = header.split(' ')[0].toLowerCase();
         await expect(provider.authenticate(request)).resolves.toEqual(
           AuthenticationResult.succeeded(
