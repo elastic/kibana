@@ -9,12 +9,11 @@ import type {
   AggregationsStringTermsBucketKeys,
   AggregationsTermsAggregateBase,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { PAGE_SIZE } from './constants';
 import type { SavedObjectTypesToQuery } from './run_invalidate';
 
 interface QueryForApiKeysInUseOpts {
-  logger?: Logger;
   apiKeyIds: string[];
   savedObjectTypeToQuery: SavedObjectTypesToQuery;
   savedObjectsClient: SavedObjectsClientContract;
@@ -45,12 +44,6 @@ export async function queryForApiKeysInUse(
       },
     },
   });
-
-  opts.logger?.info(
-    `Queried for API keys in use for saved object type ${
-      savedObjectTypeToQuery.type
-    } with filter: ${filter}, aggResult ${JSON.stringify(aggregations)}`
-  );
 
   return (aggregations?.apiKeyId?.buckets as AggregationsStringTermsBucketKeys[]) ?? [];
 }

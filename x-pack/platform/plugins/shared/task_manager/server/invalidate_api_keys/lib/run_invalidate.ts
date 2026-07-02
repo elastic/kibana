@@ -59,11 +59,6 @@ export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalid
       excludedSOIds: [...excludedSOIds],
       savedObjectType,
     });
-    logger.info(
-      `[runInvalidate] Searching for API keys pending invalidation with filter: ${JSON.stringify(
-        filter
-      )}`
-    );
     const apiKeysToInvalidate = await savedObjectsClient.find<ApiKeyToInvalidate>({
       type: savedObjectType,
       page: 1,
@@ -72,16 +67,10 @@ export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalid
       perPage: PAGE_SIZE,
       ...(filter.length > 0 ? { filter } : {}),
     });
-    logger.info(
-      `[runInvalidate] Found ${
-        apiKeysToInvalidate.total
-      } API keys pending invalidation. - ${JSON.stringify(apiKeysToInvalidate)}`
-    );
 
     if (apiKeysToInvalidate.total > 0) {
       const { apiKeyIdsToExclude, apiKeyIdsToInvalidate, uiamApiKeysToInvalidate } =
         await getApiKeyIdsToInvalidate({
-          logger,
           apiKeySOsPendingInvalidation: apiKeysToInvalidate,
           encryptedSavedObjectsClient,
           savedObjectsClient,

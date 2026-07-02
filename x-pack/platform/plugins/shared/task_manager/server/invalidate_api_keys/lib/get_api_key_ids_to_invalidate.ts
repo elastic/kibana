@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Logger,
-  SavedObjectsFindResponse,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { SavedObjectsFindResponse, SavedObjectsClientContract } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { AggregationsStringTermsBucketKeys } from '@elastic/elasticsearch/lib/api/types';
 import type { ApiKeyToInvalidate } from '../../saved_objects/schemas/api_key_to_invalidate';
@@ -34,7 +29,6 @@ interface GetApiKeyIdsToInvalidateOpts {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectType: string;
   savedObjectTypesToQuery: SavedObjectTypesToQuery[];
-  logger?: Logger;
 }
 
 interface GetApiKeysToInvalidateResult {
@@ -44,7 +38,6 @@ interface GetApiKeysToInvalidateResult {
 }
 
 export async function getApiKeyIdsToInvalidate({
-  logger,
   apiKeySOsPendingInvalidation,
   encryptedSavedObjectsClient,
   savedObjectsClient,
@@ -58,32 +51,11 @@ export async function getApiKeyIdsToInvalidate({
     // Decrypt the apiKeyId for each pending invalidation SO
     await Promise.all(
       apiKeySOsPendingInvalidation.saved_objects.map(async (apiKeyPendingInvalidationSO) => {
-        logger?.info(
-          `Decrypting API key pending invalidation saved object ${apiKeyPendingInvalidationSO.id}`
-        );
-        let decryptedApiKeyPendingInvalidationObject;
-        try {
-          decryptedApiKeyPendingInvalidationObject =
-            await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ApiKeyToInvalidate>(
-              savedObjectType,
-              apiKeyPendingInvalidationSO.id
-            );
-          logger?.info(
-            `Decrypted API key pending invalidation saved object ${JSON.stringify(
-              decryptedApiKeyPendingInvalidationObject
-            )}`
+        const decryptedApiKeyPendingInvalidationObject =
+          await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ApiKeyToInvalidate>(
+            savedObjectType,
+            apiKeyPendingInvalidationSO.id
           );
-        } catch (err) {
-          logger?.info(
-            `Error decrypting API key pending invalidation saved object ${apiKeyPendingInvalidationSO.id}`
-          );
-          logger?.info(err);
-          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-            // Already deleted, likely by a concurrent invalidation run - nothing to do.
-            return;
-          }
-          throw err;
-        }
 
         const { uiamApiKey, apiKeyId } = decryptedApiKeyPendingInvalidationObject.attributes;
         if (uiamApiKey) {
@@ -129,7 +101,6 @@ export async function getApiKeyIdsToInvalidate({
   for (const type of savedObjectTypesToQuery) {
     apiKeyIdsInUseBuckets = apiKeyIdsInUseBuckets.concat(
       await queryForApiKeysInUse({
-        logger,
         apiKeyIds: allApiKeyIdStrings,
         savedObjectTypeToQuery: type,
         savedObjectsClient,

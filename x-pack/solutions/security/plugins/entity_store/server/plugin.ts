@@ -114,7 +114,7 @@ export class EntityStorePlugin
 
     plugins.taskManager.registerEncryptedSavedObjectsClient(
       plugins.encryptedSavedObjects.getClient({
-        includedHiddenTypes: ['task'],
+        includedHiddenTypes: ['task', 'api_key_to_invalidate'],
       })
     );
 
