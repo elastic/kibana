@@ -261,7 +261,7 @@ describe('createDetectionRuleTool', () => {
               data: {
                 success: true,
                 rule: mockRule,
-                attachmentId: SECURITY_RULE_ATTACHMENT_ID,
+                attachment_id: SECURITY_RULE_ATTACHMENT_ID,
                 isNewCard: false,
                 version: 1,
               },
@@ -336,8 +336,8 @@ describe('createDetectionRuleTool', () => {
         expect(resultData.isNewCard).toBe(true);
 
         // Minted id must be hyphen-free (no markdown-shatter risk)
-        expect(typeof resultData.attachmentId).toBe('string');
-        expect(resultData.attachmentId as string).not.toContain('-');
+        expect(typeof resultData.attachment_id).toBe('string');
+        expect(resultData.attachment_id as string).not.toContain('-');
       });
 
       it('returns success result with attachmentId, version, and isNewCard=true', async () => {
@@ -390,7 +390,7 @@ describe('createDetectionRuleTool', () => {
           unknown
         >;
         expect(data1.isNewCard).toBe(false);
-        expect(data1.attachmentId).toBe(SECURITY_RULE_ATTACHMENT_ID);
+        expect(data1.attachment_id).toBe(SECURITY_RULE_ATTACHMENT_ID);
         expect(ctx1.attachments.add).not.toHaveBeenCalled();
 
         // Second create: only a real named card exists → mints a new uuid (add)
@@ -420,7 +420,7 @@ describe('createDetectionRuleTool', () => {
           unknown
         >;
         expect(data2.isNewCard).toBe(true);
-        expect(data2.attachmentId).not.toBe(SECURITY_RULE_ATTACHMENT_ID);
+        expect(data2.attachment_id).not.toBe(SECURITY_RULE_ATTACHMENT_ID);
         expect(ctx2.attachments.update).not.toHaveBeenCalled();
       });
     });
@@ -473,7 +473,7 @@ describe('createDetectionRuleTool', () => {
           unknown
         >;
         expect(resultData.isNewCard).toBe(false);
-        expect(resultData.attachmentId).toBe(existingAttachmentId);
+        expect(resultData.attachment_id).toBe(existingAttachmentId);
         expect(resultData.version).toBe(2);
       });
 

@@ -78,7 +78,7 @@ export function createDetectionRuleTool(
     type: ToolType.builtin,
     description: `Creates a security detection rule based on natural language description. Analyzes the query, identifies relevant data sources, generates ES|QL queries, and produces a complete detection rule with metadata, tags, and scheduling information.
 
-The tool stores the result as an attachment (creating new or updating existing). Use the returned attachmentId and version with <render_attachment id="..." version="..."> to display it.
+The tool stores the result as an attachment (creating new or updating existing). Use the returned attachment_id and version with <render_attachment id="..." version="..."> to display it.
 
 Limitations: only ES|QL rules are supported; requires relevant data in existing Elasticsearch indices to generate a query; severity and risk score default to low/21 and are not AI-adapted from threat context.`,
     schema: createDetectionRuleSchema,
@@ -303,7 +303,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
               data: {
                 success: true,
                 rule: ruleWithoutIds,
-                attachmentId: resolvedAttachmentId,
+                attachment_id: resolvedAttachmentId,
                 isNewCard,
                 ...(resultVersion !== undefined && { version: resultVersion }),
               },

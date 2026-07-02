@@ -297,10 +297,7 @@ export const useAgentBuilderRuleCreation = ({
             for (const result of step.results) {
               const resultData = result.data as Record<string, unknown> | undefined;
               if (resultData) {
-                // create_detection_rule returns `attachmentId`; attachment_update returns `attachment_id`.
-                const candidateId =
-                  (resultData.attachmentId as string | undefined) ??
-                  (resultData.attachment_id as string | undefined);
+                const candidateId = resultData.attachment_id as string | undefined;
                 if (candidateId) {
                   touchedAttachmentId = candidateId;
                 }
