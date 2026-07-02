@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { catchAndWrapError } from './wrap_errors';
 
 /**
  * Returns `true` when at least one remote cluster is currently connected.
@@ -18,7 +19,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 export const checkConnectedRemoteClusters = async (
   esClient: ElasticsearchClient
 ): Promise<boolean> => {
-  const response = await esClient.cluster.remoteInfo();
+  const response = await esClient.cluster.remoteInfo().catch(catchAndWrapError);
   return Object.values(response).some((remote) => remote.connected);
 };
 

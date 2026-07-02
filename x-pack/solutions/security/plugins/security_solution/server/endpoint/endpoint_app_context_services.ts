@@ -304,7 +304,9 @@ export class EndpointAppContextService {
       // otherwise a persistent `_remote/info` failure (e.g. missing privileges on the internal user)
       // is indistinguishable from "no remotes connected" for an operator debugging missing endpoints.
       this.createLogger('isCcsEnabled').debug(
-        `Failed to check connected remote clusters; treating CCS as disabled: ${error.message}`
+        `Failed to check connected remote clusters; treating CCS as disabled: ${
+          error?.stack ?? error
+        }`
       );
       return false;
     }

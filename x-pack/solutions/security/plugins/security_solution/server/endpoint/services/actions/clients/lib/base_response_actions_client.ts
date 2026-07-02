@@ -831,7 +831,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     }
   }
 
-  protected async *fetchAllPendingActions<
+  protected fetchAllPendingActions<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
     TMeta extends {} = {}
@@ -841,7 +841,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     const esClient = this.options.esClient;
     const query: QueryDslQueryContainer = getUnExpiredActionsEsQuery(this.agentType);
 
-    yield* createEsSearchIterable<
+    return createEsSearchIterable<
       LogsEndpointAction,
       Array<ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>>
     >({
