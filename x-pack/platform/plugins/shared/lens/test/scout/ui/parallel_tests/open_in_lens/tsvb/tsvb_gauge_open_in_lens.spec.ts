@@ -102,8 +102,7 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
     // Open the primary metric dimension editor and verify converted palette color stops
     await dimensions.locator('nth=0').click();
     await lens.openPalettePanel();
-    const colorStops = await lens.getPaletteColorStops();
-    expect(colorStops).toHaveLength(4);
+    const colorStops = await lens.getPaletteColorStops(4);
     // First entry: default series color with no minimum
     expect(colorStops[0].stop).toBe('');
     expect(colorStops[0].color).toBeDefined();

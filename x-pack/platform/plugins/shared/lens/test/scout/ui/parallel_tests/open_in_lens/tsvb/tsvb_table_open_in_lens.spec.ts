@@ -178,8 +178,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
     // Open the metric dimension editor and verify converted palette color stops
     await dimensions.locator('nth=0').click();
     await lens.openPalettePanel();
-    const colorStops = await lens.getPaletteColorStops();
-    expect(colorStops).toHaveLength(3);
+    const colorStops = await lens.getPaletteColorStops(3);
     expect(colorStops[0].stop).toBe('10');
     expect(colorStops[0].color).toBeDefined();
     expect(colorStops[1].stop).toBe('100');

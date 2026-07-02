@@ -214,10 +214,15 @@ export class LensApp {
    * Each entry contains a `stop` value (string) and a `color` (computed background-color
    * of the color swatch, or undefined if not present).
    */
-  async getPaletteColorStops(): Promise<Array<{ stop: string; color: string | undefined }>> {
-    const stops = await this.page
-      .locator('[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]')
-      .all();
+  async getPaletteColorStops(
+    expectedCount: number
+  ): Promise<Array<{ stop: string; color: string | undefined }>> {
+    const stopsLocator = this.page.locator(
+      '[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]'
+    );
+    await expect(stopsLocator).toHaveCount(expectedCount);
+
+    const stops = await stopsLocator.all();
     const colorSwatches = await this.page.testSubj.locator('euiColorPickerAnchor').all();
 
     const result: Array<{ stop: string; color: string | undefined }> = [];
