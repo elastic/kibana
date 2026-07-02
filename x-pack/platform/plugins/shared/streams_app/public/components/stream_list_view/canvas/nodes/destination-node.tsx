@@ -10,8 +10,15 @@
 // card-within-a-card) and is fully draggable; clicking is handled at the canvas
 // level (onNodeClick).
 
-import React, { memo, useCallback, useContext, useState } from 'react';
-import { Handle, Position, useNodeConnections, useReactFlow, type NodeProps } from '@xyflow/react';
+import React, { memo, useCallback, useContext, useEffect, useState } from 'react';
+import {
+  Handle,
+  Position,
+  useNodeConnections,
+  useReactFlow,
+  useUpdateNodeInternals,
+  type NodeProps,
+} from '@xyflow/react';
 import {
   EuiBadge,
   EuiButton,
@@ -432,6 +439,20 @@ function ConfiguredDestinationContents({
 export const DestinationNode = memo(({ id, data }: NodeProps<DestinationFlowNode>) => {
   const { setNodes, deleteElements } = useReactFlow();
   const anchorHandleClassName = useAnchorHandleClassName();
+  const updateNodeInternals = useUpdateNodeInternals();
+
+  // The attached-routing source handle (bottom-left tab anchor) is rendered
+  // conditionally, and the card plays a scale() entry animation (inflateClassName).
+  // Measuring the handle bounds while that transform is mid-flight registers it at
+  // a scaled-down offset, leaving the attached-routing branch connector detached
+  // from the tab. Re-measure immediately and again once the animation settles
+  // (onAnimationEnd is authoritative; the timeout covers interrupted animations
+  // or a node that mounts already-visible and never fires animationend).
+  useEffect(() => {
+    updateNodeInternals(id);
+    const timeout = setTimeout(() => updateNodeInternals(id), 220);
+    return () => clearTimeout(timeout);
+  }, [id, data.mode, data.attachedRouting, updateNodeInternals]);
 
   // A destination is "connected to a source" once an incoming (target) edge exists.
   // Until then it stays editable: clicking it re-opens the configuration card.
@@ -469,7 +490,7 @@ export const DestinationNode = memo(({ id, data }: NodeProps<DestinationFlowNode
   }, [deleteElements, id]);
 
   return (
-    <div className={inflateClassName}>
+    <div className={inflateClassName} onAnimationEnd={() => updateNodeInternals(id)}>
       <Handle type="target" position={Position.Left} className={anchorHandleClassName} />
       {data.mode === 'configured' ? (
         <ConfiguredDestinationContents data={data} isConnected={isConnectedToSource} />

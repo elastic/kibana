@@ -1487,6 +1487,13 @@ function StreamsCanvasInner() {
                 {inheritanceRoutingNodeId !== null ? (
                   <CreateRoutingFlyout
                     opinionated
+                    inheritedDestinationName={
+                      (
+                        getNodes().find((node) => node.id === inheritanceRoutingNodeId)?.data as
+                          | DestinationNodeData
+                          | undefined
+                      )?.title
+                    }
                     onClose={() => setInheritanceRoutingNodeId(null)}
                     onApply={applyInheritanceRouting}
                   />

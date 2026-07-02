@@ -69,24 +69,56 @@ function seedEdge(source: string, target: string, sourceHandle?: string): Edge {
 // All values below are ROW CENTER lines (not top-left); the node builders
 // subtract half the node height. Each flow occupies its own band and its
 // branch rows are evenly spaced, so connectors stay straight and never cross.
-//   Band 1 — CloudWatch : rows 40 / 180 / 320   (main chain @ 180)
-//   Band 2 — Kubernetes : rows 620 / 760 / 900  (main chain @ 760)
-//   Band 3 — NGINX      : rows 1200 / 1340      (main chain @ 1270)
+//   Band 1 — Nginx bulk + MOTLP : rows 40 / 180 / 320 / 460 (main chain @ 180)
+//   Band 2 — CloudWatch         : rows 760 / 900 / 1040     (main chain @ 900)
+//   Band 3 — Kubernetes         : rows 1340 / 1480 / 1620   (main chain @ 1480)
+//   Band 4 — NGINX              : rows 1920 / 2060          (main chain @ 1990)
 export const initialNodes: Node[] = [
+  // ── Band 1 — Nginx bulk + Managed OTLP (from Figma) ────────────────────
+  // Two sources: a bulk-source Nginx feeding a shared destination directly, and
+  // a managed OTLP endpoint feeding a routing node that fans to the shared
+  // destination (25%) and to logs.otel (75%). logs.otel carries an attached
+  // routing tab that further splits into prod/dev child streams.
+  // rows: nginx / logs-nginx-default(40) · motlp / route / logs.otel(180) ·
+  //       logs.otel.prod(320) · logs.otel.dev(460)
+  srcNode('src-nginx-bulk', 0, 40, {
+    title: 'Nginx',
+    subtitle: 'Logs · Push via Bulk source',
+    rate: '12k/s',
+    icon: 'logoNginx',
+  }),
+  srcNode('src-motlp', 0, 180, {
+    title: 'MOTLP endpoint',
+    subtitle: 'Managed input',
+    rate: '12k/s',
+    icon: 'logoObservability',
+  }),
+  routeNode('route-motlp', 380, 180, [
+    { label: 'routing-1', percentage: '25%' },
+    { label: 'routing-2', percentage: '75%' },
+  ]),
+  dstNode('dst-logs-nginx-default', 760, 40, dst('logs-nginx-default', '15k eps・175ms')),
+  dstNode('dst-logs-otel', 760, 180, {
+    ...dst('logs.otel', '7k eps・175ms'),
+    attachedRouting: true,
+  }),
+  dstNode('dst-logs-otel-prod', 1120, 320, dst('logs.otel.prod', '1k eps・175ms')),
+  dstNode('dst-logs-otel-dev', 1120, 460, dst('logs.otel.dev', '1k eps・175ms')),
+
   // ── Sources ────────────────────────────────────────────────────────────
-  srcNode('src-cloudwatch', 0, 180, {
+  srcNode('src-cloudwatch', 0, 900, {
     title: 'AWS CloudWatch',
     subtitle: 'Logs · Push via Firehose',
     rate: '11.9k/s',
     icon: 'logoAWS',
   }),
-  srcNode('src-k8s', 0, 760, {
+  srcNode('src-k8s', 0, 1480, {
     title: 'Kubernetes',
     subtitle: 'Container logs · Elastic Agent',
     rate: '24.3k/s',
     icon: 'logoKubernetes',
   }),
-  srcNode('src-nginx', 0, 1270, {
+  srcNode('src-nginx', 0, 1990, {
     title: 'NGINX',
     subtitle: 'Access logs · Filebeat',
     rate: '8.2k/s',
@@ -94,74 +126,86 @@ export const initialNodes: Node[] = [
   }),
 
   // ── Parse / decode (one per source) ───────────────────────────────────
-  pipeNode('pipe-parse-cw', 300, 180, {
+  pipeNode('pipe-parse-cw', 300, 900, {
     title: 'Parse Firehose',
     eps: '11.9k eps',
     latency: '40ms',
   }),
-  pipeNode('pipe-k8s-parse', 300, 760, {
+  pipeNode('pipe-k8s-parse', 300, 1480, {
     title: 'Parse container',
     eps: '24k eps',
     latency: '55ms',
   }),
-  pipeNode('pipe-nginx-grok', 300, 1270, {
+  pipeNode('pipe-nginx-grok', 300, 1990, {
     title: 'GROK access',
     eps: '8.2k eps',
     latency: '22ms',
   }),
 
   // ── Enrich / transform (one per source) ───────────────────────────────
-  pipeNode('pipe-cw-enrich', 580, 180, {
+  pipeNode('pipe-cw-enrich', 580, 900, {
     title: 'Enrich CloudWatch',
     eps: '11.9k eps',
     latency: '12ms',
   }),
-  pipeNode('pipe-k8s-trim', 580, 760, { title: 'Trim fields', eps: '24k eps', latency: '9ms' }),
-  pipeNode('pipe-geoip', 580, 1270, { title: 'GeoIP enrich', eps: '8.2k eps', latency: '27ms' }),
+  pipeNode('pipe-k8s-trim', 580, 1480, { title: 'Trim fields', eps: '24k eps', latency: '9ms' }),
+  pipeNode('pipe-geoip', 580, 1990, { title: 'GeoIP enrich', eps: '8.2k eps', latency: '27ms' }),
 
   // ── Routing branches (the only fan-out nodes; centered in their band) ──
-  routeNode('route-severity', 860, 180, [
+  routeNode('route-severity', 860, 900, [
     { label: 'routing-1', percentage: '60%' },
     { label: 'routing-2', percentage: '30%' },
     { label: 'routing-3', percentage: '10%' },
   ]),
-  routeNode('route-k8s', 860, 760, [
+  routeNode('route-k8s', 860, 1480, [
     { label: 'routing-1', percentage: '55%' },
     { label: 'routing-2', percentage: '35%' },
     { label: 'routing-3', percentage: '10%' },
   ]),
-  routeNode('route-nginx', 860, 1270, [
+  routeNode('route-nginx', 860, 1990, [
     { label: 'routing-1', percentage: '70%' },
     { label: 'routing-2', percentage: '30%' },
   ]),
 
   // ── Post-route transforms (each on its branch's row) ───────────────────
-  pipeNode('pipe-pii', 1140, 40, { title: 'Redact PII', eps: '2.1k eps', latency: '18ms' }),
-  pipeNode('pipe-cw-errors', 1140, 320, { title: 'Filter errors', eps: '900 eps', latency: '7ms' }),
-  pipeNode('pipe-k8s-metrics', 1140, 760, {
+  pipeNode('pipe-pii', 1140, 760, { title: 'Redact PII', eps: '2.1k eps', latency: '18ms' }),
+  pipeNode('pipe-cw-errors', 1140, 1040, {
+    title: 'Filter errors',
+    eps: '900 eps',
+    latency: '7ms',
+  }),
+  pipeNode('pipe-k8s-metrics', 1140, 1480, {
     title: 'Extract metrics',
     eps: '24k eps',
     latency: '13ms',
   }),
-  pipeNode('pipe-nginx-bots', 1140, 1340, { title: 'Tag bots', eps: '1.4k eps', latency: '9ms' }),
+  pipeNode('pipe-nginx-bots', 1140, 2060, { title: 'Tag bots', eps: '1.4k eps', latency: '9ms' }),
 
   // ── Destinations (each on its branch's row) ────────────────────────────
-  // CloudWatch band: security(40) / cloudwatch(180) / alerts(320)
-  dstNode('dst-security', 1420, 40, dst('logs-security.audit', '2.1k eps・18ms')),
-  dstNode('dst-cloudwatch', 1420, 180, dst('logs-aws.cloudwatch', '9.8k eps・44ms')),
-  dstNode('dst-cw-alerts', 1420, 320, dst('logs-cloudwatch.alerts', '900 eps・7ms')),
-  // Kubernetes band: k8s(620) / metrics(760) / archive(900)
-  dstNode('dst-k8s', 1420, 620, dst('logs-k8s.container', '24k eps・55ms')),
-  dstNode('dst-k8s-metrics', 1420, 760, dst('metrics-k8s.pod', '24k eps・13ms')),
-  dstNode('dst-archive', 1420, 900, dst('logs-archive.cold', 'S3 · external', 'external')),
-  // NGINX band: nginx(1200) / bots(1340)
-  dstNode('dst-nginx', 1420, 1200, dst('logs-nginx.access', '8.2k eps・49ms')),
-  dstNode('dst-nginx-bots', 1420, 1340, dst('logs-nginx.bots', '1.4k eps・9ms')),
+  // CloudWatch band: security(760) / cloudwatch(900) / alerts(1040)
+  dstNode('dst-security', 1420, 760, dst('logs-security.audit', '2.1k eps・18ms')),
+  dstNode('dst-cloudwatch', 1420, 900, dst('logs-aws.cloudwatch', '9.8k eps・44ms')),
+  dstNode('dst-cw-alerts', 1420, 1040, dst('logs-cloudwatch.alerts', '900 eps・7ms')),
+  // Kubernetes band: k8s(1340) / metrics(1480) / archive(1620)
+  dstNode('dst-k8s', 1420, 1340, dst('logs-k8s.container', '24k eps・55ms')),
+  dstNode('dst-k8s-metrics', 1420, 1480, dst('metrics-k8s.pod', '24k eps・13ms')),
+  dstNode('dst-archive', 1420, 1620, dst('logs-archive.cold', 'S3 · external', 'external')),
+  // NGINX band: nginx(1920) / bots(2060)
+  dstNode('dst-nginx', 1420, 1920, dst('logs-nginx.access', '8.2k eps・49ms')),
+  dstNode('dst-nginx-bots', 1420, 2060, dst('logs-nginx.bots', '1.4k eps・9ms')),
 ];
 
 // Within each routing fan-out the branches are listed top-to-bottom so their
 // vertical segments stay nested (no crossings).
 export const initialEdges: Edge[] = [
+  // Band 1 — Nginx bulk + Managed OTLP (from Figma)
+  seedEdge('src-nginx-bulk', 'dst-logs-nginx-default'), // direct source → destination
+  seedEdge('src-motlp', 'route-motlp'),
+  seedEdge('route-motlp', 'dst-logs-nginx-default', 'branch-0'), // top branch (25%) → shared dest
+  seedEdge('route-motlp', 'dst-logs-otel', 'branch-1'), // bottom branch (75%) → logs.otel
+  // logs.otel's attached routing tab fans out to its prod/dev child streams.
+  seedEdge('dst-logs-otel', 'dst-logs-otel-prod', 'attached-routing'),
+  seedEdge('dst-logs-otel', 'dst-logs-otel-dev', 'attached-routing'),
   // CloudWatch: parse → enrich → route → (redact PII → security), cloudwatch, (filter errors → alerts)
   seedEdge('src-cloudwatch', 'pipe-parse-cw'),
   seedEdge('pipe-parse-cw', 'pipe-cw-enrich'),

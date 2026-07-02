@@ -662,6 +662,7 @@ function RoutingConditionForm({
   setNewDestinationName,
   newDestinationStorage,
   setNewDestinationStorage,
+  inheritedDestinationName,
   onCancel,
   onCreate,
 }: {
@@ -673,6 +674,10 @@ function RoutingConditionForm({
   setNewDestinationName: (name: string) => void;
   newDestinationStorage: 'local' | 'external';
   setNewDestinationStorage: (storage: 'local' | 'external') => void;
+  // The destination the opinionated routing flow was triggered from. When set,
+  // it's shown as a non-editable prefix on the new destination's name so the
+  // inherited namespace is clear.
+  inheritedDestinationName?: string;
   onCancel: () => void;
   onCreate: () => void;
 }) {
@@ -833,6 +838,7 @@ function RoutingConditionForm({
                 fullWidth
                 value={newDestinationName}
                 onChange={(event) => setNewDestinationName(event.target.value)}
+                prepend={inheritedDestinationName ? `${inheritedDestinationName}.` : undefined}
                 placeholder={i18n.translate('xpack.streams.createRoutingFlyout.newDestinationName', {
                   defaultMessage: 'Name',
                 })}
@@ -1132,6 +1138,7 @@ export function CreateRoutingFlyout({
   onApply,
   initialStep = 'empty',
   opinionated = false,
+  inheritedDestinationName,
 }: {
   onClose: () => void;
   onApply?: (result: RoutingApplyResult) => void;
@@ -1148,6 +1155,12 @@ export function CreateRoutingFlyout({
    * inheritance-focused header/description, and a split suggestions button.
    */
   opinionated?: boolean;
+  /**
+   * The destination the opinionated routing flow was triggered from. Shown as a
+   * non-editable prefix on the new destination's name field so it's clear the
+   * new destination inherits that destination's namespace/schema.
+   */
+  inheritedDestinationName?: string;
 }) {
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'createRoutingFlyoutTitle' });
@@ -1163,6 +1176,18 @@ export function CreateRoutingFlyout({
     makeCondition('event.dataset', 'foo'),
     makeCondition('log.level', 'foo'),
   ]);
+
+  // The name typed in the field is only the suffix; the inherited destination is
+  // a non-editable prefix. Compose the full destination name (prefix.suffix) for
+  // both the applied summary and the created node. Left empty when nothing is
+  // typed so downstream defaulting (DEFAULT_DESTINATION_TITLE) still applies.
+  const composedDestinationName = (() => {
+    const trimmed = newDestinationName.trim();
+    if (!trimmed) {
+      return trimmed;
+    }
+    return inheritedDestinationName ? `${inheritedDestinationName}.${trimmed}` : trimmed;
+  })();
 
   return (
     <EuiFlyout
@@ -1229,6 +1254,7 @@ export function CreateRoutingFlyout({
                 setNewDestinationName={setNewDestinationName}
                 newDestinationStorage={newDestinationStorage}
                 setNewDestinationStorage={setNewDestinationStorage}
+                inheritedDestinationName={inheritedDestinationName}
                 onCancel={() => setStep('empty')}
                 onCreate={() => setStep('applied')}
               />
@@ -1236,7 +1262,7 @@ export function CreateRoutingFlyout({
               <AppliedRoutingPanel
                 conditions={conditions}
                 destination={destination}
-                newDestinationName={newDestinationName}
+                newDestinationName={composedDestinationName}
                 onEdit={() => setStep('form')}
               />
             )}
@@ -1264,7 +1290,7 @@ export function CreateRoutingFlyout({
                   onApply
                     ? onApply({
                         createNewDestination: destination === 'new',
-                        newDestinationName,
+                        newDestinationName: composedDestinationName,
                         newDestinationStorage,
                       })
                     : onClose()
