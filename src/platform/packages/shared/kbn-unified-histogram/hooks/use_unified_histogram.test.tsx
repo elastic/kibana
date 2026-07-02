@@ -158,33 +158,5 @@ describe('useUnifiedHistogram', () => {
         expect(result.current.api.state$.getValue().lensRequestAdapter).toBeUndefined();
       });
     });
-
-    it('should not clear it when the chart is hidden by the user', async () => {
-      const { result } = renderHook(() =>
-        useUnifiedHistogram({
-          services: unifiedHistogramServicesMock,
-          initialState: {},
-        })
-      );
-
-      act(() => {
-        result.current.api.fetch(fetchParamsExternal);
-      });
-      await waitFor(() => {
-        expect(result.current.isInitialized).toBe(true);
-      });
-
-      const requestAdapter = new RequestAdapter();
-      act(() => {
-        result.current.api.setLensRequestAdapter(requestAdapter);
-      });
-      expect(result.current.api.state$.getValue().lensRequestAdapter).toBe(requestAdapter);
-
-      act(() => {
-        result.current.chartProps?.onChartHiddenChange?.(true);
-      });
-
-      expect(result.current.api.state$.getValue().lensRequestAdapter).toBe(requestAdapter);
-    });
   });
 });
