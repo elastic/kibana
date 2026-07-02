@@ -46,7 +46,6 @@ import {
   getAttachmentTypeTransformers,
   resolveAttachmentSavedObjectTypes,
 } from '../../common/attachments';
-
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField } from '../../common/utils';
 import type { AggregationResponse } from '../../client/metrics/types';
@@ -85,7 +84,11 @@ import type {
   UnifiedAttachmentSavedObjectTransformed,
 } from '../../common/types/attachments_v2';
 import { isSOError } from '../../common/error';
-import { getTransformerForPatchAttributes, transformAttributesForMode } from './operations/utils';
+import {
+  assertLegacyWriteableAttachmentType,
+  getTransformerForPatchAttributes,
+  transformAttributesForMode,
+} from './operations/utils';
 
 const PERSISTABLE_ATTACHMENT_TYPES_ARRAY = Array.from(PERSISTABLE_ATTACHMENT_TYPES);
 
@@ -450,6 +453,11 @@ export class AttachmentService {
         }) as unknown as UnifiedAttachmentSavedObjectTransformed;
       }
 
+      assertLegacyWriteableAttachmentType(
+        getAttachmentTypeFromAttributes(decodedAttributes),
+        decodedAttributes.owner
+      );
+
       const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
       const { attributes: extractedAttributes, references: extractedReferences } =
         extractAttachmentSORefsFromAttributes(legacyAttributes, references);
@@ -526,6 +534,10 @@ export class AttachmentService {
               attachment.attributes
             );
 
+            assertLegacyWriteableAttachmentType(
+              getAttachmentTypeFromAttributes(decodedAttributes),
+              decodedAttributes.owner
+            );
             const transformer = getAttachmentTypeTransformers(
               getAttachmentTypeFromAttributes(decodedAttributes),
               decodedAttributes.owner
@@ -630,6 +642,11 @@ export class AttachmentService {
         return Object.assign(res, { attributes: decodedAttributes });
       }
 
+      assertLegacyWriteableAttachmentType(
+        getAttachmentTypeFromAttributes(decodedAttributes),
+        decodedAttributes.owner ?? ''
+      );
+
       const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
       const {
         attributes: extractedAttributes,
@@ -724,6 +741,14 @@ export class AttachmentService {
           });
         } else {
           assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
+          // Skip when `requestWithoutType` is set: the patch carries no `type`
+          // to resolve, and only the typed path can introduce a unified-only type.
+          if (!requestWithoutType) {
+            assertLegacyWriteableAttachmentType(
+              getAttachmentTypeFromAttributes(decodedAttributes),
+              decodedAttributes.owner ?? ''
+            );
+          }
           const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
           const {
             attributes: extractedAttributes,
