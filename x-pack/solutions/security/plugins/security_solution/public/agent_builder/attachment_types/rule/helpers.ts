@@ -83,18 +83,21 @@ export const shouldShowViewRuleButton = (
 };
 
 /**
- * Whether "Edit rule settings" should appear. Hidden when the user is already on the
- * relevant form page for this card (create form for create-intent, edit form for update-intent).
+ * True when the card's target form page is already open (create form for create-intent, this
+ * rule's edit form for update-intent). The apply button always renders — with chat→form auto-sync
+ * removed, clicking it is the only way to pull card content into the form — but when the form is
+ * already open the click applies in place instead of navigating, so the label switches to
+ * "Apply to form".
  */
-export const shouldShowEditRuleSettingsButton = (
+export const isRuleFormOpenForCard = (
   intent: RuleAttachmentIntent,
   attachmentRuleId: string | undefined,
   pathname: string
 ): boolean => {
   if (intent === 'create') {
-    return !(isOnRuleFormPage(pathname) && pathname.includes('/create'));
+    return isOnRuleFormPage(pathname) && pathname.includes('/create');
   }
-  return !isAttachmentRuleOpenOnFormPage(attachmentRuleId, pathname);
+  return isAttachmentRuleOpenOnFormPage(attachmentRuleId, pathname);
 };
 
 /**

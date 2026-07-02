@@ -17,6 +17,7 @@ import {
   getRuleIdFromEditFormPath,
   isAttachmentRuleOpenOnFormPage,
   isOnRuleFormPage,
+  isRuleFormOpenForCard,
   registerRuleAttachment,
   shouldShowViewRuleButton,
 } from './rule_attachment';
@@ -123,6 +124,29 @@ describe('isAttachmentRuleOpenOnFormPage', () => {
     expect(isAttachmentRuleOpenOnFormPage('rule-b', '/app/security/rules/id/rule-a/edit')).toBe(
       false
     );
+  });
+});
+
+describe('isRuleFormOpenForCard', () => {
+  it('is true for create intent on the create form page', () => {
+    expect(isRuleFormOpenForCard('create', undefined, '/app/security/rules/create')).toBe(true);
+  });
+
+  it('is false for create intent away from the create form', () => {
+    expect(isRuleFormOpenForCard('create', undefined, '/app/security/rules')).toBe(false);
+    expect(isRuleFormOpenForCard('create', undefined, '/app/security/rules/id/rule-a/edit')).toBe(
+      false
+    );
+  });
+
+  it("is true for update intent only on that rule's edit form", () => {
+    expect(isRuleFormOpenForCard('update', 'rule-a', '/app/security/rules/id/rule-a/edit')).toBe(
+      true
+    );
+    expect(isRuleFormOpenForCard('update', 'rule-b', '/app/security/rules/id/rule-a/edit')).toBe(
+      false
+    );
+    expect(isRuleFormOpenForCard('update', 'rule-a', '/app/security/rules/create')).toBe(false);
   });
 });
 
@@ -313,7 +337,7 @@ describe('buildRuleActionButtons', () => {
       ruleId: undefined,
       attachmentId: 'air:testcard',
       showViewRule: false,
-      showEditRuleSettings: true,
+      isRuleFormOpen: false,
       updateOrigin: jest.fn().mockResolvedValue(undefined),
     };
   });
@@ -402,14 +426,20 @@ describe('buildRuleActionButtons', () => {
     });
   });
 
-  it('omits "Edit rule settings" when showEditRuleSettings is false', () => {
-    expect(
-      labels(buildRuleActionButtons({ ...baseProps, showEditRuleSettings: false }))
-    ).not.toContain('Edit rule settings');
+  it('labels the apply button "Edit rule settings" when the target form is not open', () => {
+    expect(labels(buildRuleActionButtons(baseProps))).toContain('Edit rule settings');
   });
 
-  it('includes "Edit rule settings" when showEditRuleSettings is true', () => {
-    expect(labels(buildRuleActionButtons(baseProps))).toContain('Edit rule settings');
+  it('labels the apply button "Apply to form" when the target form is already open', () => {
+    const buttons = buildRuleActionButtons({ ...baseProps, isRuleFormOpen: true });
+    expect(labels(buttons)).toContain('Apply to form');
+    expect(labels(buttons)).not.toContain('Edit rule settings');
+  });
+
+  it('"Apply to form" still applies the rule via setAiCreatedRule', () => {
+    const buttons = buildRuleActionButtons({ ...baseProps, isRuleFormOpen: true });
+    buttons.find((b) => b.label === 'Apply to form')!.handler();
+    expect(aiRuleCreation.setAiCreatedRule).toHaveBeenCalledWith(baseProps.rule, 'air:testcard');
   });
 
   it('omits View rule from action buttons when showViewRule is false even for update intent', () => {

@@ -24,7 +24,7 @@ import {
   getRuleAttachmentIntent,
   parseRuleFromAttachment,
   shouldShowViewRuleButton,
-  shouldShowEditRuleSettingsButton,
+  isRuleFormOpenForCard,
 } from './helpers';
 
 export {
@@ -32,7 +32,7 @@ export {
   isAttachmentRuleOpenOnFormPage,
   isOnRuleFormPage,
   shouldShowViewRuleButton,
-  shouldShowEditRuleSettingsButton,
+  isRuleFormOpenForCard,
 } from './helpers';
 
 export const registerRuleAttachment = ({
@@ -82,11 +82,7 @@ export const createRuleAttachmentDefinition = ({
       updateOrigin,
       showViewRule:
         intent === 'update' && shouldShowViewRuleButton(ruleId, window.location.pathname),
-      showEditRuleSettings: shouldShowEditRuleSettingsButton(
-        intent,
-        ruleId,
-        window.location.pathname
-      ),
+      isRuleFormOpen: isRuleFormOpenForCard(intent, ruleId, window.location.pathname),
     });
   },
 });

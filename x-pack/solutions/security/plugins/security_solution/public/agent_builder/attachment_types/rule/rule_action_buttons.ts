@@ -35,8 +35,12 @@ interface BuildRuleActionButtonsParams {
   attachmentId: string;
   /** Whether to show a "View rule" link — true when the rule is saved and not already being viewed. */
   showViewRule: boolean;
-  /** Whether to show "Edit rule settings" — false when already on the edit/create form for this card. */
-  showEditRuleSettings: boolean;
+  /**
+   * True when the card's target form page is already open. The apply button always renders —
+   * it's the only chat→form path — but the label switches to "Apply to form" since clicking it
+   * applies in place instead of navigating.
+   */
+  isRuleFormOpen: boolean;
   /**
    * Framework callback that links the attachment to its saved rule via `origin` and invalidates
    * the conversation so the card reflects the saved state in-session. Threaded into the save
@@ -55,7 +59,7 @@ export const buildRuleActionButtons = ({
   ruleId,
   attachmentId,
   showViewRule,
-  showEditRuleSettings,
+  isRuleFormOpen,
   updateOrigin,
 }: BuildRuleActionButtonsParams): ActionButton[] => {
   const canEditRules = hasCapabilities(application.capabilities, RULES_UI_EDIT_PRIVILEGE);
@@ -70,25 +74,25 @@ export const buildRuleActionButtons = ({
     : getNonEsqlRuleActionDisabledReason(getRuleTypeLabel(rule.type));
 
   const buttons: ActionButton[] = [
-    ...(showEditRuleSettings
-      ? [
-          {
-            label: i18n.translate(
-              'xpack.securitySolution.agentBuilder.ruleAttachment.editRuleSettings',
-              { defaultMessage: 'Edit rule settings' }
-            ),
-            icon: 'pencil' as const,
-            type: ActionButtonType.SECONDARY,
-            handler: () => {
-              aiRuleCreation.setAiCreatedRule(rule, attachmentId);
-              application.navigateToApp('securitySolutionUI', {
-                path:
-                  isUpdate && ruleId ? `${RULES_PATH}${getEditRuleUrl(ruleId)}` : RULES_CREATE_PATH,
-              });
-            },
-          },
-        ]
-      : []),
+    {
+      label: isRuleFormOpen
+        ? i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.applyToForm', {
+            defaultMessage: 'Apply to form',
+          })
+        : i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.editRuleSettings', {
+            defaultMessage: 'Edit rule settings',
+          }),
+      icon: 'pencil' as const,
+      type: ActionButtonType.SECONDARY,
+      handler: () => {
+        // When the target form is already open, navigateToApp to the same path is a no-op and
+        // the aiCreatedRule$ subscription applies the rule to the form in place.
+        aiRuleCreation.setAiCreatedRule(rule, attachmentId);
+        application.navigateToApp('securitySolutionUI', {
+          path: isUpdate && ruleId ? `${RULES_PATH}${getEditRuleUrl(ruleId)}` : RULES_CREATE_PATH,
+        });
+      },
+    },
     ...(showViewRule && ruleId
       ? [
           {
