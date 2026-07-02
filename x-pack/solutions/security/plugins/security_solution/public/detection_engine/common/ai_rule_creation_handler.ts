@@ -151,13 +151,11 @@ export const createAiRuleCreationHandler = ({
           });
         }
 
-        // No `origin` here: the framework upserts input attachments by id and preserves the
-        // existing record's origin (prepare_conversation.ts update branch ignores input.origin),
-        // so `updateOrigin` below is the only channel that can set it.
         agentBuilder?.addAttachment({
           id: targetAttachmentId,
           type: SecurityAgentBuilderAttachments.rule,
           description: saved.name,
+          ...(isUpdate ? { origin: saved.id } : {}),
           data: {
             text: JSON.stringify(stripServerFields(saved)),
             attachmentLabel: saved.name,

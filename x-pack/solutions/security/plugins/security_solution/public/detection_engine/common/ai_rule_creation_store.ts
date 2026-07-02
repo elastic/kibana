@@ -34,8 +34,7 @@ export class AiRuleCreationService {
   private readonly savingSubject = new BehaviorSubject<string | null>(null);
   private readonly aiRuleSubject = new BehaviorSubject<RuleResponse | null>(null);
   private readonly formSyncSubject = new BehaviorSubject<boolean>(false);
-  // `null` = form idle (no active bind). Released when a brand-new rule card is minted.
-  // Plain field, not a subject: every consumer reads it imperatively via `getBoundAttachmentId`.
+  // Which attachment card this form is syncing into; null when unbound.
   private boundAttachmentId: string | null = null;
   private session: AiRuleCreationSession | null = null;
 

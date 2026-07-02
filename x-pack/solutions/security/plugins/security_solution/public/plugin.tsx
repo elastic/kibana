@@ -316,18 +316,20 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.registerFleetExtensions(core, plugins);
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
 
-    registerAiRuleCreationHandler({
-      aiRuleCreation: this.services.aiRuleCreation,
-      notifications: core.notifications,
-      agentBuilder: plugins.agentBuilder,
-      register: (subscription) => {
-        if (this.saveRuleHandlerStopped) {
-          subscription.unsubscribe();
-          return;
-        }
-        this.saveRuleSub = subscription;
-      },
-    });
+    if (this.experimentalFeatures.aiRuleCreationEnabled) {
+      registerAiRuleCreationHandler({
+        aiRuleCreation: this.services.aiRuleCreation,
+        notifications: core.notifications,
+        agentBuilder: plugins.agentBuilder,
+        register: (subscription) => {
+          if (this.saveRuleHandlerStopped) {
+            subscription.unsubscribe();
+            return;
+          }
+          this.saveRuleSub = subscription;
+        },
+      });
+    }
 
     if (plugins.agentBuilder?.attachments) {
       const coreSetup = this._coreSetup;
@@ -336,12 +338,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
 
       registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
-      registerRuleAttachment({
-        attachments: plugins.agentBuilder.attachments,
-        application: core.application,
-        aiRuleCreation: this.services.aiRuleCreation,
-        uiSettings: core.uiSettings,
-      });
+      if (this.experimentalFeatures.aiRuleCreationEnabled) {
+        registerRuleAttachment({
+          attachments: plugins.agentBuilder.attachments,
+          application: core.application,
+          aiRuleCreation: this.services.aiRuleCreation,
+          uiSettings: core.uiSettings,
+        });
+      }
       registerEntityAnalyticsDashboardAttachment({
         attachments: plugins.agentBuilder.attachments,
         application: core.application,
