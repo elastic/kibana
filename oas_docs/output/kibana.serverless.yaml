@@ -36142,6 +36142,7 @@ paths:
                                       required:
                                         - id
                                     - type: string
+                                  nullable: true
                                 es_key:
                                   anyOf:
                                     - additionalProperties: false
@@ -36152,6 +36153,7 @@ paths:
                                       required:
                                         - id
                                     - type: string
+                                  nullable: true
                                 key:
                                   anyOf:
                                     - additionalProperties: false
@@ -36162,6 +36164,7 @@ paths:
                                       required:
                                         - id
                                     - type: string
+                                  nullable: true
                         ssl:
                           additionalProperties: false
                           nullable: true
@@ -36331,6 +36334,7 @@ paths:
                               required:
                                 - id
                             - type: string
+                          nullable: true
                         es_key:
                           anyOf:
                             - additionalProperties: false
@@ -36341,6 +36345,7 @@ paths:
                               required:
                                 - id
                             - type: string
+                          nullable: true
                         key:
                           anyOf:
                             - additionalProperties: false
@@ -36351,6 +36356,7 @@ paths:
                               required:
                                 - id
                             - type: string
+                          nullable: true
                 ssl:
                   additionalProperties: false
                   nullable: true
@@ -36460,6 +36466,7 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                                nullable: true
                               es_key:
                                 anyOf:
                                   - additionalProperties: false
@@ -36470,6 +36477,7 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                                nullable: true
                               key:
                                 anyOf:
                                   - additionalProperties: false
@@ -36480,6 +36488,7 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                                nullable: true
                       ssl:
                         additionalProperties: false
                         nullable: true
@@ -36734,6 +36743,7 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                                nullable: true
                               es_key:
                                 anyOf:
                                   - additionalProperties: false
@@ -36744,6 +36754,7 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                                nullable: true
                               key:
                                 anyOf:
                                   - additionalProperties: false
@@ -36754,6 +36765,7 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                                nullable: true
                       ssl:
                         additionalProperties: false
                         nullable: true
@@ -36924,6 +36936,7 @@ paths:
                               required:
                                 - id
                             - type: string
+                          nullable: true
                         es_key:
                           anyOf:
                             - additionalProperties: false
@@ -36934,6 +36947,7 @@ paths:
                               required:
                                 - id
                             - type: string
+                          nullable: true
                         key:
                           anyOf:
                             - additionalProperties: false
@@ -36944,6 +36958,7 @@ paths:
                               required:
                                 - id
                             - type: string
+                          nullable: true
                 ssl:
                   additionalProperties: false
                   nullable: true
@@ -37050,6 +37065,7 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                                nullable: true
                               es_key:
                                 anyOf:
                                   - additionalProperties: false
@@ -37060,6 +37076,7 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                                nullable: true
                               key:
                                 anyOf:
                                   - additionalProperties: false
@@ -37070,6 +37087,7 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                                nullable: true
                       ssl:
                         additionalProperties: false
                         nullable: true
