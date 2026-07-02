@@ -92,7 +92,7 @@ export function convertWorkflowGraphToReactFlow(graph: WorkflowGraph) {
         currentDepth: meta?.currentDepth ?? 0,
         stepType: graphNode.type,
         step: 'configuration' in graphNode ? graphNode.configuration : undefined,
-        label: graphNode.id,
+        label: graphNode.stepId,
         width,
         height: NODE_HEIGHT,
       },
