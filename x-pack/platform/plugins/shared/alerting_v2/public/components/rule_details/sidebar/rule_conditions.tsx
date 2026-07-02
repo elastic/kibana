@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { getBreachEsqlQuery, getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ItemValueRuleSummary } from '../item_value_rule_summary';
 import { useRule } from '../rule_context';
 import { EMPTY_VALUE, formatAlertDelay, formatRecoveryDelay } from '../utils';
+import { RuleDetailsTable } from './rule_details_table';
 
 const MODE_LABELS: Record<string, string> = {
   signal: i18n.translate('xpack.alertingV2.ruleDetails.modeSignal', {
@@ -45,70 +45,46 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
       title: i18n.translate('xpack.alertingV2.ruleDetails.dataSource', {
         defaultMessage: 'Data source',
       }),
-      description: (
-        <ItemValueRuleSummary
-          data-test-subj="alertingV2RuleDetailsDataSource"
-          itemValue={dataSource}
-        />
-      ),
+      description: dataSource,
+      'data-test-subj': 'alertingV2RuleDetailsDataSource',
     },
     {
       title: i18n.translate('xpack.alertingV2.ruleDetails.groupKey', {
         defaultMessage: 'Group key',
       }),
-      description: (
-        <ItemValueRuleSummary
-          data-test-subj="alertingV2RuleDetailsGroupBy"
-          itemValue={rule.grouping?.fields?.length ? rule.grouping.fields.join(', ') : EMPTY_VALUE}
-        />
-      ),
+      description: rule.grouping?.fields?.length ? rule.grouping.fields.join(', ') : EMPTY_VALUE,
+      'data-test-subj': 'alertingV2RuleDetailsGroupBy',
     },
     {
       title: i18n.translate('xpack.alertingV2.ruleDetails.timeField', {
         defaultMessage: 'Time field',
       }),
-      description: (
-        <ItemValueRuleSummary
-          data-test-subj="alertingV2RuleDetailsTimeField"
-          itemValue={rule.time_field ?? EMPTY_VALUE}
-        />
-      ),
+      description: rule.time_field ?? EMPTY_VALUE,
+      'data-test-subj': 'alertingV2RuleDetailsTimeField',
     },
     {
       title: i18n.translate('xpack.alertingV2.ruleDetails.schedule', {
         defaultMessage: 'Schedule',
       }),
-      description: (
-        <ItemValueRuleSummary
-          data-test-subj="alertingV2RuleDetailsSchedule"
-          itemValue={i18n.translate('xpack.alertingV2.ruleDetails.scheduleValue', {
-            defaultMessage: 'Every {interval}',
-            values: { interval: formatDuration(rule.schedule.every) },
-          })}
-        />
-      ),
+      description: i18n.translate('xpack.alertingV2.ruleDetails.scheduleValue', {
+        defaultMessage: 'Every {interval}',
+        values: { interval: formatDuration(rule.schedule.every) },
+      }),
+      'data-test-subj': 'alertingV2RuleDetailsSchedule',
     },
     {
       title: i18n.translate('xpack.alertingV2.ruleDetails.lookback', {
         defaultMessage: 'Lookback',
       }),
-      description: (
-        <ItemValueRuleSummary
-          data-test-subj="alertingV2RuleDetailsLookback"
-          itemValue={rule.schedule.lookback ? formatDuration(rule.schedule.lookback) : EMPTY_VALUE}
-        />
-      ),
+      description: rule.schedule.lookback ? formatDuration(rule.schedule.lookback) : EMPTY_VALUE,
+      'data-test-subj': 'alertingV2RuleDetailsLookback',
     },
     {
       title: i18n.translate('xpack.alertingV2.ruleDetails.mode', {
         defaultMessage: 'Mode',
       }),
-      description: (
-        <ItemValueRuleSummary
-          data-test-subj="alertingV2RuleDetailsMode"
-          itemValue={MODE_LABELS[rule.kind] ?? rule.kind}
-        />
-      ),
+      description: MODE_LABELS[rule.kind] ?? rule.kind,
+      'data-test-subj': 'alertingV2RuleDetailsMode',
     },
     ...(isAlertMode && !isSummary
       ? [
@@ -116,23 +92,15 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
             title: i18n.translate('xpack.alertingV2.ruleDetails.alertDelay', {
               defaultMessage: 'Alert delay',
             }),
-            description: (
-              <ItemValueRuleSummary
-                data-test-subj="alertingV2RuleDetailsAlertDelay"
-                itemValue={formatAlertDelay(rule.state_transition)}
-              />
-            ),
+            description: formatAlertDelay(rule.state_transition),
+            'data-test-subj': 'alertingV2RuleDetailsAlertDelay',
           },
           {
             title: i18n.translate('xpack.alertingV2.ruleDetails.recoveryDelay', {
               defaultMessage: 'Recovery delay',
             }),
-            description: (
-              <ItemValueRuleSummary
-                data-test-subj="alertingV2RuleDetailsRecoveryDelay"
-                itemValue={formatRecoveryDelay(rule.state_transition)}
-              />
-            ),
+            description: formatRecoveryDelay(rule.state_transition),
+            'data-test-subj': 'alertingV2RuleDetailsRecoveryDelay',
           },
         ]
       : []),
@@ -172,12 +140,7 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
 
       <EuiSpacer size="l" />
 
-      <EuiDescriptionList
-        compressed
-        type="column"
-        listItems={conditionItems}
-        css={{ maxWidth: 600 }}
-      />
+      <RuleDetailsTable items={conditionItems} />
     </>
   );
 };
