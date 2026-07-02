@@ -10,6 +10,11 @@ import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, testData } from '../../fixtures';
 
+interface FleetPackageItem {
+  latestVersion?: string;
+  version?: string;
+}
+
 const getBrowserZipInput = (zipUrl?: string) => ({
   type: 'synthetics/browser',
   policy_template: 'synthetics',
@@ -64,9 +69,19 @@ const getBrowserZipInput = (zipUrl?: string) => ({
 apiTest.describe('UptimeIntegrationDeprecation', { tag: '@local-stateful-classic' }, () => {
   let adminCredentials: RoleApiCredentials;
   let agentPolicyId: string;
+  let syntheticsPackageVersion: string;
 
   apiTest.beforeAll(async ({ apiClient, requestAuth }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
+
+    const packageResponse = await apiClient.get('api/fleet/epm/packages/synthetics', {
+      headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
+      responseType: 'json',
+    });
+    expect(packageResponse.statusCode).toBe(200);
+    const item = packageResponse.body.item as FleetPackageItem;
+    syntheticsPackageVersion = item.latestVersion ?? item.version ?? '';
+    expect(syntheticsPackageVersion).not.toBe('');
 
     const response = await apiClient.post('api/fleet/agent_policies', {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
@@ -115,7 +130,7 @@ apiTest.describe('UptimeIntegrationDeprecation', { tag: '@local-stateful-classic
         package: {
           name: 'synthetics',
           title: 'For Synthetics Tests',
-          version: '0.10.2',
+          version: syntheticsPackageVersion,
         },
       },
       responseType: 'json',
