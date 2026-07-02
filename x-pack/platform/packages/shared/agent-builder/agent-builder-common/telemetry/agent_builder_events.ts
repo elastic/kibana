@@ -91,6 +91,7 @@ export interface ReportRoundCompleteParams {
   conversation_id?: string;
   execution_id?: string;
   input_tokens: number;
+  cached_input_tokens?: number;
   llm_calls: number;
   message_length: number;
   model?: string;
@@ -825,6 +826,14 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description: 'Total number of input tokens sent during this round',
         optional: false,
+      },
+    },
+    cached_input_tokens: {
+      type: 'integer',
+      _meta: {
+        description:
+          'Number of input tokens served from cache during this round (subset of input_tokens), when reported by the provider',
+        optional: true,
       },
     },
     llm_calls: {

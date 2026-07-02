@@ -16,10 +16,12 @@ import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_
 import { setAlertTagsStepDefinition } from './set_alert_tags_step/set_alert_tags_step';
 import { setAttackTagsStepDefinition } from './set_attack_tags_step/set_attack_tags_step';
 import { assignAlertStepDefinition } from './assign_alert_step/assign_alert_step';
+import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
 import {
   REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
   REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
 } from '../../../common/constants';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 type StepLoader = () => Promise<ServerStepDefinition | undefined>;
 
@@ -42,7 +44,19 @@ describe('registerWorkflowSteps (server)', () => {
       publicAttacksApiEnabled: false,
     } as ExperimentalFeatures);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(5);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      setAlertStatusStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      setAlertTagsStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      assignAlertStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      setAttackStatusStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(6);
     // getStartServices is called once eagerly to create the shared memoized promise
     expect(core.getStartServices).toHaveBeenCalledTimes(1);
   });
@@ -66,7 +80,7 @@ describe('registerWorkflowSteps (server)', () => {
       publicAttacksApiEnabled: true,
     } as ExperimentalFeatures);
 
-    const [loader1, loader2, step3, step4, step5, step6] =
+    const [loader1, loader2, step3, step4, step5, step6, step7] =
       workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => arg);
 
     await expect((loader1 as StepLoader)()).resolves.toBe(renderAlertNarrativeStepDefinition);
@@ -75,6 +89,7 @@ describe('registerWorkflowSteps (server)', () => {
     expect(step4).toBe(setAlertTagsStepDefinition);
     expect(step5).toBe(assignAlertStepDefinition);
     expect(step6).toBe(setAttackTagsStepDefinition);
+    expect(step7).toBe(setAttackStatusStepDefinition);
   });
 
   it('async loader returns undefined when feature flag is disabled', async () => {
@@ -85,7 +100,7 @@ describe('registerWorkflowSteps (server)', () => {
       publicAttacksApiEnabled: true,
     } as ExperimentalFeatures);
 
-    const [loader1, loader2, step3, step4, step5, step6] =
+    const [loader1, loader2, step3, step4, step5, step6, step7] =
       workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => arg);
 
     await expect((loader1 as StepLoader)()).resolves.toBeUndefined();
@@ -94,6 +109,7 @@ describe('registerWorkflowSteps (server)', () => {
     expect(step4).toBe(setAlertTagsStepDefinition);
     expect(step5).toBe(assignAlertStepDefinition);
     expect(step6).toBe(setAttackTagsStepDefinition);
+    expect(step7).toBe(setAttackStatusStepDefinition);
   });
 
   it('checks the feature flag exactly once even when both loaders resolve', async () => {
@@ -102,10 +118,11 @@ describe('registerWorkflowSteps (server)', () => {
 
     registerWorkflowSteps(workflowsExtensions, core, {} as ExperimentalFeatures);
 
-    const [loader1, loader2] = workflowsExtensions.registerStepDefinition.mock.calls.map(
-      ([arg]) => arg as StepLoader
-    );
-    await Promise.all([loader1(), loader2()]);
+    const loaders = workflowsExtensions.registerStepDefinition.mock.calls
+      .map(([arg]) => arg)
+      .filter((arg) => typeof arg === 'function') as StepLoader[];
+
+    await Promise.all([loaders[0](), loaders[1]()]);
 
     expect(coreStart.featureFlags.getBooleanValue).toHaveBeenCalledTimes(1);
     expect(coreStart.featureFlags.getBooleanValue).toHaveBeenCalledWith(

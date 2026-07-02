@@ -12,6 +12,7 @@ import {
   REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
   REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
 } from '../../../common/constants';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
@@ -64,6 +65,11 @@ export const registerWorkflowSteps = (
     workflowsExtensions.registerStepDefinition(() =>
       import('./set_attack_tags_step/set_attack_tags_step').then(
         (m) => m.setAttackTagsStepDefinition
+      )
+    );
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./set_attack_status_step/set_attack_status_step').then(
+        (m) => m.setAttackStatusStepDefinition
       )
     );
   }
