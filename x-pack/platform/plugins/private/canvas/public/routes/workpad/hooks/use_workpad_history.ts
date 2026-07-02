@@ -31,6 +31,7 @@ export const useWorkpadHistory = () => {
     const isInitialRun = !hasRun.current;
     const locationState = history.location.state;
     const decodedState = locationState ? decode(locationState) : {};
+    const doesFullStateMatchLocationState = isEqual(historyState, decodedState);
     const doesStateMatchLocationState = isEqual(
       withoutTimestamp(historyState),
       withoutTimestamp(decodedState)
@@ -47,6 +48,8 @@ export const useWorkpadHistory = () => {
       // There was a state change here
       // If the state of the route that we are on does not match this new state, then we are going to push
       history.push(fullPath, encode(historyState));
+    } else if (!isInitialRun && !doesFullStateMatchLocationState) {
+      history.replace(fullPath, encode(historyState));
     }
   }, [history, historyState, history.location.search]);
 };

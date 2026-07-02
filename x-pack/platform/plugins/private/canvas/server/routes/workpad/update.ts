@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { SavedObject } from '@kbn/core/server';
 import type { CanvasWorkpad } from '../../../types';
 import type { RouteInitializerDeps } from '..';
 import {
@@ -14,12 +15,13 @@ import {
   API_ROUTE_WORKPAD_ASSETS,
 } from '../../../common/lib/constants';
 import { WorkpadSchema, WorkpadAssetSchema } from './workpad_schema';
+import type { WorkpadAttributes } from './workpad_attributes';
 import { okResponse } from '../ok_response';
 import { catchErrorHandler } from '../catch_error_handler';
 
 const AssetsRecordSchema = schema.recordOf(schema.string(), WorkpadAssetSchema);
 
-const toUpdateResponse = (updatedWorkpad?: { attributes?: Record<string, unknown> }) => {
+const toUpdateResponse = (updatedWorkpad?: Pick<SavedObject<WorkpadAttributes>, 'attributes'>) => {
   const timestamp = updatedWorkpad?.attributes?.['@timestamp'];
 
   return typeof timestamp === 'string' ? { ...okResponse, '@timestamp': timestamp } : okResponse;

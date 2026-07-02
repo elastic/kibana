@@ -196,6 +196,10 @@ describe('useRestoreHistory', () => {
       rerender();
 
       expect(history.push).not.toBeCalled();
+      expect(history.replace).toBeCalledWith(
+        history.location.pathname,
+        encode(newState.persistent)
+      );
     });
 
     test('does nothing if new state matches location state', () => {

@@ -7,7 +7,7 @@
 
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { useRefreshHelper } from './use_refresh_helper';
 import type { WorkpadRoutingContextType } from '../workpad_routing_context';
 import { WorkpadRoutingContext } from '../workpad_routing_context';
@@ -62,7 +62,9 @@ describe('useRefreshHelper', () => {
     renderHook(useRefreshHelper, { wrapper: getContextWrapper(context) });
     expect(mockDispatch).not.toHaveBeenCalledWith(refreshAction);
 
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
     expect(mockDispatch).toHaveBeenCalledWith(refreshAction);
   });
 
@@ -88,12 +90,16 @@ describe('useRefreshHelper', () => {
       rerender();
 
       now += context.refreshInterval;
-      jest.advanceTimersByTime(context.refreshInterval);
+      act(() => {
+        jest.advanceTimersByTime(context.refreshInterval);
+      });
       expect(mockDispatch).toHaveBeenLastCalledWith(expectedAction);
     };
 
     now += context.refreshInterval;
-    jest.advanceTimersByTime(context.refreshInterval);
+    act(() => {
+      jest.advanceTimersByTime(context.refreshInterval);
+    });
     expect(mockDispatch).toHaveBeenLastCalledWith(refreshAction);
 
     for (let cycle = 0; cycle < 11; cycle++) {
@@ -126,7 +132,9 @@ describe('useRefreshHelper', () => {
 
     rerender();
 
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
     expect(mockDispatch).not.toHaveBeenCalled();
   });
 });
