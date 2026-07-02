@@ -412,14 +412,14 @@ describe('ExecutionHistoryPage', () => {
       expect(workflowLink).toHaveAttribute('target', '_blank');
     });
 
-    it('queries with default page=1, perPage=100, outcome=all and no search', async () => {
+    it('queries with default page=1, perPage=10, outcome=all and no search', async () => {
       mockFetchResult();
       renderPage();
       await switchToPoliciesTab();
 
       expect(mockUseFetchExecutionHistory).toHaveBeenCalledWith({
         page: 1,
-        perPage: 100,
+        perPage: 10,
         search: undefined,
         outcome: 'all',
       });
@@ -447,7 +447,7 @@ describe('ExecutionHistoryPage', () => {
       await waitFor(() => {
         expect(mockUseFetchExecutionHistory).toHaveBeenLastCalledWith({
           page: 1,
-          perPage: 100,
+          perPage: 10,
           search: undefined,
           outcome: 'dispatched',
         });
@@ -465,7 +465,7 @@ describe('ExecutionHistoryPage', () => {
         () => {
           expect(mockUseFetchExecutionHistory).toHaveBeenLastCalledWith({
             page: 1,
-            perPage: 100,
+            perPage: 10,
             search: 'cpu',
             outcome: 'all',
           });
