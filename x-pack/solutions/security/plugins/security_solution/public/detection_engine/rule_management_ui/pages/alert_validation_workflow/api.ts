@@ -57,11 +57,6 @@ export interface AlertValidationWorkflowSettingsWithConnectorResponse {
   workflowId: string;
 }
 
-export interface AlertValidationWorkflowSaveWithConnectorResponse
-  extends AlertValidationWorkflowSettingsWithConnectorResponse {
-  installed: boolean;
-}
-
 export const fetchAlertValidationWorkflowSettings = ({
   http,
 }: {
@@ -82,8 +77,8 @@ export const saveAlertValidationWorkflowSettings = ({
 }: {
   http: HttpStart;
   settings: AlertValidationWorkflowSettingsWithConnector;
-}): Promise<AlertValidationWorkflowSaveWithConnectorResponse> => {
-  return http.fetch<AlertValidationWorkflowSaveWithConnectorResponse>(
+}): Promise<AlertValidationWorkflowSettingsWithConnectorResponse> => {
+  return http.fetch<AlertValidationWorkflowSettingsWithConnectorResponse>(
     ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE,
     {
       method: 'PUT',

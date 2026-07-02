@@ -691,7 +691,7 @@ export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
     schema: schema.boolean(),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
-    readonlyMode: 'ui',
+    readonly: true,
   },
   [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED]: {
     name: i18n.translate(
@@ -714,7 +714,7 @@ export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
     schema: schema.boolean(),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
-    readonlyMode: 'ui',
+    readonly: true,
   },
   [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD]: {
     name: i18n.translate(
@@ -737,7 +737,7 @@ export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
     schema: schema.number({ min: 0, max: 1 }),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
-    readonlyMode: 'ui',
+    readonly: true,
   },
   [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD]: {
     name: i18n.translate(
@@ -760,7 +760,7 @@ export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
     schema: schema.number({ min: 0, max: 1 }),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
-    readonlyMode: 'ui',
+    readonly: true,
   },
   [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID]: {
     name: i18n.translate(
@@ -780,7 +780,7 @@ export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
     schema: schema.string(),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
-    readonlyMode: 'ui',
+    readonly: true,
   },
   [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION]: {
     name: i18n.translate(
@@ -801,7 +801,7 @@ export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
     schema: schema.boolean(),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
-    readonlyMode: 'ui',
+    readonly: true,
   },
 });
 

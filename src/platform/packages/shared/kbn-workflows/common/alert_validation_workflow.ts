@@ -52,11 +52,6 @@ export interface AlertValidationWorkflowSettingsResponse {
   workflowId: string;
 }
 
-export interface AlertValidationWorkflowSaveResponse
-  extends AlertValidationWorkflowSettingsResponse {
-  installed: boolean;
-}
-
 export const AlertValidationWorkflowRuleAttachmentListRequestQuery = z.object({
   search: z.string().optional().default(''),
   page: z.coerce.number().int().min(1).optional().default(1),

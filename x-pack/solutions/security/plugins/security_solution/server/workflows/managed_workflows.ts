@@ -9,11 +9,19 @@ import {
   SECURITY_ALERT_VALIDATION_WORKFLOW_ID,
   type ManagedWorkflowTemplateValuesForId,
 } from '@kbn/workflows/managed';
-import type { Logger } from '@kbn/core/server';
+import type { CoreStart, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import {
+  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
+  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
+  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,
+  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
+  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION,
+  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED,
+} from '@kbn/management-settings-ids';
 import { APP_ID } from '../../common/constants';
 
 export type SecurityAlertValidationWorkflowSettings = ManagedWorkflowTemplateValuesForId<
@@ -22,6 +30,83 @@ export type SecurityAlertValidationWorkflowSettings = ManagedWorkflowTemplateVal
 type SecurityManagedWorkflowsClient = Awaited<
   ReturnType<WorkflowsExtensionsServerPluginStart['initManagedWorkflowsClient']>
 >;
+
+const SPACE_SAVED_OBJECT_TYPE = 'space';
+const DEFAULT_SPACE_ID = 'default';
+
+/**
+ * Reads the six `alertValidationWorkflow*` uiSettings from an already space-scoped
+ * `IUiSettingsClient` and shapes them into the workflow's template values.
+ */
+export const readSecurityAlertValidationWorkflowSettings = async (
+  uiSettingsClient: Pick<IUiSettingsClient, 'get'>
+): Promise<SecurityAlertValidationWorkflowSettings> => ({
+  workflowEnabled: await uiSettingsClient.get<boolean>(
+    SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED
+  ),
+  autoCloseEnabled: await uiSettingsClient.get<boolean>(
+    SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED
+  ),
+  autoCloseConfidenceScoreMinThreshold: await uiSettingsClient.get<number>(
+    SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD
+  ),
+  autoCloseConfidenceScoreMaxThreshold: await uiSettingsClient.get<number>(
+    SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD
+  ),
+  connectorId: await uiSettingsClient.get<string>(
+    SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID
+  ),
+  createConversation: await uiSettingsClient.get<boolean>(
+    SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION
+  ),
+});
+
+/**
+ * Reads the alert validation workflow settings for a given space without a Kibana request,
+ * using an internal (system user) Saved Objects client scoped to that space's namespace.
+ * Used at plugin start and when self-healing a space that is missing the workflow.
+ */
+export const readSecurityAlertValidationWorkflowSettingsForSpace = async ({
+  coreStart,
+  spaceId,
+}: {
+  coreStart: Pick<CoreStart, 'savedObjects' | 'uiSettings'>;
+  spaceId: string;
+}): Promise<SecurityAlertValidationWorkflowSettings> => {
+  const spaceScopedClient = coreStart.savedObjects
+    .getUnsafeInternalClient()
+    .asScopedToNamespace(spaceId);
+  const uiSettingsClient = coreStart.uiSettings.asScopedToClient(spaceScopedClient);
+  return readSecurityAlertValidationWorkflowSettings(uiSettingsClient);
+};
+
+/**
+ * Enumerates every space id, paging through the (hidden) `space` saved objects.
+ * Always includes the default space, which has no `space` saved object of its own.
+ */
+export const getAllSpaceIds = async (
+  coreStart: Pick<CoreStart, 'savedObjects'>
+): Promise<string[]> => {
+  const spaceRepo = coreStart.savedObjects.createInternalRepository([SPACE_SAVED_OBJECT_TYPE]);
+  const perPage = 100;
+  const spaceIds = new Set<string>([DEFAULT_SPACE_ID]);
+
+  for (let page = 1; ; page++) {
+    const { saved_objects: batch } = await spaceRepo.find<unknown>({
+      type: SPACE_SAVED_OBJECT_TYPE,
+      perPage,
+      page,
+    });
+
+    batch.forEach((space) => spaceIds.add(space.id));
+
+    if (batch.length < perPage) {
+      break;
+    }
+  }
+
+  return [...spaceIds];
+};
 
 export const registerSecurityManagedWorkflowOwner = (
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup
@@ -53,6 +138,69 @@ export const initSecurityManagedWorkflowsClient = async (
   workflowsExtensions: WorkflowsExtensionsServerPluginStart
 ): Promise<SecurityManagedWorkflowsClient> => {
   return workflowsExtensions.initManagedWorkflowsClient(APP_ID);
+};
+
+/**
+ * Installs the workflow for the given space only if it is not already present, so an already
+ * installed (and possibly user-disabled) workflow is left untouched. Used to self-heal spaces
+ * that don't have the workflow yet (e.g. newly created spaces) without disturbing existing ones.
+ */
+export const ensureSecurityAlertValidationWorkflowInstalled = async ({
+  managedWorkflowsClient,
+  spaceId,
+  settings,
+}: {
+  managedWorkflowsClient: SecurityManagedWorkflowsClient;
+  spaceId: string;
+  settings: SecurityAlertValidationWorkflowSettings;
+}): Promise<void> => {
+  const status = await managedWorkflowsClient.getWorkflowStatus(
+    SECURITY_ALERT_VALIDATION_WORKFLOW_ID,
+    { spaceId, workflowIdSuffix: spaceId }
+  );
+
+  if (status.status !== 'missing') {
+    return;
+  }
+
+  await installSecurityAlertValidationWorkflow({ managedWorkflowsClient, spaceId, settings });
+};
+
+/**
+ * Ensures the alert analysis workflow is installed (enabled by default) in every existing space.
+ * Intended to be called once at plugin start, after the managed workflow owner is registered.
+ */
+export const installSecurityAlertValidationWorkflowForAllSpaces = async ({
+  coreStart,
+  workflowsExtensions,
+  logger,
+}: {
+  coreStart: Pick<CoreStart, 'savedObjects' | 'uiSettings'>;
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  logger: Logger;
+}): Promise<void> => {
+  const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(workflowsExtensions);
+  const spaceIds = await getAllSpaceIds(coreStart);
+
+  await Promise.all(
+    spaceIds.map(async (spaceId) => {
+      try {
+        const settings = await readSecurityAlertValidationWorkflowSettingsForSpace({
+          coreStart,
+          spaceId,
+        });
+        await ensureSecurityAlertValidationWorkflowInstalled({
+          managedWorkflowsClient,
+          spaceId,
+          settings,
+        });
+      } catch (error) {
+        logger.warn(`Failed to install the alert analysis workflow for space "${spaceId}"`, {
+          error,
+        });
+      }
+    })
+  );
 };
 
 export const markSecurityManagedWorkflowsReady = async ({

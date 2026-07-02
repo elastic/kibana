@@ -13,18 +13,3 @@ export const ALERT_VALIDATION_WORKFLOW_TITLE = i18n.translate(
     defaultMessage: 'Alert analysis workflow',
   }
 );
-
-export const TECHNICAL_PREVIEW_BADGE_LABEL = i18n.translate(
-  'xpack.securitySolution.alertValidationWorkflow.technicalPreviewBadgeLabel',
-  {
-    defaultMessage: 'Technical preview',
-  }
-);
-
-export const TECHNICAL_PREVIEW_BADGE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.alertValidationWorkflow.technicalPreviewBadgeTooltip',
-  {
-    defaultMessage:
-      'This functionality is in technical preview. It may change or be removed in a future release.',
-  }
-);

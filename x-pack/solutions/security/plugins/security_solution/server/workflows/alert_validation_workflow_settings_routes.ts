@@ -8,6 +8,9 @@
 import { z } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import {
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
@@ -23,9 +26,17 @@ import {
   MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
   MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT,
 } from '@kbn/workflows/common/alert_validation_workflow';
+import { ALERT_VALIDATION_WORKFLOW_SETTINGS_UPDATED_EVENT } from '../lib/telemetry/event_based/events';
 import type { SecuritySolutionPluginRouter } from '../types';
 import type { StartPlugins } from '../plugin';
 import {
+  AUDIT_CATEGORY,
+  AUDIT_OUTCOME,
+  AUDIT_TYPE,
+  AlertValidationWorkflowAuditActions,
+} from './audit';
+import {
+  ensureSecurityAlertValidationWorkflowInstalled,
   getSecurityAlertValidationWorkflowIdForSpace,
   initSecurityManagedWorkflowsClient,
   installSecurityAlertValidationWorkflow,
@@ -33,6 +44,17 @@ import {
 } from './managed_workflows';
 
 export { ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE };
+
+const REQUIRED_PRIVILEGES = [
+  'manage_advanced_settings',
+  RULES_API_ALL,
+  WorkflowsManagementApiActions.updateManaged,
+];
+
+const LICENSE_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.alertValidationWorkflow.settingsRoute.licenseError',
+  { defaultMessage: 'Your license does not support this feature.' }
+);
 
 const AlertValidationWorkflowSettingsWithConnectorRequestBody =
   AlertValidationWorkflowSettings.extend({
@@ -79,7 +101,7 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: ['manage_advanced_settings'],
+          requiredPrivileges: [{ allRequired: REQUIRED_PRIVILEGES }],
         },
       },
     })
@@ -89,7 +111,12 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
         validate: false,
       },
       async (context, request, response) => {
-        const [coreStart] = await getStartServices();
+        const { license } = await context.licensing;
+        if (!license.hasAtLeast('enterprise')) {
+          return response.forbidden({ body: LICENSE_ERROR_MESSAGE });
+        }
+
+        const [coreStart, pluginsStart] = await getStartServices();
         const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
           coreStart.savedObjects.getScopedClient(request)
         );
@@ -117,6 +144,29 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
 
         const spaceId = (await context.securitySolution).getSpaceId();
 
+        const { workflowsExtensions } = pluginsStart;
+        if (workflowsExtensions) {
+          const isEnabled = await coreStart.featureFlags.getBooleanValue(
+            MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
+            MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT
+          );
+
+          if (isEnabled) {
+            try {
+              const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(
+                workflowsExtensions
+              );
+              await ensureSecurityAlertValidationWorkflowInstalled({
+                managedWorkflowsClient,
+                spaceId,
+                settings,
+              });
+            } catch (error) {
+              logger.warn('Failed to ensure the alert analysis workflow is installed', { error });
+            }
+          }
+        }
+
         return response.ok({
           body: {
             settings,
@@ -132,7 +182,7 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: ['manage_advanced_settings'],
+          requiredPrivileges: [{ allRequired: REQUIRED_PRIVILEGES }],
         },
       },
     })
@@ -148,6 +198,11 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
         },
       },
       async (context, request, response) => {
+        const { license } = await context.licensing;
+        if (!license.hasAtLeast('enterprise')) {
+          return response.forbidden({ body: LICENSE_ERROR_MESSAGE });
+        }
+
         const [coreStart, pluginsStart] = await getStartServices();
         const isEnabled = await coreStart.featureFlags.getBooleanValue(
           MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
@@ -168,8 +223,32 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
           });
         }
 
+        const settings = toWorkflowSettings(request.body);
+        const securitySolution = await context.securitySolution;
+        const spaceId = securitySolution.getSpaceId();
+
+        const reportSettingsUpdatedEvent = (status: 'success' | 'error') => {
+          try {
+            coreStart.analytics.reportEvent(
+              ALERT_VALIDATION_WORKFLOW_SETTINGS_UPDATED_EVENT.eventType,
+              {
+                status,
+                workflowEnabled: settings.workflowEnabled,
+                autoCloseEnabled: settings.autoCloseEnabled,
+                createConversation: settings.createConversation,
+                connectorConfigured: Boolean(settings.connectorId),
+                autoCloseConfidenceScoreMinThreshold: settings.autoCloseConfidenceScoreMinThreshold,
+                autoCloseConfidenceScoreMaxThreshold: settings.autoCloseConfidenceScoreMaxThreshold,
+              }
+            );
+          } catch (telemetryError) {
+            logger.warn('Failed to report alert analysis workflow settings telemetry event', {
+              error: telemetryError,
+            });
+          }
+        };
+
         try {
-          const settings = toWorkflowSettings(request.body);
           const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
             coreStart.savedObjects.getScopedClient(request)
           );
@@ -201,22 +280,47 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
           const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(
             workflowsExtensions
           );
-          const spaceId = (await context.securitySolution).getSpaceId();
           await installSecurityAlertValidationWorkflow({
             managedWorkflowsClient,
             spaceId,
             settings,
           });
 
+          securitySolution.getAuditLogger()?.log({
+            message: 'User updated the alert analysis workflow settings',
+            event: {
+              action: AlertValidationWorkflowAuditActions.ALERT_VALIDATION_WORKFLOW_SETTINGS_UPDATE,
+              category: [AUDIT_CATEGORY.DATABASE],
+              type: [AUDIT_TYPE.CHANGE],
+              outcome: AUDIT_OUTCOME.SUCCESS,
+            },
+          });
+          reportSettingsUpdatedEvent('success');
+
           return response.ok({
             body: {
               settings,
-              installed: true,
               workflowId: getSecurityAlertValidationWorkflowIdForSpace(spaceId),
             },
           });
         } catch (error) {
           logger.warn('Failed to save alert analysis workflow settings', { error });
+
+          securitySolution.getAuditLogger()?.log({
+            message: 'User attempted to update the alert analysis workflow settings',
+            event: {
+              action: AlertValidationWorkflowAuditActions.ALERT_VALIDATION_WORKFLOW_SETTINGS_UPDATE,
+              category: [AUDIT_CATEGORY.DATABASE],
+              type: [AUDIT_TYPE.CHANGE],
+              outcome: AUDIT_OUTCOME.FAILURE,
+            },
+            error: {
+              code: error instanceof Error ? error.name : 'Error',
+              message: error instanceof Error ? error.message : String(error),
+            },
+          });
+          reportSettingsUpdatedEvent('error');
+
           return response.customError({
             statusCode: 500,
             body: {

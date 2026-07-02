@@ -25,6 +25,7 @@ import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../types';
+import { ALERT_VALIDATION_WORKFLOW_SETTINGS_UPDATED_EVENT } from '../lib/telemetry/event_based/events';
 import {
   ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE,
   registerAlertValidationWorkflowSettingsRoutes,
@@ -36,6 +37,8 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
   let getStartServices: jest.MockedFunction<StartServicesAccessor<StartPlugins>>;
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
   let uiSettingsClient: { get: jest.Mock; set: jest.Mock };
+  let auditLogger: { log: jest.Mock };
+  let hasAtLeast: jest.Mock;
   let managedWorkflowsClient: {
     install: jest.Mock;
     uninstall: jest.Mock;
@@ -47,12 +50,14 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
   const createContext = (): SecuritySolutionRequestHandlerContext => {
     const securitySolutionContext = {
       getSpaceId: jest.fn().mockReturnValue('space-1'),
-    } as Pick<SecuritySolutionApiRequestHandlerContext, 'getSpaceId'>;
+      getAuditLogger: jest.fn().mockReturnValue(auditLogger),
+    } as unknown as Pick<SecuritySolutionApiRequestHandlerContext, 'getSpaceId' | 'getAuditLogger'>;
 
     return {
       securitySolution: Promise.resolve(
         securitySolutionContext as unknown as SecuritySolutionApiRequestHandlerContext
       ),
+      licensing: Promise.resolve({ license: { hasAtLeast } }),
     } as unknown as SecuritySolutionRequestHandlerContext;
   };
 
@@ -67,6 +72,8 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
     router = httpServiceMock.createRouter() as unknown as RouterMock;
     coreStart = coreMock.createStart();
     mockResponse = httpServerMock.createResponseFactory();
+    auditLogger = { log: jest.fn() };
+    hasAtLeast = jest.fn().mockReturnValue(true);
     uiSettingsClient = {
       get: jest.fn(),
       set: jest.fn().mockResolvedValue(undefined),
@@ -75,7 +82,7 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
       install: jest.fn().mockResolvedValue(undefined),
       uninstall: jest.fn().mockResolvedValue(undefined),
       ready: jest.fn().mockResolvedValue(undefined),
-      getWorkflowStatus: jest.fn().mockResolvedValue(undefined),
+      getWorkflowStatus: jest.fn().mockResolvedValue({ status: 'intact' }),
       execute: jest.fn().mockResolvedValue('mock-execution-id'),
     };
 
@@ -100,36 +107,91 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
     );
   });
 
-  it('returns the current space-scoped settings', async () => {
-    uiSettingsClient.get
-      .mockResolvedValueOnce(true) // workflowEnabled
-      .mockResolvedValueOnce(false) // autoCloseEnabled
-      .mockResolvedValueOnce(0.7) // autoCloseConfidenceScoreMinThreshold
-      .mockResolvedValueOnce(0.9) // autoCloseConfidenceScoreMaxThreshold
-      .mockResolvedValueOnce('connector-abc') // connectorId
-      .mockResolvedValueOnce(true); // createConversation
+  describe('GET', () => {
+    const mockSettings = () => {
+      uiSettingsClient.get
+        .mockResolvedValueOnce(true) // workflowEnabled
+        .mockResolvedValueOnce(false) // autoCloseEnabled
+        .mockResolvedValueOnce(0.7) // autoCloseConfidenceScoreMinThreshold
+        .mockResolvedValueOnce(0.9) // autoCloseConfidenceScoreMaxThreshold
+        .mockResolvedValueOnce('connector-abc') // connectorId
+        .mockResolvedValueOnce(true); // createConversation
+    };
 
-    const handler = router.versioned.getRoute('get', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
-      .versions['1'].handler;
+    it('returns the current space-scoped settings', async () => {
+      mockSettings();
 
-    await handler(createContext(), createRequest(), mockResponse);
+      const handler = router.versioned.getRoute('get', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
+        .versions['1'].handler;
 
-    expect(mockResponse.ok).toHaveBeenCalledWith({
-      body: {
-        settings: {
-          workflowEnabled: true,
-          autoCloseEnabled: false,
-          autoCloseConfidenceScoreMinThreshold: 0.7,
-          autoCloseConfidenceScoreMaxThreshold: 0.9,
-          connectorId: 'connector-abc',
-          createConversation: true,
+      await handler(createContext(), createRequest(), mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          settings: {
+            workflowEnabled: true,
+            autoCloseEnabled: false,
+            autoCloseConfidenceScoreMinThreshold: 0.7,
+            autoCloseConfidenceScoreMaxThreshold: 0.9,
+            connectorId: 'connector-abc',
+            createConversation: true,
+          },
+          workflowId: 'system-security-alert-validation-space-1',
         },
-        workflowId: 'system-security-alert-validation-space-1',
-      },
+      });
+    });
+
+    it('installs the workflow for the space when it is missing', async () => {
+      mockSettings();
+      managedWorkflowsClient.getWorkflowStatus.mockResolvedValue({ status: 'missing' });
+
+      const handler = router.versioned.getRoute('get', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
+        .versions['1'].handler;
+
+      await handler(createContext(), createRequest(), mockResponse);
+
+      expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
+        SECURITY_ALERT_VALIDATION_WORKFLOW_ID,
+        {
+          spaceId: 'space-1',
+          workflowIdSuffix: 'space-1',
+          values: {
+            workflowEnabled: true,
+            autoCloseEnabled: false,
+            autoCloseConfidenceScoreMinThreshold: 0.7,
+            autoCloseConfidenceScoreMaxThreshold: 0.9,
+            connectorId: 'connector-abc',
+            createConversation: true,
+          },
+        }
+      );
+    });
+
+    it('does not install the workflow when it is already installed', async () => {
+      mockSettings();
+      managedWorkflowsClient.getWorkflowStatus.mockResolvedValue({ status: 'disabled' });
+
+      const handler = router.versioned.getRoute('get', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
+        .versions['1'].handler;
+
+      await handler(createContext(), createRequest(), mockResponse);
+
+      expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
+    });
+
+    it('returns forbidden when the license does not support the feature', async () => {
+      hasAtLeast.mockReturnValue(false);
+      const handler = router.versioned.getRoute('get', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
+        .versions['1'].handler;
+
+      await handler(createContext(), createRequest(), mockResponse);
+
+      expect(mockResponse.forbidden).toHaveBeenCalled();
+      expect(uiSettingsClient.get).not.toHaveBeenCalled();
     });
   });
 
-  it('persists settings and installs the per-space managed workflow', async () => {
+  describe('PUT', () => {
     const settings = {
       workflowEnabled: true,
       autoCloseEnabled: true,
@@ -138,69 +200,120 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
       connectorId: 'connector-xyz',
       createConversation: false,
     };
-    const handler = router.versioned.getRoute('put', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
-      .versions['1'].handler;
 
-    await handler(createContext(), createRequest(settings), mockResponse);
+    it('persists settings and installs the per-space managed workflow', async () => {
+      const handler = router.versioned.getRoute('put', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
+        .versions['1'].handler;
 
-    expect(uiSettingsClient.set).toHaveBeenCalledWith(
-      SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED,
-      settings.workflowEnabled
-    );
-    expect(uiSettingsClient.set).toHaveBeenCalledWith(
-      SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,
-      settings.autoCloseEnabled
-    );
-    expect(uiSettingsClient.set).toHaveBeenCalledWith(
-      SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
-      settings.autoCloseConfidenceScoreMinThreshold
-    );
-    expect(uiSettingsClient.set).toHaveBeenCalledWith(
-      SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
-      settings.autoCloseConfidenceScoreMaxThreshold
-    );
-    expect(uiSettingsClient.set).toHaveBeenCalledWith(
-      SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
-      settings.connectorId
-    );
-    expect(uiSettingsClient.set).toHaveBeenCalledWith(
-      SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION,
-      settings.createConversation
-    );
-    expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
-      SECURITY_ALERT_VALIDATION_WORKFLOW_ID,
-      {
-        spaceId: 'space-1',
-        workflowIdSuffix: 'space-1',
-        values: settings,
-      }
-    );
-    expect(mockResponse.ok).toHaveBeenCalledWith({
-      body: {
-        settings,
-        installed: true,
-        workflowId: 'system-security-alert-validation-space-1',
-      },
+      await handler(createContext(), createRequest(settings), mockResponse);
+
+      expect(uiSettingsClient.set).toHaveBeenCalledWith(
+        SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED,
+        settings.workflowEnabled
+      );
+      expect(uiSettingsClient.set).toHaveBeenCalledWith(
+        SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,
+        settings.autoCloseEnabled
+      );
+      expect(uiSettingsClient.set).toHaveBeenCalledWith(
+        SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
+        settings.autoCloseConfidenceScoreMinThreshold
+      );
+      expect(uiSettingsClient.set).toHaveBeenCalledWith(
+        SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
+        settings.autoCloseConfidenceScoreMaxThreshold
+      );
+      expect(uiSettingsClient.set).toHaveBeenCalledWith(
+        SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
+        settings.connectorId
+      );
+      expect(uiSettingsClient.set).toHaveBeenCalledWith(
+        SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION,
+        settings.createConversation
+      );
+      expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
+        SECURITY_ALERT_VALIDATION_WORKFLOW_ID,
+        {
+          spaceId: 'space-1',
+          workflowIdSuffix: 'space-1',
+          values: settings,
+        }
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          settings,
+          workflowId: 'system-security-alert-validation-space-1',
+        },
+      });
     });
-  });
 
-  it('does not persist or install when the feature flag is disabled', async () => {
-    coreStart.featureFlags.getBooleanValue.mockResolvedValue(false);
-    const handler = router.versioned.getRoute('put', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
-      .versions['1'].handler;
+    it('logs a successful audit event and reports telemetry on save', async () => {
+      const handler = router.versioned.getRoute('put', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
+        .versions['1'].handler;
 
-    await handler(
-      createContext(),
-      createRequest({
-        autoCloseEnabled: true,
-        autoCloseConfidenceScoreMinThreshold: 0.7,
-        autoCloseConfidenceScoreMaxThreshold: 0.9,
-      }),
-      mockResponse
-    );
+      await handler(createContext(), createRequest(settings), mockResponse);
 
-    expect(mockResponse.notFound).toHaveBeenCalled();
-    expect(uiSettingsClient.set).not.toHaveBeenCalled();
-    expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({ event: expect.objectContaining({ outcome: 'success' }) })
+      );
+      expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        ALERT_VALIDATION_WORKFLOW_SETTINGS_UPDATED_EVENT.eventType,
+        expect.objectContaining({
+          status: 'success',
+          workflowEnabled: settings.workflowEnabled,
+          autoCloseEnabled: settings.autoCloseEnabled,
+          createConversation: settings.createConversation,
+          connectorConfigured: true,
+        })
+      );
+    });
+
+    it('logs a failed audit event and reports telemetry when saving fails', async () => {
+      managedWorkflowsClient.install.mockRejectedValue(new Error('boom'));
+      const handler = router.versioned.getRoute('put', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
+        .versions['1'].handler;
+
+      await handler(createContext(), createRequest(settings), mockResponse);
+
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({ event: expect.objectContaining({ outcome: 'failure' }) })
+      );
+      expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        ALERT_VALIDATION_WORKFLOW_SETTINGS_UPDATED_EVENT.eventType,
+        expect.objectContaining({ status: 'error' })
+      );
+      expect(mockResponse.customError).toHaveBeenCalled();
+    });
+
+    it('does not persist or install when the feature flag is disabled', async () => {
+      coreStart.featureFlags.getBooleanValue.mockResolvedValue(false);
+      const handler = router.versioned.getRoute('put', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
+        .versions['1'].handler;
+
+      await handler(
+        createContext(),
+        createRequest({
+          autoCloseEnabled: true,
+          autoCloseConfidenceScoreMinThreshold: 0.7,
+          autoCloseConfidenceScoreMaxThreshold: 0.9,
+        }),
+        mockResponse
+      );
+
+      expect(mockResponse.notFound).toHaveBeenCalled();
+      expect(uiSettingsClient.set).not.toHaveBeenCalled();
+      expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
+    });
+
+    it('returns forbidden when the license does not support the feature', async () => {
+      hasAtLeast.mockReturnValue(false);
+      const handler = router.versioned.getRoute('put', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
+        .versions['1'].handler;
+
+      await handler(createContext(), createRequest(settings), mockResponse);
+
+      expect(mockResponse.forbidden).toHaveBeenCalled();
+      expect(uiSettingsClient.set).not.toHaveBeenCalled();
+    });
   });
 });

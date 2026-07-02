@@ -9,6 +9,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
+import { RULES_FEATURE_ID } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import {
@@ -24,6 +25,8 @@ jest.mock('../../../../common/containers/use_full_screen', () => ({
   }),
 }));
 
+jest.mock('../../../../common/hooks/use_license');
+
 describe('AlertValidationWorkflowPage', () => {
   const coreStart = coreMock.createStart();
 
@@ -32,6 +35,8 @@ describe('AlertValidationWorkflowPage', () => {
       ...coreStart.application.capabilities,
       advancedSettings: { show: true, save: true },
       securitySolution: { show: true, crud: true },
+      [RULES_FEATURE_ID]: { read_rules: true, edit_rules: true },
+      workflowsManagement: { updateWorkflow: true },
     };
     coreStart.application.getUrlForApp.mockImplementation(
       (appId, options) => `/app/${appId}${options?.path ?? ''}`
@@ -52,7 +57,6 @@ describe('AlertValidationWorkflowPage', () => {
 
         return {
           settings,
-          installed: options?.method === 'PUT',
           workflowId: 'system-security-alert-validation-default',
         };
       }

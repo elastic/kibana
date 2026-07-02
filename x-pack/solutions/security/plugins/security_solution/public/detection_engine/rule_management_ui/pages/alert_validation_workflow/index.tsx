@@ -10,23 +10,32 @@ import {
   EuiButton,
   EuiDescribedFormGroup,
   EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiSwitch,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import type { Capabilities } from '@kbn/core/types';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
+import { AiIcon } from '@kbn/shared-ux-ai-components';
+import { WorkflowsManagementUiActions } from '@kbn/workflows';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { HeaderPage } from '../../../../common/components/header_page';
+import { ExperimentalBadge } from '../../../../common/components/experimental_badge';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { NotFoundPage } from '../../../../app/404';
 import { SecurityPageName } from '../../../../app/types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useLicense } from '../../../../common/hooks/use_license';
 import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
+import { extractRulesCapabilities } from '../../../../common/utils/rules_capabilities';
 import {
   fetchAlertValidationWorkflowSettings,
   MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
@@ -58,6 +67,24 @@ const areSettingsEqual = (
   );
 };
 
+const getAlertValidationWorkflowAccess = (
+  capabilities: Capabilities,
+  isFeatureEnabled: boolean,
+  isEnterprise: boolean
+): { canAccessPage: boolean; canEditAdvancedSettings: boolean } => {
+  const rulesCapabilities = extractRulesCapabilities(capabilities);
+  const canEditWorkflow =
+    capabilities.workflowsManagement?.[WorkflowsManagementUiActions.update] === true;
+  const canEditAdvancedSettings = Boolean(
+    capabilities.advancedSettings?.save && rulesCapabilities.rules.edit && canEditWorkflow
+  );
+
+  return {
+    canEditAdvancedSettings,
+    canAccessPage: isFeatureEnabled && isEnterprise && canEditAdvancedSettings,
+  };
+};
+
 export const AlertValidationWorkflowPage: React.FC = () => {
   const {
     services: { application, http, notifications, featureFlags, settings },
@@ -67,11 +94,16 @@ export const AlertValidationWorkflowPage: React.FC = () => {
     MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
     MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT
   );
-  const canEditAdvancedSettings = application.capabilities.advancedSettings?.save;
+  const isEnterprise = useLicense().isEnterprise();
+  const { canAccessPage, canEditAdvancedSettings } = getAlertValidationWorkflowAccess(
+    application.capabilities,
+    isEnabled,
+    isEnterprise
+  );
   const { aiConnectors, isLoading: isLoadingConnectors } = useAIConnectors();
   const { data: savedSettingsResponse, isLoading } = useQuery({
     queryKey: ALERT_VALIDATION_WORKFLOW_SETTINGS_QUERY_KEY,
-    enabled: isEnabled,
+    enabled: canAccessPage,
     queryFn: async () => {
       return fetchAlertValidationWorkflowSettings({ http });
     },
@@ -84,6 +116,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
     AlertValidationWorkflowSettingsWithConnector | undefined
   >();
   const isDirty = !areSettingsEqual(pageSettings, savedSettings);
+  const isWorkflowEnabled = pageSettings?.workflowEnabled ?? true;
   const isThresholdRangeInvalid =
     pageSettings !== undefined &&
     pageSettings.autoCloseConfidenceScoreMinThreshold >=
@@ -123,7 +156,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
     }
   }, [savedSettings]);
 
-  if (!isEnabled) {
+  if (!canAccessPage) {
     return <NotFoundPage />;
   }
 
@@ -132,12 +165,21 @@ export const AlertValidationWorkflowPage: React.FC = () => {
       <SecuritySolutionPageWrapper data-test-subj="alertValidationWorkflowPage">
         <HeaderPage
           title={translations.ALERT_VALIDATION_WORKFLOW_TITLE}
-          badgeOptions={{
-            beta: true,
-            text: translations.TECHNICAL_PREVIEW_BADGE_LABEL,
-            tooltip: translations.TECHNICAL_PREVIEW_BADGE_TOOLTIP,
-            size: 's',
-          }}
+          titleNode={
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="l">
+                  <h1>{translations.ALERT_VALIDATION_WORKFLOW_TITLE}</h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <AiIcon iconType="sparkles" size="m" aria-hidden="true" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ExperimentalBadge />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
           subtitle={
             <FormattedMessage
               id="xpack.securitySolution.alertValidationWorkflow.description"
@@ -177,7 +219,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
                 <p>
                   <FormattedMessage
                     id="xpack.securitySolution.alertValidationWorkflow.workflowEnabledSectionDescription"
-                    defaultMessage="Enable or disable the managed alert analysis workflow."
+                    defaultMessage="Disabling the managed alert analysis workflow turns it off everywhere it is configured, including for any rules it is attached to."
                   />
                 </p>
               }
@@ -236,7 +278,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
                   connectors={aiConnectors}
                   selectedId={pageSettings.connectorId}
                   isLoading={isLoadingConnectors}
-                  isDisabled={!canEditAdvancedSettings}
+                  isDisabled={!canEditAdvancedSettings || !isWorkflowEnabled}
                   settings={settings}
                   onChange={(connectorId) =>
                     setPageSettings((prev) => (prev ? { ...prev, connectorId } : prev))
@@ -276,7 +318,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
                     { defaultMessage: 'Create conversation per alert analysis' }
                   )}
                   checked={pageSettings.createConversation ?? true}
-                  disabled={!canEditAdvancedSettings}
+                  disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
                   onChange={(event) =>
                     setPageSettings({
                       ...pageSettings,
@@ -322,7 +364,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
                     }
                   )}
                   checked={pageSettings.autoCloseEnabled}
-                  disabled={!canEditAdvancedSettings}
+                  disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
                   onChange={(event) =>
                     setPageSettings({
                       ...pageSettings,
@@ -358,7 +400,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
                   max={1}
                   step={0.01}
                   value={pageSettings.autoCloseConfidenceScoreMinThreshold}
-                  disabled={!canEditAdvancedSettings}
+                  disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
                   isInvalid={isThresholdRangeInvalid}
                   aria-label={i18n.translate(
                     'xpack.securitySolution.alertValidationWorkflow.minThresholdAriaLabel',
@@ -405,7 +447,7 @@ export const AlertValidationWorkflowPage: React.FC = () => {
                   max={1}
                   step={0.01}
                   value={pageSettings.autoCloseConfidenceScoreMaxThreshold}
-                  disabled={!canEditAdvancedSettings}
+                  disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
                   isInvalid={isThresholdRangeInvalid}
                   aria-label={i18n.translate(
                     'xpack.securitySolution.alertValidationWorkflow.maxThresholdAriaLabel',

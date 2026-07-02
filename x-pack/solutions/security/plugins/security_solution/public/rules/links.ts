@@ -9,9 +9,11 @@ import { i18n } from '@kbn/i18n';
 import {
   EXCEPTIONS_UI_READ_PRIVILEGES,
   RULES_UI_DETECTIONS_PRIVILEGE,
+  RULES_UI_EDIT_PRIVILEGE,
   RULES_UI_READ_PRIVILEGE,
   SECURITY_UI_SHOW_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
+import { WORKFLOWS_MANAGEMENT_FEATURE_ID, WorkflowsManagementUiActions } from '@kbn/workflows';
 import {
   ALERT_VALIDATION_WORKFLOW_PATH,
   COVERAGE_OVERVIEW_PATH,
@@ -35,10 +37,12 @@ import {
 import { SecurityPageName } from '../app/types';
 import { benchmarksLink } from '../cloud_security_posture/links';
 import type { LinkItem } from '../common/links';
-import { IconAlerts } from '../common/icons/alerts';
+import { IconAlertAnalysisWorkflow } from '../common/icons/alert_analysis_workflow';
 import { IconConsoleCloud } from '../common/icons/console_cloud';
 import { IconRollup } from '../common/icons/rollup';
 import { IconDashboards } from '../common/icons/dashboards';
+
+const WORKFLOWS_MANAGEMENT_UPDATE_PRIVILEGE = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}.${WorkflowsManagementUiActions.update}`;
 
 export const links: LinkItem = {
   id: SecurityPageName.rulesLanding,
@@ -116,9 +120,11 @@ export const links: LinkItem = {
             'Configure the managed alert analysis workflow that automatically classifies and closes false positive alerts.',
         }
       ),
-      landingIcon: IconAlerts,
+      landingIcon: IconAlertAnalysisWorkflow,
       path: ALERT_VALIDATION_WORKFLOW_PATH,
-      capabilities: RULES_UI_READ_PRIVILEGE,
+      capabilities: [
+        [RULES_UI_READ_PRIVILEGE, RULES_UI_EDIT_PRIVILEGE, WORKFLOWS_MANAGEMENT_UPDATE_PRIVILEGE],
+      ],
       skipUrlState: true,
       hideTimeline: true,
     },

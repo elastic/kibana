@@ -18,6 +18,10 @@ import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
+import {
+  MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
+  MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT,
+} from '@kbn/workflows/common/alert_validation_workflow';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
@@ -173,6 +177,7 @@ import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capab
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
 import {
+  installSecurityAlertValidationWorkflowForAllSpaces,
   markSecurityManagedWorkflowsReady,
   registerSecurityManagedWorkflowOwner,
 } from './workflows/managed_workflows';
@@ -893,8 +898,28 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.ruleMonitoringService.start(core, plugins);
 
     if (plugins.workflowsExtensions) {
+      const { workflowsExtensions } = plugins;
+      void (async () => {
+        try {
+          const isEnabled = await core.featureFlags.getBooleanValue(
+            MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
+            MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT
+          );
+
+          if (isEnabled) {
+            await installSecurityAlertValidationWorkflowForAllSpaces({
+              coreStart: core,
+              workflowsExtensions,
+              logger,
+            });
+          }
+        } catch (error) {
+          logger.warn('Failed to install the alert analysis workflow for all spaces', { error });
+        }
+      })();
+
       void markSecurityManagedWorkflowsReady({
-        workflowsExtensions: plugins.workflowsExtensions,
+        workflowsExtensions,
         logger,
       });
     }

@@ -53,6 +53,7 @@ export const SECURITY_ALERT_VALIDATION_WORKFLOW = {
   id: SECURITY_ALERT_VALIDATION_WORKFLOW_ID,
   pluginId: 'securitySolution',
   version: 1,
+  billable: false,
   yamlTemplate: renderAlertValidationWorkflowYaml,
   management: {
     lifecycle: 'dynamic',
