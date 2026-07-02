@@ -16,12 +16,12 @@ export interface HopDepthResult {
 export function buildUndirectedAdjacency(edges: ServiceMapEdge[]): Map<string, Set<string>> {
   const adjacency = new Map<string, Set<string>>();
   const link = (a: string, b: string) => {
-    let neighbors = adjacency.get(a);
-    if (!neighbors) {
-      neighbors = new Set();
-      adjacency.set(a, neighbors);
+    let adjacentIds = adjacency.get(a);
+    if (!adjacentIds) {
+      adjacentIds = new Set();
+      adjacency.set(a, adjacentIds);
     }
-    neighbors.add(b);
+    adjacentIds.add(b);
   };
   for (const edge of edges) {
     link(edge.source, edge.target);
@@ -65,18 +65,18 @@ export function computeHopDepthVisibilityWithCap({
     if (current.distance >= maxHops) {
       continue;
     }
-    for (const neighborId of Array.from(adjacency.get(current.id) ?? [])) {
-      if (!nodeIds.has(neighborId) || visibleNodeIds.size >= maxVisibleNodes) {
+    for (const dependencyId of Array.from(adjacency.get(current.id) ?? [])) {
+      if (!nodeIds.has(dependencyId) || visibleNodeIds.size >= maxVisibleNodes) {
         continue;
       }
       const nextDistance = current.distance + 1;
-      if (distances.has(neighborId) && distances.get(neighborId)! <= nextDistance) {
+      if (distances.has(dependencyId) && distances.get(dependencyId)! <= nextDistance) {
         continue;
       }
-      distances.set(neighborId, nextDistance);
-      visibleNodeIds.add(neighborId);
+      distances.set(dependencyId, nextDistance);
+      visibleNodeIds.add(dependencyId);
       if (nextDistance < maxHops && visibleNodeIds.size < maxVisibleNodes) {
-        queue.push({ id: neighborId, distance: nextDistance });
+        queue.push({ id: dependencyId, distance: nextDistance });
       }
     }
   }

@@ -26,6 +26,13 @@ export class OverviewTab extends ServiceDetailsTab {
   public readonly coldstartRateChartTitle: Locator;
   public readonly transactionBreakdownChart: Locator;
 
+  public readonly serviceMapSection: Locator;
+  public readonly contextualServiceMapGraph: Locator;
+  public readonly contextualServiceMapControls: Locator;
+  public readonly contextualServiceMapMaxVisibleInput: Locator;
+  public readonly contextualServiceMapMaxHopsInput: Locator;
+  public readonly exploreInServiceMapLink: Locator;
+
   constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultServiceName: string) {
     super(page, kbnUrl, defaultServiceName);
     this.tab = this.page.getByTestId(`${this.tabName}Tab`);
@@ -38,11 +45,68 @@ export class OverviewTab extends ServiceDetailsTab {
     this.coldstartRateChart = this.page.getByTestId('coldstartRate');
     this.coldstartRateChartTitle = this.page.getByTestId('coldstartRateChartTitle');
     this.transactionBreakdownChart = this.page.getByTestId('transactionBreakdownChart');
+    this.serviceMapSection = this.page.getByTestId('apmServiceOverviewServiceMapSection');
+    this.contextualServiceMapGraph = this.page.getByTestId('contextualServiceMapGraph');
+    this.contextualServiceMapControls = this.page.getByTestId('contextualServiceMapControls');
+    this.contextualServiceMapMaxVisibleInput = this.page.getByTestId(
+      'contextualServiceMapMaxVisible'
+    );
+    this.contextualServiceMapMaxHopsInput = this.page.getByTestId('contextualServiceMapMaxHops');
+    this.exploreInServiceMapLink = this.page.getByTestId('apmServiceOverviewExploreInServiceMap');
   }
 
   protected async waitForTabLoad(): Promise<void> {
     await this.latencyChart.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await this.throughputChart.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  getContextualServiceNodeRoot(serviceName: string) {
+    return this.contextualServiceMapGraph.locator(`[data-id="${serviceName}"]`);
+  }
+
+  getContextualServiceNode(serviceName: string) {
+    return this.getContextualServiceNodeRoot(serviceName).getByTestId(
+      'serviceMapNodeServiceCircle'
+    );
+  }
+
+  async waitForContextualServiceMapToLoad() {
+    await this.contextualServiceMapGraph.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  async waitForContextualServiceNodeToLoad(serviceName: string) {
+    const circle = this.getContextualServiceNode(serviceName);
+    await circle.waitFor({ state: 'attached', timeout: EXTENDED_TIMEOUT });
+    await circle.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  async setContextualMapMaxVisible(maxVisible: number) {
+    await this.contextualServiceMapMaxVisibleInput.waitFor({
+      state: 'visible',
+      timeout: EXTENDED_TIMEOUT,
+    });
+    await this.contextualServiceMapMaxVisibleInput.fill(String(maxVisible));
+    await this.contextualServiceMapMaxVisibleInput.press('Tab');
+  }
+
+  async setContextualMapMaxHops(maxHops: number) {
+    await this.contextualServiceMapMaxHopsInput.waitFor({
+      state: 'visible',
+      timeout: EXTENDED_TIMEOUT,
+    });
+    await this.contextualServiceMapMaxHopsInput.click();
+    await this.contextualServiceMapMaxHopsInput.fill(String(maxHops));
+    await this.contextualServiceMapMaxHopsInput.press('Enter');
+  }
+
+  getExpandHiddenDependenciesButton(serviceName: string) {
+    return this.getContextualServiceNodeRoot(serviceName).getByTestId(
+      'serviceMapExpandHiddenButton'
+    );
+  }
+
+  getContextualMapNodeCount() {
+    return this.contextualServiceMapGraph.locator('.react-flow__node');
   }
 
   // #region Charts and Tables
