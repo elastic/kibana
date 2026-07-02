@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MAX_ID_LENGTH, MAX_TITLE_LENGTH } from '@kbn/as-code-shared-schemas';
 import { getAsCodeTagsSchema } from '@kbn/as-code-shared-schemas/src/schemas';
 import { schema } from '@kbn/config-schema';
 import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-navigation-options-schema';
@@ -27,7 +26,6 @@ import {
 const baseLinkSchema = {
   label: schema.maybe(
     schema.string({
-      maxLength: MAX_TITLE_LENGTH,
       meta: { description: 'The label of the link displayed in the UI.' },
     })
   ),
@@ -38,7 +36,6 @@ export const dashboardLinkSchema = schema.object(
     ...baseLinkSchema,
     type: schema.literal(DASHBOARD_LINK_TYPE),
     destination: schema.string({
-      maxLength: MAX_ID_LENGTH,
       meta: { description: 'Linked dashboard saved object ID.' },
     }),
     options: dashboardNavigationOptionsSchema,
@@ -77,7 +74,6 @@ export const externalLinkSchema = schema.object(
     ...baseLinkSchema,
     type: schema.literal(EXTERNAL_LINK_TYPE),
     destination: schema.string({
-      maxLength: 250,
       meta: { description: 'The external URL to link to.' },
     }),
     options: externalLinkOptionsSchema,
@@ -107,11 +103,13 @@ export const layoutSchema = schema.maybe(
   })
 );
 
+const linksStateSchema = schema.object({
+  links: linksArraySchema,
+  layout: layoutSchema,
+});
+
 export const linksByValueSchema = serializedTitlesSchema.extends(
-  {
-    links: linksArraySchema,
-    layout: layoutSchema,
-  },
+  linksStateSchema.getPropSchemas(),
   { meta: BY_VALUE_SCHEMA_META }
 );
 
@@ -134,7 +132,8 @@ export const linksEmbeddableSchema = schema.oneOf([linksByValueSchema, linksByRe
   },
 });
 
-export const linksApiStateSchema = linksByValueSchema.extends({
-  title: schema.string(), // make title required - all links library items must have a title
+export const linksApiStateSchema = linksStateSchema.extends({
+  title: schema.string(), // title is required - all links library items must have a title
+  description: schema.maybe(schema.string()), // description of links library item is optional
   tags: getAsCodeTagsSchema(),
 });
