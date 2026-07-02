@@ -160,16 +160,22 @@ export const RoutingNode = memo(({ id, data }: NodeProps<RoutingFlowNode>) => {
   // The per-row source handles are rendered dynamically, so React Flow must be
   // told to re-measure them whenever their count changes; otherwise the
   // `branch-N` handles aren't registered and connectors fall back to the node
-  // origin instead of anchoring to their row. Re-measure again on the next
-  // frame so late layout (fonts, the node entry animation) can't leave the
-  // handle bounds stale and detach the connectors from their row anchors.
+  // origin instead of anchoring to their row.
+  //
+  // Crucially, the node plays a scale() entry animation (see inflateClassName).
+  // Measuring the handle bounds while that transform is mid-flight registers
+  // them at scaled-down offsets and leaves the connectors detached from their
+  // rows for good. So we re-measure immediately and again once the animation
+  // has settled (the onAnimationEnd handler below is the authoritative pass;
+  // the timeout is a fallback for when the animation is interrupted or the node
+  // mounts already-visible and never fires an animationend event).
   useEffect(() => {
     updateNodeInternals(id);
-    const raf = requestAnimationFrame(() => updateNodeInternals(id));
-    return () => cancelAnimationFrame(raf);
+    const timeout = setTimeout(() => updateNodeInternals(id), 220);
+    return () => clearTimeout(timeout);
   }, [id, branches.length, updateNodeInternals]);
   return (
-    <div className={inflateClassName}>
+    <div className={inflateClassName} onAnimationEnd={() => updateNodeInternals(id)}>
       <Handle type="target" position={Position.Left} className={anchorHandleClassName} />
       <RoutingNodeContents branches={branches} anchorHandleClassName={anchorHandleClassName} />
     </div>
