@@ -397,11 +397,15 @@ const getReviewComments = async ({
   repoFullName,
   pullNumber,
 }) => {
-  const threads = await fetchReviewThreads({ github, owner, repo, pullNumber });
+  try {
+    const threads = await fetchReviewThreads({ github, owner, repo, pullNumber });
 
-  return threads
-    .flatMap((thread) => reviewThreadToComments({ repoFullName, pullNumber, thread }))
-    .sort((left, right) => left.id - right.id);
+    return threads
+      .flatMap((thread) => reviewThreadToComments({ repoFullName, pullNumber, thread }))
+      .sort((left, right) => left.id - right.id);
+  } catch {
+    return [];
+  }
 };
 
 const prefetchPrContext = async ({
@@ -446,19 +450,13 @@ const prefetchPrContext = async ({
     }),
   ]);
 
-  let reviewComments = [];
-
-  try {
-    reviewComments = await getReviewComments({
-      github,
-      owner,
-      repo,
-      repoFullName,
-      pullNumber,
-    });
-  } catch {
-    reviewComments = [];
-  }
+  const reviewComments = await getReviewComments({
+    github,
+    owner,
+    repo,
+    repoFullName,
+    pullNumber,
+  });
 
   writeJson({ outputDir, filename: 'pr-metadata.json', value: metadata });
   writeJson({ outputDir, filename: 'pr-files.json', value: filesWithPatch.map(withoutPatch) });
