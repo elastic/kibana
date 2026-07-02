@@ -35,8 +35,8 @@ export const agentlessPolicyToTableItem = (
   agentlessPolicy: AgentlessPolicy,
   packageInfo: PackageInfo
 ): AgentlessPolicyTableItem => {
-  const packagePolicy = {
-    ...agentlessPolicyToPackagePolicy(agentlessPolicy, packageInfo),
+  // Identifiers/timestamps the table renders directly, independent of input expansion.
+  const identity = {
     id: agentlessPolicy.id,
     policy_ids: [agentlessPolicy.id],
     revision: 1,
@@ -44,11 +44,35 @@ export const agentlessPolicyToTableItem = (
     created_by: agentlessPolicy.created_by,
     updated_at: agentlessPolicy.updated_at,
     updated_by: agentlessPolicy.updated_by,
-  } as PackagePolicy;
+  };
 
   const agentPolicies = [
     { id: agentlessPolicy.id, name: agentlessPolicy.name } as GetAgentPoliciesResponseItem,
   ];
+
+  let packagePolicy: PackagePolicy;
+  try {
+    packagePolicy = {
+      ...agentlessPolicyToPackagePolicy(agentlessPolicy, packageInfo),
+      ...identity,
+    } as PackagePolicy;
+  } catch {
+    // Re-deriving a policy's inputs against the manifest can throw (e.g. the policy references a
+    // field that is absent from the loaded package info, or the policy predates the installed
+    // package version). Degrade this single row to a minimal package policy so one bad policy
+    // can never crash the whole deployments table.
+    packagePolicy = {
+      name: agentlessPolicy.name,
+      namespace: agentlessPolicy.namespace ?? 'default',
+      description: agentlessPolicy.description,
+      package: agentlessPolicy.package,
+      enabled: true,
+      inputs: [],
+      vars: {},
+      supports_agentless: true,
+      ...identity,
+    } as unknown as PackagePolicy;
+  }
 
   return { packagePolicy, agentPolicies };
 };

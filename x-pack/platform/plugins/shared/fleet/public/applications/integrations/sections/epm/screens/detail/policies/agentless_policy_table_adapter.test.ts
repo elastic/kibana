@@ -76,4 +76,25 @@ describe('agentlessPolicyToTableItem', () => {
 
     expect(agentPolicies).toEqual([{ id: 'agentless-1', name: 'Nginx agentless' }]);
   });
+
+  it('degrades to a minimal row (no throw) when input expansion fails', () => {
+    // e.g. the policy references a field absent from the loaded manifest, or predates the version.
+    mockAgentlessPolicyToPackagePolicy.mockImplementation(() => {
+      throw new Error('Input not found: nginx-foo');
+    });
+
+    const { packagePolicy, agentPolicies } = agentlessPolicyToTableItem(
+      agentlessPolicy,
+      packageInfo
+    );
+
+    // A single bad policy must never crash the whole deployments table.
+    expect(packagePolicy.id).toBe('agentless-1');
+    expect(packagePolicy.name).toBe('Nginx agentless');
+    expect(packagePolicy.package?.version).toBe('1.0.0');
+    expect(packagePolicy.inputs).toEqual([]);
+    expect(packagePolicy.policy_ids).toEqual(['agentless-1']);
+    expect(packagePolicy.updated_at).toBe('2026-02-02T00:00:00.000Z');
+    expect(agentPolicies).toEqual([{ id: 'agentless-1', name: 'Nginx agentless' }]);
+  });
 });
