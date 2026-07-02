@@ -15,7 +15,7 @@ export type S3AuthenticationMode = 'anonymous' | 'access_and_secret_keys' | 'fed
 /** GCS authentication modes (UI-only). */
 export type GcsAuthenticationMode = 'anonymous' | 'access_and_secret_keys' | 'federated_identity';
 
-/** Azure authentication modes (UI-only; `settings.auth` is never submitted). */
+/** Azure authentication modes (UI-only). */
 export type AzureAuthenticationMode = 'anonymous' | 'credentials' | 'federated_identity';
 
 export type CreateDataSourceAuthenticationMode =
@@ -193,7 +193,7 @@ export const applyAuthenticationModeToDataSource = (
   data: DataSourceWithSecrets,
   mode: CreateDataSourceAuthenticationMode
 ): DataSourceWithSecrets => {
-  const authSettings = mode === 'anonymous' ? { auth: 'none' } : {};
+  const authSettings = mode === 'anonymous' ? { auth: 'anonymous' } : {};
 
   switch (data.type) {
     case 's3': {
@@ -211,7 +211,11 @@ export const applyAuthenticationModeToDataSource = (
 
       let applied: Record<string, unknown> = {};
       if (mode === 'access_and_secret_keys') {
-        applied = { access_key: data.settings.access_key, secret_key: data.settings.secret_key };
+        applied = {
+          access_key: data.settings.access_key,
+          secret_key: data.settings.secret_key,
+          auth: 'static_credentials',
+        };
       } else if (mode === 'federated_identity') {
         applied = {
           role_arn: data.settings.role_arn,
@@ -219,6 +223,7 @@ export const applyAuthenticationModeToDataSource = (
           role_session_name: data.settings.role_session_name,
           sts_endpoint: data.settings.sts_endpoint,
           sts_region: data.settings.sts_region,
+          auth: 'federated_identity',
         };
       }
 
@@ -244,12 +249,13 @@ export const applyAuthenticationModeToDataSource = (
 
       let applied: Record<string, unknown> = {};
       if (mode === 'access_and_secret_keys' && credentialsText) {
-        applied = { credentials: credentialsText };
+        applied = { credentials: credentialsText, auth: 'static_credentials' };
       } else if (mode === 'federated_identity') {
         applied = {
           jwt_audience: data.settings.jwt_audience,
           sts_audience: data.settings.sts_audience,
           service_account_impersonation_url: data.settings.service_account_impersonation_url,
+          auth: 'federated_identity',
         };
       }
       return {
@@ -281,6 +287,7 @@ export const applyAuthenticationModeToDataSource = (
             ...base,
             account: data.settings.account,
             key: data.settings.key,
+            auth: 'static_credentials',
           },
         };
       }
@@ -292,6 +299,7 @@ export const applyAuthenticationModeToDataSource = (
             tenant_id: data.settings.tenant_id,
             client_id: data.settings.client_id,
             jwt_audience: data.settings.jwt_audience,
+            auth: 'federated_identity',
           },
         };
       }

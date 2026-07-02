@@ -99,11 +99,11 @@ describe('create_data_source_flyout_authentication', () => {
           region: 'us-east-1',
           access_key: 'AKIA',
           secret_key: 'SECRET',
+          auth: 'static_credentials',
         })
       );
       expect(applied.settings).not.toHaveProperty('role_arn');
       expect(applied.settings).not.toHaveProperty('jwt_audience');
-      expect(applied.settings).not.toHaveProperty('auth');
     });
 
     it('keeps only s3 federated identity fields when federated_identity selected', () => {
@@ -132,6 +132,7 @@ describe('create_data_source_flyout_authentication', () => {
           role_session_name: 'session',
           sts_endpoint: 'https://sts',
           sts_region: 'us-east-1',
+          auth: 'federated_identity',
         })
       );
       expect(applied.settings).not.toHaveProperty('access_key');
@@ -154,7 +155,7 @@ describe('create_data_source_flyout_authentication', () => {
 
       const applied = applyAuthenticationModeToDataSource(data, 'anonymous');
       expect(applied.settings).toEqual(
-        expect.objectContaining({ region: 'us-east-1', auth: 'none' })
+        expect.objectContaining({ region: 'us-east-1', auth: 'anonymous' })
       );
       expect(applied.settings).not.toHaveProperty('access_key');
       expect(applied.settings).not.toHaveProperty('secret_key');
@@ -180,6 +181,7 @@ describe('create_data_source_flyout_authentication', () => {
         expect.objectContaining({
           project_id: 'p',
           credentials: '{"k":"v"}',
+          auth: 'static_credentials',
         })
       );
       expect(applied.settings).not.toHaveProperty('jwt_audience');
@@ -207,6 +209,7 @@ describe('create_data_source_flyout_authentication', () => {
           jwt_audience: 'aud',
           sts_audience: 'sts',
           service_account_impersonation_url: 'https://impersonate',
+          auth: 'federated_identity',
         })
       );
       expect(applied.settings).not.toHaveProperty('credentials');
@@ -226,7 +229,9 @@ describe('create_data_source_flyout_authentication', () => {
       };
 
       const applied = applyAuthenticationModeToDataSource(data, 'anonymous');
-      expect(applied.settings).toEqual(expect.objectContaining({ project_id: 'p', auth: 'none' }));
+      expect(applied.settings).toEqual(
+        expect.objectContaining({ project_id: 'p', auth: 'anonymous' })
+      );
       expect(applied.settings).not.toHaveProperty('credentials');
       expect(applied.settings).not.toHaveProperty('jwt_audience');
       expect(applied.settings).not.toHaveProperty('sts_audience');
@@ -253,6 +258,7 @@ describe('create_data_source_flyout_authentication', () => {
           endpoint: 'e',
           account: 'acct',
           key: 'key',
+          auth: 'static_credentials',
         })
       );
       expect(applied.settings).not.toHaveProperty('tenant_id');
@@ -282,6 +288,7 @@ describe('create_data_source_flyout_authentication', () => {
           tenant_id: 't',
           client_id: 'c',
           jwt_audience: 'aud',
+          auth: 'federated_identity',
         })
       );
       expect(applied.settings).not.toHaveProperty('account');
@@ -305,7 +312,7 @@ describe('create_data_source_flyout_authentication', () => {
 
       const applied = applyAuthenticationModeToDataSource(data, 'anonymous');
       expect(applied.settings).toEqual(
-        expect.objectContaining({ endpoint: 'https://example', auth: 'none' })
+        expect.objectContaining({ endpoint: 'https://example', auth: 'anonymous' })
       );
       expect(applied.settings).not.toHaveProperty('account');
       expect(applied.settings).not.toHaveProperty('key');
