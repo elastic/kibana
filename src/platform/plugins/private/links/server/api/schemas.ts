@@ -124,7 +124,6 @@ export const linksByReferenceSchema = serializedTitlesSchema.extends(
       },
     }),
     ref_id: schema.string({
-      maxLength: MAX_ID_LENGTH + 50, // accounts for prefix
       meta: {
         title: 'Reference ID',
         description: 'The unique identifier of the links library item.',
