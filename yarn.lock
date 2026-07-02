@@ -2331,10 +2331,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@116.3.1":
-  version "116.3.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-116.3.1.tgz#cf695035027b14af41c332145cfc254ae9675c05"
-  integrity sha512-ebTqz2p2iv4MmKjwPPA7fBAMzk8ZgC2mWjmY8O7wJEjxRn+gh5XsYjd/yutZgdhG9pAdVFrlVQwcOBubR2/8pg==
+"@elastic/eui@116.5.0":
+  version "116.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-116.5.0.tgz#0240c84dd03b56fbfd709080c34d04cc45e3cc0e"
+  integrity sha512-AiS+0rlGUoDskGXS9eB8JAq17A8zOCjVObWhJSkUoa9ft5YLn4eV3jttJ2NSf2xzn/R0hhEI8vKTjkTgV36HkA==
   dependencies:
     "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
@@ -6192,6 +6192,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-theme-browser-internal-types@link:src/core/packages/theme/browser-internal-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-theme-browser-internal@link:src/core/packages/theme/browser-internal":
   version "0.0.0"
   uid ""
@@ -9352,6 +9356,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/significant-events-plugin@link:x-pack/platform/plugins/shared/significant_events":
+  version "0.0.0"
+  uid ""
+
 "@kbn/significant-events-schema@link:x-pack/platform/packages/shared/kbn-significant-events-schema":
   version "0.0.0"
   uid ""
@@ -10530,10 +10538,10 @@
   resolved "https://registry.yarnpkg.com/@mixmark-io/domino/-/domino-2.2.0.tgz#4e8ec69bf1afeb7a14f0628b7e2c0f35bdb336c3"
   integrity sha512-Y28PR25bHXUg88kCV7nivXrP2Nj2RueZ3/l/jdx6J9f8J4nsEGcgX0Qe6lt7Pa+J79+kPiJU3LguR6O/6zrLOw==
 
-"@modelcontextprotocol/sdk@1.26.0":
-  version "1.26.0"
-  resolved "https://registry.yarnpkg.com/@modelcontextprotocol/sdk/-/sdk-1.26.0.tgz#5b35d73062125f126cc70b0be83cbab53bcdde74"
-  integrity sha512-Y5RmPncpiDtTXDbLKswIJzTqu2hyBKxTNsgKqKclDbhIgg1wgtf1fRuvxgTnRfcnxtvvgbIEcqUOzZrJ6iSReg==
+"@modelcontextprotocol/sdk@1.29.0":
+  version "1.29.0"
+  resolved "https://registry.yarnpkg.com/@modelcontextprotocol/sdk/-/sdk-1.29.0.tgz#79786d8b525e269de850ac82b1f1f757f3915f44"
+  integrity sha512-zo37mZA9hJWpULgkRpowewez1y6ML5GsXJPY8FI0tBBCd77HEvza4jDqRKOXgHNn867PVGCyTdzqpz0izu5ZjQ==
   dependencies:
     "@hono/node-server" "^1.19.9"
     ajv "^8.17.1"
@@ -14717,11 +14725,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/braces@*":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@types/braces/-/braces-3.0.0.tgz#7da1c0d44ff1c7eb660a36ec078ea61ba7eb42cb"
-  integrity sha512-TbH79tcyi9FHwbyboOKeRachRq63mSuWYXOflsNO9ZyE5ClQ/JaozNKl+aWUq87qPNsXasXxi2AbgfwIJ+8GQw==
-
 "@types/bunyan@1.8.11":
   version "1.8.11"
   resolved "https://registry.yarnpkg.com/@types/bunyan/-/bunyan-1.8.11.tgz#0b9e7578a5aa2390faf12a460827154902299638"
@@ -15379,13 +15382,6 @@
   version "1.1.4"
   resolved "https://registry.yarnpkg.com/@types/methods/-/methods-1.1.4.tgz#d3b7ac30ac47c91054ea951ce9eed07b1051e547"
   integrity sha512-ymXWVrDiCxTBE3+RIrrP533E70eA+9qu7zdWoHuOmGujkYtzf4HQF96b8nwHLqhuf4ykX61IGRIB38CC6/sImQ==
-
-"@types/micromatch@4.0.2":
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/@types/micromatch/-/micromatch-4.0.2.tgz#ce29c8b166a73bf980a5727b1e4a4d099965151d"
-  integrity sha512-oqXqVb0ci19GtH0vOA/U2TmHTcRY9kuZl4mqUxe0QmJAlIW13kzhuK5pi1i9+ngav8FjpSb9FVS/GE00GLX1VA==
-  dependencies:
-    "@types/braces" "*"
 
 "@types/mime-types@2.1.0":
   version "2.1.0"
@@ -22395,9 +22391,9 @@ fast-string-width@^3.0.2:
     fast-string-truncated-width "^3.0.2"
 
 fast-uri@^3.0.1:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.1.2.tgz#8af3d4fc9d3e71b11572cc2673b514a7d1a8c8ec"
-  integrity sha512-rVjf7ArG3LTk+FS6Yw81V1DLuZl1bRbNrev6Tmd/9RaroeeRRJhAt7jg/6YFxbvAQXUCavSoZhPPj6oOx+5KjQ==
+  version "3.1.3"
+  resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.1.3.tgz#f695a40f006aba505631573a0021ddb21194ad11"
+  integrity sha512-i70LwGWUduXqzicKXWshooq+sWL1K3WUU5rKZNG/0i3a1OSoX3HqhH5WbWwTmqWfor4urUakGPiRQcleRZTwOg==
 
 fast-wrap-ansi@^0.2.0:
   version "0.2.0"
@@ -27908,14 +27904,6 @@ micromark@^4.0.0:
     micromark-util-symbol "^2.0.0"
     micromark-util-types "^2.0.0"
 
-micromatch@4.0.8, micromatch@^4.0.2, micromatch@^4.0.4, micromatch@^4.0.5, micromatch@^4.0.8:
-  version "4.0.8"
-  resolved "https://registry.yarnpkg.com/micromatch/-/micromatch-4.0.8.tgz#d66fa18f3a47076789320b9b1af32bd86d9fa202"
-  integrity sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==
-  dependencies:
-    braces "^3.0.3"
-    picomatch "^2.3.1"
-
 micromatch@^3.1.10:
   version "3.1.10"
   resolved "https://registry.npmjs.org/micromatch/-/micromatch-3.1.10.tgz"
@@ -27934,6 +27922,14 @@ micromatch@^3.1.10:
     regex-not "^1.0.0"
     snapdragon "^0.8.1"
     to-regex "^3.0.2"
+
+micromatch@^4.0.2, micromatch@^4.0.4, micromatch@^4.0.5, micromatch@^4.0.8:
+  version "4.0.8"
+  resolved "https://registry.yarnpkg.com/micromatch/-/micromatch-4.0.8.tgz#d66fa18f3a47076789320b9b1af32bd86d9fa202"
+  integrity sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==
+  dependencies:
+    braces "^3.0.3"
+    picomatch "^2.3.1"
 
 miller-rabin@^4.0.0:
   version "4.0.1"
