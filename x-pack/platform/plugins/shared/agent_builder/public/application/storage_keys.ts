@@ -7,6 +7,7 @@
 
 export const storageKeys = {
   lastUsedConnector: 'agentBuilder.lastUsedConnector',
+  conversationListSortMode: 'agentBuilder.conversationListSortMode',
   welcomeMessageDismissed: 'agentBuilder.welcomeMessageDismissed',
   autoIncludeWarningDismissed: 'agentBuilder.autoIncludeWarningDismissed',
   mcpClientBannerDismissedIds: 'agentBuilder.mcpClientBannerDismissedIds',

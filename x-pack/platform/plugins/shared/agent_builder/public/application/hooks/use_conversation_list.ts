@@ -8,6 +8,11 @@
 import { useQuery } from '@kbn/react-query';
 import { queryKeys } from '../query_keys';
 import { useAgentBuilderServices } from './use_agent_builder_service';
+import { isRunningInvestigationConversation } from '../components/conversations/detail/template_conversation_utils';
+
+// Poll the list while any investigation is still running so its status indicator clears when
+// the workflow completes server-side (no push channel exists for workflow-driven updates).
+const RUNNING_INVESTIGATION_POLL_MS = 3000;
 
 export const useConversationList = ({ agentId }: { agentId?: string } = {}) => {
   const { conversationsService } = useAgentBuilderServices();
@@ -21,6 +26,8 @@ export const useConversationList = ({ agentId }: { agentId?: string } = {}) => {
     queryFn: () => {
       return conversationsService.list({ agentId });
     },
+    refetchInterval: (data) =>
+      data?.some(isRunningInvestigationConversation) ? RUNNING_INVESTIGATION_POLL_MS : false,
   });
 
   return {

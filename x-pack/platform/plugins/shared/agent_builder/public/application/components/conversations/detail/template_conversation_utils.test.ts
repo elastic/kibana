@@ -11,6 +11,7 @@ import {
   getTemplateHeaderActions,
   getTemplateHeaderFields,
   isCollaborativeTemplateConversation,
+  isRunningInvestigationConversation,
   shouldShowTemplateDetailShell,
 } from './template_conversation_utils';
 
@@ -141,6 +142,41 @@ describe('template_conversation_utils', () => {
 
     it('returns empty array for unknown template', () => {
       expect(getTemplateHeaderActions({ template_id: 'unknown-template' })).toEqual([]);
+    });
+  });
+
+  describe('isRunningInvestigationConversation', () => {
+    it('returns true for an investigation template still running', () => {
+      expect(
+        isRunningInvestigationConversation({
+          template_id: 'observability-investigation-v1',
+          custom_fields: { status: 'running' },
+        })
+      ).toBe(true);
+    });
+
+    it('returns false once the investigation status is no longer running', () => {
+      expect(
+        isRunningInvestigationConversation({
+          template_id: 'observability-investigation-v1',
+          custom_fields: { status: 'complete' },
+        })
+      ).toBe(false);
+    });
+
+    it('returns false for a running conversation from a different template', () => {
+      expect(
+        isRunningInvestigationConversation({
+          template_id: 'observability-incident-v1',
+          custom_fields: { status: 'running' },
+        })
+      ).toBe(false);
+    });
+
+    it('returns false when there are no custom fields', () => {
+      expect(
+        isRunningInvestigationConversation({ template_id: 'observability-investigation-v1' })
+      ).toBe(false);
     });
   });
 

@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom-v5-compat';
 
 import {
+  EuiBadge,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -61,6 +62,13 @@ const labels = {
   actionsMenu: i18n.translate('xpack.agentBuilder.sidebar.conversationList.actionsMenu', {
     defaultMessage: 'Conversation actions',
   }),
+  investigating: i18n.translate('xpack.agentBuilder.sidebar.conversationList.investigating', {
+    defaultMessage: 'Investigating',
+  }),
+  investigatingTooltip: i18n.translate(
+    'xpack.agentBuilder.sidebar.conversationList.investigatingTooltip',
+    { defaultMessage: 'The investigation agent is running in this conversation.' }
+  ),
 };
 
 export interface ConversationListItemRowProps {
@@ -74,6 +82,8 @@ export interface ConversationListItemRowProps {
   onItemClick?: () => void;
   status?: ConversationDisplayStatus;
   read?: boolean;
+  /** POC: renders a distinct "Investigating" badge while the investigation agent runs. */
+  isRunningInvestigation?: boolean;
 }
 
 export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = ({
@@ -87,6 +97,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   onItemClick,
   status,
   read,
+  isRunningInvestigation = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -298,6 +309,20 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
             <EuiTextTruncate text={title || conversationId} />
           </Link>
         </EuiFlexItem>
+
+        {isRunningInvestigation ? (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={labels.investigatingTooltip} disableScreenReaderOutput>
+              <EuiBadge
+                color="accent"
+                iconType="search"
+                data-test-subj={`agentBuilderSidebarConversationInvestigating-${conversationId}`}
+              >
+                {labels.investigating}
+              </EuiBadge>
+            </EuiToolTip>
+          </EuiFlexItem>
+        ) : null}
 
         {status !== undefined || showActionsMenu ? (
           <EuiFlexItem grow={false}>

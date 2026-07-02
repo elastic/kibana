@@ -76,8 +76,14 @@ steps:
     create-conversation: true
     with:
       timeout: 1800s
+      # Run the agent inside the pre-created investigation group conversation when one was
+      # supplied (sigevent path), so its full round — reasoning and tool calls — is visible to
+      # collaborators. Group conversations only invoke the agent when the message mentions
+      # `@agent` (see shouldInvokeAgentForCollaborativeMessage), so we prepend it conditionally.
+      # Other callers omit conversation_id and fall back to create-conversation.
+      conversation_id: "{{ inputs.context.conversation_id }}"
       message: |
-        Investigate the root cause of the following issue:
+        {% if inputs.context.conversation_id %}@agent {% endif %}Investigate the root cause of the following issue:
 
         {{ inputs.message }}
 

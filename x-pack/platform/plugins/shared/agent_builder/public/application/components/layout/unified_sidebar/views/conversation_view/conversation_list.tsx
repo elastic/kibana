@@ -7,24 +7,57 @@
 
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom-v5-compat';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import {
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiTextTruncate,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ConversationDisplayStatus, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import {
+  ConversationDisplayStatus,
+  ConversationRoundStatus,
+  type ConversationWithoutRounds,
+} from '@kbn/agent-builder-common';
 import { appPaths } from '../../../../../utils/app_paths';
+import { storageKeys } from '../../../../../storage_keys';
 import { useStreamingContext } from '../../../../../context/streaming/streaming_context';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
 import {
   createConversationListItemStyles,
   createActiveConversationListItemStyles,
 } from '../../../../conversations/conversation_list_item_styles';
+import {
+  isRunningInvestigationConversation,
+  resolveTemplateId,
+} from '../../../../conversations/detail/template_conversation_utils';
 import { ConversationListItemRow } from './conversation_list_item_row';
+
+type ConversationSortMode = 'recent' | 'template';
+
+const sortLabels = {
+  legend: i18n.translate('xpack.agentBuilder.sidebar.conversationList.sort.legend', {
+    defaultMessage: 'Sort conversations',
+  }),
+  recent: i18n.translate('xpack.agentBuilder.sidebar.conversationList.sort.recent', {
+    defaultMessage: 'Recent',
+  }),
+  template: i18n.translate('xpack.agentBuilder.sidebar.conversationList.sort.template', {
+    defaultMessage: 'Type',
+  }),
+};
+
+const byRecencyDesc = (a: ConversationWithoutRounds, b: ConversationWithoutRounds): number =>
+  new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+
+// Conversations without a template sort after templated ones (tilde sorts after alphanumerics).
+const templateSortKey = (conversation: ConversationWithoutRounds): string =>
+  resolveTemplateId(conversation) ?? '~';
 
 const deriveDisplayStatus = (
   conversation: { read?: boolean; status?: ConversationRoundStatus },
@@ -70,18 +103,26 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   const { euiTheme } = useEuiTheme();
   const { conversations = [], isLoading } = useConversationList({ agentId });
   const { activeStreams, byConversationId } = useStreamingContext();
+  const [sortMode = 'recent', setSortMode] = useLocalStorage<ConversationSortMode>(
+    storageKeys.conversationListSortMode
+  );
 
   const sortedConversations = useMemo(
     () =>
       [...conversations].sort((a, b) => {
+        if (sortMode === 'template') {
+          const templateComparison = templateSortKey(a).localeCompare(templateSortKey(b));
+          if (templateComparison !== 0) return templateComparison;
+          return byRecencyDesc(a, b);
+        }
         const aInProgress =
           activeStreams.has(a.id) || a.status === ConversationRoundStatus.inProgress;
         const bInProgress =
           activeStreams.has(b.id) || b.status === ConversationRoundStatus.inProgress;
         if (aInProgress !== bInProgress) return aInProgress ? -1 : 1;
-        return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+        return byRecencyDesc(a, b);
       }),
-    [conversations, activeStreams]
+    [conversations, activeStreams, sortMode]
   );
 
   const linkStyles = createConversationListItemStyles(euiTheme);
@@ -116,11 +157,32 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <EuiButtonGroup
+          legend={sortLabels.legend}
+          buttonSize="compressed"
+          isFullWidth
+          options={[
+            { id: 'recent', label: sortLabels.recent },
+            { id: 'template', label: sortLabels.template },
+          ]}
+          idSelected={sortMode}
+          onChange={(id) => setSortMode(id as ConversationSortMode)}
+          css={css`
+            margin-bottom: ${euiTheme.size.xs};
+          `}
+          data-test-subj="agentBuilderSidebarConversationSort"
+        />
+      </EuiFlexItem>
       {sortedConversations.map((conversation) => {
         const isActive = currentConversationId === conversation.id;
         const isStreaming = activeStreams.has(conversation.id);
         const hasError = Boolean(byConversationId[conversation.id]?.error);
-        const status = deriveDisplayStatus(conversation, isStreaming, hasError, isActive);
+        const isRunningInvestigation = isRunningInvestigationConversation(conversation);
+        // The dedicated "Investigating" badge stands in for the generic in-progress spinner.
+        const status = isRunningInvestigation
+          ? undefined
+          : deriveDisplayStatus(conversation, isStreaming, hasError, isActive);
         return (
           <EuiFlexItem grow={false} key={conversation.id}>
             <ConversationListItemRow
@@ -134,6 +196,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
               onItemClick={onItemClick ? () => onItemClick(conversation.id) : undefined}
               status={status}
               read={conversation.read}
+              isRunningInvestigation={isRunningInvestigation}
             />
           </EuiFlexItem>
         );

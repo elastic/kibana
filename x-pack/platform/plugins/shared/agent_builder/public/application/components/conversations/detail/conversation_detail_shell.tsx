@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiTab, EuiTabs, EuiText, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiText,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
@@ -14,7 +23,10 @@ import { useConversationContext } from '../../../context/conversation/conversati
 import { Conversation } from '../conversation';
 import { ConversationDetailHeader } from './conversation_detail_header';
 import { ConversationDetailSidebar } from './conversation_detail_sidebar';
-import { isCollaborativeTemplateConversation } from './template_conversation_utils';
+import {
+  isCollaborativeTemplateConversation,
+  isRunningInvestigationConversation,
+} from './template_conversation_utils';
 import { ConversationDetailAttachmentsTab } from './tabs/conversation_detail_attachments_tab';
 import { getDisplayableConversationAttachments } from './tabs/conversation_attachment_display_utils';
 import { ConversationDetailPlaceholderTab } from './tabs/conversation_detail_placeholder_tab';
@@ -51,6 +63,17 @@ const labels = {
       defaultMessage: 'Parallel threads will appear here in a follow-up release.',
     }
   ),
+  investigationRunningTitle: i18n.translate(
+    'xpack.agentBuilder.conversationDetail.activity.investigationRunningTitle',
+    { defaultMessage: 'Investigation in progress' }
+  ),
+  investigationRunningBody: i18n.translate(
+    'xpack.agentBuilder.conversationDetail.activity.investigationRunningBody',
+    {
+      defaultMessage:
+        'The investigation agent is analyzing signals. Its reasoning and tool calls appear below as each step completes.',
+    }
+  ),
 };
 
 interface ConversationDetailShellProps {
@@ -73,6 +96,9 @@ export const ConversationDetailShell: React.FC<ConversationDetailShellProps> = (
 
   const attachmentCount = getDisplayableConversationAttachments(conversation?.attachments).length;
   const isCollaborative = isCollaborativeTemplateConversation(conversation);
+  const isRunningInvestigation = Boolean(
+    conversation && isRunningInvestigationConversation(conversation)
+  );
   const showDetailsTab = isEmbeddedContext;
 
   const shellStyles = css`
@@ -177,6 +203,24 @@ export const ConversationDetailShell: React.FC<ConversationDetailShellProps> = (
                   min-height: 0;
                 `}
               >
+                {isRunningInvestigation && (
+                  <div
+                    css={css`
+                      flex-shrink: 0;
+                      padding: ${euiTheme.size.s} ${euiTheme.size.l} 0;
+                    `}
+                  >
+                    <EuiCallOut
+                      size="s"
+                      color="primary"
+                      title={labels.investigationRunningTitle}
+                      iconType={() => <EuiLoadingSpinner size="m" />}
+                      data-test-subj="agentBuilderInvestigationRunningBanner"
+                    >
+                      {labels.investigationRunningBody}
+                    </EuiCallOut>
+                  </div>
+                )}
                 <div
                   css={css`
                     flex: 1;

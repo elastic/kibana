@@ -28,6 +28,14 @@ import { useStreamingContext, useStreamRecord } from '../context/streaming/strea
 import { useActiveSpaceId } from '../context/active_space_context';
 import { useValidateAgentId } from './agents/use_validate_agent_id';
 import { useConversationContext } from '../context/conversation/conversation_context';
+import { isRunningInvestigationConversation } from '../components/conversations/detail/template_conversation_utils';
+
+/**
+ * While an investigation workflow runs its agent round server-side in a group conversation,
+ * there is no push channel to the client, so poll to surface the round (reasoning + tool calls)
+ * and clear the indicator once the workflow marks the investigation complete.
+ */
+const RUNNING_INVESTIGATION_POLL_MS = 3000;
 
 export const useConversation = () => {
   const conversationId = useConversationId();
@@ -82,6 +90,12 @@ export const useConversation = () => {
     // Refetching an errored query (no cached success) resets status `error` → `loading`,
     // which would clear `errorType` and flip `Conversation`'s conditional rendering. Resulting in a loop of unmounts/remounts.
     retryOnMount: false,
+    // Poll while a server-run investigation is in progress (never while this client streams —
+    // that would race optimistic chunks); the query is disabled during our own stream anyway.
+    refetchInterval: (data) =>
+      !isThisConversationStreaming && data && isRunningInvestigationConversation(data)
+        ? RUNNING_INVESTIGATION_POLL_MS
+        : false,
   });
 
   return { conversation, isLoading, isFetching, isFetched, isError, error };

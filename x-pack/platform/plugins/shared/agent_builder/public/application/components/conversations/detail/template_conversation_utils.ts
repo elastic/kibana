@@ -202,6 +202,24 @@ export const resolveTemplateId = (
   return conversation.template_snapshot?.template_id ?? conversation.template_id;
 };
 
+export const OBSERVABILITY_INVESTIGATION_TEMPLATE_ID = 'observability-investigation-v1';
+
+/**
+ * A running investigation is a conversation created from the observability investigation
+ * template whose workflow is still executing. The managed investigation workflow flips
+ * `custom_fields.status` from `running` to `complete`/`failed` via the /refresh route when it
+ * finishes, so this doubles as the poll/indicator gate while the agent runs in the group
+ * conversation.
+ */
+export const isRunningInvestigationConversation = (
+  conversation: Pick<Conversation, 'template_id' | 'template_snapshot' | 'custom_fields'>
+): boolean => {
+  return (
+    resolveTemplateId(conversation) === OBSERVABILITY_INVESTIGATION_TEMPLATE_ID &&
+    conversation.custom_fields?.status === 'running'
+  );
+};
+
 const getPocTemplateDefinition = (
   conversation: Pick<Conversation, 'template_id' | 'template_snapshot'>
 ): PocTemplateDefinition | undefined => {
