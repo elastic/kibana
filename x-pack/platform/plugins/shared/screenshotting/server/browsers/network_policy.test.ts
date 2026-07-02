@@ -33,6 +33,13 @@ describe('allowRequest', () => {
     expect(allowRequest(url, rules)).toEqual(false);
   });
 
+  it('denies requests when a rule matches tasking into account port', () => {
+    const url = 'https://bad.com:80/cool/route/broå';
+    const rules = [{ allow: false, host: 'bad.com' }, { allow: true }];
+
+    expect(allowRequest(url, rules)).toEqual(false);
+  });
+
   it('allows complex rules', () => {
     const url = 'https://kibana.com/cool/route/bro';
     const rules = [{ allow: true, host: 'kibana.com', protocol: 'https:' }, { allow: false }];
