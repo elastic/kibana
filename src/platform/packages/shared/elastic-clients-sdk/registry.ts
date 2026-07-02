@@ -125,17 +125,36 @@ export interface LoadedApi {
 }
 
 /**
+ * Thrown by {@link ApiRegistry.loadApi} when no manifest entry matches the
+ * requested {@link ApiRegistryMeta.id}. Lets callers distinguish an unknown
+ * identifier from a genuine load failure.
+ */
+export class UnknownApiError extends Error {
+  constructor(public readonly id: string) {
+    super(`Unknown API identifier: "${id}"`);
+    this.name = 'UnknownApiError';
+  }
+}
+
+/**
  * A target-agnostic view over a generated client's API surface.
  *
  * - `manifest` lists every operation as cheap metadata (no schemas loaded).
- * - `loadApi(meta)` dynamic-imports and returns a {@link LoadedApi} for one operation.
+ * - `loadApi(id)` looks up the manifest entry for `id`, then dynamic-imports and
+ *   returns a {@link LoadedApi} for that operation.
  *
  * This is the contract consumed by generic API tooling that needs to discover,
  * document, and execute operations without hard-coding a specific target.
  */
-export interface ApiRegistry<M extends ApiRegistryMeta = ApiRegistryMeta> {
-  readonly manifest: readonly M[];
-  loadApi(meta: M): Promise<LoadedApi>;
+export interface ApiRegistry {
+  readonly manifest: readonly ApiRegistryMeta[];
+  /**
+   * Resolves the full {@link LoadedApi} for the operation with the given
+   * {@link ApiRegistryMeta.id}.
+   *
+   * @throws {UnknownApiError} when no manifest entry matches `id`.
+   */
+  loadApi(id: string): Promise<LoadedApi>;
 }
 
 /** The two backend targets supported by the SDK. */

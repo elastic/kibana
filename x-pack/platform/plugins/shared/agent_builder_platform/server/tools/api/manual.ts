@@ -11,7 +11,7 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { apiRegistries, findApi, targetSchema } from '@kbn/elastic-clients-sdk';
+import { apiRegistries, targetSchema, UnknownApiError } from '@kbn/elastic-clients-sdk';
 
 const manualSchema = z.object({
   target: targetSchema,
@@ -41,21 +41,20 @@ Then call \`${platformCoreTools.apiExecute}\` with the same \`target\`, \`api\`,
     schema: manualSchema,
     handler: async ({ target, api }, { logger }) => {
       const registry = apiRegistries[target];
-      const meta = findApi(registry, api);
-      if (meta == null) {
-        return {
-          results: [
-            createErrorResult({
-              message: `Unknown API identifier: "${api}". Use the ${platformCoreTools.apiDiscover} tool to find valid identifiers.`,
-            }),
-          ],
-        };
-      }
 
       let loaded;
       try {
-        loaded = await registry.loadApi(meta);
+        loaded = await registry.loadApi(api);
       } catch (err) {
+        if (err instanceof UnknownApiError) {
+          return {
+            results: [
+              createErrorResult({
+                message: `Unknown API identifier: "${api}". Use the ${platformCoreTools.apiDiscover} tool to find valid identifiers.`,
+              }),
+            ],
+          };
+        }
         logger.error(`api_manual: failed to load API "${api}" (target=${target}): ${err}`);
         return {
           results: [

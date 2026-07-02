@@ -13,11 +13,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { ApiRegistry, ApiRegistryMeta } from './registry';
 
 export type { JsonSchemaObject } from './lib/json_schema';
 
-export { apiRegistries } from './registry';
+export { apiRegistries, UnknownApiError } from './registry';
 export type {
   ApiTarget,
   ApiRegistry,
@@ -38,7 +37,3 @@ export const targetSchema = z
   .describe(
     'The backend API target. Use "elasticsearch" to call Elasticsearch HTTP APIs and "kibana" to call Kibana HTTP APIs. '
   );
-
-/** Resolves a manifest entry from its {@link ApiRegistryMeta.id}. */
-export const findApi = (registry: ApiRegistry, id: string): ApiRegistryMeta | undefined =>
-  registry.manifest.find((meta) => meta.id === id);

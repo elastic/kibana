@@ -13,16 +13,19 @@
  */
 
 import type { ApiRegistry, ApiRegistryDefinition, ApiRequest } from '../registry';
-import { withApiId } from '../registry';
+import { UnknownApiError, withApiId } from '../registry';
 import { extractSchemaArgs } from '../lib/schema_args';
 import { buildRequestParams as buildEsRequestParams } from './request_builder';
 import { apiManifest, loadEsApi } from './apis';
-import type { EsApiMeta } from './apis';
+
+const manifest = withApiId(apiManifest);
 
 /** Registry over the Elasticsearch HTTP API surface. */
-export const esApiRegistry: ApiRegistry<EsApiMeta & { readonly id: string }> = {
-  manifest: withApiId(apiManifest),
-  loadApi: async (meta) => {
+export const esApiRegistry: ApiRegistry = {
+  manifest,
+  loadApi: async (id) => {
+    const meta = manifest.find((entry) => entry.id === id);
+    if (meta == null) throw new UnknownApiError(id);
     const def = await loadEsApi(meta);
     return {
       definition: def as ApiRegistryDefinition,

@@ -14,7 +14,7 @@ import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { TransportRequestParams } from '@elastic/transport';
 import type { ApiRequest, JsonSchemaObject } from '@kbn/elastic-clients-sdk';
-import { apiRegistries, findApi, targetSchema } from '@kbn/elastic-clients-sdk';
+import { apiRegistries, targetSchema, UnknownApiError } from '@kbn/elastic-clients-sdk';
 
 /**
  * Issues a Kibana HTTP API call on behalf of the current user.
@@ -89,21 +89,20 @@ The response is the raw API response body.`,
     schema: executeSchema,
     handler: async ({ target, api, params = {} }, { esClient, request, logger }) => {
       const registry = apiRegistries[target];
-      const meta = findApi(registry, api);
-      if (meta == null) {
-        return {
-          results: [
-            createErrorResult({
-              message: `Unknown API identifier: "${api}". Use the ${platformCoreTools.apiDiscover} tool to find valid identifiers.`,
-            }),
-          ],
-        };
-      }
 
       let loaded;
       try {
-        loaded = await registry.loadApi(meta);
+        loaded = await registry.loadApi(api);
       } catch (err) {
+        if (err instanceof UnknownApiError) {
+          return {
+            results: [
+              createErrorResult({
+                message: `Unknown API identifier: "${api}". Use the ${platformCoreTools.apiDiscover} tool to find valid identifiers.`,
+              }),
+            ],
+          };
+        }
         logger.error(`api_execute: failed to load API "${api}" (target=${target}): ${err}`);
         return {
           results: [

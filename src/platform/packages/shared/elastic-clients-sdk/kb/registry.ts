@@ -15,16 +15,19 @@
 import type { JsonSchemaObject } from '../lib/json_schema';
 import type { FoundIn } from '../lib/schema_args';
 import type { ApiRegistry, ApiRegistryDefinition, ApiRequest } from '../registry';
-import { withApiId } from '../registry';
+import { UnknownApiError, withApiId } from '../registry';
 import { buildKibanaRequestParams } from './request-builder';
 import { kbApiManifest, loadKbApi } from './apis';
-import type { KbApiMeta } from './apis';
 import type { KbApiDefinition } from './types';
 
+const manifest = withApiId(kbApiManifest);
+
 /** Registry over the Kibana HTTP API surface. */
-export const kbApiRegistry: ApiRegistry<KbApiMeta & { readonly id: string }> = {
-  manifest: withApiId(kbApiManifest),
-  loadApi: async (meta) => {
+export const kbApiRegistry: ApiRegistry = {
+  manifest,
+  loadApi: async (id) => {
+    const meta = manifest.find((entry) => entry.id === id);
+    if (meta == null) throw new UnknownApiError(id);
     const rawDef = await loadKbApi(meta);
     return {
       definition: toRegistryDefinition(rawDef),
