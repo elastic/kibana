@@ -26,7 +26,7 @@ import {
   useGetPackagePolicies,
   sendBulkGetAgentPoliciesForRq,
 } from '../../../hooks';
-import { useGetOnePackagePolicy } from '../../../../integrations/hooks';
+import { useGetOnePackagePolicyQuery } from '../../../../integrations/hooks';
 
 import { ExperimentalFeaturesService } from '../../../services';
 
@@ -201,7 +201,7 @@ jest.mock('../../../hooks', () => {
 jest.mock('../../../../integrations/hooks', () => {
   return {
     ...jest.requireActual('../../../../integrations/hooks'),
-    useGetOnePackagePolicy: jest.fn(),
+    useGetOnePackagePolicyQuery: jest.fn(),
     useConfirmForceInstall: jest.fn(),
   };
 });
@@ -297,7 +297,7 @@ describe('edit package policy page', () => {
     testRenderer = createFleetTestRendererMock();
     lastStepConfigureProps = undefined;
 
-    (useGetOnePackagePolicy as MockFn).mockReturnValue({
+    (useGetOnePackagePolicyQuery as MockFn).mockReturnValue({
       data: {
         item: mockPackagePolicy,
       },
@@ -544,7 +544,7 @@ describe('edit package policy page', () => {
 
   it('should not show confirmation modal if package is on agentless policy', async () => {
     (sendBulkGetAgentPoliciesForRq as MockFn).mockResolvedValue({ data: [{ agents: 1 }] });
-    (useGetOnePackagePolicy as MockFn).mockReturnValue({
+    (useGetOnePackagePolicyQuery as MockFn).mockReturnValue({
       data: {
         item: mockPackagePolicyAgentless,
       },
@@ -594,7 +594,7 @@ describe('edit package policy page', () => {
   it('passes existing var_group selections to configure step', async () => {
     const varGroupSelections = { auth_method: 'oauth' };
 
-    (useGetOnePackagePolicy as MockFn).mockReturnValueOnce({
+    (useGetOnePackagePolicyQuery as MockFn).mockReturnValueOnce({
       data: {
         item: { ...mockPackagePolicy, var_group_selections: varGroupSelections },
       },

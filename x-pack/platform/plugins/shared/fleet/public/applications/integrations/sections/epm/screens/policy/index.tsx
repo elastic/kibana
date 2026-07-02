@@ -20,14 +20,27 @@ export const Policy = memo(() => {
   } = useRouteMatch<{ packagePolicyId: string }>();
 
   const { search } = useLocation();
-  const { data: packagePolicyData } = useGetOnePackagePolicyQuery(packagePolicyId);
+  const qs = new URLSearchParams(search);
+
+  // Detect-before-read hint: agentless surfaces append `isAgentless=true` so the edit form
+  // reads/writes through the agentless API instead of the package-policy API.
+  const isAgentless = qs.get(IS_AGENTLESS_QUERY_PARAM) === 'true';
+
+  // This read only resolves the edit UI extension, whose `useLatestPackageVersion` flag feeds
+  // `forceUpgrade`. Skipping it for agentless is safe and avoids touching the package-policy API:
+  // this screen is only used for regular (non-upgrade) edit, and the agentless load path forces
+  // `isUpgrade=false` and ignores `forceUpgrade`. Agentless *upgrades* use the separate
+  // `upgrade_package_policy` route, which omits the `isAgentless` hint and stays on the legacy
+  // package-policy path for now. The form re-resolves the extension from the loaded policy.
+  const { data: packagePolicyData } = useGetOnePackagePolicyQuery(packagePolicyId, {
+    enabled: !isAgentless,
+  });
 
   const extensionView = useUIExtension(
     packagePolicyData?.item?.package?.name ?? '',
     'package-policy-edit'
   );
 
-  const qs = new URLSearchParams(search);
   const fromQs = qs.get('from');
 
   let from: EditPackagePolicyFrom | undefined;
@@ -39,10 +52,6 @@ export const Policy = memo(() => {
   } else {
     from = 'package-edit';
   }
-
-  // Detect-before-read hint: agentless surfaces append `isAgentless=true` so the edit form
-  // reads/writes through the agentless API instead of the package-policy API.
-  const isAgentless = qs.get(IS_AGENTLESS_QUERY_PARAM) === 'true';
 
   return (
     <EditPackagePolicyForm

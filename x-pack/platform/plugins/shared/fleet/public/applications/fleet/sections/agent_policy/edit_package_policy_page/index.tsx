@@ -31,7 +31,7 @@ import {
 } from '../../../hooks';
 import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
-  useGetOnePackagePolicy,
+  useGetOnePackagePolicyQuery,
 } from '../../../../integrations/hooks';
 import {
   Loading,
@@ -81,26 +81,34 @@ export const EditPackagePolicyPage = memo(() => {
     params: { packagePolicyId, policyId },
   } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
 
-  const packagePolicy = useGetOnePackagePolicy(packagePolicyId);
-  const extensionView = useUIExtension(
-    packagePolicy.data?.item?.package?.name ?? '',
-    'package-policy-edit'
-  );
-
   // Parse the 'from' query parameter to determine navigation after save
   const { search } = useLocation();
   const qs = new URLSearchParams(search);
-  const fromQs = qs.get('from');
-  let from: EditPackagePolicyFrom | undefined;
-  if (fromQs === 'installed-integrations') {
-    from = 'installed-integrations';
-  }
 
   // Detect-before-read: the route only carries `packagePolicyId`, shared between agentless and
   // agent-based policies. Agentless surfaces append this hint so we can read/write through the
   // agentless API without first reading the package policy. See task4 follow-ups for the
   // (provisional) mechanism.
   const isAgentless = qs.get(IS_AGENTLESS_QUERY_PARAM) === 'true';
+
+  // This read only resolves the edit UI extension, whose `useLatestPackageVersion` flag feeds
+  // `forceUpgrade`. Skipping it for agentless is safe and avoids touching the package-policy API:
+  // this wrapper is only used for regular (non-upgrade) edit, and the agentless load path forces
+  // `isUpgrade=false` and ignores `forceUpgrade`. Agentless *upgrades* use the separate
+  // `upgrade_package_policy` route, which deliberately omits the `isAgentless` hint and stays on the
+  // legacy package-policy path for now (wiring the agentless `_upgrade` UI is a follow-up / task5).
+  // The form re-resolves the extension from the agentless-loaded policy for rendering.
+  const packagePolicy = useGetOnePackagePolicyQuery(packagePolicyId, { enabled: !isAgentless });
+  const extensionView = useUIExtension(
+    packagePolicy.data?.item?.package?.name ?? '',
+    'package-policy-edit'
+  );
+
+  const fromQs = qs.get('from');
+  let from: EditPackagePolicyFrom | undefined;
+  if (fromQs === 'installed-integrations') {
+    from = 'installed-integrations';
+  }
 
   return (
     <EditPackagePolicyForm
