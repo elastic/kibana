@@ -118,7 +118,18 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
     });
   });
 
-  test.beforeEach(async ({ browserAuth }) => {
+  test.beforeEach(async ({ browserAuth, kbnClient }) => {
+    // Reset snooze state before every test so the suite is order-independent and
+    // no test silently relies on the state left by a previous one. Unsnooze is
+    // idempotent server-side (a no-op when the instance isn't snoozed), so this
+    // is safe even on the first run.
+    await kbnClient.request({
+      method: 'POST',
+      path: `/api/alerting/rule/${encodeURIComponent(ruleId)}/alert/${encodeURIComponent(
+        ALERT_INSTANCE_ID_VALUE
+      )}/_unsnooze`,
+    });
+
     await browserAuth.loginWithCustomRole(SNOOZE_ALERT_ROLE);
   });
 
@@ -163,16 +174,7 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
   test('snoozes an active alert with a condition-based snooze (any operator)', async ({
     page,
     pageObjects,
-    kbnClient,
   }) => {
-    // Ensure the alert is not snoozed before entering this test.
-    await kbnClient.request({
-      method: 'POST',
-      path: `/api/alerting/rule/${encodeURIComponent(ruleId)}/alert/${encodeURIComponent(
-        ALERT_INSTANCE_ID_VALUE
-      )}/_unsnooze`,
-    });
-
     await pageObjects.ruleDetailsPage.gotoById(ruleId);
     await pageObjects.ruleDetailsPage.expectAlertsTabLoaded();
     await pageObjects.ruleDetailsPage.alertsTable.ensureGridVisible();
@@ -196,15 +198,7 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
   test('snoozes an active alert with two conditions using the all operator', async ({
     page,
     pageObjects,
-    kbnClient,
   }) => {
-    await kbnClient.request({
-      method: 'POST',
-      path: `/api/alerting/rule/${encodeURIComponent(ruleId)}/alert/${encodeURIComponent(
-        ALERT_INSTANCE_ID_VALUE
-      )}/_unsnooze`,
-    });
-
     await pageObjects.ruleDetailsPage.gotoById(ruleId);
     await pageObjects.ruleDetailsPage.expectAlertsTabLoaded();
     await pageObjects.ruleDetailsPage.alertsTable.ensureGridVisible();
@@ -232,15 +226,7 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
   test('snoozes an active alert with a combined time and condition-based snooze', async ({
     page,
     pageObjects,
-    kbnClient,
   }) => {
-    await kbnClient.request({
-      method: 'POST',
-      path: `/api/alerting/rule/${encodeURIComponent(ruleId)}/alert/${encodeURIComponent(
-        ALERT_INSTANCE_ID_VALUE
-      )}/_unsnooze`,
-    });
-
     await pageObjects.ruleDetailsPage.gotoById(ruleId);
     await pageObjects.ruleDetailsPage.expectAlertsTabLoaded();
     await pageObjects.ruleDetailsPage.alertsTable.ensureGridVisible();
