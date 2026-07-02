@@ -859,7 +859,13 @@ export default function (providerContext: FtrProviderContext) {
       }> = [];
 
       // A user with integrations read (but not write) to assert the routes' authz split.
-      const readOnlyApiClient = new SpaceTestApiClient(supertest, testUsers.fleet_all_int_read);
+      // Must use `supertestWithoutAuth` so the request runs as this user rather than the
+      // superuser (plain `supertest` is pre-authenticated as the superuser and ignores
+      // `.auth()`, which would let the write-guarded bulk upgrade return 200 instead of 403).
+      const readOnlyApiClient = new SpaceTestApiClient(
+        supertestWithoutAuth,
+        testUsers.fleet_all_int_read
+      );
 
       const createTestAgentlessPolicy = (id: string, name: string) =>
         apiClient.createAgentlessPolicy({
