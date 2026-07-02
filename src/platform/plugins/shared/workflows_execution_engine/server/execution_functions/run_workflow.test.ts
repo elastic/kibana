@@ -25,6 +25,7 @@ import {
 } from './execution_functions_test_utils';
 import { runWorkflow } from './run_workflow';
 import { setupDependencies } from './setup_dependencies';
+import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued_workflow_run_at_task_start';
 import type { WorkflowsMeteringService } from '../metering';
 import { workflowsExecutionEngineMock } from '../mocks';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
@@ -32,6 +33,9 @@ import type { WorkflowExecutionState } from '../workflow_context_manager/workflo
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
 jest.mock('./setup_dependencies');
+jest.mock('../concurrency/handle_queued_workflow_run_at_task_start', () => ({
+  handleQueuedWorkflowRunAtTaskStart: jest.fn().mockResolvedValue(false),
+}));
 jest.mock('../workflow_execution_loop', () => ({
   workflowExecutionLoop: jest.fn().mockResolvedValue(undefined),
 }));
@@ -49,6 +53,11 @@ const mockWorkflowExecutionLoop = workflowExecutionLoop as jest.MockedFunction<
 const mockStartSpan = apm.startSpan as jest.Mock;
 
 const mockWorkflowExecutionEngine = workflowsExecutionEngineMock.createStart();
+
+const mockHandleQueuedWorkflowRunAtTaskStart =
+  handleQueuedWorkflowRunAtTaskStart as jest.MockedFunction<
+    typeof handleQueuedWorkflowRunAtTaskStart
+  >;
 
 describe('runWorkflow', () => {
   describe('wiring / spans / metering', () => {
@@ -413,6 +422,38 @@ describe('runWorkflow', () => {
           )
         );
         expect(reportWorkflowExecution).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('queued-at-start handling', () => {
+      it('returns shouldDeleteTask when the dormant queue run is handled at task start', async () => {
+        mockHandleQueuedWorkflowRunAtTaskStart.mockResolvedValueOnce(true);
+
+        const result = await runWorkflowWithDefaults();
+
+        expect(result).toEqual({ shouldDeleteTask: true });
+        expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+      });
+
+      it('reports metering once via handlePostExecutionLoop when queued run ends FAILED', async () => {
+        mockHandleQueuedWorkflowRunAtTaskStart.mockResolvedValueOnce(true);
+        const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+        const meteringService = { reportWorkflowExecution } as unknown as WorkflowsMeteringService;
+        const failedExecution = {
+          id: workflowRunId,
+          workflowId: 'wf',
+          spaceId,
+          status: ExecutionStatus.FAILED,
+        };
+        workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue(failedExecution);
+
+        await runWorkflowWithDefaults({ meteringService });
+
+        expect(reportWorkflowExecution).toHaveBeenCalledTimes(1);
+        expect(reportWorkflowExecution).toHaveBeenCalledWith(
+          failedExecution,
+          dependencies.cloudSetup
+        );
       });
     });
   });

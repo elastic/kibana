@@ -91,7 +91,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('shows the details flyout when clicking on a data stream', async () => {
       // Open details flyout
-      await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
+      await pageObjects.indexManagement.searchAndClickDataStreamNameLink(TEST_DS_NAME);
       // Verify url is stateful
       const url = await browser.getCurrentUrl();
       expect(url).to.contain(`/data_streams/${TEST_DS_NAME}`);
@@ -106,7 +106,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       this.tags(['failsOnMKI']);
       it('allows to update data retention', async () => {
         // Open details flyout
-        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
+        await pageObjects.indexManagement.searchAndClickDataStreamNameLink(TEST_DS_NAME);
         // Open the edit retention dialog
         await testSubjects.click('manageDataStreamButton');
         await testSubjects.click('editDataRetentionButton');
@@ -145,7 +145,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('disabling data retention in serverless is not allowed', async () => {
         // Open details flyout
-        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
+        await pageObjects.indexManagement.searchAndClickDataStreamNameLink(TEST_DS_NAME);
         // Open the edit retention dialog
         await testSubjects.click('manageDataStreamButton');
         await testSubjects.click('editDataRetentionButton');
@@ -173,7 +173,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const verifyIndexModeIsOrigin = async (indexModeName: string) => {
         // Open details flyout of data stream
-        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME_INDEX_MODE);
+        await pageObjects.indexManagement.searchAndClickDataStreamNameLink(TEST_DS_NAME_INDEX_MODE);
         // Check that index mode detail exists and its label is origin
         expect(await testSubjects.exists('indexModeDetail')).to.be(true);
         expect(await testSubjects.getVisibleText('indexModeDetail')).to.be(indexModeName);
@@ -220,7 +220,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Open data stream
-        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME_INDEX_MODE);
+        await pageObjects.indexManagement.searchAndClickDataStreamNameLink(TEST_DS_NAME_INDEX_MODE);
         // Check that index mode detail exists and its label is destination index mode
         expect(await testSubjects.exists('indexModeDetail')).to.be(true);
         expect(await testSubjects.getVisibleText('indexModeDetail')).to.be(indexModeName);
