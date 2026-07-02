@@ -120,7 +120,7 @@ export const ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW = {
   id: ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
-  version: 10,
+  version: 11,
   yaml: `version: '1'
 name: Security - Attack discovery - Skill
 description: |
@@ -128,10 +128,11 @@ description: |
   attack-discovery-generator skill in its ground-truth mode (Mode C) via a
   native \`ai.agent\` step: the skill receives the deterministic retrieval
   phase's candidate alerts, ground-truths them, and returns a DECISION (not
-  data) — a keep-set of candidate \`_id\`s, any net-new alerts it retrieved
-  itself (when the skill toggle is on), and corroboration context. It does NOT
-  generate discoveries and NEVER invokes the attack-discovery.run tool; the
-  generation pipeline runs separately and unconditionally after the gate.
+  data) — a removal set of candidate \`_id\`s to drop (the orchestration keeps
+  every candidate NOT listed), any net-new alerts it retrieved itself (when the
+  skill toggle is on), and corroboration context. It does NOT generate
+  discoveries and NEVER invokes the attack-discovery.run tool; the generation
+  pipeline runs separately and unconditionally after the gate.
 
   Per Constraint B the gate emits decisions only and never echoes the candidate
   bytes it received — the orchestration forwards the original kept candidate
@@ -166,8 +167,9 @@ inputs:
       description: >
         The candidate alert strings produced by the deterministic retrieval
         phase, for the gate to ground-truth. Each candidate embeds its backing
-        document _id. The gate keeps a subset by _id (it never echoes these
-        bytes back); the orchestration forwards the original kept bytes.
+        document _id. The gate returns the _ids to REMOVE (it never echoes these
+        bytes back); the orchestration keeps every candidate NOT listed and
+        forwards the original kept bytes.
       items:
         type: string
       type: array
@@ -208,7 +210,7 @@ steps:
   # The skill is referenced via a markdown skill mention
   # ([/name](skill://skill-id)); the default Elastic AI agent loads it and
   # follows its Mode C guidance: ground-truth the candidate alerts and return a
-  # DECISION as typed \`structured_output\` (keep_alert_ids / added_alert_ids /
+  # DECISION as typed \`structured_output\` (remove_alert_ids / added_alert_ids /
   # additional_context).
   #
   # \`create-conversation: true\` persists the conversation so its id can be
@@ -234,11 +236,14 @@ steps:
         - {{ alert }}
         {% endfor %}
 
-        Decide which candidates to KEEP. DEFAULT to keeping every candidate; only
-        remove one when you have concrete justification that it is a false
-        positive or not attack-relevant. Favor recall — the downstream Attack
-        Discovery pipeline does the attack-chain analysis and false-positive
-        filtering and cannot analyze any alert you remove.
+        Decide which candidates, if any, to REMOVE. DEFAULT to keeping every
+        candidate, so the default output is an EMPTY removal list; only add a
+        candidate's _id to \`remove_alert_ids\` when you have concrete
+        justification that it is a false positive or not attack-relevant.
+        Omitting an _id keeps it, so the safe direction of any uncertainty is to
+        NOT list it. Favor recall — the downstream Attack Discovery pipeline does
+        the attack-chain analysis and false-positive filtering and cannot analyze
+        any alert you remove.
         {% if inputs.skill_enabled %}
         Additional retrieval is ENABLED: you MUST also retrieve net-new alerts of
         your own. Run the space-aware default ES|QL query (call the
@@ -258,9 +263,11 @@ steps:
         entity pivot came back empty or inconclusive — absence of corroborating
         telemetry is NOT evidence of a false positive, and the downstream Attack
         Discovery generation pipeline performs the attack-chain analysis and
-        false-positive filtering and CANNOT see any alert you omit. Apply the same
-        recall-first, default-to-INCLUDE rule to \`added_alert_ids\` that you apply
-        to \`keep_alert_ids\`. When there are no candidate alerts above, this
+        false-positive filtering and CANNOT see any alert you omit.
+        \`added_alert_ids\` is a positive list of net-new alerts (there is no
+        candidate universe to subtract them from), so add every alert you
+        retrieve and never shrink the list on inconclusive corroboration. When
+        there are no candidate alerts above, this
         retrieval is the ONLY source of alerts for the run — returning an empty
         \`added_alert_ids\` is a failure; broaden the time window and retry before
         giving up rather than returning nothing.
@@ -276,9 +283,9 @@ steps:
         this inside the gate's 10m timeout and token budget: (a) the output stays
         DECISION-ONLY / IDS-ONLY — corroboration feeds the short
         \`additional_context\` summary, never a report or raw data; (b)
-        corroboration is NEVER a reason to drop an alert from \`keep_alert_ids\` or
-        \`added_alert_ids\` — recall wins, and an inconclusive or empty pivot
-        leaves the keep/added sets untouched; and (c) a budget cap — scope
+        corroboration is NEVER a reason to add an alert to \`remove_alert_ids\` or
+        to drop one from \`added_alert_ids\` — recall wins, and an inconclusive or
+        empty pivot leaves the removal/added sets untouched; and (c) a budget cap — scope
         corroboration to the kept candidates, summarize findings, never dump raw
         telemetry, and skip a skill rather than blow the turn (skip gracefully
         when a skill is unavailable). Summarize any
@@ -287,27 +294,30 @@ steps:
         \`additional_context\`.
 
         OUTPUT CONTRACT (decision only): return the _id values of the candidates
-        you keep in \`keep_alert_ids\` — ids ONLY, do NOT re-emit, paraphrase, or
-        echo the candidate alert contents (the orchestration forwards the original
-        kept bytes by _id). Put the _id values of any net-new alerts you retrieved
-        yourself in \`added_alert_ids\` — ids ONLY, same contract as
-        \`keep_alert_ids\` (the orchestration re-fetches the full alerts by _id).
-        Put corroboration insight in \`additional_context\`.
+        you REMOVE in \`remove_alert_ids\` — ids ONLY, do NOT re-emit, paraphrase,
+        or echo the candidate alert contents. Omitting an _id keeps it, and an
+        empty list keeps every candidate (the orchestration keeps everything NOT
+        listed and forwards the original kept bytes by _id). Put the _id values of
+        any net-new alerts you retrieved yourself in \`added_alert_ids\` — ids
+        ONLY, same ids-only contract (the orchestration re-fetches the full alerts
+        by _id). Put corroboration insight in \`additional_context\`.
 
         Do NOT generate attack discoveries, do NOT render an Attack Discovery
         Report, and do NOT invoke the attack-discovery.run tool.
       schema:
         type: object
         properties:
-          keep_alert_ids:
+          remove_alert_ids:
             type: array
             items:
               type: string
             description: >
-              The backing document _id values of the candidate alerts to KEEP (a
-              subset of the candidate _ids). Default to keeping all; remove only
-              with concrete justification. Return ids ONLY — do NOT echo the
-              candidate alert contents.
+              The backing document _id values of the candidate alerts to REMOVE
+              (a subset of the candidate _ids) — NOT the ones to keep. Omitting an
+              _id keeps it; an empty or omitted list keeps every candidate.
+              Default to keeping all, so list an _id only with concrete
+              justification. Return ids ONLY — do NOT echo the candidate alert
+              contents.
           added_alert_ids:
             type: array
             items:
@@ -315,8 +325,8 @@ steps:
             description: >
               The backing document _id values of any NET-NEW alerts the skill
               retrieved itself (only when additional retrieval is enabled). Ids
-              ONLY — same contract as keep_alert_ids; the orchestration re-fetches
-              the full alerts by _id. Empty when the gate added none.
+              ONLY — same ids-only contract; the orchestration re-fetches the full
+              alerts by _id. Empty when the gate added none.
           additional_context:
             type: string
             description: >
@@ -324,8 +334,6 @@ steps:
               Cross-Skill Corroboration loop (entity risk and asset criticality,
               telemetry pivots, false-positive triage, threat-intel hits) —
               surfaced to the downstream generation LLM as extra signal.
-        required:
-          - keep_alert_ids
     # NOTE: deliberately no \`on-failure: retry\`. The \`ai.agent\` step is
     # conversation-stateful and long-running; a retry restarts it from scratch
     # (discarding all prior progress) and, on a timeout, simply burns the
@@ -333,15 +341,15 @@ steps:
     # Surfacing the failure immediately is the correct behavior (fail-closed).
 
   # Emit the gate DECISION plus the persisted conversation id as the workflow
-  # output. Downstream orchestration consumes \`keep_alert_ids\` (forwarding the
-  # original kept candidate bytes by _id), \`added_alert_ids\` (the skill's own
-  # net-new additions), \`additional_context\`, and \`conversation_id\` for the
-  # resumable report phase.
+  # output. Downstream orchestration consumes \`remove_alert_ids\` (keeping every
+  # candidate NOT listed and forwarding the original kept candidate bytes by
+  # _id), \`added_alert_ids\` (the skill's own net-new additions),
+  # \`additional_context\`, and \`conversation_id\` for the resumable report phase.
   - name: emit_decision
     type: workflow.output
     status: completed
     with:
-      keep_alert_ids: '\${{ steps.gate.output.structured_output.keep_alert_ids | default: [] }}'
+      remove_alert_ids: '\${{ steps.gate.output.structured_output.remove_alert_ids | default: [] }}'
       added_alert_ids: '\${{ steps.gate.output.structured_output.added_alert_ids | default: [] }}'
       additional_context: "\${{ steps.gate.output.structured_output.additional_context | default: '' }}"
       conversation_id: '\${{ steps.gate.output.conversation_id }}'`,
@@ -729,7 +737,7 @@ description: |
   \`\`\`json
   {
     "alert_retrieval_mode": "esql",
-    "esql_query": "FROM .alerts-security.alerts-default | WHERE kibana.alert.severity == \\"critical\\" | LIMIT 50"
+    "esql_query": "FROM .alerts-security.alerts-default METADATA _id | WHERE kibana.alert.severity == \\"critical\\" | LIMIT 50"
   }
   \`\`\`
 
@@ -829,7 +837,7 @@ inputs:
       description: |
         ES|QL query for alert retrieval. Required when
         alert_retrieval_mode is "esql".
-        Example: FROM .alerts-security.alerts-default
+        Example: FROM .alerts-security.alerts-default METADATA _id
                  | WHERE kibana.alert.severity == "critical"
                  | LIMIT 50
       type: string

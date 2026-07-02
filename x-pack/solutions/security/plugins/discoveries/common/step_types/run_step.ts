@@ -49,12 +49,19 @@ export const RunStepInputSchema = z.object({
  * Sync mode returns discoveries inline. Async mode returns only
  * `execution_uuid`. The `replacements` map is explicitly excluded
  * from both modes for security.
+ *
+ * `status` distinguishes a terminal run (`completed`) from one that is still
+ * executing in the background (`pending`) — the async branch and the sync
+ * soft-deadline slow path both return `pending` so consumers poll
+ * `security.attack-discovery.get_status` instead of reading the absent counts
+ * as "0 discoveries".
  */
 export const RunStepOutputSchema = z.object({
   alerts_context_count: z.number().int().optional(),
   attack_discoveries: z.array(AttackDiscoverySchema).nullable().optional(),
   discovery_count: z.number().int().optional(),
   execution_uuid: z.string(),
+  status: z.enum(['pending', 'completed']),
 });
 
 /**

@@ -16,6 +16,7 @@ import type {
 } from '../invoke_alert_retrieval_workflow';
 import type { ParsedApiConfig, WorkflowExecutionTracking } from '../types';
 
+import { AttackDiscoveryError } from '../../../lib/errors/attack_discovery_error';
 import { dedupeCandidatesById } from '../dedupe_candidates_by_id';
 import { invokeGateWorkflow } from '../invoke_gate_workflow';
 import { parseEmbeddedAlertId } from '../parse_embedded_alert_id';
@@ -59,12 +60,14 @@ export interface RunGatePhaseParams {
  * - `_id` contract (principle 3): candidates lacking a recoverable `_id` are
  *   rejected loudly before the gate.
  * - richest-wins dedup (principle 4): duplicate `_id`s collapse to the richest.
- * - original-bytes pass-through (principles 1 & 2): the kept candidates'
- *   original alert strings are forwarded unchanged (never re-fetched).
+ * - original-bytes pass-through (principles 1 & 2): keep is derived
+ *   deterministically as `candidates − removeAlertIds`, and the kept candidates'
+ *   original alert strings are forwarded unchanged (never re-fetched). An
+ *   omitted/empty/truncated removal set keeps every candidate (recall-first).
  * - skill-added alerts (principle 6): net-new alerts the gate retrieved itself
- *   are the ONLY path that re-fetches + anonymizes by `_id`
- *   (`retrieveAnonymizedAlertsByIds`), since they have no anonymized upstream
- *   form.
+ *   (returned in `addedAlertIds`) are the ONLY path that re-fetches + anonymizes
+ *   by `_id` (`retrieveAnonymizedAlertsByIds`), since they have no anonymized
+ *   upstream form.
  *
  * Fail-closed: `invokeGateWorkflow` (via `extractGateDecision`) throws when the
  * gate fails / times out, so the orchestration fails the run loudly rather than
@@ -104,6 +107,18 @@ export const runGatePhase = async ({
     );
   }
 
+  // Fail loud when EVERY candidate was rejected for a missing `_id` (residual
+  // cases the ES|QL `METADATA _id` auto-injection can't recover, e.g. `STATS`
+  // or an explicit `DROP _id`). Proceeding would run the gate on an empty
+  // candidate set and end the run as a silent `no_alerts` / 0-discovery result.
+  // Genuinely-zero results (no rejects) still fall through recall-first.
+  if (validCandidates.length === 0 && rejectedAlerts.length > 0) {
+    throw new AttackDiscoveryError({
+      errorCategory: 'validation_error',
+      message: `The ES|QL query returned ${rejectedAlerts.length} alert(s) without a recoverable backing _id, so none can be ground-truthed by the gate (execution_uuid=${executionUuid}). Ensure the query preserves \`METADATA _id\` (avoid dropping or aggregating away the _id column).`,
+    });
+  }
+
   // richest-wins dedup (principle 4).
   const dedupedCandidates = dedupeCandidatesById(validCandidates);
 
@@ -128,11 +143,14 @@ export const runGatePhase = async ({
     workflowsManagementApi,
   });
 
-  // original-bytes pass-through (principles 1 & 2): forward the kept candidates'
-  // original strings, never re-fetched or distilled.
+  // original-bytes pass-through (principles 1 & 2): keep every candidate the
+  // gate did NOT remove (keep = candidates − removeAlertIds) and forward its
+  // original strings, never re-fetched or distilled. Deriving keep from the
+  // candidate universe means an omitted/empty/truncated removal set keeps every
+  // candidate (recall-first), and a hallucinated remove id matches nothing.
   const keptCandidates = selectKeptCandidates({
     candidates: dedupedCandidates,
-    keepAlertIds: decision.keepAlertIds,
+    removeAlertIds: decision.removeAlertIds,
   });
   const keptIds = new Set(keptCandidates.map(({ id }) => id));
   const keptAlerts = keptCandidates.map(({ alert }) => alert);
@@ -142,29 +160,13 @@ export const runGatePhase = async ({
     return id != null && keptIds.has(id);
   });
 
-  // A keep id with no matching candidate has no original bytes to forward (in
-  // sole-source mode the deterministic retrieval produced zero candidates, so
-  // EVERY keep id falls here). Rather than silently drop these real alerts, fold
-  // them into the re-fetch set alongside the gate's net-new additions — the `ids`
-  // filter validates existence, so any hallucinated id is dropped while the
-  // genuinely-retrieved keeps are recovered.
-  const keptCandidateIds = new Set(keptCandidates.map(({ id }) => id));
-  const unmatchedKeepIds = decision.keepAlertIds.filter(
-    (id) => id.trim().length > 0 && !keptCandidateIds.has(id)
-  );
-
   // skill-added alerts (principle 6): the ONLY re-fetch path. The gate returns
-  // the backing `_id`s of any net-new alerts it retrieved (ids only, symmetric
-  // with `keepAlertIds`); re-fetch + anonymize those ids so they match the
-  // candidate set's anonymized form + replacements. Empty/whitespace ids are
-  // dropped defensively, and unmatched keep ids are folded in (de-duplicated)
-  // before the re-fetch.
-  const addedAlertIds = [
-    ...new Set([
-      ...decision.addedAlertIds.filter((id) => id.trim().length > 0),
-      ...unmatchedKeepIds,
-    ]),
-  ];
+  // the backing `_id`s of any net-new alerts it retrieved (ids only); re-fetch +
+  // anonymize those ids so they match the candidate set's anonymized form +
+  // replacements. Empty/whitespace ids are dropped defensively. Net-new alerts
+  // arrive exclusively via `addedAlertIds` — in sole-source mode (zero
+  // candidates) this is the only source of alerts for the run.
+  const addedAlertIds = [...new Set(decision.addedAlertIds.filter((id) => id.trim().length > 0))];
 
   const addedResult =
     addedAlertIds.length > 0
@@ -181,6 +183,20 @@ export const runGatePhase = async ({
           workflowsManagementApi,
         })
       : undefined;
+
+  // Surface the "added N but 0 resolved" gap: the gate curated net-new alert
+  // ids, but re-fetching them by `_id` returned nothing (e.g. the ids don't
+  // resolve in the alerts index). The summary log below would otherwise read
+  // "added 0 skill alert(s)" and mask that the gate's additions were lost.
+  if (addedAlertIds.length > 0 && (addedResult?.alerts.length ?? 0) === 0) {
+    logger.warn(
+      `Gate added ${
+        addedAlertIds.length
+      } alert id(s) but none resolved on re-fetch (execution_uuid=${executionUuid}); added_alert_ids=[${addedAlertIds.join(
+        ', '
+      )}]`
+    );
+  }
 
   const alerts = [...keptAlerts, ...(addedResult?.alerts ?? [])];
 
@@ -199,7 +215,9 @@ export const runGatePhase = async ({
   logger.info(
     `Gate phase completed: kept ${keptAlerts.length} of ${
       dedupedCandidates.length
-    } candidate(s), added ${addedResult?.alerts.length ?? 0} skill alert(s)`
+    } candidate(s) (removed ${decision.removeAlertIds.length}), added ${
+      addedResult?.alerts.length ?? 0
+    } skill alert(s)`
   );
 
   return {

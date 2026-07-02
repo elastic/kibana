@@ -127,6 +127,16 @@ export const retrieveAnonymizedAlertsByIds = async ({
 
   const extracted = extractAlertRetrievalResult({ apiConfig, execution });
 
+  // Surface a requested-vs-resolved mismatch: curated ids were requested but the
+  // retrieval resolved zero alerts (e.g. the ids no longer exist in the index).
+  if (alertIds.length > 0 && extracted.alertsContextCount === 0) {
+    logger.warn(
+      `Requested ${
+        alertIds.length
+      } curated alert(s) by _id but none resolved; alert_ids=[${alertIds.join(', ')}]`
+    );
+  }
+
   logger.info(
     `Retrieved and anonymized ${extracted.alertsContextCount} alert(s) for the curated set`
   );

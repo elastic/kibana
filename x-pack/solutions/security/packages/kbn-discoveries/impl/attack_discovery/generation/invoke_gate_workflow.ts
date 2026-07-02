@@ -26,6 +26,7 @@ import {
   extractGateDecision,
   type GateDecision,
 } from './extract_gate_decision';
+import { parseEmbeddedAlertId } from './parse_embedded_alert_id';
 import { pollForWorkflowCompletion } from './poll_for_workflow_completion';
 import {
   validateAlertRetrievalWorkflow,
@@ -49,7 +50,8 @@ export interface InvokeGateWorkflowParams {
   /**
    * The validated, deduped candidate alert strings produced by the retrieval
    * phase, for the gate to ground-truth. Each embeds its backing document
-   * `_id`; the gate keeps a subset by `_id` and never echoes these bytes back.
+   * `_id`; the gate returns the `_id`s to REMOVE and never echoes these bytes
+   * back (the orchestration keeps every candidate NOT listed).
    */
   candidateAlerts: string[];
   end?: string;
@@ -95,8 +97,8 @@ export interface GateWorkflowResult {
  * The gate runs a native `ai.agent` step with `create-conversation: true`. This
  * function passes the candidate alerts plus the `skill_enabled` / `connector_id`
  * inputs (Constraint A), polls for completion, and extracts the decision
- * (keep-set of `_id`s, the skill's net-new added alerts, corroboration context,
- * and the persisted conversation id).
+ * (removal set of `_id`s to drop, the skill's net-new added alerts,
+ * corroboration context, and the persisted conversation id).
  *
  * Per the fail-closed gate contract, `extractGateDecision` throws an
  * `AttackDiscoveryError` when the gate fails / is cancelled / times out / has no
@@ -213,14 +215,25 @@ export const invokeGateWorkflow = async ({
 
     const decision = extractGateDecision({ execution, logger });
 
+    // Keep is derived deterministically as `candidates − removeAlertIds`. Only
+    // count removals that actually match a candidate `_id` (a hallucinated
+    // remove id matches nothing and must not shrink the count below zero).
+    const candidateIds = new Set(
+      candidateAlerts
+        .map((alert) => parseEmbeddedAlertId(alert))
+        .filter((id): id is string => id != null)
+    );
+    const removedMatchedCount = decision.removeAlertIds.filter((id) => candidateIds.has(id)).length;
+    const keptCount = candidateAlerts.length - removedMatchedCount;
+
     logger.info(
-      `Gate workflow completed: keep=${decision.keepAlertIds.length} added=${decision.addedAlertIds.length}`
+      `Gate workflow completed: remove=${decision.removeAlertIds.length} added=${decision.addedAlertIds.length}`
     );
 
     const endTime = new Date();
 
     await writeAlertRetrievalSucceededEvent({
-      alertsContextCount: decision.keepAlertIds.length + decision.addedAlertIds.length,
+      alertsContextCount: keptCount + decision.addedAlertIds.length,
       authenticatedUser,
       connectorId: apiConfig.connector_id,
       ...(decision.conversationId != null ? { conversationId: decision.conversationId } : {}),

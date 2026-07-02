@@ -20,7 +20,7 @@ const baseCompletedExecution: WorkflowExecutionDto = {
         structured_output: {
           added_alert_ids: ['added-1', 'added-2'],
           additional_context: 'High-risk host; entity-analytics corroboration',
-          keep_alert_ids: ['id-1', 'id-2'],
+          remove_alert_ids: ['id-1', 'id-2'],
         },
       },
       stepId: 'gate',
@@ -31,10 +31,10 @@ const baseCompletedExecution: WorkflowExecutionDto = {
 } as unknown as WorkflowExecutionDto;
 
 describe('extractGateDecision', () => {
-  it('returns the keep_alert_ids from the structured_output', () => {
+  it('returns the remove_alert_ids from the structured_output', () => {
     const result = extractGateDecision({ execution: baseCompletedExecution });
 
-    expect(result.keepAlertIds).toEqual(['id-1', 'id-2']);
+    expect(result.removeAlertIds).toEqual(['id-1', 'id-2']);
   });
 
   it('returns the added_alert_ids from the structured_output', () => {
@@ -55,7 +55,7 @@ describe('extractGateDecision', () => {
     expect(result.conversationId).toBe('conversation-1');
   });
 
-  it('defaults keepAlertIds to an empty array when absent', () => {
+  it('defaults removeAlertIds to an empty array when absent (recall-first: keep all)', () => {
     const execution = {
       ...baseCompletedExecution,
       stepExecutions: [
@@ -69,7 +69,7 @@ describe('extractGateDecision', () => {
 
     const result = extractGateDecision({ execution });
 
-    expect(result.keepAlertIds).toEqual([]);
+    expect(result.removeAlertIds).toEqual([]);
   });
 
   it('defaults addedAlertIds to an empty array when absent', () => {
@@ -77,7 +77,7 @@ describe('extractGateDecision', () => {
       ...baseCompletedExecution,
       stepExecutions: [
         {
-          output: { structured_output: { keep_alert_ids: ['id-1'] } },
+          output: { structured_output: { remove_alert_ids: ['id-1'] } },
           stepId: 'gate',
           stepType: 'ai.agent',
         },
@@ -94,7 +94,7 @@ describe('extractGateDecision', () => {
       ...baseCompletedExecution,
       stepExecutions: [
         {
-          output: { structured_output: { keep_alert_ids: ['id-1'] } },
+          output: { structured_output: { remove_alert_ids: ['id-1'] } },
           stepId: 'gate',
           stepType: 'ai.agent',
         },
@@ -111,7 +111,7 @@ describe('extractGateDecision', () => {
       ...baseCompletedExecution,
       stepExecutions: [
         {
-          output: { structured_output: { additional_context: '   ', keep_alert_ids: ['id-1'] } },
+          output: { structured_output: { additional_context: '   ', remove_alert_ids: ['id-1'] } },
           stepId: 'gate',
           stepType: 'ai.agent',
         },
@@ -130,7 +130,7 @@ describe('extractGateDecision', () => {
         {
           output: {
             conversation_id: 'conversation-1',
-            structured_output: JSON.stringify({ keep_alert_ids: ['parsed-id'] }),
+            structured_output: JSON.stringify({ remove_alert_ids: ['parsed-id'] }),
           },
           stepId: 'gate',
           stepType: 'ai.agent',
@@ -140,10 +140,10 @@ describe('extractGateDecision', () => {
 
     const result = extractGateDecision({ execution });
 
-    expect(result.keepAlertIds).toEqual(['parsed-id']);
+    expect(result.removeAlertIds).toEqual(['parsed-id']);
   });
 
-  it('returns an empty keep-set when structured_output is empty', () => {
+  it('returns an empty removal set when structured_output is empty', () => {
     const execution = {
       ...baseCompletedExecution,
       stepExecutions: [
@@ -157,7 +157,7 @@ describe('extractGateDecision', () => {
 
     const result = extractGateDecision({ execution });
 
-    expect(result.keepAlertIds).toEqual([]);
+    expect(result.removeAlertIds).toEqual([]);
   });
 
   it('throws an AttackDiscoveryError when the execution failed', () => {
@@ -168,6 +168,28 @@ describe('extractGateDecision', () => {
     } as unknown as WorkflowExecutionDto;
 
     expect(() => extractGateDecision({ execution })).toThrow(AttackDiscoveryError);
+  });
+
+  it('throws with errorCategory context_length_exceeded when the failure is a token overflow', () => {
+    const execution = {
+      ...baseCompletedExecution,
+      error: { message: 'Input is too long for requested model' },
+      status: 'failed',
+    } as unknown as WorkflowExecutionDto;
+
+    expect(() => extractGateDecision({ execution })).toThrow(
+      expect.objectContaining({ errorCategory: 'context_length_exceeded' })
+    );
+  });
+
+  it('throws a friendly, actionable message on a token-overflow failure', () => {
+    const execution = {
+      ...baseCompletedExecution,
+      error: { message: 'Input is too long for requested model' },
+      status: 'failed',
+    } as unknown as WorkflowExecutionDto;
+
+    expect(() => extractGateDecision({ execution })).toThrow('exceeded the model');
   });
 
   it('throws when the execution was cancelled', () => {

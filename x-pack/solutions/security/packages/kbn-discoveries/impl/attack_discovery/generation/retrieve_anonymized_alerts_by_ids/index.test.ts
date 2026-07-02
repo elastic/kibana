@@ -177,6 +177,33 @@ describe('retrieveAnonymizedAlertsByIds', () => {
     });
   });
 
+  it('warns when curated ids were requested but none resolved', async () => {
+    const workflowsManagementApi = buildApi();
+    (workflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+      ...completedExecution,
+      stepExecutions: [
+        {
+          ...completedExecution.stepExecutions[0],
+          output: {
+            alerts: [],
+            alerts_context_count: 0,
+            anonymized_alerts: [],
+            connector_name: 'Test Connector',
+            replacements: {},
+          },
+        },
+      ],
+    });
+
+    await retrieveAnonymizedAlertsByIds({ ...baseParams, workflowsManagementApi });
+
+    expect(
+      (logger.warn as jest.Mock).mock.calls.some(([message]) =>
+        String(message).includes('none resolved')
+      )
+    ).toBe(true);
+  });
+
   it('throws an AttackDiscoveryError when the retrieval workflow is missing', async () => {
     const workflowsManagementApi = buildApi();
     (workflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(null);

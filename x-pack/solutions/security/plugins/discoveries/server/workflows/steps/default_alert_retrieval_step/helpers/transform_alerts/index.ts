@@ -13,6 +13,7 @@ import {
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { injectMetadataId } from '@kbn/securitysolution-utils';
 
 /**
  * Converts an ES|QL result row (array of values) to the raw data format
@@ -50,10 +51,16 @@ export const getAnonymizedAlertsFromEsql = async ({
   onNewReplacements?: (replacements: Replacements) => void;
   replacements?: Replacements;
 }): Promise<string[]> => {
+  // Auto-inject `METADATA _id` so the query returns a backing `_id` column even
+  // when the user's ES|QL omits it; without `_id`, every candidate is dropped at
+  // the gate `_id` contract and the run ends as a silent 0-discovery result.
+  // `injectMetadataId` is idempotent (no-op when `_id` is already preserved).
+  const queryWithMetadataId = injectMetadataId(esqlQuery);
+
   const response = await esClient.esql.query({
     allow_partial_results: true,
     drop_null_columns: true,
-    query: esqlQuery,
+    query: queryWithMetadataId,
   });
 
   const { columns, values } = response;

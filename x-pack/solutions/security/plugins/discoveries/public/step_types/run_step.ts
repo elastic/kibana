@@ -83,7 +83,7 @@ export const runStepPublicDefinition: PublicStepDefinition = {
   with:
     connector_id: my-connector
     alert_retrieval_mode: esql
-    esql_query: 'FROM .alerts-security.alerts-default | WHERE kibana.alert.severity == "critical" | LIMIT 50'
+    esql_query: 'FROM .alerts-security.alerts-default METADATA _id | WHERE kibana.alert.severity == "critical" | LIMIT 50'
 \`\`\``,
 
       `## With pre-retrieved alerts

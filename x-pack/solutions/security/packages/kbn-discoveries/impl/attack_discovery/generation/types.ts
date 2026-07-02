@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { Document } from '@langchain/core/documents';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AttackDiscoverySource, SourceMetadata } from '../persistence/event_logging';
 
@@ -110,6 +111,13 @@ export interface ExecuteGenerationWorkflowParams {
   alertsIndexPattern: string;
   analytics?: AnalyticsServiceSetup;
   apiConfig: unknown;
+  /**
+   * Security plugin `authz` service used by the authoritative authorization
+   * guard at the top of `executeGenerationWorkflow`. Required so that no AD 2.0
+   * surface can run a workflow without passing the workflow-execution
+   * authorization check.
+   */
+  authz: SecurityPluginStart['authz'];
   /**
    * Injectable integrity check function. When provided, verifyWorkflowIntegrity calls this to
    * verify managed workflow integrity. The plugin binds checkManagedWorkflowIntegrity to the

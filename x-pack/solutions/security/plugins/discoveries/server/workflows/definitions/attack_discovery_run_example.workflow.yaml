@@ -32,7 +32,7 @@ description: |
   {
     "connector_id": "<your-connector-id>",
     "alert_retrieval_mode": "esql",
-    "esql_query": "FROM .alerts-security.alerts-default | WHERE kibana.alert.severity == \"critical\" | LIMIT 50"
+    "esql_query": "FROM .alerts-security.alerts-default METADATA _id | WHERE kibana.alert.severity == \"critical\" | LIMIT 50"
   }
   ```
 
@@ -129,7 +129,7 @@ inputs:
       description: |
         ES|QL query for alert retrieval. Required when
         alert_retrieval_mode is "esql".
-        Example: FROM .alerts-security.alerts-default
+        Example: FROM .alerts-security.alerts-default METADATA _id
                  | WHERE kibana.alert.severity == "critical"
                  | LIMIT 50
       type: string

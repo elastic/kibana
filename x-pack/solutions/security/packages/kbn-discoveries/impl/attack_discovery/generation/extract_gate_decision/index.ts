@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 
 import { AttackDiscoveryError } from '../../../lib/errors/attack_discovery_error';
+import { isContextLengthExceededError } from '../../../lib/errors/is_context_length_exceeded_error';
 
 /** Step type identifier emitted by the gate workflow's `ai.agent` step. */
 export const AI_AGENT_STEP_TYPE = 'ai.agent';
@@ -18,10 +19,11 @@ export const AI_AGENT_STEP_TYPE = 'ai.agent';
  * gate workflow's `ai.agent` step output.
  *
  * The gate is the final arbiter of the candidate alert set: it returns a
- * keep-set of candidate `_id`s (pass-through), any net-new alerts it retrieved
+ * removal set of candidate `_id`s to drop, any net-new alerts it retrieved
  * itself (Skill toggle on), and corroboration context — but never the candidate
- * bytes it received (Constraint B). The orchestration (B6) forwards the original
- * kept candidate bytes by filtering on `keepAlertIds`.
+ * bytes it received (Constraint B). The orchestration (B6) keeps every candidate
+ * NOT listed in `removeAlertIds` and forwards its original bytes; an omitted or
+ * empty removal set therefore keeps every candidate (recall-first).
  */
 export interface GateDecision {
   /**
@@ -32,19 +34,21 @@ export interface GateDecision {
   additionalContext?: string;
   /**
    * The backing document `_id` values of the NET-NEW alerts the gate retrieved
-   * itself when the Skill toggle is on. The gate returns ids ONLY (symmetric
-   * with `keepAlertIds`); the orchestration re-fetches + anonymizes the matching
-   * alerts by `_id` (Data fidelity principle 6). Empty when the gate added none.
+   * itself when the Skill toggle is on. A positive list (net-new alerts have no
+   * candidate universe to subtract from); the orchestration re-fetches +
+   * anonymizes the matching alerts by `_id` (Data fidelity principle 6). Empty
+   * when the gate added none.
    */
   addedAlertIds: string[];
   /** Persisted Agent Builder conversation id, when present in the step output. */
   conversationId?: string;
   /**
-   * The candidate alert `_id` values the gate decided to KEEP (a subset of the
-   * candidate `_id`s it received). The orchestration forwards the original
-   * candidate bytes for these ids — the gate returns ids only, never the bytes.
+   * The candidate alert `_id` values the gate decided to REMOVE (a subset of the
+   * candidate `_id`s it received). The orchestration keeps every candidate NOT
+   * listed here and forwards its original bytes — the gate returns ids only,
+   * never the bytes. Empty (or omitted) keeps every candidate.
    */
-  keepAlertIds: string[];
+  removeAlertIds: string[];
 }
 
 /**
@@ -54,7 +58,7 @@ export interface GateDecision {
 interface GateStructuredOutput {
   added_alert_ids?: string[];
   additional_context?: string;
-  keep_alert_ids?: string[];
+  remove_alert_ids?: string[];
 }
 
 /**
@@ -95,6 +99,15 @@ export const extractGateDecision = ({
 }): GateDecision => {
   if (execution.status === 'failed') {
     const errorMessage = execution.error?.message ?? 'Unknown error';
+
+    if (isContextLengthExceededError(errorMessage)) {
+      throw new AttackDiscoveryError({
+        errorCategory: 'context_length_exceeded',
+        message: `The ground-truthing gate failed because the candidate alerts exceeded the model's context length. Reduce the alert \`size\` or narrow the time range, or use a connector with a larger context window. (${errorMessage})`,
+        workflowId: execution.workflowId,
+      });
+    }
+
     throw new AttackDiscoveryError({
       errorCategory: 'workflow_error',
       message: `Gate workflow failed: ${errorMessage}`,
@@ -147,7 +160,7 @@ export const extractGateDecision = ({
 
   logger?.debug(
     () =>
-      `extractGateDecision: keep=${structuredOutput.keep_alert_ids?.length ?? 0} added=${
+      `extractGateDecision: remove=${structuredOutput.remove_alert_ids?.length ?? 0} added=${
         structuredOutput.added_alert_ids?.length ?? 0
       }`
   );
@@ -165,6 +178,6 @@ export const extractGateDecision = ({
     ...(additionalContext != null ? { additionalContext } : {}),
     addedAlertIds: structuredOutput.added_alert_ids ?? [],
     ...(output.conversation_id != null ? { conversationId: output.conversation_id } : {}),
-    keepAlertIds: structuredOutput.keep_alert_ids ?? [],
+    removeAlertIds: structuredOutput.remove_alert_ids ?? [],
   };
 };

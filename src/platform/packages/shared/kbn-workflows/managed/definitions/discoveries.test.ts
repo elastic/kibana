@@ -54,8 +54,8 @@ describe('ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW', () => {
     expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.pluginId).toBe('discoveries');
   });
 
-  it('bumps the version to 10 for the recall-first added_alert_ids gate prompt', () => {
-    expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.version).toBe(10);
+  it('bumps the version to 11 for the remove_alert_ids (exception-set) gate contract', () => {
+    expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.version).toBe(11);
   });
 
   it('titles the workflow "Security - Attack discovery - Skill"', () => {
@@ -121,14 +121,19 @@ describe('ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW', () => {
       expect(step.with?.message).toContain('{% for alert in inputs.candidate_alerts %}');
     });
 
-    it('requires the keep_alert_ids field in the decision structured-output schema', () => {
+    it('does NOT require remove_alert_ids (recall-safe: omitted/empty keeps every candidate)', () => {
       const schema = step.with?.schema as { required?: string[] };
-      expect(schema.required).toContain('keep_alert_ids');
+      expect(schema.required ?? []).not.toContain('remove_alert_ids');
     });
 
-    it('declares a keep_alert_ids property in the decision structured-output schema', () => {
+    it('declares a remove_alert_ids property in the decision structured-output schema', () => {
       const schema = step.with?.schema as { properties?: Record<string, unknown> };
-      expect(schema.properties).toHaveProperty('keep_alert_ids');
+      expect(schema.properties).toHaveProperty('remove_alert_ids');
+    });
+
+    it('does NOT declare the legacy keep_alert_ids property', () => {
+      const schema = step.with?.schema as { properties?: Record<string, unknown> };
+      expect(schema.properties).not.toHaveProperty('keep_alert_ids');
     });
 
     it('declares an added_alert_ids property in the decision structured-output schema', () => {
@@ -162,6 +167,14 @@ describe('ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW', () => {
       expect(step.with?.message).toContain('DEFAULT to keeping every candidate');
     });
 
+    it('instructs the gate to emit only the ids it removes (remove_alert_ids)', () => {
+      expect(step.with?.message).toContain('remove_alert_ids');
+    });
+
+    it('tells the gate that omitting an id keeps it (recall-safe default)', () => {
+      expect(step.with?.message).toContain('Omitting an _id keeps it');
+    });
+
     it('mandates net-new skill retrieval when skill_enabled is true', () => {
       expect(step.with?.message).toContain('you MUST also retrieve net-new alerts');
     });
@@ -186,8 +199,8 @@ describe('ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW', () => {
       expect(step.with?.message).toContain('NEVER drop a self-retrieved alert');
     });
 
-    it('states corroboration is never a reason to drop an alert (guardrail b)', () => {
-      expect(step.with?.message).toContain('NEVER a reason to drop an alert');
+    it('states corroboration is never a reason to remove or drop an alert (guardrail b)', () => {
+      expect(step.with?.message).toContain('NEVER a reason to add an alert to');
     });
 
     it('forbids the gate from invoking the attack-discovery.run tool (recursion break)', () => {
@@ -234,9 +247,9 @@ describe('ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW', () => {
       expect(step.status).toBe('completed');
     });
 
-    it('emits the keep_alert_ids decision from the gate structured output', () => {
-      expect(step.with?.keep_alert_ids).toBe(
-        '${{ steps.gate.output.structured_output.keep_alert_ids | default: [] }}'
+    it('emits the remove_alert_ids decision from the gate structured output', () => {
+      expect(step.with?.remove_alert_ids).toBe(
+        '${{ steps.gate.output.structured_output.remove_alert_ids | default: [] }}'
       );
     });
 

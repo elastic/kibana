@@ -76,7 +76,7 @@ const completedExecution = {
         structured_output: {
           added_alert_ids: [],
           additional_context: 'entity risk high',
-          keep_alert_ids: ['id-1', 'id-2'],
+          remove_alert_ids: ['id-1'],
         },
       },
       stepType: 'ai.agent',
@@ -117,7 +117,7 @@ describe('invokeGateWorkflow', () => {
   it('returns the gate decision parsed from the ai.agent step output', async () => {
     const { decision } = await invokeGateWorkflow(defaultProps);
 
-    expect(decision.keepAlertIds).toEqual(['id-1', 'id-2']);
+    expect(decision.removeAlertIds).toEqual(['id-1']);
   });
 
   it('surfaces the persisted conversation id', async () => {
@@ -170,7 +170,8 @@ describe('invokeGateWorkflow', () => {
     }
   });
 
-  it('counts kept + added ids in the succeeded event alertsContextCount', async () => {
+  it('counts (candidates − removed) + added ids in the succeeded event alertsContextCount', async () => {
+    // 2 candidates, 1 removed (id-1) => 1 kept, plus 3 added => 4.
     mockPollForWorkflowCompletion.mockResolvedValue({
       status: 'completed',
       stepExecutions: [
@@ -179,7 +180,7 @@ describe('invokeGateWorkflow', () => {
             conversation_id: 'conv-1',
             structured_output: {
               added_alert_ids: ['added-1', 'added-2', 'added-3'],
-              keep_alert_ids: ['id-1', 'id-2'],
+              remove_alert_ids: ['id-1'],
             },
           },
           stepType: 'ai.agent',
@@ -193,7 +194,34 @@ describe('invokeGateWorkflow', () => {
     const succeeded = mockWriteAttackDiscoveryEvent.mock.calls.find(
       (call) => call[0].action === 'alert-retrieval-succeeded'
     );
-    expect(succeeded?.[0].alertsContextCount).toBe(5);
+    expect(succeeded?.[0].alertsContextCount).toBe(4);
+  });
+
+  it('does not let a hallucinated remove id shrink the kept count below the candidate count', async () => {
+    // A remove id that matches no candidate removes nothing: 2 candidates kept.
+    mockPollForWorkflowCompletion.mockResolvedValue({
+      status: 'completed',
+      stepExecutions: [
+        {
+          output: {
+            conversation_id: 'conv-1',
+            structured_output: {
+              added_alert_ids: [],
+              remove_alert_ids: ['does-not-exist'],
+            },
+          },
+          stepType: 'ai.agent',
+        },
+      ],
+      workflowId,
+    } as unknown as WorkflowExecutionDto);
+
+    await invokeGateWorkflow(defaultProps);
+
+    const succeeded = mockWriteAttackDiscoveryEvent.mock.calls.find(
+      (call) => call[0].action === 'alert-retrieval-succeeded'
+    );
+    expect(succeeded?.[0].alertsContextCount).toBe(2);
   });
 
   it('records the gate run under the `gate` bucket on failure', async () => {

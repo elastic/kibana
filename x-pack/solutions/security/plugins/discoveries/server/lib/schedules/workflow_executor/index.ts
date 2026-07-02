@@ -7,7 +7,7 @@
 
 import { createHash } from 'crypto';
 
-import type { AnalyticsServiceSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import type {
   AttackDiscoveryExecutorOptions,
@@ -30,7 +30,6 @@ import { v4 as uuidv4 } from 'uuid';
 import type {
   GetEventLogIndex,
   GetEventLogger,
-  GetStartServices,
   WorkflowConfig,
 } from '@kbn/discoveries/impl/attack_discovery/generation/types';
 import type { SourceMetadata } from '@kbn/discoveries/impl/attack_discovery/persistence/event_logging';
@@ -39,7 +38,9 @@ import {
   executeGenerationWorkflow,
   getInferredPrebuiltStepTypes,
 } from '../../../routes/generate/helpers';
+import type { DiscoveriesPluginStartDeps } from '../../../types';
 import { checkManagedWorkflowIntegrity } from '../../../managed_workflows/check_managed_workflow_integrity';
+import { wrapManagementApiForScheduledExecution } from './helpers/wrap_management_api_for_scheduled_execution';
 
 const DEFAULT_INSIGHT_TYPE = 'attack_discovery';
 
@@ -82,7 +83,10 @@ export interface WorkflowExecutorDeps {
   analytics?: AnalyticsServiceSetup;
   getEventLogIndex: GetEventLogIndex;
   getEventLogger: GetEventLogger;
-  getStartServices: GetStartServices;
+  getStartServices: () => Promise<{
+    coreStart: CoreStart;
+    pluginsStart: DiscoveriesPluginStartDeps;
+  }>;
   logger: Logger;
   publicBaseUrl?: string;
   request: KibanaRequest;
@@ -156,11 +160,25 @@ export const workflowExecutor = async ({
     interval: rule.schedule.interval,
   };
 
+  // On the scheduled path the active APM transaction carries an `alerting_rule_id`
+  // label, which trips a missing private API in the platform workflow runtime
+  // (`apm.setCurrentTransaction is not a function`). Deferring `runWorkflow` to
+  // Task Manager via `scheduleWorkflow` keeps the platform on its safe code path
+  // (the task-manager transaction has no `alerting_rule_id`).
+  const scheduledWorkflowsManagementApi =
+    deps.workflowsManagementApi != null
+      ? wrapManagementApiForScheduledExecution(deps.workflowsManagementApi)
+      : deps.workflowsManagementApi;
+
+  const { pluginsStart } = await deps.getStartServices();
+  const { authz } = pluginsStart.security;
+
   try {
     const orchestrationOutcome = await executeGenerationWorkflow({
       alertsIndexPattern,
       analytics: deps.analytics,
       apiConfig,
+      authz,
       checkIntegrity: (() => {
         const { workflowsExtensions, workflowsManagementApi } = deps;
         if (workflowsManagementApi == null || workflowsExtensions == null) {
@@ -213,7 +231,7 @@ export const workflowExecutor = async ({
           paramsWorkflowConfig?.validationWorkflowId ??
           getDefaultWorkflowConfig().validation_workflow_id,
       },
-      workflowsManagementApi: deps.workflowsManagementApi,
+      workflowsManagementApi: scheduledWorkflowsManagementApi,
     });
 
     // Defensive guard: the orchestration workflow may return 'validation_failed' at runtime

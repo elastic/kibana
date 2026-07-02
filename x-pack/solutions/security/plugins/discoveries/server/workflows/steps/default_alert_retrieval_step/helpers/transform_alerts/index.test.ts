@@ -134,7 +134,7 @@ describe('getAnonymizedAlertsFromEsql', () => {
     jest.clearAllMocks();
   });
 
-  it('calls esql.query with the provided query', async () => {
+  it('auto-injects METADATA _id when the query omits it', async () => {
     (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
       columns: [],
       values: [],
@@ -146,9 +146,26 @@ describe('getAnonymizedAlertsFromEsql', () => {
       esqlQuery: 'FROM .alerts | LIMIT 10',
     });
 
-    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM .alerts | LIMIT 10' })
-    );
+    const { query } = (mockEsClient.esql.query as jest.Mock).mock.calls[0][0];
+
+    expect(query).toContain('METADATA _id');
+  });
+
+  it('is idempotent when METADATA _id is already present', async () => {
+    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+      columns: [],
+      values: [],
+    });
+
+    await getAnonymizedAlertsFromEsql({
+      anonymizationFields,
+      esClient: mockEsClient,
+      esqlQuery: 'FROM .alerts METADATA _id | LIMIT 10',
+    });
+
+    const { query } = (mockEsClient.esql.query as jest.Mock).mock.calls[0][0];
+
+    expect(query.match(/METADATA/g)).toHaveLength(1);
   });
 
   it('returns one string per row', async () => {

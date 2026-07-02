@@ -36,6 +36,7 @@
     "@kbn/scout-security",
     "@kbn/security-solution-features",
     "@kbn/securitysolution-es-utils",
+    "@kbn/securitysolution-utils",
     "@kbn/spaces-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/triggers-actions-ui-plugin",

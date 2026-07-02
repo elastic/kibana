@@ -112,7 +112,7 @@ flowchart TB
   RMO["runManualOrchestration<br/>(timeout budget per phase)"]
   R["Retrieval phase: retrieval_step<br/>(deterministic toggles only —<br/>esql / query-builder / custom workflows;<br/>may be empty)"]
   SKIP{"trigger ==<br/>agent_builder?"}
-  GATE["SKILL RUN 1 — Gate (separate ai.agent workflow,<br/>create-conversation; fail-closed):<br/>ground-truth candidates + optional skill retrieval<br/>→ keep_alert_ids + added_alert_ids + conversation_id"]
+  GATE["SKILL RUN 1 — Gate (separate ai.agent workflow,<br/>create-conversation; fail-closed):<br/>ground-truth candidates + optional skill retrieval<br/>→ remove_alert_ids + added_alert_ids + conversation_id"]
   G["Generation phase: generation_step<br/>(security.attack-discovery.generate, LangGraph)"]
   V["Validation phase: validation_step<br/>(security.attack-discovery.defaultValidation<br/>+ security.attack-discovery.persistDiscoveries)"]
   REPORT["SKILL RUN 2 — Report phase (fire-and-forget):<br/>resume conversation_id → render report<br/>+ draft missed-detection rules (create the rule gate)"]
@@ -463,9 +463,11 @@ plus the generate workflow under the **Generation** phase (and one validation
 entry), with **zero** entries under Alert retrieval. The gate run is also merged
 into `alert_retrieval` (keyed by `workflow_run_id`) so its badge/inspect resolve
 under the Generation phase in the UI — but it is excluded from `combined_alerts`,
-which stays scoped to the Alert retrieval phase. The badge count is **gate-aware**:
-the sum of the kept candidate ids (`keep_alert_ids`) and the net-new ids the gate
-retrieved (`added_alert_ids`).
+which stays scoped to the Alert retrieval phase. The gate emits a removal set
+(`remove_alert_ids`), so the kept count is `candidates − removed` — not derivable
+from the gate decision alone. The interim badge count therefore reports only the
+net-new ids the gate retrieved (`added_alert_ids`) until the generate step input
+resolves the authoritative count (below).
 
 **Inspecting the alerts passed to generation.** The gate emits ids only, so on its
 own the gate entry carries no raw alerts and its inspect would be disabled. The
@@ -478,8 +480,8 @@ survived the gate) plus any net-new alerts the gate added. Alerts the gate dropp
 are intentionally absent (they were not passed to generation) and remain
 inspectable under their own Alert retrieval entries when retrieval ran. Once the
 generate step input is available, the badge count and the inspect both reflect that
-real count; before then, the gate-aware (`keep_alert_ids` + `added_alert_ids`) count
-stands and inspect is disabled.
+real count; before then, the interim (`added_alert_ids`-only) count stands and
+inspect is disabled.
 
 ### Schedule CRUD routes
 
@@ -539,7 +541,7 @@ Scope retrieval to a specific time range and alert severity:
 {
   "connector_id": "<your-connector-id>",
   "alert_retrieval_mode": "esql",
-  "esql_query": "FROM .alerts-security.alerts-default | WHERE kibana.alert.severity == \"critical\" | LIMIT 50"
+  "esql_query": "FROM .alerts-security.alerts-default METADATA _id | WHERE kibana.alert.severity == \"critical\" | LIMIT 50"
 }
 ```
 
@@ -551,7 +553,7 @@ Merge ES|QL results with output from a custom alert retrieval workflow (parallel
 {
   "connector_id": "<your-connector-id>",
   "alert_retrieval_mode": "esql",
-  "esql_query": "FROM .alerts-security.alerts-default | WHERE kibana.alert.severity == \"high\" | LIMIT 30",
+  "esql_query": "FROM .alerts-security.alerts-default METADATA _id | WHERE kibana.alert.severity == \"high\" | LIMIT 30",
   "alert_retrieval_workflow_ids": ["<your-retrieval-workflow-id>"]
 }
 ```
@@ -655,7 +657,7 @@ Across every execution path the skill provides the same three capabilities; what
 |---|---|---|
 | **A — Generate** | Agent Builder conversation (`agent_builder` trigger) | Corroborate evidence, then delegate to `security.attack-discovery.run` |
 | **B — Status-only** | Agent Builder conversation, or the fire-and-forget report workflow | Look up a prior run by `execution_uuid` and render the report |
-| **C — Ground-truth gate** | The generation-phase gate, for every non-`agent_builder` trigger | Curate the candidate alert set and return a decision (`keep_alert_ids` / `added_alert_ids` / `additional_context`) — never a report, never `attack-discovery.run` |
+| **C — Ground-truth gate** | The generation-phase gate, for every non-`agent_builder` trigger | Curate the candidate alert set and return a decision (`remove_alert_ids` / `added_alert_ids` / `additional_context`) — never a report, never `attack-discovery.run` |
 
 #### How each generation path invokes the skill
 
@@ -699,7 +701,7 @@ flowchart TD
 - **Skill via Agent Builder** (`trigger: 'agent_builder'`) — the gate is **skipped**; the conversational skill itself performs Mode A corroboration/retrieval and renders the report inline (and Mode B via `get_status`), including the Missed Detection Closure pass — the same closure the gated paths now run during their fire-and-forget Mode B report.
 - **Workflow `attack-discovery.run` step** (`trigger: 'workflow'`) — the same gated pipeline as manual.
 
-Capability → pipeline embodiment for the gated paths: *review alert data* → Mode C `keep_alert_ids` decision (informed by the gate's bounded multi-skill corroboration); *retrieve own alert data* → Mode C `added_alert_ids` when the Skill toggle is on; *report on results* → persisted discoveries in the AD UI plus the Mode B skill report, which renders the rich report and drafts missed-detection rule proposals behind the `create the rule` gate.
+Capability → pipeline embodiment for the gated paths: *review alert data* → Mode C `remove_alert_ids` decision (informed by the gate's bounded multi-skill corroboration; keep = candidates − removed); *retrieve own alert data* → Mode C `added_alert_ids` when the Skill toggle is on; *report on results* → persisted discoveries in the AD UI plus the Mode B skill report, which renders the rich report and drafts missed-detection rule proposals behind the `create the rule` gate.
 
 ### Always-on generation-phase gate
 
@@ -707,9 +709,9 @@ Every non-`agent_builder` generation (`manual`, `schedule`, `workflow`) runs the
 
 - **Single chokepoint, universal gate.** All four entry points (`_generate` manual, scheduled, run step `workflow`, the `agent_builder` run tool) flow through the same `executeGenerationWorkflow` → `runManualOrchestration` path. The gate is invoked from that single TS path and **skipped only for `agent_builder`** ([`shouldRunGate`](../../packages/kbn-discoveries/impl/attack_discovery/generation/should_run_gate/index.ts)) — the conversational skill has already ground-truthed its own data before delegating to the pipeline, so re-running the gate would double-invoke the skill. That trigger check is also the **recursion break**: if the gate's `ai.agent` ever called `security.attack-discovery.run`, the re-entry carries `trigger === 'agent_builder'` and skips the gate instead of recursing.
 - **Skill invocation count per gated run = exactly 2.** (1) the generation-phase gate `ai.agent` — one turn that ground-truths the candidates and, when the Skill toggle is on, retrieves its own additional alerts — and (2) the fire-and-forget **report** phase `ai.agent` (a resume of the gate's `conversation_id`) that renders the Attack Discovery Report after validation and then runs the **Missed Detection Closure pass** — a best-effort raw-log corroboration of the persisted chains that emits a `## ⚠️ Missed Detection` heading per coverage gap, drafts a candidate ES|QL detection rule for each, and pauses at the verbatim `create the rule` approval (it never auto-persists a rule). The `generate` step is a separate LLM call, not a skill run. The report phase runs for all gated runs (including scheduled) and is fire-and-forget, so a report failure never affects the generation outcome.
-- **Bounded multi-skill corroboration.** Before deciding, the gate loads the core corroboration skills — `threat-hunting` (raw-telemetry pivots), `entity-analytics` (host/user risk, asset criticality), and `alert-analysis` (alert drill-down) — best-effort against the candidates it is keeping, folding the findings into `additional_context`. Two hard guardrails keep this inside the gate's 10m timeout and token budget: (a) the output stays **decision-only / ids-only** (corroboration may only inform `keep_alert_ids` / `added_alert_ids` / a short `additional_context` summary — never a report or raw data), and (b) a **budget cap** (scope corroboration to the kept candidates, summarize findings, never dump raw telemetry, and skip a skill rather than blow the turn). The deeper corroboration trades additional gate latency/token use for stronger ground-truthing; the budget cap mitigates but does not eliminate that cost.
+- **Bounded multi-skill corroboration.** Before deciding, the gate loads the core corroboration skills — `threat-hunting` (raw-telemetry pivots), `entity-analytics` (host/user risk, asset criticality), and `alert-analysis` (alert drill-down) — best-effort against the candidates it is keeping, folding the findings into `additional_context`. Two hard guardrails keep this inside the gate's 10m timeout and token budget: (a) the output stays **decision-only / ids-only** (corroboration may only inform `remove_alert_ids` / `added_alert_ids` / a short `additional_context` summary — never a report or raw data), and (b) a **budget cap** (scope corroboration to the kept candidates, summarize findings, never dump raw telemetry, and skip a skill rather than blow the turn). The deeper corroboration trades additional gate latency/token use for stronger ground-truthing; the budget cap mitigates but does not eliminate that cost.
 - **Fail-closed.** If the gate errors or times out, the run fails loudly — there is no silent pass-through of un-ground-truthed candidates. The always-on gate is therefore a hard dependency of every `manual` / `schedule` / `workflow` generation.
-- **Decision-only output, ids-only contract.** The gate returns *decisions*, not rewritten data: a keep-set of candidate `_id`s (`keep_alert_ids`) + the `_id`s of any net-new alerts it retrieved itself (`added_alert_ids`) + `additional_context` (Constraint B — the gate never echoes the candidate bytes it received). Both id sets follow the **same ids-only contract** — the gate never emits raw alert strings. The orchestration forwards the **original** candidate alert strings for the kept `_id`s unchanged — it does **not** re-fetch or distill kept candidates. The retrieve-by-ids path (`retrieveAnonymizedAlertsByIds`) re-fetches + anonymizes **only** the gate's net-new `added_alert_ids` (Skill toggle on), which have no anonymized upstream form; that re-fetch is an internal hydration detail of the skill invocation and is **folded into the single gate entry** (never surfaced as a separate execution). The gate run is recorded as one entry under the event-log `gate` bucket (not `alertRetrieval`) so the monitoring UI surfaces it as a **single** sub-step under the **Generation** phase, with a gate-aware badge count of `keep_alert_ids` + `added_alert_ids`.
+- **Decision-only output, ids-only contract.** The gate returns *decisions*, not rewritten data: a removal set of candidate `_id`s to drop (`remove_alert_ids`) + the `_id`s of any net-new alerts it retrieved itself (`added_alert_ids`) + `additional_context` (Constraint B — the gate never echoes the candidate bytes it received). Both id sets follow the **same ids-only contract** — the gate never emits raw alert strings. Keep is derived deterministically as `candidates − remove_alert_ids`, so an omitted/empty/truncated removal set keeps every candidate (recall-first) and a hallucinated remove id drops nothing. The orchestration forwards the **original** candidate alert strings for every candidate NOT listed in `remove_alert_ids` unchanged — it does **not** re-fetch or distill kept candidates. The retrieve-by-ids path (`retrieveAnonymizedAlertsByIds`) re-fetches + anonymizes **only** the gate's net-new `added_alert_ids` (Skill toggle on), which have no anonymized upstream form; that re-fetch is an internal hydration detail of the skill invocation and is **folded into the single gate entry** (never surfaced as a separate execution). The gate run is recorded as one entry under the event-log `gate` bucket (not `alertRetrieval`) so the monitoring UI surfaces it as a **single** sub-step under the **Generation** phase, with an interim badge count of `added_alert_ids` until the generate step input resolves the authoritative `candidates − removed` + added count.
 - **`_id` contract + richest-wins dedup.** Before the gate, candidates lacking a recoverable backing `_id` are rejected loudly ([`validate_candidate_alert_ids`](../../packages/kbn-discoveries/impl/attack_discovery/generation/validate_candidate_alert_ids/index.ts)), and duplicate `_id`s from multiple sources collapse to the richest copy ([`dedupe_candidates_by_id`](../../packages/kbn-discoveries/impl/attack_discovery/generation/dedupe_candidates_by_id/index.ts)).
 - **Timeouts.** The gate `ai.agent` (10m) plus generate (10m) plus validate (5m) share the 30m pipeline budget — see [ADR-008](#adr-008--layered-timeout-architecture-30-min-total-budget).
 
@@ -828,7 +830,7 @@ The skill is registered in [`register_skills.ts`](server/skills/register_skills.
 
 #### 6. Gate output is ids-only, so the connector response stays small
 
-The gate `ai.agent` step emits **decisions only** (Constraint B): a keep-set of candidate `_id`s (`keep_alert_ids`), the `_id`s of any net-new alerts the skill retrieved itself (`added_alert_ids` — Skill toggle on, up to `size`), and a short `additional_context` summary. It **never** echoes alert bytes — neither the candidates it received nor the net-new alerts it found. The orchestration forwards the original kept candidate strings by `_id`, and re-fetches the net-new alerts server-side by `_id` ([`retrieveAnonymizedAlertsByIds`](../../packages/kbn-discoveries/impl/attack_discovery/generation/retrieve_anonymized_alerts_by_ids/index.ts)).
+The gate `ai.agent` step emits **decisions only** (Constraint B): a removal set of candidate `_id`s to drop (`remove_alert_ids`), the `_id`s of any net-new alerts the skill retrieved itself (`added_alert_ids` — Skill toggle on, up to `size`), and a short `additional_context` summary. It **never** echoes alert bytes — neither the candidates it received nor the net-new alerts it found. The orchestration keeps every candidate NOT listed in `remove_alert_ids` and forwards its original strings by `_id`, and re-fetches the net-new alerts server-side by `_id` ([`retrieveAnonymizedAlertsByIds`](../../packages/kbn-discoveries/impl/attack_discovery/generation/retrieve_anonymized_alerts_by_ids/index.ts)).
 
 Because the gate response carries only id arrays plus a short summary, it stays well under the actions framework's response-size cap (`xpack.actions.maxResponseContentLength`, applied at the axios layer — [`actions/server/lib/axios_utils.ts`](../../../../platform/plugins/shared/actions/server/lib/axios_utils.ts)). This ids-only contract is what removes any dependency on that setting: full alert content never rides the connector response, so AD 2.0 requires **no** change to `xpack.actions.maxResponseContentLength`. (An earlier design echoed the full net-new alert strings through this response and could exceed the 1mb default; the ids-only contract replaced it precisely to avoid that.)
 
