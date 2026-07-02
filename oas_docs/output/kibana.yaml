@@ -54088,7 +54088,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update the Entity Store log extraction configuration.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Update the Entity Store log extraction configuration. This applies to all entity types. Cadence settings (`frequency`, `delay`, `lookbackPeriod`) can also be set individually per entity type via `PUT /update/{entityType}`; a value set for a specific type takes precedence over this shared setting for that type only. Supplying a cadence field here is a request for the whole store: it applies the new value to every entity type, replacing any value that type had configured individually (including types with a different default cadence, such as Service/Generic).<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: put-security-entity-store
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -54102,6 +54102,12 @@ paths:
         content:
           application/json:
             examples:
+              appliesFrequencyToAllTypesExample:
+                description: 'Setting frequency here is a request for the whole store: it applies to every entity type (including types with a different default cadence, such as Service/Generic''s reduced cadence, and any value set individually via PUT /update/{entityType}) so all types run at 5 minutes.'
+                summary: Applies a frequency to every entity type
+                value:
+                  logExtraction:
+                    frequency: 5m
               updateLogExtractionExample:
                 description: Update the log extraction configuration with a new lookback period and frequency.
                 summary: Update log extraction settings
@@ -61694,7 +61700,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Install the Entity Store and create engines for the specified entity types. A single `logExtraction` configuration is shared across all entity types. Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. To change settings after install, use the update endpoint.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Install the Entity Store and create engines for the specified entity types. A single `logExtraction` configuration is shared across all entity types. Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. To change settings after install, use the update endpoint or update by type endpoint.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: post-security-entity-store-install
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -61718,6 +61724,15 @@ paths:
                     - service
                     - generic
                   logExtraction: {}
+              installResetsPerTypeCadenceDefaultsExample:
+                description: Install Service and Generic with an explicit frequency of 2 minutes. This is a deliberate request for the whole store and wins over each type's built-in default cadence (Service normally installs at 10m, Generic at 30m); both install at 2m instead.
+                summary: Explicit frequency resets per-type cadence defaults
+                value:
+                  entityTypes:
+                    - service
+                    - generic
+                  logExtraction:
+                    frequency: 2m
               installWithCustomSettingsExample:
                 description: Install the Entity Store for host entities only with a custom lookback period and field history length.
                 summary: Install with custom log extraction
@@ -61739,6 +61754,7 @@ paths:
                     - host
                     - service
                     - generic
+                  description: 'DEPRECATED: use `POST /install/{entityType}` to install a single entity type. Retained for backward compatibility; installs all listed types uniformly.'
                   items:
                     enum:
                       - user
@@ -61860,6 +61876,183 @@ paths:
             {
               "entityTypes": ["user", "host", "service", "generic"],
               "logExtraction": {}
+            }
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/install/{entityType}:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/install/{entityType}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Install the Entity Store for a single entity type. Accepts the same `logExtraction` shape as `POST /install`, scoped to just this type: if the Entity Store is not installed yet, this bootstraps it (shared indices/templates, global configuration, entity maintainers) for this one type; if the store is already installed by other types, only this type is added. A no-op if this type is already installed. Cadence fields (`frequency`, `delay`, `lookbackPeriod`) become this type's own cadence, distinct from the shared value; fields left unset use the type's default cadence (e.g. Service/Generic install at a reduced cadence). Every other field (index patterns, volume limits, etc.) is applied to the shared configuration, the same as `POST /install`.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: post-security-entity-store-install-entitytype
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: entityType
+          required: true
+          schema:
+            enum:
+              - user
+              - host
+              - service
+              - generic
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              installByTypeCustomCadenceExample:
+                description: Install the Service engine with a custom frequency, distinct from its built-in 10 minute default, for this type only.
+                summary: Install a single entity type with a custom cadence
+                value:
+                  logExtraction:
+                    frequency: 5m
+              installByTypeDefaultExample:
+                description: Install the Service engine. If the Entity Store is not installed yet, this bootstraps it for Service only; if it's already installed by other types, only Service is added. Since no cadence fields are supplied, Service uses its built-in default frequency of 10 minutes.
+                summary: Install a single entity type with its default cadence
+                value:
+                  logExtraction: {}
+              installByTypeFullLogExtractionExample:
+                description: Install the Service engine with a custom cadence for this type only (frequency), plus a shared setting applied the same way as POST /install (fieldHistoryLength, which affects every entity type, not just Service).
+                summary: Install with both shared and per-type settings
+                value:
+                  logExtraction:
+                    fieldHistoryLength: 20
+                    frequency: 5m
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                logExtraction:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    additionalIndexPatterns:
+                      default: []
+                      items:
+                        type: string
+                      type: array
+                    delay:
+                      default: 1m
+                      pattern: '[smdh]$'
+                      type: string
+                    docsLimit:
+                      default: 10000
+                      maximum: 9007199254740991
+                      minimum: 1
+                      type: integer
+                    excludedIndexPatterns:
+                      default: []
+                      items:
+                        type: string
+                      type: array
+                    fieldHistoryLength:
+                      default: 10
+                      maximum: 9007199254740991
+                      minimum: -9007199254740991
+                      type: integer
+                    frequency:
+                      default: 1m
+                      pattern: '[smdh]$'
+                      type: string
+                    lookbackPeriod:
+                      default: 3h
+                      pattern: '[smdh]$'
+                      type: string
+                    maxLogsPerPage:
+                      default: 50000
+                      maximum: 9007199254740991
+                      minimum: 1
+                      type: integer
+                    maxLogsPerWindow:
+                      default: 100000
+                      maximum: 9007199254740991
+                      minimum: 0
+                      type: integer
+                    maxLogsPerWindowCapBehavior:
+                      default: drop
+                      enum:
+                        - defer
+                        - drop
+                      type: string
+                    maxTimeWindowSize:
+                      default: 15m
+                      pattern: '[smdh]$'
+                      type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                alreadyInstalledByTypeExample:
+                  description: The requested entity type was already installed; no changes were made.
+                  summary: Already installed
+                  value:
+                    ok: true
+          description: Indicates the entity type is already installed.
+        '201':
+          content:
+            application/json:
+              examples:
+                installByTypeSuccessExample:
+                  description: The entity type engine was installed and is being started. If the Entity Store was not installed at all, its shared resources were bootstrapped as part of this call.
+                  summary: Entity type installed
+                  value:
+                    ok: true
+          description: Indicates the entity type was successfully installed.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidDurationByTypeExample:
+                  description: A cadence field has an invalid duration format.
+                  summary: Invalid duration parameter
+                  value:
+                    error: Bad Request
+                    message: '[request body]: logExtraction.frequency: must be a valid duration of at least 30 seconds (e.g. 1m, 30s)'
+                    statusCode: 400
+          description: Bad request.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenByTypeExample:
+                  description: The user does not have the required Elasticsearch privileges.
+                  summary: Insufficient privileges
+                  value:
+                    error: Forbidden
+                    message: User 'analyst' has insufficient privileges
+                    statusCode: 403
+          description: Insufficient privileges.
+      summary: Install a single entity type
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X POST -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"logExtraction":{"frequency":"5m"}}' \
+              "${KIBANA_URL}/api/security/entity_store/install/service"
+        - lang: Console
+          source: |
+            POST kbn://api/security/entity_store/install/service
+            {
+              "logExtraction": {
+                "frequency": "5m"
+              }
             }
       x-metaTags:
         - content: Kibana
@@ -62282,7 +62475,7 @@ paths:
                     engines: []
                     status: not_installed
                 runningStatusExample:
-                  description: The Entity Store is running with two started engines using default settings.
+                  description: 'The Entity Store is running with all four engines started. `frequency`, `delay`, and `lookbackPeriod` reflect each engine''s effective cadence: Service and Generic use their built-in reduced-cadence defaults (10m and 30m), while Host and User use the shared global default (30s in this example).'
                   summary: Entity Store running
                   value:
                     engines:
@@ -62322,6 +62515,42 @@ paths:
                         timeout: 25s
                         timestampField: '@timestamp'
                         type: user
+                      - delay: 1m
+                        docsPerSecond: -1
+                        enrichPolicyExecutionInterval: null
+                        fieldHistoryLength: 10
+                        filter: ''
+                        frequency: 10m
+                        indexPattern: ''
+                        lastExecutionTimestamp: '2026-04-10T08:30:00.000Z'
+                        lookbackPeriod: 3h
+                        maxLogsPerPage: 40000
+                        maxLogsPerWindow: 500000
+                        maxLogsPerWindowCapBehavior: defer
+                        maxPageSearchSize: 10000
+                        maxTimeWindowSize: 15m
+                        status: started
+                        timeout: 25s
+                        timestampField: '@timestamp'
+                        type: service
+                      - delay: 1m
+                        docsPerSecond: -1
+                        enrichPolicyExecutionInterval: null
+                        fieldHistoryLength: 10
+                        filter: ''
+                        frequency: 30m
+                        indexPattern: ''
+                        lastExecutionTimestamp: '2026-04-10T08:30:00.000Z'
+                        lookbackPeriod: 3h
+                        maxLogsPerPage: 40000
+                        maxLogsPerWindow: 500000
+                        maxLogsPerWindowCapBehavior: defer
+                        maxPageSearchSize: 10000
+                        maxTimeWindowSize: 15m
+                        status: started
+                        timeout: 25s
+                        timestampField: '@timestamp'
+                        type: generic
                     status: running
           description: Indicates a successful response.
       summary: Get Entity Store status
@@ -62428,7 +62657,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Uninstall the Entity Store, removing engines and associated resources for the specified entity types.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Uninstall the Entity Store, removing engines and associated resources for the specified entity types. To remove a single entity type, use `DELETE /uninstall/{entityType}` instead. Uninstalling the last remaining entity type (via either endpoint) removes the shared Entity Store resources as well (global configuration, status/history tasks, entity maintainers).<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: post-security-entity-store-uninstall
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -62467,7 +62696,7 @@ paths:
                     - host
                     - service
                     - generic
-                  description: Entity types to uninstall. Defaults to all installed types.
+                  description: 'DEPRECATED: use `DELETE /uninstall/{entityType}` to uninstall a single entity type. Retained for backward compatibility. Entity types to uninstall; defaults to all installed types.'
                   items:
                     enum:
                       - user
@@ -62502,6 +62731,193 @@ paths:
             POST kbn://api/security/entity_store/uninstall
             {
               "entityTypes": ["user", "host", "service", "generic"]
+            }
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/uninstall/{entityType}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/uninstall/{entityType}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Uninstall a single entity type, removing its engine and associated resources. Uninstalling the last remaining entity type also removes the shared Entity Store resources (global configuration, status/history tasks, entity maintainers) — the same as calling `POST /uninstall` for all types.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: delete-security-entity-store-uninstall-entitytype
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: entityType
+          required: true
+          schema:
+            enum:
+              - user
+              - host
+              - service
+              - generic
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                uninstallByTypeSuccessExample:
+                  description: 'The entity type''s engine and associated resources were removed. Idempotent: returns ok even if the type was not installed.'
+                  summary: Entity type uninstalled
+                  value:
+                    ok: true
+                uninstallLastByTypeExample:
+                  description: Uninstalling the last remaining entity type also removes the shared Entity Store resources (global configuration, status/history tasks, entity maintainers) — the same as calling POST /uninstall for all types.
+                  summary: Last entity type uninstalled
+                  value:
+                    ok: true
+          description: Indicates a successful response.
+      summary: Uninstall a single entity type
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X DELETE -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              "${KIBANA_URL}/api/security/entity_store/uninstall/service"
+        - lang: Console
+          source: |
+            DELETE kbn://api/security/entity_store/uninstall/service
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/update/{entityType}:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/update/{entityType}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update the cadence settings (`frequency`, `delay`, `lookbackPeriod`) for a single entity type. Only the fields supplied are changed; there is no way to clear a field back to the shared global value — set it explicitly to the value you want, including the type's default if desired. All other log extraction settings (index patterns, volume limits, etc.) remain store-wide only and can be changed via `PUT /update`.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: put-security-entity-store-update-entitytype
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: entityType
+          required: true
+          schema:
+            enum:
+              - user
+              - host
+              - service
+              - generic
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateByTypeSetCadenceExample:
+                description: Set the Service engine's frequency to 15 minutes. Other entity types and all other log extraction settings are unaffected. There is no way to clear this back to the default — set it explicitly if you want the default value again.
+                summary: Set the cadence for a single entity type
+                value:
+                  logExtraction:
+                    frequency: 15m
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                logExtraction:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    delay:
+                      pattern: '[smdh]$'
+                      type: string
+                    frequency:
+                      pattern: '[smdh]$'
+                      type: string
+                    lookbackPeriod:
+                      pattern: '[smdh]$'
+                      type: string
+              required:
+                - logExtraction
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateByTypeSuccessExample:
+                  description: The entity type's cadence was updated. If frequency changed and the engine is running, its extraction task is rescheduled immediately.
+                  summary: Entity type cadence updated
+                  value:
+                    ok: true
+          description: Indicates a successful response.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidDurationByTypeExample:
+                  description: A cadence field has an invalid duration format.
+                  summary: Invalid duration parameter
+                  value:
+                    error: Bad Request
+                    message: '[request body]: logExtraction.frequency: must be a valid duration of at least 30 seconds (e.g. 1m, 30s)'
+                    statusCode: 400
+                notInstalledByTypeExample:
+                  description: No engine is installed for the requested entity type.
+                  summary: Entity type not installed
+                  value:
+                    error: Bad Request
+                    message: Entity Store engine for type "service" is not installed
+                    statusCode: 400
+                nullCadenceValueByTypeExample:
+                  description: Cadence fields cannot be cleared with null; set the desired duration (including the default, if that's what you want) explicitly.
+                  summary: Null is not a valid cadence value
+                  value:
+                    error: Bad Request
+                    message: '[request body]: logExtraction.frequency: Invalid input: expected string, received null'
+                    statusCode: 400
+          description: Bad request.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenByTypeExample:
+                  description: The user does not have the required Elasticsearch privileges.
+                  summary: Insufficient privileges
+                  value:
+                    error: Forbidden
+                    message: User 'analyst' has insufficient privileges
+                    statusCode: 403
+          description: Insufficient privileges.
+      summary: Update a single entity type
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"logExtraction":{"frequency":"15m"}}' \
+              "${KIBANA_URL}/api/security/entity_store/update/service"
+        - lang: Console
+          source: |
+            PUT kbn://api/security/entity_store/update/service
+            {
+              "logExtraction": {
+                "frequency": "15m"
+              }
             }
       x-metaTags:
         - content: Kibana
