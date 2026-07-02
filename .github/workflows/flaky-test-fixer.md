@@ -74,6 +74,12 @@ safe-outputs:
     base-branch: main
     allowed-base-branches: ['main', '9.*', '8.*', '7.*']
     if-no-changes: 'ignore'
+    # Open the PR as the `kibanamachine` user rather than the default GITHUB_TOKEN
+    # (github-actions[bot]). PRs opened by GITHUB_TOKEN don't emit events that start
+    # other workflows, so the Flaky Fix Verifier's `pull_request_target: opened`
+    # trigger never fired. A user PAT makes the `opened` event fire normally. This
+    # token is only used by the deterministic safe_outputs job, never by the agent.
+    github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
     protected-files: fallback-to-issue
     # Use git format-patch / `git am --3way` instead of a git bundle. The bundle
     # transport makes the shallow safe_outputs checkout run `git fetch --unshallow`,
@@ -128,7 +134,7 @@ Add the following at the very end of the PR description (and outside of the deta
 
 ```markdown
 > [!NOTE]
-> Created by the Flaky Test Fixer workflow. Share feedback or questions in #appex-qa.
+> Created by the Flaky Test Fixer workflow. Share feedback or questions in #apps-qa.
 ```
 
 ## Outcome comment
