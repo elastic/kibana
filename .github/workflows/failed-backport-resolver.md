@@ -166,19 +166,48 @@ Resolve failed automatic backports for the pull request identified by the inject
 7. If every remaining failed branch already has an existing open backport PR, call `add_comment` exactly once with the final comment table, use status `existing` for those branches, and do not launch branch workers.
 8. Create the shared parent directory for worker worktrees by running `mkdir -p /tmp/gh-aw-worktrees`.
 9. For each remaining target branch, launch one parallel task with the `backport-branch-worker` sub-agent defined in `.claude/agents/backport-branch-worker.md`. Pass only the source PR number, source PR title, source PR URL, source PR author login, source branch, source merge commit SHA, target branch, repository from `GH_AW_GITHUB_REPOSITORY`, and the workflow run URL built from `GH_AW_GITHUB_REPOSITORY` and `GH_AW_GITHUB_RUN_ID`.
-   - Do not rewrite or expand the worker instructions when launching the task. Do not add branch naming, PR body, safe-output tool, git push, draft PR, fallback, retry, test, or validation instructions beyond the input values listed above.
-   - Branch workers are the only tasks that may call `create_pull_request`, and only for a branch whose worker result is `created`.
-   - The parent workflow must never call `create_pull_request` for a branch, including to retry, repair, or replace a worker output.
+   - Do not rewrite or expand the worker instructions when launching the task.
+   - Branch workers resolve the cherry-pick only; they never call `create_pull_request` or `assign_to_user`.
 10. Wait for every branch task to finish. Do not stop after the first failure.
-11. Treat each branch worker's returned structured result as the source of truth for that branch. Do not reinterpret, rewrite, or replace the worker's `status`, `summary`, `conflicted_files`, or `pr_title` except for the explicit validation notes below.
-   - A `created` result requires that branch worker call `create_pull_request` exactly once with a `temporary_id` and `assign_to_user` exactly once using that same temporary reference.
-   - A `needs manual backport` or `failed` result must not have a `create_pull_request` call for that branch. If a branch worker reports either status after requesting a PR, keep the worker's returned status and append a concise contract-violation note to the final comment result.
-   - If a branch worker returns `created` without a matching `assign_to_user` call, keep the branch status as `created` and append `Assignment request missing.` to the final comment result.
-12. Post exactly one final `add_comment` following the exact template below after all branch tasks finish. Include a compact table with `Branch`, `Status`, and `Result`. Use statuses: `created`, `existing`, `skipped`, `needs manual backport`, or `failed`. The status for each worker branch must match the validated status from step 11. Do not fabricate PR URLs; gh-aw safe outputs will attach related created PRs to the comment after processing.
+11. Treat each branch worker's returned structured result as the source of truth for its resolution `status` (`resolved`, `needs manual backport`, or `failed`), `summary`, `conflicted_files`, and `pr_title`. Do not reinterpret, rewrite, or replace these.
+12. Create backport pull requests one target branch at a time. Never create pull requests for two branches in parallel, because PR patch generation reads a shared repository ref. Process every branch whose worker returned `resolved`, in sequence. For each such branch:
+   - Run all git commands from the repository root (`$GITHUB_WORKSPACE`), not a worktree.
+   - Point the ref the patch generator diffs against at the target branch tip, so the generated patch contains only the cherry-pick: `git update-ref refs/remotes/origin/main "$(git rev-parse refs/remotes/origin/<target branch>)"`.
+   - Preflight the worker branch `backport/<target branch>/pr-<source PR number>`:
+     - `git rev-parse backport/<target branch>/pr-<source PR number>^` equals `git rev-parse refs/remotes/origin/<target branch>`.
+     - `git rev-list --count refs/remotes/origin/<target branch>..backport/<target branch>/pr-<source PR number>` equals `1`.
+     - If either check fails, do not call `create_pull_request`; set this branch's status to `failed` and continue to the next branch.
+   - Choose a canonical temporary PR reference for this branch using the form `#aw_` followed by 3-12 alphanumeric or underscore characters, such as `#aw_bp94` for `9.4` or `#aw_bp819` for `8.19`.
+   - Call `create_pull_request` exactly once with:
+     - `temporary_id`: the temporary PR reference chosen above
+     - `base`: the target branch
+     - `branch`: exactly `backport/<target branch>/pr-<source PR number>`
+     - `title`: `[<target branch>] <source PR title> (#<source PR number>)`
+     - `body`: matching the Backport body template below
+     - `draft`: `false`
+   - Call `assign_to_user` exactly once with `issue_number` set to the same temporary PR reference and `assignees`: `["<source PR author login>"]`.
+   - Set this branch's status to `created`.
+   - Never run `git fetch --deepen`, `git fetch --unshallow`, or edit `.git/shallow` at any point.
+13. Post exactly one final `add_comment` following the exact template below after all pull requests are created. Include a compact table with `Branch`, `Status`, and `Result`. Use statuses: `created`, `existing`, `skipped`, `needs manual backport`, or `failed`. Do not fabricate PR URLs; gh-aw safe outputs will attach related created PRs to the comment after processing.
    - Keep every `Result` cell to one concise sentence that is under 80 characters.
    - For conflicts or manual-backport cases, summarize the blocker category. Do not include long conflict explanations, implementation analysis, or full file lists in the table.
-   - For created PR requests, use a short phrase such as `Created backport PR.` If assignment was missing, append `Author assignment request missing.`
+   - For created PR requests, use a short phrase such as `Created backport PR.`
    - Do not add diagnostic paragraphs after the table; workflow logs and the agent summary contain detailed run information.
+
+## Backport body
+
+Build the `create_pull_request` body from this template exactly. JSON-escape string values in the `BACKPORT` marker when substituting real PR metadata:
+
+```markdown
+# Backport
+
+This will backport the following commits from `<source branch>` to `<target branch>`:
+- [<source PR title> (#<source PR number>)](<source PR URL>)
+
+> This backport was generated by the failed backport resolver agent. Please review it carefully before merging.
+
+<!--BACKPORT [{"sourcePullRequest":{"number":<source PR number>,"url":"<source PR URL>","title":"<source PR title>"},"sourceBranch":"<source branch>","suggestedTargetBranches":["<target branch>"],"sourceCommit":{"sha":"<source merge commit SHA>"}}] BACKPORT-->
+```
 
 ## Final Comment Template
 
