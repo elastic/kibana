@@ -36,8 +36,8 @@ export const OverviewTab = memo(({ hit, onShowCorrelations, onShowEntities }: Ov
     <EuiHorizontalRule margin="m" />
     <InsightsSection
       hit={hit}
-      onOpenCorrelationsLeftPanel={onShowCorrelations}
-      onOpenEntitiesLeftPanel={onShowEntities}
+      onShowCorrelations={onShowCorrelations}
+      onShowEntities={onShowEntities}
     />
   </div>
 ));

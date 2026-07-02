@@ -19,10 +19,13 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { JsonTab as SharedJsonTab } from '../../shared/components/json_tab';
 import { cellActionRenderer } from '../../shared/components/cell_actions';
+import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { NotesDetails } from '../../shared/tools/notes';
 import { useKibana } from '../../../common/lib/kibana';
 import { Header } from './header';
@@ -79,6 +82,8 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
+  const isInSecurityApp = useIsInSecurityApp();
+  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const alertIds = useAttackAlertIds(hit);
 
   const [selectedTabId, setSelectedTabId] = useState<AttackFlyoutTabId>('overview');
@@ -91,9 +96,9 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
         history,
         children: <NotesDetails hit={hit} />,
       }),
-      defaultToolsFlyoutProperties
+      { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
     );
-  }, [history, hit, overlays, services, store]);
+  }, [history, historyKey, hit, overlays, services, store]);
 
   const onShowCorrelations = useCallback(() => {
     overlays.openSystemFlyout(
@@ -103,9 +108,9 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
         history,
         children: <AttackCorrelationsTool hit={hit} alertIds={alertIds} />,
       }),
-      defaultToolsFlyoutProperties
+      { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
     );
-  }, [alertIds, history, hit, overlays, services, store]);
+  }, [alertIds, history, historyKey, hit, overlays, services, store]);
 
   const onShowEntities = useCallback(() => {
     overlays.openSystemFlyout(
@@ -115,9 +120,9 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
         history,
         children: <AttackEntitiesTool hit={hit} alertIds={alertIds} />,
       }),
-      defaultToolsFlyoutProperties
+      { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
     );
-  }, [alertIds, history, hit, overlays, services, store]);
+  }, [alertIds, history, historyKey, hit, overlays, services, store]);
 
   return (
     <>

@@ -26,26 +26,26 @@ jest.mock('../components/insights_section', () => ({
   InsightsSection: jest.fn(
     ({
       hit,
-      onOpenCorrelationsLeftPanel,
-      onOpenEntitiesLeftPanel,
+      onShowCorrelations,
+      onShowEntities,
     }: {
       hit: DataTableRecord;
-      onOpenCorrelationsLeftPanel?: () => void;
-      onOpenEntitiesLeftPanel?: () => void;
+      onShowCorrelations?: () => void;
+      onShowEntities?: () => void;
     }) => (
       <>
         <button
           type="button"
           data-test-subj="mock-insights-section"
           data-hit-id={(hit as { id: string }).id}
-          data-has-on-open-correlations={String(onOpenCorrelationsLeftPanel != null)}
-          onClick={onOpenCorrelationsLeftPanel}
+          data-has-on-show-correlations={String(onShowCorrelations != null)}
+          onClick={onShowCorrelations}
         />
         <button
           type="button"
           data-test-subj="mock-insights-section-entities"
-          data-has-on-open-entities={String(onOpenEntitiesLeftPanel != null)}
-          onClick={onOpenEntitiesLeftPanel}
+          data-has-on-show-entities={String(onShowEntities != null)}
+          onClick={onShowEntities}
         />
       </>
     )
@@ -122,42 +122,42 @@ describe('<OverviewTab />', () => {
     );
   });
 
-  it('forwards onShowCorrelations to InsightsSection as onOpenCorrelationsLeftPanel', () => {
+  it('forwards onShowCorrelations to InsightsSection', () => {
     const onShowCorrelations = jest.fn();
     render(<OverviewTab hit={buildHit()} onShowCorrelations={onShowCorrelations} />);
 
     expect(screen.getByTestId('mock-insights-section')).toHaveAttribute(
-      'data-has-on-open-correlations',
+      'data-has-on-show-correlations',
       'true'
     );
     fireEvent.click(screen.getByTestId('mock-insights-section'));
     expect(onShowCorrelations).toHaveBeenCalledTimes(1);
   });
 
-  it('does not pass onOpenCorrelationsLeftPanel when onShowCorrelations is omitted', () => {
+  it('does not pass onShowCorrelations when it is omitted', () => {
     render(<OverviewTab hit={buildHit()} />);
     expect(screen.getByTestId('mock-insights-section')).toHaveAttribute(
-      'data-has-on-open-correlations',
+      'data-has-on-show-correlations',
       'false'
     );
   });
 
-  it('forwards onShowEntities to InsightsSection as onOpenEntitiesLeftPanel', () => {
+  it('forwards onShowEntities to InsightsSection', () => {
     const onShowEntities = jest.fn();
     render(<OverviewTab hit={buildHit()} onShowEntities={onShowEntities} />);
 
     expect(screen.getByTestId('mock-insights-section-entities')).toHaveAttribute(
-      'data-has-on-open-entities',
+      'data-has-on-show-entities',
       'true'
     );
     fireEvent.click(screen.getByTestId('mock-insights-section-entities'));
     expect(onShowEntities).toHaveBeenCalledTimes(1);
   });
 
-  it('does not pass onOpenEntitiesLeftPanel when onShowEntities is omitted', () => {
+  it('does not pass onShowEntities when it is omitted', () => {
     render(<OverviewTab hit={buildHit()} />);
     expect(screen.getByTestId('mock-insights-section-entities')).toHaveAttribute(
-      'data-has-on-open-entities',
+      'data-has-on-show-entities',
       'false'
     );
   });
