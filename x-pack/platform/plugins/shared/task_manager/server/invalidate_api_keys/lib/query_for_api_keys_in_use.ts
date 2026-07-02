@@ -14,7 +14,7 @@ import { PAGE_SIZE } from './constants';
 import type { SavedObjectTypesToQuery } from './run_invalidate';
 
 interface QueryForApiKeysInUseOpts {
-  logger: Logger;
+  logger?: Logger;
   apiKeyIds: string[];
   savedObjectTypeToQuery: SavedObjectTypesToQuery;
   savedObjectsClient: SavedObjectsClientContract;
@@ -46,7 +46,7 @@ export async function queryForApiKeysInUse(
     },
   });
 
-  opts.logger.info(
+  opts.logger?.info(
     `Queried for API keys in use for saved object type ${
       savedObjectTypeToQuery.type
     } with filter: ${filter}, aggResult ${JSON.stringify(aggregations)}`
