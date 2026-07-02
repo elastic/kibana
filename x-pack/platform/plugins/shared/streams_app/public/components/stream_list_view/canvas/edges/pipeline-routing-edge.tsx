@@ -27,7 +27,7 @@ import {
   EdgeSegmentsContext,
   PipelineFlyoutContext,
 } from '../contexts';
-import { buildOrthogonalPath } from './orthogonal-path';
+import { buildOrthogonalPath, buildVerticalFirstPath } from './orthogonal-path';
 import { segmentsForEdge } from './edge-bridges';
 
 // A subtle "data flowing" animation: a dashed overlay stroke laid over the edge
@@ -101,6 +101,7 @@ function PipelineRoutingEdge({
   sourceY,
   targetX,
   targetY,
+  sourceHandleId,
   markerEnd,
   style,
   data,
@@ -118,25 +119,33 @@ function PipelineRoutingEdge({
   // call-to-action to connect it.
   const isDanglingRouting = Boolean(data?.routingEndpointNodeId);
 
+  // The opinionated attached-routing branch leaves the destination's routing tab
+  // travelling downward first, so it uses a vertical-first connector instead of
+  // the default horizontal-first elbow.
+  const isAttachedRouting = sourceHandleId === 'attached-routing';
+
   // Square-elbow (orthogonal) connector with lightly rounded corners; the
   // vertical segment sits at the horizontal midpoint.
   const midX = (sourceX + targetX) / 2;
-  const labelX = midX;
+  const labelX = isAttachedRouting ? sourceX : midX;
   const labelY = (sourceY + targetY) / 2;
   // Publish this edge's exact segments so bridges are computed from the same
-  // coordinates we render with. Dangling routing connectors don't participate.
+  // coordinates we render with. Dangling and attached-routing connectors don't
+  // participate.
   useEffect(() => {
-    if (isDanglingRouting) {
+    if (isDanglingRouting || isAttachedRouting) {
       segReg.remove(id);
       return;
     }
     segReg.publish(id, segmentsForEdge(sourceX, sourceY, targetX, targetY, midX));
     return () => segReg.remove(id);
-  }, [id, sourceX, sourceY, targetX, targetY, midX, isDanglingRouting, segReg]);
+  }, [id, sourceX, sourceY, targetX, targetY, midX, isDanglingRouting, isAttachedRouting, segReg]);
 
-  // Dangling routing connectors don't bridge (they're a temporary affordance).
-  const hops = isDanglingRouting ? [] : edgeHops.get(id) ?? [];
-  const edgePath = buildOrthogonalPath(sourceX, sourceY, targetX, targetY, midX, 20, hops);
+  // Dangling / attached-routing connectors don't bridge over crossings.
+  const hops = isDanglingRouting || isAttachedRouting ? [] : edgeHops.get(id) ?? [];
+  const edgePath = isAttachedRouting
+    ? buildVerticalFirstPath(sourceX, sourceY, targetX, targetY, 20)
+    : buildOrthogonalPath(sourceX, sourceY, targetX, targetY, midX, 20, hops);
 
   const isActive = isHovered || isPopoverOpen;
   const strokeColor = isActive ? euiTheme.colors.primary : euiTheme.colors.mediumShade;

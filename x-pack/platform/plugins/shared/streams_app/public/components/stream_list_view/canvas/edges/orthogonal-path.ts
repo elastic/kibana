@@ -66,3 +66,30 @@ export function buildOrthogonalPath(
     horizontalRun(midX + dirOut * r, tx, ty, hops)
   );
 }
+
+// A vertical-first orthogonal connector: the line leaves the source travelling
+// DOWN, then turns once (rounded corner) to run horizontally into the target.
+// Used by the opinionated attached-routing branch, whose connector should drop
+// out of the bottom of the destination's routing tab before heading toward the
+// new destination.
+export function buildVerticalFirstPath(
+  sx: number,
+  sy: number,
+  tx: number,
+  ty: number,
+  radius = 20
+): string {
+  // No horizontal run → a single straight vertical line.
+  if (Math.abs(tx - sx) < 0.5) {
+    return `M ${sx},${sy} L ${tx},${ty}`;
+  }
+  const down = ty > sy ? 1 : -1; // vertical direction
+  const dir = tx >= sx ? 1 : -1; // elbow → target horizontal direction
+  const r = Math.max(0, Math.min(radius, Math.abs(ty - sy), Math.abs(tx - sx)));
+  return (
+    `M ${sx},${sy}` +
+    ` L ${sx},${ty - down * r}` +
+    ` Q ${sx},${ty} ${sx + dir * r},${ty}` +
+    ` L ${tx},${ty}`
+  );
+}
