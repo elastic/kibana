@@ -43,7 +43,7 @@ spaceTest.describe('Date range picker presets persistence', { tag: testData.SQM_
       await discover.waitUntilSearchingHasFinished();
       await datePicker.openDateRangePickerPresetsPanel();
       await expect(datePicker.getDateRangePreset(presetLabel)).toBeVisible();
-      await page.keyboard.press('Escape');
+      await datePicker.closeDateRangePickerPresetsPanel();
     });
 
     await spaceTest.step('delete the date range preset', async () => {
