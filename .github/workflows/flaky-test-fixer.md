@@ -74,6 +74,8 @@ safe-outputs:
     base-branch: main
     allowed-base-branches: ['main', '9.*', '8.*', '7.*']
     if-no-changes: 'ignore'
+    # Open the PR as `kibanamachine` (a user), not the default GITHUB_TOKEN bot, so
+    # the PR's `opened` event can trigger the Flaky Fix Verifier (GITHUB_TOKEN events don't).
     github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
     protected-files: fallback-to-issue
     # Use git format-patch / `git am --3way` instead of a git bundle. The bundle

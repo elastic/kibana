@@ -31,6 +31,8 @@ permissions:
 # - Manual runs always activate.
 # - `kickoff`: any PR is opened with (or labeled) `flaky-test-fixer`. Applying that
 #   label requires write access, so this is the gate — the PR author is not checked.
+#   NOTE: not checking the author is a temporary measure for testing; tighten it
+#   back (e.g. to the `kibanamachine` fixer identity) once the flow is validated.
 # - `process_results`: the Flaky Test Runner posts its `## Flaky Test Runner Stats`
 #   comment on a PR we are actively validating (`flaky-fix-check:started`). The
 #   workflow removes `running` when it reaches a terminal verdict, so the label's
