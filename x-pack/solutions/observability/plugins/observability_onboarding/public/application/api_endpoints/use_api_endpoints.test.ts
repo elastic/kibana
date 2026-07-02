@@ -81,20 +81,20 @@ describe('useApiEndpoints', () => {
     const { result } = setup({ elasticsearchUrl: 'https://es.example.com' });
 
     expect(result.current.isLoading).toBe(false);
-    expect(findEndpoint(result, 'elasticsearch')?.url).toBe('https://es.example.com/_bulk');
+    expect(findEndpoint(result, 'elasticsearch')?.url).toBe('https://es.example.com');
   });
 
-  it('falls back to the Elasticsearch bulk URL when the managed OTLP service is unavailable', () => {
+  it('falls back to the Elasticsearch URL when the managed OTLP service is unavailable', () => {
     const { result } = setup({
       isServerless: false,
       elasticsearchUrl: 'https://es.example.com',
       managedOtlpServiceUrl: 'https://otlp.example.com:443',
     });
 
-    expect(findEndpoint(result, 'elasticsearch')?.url).toBe('https://es.example.com/_bulk');
+    expect(findEndpoint(result, 'elasticsearch')?.url).toBe('https://es.example.com');
   });
 
-  it('builds the managed Elasticsearch-compatible bulk URL from the managed OTLP URL when the managed service is available', () => {
+  it('builds the managed Elasticsearch-compatible URL from the managed OTLP URL when the managed service is available', () => {
     const { result } = setup({
       isServerless: false,
       isManagedOtlpServiceAvailable: true,
@@ -102,7 +102,7 @@ describe('useApiEndpoints', () => {
       managedOtlpServiceUrl: 'https://otlp.example.com:443',
     });
 
-    expect(findEndpoint(result, 'elasticsearch')?.url).toBe('https://otlp.example.com:443/_es/_bulk');
+    expect(findEndpoint(result, 'elasticsearch')?.url).toBe('https://otlp.example.com:443/_es');
   });
 
   it('falls back to the Elasticsearch URL when the managed OTLP URL is blank on Serverless', () => {
@@ -112,7 +112,7 @@ describe('useApiEndpoints', () => {
       managedOtlpServiceUrl: '   ',
     });
 
-    expect(findEndpoint(result, 'elasticsearch')?.url).toBe('https://es.example.com/_bulk');
+    expect(findEndpoint(result, 'elasticsearch')?.url).toBe('https://es.example.com');
   });
 
   it('uses the on-prem Elasticsearch URL resolved server-side for Prometheus', () => {

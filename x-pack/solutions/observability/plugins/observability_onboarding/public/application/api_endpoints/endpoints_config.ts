@@ -82,11 +82,11 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
       const managedUrl = normalizeEndpointUrl(managedOtlpServiceUrl);
 
       if (isManagedOtlpServiceAvailable && managedUrl) {
-        return `${managedUrl}/_es/_bulk`;
+        return `${managedUrl}/_es`;
       }
       const fallbackUrl = normalizeEndpointUrl(elasticsearchUrl);
 
-      return fallbackUrl ? `${fallbackUrl}/_bulk` : undefined;
+      return fallbackUrl;
     },
   },
 ];
