@@ -7,24 +7,17 @@
 
 import { renderHook } from '@testing-library/react';
 import { useAttackEntitiesCounts } from './use_attack_entities_counts';
-import { useOriginalAlertIds } from './use_original_alert_ids';
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 
-jest.mock('./use_original_alert_ids', () => ({
-  useOriginalAlertIds: jest.fn(),
-}));
-
-jest.mock('../../../detections/containers/detection_engine/alerts/use_query', () => ({
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_query', () => ({
   useQueryAlerts: jest.fn(),
 }));
 
 describe('useAttackEntitiesCounts', () => {
-  const mockUseOriginalAlertIds = jest.mocked(useOriginalAlertIds);
   const mockUseQueryAlerts = jest.mocked(useQueryAlerts);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseOriginalAlertIds.mockReturnValue([]);
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
       data: null,
@@ -36,9 +29,7 @@ describe('useAttackEntitiesCounts', () => {
   });
 
   it('returns zero counts and skips query when alertIds is empty', () => {
-    mockUseOriginalAlertIds.mockReturnValue([]);
-
-    const { result } = renderHook(() => useAttackEntitiesCounts());
+    const { result } = renderHook(() => useAttackEntitiesCounts([]));
 
     expect(mockUseQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -51,9 +42,7 @@ describe('useAttackEntitiesCounts', () => {
   });
 
   it('passes query with ids filter and cardinality aggs when alertIds exist', () => {
-    mockUseOriginalAlertIds.mockReturnValue(['id1', 'id2']);
-
-    renderHook(() => useAttackEntitiesCounts());
+    renderHook(() => useAttackEntitiesCounts(['id1', 'id2']));
 
     expect(mockUseQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -71,7 +60,6 @@ describe('useAttackEntitiesCounts', () => {
   });
 
   it('parses relatedUsers and relatedHosts from aggregations', () => {
-    mockUseOriginalAlertIds.mockReturnValue(['id1']);
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
       data: {
@@ -90,7 +78,7 @@ describe('useAttackEntitiesCounts', () => {
       refetch: null,
     });
 
-    const { result } = renderHook(() => useAttackEntitiesCounts());
+    const { result } = renderHook(() => useAttackEntitiesCounts(['id1']));
 
     expect(result.current.relatedUsers).toBe(6);
     expect(result.current.relatedHosts).toBe(10);
@@ -99,7 +87,6 @@ describe('useAttackEntitiesCounts', () => {
   });
 
   it('returns zero when aggregations are missing', () => {
-    mockUseOriginalAlertIds.mockReturnValue(['id1']);
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
       data: {
@@ -115,9 +102,24 @@ describe('useAttackEntitiesCounts', () => {
       refetch: null,
     });
 
-    const { result } = renderHook(() => useAttackEntitiesCounts());
+    const { result } = renderHook(() => useAttackEntitiesCounts(['id1']));
 
     expect(result.current.relatedUsers).toBe(0);
     expect(result.current.relatedHosts).toBe(0);
+  });
+
+  it('returns error true when loading is done, data is null, and alertIds are non-empty', () => {
+    mockUseQueryAlerts.mockReturnValue({
+      loading: false,
+      data: null,
+      setQuery: jest.fn(),
+      response: '',
+      request: '',
+      refetch: null,
+    });
+
+    const { result } = renderHook(() => useAttackEntitiesCounts(['id1']));
+
+    expect(result.current.error).toBe(true);
   });
 });

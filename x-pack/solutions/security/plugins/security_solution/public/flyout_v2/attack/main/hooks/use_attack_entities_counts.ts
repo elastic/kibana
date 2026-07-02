@@ -6,10 +6,9 @@
  */
 
 import { useMemo, useEffect } from 'react';
-import { useOriginalAlertIds } from './use_original_alert_ids';
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { fetchQueryAlerts } from '../../../detections/containers/detection_engine/alerts/api';
-import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
+import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
+import { fetchQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/api';
+import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 
 interface AttackEntitiesAggregations {
   unique_users?: { value: number };
@@ -27,14 +26,12 @@ export interface UseAttackEntitiesCountsResult {
  * Hook that returns distinct user and host counts across all alerts that belong to the current attack.
  * Queries the detection alerts index filtered by the attack's alert IDs and uses cardinality aggregations.
  */
-export const useAttackEntitiesCounts = (): UseAttackEntitiesCountsResult => {
-  const originalAlertIds = useOriginalAlertIds();
-
+export const useAttackEntitiesCounts = (alertIds: string[]): UseAttackEntitiesCountsResult => {
   const query = useMemo(
     () => ({
       query: {
         ids: {
-          values: originalAlertIds,
+          values: alertIds,
         },
       },
       size: 0,
@@ -51,13 +48,13 @@ export const useAttackEntitiesCounts = (): UseAttackEntitiesCountsResult => {
         },
       },
     }),
-    [originalAlertIds]
+    [alertIds]
   );
 
   const { loading, data, setQuery } = useQueryAlerts<unknown, AttackEntitiesAggregations>({
     fetchMethod: fetchQueryAlerts,
     query,
-    skip: originalAlertIds.length === 0,
+    skip: alertIds.length === 0,
     queryName: ALERTS_QUERY_NAMES.ATTACK_ENTITIES_COUNTS,
   });
 
@@ -68,7 +65,7 @@ export const useAttackEntitiesCounts = (): UseAttackEntitiesCountsResult => {
   return useMemo(() => {
     const relatedUsers = data?.aggregations?.unique_users?.value ?? 0;
     const relatedHosts = data?.aggregations?.unique_hosts?.value ?? 0;
-    const error = !loading && data === undefined && originalAlertIds.length > 0;
+    const error = !loading && data === null && alertIds.length > 0;
 
     return {
       relatedUsers,
@@ -76,5 +73,5 @@ export const useAttackEntitiesCounts = (): UseAttackEntitiesCountsResult => {
       loading,
       error,
     };
-  }, [data, loading, originalAlertIds.length]);
+  }, [data, loading, alertIds.length]);
 };
