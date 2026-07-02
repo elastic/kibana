@@ -26,6 +26,8 @@ dependsOn:
   - '@kbn/workflows-extensions'
   - '@kbn/agent-builder-plugin'
   - '@kbn/cases-plugin'
+  - '@kbn/inference-workflows-plugin'
+  - '@kbn/agent-context-layer-plugin'
 tags:
   - shared-common
   - package
