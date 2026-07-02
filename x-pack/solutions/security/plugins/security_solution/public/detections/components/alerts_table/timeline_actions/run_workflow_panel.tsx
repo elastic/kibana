@@ -53,13 +53,7 @@ export const RunWorkflowPanel = ({
   const [isInputsModalOpen, setIsInputsModalOpen] = React.useState<boolean>(false);
 
   // Share the query key with WorkflowSelector so this is a cache hit — no extra fetch.
-  const { data: workflowsData } = useWorkflows({
-    size: 1000,
-    page: 1,
-    query: '',
-    managed: 'all',
-    availableInSelector: 'rule_action',
-  });
+  const { data: workflowsData } = useWorkflows({ size: 1000, page: 1, query: '' });
   const selectedWorkflow = useMemo(
     () => workflowsData?.results.find((w) => w.id === selectedId),
     [workflowsData, selectedId]
@@ -146,7 +140,6 @@ export const RunWorkflowPanel = ({
     () => (
       <WorkflowSelector
         config={{
-          availableInSelector: 'rule_action',
           filterFunction: (workflows) => workflows.filter((w) => w.enabled),
           sortFunction: (workflows) =>
             workflows.sort((a, b) => {
