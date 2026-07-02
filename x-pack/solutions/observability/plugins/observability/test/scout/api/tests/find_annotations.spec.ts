@@ -74,20 +74,14 @@ apiTest.describe(
       const adminApiKey: RoleApiCredentials = await requestAuth.getApiKeyForAdmin();
       headers = { ...PUBLIC_HEADERS, ...adminApiKey.apiKeyHeader };
 
-      const indexExists = await esClient.indices.exists({ index: ANNOTATIONS_INDEX_NAME });
-      if (indexExists) {
-        await esClient.indices.delete({ index: ANNOTATIONS_INDEX_NAME });
-      }
+      await esClient.indices.delete({ index: ANNOTATIONS_INDEX_NAME }, { ignore: [404] });
 
       await createSloAnnotation(apiClient, { id: 'slo-id', instanceId: 'instance-id' });
       await createSloAnnotation(apiClient, { id: 'slo-id2', instanceId: 'instance-id' });
     });
 
     apiTest.afterAll(async ({ esClient }) => {
-      const indexExists = await esClient.indices.exists({ index: ANNOTATIONS_INDEX_NAME });
-      if (indexExists) {
-        await esClient.indices.delete({ index: ANNOTATIONS_INDEX_NAME });
-      }
+      await esClient.indices.delete({ index: ANNOTATIONS_INDEX_NAME }, { ignore: [404] });
     });
 
     apiTest('can find annotations filtered by slo id', async ({ apiClient }) => {
