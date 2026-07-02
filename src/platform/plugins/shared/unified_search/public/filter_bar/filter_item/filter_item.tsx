@@ -74,7 +74,8 @@ export const FILTER_EDITOR_WIDTH = 1200;
 const FILTER_ITEM_MENU = 'menu';
 const FILTER_ITEM_EDITOR = 'editFilter';
 
-function FilterItemComponent(props: FilterItemProps) {
+// exported for testing only
+export function FilterItemComponent(props: FilterItemProps) {
   const { onCloseFilterPopover, onLocalFilterCreate, onLocalFilterUpdate } = props;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
