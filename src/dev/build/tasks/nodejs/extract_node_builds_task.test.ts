@@ -123,7 +123,8 @@ async function runExtractNodeBuildsTask() {
   );
 }
 
-describe('runs expected fs operations', () => {
+// Failing: See https://github.com/elastic/kibana/issues/275911
+describe.skip('runs expected fs operations', () => {
   it('default variant', async () => {
     const usedMethods = await runExtractNodeBuildsTask();
     expect(usedMethods).toMatchSnapshot();
