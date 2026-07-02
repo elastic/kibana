@@ -36,6 +36,7 @@ export type EntityAssetCriticalityUpdatedEvent = z.infer<
 
 export const entityAssetCriticalityUpdatedTriggerDefinition: CommonTriggerDefinition = {
   id: ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID,
+  stability: 'tech_preview',
   eventSchema: entityAssetCriticalityUpdatedEventSchema,
   title: i18n.translate('entityStore.workflow.triggers.entityAssetCriticalityUpdated.title', {
     defaultMessage: 'Entity asset criticality updated',

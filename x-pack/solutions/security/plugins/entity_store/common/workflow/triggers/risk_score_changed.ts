@@ -48,6 +48,7 @@ export type EntityRiskScoreChangedEvent = z.infer<typeof entityRiskScoreChangedE
 
 export const entityRiskScoreChangedTriggerDefinition: CommonTriggerDefinition = {
   id: ENTITY_RISK_SCORE_CHANGED_TRIGGER_ID,
+  stability: 'tech_preview',
   eventSchema: entityRiskScoreChangedEventSchema,
   title: i18n.translate('entityStore.workflow.triggers.entityRiskScoreChanged.title', {
     defaultMessage: 'Entity risk score changed',
