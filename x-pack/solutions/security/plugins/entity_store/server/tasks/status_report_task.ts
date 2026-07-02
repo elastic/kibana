@@ -71,6 +71,8 @@ export const getResolutionState = async (
         resolved_entities: {
           filter: { exists: { field: 'entity.relationships.resolution.resolved_to' } },
         },
+        // `cardinality` is approximate (HyperLogLog++) above ~40k distinct values; for a
+        // periodic snapshot of resolution targets this estimate is acceptable.
         resolution_groups: {
           cardinality: { field: 'entity.relationships.resolution.resolved_to' },
         },
@@ -86,16 +88,18 @@ export const getResolutionState = async (
     { signal }
   );
 
-  const aggs = response.aggregations as {
-    resolved_entities: { doc_count: number };
-    resolution_groups: { value: number };
-    max_group_aliases: { value: number | null };
-  };
+  const aggs = response.aggregations as
+    | {
+        resolved_entities: { doc_count: number };
+        resolution_groups: { value: number };
+        max_group_aliases: { value: number | null };
+      }
+    | undefined;
 
-  const resolvedEntities = aggs.resolved_entities.doc_count;
-  const targetEntities = aggs.resolution_groups.value;
+  const resolvedEntities = aggs?.resolved_entities?.doc_count ?? 0;
+  const targetEntities = aggs?.resolution_groups?.value ?? 0;
   const resolutionGroups = targetEntities;
-  const maxGroupSize = resolutionGroups > 0 ? (aggs.max_group_aliases.value ?? 0) + 1 : 0;
+  const maxGroupSize = resolutionGroups > 0 ? (aggs?.max_group_aliases?.value ?? 0) + 1 : 0;
 
   return { resolvedEntities, targetEntities, resolutionGroups, maxGroupSize };
 };
