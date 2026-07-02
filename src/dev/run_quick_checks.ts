@@ -307,7 +307,7 @@ function stripRoot(script: string) {
 interface FailureAnnotation {
   scriptPath: string;
   section: string;
-};
+}
 
 function buildFailureAnnotation(check: CheckResult): FailureAnnotation {
   const scriptPath = stripRoot(check.script).slice(1);
@@ -321,7 +321,7 @@ function buildFailureAnnotation(check: CheckResult): FailureAnnotation {
   ].join('\n');
 
   return {
-    scriptPath: scriptPath,
+    scriptPath,
     section: [
       `<details>`,
       `<summary>❌ ${scriptPath} (ran in ${runtime})</summary>`,
@@ -330,7 +330,7 @@ function buildFailureAnnotation(check: CheckResult): FailureAnnotation {
       output,
       '```',
       `</details>`,
-    ].join('\n')
+    ].join('\n'),
   };
 }
 
