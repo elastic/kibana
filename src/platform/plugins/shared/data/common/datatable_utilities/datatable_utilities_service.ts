@@ -11,6 +11,7 @@ import type { DataView, DataViewField, DataViewsContract } from '@kbn/data-views
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { FieldFormat, FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { Unit } from '@kbn/datemath';
+import { isObject } from 'lodash';
 import {
   type AggConfig,
   type AggsCommonStart,
@@ -35,12 +36,12 @@ interface HistogramDSLParams {
 }
 
 const isHistogramDSLParams = (params: unknown): params is HistogramDSLParams => {
-  return (
-    typeof params === 'object' &&
-    params !== null &&
-    'used_interval' in params &&
-    (typeof params.used_interval === 'string' || typeof params.used_interval === 'number')
-  );
+  if (isObject(params) && Object.hasOwn(params, 'used_interval'))
+    return (
+      typeof (params as HistogramDSLParams).used_interval === 'string' ||
+      typeof (params as HistogramDSLParams).used_interval === 'number'
+    );
+  return false;
 };
 
 const ESQL_UNIT_TO_DATEMATH = {
@@ -64,12 +65,10 @@ interface ESQLBucketMeta {
 
 const getEsqlBucket = (column: DatatableColumn): ESQLBucketMeta | undefined => {
   const isESQLBucketMeta = (meta: unknown): meta is ESQLBucketMeta => {
-    return (
-      typeof meta === 'object' &&
-      meta !== null &&
-      'interval' in meta &&
-      typeof (meta as ESQLBucketMeta).interval === 'number'
-    );
+    if (isObject(meta) && Object.hasOwn(meta, 'interval')) {
+      return typeof (meta as ESQLBucketMeta).interval === 'number';
+    }
+    return false;
   };
 
   const bucket = column.meta.esMeta?.bucket;
@@ -80,7 +79,7 @@ const getEsqlBucket = (column: DatatableColumn): ESQLBucketMeta | undefined => {
 };
 
 // Convert the raw ES|QL bucket into a datemath interval string, e.g. 30 + "minute" -> "30m"
-const getEsqlDateInterval = (bucket: ESQLBucketMeta): string => {
+const formatEsqlBucketAsDateMathInterval = (bucket: ESQLBucketMeta): string => {
   const unitDateMath =
     bucket.unit && isESQLUnit(bucket.unit) ? ESQL_UNIT_TO_DATEMATH[bucket.unit] : undefined;
   return unitDateMath ? `${bucket.interval}${unitDateMath}` : `${bucket.interval}`;
@@ -157,7 +156,7 @@ export class DatatableUtilitiesService {
     if (bucket && bucket.unit && isESQLUnit(bucket.unit)) {
       const domain = getDomain(column);
       return {
-        interval: getEsqlDateInterval(bucket),
+        interval: formatEsqlBucketAsDateMathInterval(bucket),
         timeZone: defaults.timeZone,
         timeRange: appliedTimeRange,
         dropPartials,

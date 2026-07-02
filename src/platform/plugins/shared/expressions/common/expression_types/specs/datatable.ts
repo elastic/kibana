@@ -121,13 +121,39 @@ interface SourceParamsESQL extends Record<string, unknown> {
   };
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isOptionalNumber = (value: unknown): value is number | undefined =>
+  value === undefined || typeof value === 'number';
+
+const isOptionalBoolean = (value: unknown): value is boolean | undefined =>
+  value === undefined || typeof value === 'boolean';
+
+const isOptionalString = (value: unknown): value is string | undefined =>
+  value === undefined || typeof value === 'string';
+
+const isOptionalAppliedTimeRange = (
+  value: unknown
+): value is SourceParamsESQL['appliedTimeRange'] => {
+  if (value === undefined) {
+    return true;
+  }
+
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return isOptionalString(value.from) && isOptionalString(value.to);
+};
+
 export function isSourceParamsESQL(obj: Record<string, unknown>): obj is SourceParamsESQL {
   return (
     typeof obj.indexPattern === 'string' &&
     typeof obj.sourceField === 'string' &&
-    (obj.interval == null || typeof obj.interval === 'number') &&
-    (obj.dropPartials == null || typeof obj.dropPartials === 'boolean') &&
-    (obj.appliedTimeRange == null || typeof obj.appliedTimeRange === 'object')
+    isOptionalNumber(obj.interval) &&
+    isOptionalBoolean(obj.dropPartials) &&
+    isOptionalAppliedTimeRange(obj.appliedTimeRange)
   );
 }
 
