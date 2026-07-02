@@ -7,7 +7,7 @@
 
 import { parse } from 'yaml';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { SignificantEventsWorkflowStatus } from '@kbn/streams-schema';
+import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
@@ -214,6 +214,7 @@ describe('StreamsKIsOnboardingClient', () => {
           connectorUsed: '',
           tokensUsed: {},
         },
+        keepAlive: { refreshed: 0 },
       });
     });
 
@@ -242,6 +243,7 @@ describe('StreamsKIsOnboardingClient', () => {
           connectorUsed: '',
           tokensUsed: { prompt: 0, completion: 0, total: 0 },
         },
+        keepAlive: { refreshed: 0 },
       });
     });
 

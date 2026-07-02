@@ -7,9 +7,7 @@
 
 import React from 'react';
 import { act, render, screen, fireEvent, waitFor, within } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { MemoryRouter } from 'react-router-dom';
+import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { RulesListPage, SEARCH_DEBOUNCE_MS } from './rules_list_page';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT } from '../../constants';
 
@@ -151,20 +149,11 @@ const mockRules = [
   },
 ];
 
-const createQueryClient = () =>
-  new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-
 const renderPage = () => {
   return render(
-    <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter>
-        <I18nProvider>
-          <RulesListPage />
-        </I18nProvider>
-      </MemoryRouter>
-    </QueryClientProvider>
+    <ListPageTestProviders>
+      <RulesListPage />
+    </ListPageTestProviders>
   );
 };
 
@@ -311,6 +300,57 @@ describe('RulesListPage', () => {
       screen.getByRole('heading', { level: 2, name: /no rules yet\. let's get started!/i })
     ).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
+  });
+
+  it('hides the header create controls in the empty state (no rules, no active filters)', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: [], total: 0, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('createRuleButton-secondary-button')).not.toBeInTheDocument();
+  });
+
+  it('keeps the header create controls when filters are active even with zero matching rules', async () => {
+    jest.useFakeTimers();
+    // Unfiltered fetch returns rules (so the search bar renders); once a search term is applied the
+    // fetch returns zero rows, exercising the `hasActiveFilters` branch of `showHeaderMenu`.
+    mockUseFetchRules.mockImplementation((params?: { search?: string }) => ({
+      data: params?.search
+        ? { items: [], total: 0, page: 1, perPage: 20 }
+        : { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    }));
+
+    renderPage();
+
+    expect(screen.getByTestId('createRuleButton')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByPlaceholderText('Search rules'), {
+      target: { value: 'no-such-rule' },
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+    });
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith(
+        expect.objectContaining({ search: 'no-such-rule' })
+      );
+    });
+
+    // Header create controls remain because filters are active, even though the list is now empty.
+    expect(screen.getByTestId('createRuleButton')).toBeInTheDocument();
+    // The empty-state create panel must NOT take over while filters are active.
+    expect(screen.queryByTestId('createEsqlRuleCard')).not.toBeInTheDocument();
   });
 
   it('opens the flyout from the empty state ES|QL rule card', () => {
@@ -802,7 +842,7 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    fireEvent.click(screen.getByTestId('createRulePopoverButton'));
+    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
 
     await waitFor(() => {
       expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument();
@@ -823,7 +863,7 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    fireEvent.click(screen.getByTestId('createRulePopoverButton'));
+    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
 
     await waitFor(() => {
       expect(screen.getByTestId('createWithAgentButton')).toBeInTheDocument();
@@ -850,7 +890,7 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    fireEvent.click(screen.getByTestId('createRulePopoverButton'));
+    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
 
     await waitFor(() => {
       expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument();

@@ -53,7 +53,7 @@ export const SharepointServer: ConnectorSpec = {
   },
 
   auth: {
-    types: ['basic'],
+    types: [{ type: 'basic', defaults: {} }],
   },
 
   schema: lazySchema(() =>
