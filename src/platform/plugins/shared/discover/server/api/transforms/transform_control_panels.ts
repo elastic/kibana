@@ -27,7 +27,7 @@ export const transformControlPanelsOut = (
   })();
 
   if (!isObject(parsed) || Object.values(parsed).some((v) => !isObject(v))) {
-    throw new Error(`Invalid controlGroupJson: ${controlGroupJson}`);
+    throw new Error('controlGroupJson must be a JSON object');
   }
 
   const panels = Object.entries(parsed)

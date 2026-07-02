@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQL_CONTROL } from '@kbn/controls-constants';
+import { ControlValuesSource, ESQL_CONTROL } from '@kbn/controls-constants';
 import { transformControlPanelsIn, transformControlPanelsOut } from './transform_control_panels';
 
 describe('control panel transforms', () => {
@@ -57,6 +57,7 @@ describe('control panel transforms', () => {
           config: {
             data_view_id: 'logs-*',
             field_name: 'host.name',
+            values_source: ControlValuesSource.FIELD,
             use_global_filters: true,
             ignore_validations: false,
             exclude: false,
