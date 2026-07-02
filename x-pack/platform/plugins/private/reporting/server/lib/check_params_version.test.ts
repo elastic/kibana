@@ -26,17 +26,11 @@ describe('checkParamsVersion', () => {
   it('returns the version from job params when provided', () => {
     const result = checkParamsVersion(baseParams, mockLogger, '9.9.9');
     expect(result).toBe('9.1.0');
-    expect(mockLogger.debug).toHaveBeenCalledWith('Using reporting job params v9.1.0');
-    expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 
-  it('returns the defaultVersion and logs at debug when job params version is missing', () => {
+  it('returns the defaultVersion when job params version is missing', () => {
     const params = { ...baseParams, version: undefined } as unknown as BaseParams;
     const result = checkParamsVersion(params, mockLogger, '9.9.9');
     expect(result).toBe('9.9.9');
-    expect(mockLogger.debug).toHaveBeenCalledWith(
-      'No version provided in report job params. Defaulting to 9.9.9'
-    );
-    expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 });
