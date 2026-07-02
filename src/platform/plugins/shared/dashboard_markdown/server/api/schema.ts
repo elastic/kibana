@@ -12,5 +12,6 @@ import { markdownStateSchema } from '../embeddable/schemas';
 
 export const markdownLibraryItemSchema = schema.object({
   ...markdownStateSchema.getPropSchemas(),
-  title: schema.string(), // make title required
+  description: schema.maybe(schema.string()), // saved object description
+  title: schema.string(), // saved object title
 });
