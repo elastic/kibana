@@ -899,14 +899,20 @@ export function ComposeDiscoverFlyout({
     isAlert,
   ]);
 
+  const isAlertConditionStep = currentStep?.id === 'alertCondition';
+
   /*
    * Help text shown above the editor in the create-mode alert flow.
    * - Unified (default): describes the automatic split on Apply.
    * - Manual split: explains that automatic splitting is disabled and tabs are separate.
-   * Absent in edit mode (where no helper is needed), builder/read-only mode, and YAML mode.
+   * Alert Condition step only — not shown on recovery or later steps.
    */
   const sandboxHelpText =
-    isAlert && !isBuilderMode && !uiState.yamlMode && uiState.mode === 'create' ? (
+    isAlert &&
+    !isBuilderMode &&
+    !uiState.yamlMode &&
+    uiState.mode === 'create' &&
+    isAlertConditionStep ? (
       uiState.manualSplitEnabled ? (
         <EuiText size="s" color="subdued" data-test-subj="querySandboxManualSplitHelper">
           <FormattedMessage
@@ -985,10 +991,16 @@ export function ComposeDiscoverFlyout({
 
   /*
    * Split / Merge header buttons passed into the sandbox via headerActions.
-   * Only shown in create-mode alert flow, not in builder, YAML, or edit mode.
+   * Alert Condition step only in create-mode alert flow — not on recovery editing.
    */
   const sandboxHeaderActions = useMemo(() => {
-    if (isBuilderMode || uiState.yamlMode || uiState.mode !== 'create' || !isAlert) {
+    if (
+      isBuilderMode ||
+      uiState.yamlMode ||
+      uiState.mode !== 'create' ||
+      !isAlert ||
+      currentStep?.id !== 'alertCondition'
+    ) {
       return undefined;
     }
     if (uiState.manualSplitEnabled) {
@@ -1045,6 +1057,7 @@ export function ComposeDiscoverFlyout({
     uiState.mode,
     uiState.manualSplitEnabled,
     isAlert,
+    currentStep?.id,
     sandboxQuery,
     handleEnableManualSplit,
     handleDisableManualSplit,

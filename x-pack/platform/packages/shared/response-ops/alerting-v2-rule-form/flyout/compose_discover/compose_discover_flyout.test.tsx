@@ -79,6 +79,7 @@ interface SandboxFlyoutMockProps {
   onQueryChange?: (query: RuleQuery) => void;
   onApply?: () => void;
   onClose: () => void;
+  helpText?: React.ReactNode;
   headerActions?: React.ReactNode;
 }
 
@@ -90,6 +91,7 @@ jest.mock('./query_sandbox_flyout', () => ({
     sandboxFlyoutProps = props;
     return (
       <div data-test-subj="composeDiscoverChildMock">
+        <div data-test-subj="mockSandboxHelpText">{props.helpText}</div>
         <div data-test-subj="mockSandboxHeaderActions">{props.headerActions}</div>
         {props.onApply ? (
           <button type="button" data-test-subj="mockSandboxApply" onClick={() => props.onApply?.()}>
@@ -821,6 +823,46 @@ describe('ComposeDiscoverFlyout', () => {
       clickEditMode('form');
 
       expect(getLatestFormProps().state.manualSplitEnabled).toBe(false);
+    });
+
+    it('shows split controls and unified helper on the alert condition step only', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+
+      expect(screen.getByTestId('querySandboxSplitBaseAndAlert')).toBeInTheDocument();
+      expect(screen.getByTestId('querySandboxUnifiedHelper')).toBeInTheDocument();
+    });
+
+    it('hides split controls and unified helper on the custom recovery step', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      fireEvent.click(screen.getByTestId('composeDiscoverNext'));
+
+      act(() => {
+        getLatestFormProps().onRecoveryTypeChange('custom');
+      });
+
+      expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('querySandboxSplitBaseAndAlert')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('querySandboxUseSingleEditor')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('querySandboxUnifiedHelper')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('querySandboxManualSplitHelper')).not.toBeInTheDocument();
     });
   });
 
