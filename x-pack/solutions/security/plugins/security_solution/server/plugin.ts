@@ -566,7 +566,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
-    registerCaseAttachments(plugins.cases.attachmentFramework);
+    registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures);
     plugins.cases.attachmentFramework.registerUnified(securityAlertAttachmentType);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
@@ -854,7 +854,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     if (plugins.workflowsExtensions) {
-      registerWorkflowSteps(plugins.workflowsExtensions, core);
+      registerWorkflowSteps(plugins.workflowsExtensions, core, experimentalFeatures);
     }
 
     setupAlertsCapabilitiesSwitcher({
