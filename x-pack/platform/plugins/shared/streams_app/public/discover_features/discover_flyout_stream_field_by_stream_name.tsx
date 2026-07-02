@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isNonLocalIndexName } from '@kbn/es-query';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import React from 'react';
 import type { StreamsAppLocator } from '../../common/locators';
@@ -24,11 +25,27 @@ export function DiscoverFlyoutStreamFieldByStreamName({
   locator,
   cpsHasLinkedProjects,
 }: DiscoverFlyoutStreamFieldByStreamNameProps) {
+  const remote = parseRemoteStreamName(streamName);
+
   const { value, loading, error } = useResolvedDefinitionName({
     streamsRepositoryClient,
-    fallbackStreamName: streamName,
-    cpsHasLinkedProjects,
+    fallbackStreamName: remote?.streamName ?? streamName,
+    cpsHasLinkedProjects: remote ? undefined : cpsHasLinkedProjects,
   });
+
+  if (remote) {
+    return (
+      <StreamLinkContent
+        name={remote.streamName}
+        existsLocally={false}
+        loading={false}
+        error={undefined}
+        locator={locator}
+        remoteSearchType="ccs"
+        remoteName={remote.remoteName}
+      />
+    );
+  }
 
   return (
     <StreamLinkContent
@@ -40,4 +57,22 @@ export function DiscoverFlyoutStreamFieldByStreamName({
       remoteSearchType={cpsHasLinkedProjects ? 'cps' : undefined}
     />
   );
+}
+
+/**
+ * Splits a cross-cluster search (CCS) qualified name of the form
+ * `<remoteCluster>:<streamName>` into its parts. Returns `undefined` for local
+ * names so the caller falls back to normal local resolution.
+ */
+function parseRemoteStreamName(
+  name: string
+): { remoteName: string; streamName: string } | undefined {
+  if (!isNonLocalIndexName(name)) {
+    return undefined;
+  }
+  const colonIdx = name.indexOf(':');
+  return {
+    remoteName: name.substring(0, colonIdx),
+    streamName: name.substring(colonIdx + 1),
+  };
 }
