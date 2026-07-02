@@ -451,6 +451,7 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
     } as unknown as WorkflowYaml;
     const mockTriggerDefinition = {
       id: 'example.custom_trigger',
+      stability: 'tech_preview' as const,
       title: 'Example custom trigger',
       description: 'Test trigger for event schema merge',
       eventSchema: customEventSchema,

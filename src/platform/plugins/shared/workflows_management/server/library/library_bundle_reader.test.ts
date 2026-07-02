@@ -8,10 +8,12 @@
  */
 
 import { mkdir, mkdtemp, rm, writeFile } from 'fs/promises';
+import { createHash } from 'node:crypto';
 import os from 'os';
 import path from 'path';
 
 import { loggerMock } from '@kbn/logging-mocks';
+import type { Template } from '@kbn/workflows-library';
 
 import { LibraryFetchError, LibraryNotFoundError } from './errors';
 import { LibraryBundleReader } from './library_bundle_reader';
@@ -21,25 +23,8 @@ const MANIFEST = {
   latest: '9.5',
 };
 
-const CATALOG = {
-  version: 'v1',
-  kibanaVersion: '9.5.0',
-  generatedAt: '2026-06-01T00:00:00Z',
-  templates: [
-    {
-      slug: 'demo',
-      version: '1.0.0',
-      availability: '>=9.5.0',
-      name: 'Demo',
-      description: 'Demo template',
-      categories: ['utility'],
-      definitionUrl: 'templates/demo/1.0.0.yaml',
-      contentHash: `sha256:${'0'.repeat(64)}`,
-      stepTypes: [],
-      triggerTypes: [],
-    },
-  ],
-};
+const contentHash = (body: string) =>
+  `sha256:${createHash('sha256').update(body, 'utf8').digest('hex')}`;
 
 const BODY_YAML = `
 template-metadata:
@@ -59,6 +44,62 @@ steps:
   - name: noop
     type: noop
 `;
+
+// A body from a newer publisher: unknown fields at the top level and inside the
+// nested `install` block. Exercises the lenient body parse (parity with HTTP).
+const FUTURE_BODY_YAML = `
+template-metadata:
+  slug: demo
+  version: "1.0.0"
+  availability: ">=9.5.0"
+  name: "Demo"
+  description: "Demo template"
+  categories: [utility]
+  someFutureField: hello
+  install:
+    someFutureInstallKey: hi
+    form:
+      - name: api-key
+        inputType: text
+        someFutureFieldKey: hi
+
+consts:
+  k: v
+inputs:
+  - name: ip
+    type: string
+steps:
+  - name: noop
+    type: noop
+`;
+
+// The default catalog row's `contentHash` matches `BODY_YAML` so the bundle
+// reader's integrity check passes for the happy path.
+const CATALOG = {
+  version: 'v1',
+  kibanaVersion: '9.5.0',
+  generatedAt: '2026-06-01T00:00:00Z',
+  templates: [
+    {
+      slug: 'demo',
+      version: '1.0.0',
+      availability: '>=9.5.0',
+      name: 'Demo',
+      description: 'Demo template',
+      categories: ['utility'],
+      definitionUrl: 'templates/demo/1.0.0.yaml',
+      contentHash: contentHash(BODY_YAML),
+      stepTypes: [],
+      triggerTypes: [],
+    },
+  ],
+};
+
+/** A single-row catalog whose `contentHash` matches the given body. */
+const catalogForBody = (body: string, rowOverrides: Partial<Template> = {}) => ({
+  ...CATALOG,
+  templates: [{ ...CATALOG.templates[0], contentHash: contentHash(body), ...rowOverrides }],
+});
 
 interface BundleOptions {
   manifest?: unknown;
@@ -104,12 +145,19 @@ const writeBundle = async (root: string, options: BundleOptions = {}): Promise<v
 
 const buildReader = (
   bundlePath: string,
-  overrides: { kibanaVersion?: string; isServerless?: boolean } = {}
+  overrides: {
+    kibanaVersion?: string;
+    isServerless?: boolean;
+    maxCatalogBytes?: number;
+    maxBodyBytes?: number;
+  } = {}
 ) =>
   new LibraryBundleReader({
     bundlePath,
     kibanaVersion: overrides.kibanaVersion ?? '9.5.0',
     isServerless: overrides.isServerless ?? false,
+    maxCatalogBytes: overrides.maxCatalogBytes,
+    maxBodyBytes: overrides.maxBodyBytes,
     logger: loggerMock.create(),
   });
 
@@ -243,6 +291,13 @@ describe('LibraryBundleReader', () => {
 
       expect(templates.map((t) => t.slug)).toEqual(['demo']);
     });
+
+    it('rejects a catalog/manifest file larger than the configured cap (`too-large`)', async () => {
+      await writeBundle(tmpRoot);
+      const reader = buildReader(tmpRoot, { maxCatalogBytes: 8 });
+
+      await expect(reader.listTemplates()).rejects.toMatchObject({ reason: 'too-large' });
+    });
   });
 
   describe('getTemplate', () => {
@@ -257,6 +312,21 @@ describe('LibraryBundleReader', () => {
       expect(first.metadata.slug).toBe('demo');
       expect(first.body.consts).toEqual({ k: 'v' });
       expect(first.raw).toContain('template-metadata:');
+    });
+
+    it('tolerates unknown `template-metadata` fields in the body (forward-compat parity with HTTP)', async () => {
+      await writeBundle(tmpRoot, {
+        body: FUTURE_BODY_YAML,
+        catalogs: { '9.5': catalogForBody(FUTURE_BODY_YAML) },
+      });
+      const reader = buildReader(tmpRoot);
+
+      const result = await reader.getTemplate('demo');
+
+      expect(result.metadata.slug).toBe('demo');
+      expect(result.metadata).not.toHaveProperty('someFutureField');
+      expect(result.metadata.install).not.toHaveProperty('someFutureInstallKey');
+      expect(result.metadata.install?.form[0]).not.toHaveProperty('someFutureFieldKey');
     });
 
     it('throws LibraryNotFoundError when the slug is absent from the catalog', async () => {
@@ -277,12 +347,40 @@ describe('LibraryBundleReader', () => {
     });
 
     it('wraps a body parse failure as `malformed`', async () => {
-      await writeBundle(tmpRoot, { body: 'not: [valid yaml at all' });
+      // Hash matches the served bytes so the integrity check passes and it is
+      // the YAML parse that fails.
+      const invalidBody = 'not: [valid yaml at all';
+      await writeBundle(tmpRoot, {
+        body: invalidBody,
+        catalogs: { '9.5': catalogForBody(invalidBody) },
+      });
       const reader = buildReader(tmpRoot);
 
       await expect(reader.getTemplate('demo')).rejects.toMatchObject({
         name: 'LibraryFetchError',
         reason: 'malformed',
+      });
+    });
+
+    it('rejects a body whose content hash does not match the catalog row (`integrity`)', async () => {
+      // Catalog row's contentHash describes BODY_YAML but a different body is on
+      // disk — a mis-assembled bundle must be rejected before parsing.
+      await writeBundle(tmpRoot, { body: FUTURE_BODY_YAML });
+      const reader = buildReader(tmpRoot);
+
+      await expect(reader.getTemplate('demo')).rejects.toMatchObject({
+        name: 'LibraryFetchError',
+        reason: 'integrity',
+      });
+    });
+
+    it('rejects a body larger than the configured cap (`too-large`)', async () => {
+      await writeBundle(tmpRoot);
+      const reader = buildReader(tmpRoot, { maxBodyBytes: 8 });
+
+      await expect(reader.getTemplate('demo')).rejects.toMatchObject({
+        name: 'LibraryFetchError',
+        reason: 'too-large',
       });
     });
 
@@ -305,7 +403,7 @@ describe('LibraryBundleReader', () => {
     it('reports the bundle source mode and no timestamps before the first read', () => {
       const reader = buildReader(tmpRoot);
 
-      expect(reader.getHealth()).toEqual({ sourceMode: 'bundle' });
+      expect(reader.getHealth()).toEqual({ sourceMode: 'bundle', lastRefreshAt: null });
     });
 
     it('records the load timestamp after the first successful read', async () => {
