@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { classifySectionSpans, extractIocs, type IocTier } from './extract_iocs';
+import {
+  classifySectionSpans,
+  extractIocs,
+  type ExtractedIoc,
+  type IocTier,
+} from './extract_iocs';
 
 /** Helper: extract IOC values of a specific type from the result. */
 const valuesOf = (result: ReturnType<typeof extractIocs>, type: string) =>
@@ -1692,5 +1697,56 @@ describe('extract_iocs — Elastic-style end-to-end (Observations + GitHub IOC l
       expect(ioc?.tier).toBe('discriminating');
       expect(ioc?.tier_basis).toBe('ioc_section');
     }
+  });
+});
+
+// ── Mapping coverage guard ────────────────────────────────────────────────────
+//
+// This test prevents a repeat of the _offset and port bugs: if extract_iocs
+// ever emits a field that is not declared in the extracted.iocs nested mapping
+// in index_templates.ts, ES strict dynamic mapping will reject the document at
+// persist time. Keep this set in sync with the mapping's `properties` block.
+//
+// When you add a field to ExtractedIoc, you MUST:
+//   1. Add it to DECLARED_IOC_MAPPING_FIELDS below.
+//   2. Add it to the extracted.iocs.properties block in setup/index_templates.ts.
+//   3. Add a migrateExisting* call in installIndexTemplates for pre-version backing indices.
+describe('extract_iocs — mapping coverage guard', () => {
+  // Exact set of keys declared in the extracted.iocs.properties block of
+  // index_templates.ts. Must be kept in sync manually — that is the point.
+  const DECLARED_IOC_MAPPING_FIELDS = new Set<keyof ExtractedIoc>([
+    'type',
+    'value',
+    'defanged',
+    'severity' as keyof ExtractedIoc, // declared in mapping, optional on ExtractedIoc
+    'tier',
+    'tier_heuristic',
+    'tier_basis',
+    'port',
+  ]);
+
+  test('all ExtractedIoc fields are declared in the extracted.iocs mapping', () => {
+    // Build an IOC with every optional field populated so Object.keys captures them all.
+    const fullIoc: ExtractedIoc = {
+      type: 'ip',
+      value: '1.2.3.4',
+      defanged: '1[.]2[.]3[.]4',
+      tier: 'discriminating' as IocTier,
+      tier_heuristic: 'discriminating' as IocTier,
+      tier_basis: 'ioc_section',
+      port: 443,
+    };
+
+    for (const key of Object.keys(fullIoc)) {
+      expect(DECLARED_IOC_MAPPING_FIELDS.has(key as keyof ExtractedIoc)).toBe(true);
+    }
+  });
+
+  test('socket extraction emits port as integer, not string', () => {
+    const r = extractIocs({ text: 'C2 at 10.0.0.1:4444' });
+    const ioc = r.iocs.find((i) => i.type === 'ip' && i.value === '10.0.0.1');
+    expect(ioc?.port).toBeDefined();
+    expect(typeof ioc?.port).toBe('number');
+    expect(Number.isInteger(ioc?.port)).toBe(true);
   });
 });

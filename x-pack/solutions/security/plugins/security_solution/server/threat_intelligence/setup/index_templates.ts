@@ -148,6 +148,15 @@ import {
  *   Note: `primary_links` is deferred — no consumer until Slice-5 link-chasing.
  *   A `migrateExistingGateMappings` call patches pre-v16 backing indices at startup.
  *
+ * v17: adds `port` (integer) to the `extracted.iocs` nested block.
+ *   Socket extraction (PASS 5) emits `{ type, value, port }` for `host:port` patterns.
+ *   Without this mapping, strict dynamic mapping rejected any IOC with a port field.
+ *   A `migrateExistingIocPortMapping` call patches pre-v17 backing indices at startup.
+ *
+ * v16: adds `extracted.gate.*` (7 fields) — the relevance/provenance gate verdict block.
+ *   Note: `primary_links` is deferred — no consumer until Slice-5 link-chasing.
+ *   A `migrateExistingGateMappings` call patches pre-v16 backing indices at startup.
+ *
  * v15: adds IOC tier fields to the `extracted.iocs` nested block:
  *   - `tier`          (keyword) — active tier assignment (heuristic for now; LLM override in B2).
  *   - `tier_heuristic`(keyword) — the deterministic heuristic's assignment (preserved for tuning).
@@ -173,7 +182,7 @@ import {
  * template PUT or rollover). `bootstrap_threat_intelligence` logs an error at
  * startup if the endpoint is absent so operators catch the gap before data flows.
  */
-const TEMPLATE_VERSION = 16;
+const TEMPLATE_VERSION = 17;
 
 /** Keyword sentinel meaning "visible from every space". */
 export const SPACE_ID_GLOBAL = '*' as const;
@@ -291,6 +300,8 @@ const threatReportsTemplate = {
                 tier: { type: 'keyword' as const },
                 tier_heuristic: { type: 'keyword' as const },
                 tier_basis: { type: 'keyword' as const },
+                // Port from socket extraction (v17): ip:port / domain:port → integer.
+                port: { type: 'integer' as const },
               },
             },
             ioc_set_hash: { type: 'keyword' as const },
@@ -906,6 +917,81 @@ const migrateExistingIocTierMappings = async (
 };
 
 /**
+ * Patches the `extracted.iocs[].port` field onto any existing
+ * `.ds-.kibana-threat-reports-*` backing indices created before the v17 template.
+ * The v17 template adds `port` automatically to new rollovers; pre-existing
+ * backing indices keep their original (v15/v16) mapping until explicitly updated.
+ *
+ * Safe to re-run on every plugin start: PUT mapping is idempotent for additive
+ * changes. If the index does not exist yet no-ops silently.
+ */
+const migrateExistingIocPortMapping = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('ioc-port-mapping-migration');
+
+  let backingIndices: string[];
+  try {
+    const streamInfo = await esClient.indices.getDataStream(
+      { name: THREAT_REPORTS_DATA_STREAM },
+      { ignore: [404] }
+    );
+    backingIndices = (streamInfo.data_streams ?? []).flatMap((ds) =>
+      (ds.indices ?? []).map((i) => i.index_name)
+    );
+  } catch (err) {
+    log.debug(
+      `ioc-port-mapping-migration: data stream not found — skipping (${(err as Error).message})`
+    );
+    return;
+  }
+
+  for (const indexName of backingIndices) {
+    try {
+      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
+        index: indexName,
+      });
+      const iocProps = (
+        (
+          indexMappings?.mappings?.properties as
+            | Record<
+                string,
+                { properties?: Record<string, { properties?: Record<string, unknown> }> }
+              >
+            | undefined
+        )?.extracted?.properties?.iocs as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+
+      if (!iocProps?.port) {
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            extracted: {
+              properties: {
+                iocs: {
+                  type: 'nested',
+                  properties: {
+                    port: { type: 'integer' },
+                  },
+                },
+              },
+            },
+          },
+        });
+        log.info(`Migrated ioc port mapping on ${indexName} (v17 backfill)`);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to migrate ioc port mapping on ${indexName}: ${(err as Error).message}. ` +
+          `The extracted.iocs port field will be rejected by dynamic: strict until the ` +
+          `mapping is updated manually.`
+      );
+    }
+  }
+};
+
+/**
  * Patches the `extracted.gate.*` field mappings onto any existing
  * `.ds-.kibana-threat-reports-*` backing indices created before the v16 template.
  * The v16 template adds these fields automatically to new rollovers; pre-existing
@@ -1060,6 +1146,8 @@ export const installIndexTemplates = async ({
   await migrateExistingIocTierMappings(esClient, log);
   // Patch gate fields onto any pre-v16 backing indices. Safe to re-run.
   await migrateExistingGateMappings(esClient, log);
+  // Patch ioc port field onto any pre-v17 backing indices. Safe to re-run.
+  await migrateExistingIocPortMapping(esClient, log);
 
   log.info('Threat intelligence index templates installed');
 };
