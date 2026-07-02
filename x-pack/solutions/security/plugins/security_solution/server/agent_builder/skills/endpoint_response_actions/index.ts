@@ -14,6 +14,8 @@ import {
   unisolateHostTool,
   getEndpointStatusTool,
   listEndpointsTool,
+  getRunningProcessesTool,
+  scanHostTool,
 } from './tools';
 
 const ID = 'endpoint-response-actions';
@@ -26,6 +28,8 @@ export const ISOLATE_TOOL_ID = toolName('isolate_host');
 export const UNISOLATE_TOOL_ID = toolName('unisolate_host');
 export const GET_ENDPOINT_STATUS_TOOL_ID = toolName('get_endpoint_status');
 export const LIST_ENDPOINTS_TOOL_ID = toolName('list_endpoints');
+export const RUNNING_PROCESSES_TOOL_ID = toolName('running_processes');
+export const SCAN_TOOL_ID = toolName('scan');
 
 const SYSTEM_INSTRUCTIONS = `# Endpoint Response Actions Skill
 
@@ -33,27 +37,44 @@ const SYSTEM_INSTRUCTIONS = `# Endpoint Response Actions Skill
 
 Use this skill when the analyst requests any of the following in natural language:
 - List available endpoints that response actions can target
-- Isolate or un-isolate a host
+- Isolate (contain) or release (reconnect) a host
 - Check the status of a host (isolation state, last seen, online/offline)
+- List the running processes on a host (read-only inspection)
+- Scan a file or folder path on a host for malware (uses the existing Defend policy)
+
+This is Slice 1 of the Endpoint Response Actions skill: containment, read-only,
+and low-risk inspection only. High-risk execution actions (execute, kill-process,
+suspend-process, get-file, upload, runscript, memory-dump) are intentionally NOT
+part of this skill yet — do not attempt them.
 
 ## Conversation Flow
 
 ### 1. Parse Intent
 Identify the action type from the analyst's message:
-- **list** / **show** / **which endpoints** / **available hosts** → use \`list_endpoints\` tool
-- **isolate** / **quarantine** / **disconnect** → use \`isolate_host\` tool
-- **unisolate** / **release** / **reconnect** → use \`unisolate_host\` tool
-- **status** / **check** / **is isolated** → use \`get_endpoint_status\` tool
+- **list** / **show** / **which endpoints** / **available hosts** → use \`list_endpoints\` tool (read-only)
+- **isolate** / **quarantine** / **contain** / **disconnect** → use \`isolate_host\` tool (WRITE — confirm first)
+- **release** / **unisolate** / **reconnect** → use \`unisolate_host\` tool (WRITE — confirm first)
+- **status** / **check** / **is isolated** → use \`get_endpoint_status\` tool (read-only)
+- **processes** / **running processes** / **what is running** → use \`running_processes\` tool (read-only)
+- **scan** / **scan for malware** / **check path** → use \`scan\` tool (WRITE — confirm first)
 
 ### 2. Confirm Before Acting (Write Actions Only)
-For isolation/un-isolation actions:
-- Present the target host name
-- State the expected impact clearly
-- Wait for explicit analyst confirmation before dispatching
+Write actions (\`isolate_host\`, \`unisolate_host\`, \`scan\`) ALWAYS require explicit
+human confirmation before dispatch:
+- Present the target host name (and, for \`scan\`, the exact path to be scanned)
+- State the expected impact clearly (e.g. "this will disconnect the host from the network")
+- Wait for explicit analyst confirmation ("yes"/"confirm"/"go ahead") before calling the tool
+- Never dispatch a write action on inference alone
+
+Read-only actions (\`list_endpoints\`, \`get_endpoint_status\`, \`running_processes\`)
+execute immediately without a confirmation step.
 
 ### 3. Execute and Report
 - Call the appropriate tool
 - Report the result inline: action ID, status, and any output
+- The action ID is the audit anchor — always surface it so the operator can
+  reconstruct the action in the Response Actions history view, linked to the
+  initiating user and this agent session, even after the chat thread is closed
 - If the action fails, provide the error message and action ID for manual follow-up
 
 ## Error Handling
@@ -70,7 +91,7 @@ For isolation/un-isolation actions:
 ## Best Practices
 - When the analyst asks to see available endpoints, use \`list_endpoints\` first
 - Always confirm host identity before executing write actions
-- Always verify current status with \`get_endpoint_status\` before isolate/unisolate
+- Always verify current status with \`get_endpoint_status\` before isolate/release
 - Keep the analyst informed with progress updates`;
 
 export const createEndpointResponseActionsSkill = (
@@ -81,13 +102,15 @@ export const createEndpointResponseActionsSkill = (
     name: NAME,
     basePath: BASE_PATH,
     description:
-      'Execute endpoint response actions (isolate, unisolate, check status) from chat conversations. Resolves hostnames to endpoint identities and dispatches actions through the Elastic Defend Response Actions service.',
+      'Execute endpoint response actions (isolate, release, check status, list running processes, scan for malware) from chat conversations. Resolves hostnames to endpoint identities and dispatches actions through the Elastic Defend Response Actions service. Write actions require analyst confirmation.',
     content: SYSTEM_INSTRUCTIONS,
     getInlineTools: () => [
       listEndpointsTool(endpointAppContextService),
       isolateHostTool(endpointAppContextService),
       unisolateHostTool(endpointAppContextService),
       getEndpointStatusTool(endpointAppContextService),
+      getRunningProcessesTool(endpointAppContextService),
+      scanHostTool(endpointAppContextService),
     ],
   });
 };
