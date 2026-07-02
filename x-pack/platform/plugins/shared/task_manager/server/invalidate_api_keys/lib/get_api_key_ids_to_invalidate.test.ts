@@ -6,6 +6,7 @@
  */
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getApiKeyIdsToInvalidate } from './get_api_key_ids_to_invalidate';
 import type {
   EncryptedSavedObjectsClient,
@@ -506,6 +507,49 @@ describe('getApiKeyIdsToInvalidate', () => {
         ],
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"failfail"`);
+  });
+
+  test('should skip a pending invalidation SO that was already deleted, without dropping the rest of the batch', async () => {
+    const encryptedSavedObjectsClient = createEncryptedSavedObjectsClientMock();
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('api_key_pending_invalidation', '1')
+    );
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      mockInvalidatePendingApiKeyObject2
+    );
+
+    const result = await getApiKeyIdsToInvalidate({
+      apiKeySOsPendingInvalidation: {
+        saved_objects: [
+          {
+            id: '1',
+            type: 'api_key_pending_invalidation',
+            score: 0,
+            attributes: { apiKeyId: 'encryptedencrypted', createdAt: '2024-04-11T17:08:44.035Z' },
+            references: [],
+          },
+          {
+            id: '2',
+            type: 'api_key_pending_invalidation',
+            score: 0,
+            attributes: { apiKeyId: 'encryptedencrypted', createdAt: '2024-04-11T17:08:44.035Z' },
+            references: [],
+          },
+        ],
+        total: 2,
+        per_page: 10,
+        page: 1,
+      },
+      encryptedSavedObjectsClient,
+      savedObjectsClient: internalSavedObjectsRepository,
+      savedObjectType: 'api_key_pending_invalidation',
+      savedObjectTypesToQuery: [],
+    });
+
+    expect(result).toEqual({
+      apiKeyIdsToInvalidate: [{ id: '2', apiKeyId: 'xyz!==!' }],
+      apiKeyIdsToExclude: [],
+    });
   });
 
   test('should throw error if malformed savedObjectsClient.find response', async () => {

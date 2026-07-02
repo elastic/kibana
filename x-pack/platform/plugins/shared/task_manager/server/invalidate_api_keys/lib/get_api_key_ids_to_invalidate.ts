@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsFindResponse, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { AggregationsStringTermsBucketKeys } from '@elastic/elasticsearch/lib/api/types';
 import type { ApiKeyToInvalidate } from '../../saved_objects/schemas/api_key_to_invalidate';
@@ -51,11 +52,20 @@ export async function getApiKeyIdsToInvalidate({
     // Decrypt the apiKeyId for each pending invalidation SO
     await Promise.all(
       apiKeySOsPendingInvalidation.saved_objects.map(async (apiKeyPendingInvalidationSO) => {
-        const decryptedApiKeyPendingInvalidationObject =
-          await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ApiKeyToInvalidate>(
-            savedObjectType,
-            apiKeyPendingInvalidationSO.id
-          );
+        let decryptedApiKeyPendingInvalidationObject;
+        try {
+          decryptedApiKeyPendingInvalidationObject =
+            await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ApiKeyToInvalidate>(
+              savedObjectType,
+              apiKeyPendingInvalidationSO.id
+            );
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            // Already deleted, likely by a concurrent invalidation run - nothing to do.
+            return;
+          }
+          throw err;
+        }
 
         const { uiamApiKey, apiKeyId } = decryptedApiKeyPendingInvalidationObject.attributes;
         if (uiamApiKey) {
