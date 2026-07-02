@@ -34,6 +34,9 @@ export const clearStoredQueryMode = async (page: ScoutPage): Promise<void> => {
 export const getStoredQueryMode = async (page: ScoutPage): Promise<'classic' | 'esql' | null> => {
   return page.evaluate((storageKey) => {
     const storedValue = window.localStorage.getItem(storageKey);
+    if (storedValue == null) {
+      return null;
+    }
     // The app persists the value JSON-encoded (e.g. `"esql"`).
     try {
       const parsedValue = JSON.parse(storedValue);
@@ -56,6 +59,9 @@ export const waitForStoredQueryMode = async (
   await page.waitForFunction(
     ([storageKey, mode]) => {
       const storedValue = window.localStorage.getItem(storageKey);
+      if (storedValue == null) {
+        return false;
+      }
       try {
         return JSON.parse(storedValue) === mode;
       } catch {
