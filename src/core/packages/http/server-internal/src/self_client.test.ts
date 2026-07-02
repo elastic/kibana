@@ -145,6 +145,22 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
+  it('clamps inbound self-call depth to a non-negative integer', async () => {
+    const { self } = createClient();
+
+    await self
+      .asScoped(createRequest({ headers: { 'x-kbn-self-call-depth': '-1000' } }))
+      .fetch('/api/status');
+    await self
+      .asScoped(createRequest({ headers: { 'x-kbn-self-call-depth': '1.9' } }))
+      .fetch('/api/status');
+
+    const negativeDepthRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const fractionalDepthRequest = (global.fetch as jest.Mock).mock.calls[1][0] as Request;
+    expect(negativeDepthRequest.headers.get('x-kbn-self-call-depth')).toBe('1');
+    expect(fractionalDepthRequest.headers.get('x-kbn-self-call-depth')).toBe('2');
+  });
+
   it('returns response details when asResponse is true', async () => {
     const { self } = createClient();
 

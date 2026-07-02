@@ -256,7 +256,7 @@ const validateFetchArguments = <TRequestBody>(
 const parseDepth = (value: string | string[] | undefined): number => {
   const rawValue = Array.isArray(value) ? value[0] : value;
   const depth = Number(rawValue ?? 0);
-  return Number.isFinite(depth) ? depth : 0;
+  return Number.isFinite(depth) && depth > 0 ? Math.floor(depth) : 0;
 };
 
 const isProtectedHeader = (name: string) => {
