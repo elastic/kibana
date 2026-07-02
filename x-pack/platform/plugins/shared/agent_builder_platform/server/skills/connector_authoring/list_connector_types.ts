@@ -14,7 +14,11 @@ import { AgentBuilderConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { ActionType } from '@kbn/actions-plugin/common';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { getConnectorTypeDisplayName, isConnectorTypeAvailable } from './utils';
+import {
+  getConnectorTypeDisplayName,
+  isConnectorTypeAvailable,
+  isChatCallableConnectorType,
+} from './utils';
 
 interface ListedConnectorAction {
   name: string;
@@ -29,6 +33,7 @@ interface ListedConnectorType {
   technical_preview: boolean;
   auth_methods: string[];
   tool_actions: ListedConnectorAction[];
+  available_in_chat: boolean;
 }
 
 const projectConnectorType = (actionType: ActionType): ListedConnectorType => {
@@ -55,6 +60,7 @@ const projectConnectorType = (actionType: ActionType): ListedConnectorType => {
     technical_preview: actionType.isExperimental ?? spec?.metadata.isTechnicalPreview ?? false,
     auth_methods: authMethods,
     tool_actions: toolActions,
+    available_in_chat: isChatCallableConnectorType(actionType.id),
   };
 };
 
@@ -68,6 +74,10 @@ export type ListConnectorTypesInput = z.infer<typeof listConnectorTypesSchema>;
  * Lists Agent Builder connector types from the Actions registry (same source as
  * the Connectors UI), enriched from `@kbn/connector-specs` when a spec exists.
  * Filtered by {@link isConnectorTypeAvailable}. Call before `propose_connector`.
+ *
+ * Types without a spec (and that aren't MCP) are still listed — they may be
+ * useful in a Workflow — but flagged via {@link isChatCallableConnectorType}
+ * as `available_in_chat: false` since the agent has no way to call them.
  */
 export const createListConnectorTypesTool = ({
   getActionsStart,
@@ -77,7 +87,7 @@ export const createListConnectorTypesTool = ({
   id: 'list_connector_types',
   type: ToolType.builtin,
   description:
-    'List the connector types that can be created from chat, returning each type id, display name, description, required license, supported auth methods, and the sub-actions the agent could call afterwards. Call this BEFORE `propose_connector` so the draft references a connector type id that actually exists. Pick the `connector_type` value verbatim from the result — never invent one.',
+    'List the connector types that can be created from chat, returning each type id, display name, description, required license, supported auth methods, the sub-actions the agent could call afterwards, and `available_in_chat`. Call this BEFORE `propose_connector` so the draft references a connector type id that actually exists. Pick the `connector_type` value verbatim from the result — never invent one. When `available_in_chat` is false, the connector type can still be set up, but the agent has no way to call it from chat afterwards (it can be used from a Workflow instead) — tell the user this before proposing it.',
   schema: listConnectorTypesSchema,
   confirmation: { askUser: 'never' },
   handler: async () => {

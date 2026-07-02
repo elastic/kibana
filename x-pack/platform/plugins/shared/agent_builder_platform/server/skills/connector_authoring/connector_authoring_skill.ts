@@ -58,9 +58,11 @@ Never ask the user to paste API keys, tokens, passwords, or webhook URLs into th
 
 3. **Mention what they'll need.** Briefly tell the user what the connector enables and, when \`auth_methods\` is non-empty, what kind of credential they'll provide (e.g. "GitHub uses a token or OAuth"). Some registry-only connectors return an empty \`auth_methods\` list — in that case say they'll configure credentials in the setup form. Do not collect credentials in chat.
 
+   If \`available_in_chat\` is \`false\` for the chosen type, say so plainly before offering to set it up: you (the agent) won't be able to call it directly from chat, but it can be used as a step in a Workflow. Let the user decide whether to proceed on that basis.
+
 4. **Render the setup card.** Call \`propose_connector\` with the chosen \`connector_type\` (and an optional \`suggested_name\` / one-line \`reason\`). On success, emit \`<render_attachment id="ATTACHMENT_ID" />\` **on its own line** (a blank line before it — a tag on the same line as prose renders as raw text). Keep your prose short — prompt the user to click "Set up connector" and complete the form.
 
-5. **Continue after setup.** Once the user creates the connector it becomes available to you automatically — you do not need to ask for its id. On a later turn, confirm it's connected and proceed with the task (the connector tools handle any authorization prompts).
+5. **Continue after setup.** If the connector type was \`available_in_chat\`, it becomes available to you automatically once created — you do not need to ask for its id. On a later turn, confirm it's connected and proceed with the task (the connector tools handle any authorization prompts). If it was not \`available_in_chat\`, confirm it's connected and remind the user it's ready to use in a Workflow, since you cannot call it yourself.
 
 ## Example
 

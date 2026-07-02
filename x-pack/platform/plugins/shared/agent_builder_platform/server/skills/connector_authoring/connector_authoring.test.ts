@@ -53,6 +53,7 @@ const makeActionsStart = (
     isSystemActionType?: boolean;
     isDeprecated?: boolean;
     enabledInConfig?: boolean;
+    enabledInLicense?: boolean;
   }>
 ): ActionsPluginStart =>
   ({
@@ -67,7 +68,7 @@ const makeActionsStart = (
         isDeprecated: t.isDeprecated ?? false,
         enabled: true,
         enabledInConfig: t.enabledInConfig ?? true,
-        enabledInLicense: true,
+        enabledInLicense: t.enabledInLicense ?? true,
         supportedFeatureIds: ['agentBuilder'],
       }))
     ),
@@ -131,6 +132,7 @@ describe('connector-authoring inline tools', () => {
           name: 'GitHub',
           auth_methods: ['bearer', 'oauth_authorization_code'],
           tool_actions: [{ name: 'searchRepositories', description: 'Search repos' }],
+          available_in_chat: true,
         })
       );
     });
@@ -195,17 +197,39 @@ describe('connector-authoring inline tools', () => {
           minimum_license: 'gold',
           auth_methods: [],
           tool_actions: [],
+          available_in_chat: false,
         })
       );
     });
 
-    it('excludes system action types, deprecated types, and config-disabled types', async () => {
+    it('marks the MCP connector as available in chat despite having no connector-specs entry', async () => {
+      getConnectorSpecMock.mockReturnValue(undefined);
+
+      const actionsStart = makeActionsStart([{ id: '.mcp', name: 'MCP' }]);
+      const tool = createListConnectorTypesTool({ getActionsStart: async () => actionsStart });
+
+      const result = (await tool.handler(
+        {},
+        {} as ToolHandlerContext
+      )) as ToolHandlerStandardReturn;
+
+      const data = result.results[0].data as {
+        connector_types: Array<Record<string, unknown>>;
+      };
+      expect(data.connector_types[0]).toMatchObject({
+        connector_type: '.mcp',
+        available_in_chat: true,
+      });
+    });
+
+    it('excludes system action types, deprecated types, config-disabled types, and unlicensed types', async () => {
       getConnectorSpecMock.mockReturnValue(undefined);
 
       const actionsStart = makeActionsStart([
         { id: '.system', name: 'System', isSystemActionType: true },
         { id: '.deprecated', name: 'Deprecated', isDeprecated: true },
         { id: '.disabled', name: 'Disabled', enabledInConfig: false },
+        { id: '.unlicensed', name: 'Unlicensed', enabledInLicense: false },
         { id: '.normal', name: 'Normal' },
       ]);
       const tool = createListConnectorTypesTool({ getActionsStart: async () => actionsStart });
@@ -303,15 +327,16 @@ describe('connector-authoring inline tools', () => {
       expect(attachments.getActive()).toHaveLength(0);
     });
 
-    it('rejects deprecated and config-disabled connector types', async () => {
+    it('rejects deprecated, config-disabled, and unlicensed connector types', async () => {
       const actionsStart = makeActionsStart([
         { id: '.deprecated', name: 'Deprecated', isDeprecated: true },
         { id: '.disabled', name: 'Disabled', enabledInConfig: false },
+        { id: '.unlicensed', name: 'Unlicensed', enabledInLicense: false },
       ]);
       const tool = createProposeConnectorTool({ getActionsStart: async () => actionsStart });
       const { context, attachments } = createTestContext();
 
-      for (const connectorType of ['.deprecated', '.disabled']) {
+      for (const connectorType of ['.deprecated', '.disabled', '.unlicensed']) {
         const result = (await tool.handler(
           { connector_type: connectorType },
           context
