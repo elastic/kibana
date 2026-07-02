@@ -20,7 +20,7 @@ const inputCompat = getReversibleMappings<DurationInputUnitDsl, string>([
   ['us', 'microseconds'],
   ['ms', 'milliseconds'],
   ['s', 'seconds'],
-  ['m', 'minutes'],
+  ['min', 'minutes'],
   ['h', 'hours'],
   ['d', 'days'],
   ['w', 'weeks'],
@@ -29,11 +29,11 @@ const inputCompat = getReversibleMappings<DurationInputUnitDsl, string>([
 ]);
 
 const outputCompat = getReversibleMappings<DurationOutputUnit, string>([
-  ['humanize', 'humanize'],
-  ['humanizePrecise', 'humanizePrecise'],
+  ['auto-approximate', 'humanize'],
+  ['auto', 'humanizePrecise'],
   ['ms', 'asMilliseconds'],
   ['s', 'asSeconds'],
-  ['m', 'asMinutes'],
+  ['min', 'asMinutes'],
   ['h', 'asHours'],
   ['d', 'asDays'],
   ['w', 'asWeeks'],
@@ -42,11 +42,21 @@ const outputCompat = getReversibleMappings<DurationOutputUnit, string>([
 ]);
 
 export const durationInputUnitCompat = {
-  toState: (unit: DurationInputUnitDsl) => inputCompat.toState(unit)!,
+  /**
+   * Converts an API input unit to the Lens state representation.
+   * Accepts both GA short-form enums (e.g. `'min'`) and legacy verbose strings
+   * (e.g. `'minutes'`) — the latter pass through unchanged for backward compat.
+   */
+  toState: (unit: string): string => inputCompat.toState(unit as DurationInputUnitDsl) ?? unit,
   toAPI: (unit?: string) => inputCompat.toAPI(unit) ?? LENS_DURATION_API_INPUT_UNIT_DEFAULT,
 };
 
 export const durationOutputUnitCompat = {
-  toState: (unit: DurationOutputUnit) => outputCompat.toState(unit)!,
+  /**
+   * Converts an API output unit to the Lens state representation.
+   * Accepts both GA short-form enums (e.g. `'auto-approximate'`, `'min'`) and legacy
+   * verbose strings (e.g. `'humanize'`, `'asMinutes'`) for backward compat.
+   */
+  toState: (unit: string): string => outputCompat.toState(unit as DurationOutputUnit) ?? unit,
   toAPI: (unit?: string) => outputCompat.toAPI(unit) ?? LENS_DURATION_API_OUTPUT_UNIT_DEFAULT,
 };

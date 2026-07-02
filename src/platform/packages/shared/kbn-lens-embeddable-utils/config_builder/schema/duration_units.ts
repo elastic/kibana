@@ -10,14 +10,14 @@
 import { schema } from '@kbn/config-schema';
 
 const DURATION_FINE_GRAINED_INPUT = ['ps', 'ns', 'us'] as const;
-const DURATION_STANDARD_INPUT = ['ms', 's', 'm', 'h', 'd', 'w', 'mo', 'y'] as const;
+const DURATION_STANDARD_INPUT = ['ms', 's', 'min', 'h', 'd', 'w', 'mo', 'y'] as const;
 const DURATION_INPUT_UNITS_DSL = [
   ...DURATION_FINE_GRAINED_INPUT,
   ...DURATION_STANDARD_INPUT,
 ] as const;
 const DURATION_INPUT_UNITS_ESQL = DURATION_STANDARD_INPUT;
-const DURATION_FRIENDLY_OUTPUT = ['humanize', 'humanizePrecise'] as const;
-const DURATION_OUTPUT_UNITS = [...DURATION_FRIENDLY_OUTPUT, ...DURATION_STANDARD_INPUT] as const;
+const DURATION_AUTO_OUTPUT = ['auto', 'auto-approximate'] as const;
+const DURATION_OUTPUT_UNITS = [...DURATION_AUTO_OUTPUT, ...DURATION_STANDARD_INPUT] as const;
 
 export type DurationInputUnitDsl = (typeof DURATION_INPUT_UNITS_DSL)[number];
 export type DurationInputUnitEsql = (typeof DURATION_INPUT_UNITS_ESQL)[number];
@@ -36,7 +36,7 @@ export const durationInputUnitDslSchema = (opts?: Options<DurationInputUnitDsl>)
       schema.literal('us'),
       schema.literal('ms'),
       schema.literal('s'),
-      schema.literal('m'),
+      schema.literal('min'),
       schema.literal('h'),
       schema.literal('d'),
       schema.literal('w'),
@@ -51,7 +51,7 @@ export const durationInputUnitEsqlSchema = (opts?: Options<DurationInputUnitEsql
     [
       schema.literal('ms'),
       schema.literal('s'),
-      schema.literal('m'),
+      schema.literal('min'),
       schema.literal('h'),
       schema.literal('d'),
       schema.literal('w'),
@@ -64,11 +64,11 @@ export const durationInputUnitEsqlSchema = (opts?: Options<DurationInputUnitEsql
 export const durationOutputUnitSchema = (opts?: Options<DurationOutputUnit>) =>
   schema.oneOf(
     [
-      schema.literal('humanize'),
-      schema.literal('humanizePrecise'),
+      schema.literal('auto'),
+      schema.literal('auto-approximate'),
       schema.literal('ms'),
       schema.literal('s'),
-      schema.literal('m'),
+      schema.literal('min'),
       schema.literal('h'),
       schema.literal('d'),
       schema.literal('w'),
@@ -103,7 +103,7 @@ export const dslDurationFormatSchema = schema.object(
     to: durationOutputUnitSchema({
       meta: {
         description:
-          'Display time unit: `humanize` (friendly approximate), `humanizePrecise` (friendly precise), or a fixed conversion unit.',
+          'Display time unit: `auto` (precise), `auto-approximate`, or a fixed conversion unit.',
       },
     }),
     suffix: durationFormatSuffixSchema,
@@ -122,13 +122,13 @@ export const esqlDurationFormatSchema = schema.object(
     from: durationInputUnitEsqlSchema({
       meta: {
         description:
-          'Source time unit for ES|QL data sources (`ms`, `s`, `m`, `h`, `d`, `w`, `mo`, `y`).',
+          'Source time unit for ES|QL data sources (`ms`, `s`, `min`, `h`, `d`, `w`, `mo`, `y`).',
       },
     }),
     to: durationOutputUnitSchema({
       meta: {
         description:
-          'Display time unit: `humanize` (friendly approximate), `humanizePrecise` (friendly precise), or a fixed conversion unit.',
+          'Display time unit: `auto` (precise), `auto-approximate`, or a fixed conversion unit.',
       },
     }),
     suffix: durationFormatSuffixSchema,
@@ -137,6 +137,37 @@ export const esqlDurationFormatSchema = schema.object(
     meta: {
       id: 'esqlDurationFormat',
       ...durationFormatMeta,
+    },
+  }
+);
+
+/**
+ * Legacy duration format schema accepting pre-GA free-form string values for `from` and `to`.
+ * Used as a fallback when `asCode.useGASchemas` is disabled (default during Tech Preview).
+ * @see AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG
+ */
+export const legacyDurationFormatSchema = schema.object(
+  {
+    type: schema.literal('duration'),
+    from: schema.string({
+      meta: {
+        description:
+          'Source time unit (legacy free-form string; use short ES|QL-aligned enums when `asCode.useGASchemas` is enabled).',
+      },
+    }),
+    to: schema.string({
+      meta: {
+        description:
+          'Display time unit (legacy free-form string; use short ES|QL-aligned enums when `asCode.useGASchemas` is enabled).',
+      },
+    }),
+    suffix: durationFormatSuffixSchema,
+  },
+  {
+    meta: {
+      id: 'legacyDurationFormat',
+      title: 'Duration Format (Legacy)',
+      description: 'Legacy duration format accepting pre-GA free-form string values.',
     },
   }
 );
