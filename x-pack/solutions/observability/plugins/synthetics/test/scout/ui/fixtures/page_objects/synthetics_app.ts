@@ -34,6 +34,16 @@ export class SyntheticsAppPage {
       : '/app/synthetics';
     await this.page.goto(this.kbnUrl.get(url));
     await this.waitForLoadingToFinish();
+    // The spinner hiding is not enough: the Overview header mounts a
+    // <SyntheticsDatePicker /> that re-renders as it syncs the range into the
+    // URL. Assert we actually landed on the Overview tab and its date picker is
+    // present so callers (e.g. refreshOverview) don't race the header settling.
+    await expect(this.page.testSubj.locator('syntheticsOverviewPage')).toBeVisible({
+      timeout: 30_000,
+    });
+    await expect(this.page.testSubj.locator('superDatePickerApplyTimeButton')).toBeVisible({
+      timeout: 30_000,
+    });
   }
 
   async navigateToSettings() {
@@ -432,8 +442,12 @@ export class SyntheticsAppPage {
   async refreshOverview() {
     // The overview header replaced the shared refresh button with the
     // SyntheticsDatePicker, whose EuiSuperDatePicker apply/refresh button drives
-    // the app refresh.
-    await this.page.testSubj.click('superDatePickerApplyTimeButton');
+    // the app refresh. On mount the picker syncs its range into the URL, which
+    // re-renders the header and detaches the button mid-click. Wait for it to be
+    // enabled (header settled) before clicking so it isn't detached under us.
+    const applyButton = this.page.testSubj.locator('superDatePickerApplyTimeButton');
+    await expect(applyButton).toBeEnabled({ timeout: 30_000 });
+    await applyButton.click();
     await this.waitForLoadingToFinish();
   }
 
