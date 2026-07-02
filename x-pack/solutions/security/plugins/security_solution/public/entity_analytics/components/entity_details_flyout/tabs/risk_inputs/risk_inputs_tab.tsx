@@ -577,15 +577,6 @@ const RiskInputsTabContent = <T extends EntityType>({
           onRangeChange={onHistoryRangeChange}
         />
       )}
-        entityType={entityType}
-        entityId={entityId || 'unknown'}
-        from={historyFrom}
-        to={HISTORY_RANGE_TO}
-        scoreType="base"
-        selectedTimestamp={selectedTimestamp}
-        onPointSelect={setSelectedTimestamp}
-        onRangeChange={onHistoryRangeChange}
-      />
       <EuiSpacer size="m" />
       {pitSelectionActive && selectedTimestamp !== undefined && (
         <>
