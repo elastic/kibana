@@ -30,7 +30,7 @@
 # Author: Elastic
 # =============================================================================
 
-name: "security.alert.analysis"
+name: "Security Alert Analysis"
 enabled: true
 description: "Security alert analysis workflow. Author: Elastic"
 version: "1"
