@@ -6,11 +6,9 @@
  */
 
 import {
-  EuiAccordion,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiIconTip,
   EuiSpacer,
   EuiTitle,
@@ -85,53 +83,41 @@ function ServiceFlyoutChartsSection({
   rangeTo: string;
   refreshToken: number;
 }) {
-  const [isOpen, setIsOpen] = useState(true);
-
   return (
     <>
-      <EuiAccordion
-        id={`sectionAccordion-${id}`}
-        initialIsOpen
-        onToggle={setIsOpen}
-        buttonContent={
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h3>{title}</h3>
-              </EuiTitle>
-            </EuiFlexItem>
-            {description ? (
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  content={description}
-                  size="s"
-                  color="subdued"
-                  aria-label={description}
-                />
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-        }
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="xs"
+        responsive={false}
         data-test-subj={`serviceFlyoutSection-${id}`}
       >
-        <EuiSpacer size="s" />
-        <EuiFlexGrid columns={2} responsive={false} gutterSize="m">
-          {charts.map((chart) => (
-            <EuiFlexItem key={chart.id}>
-              <ServiceFlyoutLensChart
-                id={chart.id}
-                title={chart.title}
-                titleAction={chart.titleAction}
-                config={chart.config}
-                rangeFrom={rangeFrom}
-                rangeTo={rangeTo}
-                refreshToken={refreshToken}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
-      </EuiAccordion>
-      {isOpen ? null : <EuiHorizontalRule margin="xs" />}
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h3>{title}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        {description ? (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip content={description} size="s" color="subdued" aria-label={description} />
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGrid columns={2} responsive={false} gutterSize="m">
+        {charts.map((chart) => (
+          <EuiFlexItem key={chart.id}>
+            <ServiceFlyoutLensChart
+              id={chart.id}
+              title={chart.title}
+              titleAction={chart.titleAction}
+              config={chart.config}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              refreshToken={refreshToken}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
     </>
   );
 }
@@ -195,7 +181,7 @@ export function ServiceFlyoutOverview({
         onTransactionTypeChange={onTransactionTypeChange}
       />
       <EuiSpacer size="m" />
-      <EuiFlexGroup direction="column" responsive={false} gutterSize="l">
+      <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
         <EuiFlexItem>
           <ServiceFlyoutChartsSection
             id="keyMetrics"
