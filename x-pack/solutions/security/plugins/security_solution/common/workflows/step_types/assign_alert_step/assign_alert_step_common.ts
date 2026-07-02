@@ -17,7 +17,7 @@ import {
 
 export const AssignAlertStepId = 'security.assignAlert' as const;
 
-const assigneesArraySchema = z.array(z.string().min(1).max(MAX_USER_ID_LENGTH)).default([]);
+const assigneesArraySchema = z.array(z.string().min(1).max(MAX_USER_ID_LENGTH));
 
 const alertIdsBase = z.object({
   alert_ids: z
@@ -33,18 +33,14 @@ const alertIdsBase = z.object({
 // generation. Follow-up: elastic/security-team#17984.
 export const assignAlertInputSchema = z.union([
   alertIdsBase.extend({
-    assignees_to_add: z
-      .array(z.string().min(1).max(MAX_USER_ID_LENGTH))
-      .min(1)
-      .describe('A list of user IDs to assign'),
-    assignees_to_remove: assigneesArraySchema.describe('A list of user IDs to unassign'),
+    assignees_to_add: assigneesArraySchema.min(1).describe('A list of user IDs to assign'),
+    assignees_to_remove: assigneesArraySchema
+      .default([])
+      .describe('A list of user IDs to unassign'),
   }),
   alertIdsBase.extend({
-    assignees_to_add: assigneesArraySchema.describe('A list of user IDs to assign'),
-    assignees_to_remove: z
-      .array(z.string().min(1).max(MAX_USER_ID_LENGTH))
-      .min(1)
-      .describe('A list of user IDs to unassign'),
+    assignees_to_add: assigneesArraySchema.default([]).describe('A list of user IDs to assign'),
+    assignees_to_remove: assigneesArraySchema.min(1).describe('A list of user IDs to unassign'),
   }),
 ]);
 
@@ -83,8 +79,7 @@ export const assignAlertStepCommonDefinition: BaseStepDefinition<
   with:
     alert_ids: "{{ variables.alert_id }}"
     assignees_to_add:
-      - "user1"
-    assignees_to_remove: []
+      - "user_id_1"
 \`\`\``,
       `## Remove a user from multiple alerts
 \`\`\`yaml
@@ -94,9 +89,19 @@ export const assignAlertStepCommonDefinition: BaseStepDefinition<
     alert_ids:
       - "alert-1"
       - "alert-2"
-    assignees_to_add: []
     assignees_to_remove:
-      - "user2"
+      - "user_id_2"
+\`\`\``,
+      `## Assign and remove users simultaneously
+\`\`\`yaml
+- name: update_alert_assignees
+  type: security.assignAlert
+  with:
+    alert_ids: "{{ variables.alert_id }}"
+    assignees_to_add:
+      - "user_id_1"
+    assignees_to_remove:
+      - "user_id_2"
 \`\`\``,
     ],
   },
