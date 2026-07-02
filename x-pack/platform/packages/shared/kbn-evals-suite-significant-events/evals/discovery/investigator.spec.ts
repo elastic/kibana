@@ -9,7 +9,6 @@ import { SIGEVENTS_INVESTIGATOR_AGENT_ID } from '@kbn/streams-plugin/server';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
 import type { Detection, Discovery } from '@kbn/significant-events-schema';
-
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   replayIntoManagedStream,

@@ -22,6 +22,7 @@ const evaluate = (discoveries: Array<Partial<Discovery>>, expectedGroups?: strin
     },
     output: { discoveries: discoveries as unknown as Discovery[], steps: [] },
     expected: {
+      criteria: [],
       expected_discoveries: expectedGroups?.map((group) => ({
         detections: group.map((rule_uuid) => ({ kind: 'detection' as const, rule_uuid })),
       })) as unknown as Discovery[],
