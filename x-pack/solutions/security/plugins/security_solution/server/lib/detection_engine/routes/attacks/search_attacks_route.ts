@@ -39,12 +39,11 @@ export const searchAttacksRoute = (router: SecuritySolutionPluginRouter) => {
         },
       },
       async (context, request, response) => {
-        const validationError = validateSearchAlertsParams(request.body);
+        const params = buildSearchAttacksParams(request.body);
+        const validationError = validateSearchAlertsParams(params);
         if (validationError) {
           return buildSiemResponse(response).error({ statusCode: 400, body: validationError });
         }
-
-        const params = buildSearchAttacksParams(request.body);
         const index = await getAttackAlertsIndex({ context });
 
         return withSiemErrorHandling(response, () => searchAlerts({ context, index, params }));
