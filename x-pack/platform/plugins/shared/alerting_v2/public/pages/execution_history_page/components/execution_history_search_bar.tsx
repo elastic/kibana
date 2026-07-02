@@ -80,15 +80,11 @@ export const ExecutionHistorySearchBar = ({
     search: ruleSearchInput.trim() || undefined,
   });
 
-  const ruleOptions = useMemo<Array<EuiComboBoxOptionOption<RuleOption>>>(
-    () =>
-      (rulesData?.items ?? []).map((r) => ({
+  const ruleOptions = (rulesData?.items ?? []).map((r) => ({
         key: r.id,
         label: r.metadata.name,
         value: { id: r.id, name: r.metadata.name },
-      })),
-    [rulesData?.items]
-  );
+  }));
 
   const selectedOptions = ruleFilters.map((r) => ({ key: r.id, label: r.name, value: r }));
 
