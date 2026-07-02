@@ -23,7 +23,7 @@ import {
 import dateMath from '@kbn/datemath';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import type { ReactNode } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { get } from 'lodash/fp';
