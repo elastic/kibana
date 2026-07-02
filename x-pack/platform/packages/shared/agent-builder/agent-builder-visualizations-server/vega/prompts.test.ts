@@ -34,6 +34,15 @@ describe('createAuthorVegaSpecPrompt', () => {
     expect(systemText('any chart')).toContain('DOTS IN FIELD NAMES');
   });
 
+  it('guides faceting: columns as a sibling and explicit per-cell sizing', () => {
+    const text = systemText('small multiples of bytes by client ip');
+    expect(text).toContain('FACETING / SMALL MULTIPLES');
+    expect(text).toContain('"columns"');
+    expect(text).toContain('SIBLING of "facet"/"spec"');
+    expect(text).toContain('NOT inside the "facet" object');
+    expect(text).toContain('set explicit "width" and "height" INSIDE the inner "spec"');
+  });
+
   it('includes the chart-type hint only when one is provided', () => {
     expect(systemText('any chart')).not.toContain('Suggested chart style');
 
