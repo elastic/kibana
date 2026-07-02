@@ -9,9 +9,12 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
-import { registerStatusReportTask } from './status_report_task';
+import { registerStatusReportTask, getResolutionState } from './status_report_task';
 import { createAssetManagerClient } from './factories';
-import { ENTITY_STORE_METADATA_USAGE_EVENT } from '../telemetry/events';
+import {
+  ENTITY_STORE_METADATA_USAGE_EVENT,
+  ENTITY_STORE_RESOLUTION_STATE_EVENT,
+} from '../telemetry/events';
 import { ENTITY_STORE_STATUS } from '../domain/constants';
 import { getMetadataEntitiesDataStreamName } from '../domain/asset_manager/metadata_data_stream';
 import type { EntityStoreCoreSetup } from '../types';
@@ -27,10 +30,109 @@ const createAssetManagerClientMock = createAssetManagerClient as jest.Mock;
 const NAMESPACE = 'default';
 const METADATA_INDEX = getMetadataEntitiesDataStreamName(NAMESPACE);
 
+// ---------------------------------------------------------------------------
+// getResolutionState unit tests
+// ---------------------------------------------------------------------------
+
+const makeSearchResponse = ({
+  resolvedDocCount,
+  resolutionGroupsValue,
+  maxBucketValue,
+}: {
+  resolvedDocCount: number;
+  resolutionGroupsValue: number;
+  maxBucketValue: number | null;
+}) => ({
+  aggregations: {
+    resolved_entities: { doc_count: resolvedDocCount },
+    resolution_groups: { value: resolutionGroupsValue },
+    max_group_aliases: { value: maxBucketValue },
+  },
+});
+
+describe('getResolutionState', () => {
+  const signal = new AbortController().signal;
+
+  it('returns all zeros when no resolution groups exist', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValue(
+        makeSearchResponse({ resolvedDocCount: 0, resolutionGroupsValue: 0, maxBucketValue: null })
+      );
+    const esClient = { search } as unknown as ElasticsearchClient;
+
+    const result = await getResolutionState(esClient, 'test-index', 'user', signal);
+
+    expect(result).toEqual({
+      resolvedEntities: 0,
+      targetEntities: 0,
+      resolutionGroups: 0,
+      maxGroupSize: 0,
+    });
+  });
+
+  it('returns correct values for a mixed resolution state', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValue(
+        makeSearchResponse({ resolvedDocCount: 8, resolutionGroupsValue: 3, maxBucketValue: 4 })
+      );
+    const esClient = { search } as unknown as ElasticsearchClient;
+
+    const result = await getResolutionState(esClient, 'test-index', 'host', signal);
+
+    expect(result).toEqual({
+      resolvedEntities: 8,
+      targetEntities: 3,
+      resolutionGroups: 3,
+      maxGroupSize: 5, // 4 aliases + 1 target
+    });
+  });
+
+  it('coalesces null max_bucket value to 0 when resolution groups exist', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValue(
+        makeSearchResponse({ resolvedDocCount: 5, resolutionGroupsValue: 2, maxBucketValue: null })
+      );
+    const esClient = { search } as unknown as ElasticsearchClient;
+
+    const result = await getResolutionState(esClient, 'test-index', 'service', signal);
+
+    expect(result).toEqual({
+      resolvedEntities: 5,
+      targetEntities: 2,
+      resolutionGroups: 2,
+      maxGroupSize: 1, // (null ?? 0) + 1 = 1
+    });
+  });
+
+  it('passes the abort signal to the ES search call', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValue(
+        makeSearchResponse({ resolvedDocCount: 0, resolutionGroupsValue: 0, maxBucketValue: null })
+      );
+    const esClient = { search } as unknown as ElasticsearchClient;
+    const abortController = new AbortController();
+
+    await getResolutionState(esClient, 'my-index', 'generic', abortController.signal);
+
+    expect(search).toHaveBeenCalledWith(expect.any(Object), {
+      signal: abortController.signal,
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// runTask integration tests
+// ---------------------------------------------------------------------------
+
 describe('status report task — metadata usage telemetry', () => {
   let logger: MockedLogger;
   let reportEvent: jest.Mock;
   let count: jest.Mock;
+  let search: jest.Mock;
   let getStatus: jest.Mock;
 
   // Drives the task the way task-manager does: register, grab the definition,
@@ -62,10 +164,16 @@ describe('status report task — metadata usage telemetry', () => {
     count = jest.fn(async (params: { query?: unknown }) =>
       params.query ? { count: 5 } : { count: 42 }
     );
+    // Default resolution state: 3 resolved entities in 1 group, max bucket = 2 aliases
+    search = jest
+      .fn()
+      .mockResolvedValue(
+        makeSearchResponse({ resolvedDocCount: 3, resolutionGroupsValue: 1, maxBucketValue: 2 })
+      );
 
     createAssetManagerClientMock.mockResolvedValue({
       assetManagerClient: { getStatus },
-      esClient: { count } as unknown as ElasticsearchClient,
+      esClient: { count, search } as unknown as ElasticsearchClient,
     });
   });
 
@@ -102,5 +210,46 @@ describe('status report task — metadata usage telemetry', () => {
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining('Metadata datastream not present')
     );
+  });
+
+  it('fires the resolution state event for each entity type with correctly computed payload', async () => {
+    // storeSize = 5 (from count mock), resolvedEntities=3, targetEntities=1, resolutionGroups=1
+    // standaloneEntities = max(0, 5 - 3 - 1) = 1
+    // avgGroupSize = 3/1 + 1 = 4
+    // maxGroupSize = 2 + 1 = 3
+    await runStatusReportTask();
+
+    const resolutionStateCalls = reportEvent.mock.calls.filter(
+      ([eventType]) => eventType === ENTITY_STORE_RESOLUTION_STATE_EVENT.eventType
+    );
+
+    expect(resolutionStateCalls.length).toBeGreaterThan(0);
+
+    const [, payload] = resolutionStateCalls[0];
+    expect(payload).toMatchObject({
+      namespace: NAMESPACE,
+      totalEntities: 5,
+      resolvedEntities: 3,
+      targetEntities: 1,
+      standaloneEntities: 1,
+      resolutionGroups: 1,
+      avgGroupSize: 4,
+      maxGroupSize: 3,
+    });
+  });
+
+  it('clamps standaloneEntities to 0 when arithmetic would go negative', async () => {
+    // storeSize = 5, resolvedEntities=4, targetEntities=3 → 5 - 4 - 3 = -2 → clamped to 0
+    search.mockResolvedValue(
+      makeSearchResponse({ resolvedDocCount: 4, resolutionGroupsValue: 3, maxBucketValue: 1 })
+    );
+
+    await runStatusReportTask();
+
+    const [, payload] = reportEvent.mock.calls.find(
+      ([eventType]) => eventType === ENTITY_STORE_RESOLUTION_STATE_EVENT.eventType
+    )!;
+
+    expect(payload.standaloneEntities).toBe(0);
   });
 });
