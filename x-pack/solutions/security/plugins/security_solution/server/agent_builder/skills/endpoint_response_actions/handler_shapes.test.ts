@@ -18,6 +18,8 @@ import {
   UNISOLATE_TOOL_ID,
   GET_ENDPOINT_STATUS_TOOL_ID,
   LIST_ENDPOINTS_TOOL_ID,
+  RUNNING_PROCESSES_TOOL_ID,
+  SCAN_TOOL_ID,
 } from '.';
 
 function assertStandardReturn(result: unknown) {
@@ -253,7 +255,13 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
   });
 
   describe('Consistency across host-lookup tools', () => {
-    const HOST_LOOKUP_TOOL_IDS = [ISOLATE_TOOL_ID, UNISOLATE_TOOL_ID, GET_ENDPOINT_STATUS_TOOL_ID];
+    const HOST_LOOKUP_TOOL_IDS = [
+      ISOLATE_TOOL_ID,
+      UNISOLATE_TOOL_ID,
+      GET_ENDPOINT_STATUS_TOOL_ID,
+      RUNNING_PROCESSES_TOOL_ID,
+      SCAN_TOOL_ID,
+    ];
 
     it('all host-lookup tools return ToolResultType.other for "endpoint not found" (not error)', async () => {
       const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
