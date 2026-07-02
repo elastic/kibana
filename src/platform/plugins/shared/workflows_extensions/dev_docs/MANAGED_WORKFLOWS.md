@@ -365,7 +365,7 @@ Consumers that render the shared `WorkflowSelector` get this behavior by passing
 ```tsx
 <WorkflowSelector
   config={{
-    visibility: { selector: 'rule_action' },
+    visibility: { selectors: ['rule_action'] },
   }}
   selectedWorkflowId={workflowId}
   onWorkflowChange={setWorkflowId}
@@ -377,7 +377,7 @@ Solution-scoped selectors can use the same object shape with a different field:
 ```ts
 <WorkflowSelector
   config={{
-    visibility: { solution: 'security' },
+    visibility: { solutions: ['security'] },
   }}
   selectedWorkflowId={workflowId}
   onWorkflowChange={setWorkflowId}
@@ -389,7 +389,7 @@ Selectors can also provide both fields. Managed workflows matching either contex
 ```ts
 <WorkflowSelector
   config={{
-    visibility: { selector: 'rule_action', solution: 'security' },
+    visibility: { selectors: ['rule_action'], solutions: ['security'] },
   }}
   selectedWorkflowId={workflowId}
   onWorkflowChange={setWorkflowId}

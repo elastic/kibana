@@ -124,10 +124,7 @@ export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependen
             }),
           });
         } catch (error) {
-          return handleRouteError(
-            response,
-            error instanceof Error ? error : new Error(String(error))
-          );
+          return handleRouteError(response, error as Error);
         }
       })
     );

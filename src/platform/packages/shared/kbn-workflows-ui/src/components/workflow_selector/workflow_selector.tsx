@@ -72,12 +72,8 @@ const getVisibilityContext = (
   }
 
   const visibilityContexts = [
-    ...(visibility.selector
-      ? [getManagedWorkflowSelectorVisibilityContext(visibility.selector)]
-      : []),
-    ...(visibility.solution
-      ? [getManagedWorkflowSolutionVisibilityContext(visibility.solution)]
-      : []),
+    ...(visibility.selectors ?? []).map(getManagedWorkflowSelectorVisibilityContext),
+    ...(visibility.solutions ?? []).map(getManagedWorkflowSolutionVisibilityContext),
   ];
 
   if (visibilityContexts.length === 0) {

@@ -69,6 +69,13 @@ export type ManagedWorkflowDefinition<
   pluginId: string;
   version: number;
   billable: boolean;
+  /**
+   * Controls where this managed workflow is discoverable.
+   *
+   * Visibility is persisted during managed workflow installation. Changing only this metadata
+   * does not rewrite existing installed workflow documents; bump `version` when an existing
+   * install should receive the visibility change.
+   */
   visibility?: ManagedWorkflowVisibility;
   management: ManagedWorkflowManagement;
 } & ManagedWorkflowDefinitionSource<TValues>;

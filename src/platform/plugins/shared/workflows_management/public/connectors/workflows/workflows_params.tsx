@@ -188,7 +188,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
         selectedWorkflowId={workflowId}
         onWorkflowChange={handleWorkflowChange}
         config={{
-          visibility: { selector: 'rule_action' },
+          visibility: { selectors: ['rule_action'] },
           sortFunction: (workflows) =>
             workflows.sort((a, b) => {
               const enabledDiff = Number(!!b.enabled) - Number(!!a.enabled);

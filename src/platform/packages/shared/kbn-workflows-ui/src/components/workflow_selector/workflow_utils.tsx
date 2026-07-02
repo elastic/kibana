@@ -39,8 +39,8 @@ export interface WorkflowOption {
 }
 
 export interface WorkflowSelectorVisibility {
-  selector?: ManagedWorkflowSelector;
-  solution?: ManagedWorkflowSolution;
+  selectors?: ManagedWorkflowSelector[];
+  solutions?: ManagedWorkflowSolution[];
 }
 
 export interface WorkflowSelectorConfig {

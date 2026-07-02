@@ -402,10 +402,12 @@ export class WorkflowSearchService {
       }));
     } catch (error) {
       if (!isIndexNotFoundError(error)) {
-        this.deps.logger.error(`Failed to get execution history stats: ${String(error)}`);
+        this.deps.logger.error('Failed to get execution history stats', { error: error as Error });
       } else {
         this.deps.logger.warn(
-          `Executions index not found when fetching execution history stats: ${String(error)}`
+          `Executions index not found when fetching execution history stats: ${
+            (error as Error).message
+          }`
         );
       }
       return [];
