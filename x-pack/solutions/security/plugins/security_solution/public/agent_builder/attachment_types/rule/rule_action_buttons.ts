@@ -35,6 +35,8 @@ interface BuildRuleActionButtonsParams {
   attachmentId: string;
   /** Whether to show a "View rule" link — true when the rule is saved and not already being viewed. */
   showViewRule: boolean;
+  /** Whether to show "Edit rule settings" — false when already on the edit/create form for this card. */
+  showEditRuleSettings: boolean;
   /**
    * Framework callback that links the attachment to its saved rule via `origin` and invalidates
    * the conversation so the card reflects the saved state in-session. Threaded into the save
@@ -53,6 +55,7 @@ export const buildRuleActionButtons = ({
   ruleId,
   attachmentId,
   showViewRule,
+  showEditRuleSettings,
   updateOrigin,
 }: BuildRuleActionButtonsParams): ActionButton[] => {
   const canEditRules = hasCapabilities(application.capabilities, RULES_UI_EDIT_PRIVILEGE);
@@ -67,19 +70,25 @@ export const buildRuleActionButtons = ({
     : getNonEsqlRuleActionDisabledReason(getRuleTypeLabel(rule.type));
 
   const buttons: ActionButton[] = [
-    {
-      label: i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.openInForm', {
-        defaultMessage: 'Preview before saving',
-      }),
-      icon: 'pencil',
-      type: ActionButtonType.SECONDARY,
-      handler: () => {
-        aiRuleCreation.setAiCreatedRule(rule, attachmentId);
-        application.navigateToApp('securitySolutionUI', {
-          path: isUpdate && ruleId ? `${RULES_PATH}${getEditRuleUrl(ruleId)}` : RULES_CREATE_PATH,
-        });
-      },
-    },
+    ...(showEditRuleSettings
+      ? [
+          {
+            label: i18n.translate(
+              'xpack.securitySolution.agentBuilder.ruleAttachment.editRuleSettings',
+              { defaultMessage: 'Edit rule settings' }
+            ),
+            icon: 'pencil' as const,
+            type: ActionButtonType.SECONDARY,
+            handler: () => {
+              aiRuleCreation.setAiCreatedRule(rule, attachmentId);
+              application.navigateToApp('securitySolutionUI', {
+                path:
+                  isUpdate && ruleId ? `${RULES_PATH}${getEditRuleUrl(ruleId)}` : RULES_CREATE_PATH,
+              });
+            },
+          },
+        ]
+      : []),
     ...(showViewRule && ruleId
       ? [
           {

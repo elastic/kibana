@@ -313,6 +313,7 @@ describe('buildRuleActionButtons', () => {
       ruleId: undefined,
       attachmentId: 'air:testcard',
       showViewRule: false,
+      showEditRuleSettings: true,
       updateOrigin: jest.fn().mockResolvedValue(undefined),
     };
   });
@@ -365,14 +366,16 @@ describe('buildRuleActionButtons', () => {
     );
   });
 
-  it('"Preview before saving" calls setAiCreatedRule with the rule and attachmentId', () => {
+  it('"Edit rule settings" calls setAiCreatedRule with the rule and attachmentId', () => {
     const buttons = buildRuleActionButtons(baseProps);
-    buttons.find((b) => b.label === 'Preview before saving')!.handler();
+    buttons.find((b) => b.label === 'Edit rule settings')!.handler();
     expect(aiRuleCreation.setAiCreatedRule).toHaveBeenCalledWith(baseProps.rule, 'air:testcard');
   });
 
   it('guards against a double-submit while a save is already in flight', () => {
-    aiRuleCreation.requestSaveRule({ name: 'in flight' } as unknown as RuleResponse);
+    aiRuleCreation.requestSaveRule({ name: 'in flight' } as unknown as RuleResponse, {
+      attachmentId: 'air:testcard',
+    });
     (aiRuleCreation.requestSaveRule as jest.Mock).mockClear();
     expect(aiRuleCreation.getIsSaving()).toBe(true);
 
@@ -393,10 +396,20 @@ describe('buildRuleActionButtons', () => {
       application,
       ruleId: 'rule-123',
     });
-    buttons.find((b) => b.label === 'Preview before saving')!.handler();
+    buttons.find((b) => b.label === 'Edit rule settings')!.handler();
     expect(application.navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
       path: expect.stringContaining('/create'),
     });
+  });
+
+  it('omits "Edit rule settings" when showEditRuleSettings is false', () => {
+    expect(
+      labels(buildRuleActionButtons({ ...baseProps, showEditRuleSettings: false }))
+    ).not.toContain('Edit rule settings');
+  });
+
+  it('includes "Edit rule settings" when showEditRuleSettings is true', () => {
+    expect(labels(buildRuleActionButtons(baseProps))).toContain('Edit rule settings');
   });
 
   it('omits View rule from action buttons when showViewRule is false even for update intent', () => {

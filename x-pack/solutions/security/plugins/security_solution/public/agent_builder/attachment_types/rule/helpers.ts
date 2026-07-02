@@ -83,6 +83,21 @@ export const shouldShowViewRuleButton = (
 };
 
 /**
+ * Whether "Edit rule settings" should appear. Hidden when the user is already on the
+ * relevant form page for this card (create form for create-intent, edit form for update-intent).
+ */
+export const shouldShowEditRuleSettingsButton = (
+  intent: RuleAttachmentIntent,
+  attachmentRuleId: string | undefined,
+  pathname: string
+): boolean => {
+  if (intent === 'create') {
+    return !(isOnRuleFormPage(pathname) && pathname.includes('/create'));
+  }
+  return !isAttachmentRuleOpenOnFormPage(attachmentRuleId, pathname);
+};
+
+/**
  * Saved-rule id from the attachment. Lives in the attachment's top-level `origin` (set after save
  * and persisted server-side), the single source of truth — used for navigation and the save target.
  */
