@@ -7,8 +7,17 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { CasesAnalyticsV2Service, V2_NOOP_DATA_VIEW_REFRESHER } from './service';
 import { V2_NOOP_WRITER, type CasesAnalyticsV2WriterContract } from './writer';
+import { ensureCaseIndex } from './ensure_indices/case';
+import { ensureActivityIndex } from './ensure_indices/activity';
+import { makeCase, makeUserAction } from './__test_helpers__';
+
+jest.mock('./ensure_indices/case');
+jest.mock('./ensure_indices/activity');
 
 describe('CasesAnalyticsV2Service', () => {
   describe('writer proxy ↔ contract parity', () => {
@@ -105,6 +114,82 @@ describe('CasesAnalyticsV2Service', () => {
           savedObjectsClient: {} as unknown as SavedObjectsClientContract,
         })
       ).toBeUndefined();
+    });
+  });
+
+  describe('start() — writer swap is gated per-surface on bootstrap success', () => {
+    // Regression guard for the data-integrity fix: if an index fails to
+    // bootstrap, its writer must stay a no-op so a later write can't
+    // implicitly create a mis-mapped `.cases*` index (auto_create_index).
+    // Observable via the ES client — a real writer reaches `esClient.index`,
+    // a no-op never does.
+    const buildService = () =>
+      new CasesAnalyticsV2Service({
+        logger: loggerMock.create(),
+        enabled: true,
+        reconciliationIntervalMinutes: 30,
+        enableAdminRoutes: false,
+        resetTaskTimeoutMinutes: 60,
+        resetPageDelayMs: 0,
+        templatesEnabled: false,
+      });
+
+    const startService = async (service: CasesAnalyticsV2Service) => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      await service.start({
+        esClient,
+        taskManager: taskManagerMock.createStart(),
+        internalSavedObjectsClient: savedObjectsClientMock.create(),
+        dataViewsService: {} as unknown as DataViewsServerPluginStart,
+      });
+      return esClient;
+    };
+
+    // Fire-and-forget writes settle on a microtask; flush before asserting.
+    const flush = () => new Promise((r) => setImmediate(r));
+
+    afterEach(() => jest.clearAllMocks());
+
+    it('swaps in both real writers when both indices bootstrap', async () => {
+      (ensureCaseIndex as jest.Mock).mockResolvedValue(undefined);
+      (ensureActivityIndex as jest.Mock).mockResolvedValue(undefined);
+      const service = buildService();
+      const esClient = await startService(service);
+
+      service.getWriter().upsertCase(makeCase('c-1'));
+      service.getActivityWriter().upsertAction(makeUserAction('ua-1'));
+      await flush();
+
+      // One index call per surface — both writers are live.
+      expect(esClient.index).toHaveBeenCalledTimes(2);
+    });
+
+    it('keeps the case writer a no-op when .cases bootstrap fails', async () => {
+      (ensureCaseIndex as jest.Mock).mockRejectedValue(new Error('shard limit'));
+      (ensureActivityIndex as jest.Mock).mockResolvedValue(undefined);
+      const service = buildService();
+      const esClient = await startService(service);
+
+      service.getWriter().upsertCase(makeCase('c-1')); // gated → no ES write
+      service.getActivityWriter().upsertAction(makeUserAction('ua-1')); // live
+      await flush();
+
+      expect(esClient.index).toHaveBeenCalledTimes(1);
+      expect((esClient.index as unknown as jest.Mock).mock.calls[0][0].id).toBe('ua-1');
+    });
+
+    it('keeps the activity writer a no-op when .cases-activity bootstrap fails', async () => {
+      (ensureCaseIndex as jest.Mock).mockResolvedValue(undefined);
+      (ensureActivityIndex as jest.Mock).mockRejectedValue(new Error('shard limit'));
+      const service = buildService();
+      const esClient = await startService(service);
+
+      service.getWriter().upsertCase(makeCase('c-1')); // live
+      service.getActivityWriter().upsertAction(makeUserAction('ua-1')); // gated → no ES write
+      await flush();
+
+      expect(esClient.index).toHaveBeenCalledTimes(1);
+      expect((esClient.index as unknown as jest.Mock).mock.calls[0][0].id).toBe('c-1');
     });
   });
 });
