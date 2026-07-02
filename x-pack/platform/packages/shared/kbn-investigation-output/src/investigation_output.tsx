@@ -17,14 +17,13 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  euiTextTruncate,
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelativeTime } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { InvestigationHypothesis, InvestigationState } from '@kbn/significant-events-schema';
 import type { InvestigationOutputProps, InvestigationStatus } from './types';
 
@@ -196,14 +195,7 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiPanel
-      hasBorder
-      paddingSize="none"
-      data-test-subj="investigationOutput"
-      css={css`
-        padding-bottom: ${euiTheme.size.base};
-      `}
-    >
+    <EuiPanel hasBorder paddingSize="none" data-test-subj="investigationOutput">
       <EuiFlexGroup
         alignItems="center"
         gutterSize="s"
@@ -232,7 +224,7 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
           color={status === 'unavailable' ? 'warning' : 'danger'}
           data-test-subj="investigationOutputError"
           css={css`
-            padding: 0 ${euiTheme.size.base};
+            padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
           `}
         >
           <p>{error}</p>
@@ -259,7 +251,7 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
           color="subdued"
           data-test-subj="investigationOutputNoHypotheses"
           css={css`
-            padding: 0 ${euiTheme.size.base};
+            padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
           `}
         >
           <p>
