@@ -146,6 +146,28 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         })
   }${editQueryString ? `?${editQueryString}` : ''}`;
 
+  // The copy flow reuses the create page. Agentless copies must read/hydrate through the
+  // agentless API (detect-before-read), so carry the same isAgentless hint on the copy link.
+  const copyQueryParams = new URLSearchParams();
+  if (from) {
+    copyQueryParams.set('from', from);
+  }
+  if (isAgentlessPolicy) {
+    copyQueryParams.set(IS_AGENTLESS_QUERY_PARAM, 'true');
+  }
+  const copyQueryString = copyQueryParams.toString();
+  const copyHref = `${
+    isOrphanedPolicy || isAgentlessPolicy
+      ? getHref('integration_policy_copy', {
+          policyId: agentPolicy?.id || '',
+          packagePolicyId: packagePolicy.id,
+        })
+      : getHref('copy_integration', {
+          policyId: agentPolicy?.id || '',
+          packagePolicyId: packagePolicy.id,
+        })
+  }${copyQueryString ? `?${copyQueryString}` : ''}`;
+
   const menuItems = [
     // FIXME: implement View package policy action
     // <EuiContextMenuItem
@@ -244,17 +266,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
           />
         ) : undefined
       }
-      href={
-        isOrphanedPolicy || isAgentlessPolicy
-          ? getHref('integration_policy_copy', {
-              policyId: agentPolicy?.id || '',
-              packagePolicyId: packagePolicy.id,
-            }) + (from ? `?from=${from}` : '')
-          : getHref('copy_integration', {
-              policyId: agentPolicy?.id || '',
-              packagePolicyId: packagePolicy.id,
-            }) + (from ? `?from=${from}` : '')
-      }
+      href={copyHref}
       data-test-subj="PackagePolicyActionsCopyItem"
       icon="copy"
       key="packagePolicyCopy"
