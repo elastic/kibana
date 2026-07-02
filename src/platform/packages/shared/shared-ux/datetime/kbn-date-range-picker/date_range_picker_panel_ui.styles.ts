@@ -31,6 +31,7 @@ export const panelHeaderStyles = ({ euiTheme }: UseEuiTheme) => {
   const root = css`
     display: flex;
     align-items: center;
+    flex-shrink: 0;
     min-block-size: ${euiTheme.size.xxl};
   `;
 
@@ -81,8 +82,14 @@ export const panelBodyStyles = (euiThemeContext: UseEuiTheme) => {
       border-block-start: ${euiTheme.border.thin};
     }
   `;
+  // opt-in: turn the body into a flex column whose single child can fill the available height
+  const fill = css`
+    display: flex;
+    flex-direction: column;
+    min-block-size: 0;
+  `;
 
-  return { root };
+  return { root, fill };
 };
 
 export const panelBodySectionStyles = ({ euiTheme }: UseEuiTheme) => {
@@ -185,6 +192,7 @@ export const panelFooterStyles = ({ euiTheme }: UseEuiTheme) => {
     align-items: center;
     justify-content: space-between;
     gap: ${euiTheme.size.s};
+    flex-shrink: 0;
     margin-block-start: auto;
     min-block-size: ${euiTheme.size.xxl};
     padding: ${euiTheme.size.base};

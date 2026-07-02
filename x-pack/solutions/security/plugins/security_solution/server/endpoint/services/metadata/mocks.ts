@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsServiceStart } from '@kbn/core/server';
-import { coreMock, type ElasticsearchClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { type ElasticsearchClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import type { AgentPolicyServiceInterface, AgentService } from '@kbn/fleet-plugin/server';
 import type { Agent, GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
@@ -50,10 +50,7 @@ export const createEndpointMetadataServiceTestContextMock =
     const logger = loggingSystemMock.create().get();
     const { esClient, fleetStartServices, savedObjectsServiceStart } =
       createMockEndpointAppContextServiceStartContract();
-    const savedObjectsServiceFactory = new SavedObjectsClientFactory(
-      savedObjectsServiceStart,
-      coreMock.createSetup().http
-    );
+    const savedObjectsServiceFactory = new SavedObjectsClientFactory(savedObjectsServiceStart);
     const fleetServices = createEndpointFleetServicesFactoryMock({
       fleetDependencies: fleetStartServices,
       savedObjects: savedObjectsServiceFactory,

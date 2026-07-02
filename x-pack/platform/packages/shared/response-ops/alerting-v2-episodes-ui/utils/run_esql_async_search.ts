@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
@@ -25,7 +25,7 @@ export const runEsqlAsyncSearch = async ({
   params,
   abortSignal,
 }: RunEsqlAsyncSearchOptions): Promise<ESQLSearchResponse> => {
-  const response = await firstValueFrom(
+  const response = await lastValueFrom(
     data.search.search<
       IKibanaSearchRequest<ESQLSearchParams>,
       IKibanaSearchResponse<ESQLSearchResponse>

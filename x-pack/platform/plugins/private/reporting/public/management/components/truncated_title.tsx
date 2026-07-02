@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
+import { EuiToolTip } from '@elastic/eui';
 
 const LINE_CLAMP = 1;
 
@@ -25,9 +26,9 @@ interface Props {
 
 const TruncatedTitleComponent: React.FC<Props> = ({ text }) => {
   return (
-    <span css={getTextCss} title={text}>
-      {text}
-    </span>
+    <EuiToolTip content={text} disableScreenReaderOutput display="block">
+      <span css={getTextCss}>{text}</span>
+    </EuiToolTip>
   );
 };
 TruncatedTitleComponent.displayName = 'TruncatedTitle';

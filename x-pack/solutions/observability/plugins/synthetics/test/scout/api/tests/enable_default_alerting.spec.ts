@@ -80,6 +80,11 @@ apiTest.describe(
       await kbnClient.savedObjects.clean({ types: ['synthetics-monitor-multi-space'] });
       await enableSynthetics(apiClient, editorHeaders);
       await apiServices.syntheticsPrivateLocations.installSyntheticsPackage();
+      // The private location is only a monitor target and is not mutated by any
+      // test, so create it once here instead of per-test in `beforeEach`. The
+      // per-test monitor cleanup below only wipes `synthetics-monitor-multi-space`,
+      // so the location survives across tests.
+      privateLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation();
       await apiServices.alerting.connectors.create({
         name: TEST_INDEX_CONNECTOR_NAME,
         connectorTypeId: '.index',
@@ -87,9 +92,8 @@ apiTest.describe(
       });
     });
 
-    apiTest.beforeEach(async ({ apiClient, apiServices, kbnClient }) => {
+    apiTest.beforeEach(async ({ apiClient, kbnClient }) => {
       await kbnClient.savedObjects.clean({ types: ['synthetics-monitor-multi-space'] });
-      privateLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation();
       const res = await putDynamicSettings(apiClient, {
         ...DYNAMIC_SETTINGS_DEFAULTS,
         defaultConnectors: [TEST_INDEX_CONNECTOR_NAME],

@@ -6,9 +6,9 @@
  */
 
 import path from 'node:path';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
@@ -45,7 +45,7 @@ export function registerStop(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(bodySchema),
+            body: buildStrictRouteValidationWithZod(bodySchema),
           },
         },
         options: {
@@ -54,7 +54,11 @@ export function registerStop(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManagerClient: assetManager } = entityStoreCtx;
+        const {
+          logger,
+          assetManagerClient: assetManager,
+          entityMaintainersClient,
+        } = entityStoreCtx;
         const { entityTypes } = req.body;
 
         logger.debug('Stop API invoked');
@@ -66,6 +70,14 @@ export function registerStop(router: EntityStorePluginRouter) {
         const toStop = entityTypes.filter((type) => startedTypes.has(type));
 
         await Promise.all(toStop.map((type) => assetManager.stop(type)));
+
+        if (toStop.length > 0) {
+          const { engines: remainingEngines } = await assetManager.getStatus();
+          const anyStarted = remainingEngines.some((e) => e.status === ENGINE_STATUS.STARTED);
+          if (!anyStarted) {
+            await entityMaintainersClient.stopAll(req);
+          }
+        }
 
         return res.ok({
           body: {

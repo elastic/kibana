@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -21,7 +21,12 @@ import {
   type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
-import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import {
+  DOCUMENT_TYPE_ENTITY,
+  PROJECT_ROUTING_ALL,
+  PROJECT_ROUTING_ORIGIN,
+  type ProjectRouting,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { isEntityNodeEnriched } from '@kbn/cloud-security-posture-graph/src/components/utils';
 import { useFlyoutBodyAvailableHeight } from './use_flyout_body_available_height';
 import { PageScope } from '../../../data_view_manager/constants';
@@ -88,8 +93,31 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
 
   const {
     application: { capabilities },
+    cps,
   } = useKibana().services;
   const { read: hasTimelineAccess } = extractTimelineCapabilities(capabilities);
+
+  // CPS project routing for cross-project events. Security pages do not host a CPS
+  // picker — routing is locked to the active space NPRE (see kfirpeled comment on
+  // security-team#16998). Read the space's default routing rather than the picker
+  // observable (which is gated by per-app `ProjectRoutingAccess` and returns
+  // undefined when no app has registered the route as READONLY/EDITABLE).
+  const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>(undefined);
+  useEffect(() => {
+    const manager = cps?.cpsManager;
+    if (!manager) return;
+    let cancelled = false;
+    manager.whenReady().then(() => {
+      if (cancelled) return;
+      const routing = manager.getDefaultProjectRouting();
+      setProjectRouting(
+        routing === PROJECT_ROUTING_ALL || routing === PROJECT_ROUTING_ORIGIN ? routing : undefined
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [cps?.cpsManager]);
 
   const toasts = useToasts();
 
@@ -308,6 +336,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
                       from: `${props.timestamp}||-30m`,
                       to: `${props.timestamp}||+30m`,
                     },
+                    projectRouting,
                   }
                 : {
                     dataView,
@@ -316,6 +345,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
                       from: 'now-30d',
                       to: 'now',
                     },
+                    projectRouting,
                   }
             }
             showInvestigateInTimeline={hasTimelineAccess}

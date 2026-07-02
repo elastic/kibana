@@ -86,6 +86,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
+     * Navigate directly to a new Lens editor, skipping the visualize
+     * listing page and the visualization-type selection modal. Prefer this
+     * over `visualize.navigateToNewVisualization() + visualize.clickVisType('lens')`
+     * when the test builds a chart from scratch.
+     */
+    async openNewEditor() {
+      await common.navigateToApp('lens');
+      await testSubjects.existOrFail('lnsApp', { timeout: 10000 });
+    },
+
+    /**
      * Move the date filter to the specified time range, defaults to
      * a range that has data in our dataset.
      */

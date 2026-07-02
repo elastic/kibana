@@ -6,32 +6,59 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 import dateMath from '@kbn/datemath';
 import {
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
 } from '@kbn/management-settings-ids';
-import { ValueReportSettings } from './value_report_settings';
-import { CostSavingsTrend } from './cost_savings_trend';
-import { ExecutiveSummary } from './executive_summary';
-import { AlertProcessing } from './alert_processing';
-import { useValueMetrics } from '../../hooks/use_value_metrics';
+import {
+  EuiFlexGroup,
+  EuiIcon,
+  EuiImage,
+  EuiEmptyPrompt,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiPanel,
+  EuiBadge,
+  EuiTextColor,
+  EuiTitle,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { AnnouncementBanner } from '@kbn/announcement-banner';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { useSecuritySolutionLinkProps } from '../../../common/components/links';
+import analyticsSpeedAcceleration from './analytics_speed_acceleration.svg';
+import { AIValueReportLayout } from './ai_value_report_layout';
+import { useValueReportData } from '../../hooks/use_value_report_data';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
+import { PageLoader } from '../../../common/components/page_loader';
+import * as i18n from './translations';
 
 interface Props {
-  setHasAttackDiscoveries: React.Dispatch<boolean>;
+  setHasReportData: React.Dispatch<boolean>;
+  setIsDatePickerDisabled: React.Dispatch<boolean>;
+  setIsSampleMode: React.Dispatch<boolean>;
+  isSourcererLoading: boolean;
   from: string;
   to: string;
 }
 
-export const AIValueMetrics: React.FC<Props> = (props) => {
-  const { setHasAttackDiscoveries } = props;
-  const { uiSettings } = useKibana().services;
+type AIValueReportContentProps = Omit<Props, 'isSourcererLoading'>;
+
+const AIValueReportContent: React.FC<AIValueReportContentProps> = ({
+  setHasReportData,
+  setIsDatePickerDisabled,
+  setIsSampleMode,
+  from: propFrom,
+  to: propTo,
+}) => {
+  const { settings } = useKibana().services;
   const exportContext = useAIValueExportContext();
   const setReportInputForExportContext = exportContext?.setReportInput;
+  const { href: attackDiscoveryHref } = useSecuritySolutionLinkProps({
+    deepLinkId: SecurityPageName.attackDiscovery,
+  });
 
   // When exporting/scheduling, forwardedState can include relative date-math strings
   // (e.g. now-7d, now). Resolve them to a deterministic absolute range for this run.
@@ -47,127 +74,181 @@ export const AIValueMetrics: React.FC<Props> = (props) => {
       };
     }
     return {
-      from: props.from,
-      to: props.to,
+      from: propFrom,
+      to: propTo,
     };
-  }, [props.from, props.to, exportContext?.forwardedState, forceNow]);
+  }, [propFrom, propTo, exportContext?.forwardedState, forceNow]);
 
   const { analystHourlyRate, minutesPerAlert } = useMemo(
     () => ({
-      minutesPerAlert: uiSettings.get<number>(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES),
-      analystHourlyRate: uiSettings.get<number>(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE),
+      minutesPerAlert: settings.client.get<number>(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES),
+      analystHourlyRate: settings.client.get<number>(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE),
     }),
-    [uiSettings]
+    [settings.client]
   );
 
-  const { attackAlertIds, isLoading, valueMetrics, valueMetricsCompare } = useValueMetrics({
-    from,
-    to,
-    minutesPerAlert,
-    analystHourlyRate,
-  });
-
-  const hasAttackDiscoveries = useMemo(
-    () => valueMetrics.attackDiscoveryCount > 0,
-    [valueMetrics.attackDiscoveryCount]
-  );
+  const data = useValueReportData({ from, to, minutesPerAlert, analystHourlyRate });
 
   useEffect(() => {
-    if (isLoading || !setReportInputForExportContext) {
+    if (data.isLoading || data.isSample || !setReportInputForExportContext) {
       return;
     }
     setReportInputForExportContext({
-      attackAlertIds,
-      valueMetrics,
-      valueMetricsCompare,
-      analystHourlyRate,
-      minutesPerAlert,
+      attackAlertIds: data.attackAlertIds,
+      valueMetrics: data.valueMetrics,
+      valueMetricsCompare: data.valueMetricsCompare,
+      analystHourlyRate: data.analystHourlyRate,
+      minutesPerAlert: data.minutesPerAlert,
     });
-  }, [
-    isLoading,
-    attackAlertIds,
-    valueMetrics,
-    valueMetricsCompare,
-    analystHourlyRate,
-    minutesPerAlert,
-    setReportInputForExportContext,
-  ]);
+  }, [data, setReportInputForExportContext]);
 
   useEffect(() => {
-    setHasAttackDiscoveries(hasAttackDiscoveries);
-  }, [hasAttackDiscoveries, setHasAttackDiscoveries]);
+    setHasReportData(!data.isSample && data.valueMetrics.attackDiscoveryCount > 0);
+  }, [data.isSample, data.valueMetrics, setHasReportData]);
 
-  const {
-    euiTheme: { colors },
-  } = useEuiTheme();
+  useEffect(() => {
+    setIsDatePickerDisabled(data.isLoading || data.isSample);
+  }, [data.isLoading, data.isSample, setIsDatePickerDisabled]);
+
+  useEffect(() => {
+    setIsSampleMode(data.isSample);
+  }, [data.isSample, setIsSampleMode]);
+
+  if (data.isLoading) {
+    return <PageLoader />;
+  }
+
+  if (data.isSample) {
+    // render sample report with default values if there are no attack discoveries
+    // to show the full report layout and provide an example of how the metrics are calculated
+    return (
+      <>
+        <AnnouncementBanner
+          data-test-subj="aiValueSampleAttackDiscoveryBanner"
+          title={i18n.RUN_ATTACK_DISCOVERY_TEXT}
+          headingElement="h3"
+          text={i18n.GET_STARTED_ATTACK_DISCOVERY_TEXT}
+          media={<EuiIcon type={analyticsSpeedAcceleration} size="original" aria-hidden={true} />}
+          actionProps={{
+            primary: {
+              children: i18n.ATTACK_DISCOVERY_LINK,
+              href: attackDiscoveryHref,
+              iconType: 'popout',
+              iconSide: 'left',
+              target: '_blank',
+              rel: 'noopener noreferrer',
+              'data-test-subj': 'sampleAttackDiscoveryCtaButton',
+            },
+          }}
+        />
+        <EuiSpacer size="l" />
+        <EuiPanel hasBorder={true} borderRadius="m" color="transparent" paddingSize="l">
+          <EuiFlexGroup responsive={false} alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <EuiTitle
+                size="s"
+                css={css`
+                  text-align: left;
+                `}
+              >
+                <h3>
+                  <EuiTextColor color="subdued">
+                    {i18n.WHAT_REPORT_WILL_LOOK_LIKE_TEXT}
+                  </EuiTextColor>
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge
+                color="warning"
+                data-test-subj="aiValueSampleDataBadge"
+                css={css`
+                  text-transform: uppercase;
+                `}
+              >
+                {i18n.SAMPLE_DATA_BADGE}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
+          <AIValueReportLayout
+            isSample={data.isSample}
+            attackAlertIds={data.attackAlertIds}
+            analystHourlyRate={data.analystHourlyRate}
+            minutesPerAlert={data.minutesPerAlert}
+            from={data.from}
+            to={data.to}
+            valueMetrics={data.valueMetrics}
+            valueMetricsCompare={data.valueMetricsCompare}
+          />
+        </EuiPanel>
+      </>
+    );
+  }
+
+  if (data.hasEverUsedAttackDiscovery && data.valueMetrics.attackDiscoveryCount === 0) {
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem
+          css={css`
+            min-height: 50vh;
+          `}
+        >
+          <EuiEmptyPrompt
+            data-test-subj="aiValueNoResultsEmptyState"
+            icon={<EuiImage size="s" src={analyticsSpeedAcceleration} alt="" />}
+            title={<h2>{i18n.NO_RESULTS_TITLE}</h2>}
+            titleSize="s"
+            body={<p>{i18n.NO_RESULTS_BODY}</p>}
+            hasBorder={false}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   return (
-    <div
-      css={css`
-        background: ${colors.backgroundBaseSubdued};
-        width: 100%;
-        min-height: 100%;
-        border-radius: 8px;
-      `}
-    >
-      <ExecutiveSummary
-        attackAlertIds={attackAlertIds}
-        analystHourlyRate={analystHourlyRate}
-        hasAttackDiscoveries={hasAttackDiscoveries}
-        minutesPerAlert={minutesPerAlert}
-        isLoading={isLoading}
-        from={from}
-        to={to}
-        valueMetrics={valueMetrics}
-        valueMetricsCompare={valueMetricsCompare}
-      />
-      <div
-        css={css`
-          padding: 0 16px;
-        `}
-      >
-        <EuiHorizontalRule />
-      </div>
-      {(isLoading || hasAttackDiscoveries) && (
-        <>
-          <AlertProcessing
-            attackAlertIds={attackAlertIds}
-            isLoading={isLoading}
-            valueMetrics={valueMetrics}
-            from={from}
-            to={to}
-          />
-          <div
-            css={css`
-              padding: 0 16px;
-            `}
-          >
-            <EuiHorizontalRule />
-          </div>
-        </>
-      )}
-      {(isLoading || hasAttackDiscoveries) && (
-        <>
-          <CostSavingsTrend
-            analystHourlyRate={analystHourlyRate}
-            minutesPerAlert={minutesPerAlert}
-            from={from}
-            to={to}
-            isLoading={isLoading}
-          />
-          <div
-            css={css`
-              padding: 0 16px;
-            `}
-          >
-            <EuiHorizontalRule />
-          </div>
-        </>
-      )}
-      <ValueReportSettings
-        analystHourlyRate={analystHourlyRate}
-        minutesPerAlert={minutesPerAlert}
-      />
-    </div>
+    <AIValueReportLayout
+      isSample={data.isSample}
+      attackAlertIds={data.attackAlertIds}
+      analystHourlyRate={data.analystHourlyRate}
+      minutesPerAlert={data.minutesPerAlert}
+      from={data.from}
+      to={data.to}
+      valueMetrics={data.valueMetrics}
+      valueMetricsCompare={data.valueMetricsCompare}
+    />
+  );
+};
+
+export const AIValueReport: React.FC<Props> = ({
+  setHasReportData,
+  setIsDatePickerDisabled,
+  setIsSampleMode,
+  isSourcererLoading,
+  from,
+  to,
+}) => {
+  useEffect(() => {
+    if (isSourcererLoading) {
+      // safety check: clear stale parent flags as soon as loading starts.
+      setHasReportData(false);
+      setIsDatePickerDisabled(true);
+      setIsSampleMode(false);
+    }
+  }, [isSourcererLoading, setHasReportData, setIsDatePickerDisabled, setIsSampleMode]);
+
+  if (isSourcererLoading) {
+    return <PageLoader />;
+  }
+
+  return (
+    <AIValueReportContent
+      setHasReportData={setHasReportData}
+      setIsDatePickerDisabled={setIsDatePickerDisabled}
+      setIsSampleMode={setIsSampleMode}
+      from={from}
+      to={to}
+    />
   );
 };

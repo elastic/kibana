@@ -264,10 +264,40 @@ function mapSerializedValueFromAPI(value: SerializableValueType): unknown {
   return value;
 }
 
+/**
+ * Mirrors the renderable rule shapes from `ColorAssignmentMatcher#getKey`:
+ *   - `raw` -> serialized value.
+ *   - `match` with `matchEntireWord: true` -> bare pattern string; lowercased
+ *     when `matchCase` is falsy (matcher lowercases the rule side on lookup).
+ * Other shapes (`match` with `matchEntireWord: false`, `regex`, `range`) are not
+ * renderable and are silently dropped.=
+ *
+ * Round-trip rebuilds everything as `type: 'raw'` (see `fromRulesAPIToLensState`).
+ * Render-equivalent for editor-produced match rules, since both reduce to the
+ * same `String(rawValue)` lookup.
+ */
 function fromRulesLensStateToAPI(rules: ColorMapping.ColorRule[]): SerializableValueType[] {
+  const isRawRule = (
+    rule: ColorMapping.ColorRule
+  ): rule is Extract<ColorMapping.ColorRule, { type: 'raw' }> => rule.type === 'raw';
+
+  const isRenderableMatchRule = (
+    rule: ColorMapping.ColorRule
+  ): rule is Extract<ColorMapping.ColorRule, { type: 'match' }> =>
+    rule.type === 'match' && rule.matchEntireWord === true;
+
   return rules
-    .filter((rule): rule is Extract<ColorMapping.ColorRule, { type: 'raw' }> => rule.type === 'raw')
-    .map((rule) => mapSerializedValueToAPI(rule.value));
+    .filter(
+      (rule): rule is Extract<ColorMapping.ColorRule, { type: 'raw' | 'match' }> =>
+        isRawRule(rule) || isRenderableMatchRule(rule)
+    )
+    .map((rule) =>
+      isRawRule(rule)
+        ? mapSerializedValueToAPI(rule.value)
+        : rule.matchCase
+        ? rule.pattern
+        : rule.pattern.toLowerCase()
+    );
 }
 
 function isLensStateCategoricalConfigColorMapping(

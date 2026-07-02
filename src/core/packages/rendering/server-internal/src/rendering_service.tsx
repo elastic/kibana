@@ -10,15 +10,17 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { BehaviorSubject, firstValueFrom, of, map, catchError, take, timeout } from 'rxjs';
-import { i18n as i18nLib } from '@kbn/i18n';
+import { i18n as i18nLib, EN_LOCALE } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
+import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
   type DarkModeValue,
   type ThemeName,
@@ -71,10 +73,13 @@ export const DEFAULT_THEME_NAME_FEATURE_FLAG = 'coreRendering.defaultThemeName';
 /** @internal */
 export class RenderingService {
   private readonly themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
+  private readonly logger: Logger;
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
   private userStorageStart?: UserStorageServiceStart;
-  constructor(private readonly coreContext: CoreContext) {}
+  constructor(private readonly coreContext: CoreContext) {
+    this.logger = coreContext.logger.get('rendering');
+  }
 
   public async preboot({
     http,
@@ -214,7 +219,7 @@ export class RenderingService {
             // locale
             userSettings?.getUserSettingLocale(request),
             // user storage
-            this.fetchUserStorageValues(request),
+            this.fetchUserStorage(request),
           ] as [
             ReturnType<typeof withAsyncDefaultValues>,
             Promise<Record<string, UserProvidedValues>>,
@@ -296,12 +301,17 @@ export class RenderingService {
       serverBasePath,
       allowLocaleCookie: i18n.allowLocaleCookie,
     });
-    let translationsUrl: string;
-    if (usingCdn) {
-      translationsUrl = `${staticAssetsHrefBase}/translations/${effectiveLocale}.json`;
-    } else {
-      const translationHash = translationHashes[effectiveLocale] ?? i18n.getTranslationHash();
-      translationsUrl = `${serverBasePath}/translations/${translationHash}/${effectiveLocale}.json`;
+    // When the effective locale is English, the browser's pre-allocated `intl`
+    // instance is already wired to English (see kbn-i18n module initialisation).
+    // Signal null so the browser skips the HTTP fetch and react re-renders.
+    let translationsUrl: string | null = null;
+    if (effectiveLocale !== EN_LOCALE) {
+      if (usingCdn) {
+        translationsUrl = `${staticAssetsHrefBase}/translations/${effectiveLocale}.json`;
+      } else {
+        const translationHash = translationHashes[effectiveLocale] ?? i18n.getTranslationHash();
+        translationsUrl = `${serverBasePath}/translations/${translationHash}/${effectiveLocale}.json`;
+      }
     }
 
     const apmConfig = getApmConfig(request.url.pathname);
@@ -353,6 +363,7 @@ export class RenderingService {
         branch: env.packageInfo.branch,
         basePath,
         serverBasePath,
+        spaceId: request.spaceId,
         publicBaseUrl,
         assetsHrefBase: staticAssetsHrefBase,
         logging: loggingConfig,
@@ -415,14 +426,30 @@ export class RenderingService {
 
   public async stop() {}
 
-  private async fetchUserStorageValues(request: KibanaRequest): Promise<Record<string, unknown>> {
+  private async fetchUserStorage(request: KibanaRequest): Promise<Record<string, unknown>> {
     const userStorage = this.userStorageStart;
     if (!userStorage) return {};
 
     const client = userStorage.asScoped(request);
     if (!client) return {};
 
-    return client.getForInjection();
+    try {
+      return await client.getForInjection();
+    } catch (err) {
+      // Authorization errors are expected for users whose auth realm does not
+      // grant access to user-storage saved objects (e.g. certain SAML configs).
+      // Degrade gracefully so the page still renders with default values.
+      if (
+        SavedObjectsErrorHelpers.isForbiddenError(err) ||
+        SavedObjectsErrorHelpers.isNotAuthorizedError(err)
+      ) {
+        this.logger.debug(`User storage preload skipped (not authorized): ${err.message}`);
+        return {};
+      }
+
+      this.logger.error(`User storage preload failed: ${err.message}`);
+      throw err;
+    }
   }
 }
 

@@ -44,6 +44,10 @@ export function registerDeleteRoute(
   deleteRoute.addVersion(
     {
       version: routeVersion,
+      options: {
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).deleteDashboardOASOperationObject,
+      },
       validate: {
         request: {
           params: schema.object({
@@ -89,14 +93,15 @@ export function registerDeleteRoute(
               },
             });
           }
-
           if (e.isBoom && e.output.statusCode === 403) {
             logRequest(logger, req, 'debug', e.message);
             return res.forbidden({ body: { message: e.message } });
           }
 
-          logRequest(logger, req, 'error', e.message);
-          return res.customError({ statusCode: 500, body: { message: e.message } });
+          const message = e.stack ?? e.message;
+          logRequest(logger, req, 'error', message);
+          // Throw so Kibana returns a 500 HTTP response on any uncaught errors.
+          throw e;
         }
 
         return res.noContent();
