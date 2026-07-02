@@ -12,6 +12,7 @@ import {
   isRoundCompleteEvent,
   AgentExecutionMode,
 } from '@kbn/agent-builder-common';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { firstValueFrom, tap, toArray } from 'rxjs';
 import type { ServiceManager } from '../services';
@@ -21,19 +22,21 @@ import {
 } from '../../common/resolve_connector_or_inference_id';
 import { runAgentStepCommonDefinition } from '../../common/step_types/run_agent_step';
 
-const parseMaxStepSize = (value: string): number | undefined => {
-  const match = value
-    .trim()
-    .toLowerCase()
-    .match(/^(\d+(?:\.\d+)?)\s*(b|kb|mb|gb)$/);
-  if (!match) {
+/**
+ * Parses a `max-step-size` value (e.g. `"10mb"`, `"1gb"`, or a raw byte count) into bytes,
+ * reusing Kibana's shared `ByteSizeValue` parser for consistency with the rest of the platform.
+ * Returns `undefined` for empty or malformed values so the caller simply skips the override.
+ */
+export const parseMaxStepSize = (value: string): number | undefined => {
+  const trimmed = value.trim();
+  if (!trimmed) {
     return undefined;
   }
-
-  const amount = Number(match[1]);
-  const unit = match[2];
-  const multipliers = { b: 1, kb: 1024, mb: 1024 ** 2, gb: 1024 ** 3 };
-  return Math.floor(amount * multipliers[unit as keyof typeof multipliers]);
+  try {
+    return ByteSizeValue.parse(trimmed).getValueInBytes();
+  } catch {
+    return undefined;
+  }
 };
 
 /**

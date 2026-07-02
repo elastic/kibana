@@ -173,7 +173,10 @@ describe('openAIAdapter', () => {
       );
     });
 
-    it('does not pass maxContentLength for streaming requests', () => {
+    it('passes maxContentLength for streaming requests', () => {
+      // Streaming responses are still subject to the connector's axios `maxContentLength`
+      // (enforced while the response stream is consumed), so the override must be forwarded
+      // for streaming requests too — otherwise large streamed completions fail at the 1MB default.
       openAIAdapter
         .chatComplete({
           ...defaultArgs,
@@ -184,8 +187,9 @@ describe('openAIAdapter', () => {
         .subscribe(noop);
 
       expect(getSubActionParams()).toEqual(
-        expect.not.objectContaining({
-          maxContentLength: expect.any(Number),
+        expect.objectContaining({
+          stream: true,
+          maxContentLength: 10 * 1024 * 1024,
         })
       );
     });

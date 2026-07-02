@@ -95,7 +95,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
             ? { telemetryMetadata: metadata.connectorTelemetry }
             : {}),
           ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
-          ...(!stream && typeof maxContentLength === 'number' && isFinite(maxContentLength)
+          ...(typeof maxContentLength === 'number' && isFinite(maxContentLength)
             ? { maxContentLength }
             : {}),
         },

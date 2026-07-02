@@ -312,7 +312,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           responseSchema: stream ? StreamingResponseSchema : RunActionResponseSchema,
           data: executeBody,
           signal,
-          ...(!stream && maxContentLength !== undefined ? { maxContentLength } : {}),
+          ...(maxContentLength !== undefined ? { maxContentLength } : {}),
           ...axiosOptions,
           headers: {
             ...this.headers,

@@ -177,7 +177,8 @@ export const ConfigSchema = z
       ),
     /**
      * Maximum response size for this workflow step. Also used as the connector
-     * response content length limit for buffered LLM calls.
+     * response content length limit (`maxContentLength`) for the step's LLM
+     * calls, including streamed completions.
      */
     'max-step-size': z
       .string()
