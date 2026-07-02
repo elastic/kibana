@@ -290,7 +290,7 @@ function StreamsCanvasInner() {
     contextMenu,
     setContextMenu,
     selectStream,
-    cleanupSelected,
+    deleteNodes,
     onSelectionContextMenu,
     onNodeContextMenu,
   } = useCanvasSelection({ setNodes, recordHistory });
@@ -1160,7 +1160,7 @@ function StreamsCanvasInner() {
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <StreamsListTableTools
-                        newButtonIconType="save"
+                        newButtonIconType={null}
                         newButtonDisabled={!hasChanges}
                         newButtonLabel={i18n.translate(
                           'xpack.streams.streamsCanvas.saveChangesButtonLabel',
@@ -1339,7 +1339,7 @@ function StreamsCanvasInner() {
                       menu={contextMenu}
                       onClose={() => setContextMenu(null)}
                       onSelectStream={selectStream}
-                      onCleanup={cleanupSelected}
+                      onDeleteNodes={deleteNodes}
                     />
                   </div>
                 </div>

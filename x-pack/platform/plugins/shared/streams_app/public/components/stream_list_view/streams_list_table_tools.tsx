@@ -22,8 +22,8 @@ const DEFAULT_NEW_BUTTON_LABEL = i18n.translate(
 interface StreamsListTableToolsProps {
   /** Label for the primary "New" button (e.g. "New destination"). */
   newButtonLabel?: string;
-  /** Icon for the primary button. Defaults to `plus` for the "New" actions. */
-  newButtonIconType?: string;
+  /** Icon for the primary button. Defaults to `plus` for the "New" actions. Pass `null` to render no icon. */
+  newButtonIconType?: string | null;
   /** Disables the primary button (e.g. "Save changes" until the canvas is dirty). */
   newButtonDisabled?: boolean;
 }
@@ -57,7 +57,7 @@ export function StreamsListTableTools({
         <EuiButton
           size="s"
           fill
-          iconType={newButtonIconType}
+          iconType={newButtonIconType ?? undefined}
           isDisabled={newButtonDisabled}
           data-test-subj="streamsListNewButton"
         >

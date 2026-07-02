@@ -22,6 +22,9 @@ export interface CanvasContextMenu {
   x: number;
   y: number;
   nodeIds: string[];
+  /** React Flow node types for each entry in `nodeIds` (same order). Lets the
+   * menu render type-specific actions (e.g. the destination-only menu). */
+  nodeTypes: Array<string | undefined>;
 }
 
 interface SelectionDeps {
@@ -30,9 +33,21 @@ interface SelectionDeps {
 }
 
 export function useCanvasSelection({ setNodes, recordHistory }: SelectionDeps) {
-  const { getNodes, getEdges } = useReactFlow();
+  const { getNodes, getEdges, deleteElements } = useReactFlow();
   const store = useStoreApi();
   const [contextMenu, setContextMenu] = useState<CanvasContextMenu | null>(null);
+
+  // Delete the given nodes and their connected edges. React Flow's
+  // deleteElements takes care of removing any edge attached to a removed node,
+  // so a deleted routing/pipeline node doesn't leave dangling connectors.
+  const deleteNodes = useCallback(
+    (ids: string[]) => {
+      if (!ids.length) return;
+      recordHistory();
+      void deleteElements({ nodes: ids.map((id) => ({ id })) });
+    },
+    [deleteElements, recordHistory]
+  );
 
   // Cleanup applied to only the selected nodes: lay them out among themselves,
   // translate so the result keeps the selection's current top-left, then
@@ -98,11 +113,16 @@ export function useCanvasSelection({ setNodes, recordHistory }: SelectionDeps) {
     [getNodes, getEdges, store]
   );
 
-  const openContextMenu = useCallback((event: React.MouseEvent, nodeIds: string[]) => {
-    event.preventDefault();
-    if (!nodeIds.length) return;
-    setContextMenu({ x: event.clientX, y: event.clientY, nodeIds });
-  }, []);
+  const openContextMenu = useCallback(
+    (event: React.MouseEvent, nodeIds: string[]) => {
+      event.preventDefault();
+      if (!nodeIds.length) return;
+      const all = getNodes();
+      const nodeTypes = nodeIds.map((id) => all.find((n) => n.id === id)?.type);
+      setContextMenu({ x: event.clientX, y: event.clientY, nodeIds, nodeTypes });
+    },
+    [getNodes]
+  );
 
   // Right-click on the multi-selection overlay → act on the whole selection.
   const onSelectionContextMenu = useCallback(
@@ -133,6 +153,7 @@ export function useCanvasSelection({ setNodes, recordHistory }: SelectionDeps) {
     setContextMenu,
     selectStream,
     cleanupSelected,
+    deleteNodes,
     onSelectionContextMenu,
     onNodeContextMenu,
   };
