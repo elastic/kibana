@@ -10,8 +10,8 @@ import type { StreamsServer } from '../../../types';
 import { createSigEventsInvestigatorAgent } from './investigator';
 import { createSigEventsJudgeAgent } from './judge';
 
-export { SIGEVENTS_INVESTIGATOR_AGENT_ID } from './investigator';
-export { SIGEVENTS_JUDGE_AGENT_ID } from './judge';
+export { SIGNIFICANT_EVENTS_INVESTIGATOR_AGENT_ID as SIGEVENTS_INVESTIGATOR_AGENT_ID } from './investigator';
+export { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID as SIGEVENTS_JUDGE_AGENT_ID } from './judge';
 
 export const registerSignificantEventsDiscoveryAgents = ({
   agentBuilder,
