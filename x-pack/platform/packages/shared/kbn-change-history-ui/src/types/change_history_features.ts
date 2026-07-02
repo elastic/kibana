@@ -7,6 +7,11 @@
 
 /** Product-level feature toggles for change-history UI affordances. */
 export interface ChangeHistoryFeatures {
+  /**
+   * When false, compare preview and row compare actions are hidden.
+   * Omitted or true: compare is enabled.
+   */
+  compare?: boolean;
   /** When true, restore is shown when the adapter implements `restoreChange`. */
   restore?: boolean;
   /**
@@ -24,5 +29,6 @@ export interface ChangeHistoryPermissions {
 
 /** Resolved capabilities after combining features, adapter, and host gates. */
 export interface ChangeHistorySupports {
+  compare: boolean;
   restore: boolean;
 }
