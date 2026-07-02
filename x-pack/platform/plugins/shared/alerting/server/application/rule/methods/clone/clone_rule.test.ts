@@ -276,13 +276,17 @@ describe('clone', () => {
         interval: 100,
         intervalAvailable: 50,
       });
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        ...baseRule,
+        attributes: { ...baseRule.attributes, enabled: true },
+      });
 
       await expect(
         rulesClient.clone({
           id: baseRule.id,
           newId: 'cloned-rule',
         })
-      ).rejects.toThrow(/circuit breaker/i);
+      ).rejects.toThrow(/Error validating circuit breaker/i);
 
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
