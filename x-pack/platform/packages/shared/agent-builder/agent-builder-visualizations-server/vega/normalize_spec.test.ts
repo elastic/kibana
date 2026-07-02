@@ -135,6 +135,73 @@ describe('normalizeVegaSpec', () => {
     expect(result.data).toEqual({ url: { '%type%': 'esql', query: ESQL } });
   });
 
+  describe('nested data sources', () => {
+    it('strips a data source authored on a layer child so the root source flows down', () => {
+      const spec = {
+        layer: [
+          { mark: 'bar', encoding: { y: { field: 'count' } } },
+          { data: { values: [{ a: 1 }] }, mark: 'rule' },
+        ],
+      };
+      const snapshot = JSON.parse(JSON.stringify(spec));
+
+      const result = normalizeVegaSpec({ spec, esqlQuery: ESQL });
+      const layer = result.layer as Array<Record<string, unknown>>;
+
+      expect(result.data).toEqual({ url: { '%type%': 'esql', query: ESQL } });
+      expect(layer[1]).not.toHaveProperty('data');
+      expect(layer[1]).toEqual({ mark: 'rule' });
+      expect(spec).toEqual(snapshot);
+    });
+
+    it('strips a data source on the child view of a facet composite', () => {
+      const spec = {
+        facet: { field: 'ext', type: 'nominal' },
+        spec: { data: { url: 'https://example.com/x.json' }, mark: 'line' },
+      };
+
+      const result = normalizeVegaSpec({ spec, esqlQuery: ESQL });
+
+      expect(result.data).toEqual({ url: { '%type%': 'esql', query: ESQL } });
+      expect(result.spec).toEqual({ mark: 'line' });
+    });
+
+    it('strips data sources across concat array children', () => {
+      const spec = {
+        hconcat: [
+          { data: { name: 'left' }, mark: 'bar' },
+          { data: { values: [] }, mark: 'point' },
+        ],
+      };
+
+      const result = normalizeVegaSpec({ spec, esqlQuery: ESQL });
+      const hconcat = result.hconcat as Array<Record<string, unknown>>;
+
+      expect(hconcat[0]).toEqual({ mark: 'bar' });
+      expect(hconcat[1]).toEqual({ mark: 'point' });
+    });
+
+    it('strips data recursively through deeply nested views', () => {
+      const spec = {
+        facet: { field: 'ext', type: 'nominal' },
+        spec: {
+          data: { values: [{ a: 1 }] },
+          layer: [
+            { mark: 'bar' },
+            { data: { url: 'https://example.com/y.json' }, mark: 'rule' },
+          ],
+        },
+      };
+
+      const result = normalizeVegaSpec({ spec, esqlQuery: ESQL });
+      const innerSpec = result.spec as Record<string, unknown>;
+      const innerLayer = innerSpec.layer as Array<Record<string, unknown>>;
+
+      expect(innerSpec).not.toHaveProperty('data');
+      expect(innerLayer[1]).toEqual({ mark: 'rule' });
+    });
+  });
+
   it('strips fixed top-level sizing in favor of fit autosize', () => {
     const result = normalizeVegaSpec({
       spec: { width: 600, height: 400, autosize: 'pad', mark: 'bar' },

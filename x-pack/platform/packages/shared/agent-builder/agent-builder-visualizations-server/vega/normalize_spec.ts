@@ -190,6 +190,38 @@ const resolveSharedLegendConflicts = (spec: Record<string, unknown>): Record<str
   return { ...spec, layer: newLayers };
 };
 
+/** Keys that hold nested child view(s): a single `spec` or an array of views. */
+const CHILD_VIEW_KEYS = ['spec', 'layer', 'concat', 'hconcat', 'vconcat'] as const;
+
+/**
+ * Recursively drop `data` from every nested child view. Vega-Lite lets any view
+ * declare its own `data`, which shadows the inherited source, so a stray one the
+ * model authored in a `layer`/`spec`/`concat` child would bypass the ES|QL
+ * source injected at the root. Only the single root source is kept. Targets view
+ * containers (not a blind deep delete) so secondary datasets like a lookup
+ * transform's `from.data` are left intact. Does not mutate the input.
+ */
+const stripNestedDataSources = (view: Record<string, unknown>): Record<string, unknown> => {
+  const cleanChild = (child: unknown): unknown => {
+    if (child === null || typeof child !== 'object' || Array.isArray(child)) {
+      return child;
+    }
+    const { data: _droppedData, ...rest } = child as Record<string, unknown>;
+    return stripNestedDataSources(rest);
+  };
+
+  const result: Record<string, unknown> = { ...view };
+  for (const key of CHILD_VIEW_KEYS) {
+    const value = result[key];
+    if (Array.isArray(value)) {
+      result[key] = value.map(cleanChild);
+    } else if (value !== null && typeof value === 'object') {
+      result[key] = cleanChild(value);
+    }
+  }
+  return result;
+};
+
 interface NormalizeVegaSpecParams {
   /** Spec authored by the model (without a data source). */
   spec: Record<string, unknown>;
@@ -205,6 +237,8 @@ interface NormalizeVegaSpecParams {
  * Make a model-authored Vega-Lite spec safe to render in Kibana:
  * - pin the Vega-Lite v6 `$schema`,
  * - inject the canonical ES|QL query as the data source (the model never owns it),
+ * - drop any `data` the model declared on nested child views, which would
+ *   otherwise shadow the injected root source,
  * - drop fixed top-level sizing so the spec fills its container (using `fit`
  *   autosize for single/layered views; composite views are sized by Kibana
  *   without autosize, which `fit` does not support), and
@@ -225,7 +259,7 @@ export const normalizeVegaSpec = ({
   const url = buildEsqlDataUrl({ esqlQuery, columns, timefield });
 
   const normalized: Record<string, unknown> = {
-    ...rest,
+    ...stripNestedDataSources(rest),
     $schema: VEGA_LITE_SCHEMA,
     // `fit` is only valid for single/layered views; composite views (facet/
     // repeat/concat) are sized by Kibana and must not set autosize.
