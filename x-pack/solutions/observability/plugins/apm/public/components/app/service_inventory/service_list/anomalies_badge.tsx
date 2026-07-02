@@ -13,6 +13,7 @@ import type { AnomalyDetectorType } from '@kbn/apm-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { isMobileAgentName } from '../../../../../common/agent_name';
 import {
   getApmMlDetectorLabel,
@@ -88,11 +89,28 @@ export interface AnomaliesBadgeInteractionProps {
 interface AnomaliesBadgeProps {
   score: number | undefined;
   detectorType: AnomalyDetectorType | undefined;
+  /**
+   * When provided, enables interaction with the badge (clicking navigates to the service overview page with the anomaly score highlighted).
+   * It is ignored if the score is undefined, in which case the badge is always non-interactive.
+   */
   interactionProps?: AnomaliesBadgeInteractionProps;
+  /**
+   * If true, clicking the badge will navigate to the service overview page via an onClick handler instead of a plain anchor href.
+   * It is ignored if `interactionProps` is not provided or if the score is undefined.
+   */
+  interactOnClick?: boolean;
 }
 
-export function AnomaliesBadge({ score, detectorType, interactionProps }: AnomaliesBadgeProps) {
+export function AnomaliesBadge({
+  score,
+  detectorType,
+  interactionProps,
+  interactOnClick,
+}: AnomaliesBadgeProps) {
   const apmRouter = useApmRouter();
+  const apmPluginContext = useApmPluginContext();
+  const navigateToUrl = apmPluginContext?.core?.application?.navigateToUrl;
+
   const severity = getSeverity(score);
   const text = formatLabelWithScore(getI18nLabel(severity), score);
 
@@ -107,6 +125,13 @@ export function AnomaliesBadge({ score, detectorType, interactionProps }: Anomal
             query: toAnomalyOverviewQuery(interactionProps.query),
           }
         )
+      : undefined;
+
+  const onClick =
+    href && interactOnClick
+      ? (e: React.MouseEvent | React.KeyboardEvent) => {
+          navigateToUrl(href);
+        }
       : undefined;
 
   const tooltipContent =
@@ -124,7 +149,11 @@ export function AnomaliesBadge({ score, detectorType, interactionProps }: Anomal
           values: { score: score.toFixed(2) },
         });
 
-  const roleProps = href ? { href } : { role: 'img', 'aria-label': text };
+  const roleProps = onClick
+    ? { onClick, onClickAriaLabel: text }
+    : href
+    ? { href }
+    : { role: 'img', 'aria-label': text };
 
   return (
     <EuiToolTip position="bottom" content={tooltipContent}>
