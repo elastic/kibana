@@ -87,7 +87,9 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       if (
         !selectedStepExecutionId &&
         executionId === workflowExecution?.id &&
-        (workflowExecution?.stepExecutions?.length || isTerminalStatus(workflowExecution?.status))
+        (workflowExecution?.stepExecutions?.length ||
+          isTerminalStatus(workflowExecution?.status) ||
+          workflowExecution?.status === ExecutionStatus.QUEUED)
       ) {
         setSelectedStepExecution(PSEUDO_STEP_OVERVIEW);
       }
