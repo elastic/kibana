@@ -15,6 +15,7 @@ import {
   WorkflowNotFoundError,
 } from '@kbn/workflows/common/errors';
 import { registerExecutionRoutes } from '.';
+import type { WorkflowsManagementConfig } from '../../../config';
 import { ExternalResumeError } from '../../external_resume/external_resume_error';
 import { ManagedWorkflowExecutionReadForbiddenError } from '../../managed_workflow_execution_read_error';
 import type { RouteDependencies } from '../types';
@@ -24,6 +25,7 @@ describe('Execution Routes', () => {
   let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
   let mockApi: Record<string, jest.Mock>;
   let mockSpaces: { getSpaceId: jest.Mock };
+  let mockRouter: IRouter;
 
   const mockContext = {
     workflows: Promise.resolve({
@@ -123,7 +125,7 @@ describe('Execution Routes', () => {
         }),
     });
 
-    const mockRouter = {
+    const router = {
       versioned: {
         get: jest
           .fn()
@@ -147,13 +149,15 @@ describe('Execution Routes', () => {
           ),
       },
     } as unknown as jest.Mocked<IRouter>;
+    mockRouter = router;
 
     registerExecutionRoutes({
-      router: mockRouter,
+      router,
       api: mockApi as any,
       logger: loggingSystemMock.createLogger(),
       spaces: mockSpaces as any,
       audit: createWorkflowManagementAuditLogMock(),
+      config: { hitlExternalResume: { enabled: true } } as WorkflowsManagementConfig,
     } as unknown as RouteDependencies);
   });
 
@@ -739,6 +743,27 @@ describe('Execution Routes', () => {
         stepExecutionId: undefined,
       });
       expect(result).toEqual({ type: 'ok', body: logsResponse });
+    });
+  });
+
+  describe('registerExecutionRoutes hitlExternalResume kill switch', () => {
+    const externalResumePath = '/api/workflows/executions/{executionId}/resume/external';
+    const externalResumeFormPath = '/api/workflows/executions/{executionId}/resume/external/form';
+
+    it('does not register external resume routes when hitlExternalResume is disabled', () => {
+      routeHandlers = {};
+      registerExecutionRoutes({
+        router: mockRouter,
+        api: mockApi as any,
+        logger: loggingSystemMock.createLogger(),
+        spaces: mockSpaces as any,
+        audit: createWorkflowManagementAuditLogMock(),
+        config: { hitlExternalResume: { enabled: false } } as WorkflowsManagementConfig,
+      } as unknown as RouteDependencies);
+
+      expect(handler('GET', externalResumePath)).toBeUndefined();
+      expect(handler('POST', externalResumePath)).toBeUndefined();
+      expect(handler('GET', externalResumeFormPath)).toBeUndefined();
     });
   });
 

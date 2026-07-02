@@ -40,7 +40,7 @@ export function registerExecutionRoutes(deps: RouteDependencies) {
   registerCancelWorkflowExecutionsRoute(deps);
   registerGetStepExecutionRoute(deps);
   registerResumeExecutionRoute(deps);
-  if (isHitlExternalResumeEnabled(deps.config.hitlExternalResume?.enabled)) {
+  if (isHitlExternalResumeEnabled(deps.config?.hitlExternalResume?.enabled)) {
     registerExternalResumeExecutionGetRoute(deps);
     registerExternalResumeExecutionPostRoute(deps);
     registerExternalResumeFormRoute(deps);
