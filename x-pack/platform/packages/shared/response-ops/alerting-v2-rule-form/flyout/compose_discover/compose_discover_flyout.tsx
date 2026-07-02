@@ -779,6 +779,8 @@ export function ComposeDiscoverFlyout({
       const split = splitResultToRuleQuery(getBreachQuery(sandboxQuery)).query;
       queryToCommit = resolveUnifiedAlertApplyQuery(sandboxQuery, split);
       setSandboxQuery(queryToCommit);
+    } else if (uiState.manualSplitEnabled && isAlert) {
+      queryToCommit = resolveUnifiedAlertApplyQuery(methods.getValues('query'), sandboxQuery);
     }
 
     methods.setValue('query', queryToCommit, { shouldDirty: true });
@@ -1005,7 +1007,7 @@ export function ComposeDiscoverFlyout({
    * leading-WHERE-only pipelines where the heuristic cannot isolate a base).
    */
   const handleEnableManualSplit = useCallback(() => {
-    setSandboxQuery(enterManualSplitQuery(getBreachQuery(sandboxQuery)));
+    setSandboxQuery(enterManualSplitQuery(sandboxQuery));
     manualSplitUncommittedRef.current = true;
     dispatch({ type: 'ENABLE_MANUAL_SPLIT' });
   }, [sandboxQuery, dispatch]);
@@ -1015,7 +1017,7 @@ export function ComposeDiscoverFlyout({
    * Recombines base+alert into one pipeline and re-enables auto-split on Apply.
    */
   const handleDisableManualSplit = useCallback(() => {
-    setSandboxQuery(exitManualSplitQuery(getBreachQuery(sandboxQuery)));
+    setSandboxQuery(exitManualSplitQuery(sandboxQuery));
     manualSplitUncommittedRef.current = false;
     dispatch({ type: 'DISABLE_MANUAL_SPLIT' });
   }, [sandboxQuery, dispatch]);
@@ -1028,7 +1030,7 @@ export function ComposeDiscoverFlyout({
    */
   const handleManualSplitFromForm = useCallback(() => {
     const committedQuery = methods.getValues('query');
-    setSandboxQuery(enterManualSplitQuery(getBreachQuery(committedQuery)));
+    setSandboxQuery(enterManualSplitQuery(committedQuery));
     manualSplitUncommittedRef.current = true;
     dispatch({ type: 'ENABLE_MANUAL_SPLIT' });
     dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: uiState.step, isAlert });
