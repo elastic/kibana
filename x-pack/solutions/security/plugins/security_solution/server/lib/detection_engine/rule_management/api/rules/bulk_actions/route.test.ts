@@ -867,7 +867,7 @@ describe('Perform bulk action route', () => {
       expect(clients.rulesClient.update).not.toHaveBeenCalled();
     });
 
-    it('skips exception duplication when include_exceptions is false but still creates once', async () => {
+    it('creates the duplicate rule with empty exceptions when include_exceptions is false', async () => {
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
