@@ -79,6 +79,22 @@ describe('getTemplateLifecycle', () => {
     });
   });
 
+  it('maps template frozen_after into dsl', () => {
+    const result = getTemplateLifecycle({
+      aliases: {},
+      mappings: {},
+      lifecycle: {
+        enabled: true,
+        data_retention: '30d',
+        frozen_after: '10d',
+      },
+      settings: { index: { lifecycle: { prefer_ilm: false } } },
+    });
+    expect(result).toEqual({
+      dsl: { data_retention: '30d', frozen_after: '10d' },
+    });
+  });
+
   it('returns dsl when enabled is omitted but data_retention is set', () => {
     const result = getTemplateLifecycle({
       aliases: {},
@@ -216,6 +232,48 @@ describe('updateDataStreamsLifecycle downsampling', () => {
       data_retention: '30d',
     });
   });
+
+  it('preserves frozen_after alongside downsampling steps', async () => {
+    await updateDataStreamsLifecycle({
+      esClient: mockEsClient as unknown as ElasticsearchClient,
+      logger: mockLogger as unknown as Logger,
+      names: ['test-stream'],
+      lifecycle: {
+        dsl: {
+          data_retention: '30d',
+          frozen_after: '10d',
+          downsample: [{ after: '1d', fixed_interval: '1h' }],
+        },
+      },
+      isServerless: true,
+    });
+
+    expect(mockEsClient.indices.putDataLifecycle).toHaveBeenCalledWith({
+      name: ['test-stream'],
+      data_retention: '30d',
+      downsampling: [{ after: '1d', fixed_interval: '1h' }],
+      frozen_after: '10d',
+    });
+  });
+
+  it('omits frozen_after when it is not set', async () => {
+    await updateDataStreamsLifecycle({
+      esClient: mockEsClient as unknown as ElasticsearchClient,
+      logger: mockLogger as unknown as Logger,
+      names: ['test-stream'],
+      lifecycle: {
+        dsl: {
+          data_retention: '30d',
+        },
+      },
+      isServerless: true,
+    });
+
+    expect(mockEsClient.indices.putDataLifecycle).toHaveBeenCalledWith({
+      name: ['test-stream'],
+      data_retention: '30d',
+    });
+  });
 });
 
 describe('updateDataStreamsLifecycle inherit', () => {
@@ -249,6 +307,7 @@ describe('updateDataStreamsLifecycle inherit', () => {
               enabled: true,
               data_retention: '80d',
               downsampling: [{ after: '7d', fixed_interval: '1h' }],
+              frozen_after: '10d',
             },
           },
         }),
@@ -280,6 +339,7 @@ describe('updateDataStreamsLifecycle inherit', () => {
       name: 'logs-foo-default',
       data_retention: '80d',
       downsampling: [{ after: '7d', fixed_interval: '1h' }],
+      frozen_after: '10d',
     });
     expect(mockEsClient.indices.deleteDataLifecycle).not.toHaveBeenCalled();
   });
