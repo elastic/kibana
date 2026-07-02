@@ -11,13 +11,6 @@
  */
 export type VisualizationRenderer = 'lens' | 'vega';
 
-/**
- * Data for a visualization attachment, discriminated by `renderer`.
- *
- * This is the cross-runtime contract for the visualization attachment (consumed
- * by both the browser renderer and the server). Runtime validation lives in the
- * `agent_builder_visualizations` plugin server (`visualizationAttachmentDataSchema`).
- */
 export interface VisualizationAttachmentData {
   /** Renderer discriminator. Omitted defaults to Lens for legacy attachments. */
   renderer?: VisualizationRenderer;
