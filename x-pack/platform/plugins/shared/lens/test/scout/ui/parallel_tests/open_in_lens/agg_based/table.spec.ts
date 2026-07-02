@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
+import { EuiComboBoxWrapper, spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   testData,
@@ -13,6 +14,21 @@ import {
   convertToLensByTitle,
   getImportedDashboardId,
 } from '../../../fixtures';
+
+/** Returns the selected option labels from a combo box inside the dimension editor flyout. */
+const getDimensionFlyoutComboBoxSelectedOptions = async (
+  page: ScoutPage,
+  comboBoxTestSubj: string
+): Promise<string[]> => {
+  const comboBox = new EuiComboBoxWrapper(page, comboBoxTestSubj);
+  const selectedOptions = await comboBox.getSelectedMultiOptions();
+  if (selectedOptions.length > 0) {
+    return selectedOptions;
+  }
+
+  const value = await comboBox.getSelectedValue();
+  return value ? [value] : [];
+};
 
 spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.stateful.classic }, () => {
   let tableDashboardId: string;
@@ -57,7 +73,7 @@ spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.stateful
     await expect(dimensions[0]).toHaveText('Average machine.ram');
   });
 
-  spaceTest('should convert total function to summary row', async ({ pageObjects }) => {
+  spaceTest('should convert total function to summary row', async ({ pageObjects, page }) => {
     const { dashboard, lens } = pageObjects;
 
     await convertToLensByTitle({ dashboard }, 'Table - Summary row');
@@ -69,9 +85,9 @@ spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.stateful
     await expect(dimensions[0]).toHaveText('Average machine.ram');
 
     await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
-    expect(await lens.getComboBoxSelectedOptions('lnsDatatable_summaryrow_function')).toStrictEqual(
-      ['Sum']
-    );
+    expect(
+      await getDimensionFlyoutComboBoxSelectedOptions(page, 'lnsDatatable_summaryrow_function')
+    ).toStrictEqual(['Sum']);
   });
 
   spaceTest('should convert sibling pipeline aggregation', async ({ pageObjects }) => {
@@ -124,7 +140,7 @@ spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.stateful
     }
   );
 
-  spaceTest('should convert percentage column', async ({ pageObjects }) => {
+  spaceTest('should convert percentage column', async ({ pageObjects, page }) => {
     const { dashboard, lens } = pageObjects;
 
     await convertToLensByTitle({ dashboard }, 'Table - Percentage Column');
@@ -137,9 +153,9 @@ spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.stateful
     const percentageColumnText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 1);
 
     await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger', 0, 1);
-    expect(await lens.getComboBoxSelectedOptions('indexPattern-dimension-format')).toStrictEqual([
-      'Percent',
-    ]);
+    expect(
+      await getDimensionFlyoutComboBoxSelectedOptions(page, 'indexPattern-dimension-format')
+    ).toStrictEqual(['Percent']);
 
     expect(metricText).toBe('Count');
     expect(percentageColumnText).toBe('Count percentages');

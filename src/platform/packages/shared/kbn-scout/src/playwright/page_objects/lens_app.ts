@@ -181,7 +181,10 @@ export class LensApp {
    * Tab `data-test-subj` values use layer ids (not numeric indices), so tabs are resolved by order.
    */
   async activateLayerTab(index: number) {
-    const tabs = await this.page.locator('[data-test-subj^="unifiedTabs_tab_"]').all();
+    const tabsLocator = this.page.locator('[data-test-subj^="unifiedTabs_tab_"]');
+    await expect.poll(async () => (await tabsLocator.count()) > index).toBe(true);
+
+    const tabs = await tabsLocator.all();
     const tab = tabs[index];
     if (!tab) {
       throw new Error(`Layer tab not found at index ${index}`);
@@ -193,38 +196,26 @@ export class LensApp {
 
   /** Returns the selected axis side label from an open dimension editor. */
   async getSelectedAxisSide(): Promise<string> {
-    const axisSideButtons = await this.page
-      .locator('[data-test-subj^="lnsXY_axisSide_groups_"]')
-      .all();
-
-    for (const button of axisSideButtons) {
-      if ((await button.getAttribute('aria-pressed')) === 'true') {
-        const text = (await button.innerText()).trim();
-        if (!text) {
-          throw new Error('Axis side button text not yet rendered');
-        }
-        return text;
-      }
+    const selectedButton = this.page.locator(
+      '[data-test-subj^="lnsXY_axisSide_groups_"][aria-pressed="true"]'
+    );
+    await expect(selectedButton).toBeVisible();
+    const text = (await selectedButton.innerText()).trim();
+    if (!text) {
+      throw new Error('Axis side button text not yet rendered');
     }
-
-    throw new Error('No axis side button is selected');
+    return text;
   }
 
   /** Returns the selected bar orientation from the style settings flyout. */
   async getSelectedBarOrientationSetting(): Promise<string> {
     await this.openStyleSettingsFlyout();
 
-    const orientationButtons = await this.page
-      .locator('[data-test-subj^="lns_barOrientation_"]')
-      .all();
-
-    for (const button of orientationButtons) {
-      if ((await button.getAttribute('aria-pressed')) === 'true') {
-        return (await button.innerText()).trim();
-      }
-    }
-
-    throw new Error('No bar orientation button is selected');
+    const selectedButton = this.page.locator(
+      '[data-test-subj^="lns_barOrientation_"][aria-pressed="true"]'
+    );
+    await expect(selectedButton).toBeVisible();
+    return (await selectedButton.innerText()).trim();
   }
 
   async setTermsNumberOfValues(value: number) {
@@ -276,9 +267,12 @@ export class LensApp {
 
   /** Opens a dimension editor flyout from a dimension trigger inside a layer panel. */
   async openDimensionEditor(dimension: string, layerIndex = 0, dimensionIndex = 0) {
-    const editors = await this.page.testSubj
-      .locator(`lns-layerPanel-${layerIndex} > ${dimension}`)
-      .all();
+    const editorsLocator = this.page.testSubj.locator(
+      `lns-layerPanel-${layerIndex} > ${dimension}`
+    );
+    await expect.poll(async () => (await editorsLocator.count()) > dimensionIndex).toBe(true);
+
+    const editors = await editorsLocator.all();
     const editor = editors[dimensionIndex];
     if (!editor) {
       throw new Error(
@@ -287,18 +281,6 @@ export class LensApp {
     }
     await editor.click();
     await this.closeDimensionEditorButton.waitFor({ state: 'visible' });
-  }
-
-  /** Returns the selected option labels from an EUI combo box test subject. */
-  async getComboBoxSelectedOptions(comboBoxTestSubj: string): Promise<string[]> {
-    const comboBox = new EuiComboBoxWrapper(this.page, comboBoxTestSubj);
-    const selectedOptions = await comboBox.getSelectedMultiOptions();
-    if (selectedOptions.length > 0) {
-      return selectedOptions;
-    }
-
-    const value = await comboBox.getSelectedValue();
-    return value ? [value] : [];
   }
 
   private async selectOperation(operation: string, isPreviousIncompatible = false) {
@@ -374,30 +356,26 @@ export class LensApp {
     const container = workspace.getByTestId(chartSubj);
     await container.waitFor({ state: 'visible', timeout: 30_000 });
 
-    await this.page.waitForFunction(
-      ({ workspaceSubj, chartSubj: subj }) => {
-        const workspaceEl = document.querySelector(`[data-test-subj="${workspaceSubj}"]`);
-        if (!workspaceEl) {
+    let prevCount: string | null = null;
+    await expect
+      .poll(
+        async () => {
+          const count = await container.getAttribute('data-rendering-count');
+          if (count === null) {
+            return true;
+          }
+          if (count === '0') {
+            return false;
+          }
+          if (prevCount === count) {
+            return true;
+          }
+          prevCount = count;
           return false;
-        }
-        const el = workspaceEl.querySelector(`[data-test-subj="${subj}"]`);
-        if (!el) {
-          return false;
-        }
-        const count = el.getAttribute('data-rendering-count');
-        if (count === null) {
-          return true;
-        }
-        if (count === '0') {
-          return false;
-        }
-        const prev = el.getAttribute('data-lns-prev-count');
-        el.setAttribute('data-lns-prev-count', count);
-        return prev === count;
-      },
-      { workspaceSubj: 'lnsWorkspace', chartSubj },
-      { timeout: 30_000, polling: 500 }
-    );
+        },
+        { timeout: 30_000, intervals: [500] }
+      )
+      .toBe(true);
   }
 
   /** Returns the number of layers in the Lens editor (unified-tabs row is hidden for a single layer). */
@@ -418,8 +396,14 @@ export class LensApp {
 
   /** Returns visible labels for all dimension triggers inside a dimension panel. */
   private async getDimensionTriggersTexts(dimension: string): Promise<string[]> {
-    const triggers = await this.page.testSubj.locator(`${dimension} > lns-dimensionTrigger`).all();
-    const texts = await Promise.all(triggers.map((trigger) => trigger.innerText()));
+    const triggersLocator = this.page.testSubj.locator(`${dimension} > lns-dimensionTrigger`);
+    await expect.poll(async () => (await triggersLocator.count()) > 0).toBe(true);
+
+    const triggers = await triggersLocator.all();
+    const texts: string[] = [];
+    for (const trigger of triggers) {
+      texts.push(await trigger.innerText());
+    }
     // Lens inserts zero-width spaces around dots in field names for line-breaking.
     return texts.map((text) => text.replace(/\u200b/g, '').trim());
   }
@@ -462,7 +446,10 @@ export class LensApp {
    * default (un-hovered) state before asserting colors.
    */
   async hoverOverDimensionButton(index = 0) {
-    const triggers = await this.getDimensionTriggerLocator().all();
+    const triggersLocator = this.getDimensionTriggerLocator();
+    await expect.poll(async () => (await triggersLocator.count()) > index).toBe(true);
+
+    const triggers = await triggersLocator.all();
     const trigger = triggers[index];
     if (!trigger) {
       throw new Error(`Dimension trigger not found at index ${index}`);
@@ -477,36 +464,37 @@ export class LensApp {
     const tiles = await this.page.locator('[data-test-subj="mtrVis"] .echChart li').all();
     const showingBar = (await this.page.locator('.echSingleMetricProgress').count()) > 0;
 
-    return Promise.all(
-      tiles.map(async (tile) => {
-        const getText = async (selector: string) => {
-          const el = tile.locator(selector);
-          if ((await el.count()) === 0) return undefined;
-          return el.evaluate((node) => (node as HTMLElement).innerText);
-        };
-        const getColor = async (selector: string) => {
-          const el = tile.locator(selector);
-          if ((await el.count()) === 0) return undefined;
-          const color = await el.evaluate((node) => getComputedStyle(node).backgroundColor);
-          return normalizeComputedColor(color);
-        };
+    const data = [];
+    for (const tile of tiles) {
+      const getText = async (selector: string) => {
+        const el = tile.locator(selector);
+        if ((await el.count()) === 0) return undefined;
+        return el.evaluate((node) => (node as HTMLElement).innerText);
+      };
+      const getColor = async (selector: string) => {
+        const el = tile.locator(selector);
+        if ((await el.count()) === 0) return undefined;
+        const color = await el.evaluate((node) => getComputedStyle(node).backgroundColor);
+        return normalizeComputedColor(color);
+      };
 
-        return {
-          title: await getText('h2'),
-          subtitle: await getText('.echMetricText__subtitle'),
-          extraText: await getText('.echMetricText__extraBlock'),
-          value: await getText('.echMetricText__valueBlock'),
-          color: await getColor('.echMetric'),
-          trendlineColor: await (async () => {
-            const el = tile.locator('.echSingleMetricSparkline__svg > rect');
-            if ((await el.count()) === 0) return undefined;
-            return (await el.getAttribute('fill')) ?? undefined;
-          })(),
-          showingTrendline: (await tile.locator('.echSingleMetricSparkline').count()) > 0,
-          showingBar,
-        };
-      })
-    );
+      data.push({
+        title: await getText('h2'),
+        subtitle: await getText('.echMetricText__subtitle'),
+        extraText: await getText('.echMetricText__extraBlock'),
+        value: await getText('.echMetricText__valueBlock'),
+        color: await getColor('.echMetric'),
+        trendlineColor: await (async () => {
+          const el = tile.locator('.echSingleMetricSparkline__svg > rect');
+          if ((await el.count()) === 0) return undefined;
+          return (await el.getAttribute('fill')) ?? undefined;
+        })(),
+        showingTrendline: (await tile.locator('.echSingleMetricSparkline').count()) > 0,
+        showingBar,
+      });
+    }
+
+    return data;
   }
 
   /** Opens the palette panel for the currently active dimension. */
@@ -525,16 +513,21 @@ export class LensApp {
       .all();
     const colorAnchors = await this.page.testSubj.locator('euiColorPickerAnchor').all();
 
-    return Promise.all(
-      stopInputs.map(async (input, i) => ({
+    const colorStops = [];
+    for (let i = 0; i < stopInputs.length; i++) {
+      const input = stopInputs[i];
+      const colorAnchor = colorAnchors[i];
+      colorStops.push({
         stop: await input.getAttribute('value'),
         color:
-          colorAnchors[i] != null
+          colorAnchor != null
             ? normalizeComputedColor(
-                await colorAnchors[i].evaluate((node) => getComputedStyle(node).backgroundColor)
+                await colorAnchor.evaluate((node) => getComputedStyle(node).backgroundColor)
               )
             : undefined,
-      }))
-    );
+      });
+    }
+
+    return colorStops;
   }
 }
