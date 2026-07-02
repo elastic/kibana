@@ -32,9 +32,11 @@ export const createDiscoverRuleTagsInlineTool = ({
   id: DISCOVER_RULE_TAGS_INLINE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Discover available tag values across all Security detection rules. ' +
-    'Returns tag names and their rule counts. ' +
-    'Call this before filtering by tag in `security.find_rules`. ' +
+    'First step for ANY detection-rule inventory question (list, count, filter, or rank rules). ' +
+    'Discover available tag values across all Security detection rules; returns tag names and rule counts. ' +
+    'Always call this immediately before `security.find_rules` in the same turn. ' +
+    'Detection rules are managed saved objects, not indexed documents — never reach for generate_esql, ' +
+    'execute_esql, or platform.core search to inventory rules. ' +
     'Does NOT return rule names or metadata.',
   schema: discoverRuleTagsSchema,
   handler: async (_input, { request }) => {
