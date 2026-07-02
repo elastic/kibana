@@ -268,6 +268,7 @@ export const discoveryInvestigator: DatasetConfig['discoveryInvestigator'] = [
     metadata: { difficulty: 'medium', failure_domain: 'ledger-db', failure_mode: 'cascade' },
   },
 ];
+
 export const discoveryJudge: DatasetConfig['discoveryJudge'] = [
   {
     id: 'ledger-db-disconnect',
