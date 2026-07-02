@@ -9,10 +9,18 @@ import { registerKibanaFunction } from './kibana';
 import type { FunctionRegistrationParameters } from '.';
 
 function registerFunction(
-  overrides: { requestUrl?: URL; rewrittenUrl?: URL; basePath?: string } = {}
+  overrides: {
+    requestUrl?: URL;
+    rewrittenUrl?: URL;
+    basePath?: string;
+    headers?: Record<string, string | string[]>;
+  } = {}
 ) {
   const logger = { info: jest.fn(), debug: jest.fn(), warn: jest.fn(), error: jest.fn() };
-  const fetch = jest.fn().mockResolvedValue({ ok: true });
+  const fetch = jest.fn().mockImplementation((pathname: string) => ({
+    body: { ok: true },
+    request: { url: `https://target.example/base${pathname}` },
+  }));
   const scopedClient = { fetch };
   const coreStart = {
     http: {
@@ -29,7 +37,7 @@ function registerFunction(
         new URL('https://source.example/internal/observability_ai_assistant/chat/complete'),
       basePath: overrides.basePath ?? '',
       rewrittenUrl: overrides.rewrittenUrl,
-      headers: {
+      headers: overrides.headers ?? {
         'content-type': 'application/json',
         host: 'attacker.example',
         origin: 'https://attacker.example',
@@ -81,11 +89,17 @@ describe('kibana tool', () => {
       query: { type: 'dashboard' },
       body: { foo: 'bar' },
       signal,
+      headers: {
+        'content-type': 'application/json',
+        origin: 'https://attacker.example',
+      },
+      access: 'public',
+      asResponse: true,
     });
     expect(result).toEqual({ content: { ok: true } });
   });
 
-  it('logs the source request and target pathname', async () => {
+  it('logs the source request and resolved target url', async () => {
     const { handler, fetch, resources } = registerFunction({ basePath: '/s/my-space' });
 
     await handler({
@@ -97,7 +111,7 @@ describe('kibana tool', () => {
     });
 
     expect(resources.logger.info).toHaveBeenCalledWith(
-      expect.stringContaining('GET /api/saved_objects/_find')
+      expect.stringContaining('GET https://target.example/base/api/saved_objects/_find')
     );
     expect(fetch).toHaveBeenCalledWith(
       '/api/saved_objects/_find',
@@ -121,6 +135,65 @@ describe('kibana tool', () => {
 
     expect(resources.logger.info).toHaveBeenCalledWith(
       expect.stringContaining(String(rewrittenUrl))
+    );
+  });
+
+  it('forwards safe request headers without protected routing or auth headers', async () => {
+    const { handler, fetch } = registerFunction({
+      headers: {
+        accept: 'application/json',
+        'accept-language': 'en-US',
+        authorization: 'Bearer attacker',
+        cookie: 'sid=attacker',
+        host: 'attacker.example',
+        'kbn-version': '1.2.3',
+        origin: 'https://origin.example',
+        referer: 'https://origin.example/app/home',
+        'sec-fetch-site': 'same-origin',
+        'x-elastic-internal-origin': 'attacker',
+        'x-elastic-product-origin': 'observability',
+        'x-kbn-context': '%7B%7D',
+      },
+    });
+
+    await handler({
+      arguments: {
+        method: 'GET',
+        pathname: '/api/status',
+      },
+    });
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/status',
+      expect.objectContaining({
+        headers: {
+          accept: 'application/json',
+          'accept-language': 'en-US',
+          origin: 'https://origin.example',
+          referer: 'https://origin.example/app/home',
+          'sec-fetch-site': 'same-origin',
+          'x-elastic-product-origin': 'observability',
+          'x-kbn-context': '%7B%7D',
+        },
+      })
+    );
+  });
+
+  it('requests internal access for internal Kibana APIs', async () => {
+    const { handler, fetch } = registerFunction();
+
+    await handler({
+      arguments: {
+        method: 'GET',
+        pathname: '/internal/search',
+      },
+    });
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/internal/search',
+      expect.objectContaining({
+        access: 'internal',
+      })
     );
   });
 });

@@ -36,6 +36,7 @@ interface HttpSelfClientParams {
   readonly authRequestHeaders: IAuthHeadersStorage;
   readonly getServerInfo: () => HttpServerInfo;
   readonly kibanaVersion: string;
+  readonly target: 'auto' | 'local';
 }
 
 interface HttpSelfFetchError<TResponseBody = unknown> extends Error {
@@ -134,7 +135,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
   }
 
   private getBaseUrl(): URL {
-    if (this.params.basePath.publicBaseUrl) {
+    if (this.params.target === 'auto' && this.params.basePath.publicBaseUrl) {
       return new URL(this.params.basePath.publicBaseUrl);
     }
 

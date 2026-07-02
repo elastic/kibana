@@ -5,9 +5,44 @@
  * 2.0.
  */
 
-import type { HttpSelfFetchQuery, KibanaRequest } from '@kbn/core/server';
+import type { HttpSelfFetchHeaders, HttpSelfFetchQuery, KibanaRequest } from '@kbn/core/server';
 import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
+
+const forwardedHeaderNames = new Set([
+  'accept',
+  'accept-encoding',
+  'accept-language',
+  'content-type',
+  'origin',
+  'referer',
+  'user-agent',
+  'x-elastic-product-origin',
+  'x-kbn-context',
+]);
+
+const isForwardedHeader = (name: string): boolean => {
+  const normalizedName = name.toLowerCase();
+  return forwardedHeaderNames.has(normalizedName) || normalizedName.startsWith('sec-');
+};
+
+const getForwardedHeaders = (request: KibanaRequest): HttpSelfFetchHeaders => {
+  return Object.fromEntries(
+    Object.entries(request.headers).filter(([name, value]) => {
+      return value !== undefined && isForwardedHeader(name);
+    })
+  ) as HttpSelfFetchHeaders;
+};
+
+const getAccess = (pathname: string): 'public' | 'internal' => {
+  return pathname === '/internal' || pathname.startsWith('/internal/') ? 'internal' : 'public';
+};
+
+const getErrorTargetUrl = (error: unknown): string | undefined => {
+  if (error instanceof Error && 'request' in error) {
+    return (error as Error & { request?: Request }).request?.url;
+  }
+};
 
 export function registerKibanaFunction({
   functions,
@@ -48,21 +83,35 @@ export function registerKibanaFunction({
     async ({ arguments: { method, pathname, body, query } }, signal) => {
       const { request, logger } = resources;
       const core = await resources.plugins.core.start();
-
-      logger.info(
-        `Calling Kibana API by forwarding request from "${
-          request.rewrittenUrl ?? request.url
-        }" to: "${method} ${pathname}"`
-      );
-
-      const content = await core.http.self.asScoped(request).fetch(pathname, {
+      const fetchOptions = {
         method,
         query: query as HttpSelfFetchQuery | undefined,
         body,
         signal,
-      });
+        headers: getForwardedHeaders(request),
+        access: getAccess(pathname),
+        asResponse: true,
+      } as const;
 
-      return { content };
+      try {
+        const response = await core.http.self.asScoped(request).fetch(pathname, fetchOptions);
+
+        logger.info(
+          `Called Kibana API by forwarding request from "${
+            request.rewrittenUrl ?? request.url
+          }" to: "${method} ${response.request.url}"`
+        );
+
+        return { content: response.body };
+      } catch (error) {
+        const targetUrl = getErrorTargetUrl(error) ?? pathname;
+        logger.error(
+          `Error calling Kibana API by forwarding request from "${
+            request.rewrittenUrl ?? request.url
+          }" to: "${method} ${targetUrl}". Failed with ${error}`
+        );
+        throw error;
+      }
     }
   );
 }

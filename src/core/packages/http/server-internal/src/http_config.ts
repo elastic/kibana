@@ -70,6 +70,11 @@ const configSchema = schema.object(
     name: schema.string({ defaultValue: () => validHostName() }),
     autoListen: schema.boolean({ defaultValue: true }),
     publicBaseUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+    selfHttp: schema.object({
+      target: schema.oneOf([schema.literal('auto'), schema.literal('local')], {
+        defaultValue: 'auto' as const,
+      }),
+    }),
     basePath: schema.maybe(
       schema.string({
         validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
@@ -371,6 +376,9 @@ export class HttpConfig implements IHttpConfig {
   public maxPayload: ByteSizeValue;
   public basePath?: string;
   public publicBaseUrl?: string;
+  public selfHttp: {
+    target: 'auto' | 'local';
+  };
   public rewriteBasePath: boolean;
   public cdn: CdnConfig;
   public ssl: SslConfig;
@@ -430,6 +438,7 @@ export class HttpConfig implements IHttpConfig {
     this.protocol = rawHttpConfig.protocol;
     this.basePath = rawHttpConfig.basePath;
     this.publicBaseUrl = rawHttpConfig.publicBaseUrl;
+    this.selfHttp = rawHttpConfig.selfHttp;
     this.keepaliveTimeout = rawHttpConfig.keepaliveTimeout;
     this.socketTimeout = rawHttpConfig.socketTimeout;
     this.payloadTimeout = rawHttpConfig.payloadTimeout;

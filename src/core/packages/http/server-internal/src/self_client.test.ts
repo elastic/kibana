@@ -29,9 +29,11 @@ const createRequest = (overrides: Partial<KibanaRequest> = {}): KibanaRequest =>
 const createClient = ({
   publicBaseUrl = 'https://kibana.example.com/base',
   authHeaders = { authorization: 'Bearer scoped' },
+  target = 'auto',
 }: {
   publicBaseUrl?: string | null;
   authHeaders?: Record<string, string>;
+  target?: 'auto' | 'local';
 } = {}) => {
   const authRequestHeaders = {
     get: jest.fn().mockReturnValue(authHeaders),
@@ -54,6 +56,7 @@ const createClient = ({
       protocol: 'http',
     }),
     kibanaVersion: '9.9.9',
+    target,
   });
 
   return { authRequestHeaders, self };
@@ -103,6 +106,15 @@ describe('InternalHttpSelfScopedClient', () => {
 
     const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
     expect(request.url).toBe('http://localhost:5601/api/status');
+  });
+
+  it('builds a local URL when configured to ignore publicBaseUrl', async () => {
+    const { self } = createClient({ target: 'local' });
+
+    await self.asScoped(createRequest()).fetch('/api/status');
+
+    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(request.url).toBe('http://localhost:5601/base/s/my-space/api/status');
   });
 
   it('rejects full URLs and caller-provided protected headers', async () => {

@@ -250,6 +250,7 @@ export class HttpService
         basePath: internalSetup.basePath,
         getServerInfo: internalSetup.getServerInfo,
         kibanaVersion: this.env.packageInfo.version,
+        target: internalSetup.config.selfHttp.target,
       }),
       setRedactedSessionIdGetter: (getter) => {
         this.httpServer.setRedactedSessionIdGetter(getter);
