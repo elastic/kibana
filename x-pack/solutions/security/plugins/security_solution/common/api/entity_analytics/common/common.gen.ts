@@ -127,8 +127,8 @@ export type RiskScoreInput = z.infer<typeof RiskScoreInput>;
  */
 export const RiskScoreModifier = lazySchema(() =>
   z.object({
-    type: z.string(),
-    subtype: z.string().optional(),
+    type: z.string().max(100),
+    subtype: z.string().max(100).optional(),
     modifier_value: z.number().optional(),
     contribution: z.number(),
     metadata: z.object({}).catchall(z.unknown()).optional(),

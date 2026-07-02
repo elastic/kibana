@@ -151,8 +151,10 @@ components:
       properties:
         type:
           type: string
+          maxLength: 100
         subtype:
           type: string
+          maxLength: 100
         modifier_value:
           type: number
           format: double

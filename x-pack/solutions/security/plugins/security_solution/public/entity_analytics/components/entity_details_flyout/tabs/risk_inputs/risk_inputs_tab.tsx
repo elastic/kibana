@@ -532,7 +532,6 @@ const RiskInputsTabContent = <T extends EntityType>({
     </>
   );
 
-  console.log('ENTITY ID', entityId);
   return (
     <>
       {hasResolutionScore && (
