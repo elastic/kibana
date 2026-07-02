@@ -6,6 +6,7 @@
  */
 
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { MAX_EMBEDDED_RULES_PER_ITEM } from '@kbn/alerting-v2-schemas';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { ACTION_POLICY_EVENT_ACTIONS } from '../dispatcher/steps/constants';
 import {
@@ -194,33 +195,6 @@ describe('buildExecutionHistoryItem', () => {
     expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS)).toEqual(null);
   });
 
-  // it('emits one row per rule referenced', () => {
-  //   const event = buildEvent({
-  //     kibana: {
-  //       saved_objects: [
-  //         { type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' },
-  //         { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-a' },
-  //         { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-b' },
-  //       ],
-  //       alerting_v2: {
-  //         dispatcher: {
-  //           episode_count: 3,
-  //           action_group_count: 2,
-  //           workflow_ids: ['wf-1'],
-  //         },
-  //       },
-  //     },
-  //   });
-
-  //   const rows = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
-  //   expect(rows).toHaveLength(2);
-  //   expect(rows[0].rule.id).toBe('rule-a');
-  //   expect(rows[1].rule.id).toBe('rule-b');
-  //   expect(rows.every((r) => r.policy.id === 'policy-1')).toBe(true);
-  //   expect(rows.every((r) => r.episode_count === 3)).toBe(true);
-  //   expect(rows.every((r) => r.action_group_count === 2)).toBe(true);
-  // });
-
   it('combines ref-based rule ids with spillover dispatcher.rule_ids', () => {
     const event = buildEvent({
       kibana: {
@@ -402,6 +376,123 @@ describe('buildExecutionHistoryItem', () => {
         matches: null,
       });
       expect(historyItem?.rules.map((r) => r?.id)).toEqual(['rule-a', 'rule-c']);
+    });
+  });
+
+  describe('totalRuleCount and embedded rules cap', () => {
+    const eventWithNRules = (n: number): IValidatedEvent =>
+      buildEvent({
+        kibana: {
+          saved_objects: [
+            { type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' },
+            ...Array.from({ length: n }, (_, i) => ({
+              type: RULE_SAVED_OBJECT_TYPE,
+              id: `rule-${i}`,
+            })),
+          ],
+          alerting_v2: { dispatcher: {} },
+        },
+      });
+
+    it('sets totalRuleCount = relevant rules and does not truncate below the cap', () => {
+      const event = eventWithNRules(5);
+      const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
+      expect(historyItem?.totalRuleCount).toBe(5);
+      expect(historyItem?.rules).toHaveLength(5);
+    });
+
+    it('caps embedded rules to MAX_EMBEDDED_RULES_PER_ITEM while totalRuleCount reflects the full count', () => {
+      const total = MAX_EMBEDDED_RULES_PER_ITEM + 15;
+      const event = eventWithNRules(total);
+      const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
+      expect(historyItem?.totalRuleCount).toBe(total);
+      expect(historyItem?.rules).toHaveLength(MAX_EMBEDDED_RULES_PER_ITEM);
+      expect(historyItem?.rules[0]?.id).toBe('rule-0');
+    });
+
+    it('reflects the search-narrowed count in totalRuleCount (not the raw event count)', () => {
+      const event = buildEvent({
+        kibana: {
+          saved_objects: [
+            { type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' },
+            { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-a' },
+            { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-b' },
+            { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-c' },
+          ],
+          alerting_v2: { dispatcher: {} },
+        },
+      });
+      const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, {
+        policyIds: [],
+        ruleIds: ['rule-a', 'rule-c'],
+        hasMatches: true,
+        matches: null,
+      });
+      expect(historyItem?.totalRuleCount).toBe(2);
+      expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-a', 'rule-c']);
+    });
+  });
+
+  describe('mandatoryRuleIds intersect', () => {
+    const eventWithRules = (ruleIds: string[]): IValidatedEvent =>
+      buildEvent({
+        kibana: {
+          saved_objects: [
+            { type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' },
+            ...ruleIds.map((id) => ({ type: RULE_SAVED_OBJECT_TYPE, id })),
+          ],
+          alerting_v2: { dispatcher: {} },
+        },
+      });
+
+    it('intersects embedded rules to the mandatoryRuleIds subset', () => {
+      const event = eventWithRules(['rule-a', 'rule-b', 'rule-c', 'rule-d']);
+      const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, undefined, [
+        'rule-b',
+        'rule-d',
+        'rule-nonexistent',
+      ]);
+      expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-b', 'rule-d']);
+      expect(historyItem?.totalRuleCount).toBe(2);
+    });
+
+    it('returns null when no event rule matches mandatoryRuleIds', () => {
+      const event = eventWithRules(['rule-a', 'rule-b']);
+      const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, undefined, [
+        'rule-x',
+        'rule-y',
+      ]);
+      expect(historyItem).toBeNull();
+    });
+
+    it('is a no-op when mandatoryRuleIds is empty or undefined', () => {
+      const event = eventWithRules(['rule-a', 'rule-b']);
+      expect(
+        buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, undefined, [])?.rules.map((r) => r.id)
+      ).toEqual(['rule-a', 'rule-b']);
+      expect(
+        buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, undefined, undefined)?.rules.map(
+          (r) => r.id
+        )
+      ).toEqual(['rule-a', 'rule-b']);
+    });
+
+    it('intersects on top of search narrowing', () => {
+      const event = eventWithRules(['rule-a', 'rule-b', 'rule-c', 'rule-d']);
+      const historyItem = buildExecutionHistoryItem(
+        event,
+        EMPTY_NAME_MAPS,
+        {
+          policyIds: [],
+          ruleIds: ['rule-a', 'rule-b', 'rule-c'],
+          hasMatches: true,
+          matches: null,
+        },
+        ['rule-b', 'rule-d']
+      );
+      // Intersection of search-scoped {a,b,c} with mandatory {b,d} = {b}
+      expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-b']);
+      expect(historyItem?.totalRuleCount).toBe(1);
     });
   });
 });

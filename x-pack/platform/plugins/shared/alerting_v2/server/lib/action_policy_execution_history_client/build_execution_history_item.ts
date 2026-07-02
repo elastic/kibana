@@ -92,6 +92,18 @@ export function getRelevantRuleIdsFromLogEvent(
   return allRuleIds.filter((ruleId) => matchingSearchIds.ruleIds.includes(ruleId));
 }
 
+/**
+ * Builds an execution history item for a given log event.
+ * @param event The validated log event
+ * @param param1 An object containing name maps for policies, rules, and workflows
+ * @param matchingSearchIds Used to decide which rules are relevant for the current
+ * log event. A rule is relevant if it is search scoped, either because search is not active,
+ * or because the rule, or its parent policy, is in the resolved search IDs.
+ * @param mandatoryRuleIds An array of rule IDs. When provided, the resulting execution 
+ * history item will only include rules that are in this list. If undefined, all relevant 
+ * rules will be included.
+ * @returns A policy execution history item or null if the event is not relevant
+ */
 export function buildExecutionHistoryItem(
   event: IValidatedEvent,
   { policyNames, ruleNames, workflowNames }: NameMaps,
