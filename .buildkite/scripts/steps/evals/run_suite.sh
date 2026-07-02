@@ -203,13 +203,34 @@ EOF
               limit: 3
 EOF
 
-        # Additive OSS/LiteLLM subject models are exploratory: they emit scores
-        # to the matrix (OSS-facing signal) but must NOT gate the weekly green.
-        # EIS subject models stay hard-gating; only the litellm-* lane is
-        # soft_fail, so a weaker OSS model underperforming doesn't red the
-        # weekly. This is the additive-lane contract, scoped to that lane —
-        # not a blanket soft_fail over gating EIS results.
+        # Gating decision, emitted once to avoid duplicate `soft_fail` YAML keys.
+        #
+        # 1. Additive OSS/LiteLLM subject models are exploratory: they emit
+        #    scores to the matrix (OSS-facing signal) but must NOT gate the
+        #    weekly green. EIS subject models stay hard-gating; only the
+        #    litellm-* lane is soft_fail, so a weaker OSS model underperforming
+        #    doesn't red the weekly. Additive-lane contract, scoped to the lane.
+        # 2. Cross-team suites (significant-events, agent-builder-dashboards)
+        #    have their own owners, Slack channels, and hard gate on the
+        #    pipeline default branch. On iteration branches (e.g. the security
+        #    LLM performance matrix branch) their EIS failures are out of scope
+        #    for that branch's DoD and would otherwise red an already-green
+        #    security run. Soft-fail them ONLY off the default branch, so their
+        #    owners keep the hard gate on main and the iteration build isn't
+        #    blocked by separately-owned, out-of-scope failures.
+        should_soft_fail="false"
         if [[ "$connector_id" == litellm-* ]]; then
+          should_soft_fail="true"
+        fi
+        EVAL_DEFAULT_BRANCH="${BUILDKITE_PIPELINE_DEFAULT_BRANCH:-main}"
+        case " significant-events agent-builder-dashboards " in
+          *" ${EVAL_SUITE_ID} "*)
+            if [[ "${BUILDKITE_BRANCH:-}" != "${EVAL_DEFAULT_BRANCH}" ]]; then
+              should_soft_fail="true"
+            fi
+            ;;
+        esac
+        if [[ "$should_soft_fail" == "true" ]]; then
           cat >>"$FANOUT_PIPELINE_FILE" <<EOF
         soft_fail: true
 EOF
