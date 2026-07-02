@@ -212,7 +212,7 @@ export function getServiceColumns({
                 <AnomaliesBadge
                   score={anomalyScore}
                   detectorType={detectorType}
-                  interactionProps={
+                  navigationProps={
                     agentName
                       ? { serviceName, agentName, query: { ...query, transactionType } }
                       : undefined

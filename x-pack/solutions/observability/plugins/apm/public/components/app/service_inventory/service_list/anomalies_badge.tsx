@@ -76,7 +76,7 @@ function toAnomalyOverviewQuery(query: OverviewQuery) {
   };
 }
 
-export interface AnomaliesBadgeInteractionProps {
+export interface AnomaliesBadgeNavigationProps {
   serviceName: string;
   agentName: AgentName;
   /**
@@ -93,19 +93,19 @@ interface AnomaliesBadgeProps {
    * When provided, enables interaction with the badge (clicking navigates to the service overview page with the anomaly score highlighted).
    * It is ignored if the score is undefined, in which case the badge is always non-interactive.
    */
-  interactionProps?: AnomaliesBadgeInteractionProps;
+  navigationProps?: AnomaliesBadgeNavigationProps;
   /**
    * If true, clicking the badge will navigate to the service overview page via an onClick handler instead of a plain anchor href.
-   * It is ignored if `interactionProps` is not provided or if the score is undefined.
+   * It is ignored if `navigationProps` is not provided or if the score is undefined.
    */
-  interactOnClick?: boolean;
+  navigateOnClick?: boolean;
 }
 
 export function AnomaliesBadge({
   score,
   detectorType,
-  interactionProps,
-  interactOnClick,
+  navigationProps,
+  navigateOnClick,
 }: AnomaliesBadgeProps) {
   const apmRouter = useApmRouter();
   const apmPluginContext = useApmPluginContext();
@@ -115,20 +115,20 @@ export function AnomaliesBadge({
   const text = formatLabelWithScore(getI18nLabel(severity), score);
 
   const href =
-    interactionProps && score !== undefined
+    navigationProps && score !== undefined
       ? apmRouter.link(
-          isMobileAgentName(interactionProps.agentName)
+          isMobileAgentName(navigationProps.agentName)
             ? '/mobile-services/{serviceName}/overview'
             : '/services/{serviceName}/overview',
           {
-            path: { serviceName: interactionProps.serviceName },
-            query: toAnomalyOverviewQuery(interactionProps.query),
+            path: { serviceName: navigationProps.serviceName },
+            query: toAnomalyOverviewQuery(navigationProps.query),
           }
         )
       : undefined;
 
   const onClick =
-    href && interactOnClick
+    href && navigateOnClick
       ? (e: React.MouseEvent | React.KeyboardEvent) => {
           navigateToUrl(href);
         }

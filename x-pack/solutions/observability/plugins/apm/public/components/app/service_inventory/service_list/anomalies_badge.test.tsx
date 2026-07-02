@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AnomalyDetectorType } from '@kbn/apm-types';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import type { AnomaliesBadgeInteractionProps } from './anomalies_badge';
+import type { AnomaliesBadgeNavigationProps } from './anomalies_badge';
 import { AnomaliesBadge } from './anomalies_badge';
 
 const baseQuery = {
@@ -21,13 +21,13 @@ const baseQuery = {
   comparisonEnabled: false,
 };
 
-const regularClickProps: AnomaliesBadgeInteractionProps = {
+const regularClickProps: AnomaliesBadgeNavigationProps = {
   serviceName: 'opbeans-java',
   agentName: 'nodejs',
   query: baseQuery,
 };
 
-const mobileClickProps: AnomaliesBadgeInteractionProps = {
+const mobileClickProps: AnomaliesBadgeNavigationProps = {
   serviceName: 'opbeans-android',
   agentName: 'android/java',
   query: baseQuery,
@@ -75,7 +75,7 @@ describe('AnomaliesBadge', () => {
       <AnomaliesBadge
         score={82}
         detectorType={AnomalyDetectorType.txLatency}
-        interactionProps={{
+        navigationProps={{
           ...regularClickProps,
           query: { ...baseQuery, kuery: 'service.name: "foo"' },
         }}
@@ -89,7 +89,7 @@ describe('AnomaliesBadge', () => {
 
   it('links to the mobile service overview for a mobile agent', () => {
     renderBadge(
-      <AnomaliesBadge score={82} detectorType={undefined} interactionProps={mobileClickProps} />
+      <AnomaliesBadge score={82} detectorType={undefined} navigationProps={mobileClickProps} />
     );
 
     const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');

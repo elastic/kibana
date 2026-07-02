@@ -180,7 +180,7 @@ export function ServiceHeaderBadges({
           <AnomaliesBadge
             score={anomalyData?.anomalyScore}
             detectorType={anomalyData?.detectorType}
-            interactionProps={
+            navigationProps={
               agentName ? { serviceName, agentName: agentName as AgentName, query } : undefined
             }
           />
