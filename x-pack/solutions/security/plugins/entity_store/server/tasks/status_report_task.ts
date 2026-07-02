@@ -25,6 +25,7 @@ import type { GetStatusResult } from '../domain/types';
 import {
   ENTITY_STORE_HEALTH_REPORT_EVENT,
   ENTITY_STORE_METADATA_USAGE_EVENT,
+  ENTITY_STORE_RESOLUTION_STATE_EVENT,
   ENTITY_STORE_USAGE_EVENT,
   createReportEvent,
   type TelemetryReporter,
@@ -49,6 +50,55 @@ const getStoreSize = (
     },
     { signal }
   );
+
+const getResolutionState = async (
+  esClient: ElasticsearchClient,
+  index: string,
+  entityType: EntityType,
+  signal: AbortSignal
+): Promise<{
+  resolvedEntities: number;
+  targetEntities: number;
+  resolutionGroups: number;
+  maxGroupSize: number;
+}> => {
+  const response = await esClient.search(
+    {
+      index,
+      size: 0,
+      query: { term: { 'entity.EngineMetadata.Type': entityType } },
+      aggs: {
+        resolved_entities: {
+          filter: { exists: { field: 'entity.relationships.resolution.resolved_to' } },
+        },
+        resolution_groups: {
+          cardinality: { field: 'entity.relationships.resolution.resolved_to' },
+        },
+        group_sizes: {
+          terms: { field: 'entity.relationships.resolution.resolved_to', size: 10000 },
+          aggs: { alias_count: { value_count: { field: 'entity.id' } } },
+        },
+        max_group_aliases: {
+          max_bucket: { buckets_path: 'group_sizes>alias_count' },
+        },
+      },
+    },
+    { signal }
+  );
+
+  const aggs = response.aggregations as {
+    resolved_entities: { doc_count: number };
+    resolution_groups: { value: number };
+    max_group_aliases: { value: number | null };
+  };
+
+  const resolvedEntities = aggs.resolved_entities.doc_count;
+  const targetEntities = aggs.resolution_groups.value;
+  const resolutionGroups = targetEntities;
+  const maxGroupSize = resolutionGroups > 0 ? (aggs.max_group_aliases.value ?? 0) + 1 : 0;
+
+  return { resolvedEntities, targetEntities, resolutionGroups, maxGroupSize };
+};
 
 const toHealthReportPayload = (statusResult: GetStatusResult) => {
   if (statusResult.status === ENTITY_STORE_STATUS.NOT_INSTALLED) {
@@ -125,7 +175,7 @@ async function runTask({
   const index = getLatestEntitiesIndexName(namespace);
   const abortSignal = abortController.signal;
 
-  // Report Entity Store usage per entity type
+  // Report Entity Store usage and resolution state per entity type
   await Promise.all(
     ALL_ENTITY_TYPES.map(async (entityType) => {
       try {
@@ -134,6 +184,22 @@ async function runTask({
           storeSize,
           entityType,
           namespace,
+        });
+
+        const { resolvedEntities, targetEntities, resolutionGroups, maxGroupSize } =
+          await getResolutionState(esClient, index, entityType, abortSignal);
+        const standaloneEntities = Math.max(0, storeSize - resolvedEntities - targetEntities);
+        const avgGroupSize = resolutionGroups > 0 ? resolvedEntities / resolutionGroups + 1 : 0;
+        telemetryReporter.reportEvent(ENTITY_STORE_RESOLUTION_STATE_EVENT, {
+          entityType,
+          namespace,
+          totalEntities: storeSize,
+          resolvedEntities,
+          targetEntities,
+          standaloneEntities,
+          resolutionGroups,
+          avgGroupSize,
+          maxGroupSize,
         });
       } catch (e) {
         logger.error(`Error reporting store usage for ${entityType}: ${getErrorMessage(e)}`);
