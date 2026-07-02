@@ -20,7 +20,8 @@ if (!contextPath || !outputPath) {
   process.exit(1);
 }
 
-const MAX_SLACK_BODY_CHARS = Number(process.env.EVAL_WEEKLY_BODY_MAX_CHARS || '3500');
+// Slack's hard message limit is ~40k chars; keep the full list and only truncate near it.
+const MAX_SLACK_BODY_CHARS = 38000;
 
 function renderChannelLink(suite) {
   const channel = String(suite.slackChannel || '').trim();
@@ -60,6 +61,16 @@ function renderSuiteLine(suite) {
   return `• ${parts.join(' — ')}`;
 }
 
+function renderOverviewLine(suite) {
+  const modelCount = Array.isArray(suite.failingProjects) ? suite.failingProjects.length : 0;
+  const parts = [`\`${suite.suiteId}\``, `${modelCount} model${modelCount === 1 ? '' : 's'}`];
+  const channelLink = renderChannelLink(suite);
+  if (channelLink) {
+    parts.push(channelLink);
+  }
+  return `• ${parts.join(' — ')}`;
+}
+
 async function main() {
   const context = JSON.parse(readFileSync(contextPath, 'utf8'));
   const suites = Array.isArray(context.suites) ? context.suites : [];
@@ -77,7 +88,8 @@ async function main() {
 
   const lines = [header];
   if (buildUrl) {
-    lines.push('', `<${buildUrl}|${pipelineName} #${buildNumber}>`);
+    const dateLabel = new Date().toISOString().slice(0, 10);
+    lines.push(`:buildkite: <${buildUrl}|${pipelineName} #${buildNumber}> · ${dateLabel}`);
   }
 
   try {
@@ -93,7 +105,12 @@ async function main() {
     );
   }
 
-  lines.push('', '*By suite:*');
+  lines.push('', '*Failed suites:*');
+  for (const suite of suites) {
+    lines.push(renderOverviewLine(suite));
+  }
+
+  lines.push('', '*All failures:*');
   for (const suite of suites) {
     lines.push(renderSuiteLine(suite));
   }
