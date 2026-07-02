@@ -265,9 +265,19 @@ describe('getSandboxTabs', () => {
     expect(getSandboxTabs(true, state)).toBeUndefined();
   });
 
-  it('returns [base, alert] on alertCondition step in edit mode', () => {
+  it('returns undefined on alertCondition step in edit mode (unified editor by default)', () => {
     const state = createState({ step: 0, mode: 'edit' });
+    expect(getSandboxTabs(true, state)).toBeUndefined();
+  });
+
+  it('returns [base, alert] on alertCondition step in edit mode when manualSplitEnabled', () => {
+    const state = createState({ step: 0, mode: 'edit', manualSplitEnabled: true });
     expect(getSandboxTabs(true, state)).toEqual(['base', 'alert']);
+  });
+
+  it('returns undefined on alertCondition step in clone mode (unified editor by default)', () => {
+    const state = createState({ step: 0, mode: 'clone' });
+    expect(getSandboxTabs(true, state)).toBeUndefined();
   });
 
   it('returns [recovery] on recoveryCondition step with custom recovery', () => {

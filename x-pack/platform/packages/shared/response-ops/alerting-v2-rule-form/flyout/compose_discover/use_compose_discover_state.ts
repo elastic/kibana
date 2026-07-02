@@ -66,11 +66,10 @@ export const createInitialState = ({
 /**
  * Returns the tabs to show in the Sandbox for the current step.
  *
- * create + alertCondition + manualSplitEnabled → ['base', 'alert']
- * create + alertCondition                      → undefined (single unified editor; split runs on Apply)
- * edit   + alertCondition                      → ['base', 'alert']
- * isAlert + recoveryCondition  + custom        → ['recovery']
- * everything else                              → undefined (single editor)
+ * create/edit/clone + alertCondition + manualSplitEnabled → ['base', 'alert']
+ * create/edit/clone + alertCondition                      → undefined (unified editor; create runs heuristic on Apply)
+ * isAlert + recoveryCondition  + custom                 → ['recovery']
+ * everything else                                         → undefined (single editor)
  */
 export function getSandboxTabs(
   isAlert: boolean,
@@ -81,8 +80,11 @@ export function getSandboxTabs(
   const stepId = getStepIds(isAlert)[state.step];
 
   if (stepId === 'alertCondition') {
-    // Create uses a single unified editor by default; the user may opt in to manual split.
-    if (state.mode === 'create') return state.manualSplitEnabled ? ['base', 'alert'] : undefined;
+    const usesUnifiedEditorByDefault =
+      state.mode === 'create' || state.mode === 'edit' || state.mode === 'clone';
+    if (usesUnifiedEditorByDefault) {
+      return state.manualSplitEnabled ? ['base', 'alert'] : undefined;
+    }
     return ['base', 'alert'];
   }
   if (stepId === 'recoveryCondition' && state.recoveryType === 'custom') return ['recovery'];

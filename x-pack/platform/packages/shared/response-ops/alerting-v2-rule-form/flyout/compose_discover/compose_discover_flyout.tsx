@@ -621,6 +621,8 @@ export function ComposeDiscoverFlyout({
 
   const isCreate = mode === 'create' || mode === 'clone';
   const isEditing = mode === 'edit';
+  /** Create, edit, and clone share the unified ↔ split-tab sandbox toggle. */
+  const supportsUnifiedEditorToggle = isCreate || isEditing;
   const title = getFlyoutTitle(mode);
 
   const { steps } = getSteps(isAlert, builderType);
@@ -902,7 +904,7 @@ export function ComposeDiscoverFlyout({
   const isAlertConditionStep = currentStep?.id === 'alertCondition';
 
   /*
-   * Help text shown above the editor in the create-mode alert flow.
+   * Help text shown above the editor in the create/edit alert flow.
    * - Unified (default): describes the automatic split on Apply.
    * - Manual split: explains that automatic splitting is disabled and tabs are separate.
    * Alert Condition step only — not shown on recovery or later steps.
@@ -911,7 +913,7 @@ export function ComposeDiscoverFlyout({
     isAlert &&
     !isBuilderMode &&
     !uiState.yamlMode &&
-    uiState.mode === 'create' &&
+    supportsUnifiedEditorToggle &&
     isAlertConditionStep ? (
       uiState.manualSplitEnabled ? (
         <EuiText size="s" color="subdued" data-test-subj="querySandboxManualSplitHelper">
@@ -991,13 +993,13 @@ export function ComposeDiscoverFlyout({
 
   /*
    * Split / Merge header buttons passed into the sandbox via headerActions.
-   * Alert Condition step only in create-mode alert flow — not on recovery editing.
+   * Alert Condition step only — not on recovery editing.
    */
   const sandboxHeaderActions = useMemo(() => {
     if (
       isBuilderMode ||
       uiState.yamlMode ||
-      uiState.mode !== 'create' ||
+      !supportsUnifiedEditorToggle ||
       !isAlert ||
       currentStep?.id !== 'alertCondition'
     ) {
@@ -1026,10 +1028,6 @@ export function ComposeDiscoverFlyout({
         </EuiToolTip>
       );
     }
-    const activeQuery = getBreachQuery(sandboxQuery);
-    if (!activeQuery.trim()) {
-      return undefined;
-    }
     return (
       <EuiToolTip
         content={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.splitTooltip', {
@@ -1054,11 +1052,10 @@ export function ComposeDiscoverFlyout({
   }, [
     isBuilderMode,
     uiState.yamlMode,
-    uiState.mode,
+    supportsUnifiedEditorToggle,
     uiState.manualSplitEnabled,
     isAlert,
     currentStep?.id,
-    sandboxQuery,
     handleEnableManualSplit,
     handleDisableManualSplit,
   ]);
@@ -1175,7 +1172,7 @@ export function ComposeDiscoverFlyout({
                       ruleId={ruleId}
                       builderType={builderType}
                       onManualSplit={
-                        uiState.mode === 'create' ? handleManualSplitFromForm : undefined
+                        supportsUnifiedEditorToggle ? handleManualSplitFromForm : undefined
                       }
                     />
                   </BuilderStateProvider>

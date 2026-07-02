@@ -755,13 +755,68 @@ describe('ComposeDiscoverFlyout', () => {
     const getLatestFormProps = (): FormProps =>
       mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
 
-    it('passes onManualSplit only in create mode', () => {
+    it('passes onManualSplit in create and edit modes', () => {
       renderFlyout({ mode: 'create' });
       expect(getLatestFormProps().onManualSplit).toBeDefined();
 
       mockComposeDiscoverForm.mockClear();
-      renderFlyout({ mode: 'edit' });
-      expect(getLatestFormProps().onManualSplit).toBeUndefined();
+      renderFlyout({
+        mode: 'edit',
+        rule: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-*',
+            breach: { segment: '| WHERE count > 100' },
+          },
+          createdBy: 'test',
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedBy: 'test',
+          updatedAt: '2026-01-01T00:00:00Z',
+        },
+      });
+      expect(getLatestFormProps().onManualSplit).toBeDefined();
+    });
+
+    it('shows the split button before any query is typed', () => {
+      renderFlyout({ mode: 'create' });
+
+      expect(screen.getByTestId('querySandboxSplitBaseAndAlert')).toBeInTheDocument();
+    });
+
+    it('shows split controls in edit mode when the sandbox is open', () => {
+      renderFlyout({
+        mode: 'edit',
+        rule: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-*',
+            breach: { segment: '| WHERE count > 100' },
+          },
+          createdBy: 'test',
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedBy: 'test',
+          updatedAt: '2026-01-01T00:00:00Z',
+        },
+      });
+
+      act(() => {
+        getLatestFormProps().dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 0, isAlert: true });
+      });
+
+      expect(screen.getByTestId('querySandboxSplitBaseAndAlert')).toBeInTheDocument();
+      expect(screen.getByTestId('querySandboxUnifiedHelper')).toBeInTheDocument();
     });
 
     it('resets manual split when the sandbox is closed without Apply', () => {
