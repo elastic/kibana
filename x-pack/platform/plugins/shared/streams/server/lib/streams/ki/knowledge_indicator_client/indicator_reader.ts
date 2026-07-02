@@ -123,11 +123,17 @@ export class IndicatorReader {
 
   /**
    * Pure ES|QL probe: returns the timestamp of the most recent **active**
-   * feature revision for a stream (neither tombstoned nor excluded).
+   * feature revision for a stream (neither tombstoned nor excluded), optionally
+   * scoped to a set of feature types.
    *
-   * Only active revisions are counted on purpose. The throttle that
-   * consumes this value (`shouldIdentifyFeatures`) must rerun
-   * identification whenever the active feature set has been wiped.
+   * Only active revisions are counted on purpose, so a `null` result reliably
+   * signals an empty active set for the requested types. `shouldIdentifyFeatures`
+   * relies on this in two ways: a `null` inferred result forces re-identification
+   * (empty or user-wiped set), while the computed-type timestamp drives the
+   * recency throttle. Note that this probe does **not** filter on `expires_at`,
+   * so it includes durable (`expires_at IS NULL`) revisions that keep-alive
+   * re-stamps — callers that need a keep-alive-immune signal must scope to types
+   * that are always expiring (e.g. `COMPUTED_FEATURE_TYPES`).
    */
   async getLatestRevisionTimestamp(
     stream: string,

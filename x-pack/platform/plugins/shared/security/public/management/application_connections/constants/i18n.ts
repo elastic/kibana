@@ -99,6 +99,10 @@ export const labels = {
       'xpack.security.management.applicationConnections.columns.allRevokedClientLabel',
       { defaultMessage: 'All connections for this client are already revoked' }
     ),
+    noConnectionsClientLabel: i18n.translate(
+      'xpack.security.management.applicationConnections.columns.noConnectionsClientLabel',
+      { defaultMessage: 'This client has no connections yet' }
+    ),
   },
   connectionColumns: {
     connectionName: i18n.translate(
