@@ -13,6 +13,7 @@ import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
+  getManagedWorkflowVisibilityContexts,
   type ManagedWorkflowDefinition,
   type ManagedWorkflowId,
   type ManagedWorkflowTemplateValues,
@@ -681,6 +682,7 @@ export class ManagedWorkflowsService {
       managedTemplateValues: managedTemplateValues as Record<string, unknown> | null,
       originManagedWorkflowId: definition.id,
       lifecycle: definition.management.lifecycle,
+      managedVisibilityContexts: this.getManagedVisibilityContexts(definition),
       managedVersion: definition.version,
     };
 
@@ -792,5 +794,9 @@ export class ManagedWorkflowsService {
     next: ManagedWorkflowTemplateValues | null
   ): boolean {
     return JSON.stringify(existing ?? null) === JSON.stringify(next ?? null);
+  }
+
+  private getManagedVisibilityContexts(definition: ManagedWorkflowDefinition): string[] {
+    return getManagedWorkflowVisibilityContexts(definition.visibility);
   }
 }
