@@ -40,6 +40,8 @@ import { SideBarColumn } from '../../../components/side_bar_column';
 import { useAgentless } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
+import { useAgentlessPolicies } from './use_agentless_policies';
+import { agentlessPolicyToTableItem } from './agentless_policy_table_adapter';
 import { AgentBasedPackagePoliciesTable } from './components/agent_based_table';
 import { AgentlessPackagePoliciesTable } from './components/agentless_table';
 
@@ -162,20 +164,28 @@ export const PackagePoliciesPage = ({
       rowIndex: number;
     }>
   >([]);
+  // Agentless deployments are read through the agentless policies LIST API (not the
+  // package-policy LIST + bulk agent-policy reads). The server scopes the result set to
+  // agentless, so we only filter by package name; each AgentlessPolicy is mapped to the
+  // table's `{ packagePolicy, agentPolicies }` row shape before the shared enrichment.
   const {
     data: agentlessData,
     isLoading: agentlessIsLoading,
     resendRequest: refreshAgentlessPolicies,
-  } = usePackagePoliciesWithAgentPolicy({
+  } = useAgentlessPolicies({
     page: agentlessPagination.currentPage,
     perPage: agentlessPagination.pageSize,
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${name}" AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.supports_agentless: true`,
+    kuery: `package.name: "${name}"`,
   });
   useEffect(() => {
     setAgentlessPackageAndAgentPolicies(
-      !agentlessData?.items ? [] : agentlessData.items.map(mapPoliciesData)
+      !agentlessData?.items
+        ? []
+        : agentlessData.items.map((agentlessPolicy, index) =>
+            mapPoliciesData(agentlessPolicyToTableItem(agentlessPolicy, packageInfo), index)
+          )
     );
-  }, [agentlessData, mapPoliciesData]);
+  }, [agentlessData, mapPoliciesData, packageInfo]);
 
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
