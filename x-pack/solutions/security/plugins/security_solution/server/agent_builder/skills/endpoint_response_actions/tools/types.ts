@@ -5,6 +5,28 @@
  * 2.0.
  */
 
+import type { RunContext } from '@kbn/agent-builder-server';
+
+/**
+ * Builds the comment recorded on a dispatched response action so its entry in
+ * the Response Actions audit log links back to the originating agent
+ * conversation. The conversation id (falling back to the always-present run id
+ * used for tracing) is the correlation anchor; the endpoint action document has
+ * no structured "source conversation" field, so the free-text comment — the
+ * established place for analyst context — carries it.
+ *
+ * An analyst-supplied comment is preserved and the anchor is appended to it.
+ */
+export function buildResponseActionComment(
+  defaultComment: string,
+  runContext: RunContext,
+  analystComment?: string
+): string {
+  const base = analystComment ?? defaultComment;
+  const correlationId = runContext.conversationId ?? runContext.runId;
+  return correlationId ? `${base} [AI agent conversation: ${correlationId}]` : base;
+}
+
 /**
  * Reason codes that explain why an endpoint lookup produced a "not found" result.
  * The consumer (agent / caller) must distinguish these to choose the right

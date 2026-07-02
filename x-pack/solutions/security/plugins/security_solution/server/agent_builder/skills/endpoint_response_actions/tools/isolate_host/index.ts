@@ -13,6 +13,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { ISOLATE_TOOL_ID } from '../..';
+import { buildResponseActionComment } from '../types';
 
 const isolateHostSchema = z.object({
   hostName: z.string().min(1).describe('The hostname of the endpoint to isolate.'),
@@ -31,7 +32,7 @@ export const isolateHostTool = (
     type: ToolType.builtin,
     description: `Isolates a host by its hostname. Isolation disconnects the endpoint from the network to contain a potential threat. The action is dispatched through the Elastic Defend Response Actions service.`,
     schema: isolateHostSchema,
-    handler: async (params, { logger, request }) => {
+    handler: async (params, { logger, request, runContext }) => {
       try {
         const hostName = params.hostName as string;
         const comment = params.comment as string | undefined;
@@ -79,7 +80,11 @@ export const isolateHostTool = (
         const actionDetails = await responseActionsClient.isolate(
           {
             endpoint_ids: endpointIds,
-            comment: comment ?? `Isolated via AI agent: ${hostName}`,
+            comment: buildResponseActionComment(
+              `Isolated via AI agent: ${hostName}`,
+              runContext,
+              comment
+            ),
           },
           { hosts: { [endpointIds[0]]: { name: hostName } } }
         );

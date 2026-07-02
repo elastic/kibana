@@ -13,6 +13,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { SCAN_TOOL_ID } from '../..';
+import { buildResponseActionComment } from '../types';
 
 const scanHostSchema = z.object({
   hostName: z.string().min(1).describe('The hostname of the endpoint to scan for malware.'),
@@ -42,7 +43,7 @@ export const scanHostTool = (
     type: ToolType.builtin,
     description: `Scans a file or folder path on a host for malware using the endpoint's existing Elastic Defend policy. The action is dispatched through the Elastic Defend Response Actions service. Requires explicit analyst confirmation before dispatch.`,
     schema: scanHostSchema,
-    handler: async (params, { logger, request }) => {
+    handler: async (params, { logger, request, runContext }) => {
       try {
         const hostName = params.hostName as string;
         const path = params.path as string;
@@ -90,7 +91,11 @@ export const scanHostTool = (
         const actionDetails = await responseActionsClient.scan(
           {
             endpoint_ids: endpointIds,
-            comment: comment ?? `Malware scan requested via AI agent: ${hostName}`,
+            comment: buildResponseActionComment(
+              `Malware scan requested via AI agent: ${hostName}`,
+              runContext,
+              comment
+            ),
             parameters: { path },
           },
           { hosts: { [endpointIds[0]]: { name: hostName } } }

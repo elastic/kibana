@@ -20,7 +20,10 @@ import { UNISOLATE_TOOL_ID } from '../..';
 import { unisolateHostTool } from '.';
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
-const mockContext = { logger: mockLogger } as unknown as ToolHandlerContext;
+const mockContext = {
+  logger: mockLogger,
+  runContext: { conversationId: 'conv-test-1', runId: 'run-test-1' },
+} as unknown as ToolHandlerContext;
 
 function assertStandardReturn(result: unknown) {
   if (!isToolHandlerStandardReturn(result as ToolHandlerReturn)) {
@@ -161,7 +164,7 @@ describe('unisolateHostTool', () => {
         expect(mockResponseActionsClient.release).toHaveBeenCalledWith(
           {
             endpoint_ids: ['agent-123'],
-            comment: 'reconnecting',
+            comment: 'reconnecting [AI agent conversation: conv-test-1]',
           },
           { hosts: { 'agent-123': { name: 'my-host' } } }
         );
@@ -232,7 +235,7 @@ describe('unisolateHostTool', () => {
         expect(mockResponseActionsClient.release).toHaveBeenCalledWith(
           {
             endpoint_ids: ['agent-123'],
-            comment: 'Un-isolated via AI agent: test-host',
+            comment: 'Un-isolated via AI agent: test-host [AI agent conversation: conv-test-1]',
           },
           { hosts: { 'agent-123': { name: 'test-host' } } }
         );

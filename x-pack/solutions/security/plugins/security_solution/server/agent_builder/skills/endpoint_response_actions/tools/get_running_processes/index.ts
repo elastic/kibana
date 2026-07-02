@@ -13,6 +13,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { RUNNING_PROCESSES_TOOL_ID } from '../..';
+import { buildResponseActionComment } from '../types';
 
 const getRunningProcessesSchema = z.object({
   hostName: z
@@ -39,7 +40,7 @@ export const getRunningProcessesTool = (
     type: ToolType.builtin,
     description: `Retrieves the list of running processes from a host by its hostname. This is a read-only inspection action dispatched through the Elastic Defend Response Actions service; it does not modify the endpoint.`,
     schema: getRunningProcessesSchema,
-    handler: async (params, { logger, request }) => {
+    handler: async (params, { logger, request, runContext }) => {
       try {
         const hostName = params.hostName as string;
         const comment = params.comment as string | undefined;
@@ -86,7 +87,11 @@ export const getRunningProcessesTool = (
         const actionDetails = await responseActionsClient.runningProcesses(
           {
             endpoint_ids: endpointIds,
-            comment: comment ?? `Running processes requested via AI agent: ${hostName}`,
+            comment: buildResponseActionComment(
+              `Running processes requested via AI agent: ${hostName}`,
+              runContext,
+              comment
+            ),
           },
           { hosts: { [endpointIds[0]]: { name: hostName } } }
         );

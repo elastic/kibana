@@ -19,7 +19,10 @@ import { SCAN_TOOL_ID } from '../..';
 import { scanHostTool } from '.';
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
-const mockContext = { logger: mockLogger } as unknown as ToolHandlerContext;
+const mockContext = {
+  logger: mockLogger,
+  runContext: { conversationId: 'conv-test-1', runId: 'run-test-1' },
+} as unknown as ToolHandlerContext;
 
 function assertStandardReturn(result: unknown) {
   if (!isToolHandlerStandardReturn(result as ToolHandlerReturn)) {
@@ -87,7 +90,7 @@ describe('scanHostTool', () => {
     expect(mockResponseActionsClient.scan).toHaveBeenCalledWith(
       {
         endpoint_ids: ['agent-123'],
-        comment: 'ioc match',
+        comment: 'ioc match [AI agent conversation: conv-test-1]',
         parameters: { path: '/home/user/suspicious' },
       },
       { hosts: { 'agent-123': { name: 'my-host' } } }
