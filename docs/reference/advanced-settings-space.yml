@@ -635,7 +635,7 @@ groups:
           serverless: unavailable
         note: |
           :applies_to: stack: ga 9.4.3!+
-          This setting currently has no effect. Deferred loading of below-the-fold panels is temporarily disabled while a known issue is fixed, so all panels load immediately regardless of this setting.
+          This setting currently has no effect. Deferred loading of below-the-fold panels is temporarily disabled because enabling it could prevent dashboards from loading correctly, so all panels load immediately regardless of this setting.
 
       - setting: "labs:canvas:byValueEmbeddable"
         id: labs-canvas-by-value-embeddable
