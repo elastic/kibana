@@ -22,6 +22,7 @@ export {
 } from './src/schemas';
 
 export {
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
   MAX_DESCRIPTION_LENGTH,
   MAX_ID_LENGTH,
   MAX_TITLE_LENGTH,
