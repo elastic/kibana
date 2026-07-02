@@ -51,7 +51,10 @@ export {
   MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION,
   isAgentEligibleForPrivilegeLevelChange,
 } from './agent_privilege_level_change_helpers';
-export { syncDataStreamTypeFromVar } from './simplified_package_policy_helper';
+export {
+  syncDataStreamTypeFromVar,
+  toNewAgentlessPolicy,
+} from './simplified_package_policy_helper';
 export {
   addUseAPMVarIfNotPresent,
   DATA_STREAM_USE_APM_VAR,
