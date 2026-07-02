@@ -54,7 +54,7 @@ test.describe(
       await pageObjects.dataGrid.openDocumentDetails({ rowIndex: 0 });
 
       // Verify the doc viewer flyout is open
-      await pageObjects.dataGrid.waitForDocViewerFlyoutOpen();
+      await pageObjects.docViewer.waitForFlyoutOpen();
 
       // Click on the Log Overview tab
       const logOverviewTab = page.getByTestId('docViewerTab-doc_view_logs_overview');
@@ -103,7 +103,7 @@ test.describe(
       await pageObjects.dataGrid.openDocumentDetails({ rowIndex: 0 });
 
       // Verify the doc viewer flyout is open
-      await pageObjects.dataGrid.waitForDocViewerFlyoutOpen();
+      await pageObjects.docViewer.waitForFlyoutOpen();
 
       // Click on the Log Overview tab
       const logOverviewTab = page.getByTestId('docViewerTab-doc_view_logs_overview');

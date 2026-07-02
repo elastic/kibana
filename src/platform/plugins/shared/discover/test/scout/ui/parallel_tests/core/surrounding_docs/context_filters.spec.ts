@@ -69,7 +69,7 @@ spaceTest.describe('Discover context - filters (basic)', { tag: tags.deploymentA
         })
       ).toBe(true);
 
-      await pageObjects.dataGrid.closeDocViewerFlyout();
+      await pageObjects.docViewer.close();
 
       expect(
         await everyFieldMatches(pageObjects, (row) => row[2] === TEST_ANCHOR_FILTER_VALUE)
