@@ -10,12 +10,26 @@
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core/public';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 
+/** Fired once per page load with the current customized-vs-default state. */
+export const NAV_LOADED_EVENT_TYPE = 'navigation_loaded';
+
+/** Fired when the user persists a layout from the "Customize navigation" modal. */
 export const NAV_CUSTOMIZATION_EVENT_TYPE = 'navigation_customization';
 
-export type NavCustomizationAction = 'default_observed' | 'customization_saved' | 'default_saved';
+export type NavCustomizationAction = 'customization_saved' | 'default_saved';
+
+export interface NavLoadedEventProps {
+  solution_type: SolutionId;
+  /**
+   * Whether a non-default customization is currently stored for this user/space.
+   * Deduped at query time by the platform-provided `userId`, so no per-user write
+   * is needed to derive an adoption denominator/numerator from this event.
+   */
+  nav_customize_state: boolean;
+}
 
 export interface NavCustomizationEventProps {
-  space_type: SolutionId;
+  solution_type: SolutionId;
   action: NavCustomizationAction;
   did_customize: boolean;
   /** Visible nav item IDs in display order (array index = position). */
@@ -25,7 +39,7 @@ export interface NavCustomizationEventProps {
 }
 
 /**
- * Builds the nav-item ID arrays expected by the EBT event.
+ * Builds the nav-item ID arrays expected by the save event.
  * Array position encodes order; no separate `order` field is needed.
  */
 export function buildNavItemsProperties(
@@ -39,9 +53,29 @@ export function buildNavItemsProperties(
 
 export function registerNavigationCustomizationEvents(analytics: AnalyticsServiceSetup): void {
   analytics.registerEventType({
+    eventType: NAV_LOADED_EVENT_TYPE,
+    schema: {
+      solution_type: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The solution type of the active space (one of the Kibana solution/project ids, e.g. es, oblt, security, workplaceai, vectordb).',
+        },
+      },
+      nav_customize_state: {
+        type: 'boolean',
+        _meta: {
+          description:
+            'True if a non-default navigation customization is stored for this user/space at page load. Dedupe by the platform userId at query time; this event is not deduped at emit time.',
+        },
+      },
+    },
+  });
+
+  analytics.registerEventType({
     eventType: NAV_CUSTOMIZATION_EVENT_TYPE,
     schema: {
-      space_type: {
+      solution_type: {
         type: 'keyword',
         _meta: {
           description:
@@ -52,14 +86,14 @@ export function registerNavigationCustomizationEvents(analytics: AnalyticsServic
         type: 'keyword',
         _meta: {
           description:
-            'What caused the event: default_observed for the deduped baseline, customization_saved for a persisted non-default save, or default_saved for a persisted reset/default save.',
+            'What caused the save: customization_saved for a persisted non-default save, or default_saved for a persisted reset/default save.',
         },
       },
       did_customize: {
         type: 'boolean',
         _meta: {
           description:
-            'True for a persisted non-default customization. False for default-observed and default-saved events.',
+            'True for a persisted non-default customization. False for a persisted reset/default save.',
         },
       },
       visible_item_ids: {
@@ -82,6 +116,13 @@ export function registerNavigationCustomizationEvents(analytics: AnalyticsServic
       },
     },
   });
+}
+
+export function reportNavigationLoaded(
+  analytics: AnalyticsServiceStart,
+  props: NavLoadedEventProps
+): void {
+  analytics.reportEvent(NAV_LOADED_EVENT_TYPE, props);
 }
 
 export function reportNavigationCustomization(

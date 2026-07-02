@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReplaySubject, filter, firstValueFrom, of, take, takeUntil, timeout } from 'rxjs';
+import { ReplaySubject, firstValueFrom, of, take, takeUntil, timeout } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type {
@@ -19,11 +19,12 @@ import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { getNavigationNodeIcon } from '@kbn/core-chrome-browser-navigation-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { NAV_CUSTOMIZATION_STORAGE_KEY } from '../../common/constants';
 import {
-  NAV_CUSTOMIZATION_STORAGE_KEY,
-  NAV_BASELINE_TELEMETRY_REPORTED_STORAGE_KEY,
-} from '../../common/constants';
-import { buildNavItemsProperties, reportNavigationCustomization } from './telemetry';
+  buildNavItemsProperties,
+  reportNavigationCustomization,
+  reportNavigationLoaded,
+} from './telemetry';
 
 /**
  * Upper bound for waiting on the first navigation snapshot when the modal is opened.
@@ -63,8 +64,8 @@ export class NavigationCustomizationService {
   private handlerRegistered = false;
   private menuLinkAdded = false;
   private activeSolution?: SolutionId;
-  /** Guards the baseline detection event so it fires at most once per lifecycle. */
-  private detectionReported = false;
+  /** Guards the per-load nav-state event so it fires at most once per lifecycle. */
+  private loadedReported = false;
 
   /**
    * Applies the stored customization to the project navigation. Must be called
@@ -113,51 +114,23 @@ export class NavigationCustomizationService {
       this.activeSolution = solution;
     }
 
-    // Fire the baseline detection event once, the first time the solution is known.
-    if (solution && !this.detectionReported) {
-      this.detectionReported = true;
+    // Emit the per-load nav-state event once, the first time the solution is known.
+    // This carries the current customized-vs-default state so adoption can be derived
+    // from a single event: the denominator is all loads and the numerator is the
+    // `nav_customize_state: true` subset, both deduped at query time by the
+    // platform-provided `userId`. No User Storage write is performed.
+    if (solution && !this.loadedReported) {
+      this.loadedReported = true;
       const savedCustomization = core.userStorage.get<NavigationCustomization>(
         NAV_CUSTOMIZATION_STORAGE_KEY
       );
-      const hasSavedCustomization =
+      const navCustomizeState =
         savedCustomization !== undefined &&
         (savedCustomization.moves.length > 0 || savedCustomization.hidden.length > 0);
-      const baselineAlreadyReported = core.userStorage.get<boolean>(
-        NAV_BASELINE_TELEMETRY_REPORTED_STORAGE_KEY
-      );
-      if (!hasSavedCustomization && !baselineAlreadyReported) {
-        chrome.project
-          .getNavigation$()
-          .pipe(
-            filter((nav) => nav.renderableNodes.length > 0),
-            take(1),
-            takeUntil(this.stop$)
-          )
-          .subscribe((nav) => {
-            const overflowSet = new Set(nav.overflowItemIds);
-            const itemsPayload = nav.renderableNodes.map((node) => ({
-              id: node.id,
-              hidden: overflowSet.has(node.id),
-            }));
-            const navProps = buildNavItemsProperties(itemsPayload);
-            // Persist the "reported" flag first and emit the baseline only after
-            // that write succeeds. If User Storage cannot persist the flag, skip
-            // the event because future page loads could not be reliably deduped.
-            core.userStorage
-              .set(NAV_BASELINE_TELEMETRY_REPORTED_STORAGE_KEY, true)
-              .then(() => {
-                reportNavigationCustomization(core.analytics, {
-                  space_type: solution,
-                  action: 'default_observed',
-                  did_customize: false,
-                  ...navProps,
-                });
-              })
-              .catch(() => {
-                // Nothing persisted, so nothing is reported.
-              });
-          });
-      }
+      reportNavigationLoaded(core.analytics, {
+        solution_type: solution,
+        nav_customize_state: navCustomizeState,
+      });
     }
 
     if (!this.menuLinkAdded && security) {
@@ -224,7 +197,7 @@ export class NavigationCustomizationService {
               // applied — so it does not count as a customization.
               const didCustomize = c.moves.length > 0 || c.hidden.length > 0;
               reportNavigationCustomization(core.analytics, {
-                space_type: this.activeSolution,
+                solution_type: this.activeSolution,
                 action: didCustomize ? 'customization_saved' : 'default_saved',
                 did_customize: didCustomize,
                 ...buildNavItemsProperties(order.map((id) => ({ id, hidden: hiddenSet.has(id) }))),
