@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { I18nProvider } from '@kbn/i18n-react';
 import { LifecycleSummary } from './lifecycle_summary';
 import { Streams, type IngestStreamLifecycle } from '@kbn/streams-schema';
 import { LifecycleAfterSaveProvider } from '../common/hooks/lifecycle_after_save';
@@ -35,6 +36,16 @@ const mockKibana = {
     start: {
       streams: {
         streamsRepositoryClient: mockStreamsRepositoryClient,
+      },
+      share: {
+        url: {
+          locators: {
+            get: () => ({
+              getRedirectUrl: ({ policyName }: { policyName: string }) =>
+                `/app/management/data/index_lifecycle_management/policies/edit/${policyName}`,
+            }),
+          },
+        },
       },
     },
   },
@@ -72,9 +83,11 @@ jest.mock('../hooks/use_ilm_phases_color_and_description', () => ({
 describe('LifecycleSummary', () => {
   const renderWithSync = (ui: React.ReactElement) => {
     return render(
-      <LifecycleAfterSaveProvider>
-        <LifecyclePreviewProvider>{ui}</LifecyclePreviewProvider>
-      </LifecycleAfterSaveProvider>
+      <I18nProvider>
+        <LifecycleAfterSaveProvider>
+          <LifecyclePreviewProvider>{ui}</LifecyclePreviewProvider>
+        </LifecycleAfterSaveProvider>
+      </I18nProvider>
     );
   };
 
