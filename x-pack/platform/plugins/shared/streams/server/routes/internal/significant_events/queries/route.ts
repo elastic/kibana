@@ -24,7 +24,7 @@ import {
   computeOccurrences,
   fetchQueryLinks,
   getQueryOccurrences,
-  toQueryOccurrenceSeries,
+  toQueryWithOccurrences,
   type QueryOccurrences,
 } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
 import { searchModeSchema } from '../../../utils/search_mode';
@@ -351,7 +351,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
     );
     const queryOccurrences: QueryOccurrences = { queryLinks: pageLinks, ...occurrences };
     const queriesPage = pageLinks.map((queryLink) =>
-      toQueryOccurrenceSeries({ queryLink, queryOccurrences })
+      toQueryWithOccurrences({ queryLink, queryOccurrences })
     );
 
     return { queries: queriesPage, page, perPage, total };

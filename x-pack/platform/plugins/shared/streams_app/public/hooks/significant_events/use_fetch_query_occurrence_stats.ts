@@ -69,7 +69,7 @@ export const useFetchQueryOccurrenceStats = (
     const intervalString = `${bucketSize.asSeconds()}s`;
 
     const requestPromise = streamsRepositoryClient.fetch(
-      'GET /internal/streams/_query_occurrence_stats',
+      'GET /internal/streams/_query_occurrences',
       {
         params: {
           query: {

@@ -167,8 +167,8 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
   },
 });
 
-const readQueryOccurrenceStatsRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/_query_occurrence_stats',
+const readQueryOccurrencesRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_query_occurrences',
   params: z.object({
     query: z.object({
       from: dateFromString.describe('Start of the time range'),
@@ -194,8 +194,8 @@ const readQueryOccurrenceStatsRoute = createServerRoute({
   }),
   options: {
     access: 'internal',
-    summary: 'Read query occurrence stats',
-    description: 'Read query occurrence stats',
+    summary: 'Read query occurrences',
+    description: 'Read query occurrences',
   },
   security: {
     authz: {
@@ -236,5 +236,5 @@ const readQueryOccurrenceStatsRoute = createServerRoute({
 export const internalSignificantEventsQueryOccurrencesRoutes = {
   ...significantEventsQueriesGenerationStatusRoute,
   ...significantEventsQueriesGenerationTaskRoute,
-  ...readQueryOccurrenceStatsRoute,
+  ...readQueryOccurrencesRoute,
 };

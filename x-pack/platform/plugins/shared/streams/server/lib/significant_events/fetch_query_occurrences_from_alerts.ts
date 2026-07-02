@@ -289,7 +289,7 @@ export function buildQueryOccurrences({
 }
 
 /** Builds a full query occurrence series row (query fields + occurrences). */
-export function toQueryOccurrenceSeries({
+export function toQueryWithOccurrences({
   queryLink,
   queryOccurrences,
 }: {
@@ -312,7 +312,7 @@ export async function fetchQueryOccurrencesFromAlerts(
   const queryOccurrences = await getQueryOccurrences(params, dependencies);
   return {
     queries: queryOccurrences.queryLinks.map((queryLink) =>
-      toQueryOccurrenceSeries({ queryLink, queryOccurrences })
+      toQueryWithOccurrences({ queryLink, queryOccurrences })
     ),
     aggregated_occurrences: queryOccurrences.aggregatedOccurrences,
   };
