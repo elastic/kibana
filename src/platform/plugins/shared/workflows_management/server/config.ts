@@ -59,6 +59,14 @@ const configSchema = schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
   /**
+   * External HITL resume (API-key public routes + channel notifications).
+   * Disable via `workflowsManagement.hitlExternalResume.enabled` and
+   * `workflowsExecutionEngine.hitlExternalResume.enabled` in `kibana.yml`.
+   */
+  hitlExternalResume: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+  /**
    * Workflow Template Library — fetches the curated catalog and exposes it at
    * `/internal/workflows/library/*`. Server-only infrastructure settings; the
    * tech-preview enable/disable toggle is the `workflowsManagement:library:enabled`

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isHitlExternalResumeEnabled } from '@kbn/workflows';
+
 import { registerCancelExecutionRoute } from './cancel_execution';
 import { registerCancelWorkflowExecutionsRoute } from './cancel_workflow_executions';
 import { registerGetChildrenExecutionsRoute } from './get_children_executions';
@@ -38,8 +40,10 @@ export function registerExecutionRoutes(deps: RouteDependencies) {
   registerCancelWorkflowExecutionsRoute(deps);
   registerGetStepExecutionRoute(deps);
   registerResumeExecutionRoute(deps);
-  registerExternalResumeExecutionGetRoute(deps);
-  registerExternalResumeExecutionPostRoute(deps);
-  registerExternalResumeFormRoute(deps);
+  if (isHitlExternalResumeEnabled(deps.config.hitlExternalResume?.enabled)) {
+    registerExternalResumeExecutionGetRoute(deps);
+    registerExternalResumeExecutionPostRoute(deps);
+    registerExternalResumeFormRoute(deps);
+  }
   registerGetChildrenExecutionsRoute(deps);
 }

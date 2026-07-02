@@ -12,6 +12,7 @@ import {
   HITL_API_KEY_ID_INPUT_FIELD,
   HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
+  isHitlExternalResumeEnabled,
 } from '@kbn/workflows';
 import type { WaitForInputGraphNode } from '@kbn/workflows/graph';
 import {
@@ -86,7 +87,10 @@ export class WaitForInputStepImpl implements NodeImplementation {
     };
 
     const channels = withConfig.channels;
-    if (hasExternalHitlChannels(channels)) {
+    if (
+      hasExternalHitlChannels(channels) &&
+      isHitlExternalResumeEnabled(this.dependencies.config?.hitlExternalResume?.enabled)
+    ) {
       const execution = this.workflowRuntime.getWorkflowExecution();
       const spaceId = this.dependencies.spaceId ?? execution.spaceId;
       if (!spaceId) {

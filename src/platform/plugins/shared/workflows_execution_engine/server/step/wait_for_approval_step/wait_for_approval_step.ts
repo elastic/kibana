@@ -12,6 +12,7 @@ import {
   DEFAULT_WAIT_FOR_APPROVAL_REJECT_LABEL,
   DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
   HITL_API_KEY_ID_INPUT_FIELD,
+  isHitlExternalResumeEnabled,
   WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
 } from '@kbn/workflows';
 import type { WaitForApprovalGraphNode } from '@kbn/workflows/graph';
@@ -93,7 +94,10 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
     };
 
     const channels = withConfig?.channels;
-    if (hasExternalHitlChannels(channels)) {
+    if (
+      hasExternalHitlChannels(channels) &&
+      isHitlExternalResumeEnabled(this.dependencies.config?.hitlExternalResume?.enabled)
+    ) {
       const execution = this.workflowRuntime.getWorkflowExecution();
       const spaceId = this.dependencies.spaceId ?? execution.spaceId;
       if (!spaceId) {

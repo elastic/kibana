@@ -28,3 +28,7 @@ export const DEFAULT_HITL_INPUT_CHANNEL_MESSAGE =
  */
 export const HITL_EXTERNAL_CHANNELS_DESCRIPTION =
   'Optional external notification channels. Sends public short-lived resume links. Do not use for destructive, production-impacting or otherwise hard-to-reverse workflows.' as const;
+
+/** Returns false only when config explicitly sets `enabled: false`. */
+export const isHitlExternalResumeEnabled = (enabled: boolean | undefined): boolean =>
+  enabled !== false;
