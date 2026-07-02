@@ -21,6 +21,7 @@ import { createDataStream } from '../utils/create_datastream';
 
 import * as transforms from '../utils/transforms';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
+import { DEFAULT_MAX_TERMS_QUERY_COUNT } from '../utils/elasticsearch_terms_limits';
 
 jest.mock('@kbn/alerting-plugin/server', () => ({
   createOrUpdateComponentTemplate: jest.fn(),
@@ -149,6 +150,99 @@ describe('RiskScoreDataClient', () => {
           dynamic: 'false',
         })
       );
+    });
+  });
+
+  describe('getDailyAverageRiskScoreNormSeries', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('returns an empty map without querying ES when entityNames is empty', async () => {
+      const result = await riskScoreDataClient.getDailyAverageRiskScoreNormSeries({
+        entityType: 'host',
+        entityNames: [],
+      });
+
+      expect(result.size).toBe(0);
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('parses daily average scores per entity, dropping null buckets', async () => {
+      esClient.search.mockResolvedValueOnce({
+        aggregations: {
+          by_entity: {
+            buckets: [
+              {
+                key: 'server-1',
+                scores_over_time: {
+                  buckets: [
+                    { avg_score: { value: 42 } },
+                    { avg_score: { value: null } },
+                    { avg_score: { value: 55 } },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      } as never);
+
+      const result = await riskScoreDataClient.getDailyAverageRiskScoreNormSeries({
+        entityType: 'host',
+        entityNames: ['server-1'],
+      });
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(result.get('host:server-1')).toEqual([42, 55]);
+    });
+
+    it('batches the terms query so a single request never exceeds the ES max_terms_count limit', async () => {
+      const totalEntities = DEFAULT_MAX_TERMS_QUERY_COUNT + 2000;
+      const entityNames = Array.from({ length: totalEntities }, (_, i) => `host-${i}`);
+
+      esClient.search.mockImplementation((params) => {
+        const query = (params as Record<string, unknown>).query as {
+          bool: { filter: Array<Record<string, unknown>> };
+        };
+        const termsFilter = query.bool.filter[0] as { terms: Record<string, string[]> };
+        const chunk = termsFilter.terms['host.name'];
+
+        return Promise.resolve({
+          aggregations: {
+            by_entity: {
+              buckets: [
+                {
+                  key: chunk[0],
+                  scores_over_time: { buckets: [{ avg_score: { value: 10 } }] },
+                },
+              ],
+            },
+          },
+        } as never);
+      });
+
+      const result = await riskScoreDataClient.getDailyAverageRiskScoreNormSeries({
+        entityType: 'host',
+        entityNames,
+      });
+
+      // ceil(67535 / 65535) = 2 queries
+      expect(esClient.search).toHaveBeenCalledTimes(2);
+
+      for (const [params] of esClient.search.mock.calls) {
+        const query = (params as Record<string, unknown>).query as {
+          bool: { filter: Array<Record<string, unknown>> };
+        };
+        const termsFilter = query.bool.filter[0] as { terms: Record<string, string[]> };
+        expect(termsFilter.terms['host.name'].length).toBeLessThanOrEqual(
+          DEFAULT_MAX_TERMS_QUERY_COUNT
+        );
+      }
+
+      // Results from the first chunk and the second chunk both need to survive the merge.
+      expect(result.has('host:host-0')).toBe(true);
+      expect(result.has(`host:host-${DEFAULT_MAX_TERMS_QUERY_COUNT}`)).toBe(true);
     });
   });
 
