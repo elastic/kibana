@@ -20,7 +20,6 @@ import { ruleToImportHasVersion } from '../../../../../../../common/api/detectio
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { RuleParams } from '../../../../rule_schema';
 import { findRules } from '../../search/find_rules';
-import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import { applyRuleDefaults } from '../mergers/apply_rule_defaults';
 import { validateMlAuth } from '../utils';
@@ -139,14 +138,13 @@ export const bulkImportRules = async ({
     filter,
     page: 1,
     perPage: ruleIds.length,
-    fields: undefined,
+    fields: ['params.ruleId'],
     sortField: undefined,
     sortOrder: undefined,
   });
-  const existingByRuleId = new Map<string, RuleResponse>();
+  const existingRuleIds = new Set<string>();
   for (const alertingRule of found.data) {
-    const ruleResponse = convertAlertingRuleToRuleResponse(alertingRule);
-    existingByRuleId.set(ruleResponse.rule_id, ruleResponse);
+    existingRuleIds.add(alertingRule.params.ruleId);
   }
 
   // Classify: conflict | overwrite-fallback | bulk-create.
@@ -154,7 +152,7 @@ export const bulkImportRules = async ({
   const toOverwrite: PreparedImport[] = [];
   const toBulkCreate: PreparedImport[] = [];
   for (const p of prepared) {
-    if (existingByRuleId.has(p.rule.rule_id)) {
+    if (existingRuleIds.has(p.rule.rule_id)) {
       if (overwriteRules) toOverwrite.push(p);
       else conflicts.push(p);
     } else {
