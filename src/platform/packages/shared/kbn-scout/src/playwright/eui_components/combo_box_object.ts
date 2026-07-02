@@ -15,6 +15,9 @@ import { expect } from '@playwright/test';
 const INPUT_WRAPPER_TEST_SUBJ = 'comboBoxInput';
 const SEARCH_INPUT_TEST_SUBJ = 'comboBoxSearchInput';
 
+// Escapes a label for an exact-text RegExp match (mirrors the proven EuiComboBoxWrapper).
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /**
  * Kibana-specific extension of {@link EuiComboBoxObject}.
  *
@@ -95,9 +98,13 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
     await this.inputWrapper.click();
     await this.searchField.fill(value);
 
-    // Match on option text (EUI drops the option `title` while filtering, so the
-    // base helper's `getByTitle` match does not apply here).
-    const option = this.optionsList().getByRole('option', { name: value, exact: true });
+    // Match on the option's visible text (exact, trimmed) — mirrors the proven
+    // EuiComboBoxWrapper. Do NOT match on the accessible name: EUI renders a type
+    // icon/badge inside the option, so its accessible name is not exactly the label
+    // (e.g. "bytes Number"), and an exact-name match would find nothing.
+    const option = this.optionsList().locator('.euiComboBoxOption', {
+      hasText: new RegExp(`^\\s*${escapeRegExp(value)}\\s*$`),
+    });
     try {
       await expect.poll(() => option.count(), { timeout }).toBeGreaterThan(0);
     } catch (error) {
