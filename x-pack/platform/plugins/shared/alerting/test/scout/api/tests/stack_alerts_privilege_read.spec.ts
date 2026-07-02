@@ -19,7 +19,11 @@ import {
 
 apiTest.describe(
   'Stack alerts privilege - read privilege',
-  { tag: tags.deploymentAgnostic },
+  {
+    tag: tags.deploymentAgnostic.filter(
+      (tag) => ![...tags.stateful.observability, ...tags.serverless.observability.all].includes(tag)
+    ),
+  },
   () => {
     let state: StackAlertsPrivilegeState;
     let withReadPrivilegeCreds: RoleApiCredentials;
@@ -61,6 +65,21 @@ apiTest.describe(
         hits?: { total?: { value?: number }; hits?: Array<{ _source: Record<string, unknown> }> };
       };
       expect(body.hits?.total?.value).toBeGreaterThan(0);
+    });
+
+    apiTest('can read muted alert state via _find_muted_alerts', async ({ apiClient }) => {
+      const response = await apiClient.post('internal/alerting/rules/_find_muted_alerts', {
+        headers: { ...COMMON_HEADERS, ...withReadPrivilegeCookieHeader },
+        body: { page: 1, per_page: 100 },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+
+      const body = response.body as {
+        data: Array<{ id: string; muted_alert_instance_ids: string[] }>;
+      };
+      const record = body.data.find((rule) => rule.id === state.enabledRuleId);
+      expect(record?.muted_alert_instance_ids).toContain(state.mutedAlertInstanceId);
     });
 
     for (const spec of RULE_SPECS) {

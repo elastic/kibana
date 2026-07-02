@@ -28,19 +28,20 @@ jest.mocked(fetchAlertsFields).mockResolvedValue({ browserFields: {}, fields: []
 jest.mock('../../alerts_search_bar/url_synced_alerts_search_bar', () => {
   const ReactLib = jest.requireActual('react');
   return {
-    // Simulate the real search bar: invoke the readiness callbacks once mounted, so the
-    // page's `hasInitialControlLoadingFinished` gate flips to `true`.
     UrlSyncedAlertsSearchBar: ({
       onFilterControlsChange,
       onControlApiAvailable,
+      onFilterSelected,
     }: {
       onFilterControlsChange?: (filters: unknown[]) => void;
       onControlApiAvailable?: (api: unknown) => void;
+      onFilterSelected?: (filters: unknown[]) => void;
     }) => {
       ReactLib.useEffect(() => {
         onControlApiAvailable?.({});
         onFilterControlsChange?.([]);
-      }, [onControlApiAvailable, onFilterControlsChange]);
+        onFilterSelected?.([]);
+      }, [onControlApiAvailable, onFilterControlsChange, onFilterSelected]);
       return ReactLib.createElement(
         'div',
         { 'data-test-subj': 'urlSyncedAlertsSearchBar' },
@@ -52,8 +53,13 @@ jest.mock('../../alerts_search_bar/url_synced_alerts_search_bar', () => {
 
 // Not using `jest.mocked` here because the `AlertsTable` component is manually typed to ensure
 // correct type inference, but it's actually a `memo(forwardRef())` component, which is hard to mock
+const mockAlertsTable = jest.fn(({ ruleTypeIds }: { ruleTypeIds?: string[] }) => (
+  <div data-test-subj="alertsTable" data-rule-type-ids={JSON.stringify(ruleTypeIds)}>
+    Alerts table
+  </div>
+));
 jest.mock('@kbn/response-ops-alerts-table/components/alerts_table', () => ({
-  AlertsTable: () => <div data-test-subj="alertsTable">{'Alerts table'}</div>,
+  AlertsTable: (props: { ruleTypeIds?: string[] }) => mockAlertsTable(props),
 }));
 
 jest.mock('../../../../common/get_experimental_features');
@@ -67,6 +73,7 @@ describe('StackAlertsPage', () => {
   afterEach(() => {
     appMockRender.queryClient.clear();
     alertsTableQueryClient.clear();
+    mockAlertsTable.mockClear();
   });
 
   it('renders the stack alerts page with the correct permissions', async () => {
@@ -99,5 +106,29 @@ describe('StackAlertsPage', () => {
     expect(await screen.findByTestId('stackAlertsPageContent')).toBeInTheDocument();
     expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
     expect(screen.queryByTestId('noPermissionPrompt')).not.toBeInTheDocument();
+  });
+
+  it('passes non-empty ruleTypeIds to AlertsTable when the rule types API returns nothing (stackAlertsOnly)', async () => {
+    // Simulate a stackAlertsOnly user: rule types API returns empty (no rule-read),
+    // but the stackAlertsOnly `show` capability grants page access.
+    mockLoadRuleTypes.mockResolvedValue([]);
+    const core = coreMock.createStart();
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      [STACK_ALERTS_ONLY_FEATURE_ID]: { show: true },
+    };
+    const renderer = createAppMockRenderer({
+      additionalServices: { application: core.application },
+    });
+    renderer.render(<StackAlertsPage />);
+
+    await screen.findByTestId('alertsTable');
+
+    // The search bar mock fires onFilterSelected([]) on mount, simulating filter-controls
+    // initialization. The page must fall back to ALL_NON_SIEM_RULE_TYPE_IDS so that the
+    // alerts query is not disabled.
+    const lastCall = mockAlertsTable.mock.calls.at(-1)!;
+    const ruleTypeIds: string[] = lastCall[0].ruleTypeIds ?? [];
+    expect(ruleTypeIds.length).toBeGreaterThan(0);
   });
 });

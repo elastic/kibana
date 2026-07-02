@@ -68,6 +68,8 @@ export interface StackAlertsPrivilegeState {
   enabledRuleId: string;
   realAlertId: string;
   realAlertIndex: string;
+  /** Instance id of the real, active alert that was muted during setup. */
+  mutedAlertInstanceId: string;
 }
 
 export const setupStackAlertsPrivilegeTests = async (
@@ -113,6 +115,7 @@ export const setupStackAlertsPrivilegeTests = async (
 
   let realAlertId: string | undefined;
   let realAlertIndex: string | undefined;
+  let mutedAlertInstanceId: string | undefined;
   const pollIntervalMs = 2000;
   const maxAttempts = 15;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -134,18 +137,33 @@ export const setupStackAlertsPrivilegeTests = async (
       responseType: 'json',
     });
     const findBody = findResponse.body as {
-      hits?: { hits?: Array<{ _id: string; _index: string }> };
+      hits?: { hits?: Array<{ _id: string; _index: string; _source?: Record<string, unknown> }> };
     };
     const alertDoc = findBody?.hits?.hits?.[0];
     if (alertDoc) {
+      const instanceId = alertDoc._source?.['kibana.alert.instance.id'];
+      if (typeof instanceId !== 'string') {
+        await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+        continue;
+      }
       realAlertId = alertDoc._id;
       realAlertIndex = alertDoc._index;
+      mutedAlertInstanceId = instanceId;
       break;
     }
     await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
   }
   expect(realAlertId, 'expected an alert to be generated for the enabled rule').toBeDefined();
   expect(realAlertIndex, 'expected an alert index for the enabled rule').toBeDefined();
+  expect(mutedAlertInstanceId, 'expected kibana.alert.instance.id on the alert doc').toBeDefined();
+
+  const muteResponse = await apiClient.post(
+    `api/alerting/rule/${enabledRuleId!}/alert/${encodeURIComponent(
+      mutedAlertInstanceId!
+    )}/_mute?validate_alerts_existence=true`,
+    { headers: { ...COMMON_HEADERS, ...adminCreds.apiKeyHeader } }
+  );
+  expect(muteResponse).toHaveStatusCode(204);
 
   return {
     adminCreds,
@@ -153,6 +171,7 @@ export const setupStackAlertsPrivilegeTests = async (
     enabledRuleId: enabledRuleId!,
     realAlertId: realAlertId!,
     realAlertIndex: realAlertIndex!,
+    mutedAlertInstanceId: mutedAlertInstanceId!,
   };
 };
 
