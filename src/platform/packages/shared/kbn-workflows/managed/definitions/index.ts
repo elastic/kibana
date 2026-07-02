@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from './security_solution';
+import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from './alert_analysis';
 import {
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW,
@@ -33,7 +33,7 @@ export { EXAMPLE_MANAGED_WORKFLOW_ID } from './workflows_extensions_example';
 export {
   SECURITY_ALERT_ANALYSIS_WORKFLOW,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
-} from './security_solution';
+} from './alert_analysis';
 export {
   STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID,

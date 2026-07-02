@@ -8,8 +8,8 @@
  */
 
 import { parseDocument } from 'yaml';
-import ALERT_ANALYSIS_WORKFLOW_YAML = require('./security_solution_alert_analysis_workflow.yaml');
-import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../types';
+import ALERT_ANALYSIS_WORKFLOW_YAML from './alert_analysis_workflow.yaml';
+import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
 
 export const SECURITY_ALERT_ANALYSIS_WORKFLOW_ID = 'system-security-alert-analysis';
 
