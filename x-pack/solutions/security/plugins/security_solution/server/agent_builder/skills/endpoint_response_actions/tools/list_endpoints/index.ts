@@ -9,7 +9,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { escapeKuery } from '@kbn/es-query';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { LIST_ENDPOINTS_TOOL_ID } from '../..';
@@ -34,13 +34,14 @@ export const listEndpointsTool = (
     description:
       'Lists endpoints enrolled with Elastic Defend that response actions can be executed on. Returns hostname, status, isolation state, OS, and last seen time for each endpoint.',
     schema: listEndpointsSchema,
-    handler: async (params, { logger }) => {
+    handler: async (params, { logger, spaceId }) => {
       try {
-        const spaceId = DEFAULT_SPACE_ID;
         const metadataService = endpointAppContextService.getEndpointMetadataService(spaceId);
 
+        // `hostNameFilter` is user/LLM-controlled, so escape it before
+        // interpolating into the KQL wildcard expression.
         const kuery = params.hostNameFilter
-          ? `united.endpoint.host.hostname: *${params.hostNameFilter}*`
+          ? `united.endpoint.host.hostname: *${escapeKuery(params.hostNameFilter as string)}*`
           : undefined;
 
         const hostInfo = await metadataService.getHostMetadataList({

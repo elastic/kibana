@@ -13,6 +13,7 @@ import {
 } from '@kbn/agent-builder-server/tools';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 
+import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
 import { RUNNING_PROCESSES_TOOL_ID } from '../..';
@@ -50,10 +51,32 @@ describe('getRunningProcessesTool', () => {
     expect(tool.description).toContain('read-only');
   });
 
+  it('returns insufficient_privileges and does not dispatch when caller lacks canGetRunningProcesses', async () => {
+    service.getEndpointAuthz = jest
+      .fn()
+      .mockResolvedValue(getEndpointAuthzInitialStateMock({ canGetRunningProcesses: false }));
+
+    const mockResponseActionsClient = { runningProcesses: jest.fn() };
+    service.getInternalResponseActionsClient = jest.fn(
+      () => mockResponseActionsClient
+    ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+    const tool = getRunningProcessesTool(service);
+    const result = await tool.handler({ hostName: 'my-host' }, mockContext);
+
+    const results = assertStandardReturn(result);
+    expect(results[0].type).toBe(ToolResultType.error);
+    const denialData = results[0].data as Record<string, unknown>;
+    expect(denialData.error).toBe('insufficient_privileges');
+    expect(denialData.privilege).toBe('canGetRunningProcesses');
+    expect(mockResponseActionsClient.runningProcesses).not.toHaveBeenCalled();
+  });
+
   it('returns found: false with reason endpoint_not_found when no agent matches', async () => {
     const mockAgentService = { listAgents: jest.fn().mockResolvedValue({ agents: [] }) };
     service.getInternalFleetServices = jest.fn(() => ({
       agent: mockAgentService,
+      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
     })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
     const tool = getRunningProcessesTool(service);
@@ -80,6 +103,7 @@ describe('getRunningProcessesTool', () => {
     };
     service.getInternalFleetServices = jest.fn(() => ({
       agent: mockAgentService,
+      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
     })) as unknown as EndpointAppContextService['getInternalFleetServices'];
     service.getInternalResponseActionsClient = jest.fn(
       () => mockResponseActionsClient
@@ -111,6 +135,7 @@ describe('getRunningProcessesTool', () => {
     };
     service.getInternalFleetServices = jest.fn(() => ({
       agent: mockAgentService,
+      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
     })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
     const tool = getRunningProcessesTool(service);

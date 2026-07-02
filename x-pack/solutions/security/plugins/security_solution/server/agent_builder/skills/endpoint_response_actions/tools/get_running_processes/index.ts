@@ -9,11 +9,11 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { escapeKuery } from '@kbn/es-query';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { RUNNING_PROCESSES_TOOL_ID } from '../..';
-import { buildResponseActionComment } from '../types';
+import { buildResponseActionComment, insufficientPrivilegesResult } from '../types';
 
 const getRunningProcessesSchema = z.object({
   hostName: z
@@ -40,11 +40,21 @@ export const getRunningProcessesTool = (
     type: ToolType.builtin,
     description: `Retrieves the list of running processes from a host by its hostname. This is a read-only inspection action dispatched through the Elastic Defend Response Actions service; it does not modify the endpoint.`,
     schema: getRunningProcessesSchema,
-    handler: async (params, { logger, request, runContext }) => {
+    handler: async (params, { logger, request, runContext, spaceId }) => {
       try {
         const hostName = params.hostName as string;
         const comment = params.comment as string | undefined;
-        const spaceId = DEFAULT_SPACE_ID;
+
+        // Despite the "read-only inspection" framing, this enqueues a real
+        // `running-processes` response action on the host, and the HTTP route
+        // gates it behind `withEndpointAuthz({ all: ['canGetRunningProcesses'] })`.
+        // The internal client skips that check, so assert the caller's privilege
+        // here to keep chat access from bypassing endpoint RBAC.
+        const authz = await endpointAppContextService.getEndpointAuthz(request);
+        if (!authz.canGetRunningProcesses) {
+          return insufficientPrivilegesResult('canGetRunningProcesses');
+        }
+
         // Attribute the action to the initiating analyst (falls back to the
         // default system user when the current user cannot be resolved) so the
         // Response Actions audit trail records who requested it, not `elastic`.
@@ -56,11 +66,13 @@ export const getRunningProcessesTool = (
         });
 
         // The response actions API needs endpoint_ids, not host names.
+        // `hostName` is user/LLM-controlled, so escape it before interpolating
+        // into the KQL expression.
         const fleetServices = endpointAppContextService.getInternalFleetServices(spaceId);
         const agent = fleetServices.agent;
         const agents = await agent.listAgents({
           showInactive: true,
-          kuery: `local_metadata.host.name: ${hostName}`,
+          kuery: `local_metadata.host.name: ${escapeKuery(hostName)}`,
           page: 1,
           perPage: 1,
         });
@@ -83,6 +95,11 @@ export const getRunningProcessesTool = (
         }
 
         const endpointIds = agents.agents.map((a) => a.id);
+
+        // Reject hosts that live in a different space than the caller's active
+        // space — resolving/dispatching against the default space's agents would
+        // otherwise let a caller act on hosts outside their space.
+        await fleetServices.ensureInCurrentSpace({ agentIds: endpointIds });
 
         const actionDetails = await responseActionsClient.runningProcesses(
           {
