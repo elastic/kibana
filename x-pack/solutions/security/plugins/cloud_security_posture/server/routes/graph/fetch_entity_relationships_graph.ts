@@ -25,6 +25,7 @@ import {
   hashIds,
   rebuildDocData,
   addValuesToSet,
+  filterDocDataToIds,
 } from './utils';
 import type { EntityId, EntityRecord, RelationshipEdge, RelationshipEsqlRow } from './types';
 import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
@@ -147,21 +148,30 @@ ${forkBranches}
   ${JSON_OBJECT_END})
 | EVAL actorId = TO_STRING(entity.id),
   targetId = TO_STRING(_target_id)
+// Per-row actor → target mapping ("<actorId>\\n<targetId>"), collected via VALUES so that after
+// STATS drops targetId (and actorId) from the group key we can still recover which actor pointed
+// at which target. regroupRelationships uses this to split a merged same-type-actor row back into
+// distinct relationship nodes when the actors point at different target sets — mirroring how
+// fetch_events_graph uses targetDocMap to attribute targets to documents.
+| EVAL actorTargetMap = CONCAT(actorId, "\\n", targetId)
 | RENAME \`entity.type\` AS actorEntityType,
   \`entity.sub_type\` AS actorEntitySubType,
   \`entity.name\` AS actorEntityName,
   \`host.ip\` AS actorHostIps
 ${buildPinnedEsql(pinnedIds)}
 // Pre-aggregate by the actor TYPE dimensions (NOT raw actorId — entity.id is unique per
-// actor, so keying on it would never merge same-type actors). Two actors of the same
-// type/sub-type sharing a relationship and target collapse into ONE row here, matching the
-// final TypeScript group key minus the enrichment-only target type/sub-type (the target is a
-// separate entity, enriched in the follow-up query; targetId is kept as its refinement and
-// regroupRelationships performs the final target-type merge). actorIds is collected via
-// VALUES so the merged node's actorNodeId/actorIds[] can be rebuilt. actorEntityName uses
-// MV_FIRST to preserve the prior single-name-per-node output.
+// actor, so keying on it would never merge same-type actors). targetId is NOT a group key
+// either: keying on it would emit one row per target and prevent same-type targets from
+// collapsing into a single grouped target node. Instead every target that a same-(type, rel,
+// pinned) actor group points at is collected via VALUES(targetId), and regroupRelationships
+// performs the final split/merge by target type/sub-type (only known after the follow-up
+// enrichment query) — mirroring how fetch_events_graph collects targetEntityId + targetDocMap.
+// actorIds is collected via VALUES so the merged node's actorNodeId/actorIds[] can be rebuilt.
+// actorEntityName uses MV_FIRST to preserve the prior single-name-per-node output.
 | STATS badge = COUNT(*),
   actorIds = VALUES(actorId),
+  targetIds = VALUES(targetId),
+  actorTargetMap = VALUES(actorTargetMap),
   actorEntityName = MV_FIRST(VALUES(actorEntityName)),
   actorHostIps = VALUES(actorHostIps),
   actorDocData = VALUES(actorDocData),
@@ -169,7 +179,6 @@ ${buildPinnedEsql(pinnedIds)}
     BY actorEntityType,
       actorEntitySubType,
       relationship,
-      targetId,
       pinned
 | EVAL pinnedSort = CASE(pinned IS NULL, 1, 0)
 | SORT relationship ASC, pinnedSort ASC
@@ -402,6 +411,35 @@ interface RelationshipGroup {
 }
 
 /**
+ * Parses the actorTargetMap multi-value column ("<actorId>\n<targetId>" entries) into a map of
+ * actorId → set of target IDs. This lets regroupRelationships recover which actor pointed at which
+ * target after the STATS step drops actorId/targetId from the group key.
+ */
+const parseActorTargetMap = (actorTargetMap: string | string[]): Map<string, Set<string>> => {
+  const entries = Array.isArray(actorTargetMap)
+    ? actorTargetMap
+    : actorTargetMap
+    ? [actorTargetMap]
+    : [];
+  const map = new Map<string, Set<string>>();
+  for (const entry of entries) {
+    if (!entry) continue;
+    const sep = entry.indexOf('\n');
+    if (sep === -1) continue;
+    const actorId = entry.slice(0, sep);
+    const targetId = entry.slice(sep + 1);
+    if (!actorId || !targetId) continue;
+    let set = map.get(actorId);
+    if (!set) {
+      set = new Set();
+      map.set(actorId, set);
+    }
+    set.add(targetId);
+  }
+  return map;
+};
+
+/**
  * Groups per-triple relationship rows by (actorEntityType, actorEntitySubType, relationship,
  * targetType, targetSubType) — NOT by raw actorId. Two actors of the same type sharing the
  * same relationship and target type produce one relationship node instead of two.
@@ -423,56 +461,110 @@ export const regroupRelationships = (
   const groups = new Map<string, RelationshipGroup>();
 
   for (const record of records) {
-    const targetId = record.targetId;
-    if (!targetId) continue;
+    const rawActorIds = Array.isArray(record.actorIds)
+      ? record.actorIds
+      : record.actorIds
+      ? [record.actorIds]
+      : [];
+    if (rawActorIds.length === 0) continue;
 
-    const targetEnrichment = enrichmentMap.get(targetId);
-    const targetType = targetEnrichment?.type ?? null;
-    const targetSubType = targetEnrichment?.subType ?? null;
-
-    // Pinned actors are isolated into their own group via the ES|QL pinned column —
+    // Pinned actors/targets are isolated into their own group via the ES|QL pinned column —
     // same pattern as regroupEvents in fetch_events_graph.ts.
     const pinned = record.pinned ?? null;
 
-    const groupKey = JSON.stringify([
-      pinned,
-      record.actorEntityType ?? null,
-      record.actorEntitySubType ?? null,
-      record.relationship,
-      targetType,
-      targetSubType,
-    ]);
+    // Recover which actor pointed at which target (STATS no longer keys on actorId/targetId).
+    const targetsByActor = parseActorTargetMap(record.actorTargetMap);
 
-    let group = groups.get(groupKey);
-    if (!group) {
-      group = {
-        actorIds: new Set(),
-        actorEntityType: record.actorEntityType,
-        actorEntitySubType: record.actorEntitySubType,
-        actorEntityName: record.actorEntityName,
-        actorHostIps: new Set(),
-        actorsDocData: new Set(),
-        relationship: record.relationship,
-        targetType,
-        targetSubType,
-        badge: 0,
-        targetIds: new Set(),
-        targetsDocData: new Set(),
-      };
-      groups.set(groupKey, group);
+    // Partition the row's same-type actors by the SET of targets they point at. Actors that share
+    // the exact same target set collapse into one relationship node; actors with different target
+    // sets (e.g. two Services communicating with different entities) split into separate nodes.
+    // The partition signature is the hash of the actor's sorted target IDs.
+    const partitions = new Map<string, { actorIds: string[]; targetIds: Set<string> }>();
+    for (const actorId of rawActorIds) {
+      if (!actorId) continue;
+      const targetIds = [...(targetsByActor.get(actorId) ?? [])].sort((a, b) => a.localeCompare(b));
+      const signature = hashIds(targetIds);
+      let partition = partitions.get(signature);
+      if (!partition) {
+        partition = { actorIds: [], targetIds: new Set(targetIds) };
+        partitions.set(signature, partition);
+      }
+      partition.actorIds.push(actorId);
     }
 
-    // Each ES|QL row is already pre-aggregated per (actorType, relationship, target, pinned),
-    // so it carries the multi-value set of same-type actor IDs. The TS merge only adds the
-    // final target-type dimension (enrichment-only). Sum the collapsed counts and union the
-    // multi-value columns; doc-data drops the empty-string sentinel, host IPs keep the
-    // historical null-only guard.
-    group.badge += record.badge;
-    addValuesToSet(group.actorIds, record.actorIds, { dropEmpty: true });
-    group.targetIds.add(targetId);
-    addValuesToSet(group.actorsDocData, record.actorDocData, { dropEmpty: true });
-    addValuesToSet(group.targetsDocData, record.targetDocData, { dropEmpty: true });
-    addValuesToSet(group.actorHostIps, record.actorHostIps, { dropEmpty: false });
+    for (const [partitionSignature, partition] of partitions) {
+      // Within a partition, bucket the targets by their entity-store (type, subType) — same-type
+      // targets collapse into one grouped target node; different-type targets split into groups.
+      const targetsByTypeKey = new Map<
+        string,
+        { type: string | null; subType: string | null; ids: string[] }
+      >();
+      for (const targetId of partition.targetIds) {
+        if (!targetId) continue;
+        const targetEnrichment = enrichmentMap.get(targetId);
+        const targetType = targetEnrichment?.type ?? null;
+        const targetSubType = targetEnrichment?.subType ?? null;
+        const key = `${targetType}\0${targetSubType}`;
+        let entry = targetsByTypeKey.get(key);
+        if (!entry) {
+          entry = { type: targetType, subType: targetSubType, ids: [] };
+          targetsByTypeKey.set(key, entry);
+        }
+        entry.ids.push(targetId);
+      }
+
+      const actorIdSet = new Set(partition.actorIds);
+
+      for (const targetEntry of targetsByTypeKey.values()) {
+        // partitionSignature keeps actors that point at different target sets in separate groups,
+        // so their relationship nodes (rel(<actorKey>-<relationship>)) never merge.
+        const groupKey = JSON.stringify([
+          pinned,
+          record.actorEntityType ?? null,
+          record.actorEntitySubType ?? null,
+          record.relationship,
+          targetEntry.type,
+          targetEntry.subType,
+          partitionSignature,
+        ]);
+
+        let group = groups.get(groupKey);
+        if (!group) {
+          group = {
+            actorIds: new Set(),
+            actorEntityType: record.actorEntityType,
+            actorEntitySubType: record.actorEntitySubType,
+            actorEntityName: record.actorEntityName,
+            actorHostIps: new Set(),
+            actorsDocData: new Set(),
+            relationship: record.relationship,
+            targetType: targetEntry.type,
+            targetSubType: targetEntry.subType,
+            badge: 0,
+            targetIds: new Set(),
+            targetsDocData: new Set(),
+          };
+          groups.set(groupKey, group);
+        }
+
+        // Sum the collapsed counts and union the multi-value columns. actorsDocData / targetsDocData
+        // are filtered to only this partition's actors and this type group's targets so a shared
+        // STATS row doesn't leak doc data across groups. Doc-data drops the empty-string sentinel;
+        // host IPs keep the historical null-only guard.
+        group.badge += record.badge;
+        for (const id of partition.actorIds) group.actorIds.add(id);
+        for (const id of targetEntry.ids) group.targetIds.add(id);
+        addValuesToSet(group.actorsDocData, filterDocDataToIds(record.actorDocData, actorIdSet), {
+          dropEmpty: true,
+        });
+        addValuesToSet(
+          group.targetsDocData,
+          filterDocDataToIds(record.targetDocData, new Set(targetEntry.ids)),
+          { dropEmpty: true }
+        );
+        addValuesToSet(group.actorHostIps, record.actorHostIps, { dropEmpty: false });
+      }
+    }
   }
 
   return Array.from(groups.values()).map((group): RelationshipEdge => {
@@ -495,6 +587,13 @@ export const regroupRelationships = (
     ];
     const actorHostIps = [...group.actorHostIps];
 
+    // Resolve the actor name per actor from the entity store rather than from the row-level
+    // MV_FIRST(actorEntityName): when a STATS row merges several same-type actors, MV_FIRST picks
+    // only one actor's name, which would mislabel the other actors' nodes after partitioning.
+    const actorNames = actorIds
+      .map((id) => enrichmentMap.get(id)?.name)
+      .filter((n): n is string => n != null);
+
     // relationshipNodeId drives rel(...) node ID in parse_records.ts.
     // Single actor: "entity.id-relationship" (unchanged format, no test regression).
     // Merged actors: "<hashIds(actorIds)>-relationship".
@@ -506,7 +605,12 @@ export const regroupRelationships = (
       actorIdsCount: actorIds.length,
       actorEntityType: group.actorEntityType,
       actorEntitySubType: group.actorEntitySubType,
-      actorEntityName: group.actorEntityName,
+      actorEntityName:
+        actorNames.length === 0
+          ? group.actorEntityName ?? null
+          : actorNames.length === 1
+          ? actorNames[0]
+          : actorNames,
       actorHostIps: actorHostIps.length > 0 ? actorHostIps : undefined,
       actorsDocData: [...group.actorsDocData],
       targetNodeId,

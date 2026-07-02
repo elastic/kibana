@@ -32,6 +32,7 @@ import {
   hashIds,
   rebuildDocData,
   addValuesToSet,
+  filterDocDataToIds,
 } from './utils';
 import {
   type EuidSourceFields,
@@ -572,27 +573,6 @@ const createEventGroup = (
   actorsDocData: new Set(),
   targetsDocData: new Set(),
 });
-
-/**
- * Filters a multi-value doc-data column (JSON strings built by the ES|QL CONCAT expression)
- * to only the entries whose embedded "id" field is in the allowed set.
- * Each entry has the shape: {"id":"<entityId>","type":"entity",...}
- */
-const filterDocDataToIds = (
-  docData: string | string[],
-  allowedIds: Set<string>
-): string | string[] => {
-  const entries = Array.isArray(docData) ? docData : docData ? [docData] : [];
-  return entries.filter((entry) => {
-    if (!entry) return false;
-    try {
-      const parsed = JSON.parse(entry) as { id?: string };
-      return parsed.id != null && allowedIds.has(parsed.id);
-    } catch {
-      return false;
-    }
-  });
-};
 
 /**
  * Parses the targetDocMap multi-value column ("<targetEntityId>\n<_id>" entries) into a

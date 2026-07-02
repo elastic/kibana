@@ -40,6 +40,28 @@ export const addValuesToSet = (
 };
 
 /**
+ * Filters a multi-value doc-data column (JSON strings built by the ES|QL CONCAT expression)
+ * to only the entries whose embedded "id" field is in the allowed set. Used to attribute a
+ * shared STATS row's doc-data to a specific entity-type group without leaking across groups.
+ * Each entry has the shape: {"id":"<entityId>","type":"entity",...}
+ */
+export const filterDocDataToIds = (
+  docData: string | string[],
+  allowedIds: Set<string>
+): string[] => {
+  const entries = castArray(docData ?? []);
+  return entries.filter((entry) => {
+    if (!entry) return false;
+    try {
+      const parsed = JSON.parse(entry) as { id?: string };
+      return parsed.id != null && allowedIds.has(parsed.id);
+    } catch {
+      return false;
+    }
+  });
+};
+
+/**
  * Checks if the entities latest index exists.
  * Previously checked for lookup mode (required for LOOKUP JOIN), but since
  * enrichment now uses follow-up queries, only existence matters.

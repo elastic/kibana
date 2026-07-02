@@ -128,11 +128,11 @@ export interface RelationshipEdge extends GraphEdge {
 
 /**
  * Row returned by the relationships ES|QL query AFTER in-query STATS pre-aggregation.
- * One row per (actorEntityType × actorEntitySubType × relationship × targetId × pinned)
- * group — same-type actors are already merged here, so `actorIds` is the multi-value set of
- * their entity IDs. `badge` is the count of raw FORK/MV_EXPAND rows collapsed into the row.
- * regroupRelationships performs the final merge by target type/sub-type (only known after the
- * follow-up enrichment query).
+ * One row per (actorEntityType × actorEntitySubType × relationship × pinned) group — same-type
+ * actors are already merged here (`actorIds`) and every target the group points at is collected
+ * in `targetIds` (multi-value). `badge` is the count of raw FORK/MV_EXPAND rows collapsed into
+ * the row. regroupRelationships performs the final split/merge by target type/sub-type (only
+ * known after the follow-up enrichment query).
  */
 export interface RelationshipEsqlRow {
   actorIds: string | string[];
@@ -142,8 +142,16 @@ export interface RelationshipEsqlRow {
   actorHostIps?: string[] | string | null;
   actorDocData: string | string[];
   relationship: string;
-  targetId: string;
+  targetIds: string | string[];
   targetDocData: string | string[];
+  /**
+   * Per-row actor → target mapping, one entry per (actor, target) pair, encoded as
+   * "<actorId>\n<targetId>". Lets regroupRelationships recover which actor pointed at which
+   * target after the STATS pre-aggregation drops actorId/targetId from the group key, so a
+   * merged same-type-actor row can be split back into distinct relationship nodes when the
+   * actors point at different target sets.
+   */
+  actorTargetMap: string | string[];
   pinned?: string | null;
   badge: number;
 }

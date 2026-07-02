@@ -155,9 +155,10 @@ export const fetchGraph = async ({
     addValuesToSet(allEntityIds, r.targetEntityId, { dropEmpty: true });
   }
   for (const r of relationshipsResult.records) {
-    // actorIds is the multi-value set of same-type actors merged in the ES|QL STATS.
+    // actorIds / targetIds are the multi-value sets of same-type actors/targets merged in the
+    // ES|QL STATS (targetId is no longer a STATS group key — see fetch_entity_relationships_graph).
     addValuesToSet(allEntityIds, r.actorIds, { dropEmpty: true });
-    if (r.targetId) allEntityIds.add(r.targetId);
+    addValuesToSet(allEntityIds, r.targetIds, { dropEmpty: true });
   }
   for (const r of entitiesResult.records) {
     if (r.id) allEntityIds.add(r.id);

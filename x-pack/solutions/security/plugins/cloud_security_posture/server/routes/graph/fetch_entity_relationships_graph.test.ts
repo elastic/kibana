@@ -245,14 +245,17 @@ describe('fetchEntityRelationships', () => {
       // Pre-aggregate by the actor TYPE dimensions (NOT raw actorId — entity.id is unique,
       // so it would never merge same-type actors). actorIds collected via VALUES.
       expect(query).toContain('| STATS badge = COUNT(*)');
-      expect(query).toMatch(
-        /BY actorEntityType,\s*actorEntitySubType,\s*relationship,\s*targetId,\s*pinned/
-      );
+      expect(query).toMatch(/BY actorEntityType,\s*actorEntitySubType,\s*relationship,\s*pinned/);
       expect(query).toContain('actorIds = VALUES(actorId)');
+      expect(query).toContain('targetIds = VALUES(targetId)');
+      expect(query).toContain('actorTargetMap = VALUES(actorTargetMap)');
       expect(query).toContain('actorEntityName = MV_FIRST(VALUES(actorEntityName))');
       expect(query).toContain('actorHostIps = VALUES(actorHostIps)');
       // actorId must NOT be a grouping key (it is unique per entity — no merging)
       expect(query).not.toMatch(/BY actorId/);
+      // targetId must NOT be a grouping key — same-type targets merge, and the row can carry
+      // targets of different types that regroupRelationships splits after enrichment.
+      expect(query).not.toMatch(/BY[\s\S]*targetId/);
       // target type/sub-type are NOT grouped on — they come from phase-2 enrichment
       expect(query).not.toMatch(/BY[\s\S]*targetEntityType/);
 
@@ -263,24 +266,39 @@ describe('fetchEntityRelationships', () => {
 });
 
 // Helper to build a minimal RelationshipEsqlRow (aggregated ESQL output) for tests.
-// Accepts a convenient single `actorId` and maps it to the aggregated `actorIds` field
-// (one same-type actor collapsed into this row). badge defaults to 1.
+// Accepts convenient single `actorId`/`targetId` values and maps them to the aggregated
+// `actorIds`/`targetIds` fields (one same-type actor/target collapsed into this row).
+// Pass `targetIds` explicitly to model a row carrying multiple targets. badge defaults to 1.
 const buildRelationshipEsqlRow = ({
   actorId,
   targetId,
   ...overrides
 }: Partial<Omit<RelationshipEsqlRow, 'actorIds'>> & {
   actorId: string;
-  targetId: string;
-}): RelationshipEsqlRow => ({
-  actorIds: [actorId],
-  targetId,
-  relationship: 'Owns',
-  actorDocData: `{"id":"${actorId}","type":"entity","entity":{"availableInEntityStore":true}}`,
-  targetDocData: `{"id":"${targetId}","type":"entity"}`,
-  badge: 1,
-  ...overrides,
-});
+  targetId?: string;
+}): RelationshipEsqlRow => {
+  const targetIds = overrides.targetIds ?? (targetId != null ? [targetId] : []);
+  const targetIdArray = Array.isArray(targetIds) ? targetIds : [targetIds];
+  // Single target → single string (preserves the historical shape asserted by tests);
+  // multiple targets → one doc-data entry per target.
+  const defaultTargetDocData =
+    targetIdArray.length === 1
+      ? `{"id":"${targetIdArray[0]}","type":"entity"}`
+      : targetIdArray.map((id) => `{"id":"${id}","type":"entity"}`);
+  // Default actor → target mapping: this single actor points at every target in the row.
+  // Tests modelling a merged multi-actor row can override actorTargetMap explicitly.
+  const defaultActorTargetMap = targetIdArray.map((t) => `${actorId}\n${t}`);
+  return {
+    actorIds: [actorId],
+    targetIds,
+    relationship: 'Owns',
+    actorDocData: `{"id":"${actorId}","type":"entity","entity":{"availableInEntityStore":true}}`,
+    targetDocData: overrides.targetDocData ?? defaultTargetDocData,
+    actorTargetMap: overrides.actorTargetMap ?? defaultActorTargetMap,
+    badge: 1,
+    ...overrides,
+  };
+};
 
 describe('regroupRelationships', () => {
   it('single record with no enrichment produces one group with actorNodeId/targetNodeId equal to the single IDs and raw docData passed through', () => {
@@ -322,6 +340,59 @@ describe('regroupRelationships', () => {
     expect(group.targetsDocData).toEqual([record.targetDocData]);
   });
 
+  it('merges same-type targets from one row into a single grouped target node', () => {
+    // The ES|QL row carries multiple targets (targetId is no longer a group key). Two targets
+    // of the same enrichment type/sub-type collapse into ONE group with targetIdsCount=2.
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:a', { name: 'A', type: 'user', subType: 'iam', engineType: 'ecs', hostIps: [] }],
+      ['user:b', { name: 'B', type: 'user', subType: 'iam', engineType: 'ecs', hostIps: [] }],
+    ]);
+    const record = buildRelationshipEsqlRow({
+      actorId: 'user:root',
+      relationship: 'supervises',
+      targetIds: ['user:a', 'user:b'],
+      targetDocData: ['{"id":"user:a","type":"entity"}', '{"id":"user:b","type":"entity"}'],
+    });
+
+    const result = regroupRelationships([record], enrichmentMap);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].targetEntityType).toBe('user');
+    expect(result[0].targetIdsCount).toBe(2);
+    expect(result[0].targetIds).toEqual(['user:a', 'user:b']);
+    expect(result[0].targetNodeId).toBe(hashIds(['user:a', 'user:b']));
+  });
+
+  it('splits targets of different types from one row into separate groups without leaking docData', () => {
+    // One row with a Host target and an unenriched (null-type) target must produce two groups,
+    // each carrying only its own target and its own doc data.
+    const hostDoc = '{"id":"host:h","type":"entity"}';
+    const genericDoc = '{"id":"projects/generic","type":"entity"}';
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['host:h', { name: 'H', type: 'host', subType: 'linux', engineType: 'ecs', hostIps: [] }],
+    ]);
+    const record = buildRelationshipEsqlRow({
+      actorId: 'user:root',
+      relationship: 'communicates_with',
+      targetIds: ['host:h', 'projects/generic'],
+      targetDocData: [hostDoc, genericDoc],
+    });
+
+    const result = regroupRelationships([record], enrichmentMap);
+
+    expect(result).toHaveLength(2);
+    const hostGroup = result.find((g) => g.targetEntityType === 'host')!;
+    const genericGroup = result.find((g) => g.targetEntityType === null)!;
+
+    expect(hostGroup.targetIds).toEqual(['host:h']);
+    expect(hostGroup.targetsDocData).toEqual([hostDoc]);
+    expect(hostGroup.targetsDocData).not.toContain(genericDoc);
+
+    expect(genericGroup.targetIds).toEqual(['projects/generic']);
+    expect(genericGroup.targetsDocData).toEqual([genericDoc]);
+    expect(genericGroup.targetsDocData).not.toContain(hostDoc);
+  });
+
   it('sums badge across pre-aggregated rows merged into one type group', () => {
     const enrichmentMap = new Map<string, EntityEnrichmentFields>([
       ['host:t', { type: 'host', subType: 'linux', name: 'T', engineType: null, hostIps: [] }],
@@ -338,8 +409,9 @@ describe('regroupRelationships', () => {
         actorHostIps: null,
         actorDocData: '{"id":"host:a"}',
         relationship: 'communicates_with',
-        targetId: 'host:t',
+        targetIds: ['host:t'],
         targetDocData: '{"id":"host:t"}',
+        actorTargetMap: ['host:a\nhost:t'],
         pinned: null,
         badge: 4,
       },
@@ -351,8 +423,9 @@ describe('regroupRelationships', () => {
         actorHostIps: null,
         actorDocData: '{"id":"host:b"}',
         relationship: 'communicates_with',
-        targetId: 'host:t',
+        targetIds: ['host:t'],
         targetDocData: '{"id":"host:t"}',
+        actorTargetMap: ['host:b\nhost:t'],
         pinned: null,
         badge: 6,
       },
@@ -381,8 +454,9 @@ describe('regroupRelationships', () => {
       actorHostIps: null,
       actorDocData: ['{"id":"host:a"}', '{"id":"host:b"}'],
       relationship: 'communicates_with',
-      targetId: 'host:t',
+      targetIds: ['host:t'],
       targetDocData: '{"id":"host:t"}',
+      actorTargetMap: ['host:a\nhost:t', 'host:b\nhost:t'],
       pinned: null,
       badge: 5,
     };
@@ -398,6 +472,53 @@ describe('regroupRelationships', () => {
     expect(result[0].relationshipNodeId).toBe(`${hashIds(['host:a', 'host:b'])}-communicates_with`);
   });
 
+  it('splits same-type actors of one row into separate groups when they point at different targets', () => {
+    // A single STATS row merges two same-type actors (svc:a, svc:b) that communicate_with
+    // DIFFERENT targets. They must NOT collapse into one relationship node — actorTargetMap lets
+    // regroupRelationships recover the per-actor target sets and split them.
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      [
+        'svc:a',
+        { type: 'Service', subType: 'lambda', name: 'Svc A', engineType: 'ecs', hostIps: [] },
+      ],
+      [
+        'svc:b',
+        { type: 'Service', subType: 'lambda', name: 'Svc B', engineType: 'ecs', hostIps: [] },
+      ],
+      ['host:x', { type: 'Host', subType: 'ec2', name: 'X', engineType: 'ecs', hostIps: [] }],
+      ['host:y', { type: 'Host', subType: 'ec2', name: 'Y', engineType: 'ecs', hostIps: [] }],
+    ]);
+    const row: RelationshipEsqlRow = {
+      actorIds: ['svc:a', 'svc:b'],
+      actorEntityType: 'Service',
+      actorEntitySubType: 'lambda',
+      // MV_FIRST would pick only 'Svc A' for the whole row; each split node must still get its own
+      // enriched name rather than inheriting this single value.
+      actorEntityName: 'Svc A',
+      actorHostIps: null,
+      actorDocData: ['{"id":"svc:a"}', '{"id":"svc:b"}'],
+      relationship: 'communicates_with',
+      targetIds: ['host:x', 'host:y'],
+      targetDocData: ['{"id":"host:x"}', '{"id":"host:y"}'],
+      // svc:a → host:x, svc:b → host:y (different target sets)
+      actorTargetMap: ['svc:a\nhost:x', 'svc:b\nhost:y'],
+      pinned: null,
+      badge: 2,
+    };
+
+    const result = regroupRelationships([row], enrichmentMap);
+
+    expect(result).toHaveLength(2);
+    const byActor = new Map(result.map((g) => [g.actorIds.sort().join(','), g]));
+    expect(byActor.get('svc:a')!.targetIds).toEqual(['host:x']);
+    expect(byActor.get('svc:a')!.relationshipNodeId).toBe('svc:a-communicates_with');
+    // Each split node keeps its OWN name (not the row-level MV_FIRST name).
+    expect(byActor.get('svc:a')!.actorEntityName).toBe('Svc A');
+    expect(byActor.get('svc:b')!.targetIds).toEqual(['host:y']);
+    expect(byActor.get('svc:b')!.relationshipNodeId).toBe('svc:b-communicates_with');
+    expect(byActor.get('svc:b')!.actorEntityName).toBe('Svc B');
+  });
+
   it('empty-string actorDocData and targetDocData are not added to the doc-data sets', () => {
     const row: RelationshipEsqlRow = {
       actorIds: ['host:a'],
@@ -407,8 +528,9 @@ describe('regroupRelationships', () => {
       actorHostIps: null,
       actorDocData: '',
       relationship: 'communicates_with',
-      targetId: 'host:t',
+      targetIds: ['host:t'],
       targetDocData: '',
+      actorTargetMap: ['host:a\nhost:t'],
       pinned: null,
       badge: 1,
     };

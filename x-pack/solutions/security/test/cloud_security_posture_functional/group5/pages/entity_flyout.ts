@@ -299,9 +299,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
         // Phase 2 assertions:
-        //   Entity nodes (4): platform-admin-role, merged target group (count=2, from the
-        //                     pinned origin actor — its targets stay grouped),
-        //                     security-admin-group, db-team-lead (solo, pinned target)
+        //   Entity nodes (4): platform-admin-role, merged target group (count=2 — from the pinned
+        //                     origin actor, its targets stay grouped), security-admin-group,
+        //                     app-team-lead (solo, the pinned target)
         //   Relationship nodes (2): rel(platform-admin-role-supervises),
         //                           rel(security-admin-group-supervises)
         await expandedFlyoutGraph.assertGraphNodesNumber(4 + 2);
@@ -311,13 +311,16 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         await expandedFlyoutGraph.assertNodeExists(mergedTargetGroupNodeId);
         await expandedFlyoutGraph.assertNodeExists('rel(user:platform-admin-role-supervises)');
 
-        // security-admin-group supervises the pinned db-team-lead as a SEPARATE solo node.
-        // Its edge to app-team-lead is filtered out because app-team-lead is not one of the
-        // requested entity IDs (only platform-admin-role and the pinned db-team-lead are), so
-        // app-team-lead stays merged inside platform-admin-role's grouped target node.
+        // security-admin-group is pulled in and supervises the pinned target as a SEPARATE solo
+        // node. The pinned target (app-team-lead) can no longer merge with its same-type peer for
+        // security-admin-group's edge, so it splits out into its own node.
         await expandedFlyoutGraph.assertNodeExists('user:security-admin-group');
         await expandedFlyoutGraph.assertNodeExists('rel(user:security-admin-group-supervises)');
-        await expandedFlyoutGraph.assertNodeExists('user:db-team-lead');
+        await expandedFlyoutGraph.assertNodeExists('user:app-team-lead');
+        // db-team-lead does NOT appear as its own solo node — only app-team-lead was pinned; the
+        // relationships query returns only rows touching the requested entity IDs, so db-team-lead
+        // stays merged inside platform-admin-role's grouped target node.
+        await expandedFlyoutGraph.assertNodeDoesNotExist('user:db-team-lead');
 
         // --- Phase 3: hide entity relationships of the same target to unpin it ---
         // Re-open the grouped target preview panel (it still lists both members, since
