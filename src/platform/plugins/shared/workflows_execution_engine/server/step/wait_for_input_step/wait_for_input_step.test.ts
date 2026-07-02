@@ -424,6 +424,63 @@ describe('WaitForInputStepImpl', () => {
       expect(mockStepExecutionRuntime.updateWorkflowExecution).not.toHaveBeenCalled();
     });
   });
+
+  describe('onCancel', () => {
+    it('invalidates the external resume API key when the step is cancelled', async () => {
+      const invalidateAsInternalUser = jest.fn().mockResolvedValue({});
+      mockDependencies = {
+        ...mockDependencies,
+        coreStart: {
+          security: {
+            authc: {
+              apiKeys: { invalidateAsInternalUser },
+            },
+          },
+        },
+      } as unknown as ContextDependencies;
+      underTest = new WaitForInputStepImpl(
+        node,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        workflowLogger,
+        mockConnectorExecutor,
+        mockDependencies
+      );
+      (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
+        input: { _hitlApiKeyId: 'api-key-id' },
+      };
+
+      await underTest.onCancel();
+
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['api-key-id'] });
+    });
+
+    it('does nothing when no external resume API key was minted', async () => {
+      const invalidateAsInternalUser = jest.fn().mockResolvedValue({});
+      mockDependencies = {
+        ...mockDependencies,
+        coreStart: {
+          security: {
+            authc: {
+              apiKeys: { invalidateAsInternalUser },
+            },
+          },
+        },
+      } as unknown as ContextDependencies;
+      underTest = new WaitForInputStepImpl(
+        node,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        workflowLogger,
+        mockConnectorExecutor,
+        mockDependencies
+      );
+
+      await underTest.onCancel();
+
+      expect(invalidateAsInternalUser).not.toHaveBeenCalled();
+    });
+  });
 });
 
 describe('WaitForInputStepSchema', () => {

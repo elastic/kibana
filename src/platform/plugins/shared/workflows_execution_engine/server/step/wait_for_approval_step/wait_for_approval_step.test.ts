@@ -381,4 +381,35 @@ describe('WaitForApprovalStepImpl', () => {
       expect.objectContaining({ spaceId: 'custom-space' })
     );
   });
+
+  describe('onCancel', () => {
+    it('invalidates the external resume API key when the step is cancelled', async () => {
+      const invalidateAsInternalUser = jest.fn().mockResolvedValue(undefined);
+      dependencies = {
+        spaceId: 'default',
+        coreStart: {
+          security: {
+            authc: {
+              apiKeys: { invalidateAsInternalUser },
+            },
+          },
+        },
+      } as unknown as ContextDependencies;
+      underTest = new WaitForApprovalStepImpl(
+        node,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        workflowLogger,
+        connectorExecutor,
+        dependencies
+      );
+      (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
+        input: { _hitlApiKeyId: 'api-key-id' },
+      };
+
+      await underTest.onCancel();
+
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['api-key-id'] });
+    });
+  });
 });

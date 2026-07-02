@@ -28,7 +28,7 @@ import type { StepExecutionRuntime } from '../../workflow_context_manager/step_e
 import type { ContextDependencies } from '../../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
-import type { NodeImplementation } from '../node_implementation';
+import type { CancellableNode, NodeImplementation } from '../node_implementation';
 import {
   invalidateHitlExternalResumeApiKeyIfPresent,
   mintHitlExternalResumeApiKey,
@@ -40,7 +40,7 @@ import {
   tryEnterHitlWait,
 } from '../wait_for_input_step/hitl_wait_helpers';
 
-export class WaitForApprovalStepImpl implements NodeImplementation {
+export class WaitForApprovalStepImpl implements NodeImplementation, CancellableNode {
   constructor(
     private node: WaitForApprovalGraphNode,
     private stepExecutionRuntime: StepExecutionRuntime,
@@ -49,6 +49,14 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
     private connectorExecutor: ConnectorExecutor,
     private dependencies: ContextDependencies
   ) {}
+
+  async onCancel(): Promise<void> {
+    await invalidateHitlExternalResumeApiKeyIfPresent({
+      stepExecutionRuntime: this.stepExecutionRuntime,
+      dependencies: this.dependencies,
+      workflowLogger: this.workflowLogger,
+    });
+  }
 
   async run(): Promise<void> {
     if (shouldSkipHitlWaitEntry(this.stepExecutionRuntime)) {

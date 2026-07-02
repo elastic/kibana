@@ -48,12 +48,20 @@ export async function invalidateHitlExternalResumeApiKeyIfPresent({
   dependencies: ContextDependencies;
   workflowLogger: IWorkflowEventLogger;
 }): Promise<void> {
-  const input = stepExecutionRuntime.stepExecution?.input;
-  if (input == null || typeof input !== 'object' || !(HITL_API_KEY_ID_INPUT_FIELD in input)) {
+  const stepInput =
+    stepExecutionRuntime.stepExecution?.input ??
+    (typeof stepExecutionRuntime.getCurrentStepResult === 'function'
+      ? stepExecutionRuntime.getCurrentStepResult()?.input
+      : undefined);
+  if (
+    stepInput == null ||
+    typeof stepInput !== 'object' ||
+    !(HITL_API_KEY_ID_INPUT_FIELD in stepInput)
+  ) {
     return;
   }
 
-  const apiKeyId = (input as Record<string, unknown>)[HITL_API_KEY_ID_INPUT_FIELD];
+  const apiKeyId = (stepInput as Record<string, unknown>)[HITL_API_KEY_ID_INPUT_FIELD];
   if (typeof apiKeyId !== 'string' || apiKeyId.length === 0) {
     return;
   }
