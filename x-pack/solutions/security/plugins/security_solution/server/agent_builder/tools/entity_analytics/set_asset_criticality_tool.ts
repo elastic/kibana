@@ -216,7 +216,7 @@ export const setAssetCriticalityTool = (
             logger,
             collectScores: true,
           });
-        if (entityScore.baseScore != null) {
+          if (entityScore.baseScore != null) {
             riskScore = {
               recalculated: true,
               entityRiskScore: entityScore.baseScore,
