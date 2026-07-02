@@ -14,6 +14,7 @@ import { TimeComparison } from '../../shared/time_comparison';
 import { useSecondaryFiltersWidthStyle } from '../../shared/search_bar/use_secondary_filters_width_style';
 import { MobileFilters } from './service_overview/filters';
 import { UnifiedSearchBar } from '../../shared/unified_search_bar';
+import { AnomalyThresholdSelect } from '../../shared/anomaly_threshold_select';
 
 interface Props {
   hidden?: boolean;
@@ -24,6 +25,7 @@ interface Props {
   showTransactionTypeSelector?: boolean;
   showQueryInput?: boolean;
   showMobileFilters?: boolean;
+  showAnomalyThresholdSelector?: boolean;
   searchBarPlaceholder?: string;
 }
 
@@ -36,10 +38,12 @@ export function MobileSearchBar({
   showTransactionTypeSelector = false,
   showQueryInput = true,
   showMobileFilters = false,
+  showAnomalyThresholdSelector = false,
   searchBarPlaceholder,
 }: Props) {
   const { isMedium } = useBreakpoints();
-  const hasSecondaryFilters = showEnvironmentFilter || showTimeComparison || showMobileFilters;
+  const hasSecondaryFilters =
+    showEnvironmentFilter || showTimeComparison || showMobileFilters || showAnomalyThresholdSelector;
 
   const { secondaryFiltersWidthStyle, setSearchBarContainerRef } = useSecondaryFiltersWidthStyle({
     isMedium,
@@ -83,6 +87,12 @@ export function MobileSearchBar({
                 {showTimeComparison && (
                   <EuiFlexItem>
                     <TimeComparison compressed fullWidth />
+                  </EuiFlexItem>
+                )}
+
+                {showAnomalyThresholdSelector && (
+                  <EuiFlexItem>
+                    <AnomalyThresholdSelect compressed fullWidth />
                   </EuiFlexItem>
                 )}
 
