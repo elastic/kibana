@@ -6192,6 +6192,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-theme-browser-internal-types@link:src/core/packages/theme/browser-internal-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-theme-browser-internal@link:src/core/packages/theme/browser-internal":
   version "0.0.0"
   uid ""
