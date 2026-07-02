@@ -62079,29 +62079,20 @@ paths:
         '200':
           content:
             application/json:
-              schema:
-                type: object
-                properties:
-                  rules:
-                    items:
-                      type: object
-                      properties:
-                        enabled:
-                          type: boolean
-                        id:
-                          type: string
-                        kind:
-                          type: string
-                        managed:
-                          type: boolean
-                      required:
-                        - id
-                        - kind
-                        - managed
-                        - enabled
-                    type: array
-                required:
-                  - rules
+              examples:
+                rulesListExample:
+                  description: Lists the managed resolution rules and their enabled state in the current space.
+                  summary: Managed resolution rules
+                  value:
+                    rules:
+                      - enabled: false
+                        id: related_user_bridge
+                        kind: related_user_bridge
+                        managed: true
+                      - enabled: true
+                        id: email_exact_match
+                        kind: email_exact_match
+                        managed: true
           description: Entity resolution rules.
       summary: List entity resolution rules
       tags:
@@ -62134,33 +62125,31 @@ paths:
           required: true
           schema:
             type: string
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           content:
             application/json:
-              schema:
-                type: object
-                properties:
-                  enabled:
-                    type: boolean
-                  id:
-                    type: string
-                  kind:
-                    type: string
-                  managed:
-                    type: boolean
-                required:
-                  - id
-                  - kind
-                  - managed
-                  - enabled
+              examples:
+                ruleDisabledExample:
+                  description: The related user bridge rule was disabled in the current space.
+                  summary: Rule disabled
+                  value:
+                    enabled: false
+                    id: related_user_bridge
+                    kind: related_user_bridge
+                    managed: true
           description: Updated entity resolution rule.
         '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: The requested entity resolution rule does not exist.
+                  summary: Unknown rule
+                  value:
+                    error: Not Found
+                    message: Saved object [entity-resolution-rule/unknown] not found
+                    statusCode: 404
           description: Unknown entity resolution rule.
       summary: Disable an entity resolution rule
       tags:
@@ -62193,33 +62182,31 @@ paths:
           required: true
           schema:
             type: string
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           content:
             application/json:
-              schema:
-                type: object
-                properties:
-                  enabled:
-                    type: boolean
-                  id:
-                    type: string
-                  kind:
-                    type: string
-                  managed:
-                    type: boolean
-                required:
-                  - id
-                  - kind
-                  - managed
-                  - enabled
+              examples:
+                ruleEnabledExample:
+                  description: The related user bridge rule was enabled in the current space.
+                  summary: Rule enabled
+                  value:
+                    enabled: true
+                    id: related_user_bridge
+                    kind: related_user_bridge
+                    managed: true
           description: Updated entity resolution rule.
         '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: The requested entity resolution rule does not exist.
+                  summary: Unknown rule
+                  value:
+                    error: Not Found
+                    message: Saved object [entity-resolution-rule/unknown] not found
+                    statusCode: 404
           description: Unknown entity resolution rule.
       summary: Enable an entity resolution rule
       tags:

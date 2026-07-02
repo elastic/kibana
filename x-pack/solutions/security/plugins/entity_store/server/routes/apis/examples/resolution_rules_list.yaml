@@ -5,26 +5,17 @@ responses:
     description: Entity resolution rules.
     content:
       application/json:
-        schema:
-          type: object
-          properties:
-            rules:
-              type: array
-              items:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  kind:
-                    type: string
-                  managed:
-                    type: boolean
-                  enabled:
-                    type: boolean
-                required:
-                  - id
-                  - kind
-                  - managed
-                  - enabled
-          required:
-            - rules
+        examples:
+          rulesListExample:
+            summary: Managed resolution rules
+            description: Lists the managed resolution rules and their enabled state in the current space.
+            value:
+              rules:
+                - id: related_user_bridge
+                  kind: related_user_bridge
+                  managed: true
+                  enabled: false
+                - id: email_exact_match
+                  kind: email_exact_match
+                  managed: true
+                  enabled: true
