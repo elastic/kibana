@@ -13,8 +13,12 @@ import path from 'path';
 
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { LibraryFetcher, LibraryFetchError } from '..';
+import { LibraryBundleReader, LibraryFetcher, LibraryFetchError } from '..';
 
+// The HTTP fetcher and the bundle reader share one fixture: the published
+// `/v1` catalog tree (the CDN serves it; the air-gap bundle mirrors it). The
+// fetcher's fixture server serves it over HTTP from FIXTURE_ROOT; the bundle
+// reader reads the same tree from disk (pointing at the parent of `v1/`).
 const FIXTURE_ROOT = path.join(__dirname, '__fixtures__', 'dist');
 const TTL_MS = 60_000;
 
@@ -126,7 +130,7 @@ describe('Library integration — LibraryFetcher against a local fixture CDN', (
   it('records the refresh timestamp in getHealth after the first read', async () => {
     const fetcher = buildFetcher(server.baseUrl);
 
-    expect(fetcher.getHealth()).toEqual({ sourceMode: 'http' });
+    expect(fetcher.getHealth()).toEqual({ sourceMode: 'http', lastRefreshAt: null });
     await fetcher.listTemplates();
 
     expect(fetcher.getHealth()).toMatchObject({
@@ -185,6 +189,62 @@ describe('Library integration — LibraryFetcher against a local fixture CDN', (
       const fetcher = buildFetcher(closed.baseUrl);
 
       await expect(fetcher.listTemplates()).rejects.toBeInstanceOf(LibraryFetchError);
+    });
+  });
+});
+
+describe('Library integration — LibraryBundleReader against a fixture bundle', () => {
+  const buildReader = (bundlePath: string) =>
+    new LibraryBundleReader({
+      bundlePath,
+      kibanaVersion: '9.5.0',
+      isServerless: false,
+      logger: loggerMock.create(),
+    });
+
+  it('lists templates from the extracted bundle (extraction root with a v1/ directory)', async () => {
+    const reader = buildReader(FIXTURE_ROOT);
+
+    const templates = await reader.listTemplates();
+
+    expect(templates).toHaveLength(1);
+    expect(templates[0]).toMatchObject({
+      slug: 'ip-reputation-check',
+      version: '1.0.0',
+      name: 'IP Reputation Check (AbuseIPDB)',
+      solutions: ['security'],
+      categories: ['enrichment', 'threat-intel'],
+      definitionUrl: 'templates/ip-reputation-check/1.0.0.yaml',
+      stepTypes: ['abuseipdb.checkIp'],
+      triggerTypes: ['manual'],
+    });
+  });
+
+  it('reads and parses a template body from the bundle', async () => {
+    const reader = buildReader(FIXTURE_ROOT);
+
+    const body = await reader.getTemplate('ip-reputation-check');
+
+    expect(body.metadata.slug).toBe('ip-reputation-check');
+    expect(body.metadata.install?.form?.[0]).toMatchObject({
+      name: 'abuseipdb-connector',
+      inputType: 'connector',
+      connectorType: '.abuseipdb',
+    });
+    expect(body.body.inputs).toEqual([{ name: 'ip_address', type: 'string', required: true }]);
+    expect(body.body.triggers).toEqual([{ type: 'manual' }]);
+    expect(body.raw).toContain('template-metadata:');
+  });
+
+  it('reports the bundle source mode in getHealth', async () => {
+    const reader = buildReader(FIXTURE_ROOT);
+
+    expect(reader.getHealth()).toEqual({ sourceMode: 'bundle', lastRefreshAt: null });
+    await reader.listTemplates();
+
+    expect(reader.getHealth()).toMatchObject({
+      sourceMode: 'bundle',
+      lastRefreshAt: expect.any(String),
     });
   });
 });
