@@ -49,6 +49,7 @@ components:
         - init-endpoint-protection
         - init-ai-prompts
         - init-detection-rule-monitoring
+        - init-alert-validation-workflow
 
     InitializationFlowsResult:
       type: object
@@ -80,6 +81,10 @@ components:
         init-detection-rule-monitoring:
           oneOf:
             - $ref: '#/components/schemas/InstallDetectionEngineRuleMonitoringAssetsReadyResult'
+            - $ref: '#/components/schemas/InitializationFlowErrorResult'
+        init-alert-validation-workflow:
+          oneOf:
+            - $ref: '#/components/schemas/AlertValidationWorkflowReadyResult'
             - $ref: '#/components/schemas/InitializationFlowErrorResult'
 
     CreateListIndicesReadyResult:
@@ -165,6 +170,16 @@ components:
               description: Fleet package installation status (e.g., installed, already_installed).
 
     InstallDetectionEngineRuleMonitoringAssetsReadyResult:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - ready
+
+    AlertValidationWorkflowReadyResult:
       type: object
       required:
         - status

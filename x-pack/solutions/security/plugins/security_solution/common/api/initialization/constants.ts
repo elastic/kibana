@@ -26,6 +26,8 @@ export const INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION =
 export const INITIALIZATION_FLOW_INIT_AI_PROMPTS = InitializationFlowIdEnum['init-ai-prompts'];
 export const INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING =
   InitializationFlowIdEnum['init-detection-rule-monitoring'];
+export const INITIALIZATION_FLOW_INIT_ALERT_VALIDATION_WORKFLOW =
+  InitializationFlowIdEnum['init-alert-validation-workflow'];
 
 // Flow statuses
 export const INITIALIZATION_FLOW_STATUS_READY = CreateListIndicesReadyResult.shape.status.value;

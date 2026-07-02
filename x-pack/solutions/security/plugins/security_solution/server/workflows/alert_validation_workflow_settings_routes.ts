@@ -36,10 +36,10 @@ import {
   AlertValidationWorkflowAuditActions,
 } from './audit';
 import {
-  ensureSecurityAlertValidationWorkflowInstalled,
   getSecurityAlertValidationWorkflowIdForSpace,
   initSecurityManagedWorkflowsClient,
   installSecurityAlertValidationWorkflow,
+  readSecurityAlertValidationWorkflowSettings,
   type SecurityAlertValidationWorkflowSettings,
 } from './managed_workflows';
 
@@ -116,56 +116,16 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
           return response.forbidden({ body: LICENSE_ERROR_MESSAGE });
         }
 
-        const [coreStart, pluginsStart] = await getStartServices();
+        const [coreStart] = await getStartServices();
         const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
           coreStart.savedObjects.getScopedClient(request)
         );
 
-        const settings = {
-          workflowEnabled: await uiSettingsClient.get<boolean>(
-            SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED
-          ),
-          autoCloseEnabled: await uiSettingsClient.get<boolean>(
-            SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED
-          ),
-          autoCloseConfidenceScoreMinThreshold: await uiSettingsClient.get<number>(
-            SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD
-          ),
-          autoCloseConfidenceScoreMaxThreshold: await uiSettingsClient.get<number>(
-            SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD
-          ),
-          connectorId: await uiSettingsClient.get<string>(
-            SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID
-          ),
-          createConversation: await uiSettingsClient.get<boolean>(
-            SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CREATE_CONVERSATION
-          ),
-        };
-
+        // Installing the workflow for the space is handled by the
+        // init-alert-validation-workflow initialization flow, which runs the first
+        // time the Security Solution app loads in a space (see server/lib/initialization).
+        const settings = await readSecurityAlertValidationWorkflowSettings(uiSettingsClient);
         const spaceId = (await context.securitySolution).getSpaceId();
-
-        const { workflowsExtensions } = pluginsStart;
-        if (workflowsExtensions) {
-          const isEnabled = await coreStart.featureFlags.getBooleanValue(
-            MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
-            MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT
-          );
-
-          if (isEnabled) {
-            try {
-              const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(
-                workflowsExtensions
-              );
-              await ensureSecurityAlertValidationWorkflowInstalled({
-                managedWorkflowsClient,
-                spaceId,
-                settings,
-              });
-            } catch (error) {
-              logger.warn('Failed to ensure the alert analysis workflow is installed', { error });
-            }
-          }
-        }
 
         return response.ok({
           body: {

@@ -141,35 +141,10 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
       });
     });
 
-    it('installs the workflow for the space when it is missing', async () => {
+    it('does not install the workflow on GET', async () => {
+      // Installing for the space is handled by the init-alert-validation-workflow
+      // initialization flow (server/lib/initialization), not the settings route.
       mockSettings();
-      managedWorkflowsClient.getWorkflowStatus.mockResolvedValue({ status: 'missing' });
-
-      const handler = router.versioned.getRoute('get', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
-        .versions['1'].handler;
-
-      await handler(createContext(), createRequest(), mockResponse);
-
-      expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
-        SECURITY_ALERT_VALIDATION_WORKFLOW_ID,
-        {
-          spaceId: 'space-1',
-          workflowIdSuffix: 'space-1',
-          values: {
-            workflowEnabled: true,
-            autoCloseEnabled: false,
-            autoCloseConfidenceScoreMinThreshold: 0.7,
-            autoCloseConfidenceScoreMaxThreshold: 0.9,
-            connectorId: 'connector-abc',
-            createConversation: true,
-          },
-        }
-      );
-    });
-
-    it('does not install the workflow when it is already installed', async () => {
-      mockSettings();
-      managedWorkflowsClient.getWorkflowStatus.mockResolvedValue({ status: 'disabled' });
 
       const handler = router.versioned.getRoute('get', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
         .versions['1'].handler;
