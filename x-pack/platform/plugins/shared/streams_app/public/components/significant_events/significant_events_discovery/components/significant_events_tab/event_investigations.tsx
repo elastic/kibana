@@ -31,6 +31,12 @@ const NO_INVESTIGATIONS_TEXT = i18n.translate(
   }
 );
 
+const getRunningDurationText = (duration: string): string =>
+  i18n.translate('xpack.streams.sigEventsTab.flyout.investigationRunningDuration', {
+    defaultMessage: '{duration} (running)',
+    values: { duration },
+  });
+
 const formatDuration = (startedAt: string, completedAt?: string): string => {
   const start = new Date(startedAt).getTime();
   const end = completedAt ? new Date(completedAt).getTime() : Date.now();
@@ -60,7 +66,11 @@ const InvestigationRow = ({ investigation }: { investigation: SignificantEventIn
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
           {formatTimestamp(startedAt)}
-          {isRunning ? ` · ${duration} (running)` : completedAt ? ` · ${duration}` : null}
+          {isRunning
+            ? ` · ${getRunningDurationText(duration)}`
+            : completedAt
+            ? ` · ${duration}`
+            : null}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

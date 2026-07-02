@@ -51,6 +51,12 @@ const CLOSE_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.close', {
 const RUN_LABEL = i18n.translate('xpack.streams.sigEventsTab.runInvestigationButton.label', {
   defaultMessage: 'Run investigation',
 });
+const RESTART_LABEL = i18n.translate(
+  'xpack.streams.sigEventsTab.runInvestigationButton.restartLabel',
+  {
+    defaultMessage: 'Restart investigation',
+  }
+);
 const CRITICALITY_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.criticalityLabel', {
   defaultMessage: 'Criticality',
 });
@@ -186,7 +192,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
               size="s"
               data-test-subj="sigEventRunInvestigationButton"
             >
-              {RUN_LABEL}
+              {hasRunningInvestigation(latestEvent) ? RESTART_LABEL : RUN_LABEL}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

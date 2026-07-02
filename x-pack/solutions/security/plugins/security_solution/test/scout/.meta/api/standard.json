@@ -1,5 +1,5 @@
 {
-  "sha1": "f77320d0509973d14afe42ed33012f90020ef871",
+  "sha1": "d5384398c347f464cd0371f73b83b6a251300198",
   "tests": [
     {
       "id": "0e5fa6a764fdd20-784d92660b25361",
@@ -470,7 +470,7 @@
       }
     },
     {
-      "id": "a3100c817b03679-bfeaac4f4ce32ce",
+      "id": "103ef0859bf1cdd-bfeaac4f4ce32ce",
       "title": "Entity Store administers maintainer (raw_identifiers) resolves administers.ids for a freshly-seen actor",
       "expectedStatus": "passed",
       "tags": [
@@ -480,13 +480,13 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/api/tests/maintainers/raw_identifiers_maintainer_suite.spec.ts",
-        "line": 145,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/api/tests/maintainers/host_target_raw_identifiers_maintainer_suite.spec.ts",
+        "line": 158,
         "column": 14
       }
     },
     {
-      "id": "a3100c817b03679-f31298cbfae2702",
+      "id": "103ef0859bf1cdd-f31298cbfae2702",
       "title": "Entity Store administers maintainer (raw_identifiers) skips an actor whose last_seen is older than the watermark, resolves a newer one",
       "expectedStatus": "passed",
       "tags": [
@@ -496,13 +496,13 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/api/tests/maintainers/raw_identifiers_maintainer_suite.spec.ts",
-        "line": 174,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/api/tests/maintainers/host_target_raw_identifiers_maintainer_suite.spec.ts",
+        "line": 189,
         "column": 14
       }
     },
     {
-      "id": "a3100c817b03679-7e9bfbf2fb713f0",
+      "id": "103ef0859bf1cdd-7e9bfbf2fb713f0",
       "title": "Entity Store administers maintainer (raw_identifiers) writes only targets that exist as entities, drops phantom raw_identifiers",
       "expectedStatus": "passed",
       "tags": [
@@ -512,13 +512,13 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/api/tests/maintainers/raw_identifiers_maintainer_suite.spec.ts",
-        "line": 234,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/api/tests/maintainers/host_target_raw_identifiers_maintainer_suite.spec.ts",
+        "line": 249,
         "column": 14
       }
     },
     {
-      "id": "a3100c817b03679-0a49071eea99870",
+      "id": "103ef0859bf1cdd-0a49071eea99870",
       "title": "Entity Store administers maintainer (raw_identifiers) skips an actor whose entity.source is not 'entityanalytics_ad'",
       "expectedStatus": "passed",
       "tags": [
@@ -528,9 +528,121 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/api/tests/maintainers/raw_identifiers_maintainer_suite.spec.ts",
-        "line": 277,
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/api/tests/maintainers/host_target_raw_identifiers_maintainer_suite.spec.ts",
+        "line": 292,
         "column": 16
+      }
+    },
+    {
+      "id": "103ef0859bf1cdd-00cf249eba2ca1c",
+      "title": "Entity Store administers maintainer (raw_identifiers) resolves administers.ids for a USER actor pointing at a host target (user → host)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/api/tests/maintainers/host_target_raw_identifiers_maintainer_suite.spec.ts",
+        "line": 317,
+        "column": 16
+      }
+    },
+    {
+      "id": "55465afe7d68608-c2093c2fe306df9",
+      "title": "Entity Store supervises maintainer (raw_identifiers, user → user) resolves supervises.ids for a freshly-seen actor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
+        "line": 118,
+        "column": 14
+      }
+    },
+    {
+      "id": "55465afe7d68608-8eea25c97d27f8c",
+      "title": "Entity Store supervises maintainer (raw_identifiers, user → user) skips an actor whose last_seen is older than the watermark, resolves a newer one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
+        "line": 151,
+        "column": 14
+      }
+    },
+    {
+      "id": "55465afe7d68608-1c4e9a2ea5ff0f1",
+      "title": "Entity Store supervises maintainer (raw_identifiers, user → user) deduplicates supervises.ids when the same raw value appears in multiple identifier fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
+        "line": 226,
+        "column": 14
+      }
+    },
+    {
+      "id": "55465afe7d68608-751f3d70b3a3141",
+      "title": "Entity Store supervises maintainer (raw_identifiers, user → user) writes only targets that exist as entities, drops phantom raw_identifiers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
+        "line": 286,
+        "column": 14
+      }
+    },
+    {
+      "id": "55465afe7d68608-74714abc735e645",
+      "title": "Entity Store supervises maintainer (raw_identifiers, user → user) resolves supervises.ids when raw identifier is in user.id only (no email)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
+        "line": 324,
+        "column": 14
+      }
+    },
+    {
+      "id": "55465afe7d68608-c4febead3b6f712",
+      "title": "Entity Store supervises maintainer (raw_identifiers, user → user) skips an actor whose entity.source is not 'entityanalytics_okta'",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
+        "line": 354,
+        "column": 14
       }
     }
   ]
