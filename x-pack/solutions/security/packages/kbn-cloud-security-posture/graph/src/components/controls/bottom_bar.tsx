@@ -120,7 +120,7 @@ const InteractionToolButton = ({
 
     &:hover:not(:disabled),
     &:focus-visible:not(:disabled) {
-      background-color: ${euiTheme.components.button.backgroundFilledPrimaryHover};
+      background-color: ${euiTheme.components.buttons.backgroundFilledPrimaryHover};
     }
   `;
 
