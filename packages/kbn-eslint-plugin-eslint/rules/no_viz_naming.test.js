@@ -83,6 +83,11 @@ ruleTester.run('@kbn/eslint/no_viz_naming', rule, {
       errors: [{ messageId: 'noVizLiteral' }],
       output: 'const key = "visState";',
     },
+    {
+      code: "const key = 'a\\'viz';",
+      errors: [{ messageId: 'noVizLiteral' }],
+      output: "const key = 'a\\'vis';",
+    },
     // filename violations
     {
       code: 'const x = 1;',

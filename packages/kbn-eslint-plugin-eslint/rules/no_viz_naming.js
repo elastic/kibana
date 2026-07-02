@@ -54,13 +54,12 @@ module.exports = {
 
       const fixed = fixName(node.value);
       const raw = context.getSourceCode().getText(node);
-      const quote = raw[0];
 
       context.report({
         node,
         messageId: 'noVizLiteral',
         data: { name: node.value, fixed },
-        fix: (fixer) => fixer.replaceText(node, quote + fixed + quote),
+        fix: (fixer) => fixer.replaceText(node, fixName(raw)),
       });
     },
     Identifier(node) {
