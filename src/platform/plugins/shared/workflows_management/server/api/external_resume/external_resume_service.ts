@@ -254,11 +254,16 @@ async function resolveExternalResumeContext(
     throw new ExternalResumeError('Workflow execution not found', 404);
   }
 
-  const stepExecution = getExternalResumeStepExecution(execution, authenticatedApiKeyId);
+  const lookup = getExternalResumeStepExecution(execution, authenticatedApiKeyId);
 
-  if (!stepExecution) {
-    throw new ExternalResumeError('API key does not match this workflow execution', 403);
+  if ('reason' in lookup) {
+    if (lookup.reason === 'api_key_mismatch') {
+      throw new ExternalResumeError('API key does not match this workflow execution', 403);
+    }
+    throw new ExternalResumeError('This workflow response link is no longer valid', 409);
   }
+
+  const { stepExecution } = lookup;
 
   if (stepExecution.finishedAt || stepExecution.error) {
     throw new ExternalResumeError('This workflow response link is no longer valid', 409);
@@ -321,6 +326,15 @@ async function resumeWorkflowExecutionWithResolvedContext(
   }
 }
 
+type ExternalResumeStepLookupFailureReason =
+  | 'execution_not_waiting'
+  | 'execution_finished'
+  | 'api_key_mismatch';
+
+type ExternalResumeStepLookupResult =
+  | { stepExecution: WorkflowStepExecutionDto }
+  | { reason: ExternalResumeStepLookupFailureReason };
+
 function getExternalResumeStepExecution(
   execution: {
     id: string;
@@ -329,22 +343,28 @@ function getExternalResumeStepExecution(
     stepExecutions: WorkflowStepExecutionDto[];
   },
   apiKeyId: string
-): WorkflowStepExecutionDto | undefined {
+): ExternalResumeStepLookupResult {
   if (execution.status !== ExecutionStatus.WAITING_FOR_INPUT) {
-    return undefined;
+    return { reason: 'execution_not_waiting' };
   }
 
   if (execution.finishedAt) {
-    return undefined;
+    return { reason: 'execution_finished' };
   }
 
-  return execution.stepExecutions.find(
-    (stepExecution) =>
-      stepExecution.workflowRunId === execution.id &&
-      isHitlWaitStepType(stepExecution.stepType) &&
-      stepExecution.status === ExecutionStatus.WAITING_FOR_INPUT &&
-      getExternalResumeApiKeyId(stepExecution.input) === apiKeyId
+  const stepExecution = execution.stepExecutions.find(
+    (candidate) =>
+      candidate.workflowRunId === execution.id &&
+      isHitlWaitStepType(candidate.stepType) &&
+      candidate.status === ExecutionStatus.WAITING_FOR_INPUT &&
+      getExternalResumeApiKeyId(candidate.input) === apiKeyId
   );
+
+  if (!stepExecution) {
+    return { reason: 'api_key_mismatch' };
+  }
+
+  return { stepExecution };
 }
 
 export function getExternalResumeApiKeyId(input: unknown): string | undefined {

@@ -62,6 +62,7 @@ export function resumeHitlWaitStep({
   workflowRuntime.navigateToNextNode();
 }
 
+/** Skip wait-entry when the step runtime was already aborted (timeout/cancel race) to avoid re-entering WAITING_FOR_INPUT. */
 export function shouldSkipHitlWaitEntry(stepExecutionRuntime: StepExecutionRuntime): boolean {
   return stepExecutionRuntime.abortController.signal.aborted;
 }

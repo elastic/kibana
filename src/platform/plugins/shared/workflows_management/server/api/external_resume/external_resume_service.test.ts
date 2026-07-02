@@ -190,6 +190,45 @@ describe('resumeWorkflowExecutionExternally', () => {
     );
   });
 
+  it('rejects when the execution is no longer waiting for input', async () => {
+    workflowsService.getWorkflowExecution.mockResolvedValue({
+      id: 'exec-1',
+      status: ExecutionStatus.RUNNING,
+      stepExecutions: [],
+    } as unknown as WorkflowExecutionDto);
+
+    await expect(
+      resumeWorkflowExecutionExternally(workflowsService, {
+        approved: true,
+        executionId: 'exec-1',
+        spaceId: 'default',
+        apiKey: ENCODED_API_KEY,
+      })
+    ).rejects.toEqual(
+      new ExternalResumeError('This workflow response link is no longer valid', 409)
+    );
+  });
+
+  it('rejects when the execution finishedAt is set while still marked waiting', async () => {
+    workflowsService.getWorkflowExecution.mockResolvedValue({
+      id: 'exec-1',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      finishedAt: '2026-01-01T00:00:00.000Z',
+      stepExecutions: [],
+    } as unknown as WorkflowExecutionDto);
+
+    await expect(
+      resumeWorkflowExecutionExternally(workflowsService, {
+        approved: true,
+        executionId: 'exec-1',
+        spaceId: 'default',
+        apiKey: ENCODED_API_KEY,
+      })
+    ).rejects.toEqual(
+      new ExternalResumeError('This workflow response link is no longer valid', 409)
+    );
+  });
+
   it('maps engine invalid-status errors to ExternalResumeError', async () => {
     workflowsService.getWorkflowsExecutionEngine.mockResolvedValue({
       resumeWorkflowExecution: jest
