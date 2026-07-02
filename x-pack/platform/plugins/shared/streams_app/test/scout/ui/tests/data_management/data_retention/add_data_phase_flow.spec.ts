@@ -7,36 +7,41 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { omit } from 'lodash';
 
 import { test } from '../../../fixtures';
-import { closeToastsIfPresent } from '../../../fixtures/data_lifecycle_helpers';
+import {
+  RETENTION_TEST_IDS,
+  closeToastsIfPresent,
+  setStreamDslLifecycle,
+} from '../../../fixtures/data_lifecycle_helpers';
 
 const STREAM = 'logs.otel.nginx';
 
-// Test IDs for the stateful DLM "Add data phase" flow (issue #267912).
-const ADD_DATA_PHASE_BUTTON = 'dataLifecycleSummaryAddDataPhaseButton';
-const ADD_DELETE_PHASE_BUTTON = 'dataLifecycleSummaryAddDeletePhase';
-const ADD_DATA_PHASE_POPOVER = 'dataLifecycleSummaryAddDataPhasePopover';
-const FROZEN_OPTION = 'dataLifecycleSummaryAddDataPhaseOption-frozen';
-const DELETE_OPTION = 'dataLifecycleSummaryAddDataPhaseOption-delete';
-const FROZEN_DEFAULT_REPO_BADGE =
-  'dataLifecycleSummaryAddDataPhaseOption-frozen-defaultRepositoryRequiredBadge';
-const DATA_PHASES_FLYOUT = 'streamsEditDataPhasesFlyout';
-const DATA_PHASES_FLYOUT_FROZEN_PANEL = 'streamsEditDataPhasesFlyoutPanel-frozen';
-const DATA_PHASES_FLYOUT_DELETE_PANEL = 'streamsEditDataPhasesFlyoutPanel-delete';
-// Both the frozen and delete panels render the same "move after" value/unit test ids, so callers
-// must scope these to the relevant panel (…Panel-frozen / …Panel-delete) before using them.
-const DATA_PHASES_FLYOUT_MOVE_AFTER_VALUE = 'streamsEditDataPhasesFlyoutMoveAfterValue';
-const DATA_PHASES_FLYOUT_MOVE_AFTER_UNIT = 'streamsEditDataPhasesFlyoutMoveAfterUnit';
-const DATA_PHASES_FLYOUT_SAVE = 'streamsEditDataPhasesFlyoutSaveButton';
-const DATA_PHASES_FLYOUT_CANCEL = 'streamsEditDataPhasesFlyoutCancelButton';
-const DEFAULT_REPO_MODAL_TITLE = 'streamsDlmFrozenDefaultRepositoryRequiredModalTitle';
-const DEFAULT_REPO_MODAL_REFRESH = 'streamsDlmFrozenDefaultRepositoryRequiredModalRefreshButton';
-// The frozen phase's timeline test id uses its localized, capitalized display label ("Frozen").
-const FROZEN_PHASE_BUTTON = 'lifecyclePhase-Frozen-button';
-const FROZEN_PHASE_EDIT_BUTTON = 'lifecyclePhase-Frozen-editButton';
-const FROZEN_PHASE_REMOVE_BUTTON = 'lifecyclePhase-Frozen-removeButton';
+// Test IDs for the stateful DLM "Add data phase" flow (issue #267912) — sourced from the shared
+// RETENTION_TEST_IDS so app-side id changes only need updating in one place.
+const {
+  addDataPhaseButton: ADD_DATA_PHASE_BUTTON,
+  addDeletePhaseButton: ADD_DELETE_PHASE_BUTTON,
+  addDataPhasePopover: ADD_DATA_PHASE_POPOVER,
+  addDataPhaseFrozenOption: FROZEN_OPTION,
+  addDataPhaseDeleteOption: DELETE_OPTION,
+  frozenDefaultRepositoryRequiredBadge: FROZEN_DEFAULT_REPO_BADGE,
+  dataPhasesFlyout: DATA_PHASES_FLYOUT,
+  dataPhasesFrozenPanel: DATA_PHASES_FLYOUT_FROZEN_PANEL,
+  dataPhasesDeletePanel: DATA_PHASES_FLYOUT_DELETE_PANEL,
+  dataPhasesMoveAfterValue: DATA_PHASES_FLYOUT_MOVE_AFTER_VALUE,
+  dataPhasesMoveAfterUnit: DATA_PHASES_FLYOUT_MOVE_AFTER_UNIT,
+  dataPhasesSaveButton: DATA_PHASES_FLYOUT_SAVE,
+  dataPhasesCancelButton: DATA_PHASES_FLYOUT_CANCEL,
+  defaultRepositoryRequiredModalTitle: DEFAULT_REPO_MODAL_TITLE,
+  defaultRepositoryRequiredModalRefreshButton: DEFAULT_REPO_MODAL_REFRESH,
+  deletePhaseTimelineButton: DELETE_PHASE_BUTTON,
+  deletePhaseTimelineEditButton: DELETE_PHASE_EDIT_BUTTON,
+  frozenPhaseTimelineButton: FROZEN_PHASE_BUTTON,
+  frozenPhaseTimelineEditButton: FROZEN_PHASE_EDIT_BUTTON,
+  frozenPhaseTimelineRemoveButton: FROZEN_PHASE_REMOVE_BUTTON,
+  retentionMetricSubtitle: RETENTION_METRIC_SUBTITLE,
+} = RETENTION_TEST_IDS;
 
 // The "Add data phase" flow (hot → frozen → delete) is a stateful-only feature: serverless has no
 // tiers and uses the dedicated "Add delete phase" button instead.
@@ -61,14 +66,7 @@ test.describe(
       });
 
       await apiServices.streams.clearStreamChildren('logs.otel');
-      const logsDefinition = await apiServices.streams.getStreamDefinition('logs.otel');
-      await apiServices.streams.updateStream('logs.otel', {
-        ingest: {
-          ...logsDefinition.stream.ingest,
-          processing: omit(logsDefinition.stream.ingest.processing, 'updated_at'),
-          lifecycle: { dsl: {} },
-        },
-      });
+      await setStreamDslLifecycle(apiServices.streams, 'logs.otel', {});
       await apiServices.streams.forkStream('logs.otel', STREAM, {
         field: 'service.name',
         eq: 'nginx',
@@ -77,14 +75,7 @@ test.describe(
 
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-      const childDefinition = await apiServices.streams.getStreamDefinition(STREAM);
-      await apiServices.streams.updateStream(STREAM, {
-        ingest: {
-          ...childDefinition.stream.ingest,
-          processing: omit(childDefinition.stream.ingest.processing, 'updated_at'),
-          lifecycle: { dsl: {} },
-        },
-      });
+      await setStreamDslLifecycle(apiServices.streams, STREAM, {});
       await pageObjects.streams.gotoDataRetentionTab(STREAM);
     });
 
@@ -132,8 +123,8 @@ test.describe(
       });
 
       await test.step('the timeline reflects the new delete phase', async () => {
-        await expect(page.getByTestId('lifecyclePhase-delete-button')).toBeVisible();
-        await expect(page.getByTestId('retention-metric-subtitle')).toContainText('2 data phases');
+        await expect(page.getByTestId(DELETE_PHASE_BUTTON)).toBeVisible();
+        await expect(page.getByTestId(RETENTION_METRIC_SUBTITLE)).toContainText('2 data phases');
       });
     });
 
@@ -159,14 +150,7 @@ test.describe(
 
       try {
         // Reset to a clean DSL lifecycle and reload so the gating hook re-fetches the new default.
-        const childDefinition = await apiServices.streams.getStreamDefinition(STREAM);
-        await apiServices.streams.updateStream(STREAM, {
-          ingest: {
-            ...childDefinition.stream.ingest,
-            processing: omit(childDefinition.stream.ingest.processing, 'updated_at'),
-            lifecycle: { dsl: {} },
-          },
-        });
+        await setStreamDslLifecycle(apiServices.streams, STREAM, {});
         await pageObjects.streams.gotoDataRetentionTab(STREAM);
 
         await test.step('open the data phases flyout on the frozen phase (no gating)', async () => {
@@ -264,21 +248,14 @@ test.describe(
       apiServices,
       pageObjects,
     }) => {
-      const childDefinition = await apiServices.streams.getStreamDefinition(STREAM);
-      await apiServices.streams.updateStream(STREAM, {
-        ingest: {
-          ...childDefinition.stream.ingest,
-          processing: omit(childDefinition.stream.ingest.processing, 'updated_at'),
-          lifecycle: { dsl: { data_retention: '30d' } },
-        },
-      });
+      await setStreamDslLifecycle(apiServices.streams, STREAM, { data_retention: '30d' });
       await pageObjects.streams.gotoDataRetentionTab(STREAM);
 
-      await page.getByTestId('lifecyclePhase-delete-button').click();
-      await page.getByTestId('lifecyclePhase-delete-editButton').click();
+      await page.getByTestId(DELETE_PHASE_BUTTON).click();
+      await page.getByTestId(DELETE_PHASE_EDIT_BUTTON).click();
 
       await expect(page.getByTestId(DATA_PHASES_FLYOUT)).toBeVisible();
-      await expect(page.getByTestId(`${DATA_PHASES_FLYOUT}Panel-delete`)).toBeVisible();
+      await expect(page.getByTestId(DATA_PHASES_FLYOUT_DELETE_PANEL)).toBeVisible();
     });
 
     test('disables "Add data phase" when both frozen and delete phases are configured', async ({
@@ -286,13 +263,9 @@ test.describe(
       apiServices,
       pageObjects,
     }) => {
-      const childDefinition = await apiServices.streams.getStreamDefinition(STREAM);
-      await apiServices.streams.updateStream(STREAM, {
-        ingest: {
-          ...childDefinition.stream.ingest,
-          processing: omit(childDefinition.stream.ingest.processing, 'updated_at'),
-          lifecycle: { dsl: { frozen_after: '10d', data_retention: '30d' } },
-        },
+      await setStreamDslLifecycle(apiServices.streams, STREAM, {
+        frozen_after: '10d',
+        data_retention: '30d',
       });
       await pageObjects.streams.gotoDataRetentionTab(STREAM);
 
@@ -304,14 +277,7 @@ test.describe(
       apiServices,
       pageObjects,
     }) => {
-      const childDefinition = await apiServices.streams.getStreamDefinition(STREAM);
-      await apiServices.streams.updateStream(STREAM, {
-        ingest: {
-          ...childDefinition.stream.ingest,
-          processing: omit(childDefinition.stream.ingest.processing, 'updated_at'),
-          lifecycle: { dsl: { frozen_after: '10d' } },
-        },
-      });
+      await setStreamDslLifecycle(apiServices.streams, STREAM, { frozen_after: '10d' });
       await pageObjects.streams.gotoDataRetentionTab(STREAM);
 
       // The frozen phase's timeline label is the localized, capitalized "Frozen".
@@ -319,11 +285,11 @@ test.describe(
         await page.getByTestId(FROZEN_PHASE_BUTTON).click();
         await page.getByTestId(FROZEN_PHASE_EDIT_BUTTON).click();
         await expect(page.getByTestId(DATA_PHASES_FLYOUT)).toBeVisible();
-        await expect(page.getByTestId(`${DATA_PHASES_FLYOUT}Panel-frozen`)).toBeVisible();
+        await expect(page.getByTestId(DATA_PHASES_FLYOUT_FROZEN_PANEL)).toBeVisible();
       });
 
       await test.step('remove deletes the frozen phase from the timeline', async () => {
-        await page.getByTestId(`${DATA_PHASES_FLYOUT}CancelButton`).click();
+        await page.getByTestId(DATA_PHASES_FLYOUT_CANCEL).click();
         await page.getByTestId(DATA_PHASES_FLYOUT).waitFor({ state: 'hidden' });
 
         await page.getByTestId(FROZEN_PHASE_BUTTON).click();

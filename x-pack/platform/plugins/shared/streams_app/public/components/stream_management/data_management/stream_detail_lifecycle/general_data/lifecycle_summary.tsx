@@ -44,6 +44,14 @@ import type {
 } from '../data_phases/ilm_phase_select/ilm_phase_select';
 import { IlmPhaseSelect } from '../data_phases/ilm_phase_select/ilm_phase_select';
 import type { FrozenPhaseCallouts } from '../common/data_lifecycle/data_lifecycle_summary';
+import { getFrozenPhaseLabel } from '../common/data_lifecycle/lifecycle_types';
+
+const getRemovablePhaseLabel = (phaseName: string): string =>
+  phaseName === 'frozen'
+    ? getFrozenPhaseLabel()
+    : i18n.translate('xpack.streams.dataLifecycleSummary.deletePhaseLabel', {
+        defaultMessage: 'Delete',
+      });
 
 const addPhaseButtonLabel = i18n.translate(
   'xpack.streams.dataLifecycleSummary.addPhaseButtonLabel',
@@ -660,6 +668,7 @@ const NonIlmLifecycleSummary = ({
                   const { [removedKey]: _removed, ...rest } = baseline.dsl;
                   const nextLifecycle: IngestStreamLifecycle = { dsl: { ...rest } };
 
+                  const phaseLabel = getRemovablePhaseLabel(phaseName);
                   const performRemove = async () => {
                     try {
                       await updateStreamLifecycle(nextLifecycle);
@@ -668,7 +677,7 @@ const NonIlmLifecycleSummary = ({
                           'xpack.streams.dataLifecycleSummary.removeDataPhaseSuccess',
                           {
                             defaultMessage: '{phase} phase removed',
-                            values: { phase: phaseName },
+                            values: { phase: phaseLabel },
                           }
                         ),
                       });
@@ -679,7 +688,7 @@ const NonIlmLifecycleSummary = ({
                           'xpack.streams.dataLifecycleSummary.removeDataPhaseError',
                           {
                             defaultMessage: 'Failed to remove {phase} phase',
-                            values: { phase: phaseName },
+                            values: { phase: phaseLabel },
                           }
                         ),
                       });

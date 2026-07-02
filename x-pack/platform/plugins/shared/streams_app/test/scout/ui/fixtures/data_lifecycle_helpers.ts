@@ -33,17 +33,35 @@ export const RETENTION_TEST_IDS = {
   // On stateful the delete-only button/flyout above is replaced by this popover + flyout
   // (stateful is gated on `!isServerless`), so the delete phase is configured here instead.
   addDataPhaseButton: 'dataLifecycleSummaryAddDataPhaseButton',
+  addDataPhasePopover: 'dataLifecycleSummaryAddDataPhasePopover',
+  addDataPhaseFrozenOption: 'dataLifecycleSummaryAddDataPhaseOption-frozen',
   addDataPhaseDeleteOption: 'dataLifecycleSummaryAddDataPhaseOption-delete',
+  frozenDefaultRepositoryRequiredBadge:
+    'dataLifecycleSummaryAddDataPhaseOption-frozen-defaultRepositoryRequiredBadge',
   dataPhasesFlyout: 'streamsEditDataPhasesFlyout',
+  dataPhasesFrozenPanel: 'streamsEditDataPhasesFlyoutPanel-frozen',
   dataPhasesDeletePanel: 'streamsEditDataPhasesFlyoutPanel-delete',
-  dataPhasesDeleteValue: 'streamsEditDataPhasesFlyoutMoveAfterValue',
-  dataPhasesDeleteUnit: 'streamsEditDataPhasesFlyoutMoveAfterUnit',
+  // The frozen and delete panels render the same "move after" value/unit ids, so scope them to the
+  // relevant panel (frozen/delete) before using.
+  dataPhasesMoveAfterValue: 'streamsEditDataPhasesFlyoutMoveAfterValue',
+  dataPhasesMoveAfterUnit: 'streamsEditDataPhasesFlyoutMoveAfterUnit',
   dataPhasesSaveButton: 'streamsEditDataPhasesFlyoutSaveButton',
+  dataPhasesCancelButton: 'streamsEditDataPhasesFlyoutCancelButton',
   dataPhasesRemoveDeleteButton: 'streamsEditDataPhasesFlyoutRemoveDeletePhaseButton',
+
+  // Frozen-phase gating "default snapshot repository required" modal.
+  defaultRepositoryRequiredModalTitle: 'streamsDlmFrozenDefaultRepositoryRequiredModalTitle',
+  defaultRepositoryRequiredModalRefreshButton:
+    'streamsDlmFrozenDefaultRepositoryRequiredModalRefreshButton',
 
   // Timeline phase popover actions for the (successful data) delete phase — same in both flows.
   deletePhaseTimelineButton: 'lifecyclePhase-delete-button',
   deletePhaseTimelineEditButton: 'lifecyclePhase-delete-editButton',
+  // Timeline phase popover actions for the frozen phase (stateful only). The id uses the localized,
+  // capitalized display label ("Frozen").
+  frozenPhaseTimelineButton: 'lifecyclePhase-Frozen-button',
+  frozenPhaseTimelineEditButton: 'lifecyclePhase-Frozen-editButton',
+  frozenPhaseTimelineRemoveButton: 'lifecyclePhase-Frozen-removeButton',
 
   // Lifecycle method cards (DLM / ILM)
   methodCardDlm: 'editDataLifecycle-methodCard-dlm',
@@ -56,6 +74,7 @@ export const RETENTION_TEST_IDS = {
 
   // Display elements
   retentionMetric: 'retention-metric',
+  retentionMetricSubtitle: 'retention-metric-subtitle',
   retentionColumn: (streamName: string) => `retentionColumn-${streamName}`,
   failureStoreRetentionMetric: 'failureStoreRetention-metric',
   failureStoreRetentionMetricSubtitle: 'failureStoreRetention-metric-subtitle',
@@ -206,8 +225,8 @@ const dataPhaseFlow = (page: ScoutPage): DeletePhaseFlyout => {
   return {
     flyout,
     fields: flyout.getByTestId(RETENTION_TEST_IDS.dataPhasesDeletePanel),
-    valueTestId: RETENTION_TEST_IDS.dataPhasesDeleteValue,
-    unitTestId: RETENTION_TEST_IDS.dataPhasesDeleteUnit,
+    valueTestId: RETENTION_TEST_IDS.dataPhasesMoveAfterValue,
+    unitTestId: RETENTION_TEST_IDS.dataPhasesMoveAfterUnit,
     applyTestId: RETENTION_TEST_IDS.dataPhasesSaveButton,
     removeTestId: RETENTION_TEST_IDS.dataPhasesRemoveDeleteButton,
     isDataPhaseFlow: true,
