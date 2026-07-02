@@ -8,7 +8,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSpacer, useEuiTheme, EuiText, EuiSwitch } from '@elastic/eui';
-import { isSourceParamsESQL, type ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { type ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { NameInput } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
 import type {
@@ -143,16 +143,9 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     activeColumnMeta != null
       ? activeColumnMeta?.type === 'number'
       : selectedField?.meta?.type === 'number';
-  const sourceParams = activeColumnMeta?.sourceParams;
 
-  // Check if the column is a date histogram column, is there a better way to do this?
   const isDateHistogramColumn =
-    sourceParams &&
-    isSourceParamsESQL(sourceParams) &&
-    typeof sourceParams.params === 'object' &&
-    sourceParams.params !== null &&
-    'used_interval' in sourceParams.params &&
-    typeof sourceParams.params.used_interval === 'string';
+    activeColumnMeta?.esType === 'date' && activeColumnMeta?.esMeta?.bucket !== null;
 
   return (
     <>
