@@ -7,6 +7,7 @@
 
 import type { SavedObjectsServiceStart } from '@kbn/core/server';
 import { type ElasticsearchClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import type { AgentPolicyServiceInterface, AgentService } from '@kbn/fleet-plugin/server';
 import type { Agent, GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
@@ -61,12 +62,16 @@ export const createEndpointMetadataServiceTestContextMock =
       savedObjects: savedObjectsServiceFactory,
     }).service.asInternalUser();
     const endpointAppContextService = createMockEndpointAppContextService();
+
+    endpointAppContextService.getInternalEsClient.mockReturnValue(esClient);
+    endpointAppContextService.getInternalFleetServices.mockReturnValue(fleetServices);
+    endpointAppContextService.createLogger.mockReturnValue(logger);
+    (
+      endpointAppContextService.savedObjects.createInternalScopedSoClient as jest.Mock
+    ).mockReturnValue(savedObjectsServiceFactory.createInternalScopedSoClient({ readonly: false }));
     const endpointMetadataService = new EndpointMetadataService(
-      esClient,
-      savedObjectsServiceFactory.createInternalScopedSoClient({ readonly: false }),
-      fleetServices,
       endpointAppContextService,
-      logger
+      DEFAULT_SPACE_ID
     );
 
     fleetServices.packagePolicy.list.mockImplementation(async (_, options) => {

@@ -299,7 +299,13 @@ export class EndpointAppContextService {
       const hasRemoteClusters = await checkConnectedRemoteClusters(this.getInternalEsClient());
       this.ccsCache.set(CCS_CACHE_KEY, hasRemoteClusters);
       return hasRemoteClusters;
-    } catch {
+    } catch (error) {
+      // Don't cache the failure (so a transient error retries next call), but leave a breadcrumb —
+      // otherwise a persistent `_remote/info` failure (e.g. missing privileges on the internal user)
+      // is indistinguishable from "no remotes connected" for an operator debugging missing endpoints.
+      this.createLogger('isCcsEnabled').debug(
+        `Failed to check connected remote clusters; treating CCS as disabled: ${error.message}`
+      );
       return false;
     }
   }
@@ -355,13 +361,7 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    return new EndpointMetadataService(
-      this.startDependencies.esClient,
-      this.savedObjects.createInternalScopedSoClient({ readonly: false, spaceId }),
-      this.getInternalFleetServices(spaceId),
-      this,
-      this.createLogger('endpointMetadata')
-    );
+    return new EndpointMetadataService(this, spaceId);
   }
 
   /**

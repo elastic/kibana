@@ -10,6 +10,7 @@ import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@k
 import type { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   HostInfo,
   HostMetadata,
@@ -59,13 +60,23 @@ const isAgentPolicyWithPackagePolicies = (
 };
 
 export class EndpointMetadataService {
+  private readonly esClient: ElasticsearchClient;
+  private readonly soClient: SavedObjectsClientContract;
+  private readonly fleetServices: EndpointFleetServicesInterface;
+  private readonly logger: Logger;
+
   constructor(
-    private readonly esClient: ElasticsearchClient,
-    private readonly soClient: SavedObjectsClientContract,
-    private readonly fleetServices: EndpointFleetServicesInterface,
     private readonly endpointContext: EndpointAppContextService,
-    private readonly logger?: Logger
-  ) {}
+    spaceId: string = DEFAULT_SPACE_ID
+  ) {
+    this.esClient = endpointContext.getInternalEsClient();
+    this.soClient = endpointContext.savedObjects.createInternalScopedSoClient({
+      readonly: false,
+      spaceId,
+    });
+    this.fleetServices = endpointContext.getInternalFleetServices(spaceId);
+    this.logger = endpointContext.createLogger('endpointMetadata');
+  }
 
   /**
    * Validates that the data retrieved is valid for the current user space. We do this
@@ -80,7 +91,7 @@ export class EndpointMetadataService {
       .filter((id) => !!id);
 
     if (agentIds.length > 0) {
-      this.logger?.debug(
+      this.logger.debug(
         `Checking to see if the following agent ids are valid for current space:\n${agentIds.join(
           '\n'
         )}`
@@ -150,13 +161,13 @@ export class EndpointMetadataService {
     try {
       if (!fleetAgentId) {
         fleetAgentId = endpointMetadata.agent.id;
-        this.logger?.warn(`Missing elastic agent id, using host id instead ${fleetAgentId}`);
+        this.logger.warn(`Missing elastic agent id, using host id instead ${fleetAgentId}`);
       }
 
       fleetAgent = await this.getFleetAgent(fleetAgentId);
     } catch (error) {
       if (error instanceof FleetAgentNotFoundError) {
-        this.logger?.debug(`agent with id ${fleetAgentId} not found`);
+        this.logger.debug(`agent with id ${fleetAgentId} not found`);
       } else {
         throw error;
       }
@@ -211,7 +222,7 @@ export class EndpointMetadataService {
       try {
         if (!fleetAgentId) {
           fleetAgentId = endpointMetadata.agent.id;
-          this.logger?.warn(
+          this.logger.warn(
             new EndpointError(
               `Missing elastic fleet agent id on Endpoint Metadata doc - using Endpoint agent.id instead: ${fleetAgentId}`
             )
@@ -221,7 +232,7 @@ export class EndpointMetadataService {
         fleetAgent = await this.getFleetAgent(fleetAgentId);
       } catch (error) {
         if (error instanceof FleetAgentNotFoundError) {
-          this.logger?.warn(`Agent with id ${fleetAgentId} not found`);
+          this.logger.warn(`Agent with id ${fleetAgentId} not found`);
         } else {
           throw error;
         }
@@ -232,7 +243,7 @@ export class EndpointMetadataService {
       try {
         fleetAgentPolicy = await this.getFleetAgentPolicy(fleetAgent.policy_id ?? '');
       } catch (error) {
-        this.logger?.error(error);
+        this.logger.error(error);
       }
     }
 
@@ -254,7 +265,7 @@ export class EndpointMetadataService {
           endpointMetadata.Endpoint.policy.applied.id
         );
       } catch (error) {
-        this.logger?.error(error);
+        this.logger.error(error);
       }
     }
     return {
@@ -380,7 +391,7 @@ export class EndpointMetadataService {
       }
 
       const err = wrapErrorIfNeeded(error);
-      this.logger?.error(err);
+      this.logger.error(err);
       throw err;
     }
 
