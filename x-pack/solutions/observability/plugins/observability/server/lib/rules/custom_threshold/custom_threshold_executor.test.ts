@@ -16,7 +16,7 @@ import {
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server/task_running/errors';
 import { createCustomThresholdExecutor } from './custom_threshold_executor';
-import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
+import { FIRED_ACTION, WARNING_ACTION, NO_DATA_ACTION } from './constants';
 import type { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
@@ -443,6 +443,75 @@ describe('The custom threshold alert type', () => {
         expect(reportedAlert?.context?.group).toBeUndefined();
         expect(reportedAlert?.context?.reason).toBe(
           'Average test.metric.1 is 1, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName)'
+        );
+      });
+    });
+
+    describe('querying the entire infrastructure with warning threshold', () => {
+      beforeEach(() => jest.clearAllMocks());
+      afterAll(() => clearInstances());
+      const instanceID = '*';
+      const execute = () =>
+        executor({
+          ...mockOptions,
+          services,
+          params: {
+            ...mockOptions.params,
+            criteria: [
+              {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [9.999],
+                warningComparator: COMPARATORS.GREATER_THAN,
+                warningThreshold: [2.49],
+              },
+            ],
+          },
+        });
+
+      const setResults = ({
+        currentValue = 7.59,
+        shouldWarn = false,
+      }: {
+        currentValue?: number;
+        shouldWarn?: boolean;
+      }) =>
+        setEvaluationResults([
+          {
+            '*': {
+              ...customThresholdNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [9.999],
+              warningComparator: COMPARATORS.GREATER_THAN,
+              warningThreshold: [2.49],
+              currentValue,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn,
+              isNoData: false,
+              bucketKey: { groupBy0: '*' },
+            },
+          },
+        ]);
+
+      test('warns as expected with the > comparator', async () => {
+        setResults({ currentValue: 2.5, shouldWarn: true });
+        await execute();
+        expect(getLastReportedAlert(instanceID)).toHaveWarningAction();
+
+        setResults({ currentValue: 1.23, shouldWarn: false });
+        await execute();
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+
+      test('writes kibana.alert.severity: warning and the warning-threshold reason', async () => {
+        setResults({ currentValue: 2.5, shouldWarn: true });
+        await execute();
+        const reportedAlert = getLastReportedAlert(instanceID);
+        expect(reportedAlert?.actionGroup).toBe(WARNING_ACTION.id);
+        expect(reportedAlert?.payload).toMatchObject({ 'kibana.alert.severity': 'warning' });
+        expect(reportedAlert?.context?.reason).toBe(
+          'Average test.metric.1 is 2.5, above the threshold of 2.49. (duration: 1 min, data view: mockedDataViewName)'
         );
       });
     });
@@ -1202,6 +1271,7 @@ describe('The custom threshold alert type', () => {
         ]);
         // Payload should include group field (i.e. 'host.name': 'host-01')
         expect(reportedAlertInstanceIdA?.payload).toStrictEqual({
+          'kibana.alert.severity': 'critical',
           'host.name': 'host-01',
           'kibana.alert.evaluation.threshold': [0.75],
           'kibana.alert.evaluation.time_range': expect.any(Object),
@@ -1227,6 +1297,7 @@ describe('The custom threshold alert type', () => {
         ]);
         // Payload should include group field (i.e. 'host.name': 'host-02')
         expect(reportedAlertInstanceIdB?.payload).toStrictEqual({
+          'kibana.alert.severity': 'critical',
           'host.name': 'host-02',
           'kibana.alert.evaluation.threshold': [0.75],
           'kibana.alert.evaluation.time_range': expect.any(Object),
@@ -1502,6 +1573,7 @@ describe('The custom threshold alert type', () => {
         expect(reportedAlertInstanceIdA).toHaveAlertAction();
         // Payload should not include group field (i.e. groupByField)
         expect(reportedAlertInstanceIdA?.payload).toEqual({
+          'kibana.alert.severity': 'critical',
           'kibana.alert.evaluation.threshold': [1, 3],
           'kibana.alert.evaluation.time_range': expect.any(Object),
           'kibana.alert.evaluation.values': [1, 3],
@@ -4197,6 +4269,7 @@ describe('The custom threshold alert type', () => {
         ]);
         // Payload should include group field (i.e. 'host.name': 'host-01')
         expect(reportedAlertInstanceIdA?.payload).toStrictEqual({
+          'kibana.alert.severity': 'critical',
           'host.name': 'host-01',
           'kibana.alert.evaluation.threshold': [0.75],
           'kibana.alert.evaluation.time_range': expect.any(Object),
@@ -4222,6 +4295,7 @@ describe('The custom threshold alert type', () => {
         ]);
         // Payload should include group field (i.e. 'host.name': 'host-02')
         expect(reportedAlertInstanceIdB?.payload).toStrictEqual({
+          'kibana.alert.severity': 'critical',
           'host.name': 'host-02',
           'kibana.alert.evaluation.threshold': [0.75],
           'kibana.alert.evaluation.time_range': expect.any(Object),
@@ -4497,6 +4571,7 @@ describe('The custom threshold alert type', () => {
         expect(reportedAlertInstanceIdA).toHaveAlertAction();
         // Payload should not include group field (i.e. groupByField)
         expect(reportedAlertInstanceIdA?.payload).toEqual({
+          'kibana.alert.severity': 'critical',
           'kibana.alert.evaluation.threshold': [1, 3],
           'kibana.alert.evaluation.time_range': expect.any(Object),
           'kibana.alert.evaluation.values': [1, 3],
@@ -5324,6 +5399,14 @@ expect.extend({
       pass,
     };
   },
+  toHaveWarningAction(action?: Action) {
+    const pass = action?.actionGroup === WARNING_ACTION.id;
+    const message = () => `expected ${action} to be a WARNING action`;
+    return {
+      message,
+      pass,
+    };
+  },
 });
 
 declare global {
@@ -5332,6 +5415,7 @@ declare global {
     interface Matchers<R> {
       toHaveAlertAction(action?: Action): R;
       toHaveNoDataAction(action?: Action): R;
+      toHaveWarningAction(action?: Action): R;
     }
   }
 }
