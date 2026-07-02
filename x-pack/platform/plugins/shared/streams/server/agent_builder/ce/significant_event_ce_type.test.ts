@@ -107,18 +107,30 @@ describe('createSignificantEventCeType', () => {
         expect.objectContaining({
           type: SIGNIFICANT_EVENT_CE_TYPE,
           title: 'Payment outage',
-          permissions: {
-            kibana: { privileges: [{ name: 'api:read_stream' }] },
-            elasticsearch: { indices: [] },
-          },
         }),
       ],
     });
+    expect(result?.entries[0]).not.toHaveProperty('permissions');
     expect(result?.entries[0].content).toContain('Payment gateway timeout.');
     expect(findByDiscoverySlug).toHaveBeenCalledWith('payment-outage');
   });
 
-  it('converts a CE document into an attachment', async () => {
+  it('getPermissions returns the streams read API privilege', () => {
+    const ceType = createSignificantEventCeType({
+      getScopedClients: createGetScopedClients([]),
+    });
+    const permissions = ceType.getPermissions!('payment-outage', {
+      esClient: {} as never,
+      savedObjectsClient: {} as never,
+      logger: loggingSystemMock.createLogger(),
+    });
+    expect(permissions).toEqual({
+      kibana: { privileges: [{ name: 'api:read_stream' }] },
+      elasticsearch: { indices: [] },
+    });
+  });
+
+  it('converts an CE document into an attachment', async () => {
     const ceType = createSignificantEventCeType({
       getScopedClients: createGetScopedClients([event]),
     });

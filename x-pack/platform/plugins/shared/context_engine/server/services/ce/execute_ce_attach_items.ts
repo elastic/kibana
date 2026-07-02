@@ -88,11 +88,16 @@ export const resolveCeAttachItems = async ({
 
       const typeDefinition = ce.getTypeDefinition(ceDoc.type);
       if (!typeDefinition) {
+        // Unregistered type (e.g. workflow ad-hoc namespace): fall back to plain text attachment.
         return {
-          success: false,
+          success: true,
           entry_id: entryId,
-          attachment_type: ceDoc.type,
-          message: `CE type '${ceDoc.type}' does not support conversion to attachment`,
+          attachment: {
+            type: 'text',
+            data: { title: ceDoc.title, content: ceDoc.content },
+            origin: ceDoc.origin.uri,
+            description: `${ceDoc.type}/${ceDoc.title}`,
+          },
         };
       }
 

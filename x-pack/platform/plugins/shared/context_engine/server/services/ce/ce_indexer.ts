@@ -7,7 +7,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsClientContract,
+  ISavedObjectsRepository,
+} from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { CeTypeRegistry } from './ce_type_registry';
 import type {
@@ -18,9 +21,12 @@ import type {
   CeIngestionMethod,
   CeIndexerParams,
   CeIndexerDeleteAttachmentParams,
+  CePermissions,
+  CeTypeDefinition,
 } from './types';
 import { createCeStorage, ceIndexName } from './ce_storage';
 import { isNotFoundError } from './ce_service';
+import { CeUnregisteredTypeError } from './ce_errors';
 
 export interface CeIndexerDeps {
   registry: CeTypeRegistry;
@@ -41,12 +47,39 @@ export interface CeIndexer {
    * provided entries are written directly, tagged `ingestion_method: 'manual'`.
    * The write always overwrites any existing entries for the `origin_id`.
    *
+   * **Unregistered types are handled by mode:**
+   *
+   * - Origin mode (`action: 'create' | 'update'` without `content`) throws
+   *   {@link CeUnregisteredTypeError} — there is no `getCeData` to call
+   *   and no sensible fallback. The crawler and event-driven origin-mode
+   *   callers only ever target registered types, so this is never hit in
+   *   normal operation; the throw exists to surface programmer error.
+   * - Content mode (`action: 'create' | 'update'` with `content`) accepts
+   *   any `attachmentType`. When the type is registered, the entry is
+   *   stamped with the result of `getPermissions`; when it is not, the
+   *   indexer stamps empty `CePermissions` (no privileges required,
+   *   space-scoped read) and emits a once-per-process warn for that
+   *   `attachmentType` so operators see the implicit "public" stamping.
+   *   Use this when a workflow needs to write ad-hoc content that has no
+   *   dedicated CE type; register a real `CeTypeDefinition` if the
+   *   content should be gated.
+   *
+   * **`getPermissions` failures fail-closed.** When the registered type's
+   * `getPermissions` hook throws, the call is aborted *before* any
+   * mutation (existing entries remain intact) and the throw is propagated
+   * to the caller. Stamping empty permissions instead would be fail-open:
+   * the read-path filter treats `kbnPrivs.length === 0` as publicly
+   * readable. See `resolvePermissionsForOrigin` for the full rationale.
+   *
    * For `action: 'delete'`, only entries with `ingestion_method: 'crawled'` are
    * removed — manual entries for the same `origin_id` are preserved. This keeps
    * curated content around even when the upstream object goes away (e.g.
    * transient blip, or a curator pinning standalone context to a deleted
    * dashboard). Callers that need to wipe `'manual'` or `'all'` entries should
-   * use {@link CeIndexer.deleteAttachment} instead.
+   * use {@link CeIndexer.deleteAttachment} instead. **Delete is intentionally
+   * permissive about registration** — cleanup must keep working even when the
+   * plugin that originally registered the type is disabled, or stale entries
+   * become unreachable from every write path.
    */
   indexAttachment: (params: CeIndexerParams) => Promise<void>;
 
@@ -67,14 +100,21 @@ export interface CeIndexer {
    * When `ingestionMethod` is set, only entries with that method are removed; otherwise
    * all entries for the origin are removed regardless of method.
    *
-   * Exposed on the indexer so callers (e.g. `upsertDocument` in the HTTP path) can run
-   * a "delete crawled entries, keep manual" cleanup after writing a manual entry, without
-   * duplicating the index/error-handling boilerplate.
+   * When `spaces` is set, only entries whose `spaces` array contains at least
+   * one of the listed space IDs are removed. Omit for global deletes (e.g.
+   * crawler origin-mode rewrites where the caller controls all spaces).
+   *
+   * Exposed on the indexer so internal callers can run a "delete crawled
+   * entries, keep manual" cleanup after writing a manual entry without
+   * duplicating the index/error-handling boilerplate. The public write
+   * paths (HTTP routes, workflow step, event-driven CRUD) should use
+   * `indexAttachment` / `deleteAttachment` instead.
    */
   deleteEntries: (params: {
     originUri: string;
     esClient: ElasticsearchClient;
     ingestionMethod?: CeIngestionMethod;
+    spaces?: string[];
   }) => Promise<void>;
 }
 
@@ -85,6 +125,14 @@ export const createCeIndexer = ({ registry, logger }: CeIndexerDeps): CeIndexer 
 class CeIndexerImpl implements CeIndexer {
   private readonly registry: CeTypeRegistry;
   private readonly logger: Logger;
+  /**
+   * `attachmentType` values we've already emitted the "writing entries under
+   * an unregistered type" warn for in this process. Bounded by the number
+   * of distinct caller-supplied types, which is small in practice; we
+   * deliberately do not cap or evict because doing so would just re-emit
+   * the warn on the next write of an already-known type and add noise.
+   */
+  private readonly warnedUnregisteredTypes = new Set<string>();
 
   constructor({ registry, logger }: CeIndexerDeps) {
     this.registry = registry;
@@ -124,20 +172,25 @@ class CeIndexerImpl implements CeIndexer {
         attachmentType,
         spaces,
         esClient,
+        savedObjectsClient,
+        contextLogger,
         entries: params.content!,
+        createdAt: params.createdAt,
       });
       return;
     }
 
     const definition = this.registry.get(attachmentType);
     if (!definition) {
-      this.logger.warn(
-        `CE indexer: type definition '${attachmentType}' not found — skipping indexing for '${originId}'. Registered types: [${this.registry
+      // Origin-mode writes against unregistered types throw (fail-closed),
+      // mirroring content mode below. Delete still proceeds —
+      // see the early `action === 'delete'` branch above.
+      throw new CeUnregisteredTypeError(
+        `CE indexer: type definition '${attachmentType}' is not registered — cannot index origin '${originId}'. Registered types: [${this.registry
           .list()
           .map((t) => t.id)
           .join(', ')}]`
       );
-      return;
     }
 
     const force = params.force === true;
@@ -177,6 +230,32 @@ class CeIndexerImpl implements CeIndexer {
       }', content length: ${ceData.entries[0]?.content?.length ?? 0}`
     );
 
+    // Resolve permissions BEFORE `deleteEntries` so a hook throw doesn't
+    // leave the origin in a wiped state. `getPermissions(originId, ctx)`
+    // is a per-origin computation (it doesn't take a entry), so one call
+    // is correct and also avoids N hook invocations when getCeData
+    // returns multiple entries for the same origin.
+    let resolvedPermissions: CePermissions;
+    try {
+      resolvedPermissions = await this.resolvePermissionsForOrigin({
+        definition,
+        originId,
+        context,
+      });
+    } catch (error) {
+      // Fail-closed: log with origin/type framing and propagate. The
+      // existing entries for the origin remain intact (we haven't called
+      // `deleteEntries` yet). See `resolvePermissionsForOrigin` JSDoc.
+      this.logger.warn(
+        `CE indexer: type '${
+          definition.id
+        }' getPermissions threw for origin '${originId}' — aborting origin-mode write to avoid producing un-gated entries: ${
+          (error as Error).message
+        }`
+      );
+      throw error;
+    }
+
     await this.deleteEntries({ originUri, esClient });
 
     const bulkOps = ceData.entries.map((entry) =>
@@ -193,6 +272,7 @@ class CeIndexerImpl implements CeIndexer {
         originId,
         spaces,
         ingestionMethod: 'crawled',
+        resolvedPermissions,
       })
     );
 
@@ -215,33 +295,63 @@ class CeIndexerImpl implements CeIndexer {
     await this.deleteEntries({
       originUri: `${attachmentType}://${originId}`,
       esClient,
+      spaces,
       ...(scope !== 'all' ? { ingestionMethod: scope } : {}),
     });
   }
 
   /**
-   * Write a content-mode (manual) attachment: skip getCeData, write entries directly
-   * with deterministic IDs and `ingestion_method: 'manual'`. Always overwrites.
+   * Write a content-mode (manual) attachment: skip getCeData, write entries
+   * directly with bare-UUID IDs and `ingestion_method: 'manual'`. Always
+   * overwrites.
+   *
+   * Permissions resolution:
+   *
+   * - **Registered type with `getPermissions`** — the hook's result is
+   *   stamped onto every entry, identical to origin-mode behaviour so a
+   *   content-mode write inherits the same gating as a crawler-driven
+   *   write for the same type.
+   * - **Registered type without `getPermissions`** — empty
+   *   `CePermissions` is stamped (no privileges required); the entry is
+   *   readable to anyone with access to the space.
+   * - **Unregistered type** — empty `CePermissions` is stamped and a
+   *   warn is logged once per process per `attachmentType` so operators
+   *   can spot ad-hoc namespaces being created without permissions
+   *   metadata. Content mode is intentionally permissive about
+   *   registration so workflow authors can write ad-hoc content without a
+   *   code change; the trade-off is that those entries become publicly
+   *   readable in their space.
+   *
+   * The empty-entries fast path (no write actually happens) is treated as
+   * a delete-via-content-mode and proceeds even for unregistered types,
+   * mirroring the cleanup-must-still-work semantics of the
+   * `action: 'delete'` path.
    */
   private async indexManualEntries({
     originId,
     attachmentType,
     spaces,
     esClient,
+    savedObjectsClient,
+    contextLogger,
     entries,
+    createdAt,
   }: {
     originId: string;
     attachmentType: string;
     spaces: string[];
     esClient: ElasticsearchClient;
+    savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
+    contextLogger: Logger;
     entries: CeEntry[];
+    createdAt?: string;
   }): Promise<void> {
     const originUri = `${attachmentType}://${originId}`;
     if (entries.length === 0) {
       this.logger.debug(
         `CE indexer: content mode for origin '${originId}' supplied no entries — deleting existing entries`
       );
-      await this.deleteEntries({ originUri, esClient });
+      await this.deleteEntries({ originUri, esClient, spaces });
       return;
     }
 
@@ -249,25 +359,122 @@ class CeIndexerImpl implements CeIndexer {
       `CE indexer: content mode for origin '${originId}' of type '${attachmentType}' — writing ${entries.length} entry(s) as 'manual'`
     );
 
-    await this.deleteEntries({ originUri, esClient });
+    // Content mode accepts any `attachmentType` — workflow authors and
+    // HTTP callers can write entries under an unregistered namespace
+    // (e.g. ad-hoc knowledge entries) without first registering a real
+    // CeTypeDefinition. The trade-off is that without `getPermissions`,
+    // the entry has no permission gate and is readable to anyone in the
+    // space. We surface that trade-off with a one-time warn per
+    // (process, type) so operators notice when a new namespace starts
+    // being written with empty permissions.
+    const definition = this.registry.get(attachmentType);
+    if (!definition && !this.warnedUnregisteredTypes.has(attachmentType)) {
+      this.warnedUnregisteredTypes.add(attachmentType);
+      this.logger.warn(
+        `CE indexer: unregistered type '${attachmentType}' (origin '${originId}'): stamping empty permissions — entries will be publicly readable within their space. Register an CeTypeDefinition to add a permission gate.`
+      );
+    }
+
+    const context: CeContext = {
+      esClient,
+      savedObjectsClient: savedObjectsClient as SavedObjectsClientContract,
+      logger: contextLogger,
+    };
+
+    // Resolve permissions BEFORE `deleteEntries` so a hook throw doesn't
+    // leave the origin in a wiped state. Per-origin computation; see the
+    // origin-mode write path for the rationale on hoisting this out of
+    // the entry loop.
+    let resolvedPermissions: CePermissions;
+    try {
+      resolvedPermissions = await this.resolvePermissionsForOrigin({
+        definition,
+        originId,
+        context,
+      });
+    } catch (error) {
+      this.logger.warn(
+        `CE indexer: type '${
+          definition?.id ?? attachmentType
+        }' getPermissions threw for origin '${originId}' — aborting content-mode write to avoid producing un-gated entries: ${
+          (error as Error).message
+        }`
+      );
+      throw error;
+    }
+
+    await this.deleteEntries({ originUri, esClient, spaces });
 
     const bulkOps = entries.map((entry) =>
-      // Use a bare UUID for `_id`. The previous `${attachmentType}:${originId}:manual:${index}`
-      // scheme was unbounded (the inputs can be caller-controlled) and the
-      // determinism it advertised was redundant — `deleteEntries` above already
-      // wipes every entry for the `origin_id`, so re-runs cannot accumulate
-      // stale rows. The `manual` literal was decoration; the document carries
-      // `ingestion_method: 'manual'` for that semantic.
+      // Use a bare UUID for `_id`: deterministic IDs are redundant because
+      // `deleteEntries` above wipes every entry for the origin before writing,
+      // so re-runs cannot accumulate stale rows.
       this.buildIndexOp({
         entryId: uuidv4(),
         entry,
         originId,
         spaces,
         ingestionMethod: 'manual',
+        resolvedPermissions,
+        createdAt,
       })
     );
 
     await this.executeBulk({ bulkOps, esClient, originId, entryCount: entries.length });
+  }
+
+  /**
+   * Resolve the {@link CePermissions} to stamp on every entry for an
+   * origin. Called **once per origin** before any ES mutation, so a hook
+   * failure can abort the write without leaving the origin in a
+   * half-deleted state.
+   *
+   * - Registered type with `getPermissions` → the hook's result is used
+   *   (with arrays defensively defaulted to `[]` so the stored document
+   *   always has fully-shaped inner arrays). **A throw is propagated**
+   *   to the caller — see below.
+   * - Registered type without `getPermissions` → empty `CePermissions`.
+   *   This is an explicit opt-in by the CE type author signalling that
+   *   the data is space-readable.
+   * - Unregistered type (`definition === undefined`) → empty
+   *   `CePermissions`. Only reachable via content-mode writes;
+   *   origin-mode rejects unregistered types upstream via
+   *   {@link CeUnregisteredTypeError}. The warn line announcing the
+   *   namespace is emitted by `indexManualEntries` once per process per
+   *   type so this helper can stay quiet on the hot path.
+   *
+   * **Fail-closed on `getPermissions` throw.** When `getPermissions`
+   * throws, the error propagates before any ES mutation. Callers see this:
+   *
+   * - Origin-mode crawler: the task runner logs and reschedules on the
+   *   next crawl tick. The origin keeps its previous entries intact (the
+   *   throw lands before `deleteEntries` runs — see `indexAttachment`).
+   * - Workflow step: surfaced as a step `error` result.
+   * - HTTP upsert route: bubbles to a 500.
+   *
+   * The trade-off is intentional: a transient blip becomes a visible
+   * write failure rather than an invisible privilege escalation.
+   */
+  private async resolvePermissionsForOrigin({
+    definition,
+    originId,
+    context,
+  }: {
+    definition: CeTypeDefinition | undefined;
+    originId: string;
+    context: CeContext;
+  }): Promise<CePermissions> {
+    if (!definition || !definition.getPermissions) {
+      return { kibana: { privileges: [] }, elasticsearch: { indices: [] } };
+    }
+    // Intentionally NOT wrapped in try/catch — see fail-closed note in
+    // the JSDoc. Logging here is the caller's job (so origin-mode and
+    // content-mode can frame the failure with their own context).
+    const result = await definition.getPermissions(originId, context);
+    return {
+      kibana: { privileges: result.kibana?.privileges ?? [] },
+      elasticsearch: { indices: result.elasticsearch?.indices ?? [] },
+    };
   }
 
   private buildIndexOp({
@@ -276,12 +483,16 @@ class CeIndexerImpl implements CeIndexer {
     originId,
     spaces,
     ingestionMethod,
+    resolvedPermissions,
+    createdAt,
   }: {
     entryId: string;
     entry: CeEntry;
     originId: string;
     spaces: string[];
     ingestionMethod: CeIngestionMethod;
+    resolvedPermissions: CePermissions;
+    createdAt?: string;
   }) {
     const now = new Date().toISOString();
     const document: CeDocument = {
@@ -290,12 +501,12 @@ class CeIndexerImpl implements CeIndexer {
       title: entry.title,
       origin: { uri: `${entry.type}://${originId}` },
       content: entry.content,
-      created_at: now,
+      created_at: createdAt || now,
       updated_at: now,
       spaces,
       permissions: {
-        kibana: { privileges: entry.permissions?.kibana?.privileges ?? [] },
-        elasticsearch: { indices: entry.permissions?.elasticsearch?.indices ?? [] },
+        kibana: { privileges: resolvedPermissions.kibana?.privileges ?? [] },
+        elasticsearch: { indices: resolvedPermissions.elasticsearch?.indices ?? [] },
       },
       ingestion_method: ingestionMethod,
     };
@@ -402,17 +613,16 @@ class CeIndexerImpl implements CeIndexer {
       return (response.count ?? 0) > 0;
     } catch (error) {
       if (isNotFoundError(error)) {
+        // index_not_found: no index yet, no manual entry.
         return false;
       }
-      // On unexpected errors, fail-open (treat as no manual entry) and log: the safety
-      // net is best-effort. Real protection lives at the document level via the
-      // HTTP upsert route. Errors here should not prevent the crawl from progressing.
+      // Unexpected ES error: fail-closed — skip this crawl tick rather than risk destroying a manual entry.
       this.logger.warn(
-        `CE indexer: hasManualEntry check failed for origin '${originUri}': ${
+        `CE indexer: hasManualEntry check failed for origin '${originUri}' (fail-closed): ${
           (error as Error).message
         }`
       );
-      return false;
+      return true;
     }
   }
 
@@ -430,14 +640,25 @@ class CeIndexerImpl implements CeIndexer {
     originUri,
     esClient,
     ingestionMethod,
+    spaces,
   }: {
     originUri: string;
     esClient: ElasticsearchClient;
     ingestionMethod?: CeIngestionMethod;
+    spaces?: string[];
   }): Promise<void> {
     const filter: Array<Record<string, unknown>> = [{ term: { 'origin.uri': originUri } }];
     if (ingestionMethod) {
       filter.push({ term: { ingestion_method: ingestionMethod } });
+    }
+    if (spaces && spaces.length > 0) {
+      // Scope the delete to entries visible in at least one of the provided
+      // spaces. Mirrors `isVisibleInSpace`: a entry is visible when its
+      // `spaces` array contains the space id OR the wildcard `'*'` (global
+      // entries). Without the `'*'` entry, crawler-written globally-scoped
+      // entries would survive the delete and violate the "claim the origin"
+      // replace semantic of content-mode writes.
+      filter.push({ terms: { spaces: [...spaces, '*'] } });
     }
     const label = ingestionMethod ? `${ingestionMethod} entries` : 'entries';
 

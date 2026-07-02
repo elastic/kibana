@@ -77,12 +77,6 @@ export const createActionPolicyCeType = ({
             type: ACTION_POLICY_CE_TYPE,
             title: name,
             content: contentParts.join('\n'),
-            permissions: {
-              kibana: {
-                privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.actionPolicies.read}` }],
-              },
-              elasticsearch: { indices: [] },
-            },
           },
         ],
       };
@@ -93,6 +87,18 @@ export const createActionPolicyCeType = ({
       return undefined;
     }
   },
+
+  /**
+   * Action policies are gated by the Alerting v2 action-policies read API
+   * privilege — the same gate the action policies API checks before
+   * surfacing policy data.
+   */
+  getPermissions: () => ({
+    kibana: {
+      privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.actionPolicies.read}` }],
+    },
+    elasticsearch: { indices: [] },
+  }),
 
   toAttachment: async (item, context) => {
     try {

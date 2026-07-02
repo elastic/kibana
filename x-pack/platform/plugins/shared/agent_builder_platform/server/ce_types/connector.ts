@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { CeTypeDefinition } from '@kbn/context-engine-plugin/server';
+import { kibanaSavedObjectPermissions } from '@kbn/context-engine-plugin/server';
 import type { ConnectorAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { getConnectorSpec } from '@kbn/connector-specs';
@@ -73,10 +74,6 @@ export const createConnectorCeType = (deps: ConnectorCeTypeDeps): CeTypeDefiniti
               type: CONNECTOR_CE_TYPE,
               title: name,
               content: contentParts.join('\n'),
-              permissions: {
-                kibana: { privileges: [{ name: 'action:execute' }] },
-                elasticsearch: { indices: [] },
-              },
             },
           ],
         };
@@ -87,6 +84,8 @@ export const createConnectorCeType = (deps: ConnectorCeTypeDeps): CeTypeDefiniti
         return undefined;
       }
     },
+
+    getPermissions: () => kibanaSavedObjectPermissions({ savedObjectType: 'action' }),
 
     toAttachment: async (item, context) => {
       try {

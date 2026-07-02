@@ -33,91 +33,79 @@ export const ContextEngineAddEntryStepTypeId = 'contextEngine.addEntry';
 // far past the ~512-token window the embedding model truncates to. These
 // bounds exist primarily to harden the public input surface against
 // pathological payloads (CodeQL DoS rule), not to reflect storage limits.
-const MAX_CE_IDENTIFIER_LENGTH = 256;
+const MAX_CE_IDENTIFIER_LENGTH = 512;
 const MAX_CE_TITLE_LENGTH = 1024;
 const MAX_CE_DESCRIPTION_LENGTH = 8192;
 const MAX_CE_CONTENT_LENGTH = 50_000;
 const MAX_CE_REFERENCES = 100;
-const MAX_CE_PERMISSIONS = 100;
 const MAX_CE_TAGS = 100;
 const MAX_CE_TAG_LENGTH = 100;
-const MAX_CE_ES_INDICES = 100;
-
-const EntrySchema = z.object({
-  type: z
-    .string()
-    .min(1)
-    .max(MAX_CE_IDENTIFIER_LENGTH)
-    .describe('Entry type (e.g., "visualization", "dashboard").'),
-  title: z.string().min(1).max(MAX_CE_TITLE_LENGTH).describe('Display title for the entry.'),
-  content: z
-    .string()
-    .min(1)
-    .max(MAX_CE_CONTENT_LENGTH)
-    .describe('Searchable content (indexed as semantic_text).'),
-  description: z
-    .string()
-    .max(MAX_CE_DESCRIPTION_LENGTH)
-    .optional()
-    .describe('Optional longer summary indexed as semantic_text.'),
-  user_id: z
-    .string()
-    .max(MAX_CE_IDENTIFIER_LENGTH)
-    .optional()
-    .describe('Optional owner/last-modifier user id.'),
-  references: z
-    .array(z.string().max(MAX_CE_IDENTIFIER_LENGTH))
-    .max(MAX_CE_REFERENCES)
-    .optional()
-    .describe('Optional list of referenced CE entry ids.'),
-  permissions: z
-    .array(z.string().max(MAX_CE_IDENTIFIER_LENGTH))
-    .max(MAX_CE_PERMISSIONS)
-    .optional()
-    .describe('Optional Kibana privilege strings required to view the entry later.'),
-  tags: z
-    .array(
-      z
-        .string()
-        .max(MAX_CE_TAG_LENGTH)
-        .regex(
-          /^[a-z0-9][a-z0-9_-]*$/,
-          'Tag must be lowercase alphanumeric and may contain hyphens or underscores (e.g. "otel", "my-tag", "v2_data").'
-        )
-    )
-    .max(MAX_CE_TAGS)
-    .optional()
-    .describe(
-      'Optional tags for grouping and retrieval. Must be lowercase alphanumeric; hyphens and underscores are allowed (e.g. ["otel", "my-tag"]). Tags are matched with OR semantics on the list endpoint.'
-    ),
-  elasticsearchIndices: z
-    .array(z.string().max(MAX_CE_IDENTIFIER_LENGTH))
-    .max(MAX_CE_ES_INDICES)
-    .optional()
-    .describe(
-      'Optional Elasticsearch index / alias / data-stream names whose data this entry depends on. Viewers must hold the ES `read` privilege on every listed name to see the entry at search time.'
-    ),
-});
+const EntrySchema = z
+  .object({
+    type: z
+      .string()
+      .min(1)
+      .max(MAX_CE_IDENTIFIER_LENGTH)
+      .describe('Entry type (e.g., "visualization", "dashboard").'),
+    title: z.string().min(1).max(MAX_CE_TITLE_LENGTH).describe('Display title for the entry.'),
+    content: z
+      .string()
+      .min(1)
+      .max(MAX_CE_CONTENT_LENGTH)
+      .describe('Searchable content (indexed as semantic_text).'),
+    description: z
+      .string()
+      .max(MAX_CE_DESCRIPTION_LENGTH)
+      .optional()
+      .describe('Optional longer summary indexed as semantic_text.'),
+    user_id: z
+      .string()
+      .max(MAX_CE_IDENTIFIER_LENGTH)
+      .optional()
+      .describe('Optional owner/last-modifier user id.'),
+    references: z
+      .array(z.string().max(MAX_CE_IDENTIFIER_LENGTH))
+      .max(MAX_CE_REFERENCES)
+      .optional()
+      .describe('Optional list of referenced CE entry ids.'),
+    tags: z
+      .array(
+        z
+          .string()
+          .max(MAX_CE_TAG_LENGTH)
+          .regex(
+            /^[a-z0-9][a-z0-9_-]*$/,
+            'Tag must be lowercase alphanumeric and may contain hyphens or underscores (e.g. "otel", "my-tag", "v2_data").'
+          )
+      )
+      .max(MAX_CE_TAGS)
+      .optional()
+      .describe(
+        'Optional tags for grouping and retrieval. Must be lowercase alphanumeric; hyphens and underscores are allowed (e.g. ["otel", "my-tag"]). Tags are matched with OR semantics on the list endpoint.'
+      ),
+  })
+  .strict();
 
 /**
  * Step input.
  *
- * Workflow-driven writes always go through the content-mode path on the CE
- * start contract — caller-supplied entries are written as
- * `ingestion_method: 'manual'`.
- *
- * - `upsert` requires `entries` and always performs a full replace: every
- *   prior entry for the `origin_id` is removed and the supplied entries are
- *   written. There is no fail-if-exists / fail-if-not-found distinction —
- *   the indexer's content-mode path is idempotent by design, so we expose
- *   a single `upsert` action rather than the misleading `create`/`update`
- *   pair.
- * - `delete` requires only the origin/type identifiers and wipes every
- *   entry recorded for the `origin_id` regardless of how it was produced
- *   (both crawled and manual entries). This matches the "workflow owns
- *   this origin" semantic and is the opposite of the crawler's default
- *   delete (which preserves curated manual entries).
+ * Permissions are stamped by the indexer from the type's `getPermissions` hook —
+ * callers cannot supply them. Unregistered types get empty permissions (publicly
+ * readable within the space). `upsert` is a full replace; `delete` wipes all
+ * entries for the origin regardless of how they were produced.
  */
+const AttachmentTypeSchema = z
+  .string()
+  .min(1)
+  .max(MAX_CE_IDENTIFIER_LENGTH)
+  .regex(
+    /^[a-z][a-z0-9_]*$/,
+    'attachmentType must be a lowercase identifier starting with a letter (e.g. "visualization", "my_notes")'
+  )
+  .describe(
+    "Context Engine entry type id (entry namespace). When the value matches a registered CeTypeDefinition the entry inherits that type's permissions; when it does not, the indexer stamps empty permissions and the entry is readable to anyone in the caller's space."
+  );
+
 export const CeIndexAttachmentInputSchema = z.discriminatedUnion('action', [
   z.object({
     originId: z
@@ -125,17 +113,13 @@ export const CeIndexAttachmentInputSchema = z.discriminatedUnion('action', [
       .min(1)
       .max(MAX_CE_IDENTIFIER_LENGTH)
       .describe('Stable identifier for the source object (e.g., saved object id).'),
-    attachmentType: z
-      .string()
-      .min(1)
-      .max(MAX_CE_IDENTIFIER_LENGTH)
-      .describe('Context Engine entry type id (entry namespace).'),
+    attachmentType: AttachmentTypeSchema,
     action: z.literal('upsert'),
     entries: z.array(EntrySchema).min(1).max(100),
   }),
   z.object({
     originId: z.string().min(1).max(MAX_CE_IDENTIFIER_LENGTH),
-    attachmentType: z.string().min(1).max(MAX_CE_IDENTIFIER_LENGTH),
+    attachmentType: AttachmentTypeSchema,
     action: z.literal('delete'),
   }),
 ]);

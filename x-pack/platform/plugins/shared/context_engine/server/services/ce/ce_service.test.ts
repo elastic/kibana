@@ -17,7 +17,7 @@ import {
   CeAuthzEnumerationIncompleteError,
   CeCorpusTooLargeError,
 } from './ce_errors';
-import { ceIndexName, createCeStorage } from './ce_storage';
+import { ceIndexName } from './ce_storage';
 import type { CeTypeDefinition } from './types';
 
 jest.mock('./ce_storage', () => {
@@ -244,7 +244,10 @@ describe('createCeService', () => {
       expect(ceService.autocomplete).toBeDefined();
       expect(ceService.checkItemsAccess).toBeDefined();
       expect(ceService.getDocuments).toBeDefined();
+      expect(ceService.findByOrigin).toBeDefined();
+      expect(ceService.findByOriginAcrossSpaces).toBeDefined();
       expect(ceService.indexAttachment).toBeDefined();
+      expect(ceService.deleteAttachment).toBeDefined();
       expect(ceService.getTypeDefinition).toBeDefined();
       expect(ceService.listTypeDefinitions).toBeDefined();
       expect(ceService.getCrawler).toBeDefined();
@@ -2178,573 +2181,285 @@ describe('CeService', () => {
     });
   });
 
-  describe('upsertDocument', () => {
-    let ceClient: { get: jest.Mock; index: jest.Mock; delete: jest.Mock };
-
-    beforeEach(() => {
-      ceClient = {
-        get: jest.fn(),
-        index: jest.fn().mockResolvedValue({}),
-        delete: jest.fn(),
-      };
-      (createCeStorage as jest.Mock).mockReturnValue({
-        getClient: () => ceClient,
-      });
-    });
-
-    it('creates a new document with spaces=[spaceId] and equal timestamps when none exists (404)', async () => {
-      ceClient.get.mockRejectedValue(createNotFoundError());
+  describe('findByOrigin', () => {
+    it('returns every entry matching (type, originId) that is visible in the caller space', async () => {
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: 2,
+          hits: [
+            {
+              _source: {
+                id: 'entry-1',
+                type: 'visualization',
+                title: 'Viz',
+                origin: { uri: 'visualization://ref-1' },
+                content: 'c1',
+                created_at: '2024-01-01',
+                updated_at: '2024-01-02',
+                spaces: ['default'],
+                permissions: makePermissions(),
+                ingestion_method: 'manual',
+              },
+            },
+            {
+              _source: {
+                id: 'entry-2',
+                type: 'visualization',
+                title: 'Viz',
+                origin: { uri: 'visualization://ref-1' },
+                content: 'c2',
+                created_at: '2024-01-01',
+                updated_at: '2024-01-02',
+                spaces: ['default'],
+                permissions: makePermissions(),
+                ingestion_method: 'crawled',
+              },
+            },
+          ],
+        },
+      } as any);
 
       const service = createCeService();
       service.setup({ logger });
       const ceService = service.start({ logger });
 
-      const result = await ceService.upsertDocument({
-        id: 'doc-1',
+      const result = await ceService.findByOrigin({
+        type: 'visualization',
+        originId: 'ref-1',
         spaceId: 'default',
-        document: {
-          type: 'lens',
-          title: 'New Doc',
-          origin_id: 'ref-1',
-          content: 'c',
-        },
         esClient: scopedClient,
       });
 
-      expect(result).not.toBeNull();
-      expect(result!.created).toBe(true);
-      expect(result!.document.id).toBe('doc-1');
-      expect(result!.document.spaces).toEqual(['default']);
-      expect(result!.document.created_at).toBeDefined();
-      expect(result!.document.created_at).toBe(result!.document.updated_at);
-      expect(result!.document.permissions).toEqual(makePermissions());
-      expect(ceClient.index).toHaveBeenCalledWith({
-        id: 'doc-1',
-        document: result!.document,
-      });
+      expect(result).toHaveLength(2);
+      expect(result.map((d) => d.id).sort()).toEqual(['entry-1', 'entry-2']);
+      // Query targets the canonical `origin.uri` keyword — the only mapped origin field.
+      const passed = esClient.search.mock.calls[0][0] as any;
+      const filters = passed.query.bool.filter as any[];
+      expect(filters[0]).toEqual({ term: { 'origin.uri': 'visualization://ref-1' } });
     });
 
-    it('updates an existing document, preserving created_at and spaces', async () => {
-      ceClient.get.mockResolvedValue({
-        found: true,
-        _source: {
-          id: 'doc-1',
-          type: 'lens',
-          title: 'Old',
-          origin_id: 'ref-1',
-          content: 'old',
-          created_at: '2023-01-01T00:00:00.000Z',
-          updated_at: '2023-06-01T00:00:00.000Z',
-          spaces: ['default', 'engineering'],
-          permissions: makePermissions(),
-        },
-      });
+    it('returns [] when no entries exist or the index is missing', async () => {
+      esClient.search.mockRejectedValue(createNotFoundError());
 
       const service = createCeService();
       service.setup({ logger });
       const ceService = service.start({ logger });
 
-      const result = await ceService.upsertDocument({
-        id: 'doc-1',
+      const result = await ceService.findByOrigin({
+        type: 'visualization',
+        originId: 'never',
         spaceId: 'default',
-        document: {
-          type: 'lens',
-          title: 'New',
-          origin_id: 'ref-1',
-          content: 'new',
-          permissions: makePermissions(['saved_object:lens/get']),
-        },
         esClient: scopedClient,
       });
 
-      expect(result).not.toBeNull();
-      expect(result!.created).toBe(false);
-      expect(result!.document.created_at).toBe('2023-01-01T00:00:00.000Z');
-      expect(result!.document.updated_at).not.toBe('2023-06-01T00:00:00.000Z');
-      expect(result!.document.title).toBe('New');
-      expect(result!.document.permissions).toEqual(makePermissions(['saved_object:lens/get']));
-      // existing spaces are preserved — caller cannot widen or narrow membership
-      expect(result!.document.spaces).toEqual(['default', 'engineering']);
+      expect(result).toEqual([]);
     });
 
-    it('persists permissions.elasticsearch.indices when caller supplies concrete names', async () => {
-      ceClient.get.mockRejectedValue(createNotFoundError());
-
-      const service = createCeService();
-      service.setup({ logger });
-      const ceService = service.start({ logger });
-
-      const result = await ceService.upsertDocument({
-        id: 'doc-1',
-        spaceId: 'default',
-        document: {
-          type: 'visualization',
-          title: 'Viz',
-          origin_id: 'ref-1',
-          content: 'c',
-          permissions: makePermissions([], ['logs-app-*', 'metrics-prod']),
-        },
-        esClient: scopedClient,
-      });
-
-      expect(result).not.toBeNull();
-      expect(result!.document.permissions).toEqual(
-        makePermissions([], ['logs-app-*', 'metrics-prod'])
-      );
-      expect(ceClient.index).toHaveBeenCalledWith({
-        id: 'doc-1',
-        document: expect.objectContaining({
-          permissions: makePermissions([], ['logs-app-*', 'metrics-prod']),
-        }),
-      });
-    });
-
-    it('normalizes permissions to empty inner arrays when input omits them', async () => {
-      ceClient.get.mockRejectedValue(createNotFoundError());
-
-      const service = createCeService();
-      service.setup({ logger });
-      const ceService = service.start({ logger });
-
-      // Permissions absent on input → stored as `{ kibana: { privileges: [] }, elasticsearch: { indices: [] } }`.
-      const undefinedResult = await ceService.upsertDocument({
-        id: 'doc-1',
-        spaceId: 'default',
-        document: {
-          type: 'visualization',
-          title: 'Viz',
-          origin_id: 'ref-1',
-          content: 'c',
-        },
-        esClient: scopedClient,
-      });
-      expect(undefinedResult!.document.permissions).toEqual(makePermissions());
-      expect(ceClient.index).toHaveBeenLastCalledWith({
-        id: 'doc-1',
-        document: expect.objectContaining({ permissions: makePermissions() }),
-      });
-
-      // Explicit `permissions: undefined` and partial inputs both collapse to the
-      // empty-but-fully-shaped default.
-      const emptyResult = await ceService.upsertDocument({
-        id: 'doc-2',
-        spaceId: 'default',
-        document: {
-          type: 'visualization',
-          title: 'Viz',
-          origin_id: 'ref-2',
-          content: 'c',
-          permissions: makePermissions(),
-        },
-        esClient: scopedClient,
-      });
-      expect(emptyResult!.document.permissions).toEqual(makePermissions());
-      expect(ceClient.index).toHaveBeenLastCalledWith({
-        id: 'doc-2',
-        document: expect.objectContaining({ permissions: makePermissions() }),
-      });
-    });
-
-    it('returns null when an existing document is not visible in the caller space', async () => {
-      ceClient.get.mockResolvedValue({
-        found: true,
-        _source: {
-          id: 'doc-1',
-          type: 'lens',
-          title: 'Old',
-          origin_id: 'ref-1',
-          content: 'old',
-          created_at: '2023-01-01T00:00:00.000Z',
-          updated_at: '2023-06-01T00:00:00.000Z',
-          spaces: ['other-space'],
-          permissions: makePermissions(),
-        },
-      });
-
-      const service = createCeService();
-      service.setup({ logger });
-      const ceService = service.start({ logger });
-
-      const result = await ceService.upsertDocument({
-        id: 'doc-1',
-        spaceId: 'default',
-        document: {
-          type: 'lens',
-          title: 'New',
-          origin_id: 'ref-1',
-          content: 'new',
-        },
-        esClient: scopedClient,
-      });
-
-      expect(result).toBeNull();
-      expect(ceClient.index).not.toHaveBeenCalled();
-    });
-
-    it('treats spaces=["*"] as visible in any caller space', async () => {
-      ceClient.get.mockResolvedValue({
-        found: true,
-        _source: {
-          id: 'doc-1',
-          type: 'lens',
-          title: 'Old',
-          origin_id: 'ref-1',
-          content: 'old',
-          created_at: '2023-01-01T00:00:00.000Z',
-          updated_at: '2023-06-01T00:00:00.000Z',
-          spaces: ['*'],
-          permissions: makePermissions(),
-        },
-      });
-
-      const service = createCeService();
-      service.setup({ logger });
-      const ceService = service.start({ logger });
-
-      const result = await ceService.upsertDocument({
-        id: 'doc-1',
-        spaceId: 'default',
-        document: {
-          type: 'lens',
-          title: 'New',
-          origin_id: 'ref-1',
-          content: 'new',
-        },
-        esClient: scopedClient,
-      });
-
-      expect(result).not.toBeNull();
-      expect(result!.created).toBe(false);
-      expect(result!.document.spaces).toEqual(['*']);
-    });
-
-    it('throws when storage lookup fails with non-404', async () => {
-      ceClient.get.mockRejectedValue(new Error('boom'));
+    it('throws on non-404 errors and logs', async () => {
+      esClient.search.mockRejectedValue(new Error('cluster melted'));
 
       const service = createCeService();
       service.setup({ logger });
       const ceService = service.start({ logger });
 
       await expect(
-        ceService.upsertDocument({
-          id: 'doc-1',
+        ceService.findByOrigin({
+          type: 'visualization',
+          originId: 'ref-1',
           spaceId: 'default',
-          document: {
-            type: 'lens',
-            title: 'x',
-            origin_id: 'ref-1',
-            content: 'c',
-          },
           esClient: scopedClient,
         })
-      ).rejects.toThrow('boom');
-      expect(ceClient.index).not.toHaveBeenCalled();
+      ).rejects.toThrow('cluster melted');
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('CE findByOrigin failed'));
     });
 
-    it('stores provided tags on create', async () => {
-      ceClient.get.mockRejectedValue(createNotFoundError());
+    it('logs a warning when total entries exceed MAX_ENTRIES_PER_ORIGIN', async () => {
+      // `track_total_hits: true` makes ES report the real count even
+      // when it exceeds the `size` window. The helper exposes that
+      // signal via a log line so operators can spot a producer that
+      // has gone off the rails (or a typo collapsing many distinct
+      // origins into one). The returned entries are still useful — the
+      // per-space lookup is informational, not security-critical (see
+      // findByOriginAcrossSpaces for the guard-side case).
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 1500, relation: 'eq' },
+          hits: [],
+        },
+      } as any);
 
       const service = createCeService();
       service.setup({ logger });
       const ceService = service.start({ logger });
 
-      const result = await ceService.upsertDocument({
-        id: 'doc-tag-create',
+      await ceService.findByOrigin({
+        type: 'visualization',
+        originId: 'overfull',
         spaceId: 'default',
-        document: {
-          type: 'lens',
-          title: 'Tagged Doc',
-          origin_id: 'ref-1',
-          content: 'c',
-          tags: ['otel', 'claude-code'],
-        },
         esClient: scopedClient,
       });
 
-      expect(result).not.toBeNull();
-      expect(result!.document.tags).toEqual(['otel', 'claude-code']);
-      expect(ceClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({ tags: ['otel', 'claude-code'] }),
-        })
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("origin 'visualization://overfull' has 1500 entries")
       );
-    });
 
-    it('defaults tags to [] on create when caller omits the field', async () => {
-      ceClient.get.mockRejectedValue(createNotFoundError());
-
-      const service = createCeService();
-      service.setup({ logger });
-      const ceService = service.start({ logger });
-
-      const result = await ceService.upsertDocument({
-        id: 'doc-no-tags',
-        spaceId: 'default',
-        document: {
-          type: 'lens',
-          title: 'No Tags',
-          origin_id: 'ref-1',
-          content: 'c',
-        },
-        esClient: scopedClient,
-      });
-
-      expect(result).not.toBeNull();
-      expect(result!.document.tags).toEqual([]);
-    });
-
-    it('replaces existing tags when caller provides new tags on update', async () => {
-      ceClient.get.mockResolvedValue({
-        found: true,
-        _source: {
-          id: 'doc-1',
-          type: 'lens',
-          title: 'Old',
-          origin_id: 'ref-1',
-          content: 'old',
-          created_at: '2023-01-01T00:00:00.000Z',
-          updated_at: '2023-06-01T00:00:00.000Z',
-          spaces: ['default'],
-          tags: ['old-tag'],
-          permissions: makePermissions(),
-        },
-      });
-
-      const service = createCeService();
-      service.setup({ logger });
-      const ceService = service.start({ logger });
-
-      const result = await ceService.upsertDocument({
-        id: 'doc-1',
-        spaceId: 'default',
-        document: {
-          type: 'lens',
-          title: 'New',
-          origin_id: 'ref-1',
-          content: 'new',
-          tags: ['new-tag', 'another'],
-        },
-        esClient: scopedClient,
-      });
-
-      expect(result).not.toBeNull();
-      expect(result!.document.tags).toEqual(['new-tag', 'another']);
-    });
-
-    it('preserves existing tags on update when caller omits the field', async () => {
-      ceClient.get.mockResolvedValue({
-        found: true,
-        _source: {
-          id: 'doc-1',
-          type: 'lens',
-          title: 'Old',
-          origin_id: 'ref-1',
-          content: 'old',
-          created_at: '2023-01-01T00:00:00.000Z',
-          updated_at: '2023-06-01T00:00:00.000Z',
-          spaces: ['default'],
-          tags: ['keep-me'],
-          permissions: makePermissions(),
-        },
-      });
-
-      const service = createCeService();
-      service.setup({ logger });
-      const ceService = service.start({ logger });
-
-      const result = await ceService.upsertDocument({
-        id: 'doc-1',
-        spaceId: 'default',
-        document: {
-          type: 'lens',
-          title: 'New',
-          origin_id: 'ref-1',
-          content: 'new',
-          // tags omitted intentionally
-        },
-        esClient: scopedClient,
-      });
-
-      expect(result).not.toBeNull();
-      expect(result!.document.tags).toEqual(['keep-me']);
+      // The query also opts into `track_total_hits` and uses the
+      // shared `size` constant — pin both so a future change can't
+      // quietly drop the overflow detection.
+      const passed = esClient.search.mock.calls[0][0] as any;
+      expect(passed.track_total_hits).toBe(true);
+      expect(passed.size).toBe(1000);
     });
   });
 
-  describe('deleteDocument', () => {
-    let ceClient: { get: jest.Mock; index: jest.Mock; delete: jest.Mock };
-
-    beforeEach(() => {
-      ceClient = {
-        get: jest.fn(),
-        index: jest.fn(),
-        delete: jest.fn(),
-      };
-      (createCeStorage as jest.Mock).mockReturnValue({
-        getClient: () => ceClient,
-      });
-    });
-
-    it('returns false when no document exists in the requested space', async () => {
-      esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
-
-      const service = createCeService();
-      service.setup({ logger });
-      const ceService = service.start({ logger });
-
-      const result = await ceService.deleteDocument({
-        id: 'missing',
-        spaceId: 'default',
-        esClient: scopedClient,
-      });
-
-      expect(result).toBe(false);
-      expect(ceClient.delete).not.toHaveBeenCalled();
-    });
-
-    it('returns true when the document is deleted', async () => {
+  describe('findByOriginAcrossSpaces', () => {
+    it('returns matching entries regardless of which space they are in', async () => {
       esClient.search.mockResolvedValue({
         hits: {
-          total: 1,
+          total: 2,
           hits: [
             {
               _source: {
-                id: 'doc-1',
-                type: 'lens',
-                title: 'A',
-                origin: { uri: 'lens://ref-1' },
+                id: 'entry-1',
+                type: 'visualization',
+                title: 'Viz',
+                origin: { uri: 'visualization://ref-1' },
+                content: '',
+                created_at: '',
+                updated_at: '',
+                spaces: ['other-space'],
+                permissions: makePermissions(),
+                ingestion_method: 'manual',
+              },
+            },
+            {
+              _source: {
+                id: 'entry-2',
+                type: 'visualization',
+                title: 'Viz',
+                origin: { uri: 'visualization://ref-1' },
                 content: '',
                 created_at: '',
                 updated_at: '',
                 spaces: ['default'],
                 permissions: makePermissions(),
+                ingestion_method: 'crawled',
               },
             },
           ],
         },
       } as any);
-      ceClient.delete.mockResolvedValue({ acknowledged: true, result: 'deleted' });
 
       const service = createCeService();
       service.setup({ logger });
       const ceService = service.start({ logger });
 
-      const result = await ceService.deleteDocument({
-        id: 'doc-1',
-        spaceId: 'default',
+      const result = await ceService.findByOriginAcrossSpaces({
+        type: 'visualization',
+        originId: 'ref-1',
         esClient: scopedClient,
       });
 
-      expect(result).toBe(true);
-      expect(ceClient.delete).toHaveBeenCalledWith({ id: 'doc-1' });
+      expect(result).toHaveLength(2);
+      // No space filter — only the origin.uri filter is applied.
+      const passed = esClient.search.mock.calls[0][0] as any;
+      const filters = passed.query.bool.filter as any[];
+      expect(filters).toEqual([{ term: { 'origin.uri': 'visualization://ref-1' } }]);
     });
 
-    it('returns false when the storage delete reports not_found', async () => {
-      esClient.search.mockResolvedValue({
-        hits: {
-          total: 1,
-          hits: [
-            {
-              _source: {
-                id: 'doc-1',
-                type: 'lens',
-                title: 'A',
-                origin: { uri: 'lens://ref-1' },
-                content: '',
-                created_at: '',
-                updated_at: '',
-                spaces: ['default'],
-                permissions: makePermissions(),
-              },
-            },
-          ],
-        },
-      } as any);
-      ceClient.delete.mockResolvedValue({ acknowledged: true, result: 'not_found' });
+    it('returns [] when index is missing', async () => {
+      esClient.search.mockRejectedValue(createNotFoundError());
 
       const service = createCeService();
       service.setup({ logger });
       const ceService = service.start({ logger });
 
-      const result = await ceService.deleteDocument({
-        id: 'doc-1',
-        spaceId: 'default',
+      const result = await ceService.findByOriginAcrossSpaces({
+        type: 'visualization',
+        originId: 'never',
         esClient: scopedClient,
       });
 
-      expect(result).toBe(false);
+      expect(result).toEqual([]);
     });
 
-    it('returns false on a 404 from storage delete', async () => {
-      esClient.search.mockResolvedValue({
-        hits: {
-          total: 1,
-          hits: [
-            {
-              _source: {
-                id: 'doc-1',
-                type: 'lens',
-                title: 'A',
-                origin: { uri: 'lens://ref-1' },
-                content: '',
-                created_at: '',
-                updated_at: '',
-                spaces: ['default'],
-                permissions: makePermissions(),
-              },
-            },
-          ],
-        },
-      } as any);
-      ceClient.delete.mockRejectedValue(createNotFoundError());
-
-      const service = createCeService();
-      service.setup({ logger });
-      const ceService = service.start({ logger });
-
-      const result = await ceService.deleteDocument({
-        id: 'doc-1',
-        spaceId: 'default',
-        esClient: scopedClient,
-      });
-
-      expect(result).toBe(false);
-    });
-
-    it('throws on non-404 errors from storage delete', async () => {
-      esClient.search.mockResolvedValue({
-        hits: {
-          total: 1,
-          hits: [
-            {
-              _source: {
-                id: 'doc-1',
-                type: 'lens',
-                title: 'A',
-                origin: { uri: 'lens://ref-1' },
-                content: '',
-                created_at: '',
-                updated_at: '',
-                spaces: ['default'],
-                permissions: makePermissions(),
-              },
-            },
-          ],
-        },
-      } as any);
-      ceClient.delete.mockRejectedValue(new Error('boom'));
+    it('throws on non-404 errors and logs', async () => {
+      esClient.search.mockRejectedValue(new Error('boom'));
 
       const service = createCeService();
       service.setup({ logger });
       const ceService = service.start({ logger });
 
       await expect(
-        ceService.deleteDocument({
-          id: 'doc-1',
-          spaceId: 'default',
+        ceService.findByOriginAcrossSpaces({
+          type: 'visualization',
+          originId: 'ref-1',
           esClient: scopedClient,
         })
       ).rejects.toThrow('boom');
-      expect(logger.warn).toHaveBeenCalledWith('CE deleteDocument failed: boom');
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('CE findByOriginAcrossSpaces failed')
+      );
+    });
+
+    it('only fetches the guard-relevant fields via _source filter', async () => {
+      // The cross-space guard runs on every PUT and DELETE. The route
+      // only ever reads `id`, `type`, and `spaces` from the result, so
+      // pulling back the full `_source` (which can include a 50 KB
+      // `content` per entry × up to 1000 entries) would push tens of
+      // MB across the wire per call for nothing. Pinning the
+      // `_source` selector here so we notice if a future change tries
+      // to remove it (and re-introduces the bandwidth regression).
+      esClient.search.mockResolvedValue({
+        hits: { total: { value: 1, relation: 'eq' }, hits: [] },
+      } as any);
+
+      const service = createCeService();
+      service.setup({ logger });
+      const ceService = service.start({ logger });
+
+      await ceService.findByOriginAcrossSpaces({
+        type: 'visualization',
+        originId: 'ref-1',
+        esClient: scopedClient,
+      });
+
+      const passed = esClient.search.mock.calls[0][0] as any;
+      expect(passed._source).toEqual(['id', 'type', 'spaces', 'origin', 'created_at']);
+    });
+
+    it('throws CeCorpusTooLargeError (fail-closed) when total entries exceed MAX_ENTRIES_PER_ORIGIN', async () => {
+      // Security-critical: if more than MAX_ENTRIES_PER_ORIGIN entries exist
+      // across spaces, the cross-space guard would act on a partial view and
+      // could silently authorise a write that crosses a space boundary.
+      // We throw to prevent that — the write is rejected entirely.
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 2000, relation: 'eq' },
+          hits: [],
+        },
+      } as any);
+
+      const service = createCeService();
+      service.setup({ logger });
+      const ceService = service.start({ logger });
+
+      await expect(
+        ceService.findByOriginAcrossSpaces({
+          type: 'visualization',
+          originId: 'overfull',
+          esClient: scopedClient,
+        })
+      ).rejects.toThrow(expect.objectContaining({ name: 'CeCorpusTooLargeError' }));
+
+      // No spurious "failed" warn — the error is an intentional signal.
+      expect(logger.warn).not.toHaveBeenCalledWith(
+        expect.stringContaining('CE findByOriginAcrossSpaces failed')
+      );
+
+      const passed = esClient.search.mock.calls[0][0] as any;
+      expect(passed.track_total_hits).toBe(true);
+      expect(passed.size).toBe(1000);
     });
   });
 });

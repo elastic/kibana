@@ -143,19 +143,31 @@ describe('resolveCeAttachItems', () => {
     expect(mockGetTypeDefinition).not.toHaveBeenCalled();
   });
 
-  it('returns error when getTypeDefinition is undefined', async () => {
-    const ceDoc = createCeDoc({ type: 'orphan-type' });
+  it('returns a generic text attachment when getTypeDefinition is undefined (unregistered CE type)', async () => {
+    const ceDoc = createCeDoc({
+      type: 'orphan-type',
+      title: 'Ad-hoc note',
+      content: 'free-form note body',
+      origin: { uri: 'orphan-type://note-1' },
+    });
     mockCheckItemsAccess.mockResolvedValue(new Map([['entry-1', true]]));
     mockGetDocuments.mockResolvedValue(new Map([['entry-1', ceDoc]]));
     mockGetTypeDefinition.mockReturnValue(undefined);
+
     const results = await resolveCeAttachItems({
       ...baseParams,
       entryIds: ['entry-1'],
     });
-    expect(results[0].success).toBe(false);
-    if (!results[0].success) {
-      expect(results[0].message).toContain('does not support conversion');
-      expect(results[0].attachment_type).toBe('orphan-type');
+
+    expect(results[0].success).toBe(true);
+    if (results[0].success) {
+      expect(results[0].attachment).toEqual({
+        type: 'text',
+        data: { title: 'Ad-hoc note', content: 'free-form note body' },
+        origin: 'orphan-type://note-1',
+        description: 'orphan-type/Ad-hoc note',
+      });
+      expect(results[0].entry_id).toBe('entry-1');
     }
   });
 

@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldValue, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -16,9 +16,7 @@ import type {
   CeSearchResult,
   CeAutocompleteResult,
   CeDocument,
-  CeDocumentInput,
   CeTypeDefinition,
-  CeUpsertResult,
   CeSearchFilters,
   CeSearchConstraints,
   MatchedDiscoveryLabel,
@@ -28,22 +26,24 @@ import { createCeTypeRegistry, type CeTypeRegistry } from './ce_type_registry';
 import { createCeIndexer, type CeIndexer } from './ce_indexer';
 import { CeCrawlerImpl } from './ce_crawler';
 import type { CeCrawler } from './types';
-import { ceIndexName, createCeStorage } from './ce_storage';
+import { ceIndexName } from './ce_storage';
 import {
   CeResultWindowExceededError,
   CeAuthzEnumerationIncompleteError,
   CeCorpusTooLargeError,
 } from './ce_errors';
+import { MAX_ENTRIES_PER_ORIGIN } from '../../../common/constants';
 
 // ES client usage pattern in this module:
 // - Read operations (search, get, list, checkAccess) use `esClient.asInternalUser` directly with
 //   `allow_no_indices: true` / `ignore_unavailable: true` so they silently handle a missing index.
-// - Write operations (upsert, delete) use `createCeStorage` / `ceClient` so that
-//   StorageIndexAdapter auto-creates the index on first write.
+// - Every write path (origin-mode crawler, content-mode workflow step, HTTP PUT/DELETE) goes
+//   through `CeIndexer` so type-registration enforcement, permission derivation, and storage
+//   shape stay consistent. There are no document-write paths in this file.
 
 export interface CeServiceSetup {
   /**
-   * Register a CE type definition.
+   * Register an CE type definition.
    * Should be called during plugin setup.
    */
   registerType: (definition: CeTypeDefinition) => void;
@@ -178,11 +178,11 @@ class CeServiceImpl implements CeServiceInstance {
           tags,
         });
       },
-      upsertDocument: async ({ id, spaceId, document, esClient }) => {
-        return upsertDocument({ id, spaceId, document, esClient, logger });
+      findByOrigin: async ({ type, originId, spaceId, esClient }) => {
+        return findByOrigin({ type, originId, spaceId, esClient, logger });
       },
-      deleteDocument: async ({ id, spaceId, esClient }) => {
-        return deleteDocument({ id, spaceId, esClient, logger });
+      findByOriginAcrossSpaces: async ({ type, originId, esClient }) => {
+        return findByOriginAcrossSpaces({ type, originId, esClient, logger });
       },
       getTypeDefinition: (typeId: string) => {
         return this.registry.get(typeId);
@@ -207,8 +207,7 @@ export const isNotFoundError = (error: unknown): boolean => {
 
 /**
  * Empty-but-fully-shaped permissions object. Used as a fallback when
- * `_source.permissions` is somehow missing (legacy / test docs) and as
- * the input default in `upsertDocument`.
+ * `_source.permissions` is somehow missing (legacy / test docs).
  */
 const emptyPermissions = (): CeDocument['permissions'] => ({
   kibana: { privileges: [] },
@@ -1359,39 +1358,7 @@ const getDocumentsByIds = async ({
 
     for (const hit of response.hits.hits) {
       if (!hit._source) continue;
-      const source = hit._source;
-      const originUri = source.origin?.uri ?? '';
-      const doc: CeDocument = {
-        id: source.id ?? '',
-        type: source.type ?? '',
-        title: source.title ?? '',
-        origin_id: originUri.split('://')[1] ?? '',
-        origin: { uri: originUri },
-        content: source.content ?? '',
-        created_at: source.created_at ?? '',
-        updated_at: source.updated_at ?? '',
-        spaces: source.spaces ?? [],
-        permissions: source.permissions ?? emptyPermissions(),
-        ingestion_method: source.ingestion_method ?? 'crawled',
-      };
-      if (source.description !== undefined) {
-        doc.description = source.description;
-      }
-      if (source.tags !== undefined) {
-        doc.tags = source.tags;
-      }
-      if (source.discovery_labels !== undefined) {
-        doc.discovery_labels = source.discovery_labels;
-      }
-      if (source.extended_attrs !== undefined) {
-        doc.extended_attrs = source.extended_attrs;
-      }
-      if (source.user_id !== undefined) {
-        doc.user_id = source.user_id;
-      }
-      if (source.references !== undefined) {
-        doc.references = source.references;
-      }
+      const doc = hydrateDocument(hit._source);
       docMap.set(doc.id, doc);
     }
   } catch (error) {
@@ -1404,30 +1371,70 @@ const getDocumentsByIds = async ({
 };
 
 /**
- * Fetch a single CE document by id, scoped to a space.
- * Returns `undefined` when the document does not exist or is not in the space.
+ * Extract the total-hit count from an ES search response in a way that
+ * tolerates both the legacy numeric shape (older clients) and the
+ * `{ value, relation }` object shape returned when `track_total_hits`
+ * is set. Falls back to `0` when the field is absent.
  */
-const getDocumentById = async ({
-  id,
+const extractTotalHits = (total: SearchTotalHits | number | undefined): number => {
+  if (total === undefined) return 0;
+  if (typeof total === 'number') return total;
+  return total.value;
+};
+
+/**
+ * Compose the canonical `origin.uri` from the CE `type` and bare
+ * `originId`. Single source of truth for the URI scheme.
+ *
+ * Exported for the HTTP routes; the indexer derives it internally.
+ */
+export const buildOriginUri = (type: string, originId: string): string => `${type}://${originId}`;
+
+/**
+ * Fetch every entry written under `(type, originId)` that is visible
+ * in `spaceId`.
+ *
+ * Multiple entries per origin are expected: the workflow step's
+ * content mode and `getCeData` in origin mode can both produce >1
+ * entry per origin. Ordering is unspecified.
+ *
+ * Lookups happen via the `origin.uri` keyword field — the only mapped
+ * origin identifier. The compound URI is the only safe addressable key
+ * because bare `originId` is not unique across CE types (a lens id and
+ * a dashboard id can legitimately collide). The HTTP routes carry both
+ * pieces in the URL (`/ce/{type}/{originId}`) for the same reason.
+ *
+ * Results are bounded by {@link MAX_ENTRIES_PER_ORIGIN}. Overflow is
+ * logged with `track_total_hits` so operators can spot a producer
+ * that has gone off the rails. The first `MAX_ENTRIES_PER_ORIGIN`
+ * entries are still returned — the per-space response is a degraded
+ * view rather than an error.
+ */
+const findByOrigin = async ({
+  type,
+  originId,
   spaceId,
   esClient,
   logger,
 }: {
-  id: string;
+  type: string;
+  originId: string;
   spaceId: string;
   esClient: IScopedClusterClient;
   logger: Logger;
-}): Promise<CeDocument | undefined> => {
+}): Promise<CeDocument[]> => {
+  const originUri = buildOriginUri(type, originId);
   try {
     const response = await esClient.asInternalUser.search<CeDocument>({
       index: ceIndexName,
-      size: 1,
+      size: MAX_ENTRIES_PER_ORIGIN,
+      track_total_hits: true,
       allow_no_indices: true,
       ignore_unavailable: true,
       query: {
         bool: {
           filter: [
-            { term: { id } },
+            { term: { 'origin.uri': originUri } },
             {
               bool: {
                 should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
@@ -1439,30 +1446,169 @@ const getDocumentById = async ({
       },
     });
 
-    const hit = response.hits.hits[0];
-    if (!hit?._source) return undefined;
+    const total = extractTotalHits(response.hits.total);
+    if (total > MAX_ENTRIES_PER_ORIGIN) {
+      logger.warn(
+        `CE findByOrigin: origin '${originUri}' has ${total} entries in space '${spaceId}' but only the first ${MAX_ENTRIES_PER_ORIGIN} are returned. Producer is likely misbehaving — investigate before the cross-space guard becomes unreliable.`
+      );
+    }
 
-    const source = hit._source;
-    return {
-      id: source.id ?? '',
-      type: source.type ?? '',
-      title: source.title ?? '',
-      origin_id: (source.origin?.uri ?? '').split('://')[1] ?? '',
-      origin: { uri: source.origin?.uri ?? '' },
-      content: source.content ?? '',
-      created_at: source.created_at ?? '',
-      updated_at: source.updated_at ?? '',
-      spaces: source.spaces ?? [],
-      permissions: source.permissions ?? emptyPermissions(),
-      ingestion_method: source.ingestion_method ?? 'crawled',
-    };
+    return response.hits.hits
+      .filter((hit) => hit._source != null)
+      .map((hit) => hydrateDocument(hit._source!));
   } catch (error) {
     if (isNotFoundError(error)) {
-      return undefined;
+      return [];
     }
-    logger.warn(`CE getDocument failed: ${(error as Error).message}`);
+    logger.warn(`CE findByOrigin failed: ${(error as Error).message}`);
     throw error;
   }
+};
+
+/**
+ * `_source` fields fetched by `findByOriginAcrossSpaces`.
+ *
+ * The cross-space guard only reads `id`, `type`, `spaces` (and uses
+ * `origin.uri` indirectly via `hydrateDocument`'s `origin_id`
+ * derivation — `origin_id` is not stored, it's parsed from the URI at
+ * read time). Everything else — `content`, `title`, `description`,
+ * `tags`, `permissions`, … — is pulled back on the per-space path
+ * (`findByOrigin`) which is the one that surfaces to users. The
+ * guard runs on every PUT and DELETE, so trimming the payload here
+ * matters: with `size: 1000` and a 50 KB `content` field per entry,
+ * the un-filtered version could pull up to 50 MB per guard call and
+ * immediately discard 99% of it.
+ *
+ * Listed as a typed constant rather than inline so a future field
+ * addition has a single place to consider whether the guard needs to
+ * see it.
+ */
+const FIND_ACROSS_SPACES_SOURCE_FIELDS: ReadonlyArray<keyof CeDocument> = [
+  'id',
+  'type',
+  'spaces',
+  'origin',
+  'created_at',
+];
+
+/**
+ * Fetch every entry written under `(type, originId)` regardless of
+ * space.
+ *
+ * Used by the HTTP routes' cross-space-overwrite guard and the
+ * `checkItemsAccess` privilege gate — never for read paths that
+ * surface data to users. The route compares the result against the
+ * caller's space to decide between proceeding, 404, and (later) 409
+ * semantics.
+ *
+ * Returns an empty array on `index_not_found` rather than throwing —
+ * "no CE index yet" is a normal first-write state.
+ *
+ * Results are bounded by {@link MAX_ENTRIES_PER_ORIGIN}. If more than
+ * the limit exists, entries in another space might fall outside the
+ * returned window — the cross-space guard would then act on an
+ * incomplete view and could silently authorise a write that crosses
+ * a space boundary. To prevent that, overflow throws
+ * {@link CeCorpusTooLargeError} (fail-closed). The limit is generous
+ * enough that legitimate producers should never hit it (the workflow
+ * step caps batches at 100, and the crawler's built-in types produce
+ * 1 entry per origin).
+ *
+ * Returned `CeDocument`s carry only the fields in
+ * {@link FIND_ACROSS_SPACES_SOURCE_FIELDS}; everything else is
+ * defaulted to empty by `hydrateDocument`. Callers must treat the
+ * result as guard-only and not surface it to users.
+ */
+const findByOriginAcrossSpaces = async ({
+  type,
+  originId,
+  esClient,
+  logger,
+}: {
+  type: string;
+  originId: string;
+  esClient: IScopedClusterClient;
+  logger: Logger;
+}): Promise<CeDocument[]> => {
+  const originUri = buildOriginUri(type, originId);
+  try {
+    const response = await esClient.asInternalUser.search<CeDocument>({
+      index: ceIndexName,
+      size: MAX_ENTRIES_PER_ORIGIN,
+      track_total_hits: true,
+      _source: FIND_ACROSS_SPACES_SOURCE_FIELDS as unknown as string[],
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      query: {
+        bool: {
+          filter: [{ term: { 'origin.uri': originUri } }],
+        },
+      },
+    });
+
+    const total = extractTotalHits(response.hits.total);
+    if (total > MAX_ENTRIES_PER_ORIGIN) {
+      throw new CeCorpusTooLargeError(
+        `CE origin '${originUri}' has ${total} entries, which exceeds the ${MAX_ENTRIES_PER_ORIGIN}-entry cross-space guard limit. The write is rejected to avoid acting on a partial cross-space view. Reduce the entry count for this origin before retrying.`
+      );
+    }
+
+    return response.hits.hits
+      .filter((hit) => hit._source != null)
+      .map((hit) => hydrateDocument(hit._source!));
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      return [];
+    }
+    // CeCorpusTooLargeError is an intentional fail-closed signal — let it
+    // propagate without the generic "failed" warn, which would be redundant.
+    if (!(error instanceof CeCorpusTooLargeError)) {
+      logger.warn(`CE findByOriginAcrossSpaces failed: ${(error as Error).message}`);
+    }
+    throw error;
+  }
+};
+
+/**
+ * Project an ES `_source` payload into the canonical `CeDocument`
+ * shape used everywhere downstream. Centralised because three readers
+ * (getDocumentsByIds, findByOrigin, findByOriginAcrossSpaces) apply
+ * the same mapping — keeping them in sync by-hand is a footgun.
+ */
+const hydrateDocument = (source: CeDocument): CeDocument => {
+  const originUri = source.origin?.uri ?? '';
+  const doc: CeDocument = {
+    id: source.id ?? '',
+    type: source.type ?? '',
+    title: source.title ?? '',
+    origin_id: source.origin_id ?? originUri.split('://')[1] ?? '',
+    origin: { uri: originUri },
+    content: source.content ?? '',
+    created_at: source.created_at ?? '',
+    updated_at: source.updated_at ?? '',
+    spaces: source.spaces ?? [],
+    permissions: source.permissions ?? emptyPermissions(),
+    ingestion_method: source.ingestion_method ?? 'crawled',
+  };
+  if (source.description !== undefined) doc.description = source.description;
+  if (source.tags !== undefined) doc.tags = source.tags;
+  if (source.discovery_labels !== undefined) doc.discovery_labels = source.discovery_labels;
+  if (source.extended_attrs !== undefined) doc.extended_attrs = source.extended_attrs;
+  if (source.user_id !== undefined) doc.user_id = source.user_id;
+  if (source.references !== undefined) doc.references = source.references;
+  return doc;
+};
+
+/**
+ * True when a document with the given `spaces` field is visible from
+ * `spaceId`. Wildcard (`'*'`) entries are treated as global.
+ *
+ * Exported so route helpers (HTTP upsert/delete cross-space guard) can
+ * apply the same predicate used internally by `findByOrigin`.
+ */
+export const isVisibleInSpace = (spaces: string[] | undefined, spaceId: string): boolean => {
+  if (!spaces || spaces.length === 0) return false;
+  return spaces.includes(spaceId) || spaces.includes('*');
 };
 
 /**
@@ -1531,24 +1677,7 @@ const listDocuments = async ({
 
     const results: CeDocument[] = response.hits.hits
       .filter((hit) => hit._source != null)
-      .map((hit) => {
-        const source = hit._source!;
-        const uri = source.origin?.uri ?? '';
-        return {
-          id: source.id ?? '',
-          type: source.type ?? '',
-          title: source.title ?? '',
-          origin_id: uri.split('://')[1] ?? '',
-          origin: { uri },
-          content: source.content ?? '',
-          created_at: source.created_at ?? '',
-          updated_at: source.updated_at ?? '',
-          spaces: source.spaces ?? [],
-          permissions: source.permissions ?? emptyPermissions(),
-          ingestion_method: source.ingestion_method ?? 'crawled',
-          ...(source.tags !== undefined ? { tags: source.tags } : {}),
-        };
-      });
+      .map((hit) => hydrateDocument(hit._source!));
 
     return { total, results };
   } catch (error) {
@@ -1565,131 +1694,6 @@ const listDocuments = async ({
       throw new CeResultWindowExceededError(reason);
     }
     logger.warn(`CE listDocuments failed: ${(error as Error).message}`);
-    throw error;
-  }
-};
-
-/**
- * Upsert a CE document by id, scoped to a space.
- *
- * On create, `spaces` is set to `[spaceId]`. On update, `created_at` and the
- * existing `spaces` are preserved (callers cannot widen or narrow space
- * membership through this endpoint), and `updated_at` is refreshed.
- *
- * Returns `null` when a document with this id exists but is not visible from
- * `spaceId` — callers cannot clobber documents in other spaces.
- */
-const upsertDocument = async ({
-  id,
-  spaceId,
-  document,
-  esClient,
-  logger,
-}: {
-  id: string;
-  spaceId: string;
-  document: CeDocumentInput;
-  esClient: IScopedClusterClient;
-  logger: Logger;
-}): Promise<CeUpsertResult | null> => {
-  // TODO: Implement optimistic concurrency using _seq_no/_primary_term to prevent lost-update
-  // races. The current get-then-index pattern allows two concurrent upserts to silently overwrite
-  // each other. A fix should use esClient.asInternalUser.get() (which reliably returns
-  // _seq_no/_primary_term) and pass if_seq_no/if_primary_term to the index call.
-  // Note: StorageIndexAdapter.get() uses search internally and does not request
-  // seq_no_primary_term, so _seq_no is unreliable via that path.
-
-  // We use ceClient.get() rather than the space-aware getDocumentById() here intentionally:
-  // we need to detect documents that exist in another space (to block cross-space overwrites).
-  // getDocumentById() would return undefined for those, causing us to silently overwrite them.
-  const internalEsClient = esClient.asInternalUser;
-  const storage = createCeStorage({ logger, esClient: internalEsClient });
-  const ceClient = storage.getClient();
-
-  let existing: CeDocument | undefined;
-  try {
-    const existingResponse = await ceClient.get({ id });
-    if (existingResponse?.found && existingResponse._source) {
-      existing = existingResponse._source;
-    }
-  } catch (error) {
-    if (!isNotFoundError(error)) {
-      logger.warn(`CE upsertDocument lookup failed: ${(error as Error).message}`);
-      throw error;
-    }
-  }
-
-  if (existing && !isVisibleInSpace(existing.spaces, spaceId)) {
-    return null;
-  }
-
-  const now = new Date().toISOString();
-  const created = !existing;
-  const fullDocument: CeDocument = {
-    id,
-    type: document.type,
-    title: document.title,
-    origin: { uri: `${document.type}://${document.origin_id}` },
-    content: document.content,
-    created_at: existing?.created_at ?? now,
-    updated_at: now,
-    spaces: existing?.spaces ?? [spaceId],
-    permissions: {
-      kibana: { privileges: document.permissions?.kibana?.privileges ?? [] },
-      elasticsearch: { indices: document.permissions?.elasticsearch?.indices ?? [] },
-    },
-    // On create: default to []. On update: preserve existing tags if caller omits the field.
-    tags: document.tags ?? existing?.tags ?? [],
-    // HTTP upserts are by definition manual writes; tagging here lets the crawler
-    // (and origin-mode indexAttachment) skip these entries to avoid clobbering them.
-    ingestion_method: 'manual',
-  };
-
-  await ceClient.index({ id, document: fullDocument });
-
-  return { document: fullDocument, created };
-};
-
-const isVisibleInSpace = (spaces: string[] | undefined, spaceId: string): boolean => {
-  if (!spaces || spaces.length === 0) return false;
-  return spaces.includes(spaceId) || spaces.includes('*');
-};
-
-/**
- * Delete a CE document by id, scoped to a space.
- *
- * The space scope is enforced via a lookup before the delete: documents
- * that exist but are not visible in `spaceId` are reported as not found.
- * Returns `true` when a document was deleted, `false` otherwise.
- */
-const deleteDocument = async ({
-  id,
-  spaceId,
-  esClient,
-  logger,
-}: {
-  id: string;
-  spaceId: string;
-  esClient: IScopedClusterClient;
-  logger: Logger;
-}): Promise<boolean> => {
-  const existing = await getDocumentById({ id, spaceId, esClient, logger });
-  if (!existing) {
-    return false;
-  }
-
-  const internalEsClient = esClient.asInternalUser;
-  const storage = createCeStorage({ logger, esClient: internalEsClient });
-  const ceClient = storage.getClient();
-
-  try {
-    const response = await ceClient.delete({ id });
-    return response.result === 'deleted';
-  } catch (error) {
-    if (isNotFoundError(error)) {
-      return false;
-    }
-    logger.warn(`CE deleteDocument failed: ${(error as Error).message}`);
     throw error;
   }
 };

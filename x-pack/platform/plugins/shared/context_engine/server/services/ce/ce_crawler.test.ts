@@ -40,15 +40,18 @@ jest.mock('./ce_storage', () => ({
   createCeStorage: jest.fn(),
 }));
 
-jest.mock('./ce_service', () => ({
-  isNotFoundError: jest.fn(
-    (error: unknown) => (error as { statusCode?: number })?.statusCode === 404
+jest.mock('@kbn/es-errors', () => ({
+  isResponseError: jest.fn(
+    (error: unknown) => typeof (error as { statusCode?: unknown })?.statusCode === 'number'
   ),
 }));
+
+const mockUpdateMappingsIfNeeded = jest.fn();
 
 const mockCeClient = {
   clean: jest.fn().mockResolvedValue({ acknowledged: true }),
   existsIndex: jest.fn().mockResolvedValue(false),
+  reconcileMappings: mockUpdateMappingsIfNeeded,
 };
 
 const getMockCeClient = () => mockCeClient;
@@ -123,6 +126,7 @@ describe('CeCrawlerImpl', () => {
     mockStateClient.bulk.mockResolvedValue({ errors: false, items: [] });
     mockCeClient.existsIndex.mockResolvedValue(false);
     mockCeClient.clean.mockResolvedValue({ acknowledged: true });
+    mockUpdateMappingsIfNeeded.mockResolvedValue(undefined);
     (createCeStorage as jest.Mock).mockReturnValue({
       getClient: jest.fn().mockReturnValue(getMockCeClient()),
     });
@@ -635,27 +639,25 @@ describe('CeCrawlerImpl', () => {
   });
 
   describe('schema version check', () => {
-    it('schema mismatch: cleans index and forces full re-index of all items', async () => {
-      mockCeClient.existsIndex.mockResolvedValue(true);
-      (esClient.indices.getMapping as jest.Mock).mockResolvedValue({
-        '.test-sml-data-000001': {
-          mappings: { _meta: { version: 'old-schema-hash' } },
-        },
-      });
+    it('mapping update failure: drops index and forces full re-index', async () => {
+      const mappingError = {
+        statusCode: 400,
+        body: { error: { type: 'mapper_parsing_exception' } },
+      };
+      mockUpdateMappingsIfNeeded.mockRejectedValue(mappingError);
 
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
       const definition = createMockDefinition({
         list: jest.fn().mockReturnValue(yieldPages(items)),
       });
-      mockStateClient.search
-        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 1 } } })
-        .mockResolvedValue({ hits: { hits: [] } });
+      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new CeCrawlerImpl({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
+      expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(1);
       expect(mockCeClient.clean).toHaveBeenCalledTimes(1);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('schema version mismatch'));
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('mapping update failed'));
       const createOp = mockStateClient.bulk.mock.calls
         .flatMap((c: unknown[]) => (c[0] as { operations?: unknown[] }).operations ?? [])
         .find(
@@ -665,23 +667,52 @@ describe('CeCrawlerImpl', () => {
       expect(createOp).toBeDefined();
     });
 
-    it('schema matches: does not clean the index', async () => {
-      mockCeClient.existsIndex.mockResolvedValue(true);
+    it('non-response error propagates immediately without retrying', async () => {
+      const networkError = new Error('connection refused');
+      mockUpdateMappingsIfNeeded.mockRejectedValue(networkError);
 
-      const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
-      const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages(items)),
-      });
+      const definition = createMockDefinition();
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new CeCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await expect(crawler.crawl({ definition, esClient, savedObjectsClient })).rejects.toThrow(
+        'connection refused'
+      );
 
+      expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(1);
       expect(mockCeClient.clean).not.toHaveBeenCalled();
     });
 
-    it('index does not exist: skips schema check entirely', async () => {
-      mockCeClient.existsIndex.mockResolvedValue(false);
+    it('additive mapping change: applies in-place without cleaning', async () => {
+      const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
+      const definition = createMockDefinition({
+        list: jest.fn().mockReturnValue(yieldPages(items)),
+      });
+      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+
+      const crawler = new CeCrawlerImpl({ indexer: mockIndexer, logger });
+      await crawler.crawl({ definition, esClient, savedObjectsClient });
+
+      expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(1);
+      expect(mockCeClient.clean).not.toHaveBeenCalled();
+    });
+
+    it('index does not exist: updateMappingsIfNeeded resolves cleanly, crawl proceeds without cleaning', async () => {
+      const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
+      const definition = createMockDefinition({
+        list: jest.fn().mockReturnValue(yieldPages(items)),
+      });
+      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+
+      const crawler = new CeCrawlerImpl({ indexer: mockIndexer, logger });
+      await crawler.crawl({ definition, esClient, savedObjectsClient });
+
+      expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(1);
+      expect(mockCeClient.clean).not.toHaveBeenCalled();
+    });
+
+    it('404 from mapping update: race condition treated as no-op, does not clean', async () => {
+      mockUpdateMappingsIfNeeded.mockRejectedValueOnce({ statusCode: 404 });
 
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
       const definition = createMockDefinition({
@@ -692,7 +723,6 @@ describe('CeCrawlerImpl', () => {
       const crawler = new CeCrawlerImpl({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
-      expect(esClient.indices.getMapping).not.toHaveBeenCalled();
       expect(mockCeClient.clean).not.toHaveBeenCalled();
     });
   });

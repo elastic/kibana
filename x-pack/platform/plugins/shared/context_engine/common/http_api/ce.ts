@@ -50,12 +50,12 @@ export interface CeSearchFilters {
 }
 
 /**
- * Max length of `query` for POST `/internal/context_engine/_search`.
+ * Max length of `query` for POST `/internal/context_engine/ce/_search`.
  */
 export const CE_HTTP_SEARCH_QUERY_MAX_LENGTH = 512;
 
 /**
- * Response body for `POST /internal/context_engine/_search`.
+ * Response body for `POST /internal/context_engine/ce/_search`.
  */
 export interface CeSearchHttpResponse {
   results: CeSearchHttpResultItem[];
@@ -106,10 +106,16 @@ export interface CeHttpItem {
 }
 
 /**
- * Response body for `GET /internal/context_engine/{id}`.
+ * Response body for `GET /internal/context_engine/ce/{originId}`.
+ *
+ * Returns every entry written under the origin (the workflow step's
+ * content mode can write multiple entries per origin, the crawler may
+ * write one, etc.). Consumers iterate; ordering is not guaranteed.
+ * `items` is empty (not 404) is impossible — when no entries exist or
+ * none are visible to the caller, the route returns 404 directly.
  */
 export interface CeGetHttpResponse {
-  item: CeHttpItem;
+  items: CeHttpItem[];
 }
 
 /**
@@ -124,7 +130,7 @@ export const CE_HTTP_LIST_PER_PAGE_MAX = 1000;
 export const CE_HTTP_LIST_PAGE_DEFAULT = 1;
 
 /**
- * Response body for `GET /internal/context_engine`.
+ * Response body for `GET /internal/context_engine/ce`.
  */
 export interface CeListHttpResponse {
   page: number;
@@ -133,30 +139,41 @@ export interface CeListHttpResponse {
 }
 
 /**
- * Response body for `PUT /internal/context_engine/{id}`.
+ * Response body for `PUT /internal/context_engine/ce/{originId}`.
+ *
+ * PUT writes a single manual entry under `originId` via the indexer's
+ * content mode. The indexer wipes every existing entry for the origin
+ * (regardless of `ingestion_method`) before writing — HTTP PUT therefore
+ * effectively claims ownership of the origin and replaces any
+ * crawler-written entries for it. `items` reflects what the indexer
+ * actually persisted (currently always one entry for the HTTP path).
  */
 export interface CeUpsertHttpResponse {
-  item: CeHttpItem;
-  /** Whether the document was newly created (vs. updated in place). */
+  items: CeHttpItem[];
+  /** Whether the origin was newly created (vs. replacing existing entries). */
   created: boolean;
 }
 
 /**
- * Response body for `DELETE /internal/context_engine/{id}`.
+ * Response body for `DELETE /internal/context_engine/ce/{originId}`.
+ *
+ * DELETE removes every entry for the origin (manual + crawled) via the
+ * indexer's `deleteAttachment({ ingestionMethod: 'all' })`. Mirrors PUT's
+ * "claim the origin" semantic in reverse.
  */
 export interface CeDeleteHttpResponse {
-  id: string;
+  origin_id: string;
   deleted: boolean;
 }
 
 /**
- * Max length of `query` for POST `/internal/context_engine/_autocomplete`.
+ * Max length of `query` for POST `/internal/context_engine/ce/_autocomplete`.
  * Autocomplete payloads are user-typed prefixes - shorter than full retrieval queries.
  */
 export const CE_HTTP_AUTOCOMPLETE_QUERY_MAX_LENGTH = 256;
 
 /**
- * Response body for `POST /internal/context_engine/_autocomplete`.
+ * Response body for `POST /internal/context_engine/ce/_autocomplete`.
  */
 export interface CeAutocompleteHttpResponse {
   results: CeAutocompleteHttpResultItem[];

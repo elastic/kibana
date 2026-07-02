@@ -5,31 +5,33 @@
  * 2.0.
  */
 
+import type { ChangeHistoryScope } from '../types/change_history_scope';
 import { DEFAULT_CHANGE_HISTORY_PAGE_SIZE } from '../types/change_history_constants';
 
 export const CHANGE_HISTORY_QUERY_KEY = ['change-history'] as const;
 
-/** @deprecated Use {@link CHANGE_HISTORY_QUERY_KEY} or {@link changeHistoryObjectQueryKeyPrefix} */
-export const CHANGE_HISTORY_LIST_QUERY_KEY = [...CHANGE_HISTORY_QUERY_KEY, 'list'] as const;
+export const changeHistoryScopeQueryKeyPrefix = (scope: ChangeHistoryScope) =>
+  [...CHANGE_HISTORY_QUERY_KEY, scope.module, scope.dataset, scope.objectType] as const;
 
-export const changeHistoryObjectQueryKeyPrefix = (objectId: string) =>
-  [...CHANGE_HISTORY_QUERY_KEY, objectId] as const;
-
-/** @deprecated Use {@link changeHistoryObjectQueryKeyPrefix} */
-export const changeHistoryListQueryKeyPrefix = changeHistoryObjectQueryKeyPrefix;
+export const changeHistoryObjectQueryKeyPrefix = (objectId: string, scope: ChangeHistoryScope) =>
+  [...changeHistoryScopeQueryKeyPrefix(scope), objectId] as const;
 
 export const changeHistoryListQueryKey = ({
   objectId,
+  scope,
   pageSize = DEFAULT_CHANGE_HISTORY_PAGE_SIZE,
 }: {
   objectId: string;
+  scope: ChangeHistoryScope;
   pageSize?: number;
-}) => [...changeHistoryObjectQueryKeyPrefix(objectId), 'list', pageSize] as const;
+}) => [...changeHistoryObjectQueryKeyPrefix(objectId, scope), 'list', pageSize] as const;
 
 export const changeHistoryDetailQueryKey = ({
   objectId,
   changeId,
+  scope,
 }: {
   objectId: string;
   changeId: string;
-}) => [...changeHistoryObjectQueryKeyPrefix(objectId), 'detail', changeId] as const;
+  scope: ChangeHistoryScope;
+}) => [...changeHistoryObjectQueryKeyPrefix(objectId, scope), 'detail', changeId] as const;

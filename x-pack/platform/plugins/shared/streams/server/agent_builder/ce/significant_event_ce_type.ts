@@ -98,10 +98,6 @@ export const createSignificantEventCeType = ({
               type: SIGNIFICANT_EVENT_CE_TYPE,
               title: event.title,
               content: eventToCeContent(event),
-              permissions: {
-                kibana: { privileges: [{ name: `api:${STREAMS_API_PRIVILEGES.read}` }] },
-                elasticsearch: { indices: [] },
-              },
             },
           ],
         };
@@ -112,6 +108,15 @@ export const createSignificantEventCeType = ({
         return undefined;
       }
     },
+
+    /**
+     * Significant events are gated by the Streams read API privilege — the
+     * same gate the Streams API checks before surfacing event data.
+     */
+    getPermissions: () => ({
+      kibana: { privileges: [{ name: `api:${STREAMS_API_PRIVILEGES.read}` }] },
+      elasticsearch: { indices: [] },
+    }),
 
     toAttachment: async (item, context) => {
       if (!item.origin_id) {

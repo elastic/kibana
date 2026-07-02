@@ -50,12 +50,18 @@ import type { ContextEnginePluginStart } from '../types';
  *    dev/test with security disabled) we follow the standard "no security
  *    plugin → open access" convention used by the CE read path.
  *
- * The `getTypeDefinition` guard intentionally only fires on the `upsert`
- * branch: writes against an unregistered type are nonsensical (no
- * `getCeData` hook to fall back to, no `toAttachment` for downstream
- * consumers), but `delete` must remain functional even after a plugin
- * that registered the type is disabled — otherwise stale entries become
- * unreachable from the workflow surface.
+ * Unregistered-type handling lives in the indexer, not here. Content-mode
+ * writes (the only mode this step uses for `upsert`) accept any
+ * `attachmentType`: when the type is registered, `getPermissions` is
+ * stamped; when it is not, empty `CePermissions` is stamped and the
+ * indexer emits a once-per-process warn naming the namespace. This lets
+ * workflow authors write ad-hoc content without first registering an CE
+ * type, at the cost of those entries being space-readable rather than
+ * gated by a privilege. `delete` calls `deleteAttachment` directly — the
+ * indexer's delete path is permissive about registration so cleanup
+ * keeps working even after the plugin that registered the type is
+ * disabled, otherwise stale entries become unreachable from the workflow
+ * surface.
  *
  * The handler defers resolving the AGL start contract until execution
  * time so the step can be registered during plugin `setup()` and still
@@ -134,12 +140,14 @@ export const createContextEngineAddEntryStepDefinition = ({
             ingestionMethod: 'all',
           });
         } else {
-          if (!startContract.getTypeDefinition(attachmentType)) {
-            return {
-              error: new Error(`Unknown Context Engine entry type: '${attachmentType}'`),
-            };
-          }
-
+          // Permissions are intentionally *not* passed through here. The
+          // indexer derives them from the registered type's `getPermissions`
+          // hook, which makes workflow-driven writes inherit the same gating
+          // as a crawler-driven write (and cannot be spoofed by a workflow
+          // author). If `attachmentType` is unregistered, the indexer
+          // stamps empty `CePermissions` (space-readable) and emits a
+          // once-per-process warn naming the namespace — see
+          // `CeIndexer.indexManualEntries`.
           const entries: CeEntry[] = input.entries.map((entry) => ({
             type: entry.type,
             title: entry.title,
@@ -150,16 +158,6 @@ export const createContextEngineAddEntryStepDefinition = ({
             ...(entry.references !== undefined
               ? { references: entry.references.map((uri) => ({ uri })) }
               : {}),
-            // Map the workflow input's flat permission lists into the nested
-            // CE permissions shape: `permissions` -> Kibana privilege names,
-            // `elasticsearchIndices` -> ES index / alias / data-stream names
-            // that gate the entry behind the viewer's ES `read` privilege.
-            permissions: {
-              kibana: { privileges: (entry.permissions ?? []).map((name) => ({ name })) },
-              elasticsearch: {
-                indices: (entry.elasticsearchIndices ?? []).map((name) => ({ name })),
-              },
-            },
           }));
 
           await startContract.indexAttachment({

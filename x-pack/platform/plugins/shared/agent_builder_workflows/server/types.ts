@@ -11,6 +11,7 @@ import type {
   ContextEnginePluginStart,
 } from '@kbn/context-engine-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 
 export interface PluginSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
@@ -21,6 +22,7 @@ export interface PluginSetupDependencies {
 export interface PluginStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
   contextEngine: ContextEnginePluginStart;
+  security?: SecurityPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

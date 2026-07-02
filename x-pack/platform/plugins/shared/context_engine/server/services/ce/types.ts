@@ -98,8 +98,11 @@ export interface CeEntry {
   user_id?: string;
   /** Other CE entries this item references. Each entry carries a `uri` field; the object shape allows sub-fields (e.g. relationship kind) without a future migration. */
   references?: Array<{ uri: string }>;
-  /** Permissions required to access the underlying element. */
-  permissions: CePermissions;
+  // permissions: intentionally absent. The {@link CeTypeDefinition.getPermissions}
+  // hook is the single source of truth for the permissions stamped on the
+  // indexed document — neither `getCeData` nor content-mode callers (the
+  // `ce.index` workflow step, event-driven content-mode indexAttachment)
+  // can override it.
 }
 
 /**
@@ -128,7 +131,7 @@ export interface CeToAttachmentContext {
 }
 
 /**
- * An item returned by the `list` hook of a CE type.
+ * An item returned by the `list` hook of an CE type.
  */
 export interface CeListItem {
   /** Unique ID of the attachment (e.g., saved object ID) */
@@ -164,12 +167,38 @@ export interface CeTypeDefinition {
   getCeData: (originId: string, context: CeContext) => Promise<CeData | undefined>;
 
   /**
-   * Convert a CE document into a conversation attachment.
+   * Convert an CE document into a conversation attachment.
    */
   toAttachment: (
     item: CeDocument,
     context: CeToAttachmentContext
   ) => Promise<AttachmentInput<string, unknown> | undefined>;
+
+  /**
+   * Compute the {@link CePermissions} that gate access to entries for the
+   * given `originId`. Called by the indexer for every entry it stamps,
+   * regardless of which mode (crawler/origin vs. workflow/content) wrote
+   * the entry — so a workflow step's content-mode write inherits the same
+   * gating as a crawler-driven write.
+   *
+   * Authoritative when defined. Callers (workflow step, `getCeData`) cannot
+   * override or bypass it — `CeEntry` does not carry a `permissions`
+   * field. Types that need permission shapes the built-in helpers do not
+   * cover should still implement this directly (returning a fully-shaped
+   * {@link CePermissions}).
+   *
+   * Omit when the type wraps a resource that is intentionally public within
+   * the space (e.g. taxonomy entries, public schema docs). The indexer then
+   * stamps an empty `CePermissions`, which the read-path security filter
+   * treats as "no privileges required". A type that wraps a sensitive
+   * resource MUST implement this hook — there is no other way to attach an
+   * access-control gate to its entries.
+   *
+   * For Kibana saved-object-backed types, prefer the
+   * `kibanaSavedObjectPermissions` helper over hand-writing the privilege
+   * string.
+   */
+  getPermissions?: (originId: string, context: CeContext) => Promise<CePermissions> | CePermissions;
 
   /**
    * Optional: custom crawl interval for the crawler.
@@ -190,7 +219,7 @@ export interface CeTypeDefinition {
 export type CeIngestionMethod = 'manual' | 'crawled';
 
 /**
- * A CE document as stored in the system index.
+ * An CE document as stored in the system index.
  */
 export interface CeDocument {
   /** Unique id of the entry */
@@ -278,7 +307,7 @@ export interface MatchedDiscoveryLabel {
 }
 
 /**
- * A CE autocomplete result — narrower than {@link CeSearchResult}, tuned for
+ * An CE autocomplete result — narrower than {@link CeSearchResult}, tuned for
  * @ menu / typeahead rendering. Drops bulk content (`content`, `description`,
  * `extended_attrs`, etc.) and surfaces per-row provenance.
  */
@@ -319,7 +348,7 @@ export interface CeCrawlerStateDocument {
 }
 
 /**
- * Action to index a CE attachment.
+ * Action to index an CE attachment.
  */
 export type CeIndexAction = 'create' | 'update' | 'delete';
 
@@ -335,40 +364,6 @@ export interface CeCrawler {
     savedObjectsClient: ISavedObjectsRepository;
     abortSignal?: AbortSignal;
   }) => Promise<void>;
-}
-
-/**
- * Input fields for upserting a CE document.
- *
- * `created_at` / `updated_at` are managed server-side; `id` is the URL path id;
- * `spaces` is derived from the caller's space (on create) or preserved from the
- * existing document (on update) - callers cannot specify it directly.
- */
-export interface CeDocumentInput {
-  type: string;
-  title: string;
-  origin_id: string;
-  content: string;
-  /**
-   * Free-form labels for filtering and retrieval. Optional — when absent
-   * on an update, the existing document's tags are preserved.
-   */
-  tags?: string[];
-  /**
-   * Permissions required to access the underlying element. Optional on
-   * input — when omitted, the upsert handler normalizes to an empty
-   * `{ kibana: { privileges: [] }, elasticsearch: { indices: [] } }`.
-   */
-  permissions?: CePermissions;
-}
-
-/**
- * Result of an upsert operation.
- */
-export interface CeUpsertResult {
-  document: CeDocument;
-  /** Whether the document was newly created (vs. updated in place). */
-  created: boolean;
 }
 
 /**
@@ -419,6 +414,14 @@ export interface CeIndexAttachmentContentMode {
   /** Pre-built entries; skips getCeData; marks `ingestion_method='manual'`. */
   content: CeEntry[];
   force?: undefined;
+  /**
+   * `created_at` to stamp on the written entries. When provided (e.g. the
+   * HTTP PUT route passes the value from the existing entry so updates
+   * preserve the original creation timestamp), the entries are written with
+   * this value instead of the current time. Omit on first-write — the
+   * indexer will stamp `now`.
+   */
+  createdAt?: string;
 }
 
 /**
@@ -454,10 +457,28 @@ export type CeIndexerParams = CeIndexerOriginParams | CeIndexerContentParams;
  * `CeService.deleteAttachment`. Shape mirrors `CeIndexerBaseParams` minus
  * `action` (the method itself implies delete) and adds the `ingestionMethod`
  * scope selector that lets callers wipe more than just crawled entries.
+ *
+ * @remarks
+ * `spaces` controls which entries are deleted: only entries whose stored
+ * `spaces` array contains at least one of the provided space IDs (or the
+ * wildcard `'*'`) are removed. HTTP-path callers (PUT/DELETE routes) pass
+ * `[spaceId]` so the delete is scoped to the caller's space and entries
+ * belonging to other spaces are left intact.
+ *
+ * Crawler origin-mode paths omit `spaces` (via `indexAttachment`) so
+ * their deletes remain global — the crawler owns the full origin across
+ * all spaces and must be able to wipe stale entries regardless of which
+ * space they were written from.
  */
 export interface CeIndexerDeleteAttachmentParams {
   originId: string;
   attachmentType: string;
+  /**
+   * Space-isolation guard. `deleteEntries` filters by
+   * `{ terms: { spaces: [...spaces, '*'] } }` so only entries whose stored
+   * `spaces` array contains one of the provided IDs (or the global wildcard
+   * `'*'`) are removed. See type-level `@remarks` for the full contract.
+   */
   spaces: string[];
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
@@ -582,31 +603,50 @@ export interface CeService {
   }) => Promise<{ total: number; results: CeDocument[] }>;
 
   /**
-   * Upsert a CE document by id, scoped to a space.
+   * Fetch every entry written under the compound `(type, originId)`
+   * key that is visible in `spaceId`.
    *
-   * On create the new document's `spaces` is `[spaceId]`. On update the
-   * existing document's `spaces` is preserved.
+   * Used by the HTTP GET route and other origin-scoped reads. A workflow
+   * step writing in content mode (or `getCeData` in origin mode) may
+   * produce multiple entries per origin — all are returned.
    *
-   * Resolves to `null` when a document with this id exists but is not
-   * visible from `spaceId` (caller cannot clobber across spaces).
+   * The caller MUST pass both `type` and `originId`. The bare
+   * `originId` is not unique on its own (a `lens` entry and a
+   * `dashboard` entry may legitimately share an id), so the lookup
+   * keys against the canonical `origin.uri = ${type}://${originId}`.
+   *
+   * Resolves to an empty array when no visible entries exist; callers
+   * that need the "exists in another space" distinction (for
+   * cross-space write guards) should use
+   * {@link CeService.findByOriginAcrossSpaces}.
+   *
+   * **Does NOT perform per-user permission checks.** The caller is
+   * expected to have already authorized the user against the space.
+   * Direct callers from request-handling contexts should layer their own
+   * `checkItemsAccess` filter on top — or wait for the route helper that
+   * does this for them.
    */
-  upsertDocument: (params: {
-    id: string;
+  findByOrigin: (params: {
+    type: string;
+    originId: string;
     spaceId: string;
-    document: CeDocumentInput;
     esClient: IScopedClusterClient;
-  }) => Promise<CeUpsertResult | null>;
+  }) => Promise<CeDocument[]>;
 
   /**
-   * Delete a CE document by id, scoped to a space.
-   * Resolves to `true` when a document was deleted, `false` when no
-   * matching document was found.
+   * Fetch every entry written under the compound `(type, originId)`
+   * key regardless of space.
+   *
+   * Used exclusively for the HTTP route's cross-space-overwrite guard:
+   * a write request from space A must be blocked when the origin is
+   * already owned by space B. Callers MUST NOT use this for read paths
+   * that surface data to users — it bypasses space isolation.
    */
-  deleteDocument: (params: {
-    id: string;
-    spaceId: string;
+  findByOriginAcrossSpaces: (params: {
+    type: string;
+    originId: string;
     esClient: IScopedClusterClient;
-  }) => Promise<boolean>;
+  }) => Promise<CeDocument[]>;
 
   /** Get a type definition by ID */
   getTypeDefinition: (typeId: string) => CeTypeDefinition | undefined;

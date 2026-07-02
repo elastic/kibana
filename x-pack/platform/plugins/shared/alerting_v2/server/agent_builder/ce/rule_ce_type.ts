@@ -72,10 +72,6 @@ export const createRuleCeType = ({
             type: RULE_CE_TYPE,
             title: name,
             content: contentParts.join('\n'),
-            permissions: {
-              kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
-              elasticsearch: { indices: [] },
-            },
           },
         ],
       };
@@ -86,6 +82,15 @@ export const createRuleCeType = ({
       return undefined;
     }
   },
+
+  /**
+   * Rules are gated by the Alerting v2 rules read API privilege — the same
+   * gate the rules API checks before surfacing rule data.
+   */
+  getPermissions: () => ({
+    kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
+    elasticsearch: { indices: [] },
+  }),
 
   toAttachment: async (item, context) => {
     try {

@@ -172,13 +172,10 @@ describe('dashboardCeType', () => {
         expect.objectContaining({
           type: 'dashboard',
           title: 'System Overview',
-          permissions: {
-            kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
-            elasticsearch: { indices: [] },
-          },
         }),
       ],
     });
+    expect(result?.entries[0]).not.toHaveProperty('permissions');
     expect(result?.entries[0].content).toContain('System Overview');
     expect(result?.entries[0].content).toContain('Main dashboard for key metrics');
     expect(result?.entries[0].content).toContain('CPU Usage');
@@ -300,6 +297,23 @@ describe('dashboardCeType', () => {
         }),
       }),
     ]);
+  });
+
+  it('getPermissions returns the saved_object:dashboard/get privilege', () => {
+    const dashboardCeType = createDashboardCeType({
+      getDashboardClient: async () => createDashboardClient(),
+    });
+
+    const permissions = dashboardCeType.getPermissions!('dashboard-1', {
+      esClient: {} as never,
+      logger: createLogger(),
+      savedObjectsClient: createSavedObjectsClient(),
+    } as never);
+
+    expect(permissions).toEqual({
+      kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+      elasticsearch: { indices: [] },
+    });
   });
 
   it('creates requestHandlerContext from savedObjectsClient for CE reads', async () => {

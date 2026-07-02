@@ -1,5 +1,5 @@
 {
-  "sha1": "f601eb9198e31163ca8ca05623619a5bb7f85789",
+  "sha1": "32c50285e1c777a93b96d8a9c5bedac75f68c7fd",
   "tests": [
     {
       "id": "d18f81a84aa5c84-01def2558f31c21",
@@ -467,7 +467,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 87,
+        "line": 88,
         "column": 12
       }
     },
@@ -483,7 +483,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 110,
+        "line": 111,
         "column": 12
       }
     },
@@ -499,7 +499,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 128,
+        "line": 129,
         "column": 12
       }
     },
@@ -515,7 +515,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 154,
+        "line": 155,
         "column": 12
       }
     },
@@ -531,7 +531,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 171,
+        "line": 172,
         "column": 12
       }
     },
@@ -547,7 +547,39 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 188,
+        "line": 189,
+        "column": 12
+      }
+    },
+    {
+      "id": "908082c6d828973-1bb0c1f810ae2fb",
+      "title": "Agent Builder — conversations API converse create exposes and stores conversation access mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 217,
+        "column": 12
+      }
+    },
+    {
+      "id": "908082c6d828973-1c24d03c0a93c25",
+      "title": "Agent Builder — conversations API converse ignores access mode when continuing a conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 258,
         "column": 12
       }
     },
@@ -563,7 +595,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 216,
+        "line": 301,
         "column": 12
       }
     },
@@ -579,7 +611,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 225,
+        "line": 310,
         "column": 12
       }
     },
@@ -595,7 +627,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 245,
+        "line": 329,
         "column": 12
       }
     },
@@ -611,7 +643,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 254,
+        "line": 338,
         "column": 12
       }
     },
@@ -627,7 +659,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 273,
+        "line": 356,
         "column": 12
       }
     },

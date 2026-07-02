@@ -6,6 +6,7 @@
  */
 
 import type { CeTypeDefinition } from '@kbn/context-engine-plugin/server';
+import { kibanaSavedObjectPermissions } from '@kbn/context-engine-plugin/server';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardStateToAttachmentData,
@@ -18,6 +19,7 @@ import type {
 } from '@kbn/dashboard-plugin/server';
 
 const DASHBOARD_CE_TYPE = 'dashboard';
+const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 
 interface CreateDashboardCeTypeOptions {
   getDashboardClient: () => Promise<DashboardPluginStart['client']>;
@@ -100,10 +102,6 @@ export const createDashboardCeType = ({
             type: DASHBOARD_CE_TYPE,
             title: dashboard.data.title ?? originId,
             content: toDashboardSearchContent(dashboard.data),
-            permissions: {
-              kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
-              elasticsearch: { indices: [] },
-            },
           },
         ],
       };
@@ -114,6 +112,9 @@ export const createDashboardCeType = ({
       return undefined;
     }
   },
+
+  getPermissions: () =>
+    kibanaSavedObjectPermissions({ savedObjectType: DASHBOARD_SAVED_OBJECT_TYPE }),
 
   toAttachment: async (item, context) => {
     try {

@@ -29,6 +29,9 @@ export type {
   CeContext,
   CeToAttachmentContext,
   CeListItem,
+  CePermissions,
+  CeKibanaPrivilege,
+  CeElasticsearchIndex,
   CeSearchResult,
   CeSearchConstraints,
   CeSearchFilters,
@@ -39,6 +42,8 @@ export type {
   CeIndexAttachmentOriginMode,
   CeIndexAttachmentContentMode,
 } from './services/ce/types';
+
+export { kibanaSavedObjectPermissions } from './services/ce/permissions/kibana_saved_object';
 
 export type { CeResolvedItemResult } from './services/ce/execute_ce_attach_items';
 export { ceElasticsearchIndexMappings, ceIndexName } from './services/ce/ce_storage';
