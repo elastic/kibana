@@ -11,8 +11,8 @@ jest.mock('./roll_data_stream_if_required', () => ({
   rollDataStreamIfRequired: jest.fn(),
 }));
 
-import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '@kbn/workflows';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '@kbn/workflows';
 import { ensureWorkflowsDataStreamsRolledOver } from './ensure_data_streams_rolled_over';
 import { rollDataStreamIfRequired } from './roll_data_stream_if_required';
 import { WORKFLOWS_EXECUTION_LOGS_DATA_STREAM } from '../../repositories/logs_repository/constants';

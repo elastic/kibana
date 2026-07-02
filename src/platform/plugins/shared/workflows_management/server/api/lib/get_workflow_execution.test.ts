@@ -295,7 +295,7 @@ describe('getWorkflowExecution', () => {
       mockEsClient.mget.mockResolvedValue({ docs: [] } as any);
 
       const result = await getWorkflowExecution({
-        ...baseParams,
+        ...getBaseParams(),
         esClient: mockEsClient,
         logger: mockLogger,
       });
@@ -310,7 +310,7 @@ describe('getWorkflowExecution', () => {
       mockEsClient.mget.mockResolvedValue({ docs: [] } as any);
 
       const result = await getWorkflowExecution({
-        ...baseParams,
+        ...getBaseParams(),
         esClient: mockEsClient,
         logger: mockLogger,
       });
