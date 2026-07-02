@@ -431,32 +431,12 @@ class SmlIndexerImpl implements SmlIndexer {
 
   /**
    * Resolve the {@link SmlPermissions} to stamp on every chunk for an
-   * origin. Called **once per origin** before any ES mutation, so a hook
-   * failure can abort the write without leaving the origin in a
-   * half-deleted state.
+   * origin. Called **once per origin** before any ES mutation
    *
-   * - Hook + `requestedPermissions` supplied → throws
-   *   {@link SmlPermissionsConflictError}. The hook is always authoritative,
-   *   so a caller-supplied value can't silently be ignored.
-   * - Hook, no `requestedPermissions` → hook's result (arrays defaulted to
-   *   `[]`). A throw from the hook itself propagates.
-   * - No hook (or unregistered), `requestedPermissions` supplied → used
-   *   directly (arrays defaulted to `[]`); only narrows access, never
-   *   escalates.
-   * - No hook (or unregistered), no `requestedPermissions` → empty
-   *   `SmlPermissions` (space-readable, unchanged prior behavior).
-   *
-   * **Fail-closed on `getPermissions` throw.** When `getPermissions`
-   * throws, the error propagates before any ES mutation. Callers see this:
-   *
-   * - Origin-mode crawler: the task runner logs and reschedules on the
-   *   next crawl tick. The origin keeps its previous chunks intact (the
-   *   throw lands before `deleteChunks` runs — see `indexAttachment`).
-   * - Workflow step: surfaced as a step `error` result.
-   * - HTTP upsert route: bubbles to a 500.
-   *
-   * The trade-off is intentional: a transient blip becomes a visible
-   * write failure rather than an invisible privilege escalation.
+   * - If only a hook is present, it wins.
+   * - If only `requestedPermissions` is supplied, they are used.
+   * - If both a hook is present AND `requestedPermissions` are supplied, an error is thrown.
+   * - If neither, permissions are left empty.
    */
   private async resolvePermissionsForOrigin({
     definition,

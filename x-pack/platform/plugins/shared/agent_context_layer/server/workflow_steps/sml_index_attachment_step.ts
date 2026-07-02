@@ -136,9 +136,6 @@ export const createContextEngineAddEntryStepDefinition = ({
             ingestionMethod: 'all',
           });
         } else {
-          // Forwarded only when supplied. For hook-backed types the indexer
-          // throws SmlPermissionsConflictError (caught below); otherwise the
-          // value is stamped as-is. See `resolvePermissionsForOrigin`.
           const chunks: SmlChunk[] = input.chunks.map((chunk) => ({
             type: chunk.type,
             title: chunk.title,

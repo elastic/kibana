@@ -97,7 +97,6 @@ export const registerUpsertRoute = ({
               }
             )
           ),
-          // See the route JSDoc above for the hook-conflict behavior.
           permissions: schema.maybe(
             schema.object(
               {
@@ -236,12 +235,13 @@ export const registerUpsertRoute = ({
         };
         return response.ok({ body: responseBody });
       } catch (error) {
-        logger.error(`SML upsert route error: ${(error as Error).message}`);
         // Client input error (caller supplied `permissions` for a type whose
         // `getPermissions` hook is authoritative) — not a server fault.
         if (error instanceof SmlPermissionsConflictError) {
+          logger.warn(`SML upsert permissions conflict: ${error.message}`);
           return response.conflict({ body: { message: error.message } });
         }
+        logger.error(`SML upsert route error: ${(error as Error).message}`);
         throw error;
       }
     })

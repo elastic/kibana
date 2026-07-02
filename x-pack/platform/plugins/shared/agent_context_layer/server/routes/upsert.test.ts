@@ -363,6 +363,14 @@ describe('registerUpsertRoute', () => {
         body: { message: "attachmentType 'lens' derives permissions via getPermissions()" },
       });
       expect(response.ok).not.toHaveBeenCalled();
+      // Client input error, not a server fault — logged at warn, not error,
+      // so it doesn't page anyone via serverless call logs.
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("attachmentType 'lens' derives permissions via getPermissions()")
+      );
+      expect(logger.error).not.toHaveBeenCalledWith(
+        expect.stringContaining("attachmentType 'lens' derives permissions via getPermissions()")
+      );
     });
 
     it('rejects permissions.elasticsearch.indices / kibana.privileges arrays over the entry-count cap', () => {
