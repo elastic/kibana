@@ -22,6 +22,7 @@ import type { AdditionalContext, AlertActionsProps, RenderContext } from '../typ
 import { createPartialObjectMock, testQueryClientConfig } from '../utils/test';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import { SnoozeAlertAction } from './snooze_alert_action';
+import { ExpandableContextMenuPanel } from './expandable_context_menu_panel';
 
 jest.mock('../hooks/use_alert_muted_state');
 jest.mock('../hooks/use_alert_snoozed_state');
@@ -34,6 +35,25 @@ jest.mock('@kbn/response-ops-alert-snooze', () => ({
     <button data-test-subj="alertSnoozePopover" onClick={() => onApply({ expiresAt: null })}>
       Snooze
     </button>
+  ),
+  AlertSnoozePanelInline: ({
+    onApply,
+    onBack,
+  }: {
+    onApply: (payload: unknown) => void;
+    onBack: () => void;
+  }) => (
+    <div data-test-subj="alertSnoozePanelInline">
+      <button
+        data-test-subj="alertSnoozePanelInlineApply"
+        onClick={() => onApply({ expiresAt: null })}
+      >
+        Apply
+      </button>
+      <button data-test-subj="alertSnoozePanelInlineBack" onClick={onBack}>
+        Back
+      </button>
+    </div>
   ),
 }));
 
@@ -86,6 +106,19 @@ const TestComponent = (props: AlertActionsProps) => (
   <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
     <AlertsTableContextProvider value={context}>
       <SnoozeAlertAction<AdditionalContext> {...props} />
+    </AlertsTableContextProvider>
+  </QueryClientProvider>
+);
+
+// Renders the action inside ExpandableContextMenuPanel, which provides the
+// ExpandableContextMenuPanelProvider context. In this mode SnoozeAlertAction
+// renders an inline menu item that swaps the panel content for AlertSnoozePanelInline.
+const InlineTestComponent = (props: AlertActionsProps) => (
+  <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
+    <AlertsTableContextProvider value={context}>
+      <ExpandableContextMenuPanel
+        items={[<SnoozeAlertAction<AdditionalContext> key="snooze" {...props} />]}
+      />
     </AlertsTableContextProvider>
   </QueryClientProvider>
 );
@@ -329,6 +362,68 @@ describe('SnoozeAlertAction', () => {
         );
         expect(mockMuteAlert).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('within snooze panel context (inline)', () => {
+    beforeEach(() => {
+      mockUseAlertMutedState.mockReturnValue({
+        isMuted: false,
+        ruleId: RULE_ID,
+        alertInstanceId: INSTANCE_ID,
+        rule: [],
+      });
+      mockUseAlertSnoozedState.mockReturnValue({
+        isSnoozed: false,
+        snoozedInstance: undefined,
+        expiresAt: undefined,
+        ruleId: RULE_ID,
+        alertInstanceId: INSTANCE_ID,
+      });
+    });
+
+    it('shows the inline Snooze menu item instead of the popover when the context is available', () => {
+      render(<InlineTestComponent {...baseProps} />);
+
+      expect(screen.getByTestId('snooze-alert-action-snooze')).toBeInTheDocument();
+      expect(screen.queryByTestId('alertSnoozePopover')).not.toBeInTheDocument();
+    });
+
+    it('swaps the menu for the inline snooze panel when the Snooze item is clicked', () => {
+      render(<InlineTestComponent {...baseProps} />);
+      fireEvent.click(screen.getByTestId('snooze-alert-action-snooze'));
+
+      expect(screen.getByTestId('alertSnoozePanelInline')).toBeInTheDocument();
+      expect(screen.queryByTestId('snooze-alert-action-snooze')).not.toBeInTheDocument();
+    });
+
+    it('mutes the alert and restores the menu when applying an indefinite snooze from the inline panel', async () => {
+      render(<InlineTestComponent {...baseProps} />);
+      fireEvent.click(screen.getByTestId('snooze-alert-action-snooze'));
+      fireEvent.click(screen.getByTestId('alertSnoozePanelInlineApply'));
+
+      await waitFor(() => {
+        expect(mockMuteAlert).toHaveBeenCalledWith({
+          ruleId: RULE_ID,
+          alertInstanceId: INSTANCE_ID,
+        });
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('snooze-alert-action-snooze')).toBeInTheDocument();
+        expect(screen.queryByTestId('alertSnoozePanelInline')).not.toBeInTheDocument();
+      });
+    });
+
+    it('restores the menu without snoozing when Back is clicked in the inline panel', () => {
+      render(<InlineTestComponent {...baseProps} />);
+      fireEvent.click(screen.getByTestId('snooze-alert-action-snooze'));
+      fireEvent.click(screen.getByTestId('alertSnoozePanelInlineBack'));
+
+      expect(screen.getByTestId('snooze-alert-action-snooze')).toBeInTheDocument();
+      expect(screen.queryByTestId('alertSnoozePanelInline')).not.toBeInTheDocument();
+      expect(mockMuteAlert).not.toHaveBeenCalled();
+      expect(mockSnoozeAlert).not.toHaveBeenCalled();
     });
   });
 });

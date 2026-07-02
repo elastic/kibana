@@ -37,8 +37,8 @@ export const useUnmuteAlertInstance = ({
       context: AlertsQueryContext,
       onSuccess() {
         toasts.addSuccess(
-          i18n.translate('xpack.responseOpsAlertsApis.alertsTable.alertUnmuted', {
-            defaultMessage: 'Alert unmuted',
+          i18n.translate('xpack.responseOpsAlertsApis.alertsTable.alertUnsnoozed', {
+            defaultMessage: 'Alert unsnoozed',
           })
         );
       },

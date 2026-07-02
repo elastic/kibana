@@ -37,8 +37,8 @@ export const useMuteAlertInstance = ({
       context: AlertsQueryContext,
       onSuccess() {
         toasts.addSuccess(
-          i18n.translate('xpack.responseOpsAlertsApis.alertsTable.alertMuted', {
-            defaultMessage: 'Alert muted',
+          i18n.translate('xpack.responseOpsAlertsApis.alertsTable.alertSnoozed', {
+            defaultMessage: 'Alert snoozed',
           })
         );
       },
