@@ -55,6 +55,7 @@ export const InputSchema = z.object({
   defaultSearchOperator: FindCasesDefaultSearchOperatorSchema.optional(),
   from: z
     .string()
+    .max(500)
     .optional()
     .describe('ISO 8601 datetime start (inclusive). Example: "2025-01-15T00:00:00Z".'),
   owner: z
@@ -68,6 +69,7 @@ export const InputSchema = z.object({
   reporters: z.union([String, StringArray]).optional(),
   search: z
     .string()
+    .max(500)
     .optional()
     .describe('Elasticsearch simple_query_string applied to case title and description.'),
   searchFields: z.union([FindCasesSearchFieldSchema, FindCasesSearchFieldArraySchema]).optional(),
@@ -78,6 +80,7 @@ export const InputSchema = z.object({
   tags: z.union([String, StringArray]).optional(),
   to: z
     .string()
+    .max(500)
     .optional()
     .describe('ISO 8601 datetime end (exclusive). Example: "2025-01-22T00:00:00Z".'),
 });

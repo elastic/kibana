@@ -236,6 +236,7 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
             const truncated = case_ids.length > BULK_GET_LIMIT;
             logger.info(`[Cases Tool] Bulk-getting ${ids.length} cases`);
             const bulkResult = await casesClient.cases.bulkGet({ ids });
+
             const enrichedCases = enhanceCases(bulkResult.cases, request, coreServices, logger);
             const bulkAttachmentIds = await emitSearchAttachments(enrichedCases, attachments);
             return injectAttachmentIds(
@@ -261,7 +262,7 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
             logger.info(`[Cases Tool] Finding cases similar to: ${similar_to_case_id}`);
             const similarResult = await casesClient.cases.similar(similar_to_case_id, {
               page: page ?? 1,
-              perPage: perPage ?? 20,
+              perPage: Math.min(perPage ?? 10, 50),
             });
             const enrichedSimilar = enhanceCases(
               similarResult.cases,

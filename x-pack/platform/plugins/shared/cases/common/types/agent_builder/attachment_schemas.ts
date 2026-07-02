@@ -28,9 +28,9 @@ export const caseAttachmentDataSchema = CaseResponseProperties.pick({
   updated_at: true,
   total_observables: true,
 }).extend({
-  url: z.string().nullable().optional(),
+  url: z.string().max(1000).nullable().optional(),
   totalAttachments: z.number().int().optional(),
-  connector_name: z.string().nullable().optional(),
+  connector_name: z.string().max(500).nullable().optional(),
 });
 export type CaseAttachmentData = z.infer<typeof caseAttachmentDataSchema>;
 
@@ -39,6 +39,6 @@ export const CASES_ATTACHMENT_MAX = 20;
 export const casesAttachmentDataSchema = z.object({
   cases: z.array(caseAttachmentDataSchema).max(CASES_ATTACHMENT_MAX),
   total: z.number().int(),
-  url: z.string().nullable().optional(),
+  url: z.string().max(1000).nullable().optional(),
 });
 export type CasesAttachmentData = z.infer<typeof casesAttachmentDataSchema>;
