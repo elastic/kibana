@@ -257,6 +257,7 @@ EOF
           EVAL_SLACK_NOTIFICATION_CHANNEL: "${EVAL_SLACK_NOTIFICATION_CHANNEL:-}"
           EVAL_PR_NUMBER: "${resolved_pr_number}"
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
+          EVAL_TRIAGE_MODEL_ID: "${EVAL_TRIAGE_MODEL_ID:-}"
         depends_on:
 EOF
         for key in "${fanout_step_keys[@]}"; do

@@ -357,7 +357,6 @@ async function runTriageModelStructured(userPrompt) {
 module.exports = {
   MAX_LOG_EXCERPT_CHARS,
   MAX_CONTEXT_JSON_BYTES,
-  DEFAULT_TRIAGE_MODEL_ID,
   TRIAGE_SYSTEM_PROMPT,
   resolveTriageModelId,
   failureLogMetadataKey,
