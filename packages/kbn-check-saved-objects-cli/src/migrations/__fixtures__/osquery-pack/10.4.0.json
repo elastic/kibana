@@ -8,7 +8,9 @@
           "id": "query1",
           "query": "select * from processes;",
           "interval": 3600,
-          "timeout": 300
+          "timeout": 300,
+          "schedule_id": { "$match": "uuid" },
+          "start_date": { "$match": "string" }
         }
       ],
       "enabled": true,
@@ -28,7 +30,8 @@
           "query": "select * from processes;",
           "interval": 3600,
           "timeout": 300,
-          "schedule_id": { "$match": "uuid" }
+          "schedule_id": { "$match": "uuid" },
+          "start_date": { "$match": "string" }
         }
       ],
       "enabled": true,

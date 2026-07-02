@@ -123,41 +123,11 @@ export const packSchemaV3 = packSchemaV2.extends({
   rrule_schedule: schema.maybe(schema.nullable(rruleScheduleConfigSchema)),
 });
 
-const packQuerySchemaV3ForwardCompat = schema.object(
-  {
-    id: schema.maybe(schema.string()),
-    query: schema.maybe(schema.string()),
-    interval: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
-    timeout: schema.maybe(schema.number()),
-    platform: schema.maybe(schema.string()),
-    version: schema.maybe(schema.string()),
-    ecs_mapping: schema.maybe(ecsMappingSchema),
-    snapshot: schema.maybe(schema.boolean()),
-    removed: schema.maybe(schema.boolean()),
-    name: schema.maybe(schema.string()),
-    start_date: schema.maybe(schema.string()),
-    schedule_type: schema.maybe(
-      schema.nullable(schema.oneOf([schema.literal('interval'), schema.literal('rrule')]))
-    ),
-    rrule_schedule: schema.maybe(schema.nullable(rruleScheduleConfigSchema)),
-  },
-  { unknowns: 'ignore' }
-);
-
-export const packSchemaV3ForwardCompat = packSchemaV3.extends({
-  queries: schema.maybe(
-    schema.oneOf([
-      schema.recordOf(schema.string(), packQuerySchemaV3ForwardCompat),
-      schema.arrayOf(packQuerySchemaV3ForwardCompat, { maxSize: 1000 }),
-    ])
-  ),
-});
-
 // V4 is the deterministic `schedule_id` backfill model version.
 // It adds NO new top-level pack field: the backfilled
-// per-query `schedule_id` lives inside `queries`, which is `dynamic: false`,
-// and `packQuerySchema` already accepts unknown per-query keys
-// (`unknowns: 'allow'`), so `schedule_id` round-trips without an explicit
-// mapping. `packSchemaV4` therefore mirrors `packSchemaV3` and exists to be
-// the forward-compat / create schema bound to model version 4.
-export const packSchemaV4 = packSchemaV3.extends({});
+// per-query `schedule_id` (and minted `start_date` / `id`) lives inside
+// `queries`, which is `dynamic: false`, and `packQuerySchema` already accepts
+// unknown per-query keys (`unknowns: 'allow'`), so those fields round-trip
+// without an explicit mapping. Because V4 introduces no new schema surface, it
+// reuses `packSchemaV3` verbatim as its create / forward-compat schema.
+export const packSchemaV4 = packSchemaV3;

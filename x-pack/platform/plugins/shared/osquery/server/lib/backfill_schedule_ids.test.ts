@@ -490,6 +490,121 @@ describe('reconcileScheduleIdsToWire', () => {
     );
   });
 
+  test('classifies a Boom-shaped 409 (output.statusCode, no top-level statusCode) as a conflict', async () => {
+    // Fleet surfaces conflicts as Boom errors: the status lives under
+    // `output.statusCode`, NOT a top-level `statusCode`. The catch must read
+    // both, or a real conflict would fall into the generic warn branch.
+    const scopedClient = createMockScopedClient();
+    const boomConflict = Object.assign(new Error('Conflict'), {
+      output: { statusCode: 409 },
+    });
+    const packagePolicyUpdate = jest.fn().mockRejectedValueOnce(boomConflict);
+    const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
+
+    const { core } = createMockCoreStart(buildEnabledPackFindResult(), scopedClient);
+    const osqueryContext = createMockOsqueryContext({
+      fetchAllItems: packagePolicyList,
+      update: packagePolicyUpdate,
+    });
+    const logger = createMockLogger();
+
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext,
+      logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
+    });
+
+    expect(result).toEqual({ hadFailures: true });
+    // The debug (conflict) branch fires, not the generic warn branch.
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('version conflict for pack pack-1')
+    );
+    expect(logger.warn).not.toHaveBeenCalledWith(
+      expect.stringContaining('failed to reconcile pack pack-1')
+    );
+  });
+
+  test('two stale packs sharing one policy converge in one pass (two updates, no self-inflicted 409)', async () => {
+    // Both packs live on the same package policy pp-1. The first pack's write
+    // returns the fresh policy, which is spliced back into the in-memory list
+    // so the second pack diffs against post-write state — both converge in a
+    // single pass with no version conflict.
+    const scopedClient = createMockScopedClient();
+
+    // One policy carrying BOTH pack blocks (stale — queries empty, so both
+    // packs need a write).
+    const sharedPolicy = {
+      id: 'pp-1',
+      policy_ids: ['policy-1'],
+      package: { name: 'osquery_manager', version: '1.0.0' },
+      inputs: [
+        {
+          type: 'osquery',
+          streams: [],
+          config: {
+            osquery: {
+              value: {
+                packs: {
+                  'default--reconcile-pack': { shard: 100, pack_id: 'pack-1', queries: {} },
+                  'default--second-pack': { shard: 100, pack_id: 'pack-2', queries: {} },
+                },
+              },
+            },
+          },
+        },
+      ],
+    };
+
+    // `update` echoes the written draft back as the fresh policy (with its id),
+    // mirroring Fleet's real return so the splice-back has real state to reuse.
+    const packagePolicyUpdate = jest
+      .fn()
+      .mockImplementation(async (_sc, _es, id, updated) => ({ ...updated, id }));
+    const packagePolicyList = mockFetchAllItems([sharedPolicy]);
+
+    const twoPacksFindResult = {
+      saved_objects: [
+        ...buildEnabledPackFindResult().saved_objects,
+        {
+          id: 'pack-2',
+          namespaces: ['default'],
+          references: [{ id: 'policy-1', name: 'policy-1', type: 'ingest-agent-policies' }],
+          attributes: {
+            name: 'second-pack',
+            enabled: true,
+            queries: [
+              { id: 'q1', query: 'SELECT 9', interval: 90, name: 'q1', schedule_id: 'sched-p2' },
+            ],
+          },
+        },
+      ],
+      total: 2,
+    };
+
+    const { core } = createMockCoreStart(twoPacksFindResult, scopedClient);
+    const osqueryContext = createMockOsqueryContext({
+      fetchAllItems: packagePolicyList,
+      update: packagePolicyUpdate,
+    });
+    const logger = createMockLogger();
+
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext,
+      logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
+    });
+
+    expect(result).toEqual({ hadFailures: false });
+    // One write per pack, both in the same pass.
+    expect(packagePolicyUpdate).toHaveBeenCalledTimes(2);
+    // The second write is built from the policy the FIRST write returned:
+    // it carries pack-1's already-reconciled block (schedule_id projected).
+    const secondWriteDraft = packagePolicyUpdate.mock.calls[1][3];
+    const secondWritePacks = secondWriteDraft.inputs[0].config.osquery.value.packs;
+    expect(secondWritePacks['default--reconcile-pack'].queries.q1.schedule_id).toBe('sched-q1');
+    expect(secondWritePacks['default--second-pack'].queries.q1.schedule_id).toBe('sched-p2');
+  });
+
   test('logs and flags hadFailures on non-conflict errors', async () => {
     const scopedClient = createMockScopedClient();
     const packagePolicyUpdate = jest.fn().mockRejectedValueOnce(new Error('something went wrong'));

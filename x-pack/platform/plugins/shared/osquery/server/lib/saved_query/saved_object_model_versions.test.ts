@@ -14,6 +14,7 @@ import {
   packSavedObjectModelVersion3,
   packSavedObjectModelVersion4,
 } from './saved_object_model_versions';
+import { convertSOQueriesToPack } from '../../routes/pack/utils';
 
 describe('Pack saved object model version 3 forward compatibility', () => {
   const forwardCompatibility = packSavedObjectModelVersion3.schemas?.forwardCompatibility;
@@ -164,7 +165,14 @@ describe('Pack saved object model version 3 forward compatibility', () => {
     expect(() => (forwardCompatibility as ObjectType).validate(syntheticV4Doc)).not.toThrow();
   });
 
-  it('strips the V4 per-query `schedule_id` on rollback read, keeping every other field', () => {
+  // V3's forwardCompatibility is the shipped definition (`packSchemaV3` +
+  // `unknowns: 'ignore'`), whose per-query schema carries `unknowns: 'allow'`.
+  // The deployed serverless V3 binaries therefore PASS unknown per-query keys
+  // (`schedule_id`, `start_date`) THROUGH on a rollback read — they do NOT
+  // strip them. Editing released model version 3 to strip `schedule_id` would
+  // certify fiction and sever scheduled history on a rollback→resave→re-upgrade
+  // (see design decision 1). These tests pin the shipped pass-through behavior.
+  it('passes the V4-minted per-query `schedule_id`/`start_date` through on rollback read', () => {
     const v4StampedDoc = {
       name: 'test-pack-1',
       description: 'A test pack',
@@ -180,6 +188,7 @@ describe('Pack saved object model version 3 forward compatibility', () => {
           interval: 3600,
           timeout: 300,
           schedule_id: '310db1f6-e680-4471-982a-dfe304b6cf5a',
+          start_date: '2024-01-01T00:00:00.000Z',
         },
       ],
     };
@@ -188,17 +197,18 @@ describe('Pack saved object model version 3 forward compatibility', () => {
       queries: Array<Record<string, unknown>>;
     };
 
-    expect(out.queries[0]).not.toHaveProperty('schedule_id');
-    // The rest of the query round-trips untouched.
+    // `schedule_id` and `start_date` survive the rollback read unchanged.
     expect(out.queries[0]).toMatchObject({
       id: 'query1',
       query: 'select * from processes;',
       interval: 3600,
       timeout: 300,
+      schedule_id: '310db1f6-e680-4471-982a-dfe304b6cf5a',
+      start_date: '2024-01-01T00:00:00.000Z',
     });
   });
 
-  it('preserves per-query rrule overrides on rollback read (only schedule_id is shed)', () => {
+  it('passes per-query rrule overrides AND schedule_id through on rollback read', () => {
     const v4RruleDoc = {
       name: 'rrule-pack',
       enabled: true,
@@ -217,59 +227,60 @@ describe('Pack saved object model version 3 forward compatibility', () => {
       queries: Array<Record<string, unknown>>;
     };
 
-    expect(out.queries[0]).not.toHaveProperty('schedule_id');
     expect(out.queries[0]).toMatchObject({
       schedule_type: 'rrule',
       rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-05-01T00:00:00.000Z' },
+      schedule_id: '00000000-0000-4000-8000-000000000000',
     });
   });
 });
 
-describe('Pack saved object model version 4 — schedule_id backfill (security-team#17841)', () => {
+describe('Pack saved object model version 4 — schedule_id/start_date/id backfill (security-team#17841)', () => {
+  // Typed shapes for the backfill in/out so we avoid `as any` on results.
+  interface BackfillQuery extends Record<string, unknown> {
+    id?: string;
+    query?: string;
+    interval?: number;
+    schedule_id?: string;
+    start_date?: string;
+  }
+  interface BackfillAttributes {
+    queries?: BackfillQuery[];
+  }
+
   // Extract the `data_backfill` change's backfillFn from the model version so
   // we exercise the real migration logic, not a re-implementation.
   const dataBackfillChange = packSavedObjectModelVersion4.changes.find(
     (change): change is SavedObjectsModelDataBackfillChange => change.type === 'data_backfill'
   );
   const backfillFn = dataBackfillChange?.backfillFn as SavedObjectModelDataBackfillFn<
-    { queries?: Array<Record<string, unknown>> },
-    { queries?: Array<Record<string, unknown>> }
+    BackfillAttributes,
+    BackfillAttributes
   >;
 
   // The runner passes the full document and a context object; only `attributes`
-  // is read by our backfillFn. Cast through `any` to keep the test focused.
-  const runBackfill = (attributes: { queries?: Array<Record<string, unknown>> }) =>
-    backfillFn({ id: 'pack-id', type: 'osquery-pack', attributes } as any, {} as any);
+  // is read by our backfillFn. Build minimally-typed doc/context stubs rather
+  // than casting through `any`.
+  const runBackfill = (attributes: BackfillAttributes) => {
+    const doc = {
+      id: 'pack-id',
+      type: 'osquery-pack',
+      attributes,
+    } as Parameters<typeof backfillFn>[0];
+    const context = {} as Parameters<typeof backfillFn>[1];
+
+    return backfillFn(doc, context) as { attributes: BackfillAttributes };
+  };
+
+  const queriesOf = (result: { attributes: BackfillAttributes }): BackfillQuery[] =>
+    result.attributes.queries ?? [];
 
   it('registers a single data_backfill change (no mappings_addition for schedule_id)', () => {
     expect(packSavedObjectModelVersion4.changes).toHaveLength(1);
     expect(packSavedObjectModelVersion4.changes[0].type).toBe('data_backfill');
   });
 
-  it('(a) legacy doc → every query gains a non-empty schedule_id', () => {
-    const result = runBackfill({
-      queries: [
-        { id: 'q1', query: 'SELECT 1', interval: 60 },
-        { id: 'q2', query: 'SELECT 2', interval: 120 },
-      ],
-    });
-
-    const queries = (result as { attributes: { queries: Array<Record<string, unknown>> } })
-      .attributes.queries;
-    expect(queries).toHaveLength(2);
-    queries.forEach((q) => {
-      expect(typeof q.schedule_id).toBe('string');
-      expect((q.schedule_id as string).length).toBeGreaterThan(0);
-    });
-    // Distinct ids minted per query.
-    expect(queries[0].schedule_id).not.toBe(queries[1].schedule_id);
-  });
-
-  it('pre-9.4 legacy shape — queries with no `id` still each gain a schedule_id', () => {
-    // The oldest packs predate BOTH the per-query `id` and `schedule_id`
-    // fields. The mint keys off neither, so it must
-    // still assign a distinct schedule_id to every query and leave the rest
-    // untouched.
+  it('(a) bare legacy row → mints schedule_id, start_date, AND id', () => {
     const result = runBackfill({
       queries: [
         { query: 'SELECT 1', interval: 60 },
@@ -277,60 +288,60 @@ describe('Pack saved object model version 4 — schedule_id backfill (security-t
       ],
     });
 
-    const queries = (result as { attributes: { queries: Array<Record<string, unknown>> } })
-      .attributes.queries;
+    const queries = queriesOf(result);
     expect(queries).toHaveLength(2);
     queries.forEach((q) => {
       expect(typeof q.schedule_id).toBe('string');
       expect((q.schedule_id as string).length).toBeGreaterThan(0);
+      expect(typeof q.start_date).toBe('string');
+      expect((q.start_date as string).length).toBeGreaterThan(0);
+      expect(typeof q.id).toBe('string');
     });
+    // Distinct schedule_ids minted per query.
     expect(queries[0].schedule_id).not.toBe(queries[1].schedule_id);
-    // Original fields preserved; no `id` is invented.
-    expect(queries[0].query).toBe('SELECT 1');
-    expect(queries[0]).not.toHaveProperty('id');
+    // A no-id row's stamped `id` is its array-position key.
+    expect(queries[0].id).toBe('0');
+    expect(queries[1].id).toBe('1');
+    // Both rows share the same migration-run start_date.
+    expect(queries[0].start_date).toBe(queries[1].start_date);
   });
 
-  it('(b) idempotency — a query with an existing schedule_id is unchanged', () => {
+  it('(b) idempotency — existing id/schedule_id/start_date preserved byte-for-byte', () => {
     const result = runBackfill({
       queries: [
-        { id: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'already-here' },
-        { id: 'q2', query: 'SELECT 2', interval: 120 },
+        {
+          id: 'q1',
+          query: 'SELECT 1',
+          interval: 60,
+          schedule_id: 'already-here',
+          start_date: '2024-01-01T00:00:00.000Z',
+        },
+        { query: 'SELECT 2', interval: 120 },
       ],
     });
 
-    const queries = (result as { attributes: { queries: Array<Record<string, unknown>> } })
-      .attributes.queries;
-    // Existing schedule_id preserved byte-for-byte.
+    const queries = queriesOf(result);
+    // Existing values preserved exactly.
+    expect(queries[0].id).toBe('q1');
     expect(queries[0].schedule_id).toBe('already-here');
-    // The legacy sibling still gets one.
+    expect(queries[0].start_date).toBe('2024-01-01T00:00:00.000Z');
+    // The bare sibling gets all three minted.
+    expect(queries[1].id).toBe('1');
     expect(typeof queries[1].schedule_id).toBe('string');
     expect((queries[1].schedule_id as string).length).toBeGreaterThan(0);
+    expect(typeof queries[1].start_date).toBe('string');
   });
 
-  it('(c) start_date is NOT introduced by the backfill', () => {
+  it('(b) only the missing field is minted when a row carries some but not all', () => {
     const result = runBackfill({
-      queries: [{ id: 'q1', query: 'SELECT 1', interval: 60 }],
+      queries: [{ id: 'keep-me', query: 'SELECT 1', interval: 60 }],
     });
 
-    const queries = (result as { attributes: { queries: Array<Record<string, unknown>> } })
-      .attributes.queries;
-    expect(queries[0]).not.toHaveProperty('start_date');
-  });
-
-  it('(c) an existing start_date is preserved but never minted', () => {
-    const result = runBackfill({
-      queries: [
-        { id: 'q1', query: 'SELECT 1', interval: 60, start_date: '2024-01-01T00:00:00.000Z' },
-        { id: 'q2', query: 'SELECT 2', interval: 120 },
-      ],
-    });
-
-    const queries = (result as { attributes: { queries: Array<Record<string, unknown>> } })
-      .attributes.queries;
-    // Pre-existing start_date untouched.
-    expect(queries[0].start_date).toBe('2024-01-01T00:00:00.000Z');
-    // No start_date conjured for the query that lacked one.
-    expect(queries[1]).not.toHaveProperty('start_date');
+    const query = queriesOf(result)[0];
+    // `id` preserved; `schedule_id` + `start_date` minted.
+    expect(query.id).toBe('keep-me');
+    expect(typeof query.schedule_id).toBe('string');
+    expect(typeof query.start_date).toBe('string');
   });
 
   it('preserves all other per-query fields verbatim', () => {
@@ -346,8 +357,7 @@ describe('Pack saved object model version 4 — schedule_id backfill (security-t
       ],
     });
 
-    const query = (result as { attributes: { queries: Array<Record<string, unknown>> } }).attributes
-      .queries[0];
+    const query = queriesOf(result)[0];
     expect(query.id).toBe('q1');
     expect(query.query).toBe('SELECT 1');
     expect(query.interval).toBe(60);
@@ -364,14 +374,30 @@ describe('Pack saved object model version 4 — schedule_id backfill (security-t
       ],
     });
 
-    const queries = (result as { attributes: { queries: Array<Record<string, unknown>> } })
-      .attributes.queries;
-    expect(queries.map((q) => q.id)).toEqual(['q1', 'q2', 'q3']);
+    expect(queriesOf(result).map((q) => q.id)).toEqual(['q1', 'q2', 'q3']);
   });
 
   it('is a no-op (empty attribute patch) for a pack with no queries', () => {
     expect(runBackfill({ queries: [] })).toEqual({ attributes: {} });
     expect(runBackfill({})).toEqual({ attributes: {} });
+  });
+
+  it('parity — stamped `id` equals the key the GET/wire path derives for no-id rows', () => {
+    // The stamped `id` MUST equal the map key `convertSOQueriesToPack` derives
+    // for the same rows; otherwise `keyBy(queries, "id")` in the update route
+    // and the GET-path key would disagree and drop the minted schedule_id.
+    const bareQueries = [
+      { query: 'SELECT 1', interval: 60 },
+      { query: 'SELECT 2', interval: 120 },
+    ];
+
+    const stampedIds = queriesOf(runBackfill({ queries: [...bareQueries] })).map((q) => q.id);
+    // `convertSOQueriesToPack` keys the record by the derived key for each row.
+    const readPathKeys = Object.keys(
+      convertSOQueriesToPack(bareQueries.map((q) => ({ ...q, id: undefined })) as never)
+    );
+
+    expect(stampedIds).toEqual(readPathKeys);
   });
 
   it('(d) backfills regardless of feature-flag state (no flag input exists)', () => {
@@ -380,10 +406,7 @@ describe('Pack saved object model version 4 — schedule_id backfill (security-t
     // arity does not include any flag, so it cannot be flag-gated.
     expect(backfillFn.length).toBeLessThanOrEqual(2); // (document, context) only
     const result = runBackfill({ queries: [{ id: 'q1', query: 'SELECT 1' }] });
-    expect(
-      typeof (result as { attributes: { queries: Array<Record<string, unknown>> } }).attributes
-        .queries[0].schedule_id
-    ).toBe('string');
+    expect(typeof queriesOf(result)[0].schedule_id).toBe('string');
   });
 
   it('(e) forward-compat — a rolled-back node reads a V4-migrated doc without throwing', () => {

@@ -125,7 +125,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         title: 'Reconcile osquery pack schedule IDs onto the Fleet wire',
         timeout: '5m',
         maxAttempts: 3,
-        createTaskRunner: ({ abortController }) => ({
+        createTaskRunner: ({ abortController, taskInstance }) => ({
           run: async () => {
             if (!this.coreStart) {
               throw new Error('Core not started');
@@ -139,7 +139,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
               isRruleFeatureEnabled: this.rruleSchedulingEnabled,
             });
 
-            return buildReconcileRunResult(hadFailures, new Date());
+            // Thread the prior task state so a failed pass re-arms with capped
+            // exponential backoff (see buildReconcileRunResult).
+            return buildReconcileRunResult(hadFailures, new Date(), taskInstance?.state);
           },
         }),
       },
@@ -200,8 +202,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
           // we do not want to wait for it
         });
 
-        await scheduleReconcileTask(plugins.taskManager, this.logger, new Date());
-
         if (registerIngestCallback) {
           registerIngestCallback(
             'packagePolicyCreate',
@@ -248,6 +248,12 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
           registerIngestCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(client));
           registerIngestCallback('agentPolicyPostUpdate', getAgentPolicyPostUpdateCallback(core));
         }
+
+        // Schedule the reconcile task AFTER the Fleet ingest callbacks are
+        // registered — nothing downstream depends on the task, and the
+        // callbacks must be in place before the reconciler starts writing the
+        // wire so create/update/delete events are handled consistently.
+        await scheduleReconcileTask(plugins.taskManager, this.logger, new Date());
       })
       .catch(() => {
         // it shouldn't reject, but just in case

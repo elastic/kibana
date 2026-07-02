@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { keyBy } from 'lodash';
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
@@ -421,6 +422,71 @@ describe('updatePackRoute', () => {
       expect(overrides).not.toHaveProperty('rrule_schedule');
       expect(overrides).not.toHaveProperty('schedule_type');
       expect(overrides.schedule_id).toBe('sched-overrides');
+    });
+
+    it('V4-migrated pack with originally-no-id rows — every schedule_id survives GET→PUT edit-save', async () => {
+      // The keyBy-"undefined" collapse case (finding 2). Pre-9.4 / asset /
+      // imported packs had query rows with no per-query `id`. V4's data_backfill
+      // now stamps `id` = the array-position key ("0", "1", ...) — the same key
+      // the GET/wire path derives — so `keyBy(queries, 'id')` no longer collapses
+      // every row under a single `undefined` key. The UI (edit flow) round-trips
+      // that `id`, so `resolvePreservedQueries` matches each outgoing query to its
+      // stored row and preserves the V4-minted schedule_id.
+      const currentSO = {
+        ...basePackSO,
+        attributes: {
+          ...basePackSO.attributes,
+          enabled: true,
+          queries: [
+            {
+              id: '0',
+              name: 'processes',
+              query: 'SELECT * FROM processes;',
+              interval: 3600,
+              schedule_id: 'v4-minted-0',
+              start_date: '2025-01-01T00:00:00.000Z',
+            },
+            {
+              id: '1',
+              name: 'users',
+              query: 'SELECT * FROM users;',
+              interval: 3600,
+              schedule_id: 'v4-minted-1',
+              start_date: '2025-01-01T00:00:00.000Z',
+            },
+          ],
+        },
+      };
+      const mockClient = buildMockSavedObjectsClient(currentSO);
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      setupRoute(true);
+
+      // The edit-save PUT restates the queries keyed by the effective key, each
+      // value carrying its `id` (the UI round-trip fix).
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: {
+          name: 'my-pack',
+          queries: {
+            '0': { id: '0', query: 'SELECT * FROM processes;', interval: 3600 },
+            '1': { id: '1', query: 'SELECT * FROM users;', interval: 3600 },
+          },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+
+      const patchedAttributes = mockClient.update.mock.calls[0][2];
+      const writtenQueries = patchedAttributes.queries as Array<Record<string, unknown>>;
+      const byId = keyBy(writtenQueries, 'id');
+      // Both V4-minted schedule_ids survive — none re-generated.
+      expect(byId['0'].schedule_id).toBe('v4-minted-0');
+      expect(byId['1'].schedule_id).toBe('v4-minted-1');
     });
 
     it('policy_ids omitted — preserves existing policy attachments (no strip)', async () => {

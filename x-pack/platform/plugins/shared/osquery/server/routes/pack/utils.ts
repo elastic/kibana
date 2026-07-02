@@ -137,6 +137,24 @@ export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>):
     []
   );
 
+/**
+ * Derive the effective map/wire key for a stored pack query.
+ *
+ * The read/wire path keys each query by its stored `id` when present (and
+ * non-empty), else by its position in the on-disk `queries` array (the map key
+ * lodash passes while reducing). This is the SINGLE source of truth for that
+ * derivation — `convertSOQueriesToPack` (read/GET), `convertSOQueriesToPackConfig`
+ * (Fleet wire), and the V4 `data_backfill` (which stamps `id` onto no-id rows)
+ * all route through it, so a backfilled `id` equals the key those paths derive
+ * and `keyBy(queries, 'id')` in the update route can't collapse no-id rows under
+ * a single `undefined` key. An empty-string `id` is treated as absent (matches
+ * the wire builder's long-standing truthy check).
+ */
+export const deriveEffectiveQueryKey = (
+  query: { id?: string },
+  indexOrKey: string | number
+): string => (query.id ? query.id : String(indexOrKey));
+
 export const convertSOQueriesToPack = (queries: SOPackQuery[] | Record<string, PackQueryInput>) =>
   reduce(
     queries as Record<string, SOPackQuery>,
@@ -145,7 +163,7 @@ export const convertSOQueriesToPack = (queries: SOPackQuery[] | Record<string, P
       { id: queryId, ecs_mapping, query, platform, ...rest }: SOPackQuery,
       key: string
     ) => {
-      const index = queryId ?? key;
+      const index = deriveEffectiveQueryKey({ id: queryId }, key);
       acc[index] = {
         ...rest,
         query,
@@ -415,7 +433,7 @@ export const convertSOQueriesToPackConfig = (
       key: number
     ) => {
       const resultType = snapshot === false ? { removed, snapshot } : {};
-      const index = queryId ? queryId : key;
+      const index = deriveEffectiveQueryKey({ id: queryId }, key);
 
       let scheduleFields: Record<string, unknown> = {};
 

@@ -272,7 +272,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         return {
           ...restPayload,
           policy_ids: policies ?? [],
-          queries: convertSOQueriesToPack(payloadQueries),
+          // On edit, round-trip each query's `id` so the server preserves the
+          // V4-minted `schedule_id` across the save (see `convertSOQueriesToPack`).
+          // On create, omit it — the server derives id from the map key.
+          queries: convertSOQueriesToPack(payloadQueries, editMode),
           shards: getShards() ?? {},
           ...scheduleFields,
         };

@@ -156,7 +156,12 @@ export const reconcileScheduleIdsToWire = async ({
           }
         );
 
-        for (const pp of packagePolicies) {
+        // Index-based iteration so a successful write can splice the fresh
+        // policy back into `packagePolicies` — subsequent packs sharing this
+        // policy then diff against post-write state, converging in one pass
+        // instead of provoking a self-inflicted 409 per additional pack.
+        for (let ppIndex = 0; ppIndex < packagePolicies.length; ppIndex++) {
+          const pp = packagePolicies[ppIndex];
           if (policyHasPack(pp, packSO.attributes.name, spaceId)) {
             const packPath = `inputs[0].config.osquery.value.packs.${makePackKey(
               packSO.attributes.name,
@@ -187,7 +192,7 @@ export const reconcileScheduleIdsToWire = async ({
               continue;
             }
 
-            await packagePolicyService.update(
+            const updatedPolicy = await packagePolicyService.update(
               spaceClient,
               esClient,
               pp.id,
@@ -199,6 +204,14 @@ export const reconcileScheduleIdsToWire = async ({
                 return draft;
               })
             );
+
+            // Splice the returned policy back so the next pack on this policy
+            // (and the diff gate above) sees the just-written state. Fleet's
+            // optimistic-concurrency version bump also travels with it, keeping
+            // subsequent writes from stale-version conflicts. `pp.id` is
+            // re-attached defensively in case the draft's stripped `id` isn't
+            // echoed back.
+            packagePolicies[ppIndex] = { ...updatedPolicy, id: updatedPolicy.id ?? pp.id };
           }
         }
 
@@ -206,8 +219,16 @@ export const reconcileScheduleIdsToWire = async ({
           `reconcileScheduleIdsToWire: reconciled pack ${packSO.id} in space ${spaceId}`
         );
       } catch (err) {
-        const error = err as Error & { statusCode?: number };
-        if (error.statusCode === 409) {
+        const error = err as Error & {
+          statusCode?: number;
+          output?: { statusCode?: number };
+        };
+        // Fleet surfaces conflicts as Boom errors, where the HTTP status lives
+        // under `output.statusCode` (no top-level `statusCode`). Read both so a
+        // 409 is classified as a retryable conflict (debug) rather than a
+        // generic failure (warn); either way the pass is flagged for retry.
+        const statusCode = error.output?.statusCode ?? error.statusCode;
+        if (statusCode === 409) {
           logger.debug(
             `reconcileScheduleIdsToWire: version conflict for pack ${packSO.id}, will retry`
           );

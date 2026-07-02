@@ -55,6 +55,16 @@ export type PackQuerySOECSMapping = Array<{ field: string; value: string }>;
 
 export interface PackQueryFormData {
   id: string;
+  /**
+   * The query's stored Saved Object `id` at deserialize time, captured
+   * separately from `id` (which doubles as the user-editable name and changes
+   * on rename). Preserved untouched through edits so the edit-save serializer
+   * can send the ORIGINAL identity claim even after a rename — that is what
+   * lets `resolvePreservedQueries` match the renamed query to its stored row
+   * and preserve its `schedule_id` / `start_date`. Absent for brand-new queries
+   * added in the form (no stored row → server derives id from the map key).
+   */
+  originalId?: string;
   description?: string;
   query: string;
   interval: number;

@@ -9,8 +9,11 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
   RECONCILE_TASK_TYPE,
+  RECONCILE_RETRY_DELAY_MS,
+  RECONCILE_RETRY_MAX_DELAY_MS,
   buildReconcileTaskSchedule,
   buildReconcileRunResult,
+  computeBackoffDelayMs,
   scheduleReconcileTask,
 } from './reconcile_schedule_ids_task';
 
@@ -37,25 +40,69 @@ describe('buildReconcileTaskSchedule (one-shot reconcile task registration)', ()
   });
 });
 
-describe('buildReconcileRunResult (single-run re-arm contract)', () => {
-  const now = new Date('2026-06-25T00:00:00.000Z');
-
-  it('marks the task completed for good on a clean pass', () => {
-    expect(buildReconcileRunResult(false, now)).toEqual({ state: { completed: true } });
+describe('computeBackoffDelayMs (capped exponential backoff)', () => {
+  it('returns the base delay for the first failure (0 prior attempts)', () => {
+    expect(computeBackoffDelayMs(0)).toBe(RECONCILE_RETRY_DELAY_MS);
   });
 
-  it('re-arms with a future runAt on a failed pass so the task is not silently abandoned', () => {
-    const result = buildReconcileRunResult(true, now);
+  it('doubles per prior attempt', () => {
+    expect(computeBackoffDelayMs(1)).toBe(RECONCILE_RETRY_DELAY_MS * 2);
+    expect(computeBackoffDelayMs(2)).toBe(RECONCILE_RETRY_DELAY_MS * 4);
+    expect(computeBackoffDelayMs(3)).toBe(RECONCILE_RETRY_DELAY_MS * 8);
+  });
 
-    // completed:false alone would NOT re-run a single-run task — the runAt is
-    // what actually retries the unreconciled packs.
-    expect(result.state).toEqual({ completed: false });
-    expect(result.runAt).toBeInstanceOf(Date);
-    expect((result.runAt as Date).getTime()).toBeGreaterThan(now.getTime());
+  it('never exceeds the 24h cap', () => {
+    expect(computeBackoffDelayMs(100)).toBe(RECONCILE_RETRY_MAX_DELAY_MS);
+    // The first attempt that would exceed the cap is clamped exactly to it.
+    for (let attempts = 0; attempts <= 200; attempts++) {
+      expect(computeBackoffDelayMs(attempts)).toBeLessThanOrEqual(RECONCILE_RETRY_MAX_DELAY_MS);
+    }
   });
 });
 
-describe('scheduleReconcileTask (remove-then-reschedule startup contract)', () => {
+describe('buildReconcileRunResult (single-run re-arm + backoff contract)', () => {
+  const now = new Date('2026-06-25T00:00:00.000Z');
+
+  it('marks the task completed and clears the attempt counter on a clean pass', () => {
+    expect(buildReconcileRunResult(false, now)).toEqual({
+      state: { completed: true, retryAttempts: 0 },
+    });
+  });
+
+  it('resets the attempt counter even after prior failures on a clean pass', () => {
+    expect(buildReconcileRunResult(false, now, { completed: false, retryAttempts: 5 })).toEqual({
+      state: { completed: true, retryAttempts: 0 },
+    });
+  });
+
+  it('first failure (no prior state) re-arms at the base 5m delay and records one attempt', () => {
+    const result = buildReconcileRunResult(true, now);
+
+    expect(result.state).toEqual({ completed: false, retryAttempts: 1 });
+    expect((result.runAt as Date).getTime()).toBe(now.getTime() + RECONCILE_RETRY_DELAY_MS);
+  });
+
+  it('consecutive failures double the delay and increment the attempt counter', () => {
+    // Second consecutive failure: prior state recorded 1 attempt → delay 2×base.
+    const second = buildReconcileRunResult(true, now, { completed: false, retryAttempts: 1 });
+    expect(second.state).toEqual({ completed: false, retryAttempts: 2 });
+    expect((second.runAt as Date).getTime()).toBe(now.getTime() + RECONCILE_RETRY_DELAY_MS * 2);
+
+    // Third: prior 2 attempts → 4×base.
+    const third = buildReconcileRunResult(true, now, { completed: false, retryAttempts: 2 });
+    expect(third.state).toEqual({ completed: false, retryAttempts: 3 });
+    expect((third.runAt as Date).getTime()).toBe(now.getTime() + RECONCILE_RETRY_DELAY_MS * 4);
+  });
+
+  it('caps the re-arm delay at 24h no matter how many prior attempts', () => {
+    const result = buildReconcileRunResult(true, now, { completed: false, retryAttempts: 50 });
+
+    expect((result.runAt as Date).getTime()).toBe(now.getTime() + RECONCILE_RETRY_MAX_DELAY_MS);
+    expect(result.state.retryAttempts).toBe(51);
+  });
+});
+
+describe('scheduleReconcileTask (conditional-remove startup contract)', () => {
   const now = new Date('2026-06-25T00:00:00.000Z');
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
@@ -63,9 +110,14 @@ describe('scheduleReconcileTask (remove-then-reschedule startup contract)', () =
     logger = loggingSystemMock.createLogger();
   });
 
-  it('awaits removeIfExists before calling ensureScheduled, so a stale instance is cleared first', async () => {
+  it('upgraded deployment (legacy recurring doc) → removes it then schedules a fresh one-shot', async () => {
     const taskManager = taskManagerMock.createStart();
     const callOrder: string[] = [];
+    // Existing doc carries a legacy recurring schedule.
+    taskManager.get.mockResolvedValue({
+      id: RECONCILE_TASK_TYPE,
+      schedule: { interval: '1d' },
+    } as never);
     taskManager.removeIfExists.mockImplementation(async () => {
       callOrder.push('removeIfExists');
     });
@@ -79,16 +131,30 @@ describe('scheduleReconcileTask (remove-then-reschedule startup contract)', () =
 
     expect(callOrder).toEqual(['removeIfExists', 'ensureScheduled']);
     expect(taskManager.removeIfExists).toHaveBeenCalledWith(RECONCILE_TASK_TYPE);
-    expect(taskManager.ensureScheduled).toHaveBeenCalledWith(buildReconcileTaskSchedule(now));
+    const scheduled = taskManager.ensureScheduled.mock.calls[0][0];
+    expect(scheduled.runAt).toBe(now);
+    expect(scheduled).not.toHaveProperty('schedule');
   });
 
-  it('is a clean no-op on a fresh install: removeIfExists resolves and ensureScheduled still runs with the runAt-only schedule', async () => {
+  it('live one-shot doc (no recurring schedule) → does NOT remove; ensureScheduled no-ops', async () => {
     const taskManager = taskManagerMock.createStart();
-    taskManager.removeIfExists.mockResolvedValue(undefined);
+    // Existing doc is a modern one-shot: runAt only, no recurring schedule.
+    taskManager.get.mockResolvedValue({ id: RECONCILE_TASK_TYPE, runAt: now } as never);
 
     await scheduleReconcileTask(taskManager, logger, now);
 
-    expect(taskManager.removeIfExists).toHaveBeenCalledWith(RECONCILE_TASK_TYPE);
+    // The live doc is left untouched — no delete-mid-run race.
+    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+    expect(taskManager.ensureScheduled).toHaveBeenCalledWith(buildReconcileTaskSchedule(now));
+  });
+
+  it('fresh install (no existing doc / 404) → schedules without removing', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.get.mockRejectedValue(new Error('Saved object [task/...] not found'));
+
+    await scheduleReconcileTask(taskManager, logger, now);
+
+    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
     const scheduled = taskManager.ensureScheduled.mock.calls[0][0];
     expect(scheduled.runAt).toBe(now);
     expect(scheduled).not.toHaveProperty('schedule');
@@ -96,6 +162,10 @@ describe('scheduleReconcileTask (remove-then-reschedule startup contract)', () =
 
   it('catches a rejected removeIfExists and logs a warning instead of throwing', async () => {
     const taskManager = taskManagerMock.createStart();
+    taskManager.get.mockResolvedValue({
+      id: RECONCILE_TASK_TYPE,
+      schedule: { interval: '1d' },
+    } as never);
     taskManager.removeIfExists.mockRejectedValue(new Error('boom'));
 
     await expect(scheduleReconcileTask(taskManager, logger, now)).resolves.toBeUndefined();
@@ -108,7 +178,7 @@ describe('scheduleReconcileTask (remove-then-reschedule startup contract)', () =
 
   it('catches a rejected ensureScheduled and logs a warning instead of throwing', async () => {
     const taskManager = taskManagerMock.createStart();
-    taskManager.removeIfExists.mockResolvedValue(undefined);
+    taskManager.get.mockResolvedValue({ id: RECONCILE_TASK_TYPE, runAt: now } as never);
     taskManager.ensureScheduled.mockRejectedValue(new Error('boom'));
 
     await expect(scheduleReconcileTask(taskManager, logger, now)).resolves.toBeUndefined();
@@ -116,5 +186,10 @@ describe('scheduleReconcileTask (remove-then-reschedule startup contract)', () =
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Failed to schedule reconcileScheduleIdsToWire task: boom')
     );
+  });
+
+  it('is a no-op when taskManager is undefined', async () => {
+    await expect(scheduleReconcileTask(undefined, logger, now)).resolves.toBeUndefined();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 });
