@@ -89,6 +89,43 @@ describe('RuleConditions', () => {
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('-');
   });
 
+  it('renders Custom recovery with the recovery condition snippet when recovery_strategy is query', () => {
+    renderConditions(alertRule);
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('Custom');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent(
+      'Recovery condition'
+    );
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).toHaveTextContent(
+      'FROM metrics-* | WHERE avg(cpu) < 0.5'
+    );
+  });
+
+  it('renders Default recovery without a snippet when recovery_strategy is not query', () => {
+    renderConditions({
+      ...alertRule,
+      recovery_strategy: 'no_breach',
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+      },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('Default');
+    expect(screen.queryByTestId('alertingV2RuleDetailsRecoveryCondition')).not.toBeInTheDocument();
+  });
+
+  it('renders Default recovery when recovery_strategy is absent', () => {
+    renderConditions({
+      ...alertRule,
+      recovery_strategy: undefined,
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+      },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('Default');
+    expect(screen.queryByTestId('alertingV2RuleDetailsRecoveryCondition')).not.toBeInTheDocument();
+  });
+
   it('renders Immediate for alert and recovery delay when counts are zero', () => {
     renderConditions({
       ...alertRule,
@@ -167,7 +204,7 @@ describe('RuleConditions', () => {
       renderConditions(alertRule, 'summary');
       expect(screen.queryByTestId('alertingV2RuleDetailsAlertDelay')).not.toBeInTheDocument();
       expect(screen.queryByTestId('alertingV2RuleDetailsRecoveryDelay')).not.toBeInTheDocument();
-      // Recovery row has no test subj on the row itself; assert by its title text absence.
+      expect(screen.queryByTestId('alertingV2RuleDetailsRecovery')).not.toBeInTheDocument();
       expect(screen.queryByText('Recovery')).not.toBeInTheDocument();
     });
 
