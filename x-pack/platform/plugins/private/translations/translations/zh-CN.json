@@ -43531,7 +43531,6 @@
     "xpack.securitySolution.flyout.alertsHighlightedField.showMore": "显示更少",
     "xpack.securitySolution.flyout.alertSummary.optionsMenuTitle": "选项",
     "xpack.securitySolution.flyout.analyzer.title": "分析器",
-    "xpack.securitySolution.flyout.attackDetails.footer.takeActionButtonLabel": "采取操作",
     "xpack.securitySolution.flyout.attackDetails.left.insights.buttonGroupLegend": "洞见选项",
     "xpack.securitySolution.flyout.attackDetails.left.insights.correlations.noRelatedAlerts": "无相关告警",
     "xpack.securitySolution.flyout.attackDetails.left.insights.correlations.relatedAlertsTitle": "{count} 个与体系相关的{count, plural, one {alert} other {告警}}",

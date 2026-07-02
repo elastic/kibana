@@ -43236,7 +43236,6 @@
     "xpack.securitySolution.flyout.alertsHighlightedField.showMore": "Afficher moins",
     "xpack.securitySolution.flyout.alertSummary.optionsMenuTitle": "Options",
     "xpack.securitySolution.flyout.analyzer.title": "Analyseur",
-    "xpack.securitySolution.flyout.attackDetails.footer.takeActionButtonLabel": "Entreprendre une action",
     "xpack.securitySolution.flyout.attackDetails.left.insights.buttonGroupLegend": "Options des informations exploitables",
     "xpack.securitySolution.flyout.attackDetails.left.insights.correlations.noRelatedAlerts": "Aucune alerte associée.",
     "xpack.securitySolution.flyout.attackDetails.left.insights.correlationsButtonLabel": "Corrélation",
