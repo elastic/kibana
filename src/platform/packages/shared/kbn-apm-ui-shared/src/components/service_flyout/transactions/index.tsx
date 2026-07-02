@@ -130,6 +130,7 @@ export function ServiceFlyoutTransactionsSection({
 
   return (
     <TransactionsTable
+      data-test-subj="serviceFlyoutSection-transactions"
       errorMessage={
         error
           ? i18n.translate('apmUiShared.serviceFlyout.transactions.dataSourceError', {

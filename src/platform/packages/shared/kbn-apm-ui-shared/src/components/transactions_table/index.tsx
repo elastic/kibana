@@ -52,6 +52,7 @@ interface TransactionsTableProps {
   remainingTransactionsCellTooltipContent?: React.ReactNode;
   showSparklines?: boolean;
   errorMessage?: string;
+  'data-test-subj'?: string;
 }
 
 function shouldFetchServer({
@@ -82,6 +83,7 @@ export function TransactionsTable({
   remainingTransactionsCellTooltipContent,
   showSparklines: showSparklinesProp,
   errorMessage,
+  'data-test-subj': dataTestSubj,
 }: TransactionsTableProps) {
   const searchQueryRef = useRef('');
 
@@ -130,7 +132,7 @@ export function TransactionsTable({
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={dataTestSubj}>
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
