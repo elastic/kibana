@@ -63763,13 +63763,14 @@ paths:
                 - waiting_for_input
                 - waiting_for_child
                 - running
+                - queued
                 - completed
                 - failed
                 - cancelled
                 - timed_out
                 - skipped
               type: string
-            maxItems: 10
+            maxItems: 11
             type: array
         - description: Filter by execution type.
           in: query
