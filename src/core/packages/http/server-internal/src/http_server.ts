@@ -192,7 +192,7 @@ export interface HttpServerSetup {
 }
 
 /** @internal */
-export type LifecycleRegistrar = Pick<
+export type CoreHandlerDependencies = Pick<
   HttpServerSetup,
   | 'registerOnPreRouting'
   | 'registerOnPreAuth'

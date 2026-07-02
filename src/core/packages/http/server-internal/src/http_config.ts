@@ -197,11 +197,11 @@ const configSchema = schema.object(
       allowedSchemes: offeringBasedSchema({
         serverless: schema.arrayOf(xsrfSchemeSchema, {
           defaultValue: ['apikey', 'bearer'] as const,
-          maxSize: 100,
+          maxSize: 2,
         }),
         traditional: schema.arrayOf(xsrfSchemeSchema, {
           defaultValue: [] as const,
-          maxSize: 100,
+          maxSize: 2,
         }),
       }),
     }),

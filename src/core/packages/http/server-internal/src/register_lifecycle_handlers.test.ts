@@ -21,7 +21,7 @@ jest.mock('./lifecycle_handlers', () => {
 
 import { createTestEnv } from '@kbn/config-mocks';
 import type { HttpConfig } from './http_config';
-import type { LifecycleRegistrar } from './http_server';
+import type { CoreHandlerDependencies } from './http_server';
 import { registerCoreHandlers } from './register_lifecycle_handlers';
 
 import {
@@ -39,7 +39,7 @@ const createRegistrarMock = (authGet = jest.fn()) =>
     registerOnPreResponse: jest.fn(),
     registerOnPreRouting: jest.fn(),
     auth: { get: authGet, isAuthenticated: jest.fn() },
-  } as unknown as LifecycleRegistrar);
+  } as unknown as CoreHandlerDependencies);
 
 const createConfigMock = () =>
   ({

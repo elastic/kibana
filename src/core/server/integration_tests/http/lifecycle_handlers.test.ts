@@ -387,10 +387,6 @@ describe('xsrf post-auth handler with allowedSchemes (Authorization bypass)', ()
       return toolkit.authenticated({ state: { http_authentication_scheme: scheme } });
     });
     const router = serverSetup.createRouter('/');
-    router.get(
-      { path: testPath, validate: false, security: { authz: { enabled: false, reason: '' } } },
-      (context, req, res) => res.ok({ body: 'ok' })
-    );
     router.post(
       { path: testPath, validate: false, security: { authz: { enabled: false, reason: '' } } },
       (context, req, res) => res.ok({ body: 'ok' })
@@ -417,86 +413,25 @@ describe('xsrf post-auth handler with allowedSchemes (Authorization bypass)', ()
   ): supertest.Test =>
     (supertest(innerServer.listener) as any)[method.toLowerCase()](path) as supertest.Test;
 
-  it.each(destructiveMethods)(
-    'accepts a %s with apikey scheme and no kbn-xsrf when apikey is allowed',
-    async (method) => {
-      await bootServer(['apikey', 'bearer']);
-      await getSupertest(method, testPath).set(schemeHeader, 'apikey').expect(200, 'ok');
-    }
-  );
+  // These integration tests exercise only the seam between the real registerAuth →
+  // toolkit.authenticated({ state }) → getAuthState pipeline and the xsrf handler. The full
+  // allow/deny decision matrix (scheme and config permutations) is already covered exhaustively
+  // by the mocked-getAuthState unit tests in lifecycle_handlers.test.ts.
 
-  it.each(destructiveMethods)(
-    'accepts a %s with bearer scheme and no kbn-xsrf when bearer is allowed',
-    async (method) => {
-      await bootServer(['apikey', 'bearer']);
-      await getSupertest(method, testPath).set(schemeHeader, 'bearer').expect(200, 'ok');
-    }
-  );
-
-  it.each(destructiveMethods)(
-    'rejects a %s with basic scheme even when apikey and bearer are allowed',
-    async (method) => {
-      await bootServer(['apikey', 'bearer']);
-      await getSupertest(method, testPath).set(schemeHeader, 'basic').expect(400, {
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'Request must contain a kbn-xsrf header.',
-      });
-    }
-  );
-
-  it.each(destructiveMethods)(
-    'rejects a %s with no auth scheme (null) when apikey and bearer are allowed',
-    async (method) => {
-      await bootServer(['apikey', 'bearer']);
-      await getSupertest(method, testPath).expect(400, {
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'Request must contain a kbn-xsrf header.',
-      });
-    }
-  );
-
-  it.each(destructiveMethods)(
-    'rejects a %s with bearer scheme when only apikey is allowed',
-    async (method) => {
-      await bootServer(['apikey']);
-      await getSupertest(method, testPath).set(schemeHeader, 'bearer').expect(400, {
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'Request must contain a kbn-xsrf header.',
-      });
-    }
-  );
-
-  it.each(destructiveMethods)(
-    'rejects a %s with apikey scheme when no schemes are allowed (traditional default)',
-    async (method) => {
-      await bootServer([]);
-      await getSupertest(method, testPath).set(schemeHeader, 'apikey').expect(400, {
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'Request must contain a kbn-xsrf header.',
-      });
-    }
-  );
-
-  it('accepts a GET with no kbn-xsrf regardless of scheme (safe-method short-circuit)', async () => {
+  it('rejects a POST with basic scheme even when apikey and bearer are allowed', async () => {
     await bootServer(['apikey', 'bearer']);
-    await supertest(innerServer.listener)
-      .get(testPath)
-      .set(schemeHeader, 'basic')
-      .expect(200, 'ok');
+    await getSupertest('POST', testPath).set(schemeHeader, 'basic').expect(400, {
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Request must contain a kbn-xsrf header.',
+    });
   });
 
   it.each(destructiveMethods)(
-    'accepts a %s that carries the kbn-xsrf header alongside the bypass config',
+    'accepts a %s with an allowed scheme and no kbn-xsrf (confirms every destructive method routes through the handler)',
     async (method) => {
       await bootServer(['apikey', 'bearer']);
-      await getSupertest(method, testPath)
-        .set(schemeHeader, 'basic')
-        .set(xsrfHeader, 'anything')
-        .expect(200, 'ok');
+      await getSupertest(method, testPath).set(schemeHeader, 'apikey').expect(200, 'ok');
     }
   );
 });
