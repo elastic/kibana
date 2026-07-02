@@ -2305,11 +2305,12 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.13.0.tgz#b9c079532257b7d4c46e3004ecb7b1f78f00a6b9"
   integrity sha512-Itl7zn88GEYRAqfmuRzViNy03nVHkIVLAvtjIC0b3lhjBnJgUbEG8ImfdYUExMiGraFE+2/k6v/Z8LbWXxO+JA==
 
-"@elastic/esql@4.4.0":
-  version "4.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.4.0.tgz#0ca6c2b3d38482012a3b95adb6b2caafd62a7b4c"
-  integrity sha512-8mbrT9as13DNJ4wFnBW9dD1F1c2qxusmMfbPWRzexMwS/8/H35YPWrryCHBU0ESyTC2ak5yqbc/733jPbpC7Cw==
+"@elastic/esql@4.7.1":
+  version "4.7.1"
+  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.7.1.tgz#b0a31c6d50a78249cf915ef360a2109cd4854ea2"
+  integrity sha512-bJMJ8B7ICm5WiQ6phEHGNJWrIS2xmlP8AFRQ9dTS+LWrz2vgp18PGQvqVgXheGv/VFPqhD6x32BP/7FctYnckA==
   dependencies:
+    "@elastic/pretty-printer" "^4.7.1"
     antlr4 "4.13.2"
     tree-dump "1.1.0"
     tslib "2.8.1"
@@ -2491,6 +2492,14 @@
     "@opentelemetry/winston-transport" "^0.29.0"
     import-in-the-middle "^3.0.0"
     safe-stable-stringify "^2.4.3"
+
+"@elastic/pretty-printer@^4.7.1":
+  version "4.7.1"
+  resolved "https://registry.yarnpkg.com/@elastic/pretty-printer/-/pretty-printer-4.7.1.tgz#dd50d2bd49d1e958a96f2b76f43813a78c984e3f"
+  integrity sha512-XFqZECreT7iuZgcy+cEKC6ITLzNSZ4tcm80QBBWHjFVb9geRa73W2t+i5334IQbXPuNKHaTpN8O3r0tCFSYrbA==
+  dependencies:
+    tree-dump "1.1.0"
+    tslib "2.8.1"
 
 "@elastic/prismjs-esql@^1.1.2":
   version "1.1.2"
