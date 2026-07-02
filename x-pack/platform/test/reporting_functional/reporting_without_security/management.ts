@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // This concatenates lines of multi-line string into a single line.
@@ -77,7 +77,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await PageObjects.common.sleep(3000); // Wait an amount of time for auto-polling to refresh the jobs
 
-      const [firstTitleElem] = await testSubjects.findAll('reportingListItemObjectTitle');
+      const [firstTitleElem] = await testSubjects.findAllOrFail('reportingListItemObjectTitle');
       const tableCellText = await firstTitleElem.getVisibleText();
       expect(tableCellText).to.be(`Tiểu thuyết`);
     });

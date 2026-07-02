@@ -9,7 +9,7 @@
 
 import type { DebugState } from '@elastic/charts';
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../../ftr_provider_context';
 
@@ -85,7 +85,11 @@ export class ElasticChartService extends FtrService {
         throw Error(`Failed to find an elastic-chart with testSubject '${dataTestSubj}'`);
       }
 
-      return (await this.testSubjects.findAll(dataTestSubj))[match];
+      const charts = await this.testSubjects.findAllOrFail(dataTestSubj, {
+        timeout,
+        min: match + 1,
+      });
+      return charts[match];
     } else {
       const charts = await this.getAllCharts(timeout);
       if (charts.length === 0) {

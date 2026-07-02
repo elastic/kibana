@@ -6,7 +6,7 @@
  */
 
 import chroma from 'chroma-js';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { FittingFunction, XYCurveType } from '@kbn/lens-plugin/public';
 import type { DebugState } from '@elastic/charts';
@@ -1576,7 +1576,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async hoverOverDimensionButton(index = 0) {
-      const dimensionButton = (await testSubjects.findAll('lns-dimensionTrigger'))[index];
+      const dimensionButtons = await testSubjects.findAllOrFail('lns-dimensionTrigger', {
+        min: index + 1,
+      });
+      const dimensionButton = dimensionButtons[index];
       await dimensionButton.moveMouseTo();
     },
 

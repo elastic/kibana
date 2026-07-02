@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import type { FtrProviderContext } from '../../configs/ftr_provider_context';
 import type { PolicyTestResourceInfo } from '../../services/endpoint_policy';
@@ -74,7 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('policyListTable');
       });
       it('navigates to the policy details page when the policy name is clicked and returns back to the policy list page using the header back button', async () => {
-        const policyName = (await testSubjects.findAll('policyNameCellLink'))[0];
+        const policyName = (await testSubjects.findAllOrFail('policyNameCellLink'))[0];
         await policyName.click();
         await pageObjects.policy.ensureIsOnDetailsPage();
         const backButton = await testSubjects.find('policyDetailsBackLink');
@@ -83,7 +83,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       describe('when the endpoint count link is clicked', () => {
         it('navigates to the endpoint list page filtered by policy', async () => {
-          const endpointCount = (await testSubjects.findAll('policyEndpointCountLink'))[0];
+          const endpointCount = (await testSubjects.findAllOrFail('policyEndpointCountLink'))[0];
           await endpointCount.click();
           await pageObjects.endpoint.ensureIsOnEndpointListPage();
         });
@@ -97,7 +97,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('endpoint table shows the endpoints associated with selected policy', async () => {
           const expectedPolicyName = indexedData.integrationPolicies[0].name;
           await pageObjects.endpoint.ensureIsOnEndpointListPage();
-          const policyName = (await testSubjects.findAll('policyNameCellLink'))[0];
+          const policyName = (await testSubjects.findAllOrFail('policyNameCellLink'))[0];
           expect(await policyName.getVisibleText()).to.be.equal(
             expectedPolicyName.substring(0, expectedPolicyName.indexOf('-'))
           );

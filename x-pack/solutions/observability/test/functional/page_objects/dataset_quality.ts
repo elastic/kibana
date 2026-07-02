@@ -16,7 +16,7 @@ import {
   DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
   DEFAULT_QUALITY_ISSUE_SORT_FIELD,
 } from '@kbn/dataset-quality-plugin/common/constants';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import rison from '@kbn/rison';
 import querystring from 'querystring';
@@ -493,7 +493,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     getIntegrationDashboardButtons() {
-      return testSubjects.findAll(
+      return testSubjects.findAllOrFail(
         testSubjectSelectors.datasetQualityDetailsIntegrationAction('Dashboard')
       );
     },
