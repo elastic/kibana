@@ -8,7 +8,7 @@
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { buildFailureAnnotation } from './run_quick_checks';
+import { buildPipelineAnnotation } from './run_quick_checks';
 
 describe('buildFailureAnnotation', () => {
   it('creates an annotation for a single failed check', () => {
@@ -21,7 +21,7 @@ describe('buildFailureAnnotation', () => {
       },
     ];
 
-    const annotation = buildFailureAnnotation(failedChecks);
+    const annotation = buildPipelineAnnotation(failedChecks);
 
     expect(annotation).toEqual(
       [
@@ -61,7 +61,7 @@ describe('buildFailureAnnotation', () => {
       },
     ];
 
-    const annotation = buildFailureAnnotation(failedChecks);
+    const annotation = buildPipelineAnnotation(failedChecks);
 
     expect(annotation).toContain('**❌ 2 quick-checks failed**');
     expect(annotation).toContain(
@@ -86,7 +86,7 @@ describe('buildFailureAnnotation', () => {
       },
     ];
 
-    const annotation = buildFailureAnnotation(failedChecks);
+    const annotation = buildPipelineAnnotation(failedChecks);
 
     expect(annotation).toContain('… (truncated, showing last 50 lines)');
     expect(annotation).not.toContain('line 9\n');
@@ -105,7 +105,7 @@ describe('buildFailureAnnotation', () => {
       },
     ];
 
-    const annotation = buildFailureAnnotation(failedChecks);
+    const annotation = buildPipelineAnnotation(failedChecks);
 
     expect(annotation).not.toContain('truncated');
     expect(annotation).toContain('line 0');

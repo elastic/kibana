@@ -304,32 +304,40 @@ function stripRoot(script: string) {
   return script.replace(REPO_ROOT, '');
 }
 
-export function buildFailureAnnotation(failedChecks: CheckResult[]): string {
-  const sections = failedChecks.map((check) => {
-    const scriptPath = stripRoot(check.script);
-    const runtime = humanizeTime(check.durationMs);
-    const lines = check.output.trim().split('\n');
-    const truncated = lines.length > MAX_ANNOTATION_OUTPUT_LINES;
-    const outputToShow = truncated ? lines.slice(-MAX_ANNOTATION_OUTPUT_LINES) : lines;
-    const output = [
-      ...(truncated ? [`… (truncated, showing last ${MAX_ANNOTATION_OUTPUT_LINES} lines)`] : []),
-      ...outputToShow,
-    ].join('\n');
+interface FailureAnnotation {
+  scriptPath: string;
+  section: string;
+};
 
-    return [
+function buildFailureAnnotation(check: CheckResult): FailureAnnotation {
+  const scriptPath = stripRoot(check.script).slice(1);
+  const runtime = humanizeTime(check.durationMs);
+  const lines = check.output.trim().split('\n');
+  const truncated = lines.length > MAX_ANNOTATION_OUTPUT_LINES;
+  const outputToShow = truncated ? lines.slice(-MAX_ANNOTATION_OUTPUT_LINES) : lines;
+  const output = [
+    ...(truncated ? [`… (truncated, showing last ${MAX_ANNOTATION_OUTPUT_LINES} lines)`] : []),
+    ...outputToShow,
+  ].join('\n');
+
+  return {
+    scriptPath: scriptPath,
+    section: [
       `<details>`,
-      `<summary>❌ \`${scriptPath}\` (ran in ${runtime})</summary>`,
+      `<summary>❌ ${scriptPath} (ran in ${runtime})</summary>`,
       '',
       '```',
       output,
       '```',
       `</details>`,
-    ].join('\n');
-  });
+    ].join('\n')
+  };
+}
 
-  // Use the full script path (not stripRoot'd) so the command is directly runnable:
-  // collectScriptsToRun() treats any path starting with '/' as already-absolute.
-  const reproduceScripts = failedChecks.map((check) => check.script).join(',');
+export function buildPipelineAnnotation(failedChecks: CheckResult[]): string {
+  const annotations = failedChecks.map(buildFailureAnnotation);
+  const sections = annotations.map((annotation) => annotation.section);
+  const reproduceScripts = annotations.map((annotation) => annotation.scriptPath).join(',');
 
   return [
     `## ❌ ${failedChecks.length} quick-check(s) failed`,
@@ -347,13 +355,13 @@ export function buildFailureAnnotation(failedChecks: CheckResult[]): string {
 
 function annotateFailures(failedChecks: CheckResult[]): void {
   if (process.env.CI !== 'true' || failedChecks.length === 0) {
-    console.log(buildFailureAnnotation(failedChecks));
+    console.log(buildPipelineAnnotation(failedChecks));
     return;
   }
 
   try {
     execFileSync('buildkite-agent', ['annotate', '--style', 'error', '--context', 'quick_checks'], {
-      input: buildFailureAnnotation(failedChecks),
+      input: buildPipelineAnnotation(failedChecks),
     });
   } catch (error) {
     logger.warning(`Failed to create Buildkite annotation for failed quick checks: ${error}`);
