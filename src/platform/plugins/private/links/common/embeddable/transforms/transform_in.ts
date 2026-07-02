@@ -9,13 +9,17 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 
-import type { StoredLinksState } from '../../../server';
 import { LINKS_LIBRARY_TYPE } from '../../constants';
-import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../types';
+import type {
+  LinksByReferenceState,
+  LinksByValueState,
+  LinksEmbeddableState,
+  StoredLinksEmbeddableState,
+} from '../types';
 import { transformLinksIn } from './transform_links';
 
 export function transformIn(state: LinksEmbeddableState): {
-  state: StoredLinksState;
+  state: StoredLinksEmbeddableState;
   references: Reference[];
 } {
   if ((state as LinksByReferenceState).ref_id) {

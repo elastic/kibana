@@ -20,7 +20,7 @@ export function transformIn(state: LinksApiState): {
   const { state: transformedState, references } = transformEmbeddableIn(stateWithoutTags);
 
   return {
-    state: transformedState,
+    state: transformedState as StoredLinksState,
     references: [...references, ...tagReferences],
   };
 }

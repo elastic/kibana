@@ -18,5 +18,8 @@ export type {
 } from '../../server';
 
 export type StoredLinksEmbeddableState = SerializedTitles &
-  // enhancements and disabled actions were accidentally serialized in previous versions
-  StoredLinksState & { enhancements?: unknown; disabledActions?: unknown };
+  Omit<StoredLinksState, 'title'> & {
+    // enhancements and disabled actions were accidentally serialized in previous versions
+    enhancements?: unknown;
+    disabledActions?: unknown;
+  };

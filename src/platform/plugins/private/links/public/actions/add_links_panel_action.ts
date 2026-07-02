@@ -55,7 +55,7 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
             function serializeState() {
               if (refId !== undefined) {
                 return {
-                  title: title ?? '',
+                  ...(title !== undefined ? { title } : {}),
                   ref_id: refId,
                 };
               }

@@ -18,7 +18,7 @@ export function getLinksCRUResponseBody(
   savedObject: SavedObject<StoredLinksState> | SavedObjectsUpdateResponse<StoredLinksState>
 ) {
   const transformedState = transformOut(
-    { title: '', ...savedObject.attributes },
+    savedObject.attributes as StoredLinksState,
     savedObject.references
   );
   return {
