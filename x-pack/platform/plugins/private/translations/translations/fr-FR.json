@@ -21814,7 +21814,6 @@
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputPlaceholder": "Indiquer la clé du certificat",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTitle": "Clé du certificat SSL client",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTooltip": "Cette valeur sera stockée comme un secret, ce qui signifie qu'une fois qu'elle est sauvegardée, la valeur ne peut pas être affichée",
-    "xpack.fleet.settings.editOutputFlyout.SSLOptionsDescription": "Ajoutez ces paramètres uniquement lors de la configuration d'une connexion mTLS",
     "xpack.fleet.settings.editOutputFlyout.streamsLink": "Flux",
     "xpack.fleet.settings.editOutputFlyout.syncIntegrationsFormRowLabel": "Si activé, les ressources d’intégration seront installées sur le cluster Elasticsearch distant",
     "xpack.fleet.settings.editOutputFlyout.syncIntegrationsSwitchLabel": "Synchroniser les intégrations",

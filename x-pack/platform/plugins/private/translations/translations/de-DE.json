@@ -21866,7 +21866,6 @@
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputPlaceholder": "Zertifikatsschlüssel angeben",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTitle": "Client-SSL-Zertifikatsschlüssel",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTooltip": "Dieser Wert wird als Geheimnis gespeichert, was bedeutet, dass der Wert nach dem Speichern nicht erneut angezeigt werden kann",
-    "xpack.fleet.settings.editOutputFlyout.SSLOptionsDescription": "Fügen Sie diese Einstellungen nur beim Einrichten einer mTLS-Verbindung hinzu",
     "xpack.fleet.settings.editOutputFlyout.streamsLink": "Streams",
     "xpack.fleet.settings.editOutputFlyout.syncIntegrationsFormRowLabel": "Wenn aktiviert, werden Integrations-Assets auf dem entfernten Elasticsearch-Cluster installiert",
     "xpack.fleet.settings.editOutputFlyout.syncIntegrationsSwitchLabel": "Integrationen synchronisieren",
