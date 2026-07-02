@@ -27,8 +27,11 @@ const shell = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
       );
       margin-top: ${layoutVar('application.marginTop')};
       margin-bottom: ${layoutVar('application.marginBottom')};
-      margin-right: ${layoutVar('application.marginRight')};
       margin-left: ${layoutVar('agent.marginLeft', '0px')};
+
+      &[data-agent-workspace-open='false'] {
+        pointer-events: none;
+      }
 
       z-index: ${layoutLevels.content};
 
@@ -69,6 +72,9 @@ const shell = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
 
 /** Fade content out before width collapse so panel UI is not squished during the tween. */
 export const CONTENT_FADE_MS = 120;
+
+/** Shell panel chrome opacity fades more gradually than inner content. */
+export const SHELL_OPACITY_FADE_MS = 200;
 
 const content: EmotionFn = () => css`
   display: flex;

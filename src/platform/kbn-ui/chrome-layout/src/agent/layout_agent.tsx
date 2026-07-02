@@ -19,7 +19,7 @@ import {
 } from '../panel_layout_transition';
 import { resolveAgentPanelTargetWidth } from './resolve_agent_panel_target_width';
 import { useSyncAgentWidthDuringAnimation } from './use_sync_agent_width_during_animation';
-import { CONTENT_FADE_MS, contentHiddenStyles, styles } from './layout_agent.styles';
+import { CONTENT_FADE_MS, SHELL_OPACITY_FADE_MS, contentHiddenStyles, styles } from './layout_agent.styles';
 
 export interface LayoutAgentProps {
   children: ReactNode;
@@ -181,13 +181,59 @@ export const LayoutAgent = ({ children }: LayoutAgentProps) => {
     }
   }, [contentOpacity, isDualPanelClose]);
 
+  const shellOpacity = agentWorkspaceOpen ? 1 : 0;
+  const shellMarginRight = agentWorkspaceOpen ? applicationMarginRight : 0;
+
+  const shellEdgeTransition = useMemo(
+    () =>
+      (fadeMs: number) => {
+        const fadeDuration = shouldAnimateWidth ? fadeMs / 1000 : 0;
+
+        if (!shouldAnimateWidth) {
+          return { duration: 0 };
+        }
+
+        const widthDelay = 'delay' in widthTransition ? widthTransition.delay ?? 0 : 0;
+        const widthDuration = widthTransition.duration ?? 0;
+
+        if (!agentWorkspaceOpen) {
+          return {
+            duration: fadeDuration,
+            ease: 'easeInOut' as const,
+            delay: Math.max(0, widthDelay + widthDuration - fadeDuration),
+          };
+        }
+
+        return {
+          duration: fadeDuration,
+          ease: 'easeInOut' as const,
+          delay: widthDelay,
+        };
+      },
+    [agentWorkspaceOpen, shouldAnimateWidth, widthTransition]
+  );
+
+  const shellOpacityTransition = useMemo(
+    () => shellEdgeTransition(SHELL_OPACITY_FADE_MS),
+    [shellEdgeTransition]
+  );
+
+  const shellMarginTransition = useMemo(
+    () => shellEdgeTransition(CONTENT_FADE_MS),
+    [shellEdgeTransition]
+  );
+
   return (
     <motion.div
       css={styles.shell(chromeStyle)}
       className="kbnChromeLayoutAgent"
       initial={false}
-      animate={{ width: targetWidth }}
-      transition={widthTransition}
+      animate={{ width: targetWidth, opacity: shellOpacity, marginRight: shellMarginRight }}
+      transition={{
+        width: widthTransition,
+        opacity: shellOpacityTransition,
+        marginRight: shellMarginTransition,
+      }}
       onUpdate={handleUpdate}
       onAnimationComplete={handleShellAnimationComplete}
       data-test-subj="kbnChromeLayoutAgent"
