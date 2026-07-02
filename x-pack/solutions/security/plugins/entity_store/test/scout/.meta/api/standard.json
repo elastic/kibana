@@ -1,5 +1,5 @@
 {
-  "sha1": "ab993d89a7ccd0b45c6f15b57d2ddca030e7942d",
+  "sha1": "4677c746ef4f6b111e32996f85fcae1209070320",
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -226,6 +226,22 @@
       }
     },
     {
+      "id": "b766b9bba0d643a-bda631ea8a8353f",
+      "title": "Entity Store CCS logs extraction (test against local instance) Should succeed when a data stream used as remote index pattern has a closed backing index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/ccs_logs_extraction.spec.ts",
+        "line": 676,
+        "column": 12
+      }
+    },
+    {
       "id": "d9737789d696c32-0d07bebba1374b5",
       "title": "Entity Store check privileges API Should return full privileges for admin user",
       "expectedStatus": "passed",
@@ -237,7 +253,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 28,
+        "line": 32,
         "column": 10
       }
     },
@@ -253,7 +269,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 44,
+        "line": 48,
         "column": 10
       }
     },
@@ -269,13 +285,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 61,
+        "line": 65,
         "column": 10
       }
     },
     {
-      "id": "d9737789d696c32-1e7b426238d5db6",
-      "title": "Entity Store check privileges API Should return has_read_permissions: false when user has read access to only one of the two required indices",
+      "id": "d9737789d696c32-34f8999fb069dee",
+      "title": "Entity Store check privileges API Should return has_read_permissions: false when user has read access to only one of the required indices",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -285,7 +301,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 89,
+        "line": 93,
         "column": 10
       }
     },
@@ -301,7 +317,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 120,
+        "line": 124,
         "column": 10
       }
     },
@@ -1346,8 +1362,8 @@
       }
     },
     {
-      "id": "ee624d51beaf5dc-c56bc0b985a129f",
-      "title": "Entity Store entity maintainers Should return 403 when user lacks permissions for target index patterns",
+      "id": "15fad2037802d36-98adb7d54946bea",
+      "title": "Entity Store - privilege checks install - Should fail when user lacks permissions for source index patterns",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1356,14 +1372,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_maintainers.spec.ts",
-        "line": 105,
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
+        "line": 95,
         "column": 10
       }
     },
     {
-      "id": "ee624d51beaf5dc-9611dacc0635259",
-      "title": "Entity Store entity maintainers Should return 403 when user lacks permissions for entity store saved object descriptor",
+      "id": "15fad2037802d36-8544ac7d13fa2a1",
+      "title": "Entity Store - privilege checks install - Should fail when user lacks permissions for target index patterns",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1372,14 +1388,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_maintainers.spec.ts",
-        "line": 133,
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
+        "line": 121,
         "column": 10
       }
     },
     {
-      "id": "ee624d51beaf5dc-21c8ba6a65e32ee",
-      "title": "Entity Store entity maintainers Should return 400 when entity store is not installed",
+      "id": "15fad2037802d36-616e10db6ba79eb",
+      "title": "Entity Store - privilege checks install - Should fail when user lacks permissions for entity store saved object descriptor",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1388,8 +1404,56 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_maintainers.spec.ts",
-        "line": 153,
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
+        "line": 149,
+        "column": 10
+      }
+    },
+    {
+      "id": "15fad2037802d36-3324666d8642cf5",
+      "title": "Entity Store - privilege checks update - Should fail when user lacks permissions for source index patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
+        "line": 171,
+        "column": 10
+      }
+    },
+    {
+      "id": "15fad2037802d36-993c06b666a022e",
+      "title": "Entity Store - privilege checks update - Should fail when user lacks permissions for target index patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
+        "line": 197,
+        "column": 10
+      }
+    },
+    {
+      "id": "15fad2037802d36-1d08b2e42819f2d",
+      "title": "Entity Store - privilege checks update - Should fail when user lacks permissions for entity store saved object descriptor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
+        "line": 225,
         "column": 10
       }
     },
@@ -1565,55 +1629,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/history_snapshot.spec.ts",
-        "line": 65,
-        "column": 10
-      }
-    },
-    {
-      "id": "66e498dbff280b4-e1ef6b799a84fce",
-      "title": "Entity Store install - privilege checks Should fail when user lacks permissions for source index patterns",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_privileges.spec.ts",
-        "line": 93,
-        "column": 10
-      }
-    },
-    {
-      "id": "66e498dbff280b4-62ddc6b33c80984",
-      "title": "Entity Store install - privilege checks Should fail when user lacks permissions for target index patterns",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_privileges.spec.ts",
-        "line": 119,
-        "column": 10
-      }
-    },
-    {
-      "id": "66e498dbff280b4-625d2f2ef49120d",
-      "title": "Entity Store install - privilege checks Should fail when user lacks permissions for entity store saved object descriptor",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_privileges.spec.ts",
-        "line": 147,
+        "line": 66,
         "column": 10
       }
     },
@@ -2159,6 +2175,54 @@
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
         "line": 1163,
         "column": 10
+      }
+    },
+    {
+      "id": "eea391c0059ed1b-588fb43f1b015c5",
+      "title": "Entity Store Main logs extraction Should succeed when a data stream matched by the data view has a closed backing index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
+        "line": 1242,
+        "column": 10
+      }
+    },
+    {
+      "id": "ffbbb3b02706b32-fbbfd087056a8ba",
+      "title": "metadata datastream is installed by entity store init creates the .entities.v2.metadata.security_default datastream on install",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/metadata_data_stream.spec.ts",
+        "line": 47,
+        "column": 12
+      }
+    },
+    {
+      "id": "ffbbb3b02706b32-3ad24e91d8ddddc",
+      "title": "metadata datastream is installed by entity store init installs an ingest pipeline that auto-populates event.ingested on indexed docs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/metadata_data_stream.spec.ts",
+        "line": 69,
+        "column": 12
       }
     },
     {
@@ -2834,8 +2898,8 @@
       }
     },
     {
-      "id": "d70526b3c43ca29-c0753f88f610cbc",
-      "title": "Entity Store Resolution API tests Link: should return 404 for non-existent entities",
+      "id": "d70526b3c43ca29-3c3759b1065556f",
+      "title": "Entity Store Resolution API tests Link: should return 400 for non-existent entities",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -2882,8 +2946,8 @@
       }
     },
     {
-      "id": "d70526b3c43ca29-2e5ae47106a8a2f",
-      "title": "Entity Store Resolution API tests Unlink: should return 404 for non-existent entities",
+      "id": "d70526b3c43ca29-a0ccc9eedf16023",
+      "title": "Entity Store Resolution API tests Unlink: should return 400 for non-existent entities",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

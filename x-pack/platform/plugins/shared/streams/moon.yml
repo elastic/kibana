@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/zod'
   - '@kbn/streams-schema'
+  - '@kbn/significant-events-schema'
   - '@kbn/server-route-repository'
   - '@kbn/es-errors'
   - '@kbn/lock-manager'
@@ -102,6 +103,7 @@ dependsOn:
   - '@kbn/sample-log-parser'
   - '@kbn/workflows-extensions'
   - '@kbn/agent-context-layer-plugin'
+  - '@kbn/traced-es-client'
 tags:
   - plugin
   - prod

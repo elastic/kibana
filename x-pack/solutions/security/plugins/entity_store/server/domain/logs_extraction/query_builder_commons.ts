@@ -121,6 +121,7 @@ function buildLogsPageEndFilter(end: LogSlicePaginationParams): string {
 
 export function aggregationStats(fields: EntityField[], renameToRecent: boolean = true): string {
   return fields
+    .filter((field) => field.retention.operation !== 'managed')
     .map((field) => {
       const { retention, destination: dest } = field;
       const finalDest = renameToRecent ? recentData(dest) : dest;
@@ -141,6 +142,7 @@ export function aggregationStats(fields: EntityField[], renameToRecent: boolean 
 
 export function fieldsToKeep(definitionFields: EntityField[], defaultFields: string[]): string {
   const allFieldPatterns = definitionFields
+    .filter((field) => field.retention.operation !== 'managed')
     .map(({ destination }) => destination)
     .concat(defaultFields)
     .map((field) => {
@@ -223,8 +225,8 @@ export interface BuildSetFieldsByConditionPostStatsContext {
 }
 
 /**
- * Returns the raw EVAL assignment strings for a set-fields-by-condition entry (no `| EVAL` prefix).
- * Pass `postStats` for after-STATS rows; omit for pre-STATS.
+ * Builds ESQL EVAL CASE fragments for when-condition field overrides (pre-STATS by default).
+ * Pass `postStats` for after-STATS rows in logs extraction (main vs remote differs by `useRecentDataPrefix`).
  */
 export function buildSetFieldsByConditionAssignments(
   setFieldsByCondition: SetFieldsByCondition,
@@ -275,14 +277,14 @@ export function buildSetFieldsByCondition(
 
 /**
  * Maps logical field paths (entity `fields[].source` / `fields[].destination`) to ESQL column names
- * after STATS: `recent.<destination>` when `useRecentDataPrefix` is true (main extraction), else `<destination>` (CCS).
+ * after STATS: `recent.<destination>` when `useRecentDataPrefix` is true (main extraction), else `<destination>` (remote).
  */
 export function buildPostStatsLogicalToColumnMap(
   entityFields: EntityField[],
   useRecentDataPrefix: boolean
 ): Map<string, string> {
   const m = new Map<string, string>();
-  for (const f of entityFields) {
+  for (const f of entityFields.filter((field) => field.retention.operation !== 'managed')) {
     const col = useRecentDataPrefix ? recentData(f.destination) : f.destination;
     m.set(f.destination, col);
     m.set(f.source, col);
@@ -294,7 +296,9 @@ const RECENT_ESQL_COLUMN_PREFIX = 'recent.';
 
 /** Destinations aggregated under `recent.<destination>` in main logs extraction STATS. */
 export function statsFieldDestinations(fields: EntityField[]): Set<string> {
-  return new Set(fields.map((f) => f.destination));
+  return new Set(
+    fields.filter((f) => f.retention.operation !== 'managed').map((f) => f.destination)
+  );
 }
 
 /**
