@@ -1974,6 +1974,7 @@ components:
         id:
           description: ID of the response action to cancel
           example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
+          maxLength: 50
           minLength: 1
           type: string
       required:
@@ -2708,6 +2709,7 @@ components:
         id:
           description: ID of the response action to cancel
           example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
+          maxLength: 50
           minLength: 1
           type: string
       required:
