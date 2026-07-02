@@ -128,9 +128,15 @@ export const installSecurityAlertAnalysisWorkflow = async ({
 };
 
 /**
- * Installs the workflow for the given space only if it is not already present, so an already
- * installed (and possibly user-disabled) workflow is left untouched. Used to self-heal spaces
- * that don't have the workflow yet (e.g. newly created spaces) without disturbing existing ones.
+ * Installs the workflow for the given space if it is missing, or re-installs it if it has
+ * drifted from the registered definition (e.g. a bundled YAML/version bump shipped after the
+ * space last installed it). Leaves an already up to date, disabled, or otherwise unmanaged
+ * workflow untouched.
+ *
+ * `install`'s own `on_adopt` version strategy already blocks this from upgrading a space during
+ * plugin startup, so at plugin start this only repairs spaces that are actually missing the
+ * workflow. Called later, e.g. from `init-alert-analysis-workflow` on a subsequent page load,
+ * it also propagates a drifted definition to that space.
  */
 export const ensureSecurityAlertAnalysisWorkflowInstalled = async ({
   managedWorkflowsClient,
@@ -146,7 +152,7 @@ export const ensureSecurityAlertAnalysisWorkflowInstalled = async ({
     { spaceId, workflowIdSuffix: spaceId }
   );
 
-  if (status.status !== 'missing') {
+  if (status.status !== 'missing' && status.status !== 'drifted') {
     return;
   }
 

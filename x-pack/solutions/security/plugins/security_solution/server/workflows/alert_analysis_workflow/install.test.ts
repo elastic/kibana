@@ -143,6 +143,23 @@ describe('alert analysis workflow install', () => {
       });
     });
 
+    it('reinstalls the workflow when it has drifted from the registered definition', async () => {
+      const managed = createManagedClient();
+      managed.getWorkflowStatus.mockResolvedValue({ status: 'drifted' });
+
+      await ensureSecurityAlertAnalysisWorkflowInstalled({
+        managedWorkflowsClient: managed,
+        spaceId: 'security',
+        settings,
+      });
+
+      expect(managed.install).toHaveBeenCalledWith(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID, {
+        spaceId: 'security',
+        workflowIdSuffix: 'security',
+        values: settings,
+      });
+    });
+
     it('does not reinstall the workflow when it is already installed', async () => {
       const managed = createManagedClient();
       managed.getWorkflowStatus.mockResolvedValue({ status: 'disabled' });

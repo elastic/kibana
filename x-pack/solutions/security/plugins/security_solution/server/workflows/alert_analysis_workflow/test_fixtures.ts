@@ -17,7 +17,7 @@ export const createWorkflowAction = (workflowId: string): RuleAlertType['actions
       subAction: 'run',
       subActionParams: {
         workflowId,
-        summaryMode: false,
+        summaryMode: true,
       },
     },
   } as RuleAlertType['actions'][number]);
@@ -32,7 +32,7 @@ export const createWorkflowSystemAction = (
       subAction: 'run',
       subActionParams: {
         workflowId,
-        summaryMode: false,
+        summaryMode: true,
       },
     },
   } as NonNullable<RuleAlertType['systemActions']>[number]);

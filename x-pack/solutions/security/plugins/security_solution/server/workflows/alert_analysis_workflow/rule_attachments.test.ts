@@ -224,6 +224,18 @@ describe('alert analysis workflow rule attachments', () => {
         actions: [
           expect.objectContaining({
             type: BulkActionEditTypeEnum.add_rule_actions,
+            // summaryMode: true keeps the connector calling runWorkflow once per rule
+            // execution with the full alert batch. Flipping it back to false would silently
+            // restore the per-alert fan-out this was fixed to avoid.
+            value: {
+              actions: [
+                expect.objectContaining({
+                  params: expect.objectContaining({
+                    subActionParams: expect.objectContaining({ summaryMode: true }),
+                  }),
+                }),
+              ],
+            },
           }) as BulkActionEditPayload,
         ],
       })
