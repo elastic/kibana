@@ -5,12 +5,35 @@
  * 2.0.
  */
 
-import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import type { KbnClient, KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
 
 export class ServiceGroupsPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+
+  /**
+   * Removes any leftover service group with the given name so the "no service
+   * groups initially" assertion is reliable across retries and shared lanes.
+   */
+  async deleteServiceGroupsByName(kbnClient: KbnClient, groupName: string) {
+    const { data } = await kbnClient.request<{
+      serviceGroups: Array<{ id: string; groupName: string }>;
+    }>({
+      method: 'GET',
+      path: '/internal/apm/service-groups',
+    });
+
+    const matches = data.serviceGroups.filter((group) => group.groupName === groupName);
+
+    for (const { id } of matches) {
+      await kbnClient.request({
+        method: 'DELETE',
+        path: `/internal/apm/service-group?serviceGroupId=${id}`,
+        headers: { 'kbn-xsrf': 'scout' },
+      });
+    }
+  }
 
   async gotoServiceGroupsPageWithDateSelected(start: string, end: string) {
     await this.page.goto(

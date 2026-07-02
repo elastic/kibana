@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { EXTENDED_TIMEOUT } from '../constants';
+
+export class DiagnosticsPage {
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+
+  async goto() {
+    await this.page.goto(`${this.kbnUrl.app('apm')}/diagnostics`);
+    await this.page
+      .getByTestId('apmDiagnosticsTemplateRefreshButton')
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  async gotoImportExport() {
+    await this.page.goto(`${this.kbnUrl.app('apm')}/diagnostics/import-export`);
+  }
+
+  getBadge(testSubj: string) {
+    return this.page.getByTestId(testSubj);
+  }
+
+  async clickTab(testSubj: string) {
+    await this.page.getByTestId(testSubj).click();
+  }
+
+  async importBundle(filePath: string) {
+    await this.gotoImportExport();
+    await this.page
+      .locator('#file-picker')
+      .waitFor({ state: 'attached', timeout: EXTENDED_TIMEOUT });
+    await this.page.locator('#file-picker').setInputFiles(filePath);
+  }
+
+  public get removeReportButton() {
+    return this.page.getByTestId('apmImportCardRemoveReportButton');
+  }
+
+  async clearBundle() {
+    await this.page.getByTestId('apmTemplateDescriptionClearBundleButton').click();
+  }
+
+  getTableRows(containerTestSubj?: string) {
+    const root = containerTestSubj ? this.page.getByTestId(containerTestSubj) : this.page;
+    return root.locator('.euiTableRow');
+  }
+}

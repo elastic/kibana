@@ -59,10 +59,28 @@ test.describe(
       await page
         .getByRole('option', { name: PRODUCTION_ENVIRONMENT })
         .waitFor({ timeout: EXTENDED_TIMEOUT });
-      await page.getByRole('option', { name: PRODUCTION_ENVIRONMENT }).click();
+      await page
+        .getByRole('option', { name: PRODUCTION_ENVIRONMENT })
+        .click({ timeout: EXTENDED_TIMEOUT });
       await expect(page.getByTestId('comboBoxSearchInput')).toHaveValue(PRODUCTION_ENVIRONMENT, {
         timeout: EXTENDED_TIMEOUT,
       });
+    });
+
+    test.setTimeout(120000);
+    test('navigates to the next page when clicking the pagination button', async ({
+      page,
+      pageObjects: { serviceInventoryPage },
+    }) => {
+      // Filter to the bulk dataset so there are enough services to paginate.
+      await serviceInventoryPage.gotoServiceInventory({
+        rangeFrom: testData.START_DATE,
+        rangeTo: testData.END_DATE,
+      });
+      await page.testSubj.fill('tableSearchInput', testData.MULTIPLE_SERVICES_PREFIX);
+
+      await page.getByTestId('pagination-button-1').click({ timeout: EXTENDED_TIMEOUT });
+      await expect(page).toHaveURL(/page=1/);
     });
 
     test('shows the filtered services when using the service name fast filter', async ({

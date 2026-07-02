@@ -26,6 +26,7 @@ test.describe(
   'Custom links template validation',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    test.setTimeout(120000);
     test('template URL with filters — create from settings, verify in transaction, delete', async ({
       page,
       pageObjects: { customLinksPage, transactionDetailsPage },

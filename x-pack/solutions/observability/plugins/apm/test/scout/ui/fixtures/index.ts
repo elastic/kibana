@@ -35,6 +35,12 @@ import { APM_ROLES } from './constants';
 import { DependencyDetailsPage } from './page_objects/dependency_details/dependency_details';
 import { AlertDetailsPage } from './page_objects/alert_details';
 import { AlertsControls } from './page_objects/alerts_controls/alerts_controls';
+import { NavigationPage } from './page_objects/navigation';
+import { MobileTransactionsPage } from './page_objects/mobile_transactions';
+import { DiagnosticsPage } from './page_objects/diagnostics';
+import { OnboardingPage } from './page_objects/onboarding';
+import { FeatureControlsPage } from './page_objects/feature_controls';
+import { CorrelationsPage } from './page_objects/correlations';
 
 export interface ApmBrowserAuthFixture extends BrowserAuthFixture {
   loginAsApmAllPrivilegesWithoutWriteSettings: () => Promise<void>;
@@ -63,6 +69,12 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
     dependencyDetailsPage: DependencyDetailsPage;
     alertDetailsPage: AlertDetailsPage;
     alertsControls: AlertsControls;
+    navigationPage: NavigationPage;
+    mobileTransactionsPage: MobileTransactionsPage;
+    diagnosticsPage: DiagnosticsPage;
+    onboardingPage: OnboardingPage;
+    featureControlsPage: FeatureControlsPage;
+    correlationsPage: CorrelationsPage;
   };
   browserAuth: ApmBrowserAuthFixture;
 }
@@ -106,6 +118,12 @@ export const test = baseWithSynthtrace.extend<
       dependencyDetailsPage: createLazyPageObject(DependencyDetailsPage, page, kbnUrl),
       alertDetailsPage: createLazyPageObject(AlertDetailsPage, page),
       alertsControls: createLazyPageObject(AlertsControls, page),
+      navigationPage: createLazyPageObject(NavigationPage, page, kbnUrl),
+      mobileTransactionsPage: createLazyPageObject(MobileTransactionsPage, page, kbnUrl),
+      diagnosticsPage: createLazyPageObject(DiagnosticsPage, page, kbnUrl),
+      onboardingPage: createLazyPageObject(OnboardingPage, page, kbnUrl),
+      featureControlsPage: createLazyPageObject(FeatureControlsPage, page, kbnUrl),
+      correlationsPage: createLazyPageObject(CorrelationsPage, page),
     };
 
     await use(extendedPageObjects);

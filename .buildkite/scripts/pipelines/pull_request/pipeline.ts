@@ -135,18 +135,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/solutions\/observability\/plugins\/apm/,
-        /^src\/platform\/packages\/shared\/kbn-synthtrace/,
-        /^\.buildkite\/pipelines\/pull_request\/apm_cypress\.yml/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
-      ALL_UI_TEST_SUITES
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml', cancelable));
-    }
-
-    if (
-      (await doAnyChangesMatch([
         /^x-pack\/platform\/plugins\/shared\/fleet/,
         /^x-pack\/test\/fleet_cypress/,
         /^\.buildkite\/pipelines\/pull_request\/fleet_cypress\.yml/,
