@@ -38,8 +38,6 @@ import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
 import { extractRulesCapabilities } from '../../../../common/utils/rules_capabilities';
 import {
   fetchAlertAnalysisWorkflowSettings,
-  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
-  MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT,
   saveAlertAnalysisWorkflowSettings,
   type AlertAnalysisWorkflowSettingsWithConnector,
 } from './api';
@@ -69,7 +67,6 @@ const areSettingsEqual = (
 
 const getAlertAnalysisWorkflowAccess = (
   capabilities: Capabilities,
-  isFeatureEnabled: boolean,
   isEnterprise: boolean
 ): { canAccessPage: boolean; canEditAdvancedSettings: boolean } => {
   const rulesCapabilities = extractRulesCapabilities(capabilities);
@@ -81,23 +78,18 @@ const getAlertAnalysisWorkflowAccess = (
 
   return {
     canEditAdvancedSettings,
-    canAccessPage: isFeatureEnabled && isEnterprise && canEditAdvancedSettings,
+    canAccessPage: isEnterprise && canEditAdvancedSettings,
   };
 };
 
 export const AlertAnalysisWorkflowPage: React.FC = () => {
   const {
-    services: { application, http, notifications, featureFlags, settings },
+    services: { application, http, notifications, settings },
   } = useKibana();
   const queryClient = useQueryClient();
-  const isEnabled = featureFlags.getBooleanValue(
-    MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG,
-    MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT
-  );
   const isEnterprise = useLicense().isEnterprise();
   const { canAccessPage, canEditAdvancedSettings } = getAlertAnalysisWorkflowAccess(
     application.capabilities,
-    isEnabled,
     isEnterprise
   );
   const { aiConnectors, isLoading: isLoadingConnectors } = useAIConnectors();

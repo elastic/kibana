@@ -44,7 +44,6 @@ describe('initAlertAnalysisWorkflowFlow', () => {
 
   beforeEach(() => {
     coreStart = coreMock.createStart();
-    coreStart.featureFlags.getBooleanValue.mockResolvedValue(true);
     uiSettingsClient = {
       get: jest
         .fn()
@@ -98,15 +97,6 @@ describe('initAlertAnalysisWorkflowFlow', () => {
     await initAlertAnalysisWorkflowFlow.runFlow(createContext());
 
     expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
-  });
-
-  it('does nothing when the feature flag is disabled', async () => {
-    coreStart.featureFlags.getBooleanValue.mockResolvedValue(false);
-
-    const result = await initAlertAnalysisWorkflowFlow.runFlow(createContext());
-
-    expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
-    expect(result).toEqual({ status: INITIALIZATION_FLOW_STATUS_READY, payload: null });
   });
 
   it('does nothing when workflowsExtensions is unavailable', async () => {

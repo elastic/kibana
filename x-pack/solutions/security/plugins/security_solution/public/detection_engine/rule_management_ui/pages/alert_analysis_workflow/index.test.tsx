@@ -38,7 +38,6 @@ describe('AlertAnalysisWorkflowPage', () => {
     coreStart.application.getUrlForApp.mockImplementation(
       (appId, options) => `/app/${appId}${options?.path ?? ''}`
     );
-    coreStart.featureFlags.getBooleanValue.mockReturnValue(true);
     coreStart.http.fetch.mockImplementation(async (...args: unknown[]) => {
       const [path, options] = args as [string, { method?: string; body?: string } | undefined];
 

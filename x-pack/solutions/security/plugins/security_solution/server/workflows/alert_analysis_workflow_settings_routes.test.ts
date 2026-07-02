@@ -87,7 +87,6 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
     };
 
     (coreStart.uiSettings.asScopedToClient as jest.Mock).mockReturnValue(uiSettingsClient);
-    coreStart.featureFlags.getBooleanValue.mockResolvedValue(true);
 
     const workflowsExtensions = workflowsExtensionsMock.createStart();
     workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managedWorkflowsClient);
@@ -258,26 +257,6 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
         expect.objectContaining({ status: 'error' })
       );
       expect(mockResponse.customError).toHaveBeenCalled();
-    });
-
-    it('does not persist or install when the feature flag is disabled', async () => {
-      coreStart.featureFlags.getBooleanValue.mockResolvedValue(false);
-      const handler = router.versioned.getRoute('put', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
-        .versions['1'].handler;
-
-      await handler(
-        createContext(),
-        createRequest({
-          autoCloseEnabled: true,
-          autoCloseConfidenceScoreMinThreshold: 0.7,
-          autoCloseConfidenceScoreMaxThreshold: 0.9,
-        }),
-        mockResponse
-      );
-
-      expect(mockResponse.notFound).toHaveBeenCalled();
-      expect(uiSettingsClient.set).not.toHaveBeenCalled();
-      expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
     });
 
     it('returns forbidden when the license does not support the feature', async () => {

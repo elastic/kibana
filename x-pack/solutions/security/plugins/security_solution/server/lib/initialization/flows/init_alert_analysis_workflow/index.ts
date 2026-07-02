@@ -19,7 +19,6 @@ import type { StartPlugins } from '../../../../plugin';
 import {
   ensureSecurityAlertAnalysisWorkflowInstalled,
   initSecurityManagedWorkflowsClient,
-  isAlertAnalysisWorkflowEnabled,
   readSecurityAlertAnalysisWorkflowSettings,
 } from '../../../../workflows/managed_workflows';
 
@@ -42,13 +41,9 @@ export const initAlertAnalysisWorkflowFlow: InitializationFlowDefinition<null> =
       return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
     }
 
-    const [coreStart, pluginsStart] = await getStartServices();
+    const [, pluginsStart] = await getStartServices();
     const { workflowsExtensions } = pluginsStart;
     if (!workflowsExtensions) {
-      return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
-    }
-
-    if (!(await isAlertAnalysisWorkflowEnabled(coreStart))) {
       return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
     }
 

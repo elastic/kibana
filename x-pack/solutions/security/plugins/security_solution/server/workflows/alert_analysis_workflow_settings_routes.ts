@@ -33,7 +33,6 @@ import {
   getSecurityAlertAnalysisWorkflowIdForSpace,
   initSecurityManagedWorkflowsClient,
   installSecurityAlertAnalysisWorkflow,
-  isAlertAnalysisWorkflowEnabled,
   readSecurityAlertAnalysisWorkflowSettings,
   type SecurityAlertAnalysisWorkflowSettings,
 } from './managed_workflows';
@@ -158,11 +157,6 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
         }
 
         const [coreStart, pluginsStart] = await getStartServices();
-
-        if (!(await isAlertAnalysisWorkflowEnabled(coreStart))) {
-          return response.notFound();
-        }
-
         const { workflowsExtensions } = pluginsStart;
         if (!workflowsExtensions) {
           return response.customError({

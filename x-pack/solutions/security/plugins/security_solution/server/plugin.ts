@@ -174,7 +174,6 @@ import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
 import {
   installSecurityAlertAnalysisWorkflowForAllSpaces,
-  isAlertAnalysisWorkflowEnabled,
   markSecurityManagedWorkflowsReady,
   registerSecurityManagedWorkflowOwner,
 } from './workflows/managed_workflows';
@@ -861,7 +860,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     if (plugins.workflowsExtensions) {
-      registerWorkflowSteps(plugins.workflowsExtensions, core, experimentalFeatures);
+      registerWorkflowSteps(plugins.workflowsExtensions, experimentalFeatures);
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
       registerInitAlertAnalysisWorkflowFlowDependencies(core);
     }
@@ -898,19 +897,13 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     if (plugins.workflowsExtensions) {
       const { workflowsExtensions } = plugins;
-      void (async () => {
-        try {
-          if (await isAlertAnalysisWorkflowEnabled(core)) {
-            await installSecurityAlertAnalysisWorkflowForAllSpaces({
-              coreStart: core,
-              workflowsExtensions,
-              logger,
-            });
-          }
-        } catch (error) {
-          logger.warn('Failed to install the alert analysis workflow for all spaces', { error });
-        }
-      })();
+      void installSecurityAlertAnalysisWorkflowForAllSpaces({
+        coreStart: core,
+        workflowsExtensions,
+        logger,
+      }).catch((error) => {
+        logger.warn('Failed to install the alert analysis workflow for all spaces', { error });
+      });
 
       void markSecurityManagedWorkflowsReady({
         workflowsExtensions,

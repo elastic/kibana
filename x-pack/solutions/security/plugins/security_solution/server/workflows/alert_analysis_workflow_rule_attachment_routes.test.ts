@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import type { StartServicesAccessor } from '@kbn/core/server';
+import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RouterMock } from '@kbn/core-http-router-server-mocks';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { StartPlugins } from '../plugin';
 import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionPluginRouter,
@@ -49,8 +47,6 @@ const createWorkflowSystemAction = () => createWorkflowSystemActionFixture(WORKF
 
 describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
   let router: RouterMock;
-  let coreStart: ReturnType<typeof coreMock.createStart>;
-  let getStartServices: jest.MockedFunction<StartServicesAccessor<StartPlugins>>;
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
   let rulesClient: jest.Mocked<RulesClient>;
   let actionsClient: jest.Mocked<ActionsClient>;
@@ -85,8 +81,6 @@ describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
 
   beforeEach(() => {
     router = httpServiceMock.createRouter() as unknown as RouterMock;
-    coreStart = coreMock.createStart();
-    coreStart.featureFlags.getBooleanValue.mockResolvedValue(true);
     mockResponse = httpServerMock.createResponseFactory();
     rulesClient = {
       find: jest.fn(),
@@ -130,15 +124,8 @@ describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
       }),
     } as unknown as SecuritySolutionRequestHandlerContext;
 
-    getStartServices = jest
-      .fn()
-      .mockResolvedValue([coreStart, {} as StartPlugins, undefined] as unknown as Awaited<
-        ReturnType<StartServicesAccessor<StartPlugins>>
-      >);
-
     registerAlertAnalysisWorkflowRuleAttachmentRoutes(
-      router as unknown as SecuritySolutionPluginRouter,
-      getStartServices as StartServicesAccessor<StartPlugins>
+      router as unknown as SecuritySolutionPluginRouter
     );
   });
 
@@ -306,24 +293,5 @@ describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
         updated: 2,
       },
     });
-  });
-
-  it('returns 404 when the feature flag is disabled', async () => {
-    coreStart.featureFlags.getBooleanValue.mockResolvedValue(false);
-    const handler = router.versioned.getRoute('post', ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE)
-      .versions['1'].handler;
-
-    await handler(
-      context,
-      createRequest({
-        method: 'post',
-        path: ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE,
-        body: { search: '' },
-      }),
-      mockResponse
-    );
-
-    expect(mockResponse.notFound).toHaveBeenCalled();
-    expect(rulesClient.find).not.toHaveBeenCalled();
   });
 });

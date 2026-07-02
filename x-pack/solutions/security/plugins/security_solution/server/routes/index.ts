@@ -170,7 +170,7 @@ export const initRoutes = (
 
   registerWorkflowInsightsRoutes(router, config, endpointContext);
   registerAlertAnalysisWorkflowSettingsRoutes(router, getStartServices, logger);
-  registerAlertAnalysisWorkflowRuleAttachmentRoutes(router, getStartServices);
+  registerAlertAnalysisWorkflowRuleAttachmentRoutes(router);
 
   registerAssetInventoryRoutes({ router, logger });
 

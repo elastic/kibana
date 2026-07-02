@@ -9,10 +9,6 @@
 
 import { z } from '@kbn/zod/v4';
 
-export const MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG =
-  'securitySolution.managedAlertAnalysisWorkflowEnabled' as const;
-export const MANAGED_ALERT_ANALYSIS_WORKFLOW_FEATURE_FLAG_DEFAULT = true as const;
-
 export const ALERT_ANALYSIS_WORKFLOW_API_VERSION = '1' as const;
 
 export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE =

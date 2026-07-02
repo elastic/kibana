@@ -6,7 +6,6 @@
  */
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
@@ -24,14 +23,10 @@ import {
   type AlertAnalysisWorkflowRuleAttachmentStatsRequestBody as AlertAnalysisWorkflowRuleAttachmentStatsRequestBodyType,
   type AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody as AlertAnalysisWorkflowRuleAttachmentUpdateRequestBodyType,
 } from '@kbn/workflows/common/alert_analysis_workflow';
-import type { StartPlugins } from '../plugin';
 import type { SecuritySolutionPluginRouter, SecuritySolutionRequestHandlerContext } from '../types';
 import { buildSiemResponse } from '../lib/detection_engine/routes/utils';
 import { createPrebuiltRuleAssetsClient } from '../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import {
-  getSecurityAlertAnalysisWorkflowIdForSpace,
-  isAlertAnalysisWorkflowEnabled,
-} from './managed_workflows';
+import { getSecurityAlertAnalysisWorkflowIdForSpace } from './managed_workflows';
 import { createAlertAnalysisWorkflowRuleAttachmentService } from './alert_analysis_workflow_rule_attachments';
 
 export {
@@ -39,14 +34,6 @@ export {
   ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE,
-};
-
-const isAlertAnalysisWorkflowFeatureEnabled = async (
-  getStartServices: StartServicesAccessor<StartPlugins>
-): Promise<boolean> => {
-  const [coreStart] = await getStartServices();
-
-  return isAlertAnalysisWorkflowEnabled(coreStart);
 };
 
 const createReadService = async (context: SecuritySolutionRequestHandlerContext) => {
@@ -81,8 +68,7 @@ const createWriteService = async (context: SecuritySolutionRequestHandlerContext
 };
 
 export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
-  router: SecuritySolutionPluginRouter,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  router: SecuritySolutionPluginRouter
 ): void => {
   router.versioned
     .get({
@@ -107,10 +93,6 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          if (!(await isAlertAnalysisWorkflowFeatureEnabled(getStartServices))) {
-            return response.notFound();
-          }
-
           const {
             search,
             page,
@@ -153,10 +135,6 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          if (!(await isAlertAnalysisWorkflowFeatureEnabled(getStartServices))) {
-            return response.notFound();
-          }
-
           const { search } =
             request.body as AlertAnalysisWorkflowRuleAttachmentStatsRequestBodyType;
           const service = await createReadService(context);
@@ -198,10 +176,6 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          if (!(await isAlertAnalysisWorkflowFeatureEnabled(getStartServices))) {
-            return response.notFound();
-          }
-
           const { search } =
             request.body as AlertAnalysisWorkflowRuleAttachmentSelectionRequestBodyType;
           const service = await createReadService(context);
@@ -241,10 +215,6 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          if (!(await isAlertAnalysisWorkflowFeatureEnabled(getStartServices))) {
-            return response.notFound();
-          }
-
           const { attachRuleIds, detachRuleIds, dryRun } =
             request.body as AlertAnalysisWorkflowRuleAttachmentUpdateRequestBodyType;
           const service = await createWriteService(context);
