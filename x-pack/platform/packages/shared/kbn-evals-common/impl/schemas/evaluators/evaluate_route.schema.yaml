@@ -81,11 +81,9 @@ paths:
                     items:
                       type: object
                       required:
-                        - name
                         - status
+                        - evaluator
                       properties:
-                        name:
-                          type: string
                         status:
                           type: string
                           enum:

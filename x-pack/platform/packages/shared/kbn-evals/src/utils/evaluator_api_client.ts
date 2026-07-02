@@ -137,7 +137,7 @@ export class EvaluatorApiClient {
       evaluate: async (params) => {
         try {
           const result = await evaluateForTrace(params);
-          const item = result.results.find((entry) => entry.name === config.name);
+          const item = result.results.find((entry) => entry.evaluator.name === config.name);
           if (!item) {
             throw new Error(`No evaluation result returned for "${config.name}"`);
           }

@@ -155,7 +155,7 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
 
       expect(result.results).toHaveLength(1);
 
-      const groundedness = result.results.find((entry) => entry.name === 'groundedness');
+      const groundedness = result.results.find((entry) => entry.evaluator.name === 'groundedness');
 
       expect(groundedness?.status).toBe('ok');
 

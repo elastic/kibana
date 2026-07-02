@@ -221,12 +221,12 @@ describe('trace groundedness evaluator integration', () => {
     expect(batchResponse.payload.results).toHaveLength(2);
     expect(batchResponse.payload.results).toEqual([
       expect.objectContaining({
-        name: 'groundedness',
+        evaluator: expect.objectContaining({ name: 'groundedness' }),
         status: 'ok',
         scores: [expect.objectContaining({ name: 'groundedness' })],
       }),
       expect.objectContaining({
-        name: 'latency',
+        evaluator: expect.objectContaining({ name: 'latency' }),
         status: 'ok',
         scores: [expect.objectContaining({ name: 'latency', score: 2.5 })],
       }),

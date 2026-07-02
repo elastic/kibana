@@ -141,8 +141,14 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(response.status).toBe(200);
     expect(response.payload.results).toHaveLength(2);
     expect(response.payload.results).toEqual([
-      expect.objectContaining({ name: 'groundedness', status: 'ok' }),
-      expect.objectContaining({ name: 'correctness', status: 'ok' }),
+      expect.objectContaining({
+        evaluator: expect.objectContaining({ name: 'groundedness' }),
+        status: 'ok',
+      }),
+      expect.objectContaining({
+        evaluator: expect.objectContaining({ name: 'correctness' }),
+        status: 'ok',
+      }),
     ]);
     expect(getClient).toHaveBeenCalledTimes(1);
     expect(getClient).toHaveBeenCalledWith({
@@ -338,13 +344,13 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(response.status).toBe(200);
     expect(response.payload.results).toEqual([
       {
-        name: 'groundedness',
         status: 'error',
+        evaluator: { name: 'groundedness', version: '1.0.0', kind: 'llm' },
         error: { message: 'Error: failed badly' },
       },
       expect.objectContaining({
-        name: 'latency',
         status: 'ok',
+        evaluator: expect.objectContaining({ name: 'latency' }),
         scores: [{ name: 'latency', score: 42 }],
       }),
     ]);
@@ -391,8 +397,8 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(response.status).toBe(200);
     expect(response.payload.results).toEqual([
       expect.objectContaining({
-        name: 'correctness',
         status: 'ok',
+        evaluator: expect.objectContaining({ name: 'correctness' }),
         scores: [
           { name: 'factuality', score: 0.7, label: 'HIGH' },
           { name: 'relevance', score: 0.5, label: 'MEDIUM' },

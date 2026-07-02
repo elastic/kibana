@@ -148,7 +148,6 @@ export const registerEvaluateRoute = ({
             });
 
             results.push({
-              name: definition.name,
               status: 'ok',
               evaluator: {
                 name: definition.name,
@@ -160,8 +159,12 @@ export const registerEvaluateRoute = ({
           } catch (error) {
             logger.error(`Failed to execute evaluator "${config.name}": ${error}`);
             results.push({
-              name: config.name,
               status: 'error',
+              evaluator: {
+                name: definition.name,
+                version: definition.version,
+                kind: definition.kind,
+              },
               error: { message: String(error) },
             });
           }

@@ -49,15 +49,12 @@ export const EvaluateResponse = lazySchema(() =>
   z.object({
     results: z.array(
       z.object({
-        name: z.string(),
         status: z.enum(['ok', 'error']),
-        evaluator: z
-          .object({
-            name: z.string(),
-            version: z.string(),
-            kind: z.enum(['llm', 'code']),
-          })
-          .optional(),
+        evaluator: z.object({
+          name: z.string(),
+          version: z.string(),
+          kind: z.enum(['llm', 'code']),
+        }),
         scores: z
           .array(
             z.object({
