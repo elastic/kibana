@@ -10,6 +10,7 @@ import { unset } from 'lodash';
 import type { SavedObjectsBulkResponse } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { V2_NOOP_ATTACHMENTS_WRITER } from '../../cases_analytics_v2';
 import { AttachmentService } from '.';
 import {
   externalReferenceAttachmentES,
@@ -43,6 +44,7 @@ describe('AttachmentService', () => {
       log: mockLogger,
       unsecuredSavedObjectsClient,
       config: createAttachmentServiceConfig(),
+      analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
     });
     // Default `bulkGet` mock used by `resolveAttachmentSavedObjectTypes` (called
     // by `update`/`bulkUpdate`) so tests that don't care about SO-type
@@ -249,6 +251,7 @@ describe('AttachmentService', () => {
         log: mockLogger,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
+        analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
       });
       const unifiedAttrs = {
         type: 'comment',
@@ -286,6 +289,7 @@ describe('AttachmentService', () => {
         log: mockLogger,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
+        analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
       });
 
       const fileMetadata = {
@@ -365,6 +369,7 @@ describe('AttachmentService', () => {
         log: mockLogger,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
+        analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
       });
       const unifiedAttrs = {
         type: 'comment',
@@ -404,6 +409,7 @@ describe('AttachmentService', () => {
         log: mockLogger,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
+        analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
       });
       const unifiedAttrs = {
         type: 'comment',
@@ -460,6 +466,7 @@ describe('AttachmentService', () => {
         log: mockLogger,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
+        analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
       });
 
       await expect(
@@ -1163,6 +1170,7 @@ describe('AttachmentService', () => {
           log: mockLogger,
           unsecuredSavedObjectsClient,
           config: createAttachmentServiceConfig(true),
+          analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
         });
         mockResolveByBucket([], []);
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
@@ -1261,6 +1269,7 @@ describe('AttachmentService', () => {
         log: mockLogger,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
+        analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
       });
       unsecuredSavedObjectsClient.find.mockResolvedValue(
         createSOFindResponse([

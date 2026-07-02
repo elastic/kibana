@@ -41,6 +41,16 @@ describe('AttachmentService getter', () => {
       log: mockLogger,
       unsecuredSavedObjectsClient,
       config: { attachments: { enabled: attachmentsEnabled } } as unknown as ConfigType,
+      // AttachmentGetter doesn't exercise the analytics writer (it's read-only),
+      // but ServiceContext requires the field. Inline noop matches the contract.
+      analyticsV2AttachmentsWriter: {
+        upsertAttachment: () => {},
+        deleteAttachment: () => {},
+        bulkUpsertAttachments: () => {},
+        bulkDeleteAttachments: () => {},
+        bulkDeleteAttachmentsByCaseIds: () => {},
+        bulkUpsertAttachmentsAwait: async () => {},
+      },
     });
   let attachmentGetter: AttachmentGetter;
 
