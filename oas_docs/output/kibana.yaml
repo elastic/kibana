@@ -29104,6 +29104,168 @@ paths:
         - content: Kibana
           name: product_name
   /api/fleet/agentless_policies:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agentless_policies</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List agentless policies
+      operationId: get-fleet-agentless-policies
+      parameters:
+        - description: Page number. Defaults to `1`.
+          in: query
+          name: page
+          required: false
+          schema:
+            type: number
+        - description: Number of results per page. Defaults to `20`.
+          in: query
+          name: perPage
+          required: false
+          schema:
+            type: number
+        - description: Field to sort results by. Defaults to `updated_at`.
+          in: query
+          name: sortField
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+        - description: Sort order, ascending or descending. Defaults to `desc`.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            enum:
+              - desc
+              - asc
+            type: string
+        - description: 'A KQL query string to filter results. Filtering is restricted to the following fields: `name`, `namespace`, `package.name`.'
+          in: query
+          name: kuery
+          required: false
+          schema:
+            maxLength: 4096
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                listAgentlessPoliciesResponseExample:
+                  description: Example response for listing agentless policies
+                  value:
+                    items:
+                      - created_at: '2025-11-06T18:27:43.541Z'
+                        created_by: test_user
+                        description: test
+                        id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                        inputs:
+                          ESS Billing-cel:
+                            enabled: true
+                            streams:
+                              ess_billing.billing:
+                                enabled: true
+                              ess_billing.credits:
+                                enabled: false
+                            vars:
+                              api_key:
+                                id: QY1sWpoBbWcMW-edr0Ee
+                                isSecretRef: true
+                              organization_id: '1234'
+                              url: https://billing.elastic-cloud.com
+                        name: ess_billing-1
+                        namespace: default
+                        package:
+                          name: ess_billing
+                          title: Elasticsearch Service Billing
+                          version: 1.6.0
+                        updated_at: '2025-11-06T18:27:43.541Z'
+                        updated_by: test_user
+                      - cloud_connector:
+                          cloud_connector_id: aws-connector-67890
+                          enabled: true
+                        created_at: '2025-11-06T18:27:43.541Z'
+                        created_by: test_user
+                        description: CSPM integration for AWS with cloud connector
+                        id: aws-policy-12345
+                        inputs:
+                          cspm-cloudbeat/cis_aws:
+                            enabled: true
+                        name: cspm-aws-policy
+                        namespace: default
+                        package:
+                          name: cloud_security_posture
+                          title: Cloud Security Posture Management
+                          version: 3.1.1
+                        updated_at: '2025-11-06T18:27:43.541Z'
+                        updated_by: test_user
+                        vars:
+                          deployment: aws
+                          posture: cspm
+                    page: 1
+                    perPage: 20
+                    total: 2
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy'
+                    maxItems: 10000
+                    type: array
+                  page:
+                    type: number
+                  perPage:
+                    type: number
+                  total:
+                    type: number
+                required:
+                  - items
+                  - total
+                  - page
+                  - perPage
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Get agentless policies
+      tags:
+        - Fleet agentless policies
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
     post:
       description: |-
         **Spaces method and path for this operation:**
@@ -29477,6 +29639,7 @@ paths:
           name: policyId
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: Force delete the policy even if the policy is managed.
           in: query
@@ -29567,6 +29730,122 @@ paths:
       tags:
         - Fleet agentless policies
       x-state: Experimental; added in 9.3.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agentless_policies/{policyId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get an agentless policy by ID
+      operationId: get-fleet-agentless-policies-policyid
+      parameters:
+        - description: The ID of the agentless policy to retrieve.
+          in: path
+          name: policyId
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getAgentlessPolicyResponseExample:
+                  description: Example response for getting an agentless policy by ID
+                  value:
+                    item:
+                      created_at: '2025-11-06T18:27:43.541Z'
+                      created_by: test_user
+                      description: test
+                      id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      inputs:
+                        ESS Billing-cel:
+                          enabled: true
+                          streams:
+                            ess_billing.billing:
+                              enabled: true
+                              vars:
+                                hide_sensitive: true
+                                http_client_timeout: 30s
+                                lookbehind: 365
+                                tags:
+                                  - forwarded
+                                  - billing
+                            ess_billing.credits:
+                              enabled: false
+                          vars:
+                            api_key:
+                              id: QY1sWpoBbWcMW-edr0Ee
+                              isSecretRef: true
+                            organization_id: '1234'
+                            url: https://billing.elastic-cloud.com
+                      name: ess_billing-1
+                      namespace: default
+                      package:
+                        name: ess_billing
+                        title: Elasticsearch Service Billing
+                        version: 1.6.0
+                      updated_at: '2025-11-06T18:27:43.541Z'
+                      updated_by: test_user
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy_response'
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
+      summary: Get an agentless policy
+      tags:
+        - Fleet agentless policies
+      x-state: Experimental; added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -32480,6 +32759,7 @@ paths:
                             - MIGRATE
                             - PRIVILEGE_LEVEL_CHANGE
                             - ROLLBACK
+                            - REMOVE_COLLECTOR
                           type: string
                         version:
                           description: agent version number (UPGRADE action)
@@ -38993,6 +39273,12 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        allow_edit:
+                          items:
+                            maxLength: 100
+                            type: string
+                          maxItems: 100
+                          type: array
                         host_urls:
                           items:
                             type: string
@@ -39176,6 +39462,12 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                allow_edit:
+                  items:
+                    maxLength: 100
+                    type: string
+                  maxItems: 100
+                  type: array
                 host_urls:
                   items:
                     type: string
@@ -39299,6 +39591,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      allow_edit:
+                        items:
+                          maxLength: 100
+                          type: string
+                        maxItems: 100
+                        type: array
                       host_urls:
                         items:
                           type: string
@@ -39567,6 +39865,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      allow_edit:
+                        items:
+                          maxLength: 100
+                          type: string
+                        maxItems: 100
+                        type: array
                       host_urls:
                         items:
                           type: string
@@ -39756,6 +40060,12 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                allow_edit:
+                  items:
+                    maxLength: 100
+                    type: string
+                  maxItems: 100
+                  type: array
                 host_urls:
                   items:
                     type: string
@@ -39871,6 +40181,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      allow_edit:
+                        items:
+                          maxLength: 100
+                          type: string
+                        maxItems: 100
+                        type: array
                       host_urls:
                         items:
                           type: string
@@ -62415,6 +62731,7 @@ paths:
                           type: user
                         user:
                           name: jdoe
+                    entity_type: user
                     group_size: 2
                     target:
                       '@timestamp': '2026-04-10T08:30:00.000Z'
@@ -62522,6 +62839,7 @@ paths:
                   description: The entities were successfully linked to the target entity.
                   summary: Entities linked
                   value:
+                    entity_type: user
                     linked:
                       - user:jdoe@example.com
                       - user:j.doe@example.com
@@ -62539,6 +62857,13 @@ paths:
                     error: Bad Request
                     message: Cannot link entities of different types
                     statusCode: 400
+                notFoundExample:
+                  description: One or more of the specified entity identifiers were not found.
+                  summary: Entities not found
+                  value:
+                    error: Bad Request
+                    message: 'Entities not found: [user:nonexistent@example.com, user:also-nonexistent@example.com]'
+                    statusCode: 400
                 selfLinkExample:
                   description: Cannot link an entity to itself.
                   summary: Self-link error
@@ -62547,18 +62872,6 @@ paths:
                     message: Cannot link entity 'user:jane.doe@example.com' to itself.
                     statusCode: 400
           description: Bad request.
-        '404':
-          content:
-            application/json:
-              examples:
-                notFoundExample:
-                  description: One or more of the specified entity identifiers were not found.
-                  summary: Entities not found
-                  value:
-                    error: Not Found
-                    message: 'Entities not found: [user:nonexistent@example.com, user:also-nonexistent@example.com]'
-                    statusCode: 404
-          description: Entities not found.
       summary: Link entities
       tags:
         - Security entity store
@@ -62631,23 +62944,31 @@ paths:
                   description: The entities were successfully removed from their resolution group.
                   summary: Entities unlinked
                   value:
+                    entity_type: user
                     skipped: []
                     unlinked:
                       - user:jdoe@example.com
                       - user:j.doe@example.com
           description: Indicates a successful response.
-        '404':
+        '400':
           content:
             application/json:
               examples:
+                mixedTypesExample:
+                  description: All entities in a resolution group must be of the same type.
+                  summary: Mixed entity types
+                  value:
+                    error: Bad Request
+                    message: 'All entities must be of the same type. Found types: [user, host]'
+                    statusCode: 400
                 notFoundExample:
                   description: One or more of the specified entity identifiers were not found.
                   summary: Entities not found
                   value:
-                    error: Not Found
+                    error: Bad Request
                     message: 'Entities not found: [user:nonexistent@example.com]'
-                    statusCode: 404
-          description: Entities not found.
+                    statusCode: 400
+          description: Bad request.
       summary: Unlink entities
       tags:
         - Security entity store
@@ -71755,13 +72076,14 @@ paths:
                 - waiting_for_input
                 - waiting_for_child
                 - running
+                - queued
                 - completed
                 - failed
                 - cancelled
                 - timed_out
                 - skipped
               type: string
-            maxItems: 10
+            maxItems: 11
             type: array
         - description: Filter by execution type.
           in: query

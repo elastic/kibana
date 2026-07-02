@@ -6,49 +6,36 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButton, EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
-import { useChangeHistoryRestore } from '../../hooks/use_change_history_restore';
+import { EuiButton } from '@elastic/eui';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
 import type { ChangeHistoryDetail } from '../../types/change_history_detail';
-import { getRestoreVersionLabel } from '../../utils/get_restore_version_label';
+import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
+import { ChangeHistoryRestoreConfirmModal } from './change_history_restore_confirm_modal';
 import * as i18n from './restore_translations';
 
 export interface ChangeHistoryRestoreButtonProps {
   change: ChangeHistoryDetail;
+  /** Live/current change used for rollback-distance telemetry when sequences are present. */
+  currentChange?: ChangeHistoryListItem;
   /** Invoked after a successful restore (e.g. to refetch and re-select the current change). */
   onRestored?: () => Promise<void> | void;
 }
 
 export function ChangeHistoryRestoreButton({
   change,
+  currentChange,
   onRestored,
 }: ChangeHistoryRestoreButtonProps): JSX.Element | null {
-  const { objectId, supports } = useChangeHistoryConfig();
-  const { restoreChange, isRestoring, error, clearError } = useChangeHistoryRestore({ onRestored });
+  const { supports } = useChangeHistoryConfig();
   const [isConfirmVisible, setIsConfirmVisible] = useState(false);
 
-  const versionLabel = getRestoreVersionLabel(change);
-
   const handleOpenConfirm = useCallback(() => {
-    clearError();
     setIsConfirmVisible(true);
-  }, [clearError]);
+  }, []);
 
   const handleCloseConfirm = useCallback(() => {
-    if (isRestoring) {
-      return;
-    }
     setIsConfirmVisible(false);
-    clearError();
-  }, [clearError, isRestoring]);
-
-  const handleConfirmRestore = useCallback(async () => {
-    const succeeded = await restoreChange({ objectId, changeId: change.id });
-    if (succeeded) {
-      setIsConfirmVisible(false);
-      clearError();
-    }
-  }, [change, clearError, objectId, restoreChange]);
+  }, []);
 
   if (!supports.restore || change.isCurrent) {
     return null;
@@ -61,33 +48,18 @@ export function ChangeHistoryRestoreButton({
         fill
         color="primary"
         onClick={handleOpenConfirm}
-        isLoading={isRestoring}
         data-test-subj="changeHistoryRestoreButton"
       >
         {i18n.RESTORE_BUTTON_LABEL}
       </EuiButton>
 
       {isConfirmVisible ? (
-        <EuiConfirmModal
-          title={i18n.RESTORE_CONFIRM_TITLE(versionLabel)}
-          onCancel={handleCloseConfirm}
-          onConfirm={handleConfirmRestore}
-          cancelButtonText={i18n.RESTORE_CANCEL_BUTTON}
-          confirmButtonText={i18n.RESTORE_CONFIRM_BUTTON}
-          buttonColor="primary"
-          isLoading={isRestoring}
-          data-test-subj="changeHistoryRestoreConfirmModal"
-        >
-          <p>{i18n.RESTORE_CONFIRM_BODY(versionLabel)}</p>
-          {error ? (
-            <>
-              <EuiSpacer size="m" />
-              <EuiCallOut announceOnMount color="danger" iconType="alert">
-                <p>{error.message}</p>
-              </EuiCallOut>
-            </>
-          ) : null}
-        </EuiConfirmModal>
+        <ChangeHistoryRestoreConfirmModal
+          change={change}
+          currentChange={currentChange}
+          onClose={handleCloseConfirm}
+          onRestored={onRestored}
+        />
       ) : null}
     </>
   );

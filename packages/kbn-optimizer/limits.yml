@@ -44,7 +44,7 @@ pageLoadAssetSize:
   dataViewManagement: 6250
   dataViews: 66000
   dataVisualizer: 32727
-  developerToolbar: 5758
+  developerToolbar: 6043
   devTools: 8107
   discover: 30501
   discoverEnhanced: 5353
@@ -65,7 +65,7 @@ pageLoadAssetSize:
   exploratoryView: 45042
   expressionGauge: 15748
   expressionHeatmap: 20303
-  expressionLegacyMetricVis: 11834
+  expressionLegacyMetricVis: 13800
   expressionMetricVis: 18100
   expressionPartitionVis: 29826
   expressions: 104955
@@ -176,6 +176,7 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 4855
   sessionView: 47912
   share: 64059
+  significant_events: 15000
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
@@ -216,4 +217,3 @@ pageLoadAssetSize:
   workflowsExtensions: 43032
   workflowsManagement: 39968
   workplaceAIApp: 6234
-  
