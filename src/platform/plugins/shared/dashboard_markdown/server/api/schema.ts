@@ -8,9 +8,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { markdownByValueStateSchema } from '../embeddable/schemas';
+import { markdownStateSchema } from '../embeddable/schemas';
 
 export const markdownLibraryItemSchema = schema.object({
-  ...markdownByValueStateSchema.getPropSchemas(),
+  ...markdownStateSchema.getPropSchemas(),
   title: schema.string(), // make title required
 });

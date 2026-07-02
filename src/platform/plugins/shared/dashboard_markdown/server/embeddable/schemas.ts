@@ -12,26 +12,28 @@ import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
 
+export const markdownStateSchema = schema.object({
+  content: schema.string({
+    meta: {
+      description:
+        'The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\\n` for line breaks within JSON strings.',
+    },
+  }),
+  settings: schema.object(
+    {
+      open_links_in_new_tab: schema.boolean({
+        defaultValue: true,
+        meta: { description: 'Open links in a new browser tab.' },
+      }),
+    },
+    {
+      meta: { description: 'Display settings for the markdown panel.' },
+    }
+  ),
+});
+
 export const markdownByValueStateSchema = serializedTitlesSchema.extends(
-  {
-    content: schema.string({
-      meta: {
-        description:
-          'The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\\n` for line breaks within JSON strings.',
-      },
-    }),
-    settings: schema.object(
-      {
-        open_links_in_new_tab: schema.boolean({
-          defaultValue: true,
-          meta: { description: 'Open links in a new browser tab.' },
-        }),
-      },
-      {
-        meta: { description: 'Display settings for the markdown panel.' },
-      }
-    ),
-  },
+  markdownStateSchema.getPropSchemas(),
   {
     meta: BY_VALUE_SCHEMA_META,
   }
