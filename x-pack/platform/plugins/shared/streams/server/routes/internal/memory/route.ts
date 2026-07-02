@@ -591,7 +591,8 @@ const getGapsOverviewRoute = createServerRoute({
           updated_at: entry.updated_at,
         },
       };
-    } catch {
+    } catch (error) {
+      logger.debug(() => `Failed to load _gaps/overview for Nightshift page: ${error}`);
       return { available: false };
     }
   },

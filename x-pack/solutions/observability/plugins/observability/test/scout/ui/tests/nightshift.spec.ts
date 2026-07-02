@@ -11,7 +11,15 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
 } from '@kbn/management-settings-ids';
+import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '@kbn/streams-plugin/common';
 import { test } from '../fixtures';
+
+// Headers required to reach the internal core feature-flag override endpoint.
+const INTERNAL_API_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'kibana',
+  'elastic-api-version': '1',
+} as const;
 
 test.describe(
   'Nightshift navigation from Significant Events Discovery',
@@ -21,6 +29,17 @@ test.describe(
       await kbnClient.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY]: true,
+      });
+      // The Nightshift page is also gated behind the significant events memory feature flag.
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: INTERNAL_API_HEADERS,
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG]: true,
+          },
+        },
       });
     });
 
@@ -32,6 +51,16 @@ test.describe(
       await kbnClient.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY]: false,
+      });
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: INTERNAL_API_HEADERS,
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG]: false,
+          },
+        },
       });
     });
 
