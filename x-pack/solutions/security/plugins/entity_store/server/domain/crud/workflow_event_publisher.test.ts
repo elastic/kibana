@@ -12,6 +12,15 @@ import {
   ENTITY_RISK_SCORE_CHANGED_TRIGGER_ID,
 } from '../../../common/workflow/triggers';
 import type { Entity } from '../../../common';
+import { runWithSpan } from '../../telemetry/traces';
+
+jest.mock('../../telemetry/traces', () => {
+  const actual = jest.requireActual('../../telemetry/traces');
+  return {
+    ...actual,
+    runWithSpan: jest.fn(actual.runWithSpan),
+  };
+});
 
 // Drains all pending microtasks so fire-and-forget Promise chains complete.
 const flushPromises = () => new Promise<void>((resolve) => setImmediate(resolve));
@@ -26,12 +35,17 @@ describe('WorkflowEventPublisher', () => {
     emit = jest.fn().mockResolvedValue(undefined);
     fetchDocsFn = jest.fn().mockResolvedValue(new Map());
     logger = loggerMock.create();
-    publisher = new WorkflowEventPublisher({ emit, fetchDocsFn, logger });
+    publisher = new WorkflowEventPublisher({ emit, fetchDocsFn, logger, namespace: 'default' });
+    (runWithSpan as jest.Mock).mockClear();
   });
 
   describe('maybeGetExistingDocs', () => {
     it('returns empty Map without calling fetchDocsFn when emit is not configured', async () => {
-      const publisherNoEmit = new WorkflowEventPublisher({ fetchDocsFn, logger });
+      const publisherNoEmit = new WorkflowEventPublisher({
+        fetchDocsFn,
+        logger,
+        namespace: 'default',
+      });
       const result = await publisherNoEmit.maybeGetExistingDocs([
         { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
       ]);
@@ -106,7 +120,11 @@ describe('WorkflowEventPublisher', () => {
 
   describe('emitAssetCriticalityUpdated', () => {
     it('does nothing when emit is not configured', async () => {
-      const publisherNoEmit = new WorkflowEventPublisher({ fetchDocsFn, logger });
+      const publisherNoEmit = new WorkflowEventPublisher({
+        fetchDocsFn,
+        logger,
+        namespace: 'default',
+      });
       publisherNoEmit.emitAssetCriticalityUpdated([
         {
           entityId: 'host-1',
@@ -221,7 +239,11 @@ describe('WorkflowEventPublisher', () => {
 
   describe('emitRiskScoreChanged', () => {
     it('does nothing when emit is not configured', async () => {
-      const publisherNoEmit = new WorkflowEventPublisher({ fetchDocsFn, logger });
+      const publisherNoEmit = new WorkflowEventPublisher({
+        fetchDocsFn,
+        logger,
+        namespace: 'default',
+      });
       publisherNoEmit.emitRiskScoreChanged([
         {
           entityId: 'host-1',
@@ -340,7 +362,11 @@ describe('WorkflowEventPublisher', () => {
 
   describe('emitEvents', () => {
     it('does nothing when emit is not configured', async () => {
-      const publisherNoEmit = new WorkflowEventPublisher({ fetchDocsFn, logger });
+      const publisherNoEmit = new WorkflowEventPublisher({
+        fetchDocsFn,
+        logger,
+        namespace: 'default',
+      });
       publisherNoEmit.emitEvents(
         [
           {
@@ -478,6 +504,156 @@ describe('WorkflowEventPublisher', () => {
         ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID,
         expect.any(Object)
       );
+    });
+  });
+
+  describe('tracing', () => {
+    it('wraps each asset criticality emit in a span named after the trigger', async () => {
+      publisher.emitAssetCriticalityUpdated([
+        {
+          entityId: 'host-1',
+          entityType: 'generic',
+          doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+        },
+      ]);
+
+      await flushPromises();
+
+      expect(runWithSpan).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: `entityStore.workflow.emit.${ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID}`,
+          namespace: 'default',
+          attributes: {
+            'entity_store.workflow.trigger_id': ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID,
+            'entity_store.entity.type': 'generic',
+            'entity_store.entity.id': 'host-1',
+          },
+        })
+      );
+    });
+
+    it('wraps each risk score emit in a span named after the trigger', async () => {
+      publisher.emitRiskScoreChanged([
+        {
+          entityId: 'host-1',
+          entityType: 'generic',
+          doc: { entity: { id: 'host-1', risk: { calculated_score_norm: 75 } } },
+          previousScore: null,
+        },
+      ]);
+
+      await flushPromises();
+
+      expect(runWithSpan).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: `entityStore.workflow.emit.${ENTITY_RISK_SCORE_CHANGED_TRIGGER_ID}`,
+          namespace: 'default',
+          attributes: {
+            'entity_store.workflow.trigger_id': ENTITY_RISK_SCORE_CHANGED_TRIGGER_ID,
+            'entity_store.entity.type': 'generic',
+            'entity_store.entity.id': 'host-1',
+          },
+        })
+      );
+    });
+
+    it('creates one span per target when emitting for multiple entities', async () => {
+      publisher.emitAssetCriticalityUpdated([
+        {
+          entityId: 'host-1',
+          entityType: 'generic',
+          doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+        },
+        {
+          entityId: 'host-2',
+          entityType: 'generic',
+          doc: { entity: { id: 'host-2' }, asset: { criticality: 'low_impact' } },
+        },
+      ]);
+
+      await flushPromises();
+
+      expect(runWithSpan).toHaveBeenCalledTimes(2);
+    });
+
+    it('still invokes the underlying emit function through the span wrapper', async () => {
+      publisher.emitAssetCriticalityUpdated([
+        {
+          entityId: 'host-1',
+          entityType: 'generic',
+          doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+        },
+      ]);
+
+      await flushPromises();
+
+      expect(emit).toHaveBeenCalledWith(ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID, {
+        entityId: 'host-1',
+        entityType: 'generic',
+        criticalityLevel: 'high_impact',
+      });
+    });
+
+    it('propagates a rejected emit through the span wrapper so the failure is still logged', async () => {
+      emit.mockRejectedValue(new Error('emit failed'));
+      publisher.emitAssetCriticalityUpdated([
+        {
+          entityId: 'host-1',
+          entityType: 'generic',
+          doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+        },
+      ]);
+
+      await flushPromises();
+
+      expect(runWithSpan).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1 of 1'));
+    });
+
+    it('creates a span per target and logs the correct fail count when one emit succeeds and one fails', async () => {
+      emit.mockImplementation((_triggerId: string, payload: Record<string, unknown>) =>
+        payload.entityId === 'host-2'
+          ? Promise.reject(new Error('emit failed'))
+          : Promise.resolve(undefined)
+      );
+
+      publisher.emitAssetCriticalityUpdated([
+        {
+          entityId: 'host-1',
+          entityType: 'generic',
+          doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+        },
+        {
+          entityId: 'host-2',
+          entityType: 'generic',
+          doc: { entity: { id: 'host-2' }, asset: { criticality: 'low_impact' } },
+        },
+      ]);
+
+      await flushPromises();
+
+      expect(runWithSpan).toHaveBeenCalledTimes(2);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1 of 2'));
+    });
+
+    it('does not create a span when emit is not configured', async () => {
+      const publisherNoEmit = new WorkflowEventPublisher({
+        fetchDocsFn,
+        logger,
+        namespace: 'default',
+      });
+      publisherNoEmit.emitAssetCriticalityUpdated([
+        {
+          entityId: 'host-1',
+          entityType: 'generic',
+          doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+        },
+      ]);
+
+      await flushPromises();
+
+      expect(runWithSpan).not.toHaveBeenCalled();
     });
   });
 });

@@ -105,6 +105,7 @@ export class CRUDClient {
       emit: deps.emitWorkflowTriggerEvent,
       fetchDocsFn: (ids, fields) => this.getEntities(ids, fields),
       logger: deps.logger,
+      namespace: deps.namespace,
     });
     this.initWithTracing();
   }

@@ -625,6 +625,8 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
+      log.info(`API keys at start of test: ${JSON.stringify(queryResult)}`);
+
       const apiKeysLength = queryResult.body.apiKeys.length;
 
       await scheduleTaskWithApiKey({

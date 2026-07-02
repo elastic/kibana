@@ -81,6 +81,7 @@ export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalid
     if (apiKeysToInvalidate.total > 0) {
       const { apiKeyIdsToExclude, apiKeyIdsToInvalidate, uiamApiKeysToInvalidate } =
         await getApiKeyIdsToInvalidate({
+          logger,
           apiKeySOsPendingInvalidation: apiKeysToInvalidate,
           encryptedSavedObjectsClient,
           savedObjectsClient,

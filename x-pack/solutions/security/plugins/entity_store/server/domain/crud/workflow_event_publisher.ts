@@ -8,12 +8,14 @@
 import type { Logger } from '@kbn/logging';
 import { get } from 'lodash';
 import type { Entity, EntityType } from '../../../common';
+import type { AssetCriticalityLevel } from '../../../common/domain/definitions/entity.gen';
 import {
   ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID,
   ENTITY_RISK_SCORE_CHANGED_TRIGGER_ID,
   ASSET_CRITICALITY_UPDATED_WATCHED_FIELDS,
   RISK_SCORE_CHANGED_WATCHED_FIELDS,
 } from '../../../common/workflow/triggers';
+import { runWithSpan } from '../../telemetry/traces';
 
 export const ALL_WORKFLOW_WATCHED_FIELDS = [
   ...ASSET_CRITICALITY_UPDATED_WATCHED_FIELDS,
@@ -30,10 +32,18 @@ type RiskScoreWorkflowEmitTarget = WorkflowEmitTarget & {
   previousScore: number | null;
 };
 
+type AssetCriticalityWorkflowEmitTarget = WorkflowEmitTarget & {
+  // `undefined` means "no previous doc / field found" (unknown baseline, e.g. mget miss)
+  // and must NOT be treated as a known previous value of `null`, or a first-ever
+  // criticality of `null` would be wrongly suppressed as a no-op.
+  previousCriticality: AssetCriticalityLevel | null | undefined;
+};
+
 interface WorkflowEventPublisherOpts {
   emit?: (triggerId: string, payload: Record<string, unknown>) => Promise<void>;
   fetchDocsFn: (ids: string[], fields: readonly string[]) => Promise<Map<string, Entity>>;
   logger: Logger;
+  namespace: string;
 }
 
 export class WorkflowEventPublisher {
@@ -43,11 +53,45 @@ export class WorkflowEventPublisher {
     ids: string[],
     fields: readonly string[]
   ) => Promise<Map<string, Entity>>;
+  private readonly namespace: string;
 
-  constructor({ logger, emit, fetchDocsFn }: WorkflowEventPublisherOpts) {
+  constructor({ logger, emit, fetchDocsFn, namespace }: WorkflowEventPublisherOpts) {
     this.logger = logger;
     this.emit = emit;
     this.fetchDocsFn = fetchDocsFn;
+    this.namespace = namespace;
+    this.initWithTracing();
+  }
+
+  // Wraps the injected `emit` dependency so every trigger emit runs inside its
+  // own span; a rejected emit is recorded on that span as an error before the
+  // rejection continues on to the Promise.allSettled fail-count/logger.warn path.
+  private initWithTracing(): void {
+    const baseEmit = this.emit;
+    if (!baseEmit) return;
+
+    const namespace = this.namespace;
+    const tracedEmit = (triggerId: string, payload: Record<string, unknown>): Promise<void> =>
+      runWithSpan({
+        name: `entityStore.workflow.emit.${triggerId}`,
+        namespace,
+        attributes: {
+          'entity_store.workflow.trigger_id': triggerId,
+          ...(typeof payload.entityType === 'string'
+            ? { 'entity_store.entity.type': payload.entityType }
+            : {}),
+          ...(typeof payload.entityId === 'string'
+            ? { 'entity_store.entity.id': payload.entityId }
+            : {}),
+        },
+        cb: () => baseEmit(triggerId, payload),
+      });
+
+    Object.defineProperty(this, 'emit', {
+      value: tracedEmit,
+      configurable: true,
+      writable: true,
+    });
   }
 
   public async maybeGetExistingDocs(docs: Entity[]): Promise<Map<string, Entity>> {
@@ -66,13 +110,16 @@ export class WorkflowEventPublisher {
     return new Map<string, Entity>();
   }
 
-  public emitAssetCriticalityUpdated(targets: WorkflowEmitTarget[]): void {
+  public emitAssetCriticalityUpdated(targets: AssetCriticalityWorkflowEmitTarget[]): void {
     if (!this.emit || targets.length === 0) return;
-    const emitPromises = targets.flatMap(({ entityId, entityType, doc }) => {
+    const emitPromises = targets.flatMap(({ entityId, entityType, doc, previousCriticality }) => {
       const updatedCriticalityLevel = get(doc, ASSET_CRITICALITY_UPDATED_WATCHED_FIELDS[0]);
       if (updatedCriticalityLevel === undefined) return [];
+      if (previousCriticality !== undefined && updatedCriticalityLevel === previousCriticality) {
+        return [];
+      }
       return [
-        this.emit?.(ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID, {
+        this.emit!(ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID, {
           entityId,
           entityType,
           criticalityLevel: updatedCriticalityLevel,
@@ -103,7 +150,7 @@ export class WorkflowEventPublisher {
       const direction = signedDelta != null ? (signedDelta > 0 ? 'increase' : 'decrease') : null;
       const delta = signedDelta != null ? Math.abs(signedDelta) : null;
       return [
-        this.emit?.(ENTITY_RISK_SCORE_CHANGED_TRIGGER_ID, {
+        this.emit!(ENTITY_RISK_SCORE_CHANGED_TRIGGER_ID, {
           entityId,
           entityType,
           score: newScore,
@@ -130,9 +177,14 @@ export class WorkflowEventPublisher {
   public emitEvents(targets: WorkflowEmitTarget[], previousDocs: Map<string, Entity>): void {
     if (!this.emit || targets.length === 0) return;
     this.emitAssetCriticalityUpdated(
-      targets.filter(({ doc }) =>
-        ASSET_CRITICALITY_UPDATED_WATCHED_FIELDS.some((field) => get(doc, field) !== undefined)
-      )
+      targets
+        .filter(({ doc }) =>
+          ASSET_CRITICALITY_UPDATED_WATCHED_FIELDS.some((field) => get(doc, field) !== undefined)
+        )
+        .map((target) => ({
+          ...target,
+          previousCriticality: previousDocs.get(target.entityId)?.asset?.criticality,
+        }))
     );
 
     this.emitRiskScoreChanged(
