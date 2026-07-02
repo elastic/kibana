@@ -6,7 +6,7 @@
  */
 
 import {
-  STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   getManagedWorkflowDefinition,
 } from '@kbn/workflows/managed';
 import {
@@ -16,9 +16,11 @@ import {
 } from '../../../common/constants';
 
 // The continuous onboarding workflow YAML lives in the managed workflow
-// definition (kbn-workflows/managed/definitions/streams_ki/continuous_onboarding.yaml).
+// definition (kbn-workflows/managed/definitions/significant_events/knowledge_indicators/continuous_onboarding.yaml).
 // These tests keep that YAML in sync with the streams constants.
-const definition = getManagedWorkflowDefinition(STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID);
+const definition = getManagedWorkflowDefinition(
+  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID
+);
 
 const getWorkflowYaml = (): string => {
   if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
