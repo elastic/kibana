@@ -33,6 +33,7 @@ import {
   AgentPolicyRefreshContext,
   useIsPackagePolicyUpgradable,
   usePagination,
+  useGetPackageInfoByKeyQuery,
 } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import { SideBarColumn } from '../../../components/side_bar_column';
@@ -79,6 +80,20 @@ export const PackagePoliciesPage = ({
     () => getAgentlessStatusForPackage(packageInfo).isAgentless,
     [getAgentlessStatusForPackage, packageInfo]
   );
+
+  // The agentless deployments table re-derives each policy's inputs from the package manifest
+  // (agentless policies come from the LIST API with simplified object inputs). That requires the
+  // FULL package info: the detail page's `packageInfo` is fetched without `full: true`, so its
+  // policy templates carry no `inputs` and the expansion would throw `Input not found`. Fetch the
+  // full manifest only when agentless policies are possible.
+  const { data: agentlessFullPackageInfoData, isLoading: isAgentlessFullPackageInfoLoading } =
+    useGetPackageInfoByKeyQuery(
+      name,
+      version,
+      { full: true, prerelease: true },
+      { enabled: canHaveAgentlessPolicies }
+    );
+  const agentlessFullPackageInfo = agentlessFullPackageInfoData?.item;
 
   // Helper function to map raw policies data for consumption by the table
   const mapPoliciesData = useCallback(
@@ -178,14 +193,21 @@ export const PackagePoliciesPage = ({
     kuery: `package.name: "${name}"`,
   });
   useEffect(() => {
+    // Expansion needs the full manifest (see `agentlessFullPackageInfo` above); wait for it so we
+    // don't hydrate against the input-less detail-page `packageInfo`.
+    if (!agentlessData?.items || !agentlessFullPackageInfo) {
+      setAgentlessPackageAndAgentPolicies([]);
+      return;
+    }
     setAgentlessPackageAndAgentPolicies(
-      !agentlessData?.items
-        ? []
-        : agentlessData.items.map((agentlessPolicy, index) =>
-            mapPoliciesData(agentlessPolicyToTableItem(agentlessPolicy, packageInfo), index)
-          )
+      agentlessData.items.map((agentlessPolicy, index) =>
+        mapPoliciesData(
+          agentlessPolicyToTableItem(agentlessPolicy, agentlessFullPackageInfo),
+          index
+        )
+      )
     );
-  }, [agentlessData, mapPoliciesData, packageInfo]);
+  }, [agentlessData, mapPoliciesData, agentlessFullPackageInfo]);
 
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
@@ -260,7 +282,7 @@ export const PackagePoliciesPage = ({
                 <EuiSpacer size="m" />
                 <EuiPanel hasBorder={true} hasShadow={false}>
                   <AgentlessPackagePoliciesTable
-                    isLoading={agentlessIsLoading}
+                    isLoading={agentlessIsLoading || isAgentlessFullPackageInfoLoading}
                     packagePolicies={agentlessPackageAndAgentPolicies}
                     packagePoliciesTotal={agentlessData?.total ?? 0}
                     refreshPackagePolicies={refreshAgentlessPolicies}
