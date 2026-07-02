@@ -229,7 +229,7 @@ export class LensApp {
     const result: Array<{ stop: string; color: string | undefined }> = [];
 
     for (let i = 0; i < stops.length; i++) {
-      const stopValue = (await stops[i].getAttribute('value')) ?? '';
+      const stopValue = await stops[i].inputValue();
       let color: string | undefined;
       if (i < colorSwatches.length) {
         color = await colorSwatches[i].evaluate((el) => {
