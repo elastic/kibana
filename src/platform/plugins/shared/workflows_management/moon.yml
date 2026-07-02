@@ -119,8 +119,6 @@ dependsOn:
   - '@kbn/controls-schemas'
   - '@kbn/app-header'
   - '@kbn/core-chrome-app-menu-components'
-  - '@kbn/core-chrome-browser-context'
-  - '@kbn/core-chrome-browser-mocks'
 tags:
   - plugin
   - prod

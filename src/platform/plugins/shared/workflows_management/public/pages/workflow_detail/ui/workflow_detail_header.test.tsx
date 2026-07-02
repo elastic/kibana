@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { useWorkflowsCapabilities, type WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import {
@@ -77,11 +78,9 @@ jest.mock('./workflow_detail_actions_menu', () => ({
 
 // The run action is forced into the app menu overflow ("More") popover, so it is not
 // present in the DOM until the overflow button is opened.
-const openRunWorkflowButton = (result: {
-  getByTestId: (id: string) => HTMLElement;
-}): HTMLElement => {
-  fireEvent.click(result.getByTestId('app-menu-overflow-button'));
-  return result.getByTestId('runWorkflowHeaderButton');
+const openRunWorkflowButton = async (): Promise<HTMLElement> => {
+  await openAppMenuOverflow();
+  return screen.getByTestId('runWorkflowHeaderButton');
 };
 
 describe('WorkflowDetailHeader', () => {
@@ -250,19 +249,19 @@ describe('WorkflowDetailHeader', () => {
     expect(getByTestId('saveWorkflowHeaderButton')).not.toBeDisabled();
   });
 
-  it('disables run workflow button when yaml has syntax errors', () => {
-    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+  it('disables run workflow button when yaml has syntax errors', async () => {
+    renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       isValid: false,
     });
-    expect(openRunWorkflowButton(result)).toBeDisabled();
+    expect(await openRunWorkflowButton()).toBeDisabled();
   });
 
-  it('enables run workflow button when yaml has validation errors', () => {
-    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+  it('enables run workflow button when yaml has validation errors', async () => {
+    renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       isValid: true,
       hasYamlSchemaValidationErrors: true,
     });
-    expect(openRunWorkflowButton(result)).toBeEnabled();
+    expect(await openRunWorkflowButton()).toBeEnabled();
   });
 
   it('disables enabled toggle when yaml has validation errors', () => {
@@ -283,9 +282,9 @@ describe('WorkflowDetailHeader', () => {
     expect(toggle).toBeDisabled();
   });
 
-  it('enables run workflow button when yaml is valid', () => {
-    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
-    expect(openRunWorkflowButton(result)).toBeEnabled();
+  it('enables run workflow button when yaml is valid', async () => {
+    renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+    expect(await openRunWorkflowButton()).toBeEnabled();
   });
 
   it('shows the managed badge for managed workflows', () => {
@@ -325,12 +324,12 @@ describe('WorkflowDetailHeader', () => {
     expect(result.getByTestId('saveWorkflowHeaderButton')).toBeDisabled();
   });
 
-  it('shows the unsaved changes confirmation when running with unsaved changes', () => {
+  it('shows the unsaved changes confirmation when running with unsaved changes', async () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       hasChanges: true,
     });
 
-    fireEvent.click(openRunWorkflowButton(result));
+    fireEvent.click(await openRunWorkflowButton());
 
     expect(
       result.getByTestId('runWorkflowWithUnsavedChangesConfirmationModal')
@@ -338,12 +337,12 @@ describe('WorkflowDetailHeader', () => {
     expect(result.getByTestId('runWorkflowWithUnsavedChangesDontAskAgain')).toBeInTheDocument();
   });
 
-  it('stores the run confirmation preference when confirming with the checkbox selected', () => {
+  it('stores the run confirmation preference when confirming with the checkbox selected', async () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       hasChanges: true,
     });
 
-    fireEvent.click(openRunWorkflowButton(result));
+    fireEvent.click(await openRunWorkflowButton());
     fireEvent.click(result.getByTestId('runWorkflowWithUnsavedChangesDontAskAgain'));
     fireEvent.click(result.getByTestId('confirmModalConfirmButton'));
 
@@ -352,25 +351,25 @@ describe('WorkflowDetailHeader', () => {
     expect(result.store.getState().detail.isTestModalOpen).toBe(true);
   });
 
-  it('skips the unsaved changes confirmation when the preference is stored', () => {
+  it('skips the unsaved changes confirmation when the preference is stored', async () => {
     localStorage.setItem(SkipUnsavedRunConfirmationStorageKey, 'true');
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       hasChanges: true,
     });
 
-    fireEvent.click(openRunWorkflowButton(result));
+    fireEvent.click(await openRunWorkflowButton());
 
     expect(result.queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
     expect(result.store.getState().detail.isTestModalOpen).toBe(true);
   });
 
-  it('disables run workflow button while save is in flight', () => {
+  it('disables run workflow button while save is in flight', async () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       hasChanges: true,
       isSaving: true,
     });
 
-    const runButton = openRunWorkflowButton(result);
+    const runButton = await openRunWorkflowButton();
 
     expect(runButton).toBeDisabled();
     fireEvent.click(runButton);
@@ -506,7 +505,7 @@ describe('WorkflowDetailHeader', () => {
 
         const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
         const saveBtn = await result.findByTestId('saveWorkflowHeaderButton');
-        const runBtn = openRunWorkflowButton(result);
+        const runBtn = await openRunWorkflowButton();
 
         if (expectRunDisabled) {
           expect(runBtn).toBeDisabled();
