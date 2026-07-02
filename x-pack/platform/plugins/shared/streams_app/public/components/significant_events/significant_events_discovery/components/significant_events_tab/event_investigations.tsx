@@ -50,12 +50,16 @@ const InvestigationRow = ({ investigation }: { investigation: SignificantEventIn
   } = useKibana();
   const { started_at: startedAt, completed_at: completedAt, workflow_execution_id } = investigation;
   const duration = formatDuration(startedAt, completedAt);
-  const isRunning = completedAt == null;
 
-  const { state, error } = useInvestigationState({
+  // `useInvestigationState`'s own `isRunning` is authoritative — it flips to `false` as soon as
+  // the live stream settles and the final result is fetched, which can happen before the next
+  // 5s lifecycle poll updates `completed_at` on the sig-event doc. Using that (rather than the
+  // input flag derived from `completedAt`) avoids showing a stale "running" state over an
+  // already-final result.
+  const { state, error, isRunning } = useInvestigationState({
     http,
     executionId: workflow_execution_id,
-    isRunning,
+    isRunning: completedAt == null,
   });
 
   return (
