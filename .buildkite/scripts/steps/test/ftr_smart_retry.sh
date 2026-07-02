@@ -2,7 +2,6 @@
 # Reads/writes globals: exitCode, failedConfigs,
 # FAILED_CONFIGS_KEY, JOB, BUILDKITE_RETRY_COUNT.
 
-FAILED_TESTS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}_failed_tests"
 retry_recovered=false
 
 smart_retry_applicable() {
@@ -12,18 +11,20 @@ smart_retry_applicable() {
 }
 
 store_failing_tests() {
+  local failedTestsKey="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}_failed_tests"
   local junitDir="target/junit/$JOB"
   [[ -d "$junitDir" ]] || return
 
   local failedTestNames
   failedTestNames=$(node scripts/ftr_check_retry_result collect-results --type failures --junit-dir "$junitDir" || true)
   if [[ "$failedTestNames" ]]; then
-    buildkite-agent meta-data set "$FAILED_TESTS_KEY" "$failedTestNames"
+    buildkite-agent meta-data set "$failedTestsKey" "$failedTestNames"
     echo "Stored $(echo "$failedTestNames" | wc -l | tr -d ' ') previously-failing test name(s) for retry evaluation"
   fi
 }
 
 apply_smart_retry() {
+  local failedTestsKey="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}_failed_tests"
   local retryCount="${BUILDKITE_RETRY_COUNT:-0}"
 
   if [[ "$retryCount" -ge "2" ]]; then
@@ -32,7 +33,7 @@ apply_smart_retry() {
   fi
 
   local prevFailedTests
-  prevFailedTests=$(buildkite-agent meta-data get "$FAILED_TESTS_KEY" --default '' 2>/dev/null || true)
+  prevFailedTests=$(buildkite-agent meta-data get "$failedTestsKey" --default '' 2>/dev/null || true)
   [[ "$prevFailedTests" ]] || return
 
   local junitDir="target/junit/$JOB"
