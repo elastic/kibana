@@ -13,10 +13,9 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 /**
  * Workflow step type id for the "Add Context Engine entry" step.
  *
- * The id is product-named (`contextEngine.*`) rather than plugin-named
- * (`contextEngine.*`) because "Context Engine" is the user-facing brand
- * for this surface — workflow authors should not have to know about the
- * implementing plugin.
+ * The id lives under the `contextEngine.*` namespace — the user-facing
+ * "Context Engine" brand — so workflow authors reference a stable product
+ * name rather than internal implementation details.
  *
  * We deliberately avoid the `kibana.*` prefix: the workflow execution engine
  * routes any `kibana.*` step type through the HTTP-based Kibana action
