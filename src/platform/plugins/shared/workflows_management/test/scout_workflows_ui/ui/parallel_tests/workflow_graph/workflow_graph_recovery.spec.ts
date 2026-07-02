@@ -11,7 +11,10 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
-import { getBrokenGraphWorkflowYaml, getMultiStepGraphWorkflowYaml } from '../../fixtures/workflows';
+import {
+  getBrokenGraphWorkflowYaml,
+  getMultiStepGraphWorkflowYaml,
+} from '../../fixtures/workflows';
 
 const VISUAL_EDITOR_SETTING = 'workflows:ui:visualEditor:enabled';
 const WORKFLOW_NAME = 'Graph Recovery Test';
@@ -30,23 +33,23 @@ test.describe(
       await scoutSpace.uiSettings.set({ [VISUAL_EDITOR_SETTING]: true });
     });
 
+    test.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsPrivilegedUser();
+    });
+
     test.afterAll(async ({ scoutSpace, apiServices }) => {
       await scoutSpace.uiSettings.unset(VISUAL_EDITOR_SETTING);
       await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
     });
 
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsPrivilegedUser();
-    });
-
     test('restores all graph nodes after fixing a YAML syntax error', async ({
       pageObjects,
-      page,
       apiServices,
     }) => {
-      const [workflowId] = await apiServices.workflows.bulkCreate([
+      const { created } = await apiServices.workflows.bulkCreate([
         getMultiStepGraphWorkflowYaml(WORKFLOW_NAME),
       ]);
+      const workflowId = created[0].id;
 
       await pageObjects.workflowEditor.gotoWorkflow(workflowId);
       await pageObjects.workflowEditor.switchToGraphView();
@@ -80,7 +83,7 @@ test.describe(
           getMultiStepGraphWorkflowYaml(WORKFLOW_NAME)
         );
 
-        await expect(pageObjects.workflowEditor.graphYamlErrorCallout).not.toBeVisible();
+        await expect(pageObjects.workflowEditor.graphYamlErrorCallout).toBeHidden();
 
         for (const stepName of ['step_1', 'step_2', 'step_3', 'step_4', 'step_5']) {
           await expect(canvas.getByText(stepName)).toBeVisible();
