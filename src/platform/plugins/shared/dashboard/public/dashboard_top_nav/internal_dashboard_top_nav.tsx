@@ -398,11 +398,13 @@ export function InternalDashboardTopNav({
       undo: {
         onClick: () => {
           console.log('UNDO');
+          dashboardInternalApi.undo();
         },
       },
       redo: {
         onClick: () => {
           console.log('REDO');
+          dashboardInternalApi.redo();
         },
       },
     };

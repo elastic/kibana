@@ -9,7 +9,7 @@
 
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, concatMap, merge, of, Subject } from 'rxjs';
+import { BehaviorSubject, concatMap, of, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
@@ -158,20 +158,6 @@ export function getDashboardApi({
     }
   }
 
-  const unsavedChangesManager = initializeUnsavedChangesManager({
-    viewMode$: viewModeManager.api.viewMode$,
-    storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
-    lastSavedState: getLastSavedState(readResult),
-    layoutManager,
-    savedObjectId$,
-    settingsManager,
-    unifiedSearchManager,
-    projectRoutingManager,
-    approximationManager,
-    setState,
-    onSave$: onSave$.asObservable(),
-  });
-
   function getState() {
     const { panels, pinned_panels } = layoutManager.internalApi.serializeLayout();
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
@@ -188,6 +174,20 @@ export function getDashboardApi({
       pinned_panels,
     } satisfies DashboardState;
   }
+
+  const unsavedChangesManager = initializeUnsavedChangesManager({
+    viewMode$: viewModeManager.api.viewMode$,
+    storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
+    lastSavedState: getLastSavedState(readResult),
+    layoutManager,
+    savedObjectId$,
+    settingsManager,
+    unifiedSearchManager,
+    projectRoutingManager,
+    approximationManager,
+    setState,
+    onSave$: onSave$.asObservable(),
+  });
 
   const trackOverlayApi = initializeTrackOverlay(trackPanel.api);
 
@@ -211,13 +211,13 @@ export function getDashboardApi({
     ...timesliceManager.api,
     ...pauseFetchManager.api,
     ...initializeTrackContentfulRender(),
-    anyStateChange$: merge(
-      settingsManager.internalApi.anyStateChange$,
-      unifiedSearchManager.internalApi.anyStateChange$,
-      layoutManager.internalApi.anyStateChange$,
-      ...(projectRoutingManager ? [projectRoutingManager.internalApi.anyStateChange$] : []),
-      approximationManager.internalApi.anyStateChange$
-    ),
+    // anyStateChange$: merge(
+    //   settingsManager.internalApi.anyStateChange$,
+    //   unifiedSearchManager.internalApi.anyStateChange$,
+    //   layoutManager.internalApi.anyStateChange$,
+    //   ...(projectRoutingManager ? [projectRoutingManager.internalApi.anyStateChange$] : []),
+    //   approximationManager.internalApi.anyStateChange$
+    // ),
     executionContext: {
       type: 'dashboard',
       description: settingsManager.api.title$.value,
@@ -326,6 +326,7 @@ export function getDashboardApi({
     ...layoutManager.internalApi,
     ...unifiedSearchManager.internalApi,
     ...esqlVariablesManager.api,
+    ...unsavedChangesManager.internalApi,
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),
   };
