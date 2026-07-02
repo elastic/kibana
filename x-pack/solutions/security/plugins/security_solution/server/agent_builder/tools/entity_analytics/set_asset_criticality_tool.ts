@@ -23,6 +23,7 @@ import { securityTool } from '../constants';
 import { IdentifierType } from '../../../../common/api/entity_analytics/common/common.gen';
 import { recalculateEntityRiskScore } from '../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score';
 import { RiskScoreDataClient } from '../../../lib/entity_analytics/risk_score/risk_score_data_client';
+import { ASSET_CRITICALITY_UPDATED_TOOL_EVENT } from '../../../../common/entity_analytics/tool_events';
 
 export const SECURITY_SET_ASSET_CRITICALITY_TOOL_ID = securityTool('set_asset_criticality');
 
@@ -124,7 +125,7 @@ export const setAssetCriticalityTool = (
     },
     handler: async (
       params,
-      { esClient, prompts, callContext, spaceId, savedObjectsClient, request }
+      { esClient, prompts, callContext, spaceId, savedObjectsClient, request, events }
     ) => {
       logger.debug(
         `${SECURITY_SET_ASSET_CRITICALITY_TOOL_ID} tool called for entity ${params.entityId}`
@@ -227,6 +228,8 @@ export const setAssetCriticalityTool = (
             }`
           );
         }
+
+        events.sendUiEvent(ASSET_CRITICALITY_UPDATED_TOOL_EVENT, { entityType });
 
         return {
           results: [
