@@ -12,6 +12,7 @@ if [[ ! -d .moon/cache ]]; then
   echo "No moon cache directory found, skipping archive"
   exit 0
 else
+  printf '%s' "$(pwd)" > .moon/cache/.buildkite-checkout-path
   tar -cf ~/moon-cache.tar.zst -I 'zstd -19 -T0' .moon/cache || echo "Failed to archive moon cache"
   cd ~/
   upload_tmp_artifact ~/moon-cache.tar.zst moon-cache.tar.zst "$BUILDKITE_BUILD_ID" || echo "Failed to upload moon cache"
