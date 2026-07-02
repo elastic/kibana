@@ -17,7 +17,16 @@ export function transformOut(
   linksSavedObjectAttributes: StoredLinksState,
   references: Reference[] = []
 ): LinksApiState {
-  const state = transformEmbeddableOut(linksSavedObjectAttributes, references) as LinksByValueState; // `savedObject` is never the by-reference embeddable state
+  const { links, layout } = transformEmbeddableOut(
+    linksSavedObjectAttributes,
+    references
+  ) as LinksByValueState; // `savedObject` is never the by-reference embeddable state
   const { tags } = toAsCodeTags(references);
-  return { title: linksSavedObjectAttributes.title, ...state, tags };
+  return {
+    title: linksSavedObjectAttributes.title,
+    description: linksSavedObjectAttributes.description,
+    links,
+    layout,
+    tags,
+  };
 }
