@@ -89,7 +89,7 @@ describe('WorkflowsPlugin', () => {
       expect(coreSetup.application.register).not.toHaveBeenCalled();
     });
 
-    it('should register only the workflows list deep link when executions view flag is off in bootstrap', () => {
+    it('should register the workflows list and library deep links but not executions when the executions view flag is off in bootstrap', () => {
       plugin = createPlugin(false);
       coreSetup.uiSettings.get.mockImplementation((key: string, fallback?: unknown) => {
         if (key === WORKFLOWS_UI_SETTING_ID) return true;
@@ -104,7 +104,12 @@ describe('WorkflowsPlugin', () => {
           id: PLUGIN_ID,
           title: 'Workflows',
           appRoute: '/app/workflows',
-          deepLinks: [expect.objectContaining({ id: 'workflowsList', path: '/' })],
+          // Library is registered by default at bootstrap; the executions link is
+          // gated by the flag (off here). Both are refined at start().
+          deepLinks: [
+            expect.objectContaining({ id: 'workflowsList', path: '/' }),
+            expect.objectContaining({ id: 'library', path: '/library' }),
+          ],
         })
       );
       expect(result).toEqual({});
