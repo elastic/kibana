@@ -22,6 +22,7 @@ const EnrollmentSettingsFleetServerHostSchema = schema.object({
   is_default: schema.boolean({ defaultValue: false }),
   is_preconfigured: schema.boolean({ defaultValue: false }),
   is_internal: schema.maybe(schema.boolean()),
+  allow_edit: schema.maybe(schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: 100 })),
   proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   ssl: schema.maybe(
     schema.oneOf([
@@ -56,7 +57,7 @@ const EnrollmentSettingsOutputSchema = schema.object({
   otel_exporter_config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   otel_disable_beatsauth: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
   proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  allow_edit: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  allow_edit: schema.maybe(schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: 100 })),
   preset: schema.maybe(
     schema.oneOf([
       schema.literal('custom'),
