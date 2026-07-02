@@ -215,8 +215,10 @@ export const useAgentBuilderRuleCreation = ({
 
       const session = aiRuleCreation.getSession() ?? aiRuleCreation.startSession();
       aiRuleCreation.incrementApplyCount();
+      // `creationSource` is deliberately not reported: the registered AiAppliedToForm schema
+      // doesn't include it yet (telemetry lands in a follow-up PR), and the EBT dev-mode
+      // validator throws on excess keys — which would abort the form update below.
       telemetry.reportEvent(RuleCreationEventTypes.AiAppliedToForm, {
-        creationSource: existingRuleId ? 'ai_edit' : 'ai',
         ruleType: rule.type,
         sessionId: session.sessionId,
         durationSinceSessionStartMs: Date.now() - session.startTimestamp,
@@ -260,7 +262,6 @@ export const useAgentBuilderRuleCreation = ({
       addSuccess,
       addRuleAttachment,
       aiRuleCreation,
-      existingRuleId,
       getRuleIdForSync,
       telemetry,
     ]
