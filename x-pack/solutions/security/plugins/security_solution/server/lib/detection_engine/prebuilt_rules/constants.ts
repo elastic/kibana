@@ -31,9 +31,7 @@ export const PREBUILT_RULES_INSTALLATION_REVIEW_CONCURRENCY = 5;
 // and upgrade loops.
 export const PREBUILT_RULE_BATCH_SIZE = 100;
 
-// Max prebuilt rules fetched from ES and bulk-created per install handler
-// iteration. Larger than PREBUILT_RULE_BATCH_SIZE (used by the upgrade loop)
-// because rulesClient.bulkCreateRules() writes in a single bulk call; 500
-// bounds the assets held in memory by fetchAssetsByVersion while still
-// improving throughput over the old 100-rule sequential path.
+/**
+ * Max prebuilt rules fetched from ES and processed by bulk-create per install handler iteration.
+ */
 export const PREBUILT_RULES_BULK_CREATE_BATCH_SIZE = 500;
