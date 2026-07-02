@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityStoreStatus, type EntityType } from '@kbn/entity-store/common';
+import { EntityStoreStatus, type EngineStatus, type EntityType } from '@kbn/entity-store/common';
 
 // Snake-cased query for the v2 GET /entities route. Matches the on-the-wire shape.
 // Callers consume `FetchEntitiesListParams` (camelCase) defined in `public/entity_analytics/api/api.ts`.
@@ -32,13 +32,15 @@ export type StoreStatus = EntityStoreStatus;
 export const StoreStatusEnum = EntityStoreStatus.enum;
 export type StoreStatusEnum = typeof EntityStoreStatus.enum;
 
+// Runtime value map for the engine status. Kept in sync with the canonical
+// `EngineStatus` type from `@kbn/entity-store/common` via `satisfies`.
 export const EngineStatusEnum = {
   installing: 'installing',
   started: 'started',
   stopped: 'stopped',
   updating: 'updating',
   error: 'error',
-} as const;
+} as const satisfies Record<EngineStatus, EngineStatus>;
 export type EngineStatusEnum = typeof EngineStatusEnum;
 
 export const EngineComponentResourceEnum = {

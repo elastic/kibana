@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityType } from '.';
+import type { EntityStoreStatus, EntityType } from '.';
 import type { Entity } from './domain/definitions/entity.gen';
 
 export type EngineStatus = 'installing' | 'started' | 'stopped' | 'updating' | 'error';
@@ -48,7 +48,7 @@ export interface EngineComponentStatus {
 }
 
 export interface GetEntityStoreStatusResponse {
-  status: 'not_installed' | 'installing' | 'running' | 'stopped' | 'error';
+  status: EntityStoreStatus;
   engines: Array<EngineDescriptor & { components?: EngineComponentStatus[] }>;
 }
 
