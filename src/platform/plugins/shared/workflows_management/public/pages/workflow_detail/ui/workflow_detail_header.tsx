@@ -386,7 +386,6 @@ export const WorkflowDetailHeader = React.memo(
           {
             id: 'runWorkflow',
             order: 2,
-            overflow: true,
             label: Translations.runWorkflow,
             iconType: 'play',
             run: handleRunClickWithUnsavedCheck,

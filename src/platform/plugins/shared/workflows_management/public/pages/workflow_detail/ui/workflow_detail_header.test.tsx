@@ -9,7 +9,6 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { useWorkflowsCapabilities, type WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import {
@@ -76,12 +75,9 @@ jest.mock('./workflow_detail_actions_menu', () => ({
   WorkflowDetailActionsMenu: () => <div data-test-subj="workflowChangeHistoryEmbed" />,
 }));
 
-// The run action is forced into the app menu overflow ("More") popover, so it is not
-// present in the DOM until the overflow button is opened.
-const openRunWorkflowButton = async (): Promise<HTMLElement> => {
-  await openAppMenuOverflow();
-  return screen.getByTestId('runWorkflowHeaderButton');
-};
+// The run action renders inline in the app menu.
+const openRunWorkflowButton = async (): Promise<HTMLElement> =>
+  screen.getByTestId('runWorkflowHeaderButton');
 
 describe('WorkflowDetailHeader', () => {
   const defaultProps: WorkflowDetailHeaderProps = {
