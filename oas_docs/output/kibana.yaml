@@ -44731,17 +44731,10 @@ paths:
                   title: Important Resources
             schema:
               additionalProperties: false
-              description: Panel configuration stored inline
+              type: object
               properties:
                 description:
-                  description: A short description of the panel.
                   type: string
-                hide_border:
-                  description: When true, the panel border is hidden. Defaults to false.
-                  type: boolean
-                hide_title:
-                  description: When true, the panel title is hidden. Defaults to false.
-                  type: boolean
                 layout:
                   description: Whether to display the links in a horizontal or vertical layout.
                   enum:
@@ -44771,10 +44764,8 @@ paths:
                 title:
                   type: string
               required:
-                - title
                 - links
-              title: By value
-              type: object
+                - title
       responses:
         '201':
           content:
@@ -44816,17 +44807,10 @@ paths:
                 properties:
                   data:
                     additionalProperties: false
-                    description: Panel configuration stored inline
+                    type: object
                     properties:
                       description:
-                        description: A short description of the panel.
                         type: string
-                      hide_border:
-                        description: When true, the panel border is hidden. Defaults to false.
-                        type: boolean
-                      hide_title:
-                        description: When true, the panel title is hidden. Defaults to false.
-                        type: boolean
                       layout:
                         description: Whether to display the links in a horizontal or vertical layout.
                         enum:
@@ -44856,10 +44840,8 @@ paths:
                       title:
                         type: string
                     required:
-                      - title
                       - links
-                    title: By value
-                    type: object
+                      - title
                   id:
                     description: The unique ID of the links library item, as returned by the create or search endpoints.
                     type: string
@@ -45041,17 +45023,10 @@ paths:
                 properties:
                   data:
                     additionalProperties: false
-                    description: Panel configuration stored inline
+                    type: object
                     properties:
                       description:
-                        description: A short description of the panel.
                         type: string
-                      hide_border:
-                        description: When true, the panel border is hidden. Defaults to false.
-                        type: boolean
-                      hide_title:
-                        description: When true, the panel title is hidden. Defaults to false.
-                        type: boolean
                       layout:
                         description: Whether to display the links in a horizontal or vertical layout.
                         enum:
@@ -45081,10 +45056,8 @@ paths:
                       title:
                         type: string
                     required:
-                      - title
                       - links
-                    title: By value
-                    type: object
+                      - title
                   id:
                     description: The unique ID of the links library item, as returned by the create or search endpoints.
                     maxLength: 250
@@ -45170,17 +45143,10 @@ paths:
                   title: Important Resources
             schema:
               additionalProperties: false
-              description: Panel configuration stored inline
+              type: object
               properties:
                 description:
-                  description: A short description of the panel.
                   type: string
-                hide_border:
-                  description: When true, the panel border is hidden. Defaults to false.
-                  type: boolean
-                hide_title:
-                  description: When true, the panel title is hidden. Defaults to false.
-                  type: boolean
                 layout:
                   description: Whether to display the links in a horizontal or vertical layout.
                   enum:
@@ -45210,10 +45176,8 @@ paths:
                 title:
                   type: string
               required:
-                - title
                 - links
-              title: By value
-              type: object
+                - title
       responses:
         '200':
           content:
@@ -96325,11 +96289,9 @@ components:
       properties:
         destination:
           description: Linked dashboard saved object ID.
-          maxLength: 250
           type: string
         label:
           description: The label of the link displayed in the UI.
-          maxLength: 1000
           type: string
         options:
           additionalProperties: false
@@ -96366,11 +96328,9 @@ components:
       properties:
         destination:
           description: The external URL to link to.
-          maxLength: 250
           type: string
         label:
           description: The label of the link displayed in the UI.
-          maxLength: 1000
           type: string
         options:
           additionalProperties: false
@@ -97535,17 +97495,10 @@ components:
       properties:
         data:
           additionalProperties: false
-          description: Panel configuration stored inline
+          type: object
           properties:
             description:
-              description: A short description of the panel.
               type: string
-            hide_border:
-              description: When true, the panel border is hidden. Defaults to false.
-              type: boolean
-            hide_title:
-              description: When true, the panel title is hidden. Defaults to false.
-              type: boolean
             layout:
               description: Whether to display the links in a horizontal or vertical layout.
               enum:
@@ -97575,10 +97528,8 @@ components:
             title:
               type: string
           required:
-            - title
             - links
-          title: By value
-          type: object
+            - title
         id:
           description: The unique ID of the links library item, as returned by the create or search endpoints.
           maxLength: 250
