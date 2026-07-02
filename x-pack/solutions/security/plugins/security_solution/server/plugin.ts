@@ -854,7 +854,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     if (plugins.workflowsExtensions) {
-      registerWorkflowSteps(plugins.workflowsExtensions, core, config.experimentalFeatures);
+      registerWorkflowSteps(plugins.workflowsExtensions, core, experimentalFeatures);
     }
 
     setupAlertsCapabilitiesSwitcher({
