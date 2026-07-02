@@ -21,6 +21,7 @@ const ERROR_TITLE = i18n.translate('alertsApis.muteAlert.error', {
 export interface UseMuteAlertInstanceParams {
   http: HttpStart;
   notifications: NotificationsStart;
+  skipAlertsQueryContext?: boolean;
 }
 
 export const getKey = mutationKeys.muteAlertInstance;
@@ -28,13 +29,14 @@ export const getKey = mutationKeys.muteAlertInstance;
 export const useMuteAlertInstance = ({
   http,
   notifications: { toasts },
+  skipAlertsQueryContext,
 }: UseMuteAlertInstanceParams) => {
   return useMutation(
     ({ ruleId, alertInstanceId }: ToggleAlertParams) =>
       muteAlertInstance({ http, id: ruleId, instanceId: alertInstanceId }),
     {
       mutationKey: getKey(),
-      context: AlertsQueryContext,
+      context: skipAlertsQueryContext ? undefined : AlertsQueryContext,
       onSuccess() {
         toasts.addSuccess(
           i18n.translate('xpack.responseOpsAlertsApis.alertsTable.alertSnoozed', {

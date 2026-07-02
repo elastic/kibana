@@ -26,11 +26,14 @@ import { ExpandableContextMenuPanel } from './expandable_context_menu_panel';
 
 jest.mock('../hooks/use_alert_muted_state');
 jest.mock('../hooks/use_alert_snoozed_state');
-jest.mock('@kbn/response-ops-alerts-apis/hooks/use_mute_alert_instance');
-jest.mock('@kbn/response-ops-alerts-apis/hooks/use_unmute_alert_instance');
-jest.mock('@kbn/response-ops-alerts-apis/hooks/use_snooze_alert_instance');
-jest.mock('@kbn/response-ops-alerts-apis/hooks/use_unsnooze_alert_instance');
+
+// The mute-vs-snooze decision + toasts live in useAlertSnooze (covered by its own
+// unit tests), so here we mock it and assert SnoozeAlertAction wires the payloads.
+const mockSnoozeAlert = jest.fn().mockResolvedValue(true);
+const mockUnsnoozeAlert = jest.fn().mockResolvedValue(true);
+
 jest.mock('@kbn/response-ops-alert-snooze', () => ({
+  useAlertSnooze: () => ({ snoozeAlert: mockSnoozeAlert, unsnoozeAlert: mockUnsnoozeAlert }),
   AlertSnoozePopover: ({ onApply }: { onApply: (payload: unknown) => void }) => (
     <button data-test-subj="alertSnoozePopover" onClick={() => onApply({ expiresAt: null })}>
       Snooze
@@ -59,24 +62,11 @@ jest.mock('@kbn/response-ops-alert-snooze', () => ({
 
 import { useAlertMutedState } from '../hooks/use_alert_muted_state';
 import { useAlertSnoozedState } from '../hooks/use_alert_snoozed_state';
-import { useMuteAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_mute_alert_instance';
-import { useUnmuteAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_unmute_alert_instance';
-import { useSnoozeAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_snooze_alert_instance';
-import { useUnsnoozeAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_unsnooze_alert_instance';
 
 const mockUseAlertMutedState = useAlertMutedState as jest.MockedFunction<typeof useAlertMutedState>;
 const mockUseAlertSnoozedState = useAlertSnoozedState as jest.MockedFunction<
   typeof useAlertSnoozedState
 >;
-const mockMuteAlert = jest.fn().mockResolvedValue(undefined);
-const mockUnmuteAlert = jest.fn().mockResolvedValue(undefined);
-const mockSnoozeAlert = jest.fn().mockResolvedValue(undefined);
-const mockUnsnoozeAlert = jest.fn().mockResolvedValue(undefined);
-
-(useMuteAlertInstance as jest.Mock).mockReturnValue({ mutateAsync: mockMuteAlert });
-(useUnmuteAlertInstance as jest.Mock).mockReturnValue({ mutateAsync: mockUnmuteAlert });
-(useSnoozeAlertInstance as jest.Mock).mockReturnValue({ mutateAsync: mockSnoozeAlert });
-(useUnsnoozeAlertInstance as jest.Mock).mockReturnValue({ mutateAsync: mockUnsnoozeAlert });
 
 const RULE_ID = 'rule-1';
 const INSTANCE_ID = 'instance-1';
@@ -131,10 +121,8 @@ const baseProps = createPartialObjectMock<AlertActionsProps>({
 describe('SnoozeAlertAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useMuteAlertInstance as jest.Mock).mockReturnValue({ mutateAsync: mockMuteAlert });
-    (useUnmuteAlertInstance as jest.Mock).mockReturnValue({ mutateAsync: mockUnmuteAlert });
-    (useSnoozeAlertInstance as jest.Mock).mockReturnValue({ mutateAsync: mockSnoozeAlert });
-    (useUnsnoozeAlertInstance as jest.Mock).mockReturnValue({ mutateAsync: mockUnsnoozeAlert });
+    mockSnoozeAlert.mockResolvedValue(true);
+    mockUnsnoozeAlert.mockResolvedValue(true);
   });
 
   describe('visibility', () => {
@@ -244,7 +232,7 @@ describe('SnoozeAlertAction', () => {
   });
 
   describe('unsnooze actions', () => {
-    it('calls unmuteAlert when Unsnooze is clicked on a muted alert', async () => {
+    it('calls unsnoozeAlert when Unsnooze is clicked on a muted alert', async () => {
       mockUseAlertMutedState.mockReturnValue({
         isMuted: true,
         ruleId: RULE_ID,
@@ -263,11 +251,7 @@ describe('SnoozeAlertAction', () => {
       fireEvent.click(screen.getByTestId('snooze-alert-action-unsnooze'));
 
       await waitFor(() => {
-        expect(mockUnmuteAlert).toHaveBeenCalledWith({
-          ruleId: RULE_ID,
-          alertInstanceId: INSTANCE_ID,
-        });
-        expect(mockUnsnoozeAlert).not.toHaveBeenCalled();
+        expect(mockUnsnoozeAlert).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -294,11 +278,7 @@ describe('SnoozeAlertAction', () => {
       fireEvent.click(screen.getByTestId('snooze-alert-action-unsnooze'));
 
       await waitFor(() => {
-        expect(mockUnsnoozeAlert).toHaveBeenCalledWith({
-          ruleId: RULE_ID,
-          alertInstanceId: INSTANCE_ID,
-        });
-        expect(mockUnmuteAlert).not.toHaveBeenCalled();
+        expect(mockUnsnoozeAlert).toHaveBeenCalledTimes(1);
       });
     });
   });
@@ -320,21 +300,17 @@ describe('SnoozeAlertAction', () => {
       });
     });
 
-    it('calls muteAlert when snooze is applied with expiresAt: null (indefinite, no conditions)', async () => {
+    it('applies the snooze payload from the popover (indefinite, no conditions)', async () => {
       // The mock AlertSnoozePopover calls onApply({ expiresAt: null }) when clicked
       render(<TestComponent {...baseProps} />);
       fireEvent.click(screen.getByTestId('alertSnoozePopover'));
 
       await waitFor(() => {
-        expect(mockMuteAlert).toHaveBeenCalledWith({
-          ruleId: RULE_ID,
-          alertInstanceId: INSTANCE_ID,
-        });
-        expect(mockSnoozeAlert).not.toHaveBeenCalled();
+        expect(mockSnoozeAlert).toHaveBeenCalledWith({ expiresAt: null });
       });
     });
 
-    it('calls snoozeAlert when snooze is applied with an expiresAt date', async () => {
+    it('applies the snooze payload from the popover with an expiresAt date', async () => {
       // Override mock to call onApply with a time-based payload
       (jest.requireMock('@kbn/response-ops-alert-snooze') as any).AlertSnoozePopover = ({
         onApply,
@@ -353,14 +329,7 @@ describe('SnoozeAlertAction', () => {
       fireEvent.click(screen.getByTestId('alertSnoozePopover'));
 
       await waitFor(() => {
-        expect(mockSnoozeAlert).toHaveBeenCalledWith(
-          expect.objectContaining({
-            ruleId: RULE_ID,
-            alertInstanceId: INSTANCE_ID,
-            expiresAt: '2026-06-01T00:00:00.000Z',
-          })
-        );
-        expect(mockMuteAlert).not.toHaveBeenCalled();
+        expect(mockSnoozeAlert).toHaveBeenCalledWith({ expiresAt: '2026-06-01T00:00:00.000Z' });
       });
     });
   });
@@ -397,16 +366,13 @@ describe('SnoozeAlertAction', () => {
       expect(screen.queryByTestId('snooze-alert-action-snooze')).not.toBeInTheDocument();
     });
 
-    it('mutes the alert and restores the menu when applying an indefinite snooze from the inline panel', async () => {
+    it('applies the snooze and restores the menu when applying from the inline panel', async () => {
       render(<InlineTestComponent {...baseProps} />);
       fireEvent.click(screen.getByTestId('snooze-alert-action-snooze'));
       fireEvent.click(screen.getByTestId('alertSnoozePanelInlineApply'));
 
       await waitFor(() => {
-        expect(mockMuteAlert).toHaveBeenCalledWith({
-          ruleId: RULE_ID,
-          alertInstanceId: INSTANCE_ID,
-        });
+        expect(mockSnoozeAlert).toHaveBeenCalledWith({ expiresAt: null });
       });
 
       await waitFor(() => {
@@ -422,7 +388,6 @@ describe('SnoozeAlertAction', () => {
 
       expect(screen.getByTestId('snooze-alert-action-snooze')).toBeInTheDocument();
       expect(screen.queryByTestId('alertSnoozePanelInline')).not.toBeInTheDocument();
-      expect(mockMuteAlert).not.toHaveBeenCalled();
       expect(mockSnoozeAlert).not.toHaveBeenCalled();
     });
   });

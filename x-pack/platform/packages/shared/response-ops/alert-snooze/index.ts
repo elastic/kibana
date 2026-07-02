@@ -48,6 +48,9 @@ export type {
 export { AlertSnoozePanelInline } from './components/alert_snooze_panel_inline';
 export type { AlertSnoozePanelInlineProps } from './components/alert_snooze_panel_inline';
 
+export { useAlertSnooze } from './hooks/use_alert_snooze';
+export type { UseAlertSnoozeParams, UseAlertSnoozeResult } from './hooks/use_alert_snooze';
+
 export {
   DEFAULT_DATA_CONDITION_TYPES,
   fieldChangeDescriptor,

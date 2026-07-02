@@ -8,13 +8,12 @@
 import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
-import { AlertSnoozePopover, AlertSnoozePanelInline } from '@kbn/response-ops-alert-snooze';
+import {
+  AlertSnoozePopover,
+  AlertSnoozePanelInline,
+  useAlertSnooze,
+} from '@kbn/response-ops-alert-snooze';
 import type { AlertSnoozePayload } from '@kbn/response-ops-alert-snooze';
-import { useMuteAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_mute_alert_instance';
-import { useUnmuteAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_unmute_alert_instance';
-import { useSnoozeAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_snooze_alert_instance';
-import { useUnsnoozeAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_unsnooze_alert_instance';
-import type { SnoozeCondition } from '@kbn/response-ops-alerts-apis/types';
 import type { AdditionalContext, AlertActionsProps } from '../types';
 import { UNSNOOZE, SNOOZE } from '../translations';
 import { useAlertMutedState } from '../hooks/use_alert_muted_state';
@@ -41,11 +40,6 @@ export const SnoozeAlertAction = typedMemo(
     const { isMuted, ruleId, alertInstanceId } = useAlertMutedState(alert);
     const { isSnoozed, snoozedInstance } = useAlertSnoozedState(alert);
 
-    const { mutateAsync: muteAlert } = useMuteAlertInstance({ http, notifications });
-    const { mutateAsync: unmuteAlert } = useUnmuteAlertInstance({ http, notifications });
-    const { mutateAsync: snoozeAlert } = useSnoozeAlertInstance({ http, notifications });
-    const { mutateAsync: unsnoozeAlert } = useUnsnoozeAlertInstance({ http, notifications });
-
     const isAlertActive = alert[ALERT_STATUS]?.[0] === ALERT_STATUS_ACTIVE;
 
     const handleActionDone = useCallback(() => {
@@ -53,48 +47,28 @@ export const SnoozeAlertAction = typedMemo(
       refresh();
     }, [onActionExecuted, refresh]);
 
-    const handleUnsnooze = useCallback(async () => {
-      if (ruleId == null || alertInstanceId == null) return;
-      if (isMuted) {
-        await unmuteAlert({ ruleId, alertInstanceId });
-      }
-      if (isSnoozed && snoozedInstance) {
-        await unsnoozeAlert({ ruleId, alertInstanceId });
-      }
-      handleActionDone();
-    }, [
-      alertInstanceId,
-      handleActionDone,
-      isMuted,
+    const { snoozeAlert, unsnoozeAlert } = useAlertSnooze({
+      http,
+      notifications,
+      ruleId: ruleId ?? undefined,
+      instanceId: alertInstanceId ?? undefined,
+      isMuted: isMuted ?? undefined,
       isSnoozed,
-      snoozedInstance,
-      ruleId,
-      unmuteAlert,
-      unsnoozeAlert,
-    ]);
+      onSuccess: handleActionDone,
+    });
+
+    const handleUnsnooze = useCallback(async () => {
+      await unsnoozeAlert();
+    }, [unsnoozeAlert]);
 
     const handleSnoozeApply = useCallback(
       async (payload: AlertSnoozePayload) => {
-        if (ruleId == null || alertInstanceId == null) return;
-
-        if (payload.expiresAt === null && !payload.conditions?.length) {
-          // Indefinitely with no conditions → mute
-          await muteAlert({ ruleId, alertInstanceId });
-        } else {
-          await snoozeAlert({
-            ruleId,
-            alertInstanceId,
-            ...(payload.expiresAt !== undefined && { expiresAt: payload.expiresAt ?? undefined }),
-            ...(payload.conditions?.length && {
-              conditions: payload.conditions as SnoozeCondition[],
-              conditionOperator: payload.conditionOperator,
-            }),
-          });
+        const applied = await snoozeAlert(payload);
+        if (applied) {
+          closePanel?.();
         }
-        closePanel?.();
-        handleActionDone();
       },
-      [alertInstanceId, closePanel, handleActionDone, muteAlert, ruleId, snoozeAlert]
+      [closePanel, snoozeAlert]
     );
 
     if ((!isAlertActive && !isMuted && !isSnoozed) || ruleId == null || alertInstanceId == null) {
