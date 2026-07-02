@@ -105,6 +105,37 @@ describe('useChangeHistoryAutoSelection', () => {
     expect(setSelectedChangeId).toHaveBeenCalledWith('evt-2');
   });
 
+  it('invokes onAutoSelect when auto-selecting the first item', async () => {
+    const onAutoSelect = jest.fn();
+    const firstItem = createItem('evt-1');
+
+    const { rerender } = renderHook(
+      ({ items, isFetchingFirstPage }) =>
+        useChangeHistoryAutoSelection({
+          objectId: 'obj-1',
+          items,
+          isFetchingFirstPage,
+          setSelectedChangeId: jest.fn(),
+          onAutoSelect,
+        }),
+      {
+        initialProps: {
+          items: [] as ChangeHistoryListItem[],
+          isFetchingFirstPage: true,
+        },
+      }
+    );
+
+    rerender({
+      items: [firstItem],
+      isFetchingFirstPage: false,
+    });
+
+    await waitFor(() => {
+      expect(onAutoSelect).toHaveBeenCalledWith(firstItem);
+    });
+  });
+
   it('resets selection when objectId changes', () => {
     const setSelectedChangeId = jest.fn();
 
