@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { alertTriageSkill } from './alert_triage_skill';
+export { alertTriageSkill, ALERT_TRIAGE_TOOL_ID } from './alert_triage_skill';

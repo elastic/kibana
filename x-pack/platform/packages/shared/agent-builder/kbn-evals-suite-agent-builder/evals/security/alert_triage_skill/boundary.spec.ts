@@ -31,7 +31,7 @@ evaluate.describe(
                     'Uses alert-analysis (not alert-triage queue prioritization) to investigate alert ' +
                     'abc-123. Fetches alert details, related alerts, threat intelligence, and entity risk ' +
                     'to assess true positive vs false positive disposition. Does not rank the full alert ' +
-                    'queue or present multi-group prioritize-alerts output.',
+                    'queue or present multi-group alert-triage output.',
                 },
                 metadata: {
                   query_intent: 'Single Alert Investigation',

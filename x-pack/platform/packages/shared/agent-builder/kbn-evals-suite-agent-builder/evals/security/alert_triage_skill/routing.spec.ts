@@ -13,13 +13,13 @@ evaluate.describe(
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
     evaluate(
-      'queue prioritization queries activate alert-triage and prioritize-alerts',
+      'queue prioritization queries activate alert-triage skill and tool',
       async ({ evaluateDataset }) => {
         await evaluateDataset({
           dataset: {
             name: 'agent builder: security-alert-triage-skill',
             description:
-              'Validates that alert queue prioritization queries activate the alert-triage skill and use the prioritize-alerts tool',
+              'Validates that alert queue prioritization queries activate the alert-triage skill and use the alert-triage tool',
             examples: [
               {
                 input: {
@@ -27,7 +27,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'Presents ranked alert groups from prioritize-alerts. Each group shows the shared ' +
+                    'Presents ranked alert groups from the alert-triage tool. Each group shows the shared ' +
                     'entity or context, group score with drivers (base risk score, MITRE tactic boost, ' +
                     'and optional entity risk or asset criticality boosts), and the top alert _id. ' +
                     'Summarizes how many alerts were assessed and recommends alert-analysis for top groups. ' +
@@ -45,7 +45,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'Presents ranked alert groups from the last 8 hours via prioritize-alerts. Each group ' +
+                    'Presents ranked alert groups from the last 8 hours via the alert-triage tool. Each group ' +
                     'shows shared host or user entity, score drivers (base risk, MITRE boost, optional ' +
                     'entity risk or asset criticality), and top alert _id. Highest-urgency groups appear ' +
                     'first. Presentation order of details within a group does not affect correctness.',
@@ -53,7 +53,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Alert Queue Triage',
                   expectedSkill: 'alert-triage',
-                  expectedOnlyToolId: 'security.alert-triage.prioritize-alerts',
+                  expectedOnlyToolId: 'security.alert-triage',
                 },
               },
               {
@@ -63,7 +63,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'Presents ranked open alert groups as a shift starting point via prioritize-alerts. ' +
+                    'Presents ranked open alert groups as a shift starting point via the alert-triage tool. ' +
                     'Each group shows shared entity, score drivers, and top alert _id. Summarizes total ' +
                     'alerts assessed. Presentation order of details within a group does not affect correctness.',
                 },

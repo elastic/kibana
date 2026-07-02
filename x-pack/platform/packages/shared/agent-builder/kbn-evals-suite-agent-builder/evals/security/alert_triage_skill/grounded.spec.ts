@@ -65,7 +65,7 @@ evaluate.describe(
               metadata: {
                 query_intent: 'Alert Queue Triage - Grounded Output',
                 expectedSkill: 'alert-triage',
-                expectedOnlyToolId: 'security.alert-triage.prioritize-alerts',
+                expectedOnlyToolId: 'security.alert-triage',
                 requiredAlertIds: seededAlertIds ? [seededAlertIds.critical] : [],
                 requiredTerms: seededAlertIds ? ['99'] : [],
               },
@@ -107,7 +107,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Alert Queue Triage - Grounded Output with IDs',
                   expectedSkill: 'alert-triage',
-                  expectedOnlyToolId: 'security.alert-triage.prioritize-alerts',
+                  expectedOnlyToolId: 'security.alert-triage',
                   requiredAlertIds: seededAlertIds
                     ? [seededAlertIds.critical, seededAlertIds.high]
                     : [],

@@ -8,9 +8,9 @@
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-export const ALERTS_INDEX = '.alerts-security.alerts-default';
-export const RISK_INDEX = 'risk-score.risk-score-latest-default';
-export const CRITICALITY_INDEX = '.asset-criticality.asset-criticality-default';
+const ALERTS_INDEX = '.alerts-security.alerts-default';
+const RISK_INDEX = 'risk-score.risk-score-latest-default';
+const CRITICALITY_INDEX = '.asset-criticality.asset-criticality-default';
 
 const GROUNDED_EVAL_TAG = 'alert-triage-eval-seed';
 const ENRICHMENT_EVAL_TAG = 'alert-triage-enrichment-eval-seed';

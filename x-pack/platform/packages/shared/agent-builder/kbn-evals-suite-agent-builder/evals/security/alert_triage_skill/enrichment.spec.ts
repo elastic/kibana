@@ -65,7 +65,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Alert Triage - Entity Risk Enrichment',
                   expectedSkill: 'alert-triage',
-                  expectedOnlyToolId: 'security.alert-triage.prioritize-alerts',
+                  expectedOnlyToolId: 'security.alert-triage',
                   requiredAlertIds: entityRisk ? [entityRisk.enrichedAlertId] : [],
                   requiredTerms: entityRisk ? ['Critical', 'EVAL-RISK-HOST'] : [],
                 },
@@ -105,7 +105,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Alert Triage - Asset Criticality Enrichment',
                   expectedSkill: 'alert-triage',
-                  expectedOnlyToolId: 'security.alert-triage.prioritize-alerts',
+                  expectedOnlyToolId: 'security.alert-triage',
                   requiredAlertIds: assetCriticality ? [assetCriticality.watchlistAlertId] : [],
                   requiredTerms: assetCriticality ? ['extreme_impact', 'EVAL-CRIT-HOST'] : [],
                 },

@@ -9,7 +9,7 @@ import { platformCoreTools } from '@kbn/agent-builder-common';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
-import { alertTriageSkill } from './alert_triage';
+import { alertTriageSkill, ALERT_TRIAGE_TOOL_ID } from './alert_triage';
 
 const ALL_SKILLS = [threatHuntingSkill, alertAnalysisSkill, alertTriageSkill];
 
@@ -117,10 +117,10 @@ describe('Security Skills', () => {
       expect(tools).toHaveLength(0);
     });
 
-    it('returns 1 inline tool (prioritize-alerts)', async () => {
+    it('returns 1 inline tool (alert-triage)', async () => {
       const inlineTools = await alertTriageSkill.getInlineTools!();
       expect(inlineTools).toHaveLength(1);
-      expect(inlineTools[0].id).toBe('security.alert-triage.prioritize-alerts');
+      expect(inlineTools[0].id).toBe(ALERT_TRIAGE_TOOL_ID);
     });
 
     it('has total tool count within limits (0 registry + 1 inline = 1)', async () => {

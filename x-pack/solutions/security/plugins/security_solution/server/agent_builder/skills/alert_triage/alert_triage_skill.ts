@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { ToolType } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
@@ -12,7 +13,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z } from '@kbn/zod/v4';
 import { prioritizeAlerts } from './services/alert_triage_service';
 
-const PRIORITIZE_ALERTS_TOOL_ID = 'security.alert-triage.prioritize-alerts';
+export const ALERT_TRIAGE_TOOL_ID = `${internalNamespaces.security}.alert-triage`;
 
 const prioritizeAlertsSchema = z.object({
   timeWindowHours: z
@@ -46,8 +47,8 @@ const prioritizeAlertsSchema = z.object({
     ),
 });
 
-const createPrioritizeAlertsTool = (): BuiltinSkillBoundedTool<typeof prioritizeAlertsSchema> => ({
-  id: PRIORITIZE_ALERTS_TOOL_ID,
+const createAlertTriageTool = (): BuiltinSkillBoundedTool<typeof prioritizeAlertsSchema> => ({
+  id: ALERT_TRIAGE_TOOL_ID,
   type: ToolType.builtin,
   description:
     'Fetch the alert queue, score each alert using base risk score and MITRE tactic boost, ' +
@@ -116,7 +117,7 @@ Use this skill when:
 ## Triage Process
 
 ### 1. Prioritize the Alert Queue
-- Call \`security.alert-triage.prioritize-alerts\` with:
+- Call \`${ALERT_TRIAGE_TOOL_ID}\` with:
   - \`timeWindowHours\`: how far back to look (default 24h, range 1–168)
   - \`workflowStatus\`: "open" (default) or "open+acknowledged"
   - \`alertIds\`: optional list of specific alert IDs when the user has a selection
@@ -150,33 +151,33 @@ For each group returned, explain:
 ## Examples
 
 **Query**: "What should I focus on right now?"
-- Tool: \`security.alert-triage.prioritize-alerts\` (only)
+- Tool: \`${ALERT_TRIAGE_TOOL_ID}\` (only)
 - Params: \`{ timeWindowHours: 24, workflowStatus: "open" }\`
 
 **Query**: "Prioritize alerts from the last 8 hours"
-- Tool: \`security.alert-triage.prioritize-alerts\` (only)
+- Tool: \`${ALERT_TRIAGE_TOOL_ID}\` (only)
 - Params: \`{ timeWindowHours: 8, workflowStatus: "open" }\`
 
 **Query**: "Which alerts from the last 8 hours are most urgent? Give me a prioritized view."
-- Tool: \`security.alert-triage.prioritize-alerts\` (only)
+- Tool: \`${ALERT_TRIAGE_TOOL_ID}\` (only)
 - Params: \`{ timeWindowHours: 8, workflowStatus: "open" }\`
 
 **Query**: "Prioritize the alert queue for the last 24 hours and list the top alert IDs I should investigate."
-- Tool: \`security.alert-triage.prioritize-alerts\` (only)
+- Tool: \`${ALERT_TRIAGE_TOOL_ID}\` (only)
 - Params: \`{ timeWindowHours: 24, workflowStatus: "open" }\`
 - Note: The tool already returns alert _ids in its output — do NOT call \`security.alerts\` to look them up separately
 
 **Query**: "Which of these alerts should I look at first?" (with alert attachment)
-- Tool: \`security.alert-triage.prioritize-alerts\` (only)
+- Tool: \`${ALERT_TRIAGE_TOOL_ID}\` (only)
 - Params: \`{ alertIds: ["<id1>", "<id2>", ...], timeWindowHours: 24 }\`
 
 **Query**: "What alerts should I look at? Prioritize by entity risk where available."
-- Tool: \`security.alert-triage.prioritize-alerts\` (only)
+- Tool: \`${ALERT_TRIAGE_TOOL_ID}\` (only)
 - Params: \`{ timeWindowHours: 24, workflowStatus: "open" }\`
 - Response order for the top group: (1) entityName, (2) entityRiskLevel verbatim (e.g. Critical) and entityRiskBoost, (3) why it outranks peers with higher base scores, (4) top alert _id
 
 **Query**: "Prioritize the alert queue. Call out any hosts with high asset criticality."
-- Tool: \`security.alert-triage.prioritize-alerts\` (only)
+- Tool: \`${ALERT_TRIAGE_TOOL_ID}\` (only)
 - Params: \`{ timeWindowHours: 24, workflowStatus: "open" }\`
 - Response order for watchlist hosts: (1) entityName, (2) assetCriticality verbatim (e.g. extreme_impact) and assetCriticalityBoost, (3) why it outranks peers, (4) top alert _id
 
@@ -186,13 +187,13 @@ For each group returned, explain:
 - When a group's primary entity carries an entity risk level or asset criticality, cite it — these are strong prioritization signals from Entity Analytics
 - Copy \`entityRiskLevel\`, \`assetCriticality\`, and \`entityName\` verbatim from the tool result when present (e.g. "Critical", "extreme_impact", "EVAL-RISK-HOST"). Do not paraphrase level names.
 - When entity enrichment re-ranks a group above a higher base-score peer, explain why (cite the entity risk / criticality boost from scoreBreakdown)
-- Entity Analytics enrichment is internal to \`prioritize-alerts\`; never call \`security.entity_risk_score\` or any asset-criticality tool separately
+- Entity Analytics enrichment is internal to \`${ALERT_TRIAGE_TOOL_ID}\`; never call \`security.entity_risk_score\` or any asset-criticality tool separately
 - Acknowledged alerts are deprioritized (−5) but not hidden; flag the modifier in your response
 - Alerts already in a case are deprioritized (−5) but remain visible — they may group with new open alerts
 - Building-block alerts are excluded automatically (they are sub-components of parent alerts)
 - This skill does NOT require alerts to form a multi-rule chain — any actionable alert qualifies
 - If the tool returns 0 alerts, tell the user no open alerts match the criteria and suggest widening the window
-- **ALWAYS call ONLY \`security.alert-triage.prioritize-alerts\`** — never call \`security.alerts\`, \`security.entity_risk_score\`, or any other tool. The prioritize-alerts tool handles all time-window filtering, severity filtering, scoring, and returns alert _ids in its output. There are no exceptions to this rule.
+- **ALWAYS call ONLY \`${ALERT_TRIAGE_TOOL_ID}\`** — never call \`security.alerts\`, \`security.entity_risk_score\`, or any other tool. The alert-triage tool handles all time-window filtering, severity filtering, scoring, and returns alert _ids in its output. There are no exceptions to this rule.
 
 ## Response Format
 
@@ -214,5 +215,5 @@ End with a brief summary of total alerts assessed and how many groups were ident
 
   getRegistryTools: () => [],
 
-  getInlineTools: () => [createPrioritizeAlertsTool()],
+  getInlineTools: () => [createAlertTriageTool()],
 });
