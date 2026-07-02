@@ -26682,7 +26682,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update an agentless policy by ID. Uses full-replace semantics: the policy is rebuilt entirely from the request body, so any omitted optional field (description, vars, global_data_tags, cloud_connector, etc.) is cleared or reset to its default. The integration package name is immutable and the runtime-managed cluster_id is preserved from the existing policy.
+        Update an agentless policy by ID. Uses full-replace semantics: the policy is rebuilt entirely from the request body, so any omitted optional field (for example, `description`, `vars`, `global_data_tags`, `cloud_connector`) is cleared or reset to its default. The integration package name is immutable and the runtime-managed `cluster_id` is preserved from the existing policy.
       operationId: put-fleet-agentless-policies-policyid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -26704,7 +26704,7 @@ paths:
           application/json:
             examples:
               updateAgentlessPolicyAttachAWSCloudConnectorRequestExample:
-                description: Example request to attach an AWS cloud connector to an agentless policy on update. Because PUT is full-replace, the `cloud_connector` block must be present on every subsequent update or the connector is detached.
+                description: Example request to attach an AWS cloud connector to an agentless policy on update. Because `PUT` is full-replace, the `cloud_connector` block must be present on every subsequent update or the connector is detached.
                 value:
                   cloud_connector:
                     target_csp: aws
@@ -26738,7 +26738,7 @@ paths:
                     deployment: aws
                     posture: cspm
               updateAgentlessPolicyClearFieldsRequestExample:
-                description: Example showing full-replace clearing semantics. Compared to the prior state, this request omits `description` (clearing it) and provides only the minimal required fields. Any optional field not present in the body (description, vars, global_data_tags, cloud_connector, etc.) is dropped from the resulting policy.
+                description: Example showing full-replace clearing semantics. Compared to the prior state, this request omits `description` (clearing it) and provides only the minimal required fields. Any optional field not present in the body (for example, `description`, `vars`, `global_data_tags`, `cloud_connector`) is dropped from the resulting policy.
                 value:
                   inputs:
                     ESS Billing-cel:
@@ -26757,7 +26757,7 @@ paths:
                     name: ess_billing
                     version: 1.6.0
               updateAgentlessPolicyRequestExample:
-                description: 'Example request to update an agentless policy. PUT uses full-replace semantics: the policy is rebuilt entirely from this body, so any omitted optional field is cleared / reset to its default rather than preserved. For example, omitting `description` clears it, omitting `vars`/`global_data_tags` removes them, and omitting `cloud_connector` detaches any previously-attached connector. Detaching (or swapping) a cloud connector only removes the reference; the connector itself is not deleted, as connectors have an independent, shareable lifecycle and are managed via the cloud connector API. Two fields are exceptions that cannot be changed via PUT: the integration `package.name` is immutable, and the runtime-managed `cluster_id` is preserved from the existing agent policy.'
+                description: 'Example request to update an agentless policy. `PUT` uses full-replace semantics: the policy is rebuilt entirely from this body, so any omitted optional field is cleared or reset to its default rather than preserved. For example, omitting `description` clears it, omitting `vars` or `global_data_tags` removes them, and omitting `cloud_connector` detaches any previously attached connector. Detaching or swapping a cloud connector only removes the reference; the connector itself is not deleted, as connectors have an independent, shareable lifecycle and are managed through the cloud connector API. Two fields are exceptions that cannot be changed using `PUT`: the integration `package.name` is immutable, and the runtime-managed `cluster_id` is preserved from the existing agent policy.'
                 value:
                   description: updated description
                   inputs:
@@ -26784,7 +26784,7 @@ paths:
                     name: ess_billing
                     version: 1.6.0
               updateAgentlessPolicyReuseAWSCloudConnectorRequestExample:
-                description: Example request to update an agentless policy reusing an existing AWS cloud connector by id instead of creating a new one.
+                description: Example request to update an agentless policy reusing an existing AWS cloud connector by ID instead of creating a new one.
                 value:
                   cloud_connector:
                     cloud_connector_id: existing-aws-connector-id
