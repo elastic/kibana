@@ -6,12 +6,16 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiCallOut,
   EuiCheckbox,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
@@ -20,7 +24,7 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
-  EuiTreeView,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -32,7 +36,13 @@ import {
   useDeleteRegionPolicy,
 } from '../../hooks/use_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
-import { getAvailableRegions, CSP_DISPLAY_NAMES } from '../../utils/eis_utils';
+import {
+  getAvailableRegions,
+  REGION_DISPLAY_NAMES,
+  REGION_ZONE,
+  ZONE_DISPLAY_NAMES,
+  ZONE_ORDER,
+} from '../../utils/eis_utils';
 
 interface ManageRegionsModalProps {
   onClose: () => void;
@@ -40,7 +50,14 @@ interface ManageRegionsModalProps {
 
 const regionKey = (r: CspRegion) => `${r.csp}::${r.region}`;
 
+interface ZoneGroup {
+  zoneId: string;
+  displayName: string;
+  regions: CspRegion[];
+}
+
 export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose }) => {
+  const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
 
   const { data: policy, isLoading: isPolicyLoading } = useRegionPolicy();
@@ -52,17 +69,54 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
 
   const [checkedKeys, setCheckedKeys] = useState<Set<string>>(new Set());
   const [syncedFromPolicy, setSyncedFromPolicy] = useState(false);
+  const [expandedZones, setExpandedZones] = useState<Set<string>>(new Set());
+  const [isCallOutDismissed, setIsCallOutDismissed] = useState(false);
 
-  // Seed checkbox state once the policy finishes loading
+  // Seed checkbox state once the policy finishes loading.
+  // No policy (null/empty allowed_regions) means no restrictions — all regions selected.
   React.useEffect(() => {
     if (!isPolicyLoading && !syncedFromPolicy) {
       const existing = policy?.region_policy?.allowed_regions ?? [];
-      setCheckedKeys(new Set(existing.map(regionKey)));
+      if (existing.length > 0) {
+        setCheckedKeys(new Set(existing.map(regionKey)));
+      } else {
+        setCheckedKeys(new Set(availableRegions.map(regionKey)));
+      }
       setSyncedFromPolicy(true);
     }
-  }, [isPolicyLoading, syncedFromPolicy, policy]);
+  }, [isPolicyLoading, syncedFromPolicy, policy, availableRegions]);
 
-  const handleToggle = useCallback((key: string) => {
+  const zoneGroups = useMemo((): ZoneGroup[] => {
+    const byZone = new Map<string, CspRegion[]>();
+    for (const r of availableRegions) {
+      const key = regionKey(r);
+      const zoneId = REGION_ZONE[key] ?? 'other';
+      const list = byZone.get(zoneId) ?? [];
+      list.push(r);
+      byZone.set(zoneId, list);
+    }
+    return [...ZONE_ORDER]
+      .filter((z) => byZone.has(z))
+      .map((zoneId) => ({
+        zoneId,
+        displayName: ZONE_DISPLAY_NAMES[zoneId] ?? zoneId,
+        regions: byZone.get(zoneId)!,
+      }));
+  }, [availableRegions]);
+
+  const totalSelected = checkedKeys.size;
+  const totalRegions = availableRegions.length;
+  const allSelected = totalSelected === totalRegions;
+
+  const handleSelectAll = useCallback(() => {
+    if (allSelected) {
+      setCheckedKeys(new Set());
+    } else {
+      setCheckedKeys(new Set(availableRegions.map(regionKey)));
+    }
+  }, [allSelected, availableRegions]);
+
+  const handleToggleRegion = useCallback((key: string) => {
     setCheckedKeys((prev) => {
       const next = new Set(prev);
       if (next.has(key)) {
@@ -74,53 +128,83 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     });
   }, []);
 
-  const treeItems = useMemo(() => {
-    const byCSP = new Map<string, CspRegion[]>();
-    for (const r of availableRegions) {
-      const list = byCSP.get(r.csp) ?? [];
-      list.push(r);
-      byCSP.set(r.csp, list);
-    }
+  const handleToggleZone = useCallback(
+    (zone: ZoneGroup) => {
+      const zoneKeys = zone.regions.map(regionKey);
+      const allZoneChecked = zoneKeys.every((k) => checkedKeys.has(k));
+      setCheckedKeys((prev) => {
+        const next = new Set(prev);
+        if (allZoneChecked) {
+          zoneKeys.forEach((k) => next.delete(k));
+        } else {
+          zoneKeys.forEach((k) => next.add(k));
+        }
+        return next;
+      });
+    },
+    [checkedKeys]
+  );
 
-    return [...byCSP.entries()].map(([csp, regions]) => ({
-      id: `csp-${csp}`,
-      label: CSP_DISPLAY_NAMES[csp] ?? csp.toUpperCase(),
-      children: regions.map((r) => {
-        const key = regionKey(r);
-        return {
-          id: `region-${key}`,
-          label: (
-            <EuiCheckbox
-              id={`manage-region-${key}`}
-              label={r.region}
-              checked={checkedKeys.has(key)}
-              onChange={() => handleToggle(key)}
-              data-test-subj={`manageRegionsCheckbox-${key}`}
-            />
-          ),
-        };
-      }),
-    }));
-  }, [availableRegions, checkedKeys, handleToggle]);
+  const handleToggleExpand = useCallback((zoneId: string) => {
+    setExpandedZones((prev) => {
+      const next = new Set(prev);
+      if (next.has(zoneId)) {
+        next.delete(zoneId);
+      } else {
+        next.add(zoneId);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleExpandAll = useCallback(() => {
+    if (expandedZones.size === zoneGroups.length) {
+      setExpandedZones(new Set());
+    } else {
+      setExpandedZones(new Set(zoneGroups.map((z) => z.zoneId)));
+    }
+  }, [expandedZones.size, zoneGroups]);
+
+  const handleResetToDefault = useCallback(() => {
+    setCheckedKeys(new Set(availableRegions.map(regionKey)));
+  }, [availableRegions]);
 
   const handleSave = useCallback(() => {
     const allowedRegions: CspRegion[] = availableRegions.filter((r) =>
       checkedKeys.has(regionKey(r))
     );
-    savePolicy({ allowed_regions: allowedRegions }, { onSuccess: onClose });
-  }, [availableRegions, checkedKeys, savePolicy, onClose]);
-
-  const handleRemoveRestrictions = useCallback(() => {
-    deletePolicy(undefined, { onSuccess: onClose });
-  }, [deletePolicy, onClose]);
+    // All regions selected == no restrictions; use delete to clear any existing policy
+    if (allowedRegions.length === availableRegions.length) {
+      deletePolicy(undefined, { onSuccess: onClose });
+    } else {
+      savePolicy({ allowed_regions: allowedRegions }, { onSuccess: onClose });
+    }
+  }, [availableRegions, checkedKeys, savePolicy, deletePolicy, onClose]);
 
   const isLoading = isPolicyLoading || isEndpointsLoading;
   const isBusy = isSaving || isDeleting;
+  const isAllExpanded = expandedZones.size === zoneGroups.length;
+
+  const zoneRowStyles = css`
+    padding: ${euiTheme.size.s} ${euiTheme.size.s};
+    border: ${euiTheme.border.thin};
+    border-radius: ${euiTheme.border.radius.medium};
+    margin-bottom: ${euiTheme.size.xs};
+  `;
+
+  const regionRowStyles = css`
+    padding: ${euiTheme.size.xs} 0;
+  `;
+
+  const regionListStyles = css`
+    padding: ${euiTheme.size.s} ${euiTheme.size.xl};
+    border-top: ${euiTheme.border.thin};
+  `;
 
   return (
     <EuiModal
       onClose={onClose}
-      style={{ minWidth: 520 }}
+      style={{ minWidth: 560 }}
       aria-labelledby={modalTitleId}
       data-test-subj="manageRegionsModal"
     >
@@ -137,23 +221,38 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           <p>
             <FormattedMessage
               id="xpack.searchInferenceEndpoints.manageRegions.description"
-              defaultMessage="Select the regions where Elastic Inference Service models are allowed to run. Only models available in the selected regions will be accessible. Leave all unchecked to allow all available regions."
+              defaultMessage="You can restrict the routing of inference calls by specifying only those regions."
             />
           </p>
         </EuiText>
 
         <EuiSpacer size="m" />
 
+        {!isCallOutDismissed && (
+          <>
+            <EuiCallOut
+              title={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.callout.title', {
+                defaultMessage: 'All models may not be available in all regions',
+              })}
+              color="primary"
+              iconType="iInCircle"
+              onDismiss={() => setIsCallOutDismissed(true)}
+              data-test-subj="manageRegionsCallout"
+            >
+              <p>
+                {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.callout.body', {
+                  defaultMessage:
+                    "Some models are only hosted in specific regions. Restricting your selection may make those models unavailable for inference routing. Check each model's details to see its supported regions.",
+                })}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
+
         {isLoading && (
           <EuiEmptyPrompt
             icon={<EuiLoadingSpinner size="xl" />}
-            title={
-              <h3>
-                {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.loading', {
-                  defaultMessage: 'Loading region data…',
-                })}
-              </h3>
-            }
             data-test-subj="manageRegionsLoading"
           />
         )}
@@ -181,31 +280,177 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
         )}
 
         {!isLoading && availableRegions.length > 0 && (
-          <EuiTreeView
-            items={treeItems}
-            expandByDefault
-            showExpansionArrows
-            aria-label={i18n.translate(
-              'xpack.searchInferenceEndpoints.manageRegions.treeAriaLabel',
-              { defaultMessage: 'Available regions' }
-            )}
-            data-test-subj="manageRegionsTree"
-          />
+          <>
+            {/* Selection summary + Expand all / Reset to default */}
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <strong>
+                        {i18n.translate(
+                          'xpack.searchInferenceEndpoints.manageRegions.selectionCount',
+                          {
+                            defaultMessage: '{selected} of {total} selected',
+                            values: { selected: totalSelected, total: totalRegions },
+                          }
+                        )}
+                      </strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      flush="left"
+                      onClick={handleSelectAll}
+                      data-test-subj="manageRegionsSelectAllButton"
+                    >
+                      {allSelected
+                        ? i18n.translate(
+                            'xpack.searchInferenceEndpoints.manageRegions.deselectAll',
+                            { defaultMessage: 'Deselect all' }
+                          )
+                        : i18n.translate('xpack.searchInferenceEndpoints.manageRegions.selectAll', {
+                            defaultMessage: 'Select all',
+                          })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      onClick={handleExpandAll}
+                      data-test-subj="manageRegionsExpandAllButton"
+                    >
+                      {isAllExpanded
+                        ? i18n.translate(
+                            'xpack.searchInferenceEndpoints.manageRegions.collapseAll',
+                            { defaultMessage: 'Collapse all' }
+                          )
+                        : i18n.translate('xpack.searchInferenceEndpoints.manageRegions.expandAll', {
+                            defaultMessage: 'Expand all',
+                          })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      iconType="refresh"
+                      onClick={handleResetToDefault}
+                      data-test-subj="manageRegionsResetButton"
+                    >
+                      {i18n.translate(
+                        'xpack.searchInferenceEndpoints.manageRegions.resetToDefault',
+                        { defaultMessage: 'Reset to default' }
+                      )}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="s" />
+
+            {/* Zone accordion list */}
+            {zoneGroups.map((zone) => {
+              const zoneKeys = zone.regions.map(regionKey);
+              const checkedCount = zoneKeys.filter((k) => checkedKeys.has(k)).length;
+              const isZoneChecked = checkedCount === zone.regions.length;
+              const isZoneIndeterminate = checkedCount > 0 && checkedCount < zone.regions.length;
+              const isExpanded = expandedZones.has(zone.zoneId);
+              const zoneCheckboxId = `zone-checkbox-${zone.zoneId}`;
+
+              return (
+                <div key={zone.zoneId} data-test-subj={`manageRegionsZone-${zone.zoneId}`}>
+                  <div css={zoneRowStyles}>
+                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+                      <EuiFlexItem grow={false}>
+                        <EuiCheckbox
+                          id={zoneCheckboxId}
+                          checked={isZoneChecked}
+                          indeterminate={isZoneIndeterminate}
+                          onChange={() => handleToggleZone(zone)}
+                          label={<strong>{zone.displayName}</strong>}
+                          data-test-subj={`manageRegionsZoneCheckbox-${zone.zoneId}`}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiText size="s" color="subdued">
+                              {i18n.translate(
+                                'xpack.searchInferenceEndpoints.manageRegions.zoneCount',
+                                {
+                                  defaultMessage:
+                                    '{checked} of {total, plural, one {# region} other {# regions}}',
+                                  values: {
+                                    checked: checkedCount,
+                                    total: zone.regions.length,
+                                  },
+                                }
+                              )}
+                            </EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonIcon
+                              iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
+                              onClick={() => handleToggleExpand(zone.zoneId)}
+                              aria-label={
+                                isExpanded
+                                  ? i18n.translate(
+                                      'xpack.searchInferenceEndpoints.manageRegions.collapseZone',
+                                      {
+                                        defaultMessage: 'Collapse {zone}',
+                                        values: { zone: zone.displayName },
+                                      }
+                                    )
+                                  : i18n.translate(
+                                      'xpack.searchInferenceEndpoints.manageRegions.expandZone',
+                                      {
+                                        defaultMessage: 'Expand {zone}',
+                                        values: { zone: zone.displayName },
+                                      }
+                                    )
+                              }
+                              data-test-subj={`manageRegionsZoneToggle-${zone.zoneId}`}
+                            />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+
+                    {isExpanded && (
+                      <div css={regionListStyles}>
+                        {zone.regions.map((r) => {
+                          const key = regionKey(r);
+                          const displayName = REGION_DISPLAY_NAMES[key] ?? r.region;
+                          return (
+                            <div key={key} css={regionRowStyles}>
+                              <EuiCheckbox
+                                id={`region-${key}`}
+                                label={displayName}
+                                checked={checkedKeys.has(key)}
+                                onChange={() => handleToggleRegion(key)}
+                                data-test-subj={`manageRegionsCheckbox-${key}`}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </>
         )}
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty
-          onClick={handleRemoveRestrictions}
-          isDisabled={isBusy || isLoading}
-          color="danger"
-          data-test-subj="manageRegionsRemoveRestrictionsButton"
-        >
-          {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.removeRestrictions', {
-            defaultMessage: 'Remove restrictions',
-          })}
-        </EuiButtonEmpty>
-
         <EuiButtonEmpty
           onClick={onClose}
           isDisabled={isBusy}
@@ -220,11 +465,11 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           fill
           onClick={handleSave}
           isDisabled={isBusy || isLoading}
-          isLoading={isSaving}
+          isLoading={isSaving || isDeleting}
           data-test-subj="manageRegionsSaveButton"
         >
           {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.save', {
-            defaultMessage: 'Save',
+            defaultMessage: 'Save preferences',
           })}
         </EuiButton>
       </EuiModalFooter>

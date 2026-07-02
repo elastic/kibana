@@ -19,6 +19,15 @@ import { useEisModels } from '../../hooks/use_eis_models';
 
 jest.mock('../../hooks/use_region_policy');
 jest.mock('../../hooks/use_eis_models');
+jest.mock('../../utils/eis_utils', () => ({
+  ...jest.requireActual('../../utils/eis_utils'),
+  getAvailableRegions: jest.fn(),
+}));
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { getAvailableRegions: mockGetAvailableRegions } = require('../../utils/eis_utils') as {
+  getAvailableRegions: jest.Mock;
+};
 
 const mockUseRegionPolicy = useRegionPolicy as jest.Mock;
 const mockUseSaveRegionPolicy = useSaveRegionPolicy as jest.Mock;
@@ -34,6 +43,12 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
   </EuiThemeProvider>
 );
 
+// Two regions in different zones: North America and Europe
+const twoTestRegions = [
+  { csp: 'aws', region: 'us-east-1' },
+  { csp: 'aws', region: 'eu-west-1' },
+];
+
 const endpointWithRegions = {
   inference_id: '.test-model',
   service: 'elastic' as const,
@@ -41,10 +56,7 @@ const endpointWithRegions = {
   service_settings: { model_id: 'test-model' },
   metadata: {
     availability_regions: {
-      regions: [
-        { csp: 'aws', region: 'us-east-1' },
-        { csp: 'aws', region: 'eu-west-1' },
-      ],
+      regions: twoTestRegions,
       geos: ['us', 'eu'],
     },
   },
@@ -55,6 +67,9 @@ describe('ManageRegionsModal', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Default: return the two test regions (real zone mappings apply via jest.requireActual)
+    mockGetAvailableRegions.mockReturnValue(twoTestRegions);
 
     mockUseSaveRegionPolicy.mockReturnValue({
       mutate: mockSaveMutate,
@@ -98,6 +113,7 @@ describe('ManageRegionsModal', () => {
     it('shows a warning callout when no regions are available', () => {
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
       mockUseEisModels.mockReturnValue({ data: [], isLoading: false });
+      mockGetAvailableRegions.mockReturnValue([]);
 
       render(
         <Wrapper>
@@ -110,8 +126,8 @@ describe('ManageRegionsModal', () => {
     });
   });
 
-  describe('region tree', () => {
-    it('renders the tree when regions are available from eis endpoints', () => {
+  describe('region accordion', () => {
+    it('renders zone headers when regions are available from eis endpoints', () => {
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
       mockUseEisModels.mockReturnValue({ data: [endpointWithRegions], isLoading: false });
 
@@ -121,11 +137,28 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('manageRegionsTree')).toBeInTheDocument();
-      expect(screen.getByText('Amazon Web Services (AWS)')).toBeInTheDocument();
+      // us-east-1 → North America zone, eu-west-1 → Europe zone
+      expect(screen.getByTestId('manageRegionsZone-northAmerica')).toBeInTheDocument();
+      expect(screen.getByTestId('manageRegionsZone-europe')).toBeInTheDocument();
     });
 
-    it('pre-checks regions that match the current policy', async () => {
+    it('shows the correct "X of Y selected" summary', async () => {
+      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
+      mockUseEisModels.mockReturnValue({ data: [endpointWithRegions], isLoading: false });
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      // No policy → all regions selected by default
+      await waitFor(() => {
+        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
+      });
+    });
+
+    it('pre-checks only the regions from the current policy', async () => {
       mockUseRegionPolicy.mockReturnValue({
         data: { region_policy: { allowed_regions: [{ csp: 'aws', region: 'us-east-1' }] } },
         isLoading: false,
@@ -138,91 +171,173 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
+      // Expand North America zone to see its checkboxes
+      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-northAmerica'));
+      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-europe'));
+
+      await waitFor(() => {
+        const usEast = screen.getByTestId(
+          'manageRegionsCheckbox-aws::us-east-1'
+        ) as HTMLInputElement;
+        expect(usEast.checked).toBe(true);
+
+        const euWest = screen.getByTestId(
+          'manageRegionsCheckbox-aws::eu-west-1'
+        ) as HTMLInputElement;
+        expect(euWest.checked).toBe(false);
+      });
+    });
+
+    it('defaults to all regions checked when there is no existing policy', async () => {
+      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
+      mockUseEisModels.mockReturnValue({ data: [endpointWithRegions], isLoading: false });
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      // Expand both zones
+      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-northAmerica'));
+      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-europe'));
+
+      await waitFor(() => {
+        const usEast = screen.getByTestId(
+          'manageRegionsCheckbox-aws::us-east-1'
+        ) as HTMLInputElement;
+        expect(usEast.checked).toBe(true);
+
+        const euWest = screen.getByTestId(
+          'manageRegionsCheckbox-aws::eu-west-1'
+        ) as HTMLInputElement;
+        expect(euWest.checked).toBe(true);
+      });
+    });
+
+    it('toggles a region checkbox when clicked', async () => {
+      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
+      mockUseEisModels.mockReturnValue({ data: [endpointWithRegions], isLoading: false });
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-northAmerica'));
+
+      await waitFor(() => {
+        const checkbox = screen.getByTestId(
+          'manageRegionsCheckbox-aws::us-east-1'
+        ) as HTMLInputElement;
+        expect(checkbox.checked).toBe(true); // default = all selected
+        fireEvent.click(checkbox);
+      });
+
+      await waitFor(() => {
+        const checkbox = screen.getByTestId(
+          'manageRegionsCheckbox-aws::us-east-1'
+        ) as HTMLInputElement;
+        expect(checkbox.checked).toBe(false);
+      });
+    });
+  });
+
+  describe('Select all button', () => {
+    it('deselects all when all are selected', async () => {
+      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
+      mockUseEisModels.mockReturnValue({ data: [endpointWithRegions], isLoading: false });
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      // Default: all selected → button shows "Deselect all"
+      await waitFor(() => {
+        expect(screen.getByTestId('manageRegionsSelectAllButton')).toHaveTextContent(
+          'Deselect all'
+        );
+      });
+
+      fireEvent.click(screen.getByTestId('manageRegionsSelectAllButton'));
+
+      await waitFor(() => {
+        expect(screen.getByText('0 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectAllButton')).toHaveTextContent('Select all');
+      });
+    });
+  });
+
+  describe('Save preferences button', () => {
+    it('calls deletePolicy when all regions are selected (no restrictions)', async () => {
+      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
+      mockUseEisModels.mockReturnValue({ data: [endpointWithRegions], isLoading: false });
+
+      mockDeleteMutate.mockImplementation(
+        (_arg: unknown, { onSuccess }: { onSuccess: () => void }) => {
+          onSuccess();
+        }
+      );
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      // All selected by default → save should call deletePolicy
+      await waitFor(() => {
+        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('manageRegionsSaveButton'));
+
+      expect(mockDeleteMutate).toHaveBeenCalled();
+      expect(mockSaveMutate).not.toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    it('calls savePolicy with only the checked regions when a subset is selected', async () => {
+      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
+      mockUseEisModels.mockReturnValue({ data: [endpointWithRegions], isLoading: false });
+
+      mockSaveMutate.mockImplementation(
+        (_body: unknown, { onSuccess }: { onSuccess: () => void }) => {
+          onSuccess();
+        }
+      );
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      // Expand North America and uncheck us-east-1
+      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-northAmerica'));
+
       await waitFor(() => {
         const checkbox = screen.getByTestId(
           'manageRegionsCheckbox-aws::us-east-1'
         ) as HTMLInputElement;
         expect(checkbox.checked).toBe(true);
+        fireEvent.click(checkbox);
       });
 
-      const uncheckedBox = screen.getByTestId(
-        'manageRegionsCheckbox-aws::eu-west-1'
-      ) as HTMLInputElement;
-      expect(uncheckedBox.checked).toBe(false);
-    });
-
-    it('toggles a checkbox when clicked', async () => {
-      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
-      mockUseEisModels.mockReturnValue({ data: [endpointWithRegions], isLoading: false });
-
-      render(
-        <Wrapper>
-          <ManageRegionsModal onClose={onClose} />
-        </Wrapper>
-      );
-
-      const checkbox = screen.getByTestId(
-        'manageRegionsCheckbox-aws::us-east-1'
-      ) as HTMLInputElement;
-      expect(checkbox.checked).toBe(false);
-
-      fireEvent.click(checkbox);
-      await waitFor(() => expect(checkbox.checked).toBe(true));
-    });
-  });
-
-  describe('Save button', () => {
-    it('calls savePolicy with only the checked regions and then closes', () => {
-      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
-      mockUseEisModels.mockReturnValue({ data: [endpointWithRegions], isLoading: false });
-
-      mockSaveMutate.mockImplementation(
-        (_body: unknown, { onSuccess }: { onSuccess: () => void }) => {
-          onSuccess();
-        }
-      );
-
-      render(
-        <Wrapper>
-          <ManageRegionsModal onClose={onClose} />
-        </Wrapper>
-      );
+      await waitFor(() => {
+        const checkbox = screen.getByTestId(
+          'manageRegionsCheckbox-aws::us-east-1'
+        ) as HTMLInputElement;
+        expect(checkbox.checked).toBe(false);
+      });
 
       fireEvent.click(screen.getByTestId('manageRegionsSaveButton'));
 
       expect(mockSaveMutate).toHaveBeenCalledWith(
-        { allowed_regions: [] },
-        expect.objectContaining({ onSuccess: expect.any(Function) })
-      );
-      expect(onClose).toHaveBeenCalled();
-    });
-
-    it('saves only the checked regions', async () => {
-      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
-      mockUseEisModels.mockReturnValue({ data: [endpointWithRegions], isLoading: false });
-
-      mockSaveMutate.mockImplementation(
-        (_body: unknown, { onSuccess }: { onSuccess: () => void }) => {
-          onSuccess();
-        }
-      );
-
-      render(
-        <Wrapper>
-          <ManageRegionsModal onClose={onClose} />
-        </Wrapper>
-      );
-
-      const checkbox = screen.getByTestId(
-        'manageRegionsCheckbox-aws::us-east-1'
-      ) as HTMLInputElement;
-      fireEvent.click(checkbox);
-      await waitFor(() => expect(checkbox.checked).toBe(true));
-
-      fireEvent.click(screen.getByTestId('manageRegionsSaveButton'));
-
-      expect(mockSaveMutate).toHaveBeenCalledWith(
-        { allowed_regions: [{ csp: 'aws', region: 'us-east-1' }] },
+        { allowed_regions: [{ csp: 'aws', region: 'eu-west-1' }] },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
@@ -244,16 +359,13 @@ describe('ManageRegionsModal', () => {
     });
   });
 
-  describe('Remove restrictions button', () => {
-    it('calls deletePolicy and closes on success', () => {
-      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
-      mockUseEisModels.mockReturnValue({ data: [], isLoading: false });
-
-      mockDeleteMutate.mockImplementation(
-        (_arg: unknown, { onSuccess }: { onSuccess: () => void }) => {
-          onSuccess();
-        }
-      );
+  describe('Reset to default button', () => {
+    it('re-selects all regions when some are unchecked', async () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_regions: [{ csp: 'aws', region: 'us-east-1' }] } },
+        isLoading: false,
+      });
+      mockUseEisModels.mockReturnValue({ data: [endpointWithRegions], isLoading: false });
 
       render(
         <Wrapper>
@@ -261,9 +373,50 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      fireEvent.click(screen.getByTestId('manageRegionsRemoveRestrictionsButton'));
-      expect(mockDeleteMutate).toHaveBeenCalled();
-      expect(onClose).toHaveBeenCalled();
+      // Policy has only us-east-1 → 1 of 2 selected
+      await waitFor(() => {
+        expect(screen.getByText('1 of 2 selected')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('manageRegionsResetButton'));
+
+      await waitFor(() => {
+        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('info callout', () => {
+    it('renders the info callout by default', () => {
+      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
+      mockUseEisModels.mockReturnValue({ data: [], isLoading: false });
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('manageRegionsCallout')).toBeInTheDocument();
+    });
+
+    it('hides the callout after dismissal', () => {
+      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
+      mockUseEisModels.mockReturnValue({ data: [], isLoading: false });
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      const dismissButton = screen
+        .getByTestId('manageRegionsCallout')
+        .querySelector('[data-test-subj="euiDismissCalloutButton"]');
+      expect(dismissButton).toBeTruthy();
+      fireEvent.click(dismissButton!);
+
+      expect(screen.queryByTestId('manageRegionsCallout')).not.toBeInTheDocument();
     });
   });
 });
