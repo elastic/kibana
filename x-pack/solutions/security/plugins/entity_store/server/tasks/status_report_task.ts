@@ -51,7 +51,7 @@ const getStoreSize = (
     { signal }
   );
 
-const getResolutionState = async (
+export const getResolutionState = async (
   esClient: ElasticsearchClient,
   index: string,
   entityType: EntityType,

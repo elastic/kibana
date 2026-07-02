@@ -17,6 +17,7 @@ import {
 } from '../telemetry/events';
 import { ENTITY_STORE_STATUS } from '../domain/constants';
 import { getMetadataEntitiesDataStreamName } from '../domain/asset_manager/metadata_data_stream';
+import { ALL_ENTITY_TYPES } from '../../common/domain/definitions/entity_schema';
 import type { EntityStoreCoreSetup } from '../types';
 
 jest.mock('./factories');
@@ -122,6 +123,31 @@ describe('getResolutionState', () => {
       signal: abortController.signal,
     });
   });
+
+  it('queries the given index, scopes to the entity type, and requests the aggregations it parses', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValue(
+        makeSearchResponse({ resolvedDocCount: 0, resolutionGroupsValue: 0, maxBucketValue: null })
+      );
+    const esClient = { search } as unknown as ElasticsearchClient;
+
+    await getResolutionState(esClient, 'my-index', 'host', signal);
+
+    // Guards against an aggregation-key rename in the query drifting from the
+    // keys the response parser reads (resolved_entities / resolution_groups / max_group_aliases).
+    const [searchParams] = search.mock.calls[0];
+    expect(searchParams.index).toBe('my-index');
+    expect(searchParams.query).toEqual({ term: { 'entity.EngineMetadata.Type': 'host' } });
+    expect(Object.keys(searchParams.aggs)).toEqual(
+      expect.arrayContaining([
+        'resolved_entities',
+        'resolution_groups',
+        'group_sizes',
+        'max_group_aliases',
+      ])
+    );
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -212,7 +238,7 @@ describe('status report task — metadata usage telemetry', () => {
     );
   });
 
-  it('fires the resolution state event for each entity type with correctly computed payload', async () => {
+  it('fires one resolution state event per entity type with correctly computed payload', async () => {
     // storeSize = 5 (from count mock), resolvedEntities=3, targetEntities=1, resolutionGroups=1
     // standaloneEntities = max(0, 5 - 3 - 1) = 1
     // avgGroupSize = 3/1 + 1 = 4
@@ -223,19 +249,76 @@ describe('status report task — metadata usage telemetry', () => {
       ([eventType]) => eventType === ENTITY_STORE_RESOLUTION_STATE_EVENT.eventType
     );
 
-    expect(resolutionStateCalls.length).toBeGreaterThan(0);
+    // Exactly one event per entity type, covering every type — a skipped or
+    // duplicated type would change the count or the set of entityType values.
+    expect(resolutionStateCalls).toHaveLength(ALL_ENTITY_TYPES.length);
+    const reportedTypes = resolutionStateCalls.map(([, payload]) => payload.entityType);
+    expect(new Set(reportedTypes)).toEqual(new Set(ALL_ENTITY_TYPES));
 
-    const [, payload] = resolutionStateCalls[0];
-    expect(payload).toMatchObject({
-      namespace: NAMESPACE,
-      totalEntities: 5,
-      resolvedEntities: 3,
-      targetEntities: 1,
-      standaloneEntities: 1,
-      resolutionGroups: 1,
-      avgGroupSize: 4,
-      maxGroupSize: 3,
+    resolutionStateCalls.forEach(([, payload]) => {
+      expect(payload).toMatchObject({
+        namespace: NAMESPACE,
+        totalEntities: 5,
+        resolvedEntities: 3,
+        targetEntities: 1,
+        standaloneEntities: 1,
+        resolutionGroups: 1,
+        avgGroupSize: 4,
+        maxGroupSize: 3,
+      });
     });
+  });
+
+  it('reports zeros for the no-resolution case and treats all entities as standalone', async () => {
+    // storeSize = 5, no resolution groups → standaloneEntities = totalEntities, avgGroupSize = 0
+    search.mockResolvedValue(
+      makeSearchResponse({ resolvedDocCount: 0, resolutionGroupsValue: 0, maxBucketValue: null })
+    );
+
+    await runStatusReportTask();
+
+    const [, payload] = reportEvent.mock.calls.find(
+      ([eventType]) => eventType === ENTITY_STORE_RESOLUTION_STATE_EVENT.eventType
+    )!;
+
+    expect(payload).toMatchObject({
+      totalEntities: 5,
+      resolvedEntities: 0,
+      targetEntities: 0,
+      standaloneEntities: 5,
+      resolutionGroups: 0,
+      avgGroupSize: 0,
+      maxGroupSize: 0,
+    });
+  });
+
+  it('reports a fractional avgGroupSize when the average is non-integer', async () => {
+    // resolvedEntities=5 across resolutionGroups=2 → avgGroupSize = 5/2 + 1 = 3.5 (float field)
+    search.mockResolvedValue(
+      makeSearchResponse({ resolvedDocCount: 5, resolutionGroupsValue: 2, maxBucketValue: 3 })
+    );
+
+    await runStatusReportTask();
+
+    const [, payload] = reportEvent.mock.calls.find(
+      ([eventType]) => eventType === ENTITY_STORE_RESOLUTION_STATE_EVENT.eventType
+    )!;
+
+    expect(payload.avgGroupSize).toBe(3.5);
+  });
+
+  it('collects the error, does not report resolution state, and rethrows when the aggregation fails', async () => {
+    search.mockRejectedValue(new Error('boom'));
+
+    await expect(runStatusReportTask()).rejects.toThrow('boom');
+
+    const reportedResolutionState = reportEvent.mock.calls.some(
+      ([eventType]) => eventType === ENTITY_STORE_RESOLUTION_STATE_EVENT.eventType
+    );
+    expect(reportedResolutionState).toBe(false);
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Error reporting store usage for')
+    );
   });
 
   it('clamps standaloneEntities to 0 when arithmetic would go negative', async () => {
