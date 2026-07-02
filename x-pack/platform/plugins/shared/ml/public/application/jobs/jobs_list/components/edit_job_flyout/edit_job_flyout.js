@@ -42,7 +42,7 @@ import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warnin
 import { createJobActionFocusTrapProps } from '../../../../util/create_focus_trap_props';
 import { createJobActionFocusRestoration } from '../../../../util/create_focus_restoration';
 import { DEFAULT_ML_PROJECT_ROUTING } from '../../../../../../common/constants/cps';
-import { showProjectRoutingChangeConfirmModal } from '@kbn/ml-cps';
+import { showProjectRoutingChangeConfirmModal } from '../../../components/project_routing_change_confirm';
 
 const { collapseLiteralStrings } = XJson;
 
@@ -310,12 +310,16 @@ export class EditJobFlyoutUI extends Component {
       this._initialJobFormState.datafeedProjectRouting !== undefined &&
       newJobData.datafeedProjectRouting !== this._initialJobFormState.datafeedProjectRouting
     ) {
-      const { overlays, ...startServices } = this.props.kibana.services;
+      const { overlays, rendering, cps, mlServices } = this.props.kibana.services;
       try {
         await showProjectRoutingChangeConfirmModal({
           overlays,
-          startServices,
-          jobCount: 1,
+          rendering,
+          jobIds: [this.state.job.job_id],
+          selectedProjectRouting: newJobData.datafeedProjectRouting,
+          getJobs: mlServices.mlApi.jobs.jobs,
+          cpsManager: cps?.cpsManager,
+          showScopeChangeCounts: false,
         });
       } catch {
         return;

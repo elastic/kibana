@@ -30,7 +30,8 @@ import {
 } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
 import { useFetchProjects } from '@kbn/cps-utils';
-import { MlProjectPickerPanel, showProjectRoutingChangeConfirmModal } from '@kbn/ml-cps';
+import { MlProjectPickerPanel } from '@kbn/ml-cps';
+import { showProjectRoutingChangeConfirmModal } from '../../../../application/jobs/components/project_routing_change_confirm';
 import { DEFAULT_ML_PROJECT_ROUTING } from '../../../../../common/constants/cps';
 import { useMlKibana, useNotifications } from '../../../../application/contexts/kibana';
 import { useJobsApiService } from '../../../../application/services/ml_api_service/jobs';
@@ -70,7 +71,6 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
     },
     [cpsManager]
   );
-
   const projects = useFetchProjects(fetchProjects, selectedProjectRouting);
 
   const onProjectRoutingChange = useCallback((projectRouting: ProjectRouting) => {
@@ -125,14 +125,19 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
   }, [cps, jobsApi, initialJobIds, selectedProjectRouting]);
 
   const onUpdateProjectRouting = useCallback(async () => {
-    if (jobIds.length === 0) {
+    if (jobIds.length === 0 || !cpsManager) {
       return;
     }
     try {
       await showProjectRoutingChangeConfirmModal({
         overlays,
         rendering,
-        jobCount: jobIds.length,
+        countsDependencies: {
+          jobIds,
+          selectedProjectRouting,
+          getJobs: jobsApi.jobs,
+          cpsManager,
+        },
       });
     } catch {
       return;
@@ -189,7 +194,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
     } finally {
       setUpdating(false);
     }
-  }, [jobIds, jobsApi, selectedProjectRouting, toasts, onClose, overlays, rendering]);
+  }, [jobIds, jobsApi, selectedProjectRouting, toasts, onClose, overlays, rendering, cpsManager]);
 
   const allUpdatesSucceeded = useMemo(
     () =>
