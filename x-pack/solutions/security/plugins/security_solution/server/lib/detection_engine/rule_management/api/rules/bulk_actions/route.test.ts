@@ -830,7 +830,7 @@ describe('Perform bulk action route', () => {
       bulkGetRulesMock.mockResolvedValue({ rules: [mockRule], errors: [] });
     });
 
-    it('creates the duplicate once with cloned exceptions and never calls update', async () => {
+    it('creates the duplicate rule with cloned exceptions when include_exceptions is true', async () => {
       const clonedExceptions = [
         {
           id: 'cloned-list-id',
