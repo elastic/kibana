@@ -133,12 +133,13 @@ export function useBrowseIntegrationHook({
   ]);
 
   // Apply category filter on top of non-category filters.
-  // When multiple effective categories are active, show cards matching ANY of them (OR logic).
+  // When multiple effective categories are active, show cards matching ALL of them
+  // (AND logic / intersection).
   const filteredCards = useMemo(() => {
     if (effectiveCategories.length > 0 || selectedSubCategory) {
       return nonCategoryFilteredCards.filter((c) => {
         if (selectedSubCategory) return c.categories.includes(selectedSubCategory);
-        return effectiveCategories.some((cat) => c.categories.includes(cat));
+        return effectiveCategories.every((cat) => c.categories.includes(cat));
       });
     }
     return nonCategoryFilteredCards;
