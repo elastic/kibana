@@ -53,13 +53,13 @@ const tabs: AppHeaderTab[] = [
         {
           id: 'copy',
           label: 'Copy API request',
-          icon: 'copy',
+          iconType: 'copy',
           onClick: action('tab-overview-copy'),
         },
         {
           id: 'edit',
           label: 'Edit configuration',
-          icon: 'gear',
+          iconType: 'gear',
           onClick: action('tab-overview-edit'),
         },
       ],

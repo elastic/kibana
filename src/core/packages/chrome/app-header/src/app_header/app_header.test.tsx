@@ -199,7 +199,7 @@ describe('AppHeaderView', () => {
                 {
                   id: 'copy',
                   label: 'Copy API request',
-                  icon: 'copy',
+                  iconType: 'copy',
                   onClick: onCopy,
                   'data-test-subj': 'lifecycleTabCopy',
                 },

@@ -8,6 +8,7 @@
  */
 
 import type { ReactElement, ReactNode, MouseEventHandler } from 'react';
+import type { IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { GlobalHeaderAiButton } from './ai_button';
@@ -75,14 +76,21 @@ export interface AppHeaderTabAction {
   id: string;
   label: string;
   /** EUI icon type rendered next to the action label. */
-  icon?: string;
-  disabled?: boolean;
+  iconType?: IconType;
+  /** Disables the action if `true` or if the function returns `true`. */
+  disabled?: boolean | (() => boolean);
   onClick: () => void;
   'data-test-subj'?: string;
 }
 
 /**
  * Optional overflow actions for a tab, rendered as an ellipsis popover appended to the tab.
+ *
+ * @remarks
+ * Actions are intentionally flat (a single level of items). Nested submenus, modals/flyouts and
+ * focus return are not supported yet; when a use case arises, mirror the AppMenu approach
+ * (`AppMenuRunActionParams` in `@kbn/core-chrome-app-menu-components`) by adding a nested `items`
+ * prop and passing an anchor/`returnFocus` handler down to `onClick`.
  *
  * @public
  */

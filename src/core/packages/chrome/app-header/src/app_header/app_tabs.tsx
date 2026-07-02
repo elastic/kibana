@@ -46,14 +46,17 @@ const renderTabBadge = (badge: AppHeaderTab['badge']) => {
   );
 };
 
+// a11y caveat: EuiTab renders `append` inside the tab's own `<button role="tab">`/`<a href>`, so
+// this trigger is an interactive element nested in an interactive element (invalid HTML, imperfect
+// a11y tree). `append` is EuiTab's only slot; a proper fix needs EUI-level support. Accepted for now.
 const TabActions = ({ actions }: { actions: AppHeaderTabActions }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const items = actions.items.map((item) => (
     <EuiContextMenuItem
       key={item.id}
-      icon={item.icon}
-      disabled={item.disabled}
+      icon={item.iconType}
+      disabled={typeof item.disabled === 'function' ? item.disabled() : item.disabled}
       data-test-subj={item['data-test-subj']}
       onClick={(event) => {
         // Portaled popover content still bubbles through the React tree to the tab.
