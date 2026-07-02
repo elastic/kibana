@@ -31,8 +31,8 @@ interface WorkflowYamlDiffAttachment {
   data: WorkflowYamlDiffData;
 }
 
-const COLLAPSED_HEIGHT = 160;
-const LINE_HEIGHT = 18;
+const COLLAPSED_HEIGHT = 200;
+const LINE_HEIGHT = 23;
 const PADDING = 8;
 const HIDDEN_REGION_WIDGET_HEIGHT = 24;
 
@@ -148,7 +148,7 @@ const MonacoDiffViewer: React.FC<{
         contextLineCount,
       },
       renderOverviewRuler: false,
-      fontSize: 12,
+      fontSize: 14,
       lineHeight: LINE_HEIGHT,
       padding: { top: 4, bottom: 4 },
       contextmenu: false,
@@ -278,6 +278,7 @@ const componentStyles = {
   wrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'relative',
+      padding: '10px 0',
       '.diff-hidden-lines .center': {
         gap: euiTheme.size.s,
       },
