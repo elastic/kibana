@@ -136,6 +136,18 @@ import {
  * mapping is `dynamic: 'strict'` so the field MUST be declared up-front
  * before any write attempts it.
  *
+ * v16: adds `extracted.gate` (object) — the assess_relevance verdict persisted
+ *   observe-first on every extraction run. Fields:
+ *   - `is_intelligence`         (boolean) — true when the report is genuine threat-intel.
+ *   - `quality_class`           (keyword) — 'intel' | 'marketing' | 'rollup' | 'thought_leadership'.
+ *   - `provenance`              (keyword) — 'primary' | 'pointer' | 'mixed'.
+ *   - `needs_render`            (boolean) — true when the full page must be rendered before analysis.
+ *   - `has_original_commentary` (boolean) — true when the report contains original analyst commentary.
+ *   - `reason`                  (text, index:false) — LLM explanation (not searched).
+ *   - `assessed_at`             (date)   — wall-clock of the gate run.
+ *   Note: `primary_links` is deferred — no consumer until Slice-5 link-chasing.
+ *   A `migrateExistingGateMappings` call patches pre-v16 backing indices at startup.
+ *
  * v15: adds IOC tier fields to the `extracted.iocs` nested block:
  *   - `tier`          (keyword) — active tier assignment (heuristic for now; LLM override in B2).
  *   - `tier_heuristic`(keyword) — the deterministic heuristic's assignment (preserved for tuning).
@@ -161,7 +173,7 @@ import {
  * template PUT or rollover). `bootstrap_threat_intelligence` logs an error at
  * startup if the endpoint is absent so operators catch the gap before data flows.
  */
-const TEMPLATE_VERSION = 15;
+const TEMPLATE_VERSION = 16;
 
 /** Keyword sentinel meaning "visible from every space". */
 export const SPACE_ID_GLOBAL = '*' as const;
@@ -373,6 +385,21 @@ const threatReportsTemplate = {
                 // backfill_diamond_fields. Queryable for observability + future dry_run estimation
                 // using real measured fraction rather than the documented constant estimate.
                 suitable: { type: 'boolean' as const },
+              },
+            },
+            // assess_relevance gate verdict — persisted observe-first on every
+            // extraction run. No consumer gates on this yet; validated corpus-wide
+            // before an if:-skip is added in a follow-up slice.
+            // Note: primary_links is deferred (no consumer until Slice-5).
+            gate: {
+              properties: {
+                is_intelligence: { type: 'boolean' as const },
+                quality_class: { type: 'keyword' as const },
+                provenance: { type: 'keyword' as const },
+                needs_render: { type: 'boolean' as const },
+                has_original_commentary: { type: 'boolean' as const },
+                reason: { type: 'text' as const, index: false },
+                assessed_at: { type: 'date' as const },
               },
             },
           },
@@ -840,11 +867,12 @@ const migrateExistingIocTierMappings = async (
       const iocProps = (
         (
           indexMappings?.mappings?.properties as
-            | Record<string, { properties?: Record<string, { properties?: Record<string, unknown> }> }>
+            | Record<
+                string,
+                { properties?: Record<string, { properties?: Record<string, unknown> }> }
+              >
             | undefined
-        )?.extracted?.properties?.iocs as
-          | { properties?: Record<string, unknown> }
-          | undefined
+        )?.extracted?.properties?.iocs as { properties?: Record<string, unknown> } | undefined
       )?.properties;
 
       if (!iocProps?.tier) {
@@ -871,6 +899,83 @@ const migrateExistingIocTierMappings = async (
       log.error(
         `Failed to migrate ioc tier mappings on ${indexName}: ${(err as Error).message}. ` +
           `The extracted.iocs tier fields will be rejected by dynamic: strict until the ` +
+          `mapping is updated manually.`
+      );
+    }
+  }
+};
+
+/**
+ * Patches the `extracted.gate.*` field mappings onto any existing
+ * `.ds-.kibana-threat-reports-*` backing indices created before the v16 template.
+ * The v16 template adds these fields automatically to new rollovers; pre-existing
+ * backing indices keep their original (v15) mapping until explicitly updated.
+ *
+ * Safe to re-run on every plugin start: PUT mapping is idempotent for additive
+ * fields. Without this, writes to pre-v16 indices fail with
+ * `strict_dynamic_mapping_exception` because `dynamic: 'strict'` rejects
+ * unknown fields under `extracted`.
+ */
+const migrateExistingGateMappings = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('gate-mapping-migration');
+
+  let backingIndices: string[];
+  try {
+    const streamInfo = await esClient.indices.getDataStream(
+      { name: THREAT_REPORTS_DATA_STREAM },
+      { ignore: [404] }
+    );
+    backingIndices = (streamInfo.data_streams ?? []).flatMap((ds) =>
+      (ds.indices ?? []).map((i) => i.index_name)
+    );
+  } catch (err) {
+    log.debug(
+      `gate-mapping-migration: data stream not found — skipping (${(err as Error).message})`
+    );
+    return;
+  }
+
+  for (const indexName of backingIndices) {
+    try {
+      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
+        index: indexName,
+      });
+      const extractedProps = (
+        indexMappings?.mappings?.properties as
+          | Record<string, { properties?: Record<string, unknown> }>
+          | undefined
+      )?.extracted?.properties;
+
+      if (!extractedProps?.gate) {
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            extracted: {
+              properties: {
+                gate: {
+                  properties: {
+                    is_intelligence: { type: 'boolean' },
+                    quality_class: { type: 'keyword' },
+                    provenance: { type: 'keyword' },
+                    needs_render: { type: 'boolean' },
+                    has_original_commentary: { type: 'boolean' },
+                    reason: { type: 'text', index: false },
+                    assessed_at: { type: 'date' },
+                  },
+                },
+              },
+            },
+          },
+        });
+        log.info(`Migrated gate mappings on ${indexName} (v16 backfill)`);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to migrate gate mappings on ${indexName}: ${(err as Error).message}. ` +
+          `The extracted.gate fields will be rejected by dynamic: strict until the ` +
           `mapping is updated manually.`
       );
     }
@@ -953,6 +1058,8 @@ export const installIndexTemplates = async ({
   await migrateExistingDiamondMappings(esClient, log);
   // Patch ioc tier fields onto any pre-v15 backing indices. Safe to re-run.
   await migrateExistingIocTierMappings(esClient, log);
+  // Patch gate fields onto any pre-v16 backing indices. Safe to re-run.
+  await migrateExistingGateMappings(esClient, log);
 
   log.info('Threat intelligence index templates installed');
 };

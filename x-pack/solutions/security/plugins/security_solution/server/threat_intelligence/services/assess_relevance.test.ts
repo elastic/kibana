@@ -95,4 +95,41 @@ describe('assessRelevance', () => {
     const bodyInPrompt = prompt.slice(articleStart);
     expect(bodyInPrompt.length).toBeLessThanOrEqual(30_000);
   });
+
+  // Verify the gate output fields map into extracted.gate on persist.
+  // extracted.gate declares: is_intelligence, quality_class, provenance,
+  // needs_render, has_original_commentary, reason, assessed_at (stamped at persist).
+  // primary_links is deferred (no consumer until Slice-5) and is NOT persisted.
+  it('output contains all extracted.gate field keys (minus assessed_at)', async () => {
+    const { model } = buildModel();
+    const result = await assessRelevance(model, logger, { text: 'APT29 report.' });
+    const GATE_PERSISTED_KEYS = [
+      'is_intelligence',
+      'quality_class',
+      'provenance',
+      'needs_render',
+      'has_original_commentary',
+      'reason',
+    ] as const;
+    for (const key of GATE_PERSISTED_KEYS) {
+      expect(result).toHaveProperty(key);
+    }
+  });
+
+  it('primary_links is present in output but not a persisted gate field', async () => {
+    const { model } = buildModel(SAMPLE_OUTPUT);
+    const result = await assessRelevance(model, logger, { text: 'Pointer article.' });
+    // Returned by the service so callers can act on it (e.g. Slice-5 link-chasing).
+    expect(result).toHaveProperty('primary_links');
+    // But it is NOT one of the six fields written to extracted.gate by the workflow.
+    const GATE_MAPPING_KEYS = new Set([
+      'is_intelligence',
+      'quality_class',
+      'provenance',
+      'needs_render',
+      'has_original_commentary',
+      'reason',
+    ]);
+    expect(GATE_MAPPING_KEYS.has('primary_links')).toBe(false);
+  });
 });

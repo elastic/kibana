@@ -74,6 +74,48 @@ steps:
         type: loop.continue
         if: "steps.check_already_extracted.output.hits.total.value > 0"
 
+      # Gate: assess whether this report is genuine threat-intelligence.
+      # Runs FIRST so we persist the verdict alongside all other extraction fields.
+      # OBSERVE-FIRST: verdict is persisted to extracted.gate.* but gates NOTHING.
+      # All downstream extraction stages (extract_iocs, extract_behaviors,
+      # enrich_taxonomy, extract_diamond) run unconditionally for every report.
+      # Add `if: "variables.gate_is_intelligence: true"` skip gates on those steps
+      # in a follow-up slice once the corpus-wide verdict distribution is validated.
+      #
+      # The thin workflow step (request + data.set only) is intentional: the
+      # assess_relevance route is the reusable piece the future live-RSS ingest
+      # path will call before indexing. Keeping logic out of the step avoids
+      # entangling this re-extraction context with that future caller.
+      - name: assess_relevance
+        type: kibana.request
+        with:
+          method: POST
+          path: /api/threat_intelligence/assess_relevance
+          headers:
+            elastic-api-version: "2023-10-31"
+            x-elastic-internal-origin: "kibana"
+          body:
+            html: "{{ foreach.item._source.content.body_html }}"
+            text: "{{ foreach.item._source.content.body_text | slice: 0, 30000 }}"
+            title: "{{ foreach.item._source.content.title }}"
+        on-failure:
+          # Best-effort, mirroring enrich_taxonomy. A gate failure must not
+          # abort the report — fail-open defaults below ensure extraction continues.
+          continue: true
+
+      # Hoist gate outputs into variables so persist_extractions can write them
+      # cleanly. Fail-open defaults: is_intelligence defaults true so a gate miss
+      # never suppresses any report from downstream extraction.
+      - name: capture_gate_signals
+        type: data.set
+        with:
+          gate_is_intelligence: "${{ steps.assess_relevance.output.is_intelligence | default: true }}"
+          gate_quality_class: "{{ steps.assess_relevance.output.quality_class | default: 'intel' }}"
+          gate_provenance: "{{ steps.assess_relevance.output.provenance | default: 'primary' }}"
+          gate_needs_render: "${{ steps.assess_relevance.output.needs_render | default: false }}"
+          gate_has_original_commentary: "${{ steps.assess_relevance.output.has_original_commentary | default: true }}"
+          gate_reason: "{{ steps.assess_relevance.output.reason | default: '' }}"
+
       - name: extract_iocs
         type: kibana.request
         with:
@@ -424,6 +466,18 @@ steps:
               # guaranteed non-null by capture_ranking_signals's `default: false`.
               diamond:
                 suitable: "${{ variables.diamond_suitable }}"
+              # assess_relevance gate verdict — observe-first (gates nothing yet).
+              # All seven sub-fields are guaranteed non-null by capture_gate_signals.
+              # assessed_at is stamped here so it reflects the persist wall-clock,
+              # not the assess_relevance call time (consistent with provenance.extracted_at).
+              gate:
+                is_intelligence: "${{ variables.gate_is_intelligence }}"
+                quality_class: "{{ variables.gate_quality_class }}"
+                provenance: "{{ variables.gate_provenance }}"
+                needs_render: "${{ variables.gate_needs_render }}"
+                has_original_commentary: "${{ variables.gate_has_original_commentary }}"
+                reason: "{{ variables.gate_reason }}"
+                assessed_at: "${{ now }}"
             geography:
               regions: "${{ steps.enrich_taxonomy.output.regions }}"
             # Top-level multiplicative composite (`severity.score *
