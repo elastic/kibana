@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { OverviewTab } from './overview_tab';
 
@@ -23,8 +23,22 @@ jest.mock('../components/visualizations_section', () => ({
 }));
 
 jest.mock('../components/insights_section', () => ({
-  InsightsSection: ({ hit }: { hit: DataTableRecord }) => (
-    <div data-test-subj="mock-insights-section" data-hit-id={(hit as { id: string }).id} />
+  InsightsSection: jest.fn(
+    ({
+      hit,
+      onOpenCorrelationsLeftPanel,
+    }: {
+      hit: DataTableRecord;
+      onOpenCorrelationsLeftPanel?: () => void;
+    }) => (
+      <button
+        type="button"
+        data-test-subj="mock-insights-section"
+        data-hit-id={(hit as { id: string }).id}
+        data-has-on-open-correlations={String(onOpenCorrelationsLeftPanel != null)}
+        onClick={onOpenCorrelationsLeftPanel}
+      />
+    )
   ),
 }));
 
@@ -95,6 +109,26 @@ describe('<OverviewTab />', () => {
     expect(screen.getByTestId('mock-visualizations-section')).toHaveAttribute(
       'data-hit-id',
       'attack-1'
+    );
+  });
+
+  it('forwards onShowCorrelations to InsightsSection as onOpenCorrelationsLeftPanel', () => {
+    const onShowCorrelations = jest.fn();
+    render(<OverviewTab hit={buildHit()} onShowCorrelations={onShowCorrelations} />);
+
+    expect(screen.getByTestId('mock-insights-section')).toHaveAttribute(
+      'data-has-on-open-correlations',
+      'true'
+    );
+    fireEvent.click(screen.getByTestId('mock-insights-section'));
+    expect(onShowCorrelations).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not pass onOpenCorrelationsLeftPanel when onShowCorrelations is omitted', () => {
+    render(<OverviewTab hit={buildHit()} />);
+    expect(screen.getByTestId('mock-insights-section')).toHaveAttribute(
+      'data-has-on-open-correlations',
+      'false'
     );
   });
 });

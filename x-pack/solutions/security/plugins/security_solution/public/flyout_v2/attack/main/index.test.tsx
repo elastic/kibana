@@ -42,7 +42,9 @@ jest.mock('./header', () => ({
 }));
 
 jest.mock('./tabs/overview_tab', () => ({
-  OverviewTab: () => <div data-test-subj="mock-overview-tab" />,
+  OverviewTab: ({ onShowCorrelations }: { onShowCorrelations?: () => void }) => (
+    <button type="button" data-test-subj="mock-overview-tab" onClick={onShowCorrelations} />
+  ),
 }));
 jest.mock('./tabs/table_tab', () => ({
   TableTab: () => <div data-test-subj="mock-table-tab" />,
@@ -53,6 +55,14 @@ jest.mock('../../shared/components/json_tab', () => ({
 
 jest.mock('../../shared/tools/notes', () => ({
   NotesDetails: () => <div data-test-subj="mock-notes-details" />,
+}));
+
+jest.mock('../tools/correlations', () => ({
+  AttackCorrelationsTool: () => <div data-test-subj="mock-attack-correlations-tool" />,
+}));
+
+jest.mock('./hooks/use_attack_alert_ids', () => ({
+  useAttackAlertIds: jest.fn(() => ['alert-1', 'alert-2']),
 }));
 
 const createAttackHit = (extra: DataTableRecord['flattened'] = {}): DataTableRecord =>
@@ -153,6 +163,32 @@ describe('<AttackFlyout />', () => {
     );
 
     fireEvent.click(getByTestId('mock-header'));
+
+    expect(openSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        ownFocus: false,
+        resizable: true,
+        size: 'm',
+      })
+    );
+  });
+
+  it('opens the Correlations tool in a system flyout when the correlations action is clicked', () => {
+    const openSystemFlyout = jest.fn();
+    startServices.overlays = {
+      ...startServices.overlays,
+      openSystemFlyout,
+    };
+
+    const { getByTestId } = render(
+      <TestProviders startServices={startServices}>
+        <AttackFlyout hit={createAttackHit()} onAttackUpdated={jest.fn()} />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('mock-overview-tab'));
 
     expect(openSystemFlyout).toHaveBeenCalledTimes(1);
     expect(openSystemFlyout).toHaveBeenCalledWith(

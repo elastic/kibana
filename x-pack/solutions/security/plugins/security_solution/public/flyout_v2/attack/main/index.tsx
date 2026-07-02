@@ -29,6 +29,8 @@ import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from './tabs/table_tab';
 import { Footer } from './footer';
+import { AttackCorrelationsTool } from '../tools/correlations';
+import { useAttackAlertIds } from './hooks/use_attack_alert_ids';
 
 type AttackFlyoutTabId = 'overview' | 'table' | 'json';
 
@@ -76,6 +78,7 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
+  const alertIds = useAttackAlertIds(hit);
 
   const [selectedTabId, setSelectedTabId] = useState<AttackFlyoutTabId>('overview');
 
@@ -90,6 +93,18 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
       defaultToolsFlyoutProperties
     );
   }, [history, hit, overlays, services, store]);
+
+  const onShowCorrelations = useCallback(() => {
+    overlays.openSystemFlyout(
+      flyoutProviders({
+        services,
+        store,
+        history,
+        children: <AttackCorrelationsTool hit={hit} alertIds={alertIds} />,
+      }),
+      defaultToolsFlyoutProperties
+    );
+  }, [alertIds, history, hit, overlays, services, store]);
 
   return (
     <>
@@ -130,7 +145,7 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
             data-test-subj={JSON_TAB_CONTENT_TEST_ID}
           />
         ) : (
-          <OverviewTab hit={hit} />
+          <OverviewTab hit={hit} onShowCorrelations={onShowCorrelations} />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter data-test-subj="attack-flyout-footer">
