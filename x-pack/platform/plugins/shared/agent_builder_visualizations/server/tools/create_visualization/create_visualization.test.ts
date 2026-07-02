@@ -181,4 +181,34 @@ describe('createVisualizationTool handler', () => {
     expect(type).toBe(ToolResultType.error);
     expect(data.message).toContain('esql_generation_failed');
   });
+
+  it('gives an actionable hint when index auto-discovery fails and no index was passed', async () => {
+    // The deeply-nested error surfaced when the referenced fields are ungrounded.
+    mockBuildLens.mockRejectedValue(
+      new Error(
+        'Failed to generate a valid Vega specification. Last error: Could not resolve a valid ' +
+          'ES|QL query for the visualization: Could not generate ESQL query: Could not discover a ' +
+          'suitable index for the query. Please specify an index explicitly.'
+      )
+    );
+
+    const { result } = await runHandler({ query: 'cpu by host' });
+
+    const [{ type, data }] = result.results;
+    expect(type).toBe(ToolResultType.error);
+    expect(data.message).toContain('Could not find an index matching the requested fields');
+    expect(data.message).toContain('retry create_visualization with an explicit "index"');
+  });
+
+  it('does not add the index hint when an explicit index was provided', async () => {
+    mockBuildLens.mockRejectedValue(
+      new Error('Could not discover a suitable index for the query.')
+    );
+
+    const { result } = await runHandler({ query: 'cpu by host', index: 'metrics-*' });
+
+    const [{ data }] = result.results;
+    expect(data.message).toContain('Failed to create visualization:');
+    expect(data.message).not.toContain('Could not find an index matching');
+  });
 });

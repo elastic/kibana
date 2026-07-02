@@ -54,7 +54,7 @@ const createVisualizationSchema = z.object({
     .max(1024)
     .optional()
     .describe(
-      '(optional) Index, alias, or datastream to target. If not provided, the tool will attempt to discover the best index to use.'
+      '(strongly recommended) Index, alias, or datastream to target, grounded against the actual cluster. If omitted, the tool auto-discovers an index from the query, which FAILS when the referenced fields do not exist in any index. Prefer discovering the index (and verifying the fields exist) first, then pass it here — especially for multi-panel requests, where every call should reuse the same grounded index.'
     ),
   attachment_id: z
     .string()
@@ -102,7 +102,9 @@ This tool will:
 1. If attachment_id is provided, read the existing visualization from that attachment (edits keep the same renderer)
 2. Generate an ES|QL query if not provided
 3. Generate and validate the visualization (Lens config or Vega-Lite spec) for the chosen renderer
-4. Store the result as an attachment (creating new or updating existing) for future modifications`,
+4. Store the result as an attachment (creating new or updating existing) for future modifications
+
+Ground first: make sure the target index exists and every field you reference is real before calling this tool. If you omit "index" the tool auto-discovers one, but that fails when the referenced fields are invented or absent from the cluster (do NOT assume APM/metrics schemas are present). For multi-panel requests, resolve the index once up front and pass the same "index" to every call rather than firing several index-less calls in parallel.`,
     schema: createVisualizationSchema,
     tags: [],
     handler: async (
@@ -263,12 +265,20 @@ This tool will:
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         logger.error(`Error in create_visualization tool: ${message}`);
+        // Index auto-discovery only runs (and can only fail) when no `index` was
+        // passed; that failure almost always means the referenced fields are not
+        // grounded. Surface a concise, actionable next step at the top instead of
+        // the deeply-nested "Failed to…: Failed to…: Could not discover…" chain.
+        const isIndexDiscoveryFailure = !index && /suitable index/i.test(message);
+        const userMessage = isIndexDiscoveryFailure
+          ? `Could not find an index matching the requested fields. Discover the target index and verify the referenced fields exist (e.g. list indices and inspect the mapping), then retry create_visualization with an explicit "index". Details: ${message}`
+          : `Failed to create visualization: ${message}`;
         return {
           results: [
             {
               type: ToolResultType.error,
               data: {
-                message: `Failed to create visualization: ${message}`,
+                message: userMessage,
                 metadata: { nlQuery, esql, renderer: requestedRenderer, chartType },
               },
             },

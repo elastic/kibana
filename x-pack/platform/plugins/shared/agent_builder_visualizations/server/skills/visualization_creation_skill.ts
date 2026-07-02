@@ -43,9 +43,19 @@ Do **not** use this skill when:
 
 ## Visualization Creation Workflow
 
-1. **Ensure grounded index and field context**
-   - If index and fields are already known in context, continue directly.
-   - If not, explore the data first to discover the right index and validate field names. Always use real field names from the index mapping, not invented ones.
+1. **Ground the index and fields FIRST (required)**
+   - Before the first ${
+     platformCoreTools.createVisualization
+   } call, know the target index and confirm every field you reference exists in its mapping.
+   - If the index and fields are already grounded in context, continue directly.
+   - If not, discover them first: list indices, inspect the index mapping, or use ${
+     platformCoreTools.generateEsql
+   } / ${
+    platformCoreTools.executeEsql
+  }. Always use real field names from the index mapping — never invent index or field names, and never assume a domain schema (APM, metrics, etc.) is present; verify against the actual cluster.
+   - ${
+     platformCoreTools.createVisualization
+   } auto-discovers an index only when you omit \`index\`, and that discovery FAILS when the referenced fields do not exist in any index. Guessing fields and relying on auto-discovery is the most common cause of failures — ground first.
 
 2. **Prepare visualization intent**
    - For simple requests, pass natural language directly to ${
@@ -59,14 +69,14 @@ Do **not** use this skill when:
 3. **Call ${platformCoreTools.createVisualization}**
    - Provide:
      - \`query\` (required, specific and field-accurate)
-     - \`index\` (recommended)
+     - \`index\` (strongly recommended — pass the grounded index; omitting it forces auto-discovery, which fails for ungrounded/invented fields)
      - \`renderer\` (\`lens\` or \`vega\`, optional — see "Choosing the Renderer"; omit to default to Lens)
      - \`chartType\` (optional, only if confident)
      - \`esql\` (optional, when you have a validated ES|QL)
      - \`attachment_id\` (optional, only when updating an existing visualization)
-   - For multi-panel requests, call ${
+   - For multi-panel requests, resolve the index (and validate the fields) ONCE up front, then call ${
      platformCoreTools.createVisualization
-   } once per requested panel.
+   } once per panel WITH that \`index\`. Do **not** fan out several index-less calls in parallel — a single failed auto-discovery fails all of them identically.
 
 4. **Interpret output and preserve artifacts**
    - Each successful call returns \`data.attachment_id\` and \`data.version\`. Save them: they identify the persisted attachment for rendering and for later updates (pass \`attachment_id\` back to update it in place).
@@ -91,17 +101,18 @@ Render a created visualization by referencing its persisted attachment, using th
 
 ## Writing Effective Visualization Prompts
 
-Good prompt patterns:
-- "Show average system.cpu.total.pct over time grouped by host.name"
-- "Display top 10 source.ip values by document count as a bar chart"
-- "Show a single metric for error log count where log.level is error"
+Reference only fields that exist in your grounded index mapping. The field names below are illustrative — substitute the real fields from the index you resolved.
+
+Good prompt patterns (specific and field-accurate):
+- "Show average <numeric field> over time grouped by <keyword field>"
+- "Display top 10 <keyword field> values by document count as a bar chart"
+- "Show a single metric for count where <field> is <value>"
 
 Poor prompt patterns:
-- "Show CPU"
-- "Make a chart"
-- "Display everything"
+- "Show CPU" / "Make a chart" / "Display everything" (too vague)
+- Prompts naming fields you have not confirmed exist (e.g. assuming \`system.cpu.total.pct\`, \`transaction.duration.us\`, or \`service.name\` without checking the mapping — these belong to specific integrations that may not be installed)
 
-Always reference real fields from the index mapping.
+Always reference real fields from the index mapping; never invent them.
 
 ## Choosing the Renderer
 
