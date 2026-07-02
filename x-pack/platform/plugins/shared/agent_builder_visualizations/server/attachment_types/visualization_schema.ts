@@ -6,13 +6,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_VEGA_SPEC_LENGTH } from '@kbn/agent-builder-visualizations-common';
 
-/**
- * Upper bound for a serialized Vega-Lite spec. Generous enough for layered /
- * faceted specs, but bounded so an oversized `visualization.spec` cannot be
- * stored (the surrounding record values are otherwise unconstrained).
- */
-export const MAX_VEGA_SPEC_LENGTH = 100_000;
+export { MAX_VEGA_SPEC_LENGTH };
 
 /**
  * Runtime validation for visualization attachment data. The matching type

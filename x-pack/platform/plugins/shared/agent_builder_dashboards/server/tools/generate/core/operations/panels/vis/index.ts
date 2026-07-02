@@ -7,7 +7,11 @@
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
-import type { VisualizationRenderer } from '@kbn/agent-builder-visualizations-common';
+import {
+  MAX_VEGA_SPEC_LENGTH,
+  VEGA_VIS_TYPE,
+  type VisualizationRenderer,
+} from '@kbn/agent-builder-visualizations-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
 import { definePanelType } from '../panel_type';
@@ -54,9 +58,29 @@ const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((c
     ctx.issues.push({
       code: 'custom',
       message:
-        'config looks like a whole visualization attachment. Pass only its `visualization` field (the Lens API config), not the entire attachment.',
+        'config looks like a whole visualization attachment. Pass only its `visualization` field (a Lens API config, or a Vega `{ spec }` config), not the entire attachment.',
       input: config,
     });
+    return;
+  }
+
+  // A Vega visualization's `visualization` field is a `{ spec }` config: accept
+  // it by value and bound the serialized spec, matching the attachment schema.
+  if ('spec' in config) {
+    const { spec } = config as { spec?: unknown };
+    if (typeof spec !== 'string' || spec.length === 0) {
+      ctx.issues.push({
+        code: 'custom',
+        message: 'Vega panel config must provide a non-empty `spec` string.',
+        input: config,
+      });
+    } else if (spec.length > MAX_VEGA_SPEC_LENGTH) {
+      ctx.issues.push({
+        code: 'custom',
+        message: `Vega panel \`spec\` must be at most ${MAX_VEGA_SPEC_LENGTH} characters.`,
+        input: config,
+      });
+    }
     return;
   }
 
@@ -64,7 +88,7 @@ const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((c
     ctx.issues.push({
       code: 'custom',
       message:
-        'config is not a Lens API config (missing a top-level `type`). Pass the `visualization` field read from a visualization attachment.',
+        'config is neither a Lens API config (missing a top-level `type`) nor a Vega config (missing `spec`). Pass the `visualization` field read from a visualization attachment.',
       input: config,
     });
   }
@@ -79,7 +103,7 @@ export const visPanelConfigInputSchema = z.object({
   type: z.literal('vis'),
   grid: panelGridSchema,
   config: visPanelConfigSchema.describe(
-    'Already-resolved Lens config, passed by value (e.g. read from a visualization attachment). Do not hand-build a Lens config for a new visualization here — use source: "request" instead.'
+    'Already-resolved visualization config, passed by value from a visualization attachment\'s `visualization` field: either a Lens API config (has a top-level `type`) or a Vega config (`{ spec }`). Do not hand-build a config for a new visualization here — use source: "request" instead.'
   ),
 });
 
@@ -148,8 +172,17 @@ export const editPanelRequestInputSchema = panelRequestSchema
 export type EditPanelRequestInput = z.infer<typeof editPanelRequestInputSchema>;
 
 /**
- * Registry entry for the `vis` panel type. Vis is not editable via a
+ * Registry entry for the `vis` panel type. A by-value (`source: 'config'`) vis
+ * panel can carry either a Lens API config or a Vega `{ spec }` config, so the
+ * embeddable is chosen from the config shape: a `spec` string routes to the Vega
+ * embeddable, everything else stays Lens. Vis is not editable via a
  * `source: 'config'` edit (edits go through `source: 'request'`), so
  * `validateConfigEdit` is intentionally omitted.
  */
-export const visPanelDefinition = definePanelType({ embeddableType: LENS_EMBEDDABLE_TYPE });
+export const visPanelDefinition = definePanelType({
+  embeddableType: LENS_EMBEDDABLE_TYPE,
+  buildPanelContent: (config) => {
+    const isVegaConfig = typeof (config as { spec?: unknown })?.spec === 'string';
+    return { type: isVegaConfig ? VEGA_VIS_TYPE : LENS_EMBEDDABLE_TYPE, config };
+  },
+});

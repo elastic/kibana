@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { VISUALIZATION_ATTACHMENT_TYPE } from './constants';
+export { VISUALIZATION_ATTACHMENT_TYPE, MAX_VEGA_SPEC_LENGTH } from './constants';
 
 export type { VisualizationAttachmentData, VisualizationRenderer } from './visualization_types';
 
