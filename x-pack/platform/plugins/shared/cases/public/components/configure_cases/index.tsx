@@ -8,6 +8,7 @@
 /* eslint-disable complexity */
 
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { AppHeader } from '@kbn/app-header';
 import { useLocation } from 'react-router-dom';
 import { css } from '@emotion/react';
 
@@ -49,7 +50,8 @@ import { HeaderPage } from '../header_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId, getCasesConfigureTemplatesPath } from '../../common/navigation';
-import { useAllCasesNavigation } from '../../common/navigation/hooks';
+import { useAllCasesNavigation, useCasesTemplatesNavigation } from '../../common/navigation/hooks';
+import { getSettingsMenu } from './header_menu';
 import { CustomFields } from '../custom_fields';
 import { CommonFlyout } from './flyout';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
@@ -132,9 +134,11 @@ const addNewCustomFieldToTemplates = ({
 
 export const ConfigureCases: React.FC = React.memo(() => {
   const { permissions, basePath } = useCasesContext();
-  const { navigateToAllCases } = useAllCasesNavigation();
+  const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
+  const { getCasesTemplatesUrl, navigateToCasesTemplates } = useCasesTemplatesNavigation();
   const { triggersActionsUi, docLinks } = useKibana().services;
   const isTemplatesEnabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
+  const isSettingsRedesignEnabled = KibanaServices.getConfig()?.casesRedesign?.settings ?? false;
   const location = useLocation();
   const isTemplatesTab =
     isTemplatesEnabled && location.pathname === getCasesConfigureTemplatesPath(basePath);
@@ -643,25 +647,58 @@ export const ConfigureCases: React.FC = React.memo(() => {
       </CommonFlyout>
     ) : null;
 
+  const settingsMenu = useMemo(
+    () =>
+      getSettingsMenu({
+        isTemplatesEnabled,
+        permissions,
+        navigateToCasesTemplates,
+        getCasesTemplatesUrl,
+      }),
+    [getCasesTemplatesUrl, isTemplatesEnabled, navigateToCasesTemplates, permissions]
+  );
+
   return (
     <EuiPageSection paddingSize="none">
-      {!isTemplatesTab && <ConfigureGeneralBreadcrumbs />}
-      {isTemplatesEnabled && (
-        <EuiButtonEmpty
-          iconType="sortLeft"
-          size="xs"
-          flush="left"
-          onClick={navigateToAllCases}
-          data-test-subj="configure-cases-back-to-cases"
-        >
-          {i18n.BACK_TO_ALL}
-        </EuiButtonEmpty>
-      )}
-      <HeaderPage data-test-subj="case-configure-title" title={i18n.CONFIGURE_CASES_PAGE_TITLE} />
-      {isTemplatesEnabled && (
+      {!isTemplatesTab && (
         <>
-          <SettingsTabs activeTab={isTemplatesTab ? 'templates' : 'general'} />
-          <EuiSpacer size="l" />
+          {isSettingsRedesignEnabled ? (
+            <AppHeader
+              title={i18n.CONFIGURE_CASES_PAGE_TITLE}
+              back={{
+                href: getAllCasesUrl(),
+                label: i18n.PAGE_TITLE,
+                onClick: navigateToAllCases,
+              }}
+              menu={settingsMenu}
+              sticky={false}
+            />
+          ) : (
+            <>
+              <ConfigureGeneralBreadcrumbs />
+              {isTemplatesEnabled && (
+                <EuiButtonEmpty
+                  iconType="sortLeft"
+                  size="xs"
+                  flush="left"
+                  onClick={navigateToAllCases}
+                  data-test-subj="configure-cases-back-to-cases"
+                >
+                  {i18n.BACK_TO_ALL}
+                </EuiButtonEmpty>
+              )}
+              <HeaderPage
+                data-test-subj="case-configure-title"
+                title={i18n.CONFIGURE_CASES_PAGE_TITLE}
+              />
+              {isTemplatesEnabled && (
+                <>
+                  <SettingsTabs activeTab="general" />
+                  <EuiSpacer size="l" />
+                </>
+              )}
+            </>
+          )}
         </>
       )}
       <EuiPageBody restrictWidth={false}>

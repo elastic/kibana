@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { AppHeader } from '@kbn/app-header';
 import { EuiBasicTable, EuiSkeletonText } from '@elastic/eui';
 import type { TemplateListItem } from '../../../../common/types/api/template/v1';
-import { useCasesCreateTemplateNavigation } from '../../../common/navigation/hooks';
+import {
+  useConfigureCasesNavigation,
+  useCasesCreateTemplateNavigation,
+  useCasesFieldLibraryNavigation,
+} from '../../../common/navigation/hooks';
 import { useCasesTemplatesBreadcrumbs } from '../../use_breadcrumbs';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from '../translations';
+import * as configureCasesI18n from '../../configure_cases/translations';
 import { useTemplatesColumns } from '../hooks/use_templates_columns';
 import { useTemplatesState } from '../hooks/use_templates_state';
 import { useTemplatesPagination } from '../hooks/use_templates_pagination';
@@ -19,7 +25,8 @@ import { useGetTemplates } from '../hooks/use_get_templates';
 import { useGetTemplateTags } from '../hooks/use_get_template_tags';
 import { useGetTemplateCreators } from '../hooks/use_get_template_creators';
 import { useTemplatesActions } from '../hooks/use_templates_actions';
-import { TemplatesListHeader } from '../components/templates_list_header';
+import { getTemplatesListMenu } from '../components/header_menu';
+import { TemplateFlyout } from '../components/template_flyout';
 import { TemplatesTableFilters } from '../components/templates_table_filters';
 import { TemplatesInfoPanel } from '../components/templates_info_panel';
 import { TemplatesTableSettings } from '../components/templates_table_settings';
@@ -29,8 +36,37 @@ import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmati
 export const AllTemplatesPage: React.FC = () => {
   useCasesTemplatesBreadcrumbs();
   const { owner } = useCasesContext();
+  const { getConfigureCasesUrl, navigateToConfigureCases } = useConfigureCasesNavigation();
   const { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate } =
     useCasesCreateTemplateNavigation();
+  const { getCasesFieldLibraryUrl, navigateToCasesFieldLibrary } = useCasesFieldLibraryNavigation();
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+
+  const openFlyout = useCallback(() => {
+    setIsFlyoutOpen(true);
+  }, []);
+
+  const closeFlyout = useCallback(() => {
+    setIsFlyoutOpen(false);
+  }, []);
+
+  const templatesListMenu = useMemo(
+    () =>
+      getTemplatesListMenu({
+        onImportClick: openFlyout,
+        navigateToCasesCreateTemplate,
+        getCasesCreateTemplateUrl,
+        navigateToCasesFieldLibrary,
+        getCasesFieldLibraryUrl,
+      }),
+    [
+      getCasesCreateTemplateUrl,
+      getCasesFieldLibraryUrl,
+      navigateToCasesCreateTemplate,
+      navigateToCasesFieldLibrary,
+      openFlyout,
+    ]
+  );
 
   const { queryParams, setQueryParams, sorting, selectedTemplates, selection, deselectTemplates } =
     useTemplatesState();
@@ -98,7 +134,16 @@ export const AllTemplatesPage: React.FC = () => {
 
   return (
     <>
-      <TemplatesListHeader />
+      <AppHeader
+        title={i18n.TEMPLATE_TITLE}
+        back={{
+          href: getConfigureCasesUrl(),
+          label: configureCasesI18n.CONFIGURE_CASES_PAGE_TITLE,
+          onClick: navigateToConfigureCases,
+        }}
+        menu={templatesListMenu}
+        sticky={false}
+      />
       <TemplatesInfoPanel />
       <TemplatesTableFilters
         queryParams={queryParams}
@@ -154,6 +199,7 @@ export const AllTemplatesPage: React.FC = () => {
           onConfirm={confirmDelete}
         />
       )}
+      {isFlyoutOpen && <TemplateFlyout onClose={closeFlyout} onImport={closeFlyout} />}
     </>
   );
 };

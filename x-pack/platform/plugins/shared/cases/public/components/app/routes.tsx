@@ -56,9 +56,6 @@ const AllFieldDefinitionsLazy: FC<AllFieldDefinitionsPageProps> = lazy(
 // These will progressively replace the current pages and the FF will be removed.
 const AllCasesRedesignLazy = lazy(() => import('../cases_redesign/all_cases'));
 const CaseViewRedesignLazy: FC<CaseViewProps> = lazy(() => import('../cases_redesign/case_view'));
-const ConfigureCasesRedesignLazy = lazy(
-  () => import('../cases_redesign/configure_cases/configure_cases')
-);
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timelineIntegration }) => {
   const { basePath, permissions } = useCasesContext();
@@ -76,7 +73,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
   const casesRedesign = {
     list: config?.casesRedesign?.list ?? false,
     details: config?.casesRedesign?.details ?? false,
-    settings: config?.casesRedesign?.settings ?? false,
   };
 
   return (
@@ -143,13 +139,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
 
         <Route path={getCasesConfigurePath(basePath)}>
           {permissions.settings ? (
-            casesRedesign.settings ? (
-              <Suspense fallback={<EuiLoadingSpinner />}>
-                <ConfigureCasesRedesignLazy />
-              </Suspense>
-            ) : (
-              <ConfigureCases />
-            )
+            <ConfigureCases />
           ) : (
             <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />
           )}

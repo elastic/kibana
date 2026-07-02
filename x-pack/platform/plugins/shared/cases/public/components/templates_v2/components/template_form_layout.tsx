@@ -6,9 +6,10 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { isEqual } from 'lodash';
+import { AppHeader } from '@kbn/app-header';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { isEqual } from 'lodash';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider } from 'react-hook-form';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -21,8 +22,8 @@ import { useDebouncedYamlEdit } from '../hooks/use_debounced_yaml_edit';
 import * as i18n from '../translations';
 import { componentStyles } from './template_form_layout.styles';
 import { TEMPLATE_PREVIEW_WIDTH_KEY } from '../constants';
-import { TemplateFormHeader } from './template_form_header';
 import { TemplateResetModal } from './template_reset_modal';
+import { getTemplateFormBadges, getTemplateFormMenu } from './header_menu';
 import { TemplateEditorLayout } from './template_editor_layout';
 import {
   type FieldDefaultValue,
@@ -77,7 +78,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   initialIsEnabled = true,
 }) => {
   const styles = useMemoCss(componentStyles);
-  const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
+  const { getCasesTemplatesUrl, navigateToCasesTemplates } = useCasesTemplatesNavigation();
 
   const defaultPreviewWidth = Math.floor(window.innerWidth * 0.3);
   const [previewWidth = defaultPreviewWidth, setPreviewWidth] = useLocalStorage(
@@ -276,6 +277,36 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     setIsEnabled(enabled);
   }, []);
 
+  const templateFormMenu = useMemo(
+    () =>
+      getTemplateFormMenu({
+        hasChanges,
+        hasValidationErrors,
+        isEdit,
+        isLoading,
+        isSaving,
+        isEnabled,
+        submitError,
+        onReset: handleResetClick,
+        onSave: handleSave,
+        onIsEnabledChange: handleIsEnabledChange,
+      }),
+    [
+      handleIsEnabledChange,
+      handleResetClick,
+      handleSave,
+      hasChanges,
+      hasValidationErrors,
+      isEdit,
+      isEnabled,
+      isLoading,
+      isSaving,
+      submitError,
+    ]
+  );
+
+  const templateFormBadges = useMemo(() => getTemplateFormBadges(hasChanges), [hasChanges]);
+
   return (
     <FormProvider {...form}>
       <EuiFlexGroup
@@ -287,20 +318,17 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         // fill the viewport exactly and never scroll the header under the sticky top bar.
         css={[kbnFullBodyHeightCss('57px'), styles.wrapper]}
       >
-        <EuiFlexItem grow={false} css={styles.header}>
-          <TemplateFormHeader
+        <EuiFlexItem grow={false}>
+          <AppHeader
             title={title}
-            isLoading={isLoading}
-            isSaving={isSaving}
-            hasChanges={hasChanges}
-            isEdit={isEdit}
-            submitError={submitError}
-            hasValidationErrors={hasValidationErrors}
-            isEnabled={isEnabled}
-            onBack={navigateToCasesTemplates}
-            onReset={handleResetClick}
-            onSave={handleSave}
-            onIsEnabledChange={handleIsEnabledChange}
+            back={{
+              href: getCasesTemplatesUrl(),
+              label: i18n.BACK_TO_TEMPLATES,
+              onClick: navigateToCasesTemplates,
+            }}
+            badges={templateFormBadges}
+            menu={templateFormMenu}
+            sticky={false}
           />
         </EuiFlexItem>
 
