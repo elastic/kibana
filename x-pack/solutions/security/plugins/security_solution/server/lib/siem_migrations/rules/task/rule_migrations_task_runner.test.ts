@@ -122,18 +122,16 @@ describe('RuleMigrationTaskRunner', () => {
           { type: 'lookup', name: 'threat_intel_ip', content: 'lookup_default_threat_intel_ip' },
         ],
       });
-      mockRuleMigrationsDataClient.esScopedClient.asCurrentUser.indices.getMapping.mockResolvedValue(
-        {
-          lookup_default_threat_intel_ip: {
-            mappings: {
-              runtime: {
-                ip: { type: 'ip' },
-                threat_category: { type: 'keyword' },
-              },
+      mockRuleMigrationsDataClient.resources.getMapping.mockResolvedValue({
+        lookup_default_threat_intel_ip: {
+          mappings: {
+            runtime: {
+              ip: { type: 'ip' },
+              threat_category: { type: 'keyword' },
             },
           },
-        }
-      );
+        },
+      });
 
       await expect(
         // @ts-expect-error checking protected method
@@ -157,6 +155,11 @@ describe('RuleMigrationTaskRunner', () => {
         },
       });
       expect(mockGetResources).toHaveBeenCalledWith(migrationRule.original_rule);
+      expect(mockRuleMigrationsDataClient.resources.getMapping).toHaveBeenCalledWith({
+        index: ['lookup_default_threat_intel_ip'],
+        allow_no_indices: true,
+        ignore_unavailable: true,
+      });
     });
 
     it('should not fetch resources for unsupported vendors', async () => {
@@ -174,9 +177,7 @@ describe('RuleMigrationTaskRunner', () => {
         resources: {},
       });
       expect(mockGetResources).not.toHaveBeenCalled();
-      expect(
-        mockRuleMigrationsDataClient.esScopedClient.asCurrentUser.indices.getMapping
-      ).not.toHaveBeenCalled();
+      expect(mockRuleMigrationsDataClient.resources.getMapping).not.toHaveBeenCalled();
     });
   });
 });

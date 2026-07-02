@@ -119,7 +119,7 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
       original_dashboard: migrationDashboard.original_dashboard,
       resources: await enrichLookupResourcesWithMappings({
         resources,
-        esClient: this.data.esScopedClient.asCurrentUser,
+        resourcesDataClient: this.data.resources,
         logger: this.logger,
       }),
     };

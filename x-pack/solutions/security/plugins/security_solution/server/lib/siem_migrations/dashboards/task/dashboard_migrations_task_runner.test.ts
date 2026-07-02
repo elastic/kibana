@@ -53,12 +53,7 @@ describe('DashboardMigrationTaskRunner', () => {
         },
       });
       const dataClient = {
-        resources: {},
-        esScopedClient: {
-          asCurrentUser: {
-            indices: { getMapping },
-          },
-        },
+        resources: { getMapping },
       };
       const taskRunner = new DashboardMigrationTaskRunner(
         'test-migration-id',
@@ -74,9 +69,10 @@ describe('DashboardMigrationTaskRunner', () => {
         id: 'dashboard-1',
         original_dashboard: { vendor: 'splunk' },
       };
-      mockGetResources.mockResolvedValue({
+      const resources = {
         lookup: [{ type: 'lookup', name: 'panel_lookup', content: 'lookup_default_panel_lookup' }],
-      });
+      };
+      mockGetResources.mockResolvedValue(resources);
 
       await expect(
         // @ts-expect-error checking protected method

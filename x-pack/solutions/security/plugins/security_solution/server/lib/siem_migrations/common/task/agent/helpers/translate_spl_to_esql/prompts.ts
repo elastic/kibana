@@ -39,6 +39,13 @@ Examples of macros and lookups placeholders:
 - [lookup:someLookup_name]
 </placeholders_syntax>
 <lookup_syntax>
+<lookup_join_rules>
+  - Use LOOKUP JOIN for lookup indices. Do not use ENRICH.
+  - Lookup fields are declared as field elements; field @name is the lookup-side ES|QL field name and field @type is its datatype.
+  - When source and lookup field names differ, use LOOKUP JOIN lookup_index ON source_field == lookup_field.
+  - When source and lookup field names are the same, use LOOKUP JOIN lookup_index ON field_name.
+  - If source and lookup field types differ, create a source-side EVAL field with the matching type before LOOKUP JOIN.
+</lookup_join_rules>
 If in an SPL query you identify a lookup call, it should be translated the following way:
 \`\`\`spl
 ... | lookup users uid OUTPUTNEW username, department

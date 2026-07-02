@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SiemMigrationsDataResourcesClient } from '../../data/siem_migrations_data_resources_client';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { MigrationResources } from '../retrievers/resource_retriever';
 import {
@@ -16,9 +16,9 @@ import {
 describe('lookup resource mappings', () => {
   const logger = loggerMock.create();
   const getMapping = jest.fn();
-  const esClient = {
-    indices: { getMapping },
-  } as unknown as ElasticsearchClient;
+  const resourcesDataClient = {
+    getMapping,
+  } as unknown as SiemMigrationsDataResourcesClient;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -86,7 +86,7 @@ describe('lookup resource mappings', () => {
       });
 
       await expect(
-        enrichLookupResourcesWithMappings({ resources, esClient, logger })
+        enrichLookupResourcesWithMappings({ resources, resourcesDataClient, logger })
       ).resolves.toEqual({
         lookup: [
           {
@@ -123,7 +123,7 @@ describe('lookup resource mappings', () => {
       getMapping.mockResolvedValue({});
 
       await expect(
-        enrichLookupResourcesWithMappings({ resources, esClient, logger })
+        enrichLookupResourcesWithMappings({ resources, resourcesDataClient, logger })
       ).resolves.toEqual(resources);
     });
 
@@ -134,7 +134,7 @@ describe('lookup resource mappings', () => {
       getMapping.mockRejectedValue(new Error('mapping unavailable'));
 
       await expect(
-        enrichLookupResourcesWithMappings({ resources, esClient, logger })
+        enrichLookupResourcesWithMappings({ resources, resourcesDataClient, logger })
       ).resolves.toEqual(resources);
       expect(logger.warn).toHaveBeenCalledWith(
         'Failed to enrich lookup resources with runtime mappings: Error: mapping unavailable'

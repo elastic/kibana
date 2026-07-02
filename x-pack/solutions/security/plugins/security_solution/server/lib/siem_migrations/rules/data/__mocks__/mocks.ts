@@ -62,13 +62,6 @@ export const mockDeleteMigration = jest.fn().mockResolvedValue(undefined);
 // Rule migrations data client
 export const createRuleMigrationsDataClientMock = () =>
   ({
-    esScopedClient: {
-      asCurrentUser: {
-        indices: {
-          getMapping: jest.fn().mockResolvedValue({}),
-        },
-      },
-    },
     items: mockRuleMigrationsDataRulesClient,
     resources: mockSiemMigrationsDataResourcesClient,
     integrations: mockRuleMigrationsDataIntegrationsClient,

@@ -116,7 +116,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
       : {};
     const enrichedResources = await enrichLookupResourcesWithMappings({
       resources,
-      esClient: this.data.esScopedClient.asCurrentUser,
+      resourcesDataClient: this.data.resources,
       logger: this.logger,
     });
 

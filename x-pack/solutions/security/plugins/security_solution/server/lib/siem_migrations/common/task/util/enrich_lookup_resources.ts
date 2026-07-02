@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { MappingRuntimeField, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { MigrationResources, MigrationResourcesData } from '../retrievers/resource_retriever';
+import type { SiemMigrationsDataResourcesClient } from '../../data/siem_migrations_data_resources_client';
 
 export interface EnrichedLookupResourceField {
   path: string;
@@ -24,7 +25,7 @@ export type EnrichedMigrationResources = Omit<MigrationResources, 'lookup'> & {
 
 export interface EnrichLookupResourcesParams {
   resources: MigrationResources;
-  esClient: ElasticsearchClient;
+  resourcesDataClient: SiemMigrationsDataResourcesClient;
   logger: Logger;
 }
 
@@ -33,7 +34,7 @@ export interface EnrichLookupResourcesParams {
  * */
 export const enrichLookupResourcesWithMappings = async ({
   resources,
-  esClient,
+  resourcesDataClient,
   logger,
 }: EnrichLookupResourcesParams): Promise<EnrichedMigrationResources> => {
   const lookups = resources.lookup?.filter(isLookupResource);
@@ -50,7 +51,7 @@ export const enrichLookupResourcesWithMappings = async ({
   }
 
   try {
-    const mappingsByIndex = await esClient.indices.getMapping({
+    const mappingsByIndex = await resourcesDataClient.getMapping({
       index: lookupIndexNames,
       allow_no_indices: true,
       ignore_unavailable: true,
