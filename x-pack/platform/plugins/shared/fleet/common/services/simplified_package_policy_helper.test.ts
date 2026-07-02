@@ -861,6 +861,68 @@ describe('agentlessPolicyToPackagePolicy', () => {
     });
   });
 
+  describe('multi-template packages', () => {
+    const findInput = (
+      packagePolicy: ReturnType<typeof agentlessPolicyToPackagePolicy>,
+      policyTemplate: string,
+      type: string
+    ) =>
+      packagePolicy.inputs.find(
+        (input) => input.policy_template === policyTemplate && input.type === type
+      );
+
+    const multiTemplateAgentlessPolicy = (inputs: Record<string, { enabled?: boolean }>) =>
+      baseAgentlessPolicy({
+        package: { name: 'good_v3', title: 'Good v3', version: '1.0.0' },
+        inputs,
+      });
+
+    it('derives the active template and keeps the full-inputs contract a no-op', () => {
+      // Full GET payload: every input present, only the active template's input enabled.
+      const result = agentlessPolicyToPackagePolicy(
+        multiTemplateAgentlessPolicy({
+          'apache-agentless-aws/s3': { enabled: true },
+          'otel-otelcol': { enabled: false },
+          'mixed-httpjson': { enabled: false },
+          'mixed-cel': { enabled: false },
+        }),
+        multiTemplatePkgInfo
+      );
+
+      expect(findInput(result, 'apache-agentless', 'aws/s3')?.enabled).toBe(true);
+      expect(findInput(result, 'otel', 'otelcol')?.enabled).toBe(false);
+      expect(findInput(result, 'mixed', 'httpjson')?.enabled).toBe(false);
+      expect(findInput(result, 'mixed', 'cel')?.enabled).toBe(false);
+    });
+
+    it('does not leak other templates default-enabled inputs on a partial-inputs response', () => {
+      // Partial GET payload: only the active template's input is present. Other templates'
+      // default-enabled inputs (otel-otelcol, mixed-httpjson) must not leak in as enabled.
+      const result = agentlessPolicyToPackagePolicy(
+        multiTemplateAgentlessPolicy({ 'apache-agentless-aws/s3': { enabled: true } }),
+        multiTemplatePkgInfo
+      );
+
+      expect(findInput(result, 'apache-agentless', 'aws/s3')?.enabled).toBe(true);
+      expect(findInput(result, 'otel', 'otelcol')?.enabled).toBe(false);
+      expect(findInput(result, 'mixed', 'httpjson')?.enabled).toBe(false);
+      expect(findInput(result, 'mixed', 'cel')?.enabled).toBe(false);
+    });
+
+    it('honors an explicit policyTemplate over the derived one', () => {
+      const result = agentlessPolicyToPackagePolicy(
+        multiTemplateAgentlessPolicy({ 'apache-agentless-aws/s3': { enabled: true } }),
+        multiTemplatePkgInfo,
+        { policyTemplate: 'otel' }
+      );
+
+      // Forcing `otel` keeps otel's default-enabled input on, even though the response's only
+      // enabled input belongs to `apache-agentless` (which derivation would have selected,
+      // disabling otel-otelcol instead).
+      expect(findInput(result, 'otel', 'otelcol')?.enabled).toBe(true);
+    });
+  });
+
   describe('round trip with toNewAgentlessPolicy (load then save is a no-op)', () => {
     // Build a realistic simplified GET payload by running the create-side
     // converters first, so the fixture matches the actual wire format rather

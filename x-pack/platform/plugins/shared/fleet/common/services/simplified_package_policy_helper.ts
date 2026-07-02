@@ -23,7 +23,11 @@ import type { AgentlessPolicy } from '../types/models/agentless_policy';
 
 import { PackagePolicyValidationError } from '../errors';
 
-import { packageToPackagePolicy, getInputEffectiveName } from './package_to_package_policy';
+import {
+  packageToPackagePolicy,
+  packageToPackagePolicyInputs,
+  getInputEffectiveName,
+} from './package_to_package_policy';
 import { isInputAllowedForDeploymentMode } from './agentless_policy_helper';
 import { detectTargetCsp } from './cloud_connectors';
 
@@ -400,14 +404,61 @@ export const toNewAgentlessPolicy = (
 };
 
 /**
+ * For a multi-template package, work out which `policy_template` an {@link AgentlessPolicy}
+ * belongs to by mapping its enabled input ids back to the manifest. An agentless deployment
+ * enables exactly one integration, so we only disambiguate when a single template is
+ * represented; otherwise we return `undefined` and let the full-inputs contract drive
+ * enablement (see {@link agentlessPolicyToPackagePolicy}).
+ */
+const deriveAgentlessPolicyTemplate = (
+  agentlessPolicy: AgentlessPolicy,
+  packageInfo: PackageInfo
+): string | undefined => {
+  const templates = packageInfo.policy_templates ?? [];
+  // Single-template (or template-less) packages have nothing to disambiguate.
+  if (templates.length <= 1) {
+    return undefined;
+  }
+
+  const inputIdToTemplate = new Map<string, string | undefined>();
+  packageToPackagePolicyInputs(packageInfo).forEach((input) => {
+    inputIdToTemplate.set(generateInputId(input), input.policy_template);
+  });
+
+  const activeTemplates = new Set<string>();
+  Object.entries((agentlessPolicy.inputs as SimplifiedInputs | undefined) ?? {}).forEach(
+    ([inputId, value]) => {
+      // Skip explicitly-disabled inputs: under the full-inputs contract the response carries
+      // every input (including other templates' disabled ones), so only the enabled inputs
+      // identify the active template.
+      if (value?.enabled === false) {
+        return;
+      }
+      const template = inputIdToTemplate.get(inputId);
+      if (template) {
+        activeTemplates.add(template);
+      }
+    }
+  );
+
+  return activeTemplates.size === 1 ? [...activeTemplates][0] : undefined;
+};
+
+/**
  * Inverse of {@link toNewAgentlessPolicy}: expand a clean {@link AgentlessPolicy}
  * (as returned by the GET/LIST agentless API, with simplified object-style `inputs`)
  * back into the full {@link NewPackagePolicy} shape that the shared edit/copy form
  * components and `validatePackagePolicy` expect (array-based `inputs`).
  *
- * `packageInfo` must be loaded for `agentlessPolicy.package.version` (the form fetches
- * it from the EPM/registry API). For multi-template packages, pass `policyTemplate` so
- * the converter selects the right template — it is not carried on the API response.
+ * `packageInfo` must be loaded (with `full: true`) for `agentlessPolicy.package.version` — the
+ * form fetches it from the EPM/registry API — so the scaffold carries every template's inputs.
+ *
+ * `policyTemplate` selects the integration for multi-template packages. The API response does
+ * not carry it, so when the caller omits it we derive it from the enabled inputs
+ * ({@link deriveAgentlessPolicyTemplate}). Today the GET serializes *every* input (full-inputs
+ * contract), so enablement is reconstructed correctly even without the hint; deriving it keeps
+ * the read correct if the API ever returns a partial `inputs` object (otherwise other templates'
+ * default-enabled inputs would leak in as enabled). An explicit `options.policyTemplate` wins.
  */
 export const agentlessPolicyToPackagePolicy = (
   agentlessPolicy: AgentlessPolicy,
@@ -432,8 +483,11 @@ export const agentlessPolicyToPackagePolicy = (
     cloud_connector_id: cloudConnector?.cloud_connector_id ?? null,
   };
 
+  const policyTemplate =
+    options?.policyTemplate ?? deriveAgentlessPolicyTemplate(agentlessPolicy, packageInfo);
+
   const packagePolicy = simplifiedPackagePolicytoNewPackagePolicy(simplified, packageInfo, {
-    policyTemplate: options?.policyTemplate,
+    policyTemplate,
   });
 
   return {
