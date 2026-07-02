@@ -195,12 +195,22 @@ const registerHostTargetRawIdentifiersMaintainerSuite = (
           const primingTargetFqdn = targetFqdn('prime');
           const primingTarget = targetId('prime');
 
+          // Seed the priming actor with a FUTURE last_seen so it is always strictly
+          // greater than any watermark a concurrent/automatic maintainer run may have
+          // persisted — the same defense the "freshly-seen actor" test above uses.
+          // The priming run's watermark is its own wall-clock start time, not the
+          // actor's last_seen, so a future value here does not affect the stale/fresh
+          // gate asserted later.
+          const primingTs = new Date(Date.now() + 3_600_000).toISOString();
+
           await seedHostEntity(esClient, { entityId: primingTarget, hostName: primingTargetFqdn });
           await seedHostEntity(esClient, {
             entityId: primingActor,
             hostName: `${entityPrefix}-prime.${domain}`,
             relationship: { key: relationshipKey, hostNames: [primingTargetFqdn] },
             entitySource: requiredEntitySource,
+            lastSeen: primingTs,
+            firstSeen: primingTs,
           });
 
           await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });
@@ -325,6 +335,12 @@ const registerHostTargetRawIdentifiersMaintainerSuite = (
             // host target regardless of actor type.
             const userActor = `user:${entityPrefix}-admin@${domain}@${userActorNamespace}`;
 
+            // Seed the user actor with a FUTURE last_seen for the same reason as the
+            // freshly-seen and priming actors above: keep it strictly newer than any
+            // watermark a concurrent/automatic maintainer run may have persisted, so
+            // it resolves deterministically.
+            const futureTs = new Date(Date.now() + 3_600_000).toISOString();
+
             await seedHostEntity(esClient, { entityId: target, hostName: tFqdn });
             await seedUserEntity(esClient, {
               entityId: userActor,
@@ -332,6 +348,8 @@ const registerHostTargetRawIdentifiersMaintainerSuite = (
               email: `${entityPrefix}-admin@${domain}`,
               entitySource: requiredEntitySource,
               relationship: { key: relationshipKey, hostNames: [tFqdn] },
+              lastSeen: futureTs,
+              firstSeen: futureTs,
             });
 
             await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });
