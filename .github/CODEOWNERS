@@ -2698,23 +2698,6 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/test/scout @elastic/security-engineering-productivity
 
-<<<<<<< HEAD
-=======
-## Security Solution sub teams - Platform Delivery And Success
-
-/x-pack/solutions/security/plugins/security_solution/public/app/links @elastic/security-pds-deployment
-/x-pack/solutions/security/plugins/security_solution/public/common/components/navigation @elastic/security-pds-deployment
-/x-pack/solutions/security/plugins/security_solution/public/onboarding @elastic/security-pds-deployment
-/x-pack/solutions/security/plugins/security_solution/public/reports @elastic/security-pds-deployment
-/x-pack/solutions/security/plugins/security_solution/test/scout/reports/ @elastic/security-pds-deployment
-/x-pack/solutions/security/plugins/security_solution/test/scout_ai_value_report/ @elastic/security-pds-deployment
-x-pack/solutions/security/plugins/security_solution/common/trial_companion/ @elastic/security-pds-deployment
-x-pack/solutions/security/plugins/security_solution/public/trial_companion/ @elastic/security-pds-deployment
-x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/ @elastic/security-pds-deployment
-x-pack/solutions/security/test/serverless/functional/test_suites/ftr/trial_companion/ @elastic/security-pds-deployment
-x-pack/solutions/security/test/serverless/functional/configs/config.trial_companion.ts @elastic/security-pds-deployment
-
->>>>>>> f1949013b6c8 ([scout] separate scout tests into namespace sub-directories (#275087))
 ## Security Solution sub teams - Cloud Security Posture
 
 x-pack/solutions/security/plugins/security_solution/public/asset_inventory @elastic/contextual-security-apps
