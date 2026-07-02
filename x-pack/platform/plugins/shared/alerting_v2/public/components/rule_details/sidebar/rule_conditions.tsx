@@ -103,7 +103,7 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
                   defaultMessage: 'Custom',
                 })}
                 <EuiSpacer size="s" />
-                <EuiText size="s">
+                <EuiText size="xs">
                   <strong>
                     {i18n.translate('xpack.alertingV2.ruleDetails.recoveryCondition', {
                       defaultMessage: 'Recovery condition',

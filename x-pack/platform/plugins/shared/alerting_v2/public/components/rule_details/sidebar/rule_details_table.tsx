@@ -22,6 +22,7 @@ export interface RuleDetailsTableProps {
 export const RuleDetailsTable: React.FunctionComponent<RuleDetailsTableProps> = ({ items }) => {
   return (
     <EuiTable
+      compressed
       css={{
         tableLayout: 'auto',
         '.euiTableCellContent': {
