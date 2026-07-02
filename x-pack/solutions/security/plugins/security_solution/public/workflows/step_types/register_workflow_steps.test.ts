@@ -44,7 +44,7 @@ describe('registerWorkflowSteps (public)', () => {
     } as ExperimentalFeatures);
 
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(expect.any(Function));
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(6);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(5);
     // getStartServices is called once eagerly to create the shared memoized promise
     expect(core.getStartServices).toHaveBeenCalledTimes(1);
   });
@@ -57,7 +57,7 @@ describe('registerWorkflowSteps (public)', () => {
       publicAttacksApiEnabled: true,
     } as ExperimentalFeatures);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(6);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(7);
   });
 
   it('async loader returns step definitions when feature flag is enabled', async () => {
