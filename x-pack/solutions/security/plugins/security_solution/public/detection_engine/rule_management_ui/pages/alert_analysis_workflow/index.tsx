@@ -145,10 +145,12 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
   });
 
   useEffect(() => {
-    if (savedSettings) {
+    // Only initialize local edits from the fetched settings once. Re-running this on every
+    // background refetch (e.g. a reconnect) would silently discard unsaved edits.
+    if (savedSettings && pageSettings === undefined) {
       setPageSettings(savedSettings);
     }
-  }, [savedSettings]);
+  }, [savedSettings, pageSettings]);
 
   if (!canAccessPage) {
     return <NotFoundPage />;

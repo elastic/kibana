@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { focusManager } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { RULES_FEATURE_ID } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock';
@@ -27,6 +28,17 @@ jest.mock('../../../../common/hooks/use_license');
 describe('AlertAnalysisWorkflowPage', () => {
   const coreStart = coreMock.createStart();
 
+  const settingsGetResponse = (
+    settings: Record<string, unknown> = {
+      autoCloseEnabled: true,
+      autoCloseConfidenceScoreMinThreshold: 0.85,
+      autoCloseConfidenceScoreMaxThreshold: 1,
+    }
+  ) => ({
+    settings,
+    workflowId: 'system-security-alert-analysis-default',
+  });
+
   const renderComponent = () => {
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
@@ -42,19 +54,9 @@ describe('AlertAnalysisWorkflowPage', () => {
       const [path, options] = args as [string, { method?: string; body?: string } | undefined];
 
       if (path === ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE) {
-        const settings =
-          options?.method === 'PUT'
-            ? JSON.parse(options.body as string)
-            : {
-                autoCloseEnabled: true,
-                autoCloseConfidenceScoreMinThreshold: 0.85,
-                autoCloseConfidenceScoreMaxThreshold: 1,
-              };
-
-        return {
-          settings,
-          workflowId: 'system-security-alert-analysis-default',
-        };
+        return options?.method === 'PUT'
+          ? settingsGetResponse(JSON.parse(options.body as string))
+          : settingsGetResponse();
       }
 
       return {
@@ -105,6 +107,46 @@ describe('AlertAnalysisWorkflowPage', () => {
         }),
       });
     });
+  });
+
+  it('keeps unsaved edits when the settings query refetches in the background', async () => {
+    renderComponent();
+
+    const autoCloseSwitch = await screen.findByTestId('alertAnalysisWorkflowAutoCloseEnabled');
+    await waitFor(() => expect(autoCloseSwitch).toBeChecked());
+
+    fireEvent.click(autoCloseSwitch);
+    expect(autoCloseSwitch).not.toBeChecked();
+
+    // The refetch below must return data that actually differs from the initial fetch.
+    // react-query's structural sharing otherwise keeps the same `data` reference for a
+    // value-identical refetch, which would hide a bug in an effect that depends on it.
+    let settingsGetCount = 0;
+    coreStart.http.fetch.mockImplementation(async (...args: unknown[]) => {
+      const [path, options] = args as [string, { method?: string } | undefined];
+      if (path === ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE && options?.method !== 'PUT') {
+        settingsGetCount += 1;
+        return settingsGetResponse({
+          autoCloseEnabled: true,
+          autoCloseConfidenceScoreMinThreshold: 0.85,
+          autoCloseConfidenceScoreMaxThreshold: 0.99,
+        });
+      }
+      return { page: 1, perPage: 5, total: 0, attached: 0, rules: [] };
+    });
+
+    // Simulate a background refetch (e.g. a reconnect) while the edit above is unsaved.
+    await act(async () => {
+      focusManager.setFocused(false);
+    });
+    await act(async () => {
+      focusManager.setFocused(true);
+    });
+
+    await waitFor(() => expect(settingsGetCount).toBeGreaterThan(0));
+
+    // The refetch returned different data, but the unsaved edit must survive.
+    expect(autoCloseSwitch).not.toBeChecked();
   });
 
   it('disables saving when the minimum confidence score field is cleared', async () => {
