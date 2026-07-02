@@ -58,7 +58,8 @@ describe('WaitForApprovalStepImpl', () => {
   beforeEach(() => {
     mockHasExternalHitlChannels.mockReturnValue(false);
     mockBuildWaitForApprovalResumeLinks.mockClear();
-    mockSendWaitForApprovalNotifications.mockClear();
+    mockSendWaitForApprovalNotifications.mockReset();
+    mockSendWaitForApprovalNotifications.mockResolvedValue(undefined);
     mockCreateExternalResumeApiKey.mockClear();
 
     node = {
@@ -166,6 +167,52 @@ describe('WaitForApprovalStepImpl', () => {
       expect.objectContaining({ encodedApiKey: 'encoded-api-key' })
     );
     expect(mockSendWaitForApprovalNotifications).toHaveBeenCalled();
+  });
+
+  it('persists the external resume API key id before sending notifications', async () => {
+    mockHasExternalHitlChannels.mockReturnValue(true);
+    node.configuration = {
+      ...node.configuration,
+      with: {
+        ...node.configuration.with,
+        channels: {
+          slack: { 'connector-id': 'slack-1' },
+        },
+      },
+    } as WaitForApprovalStep;
+
+    await underTest.run();
+
+    expect(mockStepExecutionRuntime.setInput).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        externalResumeApiKeyId: 'api-key-id',
+      })
+    );
+    expect(mockSendWaitForApprovalNotifications).toHaveBeenCalled();
+    expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledTimes(2);
+  });
+
+  it('persists the external resume API key id when notification delivery fails', async () => {
+    mockHasExternalHitlChannels.mockReturnValue(true);
+    mockSendWaitForApprovalNotifications.mockRejectedValue(new Error('Slack connector failed'));
+    node.configuration = {
+      ...node.configuration,
+      with: {
+        ...node.configuration.with,
+        channels: {
+          slack: { 'connector-id': 'slack-1' },
+        },
+      },
+    } as WaitForApprovalStep;
+
+    await expect(underTest.run()).rejects.toThrow('Slack connector failed');
+
+    expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith(
+      expect.objectContaining({
+        externalResumeApiKeyId: 'api-key-id',
+      })
+    );
   });
 
   it('finishes with approval output shape on resume', async () => {

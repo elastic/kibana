@@ -18,6 +18,34 @@ import type { ContextDependencies } from '../../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 
+jest.mock('@kbn/workflows/server', () => ({
+  ...jest.requireActual('@kbn/workflows/server'),
+  createExternalResumeApiKey: jest.fn().mockResolvedValue({
+    id: 'api-key-id',
+    encoded: 'encoded-api-key',
+  }),
+}));
+
+jest.mock('../wait_for_approval_step/send_wait_for_approval_notifications', () => ({
+  hasExternalHitlChannels: jest.fn().mockReturnValue(false),
+}));
+
+jest.mock('../wait_for_approval_step/send_wait_for_input_notifications', () => ({
+  sendWaitForInputNotifications: jest.fn(),
+}));
+
+const mockCreateExternalResumeApiKey = jest.requireMock('@kbn/workflows/server')
+  .createExternalResumeApiKey as jest.Mock;
+
+const { hasExternalHitlChannels } = jest.requireMock(
+  '../wait_for_approval_step/send_wait_for_approval_notifications'
+);
+const { sendWaitForInputNotifications } = jest.requireMock(
+  '../wait_for_approval_step/send_wait_for_input_notifications'
+);
+const mockHasExternalHitlChannels = hasExternalHitlChannels as jest.Mock;
+const mockSendWaitForInputNotifications = sendWaitForInputNotifications as jest.Mock;
+
 describe('WaitForInputStepImpl', () => {
   let underTest: WaitForInputStepImpl;
 
@@ -29,6 +57,11 @@ describe('WaitForInputStepImpl', () => {
   let mockDependencies: ContextDependencies;
 
   beforeEach(() => {
+    mockHasExternalHitlChannels.mockReturnValue(false);
+    mockSendWaitForInputNotifications.mockReset();
+    mockSendWaitForInputNotifications.mockResolvedValue(undefined);
+    mockCreateExternalResumeApiKey.mockClear();
+
     node = {
       id: 'wait-for-input-step',
       type: 'waitForInput',
@@ -50,12 +83,18 @@ describe('WaitForInputStepImpl', () => {
       abortController: new AbortController(),
       contextManager: {
         renderValueAccordingToContext: jest.fn(<T>(v: T): T => v),
+        getEsClientAsUser: jest.fn().mockReturnValue({ security: { createApiKey: jest.fn() } }),
       },
     } as unknown as jest.Mocked<StepExecutionRuntime>;
 
     mockWorkflowRuntime = {
       navigateToNextNode: jest.fn(),
-      getWorkflowExecution: jest.fn().mockReturnValue({ id: 'exec-abc', context: {} }),
+      getWorkflowExecution: jest.fn().mockReturnValue({
+        id: 'exec-abc',
+        workflowId: 'wf-1',
+        spaceId: 'default',
+        context: {},
+      }),
     } as unknown as jest.Mocked<WorkflowExecutionRuntimeManager>;
 
     workflowLogger = {
@@ -173,6 +212,54 @@ describe('WaitForInputStepImpl', () => {
     it('should not update workflow execution context on first run', async () => {
       await underTest.run();
       expect(mockStepExecutionRuntime.updateWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('should persist the external resume API key id before sending notifications', async () => {
+      mockHasExternalHitlChannels.mockReturnValue(true);
+      node.configuration = {
+        ...node.configuration,
+        with: {
+          message: 'Please approve',
+          channels: {
+            slack: { 'connector-id': 'slack-1' },
+          },
+        },
+      } as WaitForInputStep;
+
+      await underTest.run();
+
+      expect(mockCreateExternalResumeApiKey).toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.setInput).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          externalResumeApiKeyId: 'api-key-id',
+          message: 'Please approve',
+        })
+      );
+      expect(mockSendWaitForInputNotifications).toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledTimes(2);
+    });
+
+    it('should persist the external resume API key id when notification delivery fails', async () => {
+      mockHasExternalHitlChannels.mockReturnValue(true);
+      mockSendWaitForInputNotifications.mockRejectedValue(new Error('Slack connector failed'));
+      node.configuration = {
+        ...node.configuration,
+        with: {
+          message: 'Please approve',
+          channels: {
+            slack: { 'connector-id': 'slack-1' },
+          },
+        },
+      } as WaitForInputStep;
+
+      await expect(underTest.run()).rejects.toThrow('Slack connector failed');
+
+      expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith(
+        expect.objectContaining({
+          externalResumeApiKeyId: 'api-key-id',
+        })
+      );
     });
   });
 

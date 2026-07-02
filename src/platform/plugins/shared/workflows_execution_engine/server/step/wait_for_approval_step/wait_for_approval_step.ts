@@ -109,6 +109,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
       });
 
       stepInput.externalResumeApiKeyId = apiKey.id;
+      this.stepExecutionRuntime.setInput(stepInput);
 
       await this.sendExternalNotifications({
         channels,

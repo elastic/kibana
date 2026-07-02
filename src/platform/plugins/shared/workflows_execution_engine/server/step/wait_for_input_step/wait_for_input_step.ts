@@ -102,6 +102,7 @@ export class WaitForInputStepImpl implements NodeImplementation {
       });
 
       stepInput.externalResumeApiKeyId = apiKey.id;
+      this.stepExecutionRuntime.setInput(stepInput);
 
       const kibanaUrl = getKibanaUrl(this.dependencies.coreStart, this.dependencies.cloudSetup);
       const formUrl = buildExternalResumeFormUrl({
