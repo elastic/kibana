@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
@@ -13,10 +13,10 @@ import { ExpandableSection } from '../../../shared/components/expandable_section
 import { INSIGHTS_SECTION_TEST_ID } from '../constants/test_ids';
 import { EntitiesOverview } from './entities_overview';
 import { CorrelationsOverview } from './correlations_overview';
+import { useAttackAlertIds } from '../hooks/use_attack_alert_ids';
 
 const KEY = 'insights';
 const STORAGE_KEY = 'securitySolution.attackDetailsFlyout.overviewSectionExpanded.v9.4';
-const FIELD_ALERT_IDS = 'kibana.alert.attack_discovery.alert_ids' as const;
 
 export interface InsightsSectionProps {
   /** The raw attack document hit. */
@@ -38,12 +38,7 @@ export const InsightsSection = memo(
       defaultValue: false,
     });
 
-    const alertIds = useMemo(() => {
-      const value = hit.flattened[FIELD_ALERT_IDS];
-      if (!value) return [];
-      const arr = Array.isArray(value) ? value : [value];
-      return [...new Set(arr as string[])];
-    }, [hit]);
+    const alertIds = useAttackAlertIds(hit);
 
     return (
       <ExpandableSection
