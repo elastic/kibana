@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
+import { EntityType } from '../../domain/definitions/entity_schema';
 
 export const ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID =
   'entityStore.entityAssetCriticalityUpdated' as const;
@@ -19,10 +20,7 @@ export const entityAssetCriticalityUpdatedEventSchema = z.object({
     .string()
     .max(1000)
     .describe('The unique EUID of the entity whose asset criticality changed.'),
-  entityType: z
-    .string()
-    .max(10)
-    .describe('The type of entity (e.g. host, user, service, generic).'),
+  entityType: EntityType.describe('The type of entity (e.g. host, user, service, generic).'),
   criticalityLevel: z
     .string()
     .max(20)
