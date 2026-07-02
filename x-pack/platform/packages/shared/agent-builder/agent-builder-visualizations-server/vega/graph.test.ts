@@ -63,12 +63,15 @@ describe('createVegaGraph', () => {
     >);
   });
 
-  const run = async (input: { esqlQuery?: string; existingSpec?: string } = {}) => {
+  const run = async (
+    input: { esqlQuery?: string; existingSpec?: string; existingEsql?: string } = {}
+  ) => {
     const graph = await createVegaGraph(modelProvider, logger, events, esClient);
     return graph.invoke({
       nlQuery: 'small multiples of latency by region',
       index: undefined,
       existingSpec: input.existingSpec,
+      existingEsql: input.existingEsql,
       esqlQuery: input.esqlQuery ?? '',
       currentAttempt: 0,
       actions: [],
@@ -89,6 +92,42 @@ describe('createVegaGraph', () => {
     expect(spec.data).toEqual({ url: { '%type%': 'esql', query: GENERATED_ESQL } });
     expect(spec.mark).toBe('bar');
     expect(state.esqlQuery).toBe(GENERATED_ESQL);
+  });
+
+  it('seeds ES|QL generation with the existing query as context when editing', async () => {
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
+
+    // An edit with no trusted query: the recovered query must be handed to the
+    // generator as context so a data-shape change (e.g. a new breakdown) can
+    // actually modify the query instead of being stuck with the original one.
+    const state = await run({ existingEsql: PROVIDED_ESQL });
+
+    expect(mockedGenerateEsql).toHaveBeenCalledTimes(1);
+    const { nlQuery } = mockedGenerateEsql.mock.calls[0][0];
+    expect(nlQuery).toContain(PROVIDED_ESQL);
+    expect(nlQuery).toContain('small multiples of latency by region');
+    // The (possibly modified) generated query is what ends up in the spec.
+    expect(JSON.parse(state.spec!).data.url.query).toBe(GENERATED_ESQL);
+  });
+
+  it('does not add edit context when there is no existing query to modify', async () => {
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
+
+    await run();
+
+    const { nlQuery } = mockedGenerateEsql.mock.calls[0][0];
+    expect(nlQuery).not.toContain('Existing esql query to modify');
+  });
+
+  it('prefers a trusted provided query over the edit context', async () => {
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'point' }));
+
+    // A caller-provided query that executes wins; generation (and its edit
+    // context) is skipped entirely.
+    const state = await run({ esqlQuery: PROVIDED_ESQL, existingEsql: GENERATED_ESQL });
+
+    expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    expect(JSON.parse(state.spec!).data.url.query).toBe(PROVIDED_ESQL);
   });
 
   it('executes a provided ES|QL query instead of generating one', async () => {

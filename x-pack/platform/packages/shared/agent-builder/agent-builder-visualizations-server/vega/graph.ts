@@ -72,6 +72,8 @@ const VegaStateAnnotation = Annotation.Root({
   nlQuery: Annotation<string>(),
   index: Annotation<string | undefined>(),
   existingSpec: Annotation<string | undefined>(),
+  /** Query recovered from the spec being edited, used as context to (re)generate. */
+  existingEsql: Annotation<string | undefined>(),
   chartType: Annotation<SupportedChartType | undefined>(),
   // internal
   esqlQuery: Annotation<string>(),
@@ -145,6 +147,10 @@ export const createVegaGraph = async (
         logger.debug('Generating ES|QL query for Vega visualization');
         const generated = await generateVisualizationEsql({
           nlQuery: state.nlQuery,
+          // On edit, seed generation with the query recovered from the existing
+          // spec so a data-shape edit (e.g. a new breakdown) can modify it
+          // instead of being stuck with the original columns.
+          existingQueries: state.existingEsql ? [state.existingEsql] : undefined,
           index: state.index,
           modelProvider,
           events,

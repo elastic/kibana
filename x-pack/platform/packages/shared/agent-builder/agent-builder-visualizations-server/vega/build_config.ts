@@ -37,8 +37,10 @@ export interface BuildVegaConfigResult {
 
 /**
  * Orchestrate Vega-Lite spec generation: optionally reuse a caller-provided
- * ES|QL query (dropped if it fails validation so the graph regenerates one), run
- * the generation graph, and surface a clear error if no spec is produced.
+ * ES|QL query (dropped if it fails validation so the graph regenerates one), on
+ * edits seed generation with the query recovered from the existing spec so the
+ * graph can modify it when the instruction needs different data, run the
+ * generation graph, and surface a clear error if no spec is produced.
  */
 export const buildVegaConfig = async ({
   nlQuery,
@@ -72,18 +74,15 @@ export const buildVegaConfig = async ({
     }
   }
 
-  // On edit, reuse the ES|QL embedded in the existing spec rather than
-  // regenerating one, so the graph re-authors only what the instruction asks.
-  // This also recovers the query when a caller-provided ES|QL was dropped above,
-  // and survives save/import round-trips where the spec is the source of truth.
-  // The graph re-executes the query to validate it, so a recovered-but-now-stale
-  // query still self-corrects.
-  if (!providedEsql && existingSpec) {
-    const recoveredEsql = extractEsqlFromSpec(existingSpec);
-    if (recoveredEsql) {
-      logger.debug('Reusing the ES|QL embedded in the existing Vega spec for this edit');
-      providedEsql = recoveredEsql;
-    }
+  // On edit, recover the ES|QL embedded in the existing spec and pass it to the
+  // graph as context (not as the query to reuse). The graph modifies it when the
+  // instruction needs different data (e.g. a new breakdown) and keeps it for
+  // visual-only edits, so query-changing edits are not blocked. A trusted
+  // caller-provided query (above) still takes precedence. Recovery also survives
+  // save/import round-trips, where the stored spec is the source of truth.
+  const existingEsql = existingSpec ? extractEsqlFromSpec(existingSpec) : undefined;
+  if (existingEsql) {
+    logger.debug('Recovered ES|QL from the existing Vega spec to seed this edit');
   }
 
   const graph = await createVegaGraph(modelProvider, logger, events, esClient);
@@ -92,6 +91,7 @@ export const buildVegaConfig = async ({
     nlQuery,
     index,
     existingSpec,
+    existingEsql,
     chartType,
     esqlQuery: providedEsql || '',
     currentAttempt: 0,

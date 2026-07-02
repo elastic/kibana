@@ -122,20 +122,22 @@ describe('buildVegaConfig', () => {
         esClient,
       });
 
-    it('reuses the ES|QL embedded in the existing spec when no query is provided', async () => {
+    it('passes the recovered ES|QL as edit context, not as the query to reuse', async () => {
       await edit(undefined);
 
-      // The recovered query is already known-good, so it bypasses pre-validation
-      // and is handed to the graph, which re-executes it while re-authoring.
+      // No caller query to pre-validate; the recovered query is threaded as
+      // context (existingEsql) so the graph can modify it when the edit needs
+      // different data, while esqlQuery stays empty so generation runs.
       expect(mockedValidateEsqlQuery).not.toHaveBeenCalled();
       expect(invoke.mock.calls[0][0]).toMatchObject({
-        esqlQuery: PROVIDED_ESQL,
+        esqlQuery: '',
+        existingEsql: PROVIDED_ESQL,
         existingSpec,
       });
-      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('Reusing the ES|QL'));
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('Recovered ES|QL'));
     });
 
-    it('regenerates when the existing spec has no ES|QL binding to recover', async () => {
+    it('has no edit context when the existing spec has no ES|QL binding to recover', async () => {
       const specWithoutEsql = JSON.stringify({ mark: 'bar', data: { values: [{ a: 1 }] } });
 
       await buildVegaConfig({
@@ -149,6 +151,7 @@ describe('buildVegaConfig', () => {
 
       expect(invoke.mock.calls[0][0]).toMatchObject({
         esqlQuery: '',
+        existingEsql: undefined,
         existingSpec: specWithoutEsql,
       });
     });
@@ -158,26 +161,26 @@ describe('buildVegaConfig', () => {
 
       await edit(newEsql);
 
-      expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: newEsql });
+      // The trusted caller query wins, but the recovered query is still threaded
+      // as context so the graph has the prior shape available.
+      expect(invoke.mock.calls[0][0]).toMatchObject({
+        esqlQuery: newEsql,
+        existingEsql: PROVIDED_ESQL,
+      });
     });
 
-    it('passes a valid provided ES|QL through when editing', async () => {
-      const newEsql = 'FROM metrics-* | STATS avg = AVG(value)';
-
-      await edit(newEsql);
-
-      expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: newEsql });
-    });
-
-    it('recovers the embedded ES|QL when a provided query fails validation on edit', async () => {
+    it('still provides the embedded ES|QL as context when a provided query fails validation', async () => {
       mockedValidateEsqlQuery.mockResolvedValue('line 1, column 1: bad query');
 
       await edit('INVALID QUERY');
 
-      // The invalid query is dropped, then recovery falls back to the query
-      // embedded in the existing spec rather than regenerating from scratch.
+      // The invalid caller query is dropped (esqlQuery empty, so generation runs)
+      // and the query embedded in the existing spec seeds regeneration.
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('bad query'));
-      expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: PROVIDED_ESQL });
+      expect(invoke.mock.calls[0][0]).toMatchObject({
+        esqlQuery: '',
+        existingEsql: PROVIDED_ESQL,
+      });
     });
   });
 });

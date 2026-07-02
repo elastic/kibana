@@ -114,20 +114,12 @@ export const createVisualizationGraph = async (
 
     let action: GenerateEsqlAction;
     try {
-      const existingQueries = getExistingEsqlQueries(state.parsedExistingConfig);
-
-      let nlQueryWithContext = state.nlQuery;
-      if (existingQueries.length > 0) {
-        if (existingQueries.length === 1) {
-          nlQueryWithContext = `Existing esql query to modify: "${existingQueries[0]}"\n\nUser query: ${state.nlQuery}`;
-        } else {
-          const queriesContext = existingQueries.map((q, i) => `Layer ${i + 1}: "${q}"`).join('\n');
-          nlQueryWithContext = `Existing esql queries from multiple layers:\n${queriesContext}\n\nUser query: ${state.nlQuery}`;
-        }
-      }
-
       const generated = await generateVisualizationEsql({
-        nlQuery: nlQueryWithContext,
+        nlQuery: state.nlQuery,
+        // On edit, seed generation with the existing per-layer queries so a
+        // query-changing edit can modify them instead of being stuck with the
+        // original columns.
+        existingQueries: getExistingEsqlQueries(state.parsedExistingConfig),
         index: state.index,
         modelProvider,
         events,
