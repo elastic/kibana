@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test, tags } from '@kbn/scout-security';
+import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import {
   HOST_FLYOUT_ENTITY_ID,
@@ -18,12 +18,13 @@ import {
 
 const ANOMALY_OVERVIEW_ROUTE = `**/internal/entity_analytics/entities/host/${HOST_FLYOUT_ENTITY_ID}/anomaly_overview`;
 const ANOMALY_SUMMARY_ROUTE = `**/internal/entity_analytics/entities/host/${HOST_FLYOUT_ENTITY_ID}/anomaly_summary`;
+const ANOMALY_PRIVILEGES_ROUTE = '**/internal/entity_analytics/anomalies/privileges';
 
-test.describe(
+spaceTest.describe(
   'Entity flyout anomalies',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    test.beforeAll(async ({ apiServices }) => {
+    spaceTest.beforeAll(async ({ apiServices }) => {
       await apiServices.entityAnalytics.installEntityStoreV2(['host']);
       await apiServices.entityAnalytics.indexEntityStoreEntry(
         HOST_FLYOUT_ENTITY_ID,
@@ -31,167 +32,180 @@ test.describe(
       );
     });
 
-    test.beforeEach(async ({ browserAuth }) => {
+    spaceTest.beforeEach(async ({ browserAuth, page }) => {
       await browserAuth.loginAsAdmin();
+      // The privileges check gates every anomalies fetch below and isn't itself under test here;
+      // mock it so a transient real-backend hiccup can't make the anomalies section silently
+      // never load (see the flakiness this caused when left to hit the real endpoint).
+      await page.route(ANOMALY_PRIVILEGES_ROUTE, async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            has_all_required: true,
+            privileges: { elasticsearch: {} },
+          }),
+        });
+      });
     });
 
-    test.afterAll(async ({ apiServices }) => {
+    spaceTest.afterAll(async ({ apiServices }) => {
       await apiServices.entityAnalytics.uninstallEntityStoreV2(['host']);
     });
 
-    test('host right panel shows anomalies section when the entity has anomalies', async ({
-      page,
-      pageObjects,
-    }) => {
-      await page.route(ANOMALY_OVERVIEW_ROUTE, (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES),
-        })
-      );
+    spaceTest(
+      'host right panel shows anomalies section when the entity has anomalies',
+      async ({ page, pageObjects }) => {
+        await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES),
+          });
+        });
 
-      await pageObjects.entityFlyoutAnomaliesPage.navigateToHostRightPanel();
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostRightPanel();
 
-      await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesSection).toBeVisible();
-      await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesExpandablePanel).toBeVisible();
-      await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesRecentTable).toBeVisible();
-    });
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesSection).toBeVisible();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesExpandablePanel).toBeVisible();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesRecentTable).toBeVisible();
+      }
+    );
 
-    test('host right panel does not show anomalies section when the entity has no anomalies', async ({
-      page,
-      pageObjects,
-    }) => {
-      await page.route(ANOMALY_OVERVIEW_ROUTE, (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_EMPTY),
-        })
-      );
+    spaceTest(
+      'host right panel does not show anomalies section when the entity has no anomalies',
+      async ({ page, pageObjects }) => {
+        await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_EMPTY),
+          });
+        });
 
-      const overviewResponse = page.waitForResponse(ANOMALY_OVERVIEW_ROUTE);
-      await pageObjects.entityFlyoutAnomaliesPage.navigateToHostRightPanel();
-      await overviewResponse;
+        const overviewResponse = page.waitForResponse(ANOMALY_OVERVIEW_ROUTE, { timeout: 30000 });
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostRightPanel();
+        await overviewResponse;
 
-      await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesSection).toBeHidden();
-    });
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesSection).toBeHidden();
+      }
+    );
 
-    test('host entity details left panel shows anomalies tab and tab content when the entity has anomalies', async ({
-      page,
-      pageObjects,
-    }) => {
-      await page.route(ANOMALY_OVERVIEW_ROUTE, (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES),
-        })
-      );
-      await page.route(ANOMALY_SUMMARY_ROUTE, (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(MOCK_ANOMALY_SUMMARY),
-        })
-      );
+    spaceTest(
+      'host entity details left panel shows anomalies tab and tab content when the entity has anomalies',
+      async ({ page, pageObjects }) => {
+        await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES),
+          });
+        });
+        await page.route(ANOMALY_SUMMARY_ROUTE, async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(MOCK_ANOMALY_SUMMARY),
+          });
+        });
 
-      await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
 
-      await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTab).toBeVisible();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTab).toBeVisible();
 
-      await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
+        await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
 
-      await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabAttackChain).toBeVisible();
-      await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabTimeline).toBeVisible();
-      await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabTable).toBeVisible();
-      await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabTableGrid).toBeVisible();
-      await expect(
-        pageObjects.entityFlyoutAnomaliesPage.anomaliesTabManageJobsButton
-      ).toBeVisible();
-    });
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabAttackChain).toBeVisible();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabTimeline).toBeVisible();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabTable).toBeVisible();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabTableGrid).toBeVisible();
+        await expect(
+          pageObjects.entityFlyoutAnomaliesPage.anomaliesTabManageJobsButton
+        ).toBeVisible();
+      }
+    );
 
-    test('host right panel does not show anomalies section when the anomaly overview API returns an error', async ({
-      page,
-      pageObjects,
-    }) => {
-      await page.route(ANOMALY_OVERVIEW_ROUTE, (route) => route.fulfill({ status: 500 }));
+    spaceTest(
+      'host right panel does not show anomalies section when the anomaly overview API returns an error',
+      async ({ page, pageObjects }) => {
+        await page.route(ANOMALY_OVERVIEW_ROUTE, (route) => route.fulfill({ status: 500 }));
 
-      const overviewResponse = page.waitForResponse(ANOMALY_OVERVIEW_ROUTE);
-      await pageObjects.entityFlyoutAnomaliesPage.navigateToHostRightPanel();
-      await overviewResponse;
+        const overviewResponse = page.waitForResponse(ANOMALY_OVERVIEW_ROUTE, { timeout: 30000 });
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostRightPanel();
+        await overviewResponse;
 
-      await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesSection).toBeHidden();
-    });
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesSection).toBeHidden();
+      }
+    );
 
-    test('host entity details left panel does not show anomalies tab when the entity has no anomalies', async ({
-      page,
-      pageObjects,
-    }) => {
-      await page.route(ANOMALY_OVERVIEW_ROUTE, (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_EMPTY),
-        })
-      );
+    spaceTest(
+      'host entity details left panel does not show anomalies tab when the entity has no anomalies',
+      async ({ page, pageObjects }) => {
+        await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_EMPTY),
+          });
+        });
 
-      const overviewResponse = page.waitForResponse(ANOMALY_OVERVIEW_ROUTE);
-      await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
-      await overviewResponse;
+        const overviewResponse = page.waitForResponse(ANOMALY_OVERVIEW_ROUTE, { timeout: 30000 });
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
+        await overviewResponse;
 
-      await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTab).toBeHidden();
-    });
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTab).toBeHidden();
+      }
+    );
 
-    test('host entity details left panel anomalies tab shows table but not attack chain when entity has no tactic associations', async ({
-      page,
-      pageObjects,
-    }) => {
-      await page.route(ANOMALY_OVERVIEW_ROUTE, (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES_NO_TACTICS),
-        })
-      );
-      await page.route(ANOMALY_SUMMARY_ROUTE, (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(MOCK_ANOMALY_SUMMARY),
-        })
-      );
+    spaceTest(
+      'host entity details left panel anomalies tab shows table but not attack chain when entity has no tactic associations',
+      async ({ page, pageObjects }) => {
+        await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES_NO_TACTICS),
+          });
+        });
+        await page.route(ANOMALY_SUMMARY_ROUTE, async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(MOCK_ANOMALY_SUMMARY),
+          });
+        });
 
-      await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
-      await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
+        await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
 
-      await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabAttackChain).toBeHidden();
-      await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabTable).toBeVisible();
-    });
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabAttackChain).toBeHidden();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabTable).toBeVisible();
+      }
+    );
 
-    test('clicking the anomalies count link in the right panel opens the entity details left panel on the anomalies tab', async ({
-      page,
-      pageObjects,
-    }) => {
-      await page.route(ANOMALY_OVERVIEW_ROUTE, (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES),
-        })
-      );
-      await page.route(ANOMALY_SUMMARY_ROUTE, (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(MOCK_ANOMALY_SUMMARY),
-        })
-      );
+    spaceTest(
+      'clicking the anomalies count link in the right panel opens the entity details left panel on the anomalies tab',
+      async ({ page, pageObjects }) => {
+        await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES),
+          });
+        });
+        await page.route(ANOMALY_SUMMARY_ROUTE, async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(MOCK_ANOMALY_SUMMARY),
+          });
+        });
 
-      await pageObjects.entityFlyoutAnomaliesPage.navigateToHostRightPanel();
-      await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesCountLink();
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostRightPanel();
+        await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesCountLink();
 
-      await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTab).toBeVisible();
-    });
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTab).toBeVisible();
+      }
+    );
   }
 );
