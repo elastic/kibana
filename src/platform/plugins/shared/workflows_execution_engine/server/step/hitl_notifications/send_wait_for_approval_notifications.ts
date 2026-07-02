@@ -161,16 +161,20 @@ export async function sendWaitForApprovalNotifications({
     assertConnectorSucceeded(result);
   }
 
-  const slackApiChannelId = channels.slack_api?.channels?.[0];
-  if (channels.slack_api?.['connector-id'] && slackApiChannelId) {
-    const result = await connectorExecutor.execute({
-      connectorType: 'slack_api',
-      connectorNameOrId: channels.slack_api['connector-id'],
-      input: buildSlackApiBlockkitInput(linkParams, {
-        channelIds: [slackApiChannelId],
-      }),
-      abortController,
-    });
-    assertConnectorSucceeded(result);
+  const slackApiConfig = channels.slack_api;
+  const slackApiConnectorId = slackApiConfig?.['connector-id'];
+  const slackApiChannelIds = slackApiConfig?.channels;
+  if (slackApiConnectorId && slackApiChannelIds?.length) {
+    for (const channelId of slackApiChannelIds) {
+      const result = await connectorExecutor.execute({
+        connectorType: 'slack_api',
+        connectorNameOrId: slackApiConnectorId,
+        input: buildSlackApiBlockkitInput(linkParams, {
+          channelIds: [channelId],
+        }),
+        abortController,
+      });
+      assertConnectorSucceeded(result);
+    }
   }
 }

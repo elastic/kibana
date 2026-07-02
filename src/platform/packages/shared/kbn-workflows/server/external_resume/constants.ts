@@ -18,4 +18,8 @@ export const WORKFLOW_EXTERNAL_RESUME_ROLE = 'workflow_external_resume' as const
 export const WORKFLOW_EXTERNAL_RESUME_APPLICATION = 'kibana-workflows' as const;
 
 export { DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT } from '../../common/wait_for_approval';
-export { DEFAULT_WAIT_FOR_INPUT_TIMEOUT } from '../../common/hitl';
+export {
+  DEFAULT_HITL_INPUT_CHANNEL_MESSAGE,
+  DEFAULT_HITL_INPUT_OPEN_FORM_LABEL,
+  DEFAULT_WAIT_FOR_INPUT_TIMEOUT,
+} from '../../common/hitl';

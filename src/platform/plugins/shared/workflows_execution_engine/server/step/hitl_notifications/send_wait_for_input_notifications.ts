@@ -11,7 +11,7 @@ import type { WaitForInputStep } from '@kbn/workflows';
 import {
   DEFAULT_HITL_INPUT_CHANNEL_MESSAGE,
   DEFAULT_HITL_INPUT_OPEN_FORM_LABEL,
-} from '@kbn/workflows';
+} from '@kbn/workflows/server';
 import { hasExternalHitlChannels } from './has_external_hitl_channels';
 import { assertConnectorSucceeded } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
@@ -146,13 +146,15 @@ export async function sendWaitForInputNotifications({
     assertConnectorSucceeded(result);
   }
 
-  const slackApiChannelId = channels.slack_api?.channels?.[0];
-  if (channels.slack_api?.['connector-id'] && slackApiChannelId) {
+  const slackApiConfig = channels.slack_api;
+  const slackApiConnectorId = slackApiConfig?.['connector-id'];
+  const slackApiChannelIds = slackApiConfig?.channels;
+  if (slackApiConnectorId && slackApiChannelIds?.length) {
     const slackApiBlocks =
-      channels.slack_api.message != null
+      slackApiConfig.message != null
         ? buildInputSlackApiBlocksFromMessage(
             resolveWaitForInputChannelMessage({
-              channelMessageTemplate: channels.slack_api.message,
+              channelMessageTemplate: slackApiConfig.message,
               stepMessage,
               formUrl,
               renderTemplate,
@@ -160,14 +162,16 @@ export async function sendWaitForInputNotifications({
           )
         : buildDefaultInputSlackApiBlocks({ stepMessage, formUrl });
 
-    const result = await connectorExecutor.execute({
-      connectorType: 'slack_api',
-      connectorNameOrId: channels.slack_api['connector-id'],
-      input: buildSlackApiBlockkitInput(slackApiBlocks, {
-        channelIds: [slackApiChannelId],
-      }),
-      abortController,
-    });
-    assertConnectorSucceeded(result);
+    for (const channelId of slackApiChannelIds) {
+      const result = await connectorExecutor.execute({
+        connectorType: 'slack_api',
+        connectorNameOrId: slackApiConnectorId,
+        input: buildSlackApiBlockkitInput(slackApiBlocks, {
+          channelIds: [channelId],
+        }),
+        abortController,
+      });
+      assertConnectorSucceeded(result);
+    }
   }
 }

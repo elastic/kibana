@@ -33,6 +33,8 @@ export {
   WORKFLOW_EXTERNAL_RESUME_APPLICATION,
   WORKFLOW_EXTERNAL_RESUME_ROLE,
   DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
+  DEFAULT_HITL_INPUT_CHANNEL_MESSAGE,
+  DEFAULT_HITL_INPUT_OPEN_FORM_LABEL,
   DEFAULT_WAIT_FOR_INPUT_TIMEOUT,
 } from './external_resume/constants';
 export { buildExternalResumeUrl } from './external_resume/build_external_resume_url';

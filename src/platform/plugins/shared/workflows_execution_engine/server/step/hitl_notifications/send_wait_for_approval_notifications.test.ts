@@ -116,6 +116,29 @@ describe('send_wait_for_approval_notifications', () => {
       });
     });
 
+    it('sends slack_api notifications to every configured channel', async () => {
+      const execute = jest
+        .fn()
+        .mockResolvedValueOnce({ status: 'ok' })
+        .mockResolvedValueOnce({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        channels: {
+          slack_api: { 'connector-id': 'slack-api-1', channels: ['C0123', 'C0456'] },
+        },
+        message: 'Approve change?',
+        approveLabel: 'Approve',
+        rejectLabel: 'Decline',
+        resumeLinks,
+        connectorExecutor: { execute } as never,
+        abortController: new AbortController(),
+      });
+
+      expect(execute).toHaveBeenCalledTimes(2);
+      expect(execute.mock.calls[0][0].input.subActionParams.channelIds).toEqual(['C0123']);
+      expect(execute.mock.calls[1][0].input.subActionParams.channelIds).toEqual(['C0456']);
+    });
+
     it('throws when a configured connector fails', async () => {
       const execute = jest
         .fn()
