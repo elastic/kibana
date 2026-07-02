@@ -82,6 +82,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
     workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
     stepExecutionRepository = new StepExecutionRepository(esClient);
     jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
+    jest.spyOn(workflowExecutionRepository, 'updateWorkflowExecution').mockResolvedValue({});
     logger = loggingSystemMock.create().get();
     workflow = {
       id: 'test-workflow-id',
@@ -431,17 +432,13 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         docs: [
           {
             found: true,
+            _id: encodedId,
             _index: TEST_BACKING_INDEX,
             _seq_no: 1,
             _primary_term: 1,
             _source: existingExecution._source,
           },
         ],
-      } as any);
-      esClient.update.mockResolvedValue({
-        _index: TEST_BACKING_INDEX,
-        _seq_no: 2,
-        _primary_term: 1,
       } as any);
       (esClient.indices?.exists as jest.Mock).mockResolvedValue(true);
 
@@ -458,17 +455,14 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       );
 
       expect(result).toBe(false); // Proceed with new execution
-      expect(esClient.update).toHaveBeenCalledWith(
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: TEST_BACKING_INDEX,
           id: encodedId,
-          doc: expect.objectContaining({
-            status: ExecutionStatus.FAILED,
-            error: {
-              type: 'TaskRecoveryError',
-              message: expect.stringContaining('Execution abandoned'),
-            },
-          }),
+          status: ExecutionStatus.FAILED,
+          error: {
+            type: 'TaskRecoveryError',
+            message: expect.stringContaining('Execution abandoned'),
+          },
         })
       );
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Found stale execution'));
@@ -721,17 +715,13 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         docs: [
           {
             found: true,
+            _id: encodedId,
             _index: TEST_BACKING_INDEX,
             _seq_no: 1,
             _primary_term: 1,
             _source: existingExecution._source,
           },
         ],
-      } as any);
-      esClient.update.mockResolvedValue({
-        _index: TEST_BACKING_INDEX,
-        _seq_no: 2,
-        _primary_term: 1,
       } as any);
       (esClient.indices?.exists as jest.Mock).mockResolvedValue(true);
 
@@ -748,11 +738,9 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       );
 
       expect(result).toBe(false); // Proceed - mark stale as failed
-      expect(esClient.update).toHaveBeenCalledWith(
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
-          doc: expect.objectContaining({
-            status: ExecutionStatus.FAILED,
-          }),
+          status: ExecutionStatus.FAILED,
         })
       );
     });

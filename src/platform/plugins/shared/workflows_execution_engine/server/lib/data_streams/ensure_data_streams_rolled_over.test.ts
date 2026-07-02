@@ -11,11 +11,14 @@ jest.mock('./roll_data_stream_if_required', () => ({
   rollDataStreamIfRequired: jest.fn(),
 }));
 
+import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '@kbn/workflows';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ensureWorkflowsDataStreamsRolledOver } from './ensure_data_streams_rolled_over';
 import { rollDataStreamIfRequired } from './roll_data_stream_if_required';
 import { WORKFLOWS_EXECUTION_LOGS_DATA_STREAM } from '../../repositories/logs_repository/constants';
 import { WORKFLOWS_LOGS_MANAGED_INDEX_MAPPINGS_VERSION } from '../../repositories/logs_repository/data_stream';
+import { WORKFLOWS_STEP_EXECUTIONS_MANAGED_INDEX_MAPPINGS_VERSION } from '../../repositories/step_executions_data_stream';
+import { WORKFLOWS_EXECUTIONS_MANAGED_INDEX_MAPPINGS_VERSION } from '../../repositories/workflow_executions_data_stream';
 import { WORKFLOWS_EVENTS_DATA_STREAM } from '../../trigger_events/event_logs/constants';
 import { WORKFLOWS_EVENTS_MANAGED_INDEX_MAPPINGS_VERSION } from '../../trigger_events/event_logs/trigger_events_data_stream';
 
@@ -43,7 +46,7 @@ describe('ensureWorkflowsDataStreamsRolledOver', () => {
 
     await ensureWorkflowsDataStreamsRolledOver(mockLogger, mockEsClient);
 
-    expect(mockRollDataStreamIfRequired).toHaveBeenCalledTimes(2);
+    expect(mockRollDataStreamIfRequired).toHaveBeenCalledTimes(4);
     expect(mockRollDataStreamIfRequired.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         logger: mockLogger,
@@ -60,6 +63,22 @@ describe('ensureWorkflowsDataStreamsRolledOver', () => {
         targetManagedIndexMappingsVersion: WORKFLOWS_EVENTS_MANAGED_INDEX_MAPPINGS_VERSION,
       })
     );
+    expect(mockRollDataStreamIfRequired.mock.calls[2][0]).toEqual(
+      expect.objectContaining({
+        logger: mockLogger,
+        esClient: mockEsClient,
+        dataStreamName: WORKFLOWS_EXECUTIONS_INDEX,
+        targetManagedIndexMappingsVersion: WORKFLOWS_EXECUTIONS_MANAGED_INDEX_MAPPINGS_VERSION,
+      })
+    );
+    expect(mockRollDataStreamIfRequired.mock.calls[3][0]).toEqual(
+      expect.objectContaining({
+        logger: mockLogger,
+        esClient: mockEsClient,
+        dataStreamName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+        targetManagedIndexMappingsVersion: WORKFLOWS_STEP_EXECUTIONS_MANAGED_INDEX_MAPPINGS_VERSION,
+      })
+    );
 
     expect(mockLogger.error).toHaveBeenCalledTimes(1);
     expect(mockLogger.error).toHaveBeenCalledWith(
@@ -73,7 +92,7 @@ describe('ensureWorkflowsDataStreamsRolledOver', () => {
 
     await ensureWorkflowsDataStreamsRolledOver(mockLogger, mockEsClient);
 
-    expect(mockRollDataStreamIfRequired).toHaveBeenCalledTimes(2);
+    expect(mockRollDataStreamIfRequired).toHaveBeenCalledTimes(4);
     expect(mockLogger.error).not.toHaveBeenCalled();
   });
 });

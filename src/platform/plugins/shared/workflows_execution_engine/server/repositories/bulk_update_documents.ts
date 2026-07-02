@@ -81,25 +81,25 @@ const isRetriableBulkUpdate = (item: {
  * returns them keyed by document id. Returns an empty map (no round trips)
  * when there is nothing to resolve.
  */
-const refreshVersions = async <TDocument extends IdentifiedDocument>({
+export const resolveVersions = async <TDocument extends IdentifiedDocument>({
   esClient,
   dataStreamName,
   entityName,
-  writes,
+  ids,
 }: {
   esClient: ElasticsearchClient;
   dataStreamName: string;
   entityName: string;
-  writes: DocumentUpdate<TDocument>[];
+  ids: string[];
 }): Promise<DocumentVersionsById> => {
-  if (writes.length === 0) {
+  if (ids.length === 0) {
     return {};
   }
 
   const writeIndex = await resolveWriteIndex({ esClient, dataStreamName });
   return resolveDocumentVersionsByIds<TDocument>({
     esClient,
-    ids: writes.map(({ doc }) => doc.id as string),
+    ids,
     writeIndex,
     dataStreamName,
     entityName,
@@ -133,7 +133,12 @@ const fillMissingVersions = async <TDocument extends IdentifiedDocument>({
     }
   }
 
-  const resolved = await refreshVersions({ esClient, dataStreamName, entityName, writes: missing });
+  const resolved = await resolveVersions({
+    esClient,
+    dataStreamName,
+    entityName,
+    ids: missing.map(({ doc }) => doc.id as string),
+  });
   return { ...provided, ...resolved };
 };
 
@@ -181,11 +186,11 @@ export const bulkUpdateDocuments = async <TDocument extends IdentifiedDocument>(
   for (let attempt = 1; attempt <= retryAttempts; attempt++) {
     if (attempt > 1) {
       await delayMs(getBackoffWithJitterMs(retryBaseDelayMs, attempt));
-      versionsById = await refreshVersions({
+      versionsById = await resolveVersions({
         esClient,
         dataStreamName,
         entityName,
-        writes: pendingWrites,
+        ids: pendingWrites.map(({ doc }) => doc.id as string),
       });
     }
 

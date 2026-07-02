@@ -475,7 +475,6 @@ describe('WorkflowExecuteSyncStrategy', () => {
       expect(result.output).toEqual({ data: 'from last step' });
       expect(mockStepRepo.getStepExecutionsByWorkflowExecution).toHaveBeenCalledWith(
         'child-exec-1',
-        undefined,
         ['step-1']
       );
     });

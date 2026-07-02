@@ -312,7 +312,7 @@ describe('WorkflowExecutionRepository', () => {
         _source_includes: ['id'],
       });
       expect(esClient.bulk).toHaveBeenCalledWith({
-        refresh: true,
+        refresh: false,
         operations: [
           {
             update: {
@@ -1433,6 +1433,18 @@ describe('WorkflowExecutionRepository', () => {
 
   describe('tryCasPromoteQueuedWorkflowExecutionToPending', () => {
     it('uses refresh wait_for so search-based slot counts observe pending before the next drain iteration', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          {
+            found: true,
+            _id: 'exec-1',
+            _index: TEST_BACKING_INDEX,
+            _seq_no: 3,
+            _primary_term: 1,
+            _source: { id: 'exec-1' },
+          },
+        ],
+      });
       esClient.update.mockResolvedValue({ result: 'updated' });
 
       await repository.tryCasPromoteQueuedWorkflowExecutionToPending({
@@ -1442,8 +1454,10 @@ describe('WorkflowExecutionRepository', () => {
 
       expect(esClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: WORKFLOWS_EXECUTIONS_INDEX,
+          index: TEST_BACKING_INDEX,
           id: 'exec-1',
+          if_seq_no: 3,
+          if_primary_term: 1,
           refresh: 'wait_for',
         })
       );
