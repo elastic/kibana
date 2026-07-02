@@ -54,6 +54,11 @@ settings:
 consts:
   workflow_version: "v0.0.1"
 
+  # Stable namespace for the alert tags this workflow writes and matches on
+  # (dedup gate + auto-close). Kept independent of the human-facing workflow
+  # name so renaming the workflow never shifts the tag taxonomy.
+  workflow_tag_namespace: "security.alert.analysis"
+
   # When false, the workflow exits early if the alert already carries the
   # workflow tag prefix. Set to true to re-evaluate previously analyzed alerts.
   override_previous: false
@@ -84,15 +89,14 @@ steps:
   # ---------------------------------------------------------------------------
   # Initialise workflow-scoped variables
   # ---------------------------------------------------------------------------
-  # Derive normalised names and a tag prefix that is used throughout the
-  # workflow to mark and identify alerts processed by this execution.
+  # Derive the normalised version and tag prefix used throughout the workflow
+  # to mark and identify alerts processed by this execution.
   - name: set_workflow_variables
     type: data.set
     with:
       running_note: false
-      normalized_name: "{{ workflow.name | downcase | replace: ' ', '_' }}"
       normalized_version: "{{ consts.workflow_version | downcase | replace: ' ', '_' }}"
-      tag_prefix: "workflow.{{ workflow.name | downcase | replace: ' ', '_' }}"
+      tag_prefix: "workflow.{{ consts.workflow_tag_namespace }}"
 
   # ---------------------------------------------------------------------------
   # Iterate over each alert in the trigger batch
