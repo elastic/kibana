@@ -31,7 +31,7 @@ import { NewEventsBanner } from './new_events_banner';
 import { TruncatedCallout } from './truncated_callout';
 import { RulesCell } from './rules_cell';
 
-const DEFAULT_PER_PAGE = 100;
+const DEFAULT_PER_PAGE = 10;
 const DEFAULT_OUTCOME: PolicyExecutionOutcomeFilter = 'all';
 const MAX_VISIBLE_RULES = 3;
 
