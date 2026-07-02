@@ -18,8 +18,5 @@
     "@kbn/i18n-react",
     "@kbn/core-http-browser",
     "@kbn/ui-actions-plugin",
-    "@kbn/core",
-    "@kbn/core-rendering-browser",
-    "@kbn/react-kibana-mount"
   ]
 }
