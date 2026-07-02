@@ -34,31 +34,12 @@ export async function cloneRule<Params extends RuleParams = never>(
   context: RulesClientContext,
   params: CloneRuleParams
 ): Promise<SanitizedRule<Params>> {
-  const { id, newId, data: ruleData } = params;
+  const { id, newId } = params;
 
   try {
     cloneRuleParamsSchema.validate(params);
   } catch (error) {
     throw Boom.badRequest(`Error validating clone data - ${error.message}`);
-  }
-
-  let validationPayload: ValidateScheduleLimitResult = null;
-  if (ruleData.enabled) {
-    validationPayload = await validateScheduleLimit({
-      context,
-      updatedInterval: ruleData.schedule.interval,
-    });
-  }
-
-  if (validationPayload) {
-    throw Boom.badRequest(
-      getRuleCircuitBreakerErrorMessage({
-        name: ruleData.name,
-        interval: validationPayload.interval,
-        intervalAvailable: validationPayload.intervalAvailable,
-        action: 'clone',
-      })
-    );
   }
 
   let ruleSavedObject: SavedObject<RawRule>;
@@ -90,6 +71,24 @@ export async function cloneRule<Params extends RuleParams = never>(
           savedObjectsClient: context.unsecuredSavedObjectsClient,
         });
       }
+    );
+  }
+
+  let validationPayload: ValidateScheduleLimitResult = null;
+  if (ruleSavedObject.attributes.enabled) {
+    validationPayload = await validateScheduleLimit({
+      context,
+      updatedInterval: ruleSavedObject.attributes.schedule.interval,
+    });
+  }
+  if (validationPayload) {
+    throw Boom.badRequest(
+      getRuleCircuitBreakerErrorMessage({
+        name: ruleSavedObject.attributes.name,
+        interval: validationPayload.interval,
+        intervalAvailable: validationPayload.intervalAvailable,
+        action: 'clone',
+      })
     );
   }
 
