@@ -27,29 +27,26 @@ spaceTest.describe(
 
     spaceTest(
       'should support Discover sessions without tabs created through the deprecated saved objects API',
-      async ({ browserAuth, kbnClient, pageObjects, scoutSpace }) => {
-        await kbnClient.request({
-          method: 'POST',
-          path: `/s/${scoutSpace.id}/api/saved_objects/search`,
-          body: {
-            typeMigrationVersion: '10.8.0',
-            attributes: {
-              title: LEGACY_DISCOVER_SESSION_TITLE,
-              description: '',
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: JSON.stringify({ query: { esql: LEGACY_ESQL_QUERY } }),
-              },
-              sort: [['@timestamp', 'desc']],
-              columns: [],
-              grid: {},
-              hideChart: false,
-              viewMode: 'documents',
-              isTextBasedQuery: true,
-              timeRestore: false,
+      async ({ apiServices, browserAuth, pageObjects, scoutSpace }) => {
+        await apiServices.savedObjects.search({
+          spaceId: scoutSpace.id,
+          typeMigrationVersion: '10.8.0',
+          attributes: {
+            title: LEGACY_DISCOVER_SESSION_TITLE,
+            description: '',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify({ query: { esql: LEGACY_ESQL_QUERY } }),
             },
-            initialNamespaces: [scoutSpace.id],
-            references: [],
+            sort: [['@timestamp', 'desc']],
+            columns: [],
+            grid: {},
+            hideChart: false,
+            viewMode: 'documents',
+            isTextBasedQuery: true,
+            timeRestore: false,
           },
+          initialNamespaces: [scoutSpace.id],
+          references: [],
         });
 
         await browserAuth.loginAsPrivilegedUser();
