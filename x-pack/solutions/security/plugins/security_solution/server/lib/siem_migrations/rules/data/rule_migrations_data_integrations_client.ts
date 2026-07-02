@@ -70,7 +70,8 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       }
     } catch (error) {
       this.logger.warn(
-        `Failed to fetch fields metadata for package ${pkg.name}: ${error instanceof Error ? error.message : String(error)
+        `Failed to fetch fields metadata for package ${pkg.name}: ${
+          error instanceof Error ? error.message : String(error)
         }`
       );
     }
@@ -143,7 +144,8 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       );
     } catch (error) {
       this.logger.warn(
-        `Failed to fetch package archive for ${pkg.name}: ${error instanceof Error ? error.message : String(error)
+        `Failed to fetch package archive for ${pkg.name}: ${
+          error instanceof Error ? error.message : String(error)
         }`
       );
     }
