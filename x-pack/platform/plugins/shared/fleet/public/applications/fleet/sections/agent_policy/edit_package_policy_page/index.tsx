@@ -55,6 +55,7 @@ import {
 } from '../create_package_policy_page/services';
 import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo, ExperimentalFeaturesService } from '../../../services';
+import { IS_AGENTLESS_QUERY_PARAM } from '../../../../../../common/constants';
 
 import {
   getInheritedNamespace,
@@ -96,11 +97,18 @@ export const EditPackagePolicyPage = memo(() => {
     from = 'installed-integrations';
   }
 
+  // Detect-before-read: the route only carries `packagePolicyId`, shared between agentless and
+  // agent-based policies. Agentless surfaces append this hint so we can read/write through the
+  // agentless API without first reading the package policy. See task4 follow-ups for the
+  // (provisional) mechanism.
+  const isAgentless = qs.get(IS_AGENTLESS_QUERY_PARAM) === 'true';
+
   return (
     <EditPackagePolicyForm
       packagePolicyId={packagePolicyId}
       policyId={policyId}
       from={from}
+      isAgentless={isAgentless}
       // If an extension opts in to this `useLatestPackageVersion` flag, we want to display
       // the edit form in an "upgrade" state regardless of whether the user intended to
       // "edit" their policy or "upgrade" it. This ensures the new policy generated will be
@@ -115,7 +123,8 @@ export const EditPackagePolicyForm = memo<{
   forceUpgrade?: boolean;
   from?: EditPackagePolicyFrom;
   policyId?: string;
-}>(({ packagePolicyId, policyId, forceUpgrade = false, from = 'edit' }) => {
+  isAgentless?: boolean;
+}>(({ packagePolicyId, policyId, forceUpgrade = false, from = 'edit', isAgentless = false }) => {
   const { application, notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
@@ -144,15 +153,25 @@ export const EditPackagePolicyForm = memo<{
     validationResults,
   } = usePackagePolicyWithRelatedData(packagePolicyId, {
     forceUpgrade,
+    isAgentless,
   });
 
   const hasAgentlessAgentPolicy = useMemo(
     () =>
-      existingAgentPolicies.length === 1
+      // When editing through the agentless API we don't fetch an agent policy, so the hint is
+      // authoritative. Otherwise fall back to inspecting the loaded agent policy (legacy path).
+      isAgentless ||
+      (existingAgentPolicies.length === 1
         ? existingAgentPolicies.some((policy) => isAgentlessAgentPolicy(policy)) &&
           getAgentlessStatusForPackage(packageInfo).isAgentless
-        : false,
-    [existingAgentPolicies, isAgentlessAgentPolicy, packageInfo, getAgentlessStatusForPackage]
+        : false),
+    [
+      isAgentless,
+      existingAgentPolicies,
+      isAgentlessAgentPolicy,
+      packageInfo,
+      getAgentlessStatusForPackage,
+    ]
   );
 
   // Derive var_group_selections from policy for edit mode

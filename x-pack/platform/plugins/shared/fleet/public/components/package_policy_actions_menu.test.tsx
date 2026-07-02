@@ -264,9 +264,11 @@ describe('PackagePolicyActionsMenu', () => {
       expect(jest.mocked(useLink().getHref)).toHaveBeenCalledWith('integration_policy_edit', {
         packagePolicyId: 'some-uuid2',
       });
+      // Agentless edit links carry the detect-before-read hint so the edit page uses the
+      // agentless API instead of the package-policy API.
       expect(editButton).toHaveAttribute(
         'href',
-        '/mock/app/integrations/edit-integration/some-uuid2'
+        '/mock/app/integrations/edit-integration/some-uuid2?isAgentless=true'
       );
     });
   });

@@ -22,6 +22,7 @@ import type { AgentlessPolicyThroughput } from '../../../../../../../../../commo
 import {
   AGENTS_PREFIX,
   FLEET_CONNECTORS_PACKAGE,
+  IS_AGENTLESS_QUERY_PARAM,
   SO_SEARCH_LIMIT,
 } from '../../../../../../../../../common/constants';
 import type { usePagination } from '../../../../../../hooks';
@@ -225,11 +226,18 @@ export const AgentlessPackagePoliciesTable = ({
               const editHref = getHref('integration_policy_edit', {
                 packagePolicyId: packagePolicy.id,
               });
+              const editParams = new URLSearchParams();
+              if (from) {
+                editParams.set('from', from);
+              }
+              // Hint that this is an agentless policy so the edit page reads/writes through the
+              // agentless API rather than the package-policy API (detect-before-read).
+              editParams.set(IS_AGENTLESS_QUERY_PARAM, 'true');
               return (
                 <EuiLink
                   className="eui-textTruncate"
                   data-test-subj="agentlessIntegrationNameLink"
-                  href={from ? `${editHref}?from=${from}` : editHref}
+                  href={`${editHref}?${editParams.toString()}`}
                 >
                   {packagePolicy.name}
                 </EuiLink>

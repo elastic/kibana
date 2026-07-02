@@ -23,7 +23,10 @@ import {
 import type { PackageInfo, NewAgentPolicy, NewPackagePolicy } from '../../../../../types';
 import { ExperimentalFeaturesService } from '../../../../../services';
 import { SelectedPolicyTab } from '../../components';
-import { generateCreateAgentlessPolicyDevToolsRequest } from '../../../services/devtools_request';
+import {
+  generateCreateAgentlessPolicyDevToolsRequest,
+  generateUpdateAgentlessPolicyDevToolsRequest,
+} from '../../../services/devtools_request';
 
 export function useDevToolsRequest({
   newAgentPolicy,
@@ -104,6 +107,20 @@ export function useDevToolsRequest({
                   'These Kibana requests create a new agent policy and a new package policy.',
               }
             ),
+      ];
+    }
+
+    // Editing an existing agentless policy: preview the agentless full-replace PUT rather than the
+    // package-policy update, matching the actual request the edit form now issues.
+    if (packagePolicyId && packagePolicy.supports_agentless) {
+      return [
+        generateUpdateAgentlessPolicyDevToolsRequest(packagePolicyId, packagePolicy, varGroups),
+        i18n.translate(
+          'xpack.fleet.editPackagePolicy.devtoolsRequestUpdateAgentlessPolicyDescription',
+          {
+            defaultMessage: 'This Kibana request updates an agentless policy.',
+          }
+        ),
       ];
     }
 

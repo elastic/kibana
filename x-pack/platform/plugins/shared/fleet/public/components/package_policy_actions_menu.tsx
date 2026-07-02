@@ -15,6 +15,7 @@ import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 import {
   EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES,
   FLEET_CONNECTORS_PACKAGE,
+  IS_AGENTLESS_QUERY_PARAM,
 } from '../../common/constants';
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import {
@@ -122,6 +123,29 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     .map((input) => input?.vars?.connector_id?.value)
     .find(Boolean);
 
+  // Build the edit link query string once. For agentless policies we append an
+  // isAgentless hint so the edit page reads/writes through the agentless API
+  // instead of the package-policy API (detect-before-read). Orphaned (non-agentless)
+  // policies keep editing a package policy, so the hint is only added when agentless.
+  const editQueryParams = new URLSearchParams();
+  if (from) {
+    editQueryParams.set('from', from);
+  }
+  if (isAgentlessPolicy) {
+    editQueryParams.set(IS_AGENTLESS_QUERY_PARAM, 'true');
+  }
+  const editQueryString = editQueryParams.toString();
+  const editHref = `${
+    isOrphanedPolicy || isAgentlessPolicy
+      ? getHref('integration_policy_edit', {
+          packagePolicyId: packagePolicy.id,
+        })
+      : getHref('edit_integration', {
+          policyId: agentPolicy?.id ?? '',
+          packagePolicyId: packagePolicy.id,
+        })
+  }${editQueryString ? `?${editQueryString}` : ''}`;
+
   const menuItems = [
     // FIXME: implement View package policy action
     // <EuiContextMenuItem
@@ -158,16 +182,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       data-test-subj="PackagePolicyActionsEditItem"
       disabled={!canWriteIntegrationPolicies || (!agentPolicy && !isOrphanedPolicy)}
       icon="pencil"
-      href={`${
-        isOrphanedPolicy || isAgentlessPolicy
-          ? getHref('integration_policy_edit', {
-              packagePolicyId: packagePolicy.id,
-            })
-          : getHref('edit_integration', {
-              policyId: agentPolicy?.id ?? '',
-              packagePolicyId: packagePolicy.id,
-            })
-      }${from ? `?from=${from}` : ''}`}
+      href={editHref}
       key="packagePolicyEdit"
     >
       <FormattedMessage
