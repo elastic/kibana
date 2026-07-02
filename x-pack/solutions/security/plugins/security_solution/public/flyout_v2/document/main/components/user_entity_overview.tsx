@@ -153,7 +153,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   const { data: userRisk, loading: isRiskScoreLoading } = useRiskScore({
     filterQuery: riskScoreFilterQuery,
     riskEntity: EntityType.user,
-    skip: true,
+    skip: riskFromEntityRecord != null || userName == null,
     timerange,
   });
   const userRiskFromSearch = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
