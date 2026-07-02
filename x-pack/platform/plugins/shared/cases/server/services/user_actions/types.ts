@@ -183,7 +183,6 @@ export interface ServiceContext {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   savedObjectsSerializer: ISavedObjectsSerializer;
   auditLogger: AuditLogger;
-  isCasesAttachmentsEnabled?: boolean;
   /**
    * Cases-analytics v2 activity writer. Real implementation when v2 is
    * enabled, `V2_NOOP_ACTIVITY_WRITER` otherwise — every call site stays

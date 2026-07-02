@@ -318,7 +318,6 @@ export class CasesClientFactory {
         unsecuredSavedObjectsClient,
         savedObjectsSerializer,
         auditLogger,
-        isCasesAttachmentsEnabled: this.options.config.attachments?.enabled === true,
         analyticsV2ActivityWriter: this.options.analyticsV2ActivityWriter,
       }),
       attachmentService,

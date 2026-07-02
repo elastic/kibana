@@ -523,4 +523,50 @@ describe('WorkflowTaskManager', () => {
       expect(mockTaskManager.runSoon).toHaveBeenCalledWith('new-resume-task');
     });
   });
+
+  describe('queued workflow run tasks', () => {
+    it('scheduleDormantQueuedRunTask schedules workflow:run with queue TTL runAt and trigger request', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2025-08-05T20:00:00.000Z'));
+      const workflowExecution = createMockWorkflowExecution({
+        triggeredBy: 'alert',
+      });
+      mockTaskManager.schedule.mockResolvedValue({ id: 'workflow:exec-id:alert' } as any);
+
+      await workflowTaskManager.scheduleDormantQueuedRunTask({
+        workflowExecution,
+        request: fakeRequest,
+      });
+
+      expect(mockTaskManager.removeIfExists).toHaveBeenCalledWith(
+        'workflow:test-execution-id:alert'
+      );
+      expect(mockTaskManager.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'workflow:test-execution-id:alert',
+          taskType: 'workflow:run',
+          runAt: new Date('2025-08-06T20:00:00.000Z'),
+        }),
+        { request: fakeRequest }
+      );
+      jest.useRealTimers();
+    });
+
+    it('promoteQueuedRunTask calls runSoon on the dormant task id', async () => {
+      await workflowTaskManager.promoteQueuedRunTask({
+        executionId: 'exec-1',
+        triggeredBy: 'manual',
+      });
+
+      expect(mockTaskManager.runSoon).toHaveBeenCalledWith('workflow:exec-1:manual');
+    });
+
+    it('removeQueuedRunTask removes the dormant task id', async () => {
+      await workflowTaskManager.removeQueuedRunTask({
+        executionId: 'exec-1',
+        triggeredBy: 'manual',
+      });
+
+      expect(mockTaskManager.removeIfExists).toHaveBeenCalledWith('workflow:exec-1:manual');
+    });
+  });
 });
