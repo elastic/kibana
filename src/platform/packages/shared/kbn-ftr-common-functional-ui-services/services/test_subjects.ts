@@ -17,6 +17,11 @@ interface ExistsOptions {
   allowHidden?: boolean;
 }
 
+interface FindAllOrFailOptions {
+  timeout?: number;
+  min?: number;
+}
+
 interface SetValueOptions {
   clearWithKeyboard?: boolean;
   typeCharByChar?: boolean;
@@ -35,6 +40,7 @@ export class TestSubjects extends FtrService {
   public readonly FIND_TIME = this.config.get('timeouts.find');
   public readonly TRY_TIME = this.config.get('timeouts.try');
   public readonly WAIT_FOR_EXISTS_TIME = this.config.get('timeouts.waitForExists');
+  public readonly FIND_ALL_OR_FAIL_TIME = 5000;
 
   /**
    * Get a promise that resolves with `true` when an element exists, if the element doesn't exist
@@ -232,6 +238,35 @@ export class TestSubjects extends FtrService {
       this.log.debug(`TestSubjects.findAll(${selector})`);
       const all = await this.findService.allByCssSelector(testSubjSelector(selector), timeout);
       return await this.findService.filterElementIsDisplayed(all);
+    });
+  }
+
+  /**
+   * Find all displayed elements matching a test subject and fail when fewer than `min` exist.
+   *
+   * Use this instead of `findAll()` when a test expects at least one matching element and
+   * will index into the returned array. `findAll()` intentionally returns snapshots, including
+   * empty arrays, for optional UI states.
+   */
+  public async findAllOrFail(
+    selector: string,
+    { timeout = this.FIND_ALL_OR_FAIL_TIME, min = 1 }: FindAllOrFailOptions = {}
+  ): Promise<WebElementWrapper[]> {
+    return await this.retry.tryForTime(timeout, async () => {
+      this.log.debug(`TestSubjects.findAllOrFail(${selector}, min=${min})`);
+      const all = await this.findService.allByCssSelector(
+        testSubjSelector(selector),
+        Math.min(timeout, this.WAIT_FOR_EXISTS_TIME)
+      );
+      const displayed = await this.findService.filterElementIsDisplayed(all);
+
+      if (displayed.length < min) {
+        throw new Error(
+          `expected at least ${min} displayed testSubject(${selector}) but found ${displayed.length}`
+        );
+      }
+
+      return displayed;
     });
   }
 
