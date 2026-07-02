@@ -68,10 +68,12 @@ describe('create_dataset_flyout_form_state', () => {
       expect(
         buildDatasetSettingsFromFormValues({ ...empty(), hive_partitioning: 'false' })
       ).toEqual({ hive_partitioning: false });
+      expect(buildDatasetSettingsFromFormValues({ ...empty(), hive_partitioning: 'true' })).toEqual(
+        { hive_partitioning: true }
+      );
       expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), hive_partitioning: 'true' })
-      ).toEqual({ hive_partitioning: true });
-      expect(buildDatasetSettingsFromFormValues({ ...empty(), hive_partitioning: '' })).toBeUndefined();
+        buildDatasetSettingsFromFormValues({ ...empty(), hive_partitioning: '' })
+      ).toBeUndefined();
     });
 
     it('ignores format-specific fields when no format is selected', () => {

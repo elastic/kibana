@@ -16,7 +16,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
-import { useController, useWatch } from 'react-hook-form';
+import { useController } from 'react-hook-form';
 
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
 import {

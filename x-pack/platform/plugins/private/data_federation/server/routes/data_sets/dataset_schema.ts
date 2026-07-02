@@ -30,11 +30,7 @@ export const datasetSchema = schema.object({
       ),
       // Universal
       partition_detection: schema.maybe(
-        schema.oneOf([
-          schema.literal('auto'),
-          schema.literal('hive'),
-          schema.literal('none'),
-        ])
+        schema.oneOf([schema.literal('auto'), schema.literal('hive'), schema.literal('none')])
       ),
       schema_resolution: schema.maybe(
         schema.oneOf([

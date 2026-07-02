@@ -245,12 +245,9 @@ export const createDatasetFlyoutStrings = {
     }),
 
   settingsSchemaResolutionPlaceholder: () =>
-    i18n.translate(
-      'xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionPlaceholder',
-      {
-        defaultMessage: 'Default',
-      }
-    ),
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionPlaceholder', {
+      defaultMessage: 'Default',
+    }),
 
   settingsSchemaResolutionFirstFileWins: () =>
     i18n.translate(
@@ -266,12 +263,9 @@ export const createDatasetFlyoutStrings = {
     }),
 
   settingsSchemaResolutionUnionByName: () =>
-    i18n.translate(
-      'xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionUnionByName',
-      {
-        defaultMessage: 'Union by name',
-      }
-    ),
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionUnionByName', {
+      defaultMessage: 'Union by name',
+    }),
 
   settingsPartitionPathLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPartitionPathLabel', {
@@ -289,12 +283,9 @@ export const createDatasetFlyoutStrings = {
     }),
 
   settingsHivePartitioningPlaceholder: () =>
-    i18n.translate(
-      'xpack.dataFederation.createDatasetFlyout.settingsHivePartitioningPlaceholder',
-      {
-        defaultMessage: 'Default',
-      }
-    ),
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsHivePartitioningPlaceholder', {
+      defaultMessage: 'Default',
+    }),
 
   settingsHivePartitioningEnabled: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsHivePartitioningEnabled', {
