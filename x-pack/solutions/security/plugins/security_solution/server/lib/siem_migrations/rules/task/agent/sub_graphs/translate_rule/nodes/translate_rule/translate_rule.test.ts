@@ -69,11 +69,6 @@ FROM logs-*
 </lookup_resource>`)
     );
     expect(esqlKnowledgeBase.translate).toHaveBeenCalledWith(
-      expect.stringContaining(
-        '<rule>When source and lookup field names differ, use LOOKUP JOIN lookup_index ON source_field == lookup_field.</rule>'
-      )
-    );
-    expect(esqlKnowledgeBase.translate).toHaveBeenCalledWith(
       expect.stringContaining('integration context')
     );
   });

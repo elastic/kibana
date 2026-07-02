@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EnrichedLookupResource } from '../../../../../../../common/task/util/enrich_lookup_resources';
+import type { EnrichedLookupResource } from './enrich_lookup_resources';
 
 export const formatLookupResourcesContext = (lookups: EnrichedLookupResource[]): string => {
   const resourceBlocks = lookups

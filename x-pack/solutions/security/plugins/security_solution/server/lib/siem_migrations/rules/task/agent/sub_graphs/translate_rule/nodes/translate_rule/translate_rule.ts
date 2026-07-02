@@ -13,7 +13,7 @@ import {
   type GetTranslateSplToEsqlParams,
 } from '../../../../../../../common/task/agent/helpers/translate_spl_to_esql';
 import type { GraphNode } from '../../types';
-import { formatLookupResourcesContext } from './format_lookup_resource';
+import { formatLookupResourcesContext } from '../../../../../../../common/task/util/format_lookup_resource';
 import {
   getElasticRiskScoreFromOriginalRule,
   getElasticSeverityFromOriginalRule,
