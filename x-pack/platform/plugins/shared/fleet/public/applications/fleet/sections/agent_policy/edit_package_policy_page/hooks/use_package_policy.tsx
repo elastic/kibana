@@ -391,8 +391,9 @@ export function usePackagePolicyWithRelatedData(
   }, [packagePolicyId, options.forceUpgrade, options.isAgentless, yaml]);
 
   // Load the agentless policy through the agentless API. Deliberately skips the agent-policy bulk
-  // read and the upgrade dry-run: agentless deployments have no user-facing agent policy and no
-  // agentless upgrade flow yet (that stays on the legacy path until the bulk `_upgrade` endpoint).
+  // read and the upgrade dry-run: agentless deployments have no user-facing agent policy, and the
+  // edit page has no upgrade flow (agentless upgrades go through the dedicated bulk `_upgrade`
+  // surface, not this form).
   useEffect(() => {
     // Wait for `yaml` before fetching: the whole load (hydration + validation) needs it, so firing
     // the GET before it's ready would just throw the result away and cause a second, redundant call
