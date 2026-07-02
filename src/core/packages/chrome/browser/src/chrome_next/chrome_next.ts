@@ -71,6 +71,30 @@ export interface AppHeaderTabIconBadge {
 export type AppHeaderTabBadge = number | AppHeaderTabIconBadge;
 
 /** @public */
+export interface AppHeaderTabAction {
+  id: string;
+  label: string;
+  /** EUI icon type rendered next to the action label. */
+  icon?: string;
+  disabled?: boolean;
+  onClick: () => void;
+  'data-test-subj'?: string;
+}
+
+/**
+ * Optional overflow actions for a tab, rendered as an ellipsis popover appended to the tab.
+ *
+ * @public
+ */
+export interface AppHeaderTabActions {
+  /** Accessible label and tooltip for the ellipsis trigger. */
+  ariaLabel: string;
+  items: AppHeaderTabAction[];
+  /** `data-test-subj` for the ellipsis trigger button. */
+  'data-test-subj'?: string;
+}
+
+/** @public */
 export interface AppHeaderTab {
   id: string;
   label: string;
@@ -81,6 +105,11 @@ export interface AppHeaderTab {
   'data-test-subj'?: string;
   disabled?: boolean;
   toolTipContent?: string;
+  /**
+   * Optional overflow actions rendered as an ellipsis popover appended to the tab. Only surfaced
+   * for the selected tab (`isSelected`); may be provided unconditionally.
+   */
+  actions?: AppHeaderTabActions;
 }
 
 /** @public */
