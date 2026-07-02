@@ -27,7 +27,7 @@ export async function collectTestNames(junitDir: string, type: ResultType): Prom
       const isFailed = Boolean(testCase.failure);
       const isSkipped = Boolean(testCase.skipped);
       if (type === 'failures' ? isFailed : !isFailed && !isSkipped) {
-        names.add(testCase.$.name.trim());
+        names.add(`${testCase.$.classname.trim()} ${testCase.$.name.trim()}`);
       }
     }
   }
