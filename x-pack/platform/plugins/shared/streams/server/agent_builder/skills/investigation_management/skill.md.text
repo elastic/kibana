@@ -52,11 +52,11 @@ execute_workflow({
 
 ### Investigating a Significant Event
 
-When the user wants to investigate a Significant Event (SigEvent), gather the event's metadata first, then trigger the investigation with that context.
+When the user wants to investigate a Significant Event, gather the event's metadata first, then trigger the investigation with that context.
 
 **1. Source the event.**
-- **If a SigEvent is already attached to the conversation**, read its fields directly from the attachment — it renders as text with `Event ID`, `Discovery slug`, `Status`, `Impact`, `Criticality`, `Confidence`, `Streams`, `Summary`, `Root cause`, and `Recommendations`. Use those values directly; do not re-fetch.
-- **If no SigEvent is attached**, load the `significant-events-management` skill (via the `load_skill` tool) and use its `event_search` tool to find the relevant event, then attach it and render the attachment inline per that skill's rules. Read its metadata from the attachment.
+- **If a SignificantEvent is already attached to the conversation**, read its fields directly from the attachment — it renders as text with `Event ID`, `Discovery slug`, `Status`, `Impact`, `Criticality`, `Confidence`, `Streams`, `Summary`, `Root cause`, and `Recommendations`. Use those values directly; do not re-fetch.
+- **If no SignificantEvent is attached**, load the `significant-events-management` skill (via the `load_skill` tool) and use its `event_search` tool to find the relevant event, then attach it and render the attachment inline per that skill's rules. Read its metadata from the attachment.
 
 **2. Build the workflow inputs from the event:**
 - `message`: `"{title}\n\n{summary}\n\nProbable cause: {root_cause}"`
@@ -138,6 +138,27 @@ Use `platform.core.get_workflow_execution_status` with the `executionId` from th
 - Status `running` — investigation is still in progress; let the user know it's still running and share the `executionId` so they can ask for an update later.
 - Status `completed` — the execution output contains the RCA findings.
 - Status `failed` — the output contains error details.
+
+### Recording the investigation on a Significant Event
+
+When you trigger an investigation for a Significant Event, record it on the event using `platform.streams.sig_events.event_investigation_attach` — once immediately when the investigation starts (status `pending`), and again when it reaches a terminal state (status `success` or `failed`).
+
+**On start** (right after `execute_workflow` returns an execution id):
+- `event_id` — the `event_id` of the Significant Event.
+- `workflow_execution_id` — the `executionId` returned by `execute_workflow`.
+- `status` — `"pending"`.
+- `started_at` — the execution start time from the workflow execution object.
+
+**On completion** (once the investigation has reached a terminal state):
+- `event_id` — same as above.
+- `workflow_execution_id` — same as above.
+- `status` — `"success"` if the investigation completed without errors, `"failed"` otherwise.
+- `started_at` — same start time as the pending call.
+- `completed_at` — the current ISO-8601 datetime.
+
+This tool is idempotent (replace-by-`workflow_execution_id`): the investigation workflow also auto-records both the pending and terminal entries when it runs via the triage pipeline, so calling this tool for the same execution id is always safe.
+
+Only call this tool when a Significant Event was the context for the investigation (`event_id` is known). Skip it for free-form issues or alert investigations.
 
 ### Presenting results
 
