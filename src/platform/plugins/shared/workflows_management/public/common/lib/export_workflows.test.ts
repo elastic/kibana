@@ -162,9 +162,7 @@ describe('export_workflows', () => {
     it('should fetch YAML from the server and export a single workflow as .yml', async () => {
       const api = createMockWorkflowApi();
       api.exportWorkflows.mockResolvedValue({
-        entries: [
-          { id: 'w-1', yaml: '# preserved comment\nname: Test Workflow\nsteps: []' },
-        ],
+        entries: [{ id: 'w-1', yaml: '# preserved comment\nname: Test Workflow\nsteps: []' }],
         manifest: { exportedCount: 1, exportedAt: '2026-01-01T00:00:00.000Z', version: '1' },
       });
       const result = await exportWorkflows([createWorkflow()], api);

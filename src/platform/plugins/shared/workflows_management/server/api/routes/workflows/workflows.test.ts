@@ -828,9 +828,7 @@ describe('Workflow routes', () => {
       expect(body.entries).toHaveLength(1);
       expect(body.entries[0].id).toBe('w-commented');
       expect(body.entries[0].yaml).toContain('# top-level description of this workflow');
-      expect(body.entries[0].yaml).toContain(
-        '# temporarily disabled while we debug the flake'
-      );
+      expect(body.entries[0].yaml).toContain('# temporarily disabled while we debug the flake');
       expect(body.entries[0].yaml).toContain('# - name: broken_step');
     });
   });
