@@ -30,13 +30,18 @@ import {
   DEFAULT_OUTPUT_ID,
   DEFAULT_OUTPUT,
   ECH_AGENTLESS_OUTPUT_ID,
+  ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
   SERVERLESS_DEFAULT_OUTPUT_ID,
   SERVERLESS_PRIVATE_OUTPUT_ID,
 } from '../../constants';
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
-import { isAgentlessEnabled } from '../utils/agentless';
+import {
+  isAgentlessEnabled,
+  isManagedBulkEnabled,
+  getManagedBulkEndpoint,
+} from '../utils/agentless';
 
 import { applyAllowEditOverrides, isDifferent } from './utils';
 
@@ -80,6 +85,21 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
             is_default_monitoring: false,
             is_preconfigured: true,
             allow_edit: ['hosts', 'ca_sha256'],
+          } as PreconfiguredOutput,
+        ]
+      : []),
+    // Include agentless managed bulk output in ECH
+    ...(isManagedBulkEnabled() && !appContextService.getCloud()?.isServerlessEnabled
+      ? [
+          {
+            id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+            name: 'Internal output for agentless managed bulk',
+            type: 'elasticsearch' as const,
+            hosts: [getManagedBulkEndpoint()!],
+            // No ca_sha256 — the managed bulk endpoint uses a public cert trusted by system CAs.
+            is_default: false,
+            is_default_monitoring: false,
+            is_preconfigured: true,
           } as PreconfiguredOutput,
         ]
       : []),

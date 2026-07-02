@@ -35,6 +35,7 @@ const _allowedExperimentalValues = {
   enableResolveDependencies: true, // When enabled, the resolve dependencies step will be available during package installation.
   enableOtelUI: false, // When enabled, OTel-specific UI elements (e.g. Collector Config tab) will be shown.
   enableCloudOnboardingDeployments: false, // When enabled, the cloud-onboarding-deployment CRUD API is registered and available.
+  managedOtlpOutput: false, // When enabled, the OTLP output type is available for creation and assignment in Fleet.
 };
 
 /**
