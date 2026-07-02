@@ -383,6 +383,9 @@ export function useFleetServerHostsForm(
     sslAgentCertificateInput.value,
     sslAgentCertificateAuthoritiesInput.value,
     onSuccess,
+    sslKeySecretInput.hasChanged,
+    sslESKeySecretInput.hasChanged,
+    sslAgentKeySecretInput.hasChanged,
   ]);
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
