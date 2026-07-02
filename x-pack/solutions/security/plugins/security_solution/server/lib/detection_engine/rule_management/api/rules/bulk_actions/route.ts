@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -34,7 +36,7 @@ import { initPromisePool } from '../../../../../../utils/promise_pool';
 import { routeLimitedConcurrencyTag } from '../../../../../../utils/route_limited_concurrency_tag';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { buildSiemResponse } from '../../../../routes/utils';
-import type { RuleAlertType } from '../../../../rule_schema';
+import type { RuleAlertType, RuleParams } from '../../../../rule_schema';
 import { duplicateExceptions } from '../../../logic/actions/duplicate_exceptions';
 import { duplicateRule } from '../../../logic/actions/duplicate_rule';
 import { bulkEditRules } from '../../../logic/bulk_actions/bulk_edit_rules';
@@ -140,6 +142,36 @@ const prepareGapParams = ({
   };
 };
 
+const deleteOrphanedExceptions = async ({
+  exceptions,
+  exceptionsClient,
+  logger,
+}: {
+  exceptions: RuleParams['exceptionsList'];
+  exceptionsClient: ExceptionListClient | undefined;
+  logger: Logger;
+}): Promise<void> => {
+  if (exceptionsClient == null) {
+    return;
+  }
+
+  const orphaned = exceptions.filter(({ type }) => type === ExceptionListTypeEnum.RULE_DEFAULT);
+
+  await Promise.all(
+    orphaned.map(async ({ id, namespace_type: namespaceType, list_id: listId }) => {
+      try {
+        await exceptionsClient.deleteExceptionList({ id, listId: undefined, namespaceType });
+      } catch (cleanupError) {
+        logger.warn(
+          `Failed to delete orphaned exception list "${listId}" after rule duplication error: ${
+            transformError(cleanupError).message
+          }`
+        );
+      }
+    })
+  );
+};
+
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml']
@@ -218,6 +250,7 @@ export const performBulkActionRoute = (
           const endpointAuthz = await ctx.securitySolution.getEndpointAuthz();
           const endpointService = ctx.securitySolution.getEndpointService();
           const spaceId = ctx.securitySolution.getSpaceId();
+          const logger = ctx.securitySolution.getLogger();
 
           const { getExporter, getClient } = ctx.core.savedObjects;
           const client = getClient({ includedHiddenTypes: ['action'] });
@@ -343,22 +376,27 @@ export const performBulkActionRoute = (
                     rule,
                   });
 
-                  const createdRule = await rulesClient.create({
-                    data: {
-                      ...duplicateRuleToCreate,
-                      params: {
-                        ...duplicateRuleToCreate.params,
-                        exceptionsList: exceptions,
+                  const createdRule = await rulesClient
+                    .create({
+                      data: {
+                        ...duplicateRuleToCreate,
+                        params: {
+                          ...duplicateRuleToCreate.params,
+                          exceptionsList: exceptions,
+                        },
                       },
-                    },
-                    changeTracking: {
-                      action: SecurityRuleChangeTrackingAction.ruleDuplicate,
-                      metadata: {
-                        bulkCount: rules.length,
-                        originalRuleSoId: rule.id,
+                      changeTracking: {
+                        action: SecurityRuleChangeTrackingAction.ruleDuplicate,
+                        metadata: {
+                          bulkCount: rules.length,
+                          originalRuleSoId: rule.id,
+                        },
                       },
-                    },
-                  });
+                    })
+                    .catch(async (createError) => {
+                      await deleteOrphanedExceptions({ exceptions, exceptionsClient, logger });
+                      throw createError;
+                    });
 
                   return createdRule;
                 },

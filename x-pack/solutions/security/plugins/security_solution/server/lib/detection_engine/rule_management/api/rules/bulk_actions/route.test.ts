@@ -890,6 +890,67 @@ describe('Perform bulk action route', () => {
       );
       expect(clients.rulesClient.update).not.toHaveBeenCalled();
     });
+
+    it('deletes cloned rule_default exception lists when rule creation fails', async () => {
+      const clonedExceptions = [
+        {
+          id: 'shared-list-id',
+          list_id: 'shared-list',
+          namespace_type: 'single' as const,
+          type: 'detection' as const,
+        },
+        {
+          id: 'cloned-list-id',
+          list_id: 'cloned-list',
+          namespace_type: 'single' as const,
+          type: 'rule_default' as const,
+        },
+      ];
+      duplicateExceptionsMock.mockResolvedValue(clonedExceptions);
+      clients.rulesClient.create.mockRejectedValue(new Error('create failed'));
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionDuplicateSchemaMock(),
+          duplicate: { include_exceptions: true, include_expired_exceptions: true },
+        },
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(clients.lists.exceptionListClient.deleteExceptionList).toHaveBeenCalledTimes(1);
+      expect(clients.lists.exceptionListClient.deleteExceptionList).toHaveBeenCalledWith({
+        id: 'cloned-list-id',
+        listId: undefined,
+        namespaceType: 'single',
+      });
+    });
+
+    it('does not delete exception lists when rule creation succeeds', async () => {
+      duplicateExceptionsMock.mockResolvedValue([
+        {
+          id: 'cloned-list-id',
+          list_id: 'cloned-list',
+          namespace_type: 'single' as const,
+          type: 'rule_default' as const,
+        },
+      ]);
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionDuplicateSchemaMock(),
+          duplicate: { include_exceptions: true, include_expired_exceptions: true },
+        },
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(clients.lists.exceptionListClient.deleteExceptionList).not.toHaveBeenCalled();
+    });
   });
 
   describe('gap range functionality', () => {
