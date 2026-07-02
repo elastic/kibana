@@ -12,7 +12,7 @@
   ],
   "private": true,
   "version": "9.5.0",
-  "branch": "main",
+  "branch": "dry-run-9.5-9.5.0-2026-07-02_13-20-32",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
   "build": {
