@@ -39,7 +39,8 @@ const prioritizeAlertsSchema = z.object({
         'Use "open+acknowledged" to include acknowledged alerts.'
     ),
   alertIds: z
-    .array(z.string())
+    .array(z.string().min(1).max(512))
+    .max(500)
     .optional()
     .describe(
       'Optional: specific alert IDs to triage (e.g. from an alert attachment or user selection). ' +
