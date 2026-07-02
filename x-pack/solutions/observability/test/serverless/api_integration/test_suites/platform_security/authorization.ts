@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -46,6 +47,12 @@ export default function ({ getService }: FtrProviderContext) {
         const features = Object.fromEntries(
           Object.entries(body.features).filter(([key]) => compositeFeatureIds.includes(key))
         );
+
+        // Stack Rules (stackAlerts) and Stack Alerts (stackAlertsOnly) are hidden
+        // in the serverless observability project, so they must not be exposed by
+        // the security privileges API.
+        expect(body.features).to.not.have.property('stackAlerts');
+        expect(body.features).to.not.have.property('stackAlertsOnly');
 
         expectSnapshot(features).toMatchInline(`
           Object {
