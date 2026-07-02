@@ -69,11 +69,17 @@ export const AlertEpisodeTimelineActionBody = ({
     details.push(<AlertEpisodeTags key="tags" tags={entry.tags} />);
   }
 
-  if (entry.assignee_uid !== undefined) {
+  if (entry.assignee_uid != null) {
     const assigneeName =
       assigneeProfile?.user.full_name ?? assigneeProfile?.user.username ?? entry.assignee_uid;
     details.push(
-      <EuiFlexGroup key="assignee" gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexGroup
+        key="assignee"
+        gutterSize="s"
+        alignItems="center"
+        responsive={false}
+        data-test-subj="alertingV2TimelineActionAssignee"
+      >
         {assigneeProfile && (
           <EuiFlexItem grow={false}>
             <UserAvatar
