@@ -16,14 +16,6 @@ import type { AgentlessPolicy } from '../models/agentless_policy';
 import type { ListResult } from './common';
 
 export const CreateAgentlessPolicyRequestSchema = {
-  query: schema.object({
-    format: schema.oneOf([schema.literal('legacy'), schema.literal('simplified')], {
-      defaultValue: 'simplified',
-      meta: {
-        description: 'The format of the response package policy.',
-      },
-    }),
-  }),
   body: SimplifiedCreatePackagePolicyRequestBodySchema.extends(
     {
       // Remove all properties that are not relevant for agentless policies
@@ -144,7 +136,6 @@ export type CreateAgentlessPolicyResponse = TypeOf<typeof CreateAgentlessPolicyR
 
 export interface CreateAgentlessPolicyRequest {
   body: TypeOf<typeof CreateAgentlessPolicyRequestSchema.body>;
-  query: TypeOf<typeof CreateAgentlessPolicyRequestSchema.query>;
 }
 
 /**

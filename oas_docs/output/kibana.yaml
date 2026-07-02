@@ -29283,16 +29283,6 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The format of the response package policy.
-          in: query
-          name: format
-          required: false
-          schema:
-            default: simplified
-            enum:
-              - legacy
-              - simplified
-            type: string
       requestBody:
         content:
           application/json:
