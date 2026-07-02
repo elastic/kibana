@@ -19,7 +19,6 @@ import {
   REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
   REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
 } from '../../../common/constants';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
