@@ -45,12 +45,16 @@ const EXTERNAL_RESUME_UNEXPECTED_ERROR_MESSAGE = i18n.translate(
   }
 );
 
+const EXTERNAL_RESUME_HTML_HEADERS = {
+  'content-type': 'text/html; charset=utf-8',
+  // Belt-and-suspenders: block script execution if schema-derived markup is ever mishandled.
+  'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'",
+} as const;
+
 export function htmlOk(response: KibanaResponseFactory, body: string) {
   return response.ok({
     body,
-    headers: {
-      'content-type': 'text/html; charset=utf-8',
-    },
+    headers: EXTERNAL_RESUME_HTML_HEADERS,
   });
 }
 
@@ -75,9 +79,7 @@ function htmlError(response: KibanaResponseFactory, statusCode: number, message:
     statusCode,
     bypassErrorFormat: true,
     body: renderExternalResumeErrorPage(message),
-    headers: {
-      'content-type': 'text/html; charset=utf-8',
-    },
+    headers: EXTERNAL_RESUME_HTML_HEADERS,
   });
 }
 

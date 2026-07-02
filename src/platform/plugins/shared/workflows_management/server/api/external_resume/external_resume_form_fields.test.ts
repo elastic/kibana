@@ -30,6 +30,29 @@ const ARRAY_ENUM_SCHEMA: JsonModelSchemaType = {
 };
 
 describe('external_resume_form_fields', () => {
+  describe('XSS hardening', () => {
+    it('escapes malicious strings in schema-derived field markup', () => {
+      const xssPayload = '<script>alert(1)</script>';
+      const html = buildExternalResumeFormFieldsHtml({
+        type: 'object',
+        properties: {
+          '<img src=x onerror=alert(1)>': {
+            type: 'string',
+            title: xssPayload,
+            description: xssPayload,
+            enum: [xssPayload],
+          },
+        },
+        required: ['<img src=x onerror=alert(1)>'],
+      });
+
+      expect(html).not.toContain('<script>');
+      expect(html).not.toMatch(/<img[^>]*onerror=/);
+      expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+      expect(html).toContain('id="&lt;img src=x onerror=alert(1)&gt;"');
+    });
+  });
+
   describe('array-of-enum fields', () => {
     it('renders a multi-select for array items with enum', () => {
       const html = buildExternalResumeFormFieldsHtml(ARRAY_ENUM_SCHEMA);
