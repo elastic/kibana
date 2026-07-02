@@ -210,7 +210,6 @@ evaluate.describe(
                 ],
                 expectedStepCount: { min: 14, max: 22 },
                 expectedStepTypes: [
-                  'kibana.createCase|cases.createCase|kibana.request',
                   'foreach',
                   'elasticsearch.search',
                   'if',

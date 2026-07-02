@@ -1204,7 +1204,9 @@ evaluate.describe(
                   'console',
                 ],
                 expectedStepCount: { min: 4, max: 7 },
-                expectedLiquidChains: [{ ref: 'steps.', resolvesTo: 'step-output' }],
+                expectedLiquidChains: [
+                  { ref: '.output.body.correlation_id', resolvesTo: 'step-output' },
+                ],
                 expectedMaxToolCalls: 6,
                 expectedToolSequence: ['platform.core.generate_workflow'],
               },
