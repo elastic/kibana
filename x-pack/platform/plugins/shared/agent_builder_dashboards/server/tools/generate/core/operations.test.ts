@@ -13,8 +13,15 @@ import type {
 } from '@kbn/agent-builder-dashboards-common';
 import { isSection } from '@kbn/agent-builder-dashboards-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
-import type { PanelContentAttempt } from './resolve_panel';
-import type { ResolvePanelContent } from './operations/panels';
+import type { PanelContentAttempt, PanelResolutionRequestBase } from './resolve_panel';
+import {
+  PANEL_TYPE_DEFINITIONS,
+  definePanelType,
+  type PanelResolutionRequest,
+  type PanelResolutionSourceInput,
+  type PanelTypeDefinition,
+  type ResolvePanelContent,
+} from './operations/panels';
 import {
   executeDashboardOperations,
   dashboardOperationSchema,
@@ -303,6 +310,7 @@ describe('executeDashboardOperations', () => {
         type: 'add_panels',
         identifier: 'show p95 latency',
         error: 'ES|QL generation failed',
+        operationIndex: 0,
       },
     ]);
   });
@@ -497,6 +505,7 @@ describe('executeDashboardOperations', () => {
         type: 'add_section',
         identifier: 'show p95 latency',
         error: 'ES|QL generation failed',
+        operationIndex: 0,
       },
     ]);
   });
@@ -931,6 +940,408 @@ describe('executeDashboardOperations', () => {
     ]);
   });
 
+  describe('section refs (client temp keys)', () => {
+    it('resolves an add_panels sectionId through a ref declared by add_section in the same call', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [],
+        },
+        operations: [
+          { operation: 'add_section', title: 'Overview', ref: 'overview', grid: { y: 0 } },
+          {
+            operation: 'add_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'vis',
+                config: { type: 'metric' },
+                sectionId: 'overview',
+                grid: { x: 0, y: 0, w: 24, h: 9 },
+              },
+            ],
+          },
+        ],
+        logger,
+      });
+
+      const sections = getSections(result.dashboardData.panels);
+      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([]);
+      expect(sections).toHaveLength(1);
+      expect(sections[0].panels).toEqual([
+        expect.objectContaining({
+          type: LENS_EMBEDDABLE_TYPE,
+          config: { type: 'metric' },
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+        }),
+      ]);
+      expect(result.failures).toEqual([]);
+      expect(result.sectionRefs).toEqual(new Map([['overview', sections[0].id]]));
+    });
+
+    it('moves a panel into a ref-declared section via update_panel_layouts', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [createLensPanel('top-1')],
+        },
+        operations: [
+          { operation: 'add_section', title: 'Overview', ref: 'overview', grid: { y: 10 } },
+          {
+            operation: 'update_panel_layouts',
+            panels: [{ panelId: 'top-1', sectionId: 'overview' }],
+          },
+        ],
+        logger,
+      });
+
+      const sections = getSections(result.dashboardData.panels);
+      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([]);
+      expect(sections[0].panels).toEqual([expect.objectContaining({ id: 'top-1' })]);
+      expect(result.failures).toEqual([]);
+    });
+
+    it('records a soft failure when a sectionId matches neither a declared ref nor a section id', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [],
+        },
+        operations: [
+          { operation: 'add_section', title: 'Overview', ref: 'overview', grid: { y: 0 } },
+          {
+            operation: 'add_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'vis',
+                config: { type: 'metric' },
+                sectionId: 'unknown-ref',
+                grid: { x: 0, y: 0, w: 24, h: 9 },
+              },
+            ],
+          },
+        ],
+        logger,
+      });
+
+      // The panel targeting the unknown ref is skipped; the section itself persists.
+      expect(getSections(result.dashboardData.panels)).toEqual([
+        expect.objectContaining({ title: 'Overview', panels: [] }),
+      ]);
+      expect(result.failures).toEqual([
+        {
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.addPanels,
+          identifier: 'unknown-ref',
+          error: 'Section "unknown-ref" not found. The panel was not added.',
+          operationIndex: 1,
+        },
+      ]);
+    });
+
+    it('returns an empty sectionRefs map when no refs are declared', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [],
+        },
+        operations: [{ operation: 'add_section', title: 'Overview', grid: { y: 0 } }],
+        logger,
+      });
+
+      expect(result.sectionRefs.size).toBe(0);
+    });
+  });
+
+  describe('add_panels rows mode', () => {
+    it('creates panels with computed grids, appending below existing content', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [createLensPanel('existing-panel')], // grid: { x: 0, y: 0, w: 24, h: 9 }
+        },
+        operations: [
+          {
+            operation: 'add_panels',
+            rows: [
+              [
+                { source: 'config', type: 'vis', config: { type: 'metric' } },
+                { source: 'config', type: 'vis', config: { type: 'metric' } },
+              ],
+              [{ source: 'config', type: 'markdown', config: { content: '### Summary' } }],
+            ],
+          },
+        ],
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(result.dashboardData.panels).toEqual([
+        expect.objectContaining({ id: 'existing-panel' }),
+        expect.objectContaining({
+          type: LENS_EMBEDDABLE_TYPE,
+          config: { type: 'metric' },
+          grid: { x: 0, y: 9, w: 24, h: 5 },
+        }),
+        expect.objectContaining({
+          type: LENS_EMBEDDABLE_TYPE,
+          config: { type: 'metric' },
+          grid: { x: 24, y: 9, w: 24, h: 5 },
+        }),
+        expect.objectContaining({
+          type: MARKDOWN_EMBEDDABLE_TYPE,
+          config: { content: '### Summary' },
+          grid: { x: 0, y: 14, w: 48, h: 6 },
+        }),
+      ]);
+    });
+
+    it('mixes request and config items in one row, sizing the row by its members', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [],
+        },
+        operations: [
+          {
+            operation: 'add_panels',
+            rows: [
+              [
+                { source: 'request', type: 'vis', query: 'show total requests' },
+                { source: 'config', type: 'markdown', config: { content: '### Notes' } },
+              ],
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent: createResolvePanelContent({
+          'show total requests': createResolvedPanelContent({
+            type: LENS_EMBEDDABLE_TYPE,
+            config: { type: 'metric' },
+          }),
+        }),
+      });
+
+      expect(result.failures).toEqual([]);
+      // Request item without chartType uses the default height (10) > markdown (6).
+      expect(result.dashboardData.panels).toEqual([
+        expect.objectContaining({
+          type: LENS_EMBEDDABLE_TYPE,
+          config: { type: 'metric' },
+          grid: { x: 0, y: 0, w: 24, h: 10 },
+        }),
+        expect.objectContaining({
+          type: MARKDOWN_EMBEDDABLE_TYPE,
+          config: { content: '### Notes' },
+          grid: { x: 24, y: 0, w: 24, h: 10 },
+        }),
+      ]);
+    });
+
+    it('adds rows into an existing section, packing below the section contents', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [createSection('section-a', 'Section A', 0, [createLensPanel('section-a-1', 0)])],
+        },
+        operations: [
+          {
+            operation: 'add_panels',
+            sectionId: 'section-a',
+            rows: [
+              [
+                { source: 'config', type: 'vis', config: { type: 'metric' } },
+                { source: 'config', type: 'vis', config: { type: 'metric' } },
+              ],
+            ],
+          },
+        ],
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([]);
+      // Existing section panel occupies y 0..9 (section-relative), so rows start at y 9.
+      expect(getSections(result.dashboardData.panels)[0].panels).toEqual([
+        expect.objectContaining({ id: 'section-a-1' }),
+        expect.objectContaining({
+          config: { type: 'metric' },
+          grid: { x: 0, y: 9, w: 24, h: 5 },
+        }),
+        expect.objectContaining({
+          config: { type: 'metric' },
+          grid: { x: 24, y: 9, w: 24, h: 5 },
+        }),
+      ]);
+    });
+
+    it('adds rows into a section declared via ref earlier in the same call', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [],
+        },
+        operations: [
+          { operation: 'add_section', title: 'Overview', ref: 'overview', grid: { y: 0 } },
+          {
+            operation: 'add_panels',
+            sectionId: 'overview',
+            rows: [[{ source: 'config', type: 'vis', config: { type: 'metric' } }]],
+          },
+        ],
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      const sections = getSections(result.dashboardData.panels);
+      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([]);
+      expect(sections[0].panels).toEqual([
+        expect.objectContaining({
+          config: { type: 'metric' },
+          grid: { x: 0, y: 0, w: 48, h: 5 },
+        }),
+      ]);
+      expect(result.sectionRefs).toEqual(new Map([['overview', sections[0].id]]));
+    });
+
+    it('records a soft failure and adds nothing when the rows target section is missing', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [],
+        },
+        operations: [
+          {
+            operation: 'add_panels',
+            sectionId: 'nonexistent-section',
+            rows: [[{ source: 'config', type: 'vis', config: { type: 'metric' } }]],
+          },
+        ],
+        logger,
+      });
+
+      expect(result.dashboardData.panels).toEqual([]);
+      expect(result.failures).toEqual([
+        {
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.addPanels,
+          identifier: 'nonexistent-section',
+          error: 'Section "nonexistent-section" not found. The panels were not added.',
+          operationIndex: 0,
+        },
+      ]);
+    });
+
+    it('records request failures inside rows as soft failures and keeps the other panels', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [],
+        },
+        operations: [
+          {
+            operation: 'add_panels',
+            rows: [
+              [
+                { source: 'request', type: 'vis', query: 'show total requests' },
+                { source: 'request', type: 'vis', query: 'show p95 latency' },
+              ],
+              [{ source: 'config', type: 'markdown', config: { content: '### Summary' } }],
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent: createResolvePanelContent({
+          'show total requests': createResolvedPanelContent({
+            type: LENS_EMBEDDABLE_TYPE,
+            config: { type: 'metric' },
+          }),
+          'show p95 latency': {
+            type: 'failure',
+            failure: {
+              type: 'add_panels',
+              identifier: 'show p95 latency',
+              error: 'ES|QL generation failed',
+            },
+          },
+        }),
+      });
+
+      // The failed item's slot stays empty; surviving panels keep their computed grids.
+      expect(result.dashboardData.panels).toEqual([
+        expect.objectContaining({
+          type: LENS_EMBEDDABLE_TYPE,
+          config: { type: 'metric' },
+          grid: { x: 0, y: 0, w: 24, h: 10 },
+        }),
+        expect.objectContaining({
+          type: MARKDOWN_EMBEDDABLE_TYPE,
+          config: { content: '### Summary' },
+          grid: { x: 0, y: 10, w: 48, h: 6 },
+        }),
+      ]);
+      expect(result.failures).toEqual([
+        {
+          type: 'add_panels',
+          identifier: 'show p95 latency',
+          error: 'ES|QL generation failed',
+          operationIndex: 0,
+        },
+      ]);
+    });
+
+    it('accepts rows and rejects add_panels payloads that break the exactly-one-of rule', () => {
+      const rowsOnly = dashboardOperationSchema.safeParse({
+        operation: 'add_panels',
+        rows: [[{ source: 'config', type: 'markdown', config: { content: 'hi' } }]],
+      });
+      expect(rowsOnly.success).toBe(true);
+
+      const both = dashboardOperationSchema.safeParse({
+        operation: 'add_panels',
+        panels: [
+          {
+            source: 'config',
+            type: 'markdown',
+            config: { content: 'hi' },
+            grid: { x: 0, y: 0, w: 48, h: 5 },
+          },
+        ],
+        rows: [[{ source: 'config', type: 'markdown', config: { content: 'hi' } }]],
+      });
+      expect(both.success).toBe(false);
+
+      const neither = dashboardOperationSchema.safeParse({ operation: 'add_panels' });
+      expect(neither.success).toBe(false);
+    });
+
+    it('rejects an operation-level sectionId in panels mode', () => {
+      const result = dashboardOperationSchema.safeParse({
+        operation: 'add_panels',
+        sectionId: 'section-a',
+        panels: [
+          {
+            source: 'config',
+            type: 'markdown',
+            config: { content: 'hi' },
+            grid: { x: 0, y: 0, w: 48, h: 5 },
+          },
+        ],
+      });
+
+      expect(result.success).toBe(false);
+    });
+  });
+
   describe('update_panel_layouts', () => {
     it('updates panel grid without changing its current location', async () => {
       const result = await executeDashboardOperations({
@@ -1058,6 +1469,44 @@ describe('executeDashboardOperations', () => {
           type: 'update_panel_layouts',
           identifier: 'missing-panel',
           error: 'Panel "missing-panel" not found.',
+          operationIndex: 0,
+        },
+      ]);
+    });
+
+    it('records a failure and does not move the panel when the target section is missing', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [createLensPanel('top-1')],
+        },
+        operations: [
+          { operation: 'set_metadata', title: 'Updated title' },
+          {
+            operation: 'update_panel_layouts',
+            panels: [
+              {
+                panelId: 'top-1',
+                sectionId: 'nonexistent-section',
+                grid: { x: 24, y: 0, w: 24, h: 9 },
+              },
+            ],
+          },
+        ],
+        logger,
+      });
+
+      // The panel stays at its original location with its original grid.
+      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
+        expect.objectContaining({ id: 'top-1', grid: { x: 0, y: 0, w: 24, h: 9 } }),
+      ]);
+      expect(result.failures).toEqual([
+        {
+          type: 'update_panel_layouts',
+          identifier: 'top-1',
+          error: 'Section "nonexistent-section" not found. Panel "top-1" was not moved.',
+          operationIndex: 1,
         },
       ]);
     });
@@ -1292,6 +1741,7 @@ describe('executeDashboardOperations', () => {
           type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
           identifier: 'panel-1',
           error: 'Panel "panel-1" not found.',
+          operationIndex: 1,
         },
       ]);
     });
@@ -1345,6 +1795,7 @@ describe('executeDashboardOperations', () => {
           type: 'add_panels',
           identifier: 'show p95 latency',
           error: 'ES|QL generation failed',
+          operationIndex: 0,
         },
       ]);
     });
@@ -1399,6 +1850,7 @@ describe('executeDashboardOperations', () => {
           identifier: 'panel-1',
           error:
             'Panel "panel-1" with type "aiOpsLogRateAnalysis" is not supported for inline visualization editing.',
+          operationIndex: 0,
         },
       ]);
     });
@@ -1529,11 +1981,13 @@ describe('executeDashboardOperations', () => {
           type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
           identifier: 'panel-1',
           error: duplicateError,
+          operationIndex: 0,
         },
         {
           type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
           identifier: 'panel-1',
           error: duplicateError,
+          operationIndex: 0,
         },
       ]);
 
@@ -1633,6 +2087,7 @@ describe('executeDashboardOperations', () => {
           type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
           identifier: 'panel-1',
           error: `Panel "panel-1" with type "${LENS_EMBEDDABLE_TYPE}" cannot be edited as markdown. Use source: "request" for ES|QL-backed Lens panels.`,
+          operationIndex: 0,
         },
       ]);
 
@@ -1710,31 +2165,363 @@ describe('executeDashboardOperations', () => {
     });
   });
 
-  it('throws when add_panels markdown item references an invalid sectionId', async () => {
-    await expect(
-      executeDashboardOperations({
+  describe('resolvable panel type additivity', () => {
+    const FAKE_EMBEDDABLE_TYPE = 'fakeEmbeddable';
+
+    interface FakePanelResolutionSourceInput extends PanelResolutionSourceInput {
+      type: 'fake';
+      /** The fake type's own request payload; unknown to the vis request shape. */
+      fakeQuery: string;
+      /** Present on edit inputs. */
+      panelId?: string;
+    }
+
+    interface FakePanelResolutionRequest extends PanelResolutionRequestBase {
+      type: 'fake';
+      fakeQuery: string;
+    }
+
+    /**
+     * A second resolvable panel type registered exactly the way a real one would
+     * be: its module-level definition owns its resolution-request shape. The
+     * model-facing schemas are intentionally untouched (vis stays the only
+     * request-source type the LLM sees), so operations are cast below.
+     */
+    const fakePanelDefinition = definePanelType<FakePanelResolutionSourceInput>({
+      embeddableType: FAKE_EMBEDDABLE_TYPE,
+      buildResolutionRequest: ({
+        input,
+        operationType,
+        existingPanel,
+      }): FakePanelResolutionRequest => ({
+        type: 'fake',
+        operationType,
+        identifier: input.panelId ?? input.fakeQuery,
+        fakeQuery: input.fakeQuery,
+        existingPanel,
+      }),
+    });
+
+    const registry = PANEL_TYPE_DEFINITIONS as Record<string, PanelTypeDefinition>;
+
+    beforeAll(() => {
+      registry.fake = fakePanelDefinition;
+    });
+
+    afterAll(() => {
+      delete registry.fake;
+    });
+
+    const createFakeAwareResolver = () =>
+      jest.fn(
+        async (
+          request: PanelResolutionRequest | FakePanelResolutionRequest
+        ): Promise<PanelContentAttempt> => {
+          if (request.type === 'fake') {
+            return {
+              type: 'success',
+              panelContent: {
+                type: FAKE_EMBEDDABLE_TYPE,
+                config: { fakeQuery: request.fakeQuery },
+              },
+            };
+          }
+
+          return createResolvedPanelContent({
+            type: LENS_EMBEDDABLE_TYPE,
+            config: { type: 'metric' },
+          });
+        }
+      );
+
+    it('collects, resolves, and materializes fake-type panel creations with no operation-handler changes', async () => {
+      const resolvePanelContent = createFakeAwareResolver();
+
+      const operations = [
+        {
+          operation: 'add_section',
+          title: 'Fakes',
+          grid: { y: 0 },
+          panels: [
+            {
+              source: 'request',
+              type: 'fake',
+              fakeQuery: 'render the section fake widget',
+              grid: { x: 0, y: 0, w: 24, h: 9 },
+            },
+          ],
+        },
+        {
+          operation: 'add_panels',
+          panels: [
+            {
+              source: 'request',
+              type: 'fake',
+              fakeQuery: 'render the fake widget',
+              grid: { x: 0, y: 9, w: 24, h: 9 },
+            },
+            {
+              source: 'request',
+              type: 'vis',
+              query: 'show total requests',
+              grid: { x: 24, y: 9, w: 24, h: 9 },
+            },
+          ],
+        },
+      ] as unknown as DashboardOperation[];
+
+      const result = await executeDashboardOperations({
+        dashboardData: { title: 'Test', description: 'Desc', panels: [] },
+        operations,
+        logger,
+        resolvePanelContent,
+      });
+
+      // Each type's registered builder shaped its own request.
+      expect(resolvePanelContent).toHaveBeenCalledWith({
+        type: 'fake',
+        operationType: 'add_section',
+        identifier: 'render the section fake widget',
+        fakeQuery: 'render the section fake widget',
+        existingPanel: undefined,
+      });
+      expect(resolvePanelContent).toHaveBeenCalledWith({
+        type: 'fake',
+        operationType: 'add_panels',
+        identifier: 'render the fake widget',
+        fakeQuery: 'render the fake widget',
+        existingPanel: undefined,
+      });
+      expect(resolvePanelContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'vis',
+          operationType: 'add_panels',
+          identifier: 'show total requests',
+          nlQuery: 'show total requests',
+        })
+      );
+
+      expect(getSections(result.dashboardData.panels)[0].panels).toEqual([
+        expect.objectContaining({
+          type: FAKE_EMBEDDABLE_TYPE,
+          config: { fakeQuery: 'render the section fake widget' },
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+        }),
+      ]);
+      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
+        expect.objectContaining({
+          type: FAKE_EMBEDDABLE_TYPE,
+          config: { fakeQuery: 'render the fake widget' },
+          grid: { x: 0, y: 9, w: 24, h: 9 },
+        }),
+        expect.objectContaining({
+          type: LENS_EMBEDDABLE_TYPE,
+          config: { type: 'metric' },
+          grid: { x: 24, y: 9, w: 24, h: 9 },
+        }),
+      ]);
+      expect(result.failures).toEqual([]);
+    });
+
+    it('edits an existing fake-type panel through the registered request builder', async () => {
+      const resolvePanelContent = createFakeAwareResolver();
+
+      const result = await executeDashboardOperations({
         dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
-          panels: [],
+          title: 'Test',
+          description: 'Desc',
+          panels: [
+            {
+              id: 'fake-1',
+              type: FAKE_EMBEDDABLE_TYPE,
+              config: { fakeQuery: 'old fake widget' },
+              grid: { x: 0, y: 0, w: 24, h: 9 },
+            },
+          ],
         },
         operations: [
           {
-            operation: 'add_panels',
+            operation: 'edit_panels',
             panels: [
               {
-                source: 'config',
-                type: 'markdown',
-                config: { content: '### Summary' },
-                grid: { x: 0, y: 0, w: 48, h: 5 },
-                sectionId: 'nonexistent-section',
+                source: 'request',
+                type: 'fake',
+                panelId: 'fake-1',
+                fakeQuery: 'make it fancier',
               },
             ],
           },
-        ],
+        ] as unknown as DashboardOperation[],
         logger,
-      })
-    ).rejects.toThrow('Section "nonexistent-section" not found.');
+        resolvePanelContent,
+      });
+
+      expect(resolvePanelContent).toHaveBeenCalledWith({
+        type: 'fake',
+        operationType: 'edit_panels',
+        identifier: 'fake-1',
+        fakeQuery: 'make it fancier',
+        existingPanel: expect.objectContaining({ id: 'fake-1' }),
+      });
+      expect(getPanelsOnly(result.dashboardData.panels)[0]).toEqual(
+        expect.objectContaining({
+          id: 'fake-1',
+          type: FAKE_EMBEDDABLE_TYPE,
+          config: { fakeQuery: 'make it fancier' },
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+        })
+      );
+      expect(result.failures).toEqual([]);
+    });
+  });
+
+  it('records a failure and skips the panel when an add_panels item references an invalid sectionId', async () => {
+    const result = await executeDashboardOperations({
+      dashboardData: {
+        title: 'Test dashboard',
+        description: 'Description',
+        panels: [],
+      },
+      operations: [
+        {
+          operation: 'add_panels',
+          panels: [
+            {
+              source: 'config',
+              type: 'markdown',
+              config: { content: '### Summary' },
+              grid: { x: 0, y: 0, w: 48, h: 5 },
+              sectionId: 'nonexistent-section',
+            },
+            {
+              source: 'config',
+              type: 'vis',
+              config: { type: 'metric' },
+              grid: { x: 0, y: 5, w: 24, h: 9 },
+            },
+          ],
+        },
+      ],
+      logger,
+    });
+
+    // The bad-target panel is skipped; the valid panel is still added.
+    expect(result.dashboardData.panels).toEqual([
+      expect.objectContaining({
+        type: LENS_EMBEDDABLE_TYPE,
+        config: { type: 'metric' },
+        grid: { x: 0, y: 5, w: 24, h: 9 },
+      }),
+    ]);
+    expect(result.failures).toEqual([
+      {
+        type: DASHBOARD_OPERATION_FAILURE_TYPES.addPanels,
+        identifier: 'nonexistent-section',
+        error: 'Section "nonexistent-section" not found. The panel was not added.',
+        operationIndex: 0,
+      },
+    ]);
+  });
+
+  it('records a failure when a resolved request-source panel targets an invalid sectionId', async () => {
+    const result = await executeDashboardOperations({
+      dashboardData: {
+        title: 'Test dashboard',
+        description: 'Description',
+        panels: [],
+      },
+      operations: [
+        { operation: 'set_metadata', title: 'Updated title' },
+        {
+          operation: 'add_panels',
+          panels: [
+            {
+              source: 'request',
+              type: 'vis',
+              query: 'show total requests',
+              sectionId: 'nonexistent-section',
+              grid: { x: 0, y: 0, w: 24, h: 9 },
+            },
+          ],
+        },
+      ],
+      logger,
+      resolvePanelContent: createResolvePanelContent(),
+    });
+
+    expect(result.dashboardData.panels).toEqual([]);
+    expect(result.failures).toEqual([
+      {
+        type: DASHBOARD_OPERATION_FAILURE_TYPES.addPanels,
+        identifier: 'nonexistent-section',
+        error: 'Section "nonexistent-section" not found. The panel was not added.',
+        operationIndex: 1,
+      },
+    ]);
+  });
+
+  it('records a failure and leaves the dashboard unchanged when remove_section targets an unknown id', async () => {
+    const result = await executeDashboardOperations({
+      dashboardData: {
+        title: 'Test dashboard',
+        description: 'Description',
+        panels: [
+          createLensPanel('top-1'),
+          createSection('section-a', 'Section A', 10, [createLensPanel('section-a-1', 0)]),
+        ],
+      },
+      operations: [
+        { operation: 'remove_section', id: 'nonexistent-section', panelAction: 'delete' },
+      ],
+      logger,
+    });
+
+    expect(result.dashboardData.panels).toEqual([
+      expect.objectContaining({ id: 'top-1' }),
+      expect.objectContaining({
+        id: 'section-a',
+        panels: [expect.objectContaining({ id: 'section-a-1' })],
+      }),
+    ]);
+    expect(result.failures).toEqual([
+      {
+        type: DASHBOARD_OPERATION_FAILURE_TYPES.removeSection,
+        identifier: 'nonexistent-section',
+        error: 'Section "nonexistent-section" not found.',
+        operationIndex: 0,
+      },
+    ]);
+  });
+
+  it('records one failure per unmatched remove_panels id while removing matched ids', async () => {
+    const result = await executeDashboardOperations({
+      dashboardData: {
+        title: 'Test dashboard',
+        description: 'Description',
+        panels: [createLensPanel('top-1'), createLensPanel('top-2', 9)],
+      },
+      operations: [
+        { operation: 'set_metadata', title: 'Updated title' },
+        { operation: 'remove_panels', panelIds: ['top-1', 'missing-1', 'missing-2'] },
+      ],
+      logger,
+    });
+
+    expect(result.dashboardData.panels).toEqual([expect.objectContaining({ id: 'top-2' })]);
+    expect(result.failures).toEqual([
+      {
+        type: DASHBOARD_OPERATION_FAILURE_TYPES.removePanels,
+        identifier: 'missing-1',
+        error: 'Panel "missing-1" not found.',
+        operationIndex: 1,
+      },
+      {
+        type: DASHBOARD_OPERATION_FAILURE_TYPES.removePanels,
+        identifier: 'missing-2',
+        error: 'Panel "missing-2" not found.',
+        operationIndex: 1,
+      },
+    ]);
   });
 
   it('accepts a markdown config-source panel with content and optional settings', () => {

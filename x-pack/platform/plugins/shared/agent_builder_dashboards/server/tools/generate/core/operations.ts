@@ -41,6 +41,8 @@ export const executeDashboardOperations = async ({
 }: ExecuteDashboardOperationsParams): Promise<{
   dashboardData: DashboardAttachmentData;
   failures: PanelFailure[];
+  /** `add_section` temp keys (`ref`) declared in this call, mapped to the minted section ids. */
+  sectionRefs: Map<string, string>;
 }> => {
   let nextDashboardData = structuredClone(
     dashboardData ?? {
@@ -70,5 +72,6 @@ export const executeDashboardOperations = async ({
   return {
     dashboardData: nextDashboardData,
     failures,
+    sectionRefs: context.sectionRefs,
   };
 };

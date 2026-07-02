@@ -19,7 +19,7 @@ Operations run in order, so earlier operations should set up state needed by lat
 
 When a dashboard needs sections, prefer a single batched call:
 1. Use \`add_section\` with its optional \`panels\` array when you already know the panels that belong in the new section.
-2. Use a follow-up \`add_panels\` with per-item \`sectionId\` only when you need to target an existing section returned by an earlier tool result.
+2. Use \`add_panels\` with per-item \`sectionId\` to target an existing section, or a section created by an earlier \`add_section\` in the same call.
 
 For a new dashboard:
 - Start with \`set_metadata\` and provide both \`title\` and \`description\`. Include \`time_range\` if the user specified a time window.
@@ -35,6 +35,10 @@ For an existing dashboard:
 
 - Use \`source: "request"\` to create or edit a Lens panel from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization. Never hand-build a Lens \`config\` for a new visualization.
 - Use \`source: "config"\` only for content you have already resolved (an existing visualization's config, or markdown). The generation tool never reads an attachment or saved-object store, so the config must be supplied directly.
+
+## Rows Layout
+
+Prefer \`add_panels\` with \`rows\` (rows of panel items, top to bottom, without \`grid\`) when adding panels: the server computes every panel's grid — sizing by chart type, splitting each row's width evenly, and appending below existing content (or below the target \`sectionId\`'s content). Use the explicit \`panels\` + \`grid\` form only when precise placement is required (e.g. filling a specific gap).
 
 ${dashboardDesignGuidancePrompt}
 

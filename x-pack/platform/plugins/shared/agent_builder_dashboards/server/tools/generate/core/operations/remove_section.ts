@@ -8,6 +8,7 @@
 import type { DashboardSection } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
 import { findSectionIndex, getWidgetsBottomY } from '../dashboard_state';
+import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { defineOperation } from './types';
 
 export const removeSectionOperation = defineOperation({
@@ -18,10 +19,17 @@ export const removeSectionOperation = defineOperation({
       .enum(['promote', 'delete'])
       .describe('How to handle section panels: promote to top-level or delete them.'),
   }),
-  handler: ({ dashboardData, operation }) => {
+  handler: ({ dashboardData, operation, operationIndex, context }) => {
     const sectionIndex = findSectionIndex(dashboardData.panels, operation.id);
+    // Bad section target is a soft failure: record it and leave the dashboard unchanged.
     if (sectionIndex === -1) {
-      throw new Error(`Section "${operation.id}" not found.`);
+      context.failures.push({
+        type: DASHBOARD_OPERATION_FAILURE_TYPES.removeSection,
+        identifier: operation.id,
+        error: `Section "${operation.id}" not found.`,
+        operationIndex,
+      });
+      return dashboardData;
     }
 
     const sectionToRemove = dashboardData.panels[sectionIndex] as DashboardSection;

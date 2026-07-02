@@ -23,17 +23,12 @@ export interface VisPanelResolverDeps {
 }
 
 /**
- * Default implementation of the generate core's `ResolvePanelContent` seam for
- * `vis` panels.
+ * Resolver for `vis` panel resolution requests — the `vis` entry of the
+ * type-dispatched default resolver (see `panel_content_resolver.ts`).
  *
  * Builds inline Lens panel content from natural language / ES|QL using Kibana
  * plumbing (model provider, ES client, the visualization builder) and returns
  * it to the core through the type-agnostic {@link PanelContentAttempt} contract.
- *
- * It ships in `core/resolvers/` so any caller of the generation core — the
- * dashboard tool or a CLI host — gets a ready-to-use vis resolver from one
- * place. It is still wired in through the `resolvePanelContent` seam, so tests
- * can inject a fake and a host can substitute its own resolver if ever needed.
  */
 export const createVisPanelResolver = ({
   logger,

@@ -17,6 +17,14 @@ export const addSectionOperation = defineOperation({
   schema: z.object({
     operation: z.literal('add_section'),
     title: z.string().max(256).describe('Section title.'),
+    ref: z
+      .string()
+      .min(1)
+      .max(64)
+      .optional()
+      .describe(
+        'Caller-chosen temporary key for the new section, scoped to this tool call only. Later operations in the same call may pass it as a sectionId; the tool result maps each ref to the real section id.'
+      ),
     grid: sectionGridSchema,
     panels: z
       .array(addSectionPanelItemSchema)
@@ -34,6 +42,10 @@ export const addSectionOperation = defineOperation({
       grid: operation.grid,
       panels: [],
     };
+
+    if (operation.ref !== undefined) {
+      context.sectionRefs.set(operation.ref, nextSection.id);
+    }
 
     if (operation.panels) {
       const materializePanelInput = createPanelInputMaterializer({

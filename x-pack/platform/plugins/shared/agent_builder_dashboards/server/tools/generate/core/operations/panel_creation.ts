@@ -9,7 +9,9 @@ import type { PanelFailure } from '../utils';
 import type { DashboardOperation } from './registry';
 import {
   PANEL_TYPE_DEFINITIONS,
+  buildPanelResolutionRequest,
   type AddPanelsItemInput,
+  type AddPanelsRowItemInput,
   type NewPanelInput,
   type PanelContent,
   type PanelRequestInput,
@@ -26,7 +28,7 @@ export type PanelCreationRequest =
     }
   | {
       operationType: 'add_panels';
-      panelInput: Extract<AddPanelsItemInput, { source: 'request' }>;
+      panelInput: Extract<AddPanelsItemInput | AddPanelsRowItemInput, { source: 'request' }>;
       panelInputIndex: number;
       sectionId?: string;
     };
@@ -70,18 +72,35 @@ const collectPanelCreationRequests = (
         break;
       }
       case 'add_panels': {
-        const panelRequests = operation.panels.flatMap((panelInput, panelInputIndex) =>
-          panelInput.source === 'request'
-            ? [
-                {
-                  operationType: operation.operation,
-                  panelInput,
-                  panelInputIndex,
-                  sectionId: panelInput.sectionId,
-                },
-              ]
-            : []
-        );
+        // Rows mode flattens row-major: `panelInputIndex` is the flattened index,
+        // and the handler materializes rows in the same row-major order, so
+        // materializer matching by `panelInputIndex` stays correct in both modes.
+        const panelRequests =
+          operation.rows !== undefined
+            ? operation.rows.flat().flatMap((panelInput, panelInputIndex) =>
+                panelInput.source === 'request'
+                  ? [
+                      {
+                        operationType: operation.operation,
+                        panelInput,
+                        panelInputIndex,
+                        sectionId: operation.sectionId,
+                      },
+                    ]
+                  : []
+              )
+            : (operation.panels ?? []).flatMap((panelInput, panelInputIndex) =>
+                panelInput.source === 'request'
+                  ? [
+                      {
+                        operationType: operation.operation,
+                        panelInput,
+                        panelInputIndex,
+                        sectionId: panelInput.sectionId,
+                      },
+                    ]
+                  : []
+              );
 
         if (panelRequests.length > 0) {
           requestsByOperationIndex.set(operationIndex, panelRequests);
@@ -127,15 +146,12 @@ export const resolvePanelCreationRequests = async ({
           await Promise.all(
             requests.map(async (request) => ({
               request,
-              resolvedPanel: await resolvePanelContent({
-                type: request.panelInput.type,
-                operationType: request.operationType,
-                identifier: request.panelInput.query,
-                nlQuery: request.panelInput.query,
-                index: request.panelInput.index,
-                chartType: request.panelInput.chartType,
-                esql: request.panelInput.esql,
-              }),
+              resolvedPanel: await resolvePanelContent(
+                buildPanelResolutionRequest({
+                  input: request.panelInput,
+                  operationType: request.operationType,
+                })
+              ),
             }))
           ),
         ] as const
@@ -164,6 +180,9 @@ const getResolvedPanelCreationRequests = ({
  * - `source: 'request'`: read from the up-front parallel resolution (keyed by
  *   panel input index).
  *
+ * In `add_panels` rows mode the panel input index is the row-major flattened
+ * index: the collector and the handler both walk rows in that order.
+ *
  * Returns `undefined` and records a failure when a panel request didn't resolve.
  */
 export const createPanelInputMaterializer = ({
@@ -176,7 +195,10 @@ export const createPanelInputMaterializer = ({
   operationIndex: number;
   operationType: DashboardOperation['operation'];
   failures: PanelFailure[];
-}): ((item: NewPanelInput, panelInputIndex: number) => PanelContent | undefined) => {
+}): ((
+  item: NewPanelInput | AddPanelsRowItemInput,
+  panelInputIndex: number
+) => PanelContent | undefined) => {
   const resolvedRequestByInputIndex = new Map(
     getResolvedPanelCreationRequests({
       resolvedRequestsByOperationIndex: resolvedPanelCreationRequests,
@@ -197,7 +219,7 @@ export const createPanelInputMaterializer = ({
     }
 
     if (resolvedRequest.resolvedPanel.type === 'failure') {
-      failures.push(resolvedRequest.resolvedPanel.failure);
+      failures.push({ ...resolvedRequest.resolvedPanel.failure, operationIndex });
       return undefined;
     }
 

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
-import type { PanelContentAttempt } from '../../resolve_panel';
-import type { PanelTypeDefinition } from './panel_type';
+import type { InlinePanelOperationType, PanelContentAttempt } from '../../resolve_panel';
+import type { PanelResolutionSourceInput, PanelTypeDefinition } from './panel_type';
 import {
   visPanelConfigInputSchema,
   visPanelDefinition,
@@ -37,10 +38,19 @@ import {
  * - `type`: which panel type — `'vis'`, `'markdown'`, … (maps to an embeddable).
  *
  * Today `source: 'request'` only resolves `type: 'vis'`; adding another
- * resolvable type is additive and needs no operation-handler changes.
+ * resolvable type is additive and needs no operation-handler changes: its module
+ * provides a `buildResolutionRequest` in its {@link PanelTypeDefinition} (see
+ * {@link buildPanelResolutionRequest}) and its resolver is registered in the
+ * type-dispatched default resolver (`core/resolvers/panel_content_resolver.ts`).
  */
 export type { PanelRequestInput, EditPanelRequestInput, VisPanelResolutionRequest } from './vis';
-export type { PanelContent } from './panel_type';
+export type {
+  BuildResolutionRequestParams,
+  PanelContent,
+  PanelResolutionSourceInput,
+  PanelTypeDefinition,
+} from './panel_type';
+export { definePanelType } from './panel_type';
 
 /**
  * A `source: 'config'` panel adds a panel from an already-resolved config passed
@@ -67,7 +77,7 @@ const sectionIdField = z
   .max(256)
   .optional()
   .describe(
-    'ID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
+    'Section to add this panel into: an existing section id, or a ref declared by an earlier add_section in the same call. If omitted, panel is added at the top level.'
   );
 
 /** A single panel item accepted by `add_panels` (any panel type, optionally targeting a section). */
@@ -80,6 +90,21 @@ export const addPanelsItemSchema = z.discriminatedUnion('source', [
 ]);
 
 export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
+
+/**
+ * A single panel item inside an `add_panels` `rows` row: the add-panel input
+ * without `grid` (the server packs the row into grids) and without a per-item
+ * `sectionId` (the target section is set once at the operation level).
+ */
+export const addPanelsRowItemSchema = z.discriminatedUnion('source', [
+  z.discriminatedUnion('type', [
+    visPanelConfigInputSchema.omit({ grid: true }),
+    markdownPanelConfigInputSchema.omit({ grid: true }),
+  ]),
+  panelRequestSchema.omit({ grid: true }),
+]);
+
+export type AddPanelsRowItemInput = z.infer<typeof addPanelsRowItemSchema>;
 
 /** A single inline panel item accepted by `add_section` (section-relative, no sectionId). */
 export const addSectionPanelItemSchema = z.discriminatedUnion('source', [
@@ -113,7 +138,38 @@ export type PanelResolutionRequest = VisPanelResolutionRequest;
 /**
  * Contract for inline panel content resolution. The generate core consumes this
  * to turn a panel resolution request into panel content. The default resolver
- * (see `core/resolvers/vis_panel_resolver.ts`) routes each request to the resolver
- * for its `type`; it is injected so tests can supply a fake.
+ * (see `core/resolvers/panel_content_resolver.ts`) routes each request to the
+ * resolver for its `type`; it is injected so tests can supply a fake.
  */
 export type ResolvePanelContent = (request: PanelResolutionRequest) => Promise<PanelContentAttempt>;
+
+/**
+ * Builds the resolution request for a parsed `source: 'request'` panel input by
+ * dispatching to the request builder its panel type registered (see
+ * {@link PanelTypeDefinition.buildResolutionRequest}). Operations call this
+ * instead of reading type-specific request fields, so adding a resolvable panel
+ * type never touches operation handlers.
+ *
+ * Throws for panel types without a registered builder; the model-facing schemas
+ * only accept resolvable types, so this only fires on a registry bug.
+ */
+export const buildPanelResolutionRequest = ({
+  input,
+  operationType,
+  existingPanel,
+}: {
+  input: PanelResolutionSourceInput & { type: PanelType };
+  operationType: InlinePanelOperationType;
+  existingPanel?: AttachmentPanel;
+}): PanelResolutionRequest => {
+  const buildResolutionRequest = PANEL_TYPE_DEFINITIONS[input.type]?.buildResolutionRequest;
+  if (!buildResolutionRequest) {
+    throw new Error(
+      `Panel type "${input.type}" does not support resolution from a source: "request" input.`
+    );
+  }
+
+  // Definitions are stored type-erased (see `definePanelType`); each registered
+  // builder returns its own member of the `PanelResolutionRequest` union.
+  return buildResolutionRequest({ input, operationType, existingPanel }) as PanelResolutionRequest;
+};

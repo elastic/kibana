@@ -10,6 +10,8 @@ export const DASHBOARD_OPERATION_FAILURE_TYPES = {
   addPanels: 'add_panels',
   editPanels: 'edit_panels',
   updatePanelLayouts: 'update_panel_layouts',
+  removeSection: 'remove_section',
+  removePanels: 'remove_panels',
 } as const;
 
 export type DashboardOperationFailureType =

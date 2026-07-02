@@ -99,6 +99,45 @@ describe('createVisualizationGraph', () => {
     expect(finalState.esqlQuery).toBe(esqlQuery);
   });
 
+  it('skips esql generation for edits when a query is provided, pinning it over the existing one', async () => {
+    const providedQuery = 'FROM logs-* | WHERE response.code != 503 | STATS count = COUNT(*)';
+    const graph = await createVisualizationGraph(
+      createMockModel() as never,
+      logger,
+      events,
+      esClient,
+      false
+    );
+    const parsedExistingConfig = {
+      type: 'metric',
+      data_source: {
+        type: 'esql',
+        query: 'FROM logs-* | STATS count = COUNT(*)',
+      },
+    } as unknown as VisualizationConfig;
+
+    const finalState = await graph.invoke({
+      nlQuery: 'Exclude 503 response codes',
+      index: 'logs-*',
+      chartType: SupportedChartType.Metric,
+      schema: {},
+      existingConfig: JSON.stringify(parsedExistingConfig),
+      parsedExistingConfig,
+      esqlQuery: providedQuery,
+      currentAttempt: 0,
+      actions: [],
+      validatedConfig: null,
+      error: null,
+    });
+
+    expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    expect(finalState.esqlQuery).toBe(providedQuery);
+    const validated = finalState.validatedConfig as {
+      data_source?: { type: string; query: string };
+    };
+    expect(validated.data_source).toEqual({ type: 'esql', query: providedQuery });
+  });
+
   it('regenerates esql for edits and includes the existing query as context', async () => {
     mockedGenerateEsql.mockResolvedValue({
       query: 'FROM logs-* | WHERE response.code != 503 | STATS count = COUNT(*)',

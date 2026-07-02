@@ -1,0 +1,231 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`XY capability manifest anti-drift: generated artifacts snapshot capability index 1`] = `
+"layer_data — ES|QL data source query, column-to-dimension bindings (x, y, breakdown_by), breakdown series collapsing, sampling, and per-layer global-filter opt-out.
+panel_filters — Panel-level filters applied to the query results: field conditions, condition groups, raw Elasticsearch DSL, or spatial filters.
+legend — Legend visibility, placement (inside/outside), position, layout, size, columns, and per-series statistics.
+axes — X/Y/Y2 axis configuration (titles, ticks, grid lines, label orientation, scale, domain bounds) and which Y axis each metric is plotted on.
+labels — Display labels for the x, y, and breakdown dimensions (series/column names).
+value_formatting — Value display formats (number/percent, bits/bytes, duration, custom pattern) for the x, y, and breakdown dimensions.
+coloring — Series colors: static or auto color per Y metric, and categorical or gradient color mappings for breakdown values.
+fitting — Missing-data handling for line/area series: fitting function, edge extension, and emphasis of fitted segments.
+styling — Visual styling: line/area interpolation, point markers, area fill opacity, bar settings and data labels, and overlays (current time marker, partial buckets)."
+`;
+
+exports[`XY capability manifest anti-drift: generated artifacts snapshot core schema keeps only unclaimed subtrees 1`] = `
+Object {
+  "$defs": Object {
+    "xyChartESQL": Object {
+      "additionalProperties": false,
+      "default": Object {
+        "special": "deep",
+      },
+      "properties": Object {
+        "description": Object {
+          "type": "string",
+        },
+        "layers": Object {
+          "items": Object {
+            "$ref": "#/$defs/xyLayersESQL",
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array",
+        },
+        "title": Object {
+          "type": "string",
+        },
+        "type": Object {
+          "const": "xy",
+        },
+      },
+      "title": "XY Chart (ES|QL)",
+      "type": "object",
+    },
+    "xyLayerESQL": Object {
+      "additionalProperties": false,
+      "default": Object {
+        "special": "deep",
+      },
+      "properties": Object {
+        "type": Object {
+          "anyOf": Array [
+            Object {
+              "const": "area",
+            },
+            Object {
+              "const": "area_percentage",
+            },
+            Object {
+              "const": "area_stacked",
+            },
+            Object {
+              "const": "bar",
+            },
+            Object {
+              "const": "bar_horizontal",
+            },
+            Object {
+              "const": "bar_horizontal_stacked",
+            },
+            Object {
+              "const": "bar_horizontal_percentage",
+            },
+            Object {
+              "const": "bar_percentage",
+            },
+            Object {
+              "const": "bar_stacked",
+            },
+            Object {
+              "const": "line",
+            },
+          ],
+        },
+      },
+      "title": "Layer (ES|QL)",
+      "type": "object",
+    },
+    "xyLayersESQL": Object {
+      "$ref": "#/$defs/xyLayerESQL",
+      "title": "xyLayersESQL",
+    },
+  },
+  "$ref": "#/$defs/xyChartESQL",
+}
+`;
+
+exports[`XY capability manifest anti-drift: generated artifacts snapshot fragment names, subtree paths, and $def closures 1`] = `
+Object {
+  "axes": Object {
+    "defs": Array [
+      "vis_api_domain_custom",
+      "vis_api_domain_fit",
+      "vis_api_domain_full",
+      "vis_api_orientation",
+      "vis_api_xy_axis_config",
+    ],
+    "kind": "presentation",
+    "subtrees": Array [
+      "/axis",
+      "/layers/*/y/*/axis",
+    ],
+  },
+  "coloring": Object {
+    "defs": Array [
+      "autoColor",
+      "categoricalColorMapping",
+      "colorFromPalette",
+      "colorMapping",
+      "color_code",
+      "gradientColorMapping",
+      "multi_field_key",
+      "range_key",
+      "staticColor",
+      "unassignedColorSchema",
+    ],
+    "kind": "presentation",
+    "subtrees": Array [
+      "/layers/*/y/*/color",
+      "/layers/*/breakdown_by/color",
+    ],
+  },
+  "fitting": Object {
+    "defs": Array [
+      "xyFitting",
+    ],
+    "kind": "presentation",
+    "subtrees": Array [
+      "/styling/fitting",
+    ],
+  },
+  "labels": Object {
+    "defs": Array [],
+    "kind": "presentation",
+    "subtrees": Array [
+      "/layers/*/x/label",
+      "/layers/*/y/*/label",
+      "/layers/*/breakdown_by/label",
+    ],
+  },
+  "layer_data": Object {
+    "defs": Array [
+      "collapseBy",
+      "esqlDataSource",
+    ],
+    "kind": "data",
+    "subtrees": Array [
+      "/layers/*/data_source",
+      "/layers/*/x/column",
+      "/layers/*/y/*/column",
+      "/layers/*/breakdown_by/column",
+      "/layers/*/breakdown_by/collapse_by",
+      "/layers/*/sampling",
+      "/layers/*/ignore_global_filters",
+    ],
+  },
+  "legend": Object {
+    "defs": Array [
+      "legendSize",
+      "xyLegend",
+      "xyLegendInside",
+      "xyLegendOutsideHorizontal",
+      "xyLegendOutsideVertical",
+      "xyLegendSeriesHeader",
+    ],
+    "kind": "presentation",
+    "subtrees": Array [
+      "/legend",
+    ],
+  },
+  "panel_filters": Object {
+    "defs": Array [
+      "kbn-as-code-filters-schema_asCodeConditionFilterSchema",
+      "kbn-as-code-filters-schema_asCodeDSLFilterSchema",
+      "kbn-as-code-filters-schema_asCodeGroupFilterSchema",
+      "kbn-as-code-filters-schema_asCodeSpatialFilterSchema",
+      "kbn-as-code-filters-schema_condition_exists",
+      "kbn-as-code-filters-schema_condition_is",
+      "kbn-as-code-filters-schema_condition_is_one_of",
+      "kbn-as-code-filters-schema_condition_range",
+      "kbn-as-code-filters-schema_groupFilter",
+      "lensPanelFilters",
+    ],
+    "kind": "data",
+    "subtrees": Array [
+      "/filters",
+    ],
+  },
+  "styling": Object {
+    "defs": Array [
+      "xyStylingAreas",
+      "xyStylingBars",
+      "xyStylingOverlays",
+      "xyStylingPoints",
+    ],
+    "kind": "presentation",
+    "subtrees": Array [
+      "/styling/interpolation",
+      "/styling/points",
+      "/styling/areas",
+      "/styling/bars",
+      "/styling/overlays",
+    ],
+  },
+  "value_formatting": Object {
+    "defs": Array [
+      "byteFormat",
+      "customFormat",
+      "durationFormat",
+      "formatType",
+      "numericFormat",
+    ],
+    "kind": "presentation",
+    "subtrees": Array [
+      "/layers/*/x/format",
+      "/layers/*/y/*/format",
+      "/layers/*/breakdown_by/format",
+    ],
+  },
+}
+`;

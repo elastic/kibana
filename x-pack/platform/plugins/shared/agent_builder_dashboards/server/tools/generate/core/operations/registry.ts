@@ -63,6 +63,7 @@ export const prepareOperationExecution = async ({
     failures,
     resolvedPanelCreationRequests,
     resolvePanelContent,
+    sectionRefs: new Map(),
   };
 };
 

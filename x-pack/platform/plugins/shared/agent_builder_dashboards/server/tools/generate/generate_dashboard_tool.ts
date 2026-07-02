@@ -14,13 +14,16 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   isSection,
+  type AttachmentPanel,
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 
 import { dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
-  createVisPanelResolver,
+  createPanelContentResolver,
   executeDashboardOperations,
   getErrorMessage,
   hasValidCreateMetadataOperations,
@@ -41,37 +44,102 @@ const generateDashboardSchema = z.object({
   operations: z.array(dashboardOperationSchema).min(1),
 });
 
+const QUERY_EXPRESSION_PREVIEW_LENGTH = 120;
+const MARKDOWN_CONTENT_PREVIEW_LENGTH = 60;
+
+const truncate = (value: string, maxLength: number): string =>
+  value.length > maxLength ? `${value.slice(0, maxLength)}…` : value;
+
+/**
+ * Cheap per-panel identity hints so the model can target panels in follow-up
+ * operations without ever seeing full configs: Lens panels expose the chart
+ * type and title read from their API-format config (top-level `type`/`title`),
+ * markdown panels a short content preview.
+ */
+const summarizePanel = (panel: AttachmentPanel) => {
+  const summary: {
+    type: string;
+    id: string;
+    grid: AttachmentPanel['grid'];
+    chart_type?: string;
+    title?: string;
+    content_preview?: string;
+  } = { type: panel.type, id: panel.id, grid: panel.grid };
+
+  if (panel.type === LENS_EMBEDDABLE_TYPE) {
+    const { type: chartType, title } = panel.config;
+    if (typeof chartType === 'string') {
+      summary.chart_type = chartType;
+    }
+    if (typeof title === 'string' && title.length > 0) {
+      summary.title = title;
+    }
+  } else if (panel.type === MARKDOWN_EMBEDDABLE_TYPE) {
+    const { content } = panel.config;
+    if (typeof content === 'string') {
+      summary.content_preview = truncate(content, MARKDOWN_CONTENT_PREVIEW_LENGTH);
+    }
+  }
+
+  return summary;
+};
+
 /**
  * Compact projection of a dashboard payload, returned in the tool result.
  *
  * The full dashboard payload lives in the dashboard attachment (referenced by
  * id); the LLM only ever sees this slim summary, so it never has to re-emit the
- * heavy payload into a follow-up tool call.
+ * heavy payload into a follow-up tool call. Every dashboard-level field the
+ * model can write is echoed back here (summary parity) — absent or empty fields
+ * are omitted entirely to keep the summary compact.
  */
-const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
-  title: dashboardData.title,
-  description: dashboardData.description,
-  panels: dashboardData.panels.map((widget) => {
-    if (isSection(widget)) {
-      return {
-        id: widget.id,
-        title: widget.title,
-        collapsed: widget.collapsed,
-        grid: widget.grid,
-        panels: widget.panels.map((panel) => ({
-          type: panel.type,
-          id: panel.id,
-          grid: panel.grid,
-        })),
-      };
-    }
-    return {
-      type: widget.type,
-      id: widget.id,
-      grid: widget.grid,
-    };
-  }),
-});
+const summarizeDashboard = (dashboardData: DashboardAttachmentData) => {
+  const {
+    title,
+    description,
+    time_range: timeRange,
+    tags,
+    query,
+    filters,
+    pinned_panels: pinnedPanels,
+    refresh_interval: refreshInterval,
+    panels,
+  } = dashboardData;
+
+  return {
+    title,
+    description,
+    ...(timeRange !== undefined && { time_range: timeRange }),
+    ...(tags !== undefined && tags.length > 0 && { tags }),
+    ...(query !== undefined && {
+      query: {
+        language: query.language,
+        expression: truncate(
+          typeof query.expression === 'string'
+            ? query.expression
+            : JSON.stringify(query.expression),
+          QUERY_EXPRESSION_PREVIEW_LENGTH
+        ),
+      },
+    }),
+    ...(filters !== undefined && filters.length > 0 && { filters_count: filters.length }),
+    ...(pinnedPanels !== undefined &&
+      pinnedPanels.length > 0 && { controls_count: pinnedPanels.length }),
+    ...(refreshInterval !== undefined && { refresh_interval: refreshInterval }),
+    panels: panels.map((widget) => {
+      if (isSection(widget)) {
+        return {
+          id: widget.id,
+          title: widget.title,
+          collapsed: widget.collapsed,
+          grid: widget.grid,
+          panels: widget.panels.map(summarizePanel),
+        };
+      }
+      return summarizePanel(widget);
+    }),
+  };
+};
 
 /**
  * Kibana dashboard generation tool.
@@ -118,11 +186,11 @@ Use operations[] to:
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
 
-        const { dashboardData, failures } = await executeDashboardOperations({
+        const { dashboardData, failures, sectionRefs } = await executeDashboardOperations({
           dashboardData: latestVersion?.data,
           operations,
           logger,
-          resolvePanelContent: createVisPanelResolver({
+          resolvePanelContent: createPanelContentResolver({
             logger,
             modelProvider,
             events,
@@ -158,6 +226,8 @@ Use operations[] to:
                 attachment_id: attachment.id,
                 version: attachment.current_version ?? 1,
                 dashboard: summarizeDashboard(dashboardData),
+                // Maps each add_section `ref` declared in this call to the real section id.
+                section_refs: sectionRefs.size > 0 ? Object.fromEntries(sectionRefs) : undefined,
                 failures: failures.length > 0 ? failures : undefined,
               },
             },
@@ -172,7 +242,7 @@ Use operations[] to:
               type: ToolResultType.error,
               data: {
                 message: `Failed to generate dashboard: ${errorMessage}`,
-                metadata: { dashboardAttachmentId: previousAttachmentId, operations },
+                metadata: { dashboardAttachmentId: previousAttachmentId },
               },
             },
           ],

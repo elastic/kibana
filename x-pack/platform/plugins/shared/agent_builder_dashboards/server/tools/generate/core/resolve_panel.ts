@@ -13,7 +13,7 @@ import type { PanelFailure } from './utils';
  * result, the failure helper, and the request fields shared by every panel type.
  * Each panel type contributes its own request shape (see `operations/panels/<type>`),
  * and the panels barrel aggregates them into the `ResolvePanelContent` contract,
- * whose default implementation lives in `resolvers/vis_panel_resolver.ts`.
+ * whose default implementation lives in `resolvers/panel_content_resolver.ts`.
  */
 export type PanelContentAttempt =
   | {

@@ -13,6 +13,7 @@ import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import { createVisualizationGraph } from './graph_lens';
 import { guessChartType } from './guess_chart_type';
+import { tryMicroEdit } from './micro_edit';
 import { getSchemaForChartType } from './schemas';
 import type { VisualizationConfig } from './types';
 
@@ -36,6 +37,12 @@ interface BuildVisualizationConfigResult {
   validatedConfig: VisualizationConfig;
   esqlQuery: string;
   timeRange?: { from: string; to: string };
+  /**
+   * Non-fatal fulfillment-check findings: requested capabilities/asks the
+   * generated config may not satisfy. Present only when the fulfillment check
+   * still reported unmet asks after its single regeneration was spent.
+   */
+  warnings?: string[];
 }
 
 export const buildVisualizationConfig = async ({
@@ -52,14 +59,50 @@ export const buildVisualizationConfig = async ({
   events,
   esClient,
 }: BuildVisualizationConfigParams): Promise<BuildVisualizationConfigResult> => {
+  const existingType =
+    parsedExistingConfig && 'type' in parsedExistingConfig
+      ? String(parsedExistingConfig.type)
+      : undefined;
+  const existingChartType =
+    existingType !== undefined &&
+    (Object.values(SupportedChartType) as string[]).includes(existingType)
+      ? (existingType as SupportedChartType)
+      : undefined;
+
+  // Micro-edit fast path (decisions §5): a presentation-only edit of an
+  // existing config is resolved as a small JSON merge patch against it — no
+  // chart-type guess, no ES|QL regeneration, no full config generation. Only
+  // chart types with a capability manifest take this path (enforced inside
+  // tryMicroEdit); data edits, an explicitly provided ES|QL query, chart-type
+  // changes, and every micro-edit failure fall through to the full pipeline
+  // below unchanged.
+  if (
+    parsedExistingConfig !== null &&
+    existingChartType !== undefined &&
+    !esql &&
+    (!chartType || chartType === existingChartType)
+  ) {
+    const microEdit = await tryMicroEdit({
+      nlQuery,
+      chartType: existingChartType,
+      existingConfig: parsedExistingConfig,
+      modelProvider,
+      logger,
+    });
+    if (microEdit.outcome === 'patched') {
+      return {
+        selectedChartType: existingChartType,
+        validatedConfig: microEdit.validatedConfig,
+        esqlQuery: microEdit.esqlQuery,
+      };
+    }
+    logger.debug(`Micro-edit fell back to the full pipeline: ${microEdit.reason}`);
+  }
+
   let selectedChartType: SupportedChartType = chartType || SupportedChartType.Metric;
 
   if (!chartType) {
     logger.debug('Chart type not provided, using LLM to suggest one');
-    const existingType =
-      parsedExistingConfig && 'type' in parsedExistingConfig
-        ? String(parsedExistingConfig.type)
-        : undefined;
     selectedChartType = await guessChartType(modelProvider, nlQuery, existingType);
   }
 
@@ -108,7 +151,8 @@ export const buildVisualizationConfig = async ({
     error: null,
   });
 
-  const { validatedConfig, error, currentAttempt, esqlQuery, timeRange } = finalState;
+  const { validatedConfig, error, currentAttempt, esqlQuery, timeRange, fulfillmentWarnings } =
+    finalState;
 
   if (!validatedConfig) {
     throw new Error(
@@ -123,5 +167,8 @@ export const buildVisualizationConfig = async ({
     validatedConfig,
     esqlQuery,
     ...(timeRange && { timeRange }),
+    ...(fulfillmentWarnings && fulfillmentWarnings.length > 0
+      ? { warnings: fulfillmentWarnings }
+      : {}),
   };
 };

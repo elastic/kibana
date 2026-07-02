@@ -37,11 +37,24 @@ export interface GenerateTimeRangeAction {
   error?: string;
 }
 
+export interface FulfillmentCheckAction {
+  type: 'fulfillment_check';
+  success: boolean;
+  /** Whether the validated config satisfies the user request; set on success. */
+  satisfied?: boolean;
+  /** Unmet asks: capability names from the index, or short descriptions. */
+  unmet?: string[];
+  /** True when this unsatisfied check triggered the single fulfillment-driven regeneration. */
+  regenerate?: boolean;
+  error?: string;
+}
+
 export type Action =
   | GenerateEsqlAction
   | GenerateConfigAction
   | ValidateConfigAction
-  | GenerateTimeRangeAction;
+  | GenerateTimeRangeAction
+  | FulfillmentCheckAction;
 
 export function isGenerateConfigAction(action: Action): action is GenerateConfigAction {
   return action.type === 'generate_config';
@@ -55,11 +68,16 @@ export function isGenerateTimeRangeAction(action: Action): action is GenerateTim
   return action.type === 'generate_time_range';
 }
 
+export function isFulfillmentCheckAction(action: Action): action is FulfillmentCheckAction {
+  return action.type === 'fulfillment_check';
+}
+
 // Node name constants
 export const GENERATE_ESQL_NODE = 'generate_esql_query';
 export const GENERATE_CONFIG_NODE = 'generate_config';
 export const VALIDATE_CONFIG_NODE = 'validate_config';
 export const GENERATE_TIME_RANGE_NODE = 'generate_time_range';
+export const FULFILLMENT_CHECK_NODE = 'fulfillment_check';
 
 // Configuration constants
 export const MAX_RETRY_ATTEMPTS = 5;

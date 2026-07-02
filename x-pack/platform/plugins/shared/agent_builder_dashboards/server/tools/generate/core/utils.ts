@@ -15,6 +15,8 @@ export interface PanelFailure {
   type: DashboardOperationFailureType;
   identifier: string;
   error: string;
+  /** Index of the failed operation in the tool call's `operations` array. */
+  operationIndex?: number;
 }
 
 /**

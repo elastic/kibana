@@ -34,6 +34,12 @@ jest.mock('./guess_chart_type', () => ({
   guessChartType: jest.fn(),
 }));
 
+// Not exercised here (no existing config is passed); mocked so the mocked
+// './schemas' above never reaches the module-load capability compilation.
+jest.mock('./micro_edit', () => ({
+  tryMicroEdit: jest.fn(),
+}));
+
 const mockedValidateEsqlQuery = jest.mocked(validateEsqlQuery);
 const mockedBuildCallbacks = jest.mocked(buildServerESQLCallbacks);
 const mockedCreateGraph = jest.mocked(createVisualizationGraph);
@@ -121,5 +127,27 @@ describe('buildVisualizationConfig', () => {
 
     expect(mockedValidateEsqlQuery).not.toHaveBeenCalled();
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: '' });
+  });
+
+  it('attaches fulfillment warnings as a non-fatal warnings field', async () => {
+    invoke.mockResolvedValue({
+      validatedConfig: { type: 'metric' },
+      error: null,
+      currentAttempt: 1,
+      esqlQuery: PROVIDED_ESQL,
+      timeRange: null,
+      fulfillmentWarnings: ['legend', 'a threshold line at 100'],
+    });
+
+    const result = await run(undefined);
+
+    expect(result.validatedConfig).toEqual({ type: 'metric' });
+    expect(result.warnings).toEqual(['legend', 'a threshold line at 100']);
+  });
+
+  it('omits warnings when the fulfillment check reported none', async () => {
+    const result = await run(undefined);
+
+    expect(result.warnings).toBeUndefined();
   });
 });

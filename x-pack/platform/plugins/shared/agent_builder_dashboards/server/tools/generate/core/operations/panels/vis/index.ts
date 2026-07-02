@@ -9,7 +9,7 @@ import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result'
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
-import { definePanelType } from '../panel_type';
+import { definePanelType, type BuildResolutionRequestParams } from '../panel_type';
 import type { PanelResolutionRequestBase } from '../../../resolve_panel';
 
 /**
@@ -132,9 +132,36 @@ export const editPanelRequestInputSchema = panelRequestSchema
 
 export type EditPanelRequestInput = z.infer<typeof editPanelRequestInputSchema>;
 
+/** The vis `source: 'request'` inputs the resolution-request builder accepts. */
+type VisPanelResolutionSourceInput = PanelRequestInput | EditPanelRequestInput;
+
+/**
+ * Builds the vis member of the panel resolution union from a parsed vis
+ * `source: 'request'` input (create or edit), so operations never read the
+ * vis-specific request fields. The failure-attribution identifier is the
+ * `panelId` for edits and the natural-language query for creates.
+ */
+const buildVisPanelResolutionRequest = ({
+  input,
+  operationType,
+  existingPanel,
+}: BuildResolutionRequestParams<VisPanelResolutionSourceInput>): VisPanelResolutionRequest => ({
+  type: 'vis',
+  operationType,
+  identifier: 'panelId' in input ? input.panelId : input.query,
+  nlQuery: input.query,
+  index: 'panelId' in input ? undefined : input.index,
+  chartType: input.chartType,
+  esql: input.esql,
+  existingPanel,
+});
+
 /**
  * Registry entry for the `vis` panel type. Vis is not editable via a
  * `source: 'config'` edit (edits go through `source: 'request'`), so
  * `validateConfigEdit` is intentionally omitted.
  */
-export const visPanelDefinition = definePanelType({ embeddableType: LENS_EMBEDDABLE_TYPE });
+export const visPanelDefinition = definePanelType({
+  embeddableType: LENS_EMBEDDABLE_TYPE,
+  buildResolutionRequest: buildVisPanelResolutionRequest,
+});

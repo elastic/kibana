@@ -9,52 +9,105 @@ import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { EffortLevels } from '@kbn/agent-builder-common';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
+import {
+  capabilityForErrorPath,
+  getCapabilityIndex,
+  getCoreSchema,
+  getSchemaFragments,
+} from './capabilities';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './chart_type_registry';
+import { getEsqlDataSourceCarriers } from './esql_data_source';
+import type { ChartConfigExample } from './examples/xy';
+import { xyConfigExamples } from './examples/xy';
 import {
   GENERATE_ESQL_NODE,
   GENERATE_CONFIG_NODE,
   VALIDATE_CONFIG_NODE,
   GENERATE_TIME_RANGE_NODE,
+  FULFILLMENT_CHECK_NODE,
   MAX_RETRY_ATTEMPTS,
   type Action,
   type GenerateEsqlAction,
   type GenerateConfigAction,
   type ValidateConfigAction,
   type GenerateTimeRangeAction,
+  type FulfillmentCheckAction,
   isGenerateConfigAction,
   isValidateConfigAction,
+  isFulfillmentCheckAction,
 } from './actions_lens';
-import { createGenerateConfigPrompt, esqlAdditionalInstructions } from './prompts';
+import {
+  createFulfillmentCheckPrompt,
+  createGenerateConfigPrompt,
+  esqlAdditionalInstructions,
+} from './prompts';
+import type { GenerateConfigSchemaContent } from './prompts';
 
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
+
+/** Canonical example configs per chart type, shown on escalation-ladder attempts. */
+const configExamplesByChartType: Partial<Record<SupportedChartType, ChartConfigExample[]>> = {
+  [SupportedChartType.XY]: xyConfigExamples,
+};
+
+// kbn-config-schema validation messages mark every failing path as `[path.to.field]:`.
+const VALIDATION_ERROR_PATH_REGEX = /\[([\w.]+)\]:/g;
+
+/**
+ * Maps the paths of previous validation errors to the capabilities owning
+ * them (first-seen order), so repair retries can include exactly those schema
+ * fragments instead of re-dumping the full schema.
+ */
+const collectRepairCapabilityNames = (
+  chartType: SupportedChartType,
+  actions: Action[]
+): string[] => {
+  const names: string[] = [];
+  for (const action of actions) {
+    if (!isValidateConfigAction(action) || action.success || !action.error) {
+      continue;
+    }
+    for (const [, errorPath] of action.error.matchAll(VALIDATION_ERROR_PATH_REGEX)) {
+      const name = capabilityForErrorPath(chartType, errorPath);
+      if (name !== undefined && !names.includes(name)) {
+        names.push(name);
+      }
+    }
+  }
+  return names;
+};
+
+/**
+ * Collects the unmet asks reported by unsatisfied fulfillment checks so the
+ * fulfillment-triggered regeneration can carry the schema fragments of the
+ * capabilities involved. Free-text asks that are not capability names are
+ * skipped downstream by getSchemaFragments.
+ */
+const collectUnmetCapabilityNames = (actions: Action[]): string[] => {
+  const names: string[] = [];
+  for (const action of actions) {
+    if (!isFulfillmentCheckAction(action) || action.satisfied !== false) {
+      continue;
+    }
+    for (const name of action.unmet ?? []) {
+      if (!names.includes(name)) {
+        names.push(name);
+      }
+    }
+  }
+  return names;
+};
 
 const validateConfigForChartType = (
   chartType: SupportedChartType,
   config: unknown
 ): VisualizationConfig => chartTypeRegistry[chartType].schema.validate(config);
-
-interface EsqlDataSourceCarrier {
-  data_source?: { type?: string; query?: string };
-}
-
-/**
- * Returns the objects that carry a `data_source` for this config shape:
- * XY-ESQL configs keep one `data_source` per layer; every other ESQL chart
- * (metric, gauge, tagcloud, ...) carries it on the config itself. Used both to
- * read existing queries (edits) and to inject the validated query (generation).
- */
-const getEsqlDataSourceCarriers = (config: unknown): EsqlDataSourceCarrier[] => {
-  if (!config || typeof config !== 'object') return [];
-  const { layers } = config as { layers?: unknown };
-  return Array.isArray(layers)
-    ? (layers as EsqlDataSourceCarrier[])
-    : [config as EsqlDataSourceCarrier];
-};
 
 /**
  * Helper to extract ESQL queries from a visualization config.
@@ -86,6 +139,11 @@ const VisualizationStateAnnotation = Annotation.Root({
   // internal
   esqlQuery: Annotation<string>(),
   currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
+  // Guards the fulfillment check: at most one fulfillment-triggered regeneration per run.
+  fulfillmentRetryUsed: Annotation<boolean>({
+    reducer: (_, newValue) => newValue,
+    default: () => false,
+  }),
   actions: Annotation<Action[]>({
     reducer: (a, b) => [...a, ...b],
     default: () => [],
@@ -93,6 +151,8 @@ const VisualizationStateAnnotation = Annotation.Root({
   // outputs
   validatedConfig: Annotation<VisualizationConfig | null>(),
   timeRange: Annotation<{ from: string; to: string } | null>(),
+  // Non-fatal: unmet asks reported by the last unsatisfied fulfillment check.
+  fulfillmentWarnings: Annotation<string[] | null>(),
   error: Annotation<string | null>(),
 });
 
@@ -181,7 +241,12 @@ export const createVisualizationGraph = async (
 
     // Build context from previous actions for retry attempts
     const previousActionContext = state.actions
-      .filter((action) => isGenerateConfigAction(action) || isValidateConfigAction(action))
+      .filter(
+        (action) =>
+          isGenerateConfigAction(action) ||
+          isValidateConfigAction(action) ||
+          isFulfillmentCheckAction(action)
+      )
       .map((action) => {
         if (isGenerateConfigAction(action)) {
           return `Previous generation attempt ${action.attempt}: ${
@@ -193,6 +258,13 @@ export const createVisualizationGraph = async (
             action.success ? 'SUCCESS' : `FAILED - ${action.error}`
           }`;
         }
+        if (isFulfillmentCheckAction(action)) {
+          return action.satisfied === false && action.unmet && action.unmet.length > 0
+            ? `Fulfillment check: the previous configuration was valid but did not satisfy these requested features: ${action.unmet.join(
+                '; '
+              )}. Update the configuration so it includes them.`
+            : '';
+        }
         return '';
       })
       .filter(Boolean)
@@ -202,11 +274,41 @@ export const createVisualizationGraph = async (
       ? `Previous attempts:\n${previousActionContext}\n\nPlease fix the issues mentioned above.`
       : undefined;
 
+    // Escalation ladder for chart types with a capability manifest: start from
+    // the capability index + core schema + examples, add repair fragments for
+    // capabilities implicated by previous validation errors, and fall back to
+    // the full schema only on the final attempt. Chart types without a
+    // manifest keep the full-schema prompt on every attempt.
+    const capabilityIndex = getCapabilityIndex(state.chartType);
+    const coreSchema = getCoreSchema(state.chartType);
+    let schemaContent: GenerateConfigSchemaContent;
+    if (
+      capabilityIndex === undefined ||
+      coreSchema === undefined ||
+      attempt >= MAX_RETRY_ATTEMPTS
+    ) {
+      schemaContent = { mode: 'full', schema: state.schema };
+    } else {
+      const repairCapabilityNames = collectRepairCapabilityNames(state.chartType, state.actions);
+      const unmetCapabilityNames = collectUnmetCapabilityNames(state.actions);
+      schemaContent = {
+        mode: 'capabilities',
+        capabilityIndex,
+        coreSchema,
+        fragments:
+          getSchemaFragments(state.chartType, [
+            ...repairCapabilityNames,
+            ...unmetCapabilityNames,
+          ]) ?? [],
+        examples: configExamplesByChartType[state.chartType] ?? [],
+      };
+    }
+
     const prompt = createGenerateConfigPrompt({
       nlQuery: state.nlQuery,
       esqlQuery,
       chartType: state.chartType,
-      schema: state.schema,
+      schemaContent,
       existingConfig: state.existingConfig,
       additionalChartConfigInstructions,
       additionalContext,
@@ -331,6 +433,88 @@ export const createVisualizationGraph = async (
     };
   };
 
+  // Node: Fulfillment check - validation proves structural validity, not intent
+  // satisfaction (a valid config can silently omit a requested capability, e.g.
+  // a threshold line). One cheap model call decides whether the validated
+  // config satisfies the request; unmet asks trigger at most one regeneration.
+  // Only runs on the capability-ladder path (chart types with a manifest).
+  const fulfillmentCheckNode = async (state: VisualizationState) => {
+    logger.debug('Checking whether the validated configuration fulfills the request');
+
+    const lastValidateAction = [...state.actions].reverse().find(isValidateConfigAction);
+    const validatedConfig = lastValidateAction?.success ? lastValidateAction.config : undefined;
+    const capabilityIndex = getCapabilityIndex(state.chartType);
+
+    let action: FulfillmentCheckAction;
+    try {
+      if (validatedConfig === undefined || capabilityIndex === undefined) {
+        throw new Error('No validated configuration or capability index available');
+      }
+
+      // The check is a small classification task: use the cheaper model tier.
+      const fulfillmentModel = await modelProvider.selectModel({
+        effortLevel: EffortLevels.low,
+      });
+      const checkModel = fulfillmentModel.chatModel.withStructuredOutput(
+        z.object({
+          satisfied: z
+            .boolean()
+            .describe(
+              'True when the configuration contains every feature the user explicitly asked for'
+            ),
+          unmet: z
+            .array(z.string())
+            .describe(
+              'When not satisfied: each missing ask, as a capability name from the index when one applies, otherwise a short description. Empty when satisfied.'
+            ),
+        }),
+        { name: 'check_fulfillment' }
+      );
+
+      const result = await checkModel.invoke(
+        createFulfillmentCheckPrompt({
+          nlQuery: state.nlQuery,
+          chartType: state.chartType,
+          validatedConfig,
+          capabilityIndex,
+        })
+      );
+
+      const satisfied = result.satisfied || result.unmet.length === 0;
+      const regenerate =
+        !satisfied && !state.fulfillmentRetryUsed && state.currentAttempt < MAX_RETRY_ATTEMPTS;
+      if (!satisfied) {
+        logger.debug(
+          `Fulfillment check found unmet asks (${result.unmet.join('; ')}); ${
+            regenerate ? 'regenerating once' : 'continuing with warnings'
+          }`
+        );
+      }
+      action = {
+        type: 'fulfillment_check',
+        success: true,
+        satisfied,
+        unmet: satisfied ? [] : result.unmet,
+        regenerate,
+      };
+    } catch (error) {
+      // Fail open: the check is advisory and must never fail a validated config.
+      logger.warn(
+        `Fulfillment check failed, continuing with the validated config: ${error.message}`
+      );
+      action = {
+        type: 'fulfillment_check',
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return {
+      actions: [action],
+      ...(action.regenerate ? { fulfillmentRetryUsed: true } : {}),
+    };
+  };
+
   // Node: Generate time range - ask the LLM to determine the appropriate time range
   const generateTimeRangeNode = async (state: VisualizationState) => {
     logger.debug('Generating time range for visualization');
@@ -407,6 +591,13 @@ What is the most appropriate time range for this visualization?`,
 
   // Node: Finalize - extract outputs from actions
   const finalizeNode = async (state: VisualizationState) => {
+    // Fall back to the last successful validation so a fulfillment-triggered
+    // regeneration that never validates cannot downgrade a valid result.
+    const lastSuccessfulValidateAction = [...state.actions]
+      .reverse()
+      .find(
+        (action): action is ValidateConfigAction => isValidateConfigAction(action) && action.success
+      );
     const lastValidateAction = [...state.actions].reverse().find(isValidateConfigAction);
     const lastGenerateEsqlAction = [...state.actions]
       .reverse()
@@ -414,12 +605,24 @@ What is the most appropriate time range for this visualization?`,
     const lastTimeRangeAction = [...state.actions]
       .reverse()
       .find((action): action is GenerateTimeRangeAction => action.type === 'generate_time_range');
+    const lastFulfillmentAction = [...state.actions].reverse().find(isFulfillmentCheckAction);
+
+    // Non-fatal: the config is valid but the last fulfillment check still
+    // reported unmet asks after the retry budget was spent.
+    const fulfillmentWarnings =
+      lastSuccessfulValidateAction &&
+      lastFulfillmentAction?.satisfied === false &&
+      lastFulfillmentAction.unmet &&
+      lastFulfillmentAction.unmet.length > 0
+        ? lastFulfillmentAction.unmet
+        : null;
 
     return {
-      validatedConfig: lastValidateAction?.success ? lastValidateAction.config : null,
-      error: lastValidateAction?.success ? null : lastValidateAction?.error || null,
+      validatedConfig: lastSuccessfulValidateAction?.config ?? null,
+      error: lastSuccessfulValidateAction ? null : lastValidateAction?.error || null,
       esqlQuery: lastGenerateEsqlAction?.query || state.esqlQuery,
       timeRange: lastTimeRangeAction?.timeRange ?? null,
+      fulfillmentWarnings,
     };
   };
 
@@ -427,8 +630,14 @@ What is the most appropriate time range for this visualization?`,
   const shouldRetryRouter = (state: VisualizationState): string => {
     const lastValidateAction = [...state.actions].reverse().find(isValidateConfigAction);
 
-    // Success case - optionally generate a time range before finalizing
+    // Success case - fulfillment check on the capability-ladder path, then
+    // optionally generate a time range before finalizing
     if (lastValidateAction?.success) {
+      if (getCapabilityIndex(state.chartType) !== undefined) {
+        logger.debug('Configuration validated successfully, running fulfillment check');
+        return FULFILLMENT_CHECK_NODE;
+      }
+
       if (includeTimeRange) {
         logger.debug('Configuration validated successfully, generating time range');
         return GENERATE_TIME_RANGE_NODE;
@@ -451,6 +660,18 @@ What is the most appropriate time range for this visualization?`,
     return GENERATE_CONFIG_NODE;
   };
 
+  // Router: After the fulfillment check, either regenerate the config (at most
+  // once, decided by the node itself) or proceed to time range / finalize.
+  const afterFulfillmentRouter = (state: VisualizationState): string => {
+    const lastFulfillmentAction = [...state.actions].reverse().find(isFulfillmentCheckAction);
+
+    if (lastFulfillmentAction?.regenerate) {
+      return GENERATE_CONFIG_NODE;
+    }
+
+    return includeTimeRange ? GENERATE_TIME_RANGE_NODE : 'finalize';
+  };
+
   // Router: Use an explicit ES|QL query when provided, otherwise generate one.
   // Existing config is still valuable because generateESQLNode includes the
   // prior query as context when regenerating edits.
@@ -470,6 +691,7 @@ What is the most appropriate time range for this visualization?`,
     .addNode(GENERATE_ESQL_NODE, generateESQLNode)
     .addNode(GENERATE_CONFIG_NODE, generateConfigNode)
     .addNode(VALIDATE_CONFIG_NODE, validateConfigNode)
+    .addNode(FULFILLMENT_CHECK_NODE, fulfillmentCheckNode)
     .addNode(GENERATE_TIME_RANGE_NODE, generateTimeRangeNode)
     .addNode('finalize', finalizeNode)
     // Add edges
@@ -480,6 +702,12 @@ What is the most appropriate time range for this visualization?`,
     .addEdge(GENERATE_ESQL_NODE, GENERATE_CONFIG_NODE)
     .addEdge(GENERATE_CONFIG_NODE, VALIDATE_CONFIG_NODE)
     .addConditionalEdges(VALIDATE_CONFIG_NODE, shouldRetryRouter, {
+      [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
+      [FULFILLMENT_CHECK_NODE]: FULFILLMENT_CHECK_NODE,
+      [GENERATE_TIME_RANGE_NODE]: GENERATE_TIME_RANGE_NODE,
+      finalize: 'finalize',
+    })
+    .addConditionalEdges(FULFILLMENT_CHECK_NODE, afterFulfillmentRouter, {
       [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
       [GENERATE_TIME_RANGE_NODE]: GENERATE_TIME_RANGE_NODE,
       finalize: 'finalize',

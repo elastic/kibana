@@ -7,11 +7,12 @@
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
-import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_panel';
+import type { PanelContentAttempt } from '../resolve_panel';
 import { indexPanelsById, updatePanelInDashboard } from '../dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import {
   PANEL_TYPE_DEFINITIONS,
+  buildPanelResolutionRequest,
   editPanelItemSchema,
   type EditPanelItem,
   type EditPanelRequestInput,
@@ -40,14 +41,16 @@ export const editPanelsOperation = defineOperation({
     .describe(
       'Edit existing panels in place by panelId. Supports ES|QL-backed Lens visualization panels (source: "request") and markdown panels (source: "config", type: "markdown"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based Lens panels instead.'
     ),
-  handler: async ({ dashboardData, operation, context }) => {
+  handler: async ({ dashboardData, operation, operationIndex, context }) => {
     const { resolvePanelContent } = context;
 
     const recordFailure = (panelId: string, error: string): void => {
-      context.failures.push(
-        createPanelFailureResult(DASHBOARD_OPERATION_FAILURE_TYPES.editPanels, panelId, error)
-          .failure
-      );
+      context.failures.push({
+        type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
+        identifier: panelId,
+        error,
+        operationIndex,
+      });
     };
 
     const hasPanelRequestEdits = operation.panels.some(
@@ -113,15 +116,13 @@ export const editPanelsOperation = defineOperation({
 
       const attempts = await Promise.all(
         validPanelRequestEdits.map(({ panelInput, existingPanel }) =>
-          resolvePanelContent({
-            type: panelInput.type,
-            operationType: operation.operation,
-            identifier: panelInput.panelId,
-            nlQuery: panelInput.query,
-            chartType: panelInput.chartType,
-            esql: panelInput.esql,
-            existingPanel,
-          })
+          resolvePanelContent(
+            buildPanelResolutionRequest({
+              input: panelInput,
+              operationType: operation.operation,
+              existingPanel,
+            })
+          )
         )
       );
       validPanelRequestEdits.forEach(({ panelInput }, i) => {
@@ -157,7 +158,7 @@ export const editPanelsOperation = defineOperation({
       }
 
       if (attempt.type === 'failure') {
-        context.failures.push(attempt.failure);
+        context.failures.push({ ...attempt.failure, operationIndex });
         continue;
       }
 

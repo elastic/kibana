@@ -20,8 +20,50 @@ import {
   mosaicConfigSchemaESQL,
 } from '@kbn/lens-embeddable-utils';
 
+/**
+ * Selector into the joi→JSON-schema document of a chart type.
+ *
+ * Either a plain JSON pointer navigated through `properties`/`items` segments
+ * (`$ref`s are resolved transparently), or a pointer to a union (`anyOf`) node
+ * plus a branch discriminator that picks exactly one union member by the value
+ * its `properties[key]` accepts — union members are never selected by array
+ * index.
+ */
+export type CapabilitySelector =
+  | string
+  | {
+      pointer: string;
+      branch: { key: string; value: string };
+    };
+
+export interface ChartCapability {
+  /** One-line summary shown in the generated capability index. */
+  blurb: string;
+  /**
+   * `data` capabilities change what data is fetched or bound (edits touching
+   * them require the full generation pipeline); `presentation` capabilities
+   * only change how the data is rendered.
+   */
+  kind: 'data' | 'presentation';
+  /** Schema subtrees owned by this capability. */
+  select: CapabilitySelector[];
+}
+
 interface ChartTypeRegistryEntry {
   schema: { validate: (config: unknown) => any; getSchema: () => any };
+  /**
+   * Capability manifest: named clusters of the converted JSON schema used to
+   * generate the capability index, on-demand schema fragments, and the core
+   * schema (see capabilities.ts). Together with `coreSelectors`, every leaf of
+   * the converted schema must be claimed by exactly one capability — enforced
+   * by the anti-drift tests in capabilities.test.ts.
+   */
+  capabilities?: Record<string, ChartCapability>;
+  /**
+   * Selectors for the schema parts that are always relevant and belong to no
+   * capability (chart identity, title, ...).
+   */
+  coreSelectors?: CapabilitySelector[];
   prompt: {
     /**
      * Guidance used when selecting the best chart type for a user request.
@@ -115,6 +157,92 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
   },
   [SupportedChartType.XY]: {
     schema: xyConfigSchemaESQL,
+    capabilities: {
+      layer_data: {
+        blurb:
+          'ES|QL data source query, column-to-dimension bindings (x, y, breakdown_by), breakdown series collapsing, sampling, and per-layer global-filter opt-out.',
+        kind: 'data',
+        select: [
+          '/properties/layers/items/properties/data_source',
+          '/properties/layers/items/properties/x/properties/column',
+          '/properties/layers/items/properties/y/items/properties/column',
+          '/properties/layers/items/properties/breakdown_by/properties/column',
+          '/properties/layers/items/properties/breakdown_by/properties/collapse_by',
+          '/properties/layers/items/properties/sampling',
+          '/properties/layers/items/properties/ignore_global_filters',
+        ],
+      },
+      panel_filters: {
+        blurb:
+          'Panel-level filters applied to the query results: field conditions, condition groups, raw Elasticsearch DSL, or spatial filters.',
+        kind: 'data',
+        select: ['/properties/filters'],
+      },
+      legend: {
+        blurb:
+          'Legend visibility, placement (inside/outside), position, layout, size, columns, and per-series statistics.',
+        kind: 'presentation',
+        select: ['/properties/legend'],
+      },
+      axes: {
+        blurb:
+          'X/Y/Y2 axis configuration (titles, ticks, grid lines, label orientation, scale, domain bounds) and which Y axis each metric is plotted on.',
+        kind: 'presentation',
+        select: ['/properties/axis', '/properties/layers/items/properties/y/items/properties/axis'],
+      },
+      labels: {
+        blurb: 'Display labels for the x, y, and breakdown dimensions (series/column names).',
+        kind: 'presentation',
+        select: [
+          '/properties/layers/items/properties/x/properties/label',
+          '/properties/layers/items/properties/y/items/properties/label',
+          '/properties/layers/items/properties/breakdown_by/properties/label',
+        ],
+      },
+      value_formatting: {
+        blurb:
+          'Value display formats (number/percent, bits/bytes, duration, custom pattern) for the x, y, and breakdown dimensions.',
+        kind: 'presentation',
+        select: [
+          '/properties/layers/items/properties/x/properties/format',
+          '/properties/layers/items/properties/y/items/properties/format',
+          '/properties/layers/items/properties/breakdown_by/properties/format',
+        ],
+      },
+      coloring: {
+        blurb:
+          'Series colors: static or auto color per Y metric, and categorical or gradient color mappings for breakdown values.',
+        kind: 'presentation',
+        select: [
+          '/properties/layers/items/properties/y/items/properties/color',
+          '/properties/layers/items/properties/breakdown_by/properties/color',
+        ],
+      },
+      fitting: {
+        blurb:
+          'Missing-data handling for line/area series: fitting function, edge extension, and emphasis of fitted segments.',
+        kind: 'presentation',
+        select: ['/properties/styling/properties/fitting'],
+      },
+      styling: {
+        blurb:
+          'Visual styling: line/area interpolation, point markers, area fill opacity, bar settings and data labels, and overlays (current time marker, partial buckets).',
+        kind: 'presentation',
+        select: [
+          '/properties/styling/properties/interpolation',
+          '/properties/styling/properties/points',
+          '/properties/styling/properties/areas',
+          '/properties/styling/properties/bars',
+          '/properties/styling/properties/overlays',
+        ],
+      },
+    },
+    coreSelectors: [
+      '/properties/type',
+      '/properties/title',
+      '/properties/description',
+      '/properties/layers/items/properties/type',
+    ],
     prompt: {
       selection: {
         description:

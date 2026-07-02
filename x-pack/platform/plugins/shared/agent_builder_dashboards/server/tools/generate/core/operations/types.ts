@@ -17,6 +17,13 @@ export interface OperationExecutionContext {
   failures: PanelFailure[];
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   resolvePanelContent?: ResolvePanelContent;
+  /**
+   * Caller-chosen temporary keys (`ref`) declared by `add_section` operations in
+   * this call, mapped to the minted section ids. Later operations resolve their
+   * `sectionId` through this map first, so a single call can compose a new
+   * section and its contents. Scoped to one tool call.
+   */
+  sectionRefs: Map<string, string>;
 }
 
 export interface OperationHandlerParams<TOperation> {
