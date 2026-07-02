@@ -12,6 +12,7 @@ import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments'
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type {
@@ -64,6 +65,77 @@ export const isPlaceholderRuleText = (text: string): boolean => {
   } catch {
     return false;
   }
+};
+
+interface ResolvedAttachmentTarget {
+  /** The attachment id the rule will be written to. */
+  resolvedAttachmentId: string;
+  /** Serialized rule text to seed the graph with (query rewrites); undefined for fresh creates. */
+  existingRuleText: string | undefined;
+  /** True when a new card must be minted via add(); false when updating an existing card. */
+  isNewCard: boolean;
+}
+
+/**
+ * Resolve which attachment the rule should be written to, and whether the graph
+ * should be seeded with an existing rule (for query rewrites).
+ *
+ * Three-way decision:
+ *  1. attachment_id provided → update that card (query rewrite / explicit re-target).
+ *     Fails closed: a hallucinated/stale id, a non-rule target, or a versionless
+ *     record throws rather than silently no-op'ing update() or overwriting the wrong
+ *     card. Mirrors the dashboards `retrieveLatestVersion` guards.
+ *  2. attachment_id absent + an empty placeholder card exists → consume it (the first
+ *     create in a conversation opened from a menu/form entry point).
+ *  3. attachment_id absent + no placeholder → mint a new id (genuine second create).
+ */
+export const resolveAttachmentTarget = (
+  attachments: AttachmentStateManager,
+  attachmentId: string | undefined
+): ResolvedAttachmentTarget => {
+  if (attachmentId) {
+    // Branch 1: explicit update.
+    const record = attachments.getAttachmentRecord(attachmentId);
+    if (!record) {
+      throw new Error(`Rule attachment "${attachmentId}" not found`);
+    }
+    if (!isRuleAttachment(record)) {
+      throw new Error(
+        `Attachment "${attachmentId}" is not a ${SecurityAgentBuilderAttachments.rule} attachment`
+      );
+    }
+    const latestVersion = getLatestVersion(record);
+    if (!latestVersion) {
+      throw new Error(`Could not retrieve latest version of rule attachment "${attachmentId}"`);
+    }
+    return {
+      resolvedAttachmentId: attachmentId,
+      existingRuleText: latestVersion.data.text,
+      isNewCard: false,
+    };
+  }
+
+  // No explicit id — look for an empty placeholder card
+  const placeholderRecord = attachments.getAttachmentRecord(SECURITY_RULE_ATTACHMENT_ID);
+  const placeholderVersion = placeholderRecord ? getLatestVersion(placeholderRecord) : undefined;
+  const placeholderText = (placeholderVersion?.data as Record<string, unknown> | undefined)
+    ?.text as string | undefined;
+
+  if (placeholderRecord && placeholderText && isPlaceholderRuleText(placeholderText)) {
+    // Branch 2: consume the empty seed (placeholder has no real rule content)
+    return {
+      resolvedAttachmentId: SECURITY_RULE_ATTACHMENT_ID,
+      existingRuleText: undefined,
+      isNewCard: false,
+    };
+  }
+
+  // Branch 3: mint a new id for a genuinely additional rule
+  return {
+    resolvedAttachmentId: mintRuleAttachmentId(),
+    existingRuleText: undefined,
+    isNewCard: true,
+  };
 };
 
 const createDetectionRuleSchema = z.object({
@@ -160,62 +232,10 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
         const [coreStart, startPlugins] = await core.getStartServices();
         const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
-        // Resolve which attachment to target and whether the graph should be seeded with
-        // an existing rule (for query rewrites).
-        //
-        // Three-way decision:
-        //  1. attachment_id provided → update that card (query rewrite / explicit re-target).
-        //  2. attachment_id absent + an empty placeholder card exists → consume it (the first
-        //     create in a conversation that was opened from a menu/form entry point).
-        //  3. attachment_id absent + no placeholder → mint a new id (genuine second create).
-        let resolvedAttachmentId: string;
-        let existingRuleText: string | undefined;
-        let isNewCard: boolean;
-
-        if (attachmentId) {
-          // Branch 1: explicit update. Fail closed — a hallucinated/stale id, a
-          // non-rule target, or a versionless record must error rather than silently
-          // no-op (update() returns undefined for a missing id) or overwrite the
-          // wrong card. Mirrors the dashboards `retrieveLatestVersion` guards.
-          const record = attachments.getAttachmentRecord(attachmentId);
-          if (!record) {
-            throw new Error(`Rule attachment "${attachmentId}" not found`);
-          }
-          if (!isRuleAttachment(record)) {
-            throw new Error(
-              `Attachment "${attachmentId}" is not a ${SecurityAgentBuilderAttachments.rule} attachment`
-            );
-          }
-          const latestVersion = getLatestVersion(record);
-          if (!latestVersion) {
-            throw new Error(
-              `Could not retrieve latest version of rule attachment "${attachmentId}"`
-            );
-          }
-          existingRuleText = latestVersion.data.text;
-          resolvedAttachmentId = attachmentId;
-          isNewCard = false;
-        } else {
-          // No explicit id — look for an empty placeholder card
-          const placeholderRecord = attachments.getAttachmentRecord(SECURITY_RULE_ATTACHMENT_ID);
-          const placeholderVersion = placeholderRecord
-            ? getLatestVersion(placeholderRecord)
-            : undefined;
-          const placeholderText = (placeholderVersion?.data as Record<string, unknown> | undefined)
-            ?.text as string | undefined;
-
-          if (placeholderRecord && placeholderText && isPlaceholderRuleText(placeholderText)) {
-            // Branch 2: consume the empty seed
-            resolvedAttachmentId = SECURITY_RULE_ATTACHMENT_ID;
-            existingRuleText = undefined; // placeholder has no real rule content
-            isNewCard = false;
-          } else {
-            // Branch 3: mint a new id for a genuinely additional rule
-            resolvedAttachmentId = mintRuleAttachmentId();
-            existingRuleText = undefined;
-            isNewCard = true;
-          }
-        }
+        const { resolvedAttachmentId, existingRuleText, isNewCard } = resolveAttachmentTarget(
+          attachments,
+          attachmentId
+        );
 
         const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
         const iterativeAgent = await getBuildAgent({
