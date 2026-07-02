@@ -17,6 +17,7 @@ project:
   owner: '@elastic/appex-qa'
   sourceRoot: x-pack/platform/packages/private/kbn-scout-release-testing
 dependsOn:
+  - '@kbn/discover-plugin'
   - '@kbn/scout'
   - '@kbn/test'
 tags:
