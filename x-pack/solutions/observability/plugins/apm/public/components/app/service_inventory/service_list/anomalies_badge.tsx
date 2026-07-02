@@ -63,15 +63,11 @@ const anomaliesBadgeHealthCss = css`
 
 interface AnomaliesBadgeProps {
   score?: number;
-  /** When set, the badge renders as an anchor linking to this URL (e.g. the service overview tab). */
   href?: string;
-  /** When set, the badge renders as a button using this handler for SPA navigation (avoids a full page reload). Mutually exclusive with `href`. */
-  onClick?: React.MouseEventHandler<HTMLButtonElement>;
-  /** Detector that produced the surfaced score, used to name the anomalous signal in the tooltip. */
   detectorType?: AnomalyDetectorType;
 }
 
-export function AnomaliesBadge({ score, href, onClick, detectorType }: AnomaliesBadgeProps) {
+export function AnomaliesBadge({ score, href, detectorType }: AnomaliesBadgeProps) {
   const severity = getSeverity(score);
   const text = formatLabelWithScore(getI18nLabel(severity), score);
 
@@ -90,13 +86,7 @@ export function AnomaliesBadge({ score, href, onClick, detectorType }: Anomalies
           values: { score: score.toFixed(2) },
         });
 
-  // `EuiBadge` exposes anchor (`href`) and button (`onClick`) variants as a
-  // mutually exclusive union, so the interaction props are resolved up front.
-  const interactionProps = onClick
-    ? { onClick, onClickAriaLabel: text }
-    : href
-    ? { href }
-    : { role: 'img', 'aria-label': text };
+  const interactionProps = href ? { href } : { role: 'img', 'aria-label': text };
 
   return (
     <EuiToolTip position="bottom" content={tooltipContent}>

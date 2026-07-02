@@ -183,7 +183,7 @@ export function ServiceHeaderBadges({
           <AnomaliesBadge
             score={anomalyData?.anomalyScore}
             detectorType={anomalyData?.detectorType}
-            onClick={isOnOverviewTab ? undefined : onAnomaliesBadgeClick}
+            href={overviewTabHref}
           />
         </EuiFlexItem>
       )}
