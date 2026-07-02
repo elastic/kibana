@@ -14,7 +14,7 @@ import { MAX_ATTACK_ID_LENGTH, MAX_WORKFLOW_MESSAGE_LENGTH } from '../common/con
 
 export const SetAttackTagsStepId = 'security.setAttackTags' as const;
 
-const tagsArray = z.array(AlertTag).default([]);
+const tagsArray = z.array(AlertTag);
 
 const attackIdsBase = z.object({
   ids: z
@@ -32,10 +32,10 @@ const attackIdsBase = z.object({
 export const setAttackTagsInputSchema = z.union([
   attackIdsBase.extend({
     tags_to_add: z.array(AlertTag).min(1).describe('Tags to add to the specified attacks'),
-    tags_to_remove: tagsArray.describe('Tags to remove from the specified attacks'),
+    tags_to_remove: tagsArray.default([]).describe('Tags to remove from the specified attacks'),
   }),
   attackIdsBase.extend({
-    tags_to_add: tagsArray.describe('Tags to add to the specified attacks'),
+    tags_to_add: tagsArray.default([]).describe('Tags to add to the specified attacks'),
     tags_to_remove: z.array(AlertTag).min(1).describe('Tags to remove from the specified attacks'),
   }),
 ]);
