@@ -980,6 +980,83 @@ describe('DataStreamDetailPanel', () => {
       expect(mockUpdateIndexSettings).not.toHaveBeenCalled();
     });
 
+    it('preserves the failure store when applying via the inspect-policy shortcut (no failedData)', async () => {
+      const dataStream = createWiredDataStream();
+
+      mockUseLoadDataStream.mockReturnValue({
+        data: dataStream,
+        isLoading: false,
+        error: null,
+        resendRequest: jest.fn(),
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
+
+      // The stream has an explicit (non-inherited) failure store override.
+      const explicitFailureStore = { lifecycle: { enabled: { data_retention: '14d' } } };
+      const streamsGetResponse = createWiredStreamsGetResponse({
+        lifecycle: { ilm: { policy: 'my_policy' } },
+        failureStore: explicitFailureStore,
+        effectiveLifecycle: { ilm: { policy: 'my_policy' }, from: WIRED_STREAM_NAME },
+        effectiveFailureStore: {
+          lifecycle: { enabled: { data_retention: '14d' } },
+          from: WIRED_STREAM_NAME,
+        },
+      });
+
+      const putCalls: any[] = [];
+      mockSendRequest.mockImplementation(async ({ path, method, body }: any) => {
+        if (path === `/api/streams/${WIRED_STREAM_NAME}` && method === 'get') {
+          return { data: streamsGetResponse } as any;
+        }
+        if (path === `/api/streams/${WIRED_STREAM_NAME}/_ingest` && method === 'put') {
+          putCalls.push(body);
+          return { data: {} } as any;
+        }
+        if (typeof path === 'string' && path.endsWith('/data_streams/ilm_policies')) {
+          return {
+            data: [
+              {
+                name: 'my_policy',
+                phases: {},
+                serializedPolicy: { name: 'my_policy', phases: {} },
+              },
+            ],
+          } as any;
+        }
+        return { data: undefined } as any;
+      });
+
+      const { getByTestId } = renderWithI18n(
+        <DataStreamDetailPanel dataStreamName={WIRED_STREAM_NAME} onClose={onCloseMock} />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('manageDataStreamButton')).toBeInTheDocument();
+      });
+
+      await userEvent.click(getByTestId('manageDataStreamButton'));
+      await waitFor(() => expect(getByTestId('editDataLifecycleButton')).toBeInTheDocument());
+      await userEvent.click(getByTestId('editDataLifecycleButton'));
+
+      // Open the inspect-policy flyout from the successful-data tab and use its "Apply" shortcut,
+      // which applies only the successful lifecycle (no failedData).
+      await waitFor(() =>
+        expect(getByTestId('retentionSelectableRowInspect-my_policy')).toBeInTheDocument()
+      );
+      await userEvent.click(getByTestId('retentionSelectableRowInspect-my_policy'));
+      await waitFor(() =>
+        expect(getByTestId('inspectIlmPolicyFlyoutSelectAndApplyButton')).toBeInTheDocument()
+      );
+      await userEvent.click(getByTestId('inspectIlmPolicyFlyoutSelectAndApplyButton'));
+
+      await waitFor(() => {
+        expect(putCalls).toHaveLength(1);
+      });
+
+      // The failure store must be preserved as-is, not reset to `{ inherit: {} }`.
+      expect(putCalls[0].ingest.failure_store).toEqual(explicitFailureStore);
+    });
+
     it('does not offer inheritance for a wired root stream', async () => {
       const rootName = 'logs';
       const dataStream = createMockDataStream({

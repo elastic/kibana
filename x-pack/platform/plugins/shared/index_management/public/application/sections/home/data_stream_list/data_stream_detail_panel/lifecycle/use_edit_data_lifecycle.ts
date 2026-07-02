@@ -489,7 +489,11 @@ export const useEditDataLifecycle = ({
             const nextIngest = {
               ...upsertRequest.stream.ingest,
               lifecycle: nextLifecycle,
-              failure_store: nextFailureStore,
+              // Only override the failure store when the failed-data tab was part of this apply.
+              // The Inspect-policy "Apply" shortcut sends only `successfulData`, so we keep the
+              // stream's current failure store (already carried over by the spread above) instead
+              // of resetting it to inherit.
+              ...(failedData ? { failure_store: nextFailureStore } : {}),
             };
 
             const streamsPut = await sendRequest({
