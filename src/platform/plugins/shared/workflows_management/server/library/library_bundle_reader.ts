@@ -25,8 +25,8 @@ import {
 import { ZodError } from '@kbn/zod/v4';
 
 import { LibraryFetchError, LibraryNotFoundError } from './errors';
-import { LibraryCache, type LibraryHealth } from './library_cache';
-import type { LibrarySource } from './library_source';
+import { LibraryCache } from './library_cache';
+import { LibrarySource } from './library_source';
 import { resolveVersionId } from './resolve_version_id';
 
 const VERSIONS_FILE = 'kibana-versions.json';
@@ -45,6 +45,14 @@ export interface LibraryBundleReaderDeps {
   /** Whether this is a serverless deployment (always resolves to `main`). */
   isServerless: boolean;
   logger: Logger;
+  /**
+   * Override the maximum accepted file sizes in bytes (defaults
+   * {@link LibrarySource.MAX_CATALOG_BYTES} for catalog/manifest JSON and
+   * {@link LibrarySource.MAX_BODY_BYTES} for template bodies); tests lower
+   * these to exercise the size guard cheaply.
+   */
+  maxCatalogBytes?: number;
+  maxBodyBytes?: number;
 }
 
 /**
@@ -60,16 +68,19 @@ export interface LibraryBundleReaderDeps {
  * — the bundle is immutable for the process lifetime (operators replace the
  * directory and restart Kibana), so the catalog is read once and cached.
  *
- * Validation reuses the same consumption schemas + YAML parser as the HTTP
- * path, so parsed shapes and forward-compatibility behavior are identical.
+ * Validation reuses the same lenient schemas + YAML parser as the HTTP path,
+ * and the same `contentHash` integrity guard and size caps (via the shared
+ * {@link LibrarySource} base), so parsed shapes, forward-compatibility, and
+ * integrity behavior are identical.
  */
-export class LibraryBundleReader implements LibrarySource {
-  private readonly cache = new LibraryCache(Number.POSITIVE_INFINITY, 'bundle');
+export class LibraryBundleReader extends LibrarySource {
   private root?: string;
   private loaded = false;
   private loading?: Promise<void>;
 
-  constructor(private readonly deps: LibraryBundleReaderDeps) {}
+  constructor(private readonly deps: LibraryBundleReaderDeps) {
+    super(new LibraryCache(Number.POSITIVE_INFINITY, 'bundle'));
+  }
 
   async listTemplates(): Promise<Template[]> {
     const catalog = await this.getCatalog();
@@ -84,13 +95,9 @@ export class LibraryBundleReader implements LibrarySource {
     }
     const cached = this.cache.getBody(slug);
     if (cached) return cached;
-    const body = await this.readTemplateBody(row.definitionUrl);
+    const body = await this.readTemplateBody(row);
     this.cache.setBody(slug, body);
     return body;
-  }
-
-  getHealth(): LibraryHealth {
-    return this.cache.getHealth();
   }
 
   private async getCatalog(): Promise<TemplatesCatalog> {
@@ -173,14 +180,20 @@ export class LibraryBundleReader implements LibrarySource {
     );
   }
 
-  private async readTemplateBody(definitionUrl: string): Promise<TemplateBody> {
+  private async readTemplateBody(row: Template): Promise<TemplateBody> {
     const root = this.root;
     if (!root) {
       // Defensive: bodies are only read after a successful catalog load.
       throw new LibraryFetchError('Workflow Template Library bundle is not loaded.', 'unavailable');
     }
-    const file = this.resolveBodyPath(root, definitionUrl);
-    const text = await this.readFileOrThrow(file);
+    const file = this.resolveBodyPath(root, row.definitionUrl);
+    const text = await this.readFileOrThrow(
+      file,
+      this.deps.maxBodyBytes ?? LibrarySource.MAX_BODY_BYTES
+    );
+    // Integrity parity with the HTTP path: a mis-assembled bundle (body out of
+    // sync with the catalog row it was listed under) is rejected before parse.
+    this.assertContentHashMatches(row, text, file);
     try {
       // Lenient parse for parity with the HTTP path: tolerate unknown
       // `template-metadata` fields (top-level and nested `install`) from a
@@ -219,7 +232,10 @@ export class LibraryBundleReader implements LibrarySource {
   }
 
   private async readJson<T>(file: string, parse: (json: unknown) => T): Promise<T> {
-    const text = await this.readFileOrThrow(file);
+    const text = await this.readFileOrThrow(
+      file,
+      this.deps.maxCatalogBytes ?? LibrarySource.MAX_CATALOG_BYTES
+    );
     let json: unknown;
     try {
       json = JSON.parse(text);
@@ -247,10 +263,19 @@ export class LibraryBundleReader implements LibrarySource {
     }
   }
 
-  private async readFileOrThrow(file: string): Promise<string> {
+  private async readFileOrThrow(file: string, maxBytes: number): Promise<string> {
     try {
+      const { size } = await stat(file);
+      if (size > maxBytes) {
+        throw new LibraryFetchError(
+          `Bundle file at ${file} exceeds the maximum allowed size of ${maxBytes} bytes.`,
+          'too-large',
+          file
+        );
+      }
       return await readFile(file, 'utf8');
     } catch (err) {
+      if (err instanceof LibraryFetchError) throw err;
       throw new LibraryFetchError(
         `Could not read ${file} from the Workflow Template Library bundle: ${
           err instanceof Error ? err.message : String(err)
