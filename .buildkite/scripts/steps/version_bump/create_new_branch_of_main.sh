@@ -20,6 +20,7 @@ git fetch origin main
 git checkout -b "$branch" origin/main
 if [ "${DRY_RUN:-}" = "true" ]; then
   git push origin "$branch"
+  buildkite-agent meta-data set "version_bump:dry_run_branch" "$branch"
   echo "DRY_RUN temporary branch '$branch' was pushed"
 else
   git push origin "$branch"
