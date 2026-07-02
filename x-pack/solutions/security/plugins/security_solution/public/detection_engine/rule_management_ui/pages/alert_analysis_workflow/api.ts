@@ -22,7 +22,7 @@ import {
   type RuleAttachmentStats,
   type RuleAttachmentSummary,
   type UpdateRuleAttachmentsResult,
-} from '@kbn/workflows/common/alert_analysis_workflow';
+} from '../../../../../common/workflows/alert_analysis_workflow';
 
 export {
   ALERT_ANALYSIS_WORKFLOW_API_VERSION,

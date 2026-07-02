@@ -23,7 +23,7 @@ import {
   ALERT_ANALYSIS_WORKFLOW_API_VERSION,
   ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
   AlertAnalysisWorkflowSettings,
-} from '@kbn/workflows/common/alert_analysis_workflow';
+} from '../../../common/workflows/alert_analysis_workflow';
 import { ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT } from '../../lib/telemetry/event_based/events';
 import type { SecuritySolutionPluginRouter } from '../../types';
 import type { StartPlugins } from '../../plugin';

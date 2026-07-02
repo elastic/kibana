@@ -13,7 +13,7 @@ import type {
   AlertAnalysisWorkflowRuleAttachmentService,
   RuleAttachmentSelection,
   RuleAttachmentSummary,
-} from '@kbn/workflows/common/alert_analysis_workflow';
+} from '../../../common/workflows/alert_analysis_workflow';
 import {
   BulkActionEditTypeEnum,
   type BulkActionEditPayload,

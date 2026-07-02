@@ -23,7 +23,7 @@ import {
   type AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody as AlertAnalysisWorkflowRuleAttachmentSelectionRequestBodyType,
   type AlertAnalysisWorkflowRuleAttachmentStatsRequestBody as AlertAnalysisWorkflowRuleAttachmentStatsRequestBodyType,
   type AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody as AlertAnalysisWorkflowRuleAttachmentUpdateRequestBodyType,
-} from '@kbn/workflows/common/alert_analysis_workflow';
+} from '../../../common/workflows/alert_analysis_workflow';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
