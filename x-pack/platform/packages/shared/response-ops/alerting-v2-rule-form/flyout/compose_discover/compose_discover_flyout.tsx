@@ -47,7 +47,12 @@ import {
 import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { QuerySandboxFlyout } from './query_sandbox_flyout';
 import { isAlertTabDisabled } from './compose_discover_tabs';
-import { RULE_BUILDER_REGISTRY, BuilderStateProvider, type BuilderState } from './rule_builder';
+import {
+  RULE_BUILDER_REGISTRY,
+  BuilderStateProvider,
+  parseDiscoverQueryForBuilder,
+  type BuilderState,
+} from './rule_builder';
 import type { ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
 import { isBuilderConditionStepId } from './types';
 import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
@@ -257,9 +262,17 @@ export function ComposeDiscoverFlyout({
   // Registered once here so providers persist across Sandbox open/close cycles.
   useEsqlAutocomplete(baseServices);
 
+  const [initialParsedState] = useState<BuilderState | null>(() => {
+    if (!builderType || initialBuilderState !== undefined || !inlineResult.query) return null;
+    return parseDiscoverQueryForBuilder(inlineResult.query);
+  });
+
+  const builderParsedFromDiscover = initialParsedState !== null;
+
   const [builderState, setBuilderState] = useState<BuilderState>(() => {
     if (!builderType) return undefined;
     if (initialBuilderState !== undefined) return initialBuilderState;
+    if (initialParsedState) return initialParsedState;
     const definition = RULE_BUILDER_REGISTRY[builderType];
     return definition ? definition.createDefaultState() : undefined;
   });
@@ -282,14 +295,16 @@ export function ComposeDiscoverFlyout({
       }
       return mapped;
     }
-    if (initialQuery !== undefined) {
+    const shouldSeedFromDiscover =
+      initialQuery !== undefined && (!builderType || builderParsedFromDiscover);
+    if (shouldSeedFromDiscover) {
       return {
         ...EMPTY_FORM_VALUES,
         query: discoverComposedQuery ?? discoverQueryToComposed(''),
       };
     }
     return EMPTY_FORM_VALUES;
-  }, [rule, mode, initialQuery, discoverComposedQuery]);
+  }, [rule, mode, initialQuery, discoverComposedQuery, builderType, builderParsedFromDiscover]);
 
   const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues });
   const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);
@@ -432,6 +447,10 @@ export function ComposeDiscoverFlyout({
       return;
     }
 
+    if (builderType && !builderParsedFromDiscover) {
+      return;
+    }
+
     const prev = prevExternalQueryRef.current;
     if (prev?.query === initialQuery && prev?.esqlVariables === esqlVariables) {
       return;
@@ -450,7 +469,16 @@ export function ComposeDiscoverFlyout({
     dispatch({
       type: composedQuery.breach.segment.trim() ? 'COMMIT_QUERY' : 'INVALIDATE_QUERY',
     });
-  }, [initialQuery, esqlVariables, inlineResult.query, rule, methods, dispatch]);
+  }, [
+    initialQuery,
+    esqlVariables,
+    inlineResult.query,
+    rule,
+    methods,
+    dispatch,
+    builderType,
+    builderParsedFromDiscover,
+  ]);
 
   const syncSandbox = useCallback(() => {
     setSandboxQuery(methods.getValues('query'));

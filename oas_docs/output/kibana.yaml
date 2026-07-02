@@ -39271,6 +39271,12 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        allow_edit:
+                          items:
+                            maxLength: 100
+                            type: string
+                          maxItems: 100
+                          type: array
                         host_urls:
                           items:
                             type: string
@@ -39454,6 +39460,12 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                allow_edit:
+                  items:
+                    maxLength: 100
+                    type: string
+                  maxItems: 100
+                  type: array
                 host_urls:
                   items:
                     type: string
@@ -39577,6 +39589,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      allow_edit:
+                        items:
+                          maxLength: 100
+                          type: string
+                        maxItems: 100
+                        type: array
                       host_urls:
                         items:
                           type: string
@@ -39845,6 +39863,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      allow_edit:
+                        items:
+                          maxLength: 100
+                          type: string
+                        maxItems: 100
+                        type: array
                       host_urls:
                         items:
                           type: string
@@ -40034,6 +40058,12 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                allow_edit:
+                  items:
+                    maxLength: 100
+                    type: string
+                  maxItems: 100
+                  type: array
                 host_urls:
                   items:
                     type: string
@@ -40149,6 +40179,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      allow_edit:
+                        items:
+                          maxLength: 100
+                          type: string
+                        maxItems: 100
+                        type: array
                       host_urls:
                         items:
                           type: string
@@ -61866,6 +61902,7 @@ paths:
                           type: user
                         user:
                           name: jdoe
+                    entity_type: user
                     group_size: 2
                     target:
                       '@timestamp': '2026-04-10T08:30:00.000Z'
@@ -61973,6 +62010,7 @@ paths:
                   description: The entities were successfully linked to the target entity.
                   summary: Entities linked
                   value:
+                    entity_type: user
                     linked:
                       - user:jdoe@example.com
                       - user:j.doe@example.com
@@ -61990,6 +62028,13 @@ paths:
                     error: Bad Request
                     message: Cannot link entities of different types
                     statusCode: 400
+                notFoundExample:
+                  description: One or more of the specified entity identifiers were not found.
+                  summary: Entities not found
+                  value:
+                    error: Bad Request
+                    message: 'Entities not found: [user:nonexistent@example.com, user:also-nonexistent@example.com]'
+                    statusCode: 400
                 selfLinkExample:
                   description: Cannot link an entity to itself.
                   summary: Self-link error
@@ -61998,18 +62043,6 @@ paths:
                     message: Cannot link entity 'user:jane.doe@example.com' to itself.
                     statusCode: 400
           description: Bad request.
-        '404':
-          content:
-            application/json:
-              examples:
-                notFoundExample:
-                  description: One or more of the specified entity identifiers were not found.
-                  summary: Entities not found
-                  value:
-                    error: Not Found
-                    message: 'Entities not found: [user:nonexistent@example.com, user:also-nonexistent@example.com]'
-                    statusCode: 404
-          description: Entities not found.
       summary: Link entities
       tags:
         - Security entity store
@@ -62082,23 +62115,31 @@ paths:
                   description: The entities were successfully removed from their resolution group.
                   summary: Entities unlinked
                   value:
+                    entity_type: user
                     skipped: []
                     unlinked:
                       - user:jdoe@example.com
                       - user:j.doe@example.com
           description: Indicates a successful response.
-        '404':
+        '400':
           content:
             application/json:
               examples:
+                mixedTypesExample:
+                  description: All entities in a resolution group must be of the same type.
+                  summary: Mixed entity types
+                  value:
+                    error: Bad Request
+                    message: 'All entities must be of the same type. Found types: [user, host]'
+                    statusCode: 400
                 notFoundExample:
                   description: One or more of the specified entity identifiers were not found.
                   summary: Entities not found
                   value:
-                    error: Not Found
+                    error: Bad Request
                     message: 'Entities not found: [user:nonexistent@example.com]'
-                    statusCode: 404
-          description: Entities not found.
+                    statusCode: 400
+          description: Bad request.
       summary: Unlink entities
       tags:
         - Security entity store
