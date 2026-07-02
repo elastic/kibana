@@ -271,6 +271,7 @@ export function getActionOptions(
         }),
         iconType: 'user',
         iconColor: euiTheme.colors.vis.euiColorVis0,
+        stability: getBuiltInStepDefinition('waitForInput')?.stability,
       },
       ...getBuiltInNestedFlowControlStepOptions(euiTheme),
     ],

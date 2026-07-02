@@ -245,6 +245,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     label: 'Wait For Input',
     description: 'Pause execution until external input is provided (human-in-the-loop)',
     category: StepCategory.FlowControl,
+    stability: 'tech_preview',
     inputSchema: WaitForInputStepInputSchema,
     outputSchema: z.object({
       response: z.record(z.string(), z.unknown()),
@@ -278,6 +279,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     label: 'Wait For Approval',
     description: 'Pause execution until approval or rejection is received (human-in-the-loop)',
     category: StepCategory.FlowControl,
+    stability: 'tech_preview',
     inputSchema: WaitForApprovalStepInputSchema,
     outputSchema: z.object({
       response: z.object({ approved: z.boolean() }),
