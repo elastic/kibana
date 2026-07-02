@@ -35,10 +35,12 @@ Do **not** use this skill when:
 
 - **${
     platformCoreTools.createVisualization
-  }**: Create or update visualization configurations and return \`attachment_id\` when persistence succeeds.
+  }**: Create or update visualization configurations and return \`attachment_id\` when persistence succeeds. It generates and validates the ES|QL internally from your natural-language \`query\` — you do not need to build ES|QL yourself for the common case.
 - **${
     platformCoreTools.generateEsql
-  }**: Generate ES|QL for complex requests before visualization creation.
+  }**: Optional. Only for genuinely complex aggregations/joins you want to control and validate precisely; pass the result to ${
+    platformCoreTools.createVisualization
+  } via \`esql\`. Not a required step before every visualization.
 - **${platformCoreTools.executeEsql}**: Validate ES|QL and inspect sample result shape.
 
 ## Visualization Creation Workflow
@@ -48,23 +50,24 @@ Do **not** use this skill when:
      platformCoreTools.createVisualization
    } call, know the target index and confirm every field you reference exists in its mapping.
    - If the index and fields are already grounded in context, continue directly.
-   - If not, discover them first: list indices, inspect the index mapping, or use ${
-     platformCoreTools.generateEsql
-   } / ${
-    platformCoreTools.executeEsql
-  }. Always use real field names from the index mapping — never invent index or field names, and never assume a domain schema (APM, metrics, etc.) is present; verify against the actual cluster.
+   - If not, discover them first: list indices and inspect the index mapping (optionally probe with ${
+     platformCoreTools.executeEsql
+   }). Always use real field names from the index mapping — never invent index or field names, and never assume a domain schema (APM, metrics, etc.) is present; verify against the actual cluster.
    - ${
      platformCoreTools.createVisualization
    } auto-discovers an index only when you omit \`index\`, and that discovery FAILS when the referenced fields do not exist in any index. Guessing fields and relying on auto-discovery is the most common cause of failures — ground first.
 
 2. **Prepare visualization intent**
-   - For simple requests, pass natural language directly to ${
+   - Default path: pass the natural-language \`query\` to ${
      platformCoreTools.createVisualization
-   }.
-   - For complex aggregations or joins, use ${platformCoreTools.generateEsql}.
-   - Optionally run ${
+   } and let it generate the ES|QL. This is the right choice for almost every request — do **not** call ${
+    platformCoreTools.generateEsql
+  } first just to build a query.
+   - Only for genuinely complex aggregations or joins you want to control precisely: pre-generate with ${
+     platformCoreTools.generateEsql
+   }, optionally validate the shape with ${
      platformCoreTools.executeEsql
-   } to validate result shape before visualization creation.
+   }, then hand the query to ${platformCoreTools.createVisualization} via \`esql\`.
 
 3. **Call ${platformCoreTools.createVisualization}**
    - Provide:
