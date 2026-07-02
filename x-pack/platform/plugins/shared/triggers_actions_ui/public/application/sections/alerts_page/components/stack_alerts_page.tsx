@@ -15,6 +15,7 @@ import {
   ALERT_STATUS_UNTRACKED,
   AlertConsumers,
   isSiemRuleType,
+  STACK_ALERTS_ONLY_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { BoolQuery, Filter } from '@kbn/es-query';
@@ -77,12 +78,18 @@ const PageContentWrapperComponent: React.FC = () => {
     setBreadcrumbs,
     http,
     notifications: { toasts },
+    application: { capabilities },
   } = useKibana().services;
 
   const {
     ruleTypesState: { data: ruleTypesIndex, isInitialLoad: isInitialLoadingRuleTypes },
     authorizedToReadAnyRules,
   } = useGetRuleTypesPermissions({ http, toasts, filteredRuleTypes: [] });
+
+  // The Stack Alerts feature grants read access to alerts without requiring rule
+  // read privileges, so its `show` capability also unlocks this page.
+  const authorizedToReadAnyAlerts =
+    authorizedToReadAnyRules || Boolean(capabilities?.[STACK_ALERTS_ONLY_FEATURE_ID]?.show);
 
   const ruleTypeIdsByFeatureId = useRuleTypeIdsByFeatureId(ruleTypesIndex);
 
@@ -94,7 +101,7 @@ const PageContentWrapperComponent: React.FC = () => {
   return !isInitialLoadingRuleTypes ? (
     <PageContent
       isLoading={isInitialLoadingRuleTypes}
-      authorizedToReadAnyRules={authorizedToReadAnyRules}
+      authorizedToReadAnyRules={authorizedToReadAnyAlerts}
       ruleTypeIdsByFeatureId={ruleTypeIdsByFeatureId}
     />
   ) : null;
