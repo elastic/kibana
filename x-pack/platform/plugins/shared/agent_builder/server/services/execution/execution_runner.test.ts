@@ -6,8 +6,50 @@
  */
 
 import Boom from '@hapi/boom';
-import { AgentBuilderErrorCode, createBadRequestError } from '@kbn/agent-builder-common';
-import { serializeExecutionError } from './execution_runner';
+import { of } from 'rxjs';
+import {
+  AgentBuilderErrorCode,
+  ChatEventType,
+  ConversationAccessControlMode,
+  createBadRequestError,
+  type ChatEvent,
+} from '@kbn/agent-builder-common';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { collectAndWriteEvents, serializeExecutionError } from './execution_runner';
+
+describe('collectAndWriteEvents', () => {
+  const event: ChatEvent = {
+    type: ChatEventType.conversationUpdated,
+    data: {
+      conversation_id: 'conversation-1',
+      title: 'Conversation',
+      access_control: { access_mode: ConversationAccessControlMode.Public },
+    },
+  };
+
+  const createExecutionClient = () => ({
+    appendEvents: jest.fn().mockResolvedValue(undefined),
+  });
+
+  const execution = {
+    executionId: 'execution-1',
+  };
+
+  it('resolves with the collected events and appends them to the execution document', async () => {
+    const executionClient = createExecutionClient();
+
+    await expect(
+      collectAndWriteEvents({
+        events$: of(event),
+        execution: execution as never,
+        executionClient: executionClient as never,
+        logger: loggingSystemMock.createLogger(),
+      })
+    ).resolves.toEqual([event]);
+
+    expect(executionClient.appendEvents).toHaveBeenCalledWith('execution-1', [event]);
+  });
+});
 
 describe('serializeExecutionError', () => {
   it('passes through AgentBuilderError code, message, and meta', () => {

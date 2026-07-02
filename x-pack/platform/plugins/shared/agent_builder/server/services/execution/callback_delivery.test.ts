@@ -7,14 +7,23 @@
 
 import { createHmac } from 'crypto';
 import {
+  AgentBuilderErrorCode,
+  ChatEventType,
   ConversationAccessControlMode,
   ConversationRoundStatus,
   ExecutionStatus,
+  type ChatEvent,
+  type SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { ChatCallbackSuccessPayload } from '../../../common/http_api/chat_callback';
-import { deliverCallback } from './callback_delivery';
+import { buildChatResponseFromEvents } from './utils/chat_response';
+import {
+  makeCallbackRequest,
+  makeFailureCallbackIfConfigured,
+  makeSuccessCallbackIfConfigured,
+} from './callback_delivery';
 
-describe('deliverCallback', () => {
+describe('makeCallbackRequest', () => {
   const payload: ChatCallbackSuccessPayload = {
     execution_id: 'execution-1',
     status: ExecutionStatus.completed,
@@ -45,7 +54,7 @@ describe('deliverCallback', () => {
   it('posts the exact serialized JSON body with an HMAC signature', async () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
 
-    await deliverCallback({
+    await makeCallbackRequest({
       url: 'https://relay.example.com/events?token=abc',
       secret: 'secret-1',
       payload,
@@ -71,7 +80,7 @@ describe('deliverCallback', () => {
       .mockResolvedValueOnce({ status: 503 } as Response)
       .mockResolvedValueOnce({ status: 204 } as Response);
 
-    const delivery = deliverCallback({
+    const delivery = makeCallbackRequest({
       url: 'https://relay.example.com/events?token=abc',
       secret: 'secret-1',
       payload,
@@ -88,7 +97,7 @@ describe('deliverCallback', () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 400 } as Response);
 
     await expect(
-      deliverCallback({
+      makeCallbackRequest({
         url: 'https://relay.example.com/events?token=abc',
         secret: 'secret-1',
         payload,
@@ -102,7 +111,7 @@ describe('deliverCallback', () => {
     jest.useFakeTimers();
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 503 } as Response);
 
-    const delivery = deliverCallback({
+    const delivery = makeCallbackRequest({
       url: 'https://relay.example.com/events?token=abc',
       secret: 'secret-1',
       payload,
@@ -115,5 +124,145 @@ describe('deliverCallback', () => {
 
     await deliveryExpectation;
     expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+});
+
+const callbackMetadata = {
+  callback_url: 'https://relay.example.com/events?token=abc',
+  callback_signing_secret: 'secret-1',
+};
+
+describe('makeSuccessCallbackIfConfigured', () => {
+  const events: ChatEvent[] = [
+    {
+      type: ChatEventType.conversationUpdated,
+      data: {
+        conversation_id: 'conversation-1',
+        title: 'Conversation',
+        access_control: { access_mode: ConversationAccessControlMode.Public },
+      },
+    },
+    {
+      type: ChatEventType.roundComplete,
+      data: {
+        round: {
+          id: 'round-1',
+          status: ConversationRoundStatus.completed,
+          input: { message: 'hello' },
+          steps: [],
+          response: { message: 'world' },
+          started_at: '2026-01-01T00:00:00.000Z',
+          time_to_first_token: 1,
+          time_to_last_token: 2,
+          model_usage: {
+            connector_id: 'connector-1',
+            llm_calls: 1,
+            input_tokens: 1,
+            output_tokens: 1,
+          },
+        },
+      },
+    },
+  ];
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('does not deliver when no callback is configured', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch');
+
+    await makeSuccessCallbackIfConfigured({
+      callbackUrl: undefined,
+      callbackSigningSecret: undefined,
+      executionId: 'execution-1',
+      events,
+    });
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('delivers the completed response payload when configured', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
+
+    await makeSuccessCallbackIfConfigured({
+      callbackUrl: callbackMetadata.callback_url,
+      callbackSigningSecret: callbackMetadata.callback_signing_secret,
+      executionId: 'execution-1',
+      events,
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const body = fetchMock.mock.calls[0][1]?.body as string;
+    expect(JSON.parse(body)).toEqual({
+      execution_id: 'execution-1',
+      status: ExecutionStatus.completed,
+      response: buildChatResponseFromEvents(events),
+    });
+  });
+});
+
+describe('makeFailureCallbackIfConfigured', () => {
+  const error: SerializedExecutionError = {
+    code: AgentBuilderErrorCode.internalError,
+    message: 'boom',
+  };
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('does not deliver when no callback is configured', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch');
+
+    await makeFailureCallbackIfConfigured({
+      callbackUrl: undefined,
+      callbackSigningSecret: undefined,
+      executionId: 'execution-1',
+      error,
+      status: ExecutionStatus.failed,
+    });
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('includes conversation_id when provided', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
+
+    await makeFailureCallbackIfConfigured({
+      callbackUrl: callbackMetadata.callback_url,
+      callbackSigningSecret: callbackMetadata.callback_signing_secret,
+      executionId: 'execution-1',
+      conversationId: 'conversation-1',
+      error,
+      status: ExecutionStatus.failed,
+    });
+
+    const body = fetchMock.mock.calls[0][1]?.body as string;
+    expect(JSON.parse(body)).toEqual({
+      execution_id: 'execution-1',
+      conversation_id: 'conversation-1',
+      status: ExecutionStatus.failed,
+      error,
+    });
+  });
+
+  it('omits conversation_id when not provided', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
+
+    await makeFailureCallbackIfConfigured({
+      callbackUrl: callbackMetadata.callback_url,
+      callbackSigningSecret: callbackMetadata.callback_signing_secret,
+      executionId: 'execution-1',
+      error,
+      status: ExecutionStatus.aborted,
+    });
+
+    const body = fetchMock.mock.calls[0][1]?.body as string;
+    expect(JSON.parse(body)).toEqual({
+      execution_id: 'execution-1',
+      status: ExecutionStatus.aborted,
+      error,
+    });
   });
 });

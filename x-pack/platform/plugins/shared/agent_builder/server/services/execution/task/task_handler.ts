@@ -17,8 +17,10 @@ import {
   type AgentExecutionDeps,
 } from '../execution_runner';
 import { AbortMonitor } from './abort_monitor';
-import { deliverCallback } from '../callback_delivery';
-import { buildChatResponseFromEvents } from '../utils/chat_response';
+import {
+  makeSuccessCallbackIfConfigured,
+  makeFailureCallbackIfConfigured,
+} from '../callback_delivery';
 
 export interface TaskHandlerDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
@@ -93,41 +95,68 @@ class TaskHandlerImpl implements TaskHandler {
         logger: this.logger,
       });
 
-      await this.deliverSuccessCallbackIfConfigured({ execution, events });
+      // 6. Deliver success callback if configured
+      await makeSuccessCallbackIfConfigured({
+        callbackUrl: execution.metadata?.callback_url,
+        callbackSigningSecret: execution.metadata?.callback_signing_secret,
+        executionId,
+        events,
+      });
 
-      // 6. Mark as completed
+      // 7. Mark as completed
       await executionClient.updateStatus(executionId, ExecutionStatus.completed);
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Execution ${executionId} failed: ${message}`);
-
-      try {
-        let serializedError = serializeExecutionError(error);
-        let terminalStatus = isRequestAbortedError(error)
-          ? ExecutionStatus.aborted
-          : ExecutionStatus.failed;
-        try {
-          await this.deliverErrorCallbackIfConfigured({
-            execution,
-            error: serializedError,
-            status: terminalStatus,
-          });
-        } catch (callbackError) {
-          serializedError = serializeExecutionError(callbackError);
-          terminalStatus = ExecutionStatus.failed;
-        }
-        if (terminalStatus === ExecutionStatus.aborted) {
-          await executionClient.updateStatus(executionId, ExecutionStatus.aborted);
-        } else {
-          await executionClient.updateStatus(executionId, ExecutionStatus.failed, serializedError);
-        }
-      } catch (statusError) {
-        this.logger.error(
-          `Failed to update status for execution ${executionId}: ${statusError.message}`
-        );
-      }
+      await this.handleExecutionFailure({ executionId, execution, executionClient, error });
     } finally {
       abortMonitor.stop();
+    }
+  }
+
+  private async handleExecutionFailure({
+    executionId,
+    execution,
+    executionClient,
+    error,
+  }: {
+    executionId: string;
+    execution: NonNullable<Awaited<ReturnType<AgentExecutionClient['get']>>>;
+    executionClient: AgentExecutionClient;
+    error: unknown;
+  }): Promise<void> {
+    const message = error instanceof Error ? error.message : String(error);
+    this.logger.error(`Execution ${executionId} failed: ${message}`);
+
+    try {
+      let serializedError = serializeExecutionError(error);
+      let terminalStatus = isRequestAbortedError(error)
+        ? ExecutionStatus.aborted
+        : ExecutionStatus.failed;
+      const conversationId =
+        execution.executionMode === 'conversation'
+          ? execution.agentParams.conversationId
+          : undefined;
+      try {
+        await makeFailureCallbackIfConfigured({
+          callbackUrl: execution.metadata?.callback_url,
+          callbackSigningSecret: execution.metadata?.callback_signing_secret,
+          executionId,
+          conversationId,
+          error: serializedError,
+          status: terminalStatus,
+        });
+      } catch (callbackError) {
+        serializedError = serializeExecutionError(callbackError);
+        terminalStatus = ExecutionStatus.failed;
+      }
+      if (terminalStatus === ExecutionStatus.aborted) {
+        await executionClient.updateStatus(executionId, ExecutionStatus.aborted);
+      } else {
+        await executionClient.updateStatus(executionId, ExecutionStatus.failed, serializedError);
+      }
+    } catch (statusError) {
+      this.logger.error(
+        `Failed to update status for execution ${executionId}: ${statusError.message}`
+      );
     }
   }
 
@@ -140,56 +169,6 @@ class TaskHandlerImpl implements TaskHandler {
     return createAgentExecutionClient({
       logger: this.logger.get('execution-client'),
       esClient: this.deps.elasticsearch.client.asInternalUser,
-    });
-  }
-
-  private async deliverSuccessCallbackIfConfigured({
-    execution,
-    events,
-  }: {
-    execution: Awaited<ReturnType<AgentExecutionClient['get']>>;
-    events: Parameters<typeof buildChatResponseFromEvents>[0];
-  }): Promise<void> {
-    if (!execution?.metadata?.callback_url || !execution.metadata.callback_signing_secret) {
-      return;
-    }
-
-    await deliverCallback({
-      url: execution.metadata.callback_url,
-      secret: execution.metadata.callback_signing_secret,
-      payload: {
-        execution_id: execution.executionId,
-        status: ExecutionStatus.completed,
-        response: buildChatResponseFromEvents(events),
-      },
-    });
-  }
-
-  private async deliverErrorCallbackIfConfigured({
-    execution,
-    error,
-    status,
-  }: {
-    execution: Awaited<ReturnType<AgentExecutionClient['get']>>;
-    error: ReturnType<typeof serializeExecutionError>;
-    status: ExecutionStatus.failed | ExecutionStatus.aborted;
-  }): Promise<void> {
-    if (!execution?.metadata?.callback_url || !execution.metadata.callback_signing_secret) {
-      return;
-    }
-
-    const conversationId =
-      execution.executionMode === 'conversation' ? execution.agentParams.conversationId : undefined;
-
-    await deliverCallback({
-      url: execution.metadata.callback_url,
-      secret: execution.metadata.callback_signing_secret,
-      payload: {
-        execution_id: execution.executionId,
-        ...(conversationId ? { conversation_id: conversationId } : {}),
-        status,
-        error,
-      },
     });
   }
 }

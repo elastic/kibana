@@ -7,11 +7,17 @@
 
 import { createHmac } from 'crypto';
 import pRetry, { AbortError } from 'p-retry';
+import {
+  ExecutionStatus,
+  type ChatEvent,
+  type SerializedExecutionError,
+} from '@kbn/agent-builder-common';
 import type {
   ChatCallbackAbortedPayload,
   ChatCallbackFailurePayload,
   ChatCallbackSuccessPayload,
 } from '../../../common/http_api/chat_callback';
+import { buildChatResponseFromEvents } from './utils/chat_response';
 
 type CallbackPayload =
   | ChatCallbackSuccessPayload
@@ -25,7 +31,72 @@ const callbackRetryOptions = {
   randomize: false,
 } as const;
 
-export const deliverCallback = async ({
+/**
+ * Delivers a success callback for a completed execution when a callback URL and
+ * signing secret are configured. No-op otherwise.
+ */
+export const makeSuccessCallbackIfConfigured = async ({
+  executionId,
+  events,
+  callbackUrl,
+  callbackSigningSecret,
+}: {
+  executionId: string;
+  events: ChatEvent[];
+  callbackUrl: string | undefined;
+  callbackSigningSecret: string | undefined;
+}): Promise<void> => {
+  if (!callbackUrl || !callbackSigningSecret) {
+    return;
+  }
+
+  await makeCallbackRequest({
+    url: callbackUrl,
+    secret: callbackSigningSecret,
+    payload: {
+      execution_id: executionId,
+      status: ExecutionStatus.completed,
+      response: buildChatResponseFromEvents(events),
+    },
+  });
+};
+
+/**
+ * Delivers a failure callback for a failed or aborted execution when a callback URL and
+ * signing secret are configured. No-op otherwise.
+ */
+export const makeFailureCallbackIfConfigured = async ({
+  executionId,
+  conversationId,
+  error,
+  status,
+  callbackUrl,
+  callbackSigningSecret,
+}: {
+  executionId: string;
+  conversationId?: string;
+  error: SerializedExecutionError;
+  status: ExecutionStatus.failed | ExecutionStatus.aborted;
+  callbackUrl: string | undefined;
+  callbackSigningSecret: string | undefined;
+}): Promise<void> => {
+  if (!callbackUrl || !callbackSigningSecret) {
+    return;
+  }
+
+  await makeCallbackRequest({
+    url: callbackUrl,
+    secret: callbackSigningSecret,
+    payload: {
+      execution_id: executionId,
+      ...(conversationId ? { conversation_id: conversationId } : {}),
+      status,
+      error,
+    },
+  });
+};
+
+export const makeCallbackRequest = async ({
   url,
   secret,
   payload,
