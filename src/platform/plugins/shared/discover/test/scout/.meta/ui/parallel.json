@@ -1,5 +1,5 @@
 {
-  "sha1": "1c68a0cded7d73d353f5510bd52d0fe13f4e90af",
+  "sha1": "aea246e972a901526dac2761871074d78a3d7f1b",
   "tests": [
     {
       "id": "5f3825f308b4d12-d89fd2ade65d14f",
@@ -761,8 +761,7 @@
       "title": "Data view without timefield should not display a timepicker",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
@@ -775,8 +774,7 @@
       "title": "Data view without timefield should adapt sidebar fields when switching",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
@@ -789,8 +787,7 @@
       "title": "Data view without timefield should display a timepicker after switching to an index pattern with timefield",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
@@ -803,8 +800,7 @@
       "title": "Data view without timefield should switch between with and without timefield using the browser back button",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
@@ -817,8 +813,7 @@
       "title": "Data view without timefield should disable the auto refresh interval when switching to a data view without a time field",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
@@ -831,8 +826,7 @@
       "title": "Data view without timefield should allow switching from a saved search with a time field to a saved search without a time field",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
@@ -845,8 +839,7 @@
       "title": "Data view without timefield should allow switching from data views with different timefields and sort correctly",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
@@ -898,12 +891,11 @@
       "title": "Discover context - accessibility should give focus to the Load link when Tab is pressed",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_accessibility.spec.ts",
-        "line": 35,
+        "line": 34,
         "column": 12
       }
     },
@@ -912,12 +904,11 @@
       "title": "Discover context - date_nanos custom timestamp displays predecessors - anchor - successors in right order",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_date_nanos_custom.spec.ts",
-        "line": 42,
+        "line": 41,
         "column": 14
       }
     },
@@ -926,12 +917,11 @@
       "title": "Discover context - date_nanos displays predecessors - anchor - successors in right order",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_date_nanos.spec.ts",
-        "line": 39,
+        "line": 38,
         "column": 12
       }
     },
@@ -940,12 +930,11 @@
       "title": "Discover context - date_nanos displays correctly when predecessors and successors are loaded",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_date_nanos.spec.ts",
-        "line": 54,
+        "line": 53,
         "column": 12
       }
     },
@@ -1383,8 +1372,7 @@
       "title": "Data view with unmapped fields unmapped fields exist on a new saved search",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unmapped_fields.spec.ts",
@@ -1397,8 +1385,7 @@
       "title": "Data view with unmapped fields unmapped fields exist on an existing saved search",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unmapped_fields.spec.ts",
