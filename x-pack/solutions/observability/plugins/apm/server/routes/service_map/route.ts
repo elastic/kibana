@@ -11,7 +11,6 @@ import {
   type ServiceMapRouteResponse,
   type ServiceMapServiceBadgesResponse,
   type ServiceMapServiceDependencyInfoResponse,
-  type ServiceMapServiceNodeInfoResponse,
 } from '@kbn/apm-api-shared';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
@@ -28,7 +27,6 @@ import { getServiceGroup } from '../service_groups/get_service_group';
 import { getServiceMap } from './get_service_map';
 import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
 import { getServiceMapServiceBadges } from './get_service_map_service_badges';
-import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: routeDefinitions.serviceMap.serviceMap.endpoint,
@@ -93,47 +91,6 @@ const serviceMapRoute = createApmServerRoute({
       serviceGroupKuery: serviceGroup?.kuery,
       kuery,
       esQuery: esQuery as { bool: BoolQuery } | undefined,
-    });
-  },
-});
-
-const serviceMapServiceNodeRoute = createApmServerRoute({
-  endpoint: routeDefinitions.serviceMap.serviceNode.endpoint,
-  params: routeDefinitions.serviceMap.serviceNode.params,
-  security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<ServiceMapServiceNodeInfoResponse> => {
-    const { config, context, params } = resources;
-
-    if (!config.serviceMapEnabled) {
-      throw Boom.notFound();
-    }
-
-    const licensingContext = await context.licensing;
-    if (!isActivePlatinumLicense(licensingContext.license)) {
-      throw Boom.forbidden(invalidLicenseMessage);
-    }
-    const apmEventClient = await getApmEventClient(resources);
-
-    const {
-      path: { serviceName },
-      query: { environment, start, end, offset },
-    } = params;
-
-    const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient,
-      config,
-      start,
-      end,
-    });
-
-    return getServiceMapServiceNodeInfo({
-      environment,
-      apmEventClient,
-      serviceName,
-      searchAggregatedTransactions,
-      start,
-      end,
-      offset,
     });
   },
 });
@@ -209,7 +166,6 @@ const serviceMapServiceBadgesRoute = createApmServerRoute({
 
 export const serviceMapRouteRepository = {
   ...serviceMapRoute,
-  ...serviceMapServiceNodeRoute,
   ...serviceMapDependencyNodeRoute,
   ...serviceMapServiceBadgesRoute,
 };

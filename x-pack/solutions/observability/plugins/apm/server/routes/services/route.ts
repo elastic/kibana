@@ -27,6 +27,8 @@ import {
   type ServiceTransactionDetailedStatPeriodsResponse,
   type ServiceTransactionTypesResponse,
   type ServiceMixedIngestionResponse,
+  rangeRt,
+  environmentRt,
 } from '@kbn/apm-api-shared';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import {
@@ -72,6 +74,7 @@ import { getServicesAlerts } from './get_services/get_service_alerts';
 import { getServicesItems } from './get_services/get_services_items';
 import { getThroughput } from './get_throughput';
 import { getServiceTransactionDetailedStatsPeriods } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
+import { getServiceHasSystemMetrics } from './get_service_has_system_metrics';
 
 const servicesRoute = createApmServerRoute({
   endpoint: routeDefinitions.services.servicesList.endpoint,
@@ -837,6 +840,24 @@ const serviceSlosRoute = createApmServerRoute({
   },
 });
 
+const serviceHasSystemMetricsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/has_system_metrics',
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: t.intersection([environmentRt, rangeRt]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<{ hasSystemMetrics: boolean }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const {
+      path: { serviceName },
+      query: { environment, start, end },
+    } = resources.params;
+
+    return getServiceHasSystemMetrics({ apmEventClient, serviceName, environment, start, end });
+  },
+});
+
 export const serviceRouteRepository = {
   ...servicesRoute,
   ...servicesDetailedStatisticsRoute,
@@ -858,4 +879,5 @@ export const serviceRouteRepository = {
   ...serviceAlertsRoute,
   ...serviceAnomalyScoreRoute,
   ...serviceSlosRoute,
+  ...serviceHasSystemMetricsRoute,
 };

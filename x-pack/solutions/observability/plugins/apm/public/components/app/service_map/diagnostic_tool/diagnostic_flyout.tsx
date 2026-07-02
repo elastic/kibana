@@ -39,8 +39,8 @@ import { callApmApi as callLegacyApmApi } from '../../../../services/rest/create
 interface DiagnosticFlyoutProps {
   onClose: () => void;
   isOpen: boolean;
-  /** Selected node or edge from the service map */
-  selection: ServiceMapSelection;
+  /** Selected node or edge from the service map. When omitted the form starts with an empty source node. */
+  selection?: ServiceMapSelection;
 }
 
 function checkForForbiddenServiceNames(form: DiagnosticFormState | null): boolean {
@@ -72,7 +72,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selection }: DiagnosticFlyou
   const [isLoading, setIsLoading] = useState(false);
 
   const [form, setFormState] = useState<DiagnosticFormState>({
-    sourceNode: selection.id,
+    sourceNode: selection?.id ?? '',
     destinationNode: undefined,
     traceId: undefined,
     isValid: false,
