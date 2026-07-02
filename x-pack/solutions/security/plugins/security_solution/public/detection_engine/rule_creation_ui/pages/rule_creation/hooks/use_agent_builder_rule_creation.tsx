@@ -398,10 +398,9 @@ export const useAgentBuilderRuleCreation = ({
         );
         const isUpdateIntent = intentRef.current === 'update';
         const ruleIdForSync = isUpdateIntent ? getRuleIdForSync() : undefined;
-        const ruleToSync = ruleIdForSync ? { ...formattedRule, id: ruleIdForSync } : formattedRule;
         addRuleAttachment(
-          ruleToSync,
-          ruleToSync.name ||
+          formattedRule,
+          formattedRule.name ||
             (isUpdateIntent && ruleIdForSync
               ? i18n.translate(
                   'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationAttachmentLabelExisting',
