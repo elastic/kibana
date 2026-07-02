@@ -10,11 +10,12 @@
 import INVESTIGATION_WORKFLOW_YAML from './investigation_workflow.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
 
-export const SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID = 'system-streams-investigation';
+export const SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID =
+  'system-significant-events-investigation';
 
 export const SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-  pluginId: 'streams',
+  pluginId: 'streams', // todo: update to significant_events once https://github.com/elastic/kibana/pull/275522 and follow ups merge
   version: 2,
   billable: false,
   yaml: INVESTIGATION_WORKFLOW_YAML,

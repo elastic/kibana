@@ -8,12 +8,13 @@ enabled: true
 settings:
   timeout: '60m'
   concurrency:
-    key: 'streams-investigation-{{ inputs.concurrency_key | default: execution.id }}'
+    key: 'significant-events-investigation-{{ inputs.concurrency_key | default: execution.id }}'
     strategy: cancel-in-progress
     max: 1
 tags:
   - observability
   - streams
+  - significant-events
   - investigation
 
 triggers:
@@ -56,7 +57,7 @@ steps:
     if: '${{ inputs.context.event_id != null }}'
     with:
       method: POST
-      path: '/internal/sig_events/events/{{ inputs.context.event_id }}/investigations'
+      path: '/internal/significant_events/events/{{ inputs.context.event_id }}/investigations'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -68,12 +69,12 @@ steps:
 
   - name: investigate
     type: ai.agent
-    agent-id: platform.streams.investigation
+    agent-id: platform.sig_events.investigation
     connector-id: '{{ inputs.connector_id }}'
-    # Keep plugin-id/aggregate-by in sync with @kbn/streams-schema inference_feature_ids.ts
-    # (STREAMS_SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID / SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
-    plugin-id: 'streams_significant_events_investigation'
-    aggregate-by: 'streams_significant_events'
+    # Keep plugin-id/aggregate-by in sync with @kbn/significant-events-schema inference_feature_ids.ts
+    # (SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID / SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
+    plugin-id: 'significant_events_investigation'
+    aggregate-by: 'significant_events'
     create-conversation: true
     with:
       timeout: 1800s
@@ -147,7 +148,7 @@ steps:
     if: '${{ inputs.context.event_id != null }}'
     with:
       method: POST
-      path: '/internal/sig_events/events/{{ inputs.context.event_id }}/investigations'
+      path: '/internal/significant_events/events/{{ inputs.context.event_id }}/investigations'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -167,7 +168,7 @@ steps:
     with:
       timeout: 120s
       message: |
-        Call load_skill with path skills/platform/streams/significant-events-memory to get the memory tools.
+        Call load_skill with path skills/platform/significant-events/memory to get the memory tools.
 
         The following knowledge gaps were identified during an investigation:
 
