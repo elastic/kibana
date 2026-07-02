@@ -138,8 +138,8 @@ describe('AlertEpisodesAssigneeFilter', () => {
     );
   });
 
-  it('limits the displayed options to 7', async () => {
-    const manyProfiles = Array.from({ length: 8 }, (_, i) => ({
+  it('limits the displayed options to 10', async () => {
+    const manyProfiles = Array.from({ length: 11 }, (_, i) => ({
       uid: `uid-${i}`,
       user: { full_name: `User ${i}`, email: `user${i}@example.com`, username: `user${i}` },
       data: { avatar: undefined },
@@ -160,7 +160,7 @@ describe('AlertEpisodesAssigneeFilter', () => {
     await openPopover();
 
     const { options } = InlineFilterPopoverSpy.mock.calls[0][0];
-    expect(options).toHaveLength(7);
+    expect(options).toHaveLength(10);
   });
 
   it('calls onAssigneeChange with uid when a value is selected', async () => {
