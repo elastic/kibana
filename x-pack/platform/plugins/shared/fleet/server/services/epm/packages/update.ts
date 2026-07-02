@@ -23,6 +23,11 @@ export interface NamespaceCustomizationDiff {
   removedNamespaces: string[];
 }
 
+export interface IlmPolicyChange {
+  namespace: string;
+  ilmPolicy: string | undefined;
+}
+
 export async function updatePackage(
   options: {
     savedObjectsClient: SavedObjectsClientContract;
@@ -32,12 +37,14 @@ export async function updatePackage(
 ): Promise<{
   packageInfo: Awaited<ReturnType<typeof getPackageInfo>>;
   namespaceCustomizationDiff: NamespaceCustomizationDiff;
+  ilmPolicyChanges: IlmPolicyChange[];
 }> {
   const {
     savedObjectsClient,
     pkgName,
     keepPoliciesUpToDate,
     namespace_customization_enabled_for: newNamespaceCustomization,
+    namespace_customization_settings: newNamespaceCustomizationSettings,
   } = options;
   const installedPackage = await getInstallationObject({ savedObjectsClient, pkgName });
 
@@ -57,6 +64,7 @@ export async function updatePackage(
     addedNamespaces: [],
     removedNamespaces: [],
   };
+  const ilmPolicyChanges: IlmPolicyChange[] = [];
 
   if (keepPoliciesUpToDate !== undefined) {
     updateAttrs.keep_policies_up_to_date = keepPoliciesUpToDate;
@@ -71,13 +79,69 @@ export async function updatePackage(
     namespaceCustomizationDiff.addedNamespaces = newList.filter((ns) => !oldList.includes(ns));
     namespaceCustomizationDiff.removedNamespaces = oldList.filter((ns) => !newList.includes(ns));
     updateAttrs.namespace_customization_enabled_for = newList;
+
+    // When a namespace is opted out, automatically clear its ILM policy setting.
+    if (namespaceCustomizationDiff.removedNamespaces.length > 0) {
+      const currentSettings = installedPackage.attributes.namespace_customization_settings ?? {};
+      const patchedSettings = { ...currentSettings };
+      for (const ns of namespaceCustomizationDiff.removedNamespaces) {
+        if (patchedSettings[ns]?.ilm_policy) {
+          ilmPolicyChanges.push({ namespace: ns, ilmPolicy: undefined });
+          const { ilm_policy: _removed, ...rest } = patchedSettings[ns];
+          if (Object.keys(rest).length > 0) {
+            patchedSettings[ns] = rest;
+          } else {
+            delete patchedSettings[ns];
+          }
+        }
+      }
+      if (ilmPolicyChanges.length > 0) {
+        updateAttrs.namespace_customization_settings = patchedSettings;
+      }
+    }
   }
 
-  await savedObjectsClient.update<Installation>(
-    PACKAGES_SAVED_OBJECT_TYPE,
-    installedPackage.id,
-    updateAttrs
-  );
+  if (newNamespaceCustomizationSettings) {
+    const oldSettings = installedPackage.attributes.namespace_customization_settings ?? {};
+
+    // Namespaces already scheduled for ILM clearing (e.g. from the opt-out path above)
+    const alreadyScheduled = new Set(ilmPolicyChanges.map((c) => c.namespace));
+
+    // Namespaces present in old settings but absent from the new payload — clear their ILM policy
+    for (const [namespace, oldNsSettings] of Object.entries(oldSettings)) {
+      if (!(namespace in newNamespaceCustomizationSettings) && oldNsSettings.ilm_policy && !alreadyScheduled.has(namespace)) {
+        ilmPolicyChanges.push({ namespace, ilmPolicy: undefined });
+      }
+    }
+
+    for (const [namespace, newNsSettings] of Object.entries(newNamespaceCustomizationSettings)) {
+      const oldIlmPolicy = oldSettings[namespace]?.ilm_policy;
+      const newIlmPolicy = newNsSettings.ilm_policy;
+      if (oldIlmPolicy !== newIlmPolicy) {
+        ilmPolicyChanges.push({ namespace, ilmPolicy: newIlmPolicy });
+      }
+    }
+    updateAttrs.namespace_customization_settings = newNamespaceCustomizationSettings;
+  }
+
+  if (updateAttrs.namespace_customization_settings !== undefined) {
+    // ES's partial-update merges nested objects rather than replacing them, so saving
+    // { production: {...} } would keep a pre-existing staging key intact. Using
+    // mergeAttributes: false makes Kibana do a full document replacement instead.
+    // We spread the current attributes first so no other fields are lost.
+    await savedObjectsClient.update<Installation>(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      installedPackage.id,
+      { ...installedPackage.attributes, ...updateAttrs },
+      { mergeAttributes: false }
+    );
+  } else {
+    await savedObjectsClient.update<Installation>(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      installedPackage.id,
+      updateAttrs
+    );
+  }
 
   const packageInfo = await getPackageInfo({
     savedObjectsClient,
@@ -85,7 +149,7 @@ export async function updatePackage(
     pkgVersion: installedPackage.attributes.version,
   });
 
-  return { packageInfo, namespaceCustomizationDiff };
+  return { packageInfo, namespaceCustomizationDiff, ilmPolicyChanges };
 }
 
 export async function reviewUpgrade(options: {

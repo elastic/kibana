@@ -83,6 +83,7 @@ import {
   type VarGroupSelection,
 } from '../services/var_group_helpers';
 import { applyNamespaceCustomizationChange } from '../services/apply_namespace_customization';
+import { applyIlmPolicyChange } from '../services/apply_ilm_policy';
 
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 
@@ -328,6 +329,31 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       packageInfo.title ?? packageInfo.name
     );
   }, [savedPackagePolicy, packageInfo, installedNamespaceCustomizationEnabledFor, notifications]);
+
+  // ILM policy. Selected value is tracked via ref and applied after the policy save.
+  const ilmPolicyRef = useRef<string | undefined>(undefined);
+  const ilmPolicyAppliedRef = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (!savedPackagePolicy || !packageInfo) {
+      return;
+    }
+    if (ilmPolicyAppliedRef.current === savedPackagePolicy.policy.id) {
+      return;
+    }
+    ilmPolicyAppliedRef.current = savedPackagePolicy.policy.id;
+    const selectedIlmPolicy = ilmPolicyRef.current;
+    ilmPolicyRef.current = undefined;
+    void applyIlmPolicyChange(
+      packageInfo.name,
+      packageInfo.version,
+      savedPackagePolicy.policy.namespace,
+      selectedIlmPolicy,
+      packageInfo,
+      notifications,
+      packageInfo.title ?? packageInfo.name
+    );
+  }, [savedPackagePolicy, packageInfo, notifications]);
 
   // Retrieve agent count
   const agentPolicyIds = agentPolicies.map((policy) => policy.id);
@@ -604,6 +630,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             agentPolicies={agentPolicies}
             onNamespaceCustomizationEnabledChange={(enabled) => {
               namespaceCustomizationEnabledRef.current = enabled;
+            }}
+            onIlmPolicyChange={(ilmPolicy) => {
+              ilmPolicyRef.current = ilmPolicy;
             }}
           />
 
