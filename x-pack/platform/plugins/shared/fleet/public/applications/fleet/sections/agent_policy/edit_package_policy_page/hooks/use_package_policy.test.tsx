@@ -12,10 +12,15 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import { omit } from 'lodash';
 
-import { sendGetPackageInfoByKey, sendUpgradePackagePolicyDryRun } from '../../../../../../hooks';
+import {
+  sendGetAgentlessPolicy,
+  sendGetPackageInfoByKey,
+  sendUpdateAgentlessPolicy,
+  sendUpgradePackagePolicyDryRun,
+} from '../../../../../../hooks';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { usePackagePolicyWithRelatedData } from './use_package_policy';
@@ -51,6 +56,8 @@ const mockPackagePolicy = {
 
 jest.mock('../../../../../../hooks/use_request', () => ({
   ...jest.requireActual('../../../../../../hooks/use_request'),
+  sendGetAgentlessPolicy: jest.fn(),
+  sendUpdateAgentlessPolicy: jest.fn(),
   sendGetOnePackagePolicy: (packagePolicyId: string) => {
     if (packagePolicyId === 'package-policy-1') {
       return {
@@ -578,5 +585,96 @@ describe('usePackagePolicy', () => {
         },
       }
     `);
+  });
+});
+
+describe('usePackagePolicy - agentless', () => {
+  // The GET/LIST agentless payload uses simplified object-style inputs. The real inverse mapper
+  // (`agentlessPolicyToPackagePolicy`) runs here against the mocked nginx package info, so these
+  // tests exercise the hook's agentless branching end to end.
+  const agentlessPolicy = {
+    id: 'agentless-1',
+    name: 'agentless-1',
+    namespace: 'default',
+    description: 'Agentless nginx',
+    package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
+    inputs: {},
+    created_at: '2026-01-01T00:00:00.000Z',
+    created_by: 'creator',
+    updated_at: '2026-02-02T00:00:00.000Z',
+    updated_by: 'updater',
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(sendGetAgentlessPolicy).mockResolvedValue({ item: agentlessPolicy } as any);
+  });
+
+  it('reads through the agentless API and skips the upgrade dry-run', async () => {
+    const renderer = createFleetTestRendererMock();
+    const { result } = renderer.renderHook(() =>
+      usePackagePolicyWithRelatedData('agentless-1', { isAgentless: true })
+    );
+
+    await waitFor(() => expect(result.current.packagePolicy?.name).toBe('agentless-1'));
+
+    expect(sendGetAgentlessPolicy).toHaveBeenCalledWith('agentless-1');
+    // Agentless deployments have no user-facing agent policy and no edit-page upgrade flow.
+    expect(sendUpgradePackagePolicyDryRun).not.toHaveBeenCalled();
+    // The API identifiers/timestamps are carried onto the "original" baseline for edit extensions.
+    expect(result.current.originalPackagePolicy).toEqual(
+      expect.objectContaining({
+        id: 'agentless-1',
+        created_at: '2026-01-01T00:00:00.000Z',
+        created_by: 'creator',
+        updated_at: '2026-02-02T00:00:00.000Z',
+        updated_by: 'updater',
+      })
+    );
+  });
+
+  it('saves through the agentless API', async () => {
+    jest.mocked(sendUpdateAgentlessPolicy).mockResolvedValue({ item: { id: 'agentless-1' } } as any);
+
+    const renderer = createFleetTestRendererMock();
+    const { result } = renderer.renderHook(() =>
+      usePackagePolicyWithRelatedData('agentless-1', { isAgentless: true })
+    );
+    await waitFor(() => expect(result.current.packagePolicy?.name).toBe('agentless-1'));
+
+    let saveResult: any;
+    await act(async () => {
+      saveResult = await result.current.savePackagePolicy();
+    });
+
+    // The full-replace PUT body is produced by `toNewAgentlessPolicy` from the loaded policy.
+    expect(sendUpdateAgentlessPolicy).toHaveBeenCalledWith(
+      'agentless-1',
+      expect.objectContaining({
+        name: 'agentless-1',
+        package: expect.objectContaining({ name: 'nginx' }),
+      })
+    );
+    expect(saveResult).toEqual({ data: { item: { id: 'agentless-1' } }, error: null });
+    // Never falls back to the package-policy update API for agentless policies.
+    expect(sendGetPackageInfoByKey).toHaveBeenCalled();
+  });
+
+  it('normalizes agentless save failures into the { data, error } shape', async () => {
+    const requestError = Object.assign(new Error('conflict'), { statusCode: 409 });
+    jest.mocked(sendUpdateAgentlessPolicy).mockRejectedValue(requestError);
+
+    const renderer = createFleetTestRendererMock();
+    const { result } = renderer.renderHook(() =>
+      usePackagePolicyWithRelatedData('agentless-1', { isAgentless: true })
+    );
+    await waitFor(() => expect(result.current.packagePolicy?.name).toBe('agentless-1'));
+
+    let saveResult: any;
+    await act(async () => {
+      saveResult = await result.current.savePackagePolicy();
+    });
+
+    expect(saveResult).toEqual({ data: undefined, error: requestError });
   });
 });

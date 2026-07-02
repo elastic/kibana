@@ -62,7 +62,8 @@ export function useDevToolsRequest({
               ...packagePolicy,
               create_dataset_templates: createDatasetTemplates,
             },
-            varGroups
+            varGroups,
+            packageInfo
           ),
           i18n.translate(
             'xpack.fleet.editPackagePolicy.devtoolsRequestAgentlessPolicyDescription',
@@ -114,7 +115,12 @@ export function useDevToolsRequest({
     // package-policy update, matching the actual request the edit form now issues.
     if (packagePolicyId && packagePolicy.supports_agentless) {
       return [
-        generateUpdateAgentlessPolicyDevToolsRequest(packagePolicyId, packagePolicy, varGroups),
+        generateUpdateAgentlessPolicyDevToolsRequest(
+          packagePolicyId,
+          packagePolicy,
+          varGroups,
+          packageInfo
+        ),
         i18n.translate(
           'xpack.fleet.editPackagePolicy.devtoolsRequestUpdateAgentlessPolicyDescription',
           {
@@ -150,6 +156,7 @@ export function useDevToolsRequest({
     packagePolicyId,
     createDatasetTemplates,
     varGroups,
+    packageInfo,
   ]);
 
   return { showDevtoolsRequest, devtoolRequest, devtoolRequestDescription };
