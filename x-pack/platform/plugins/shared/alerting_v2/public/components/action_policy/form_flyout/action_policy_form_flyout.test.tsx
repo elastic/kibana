@@ -27,6 +27,32 @@ jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => key,
 }));
 
+const INLINE_DEFS = [
+  {
+    id: 'email',
+    label: 'Email',
+    iconType: 'email',
+    connectorTypeId: '.email',
+    paramsTemplate: 'to: ""\n',
+  },
+  {
+    id: 'slack',
+    label: 'Slack',
+    iconType: 'logoSlack',
+    connectorTypeId: '.slack',
+    paramsTemplate: 'message: ""\n',
+  },
+];
+
+jest.mock('@kbn/alerting-v2-rule-form', () => ({
+  INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
+  getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
+  isActionValid: () => true,
+  InlineWorkflowEditor: ({ value }: { value: { id: string } }) => (
+    <div data-test-subj={`inlineWorkflowEditor-${value.id}`} />
+  ),
+}));
+
 jest.mock('../form/components/matcher_input', () => ({
   MatcherInput: (props: {
     value: string;

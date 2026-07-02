@@ -25,6 +25,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { FormProvider } from 'react-hook-form';
 import { ActionPolicyForm } from '../form/action_policy_form';
+import { toCreatePayload, toUpdatePayload } from '../form/form_utils';
+import type { ActionPolicyFormState } from '../form/types';
 import { useActionPolicyForm } from '../form/use_action_policy_form';
 
 const FLYOUT_TITLE_ID = 'actionPolicyFlyoutTitle';
@@ -46,8 +48,9 @@ export const ActionPolicyFormFlyout = ({
   isLoading = false,
   initialValues,
 }: ActionPolicyFormFlyoutProps) => {
-  const onSubmitCreate = (data: CreateActionPolicyData) => onSave?.(data);
-  const onSubmitUpdate = (id: string, data: UpdateActionPolicyBody) => onUpdate?.(id, data);
+  const onSubmitCreate = (values: ActionPolicyFormState) => onSave?.(toCreatePayload(values));
+  const onSubmitUpdate = (id: string, values: ActionPolicyFormState, version: string) =>
+    onUpdate?.(id, toUpdatePayload(values, version));
 
   const { methods, isEditMode, isSubmitEnabled, handleSubmit } = useActionPolicyForm({
     initialValues,
