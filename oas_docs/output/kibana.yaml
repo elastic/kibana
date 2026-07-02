@@ -132695,8 +132695,10 @@ components:
           format: double
           type: number
         subtype:
+          maxLength: 100
           type: string
         type:
+          maxLength: 100
           type: string
       required:
         - type
