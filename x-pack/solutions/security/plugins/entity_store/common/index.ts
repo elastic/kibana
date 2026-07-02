@@ -9,11 +9,12 @@
  * Lightweight `@kbn/entity-store/common` barrel (webpack `common` entry).
  * Keeps page-load size small: no euid / streamlang here — use `euid_helpers` or `loadEuidApi()`.
  *
+ * Public API for the entity_store plugin. Exports only constants and types needed
+ * on every load (including browser). For EUID translation helpers
+ * (DSL/ESQL/Painless, entity types), use common/euid_helpers.
+ *
  * @example
  * import { euid, type EntityType } from '@kbn/entity-store/common/euid_helpers';
- * Public API for the entity_store plugin.
- * Exports only constants and types needed on every load (including browser).
- * For EUID translation helpers (DSL/ESQL/Painless, entity types), use common/euid_helpers.
  */
 
 import { z } from '@kbn/zod/v4';
@@ -80,6 +81,9 @@ export {
   GetEntityMaintainersResponse,
 } from './entity_maintainers';
 
+export { RESOLUTION_RULE_IDS } from './domain/resolution_rules/constants';
+export type { ResolutionRuleId } from './domain/resolution_rules/constants';
+
 export const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
     return error.message;
@@ -112,6 +116,7 @@ export {
   ENTITY_LATEST,
   ENTITY_UPDATES,
   ENTITY_HISTORY,
+  ENTITY_METADATA,
   ENTITY_BASE_PREFIX,
   ENTITY_SCHEMA_VERSION_V2,
   MAPPING_VERSION,
@@ -119,4 +124,13 @@ export {
   getEntitiesAlias,
   getLatestEntitiesIndexName,
   getLatestEntityIndexPattern,
+  getEntityMetadataAlias,
+  getMetadataEntityIndexPattern,
 } from './domain/entity_index';
+
+export { RELATIONSHIP_KINDS } from './domain/entity_metadata/relationship_metadata';
+export type {
+  RelationshipKind,
+  RelationshipMetadataDoc,
+  RelationshipMetadataMaintainer,
+} from './domain/entity_metadata/relationship_metadata';

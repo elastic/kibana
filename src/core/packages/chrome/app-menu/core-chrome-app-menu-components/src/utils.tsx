@@ -16,7 +16,9 @@ import {
   type EuiContextMenuPanelItemDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { AppMenuBadge } from './components/app_menu_badge';
@@ -30,6 +32,7 @@ import type {
   AppMenuSwitch,
 } from './types';
 import { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
+import { APP_MENU_TEST_SUBJECTS, getAppMenuItemTestSubj } from './test_subjects';
 
 const sortByOrder = <T extends { order: number }>(items: T[]): T[] =>
   [...items].sort((a, b) => a.order - b.order);
@@ -85,7 +88,11 @@ export const getAppMenuItems = ({
 }: {
   config?: AppMenuConfig;
   hasStaticItems?: boolean;
-}) => {
+}): {
+  displayedItems: AppMenuItemType[];
+  overflowItems: AppMenuItemType[];
+  shouldOverflow: boolean;
+} => {
   if (!config || !config.items) {
     return {
       displayedItems: [],
@@ -160,7 +167,9 @@ export const createReturnFocus =
       parentElement.focus();
       return;
     }
-    document.querySelector<HTMLElement>('[data-test-subj="app-menu-overflow-button"]')?.focus();
+    document
+      .querySelector<HTMLElement>(`[data-test-subj="${APP_MENU_TEST_SUBJECTS.overflowButton}"]`)
+      ?.focus();
   };
 
 export const mapAppMenuItemToPanelItem = (
@@ -175,8 +184,10 @@ export const mapAppMenuItemToPanelItem = (
     tooltipTitle: item?.tooltipTitle,
   });
 
+  const loading = Boolean(item.isLoading);
+
   const handleClick = (event: MouseEvent) => {
-    if (isDisabled(item?.disableButton)) {
+    if (isDisabled(item?.disableButton) || loading) {
       return;
     }
 
@@ -200,14 +211,13 @@ export const mapAppMenuItemToPanelItem = (
       ? getRouterLinkProps({ href: item.href, onClick: handleClick })
       : { onClick: hasClickHandler ? handleClick : undefined };
 
+  const itemTestSubj = item.testId ?? getAppMenuItemTestSubj(item.id);
+
   const itemName: ReactNode = item.labelBadgeText ? (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>{upperFirst(item.label)}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <AppMenuBadge
-          text={item.labelBadgeText}
-          data-test-subj={item.testId ? `${item.testId}-badge` : undefined}
-        />
+        <AppMenuBadge text={item.labelBadgeText} data-test-subj={`${itemTestSubj}-badge`} />
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
@@ -217,17 +227,22 @@ export const mapAppMenuItemToPanelItem = (
   return {
     key: item.id,
     name: itemName,
-    icon: item?.iconType,
+    icon: loading ? (
+      <EuiLoadingSpinner size="m" data-test-subj={`${itemTestSubj}-loading`} />
+    ) : (
+      item?.iconType
+    ),
     ...routerLinkProps,
     href: item?.href,
     target: item?.href ? item?.target : undefined,
-    disabled: isDisabled(item?.disableButton),
-    'data-test-subj': item?.testId,
+    disabled: isDisabled(item?.disableButton) || loading,
+    'data-test-subj': itemTestSubj,
     toolTipContent: content,
     toolTipProps: {
       title,
     },
     ...(childPanelId !== undefined && { panel: childPanelId }),
+    ...(item?.isDestructive && { color: 'danger' }),
   };
 };
 
@@ -291,22 +306,38 @@ export const getPopoverSwitchItems = ({
   switchConfig: AppMenuSwitch;
 }): EuiContextMenuPanelItemDescriptor[] => {
   const separator = createSeparatorItem('switch-separator');
+  const { title, content } = getTooltip({
+    tooltipContent: switchConfig.tooltipContent,
+    tooltipTitle: switchConfig.tooltipTitle,
+  });
+  const showTooltip = Boolean(content || title);
 
   return [
     separator,
     {
       key: `switch-${switchConfig.id}`,
-      renderItem: () => (
-        <EuiSwitch
-          id={switchConfig.id}
-          label={switchConfig.label}
-          labelProps={switchConfig.labelProps}
-          checked={switchConfig.checked}
-          onChange={(e) => switchConfig.onChange(e.target.checked)}
-          compressed
-          data-test-subj={switchConfig['data-test-subj'] ?? 'app-menu-switch'}
-        />
-      ),
+      renderItem: () => {
+        const switchElement = (
+          <EuiSwitch
+            id={switchConfig.id}
+            label={switchConfig.label}
+            labelProps={switchConfig.labelProps}
+            checked={switchConfig.checked}
+            onChange={(e) => switchConfig.onChange(e.target.checked)}
+            disabled={switchConfig.disabled}
+            compressed
+            data-test-subj={switchConfig['data-test-subj'] ?? APP_MENU_TEST_SUBJECTS.switch}
+          />
+        );
+
+        return showTooltip ? (
+          <EuiToolTip content={content} title={title}>
+            {switchElement}
+          </EuiToolTip>
+        ) : (
+          switchElement
+        );
+      },
     },
   ];
 };

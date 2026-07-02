@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowDetailDto } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 
 import { mapWorkflowHistoryItem } from './map_workflow_history_item';
 import { WorkflowChangeHistoryDisabledError } from './workflow_change_history_disabled_error';
+import type { WorkflowChangesHistoryResponse } from '../../common/lib/workflow_change_history/types';
 import type { IWorkflowChangeHistoryService } from '../services/workflow_change_history_types';
-import type { WorkflowChangesHistoryResponse } from '../types/workflow_change_history';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 20;
 
 export interface GetWorkflowChangeHistoryDeps {
   changeHistoryService: IWorkflowChangeHistoryService;
-  getWorkflow: (id: string, spaceId: string) => Promise<WorkflowDetailDto | null>;
+  getWorkflowSource: (id: string, spaceId: string) => Promise<{ spaceId: string } | null>;
   workflowVersioningEnabled: boolean;
 }
 
@@ -55,12 +55,15 @@ export const getHistoryForWorkflow = async (
 ): Promise<WorkflowChangesHistoryResponse> => {
   assertWorkflowChangeHistoryEnabled(deps.changeHistoryService, deps.workflowVersioningEnabled);
 
-  const workflow = await deps.getWorkflow(workflowId, spaceId);
+  const workflow = await deps.getWorkflowSource(workflowId, spaceId);
   if (!workflow) {
     throw new WorkflowNotFoundError(workflowId);
   }
 
-  const result = await deps.changeHistoryService.getHistory(spaceId, workflowId, {
+  const historySpaceId =
+    workflow.spaceId === GLOBAL_WORKFLOW_SPACE_ID ? GLOBAL_WORKFLOW_SPACE_ID : spaceId;
+
+  const result = await deps.changeHistoryService.getHistory(historySpaceId, workflowId, {
     from: (page - 1) * perPage,
     size: perPage,
   });
