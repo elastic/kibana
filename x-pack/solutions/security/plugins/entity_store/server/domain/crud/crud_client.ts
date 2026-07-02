@@ -27,7 +27,7 @@ import {
   EntityStoreNotInstalledError,
 } from '../errors';
 import { buildEntityListSourceFilter } from '../../../common/domain/definitions/entity_list_source';
-import { validateAndTransformDoc, type ValidateAndTransformDocOptions } from './utils';
+import { validateAndTransformDoc } from './utils';
 import { runWithSpan } from '../../telemetry/traces';
 import {
   searchEntitiesV2,
@@ -52,8 +52,6 @@ export interface ListEntitiesParams {
   source?: string[] | undefined;
   searchAfter?: Array<string | number>;
   fields?: (QueryDslFieldAndFormat | string)[];
-  /** When true, return `entity.attributes.summary` in list/search hits (excluded by default). */
-  includeSummary?: boolean;
   /** Page/search mode (unified latest index); mutually exclusive with KQL `filter` / cursor params on the route. */
   entityTypes?: EntityType[];
   filterQuery?: string;
@@ -473,7 +471,6 @@ export class CRUDClient {
         perPage: p.perPage ?? 10,
         sortField: p.sortField ?? '@timestamp',
         sortOrder: p.sortOrder ?? 'desc',
-        includeSummary: p.includeSummary,
       });
       return {
         entities: records,
@@ -486,7 +483,7 @@ export class CRUDClient {
 
     this.logger.debug('Listing entities (cursor mode)');
 
-    const { filter, size, searchAfter, source, fields, includeSummary } = p;
+    const { filter, size, searchAfter, source, fields } = p;
 
     let query: QueryDslQueryContainer = { match_all: {} };
     if (filter) {
@@ -505,7 +502,6 @@ export class CRUDClient {
       search_after: searchAfter,
       ...(fields && fields.length > 0 ? { fields } : {}),
       ...buildEntityListSourceFilter({
-        includeSummary,
         sourceIncludes: source,
       }),
     });

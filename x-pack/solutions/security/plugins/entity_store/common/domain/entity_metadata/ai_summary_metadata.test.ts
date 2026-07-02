@@ -158,12 +158,9 @@ describe('drift guard: AiSummaryMetadataDoc stays in sync with component templat
     expect(exhaustive).toBe(true);
   });
 
-  it.each(AI_SUMMARY_FLAT_TEMPLATE_PATHS)(
-    'declares %s on the component template',
-    (path) => {
-      expect(properties[path]).toBeDefined();
-    }
-  );
+  it.each(AI_SUMMARY_FLAT_TEMPLATE_PATHS)('declares %s on the component template', (path) => {
+    expect(properties[path]).toBeDefined();
+  });
 
   it('declares ai_summary.highlights as an object mapping', () => {
     expect(properties['ai_summary.highlights']).toBeDefined();

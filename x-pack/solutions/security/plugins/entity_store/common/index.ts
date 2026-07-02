@@ -109,7 +109,6 @@ export type {
   EntityField,
   EngineMetadata,
   Asset,
-  EntitySummaryAttribute,
 } from './domain/definitions/entity.gen';
 export type {
   EntitySummaryHighlight,
@@ -119,6 +118,8 @@ export type {
   EntitySummaryStalenessEntitySnapshot,
   SaveEntityAiSummaryParams,
   SaveEntityAiSummarySummary,
+  PersistedEntityAiSummary,
+  GetPersistedAiSummaryResponse,
 } from './domain/definitions/entity_summary_staleness';
 export {
   ENTITY_SUMMARY_STALENESS_SIGNALS,
@@ -126,10 +127,7 @@ export {
   buildEntitySummaryStaleness,
   computeEntitySummaryStalenessReasons,
 } from './domain/definitions/entity_summary_staleness';
-export {
-  ENTITY_ATTRIBUTES_SUMMARY_SOURCE_PATH,
-  buildEntityListSourceFilter,
-} from './domain/definitions/entity_list_source';
+export { buildEntityListSourceFilter } from './domain/definitions/entity_list_source';
 
 export interface IdentitySourceFields {
   /** Fields that participate in identity (EUID composition). */

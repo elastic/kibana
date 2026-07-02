@@ -82,17 +82,13 @@ export const entityDetailsAiSummaryRoute = ({
           const spaceId = securitySolution.getSpaceId();
 
           // Derive the author server-side — never trust the client-supplied value.
-          const generatedBy =
-            coreContext.security.authc.getCurrentUser()?.username ?? 'unknown';
+          const generatedBy = coreContext.security.authc.getCurrentUser()?.username ?? 'unknown';
 
           // Write via the internal ES client so the user's own metadata index write
           // privilege is not required. Generation is fully backend-produced; the user
           // cannot supply arbitrary content through this route.
           const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
-          const metadataClient = entityStore.createEntityMetadataClient(
-            internalEsClient,
-            spaceId
-          );
+          const metadataClient = entityStore.createEntityMetadataClient(internalEsClient, spaceId);
 
           const doc: AiSummaryMetadataDoc = {
             '@timestamp': new Date().toISOString(),

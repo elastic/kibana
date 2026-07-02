@@ -137,10 +137,10 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       allowAPIUpdate: true,
     }),
     /*
-     * NOTE: entity.attributes.summary is intentionally excluded from ESQL extraction.
-     * It is API-written only (crudClient.updateEntity with force=true).
-     * Application schema: entity.schema.yaml / entity.gen.ts.
-     * Elasticsearch mappings: entity_summary_index_mappings.ts (latest component templates).
+     * NOTE: the AI summary is not an entity field. It persists to the entity metadata
+     * datastream (.entities.v2.metadata.security_{namespace}) via EntityMetadataClient
+     * as an immutable `ai_summary_generated` document, and is read back from there — it
+     * is never stored on the latest-index entity document.
      */
 
     // LIFECYCLE ------------------------------------------------------------

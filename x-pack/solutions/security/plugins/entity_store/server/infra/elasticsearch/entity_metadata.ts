@@ -58,3 +58,41 @@ export const bulkCreateEntityMetadataDocs = async <TDoc extends object>(
 
   return { successful, failed, dropsByType: dropAggregator.summary() };
 };
+
+/**
+ * Read the most recent metadata doc for a given entity and event action.
+ *
+ * The metadata datastream is append-only, so multiple docs of the same
+ * `event.action` can exist for one `entity.id` (e.g. one per AI-summary
+ * generation). This returns the latest by `@timestamp` ("latest wins"),
+ * which is what single-entity views (the flyout) need.
+ *
+ * The datastream may not exist yet (no docs written in this space), so the
+ * search tolerates missing indices rather than throwing.
+ */
+export const getLatestEntityMetadataDoc = async <TDoc>(
+  esClient: ElasticsearchClient,
+  params: {
+    index: string;
+    entityId: string;
+    eventAction: string;
+  }
+): Promise<TDoc | null> => {
+  const response = await esClient.search<TDoc>({
+    index: params.index,
+    size: 1,
+    sort: [{ '@timestamp': { order: 'desc' } }],
+    query: {
+      bool: {
+        filter: [
+          { term: { 'event.action': params.eventAction } },
+          { term: { 'entity.id': params.entityId } },
+        ],
+      },
+    },
+    allow_no_indices: true,
+    ignore_unavailable: true,
+  });
+
+  return response.hits.hits[0]?._source ?? null;
+};

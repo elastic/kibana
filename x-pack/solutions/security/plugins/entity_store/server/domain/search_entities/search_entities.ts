@@ -8,7 +8,6 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { set } from '@kbn/safer-lodash-set';
-import { buildEntityListSourceFilter } from '../../../common/domain/definitions/entity_list_source';
 import { getLatestEntitiesIndexName, type Entity, type EntityType } from '../../../common';
 
 const MAX_SEARCH_RESPONSE_SIZE = 10_000;
@@ -54,8 +53,6 @@ export interface SearchEntitiesV2Params {
   perPage: number;
   sortField: string;
   sortOrder: SortOrder;
-  /** When true, return `entity.attributes.summary` in hits (excluded by default). */
-  includeSummary?: boolean;
 }
 
 export interface SearchEntitiesV2Inspect {
@@ -79,17 +76,8 @@ export async function searchEntitiesV2(
     namespace: string;
   } & SearchEntitiesV2Params
 ): Promise<SearchEntitiesV2Result> {
-  const {
-    esClient,
-    namespace,
-    entityTypes,
-    filterQuery,
-    page,
-    perPage,
-    sortField,
-    sortOrder,
-    includeSummary,
-  } = options;
+  const { esClient, namespace, entityTypes, filterQuery, page, perPage, sortField, sortOrder } =
+    options;
 
   const index = [getLatestEntitiesIndexName(namespace)];
   const from = (page - 1) * perPage;
@@ -118,7 +106,6 @@ export async function searchEntitiesV2(
     from,
     sort,
     ignore_unavailable: true,
-    ...buildEntityListSourceFilter({ includeSummary }),
   });
 
   const { hits } = response;

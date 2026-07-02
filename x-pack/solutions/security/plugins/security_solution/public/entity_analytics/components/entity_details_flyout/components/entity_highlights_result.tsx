@@ -20,7 +20,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
@@ -57,7 +56,6 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
   stalenessDisplayMode = 'banner',
   onRefresh,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const anonymizedResult = useAnonymizedResponse(assistantResult, showAnonymizedValues);
   const textToCopy = useMemo(() => formatTextToCopy(anonymizedResult), [anonymizedResult]);
 

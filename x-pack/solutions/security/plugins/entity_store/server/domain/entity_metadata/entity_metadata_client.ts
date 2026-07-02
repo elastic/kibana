@@ -10,7 +10,10 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { getMetadataEntitiesDataStreamName } from '../asset_manager/metadata_data_stream';
 import { runWithSpan } from '../../telemetry/traces';
 import type { BulkCreateEntityMetadataDocsResult } from '../../infra/elasticsearch/entity_metadata';
-import { bulkCreateEntityMetadataDocs } from '../../infra/elasticsearch/entity_metadata';
+import {
+  bulkCreateEntityMetadataDocs,
+  getLatestEntityMetadataDoc,
+} from '../../infra/elasticsearch/entity_metadata';
 
 interface EntityMetadataClientDependencies {
   logger: Logger;
@@ -87,5 +90,37 @@ export class EntityMetadataClient {
 
     this.logger.debug(`Appended ${successful} entity metadata docs, dropped ${failed}`);
     return { successful, failed, dropsByType };
+  }
+
+  /**
+   * Returns the most recent metadata doc for `entityId` matching `eventAction`
+   * ("latest wins" by `@timestamp`), or `null` if none exists. Event-action
+   * agnostic: the caller owns `TDoc` and supplies the discriminating action.
+   *
+   * Runs against whichever ES client this instance was constructed with — pass
+   * an `asCurrentUser` client to honour the caller's own index read privileges
+   * (gated read), or `asInternalUser` for a system-level read.
+   */
+  public async getLatestByEntityId<TDoc extends object>({
+    entityId,
+    eventAction,
+  }: {
+    entityId: string;
+    eventAction: string;
+  }): Promise<TDoc | null> {
+    return runWithSpan({
+      name: 'entityStore.metadata.get_latest_by_entity_id',
+      namespace: this.namespace,
+      attributes: {
+        'entity_store.metadata.operation': 'get_latest_by_entity_id',
+        'entity_store.metadata.event_action': eventAction,
+      },
+      cb: () =>
+        getLatestEntityMetadataDoc<TDoc>(this.esClient, {
+          index: getMetadataEntitiesDataStreamName(this.namespace),
+          entityId,
+          eventAction,
+        }),
+    });
   }
 }

@@ -356,14 +356,9 @@ describe('crud_client utils', () => {
 
       const doc: Entity = {
         entity: {
-          id: 'entity-summary-update',
+          id: 'entity-preserve-timestamp-update',
           attributes: {
-            summary: {
-              highlights: [{ title: 'T', text: 'x' }],
-              generated_at: 1,
-              generated_by: 'user',
-              staleness: { enabled_signals: [], snapshot: {} },
-            },
+            managed: true,
           },
         },
       };

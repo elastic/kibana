@@ -9,12 +9,12 @@ import type { AnonymizationFieldResponse, Replacements } from '@kbn/elastic-assi
 import type { ToolSchema } from '@kbn/inference-common';
 import { isInferenceRequestAbortedError } from '@kbn/inference-common';
 import { i18n } from '@kbn/i18n';
-import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../../common/constants';
 import {
-  type EntitySummaryAttribute,
+  type PersistedEntityAiSummary,
   type EntitySummaryStalenessEntitySnapshot,
   buildEntitySummaryStaleness,
 } from '@kbn/entity-store/common';
+import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -65,10 +65,12 @@ type AssistantResult = {
 } | null;
 
 /**
- * Converts a stored entity store summary back into the assistantResult shape
- * so the flyout can display a persisted summary without re-generating.
+ * Converts a persisted summary (from the metadata datastream) back into the
+ * assistantResult shape so the flyout can display it without re-generating.
  */
-const buildResultFromStoredSummary = (storedSummary: EntitySummaryAttribute): AssistantResult => ({
+const buildResultFromStoredSummary = (
+  storedSummary: PersistedEntityAiSummary
+): AssistantResult => ({
   response: {
     // Guard against corrupted stored data — highlights must be an array
     highlights: Array.isArray(storedSummary.highlights) ? storedSummary.highlights : [],
@@ -90,17 +92,20 @@ export const useFetchEntityDetailsHighlights = ({
   storedSummary,
   entitySnapshot,
   refetchEntityRecord,
+  refetchPersistedSummary,
   promptVariant,
 }: {
   connectorId: string;
   anonymizationFields: AnonymizationFieldResponse[];
   entityType: string;
   entityIdentifier: string;
-  storedSummary?: EntitySummaryAttribute | null;
+  storedSummary?: PersistedEntityAiSummary | null;
   /** Current entity signal values — snapshotted into the summary at generation time for staleness detection. */
   entitySnapshot?: EntitySummaryStalenessEntitySnapshot | null;
-  /** Refetch entity store record after persist so `storedSummary` and staleness snapshot stay in sync. */
+  /** Refetch entity store record after persist so the staleness snapshot stays in sync. */
   refetchEntityRecord?: () => void;
+  /** Refetch the persisted summary from the metadata datastream after a new one is saved. */
+  refetchPersistedSummary?: () => void;
   /** POC: dev-only A/B selector forwarded to the highlights route. Omit for the packaged prompt. */
   promptVariant?: 'default' | 'new';
 }) => {
@@ -222,6 +227,9 @@ export const useFetchEntityDetailsHighlights = ({
         .then(() => {
           setGenerationBaseline(null);
           refetchEntityRecord?.();
+          // Pull the just-persisted summary from the metadata datastream so a
+          // reopen (or another user) reads the same document, not a stale cache.
+          refetchPersistedSummary?.();
         })
         .catch((persistError: Error) => {
           // Persist is best-effort — the in-memory result is still usable this session.
@@ -258,6 +266,7 @@ export const useFetchEntityDetailsHighlights = ({
     currentUser,
     entitySnapshot,
     refetchEntityRecord,
+    refetchPersistedSummary,
     promptVariant,
   ]);
 

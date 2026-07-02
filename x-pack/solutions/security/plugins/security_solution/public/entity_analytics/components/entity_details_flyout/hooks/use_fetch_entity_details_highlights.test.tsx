@@ -12,6 +12,7 @@ import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type { EntityHighlightsResponse } from '../types';
 
 const mockFetchEntityDetailsHighlights = jest.fn();
+const mockSaveEntityAiSummary = jest.fn();
 const mockAddError = jest.fn();
 const mockInferenceOutput = jest.fn();
 
@@ -20,6 +21,7 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 jest.mock('../../../api/api', () => ({
   useEntityAnalyticsRoutes: () => ({
     fetchEntityDetailsHighlights: mockFetchEntityDetailsHighlights,
+    saveEntityAiSummary: mockSaveEntityAiSummary,
   }),
 }));
 
@@ -67,6 +69,7 @@ const mockSuccessfulInferenceOutput: {
 describe('useFetchEntityDetailsHighlights', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSaveEntityAiSummary.mockResolvedValue({ created: true });
 
     mockUseKibana.mockReturnValue({
       services: {
@@ -87,6 +90,7 @@ describe('useFetchEntityDetailsHighlights', () => {
       abortStream: expect.any(Function),
       result: null,
       error: null,
+      generationBaseline: null,
     });
   });
 
@@ -124,6 +128,7 @@ describe('useFetchEntityDetailsHighlights', () => {
       response: mockSuccessfulInferenceOutput.output,
       replacements: mockEntityDetailsResponse.replacements,
       generatedAt: expect.any(Number),
+      generatedBy: expect.any(String),
     });
 
     // Verify no errors were added

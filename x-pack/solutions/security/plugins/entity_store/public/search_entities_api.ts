@@ -15,8 +15,6 @@ export interface SearchEntitiesFromEntityStoreParams {
   perPage: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
-  /** When true, include persisted AI summary in hits (excluded by default). */
-  includeSummary?: boolean;
 }
 
 export interface SearchEntitiesFromEntityStoreResponse {
@@ -46,7 +44,6 @@ export async function searchEntitiesFromEntityStore(
       page: params.page,
       per_page: params.perPage,
       filterQuery: params.filterQuery,
-      ...(params.includeSummary ? { include_summary: true } : {}),
     },
     signal: options?.signal,
   });

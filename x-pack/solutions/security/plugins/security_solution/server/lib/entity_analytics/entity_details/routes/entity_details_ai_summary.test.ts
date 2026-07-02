@@ -52,8 +52,12 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
     mockCreateEntityMetadataClient.mockClear();
 
     // Set up authenticated user
-    context.core.security.authc.getCurrentUser = jest.fn().mockReturnValue({ username: 'test-user' });
-    context.securitySolution.getSpaceId = jest.fn().mockReturnValue('default');
+    (
+      context.core as unknown as { security: { authc: { getCurrentUser: jest.Mock } } }
+    ).security.authc.getCurrentUser = jest.fn().mockReturnValue({ username: 'test-user' });
+    (context.securitySolution as unknown as { getSpaceId: jest.Mock }).getSpaceId = jest
+      .fn()
+      .mockReturnValue('default');
 
     mockGetStartServices.mockResolvedValue([
       {
@@ -74,7 +78,7 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
       router: server.router,
       getStartServices: mockGetStartServices,
       logger,
-    } as Parameters<typeof entityDetailsAiSummaryRoute>[0]);
+    } as unknown as Parameters<typeof entityDetailsAiSummaryRoute>[0]);
   });
 
   afterEach(() => {
@@ -154,7 +158,9 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
   });
 
   it('falls back to "unknown" for ai_summary.generated_by when no authenticated user', async () => {
-    context.core.security.authc.getCurrentUser = jest.fn().mockReturnValue(null);
+    (
+      context.core as unknown as { security: { authc: { getCurrentUser: jest.Mock } } }
+    ).security.authc.getCurrentUser = jest.fn().mockReturnValue(null);
 
     const request = buildRequest();
     await server.inject(request, context);

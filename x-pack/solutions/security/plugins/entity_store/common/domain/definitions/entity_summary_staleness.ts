@@ -5,26 +5,45 @@
  * 2.0.
  */
 
-import type { EntitySummaryAttribute } from './entity.gen';
-
 /**
- * Staleness signal ids stored on `entity.attributes.summary.staleness.enabled_signals`.
- * Snapshot property names in `entity.schema.yaml` must stay in sync with these values.
+ * Staleness signal ids compared when deciding whether a persisted AI summary is stale.
+ * Snapshot property names on {@link EntitySummaryStalenessSnapshot} must stay in sync.
  */
 export const ENTITY_SUMMARY_STALENESS_SIGNALS = ['risk_score'] as const;
 
 export type EntitySummaryStalenessSignal = (typeof ENTITY_SUMMARY_STALENESS_SIGNALS)[number];
 
-export type EntitySummaryStaleness = NonNullable<EntitySummaryAttribute['staleness']>;
+/** A single structured highlight section produced by the LLM. */
+export interface EntitySummaryHighlight {
+  title: string;
+  text: string;
+}
 
-export type EntitySummaryStalenessSnapshot = EntitySummaryStaleness['snapshot'];
+/**
+ * Signal values captured at generation time. Property names correspond to staleness
+ * signal ids; only `risk_score` is compared today (see the registry below), the others
+ * are captured for the deferred staleness-signal-parity follow-up.
+ */
+export interface EntitySummaryStalenessSnapshot {
+  /** `entity.risk.calculated_score_norm` at generation time (flyout risk gauge). */
+  risk_score?: number | null;
+  /** `entity.behaviors.anomaly_job_ids` at generation time. */
+  anomaly_job_ids?: string[] | null;
+  /** `entity.behaviors.rule_names` at generation time. */
+  rule_names?: string[] | null;
+}
 
-export type EntitySummaryHighlight = EntitySummaryAttribute['highlights'][number];
+/** Policy and snapshot used for summary staleness checks. */
+export interface EntitySummaryStaleness {
+  /** Signal ids to compare when deciding if the summary is stale. */
+  enabled_signals: string[];
+  snapshot: EntitySummaryStalenessSnapshot;
+}
 
 /** POST body for saving a summary. The API route adds `generated_by` from the authenticated user. */
 export interface SaveEntityAiSummarySummary {
-  highlights: EntitySummaryAttribute['highlights'];
-  recommendedActions?: EntitySummaryAttribute['recommendedActions'];
+  highlights: EntitySummaryHighlight[];
+  recommendedActions?: string[] | null;
   generated_at: number;
   staleness: EntitySummaryStaleness;
 }
@@ -33,6 +52,33 @@ export interface SaveEntityAiSummaryParams {
   entityId: string;
   entityType: string;
   summary: SaveEntityAiSummarySummary;
+}
+
+/**
+ * A persisted AI summary as read back from the entity metadata datastream
+ * (`.entities.v2.metadata.security_{namespace}`) and returned by the read route.
+ * The flyout hydrates its display from this shape.
+ */
+export interface PersistedEntityAiSummary {
+  highlights: EntitySummaryHighlight[];
+  recommendedActions?: string[] | null;
+  /** Unix timestamp (ms) of when the summary was generated. */
+  generated_at: number;
+  /** Username of the user who triggered generation (set server-side). */
+  generated_by: string;
+  staleness: EntitySummaryStaleness;
+  anomaly_job_ids?: string[];
+  variant_id?: string;
+}
+
+/**
+ * Response of the persisted-summary read route. `canRead` is false when the
+ * caller lacks read access to the metadata index — the flyout then falls back
+ * to on-demand generation instead of showing a persisted summary.
+ */
+export interface GetPersistedAiSummaryResponse {
+  summary: PersistedEntityAiSummary | null;
+  canRead: boolean;
 }
 
 /**
@@ -47,6 +93,16 @@ export const DEFAULT_ENTITY_SUMMARY_STALENESS_SIGNALS: EntitySummaryStalenessSig
 export interface EntitySummaryStalenessEntitySnapshot {
   /** `entity.risk.calculated_score_norm` — same value shown in the entity flyout risk summary. */
   riskScoreNorm?: number | null;
+  /**
+   * `entity.behaviors.anomaly_job_ids` at generation time. Captured by callers today;
+   * the staleness comparison for this signal is a follow-up (only `risk_score` is compared).
+   */
+  anomalyJobIds?: string[] | null;
+  /**
+   * `entity.behaviors.rule_names` at generation time. Captured by callers today;
+   * the staleness comparison for this signal is a follow-up (only `risk_score` is compared).
+   */
+  ruleNames?: string[] | null;
 }
 
 const RISK_SCORE_EPSILON = 0.01;
@@ -108,7 +164,7 @@ export const buildEntitySummaryStaleness = (
 });
 
 export const computeEntitySummaryStalenessReasons = (
-  summary: EntitySummaryAttribute,
+  summary: { staleness?: EntitySummaryStaleness | null },
   entitySnapshot: EntitySummaryStalenessEntitySnapshot
 ): string[] => {
   const staleness = summary.staleness;

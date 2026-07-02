@@ -30,6 +30,10 @@ import { AddConnectorModal } from '@kbn/elastic-assistant/impl/connectorland/add
 import { useLoadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/use_load_action_types';
 import type { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLoadConnectors } from '@kbn/inference-connectors';
+import {
+  buildEntitySummaryStaleness,
+  computeEntitySummaryStalenessReasons,
+} from '@kbn/entity-store/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
@@ -38,15 +42,11 @@ import { useStoredAssistantConnectorId } from '../../../../onboarding/components
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useHasEntityHighlightsLicense } from '../../../../common/hooks/use_has_entity_highlights_license';
 import { useFetchEntityDetailsHighlights } from '../hooks/use_fetch_entity_details_highlights';
+import { useFetchPersistedAiSummary } from '../hooks/use_fetch_persisted_ai_summary';
 import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { EntityHighlightsResult } from './entity_highlights_result';
 import type { StalenessDisplayMode } from './entity_highlights_result';
 import type { Entity } from '../../../../../common/api/entity_analytics';
-import {
-  type EntitySummaryAttribute,
-  buildEntitySummaryStaleness,
-  computeEntitySummaryStalenessReasons,
-} from '@kbn/entity-store/common';
 import { buildEntitySummaryStalenessEntitySnapshot } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
@@ -129,11 +129,13 @@ export const EntityHighlightsAccordion: React.FC<{
     []
   );
 
-  // Read the persisted summary from the entity store record (may be null if never generated)
-  const storedSummary = useMemo((): EntitySummaryAttribute | null => {
-    const summary = entityRecord?.entity?.attributes?.summary;
-    return summary ?? null;
-  }, [entityRecord]);
+  // Read the persisted summary from the metadata datastream (may be null if never
+  // generated, or if the user lacks metadata read access — see `canRead`). This
+  // loads on flyout open and does not regenerate on close / click-away.
+  const { summary: storedSummary, refetch: refetchPersistedSummary } = useFetchPersistedAiSummary({
+    entityType,
+    entityIdentifier,
+  });
 
   // Snapshot of current entity signals — passed to the hook so they are persisted
   // alongside the summary at generation time for future staleness detection.
@@ -159,6 +161,7 @@ export const EntityHighlightsAccordion: React.FC<{
     storedSummary,
     entitySnapshot,
     refetchEntityRecord,
+    refetchPersistedSummary,
     promptVariant,
   });
 
