@@ -58,7 +58,7 @@ describe('registerWorkflowSteps (public)', () => {
       publicAttacksApiEnabled: true,
     } as ExperimentalFeatures);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(7);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(8);
   });
 
   it('async loader returns step definitions when feature flag is enabled', async () => {
