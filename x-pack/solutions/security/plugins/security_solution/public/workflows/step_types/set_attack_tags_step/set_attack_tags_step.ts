@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { setAlertTagsStepCommonDefinition } from '../../../../common/workflows/step_types/set_alert_tags_step/set_alert_tags_step_common';
+import { setAttackTagsStepCommonDefinition } from '../../../../common/workflows/step_types/set_attack_tags_step/set_attack_tags_step_common';
 import { alertTagsInputEditorHandlers } from '../common/alert_tags_selection_handler';
 
-export const setAlertTagsStepDefinition = createPublicStepDefinition({
-  ...setAlertTagsStepCommonDefinition,
+export const setAttackTagsStepDefinition = createPublicStepDefinition({
+  ...setAttackTagsStepCommonDefinition,
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/app_security').then(({ icon }) => ({
       default: icon,
