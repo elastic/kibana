@@ -6,6 +6,7 @@
  */
 
 import type { AnomalyDetectorType } from '@kbn/apm-types';
+import type { Environment } from '../../../../common/environment_rt';
 import type { MlClient } from '../../../lib/helpers/get_ml_client';
 import { getServiceAnomalies } from '../../service_map/get_service_anomalies';
 
@@ -21,6 +22,7 @@ export type ServiceAnomalyScoresResponse = Array<{
   serviceName: string;
   anomalyScore: number;
   detectorType?: AnomalyDetectorType;
+  anomalyEnvironment?: Environment;
 }>;
 
 export async function getServiceAnomalyScores({
@@ -42,9 +44,12 @@ export async function getServiceAnomalyScores({
     searchQuery,
   });
 
-  return serviceAnomalies.map(({ serviceName, anomalyScore, detectorType }) => ({
-    serviceName,
-    anomalyScore,
-    detectorType,
-  }));
+  return serviceAnomalies.map(
+    ({ serviceName, anomalyScore, detectorType, environment: anomalyEnvironment }) => ({
+      serviceName,
+      anomalyScore,
+      detectorType,
+      anomalyEnvironment,
+    })
+  );
 }

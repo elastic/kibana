@@ -6,6 +6,7 @@
  */
 
 import type { AnomalyDetectorType } from './anomaly_detector_type';
+import type { Environment } from './environment_rt';
 
 export interface ServiceAnomaliesResponse {
   mlJobIds: string[];
@@ -16,5 +17,6 @@ export interface ServiceAnomaliesResponse {
     actualValue: number;
     anomalyScore: number;
     detectorType?: AnomalyDetectorType;
+    anomalyEnvironment: Environment;
   }>;
 }

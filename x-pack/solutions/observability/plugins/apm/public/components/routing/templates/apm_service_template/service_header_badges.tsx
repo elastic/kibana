@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AnomalyDetectorType } from '@kbn/apm-types';
+import type { AnomalyDetectorType, Environment } from '@kbn/apm-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useServiceSloContext } from '../../../../context/service_slo/use_service_slo_context';
@@ -81,8 +81,18 @@ export function ServiceHeaderBadges({
           query: { start, end, environment },
         },
       })
-        .then((res) => ({ anomalyScore: res.anomalyScore, detectorType: res.detectorType }))
-        .catch((): { anomalyScore?: number; detectorType?: AnomalyDetectorType } => ({}));
+        .then((res) => ({
+          anomalyScore: res.anomalyScore,
+          detectorType: res.detectorType,
+          anomalyEnvironment: res.anomalyEnvironment,
+        }))
+        .catch(
+          (): {
+            anomalyScore?: number;
+            detectorType?: AnomalyDetectorType;
+            anomalyEnvironment?: Environment;
+          } => ({})
+        );
     },
     [serviceName, start, end, environment, canReadMlJobs],
     { showToastOnError: false }

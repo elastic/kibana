@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { AnomalyDetectorType } from '@kbn/apm-types';
+import type { Environment } from '../../../../common/environment_rt';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import type { SloStatus } from '../../../../common/service_inventory';
@@ -24,6 +25,7 @@ export interface MergedServiceStat {
   throughput?: number;
   anomalyScore?: number;
   detectorType?: AnomalyDetectorType;
+  anomalyEnvironment?: Environment;
   alertsCount?: number;
   sloStatus?: SloStatus;
   sloCount?: number;

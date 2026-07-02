@@ -16,6 +16,7 @@ import {
   getAnomalyDetectorType,
 } from '../../../common/anomaly_detection/apm_ml_detectors';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import type { Environment } from '../../../common/environment_rt';
 import { defaultTransactionTypes } from '../../../common/transaction_types';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
@@ -144,12 +145,15 @@ export async function getServiceAnomalies({
       },
     };
 
-    const [anomalyResponse, jobIds] = await Promise.all([
+    const [anomalyResponse, mlJobs] = await Promise.all([
       withApmSpan('ml_anomaly_search', () =>
         anomalySearch(mlClient.mlSystem.mlAnomalySearch, params)
       ),
-      getMLJobIds(mlClient.anomalyDetectors, environment),
+      getMLJobs(mlClient.anomalyDetectors, environment),
     ]);
+
+    const jobIds = mlJobs.map((job) => job.jobId);
+    const environmentByJobId = new Map(mlJobs.map((job) => [job.jobId, job.environment]));
 
     // make sure we only return data for jobs that are available in this space
     const availableBuckets =
@@ -169,9 +173,11 @@ export async function getServiceAnomalies({
         | number
         | undefined;
 
+      const jobId = bucket.key.jobId as string;
+
       return {
         serviceName: bucket.key.serviceName as string,
-        jobId: bucket.key.jobId as string,
+        jobId,
         transactionType: (recordMetrics?.by_field_value ||
           modelPlotMetrics?.by_field_value) as string,
         actualValue: (recordMetrics?.actual || modelPlotMetrics?.actual) as number,
@@ -180,6 +186,7 @@ export async function getServiceAnomalies({
         // `actualValue` (e.g. latency as a duration, failure rate as a percentage)
         detectorType:
           detectorIndex !== undefined ? getAnomalyDetectorType(detectorIndex) : undefined,
+        anomalyEnvironment: environmentByJobId.get(jobId) as Environment,
       };
     });
 
