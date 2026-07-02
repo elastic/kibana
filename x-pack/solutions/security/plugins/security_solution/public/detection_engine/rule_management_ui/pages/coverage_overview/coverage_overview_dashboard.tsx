@@ -41,11 +41,7 @@ const CoverageOverviewDashboardComponent = () => {
   return (
     <>
       <CoverageOverviewHeader />
-      {isMitreAttackUpdatesUIEnabled && data && (
-        <CoverageOverviewInvalidMitreRulesCallout
-          invalidlyMappedRules={data.invalidlyMappedRules}
-        />
-      )}
+      {isMitreAttackUpdatesUIEnabled && <CoverageOverviewInvalidMitreRulesCallout />}
       <CoverageOverviewFiltersPanel />
       <EuiSpacer />
       <EuiFlexGroup gutterSize="m" className="eui-xScroll" tabIndex={0}>

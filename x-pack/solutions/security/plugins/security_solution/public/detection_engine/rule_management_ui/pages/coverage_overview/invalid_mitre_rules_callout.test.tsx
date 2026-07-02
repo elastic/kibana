@@ -11,21 +11,37 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { CoverageOverviewInvalidMitreRulesCallout } from './invalid_mitre_rules_callout';
 import { MITRE_ATTACK_VERSION } from '../../../../../common/detection_engine/mitre/mitre_version';
+import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import type { CoverageOverviewDashboard } from '../../../rule_management/model/coverage_overview/dashboard';
+
+jest.mock('./coverage_overview_dashboard_context');
 
 const emptyInvalidlyMappedRules: CoverageOverviewDashboard['invalidlyMappedRules'] = {
   enabledRules: [],
   disabledRules: [],
 };
 
-const renderCallout = (
-  props: React.ComponentProps<typeof CoverageOverviewInvalidMitreRulesCallout>
-) =>
-  render(
+const mockContextWithInvalidRules = (
+  invalidlyMappedRules: CoverageOverviewDashboard['invalidlyMappedRules']
+) => {
+  (useCoverageOverviewDashboardContext as jest.Mock).mockReturnValue({
+    state: { data: { invalidlyMappedRules } },
+  });
+};
+
+const renderCallout = ({
+  invalidlyMappedRules,
+}: {
+  invalidlyMappedRules: CoverageOverviewDashboard['invalidlyMappedRules'];
+}) => {
+  mockContextWithInvalidRules(invalidlyMappedRules);
+
+  return render(
     <TestProviders>
-      <CoverageOverviewInvalidMitreRulesCallout {...props} />
+      <CoverageOverviewInvalidMitreRulesCallout />
     </TestProviders>
   );
+};
 
 describe('CoverageOverviewInvalidMitreRulesCallout', () => {
   it('renders nothing when there are no invalidly mapped rules', () => {
