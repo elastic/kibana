@@ -21,9 +21,13 @@ export class LinterCheck extends PrecommitCheck {
     const nonDeletedFiles = allFiles.filter((f) => f.getGitStatus() !== 'deleted');
     const filesToLint = await this.linter.pickFilesToLint(log, nonDeletedFiles);
     if (filesToLint.length > 0) {
-      await this.linter.lintFiles(log, filesToLint, {
+      const result = await this.linter.lintFiles(log, filesToLint, {
         fix: options.fix,
       });
+
+      if (result?.failedFiles?.length > 0) {
+        throw new Error(`${this.name} errors in ${result.failedFiles.length} file(s)`);
+      }
 
       if (options.fix && options.stage) {
         const simpleGit = new SimpleGit(REPO_ROOT);
