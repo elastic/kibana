@@ -13,6 +13,7 @@ import {
   type PersistedEntityAiSummary,
   type EntitySummaryStalenessEntitySnapshot,
   buildEntitySummaryStaleness,
+  capEntitySummaryContent,
 } from '@kbn/entity-store/common';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
@@ -93,7 +94,6 @@ export const useFetchEntityDetailsHighlights = ({
   entitySnapshot,
   refetchEntityRecord,
   refetchPersistedSummary,
-  promptVariant,
 }: {
   connectorId: string;
   anonymizationFields: AnonymizationFieldResponse[];
@@ -106,8 +106,6 @@ export const useFetchEntityDetailsHighlights = ({
   refetchEntityRecord?: () => void;
   /** Refetch the persisted summary from the metadata datastream after a new one is saved. */
   refetchPersistedSummary?: () => void;
-  /** POC: dev-only A/B selector forwarded to the highlights route. Omit for the packaged prompt. */
-  promptVariant?: 'default' | 'new';
 }) => {
   const { inference } = useKibana().services;
   const { fetchEntityDetailsHighlights, saveEntityAiSummary } = useEntityAnalyticsRoutes();
@@ -163,7 +161,6 @@ export const useFetchEntityDetailsHighlights = ({
       from: fromDate,
       to: toDate,
       connectorId,
-      promptVariant,
     }).catch((e: Error) => {
       const caughtError = e instanceof Error ? e : new Error(String(e));
       addError(caughtError, {
@@ -199,11 +196,20 @@ export const useFetchEntityDetailsHighlights = ({
       const generatedAt = Date.now();
       const generatedBy = currentUser?.username ?? 'unknown';
 
+      // Apply the structural caps up front so the in-session view matches the persisted
+      // document (which the server also caps) — avoids showing more items now than after
+      // a reopen. Caps counts rather than truncating prose.
+      const { highlights, recommendedActions } = capEntitySummaryContent({
+        highlights: typedOutput.highlights,
+        recommendedActions: typedOutput.recommendedActions,
+      });
+      const cappedOutput: EntityHighlightsResponse = { highlights, recommendedActions };
+
       userTriggeredGeneration.current = true;
       setGenerationBaseline(entitySnapshot ?? null);
       setAssistantResult({
         summaryAsText: summaryFormatted,
-        response: typedOutput,
+        response: cappedOutput,
         replacements,
         generatedAt,
         generatedBy,
@@ -214,8 +220,8 @@ export const useFetchEntityDetailsHighlights = ({
         entityId: entityIdentifier,
         entityType,
         summary: {
-          highlights: typedOutput.highlights,
-          recommendedActions: typedOutput.recommendedActions,
+          highlights,
+          recommendedActions,
           generated_at: generatedAt,
           staleness: buildEntitySummaryStaleness({
             riskScoreNorm: entitySnapshot?.riskScoreNorm ?? null,
@@ -267,7 +273,6 @@ export const useFetchEntityDetailsHighlights = ({
     entitySnapshot,
     refetchEntityRecord,
     refetchPersistedSummary,
-    promptVariant,
   ]);
 
   const abortStream = useCallback(() => {

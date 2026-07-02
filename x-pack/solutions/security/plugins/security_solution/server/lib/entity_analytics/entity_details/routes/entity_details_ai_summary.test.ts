@@ -6,7 +6,12 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import {
+  MAX_ENTITY_SUMMARY_HIGHLIGHTS,
+  MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS,
+} from '@kbn/entity-store/common';
 import { ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
+import { ENTITY_AI_SUMMARY_PERSISTED_EVENT } from '../../../telemetry/event_based/events';
 import {
   serverMock,
   requestContextMock,
@@ -39,25 +44,34 @@ const BASE_REQUEST_BODY = {
 
 describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
+  let ctx: ReturnType<typeof requestContextMock.createTools>['context'];
   let context: ReturnType<typeof requestContextMock.convertContext>;
   let logger: ReturnType<typeof loggerMock.create>;
+  let mockReportEvent: jest.Mock;
 
   beforeEach(() => {
     server = serverMock.create();
     logger = loggerMock.create();
-    const { context: ctx } = requestContextMock.createTools();
-    context = requestContextMock.convertContext(ctx);
+    ({ context: ctx } = requestContextMock.createTools());
 
     mockBulkAppendMetadata.mockReset().mockResolvedValue({ successful: 1, failed: 0 });
     mockCreateEntityMetadataClient.mockClear();
 
-    // Set up authenticated user
-    (
-      context.core as unknown as { security: { authc: { getCurrentUser: jest.Mock } } }
-    ).security.authc.getCurrentUser = jest.fn().mockReturnValue({ username: 'test-user' });
-    (context.securitySolution as unknown as { getSpaceId: jest.Mock }).getSpaceId = jest
-      .fn()
-      .mockReturnValue('default');
+    // Mocks must be configured on the raw context before convertContext wraps it —
+    // mutating the converted context.core does not propagate through to the route.
+    // Authenticated user (getCurrentUser is already a jest.Mock on the core mock).
+    (ctx.core.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+      username: 'test-user',
+    });
+
+    // getSpaceId already returns 'default'. Use a stable analytics mock so the telemetry
+    // assertions can inspect reportEvent regardless of how many times getAnalytics is called.
+    mockReportEvent = jest.fn();
+    (ctx.securitySolution.getAnalytics as jest.Mock).mockReturnValue({
+      reportEvent: mockReportEvent,
+    });
+
+    context = requestContextMock.convertContext(ctx);
 
     mockGetStartServices.mockResolvedValue([
       {
@@ -158,15 +172,91 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
   });
 
   it('falls back to "unknown" for ai_summary.generated_by when no authenticated user', async () => {
-    (
-      context.core as unknown as { security: { authc: { getCurrentUser: jest.Mock } } }
-    ).security.authc.getCurrentUser = jest.fn().mockReturnValue(null);
+    // Same jest.Mock reference the converted context wraps, so this applies at request time.
+    (ctx.core.security.authc.getCurrentUser as jest.Mock).mockReturnValue(null);
 
     const request = buildRequest();
     await server.inject(request, context);
 
     const [docs] = mockBulkAppendMetadata.mock.calls[0];
     expect(docs[0]['ai_summary.generated_by']).toBe('unknown');
+  });
+
+  it('caps highlights and recommendedActions in the persisted document', async () => {
+    const overshootHighlights = Array.from(
+      { length: MAX_ENTITY_SUMMARY_HIGHLIGHTS + 2 },
+      (_, i) => ({ title: `h${i}`, text: `t${i}` })
+    );
+    const overshootActions = Array.from(
+      { length: MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS + 3 },
+      (_, i) => `action ${i}`
+    );
+
+    const request = buildRequest({
+      ...BASE_REQUEST_BODY,
+      summary: {
+        ...BASE_REQUEST_BODY.summary,
+        highlights: overshootHighlights,
+        recommendedActions: overshootActions,
+      },
+    });
+    await server.inject(request, context);
+
+    const [docs] = mockBulkAppendMetadata.mock.calls[0];
+    expect(docs[0]['ai_summary.highlights']).toHaveLength(MAX_ENTITY_SUMMARY_HIGHLIGHTS);
+    expect(docs[0]['ai_summary.highlights']).toEqual(
+      overshootHighlights.slice(0, MAX_ENTITY_SUMMARY_HIGHLIGHTS)
+    );
+    expect(docs[0]['ai_summary.recommendedActions']).toHaveLength(
+      MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS
+    );
+    expect(docs[0]['ai_summary.recommendedActions']).toEqual(
+      overshootActions.slice(0, MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS)
+    );
+  });
+
+  it('reports the pre-cap counts and dropped amounts via telemetry', async () => {
+    const overshootHighlights = Array.from(
+      { length: MAX_ENTITY_SUMMARY_HIGHLIGHTS + 2 },
+      (_, i) => ({ title: `h${i}`, text: `t${i}` })
+    );
+    const overshootActions = Array.from(
+      { length: MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS + 3 },
+      (_, i) => `action ${i}`
+    );
+
+    const request = buildRequest({
+      ...BASE_REQUEST_BODY,
+      summary: {
+        ...BASE_REQUEST_BODY.summary,
+        highlights: overshootHighlights,
+        recommendedActions: overshootActions,
+      },
+    });
+    await server.inject(request, context);
+
+    expect(mockReportEvent).toHaveBeenCalledWith(ENTITY_AI_SUMMARY_PERSISTED_EVENT.eventType, {
+      entityType: 'user',
+      spaceId: 'default',
+      highlightsCount: MAX_ENTITY_SUMMARY_HIGHLIGHTS + 2,
+      recommendedActionsCount: MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS + 3,
+      highlightsDropped: 2,
+      recommendedActionsDropped: 3,
+    });
+  });
+
+  it('reports zero dropped when within budget', async () => {
+    const request = buildRequest();
+    await server.inject(request, context);
+
+    expect(mockReportEvent).toHaveBeenCalledWith(ENTITY_AI_SUMMARY_PERSISTED_EVENT.eventType, {
+      entityType: 'user',
+      spaceId: 'default',
+      highlightsCount: 1,
+      recommendedActionsCount: 1,
+      highlightsDropped: 0,
+      recommendedActionsDropped: 0,
+    });
   });
 
   it('returns 500 when bulkAppendMetadata throws', async () => {

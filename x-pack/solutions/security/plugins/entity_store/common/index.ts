@@ -128,6 +128,15 @@ export {
   computeEntitySummaryStalenessReasons,
 } from './domain/definitions/entity_summary_staleness';
 export { buildEntityListSourceFilter } from './domain/definitions/entity_list_source';
+export type {
+  EntitySummaryContent,
+  CappedEntitySummaryContent,
+} from './domain/definitions/entity_summary_limits';
+export {
+  MAX_ENTITY_SUMMARY_HIGHLIGHTS,
+  MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS,
+  capEntitySummaryContent,
+} from './domain/definitions/entity_summary_limits';
 
 export interface IdentitySourceFields {
   /** Fields that participate in identity (EUID composition). */

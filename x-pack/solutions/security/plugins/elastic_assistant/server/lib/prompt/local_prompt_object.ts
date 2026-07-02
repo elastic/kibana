@@ -49,7 +49,6 @@ import {
   costSavingsInsightPart1,
   costSavingsInsightPart2,
   ENTITY_DETAILS_HIGHLIGHTS_PROMPT,
-  ENTITY_DETAILS_HIGHLIGHTS_PROMPT_NEW,
 } from './prompts';
 
 export const promptGroupId = {
@@ -69,8 +68,6 @@ export const promptDictionary = {
   alertSummary: `alertSummary`,
   alertSummarySystemPrompt: `alertSummarySystemPrompt`,
   entityDetailsHighlights: `entityDetailsHighlights`,
-  // POC: candidate replacement variant resolved only via local fallback (no saved object).
-  entityDetailsHighlightsNew: `entityDetailsHighlightsNew`,
   costSavingsInsightPart1: `costSavingsInsightPart1`,
   costSavingsInsightPart2: `costSavingsInsightPart2`,
   systemPrompt: `systemPrompt`,
@@ -424,15 +421,6 @@ export const localPrompts: Prompt[] = [
     promptGroupId: promptGroupId.aiForEntityAnalytics,
     prompt: {
       default: ENTITY_DETAILS_HIGHLIGHTS_PROMPT,
-    },
-  },
-  {
-    // POC: candidate replacement variant. No saved object is published for this
-    // promptId, so `getPrompt` always falls through to this local default.
-    promptId: promptDictionary.entityDetailsHighlightsNew,
-    promptGroupId: promptGroupId.aiForEntityAnalytics,
-    prompt: {
-      default: ENTITY_DETAILS_HIGHLIGHTS_PROMPT_NEW,
     },
   },
   {

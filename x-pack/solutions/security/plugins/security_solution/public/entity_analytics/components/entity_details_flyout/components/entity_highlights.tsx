@@ -117,18 +117,6 @@ export const EntityHighlightsAccordion: React.FC<{
     []
   );
 
-  // POC A/B toggle: pick which prompt the highlights route resolves.
-  // `default` = packaged saved-object prompt, `new` = candidate replacement
-  // (local-only, see ENTITY_DETAILS_HIGHLIGHTS_PROMPT_NEW). Remove before merging.
-  const [promptVariant, setPromptVariant] = useState<'default' | 'new'>('default');
-  const promptVariantToggleButtons = useMemo(
-    () => [
-      { id: 'default', label: 'Old prompt' },
-      { id: 'new', label: 'New prompt' },
-    ],
-    []
-  );
-
   // Read the persisted summary from the metadata datastream (may be null if never
   // generated, or if the user lacks metadata read access — see `canRead`). This
   // loads on flyout open and does not regenerate on close / click-away.
@@ -162,7 +150,6 @@ export const EntityHighlightsAccordion: React.FC<{
     entitySnapshot,
     refetchEntityRecord,
     refetchPersistedSummary,
-    promptVariant,
   });
 
   // Staleness check — compare stored snapshot against current entity signals.
@@ -293,19 +280,6 @@ export const EntityHighlightsAccordion: React.FC<{
                   </EuiToolTip>
                 </EuiFlexItem>
               )}
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content="POC: switch between the packaged entity-highlights prompt and the new candidate prompt. Press Generate after switching to see the other variant.">
-                  <EuiButtonGroup
-                    legend="Prompt variant"
-                    options={promptVariantToggleButtons}
-                    idSelected={promptVariant}
-                    onChange={(id) => setPromptVariant(id as 'default' | 'new')}
-                    buttonSize="compressed"
-                    color="primary"
-                    data-test-subj="entity-highlights-prompt-variant-toggle"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EntityHighlightsSettings
                   assistantResult={assistantResult}

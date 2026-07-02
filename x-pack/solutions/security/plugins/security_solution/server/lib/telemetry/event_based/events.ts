@@ -744,6 +744,55 @@ export const ENTITY_HIGHLIGHTS_USAGE_EVENT: EventTypeOpts<{
   },
 };
 
+export const ENTITY_AI_SUMMARY_PERSISTED_EVENT: EventTypeOpts<{
+  entityType: string;
+  spaceId: string;
+  highlightsCount: number;
+  recommendedActionsCount: number;
+  highlightsDropped: number;
+  recommendedActionsDropped: number;
+}> = {
+  eventType: 'entity_ai_summary_persisted',
+  schema: {
+    entityType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entity the AI summary was generated for (e.g. "host")',
+      },
+    },
+    spaceId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Space where the summary was persisted (e.g. "default")',
+      },
+    },
+    highlightsCount: {
+      type: 'long',
+      _meta: {
+        description: 'Number of highlights the model produced, before structural capping',
+      },
+    },
+    recommendedActionsCount: {
+      type: 'long',
+      _meta: {
+        description: 'Number of recommended actions the model produced, before structural capping',
+      },
+    },
+    highlightsDropped: {
+      type: 'long',
+      _meta: {
+        description: 'Number of highlights dropped by the cap (0 when within budget)',
+      },
+    },
+    recommendedActionsDropped: {
+      type: 'long',
+      _meta: {
+        description: 'Number of recommended actions dropped by the cap (0 when within budget)',
+      },
+    },
+  },
+};
+
 export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
   entitiesReturned: number;
   entityTypes: string[];
@@ -2100,6 +2149,7 @@ export const events = [
   ENTITY_ENGINE_DELETION_EVENT,
   ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT,
   ENTITY_HIGHLIGHTS_USAGE_EVENT,
+  ENTITY_AI_SUMMARY_PERSISTED_EVENT,
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   WATCHLIST_API_CALL_EVENT,

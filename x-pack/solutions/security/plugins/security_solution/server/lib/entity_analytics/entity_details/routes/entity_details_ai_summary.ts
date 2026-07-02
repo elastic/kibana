@@ -11,10 +11,12 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { AiSummaryMetadataDoc } from '@kbn/entity-store/common';
+import { capEntitySummaryContent } from '@kbn/entity-store/common';
 import { ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
 import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { withLicense } from '../../../siem_migrations/common/api/util/with_license';
+import { ENTITY_AI_SUMMARY_PERSISTED_EVENT } from '../../../telemetry/event_based/events';
 
 const AiSummaryHighlightItem = z.object({
   title: z.string(),
@@ -84,6 +86,22 @@ export const entityDetailsAiSummaryRoute = ({
           // Derive the author server-side — never trust the client-supplied value.
           const generatedBy = coreContext.security.authc.getCurrentUser()?.username ?? 'unknown';
 
+          // Enforce the structural caps at the authoritative persistence boundary so every
+          // consumer of the datastream (flyout reopen, other users, Agent Builder) sees a
+          // bounded summary regardless of how much the model produced. Counts are capped
+          // rather than the prose truncated, so nothing is cut mid-sentence.
+          const {
+            highlights,
+            recommendedActions,
+            highlightsCount,
+            recommendedActionsCount,
+            highlightsDropped,
+            recommendedActionsDropped,
+          } = capEntitySummaryContent({
+            highlights: summary.highlights,
+            recommendedActions: summary.recommendedActions,
+          });
+
           // Write via the internal ES client so the user's own metadata index write
           // privilege is not required. Generation is fully backend-produced; the user
           // cannot supply arbitrary content through this route.
@@ -98,9 +116,9 @@ export const entityDetailsAiSummaryRoute = ({
             'entity.type': entityType,
             'ai_summary.generated_by': generatedBy,
             'ai_summary.generated_at': summary.generated_at,
-            'ai_summary.highlights': summary.highlights,
-            ...(summary.recommendedActions != null && {
-              'ai_summary.recommendedActions': summary.recommendedActions,
+            'ai_summary.highlights': highlights,
+            ...(recommendedActions != null && {
+              'ai_summary.recommendedActions': recommendedActions,
             }),
             ...(summary.anomaly_job_ids != null && {
               'ai_summary.anomaly_job_ids': summary.anomaly_job_ids,
@@ -110,6 +128,17 @@ export const entityDetailsAiSummaryRoute = ({
           };
 
           await metadataClient.bulkAppendMetadata([doc]);
+
+          // Emit the model's pre-cap output sizes so we can measure how often (and by how
+          // much) it overshoots the intended summary length and tune the prompt from data.
+          securitySolution.getAnalytics().reportEvent(ENTITY_AI_SUMMARY_PERSISTED_EVENT.eventType, {
+            entityType,
+            spaceId,
+            highlightsCount,
+            recommendedActionsCount,
+            highlightsDropped,
+            recommendedActionsDropped,
+          });
 
           return response.ok({ body: { created: true } });
         } catch (e) {
