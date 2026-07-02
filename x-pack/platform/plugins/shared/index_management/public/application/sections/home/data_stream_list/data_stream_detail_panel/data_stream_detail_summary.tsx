@@ -522,28 +522,17 @@ export const DataStreamDetailSummary: React.FunctionComponent<DataStreamDetailSu
           dataStream.failureStoreRetention?.customRetentionPeriod ??
           dataStream.failureStoreRetention?.defaultRetentionPeriod;
         const hasFiniteRetention = typeof retention === 'string' && retention.length > 0;
-        const retentionLabel = isRetentionDisabled
-          ? i18n.translate(
-              'xpack.idxMgmt.dataStreamDetailPanel.failedIngestLifecycleRetentionDisabled',
-              {
-                defaultMessage: 'Disabled',
-              }
-            )
-          : retention === -1
-          ? i18n.translate(
-              'xpack.idxMgmt.dataStreamDetailPanel.failedIngestLifecycleRetentionInfinite',
-              {
-                defaultMessage: 'Keep data indefinitely',
-              }
-            )
-          : hasFiniteRetention
-          ? getRetentionPeriod(retention)
-          : i18n.translate(
-              'xpack.idxMgmt.dataStreamDetailPanel.failedIngestLifecycleRetentionUnknown',
-              {
-                defaultMessage: 'Keep data indefinitely',
-              }
-            );
+        // When the failure store is enabled but the retention lifecycle is disabled (no delete
+        // phase), documents are kept indefinitely
+        const retentionLabel =
+          !isRetentionDisabled && hasFiniteRetention
+            ? getRetentionPeriod(retention)
+            : i18n.translate(
+                'xpack.idxMgmt.dataStreamDetailPanel.failedIngestLifecycleRetentionInfinite',
+                {
+                  defaultMessage: '∞',
+                }
+              );
 
         const shouldShowPhaseCounts = !isServerless;
         const phaseCount = !isRetentionDisabled && hasFiniteRetention ? 2 : 1;

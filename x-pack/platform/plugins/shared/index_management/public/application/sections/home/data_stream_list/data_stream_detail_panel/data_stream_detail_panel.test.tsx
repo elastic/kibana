@@ -131,10 +131,11 @@ describe('DataStreamDetailPanel', () => {
         );
       });
     });
+
   });
 
   describe('failed ingest lifecycle retention', () => {
-    it('shows "Disabled" when retention is explicitly disabled', async () => {
+    it('shows ∞ when the retention lifecycle is disabled (kept indefinitely)', async () => {
       const dataStream = createMockDataStream({
         failureStoreEnabled: true,
         failureStoreRetention: {
@@ -155,7 +156,7 @@ describe('DataStreamDetailPanel', () => {
       );
 
       await waitFor(() => {
-        expect(getByTestId('failedIngestLifecycleDetail')).toHaveTextContent('Disabled');
+        expect(getByTestId('failedIngestLifecycleDetail')).toHaveTextContent('∞');
       });
     });
 
