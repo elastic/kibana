@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import React, { createRef } from 'react';
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createInitialState } from './use_compose_discover_state';
 import type { ComposeDiscoverState, StepDefinition } from './types';
-import type { ComposeFormValues } from './compose_form_types';
+import type { FormValues } from '../../form/types';
 import { ComposeDiscoverFooter, type ComposeDiscoverFooterProps } from './compose_discover_footer';
 
 const ALERT_CONDITION_STEP: StepDefinition = {
   id: 'alertCondition',
+  title: 'Alert Condition',
+  render: () => null,
+};
+
+const BUILDER_CONDITION_STEP: StepDefinition = {
+  id: 'builderCondition',
   title: 'Alert Condition',
   render: () => null,
 };
@@ -35,10 +41,10 @@ const Wrapper = ({
   formValues,
   children,
 }: {
-  formValues: Partial<ComposeFormValues>;
+  formValues: Partial<FormValues>;
   children: React.ReactNode;
 }) => {
-  const defaults: ComposeFormValues = {
+  const defaults: FormValues = {
     kind: 'alert',
     metadata: { name: '', enabled: true },
     timeField: '@timestamp',
@@ -48,7 +54,7 @@ const Wrapper = ({
     stateTransitionRecoveryDelayMode: 'immediate',
     ...formValues,
   };
-  const form = useForm<ComposeFormValues>({ defaultValues: defaults });
+  const form = useForm<FormValues>({ defaultValues: defaults });
   return (
     <IntlProvider locale="en">
       <FormProvider {...form}>{children}</FormProvider>
@@ -62,16 +68,13 @@ const renderFooter = ({
   propsOverrides = {},
 }: {
   stateOverrides?: Partial<ComposeDiscoverState>;
-  formValues?: Partial<ComposeFormValues>;
+  formValues?: Partial<FormValues>;
   propsOverrides?: Partial<ComposeDiscoverFooterProps>;
 } = {}) => {
   const onNext = jest.fn();
   const onFinalSubmit = jest.fn();
   const onYamlSave = jest.fn();
-  const onRequestClose = jest.fn();
   const dispatch = jest.fn();
-  const closeSourceRef = createRef<'button' | 'eui'>() as React.MutableRefObject<'button' | 'eui'>;
-  closeSourceRef.current = 'eui';
 
   const props: ComposeDiscoverFooterProps = {
     uiState: createState({ queryCommitted: true, childOpen: false, ...stateOverrides }),
@@ -81,12 +84,12 @@ const renderFooter = ({
     isCreate: true,
     hasValidationErrors: false,
     yamlHasErrors: false,
+    isBuilderMode: false,
+    isBuilderStepValid: true,
     isSaving: false,
     onNext,
     onFinalSubmit,
     onYamlSave,
-    onRequestClose,
-    closeSourceRef,
     ...propsOverrides,
   };
 
@@ -96,7 +99,7 @@ const renderFooter = ({
     </Wrapper>
   );
 
-  return { onNext, onFinalSubmit, onYamlSave, onRequestClose, dispatch, closeSourceRef };
+  return { onNext, onFinalSubmit, onYamlSave, dispatch };
 };
 
 describe('ComposeDiscoverFooter', () => {
@@ -159,16 +162,14 @@ describe('ComposeDiscoverFooter', () => {
     it('dispatches GO_BACK when Back is clicked', () => {
       const { dispatch } = renderFooter({ stateOverrides: { step: 1 } });
       fireEvent.click(screen.getByTestId('composeDiscoverBack'));
-      expect(dispatch).toHaveBeenCalledWith({ type: 'GO_BACK' });
+      expect(dispatch).toHaveBeenCalledWith({ type: 'GO_BACK', isBuilderMode: false });
     });
   });
 
   describe('Cancel button', () => {
-    it('sets closeSourceRef to "button" and calls onRequestClose', () => {
-      const { onRequestClose, closeSourceRef } = renderFooter();
-      fireEvent.click(screen.getByTestId('composeDiscoverCancel'));
-      expect(closeSourceRef.current).toBe('button');
-      expect(onRequestClose).toHaveBeenCalledTimes(1);
+    it('does not render a Cancel button', () => {
+      renderFooter();
+      expect(screen.queryByTestId('composeDiscoverCancel')).not.toBeInTheDocument();
     });
   });
 
@@ -349,6 +350,50 @@ describe('ComposeDiscoverFooter', () => {
     it('disables Back when child flyout is open', () => {
       renderFooter({ stateOverrides: { step: 1, childOpen: true } });
       expect(screen.getByTestId('composeDiscoverBack')).toBeDisabled();
+    });
+
+    it('does not disable Back when child flyout is open in builder mode', () => {
+      renderFooter({
+        stateOverrides: { step: 1, childOpen: true },
+        propsOverrides: { isBuilderMode: true },
+      });
+      expect(screen.getByTestId('composeDiscoverBack')).not.toBeDisabled();
+    });
+  });
+
+  describe('Builder mode validation', () => {
+    it('disables Next when isBuilderStepValid is false', () => {
+      renderFooter({
+        propsOverrides: {
+          currentStep: BUILDER_CONDITION_STEP,
+          isBuilderMode: true,
+          isBuilderStepValid: false,
+        },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
+    });
+
+    it('enables Next when isBuilderStepValid is true', () => {
+      renderFooter({
+        propsOverrides: {
+          currentStep: BUILDER_CONDITION_STEP,
+          isBuilderMode: true,
+          isBuilderStepValid: true,
+        },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
+    });
+
+    it('does not block Next due to childOpen in builder mode', () => {
+      renderFooter({
+        stateOverrides: { childOpen: true },
+        propsOverrides: {
+          currentStep: BUILDER_CONDITION_STEP,
+          isBuilderMode: true,
+          isBuilderStepValid: true,
+        },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
     });
   });
 

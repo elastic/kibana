@@ -36,6 +36,7 @@ pageLoadAssetSize:
   dashboard: 452
   dashboardMarkdown: 4405
   data: 11799
+  dataFederation: 1150
   dataQuality: 5836
   datasetQuality: 41081
   dataUsage: 4123
@@ -181,6 +182,7 @@ pageLoadAssetSize:
   shared-packages: 3079800
   shared-plugins: 12276963
   shared-solution-packages: 184340
+  significant_events: 295
   slo: 19531
   snapshotRestore: 16909
   spaces: 22966
