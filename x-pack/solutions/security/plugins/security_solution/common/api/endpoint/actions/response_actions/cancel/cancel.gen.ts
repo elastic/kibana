@@ -29,7 +29,7 @@ export const ElasticDefendCancelParameters = lazySchema(() =>
     /**
      * ID of the response action to cancel
      */
-    id: z.string().min(1),
+    id: z.string().min(1).max(50),
     /**
      * Forcefully cancel the response action even when it is already running
      */
@@ -46,7 +46,7 @@ export const MDECancelParameters = lazySchema(() =>
     /**
      * ID of the response action to cancel
      */
-    id: z.string().min(1),
+    id: z.string().min(1).max(50),
   })
 );
 export type MDECancelParameters = z.infer<typeof MDECancelParameters>;
