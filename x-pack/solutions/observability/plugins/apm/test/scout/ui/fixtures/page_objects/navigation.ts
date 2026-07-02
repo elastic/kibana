@@ -35,10 +35,6 @@ export class NavigationPage {
   }
 
   getSearchResult(title: string) {
-    this.page
-      .getByTestId('euiSelectableList')
-      .getByText(title, { exact: true })
-      .scrollIntoViewIfNeeded();
     return this.page.getByTestId('euiSelectableList').getByText(title, { exact: true });
   }
 
