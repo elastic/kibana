@@ -29,6 +29,7 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/appex-ai-infra',
     'elastic/appex-qa',
     'elastic/appex-sharedux',
+    'elastic/context-eng',
     'elastic/docs',
     'elastic/eui-team',
     'elastic/fleet',
@@ -56,7 +57,7 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
   search: ['elastic/jinastic', 'elastic/search-design', 'elastic/search-kibana'],
   observability: [
     'elastic/actionable-obs-team',
-    'elastic/obs-ai-team',
+    'elastic/nightshift-context-and-research-team',
     'elastic/obs-cloudnative-monitoring',
     'elastic/obs-docs',
     'elastic/obs-exploration-team',

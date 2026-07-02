@@ -10,7 +10,12 @@ import React from 'react';
 import { ChangeHistoryProvider } from '../provider/change_history_provider';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import { useChangeHistoryRestore } from './use_change_history_restore';
-import { TEST_OBJECT_ID, TEST_OBJECT_TITLE } from '../test_utils/change_history_test_fixtures';
+import { ChangeHistoryTelemetryEventTypes } from '../telemetry/types';
+import {
+  TEST_CHANGE_HISTORY_SCOPE,
+  TEST_OBJECT_ID,
+  TEST_OBJECT_TITLE,
+} from '../test_utils/change_history_test_fixtures';
 import { changeHistoryObjectQueryKeyPrefix } from './change_history_list_query_key';
 import { createQueryClientWrapper } from '../test_utils/create_query_client_wrapper';
 
@@ -25,7 +30,8 @@ const createAdapter = (
 const createHarness = (
   adapter: ChangeHistoryAdapter,
   features: { restore?: boolean } = { restore: true },
-  permissions: { canRestore?: boolean } = { canRestore: true }
+  permissions: { canRestore?: boolean } = { canRestore: true },
+  reportEvent?: jest.Mock
 ) => {
   const { wrapper: QueryClientWrapper, queryClient } = createQueryClientWrapper();
 
@@ -38,6 +44,8 @@ const createHarness = (
         permissions={permissions}
         labels={{ previewTitle: TEST_OBJECT_TITLE }}
         renderPreview={() => null}
+        scope={TEST_CHANGE_HISTORY_SCOPE}
+        analytics={reportEvent ? { reportEvent } : undefined}
       >
         {children}
       </ChangeHistoryProvider>
@@ -81,7 +89,7 @@ describe('useChangeHistoryRestore', () => {
     });
     expect(invalidateSpy).toHaveBeenCalledTimes(1);
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: changeHistoryObjectQueryKeyPrefix(TEST_OBJECT_ID),
+      queryKey: changeHistoryObjectQueryKeyPrefix(TEST_OBJECT_ID, TEST_CHANGE_HISTORY_SCOPE),
       refetchType: 'active',
     });
     expect(onRestored).toHaveBeenCalledTimes(1);
@@ -145,5 +153,187 @@ describe('useChangeHistoryRestore', () => {
     expect(invalidateSpy).not.toHaveBeenCalled();
     expect(onRestored).not.toHaveBeenCalled();
     expect(result.current.canRestore).toBe(false);
+  });
+
+  it('reports restore_completed telemetry on success', async () => {
+    const reportEvent = jest.fn();
+    const restoreChange = jest.fn().mockResolvedValue(undefined);
+    const adapter = createAdapter(restoreChange);
+    const { wrapper } = createHarness(
+      adapter,
+      { restore: true },
+      { canRestore: true },
+      reportEvent
+    );
+
+    const { result } = renderHook(() => useChangeHistoryRestore(), { wrapper });
+
+    await act(async () => {
+      await result.current.restoreChange({
+        objectId: TEST_OBJECT_ID,
+        changeId: 'evt-3',
+        restoreTelemetry: {
+          restoredFromSequence: 3,
+          currentSequence: 7,
+          rollbackDistance: 4,
+        },
+        confirmedAtMs: Date.now() - 25,
+      });
+    });
+
+    expect(reportEvent).toHaveBeenCalledWith(
+      ChangeHistoryTelemetryEventTypes.RestoreCompleted,
+      expect.objectContaining({
+        eventName: 'Change history restore completed',
+        ...TEST_CHANGE_HISTORY_SCOPE,
+        restoredFromSequence: 3,
+        currentSequence: 7,
+        rollbackDistance: 4,
+        durationMs: expect.any(Number),
+      })
+    );
+  });
+
+  it('measures restore duration before onRestored and cache invalidation', async () => {
+    const reportEvent = jest.fn();
+    const restoreChange = jest.fn().mockResolvedValue(undefined);
+    const onRestored = jest.fn(() => new Promise<void>((resolve) => setTimeout(resolve, 200)));
+    const adapter = createAdapter(restoreChange);
+    const { wrapper, queryClient } = createHarness(
+      adapter,
+      { restore: true },
+      { canRestore: true },
+      reportEvent
+    );
+    jest
+      .spyOn(queryClient, 'invalidateQueries')
+      .mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 200)));
+
+    const { result } = renderHook(() => useChangeHistoryRestore({ onRestored }), { wrapper });
+
+    await act(async () => {
+      await result.current.restoreChange({
+        objectId: TEST_OBJECT_ID,
+        changeId: 'evt-3',
+        confirmedAtMs: Date.now() - 30,
+      });
+    });
+
+    const completedCall = reportEvent.mock.calls.find(
+      ([eventType]) => eventType === ChangeHistoryTelemetryEventTypes.RestoreCompleted
+    );
+    expect(completedCall).toBeDefined();
+    const durationMs = completedCall?.[1]?.durationMs as number;
+    expect(durationMs).toBeGreaterThanOrEqual(25);
+    expect(durationMs).toBeLessThan(150);
+  });
+
+  it('reports restore_completed and returns true when post-restore steps fail', async () => {
+    const reportEvent = jest.fn();
+    const restoreChange = jest.fn().mockResolvedValue(undefined);
+    const onRestored = jest.fn().mockRejectedValue(new Error('callback failed'));
+    const adapter = createAdapter(restoreChange);
+    const { wrapper } = createHarness(
+      adapter,
+      { restore: true },
+      { canRestore: true },
+      reportEvent
+    );
+
+    const { result } = renderHook(() => useChangeHistoryRestore({ onRestored }), { wrapper });
+
+    await act(async () => {
+      const succeeded = await result.current.restoreChange({
+        objectId: TEST_OBJECT_ID,
+        changeId: 'evt-3',
+        restoreTelemetry: { rollbackDistance: 4 },
+      });
+      expect(succeeded).toBe(true);
+    });
+
+    expect(reportEvent).toHaveBeenCalledWith(
+      ChangeHistoryTelemetryEventTypes.RestoreCompleted,
+      expect.objectContaining({
+        eventName: 'Change history restore completed',
+        rollbackDistance: 4,
+      })
+    );
+    expect(reportEvent).not.toHaveBeenCalledWith(
+      ChangeHistoryTelemetryEventTypes.RestoreFailed,
+      expect.anything()
+    );
+    expect(result.current.error).toBeUndefined();
+  });
+
+  it('reports restore_completed and returns true when cache invalidation fails', async () => {
+    const reportEvent = jest.fn();
+    const restoreChange = jest.fn().mockResolvedValue(undefined);
+    const adapter = createAdapter(restoreChange);
+    const { wrapper, queryClient } = createHarness(
+      adapter,
+      { restore: true },
+      { canRestore: true },
+      reportEvent
+    );
+    jest.spyOn(queryClient, 'invalidateQueries').mockRejectedValue(new Error('network error'));
+
+    const { result } = renderHook(() => useChangeHistoryRestore(), { wrapper });
+
+    await act(async () => {
+      const succeeded = await result.current.restoreChange({
+        objectId: TEST_OBJECT_ID,
+        changeId: 'evt-3',
+        restoreTelemetry: { rollbackDistance: 2 },
+      });
+      expect(succeeded).toBe(true);
+    });
+
+    expect(reportEvent).toHaveBeenCalledWith(
+      ChangeHistoryTelemetryEventTypes.RestoreCompleted,
+      expect.objectContaining({
+        eventName: 'Change history restore completed',
+        rollbackDistance: 2,
+      })
+    );
+    expect(reportEvent).not.toHaveBeenCalledWith(
+      ChangeHistoryTelemetryEventTypes.RestoreFailed,
+      expect.anything()
+    );
+    expect(result.current.error).toBeUndefined();
+  });
+
+  it('reports restore_failed telemetry when restore fails', async () => {
+    const reportEvent = jest.fn();
+    const restoreChange = jest.fn().mockRejectedValue({
+      body: {
+        code: 'RESTORE_CONFLICT',
+        message: 'Object was updated by another user.',
+      },
+    });
+    const adapter = createAdapter(restoreChange);
+    const { wrapper } = createHarness(
+      adapter,
+      { restore: true },
+      { canRestore: true },
+      reportEvent
+    );
+
+    const { result } = renderHook(() => useChangeHistoryRestore(), { wrapper });
+
+    await act(async () => {
+      await result.current.restoreChange({
+        objectId: TEST_OBJECT_ID,
+        changeId: 'evt-3',
+        restoreTelemetry: { rollbackDistance: 4 },
+        confirmedAtMs: Date.now(),
+      });
+    });
+
+    expect(reportEvent).toHaveBeenCalledWith(ChangeHistoryTelemetryEventTypes.RestoreFailed, {
+      eventName: 'Change history restore failed',
+      ...TEST_CHANGE_HISTORY_SCOPE,
+      rollbackDistance: 4,
+      errorCode: 'RESTORE_CONFLICT',
+    });
   });
 });
