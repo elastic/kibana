@@ -367,6 +367,11 @@ export interface RoundModelUsageStats {
    */
   output_tokens: number;
   /**
+   * Number of input tokens served from cache this round, when reported by the provider.
+   * Subset of `input_tokens` (cache reads), not additive.
+   */
+  cached_input_tokens?: number;
+  /**
    * Model identifier from the provider response, if available.
    */
   model?: string;
