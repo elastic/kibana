@@ -8,79 +8,32 @@
  */
 
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { BehaviorSubject, Subject, type Observable } from 'rxjs';
+import { of } from 'rxjs';
 
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import type { IUserStorageClient, UserStorageUpdate } from '@kbn/core-user-storage-browser';
-
-import {
-  DATE_RANGE_PICKER_PRESETS_KEY,
-  DEFAULT_STORED_PRESETS,
-  MAX_PRESETS,
-  type StoredPresets,
+import type {
+  DateRangePickerPresetsService,
+  PresetItem,
+  SavePresetOutcome,
 } from '@kbn/date-range-picker-presets-common';
+
 import { useDateRangePickerPresets } from './use_date_range_picker_presets';
 
-const quickRanges = [
-  { from: 'now/d', to: 'now/d', display: 'Today' },
-  { from: 'now-15m', to: 'now', display: 'Last 15 minutes' },
-];
-
-const quickRangePresets = [
+const defaultPresets: PresetItem[] = [
   { start: 'now/d', end: 'now/d', label: 'Today' },
   { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
 ];
 
-class TestUserStorage implements IUserStorageClient {
-  private readonly storedPresets$ = new BehaviorSubject<StoredPresets>(DEFAULT_STORED_PRESETS);
-
-  public readonly setMock = jest.fn(async <T = unknown>(_key: string, value: T): Promise<T> => {
-    this.storedPresets$.next(value as StoredPresets);
-    return value;
-  });
-
-  public peek<T = unknown>(_key: string, defaultValue?: T): T | undefined {
-    return (this.storedPresets$.getValue() ?? defaultValue) as T | undefined;
-  }
-
-  public get<T = unknown>(_key: string, defaultValue?: T): T | undefined {
-    return (this.storedPresets$.getValue() ?? defaultValue) as T | undefined;
-  }
-
-  public get$<T = unknown>(): Observable<T> {
-    return this.storedPresets$.asObservable() as Observable<T>;
-  }
-
-  public set<T = unknown>(key: string, value: T): Promise<T> {
-    return this.setMock(key, value);
-  }
-
-  public async remove(_key: string): Promise<void> {}
-
-  public getUpdate$(): Observable<UserStorageUpdate> {
-    return new Subject<UserStorageUpdate>();
-  }
-
-  public getHttpError$() {
-    return new Subject<Error>();
-  }
-
-  public setStoredPresets(storedPresets: StoredPresets): void {
-    this.storedPresets$.next(storedPresets);
-  }
-}
-
-const createUiSettings = (): IUiSettingsClient =>
-  ({
-    get: jest.fn(() => quickRanges),
-  } as unknown as IUiSettingsClient);
-
-const createUserProfile = (profile: {} | null = {}): UserProfileService =>
-  ({
-    getUserProfile$: jest.fn(() => new BehaviorSubject(profile).asObservable()),
-  } as unknown as UserProfileService);
+const createServiceMock = (
+  overrides: Partial<jest.Mocked<DateRangePickerPresetsService>> = {}
+): jest.Mocked<DateRangePickerPresetsService> => ({
+  getDefaultPresets: jest.fn(() => defaultPresets),
+  getPresets$: jest.fn(() => of(defaultPresets)),
+  getCanWrite$: jest.fn(() => of(true)),
+  savePreset: jest.fn<Promise<SavePresetOutcome>, [PresetItem]>().mockResolvedValue('saved'),
+  deletePreset: jest.fn<Promise<void>, [PresetItem]>().mockResolvedValue(undefined),
+  ...overrides,
+});
 
 const createNotifications = (): NotificationsStart =>
   ({
@@ -91,169 +44,125 @@ const createNotifications = (): NotificationsStart =>
   } as unknown as NotificationsStart);
 
 const renderPresetsHook = ({
-  userStorage = new TestUserStorage(),
-  userProfile = createUserProfile(),
+  service = createServiceMock(),
+  persistenceEnabled = true,
   notifications = createNotifications(),
 }: {
-  userStorage?: IUserStorageClient | null;
-  userProfile?: UserProfileService;
+  service?: jest.Mocked<DateRangePickerPresetsService>;
+  persistenceEnabled?: boolean;
   notifications?: NotificationsStart;
 } = {}) => {
-  const uiSettings = createUiSettings();
-
   const hook = renderHook(() =>
-    useDateRangePickerPresets({
-      userStorage,
-      uiSettings,
-      userProfile,
-      notifications,
-    })
+    useDateRangePickerPresets({ service, persistenceEnabled, notifications })
   );
-
-  return {
-    ...hook,
-    notifications,
-    uiSettings,
-    userStorage,
-  };
+  return { hook, service, notifications };
 };
 
 describe('useDateRangePickerPresets', () => {
-  it('uses quick ranges while stored presets are unseeded', () => {
-    const { result } = renderPresetsHook();
+  describe('when enabled', () => {
+    it('returns the resolved presets from the service', async () => {
+      const stored: PresetItem[] = [{ start: 'now-1h', end: 'now', label: 'Last hour' }];
+      const service = createServiceMock({ getPresets$: jest.fn(() => of(stored)) });
+      const { hook } = renderPresetsHook({ service });
 
-    expect(result.current.presets).toEqual(quickRangePresets);
-  });
-
-  it('uses stored presets once the user owns the list', async () => {
-    const userStorage = new TestUserStorage();
-    const storedPreset = { start: 'now-7d', end: 'now', label: 'Last 7 days' };
-
-    userStorage.setStoredPresets({ version: 1, presets: [storedPreset] });
-
-    const { result } = renderPresetsHook({ userStorage });
-
-    await waitFor(() => expect(result.current.presets).toEqual([storedPreset]));
-  });
-
-  it('materializes quick ranges and appends on save', async () => {
-    const userStorage = new TestUserStorage();
-    const option = { start: 'now-30d', end: 'now', label: 'Last 30 days' };
-    const { result } = renderPresetsHook({ userStorage });
-
-    act(() => {
-      result.current.onPresetSave?.(option);
+      await waitFor(() => expect(hook.result.current.presets).toEqual(stored));
     });
 
-    await waitFor(() =>
-      expect(userStorage.setMock).toHaveBeenCalledWith(DATE_RANGE_PICKER_PRESETS_KEY, {
-        version: 1,
-        presets: [...quickRangePresets, option],
-      })
-    );
-    expect(result.current.presets).toEqual([...quickRangePresets, option]);
-  });
+    it('exposes save/delete handlers when the user can write', async () => {
+      const { hook } = renderPresetsHook();
 
-  it('persists display labels on save', async () => {
-    const userStorage = new TestUserStorage();
-    const option = {
-      start: '2026-05-01T00:00:00.000Z',
-      end: '2026-05-02T23:59:00.000Z',
-      label: 'May 1, 00:00 → May 2, 23:59',
-    };
-    const { result } = renderPresetsHook({ userStorage });
-
-    act(() => {
-      result.current.onPresetSave?.(option);
+      await waitFor(() => {
+        expect(hook.result.current.onPresetSave).toBeDefined();
+        expect(hook.result.current.onPresetDelete).toBeDefined();
+      });
     });
 
-    await waitFor(() =>
-      expect(userStorage.setMock).toHaveBeenCalledWith(DATE_RANGE_PICKER_PRESETS_KEY, {
-        version: 1,
-        presets: [...quickRangePresets, option],
-      })
-    );
-  });
+    it('omits save/delete handlers when the user cannot write', () => {
+      const service = createServiceMock({ getCanWrite$: jest.fn(() => of(false)) });
+      const { hook } = renderPresetsHook({ service });
 
-  it('deduplicates saves by start and end', () => {
-    const userStorage = new TestUserStorage();
-    const { result } = renderPresetsHook({ userStorage });
-
-    act(() => {
-      result.current.onPresetSave?.({ start: 'now/d', end: 'now/d', label: 'Today again' });
+      expect(hook.result.current.onPresetSave).toBeUndefined();
+      expect(hook.result.current.onPresetDelete).toBeUndefined();
     });
 
-    expect(userStorage.setMock).not.toHaveBeenCalled();
-  });
+    it('delegates save to the service', async () => {
+      const { hook, service } = renderPresetsHook();
+      await waitFor(() => expect(hook.result.current.onPresetSave).toBeDefined());
 
-  it('persists a deleted preset', async () => {
-    const userStorage = new TestUserStorage();
-    const { result } = renderPresetsHook({ userStorage });
+      const preset: PresetItem = { start: 'now-1h', end: 'now' };
+      act(() => hook.result.current.onPresetSave!(preset));
 
-    act(() => {
-      result.current.onPresetDelete?.(quickRangePresets[0]);
+      expect(service.savePreset).toHaveBeenCalledWith(preset);
     });
 
-    await waitFor(() =>
-      expect(userStorage.setMock).toHaveBeenCalledWith(DATE_RANGE_PICKER_PRESETS_KEY, {
-        version: 1,
-        presets: [quickRangePresets[1]],
-      })
-    );
-  });
+    it('warns when the preset limit is reached', async () => {
+      const service = createServiceMock({
+        savePreset: jest
+          .fn<Promise<SavePresetOutcome>, [PresetItem]>()
+          .mockResolvedValue('limit-reached'),
+      });
+      const { hook, notifications } = renderPresetsHook({ service });
+      await waitFor(() => expect(hook.result.current.onPresetSave).toBeDefined());
 
-  it('shows a warning instead of writing past the cap', () => {
-    const userStorage = new TestUserStorage();
-    const notifications = createNotifications();
-    const cappedPresets = Array.from({ length: MAX_PRESETS }, (_, i) => ({
-      start: `now-${i}d`,
-      end: 'now',
-      label: `Preset ${i}`,
-    }));
-    userStorage.setStoredPresets({ version: 1, presets: cappedPresets });
-    const { result } = renderPresetsHook({ userStorage, notifications });
+      act(() => hook.result.current.onPresetSave!({ start: 'now-1h', end: 'now' }));
 
-    act(() => {
-      result.current.onPresetSave?.({ start: 'now-100d', end: 'now', label: 'Too many' });
+      await waitFor(() => expect(notifications.toasts.addWarning).toHaveBeenCalled());
+      expect(notifications.toasts.addDanger).not.toHaveBeenCalled();
     });
 
-    expect(userStorage.setMock).not.toHaveBeenCalled();
-    expect(notifications.toasts.addWarning).toHaveBeenCalledWith(
-      'Maximum of 40 date range presets reached.'
-    );
-  });
+    it('shows a danger toast when saving fails', async () => {
+      const service = createServiceMock({
+        savePreset: jest
+          .fn<Promise<SavePresetOutcome>, [PresetItem]>()
+          .mockRejectedValue(new Error('boom')),
+      });
+      const { hook, notifications } = renderPresetsHook({ service });
+      await waitFor(() => expect(hook.result.current.onPresetSave).toBeDefined());
 
-  it('returns read-only quick ranges when userStorage is disabled', () => {
-    const { result } = renderPresetsHook({ userStorage: null });
+      act(() => hook.result.current.onPresetSave!({ start: 'now-1h', end: 'now' }));
 
-    expect(result.current.presets).toEqual(quickRangePresets);
-    expect(result.current.onPresetSave).toBeUndefined();
-    expect(result.current.onPresetDelete).toBeUndefined();
-  });
-
-  it('returns read-only quick ranges when there is no user profile', () => {
-    const { result } = renderPresetsHook({ userProfile: createUserProfile(null) });
-
-    expect(result.current.presets).toEqual(quickRangePresets);
-    expect(result.current.onPresetSave).toBeUndefined();
-    expect(result.current.onPresetDelete).toBeUndefined();
-  });
-
-  it('shows a danger toast when persistence fails', async () => {
-    const userStorage = new TestUserStorage();
-    const notifications = createNotifications();
-    userStorage.setMock.mockRejectedValueOnce(new Error('boom'));
-
-    const { result } = renderPresetsHook({ userStorage, notifications });
-
-    act(() => {
-      result.current.onPresetSave?.({ start: 'now-30d', end: 'now', label: 'Last 30 days' });
+      await waitFor(() => expect(notifications.toasts.addDanger).toHaveBeenCalled());
     });
 
-    await waitFor(() =>
-      expect(notifications.toasts.addDanger).toHaveBeenCalledWith(
-        'Unable to update date range presets.'
-      )
-    );
+    it('delegates delete to the service', async () => {
+      const { hook, service } = renderPresetsHook();
+      await waitFor(() => expect(hook.result.current.onPresetDelete).toBeDefined());
+
+      const preset: PresetItem = { start: 'now-1h', end: 'now' };
+      act(() => hook.result.current.onPresetDelete!(preset));
+
+      expect(service.deletePreset).toHaveBeenCalledWith(preset);
+    });
+
+    it('shows a danger toast when deleting fails', async () => {
+      const service = createServiceMock({
+        deletePreset: jest.fn<Promise<void>, [PresetItem]>().mockRejectedValue(new Error('boom')),
+      });
+      const { hook, notifications } = renderPresetsHook({ service });
+      await waitFor(() => expect(hook.result.current.onPresetDelete).toBeDefined());
+
+      act(() => hook.result.current.onPresetDelete!({ start: 'now-1h', end: 'now' }));
+
+      await waitFor(() => expect(notifications.toasts.addDanger).toHaveBeenCalled());
+    });
+  });
+
+  describe('when disabled', () => {
+    it('returns the default presets without reading stored presets', () => {
+      const service = createServiceMock();
+      const { hook } = renderPresetsHook({ service, persistenceEnabled: false });
+
+      expect(hook.result.current.presets).toEqual(defaultPresets);
+      expect(service.getPresets$).not.toHaveBeenCalled();
+    });
+
+    it('omits save/delete handlers and skips the canWrite check', () => {
+      const service = createServiceMock();
+      const { hook } = renderPresetsHook({ service, persistenceEnabled: false });
+
+      expect(hook.result.current.onPresetSave).toBeUndefined();
+      expect(hook.result.current.onPresetDelete).toBeUndefined();
+      expect(service.getCanWrite$).not.toHaveBeenCalled();
+    });
   });
 });

@@ -7,13 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useDateRangePickerPresets } from './src/use_date_range_picker_presets';
-export type {
-  UseDateRangePickerPresetsArgs,
-  UseDateRangePickerPresetsResult,
-} from './src/use_date_range_picker_presets';
-export type {
-  DateRangePickerPresetsService,
-  PresetItem,
-  SavePresetOutcome,
-} from '@kbn/date-range-picker-presets-common';
+export { DateRangePickerPresetsService } from './date_range_picker_presets_service';
+export type { DateRangePickerPresetsServiceDeps } from './date_range_picker_presets_service';

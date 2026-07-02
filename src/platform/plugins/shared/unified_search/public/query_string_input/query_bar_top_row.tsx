@@ -402,8 +402,6 @@ export const QueryBarTopRow = React.memo(
       dataViews,
       application,
       featureFlags,
-      userStorage,
-      userProfile,
     } = kibana.services;
 
     const isDateRangePickerFeatureFlagEnabled$ = useMemo(
@@ -438,9 +436,8 @@ export const QueryBarTopRow = React.memo(
     const shouldPersistDateRangePickerPresets =
       !shouldUseLegacyTimePicker && isPresetsPersistenceFeatureFlagEnabled;
     const dateRangePickerPresets = useDateRangePickerPresets({
-      userStorage: shouldPersistDateRangePickerPresets ? userStorage ?? null : null,
-      uiSettings,
-      userProfile,
+      service: data.dateRangePickerPresets,
+      persistenceEnabled: shouldPersistDateRangePickerPresets,
       notifications,
     });
 

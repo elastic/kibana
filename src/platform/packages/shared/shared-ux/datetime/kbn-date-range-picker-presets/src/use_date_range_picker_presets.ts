@@ -11,26 +11,27 @@ import { useCallback, useMemo } from 'react';
 import { of } from 'rxjs';
 
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import type { IUserStorageClient } from '@kbn/core-user-storage-browser';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { i18n } from '@kbn/i18n';
 import { useObservable } from '@kbn/use-observable';
 
-import {
-  DATE_RANGE_PICKER_PRESETS_KEY,
-  DEFAULT_STORED_PRESETS,
-  MAX_PRESETS,
-  type PresetItem,
-  type StoredPresets,
-  normalize,
+import type {
+  DateRangePickerPresetsService,
+  PresetItem,
 } from '@kbn/date-range-picker-presets-common';
-import { mapQuickRanges, TIMEPICKER_QUICK_RANGES_SETTING, type QuickRange } from './quick_ranges';
 
 export interface UseDateRangePickerPresetsArgs {
-  userStorage: IUserStorageClient | null;
-  uiSettings: IUiSettingsClient;
-  userProfile?: UserProfileService;
+  /**
+   * Storage-agnostic presets service (e.g. `data.dateRangePickerPresets`). Owns
+   * the persistence mechanism and the dedupe/cap rules; this hook only adapts it
+   * to the picker props and surfaces failures as toasts.
+   */
+  service: DateRangePickerPresetsService;
+  /**
+   * When `false`, presets are the read-only quick-ranges defaults: no stored
+   * value is read and save/delete are unavailable. Consumers gate this on their
+   * persistence feature flag.
+   */
+  persistenceEnabled: boolean;
   notifications: NotificationsStart;
 }
 
@@ -40,77 +41,32 @@ export interface UseDateRangePickerPresetsResult {
   onPresetDelete?: (option: PresetItem) => void;
 }
 
-const getPresetKey = ({ start, end }: Pick<PresetItem, 'start' | 'end'>): string =>
-  `${start}|${end}`;
-
-const toPresetItem = ({ start, end, label }: PresetItem): PresetItem => ({
-  start,
-  end,
-  ...(label ? { label } : {}),
-});
-
 export const useDateRangePickerPresets = ({
-  userStorage,
-  uiSettings,
-  userProfile,
+  service,
+  persistenceEnabled,
   notifications,
 }: UseDateRangePickerPresetsArgs): UseDateRangePickerPresetsResult => {
-  const userProfile$ = useMemo(
-    () => (userProfile ? userProfile.getUserProfile$() : of(undefined)),
-    [userProfile]
+  const defaultPresets = useMemo(() => service.getDefaultPresets(), [service]);
+
+  const presets$ = useMemo(
+    () => (persistenceEnabled ? service.getPresets$() : of(defaultPresets)),
+    [persistenceEnabled, service, defaultPresets]
   );
-  const userProfileData = useObservable(userProfile$);
+  const presets = useObservable(presets$, defaultPresets);
 
-  const quickRanges = useMemo(
-    () => mapQuickRanges(uiSettings.get<QuickRange[]>(TIMEPICKER_QUICK_RANGES_SETTING) ?? []),
-    [uiSettings]
+  const canWrite$ = useMemo(
+    () => (persistenceEnabled ? service.getCanWrite$() : of(false)),
+    [persistenceEnabled, service]
   );
+  const canWrite = useObservable(canWrite$, false);
 
-  const storedPresets$ = useMemo(
-    () =>
-      userStorage
-        ? userStorage.get$<StoredPresets>(DATE_RANGE_PICKER_PRESETS_KEY, DEFAULT_STORED_PRESETS)
-        : of(DEFAULT_STORED_PRESETS),
-    [userStorage]
-  );
-
-  const storedPresets = normalize(useObservable(storedPresets$, DEFAULT_STORED_PRESETS));
-  const presets = storedPresets.presets ?? quickRanges;
-  const canWrite = Boolean(userStorage && userProfileData);
-
-  const getMutationBase = useCallback((): PresetItem[] => {
-    if (!userStorage) {
-      return quickRanges;
-    }
-
-    const cachedStoredPresets = normalize(
-      userStorage.peek<StoredPresets>(DATE_RANGE_PICKER_PRESETS_KEY, DEFAULT_STORED_PRESETS)
+  const notifyPersistFailure = useCallback(() => {
+    notifications.toasts.addDanger(
+      i18n.translate('sharedUXPackages.dateRangePickerPresets.persistFailureErrorMessage', {
+        defaultMessage: 'Unable to update date range presets.',
+      })
     );
-
-    return cachedStoredPresets.presets ?? quickRanges;
-  }, [quickRanges, userStorage]);
-
-  const persistPresets = useCallback(
-    async (nextPresets: PresetItem[]): Promise<void> => {
-      if (!userStorage) {
-        return;
-      }
-
-      try {
-        await userStorage.set<StoredPresets>(DATE_RANGE_PICKER_PRESETS_KEY, {
-          version: 1,
-          presets: nextPresets.map(toPresetItem),
-        });
-      } catch {
-        notifications.toasts.addDanger(
-          i18n.translate('sharedUXPackages.dateRangePickerPresets.persistFailureErrorMessage', {
-            defaultMessage: 'Unable to update date range presets.',
-          })
-        );
-      }
-    },
-    [notifications.toasts, userStorage]
-  );
+  }, [notifications.toasts]);
 
   const onPresetSave = useMemo(() => {
     if (!canWrite) {
@@ -118,29 +74,20 @@ export const useDateRangePickerPresets = ({
     }
 
     return (option: PresetItem) => {
-      const base = getMutationBase();
-      const nextPresetKey = getPresetKey(option);
-      const alreadySaved = base.some((preset) => getPresetKey(preset) === nextPresetKey);
-
-      if (alreadySaved) {
-        return;
-      }
-
-      if (base.length >= MAX_PRESETS) {
-        notifications.toasts.addWarning(
-          i18n.translate(
-            'sharedUXPackages.dateRangePickerPresets.maximumPresetsReachedErrorMessage',
-            {
-              defaultMessage: 'Maximum of 40 date range presets reached.',
-            }
-          )
-        );
-        return;
-      }
-
-      void persistPresets([...base, option]);
+      void service.savePreset(option).then((outcome) => {
+        if (outcome === 'limit-reached') {
+          notifications.toasts.addWarning(
+            i18n.translate(
+              'sharedUXPackages.dateRangePickerPresets.maximumPresetsReachedErrorMessage',
+              {
+                defaultMessage: 'Maximum of 40 date range presets reached.',
+              }
+            )
+          );
+        }
+      }, notifyPersistFailure);
     };
-  }, [canWrite, getMutationBase, notifications.toasts, persistPresets]);
+  }, [canWrite, service, notifications.toasts, notifyPersistFailure]);
 
   const onPresetDelete = useMemo(() => {
     if (!canWrite) {
@@ -148,14 +95,9 @@ export const useDateRangePickerPresets = ({
     }
 
     return (option: PresetItem) => {
-      const presetKeyToDelete = getPresetKey(option);
-      const nextPresets = getMutationBase().filter(
-        (preset) => getPresetKey(preset) !== presetKeyToDelete
-      );
-
-      void persistPresets(nextPresets);
+      void service.deletePreset(option).catch(notifyPersistFailure);
     };
-  }, [canWrite, getMutationBase, persistPresets]);
+  }, [canWrite, service, notifyPersistFailure]);
 
   return {
     presets,

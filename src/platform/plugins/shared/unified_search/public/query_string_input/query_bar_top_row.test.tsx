@@ -875,7 +875,7 @@ describe('QueryBarTopRowTopRow', () => {
         })
       );
 
-    it('passes userStorage to the presets hook when the new picker and persistence flag are enabled', async () => {
+    it('enables the presets hook when the new picker and persistence flag are enabled', async () => {
       useNewDateRangePickerFlag = true;
       usePresetPersistenceFlag = true;
 
@@ -884,16 +884,15 @@ describe('QueryBarTopRowTopRow', () => {
       await waitFor(() => {
         expect(mockUseDateRangePickerPresets).toHaveBeenCalledWith(
           expect.objectContaining({
-            userStorage: startMock.userStorage,
-            uiSettings: startMock.uiSettings,
-            userProfile: startMock.userProfile,
+            service: expect.objectContaining({ getPresets$: expect.any(Function) }),
+            persistenceEnabled: true,
             notifications: startMock.notifications,
           })
         );
       });
     });
 
-    it('passes null userStorage to the presets hook when persistence is disabled', async () => {
+    it('disables the presets hook when persistence is disabled', async () => {
       useNewDateRangePickerFlag = true;
       usePresetPersistenceFlag = false;
 
@@ -902,13 +901,13 @@ describe('QueryBarTopRowTopRow', () => {
       await waitFor(() => {
         expect(mockUseDateRangePickerPresets).toHaveBeenCalledWith(
           expect.objectContaining({
-            userStorage: null,
+            persistenceEnabled: false,
           })
         );
       });
     });
 
-    it('passes null userStorage to the presets hook on the legacy picker path', async () => {
+    it('disables the presets hook on the legacy picker path', async () => {
       useNewDateRangePickerFlag = false;
       usePresetPersistenceFlag = true;
 
@@ -917,7 +916,7 @@ describe('QueryBarTopRowTopRow', () => {
       await waitFor(() => {
         expect(mockUseDateRangePickerPresets).toHaveBeenCalledWith(
           expect.objectContaining({
-            userStorage: null,
+            persistenceEnabled: false,
           })
         );
       });
