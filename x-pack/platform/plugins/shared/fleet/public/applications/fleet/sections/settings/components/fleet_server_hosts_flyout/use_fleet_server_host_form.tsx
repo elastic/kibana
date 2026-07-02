@@ -312,7 +312,9 @@ export function useFleetServerHostsForm(
             ssl: {
               certificate: sslCertificateInput.value,
               key: sslKeyInput.value || undefined,
-              certificate_authorities: sslCertificateAuthoritiesInput.value.filter((val) => val !== ''),
+              certificate_authorities: sslCertificateAuthoritiesInput.value.filter(
+                (val) => val !== ''
+              ),
               es_certificate: sslEsCertificateInput.value,
               es_key: sslESKeyInput.value || undefined,
               es_certificate_authorities: sslEsCertificateAuthoritiesInput.value.filter(
