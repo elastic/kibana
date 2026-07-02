@@ -11,12 +11,11 @@ import { isEmpty } from 'lodash';
 import type { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION,
+  ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
-  ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   TIMESTAMP,
-  ALERT_RULE_CONSUMER,
   ALERT_RULE_PRODUCER,
 } from '@kbn/rule-data-utils';
 import { EuiBadge, EuiLink, EuiText } from '@elastic/eui';
@@ -48,9 +47,7 @@ export const DefaultCellValue = ({
     },
   } = useAlertsTableContext();
   const formatField = useFieldFormatter(fieldFormats);
-  // Rule read is authorized per rule type (and consumer), so the rule name only
-  // links to the rule details page when the user can read the alert's rule.
-  const { authorizedToReadRuleType } = useGetRuleTypesPermissions({
+  const { authorizedToReadRuleForAlert } = useGetRuleTypesPermissions({
     filteredRuleTypes: [],
     http,
     toasts,
@@ -73,9 +70,7 @@ export const DefaultCellValue = ({
       if (!ruleName || !ruleUuid) {
         return null;
       }
-      const ruleTypeId = alert?.[ALERT_RULE_TYPE_ID]?.[0] as string | undefined;
-      const ruleConsumer = alert?.[ALERT_RULE_CONSUMER]?.[0] as string | undefined;
-      const canReadRule = Boolean(ruleTypeId && authorizedToReadRuleType(ruleTypeId, ruleConsumer));
+      const canReadRule = authorizedToReadRuleForAlert(alert);
       if (!canReadRule) {
         return (
           <EuiText size="s" data-test-subj="alertRuleName">

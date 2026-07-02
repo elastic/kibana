@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState, type ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
 import { STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX } from '@kbn/response-ops-alerts-table/constants';
@@ -53,16 +52,12 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const { authorizedToReadRuleType } = useGetRuleTypesPermissions({
+  const { authorizedToReadRuleForAlert } = useGetRuleTypesPermissions({
     http,
     toasts,
     filteredRuleTypes: [],
   });
-  const alertRuleTypeId = alert[ALERT_RULE_TYPE_ID]?.[0] as string | undefined;
-  const alertConsumer = alert[ALERT_RULE_CONSUMER]?.[0] as string | undefined;
-  const canReadAlertRule = Boolean(
-    alertRuleTypeId && authorizedToReadRuleType(alertRuleTypeId, alertConsumer)
-  );
+  const canReadAlertRule = authorizedToReadRuleForAlert(alert);
 
   const closeActionsPopover = useCallback(() => {
     setIsPopoverOpen(false);
