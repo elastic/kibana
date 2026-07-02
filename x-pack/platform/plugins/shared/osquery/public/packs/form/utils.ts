@@ -36,20 +36,8 @@ export const convertPackQueriesToSO = (queries: Record<string, Omit<PackQueryFor
     [] as PackQueryFormData[]
   );
 
-/**
- * Convert the form's query array into the record shape the pack API expects,
- * keyed by each query's (editable) `id`.
- *
- * @param includeId When `true` (edit-save only), each query value ALSO carries
- * an `id` so the server's `resolvePreservedQueries` can match by the explicit
- * identity claim (pass 1) rather than relying solely on the map key. The claim
- * is the query's `originalId` (its stored id captured at deserialize time) when
- * present, so a RENAMED query still carries the id of the stored row it came
- * from — that is what preserves the V4-minted `schedule_id` / `start_date`
- * across a rename. For a brand-new query (no `originalId`) it falls back to the
- * map key. On create the id is omitted entirely — the server derives it from
- * the map key, as before. `originalId` is a form-only field and is never sent.
- */
+// includeId=true (edit-save) sends each query's originalId so the server
+// matches renamed queries to their stored row and preserves schedule_id.
 export const convertSOQueriesToPack = (queries: PackQueryFormData[], includeId = false) =>
   reduce(
     queries,

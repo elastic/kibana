@@ -313,10 +313,7 @@ describe('updatePackRoute', () => {
     });
 
     it('interval → rrule with queries omitted — strips prior-mode per-query interval from SO write', async () => {
-      // Repro from the review: pack runs interval with per-query `fast.interval: 30`.
-      // PUT flips schedule_type to rrule WITHOUT restating queries. Without the
-      // transition strip, the per-query interval survives on the SO and leaks
-      // via GET/find as cross-mode state.
+      // Flipping to rrule without restating queries must not leave the old per-query interval on the SO.
       const currentSO = {
         ...basePackSO,
         attributes: {
@@ -425,13 +422,8 @@ describe('updatePackRoute', () => {
     });
 
     it('V4-migrated pack with originally-no-id rows — every schedule_id survives GET→PUT edit-save', async () => {
-      // The keyBy-"undefined" collapse case (finding 2). Pre-9.4 / asset /
-      // imported packs had query rows with no per-query `id`. V4's data_backfill
-      // now stamps `id` = the array-position key ("0", "1", ...) — the same key
-      // the GET/wire path derives — so `keyBy(queries, 'id')` no longer collapses
-      // every row under a single `undefined` key. The UI (edit flow) round-trips
-      // that `id`, so `resolvePreservedQueries` matches each outgoing query to its
-      // stored row and preserves the V4-minted schedule_id.
+      // No-id rows are stamped with their array-position key, so keyBy(queries, 'id')
+      // no longer collapses every row under a single `undefined` key.
       const currentSO = {
         ...basePackSO,
         attributes: {
@@ -490,11 +482,7 @@ describe('updatePackRoute', () => {
     });
 
     it('policy_ids omitted — preserves existing policy attachments (no strip)', async () => {
-      // Reproduces the schedule-update bug: when a PUT updates schedule fields
-      // without restating `policy_ids`, the pack must remain attached to its
-      // current policies. Previously, missing `policy_ids` was interpreted as
-      // "intersect with empty set" by getInitialPolicies, which then drove
-      // the pack out of every Fleet package policy block.
+      // Omitting `policy_ids` must not detach the pack from its current policies.
       const currentSO = {
         ...basePackSO,
         references: [{ id: 'policy-1', name: 'policy-1', type: 'ingest-agent-policies' }],
@@ -618,12 +606,8 @@ describe('updatePackRoute', () => {
     });
 
     it('enabled flip true + policy_ids omitted — uses current agent policy ids, not empty set', async () => {
-      // Locks the enable-flip branch at update_pack_route.ts:371.
-      // `const policyIds = policy_ids || !isEmpty(shards) ? policiesList : currentAgentPolicyIds`
-      // When `policy_ids` is absent and shards is empty, `policiesList` is built
-      // from `currentAgentPolicyIds` via `getInitialPolicies`, so the pack must
-      // remain attached to its existing policy. A regression here would silently
-      // detach the pack from every policy on every enable toggle.
+      // When policy_ids is absent, enabling the pack must not detach it from
+      // its existing policy.
       const currentSO = {
         ...basePackSO,
         references: [{ id: 'policy-1', name: 'policy-1', type: 'ingest-agent-policies' }],
@@ -804,16 +788,8 @@ describe('updatePackRoute', () => {
       expect(secondGetResult.attributes.rrule_schedule._unknown_subfield).toBe('preserved-value');
     });
 
-    it('partial same-mode rrule update — body sends only `rrule`, merge preserves start_date and splay (regression for PR#270639)', async () => {
-      // A client editing one knob of an existing pack-level RRULE
-      // (e.g. bumping `INTERVAL=2 → INTERVAL=3`) must be able to PATCH
-      // just `rrule_schedule.rrule` without restating `start_date` /
-      // `splay`. The strict io-ts variant (`rrule` + `start_date`
-      // required) would 400 such a body before the route's
-      // read → merge → write logic ran. The partial variant lets it
-      // through; `resolvePackScheduleForUpdate` merges against the
-      // current SO; `validatePackScheduleFields` enforces the strict
-      // shape on the merged result.
+    it('partial same-mode rrule update — body sends only `rrule`, merge preserves start_date and splay', async () => {
+      // A partial body must be able to PATCH just `rrule` without restating start_date/splay.
       const existingRrule = {
         rrule: 'FREQ=MINUTELY;INTERVAL=2',
         start_date: '2026-01-01T00:00:00Z',
@@ -1154,13 +1130,9 @@ describe('updatePackRoute', () => {
     });
   });
 
-  describe('schedule-validation error response shape (6.8)', () => {
+  describe('schedule-validation error response shape', () => {
     it('returns a 400 whose body.message carries the human-readable validator string', async () => {
-      // A same-mode rrule pack (no transition → no per-query strip) whose query
-      // override carries both `interval` and `rrule_schedule` is a mixed payload
-      // the validator rejects. The rejection MUST be a structured `{ message }`
-      // body — not a bare string — so the client toast (`error.body.message`)
-      // renders the reason.
+      // Mixed interval+rrule query payload must reject with a structured `{ message }` body.
       const rruleValue = { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00Z' };
       const currentSO = {
         ...basePackSO,
@@ -1187,8 +1159,7 @@ describe('updatePackRoute', () => {
           queries: {
             q1: {
               query: 'SELECT 1',
-              // Both interval AND rrule_schedule → mutual-exclusivity error
-              // (utils.ts:717).
+              // Both interval AND rrule_schedule → mutual-exclusivity error.
               interval: 30,
               schedule_type: 'rrule',
               rrule_schedule: rruleValue,
@@ -1204,22 +1175,15 @@ describe('updatePackRoute', () => {
       const badRequestArg = mockResponse.badRequest.mock.calls[0][0] as {
         body: { message: string };
       };
-      // Structured body — `message` is a non-empty human-readable string, not
-      // a bare-string body (which would leave `error.body.message` undefined).
       expect(typeof badRequestArg.body).toBe('object');
       expect(typeof badRequestArg.body.message).toBe('string');
       expect(badRequestArg.body.message.length).toBeGreaterThan(0);
-      // The mode-mismatch message names the conflict.
       expect(badRequestArg.body.message).toMatch(/interval|rrule|schedule/i);
     });
   });
 
   describe('response contract (PUT/GET parity)', () => {
-    // Regression for PR#270639 — buildResponseData was
-    // pulling `policy_ids` from `attrs.policy_ids` (always undefined: the route
-    // writes policies to `references`, not attributes) and emitting `shards` in
-    // the SO array form instead of the public object map. These tests pin the
-    // PUT response to the same contract as GET / find_packs.
+    // PUT response must match the GET/find_packs contract.
 
     it('derives policy_ids from SO references, not attributes', async () => {
       const currentSO = {
@@ -1552,12 +1516,8 @@ describe('updatePackRoute', () => {
     });
 
     it('does not let two queries collide on one schedule_id when a stale `id` is reused', async () => {
-      // Konrad review #3: a stale/duplicate client-supplied `id` (here `q2`
-      // lies that its id is `q1`) must not make both queries inherit the same
-      // stored `schedule_id`. Each stored row is consumable once: `q1` is
-      // processed first and claims its own id, so `q2`'s stale claim on the
-      // same id misses and it mints a fresh schedule_id instead of stealing
-      // `q1`'s.
+      // A stale/duplicate client-supplied id must not make two queries
+      // inherit the same stored schedule_id — each stored row is consumable once.
       const currentSO = {
         ...basePackSO,
         attributes: {
@@ -1604,20 +1564,13 @@ describe('updatePackRoute', () => {
       const written = getWrittenQueries(mockClient);
       const q1 = written.find((q) => q.id === 'q1')!;
       const q2 = written.find((q) => q.id === 'q2')!;
-      // q1 keeps its own stored schedule_id.
       expect(q1.schedule_id).toBe('sid-q1');
-      // q2's stale id claim is rejected: it does NOT inherit sid-q1.
       expect(q2.schedule_id).not.toBe('sid-q1');
-      // No two queries share a schedule_id.
       expect(q1.schedule_id).not.toBe(q2.schedule_id);
     });
 
     it('honors an explicit rename `id` claim over another query`s own map key, regardless of order', async () => {
-      // Explicit rename intent (`id`) is resolved before the map-key
-      // fallback. Here `other` claims id `q1` (a genuine rename), while a
-      // separate `q1` entry in the same save has no special claim beyond
-      // its own map key — so `other` wins the stored row and `q1` is left
-      // to mint a fresh schedule_id.
+      // Explicit rename intent wins the stored row regardless of key order.
       const currentSO = {
         ...basePackSO,
         attributes: {
@@ -1662,11 +1615,7 @@ describe('updatePackRoute', () => {
     });
 
     it('rename plus name reuse does not misattribute schedule_id (regression)', async () => {
-      // A single save renames `old-name` -> `new-name` (payload carries
-      // id: 'old-name') while also adding a brand-new query that reuses the
-      // freed map key `old-name` (no id). The rename must win: `new-name`
-      // keeps the original schedule_id, and the new `old-name` query gets a
-      // fresh, different one.
+      // Rename must win over a new query reusing the freed map key.
       const currentSO = {
         ...basePackSO,
         attributes: {

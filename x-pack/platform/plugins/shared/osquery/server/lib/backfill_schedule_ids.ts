@@ -31,19 +31,9 @@ import {
 } from '../routes/pack/utils';
 
 /**
- * One-shot, idempotent reconciler that projects each enabled pack's
- * Saved-Object `schedule_id` values onto its Fleet package-policy wire, so the
- * Elastic Agent emits result documents carrying `schedule_id` (the modern
- * scheduled-history join key).
- *
- * This is NOT a backfill: minting `schedule_id` is owned by the pack SO
- * `data_backfill` model version (V4). By the time this runs, the SO carries
- * `schedule_id` on every query, so the reconciler reads it as the source of
- * truth and never mints — making it idempotent (no per-run uuid drift). Writing
- * the cross-SO Fleet package policy is the one job a model version cannot do.
- *
- * It writes ONLY the osquery pack block of the package policy; all other
- * policy state is preserved.
+ * Idempotent, one-shot pass that pushes each enabled pack's `schedule_id`
+ * values onto its Fleet package-policy wire so agents emit them in results.
+ * Writes only the osquery pack block; never mints.
  */
 export const reconcileScheduleIdsToWire = async ({
   coreStart,
@@ -60,9 +50,7 @@ export const reconcileScheduleIdsToWire = async ({
 }): Promise<{ hadFailures: boolean }> => {
   const internalClient = await getInternalSavedObjectsClient(coreStart);
 
-  // Page through every pack across all spaces via the platform's all-pages
-  // iterator — a deployment can have >1000 packs, and this has no
-  // offset-window ceiling and cannot spin on a stale `total`.
+  // Page all packs across spaces (no 1000-pack ceiling, no offset drift).
   const packFinder = internalClient.createPointInTimeFinder<PackSavedObject>({
     type: packSavedObjectType,
     perPage: 1000,
@@ -75,10 +63,6 @@ export const reconcileScheduleIdsToWire = async ({
 
   await packFinder.close();
 
-  // Only enabled packs reach the Fleet wire. A pack whose SO carries
-  // `schedule_id` values (guaranteed post-V4 for every query) is a reconcile
-  // candidate; the per-policy wire-vs-SO diff gate below decides whether a
-  // write is actually needed, so an already-in-sync pack is skipped.
   const packsToReconcile = allPackSavedObjects.filter(
     (pack) => pack.attributes.enabled && pack.attributes.queries?.length
   );
@@ -156,10 +140,9 @@ export const reconcileScheduleIdsToWire = async ({
           }
         );
 
-        // Index-based iteration so a successful write can splice the fresh
-        // policy back into `packagePolicies` — subsequent packs sharing this
-        // policy then diff against post-write state, converging in one pass
-        // instead of provoking a self-inflicted 409 per additional pack.
+        // Index-based so a successful write can be spliced back in, letting
+        // later packs on the same policy diff against post-write state
+        // instead of retrying a 409.
         for (let ppIndex = 0; ppIndex < packagePolicies.length; ppIndex++) {
           const pp = packagePolicies[ppIndex];
           if (policyHasPack(pp, packSO.attributes.name, spaceId)) {
@@ -205,12 +188,8 @@ export const reconcileScheduleIdsToWire = async ({
               })
             );
 
-            // Splice the returned policy back so the next pack on this policy
-            // (and the diff gate above) sees the just-written state. Fleet's
-            // optimistic-concurrency version bump also travels with it, keeping
-            // subsequent writes from stale-version conflicts. `pp.id` is
-            // re-attached defensively in case the draft's stripped `id` isn't
-            // echoed back.
+            // Splice the updated policy back so later packs see fresh state
+            // and the version bump, avoiding stale-version conflicts.
             packagePolicies[ppIndex] = { ...updatedPolicy, id: updatedPolicy.id ?? pp.id };
           }
         }

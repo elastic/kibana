@@ -230,10 +230,7 @@ describe('Pack utils', () => {
       expect(out.queries.q1).not.toHaveProperty('rrule_schedule');
     });
 
-    // Regression: per-query rrule override must NOT emit a top-level start_date.
-    // The stale create-time start_date in the SO (e.g. 11:37Z) would shadow the
-    // user-chosen rrule_schedule.start_date (e.g. 13:38Z), causing osquerybeat
-    // to compute the next fire from the wrong baseline and never execute the query.
+    // Stale per-query start_date must not shadow the user's chosen rrule start_date.
     test('per-query rrule override — no top-level start_date emitted (shadowing fix)', () => {
       const overrideRrule = {
         rrule: 'FREQ=DAILY',
@@ -259,14 +256,11 @@ describe('Pack utils', () => {
           isRruleFeatureEnabled: true,
         }
       );
-      // The stale top-level start_date must not appear — only rrule_schedule.start_date.
       expect(out.queries.uptime).not.toHaveProperty('start_date');
       expect(out.queries.uptime.rrule_schedule).toEqual(overrideRrule);
     });
 
-    // Pack-inheriting query (no per-query override) in rrule mode also must not
-    // emit the stale top-level start_date — the pack default_rrule_schedule is
-    // the authoritative time source.
+    // Pack default_rrule_schedule is the authoritative time source, not the stale SO start_date.
     test('pack-inheriting rrule query — no top-level start_date emitted', () => {
       const out = convertSOQueriesToPackConfig(
         [
@@ -308,8 +302,7 @@ describe('Pack utils', () => {
       expect(out.queries.q1.start_date).toBe('2026-06-18T11:37:48.355Z');
     });
 
-    // Wire-gate off: even with an rrule query on the SO, top-level start_date
-    // must be emitted (legacy mode, flag is off).
+    // The wire gate enforces this even if the SO already has RRULE state.
     test('wire-gate off — top-level start_date preserved on rrule SO query (legacy fallback)', () => {
       const out = convertSOQueriesToPackConfig(
         [
@@ -390,12 +383,7 @@ describe('Pack utils', () => {
       expect(out.queries.q1).not.toHaveProperty('rrule_schedule');
     });
 
-    // Rollback symmetry: a pack SO planted with `schedule_type:'interval'`
-    // and a pack-level interval (i.e. a pack written during a flag-on era)
-    // MUST also fall back to the pre-rrule wire shape when the flag is off —
-    // no `default_native_schedule`. The per-query `interval` is the legacy
-    // signal and survives. Locks the fix for the gating bug at the packMode
-    // ternary that previously let `'interval'` mode escape the rollback gate.
+    // Interval-mode packs must also fall back to the legacy shape when the flag is off.
     test('defense in depth: pack SO carries interval mode + flag off → no default_native_schedule', () => {
       const out = convertSOQueriesToPackConfig(
         [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60 }],
@@ -409,12 +397,8 @@ describe('Pack utils', () => {
       expect(out.queries.q1.interval).toBe(60);
     });
 
-    // Rollback sub-cases — guard rails on pack-level emission.
+    // Guards against malformed/partial pack-level schedule state leaking to the wire.
 
-    // Sub-case 1: malformed SO where schedule_type is 'rrule' but rrule_schedule
-    // is missing. The L341 guard (`packSchedule?.rrule_schedule` truthy) must
-    // prevent emitting a `default_rrule_schedule` of undefined, and no
-    // `default_native_schedule` should appear either.
     test('flag on + malformed SO (schedule_type rrule, missing rrule_schedule) — no default_rrule_schedule emitted', () => {
       const out = convertSOQueriesToPackConfig([{ id: 'q1', name: 'q1', query: 'SELECT 1' }], {
         packSchedule: { schedule_type: 'rrule', rrule_schedule: undefined },
@@ -424,11 +408,6 @@ describe('Pack utils', () => {
       expect(out.default_native_schedule).toBeUndefined();
     });
 
-    // Sub-case 2: no pack-level schedule_type at all, but a query SO carries
-    // per-query rrule fields. With packMode === undefined the per-query loop
-    // falls into the legacy `else` branch (utils.ts:312-318), so per-query
-    // rrule_schedule is NOT emitted to the wire — only per-query interval if
-    // present.
     test('flag on + no pack-level schedule_type + per-query rrule_schedule on SO — emits legacy per-query path', () => {
       const perQueryRrule = {
         rrule: 'FREQ=DAILY',
@@ -715,12 +694,8 @@ describe('Pack utils', () => {
       });
     });
 
-    // Verifies the "inert under flag-off" claim of PR A: every existing pack
-    // write predates PR C wiring the new routes, so `schedule_type` is always
-    // undefined on input. The default-pick path MUST produce byte-identical
-    // output to its pre-PR-A shape.
     describe('byte-identical default pick-list (no schedule_type on input)', () => {
-      test('emits the canonical pre-PR-A pick-list shape', () => {
+      test('emits the canonical default pick-list shape', () => {
         const result = convertPackQueriesToSO({
           q1: {
             name: 'q1',
@@ -774,7 +749,7 @@ describe('Pack utils', () => {
       });
     });
 
-    describe('per-query schedule_type override (PR C will exercise this)', () => {
+    describe('per-query schedule_type override', () => {
       test('schedule_type:"rrule" drops interval, keeps rrule_schedule', () => {
         const result = convertPackQueriesToSO({
           q1: {
@@ -807,10 +782,7 @@ describe('Pack utils', () => {
       });
     });
 
-    // Defense in depth: query carries rrule_schedule without
-    // schedule_type. Route validator rejects earlier; here we ensure the
-    // utility drops the field so no RRULE state lands on the SO without
-    // its discriminator.
+    // Route validator rejects this earlier; here we check the utility also drops the field.
     describe('defense in depth', () => {
       test('drops rrule_schedule when schedule_type is missing', () => {
         const result = convertPackQueriesToSO({
@@ -1387,9 +1359,7 @@ describe('resolvePreservedQueries', () => {
   });
 
   it('consumes each stored row at most once — a duplicate `id` claim only wins once', () => {
-    // q1 and q2 both claim id 'q1'. Pass 1 (by id) processes q1 first, so it
-    // consumes stored q1. q2's claim on the same id is then stale and misses;
-    // q2 falls through to pass 2, where its own map key still resolves stored q2.
+    // q1 wins stored q1 first; q2's stale claim on the same id falls through to its own map key.
     const result = resolvePreservedQueries(
       { q1: { id: 'q1', query: 'a' }, q2: { id: 'q1', query: 'b' } },
       existing
@@ -1400,9 +1370,7 @@ describe('resolvePreservedQueries', () => {
   });
 
   it('an explicit `id` claim wins even when the claiming query has no stored row of its own', () => {
-    // `extra` claims id 'q1' and is processed before `q1` in pass 1 (by id),
-    // so `extra` wins stored q1. The genuine `q1` query then finds its own
-    // row already consumed and is left unmatched (caller mints fresh).
+    // `extra` wins stored q1; the genuine q1 finds its row already consumed.
     const result = resolvePreservedQueries(
       { extra: { id: 'q1', query: 'b' }, q1: { id: 'q1', query: 'a' } },
       existing
@@ -1416,9 +1384,6 @@ describe('resolvePreservedQueries', () => {
       { other: { id: 'q1', query: 'b' }, q1: { id: 'q1', query: 'a' } },
       existing
     );
-    // Pass 1 (by id) reserves q1 for whichever query claims id 'q1' first;
-    // here that is `other`, so `other` wins and the plain `q1` map-key match
-    // in pass 2 finds the row already consumed.
     expect(result.other).toEqual({ schedule_id: 'sid-q1', start_date: 'd1' });
     expect(result.q1).toBeUndefined();
   });
@@ -1429,10 +1394,7 @@ describe('resolvePreservedQueries', () => {
   });
 
   it('rename plus name reuse does not misattribute schedule_id (regression)', () => {
-    // q1 is renamed to q2 (payload carries id: 'q1'); a new query reuses the
-    // freed map key `q1` with no id. Explicit rename intent must win: q2
-    // inherits stored q1's schedule_id, and the new q1 is left unmatched so
-    // the caller mints it a fresh one.
+    // Explicit rename intent must win over a new query reusing the freed map key.
     const result = resolvePreservedQueries(
       { q1: { query: 'new query reusing the freed name' }, q2: { id: 'q1', query: 'renamed' } },
       { q1: { schedule_id: 'S1', start_date: 'd1' } }

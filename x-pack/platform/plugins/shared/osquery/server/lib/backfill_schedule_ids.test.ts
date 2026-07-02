@@ -61,8 +61,7 @@ const createMockCoreStart = (
   };
 };
 
-// `fetchAllItems` returns `Promise<AsyncIterable<PackagePolicy[]>>` — an async
-// generator yielding one batch is sufficient to exercise the drain loop.
+// One batch is enough to exercise the drain loop.
 const mockFetchAllItems = (items: unknown[]) =>
   jest.fn().mockImplementation(async function* asyncGenerator() {
     yield items;
@@ -78,9 +77,7 @@ const createMockOsqueryContext = (packagePolicyService?: unknown) =>
     ),
   } as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['osqueryContext']);
 
-// A pack SO that already carries `schedule_id` on every query (the post-V4
-// guarantee). The reconciler reads these as the source of truth and projects
-// them onto the wire — it never mints.
+// Every query already carries schedule_id — the reconciler projects, never mints.
 const buildEnabledPackFindResult = (overrides: Record<string, unknown> = {}) => ({
   saved_objects: [
     {
@@ -142,8 +139,6 @@ describe('reconcileScheduleIdsToWire', () => {
     });
 
     expect(result).toEqual({ hadFailures: false });
-    // The reconciler must NEVER write the pack SO — minting is owned by the
-    // model version. Only the Fleet package policy is updated.
     expect(scopedClient.update).not.toHaveBeenCalled();
     expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
   });
@@ -171,14 +166,10 @@ describe('reconcileScheduleIdsToWire', () => {
     expect(packBlock).toBeDefined();
     expect(packBlock.queries.q1.schedule_id).toBe('sched-q1');
     expect(packBlock.queries.q2.schedule_id).toBe('sched-q2');
-    // pack_id is set from the SO id.
     expect(packBlock.pack_id).toBe('pack-1');
   });
 
-  // Build the route-shaped wire a pack would actually carry once reconciled:
-  // the reconciler's own projected block PLUS the `shard` field the create/
-  // update routes always set (and that `convertSOQueriesToPackConfig` never
-  // emits). This is the realistic steady-state input the diff gate must match.
+  // Route-shaped wire: reconciler output plus the `shard` field routes always set.
   const buildInSyncPolicyFromFirstReconcile = async () => {
     const firstUpdate = jest.fn().mockResolvedValue({});
     const firstList = mockFetchAllItems([buildPackagePolicy()]);
@@ -193,9 +184,6 @@ describe('reconcileScheduleIdsToWire', () => {
     });
 
     const reconciledPolicy = { ...firstUpdate.mock.calls[0][3], id: 'pp-1' };
-    // The first reconcile preserves `shard: 100` from buildPackagePolicy, so
-    // reconciledPolicy is already route-shaped (carries `shard`). Assert that
-    // rather than re-injecting it, so the fixture can't silently lose realism.
     expect(
       reconciledPolicy.inputs[0].config.osquery.value.packs['default--reconcile-pack'].shard
     ).toBe(100);
@@ -263,17 +251,11 @@ describe('reconcileScheduleIdsToWire', () => {
     });
 
     expect(result).toEqual({ hadFailures: false });
-    // Two enabled packs in the same space share a single policy fetch.
     expect(packagePolicyList).toHaveBeenCalledTimes(1);
     expect(packagePolicyUpdate).toHaveBeenCalledTimes(2);
   });
 
   test('skips a legacy-keyed pack whose wire block already matches the SO (no revision churn)', async () => {
-    // Seed a route-shaped, in-sync block via a real first reconcile (same
-    // technique as buildInSyncPolicyFromFirstReconcile), then move it to the
-    // legacy bare-name key. The diff gate must read the legacy key (since the
-    // namespaced key no longer exists) to detect it's in sync, rather than
-    // always seeing `undefined` under the namespaced key and rewriting.
     const reconciledPolicy = await buildInSyncPolicyFromFirstReconcile();
     const inSyncBlock =
       reconciledPolicy.inputs[0].config.osquery.value.packs['default--reconcile-pack'];
@@ -319,8 +301,7 @@ describe('reconcileScheduleIdsToWire', () => {
   test('preserves the wire-only `shard` field when it does write', async () => {
     const scopedClient = createMockScopedClient();
     const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-    // A route-shaped wire whose `schedule_id`s are stale → a write IS needed,
-    // but `shard` must survive (it controls pack rollout percentage).
+    // Stale schedule_id forces a write; `shard` must survive it.
     const stalePolicy = buildPackagePolicy();
     stalePolicy.inputs[0].config.osquery.value.packs['default--reconcile-pack'].shard = 42;
     const packagePolicyList = mockFetchAllItems([stalePolicy]);
@@ -347,10 +328,7 @@ describe('reconcileScheduleIdsToWire', () => {
   test('migrates a legacy bare-name-keyed wire block to the spaceId--name key and preserves its `shard`', async () => {
     const scopedClient = createMockScopedClient();
     const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-    // A pre-`spaceId--name` pack keyed by its bare name (`reconcile-pack`), with
-    // a wire-only `shard` set. `policyHasPack` matches via its bare-name
-    // fallback, so the reconciler writes — it must migrate the block to the
-    // modern key AND carry `shard` across (the SO never carried it).
+    // Bare-name pack matched via `policyHasPack`'s legacy fallback.
     const legacyPolicy = buildPackagePolicy('reconcile-pack');
     legacyPolicy.inputs[0].config.osquery.value.packs['reconcile-pack'].shard = 7;
     const packagePolicyList = mockFetchAllItems([legacyPolicy]);
@@ -370,10 +348,8 @@ describe('reconcileScheduleIdsToWire', () => {
 
     const updatedPolicy = packagePolicyUpdate.mock.calls[0][3];
     const packs = updatedPolicy.inputs[0].config.osquery.value.packs;
-    // The legacy key is gone, the modern key holds the migrated block...
     expect(packs['reconcile-pack']).toBeUndefined();
     expect(packs['default--reconcile-pack']).toBeDefined();
-    // ...and the `shard` that lived under the legacy key survived the migration.
     expect(packs['default--reconcile-pack'].shard).toBe(7);
     expect(packs['default--reconcile-pack'].queries.q1.schedule_id).toBe('sched-q1');
   });
@@ -411,7 +387,6 @@ describe('reconcileScheduleIdsToWire', () => {
         'default--reconcile-pack'
       ];
 
-    // Same source-of-truth SO → byte-identical wire, no uuid drift.
     expect(secondWire.queries.q1.schedule_id).toBe(firstWire.queries.q1.schedule_id);
     expect(secondWire.queries.q2.schedule_id).toBe(firstWire.queries.q2.schedule_id);
     expect(secondWire.queries.q1.schedule_id).toBe('sched-q1');
@@ -481,9 +456,6 @@ describe('reconcileScheduleIdsToWire', () => {
       logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
     });
 
-    // A 409 means the pack's wire was NOT written this pass. Because the task
-    // is single-run, only `hadFailures: true` makes it re-arm and retry — a
-    // swallowed 409 would silently abandon the pack on a stale wire.
     expect(result).toEqual({ hadFailures: true });
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining('version conflict for pack pack-1')
@@ -491,9 +463,6 @@ describe('reconcileScheduleIdsToWire', () => {
   });
 
   test('classifies a Boom-shaped 409 (output.statusCode, no top-level statusCode) as a conflict', async () => {
-    // Fleet surfaces conflicts as Boom errors: the status lives under
-    // `output.statusCode`, NOT a top-level `statusCode`. The catch must read
-    // both, or a real conflict would fall into the generic warn branch.
     const scopedClient = createMockScopedClient();
     const boomConflict = Object.assign(new Error('Conflict'), {
       output: { statusCode: 409 },
@@ -515,7 +484,6 @@ describe('reconcileScheduleIdsToWire', () => {
     });
 
     expect(result).toEqual({ hadFailures: true });
-    // The debug (conflict) branch fires, not the generic warn branch.
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining('version conflict for pack pack-1')
     );
@@ -525,14 +493,8 @@ describe('reconcileScheduleIdsToWire', () => {
   });
 
   test('two stale packs sharing one policy converge in one pass (two updates, no self-inflicted 409)', async () => {
-    // Both packs live on the same package policy pp-1. The first pack's write
-    // returns the fresh policy, which is spliced back into the in-memory list
-    // so the second pack diffs against post-write state — both converge in a
-    // single pass with no version conflict.
     const scopedClient = createMockScopedClient();
 
-    // One policy carrying BOTH pack blocks (stale — queries empty, so both
-    // packs need a write).
     const sharedPolicy = {
       id: 'pp-1',
       policy_ids: ['policy-1'],
@@ -555,8 +517,7 @@ describe('reconcileScheduleIdsToWire', () => {
       ],
     };
 
-    // `update` echoes the written draft back as the fresh policy (with its id),
-    // mirroring Fleet's real return so the splice-back has real state to reuse.
+    // update echoes the written draft back with its id, mirroring Fleet's real return.
     const packagePolicyUpdate = jest
       .fn()
       .mockImplementation(async (_sc, _es, id, updated) => ({ ...updated, id }));
@@ -595,10 +556,7 @@ describe('reconcileScheduleIdsToWire', () => {
     });
 
     expect(result).toEqual({ hadFailures: false });
-    // One write per pack, both in the same pass.
     expect(packagePolicyUpdate).toHaveBeenCalledTimes(2);
-    // The second write is built from the policy the FIRST write returned:
-    // it carries pack-1's already-reconciled block (schedule_id projected).
     const secondWriteDraft = packagePolicyUpdate.mock.calls[1][3];
     const secondWritePacks = secondWriteDraft.inputs[0].config.osquery.value.packs;
     expect(secondWritePacks['default--reconcile-pack'].queries.q1.schedule_id).toBe('sched-q1');
@@ -780,12 +738,8 @@ describe('reconcileScheduleIdsToWire', () => {
     });
   });
 
+  // End-to-end: legacy SO → real V4 backfill → reconciler → Fleet wire.
   describe('integration — legacy SO → model version V4 → reconciler → Fleet wire', () => {
-    // End-to-end sanity (FTR-style, in-process): a legacy pack whose queries
-    // have NO schedule_id is migrated by the real V4 `data_backfill`, then the
-    // reconciler projects the now-minted schedule_id values onto the Fleet
-    // package-policy wire. Asserts the full pipeline delivers schedule_id per
-    // query without the reconciler minting anything.
     const backfillFn = (
       packSavedObjectModelVersion4.changes.find(
         (change): change is SavedObjectsModelDataBackfillChange => change.type === 'data_backfill'
@@ -796,13 +750,11 @@ describe('reconcileScheduleIdsToWire', () => {
     >;
 
     test('legacy queries gain schedule_id via V4, and the reconciler carries them to the wire', async () => {
-      // 1) Legacy SO: queries with no schedule_id.
       const legacyQueries = [
         { id: 'q1', query: 'SELECT 1', interval: 60, name: 'q1' },
         { id: 'q2', query: 'SELECT 2', interval: 120, name: 'q2' },
       ];
 
-      // 2) Run the REAL model-version backfill.
       const migrated = backfillFn(
         { id: 'pack-legacy', type: 'osquery-pack', attributes: { queries: legacyQueries } } as any,
 
@@ -812,7 +764,6 @@ describe('reconcileScheduleIdsToWire', () => {
       const migratedQueries = migrated.attributes.queries;
       migratedQueries.forEach((q) => expect(q.schedule_id).toMatch(UUID_REGEX));
 
-      // 3) Feed the migrated SO into the reconciler.
       const scopedClient = createMockScopedClient();
       const packagePolicyUpdate = jest.fn().mockResolvedValue({});
       const packagePolicyList = mockFetchAllItems([
@@ -850,7 +801,6 @@ describe('reconcileScheduleIdsToWire', () => {
         logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
       });
 
-      // 4) The reconciler minted nothing and the wire carries each schedule_id.
       expect(result).toEqual({ hadFailures: false });
       expect(scopedClient.update).not.toHaveBeenCalled();
 

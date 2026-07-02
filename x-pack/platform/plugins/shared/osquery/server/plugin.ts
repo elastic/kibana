@@ -139,8 +139,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
               isRruleFeatureEnabled: this.rruleSchedulingEnabled,
             });
 
-            // Thread the prior task state so a failed pass re-arms with capped
-            // exponential backoff (see buildReconcileRunResult).
             return buildReconcileRunResult(hadFailures, new Date(), taskInstance?.state);
           },
         }),
@@ -249,10 +247,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
           registerIngestCallback('agentPolicyPostUpdate', getAgentPolicyPostUpdateCallback(core));
         }
 
-        // Schedule the reconcile task AFTER the Fleet ingest callbacks are
-        // registered — nothing downstream depends on the task, and the
-        // callbacks must be in place before the reconciler starts writing the
-        // wire so create/update/delete events are handled consistently.
+        // Schedule after Fleet callbacks are registered so create/update/delete
+        // events are handled consistently.
         await scheduleReconcileTask(plugins.taskManager, this.logger, new Date());
       })
       .catch(() => {

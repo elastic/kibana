@@ -177,12 +177,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           throw err;
         }
 
-        // Index of every current SO query by its stored `id`, carrying the
-        // fields we must preserve across an edit-save: the per-query
-        // `schedule_id` (the modern scheduled-history join key) and
-        // `start_date`, plus the existing `rrule_schedule` used to merge
-        // partial per-query rrule payloads on same-mode override edits.
-
+        // Index of current SO queries by id, carrying schedule_id/start_date
+        // to preserve across edit-save.
         const existingQueriesById = keyBy(currentPackSO.attributes.queries ?? [], 'id') as Record<
           string,
           PreservableQueryFields
@@ -207,14 +203,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const now = moment().toISOString();
 
-        // On a pack-mode transition the request typically doesn't restate
-        // `queries`, but the SO carries per-query fields from the prior mode
-        // (e.g. `fast.interval: 30` from an old interval pack). Without a
-        // rewrite those fields stay on the SO and surface via GET/find,
-        // leaking cross-mode state. Hydrate from the current SO when the
-        // request omits `queries`, then strip prior-mode per-query fields so
-        // the merged set is consistent with the new pack mode before both
-        // validation and SO write.
+        // On a mode transition, hydrate queries from the SO when the request
+        // omits them, then strip prior-mode fields — otherwise stale
+        // cross-mode state leaks via GET.
         const baseQueries =
           gatedQueries ??
           (resolved.transitioned
@@ -224,9 +215,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               >)
             : undefined);
 
-        // Map each outgoing query to the stored query it preserves
-        // `schedule_id` / `start_date` from, guaranteeing no two queries share a
-        // stored row (see `resolvePreservedQueries`).
+        // Map each outgoing query to the stored row it preserves schedule_id from.
         const resolvedExistingByKey = baseQueries
           ? resolvePreservedQueries(baseQueries, existingQueriesById)
           : {};
@@ -238,13 +227,6 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                 ? stripPriorModePerQueryFields(queryData, resolved.scheduleType)
                 : queryData;
 
-              // Mirror of the pack-level partial-merge in
-              // `resolvePackScheduleForUpdate`: on a same-mode rrule
-              // override edit, shallow-merge the request's per-query
-              // `rrule_schedule` over the existing one so the client can
-              // change just `splay` (or `rrule`) without restating the
-              // rest. Mode transitions skip the merge — they already had
-              // their prior-mode fields stripped by `carried`.
               const existingRrule = existing?.rrule_schedule;
               const merged =
                 !resolved.transitioned &&
@@ -301,11 +283,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           policyHasPack(packagePolicy, currentPackSO.attributes.name, spaceId)
         );
 
-        // When `policy_ids` is omitted from the request, preserve the pack's
-        // existing policy attachments. Otherwise an unrelated PUT (e.g. just
-        // toggling schedule_type) would strip the pack from every assigned
-        // policy because `getInitialPolicies` interprets the missing field as
-        // "intersect with empty set."
+        // Preserve existing policy attachments when policy_ids is omitted, so
+        // an unrelated PUT doesn't strip the pack from every policy.
         const currentAgentPolicyIds = map(
           filter(currentPackSO.references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
           'id'
@@ -351,12 +330,6 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const references = getUpdatedReferences();
 
-        // Build the schedule slice for the SO write. Honor read→merge→write
-        // by only including a field on the patch when the request actually
-        // sent it (or when transitioning between modes). The patch slot
-        // uses the SO's strict shape — the value comes from
-        // `resolved.rrule_schedule`, which is the post-merge object
-        // already gated through `validatePackScheduleFields`.
         const scheduleSoPatch: Partial<
           Pick<PackSavedObject, 'schedule_type' | 'interval' | 'rrule_schedule'>
         > = {};
@@ -370,12 +343,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           }
 
           if (resolved.transitioned || rruleSchedulePresent) {
-            // Narrowing: `resolved.rrule_schedule` is typed as a partial
-            // because the request body may be partial. By the time we
-            // reach this write, `validatePackScheduleFields` has already
-            // 400'd any merged result that is not a full
-            // `RRuleScheduleConfig`, so the runtime value is either the
-            // strict shape, `null` (clear), or `undefined`.
+            // validatePackScheduleFields has already rejected any non-strict merged shape by this point.
             scheduleSoPatch.rrule_schedule = (resolved.rrule_schedule ??
               null) as RRuleScheduleConfig | null;
           }
@@ -456,17 +424,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             updated_by: attrs.updated_by,
             updated_by_profile_uid: attrs.updated_by_profile_uid,
             policy_ids: policyIds,
-            // TODO: collapse `PackResponseData.shards` (currently `SOShard`,
-            // array form) onto the documented public contract `Record<string,
-            // number>`. The OAS, the GET responses, and the runtime validator's
-            // `oneOf(array, object)` all point to the object form being the real
-            // public shape; the array typing here is a leak of the internal SO
-            // storage shape. Fix would also let `find_pack_route` and
-            // `create_pack_route` stop returning array form silently. Tracked
-            // separately — this cast is the bridge until then.
+            // TODO: PackResponseData.shards should be the public object-map
+            // shape; array form here is a leak of internal SO storage.
             shards: convertShardsToObject(attrs.shards) as unknown as PackResponseData['shards'],
             saved_object_id: updatedPackSO.id,
-            // Discriminated response — see buildScheduleResponseSlice.
             ...buildScheduleResponseSlice(attrs, isRruleFeatureEnabled),
           };
         };
@@ -532,11 +493,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             );
           }
         } else {
-          // `policiesList` is the post-validation set returned by
-          // `getInitialPolicies` (only ids that map to a real Fleet package
-          // policy). Diff against `currentAgentPolicyIds` to compute the
-          // remove / keep-and-update / add buckets. Validated empirically by
-          // the multi-policy fan-out probe.
+          // Diff current vs. target policy ids into remove/keep/add buckets.
           const agentPolicyIdsToRemove = uniq(difference(currentAgentPolicyIds, policiesList));
           const agentPolicyIdsToUpdate = uniq(
             difference(currentAgentPolicyIds, agentPolicyIdsToRemove)

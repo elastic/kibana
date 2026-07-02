@@ -125,18 +125,8 @@ describe('Pack saved object model version 3 forward compatibility', () => {
     expect(() => (forwardCompatibility as ObjectType).validate(transitioningDoc)).not.toThrow();
   });
 
-  // Phase 9 / D29–D32 introduces V4 fields (pack-level osquery `version` +
-  // `snapshot` boolean + per-query `enabled` flag). A pack SO migrated forward
-  // to V4 in a future Kibana must still load through the V3 forward-compat
-  // schema on this Kibana. The forward-compat schema uses `unknowns: 'ignore'`
-  // so unrecognized future fields MUST NOT cause it to throw — they just get
-  // dropped (the V4 Kibana will see them on subsequent loads).
-  //
-  // Note: V3 already declares a `version` field on the pack root as
-  // `schema.number()` (prebuilt-pack version). The V4 "min osquery version"
-  // field uses a different name (kept as `min_osquery_version` in this test)
-  // to avoid the type collision; the actual V4 migration is free to pick its
-  // own naming when it lands.
+  // A pack SO migrated forward to a future model version must still load
+  // through this V3 forward-compat schema; unrecognized fields are dropped, not rejected.
   it('accepts a synthetic V4 pack SO with fictitious future root fields', () => {
     const syntheticV4Doc = {
       name: 'forward-compat-pack',
@@ -165,13 +155,8 @@ describe('Pack saved object model version 3 forward compatibility', () => {
     expect(() => (forwardCompatibility as ObjectType).validate(syntheticV4Doc)).not.toThrow();
   });
 
-  // V3's forwardCompatibility is the shipped definition (`packSchemaV3` +
-  // `unknowns: 'ignore'`), whose per-query schema carries `unknowns: 'allow'`.
-  // The deployed serverless V3 binaries therefore PASS unknown per-query keys
-  // (`schedule_id`, `start_date`) THROUGH on a rollback read — they do NOT
-  // strip them. Editing released model version 3 to strip `schedule_id` would
-  // certify fiction and sever scheduled history on a rollback→resave→re-upgrade
-  // (see design decision 1). These tests pin the shipped pass-through behavior.
+  // V3's unknowns:'allow' per-query schema passes schedule_id/start_date
+  // through on a rollback read rather than stripping them.
   it('passes the V4-minted per-query `schedule_id`/`start_date` through on rollback read', () => {
     const v4StampedDoc = {
       name: 'test-pack-1',
@@ -197,7 +182,6 @@ describe('Pack saved object model version 3 forward compatibility', () => {
       queries: Array<Record<string, unknown>>;
     };
 
-    // `schedule_id` and `start_date` survive the rollback read unchanged.
     expect(out.queries[0]).toMatchObject({
       id: 'query1',
       query: 'select * from processes;',
@@ -235,8 +219,7 @@ describe('Pack saved object model version 3 forward compatibility', () => {
   });
 });
 
-describe('Pack saved object model version 4 — schedule_id/start_date/id backfill (security-team#17841)', () => {
-  // Typed shapes for the backfill in/out so we avoid `as any` on results.
+describe('Pack saved object model version 4 — schedule_id/start_date/id backfill', () => {
   interface BackfillQuery extends Record<string, unknown> {
     id?: string;
     query?: string;
@@ -383,9 +366,7 @@ describe('Pack saved object model version 4 — schedule_id/start_date/id backfi
   });
 
   it('parity — stamped `id` equals the key the GET/wire path derives for no-id rows', () => {
-    // The stamped `id` MUST equal the map key `convertSOQueriesToPack` derives
-    // for the same rows; otherwise `keyBy(queries, "id")` in the update route
-    // and the GET-path key would disagree and drop the minted schedule_id.
+    // keyBy(queries, 'id') must agree with the GET-path key or the minted schedule_id gets dropped.
     const bareQueries = [
       { query: 'SELECT 1', interval: 60 },
       { query: 'SELECT 2', interval: 120 },
@@ -401,9 +382,6 @@ describe('Pack saved object model version 4 — schedule_id/start_date/id backfi
   });
 
   it('(d) backfills regardless of feature-flag state (no flag input exists)', () => {
-    // The backfillFn takes no feature-flag argument by construction — it is
-    // structurally unconditional. This test pins that contract: the function
-    // arity does not include any flag, so it cannot be flag-gated.
     expect(backfillFn.length).toBeLessThanOrEqual(2); // (document, context) only
     const result = runBackfill({ queries: [{ id: 'q1', query: 'SELECT 1' }] });
     expect(typeof queriesOf(result)[0].schedule_id).toBe('string');
@@ -413,7 +391,6 @@ describe('Pack saved object model version 4 — schedule_id/start_date/id backfi
     const forwardCompatibility = packSavedObjectModelVersion4.schemas?.forwardCompatibility;
     expect(forwardCompatibility).toBeDefined();
 
-    // Simulate the migrated doc: queries now carry schedule_id.
     const migratedDoc = {
       name: 'migrated-pack',
       enabled: true,

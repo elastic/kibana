@@ -22,11 +22,7 @@ describe('buildReconcileTaskSchedule (one-shot reconcile task registration)', ()
     const runAt = new Date('2026-06-25T00:00:00.000Z');
     const params = buildReconcileTaskSchedule(runAt);
 
-    // One-shot: runAt drives a single prompt execution.
     expect(params.runAt).toBe(runAt);
-    // No recurring schedule — the daily heartbeat is gone now that minting is
-    // owned by the model version. Re-run pressure on a failed pass comes from
-    // the explicit `runAt` re-arm in buildReconcileRunResult, NOT a schedule.
     expect(params).not.toHaveProperty('schedule');
   });
 
@@ -53,7 +49,6 @@ describe('computeBackoffDelayMs (capped exponential backoff)', () => {
 
   it('never exceeds the 24h cap', () => {
     expect(computeBackoffDelayMs(100)).toBe(RECONCILE_RETRY_MAX_DELAY_MS);
-    // The first attempt that would exceed the cap is clamped exactly to it.
     for (let attempts = 0; attempts <= 200; attempts++) {
       expect(computeBackoffDelayMs(attempts)).toBeLessThanOrEqual(RECONCILE_RETRY_MAX_DELAY_MS);
     }
@@ -83,12 +78,10 @@ describe('buildReconcileRunResult (single-run re-arm + backoff contract)', () =>
   });
 
   it('consecutive failures double the delay and increment the attempt counter', () => {
-    // Second consecutive failure: prior state recorded 1 attempt → delay 2×base.
     const second = buildReconcileRunResult(true, now, { completed: false, retryAttempts: 1 });
     expect(second.state).toEqual({ completed: false, retryAttempts: 2 });
     expect((second.runAt as Date).getTime()).toBe(now.getTime() + RECONCILE_RETRY_DELAY_MS * 2);
 
-    // Third: prior 2 attempts → 4×base.
     const third = buildReconcileRunResult(true, now, { completed: false, retryAttempts: 2 });
     expect(third.state).toEqual({ completed: false, retryAttempts: 3 });
     expect((third.runAt as Date).getTime()).toBe(now.getTime() + RECONCILE_RETRY_DELAY_MS * 4);
@@ -113,7 +106,6 @@ describe('scheduleReconcileTask (conditional-remove startup contract)', () => {
   it('upgraded deployment (legacy recurring doc) → removes it then schedules a fresh one-shot', async () => {
     const taskManager = taskManagerMock.createStart();
     const callOrder: string[] = [];
-    // Existing doc carries a legacy recurring schedule.
     taskManager.get.mockResolvedValue({
       id: RECONCILE_TASK_TYPE,
       schedule: { interval: '1d' },
@@ -138,12 +130,10 @@ describe('scheduleReconcileTask (conditional-remove startup contract)', () => {
 
   it('live one-shot doc (no recurring schedule) → does NOT remove; ensureScheduled no-ops', async () => {
     const taskManager = taskManagerMock.createStart();
-    // Existing doc is a modern one-shot: runAt only, no recurring schedule.
     taskManager.get.mockResolvedValue({ id: RECONCILE_TASK_TYPE, runAt: now } as never);
 
     await scheduleReconcileTask(taskManager, logger, now);
 
-    // The live doc is left untouched — no delete-mid-run race.
     expect(taskManager.removeIfExists).not.toHaveBeenCalled();
     expect(taskManager.ensureScheduled).toHaveBeenCalledWith(buildReconcileTaskSchedule(now));
   });

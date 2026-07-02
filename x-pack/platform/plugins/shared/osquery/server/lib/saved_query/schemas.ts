@@ -48,12 +48,8 @@ export const savedQuerySchemaV2 = savedQuerySchemaV1.extends({
   updated_by_profile_uid: schema.maybe(schema.nullable(schema.string())),
 });
 
-// `unknowns: 'allow'` is load-bearing — do not tighten. The per-query RRULE
-// overrides (`schedule_type`, `rrule_schedule`) flow through this schema
-// without an explicit `queries.properties` mapping addition because the pack
-// SO's `queries` field is `dynamic: false` and this schema accepts unknown
-// keys at read time. Tightening to `forbid` silently breaks flag-on customers
-// with per-query RRULE overrides.
+// `unknowns: 'allow'` is load-bearing — per-query RRULE overrides round-trip
+// through this. Do not tighten to `forbid`.
 const packQuerySchema = schema.object(
   {
     id: schema.maybe(schema.string()),
@@ -123,11 +119,6 @@ export const packSchemaV3 = packSchemaV2.extends({
   rrule_schedule: schema.maybe(schema.nullable(rruleScheduleConfigSchema)),
 });
 
-// V4 is the deterministic `schedule_id` backfill model version.
-// It adds NO new top-level pack field: the backfilled
-// per-query `schedule_id` (and minted `start_date` / `id`) lives inside
-// `queries`, which is `dynamic: false`, and `packQuerySchema` already accepts
-// unknown per-query keys (`unknowns: 'allow'`), so those fields round-trip
-// without an explicit mapping. Because V4 introduces no new schema surface, it
-// reuses `packSchemaV3` verbatim as its create / forward-compat schema.
+// V4 adds no new schema surface — new fields live under `queries`, already
+// `unknowns: 'allow'`.
 export const packSchemaV4 = packSchemaV3;

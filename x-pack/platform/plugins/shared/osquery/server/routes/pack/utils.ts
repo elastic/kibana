@@ -69,10 +69,7 @@ export interface SOPackQuery extends Omit<PackQueryInput, 'name'> {
   name: string;
 }
 
-// Default pick list for pack query SOs — byte-identical to the pre-rrule
-// shape. Used when `schedule_type` is unset (the only path under
-// `rruleScheduling: false`) and when a query inherits the pack's schedule in
-// interval mode.
+// Byte-identical to the pre-rrule pick list.
 const INTERVAL_MODE_PICK = [
   'name',
   'query',
@@ -86,10 +83,6 @@ const INTERVAL_MODE_PICK = [
   'start_date',
 ] as const;
 
-// Same fields minus `interval` — used when a query opts into rrule mode. The
-// SO never carries both `interval` and `rrule_schedule` for one query (mutual
-// exclusivity is enforced by building two disjoint pick lists rather than
-// mutating one).
 const RRULE_MODE_PICK = [
   'name',
   'query',
@@ -137,19 +130,7 @@ export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>):
     []
   );
 
-/**
- * Derive the effective map/wire key for a stored pack query.
- *
- * The read/wire path keys each query by its stored `id` when present (and
- * non-empty), else by its position in the on-disk `queries` array (the map key
- * lodash passes while reducing). This is the SINGLE source of truth for that
- * derivation — `convertSOQueriesToPack` (read/GET), `convertSOQueriesToPackConfig`
- * (Fleet wire), and the V4 `data_backfill` (which stamps `id` onto no-id rows)
- * all route through it, so a backfilled `id` equals the key those paths derive
- * and `keyBy(queries, 'id')` in the update route can't collapse no-id rows under
- * a single `undefined` key. An empty-string `id` is treated as absent (matches
- * the wire builder's long-standing truthy check).
- */
+// Single source of truth for the stored-query key: id when present, else array index.
 export const deriveEffectiveQueryKey = (
   query: { id?: string },
   indexOrKey: string | number
@@ -187,28 +168,9 @@ export interface PreservableQueryFields {
   rrule_schedule?: PackQueryInput['rrule_schedule'];
 }
 
-/**
- * Resolve which stored query each outgoing query preserves its `schedule_id` /
- * `start_date` / `rrule_schedule` from, returning a map keyed by the outgoing
- * query's map key.
- *
- * Hard invariant: a stored query is consumed at most once. Otherwise a stale or
- * duplicate client-supplied per-query `id` (two outgoing queries claiming the
- * same stored `id`) would let both inherit the same `schedule_id`, collapsing
- * two queries onto one scheduled-history join key.
- *
- * Two passes make the result independent of object key order, with explicit
- * rename intent taking precedence over the map-key default:
- *  1. Reserve a stored row for the outgoing query that carries a matching
- *     client-supplied `id` (explicit rename intent). This guarantees a renamed
- *     query keeps its `schedule_id` even if another outgoing query
- *     simultaneously reuses its old map key.
- *  2. Match the remainder by their own map key (the normal case — stored key
- *     === query id) against rows not already reserved.
- *
- * An outgoing query with no resolved match is absent from the result; the
- * caller mints a fresh `schedule_id` for it.
- */
+// Resolves which stored query each outgoing query preserves schedule_id
+// from; a stored row is claimed at most once so two queries can't collapse
+// onto one join key.
 export const resolvePreservedQueries = (
   outgoingQueries: Record<string, PackQueryInput>,
   existingQueriesById: Record<string, PreservableQueryFields>
@@ -278,19 +240,8 @@ export const buildScheduleResponseSlice = (
   return {};
 };
 
-/**
- * Per-query response-boundary gate (response-side mirror of the wire-boundary
- * gate in `convertSOQueriesToPackConfig`). When the rrule feature flag is off,
- * strip per-query `schedule_type` and `rrule_schedule` from every query so the
- * "pretend this never happened" contract holds at the response boundary
- * regardless of what the SO carries. Per-query `interval` continues to
- * surface (legacy field).
- *
- * Accepts both the SO-array shape (`SOPackQuery[]`) and the converted-record
- * shape (`Record<string, PackQueryInput>`) so it can be applied uniformly
- * before any route's response build. When the flag is on, returns the input
- * unchanged (no allocation, no copy) so the hot path stays cheap.
- */
+// Response-side mirror of the wire-boundary gate: strips per-query rrule
+// fields when the flag is off. No-op (no copy) when the flag is on.
 export function stripPerQueryRruleFields<T extends SOPackQuery[] | Record<string, PackQueryInput>>(
   queries: T,
   isRruleFeatureEnabled: boolean
@@ -309,15 +260,6 @@ export function stripPerQueryRruleFields<T extends SOPackQuery[] | Record<string
   ) as T;
 }
 
-/**
- * Drop the per-query override fields that don't match the new pack mode.
- * Used on a PUT that transitions `schedule_type` (interval ↔ rrule, or clears
- * the mode) so the SO write and read-API responses don't carry stale
- * prior-mode overrides. Returns the same query verbatim when the per-query
- * `schedule_type` already matches `newPackMode`, when the query carries no
- * mode-specific fields, or when `newPackMode` is undefined (mode cleared —
- * drop both override flavours).
- */
 export const stripPriorModePerQueryFields = (
   query: PackQueryInput,
   newPackMode: ScheduleType | undefined
@@ -358,17 +300,8 @@ export const stripPriorModePerQueryFields = (
 export interface ConvertSOQueriesToPackConfigOptions {
   spaceId?: string;
   packSchedule?: PackScheduleInput;
-  /**
-   * Wire-boundary rollback gate. When `false`, ignore `packSchedule`
-   * entirely (no `default_rrule_schedule`), drop per-query `rrule_schedule`,
-   * fall back to per-query `interval` if present. `default_space_id`
-   * continues to emit regardless of the flag.
-   *
-   * Required: callers must explicitly resolve this from
-   * `osqueryContext.experimentalFeatures.rruleScheduling`. Failing closed
-   * here prevents a missing wiring from silently shipping RRULE state to
-   * Fleet when the feature is off.
-   */
+  // Required — callers must resolve this explicitly so a missing wiring
+  // never silently ships RRULE state to Fleet.
   isRruleFeatureEnabled: boolean;
 }
 
@@ -379,33 +312,14 @@ export interface PackConfigOutput {
   queries: Record<string, Record<string, unknown>>;
 }
 
-/**
- * Build the Fleet agent-policy `packs.{key}.queries` config plus pack-level
- * defaults from a pack's SO queries and optional pack-level schedule.
- *
- * Output shape:
- *   {
- *     default_native_schedule?: { interval: number };
- *     default_rrule_schedule?: RRuleScheduleConfig;
- *     default_space_id?: string;
- *     queries: Record<queryId, { query, schedule_id, start_date, ...overrides }>;
- *   }
- *
- * Per-query fields are emitted ONLY when they override the pack default (or
- * when there is no pack default — legacy mode). The mode invariant is
- * preserved: no query carries both `interval` and `rrule_schedule`, and no
- * query carries a mode different from the pack default.
- */
+// Builds the Fleet packs.{key}.queries config plus pack-level defaults;
+// per-query fields only emitted when they override the pack default.
 export const convertSOQueriesToPackConfig = (
   queries: SOPackQuery[] | Record<string, PackQueryInput>,
   options: ConvertSOQueriesToPackConfigOptions
 ): PackConfigOutput => {
   const { spaceId, packSchedule, isRruleFeatureEnabled } = options;
 
-  // Single source of truth for the wire-boundary rollback gate: when the flag
-  // is off, `packSchedule` is ignored in full — no `default_rrule_schedule`
-  // AND no `default_native_schedule`. Per-query fallback to legacy `interval`
-  // happens in the loop below.
   const packMode: ScheduleType | undefined = isRruleFeatureEnabled
     ? packSchedule?.schedule_type ?? undefined
     : undefined;
@@ -438,27 +352,14 @@ export const convertSOQueriesToPackConfig = (
       let scheduleFields: Record<string, unknown> = {};
 
       if (!isRruleFeatureEnabled) {
-        // Wire-boundary rollback gate: ignore RRULE state entirely.
-        // Fall back to legacy: per-query `interval` if present, otherwise
-        // no schedule field on the query.
         if (interval !== undefined) {
           scheduleFields = { interval };
         }
       } else if (packMode === 'rrule') {
-        // Pack runs rrule. Inherit by default; per-query override only when
-        // the query opts into rrule explicitly. Any per-query `interval` on
-        // the SO is stale — strip it (mode invariant).
         if (querySchedType === 'rrule' && queryRrule) {
           scheduleFields = { rrule_schedule: queryRrule };
         }
       } else if (packMode === 'interval') {
-        // Pack runs interval. Inherit by default; per-query interval
-        // override only when the query's `interval` differs from the pack
-        // default. Any per-query `rrule_schedule` on the SO is stale.
-        // Covers both explicit `schedule_type: 'interval'` overrides and
-        // legacy queries without `schedule_type`; rrule overrides on an
-        // interval pack are rejected at the validator but defensively
-        // ignored here too.
         if (
           querySchedType !== 'rrule' &&
           interval !== undefined &&
@@ -467,17 +368,13 @@ export const convertSOQueriesToPackConfig = (
           scheduleFields = { interval };
         }
       } else {
-        // Legacy pack (no pack-level schedule): per-query `interval` only,
-        // byte-identical to pre-feature output.
         if (interval !== undefined) {
           scheduleFields = { interval };
         }
       }
 
-      // Suppress the legacy top-level `start_date` for rrule-mode queries.
-      // The authoritative time-of-day lives in `rrule_schedule.start_date`;
-      // emitting both causes osquerybeat to honour the stale create-time
-      // top-level value instead of the user-chosen override.
+      // Suppress legacy top-level start_date for rrule-mode queries — otherwise
+      // osquerybeat honours the stale value instead of the user-chosen override.
       const startDateField =
         isRruleFeatureEnabled && (packMode === 'rrule' || querySchedType === 'rrule')
           ? {}
@@ -511,8 +408,6 @@ export const convertSOQueriesToPackConfig = (
 
   const output: PackConfigOutput = { queries: queriesOut };
 
-  // `packMode` is forced to `undefined` when the flag is off, so neither
-  // branch fires under rollback — no redundant flag check needed here.
   if (packMode === 'rrule' && packSchedule?.rrule_schedule) {
     output.default_rrule_schedule = packSchedule.rrule_schedule;
   } else if (packMode === 'interval' && packSchedule?.interval != null) {
@@ -541,35 +436,12 @@ const formatGoDurationSeconds = (totalSeconds: number): string => {
   return `${seconds}s`;
 };
 
-/**
- * Strict RFC 3339 datetime regex matching the OpenAPI Zod `.datetime()` shape
- * and beats's `time.Parse(time.RFC3339, ...)` parser. Requires:
- * - YYYY-MM-DD
- * - `T` separator (uppercase)
- * - HH:MM:SS
- * - Optional fractional seconds
- * - Timezone offset `Z` or `±HH:MM`
- */
-// Tightened component ranges (hour 00-23, minute/second 00-59, day 01-31,
-// month 01-12) so the regex itself rejects the wall-clock values beats's
-// `time.Parse(time.RFC3339, ...)` rejects without us having to round-trip
-// through a parser. Calendar validity (Feb-31, leap-year Feb-29) is checked
-// by `moment.parseZone(..., true)` below.
+// Strict RFC 3339 datetime regex matching beats's time.Parse(time.RFC3339, ...) parser.
 const RFC_3339_REGEX =
   /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
 
-/**
- * Strict RFC 3339 datetime validator. Rejects loose strings like
- * `"2024-01-01"` (no time component) which `Date.parse` would accept, AND
- * rejects calendar-invalid dates like `"2024-02-31T00:00:00Z"` that the JS
- * `Date` parser silently normalizes (Feb-31 → Mar-2). Beats's Go
- * `time.Parse(time.RFC3339, ...)` rejects these and aborts the entire RRULE
- * scheduler update on the agent, halting every other RRULE pack on the
- * policy — so we reject at the API edge.
- *
- * The regex enforces shape; `moment.parseZone(..., ISO_8601, true)` enforces
- * calendar validity (rejects Feb-31, Feb-29 in a non-leap year, etc.).
- */
+// Rejects loose/calendar-invalid dates that Date.parse silently accepts —
+// beats's RFC3339 parser rejects them and halts the whole RRULE scheduler on the agent.
 export const isValidRfc3339 = (value: unknown): value is string => {
   if (typeof value !== 'string') return false;
   if (!RFC_3339_REGEX.test(value)) return false;
@@ -577,16 +449,7 @@ export const isValidRfc3339 = (value: unknown): value is string => {
   return moment.parseZone(value, moment.ISO_8601, true).isValid();
 };
 
-/**
- * Validate an `RRuleScheduleConfig` object at the API request boundary.
- * Returns `null` on success or a human-readable error message on failure.
- *
- * @param recurrenceSeconds - Conservative lower bound of the RRULE period in
- *   seconds (derived by the caller via {@link safeDerivePeriodSeconds}). When
- *   provided, the splay is also checked against the half-period rule enforced
- *   by osquerybeat: `splay ≤ period / 2`. When omitted, only the absolute 12h
- *   cap is checked (backward-compatible behaviour).
- */
+// Validates an RRuleScheduleConfig at the request boundary; returns an error message or null.
 export const validateRruleConfig = (
   config: Partial<RRuleScheduleConfig>,
   recurrenceSeconds?: number
@@ -740,18 +603,6 @@ export const resolvePackScheduleForUpdate = ({
   return { scheduleType, interval, rrule_schedule: rruleSchedule, transitioned };
 };
 
-/**
- * Validate the schedule fields on a pack-level create/update body and on
- * each per-query override. Enforces:
- * - Mutual exclusivity (no both `interval` and `rrule_schedule`).
- * - Pack-level discriminator presence when fields are present.
- * - Per-query same-mode constraint: every override SHALL match the
- *   pack's schedule_type.
- * - Field-level validity via `validateRruleConfig` (RFC 3339, parseability,
- *   splay cap, end_date > start_date).
- *
- * Returns `null` on success or a human-readable error message on failure.
- */
 export const validatePackScheduleFields = ({
   packScheduleType,
   packInterval,
@@ -770,13 +621,10 @@ export const validatePackScheduleFields = ({
     }
   >;
 }): string | null => {
-  // Pack-level mutual exclusivity.
   if (packInterval != null && packRrule) {
     return 'Pack cannot specify both pack-level interval and rrule_schedule';
   }
 
-  // Pack-level discriminator: if schedule_type is set, the matching field
-  // must be present; if a schedule field is set, schedule_type must match.
   if (packScheduleType === 'rrule') {
     if (!packRrule) {
       return 'Pack schedule_type "rrule" requires rrule_schedule';
@@ -796,8 +644,6 @@ export const validatePackScheduleFields = ({
       return 'Pack interval must be a positive number (seconds)';
     }
   } else {
-    // schedule_type unset: do not allow standalone pack-level interval /
-    // rrule_schedule without the discriminator.
     if (packRrule) {
       return 'Pack rrule_schedule requires schedule_type "rrule"';
     }
@@ -810,7 +656,6 @@ export const validatePackScheduleFields = ({
   if (!queries) return null;
 
   for (const [queryId, query] of Object.entries(queries)) {
-    // Per-query mutual exclusivity.
     if (query.interval !== undefined && query.rrule_schedule) {
       return `Query "${queryId}" cannot specify both interval and rrule_schedule`;
     }
@@ -839,8 +684,6 @@ export const validatePackScheduleFields = ({
       }
     }
 
-    // Same-mode constraint — when the pack has a mode, every query
-    // override SHALL match.
     if (packScheduleType && query.schedule_type && query.schedule_type !== packScheduleType) {
       return `Query "${queryId}" schedule_type "${query.schedule_type}" does not match pack schedule_type "${packScheduleType}"; per-query overrides must use the same mode as the pack`;
     }
@@ -875,15 +718,9 @@ export const removePackFromPolicy = (
 };
 
 export const makePackKey = (packName: string, spaceId: string) => `${spaceId}--${packName}`;
-/**
- * Filter and validate caller-supplied policy ids against the set of osquery
- * package-policy-supported agent policies. The `policyIds` argument is REQUIRED
- * and must be explicit — callers MUST resolve any "preserve current attachments"
- * semantic upstream (e.g. on the update path, fall back to the pack's existing
- * agent-policy references before calling). A bare `[]` here means: detach from
- * every policy, which was the silent default that previously caused the PUT-
- * without-`policy_ids` strip bug.
- */
+
+// policyIds is required and explicit; callers resolve "preserve current
+// attachments" upstream. An empty array here detaches from every policy.
 export const getInitialPolicies = (
   packagePolicies: PackagePolicy[] | never[],
   policyIds: string[],

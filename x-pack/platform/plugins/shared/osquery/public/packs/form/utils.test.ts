@@ -33,18 +33,13 @@ describe('pack form serializer (public) — convertSOQueriesToPack', () => {
     );
 
     expect(Object.keys(result)).toEqual(['processes']);
-    // The id claim lets the server's resolvePreservedQueries match by id (pass 1)
-    // and preserve the V4-minted schedule_id.
     expect(result.processes).toMatchObject({ id: 'processes', query: 'SELECT 1;' });
     // originalId is a form-only field — never sent to the server.
     expect(result.processes).not.toHaveProperty('originalId');
   });
 
   it('edit payload: a RENAMED query carries its ORIGINAL id, not the new name', () => {
-    // The user renamed `processes` → `renamed`; the form-state `id` (= name)
-    // is now `renamed`, but `originalId` still holds the stored id. The
-    // serializer must emit the ORIGINAL id under the new map key so the server
-    // matches the renamed query to its stored row and preserves schedule_id.
+    // originalId still holds the stored id after a rename; the server matches on it.
     const result = convertSOQueriesToPack(
       [makeQuery({ id: 'renamed', originalId: 'processes' })],
       true
@@ -55,15 +50,13 @@ describe('pack form serializer (public) — convertSOQueriesToPack', () => {
   });
 
   it('edit payload: a brand-new query (no originalId) falls back to the map key', () => {
-    // A query added in the form has no stored row → no originalId → the claim
-    // is the map key; the server derives/mints from there.
     const result = convertSOQueriesToPack([makeQuery({ id: 'brand_new' })], true);
 
     expect(result.brand_new).toMatchObject({ id: 'brand_new' });
   });
 
   it('deserializer captures originalId; a rename then round-trips the original claim', () => {
-    // GET delivers queries keyed by their stored id (value has no id).
+    // GET delivers queries keyed by stored id; a rename must still round-trip that id.
     const stored = { processes: { query: 'SELECT 1;', interval: 3600, ecs_mapping: {} } };
     const asArray = convertPackQueriesToSO(stored as never);
     expect(asArray[0].id).toBe('processes');
