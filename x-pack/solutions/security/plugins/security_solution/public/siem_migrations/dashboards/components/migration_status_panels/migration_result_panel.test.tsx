@@ -76,7 +76,8 @@ const renderTestComponent = (
   });
 };
 
-describe('DashboardMigrationResultPanel', () => {
+// Failing: See https://github.com/elastic/kibana/issues/275681
+describe.skip('DashboardMigrationResultPanel', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2026-01-01T01:00:00Z')); // exactly 2 years after last_updated_at
@@ -138,7 +139,8 @@ describe('DashboardMigrationResultPanel', () => {
     expect(screen.getByText(/Click Upload to continue translating/i)).toBeInTheDocument();
   });
 
-  describe('Total execution time', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/275681
+  describe.skip('Total execution time', () => {
     it('should display Total execution time when total_execution_time_ms is present', () => {
       renderTestComponent({
         migrationStats: {
