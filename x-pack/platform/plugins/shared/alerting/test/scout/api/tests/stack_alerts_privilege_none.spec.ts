@@ -82,8 +82,8 @@ apiTest.describe('Stack alerts privilege - no privilege', { tag: tags.deployment
       headers: { ...COMMON_HEADERS, ...withoutPrivilegeCookieHeader },
       body: {
         status: 'acknowledged',
-        ids: [state.realAlertId ?? 'nonexistent'],
-        index: '.alerts-stack.alerts-default',
+        ids: [state.realAlertId],
+        index: state.realAlertIndex,
       },
       responseType: 'json',
     });

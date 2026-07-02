@@ -67,6 +67,7 @@ export interface StackAlertsPrivilegeState {
   createdRules: Array<{ ruleTypeId: string; ruleId: string }>;
   enabledRuleId: string;
   realAlertId: string;
+  realAlertIndex: string;
 }
 
 export const setupStackAlertsPrivilegeTests = async (
@@ -110,21 +111,49 @@ export const setupStackAlertsPrivilegeTests = async (
     ...cookieHeader,
   });
 
-  const findResponse = await apiClient.post('internal/rac/alerts/find', {
-    headers: { ...COMMON_HEADERS, ...cookieHeader },
-    body: {
-      rule_type_ids: ['.es-query'],
-      consumers: ['stackAlerts'],
-      query: { match_all: {} },
-      size: 1,
-    },
-    responseType: 'json',
-  });
-  const findBody = findResponse.body as { hits?: { hits?: Array<{ _id: string }> } };
-  const realAlertId = findBody?.hits?.hits?.[0]?._id;
+  let realAlertId: string | undefined;
+  let realAlertIndex: string | undefined;
+  const pollIntervalMs = 2000;
+  const maxAttempts = 15;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const findResponse = await apiClient.post('internal/rac/alerts/find', {
+      headers: { ...COMMON_HEADERS, ...adminCreds.apiKeyHeader },
+      body: {
+        rule_type_ids: ['.es-query'],
+        consumers: ['stackAlerts'],
+        query: {
+          bool: {
+            filter: [
+              { term: { 'kibana.alert.rule.uuid': enabledRuleId } },
+              { term: { 'kibana.alert.status': 'active' } },
+            ],
+          },
+        },
+        size: 1,
+      },
+      responseType: 'json',
+    });
+    const findBody = findResponse.body as {
+      hits?: { hits?: Array<{ _id: string; _index: string }> };
+    };
+    const alertDoc = findBody?.hits?.hits?.[0];
+    if (alertDoc) {
+      realAlertId = alertDoc._id;
+      realAlertIndex = alertDoc._index;
+      break;
+    }
+    await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+  }
   expect(realAlertId, 'expected an alert to be generated for the enabled rule').toBeDefined();
+  expect(realAlertIndex, 'expected an alert index for the enabled rule').toBeDefined();
 
-  return { adminCreds, createdRules, enabledRuleId: enabledRuleId!, realAlertId: realAlertId! };
+  return {
+    adminCreds,
+    createdRules,
+    enabledRuleId: enabledRuleId!,
+    realAlertId: realAlertId!,
+    realAlertIndex: realAlertIndex!,
+  };
 };
 
 export const teardownStackAlertsPrivilegeTests = async (

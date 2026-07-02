@@ -77,11 +77,11 @@ apiTest.describe(
 
     apiTest('cannot acknowledge an alert via bulk update', async ({ apiClient }) => {
       const response = await apiClient.post('internal/rac/alerts/bulk_update', {
-        headers: { ...COMMON_HEADERS, ...withReadPrivilegeCookieHeader },
+        headers: { ...COMMON_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader },
         body: {
           status: 'acknowledged',
           ids: [state.realAlertId],
-          index: '.alerts-stack.alerts-default',
+          index: state.realAlertIndex,
         },
         responseType: 'json',
       });

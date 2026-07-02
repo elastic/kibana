@@ -167,15 +167,12 @@ apiTest.describe('Stack alerts privilege - all privilege', { tag: tags.deploymen
   });
 
   apiTest('can acknowledge a real alert via bulk update', async ({ apiClient }) => {
-    if (!state.realAlertId) {
-      return;
-    }
     const response = await apiClient.post('internal/rac/alerts/bulk_update', {
       headers: { ...COMMON_HEADERS, ...withAllPrivilegeCookieHeader },
       body: {
         status: 'acknowledged',
         ids: [state.realAlertId],
-        index: '.alerts-stack.alerts-default',
+        index: state.realAlertIndex,
       },
       responseType: 'json',
     });

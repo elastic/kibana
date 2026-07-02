@@ -19,6 +19,7 @@ import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
 import { STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX } from '@kbn/response-ops-alerts-table/constants';
 import { useViewInAppUrl } from '@kbn/response-ops-alerts-table/hooks/use_view_in_app_url';
 import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
+import { useCanModifyAlerts } from '../../alerts_page/hooks/use_can_modify_alerts';
 
 const VIEW_DETAILS = i18n.translate(
   'xpack.triggersActionsUI.ruleDetails.alertsTable.viewDetailsLabel',
@@ -43,6 +44,7 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
   const { rowIndex, alert, getAlertFormatter, openLinksInNewTab, alertDetailsNavigation } = props;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const viewInAppUrl = useViewInAppUrl(alert, getAlertFormatter);
+  const canModifyAlerts = useCanModifyAlerts();
 
   const closeActionsPopover = useCallback(() => {
     setIsPopoverOpen(false);
@@ -76,6 +78,7 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
         alertRuleId ? `${STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX}${alertRuleId}` : null
       }
       {...defaultActionProps}
+      canModifyAlerts={canModifyAlerts}
     />,
   ];
 
