@@ -50,6 +50,7 @@ describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
   let rulesClient: jest.Mocked<RulesClient>;
   let actionsClient: jest.Mocked<ActionsClient>;
+  let hasAtLeast: jest.Mock;
   let context: SecuritySolutionRequestHandlerContext;
 
   const mockFindRules = (rules: RuleAlertType[]) => {
@@ -107,7 +108,9 @@ describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
       'getSpaceId' | 'getDetectionRulesClient' | 'getMlAuthz' | 'getRulesAuthz'
     >;
 
+    hasAtLeast = jest.fn().mockReturnValue(true);
     context = {
+      licensing: Promise.resolve({ license: { hasAtLeast } }),
       resolve: jest.fn().mockResolvedValue({
         core: {
           savedObjects: {
@@ -293,5 +296,25 @@ describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
         updated: 2,
       },
     });
+  });
+
+  it('returns forbidden when the license does not support the feature', async () => {
+    hasAtLeast.mockReturnValue(false);
+    const handler = router.versioned.getRoute('post', ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE)
+      .versions['1'].handler;
+
+    await handler(
+      context,
+      createRequest({
+        method: 'post',
+        path: ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE,
+        body: { attachRuleIds: ['rule-1'], detachRuleIds: [], dryRun: false },
+      }),
+      mockResponse
+    );
+
+    expect(mockResponse.forbidden).toHaveBeenCalled();
+    expect(rulesClient.bulkEdit).not.toHaveBeenCalled();
+    expect(rulesClient.find).not.toHaveBeenCalled();
   });
 });

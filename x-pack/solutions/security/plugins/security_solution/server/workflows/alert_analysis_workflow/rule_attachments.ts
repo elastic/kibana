@@ -324,29 +324,40 @@ export const createAlertAnalysisWorkflowRuleAttachmentService = (
       }
 
       const bulkEditDependencies = getBulkEditDependencies(dependencies);
-      const [attachResult, detachResults] = await Promise.all([
+      // Normalize each bulkEdit to a success/error count. A bulkEdit that rejects (transport
+      // error) is caught and counted as failures rather than left to abort its siblings, so
+      // every attach/detach is attempted and the reported counts reflect what actually happened.
+      const runBulkEdit = async (
+        rulesToEdit: RuleAlertType[],
+        actions: BulkActionEditPayload[]
+      ): Promise<{ updated: number; errors: number }> => {
+        try {
+          const result = await bulkEditRulesFn({
+            rulesClient,
+            rules: rulesToEdit,
+            actions,
+            ...bulkEditDependencies,
+          } satisfies BulkEditRulesArguments);
+          return { updated: result.rules.length, errors: result.errors.length };
+        } catch (error) {
+          return { updated: 0, errors: rulesToEdit.length };
+        }
+      };
+
+      // Attach shares one bulkEdit for all rules (identical added action); detach needs one call
+      // per rule because it rewrites each rule's full action list, so it's bounded by pMap.
+      const [attachOutcome, detachOutcomes] = await Promise.all([
         rulesToAttach.length > 0
-          ? bulkEditRulesFn({
-              rulesClient,
-              rules: rulesToAttach,
-              actions: [createAddWorkflowActionEdit(workflowId)],
-              ...bulkEditDependencies,
-            } satisfies BulkEditRulesArguments)
-          : undefined,
+          ? runBulkEdit(rulesToAttach, [createAddWorkflowActionEdit(workflowId)])
+          : Promise.resolve({ updated: 0, errors: 0 }),
         pMap(
           rulesToDetach,
-          (rule) =>
-            bulkEditRulesFn({
-              rulesClient,
-              rules: [rule],
-              actions: [createSetWorkflowActionsEdit(rule, workflowId)],
-              ...bulkEditDependencies,
-            } satisfies BulkEditRulesArguments),
+          (rule) => runBulkEdit([rule], [createSetWorkflowActionsEdit(rule, workflowId)]),
           { concurrency: DETACH_CONCURRENCY }
         ),
       ]);
-      const bulkEditResults = [...(attachResult ? [attachResult] : []), ...detachResults];
-      const errorCount = bulkEditResults.reduce((count, result) => count + result.errors.length, 0);
+      const outcomes = [attachOutcome, ...detachOutcomes];
+      const errorCount = outcomes.reduce((count, outcome) => count + outcome.errors, 0);
 
       if (errorCount > 0) {
         throw new Error(`Failed to update the alert analysis workflow on ${errorCount} rule(s)`);
@@ -354,7 +365,7 @@ export const createAlertAnalysisWorkflowRuleAttachmentService = (
 
       return {
         matched: uniqueRuleIds.length,
-        updated: bulkEditResults.reduce((count, result) => count + result.rules.length, 0),
+        updated: outcomes.reduce((count, outcome) => count + outcome.updated, 0),
       };
     },
   };

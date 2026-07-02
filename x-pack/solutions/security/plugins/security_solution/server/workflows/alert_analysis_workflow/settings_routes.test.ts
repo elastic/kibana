@@ -36,7 +36,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let getStartServices: jest.MockedFunction<StartServicesAccessor<StartPlugins>>;
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
-  let uiSettingsClient: { get: jest.Mock; set: jest.Mock };
+  let uiSettingsClient: { get: jest.Mock; setMany: jest.Mock };
   let auditLogger: { log: jest.Mock };
   let hasAtLeast: jest.Mock;
   let managedWorkflowsClient: {
@@ -76,7 +76,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
     hasAtLeast = jest.fn().mockReturnValue(true);
     uiSettingsClient = {
       get: jest.fn(),
-      set: jest.fn().mockResolvedValue(undefined),
+      setMany: jest.fn().mockResolvedValue(undefined),
     };
     managedWorkflowsClient = {
       install: jest.fn().mockResolvedValue(undefined),
@@ -181,30 +181,18 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
 
       await handler(createContext(), createRequest(settings), mockResponse);
 
-      expect(uiSettingsClient.set).toHaveBeenCalledWith(
-        SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
-        settings.workflowEnabled
-      );
-      expect(uiSettingsClient.set).toHaveBeenCalledWith(
-        SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED,
-        settings.autoCloseEnabled
-      );
-      expect(uiSettingsClient.set).toHaveBeenCalledWith(
-        SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
-        settings.autoCloseConfidenceScoreMinThreshold
-      );
-      expect(uiSettingsClient.set).toHaveBeenCalledWith(
-        SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
-        settings.autoCloseConfidenceScoreMaxThreshold
-      );
-      expect(uiSettingsClient.set).toHaveBeenCalledWith(
-        SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID,
-        settings.connectorId
-      );
-      expect(uiSettingsClient.set).toHaveBeenCalledWith(
-        SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
-        settings.createConversation
-      );
+      expect(uiSettingsClient.setMany).toHaveBeenCalledTimes(1);
+      expect(uiSettingsClient.setMany).toHaveBeenCalledWith({
+        [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED]: settings.workflowEnabled,
+        [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED]: settings.autoCloseEnabled,
+        [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD]:
+          settings.autoCloseConfidenceScoreMinThreshold,
+        [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD]:
+          settings.autoCloseConfidenceScoreMaxThreshold,
+        [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID]: settings.connectorId,
+        [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION]:
+          settings.createConversation,
+      });
       expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
         SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
         {
@@ -267,7 +255,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
       await handler(createContext(), createRequest(settings), mockResponse);
 
       expect(mockResponse.forbidden).toHaveBeenCalled();
-      expect(uiSettingsClient.set).not.toHaveBeenCalled();
+      expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
     });
   });
 });

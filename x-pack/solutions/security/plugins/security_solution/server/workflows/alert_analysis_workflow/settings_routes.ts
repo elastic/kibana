@@ -196,30 +196,21 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
           const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
             coreStart.savedObjects.getScopedClient(request)
           );
-          await uiSettingsClient.set(
-            SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
-            settings.workflowEnabled
-          );
-          await uiSettingsClient.set(
-            SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED,
-            settings.autoCloseEnabled
-          );
-          await uiSettingsClient.set(
-            SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
-            settings.autoCloseConfidenceScoreMinThreshold
-          );
-          await uiSettingsClient.set(
-            SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
-            settings.autoCloseConfidenceScoreMaxThreshold
-          );
-          await uiSettingsClient.set(
-            SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID,
-            settings.connectorId
-          );
-          await uiSettingsClient.set(
-            SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
-            settings.createConversation
-          );
+          // Persist all six settings in a single atomic saved-object update so a mid-write
+          // failure can't leave them inconsistent (e.g. a stored min >= max that violates the
+          // cross-field validation applied to the request body).
+          await uiSettingsClient.setMany({
+            [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED]: settings.workflowEnabled,
+            [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED]:
+              settings.autoCloseEnabled,
+            [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD]:
+              settings.autoCloseConfidenceScoreMinThreshold,
+            [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD]:
+              settings.autoCloseConfidenceScoreMaxThreshold,
+            [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID]: settings.connectorId,
+            [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION]:
+              settings.createConversation,
+          });
 
           const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(
             workflowsExtensions

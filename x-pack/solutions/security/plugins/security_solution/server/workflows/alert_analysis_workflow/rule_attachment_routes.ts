@@ -6,6 +6,7 @@
  */
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { i18n } from '@kbn/i18n';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
@@ -37,6 +38,20 @@ export {
   ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE,
+};
+
+const LICENSE_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentRoute.licenseError',
+  { defaultMessage: 'Your license does not support this feature.' }
+);
+
+// The alert analysis workflow is an Enterprise feature (the settings routes enforce the same
+// gate), so its rule-attachment routes require an Enterprise license too.
+const hasEnterpriseLicense = async (
+  context: SecuritySolutionRequestHandlerContext
+): Promise<boolean> => {
+  const { license } = await context.licensing;
+  return license.hasAtLeast('enterprise');
 };
 
 const createReadService = async (context: SecuritySolutionRequestHandlerContext) => {
@@ -96,6 +111,10 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
         const siemResponse = buildSiemResponse(response);
 
         try {
+          if (!(await hasEnterpriseLicense(context))) {
+            return response.forbidden({ body: LICENSE_ERROR_MESSAGE });
+          }
+
           const {
             search,
             page,
@@ -138,6 +157,10 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
         const siemResponse = buildSiemResponse(response);
 
         try {
+          if (!(await hasEnterpriseLicense(context))) {
+            return response.forbidden({ body: LICENSE_ERROR_MESSAGE });
+          }
+
           const { search } =
             request.body as AlertAnalysisWorkflowRuleAttachmentStatsRequestBodyType;
           const service = await createReadService(context);
@@ -179,6 +202,10 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
         const siemResponse = buildSiemResponse(response);
 
         try {
+          if (!(await hasEnterpriseLicense(context))) {
+            return response.forbidden({ body: LICENSE_ERROR_MESSAGE });
+          }
+
           const { search } =
             request.body as AlertAnalysisWorkflowRuleAttachmentSelectionRequestBodyType;
           const service = await createReadService(context);
@@ -218,6 +245,10 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
         const siemResponse = buildSiemResponse(response);
 
         try {
+          if (!(await hasEnterpriseLicense(context))) {
+            return response.forbidden({ body: LICENSE_ERROR_MESSAGE });
+          }
+
           const { attachRuleIds, detachRuleIds, dryRun } =
             request.body as AlertAnalysisWorkflowRuleAttachmentUpdateRequestBodyType;
           const service = await createWriteService(context);

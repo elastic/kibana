@@ -327,6 +327,35 @@ describe('alert analysis workflow rule attachments', () => {
     expect(maxActive).toBeLessThanOrEqual(10);
   });
 
+  it('attempts every detach even when one bulkEdit rejects, and reports the failure count', async () => {
+    const rules = Array.from({ length: 5 }, (_, index) =>
+      createRule({ id: `rule-${index}`, actions: [createWorkflowAction()] })
+    );
+    // One rule's detach rejects at the transport level; the others must still be attempted
+    // rather than aborted, and the failure must be surfaced.
+    const bulkEditRulesFn = jest.fn().mockImplementation(async ({ rules: editedRules }) => {
+      if (editedRules[0].id === 'rule-2') {
+        throw new Error('transport error');
+      }
+      return { rules: editedRules, skipped: [], errors: [], total: editedRules.length };
+    }) as jest.MockedFunction<typeof bulkEditRules>;
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
+      rulesClient: createRulesClient(rules),
+      workflowId: WORKFLOW_ID,
+      bulkEditDependencies: createBulkEditDependencies(),
+      bulkEditRulesFn,
+    });
+
+    await expect(
+      service.updateRuleAttachments({
+        attachRuleIds: [],
+        detachRuleIds: rules.map(({ id }) => id),
+      })
+    ).rejects.toThrow('Failed to update the alert analysis workflow on 1 rule(s)');
+    // All five detaches were attempted despite the one rejection (no fail-fast abort).
+    expect(bulkEditRulesFn).toHaveBeenCalledTimes(5);
+  });
+
   it('rejects rules that are both attached and detached in the same request', async () => {
     const service = createAlertAnalysisWorkflowRuleAttachmentService({
       rulesClient: createRulesClient([createRule({ id: 'rule-1' })]),

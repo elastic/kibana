@@ -86,18 +86,6 @@ const getShowingRulesRange = ({
   return { first, last };
 };
 
-const getNextAttachedCount = ({
-  attached,
-  attachCount,
-  detachCount,
-  total,
-}: {
-  attached: number;
-  attachCount: number;
-  detachCount: number;
-  total: number;
-}): number => Math.min(Math.max(attached + attachCount - detachCount, 0), total);
-
 export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
   const {
     services: { application, http, notifications },
@@ -119,7 +107,7 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
   // so onTableChange can restore them, discarding that spurious callback.
   const selectedRuleIdsRef = useRef(selectedRuleIds);
   selectedRuleIdsRef.current = selectedRuleIds;
-  const canEditRules = application.capabilities.securitySolution?.crud !== false;
+  const canEditRules = application.capabilities.securitySolution?.crud === true;
   const selectedRulesCount = selectedRuleIds.length;
 
   const showRuleAttachmentError = useCallback(
@@ -222,96 +210,17 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
         detachRuleIds: action === 'detach' ? selectedRuleIds : [],
       });
     },
-    onSuccess: (response: UpdateRuleAttachmentsResult, action) => {
-      const attachRuleIds = action === 'attach' ? selectedRuleIds : [];
-      const detachRuleIds = action === 'detach' ? selectedRuleIds : [];
-      const attachRuleIdsSetForCache = new Set(attachRuleIds);
-      const detachRuleIdsSetForCache = new Set(detachRuleIds);
-
-      queryClient.setQueryData<RuleAttachmentStats>(
-        [...RULE_ATTACHMENT_STATS_QUERY_KEY, normalizedRuleQuery],
-        (currentStats) =>
-          currentStats
-            ? {
-                ...currentStats,
-                attached: getNextAttachedCount({
-                  attached: currentStats.attached,
-                  attachCount: attachRuleIds.length,
-                  detachCount: detachRuleIds.length,
-                  total: currentStats.total,
-                }),
-              }
-            : currentStats
-      );
-      queryClient.setQueriesData<RuleAttachmentPage>(
-        [...RULE_ATTACHMENTS_QUERY_KEY, normalizedRuleQuery],
-        (currentPage) =>
-          currentPage
-            ? {
-                ...currentPage,
-                attached: getNextAttachedCount({
-                  attached: currentPage.attached,
-                  attachCount: attachRuleIds.length,
-                  detachCount: detachRuleIds.length,
-                  total: currentPage.total,
-                }),
-                rules: currentPage.rules.map((rule) => {
-                  if (attachRuleIdsSetForCache.has(rule.id)) {
-                    return { ...rule, attached: true };
-                  }
-
-                  if (detachRuleIdsSetForCache.has(rule.id)) {
-                    return { ...rule, attached: false };
-                  }
-
-                  return rule;
-                }),
-              }
-            : currentPage
-      );
-      queryClient.setQueriesData<RuleAttachmentSelection>(
-        [...RULE_ATTACHMENT_SELECTION_QUERY_KEY, normalizedRuleQuery],
-        (currentSelection) =>
-          currentSelection
-            ? {
-                ...currentSelection,
-                attached: getNextAttachedCount({
-                  attached: currentSelection.attached,
-                  attachCount: attachRuleIds.length,
-                  detachCount: detachRuleIds.length,
-                  total: currentSelection.total,
-                }),
-                selectable: getNextAttachedCount({
-                  attached: currentSelection.selectable,
-                  attachCount: detachRuleIds.length,
-                  detachCount: attachRuleIds.length,
-                  total: currentSelection.total,
-                }),
-                attachedRuleIds: [
-                  ...new Set([
-                    ...currentSelection.attachedRuleIds.filter(
-                      (ruleId) => !detachRuleIdsSetForCache.has(ruleId)
-                    ),
-                    ...attachRuleIds,
-                  ]),
-                ],
-                ruleIds: [
-                  ...new Set([
-                    ...currentSelection.ruleIds.filter(
-                      (ruleId) => !attachRuleIdsSetForCache.has(ruleId)
-                    ),
-                    ...detachRuleIds,
-                  ]),
-                ],
-              }
-            : currentSelection
-      );
-
+    onSuccess: (response: UpdateRuleAttachmentsResult) => {
       setConfirmAction(null);
       setSelectedRuleIds([]);
       setBulkSelection(null);
+      // Refetch from the server rather than patching the caches optimistically: in the pure
+      // selection model a selected rule may already be in the target state, so the client can't
+      // compute the resulting attached/selectable counts precisely (it only knows attach state
+      // for the current page). Invalidate all three queries so they reflect the real state.
       queryClient.invalidateQueries({ queryKey: RULE_ATTACHMENT_STATS_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: RULE_ATTACHMENTS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: RULE_ATTACHMENT_SELECTION_QUERY_KEY });
       notifications.toasts.addSuccess(
         i18n.translate(
           'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentSuccessMessage',
