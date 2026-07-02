@@ -530,17 +530,81 @@ describe('AssetManagerClient', () => {
       mockEngineDescriptorClient.getAll.mockResolvedValue([
         { type: 'host', status: 'started', logExtractionOverrides: noOverride },
       ]);
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue({
+        type: 'service',
+        status: 'started',
+        logExtractionOverrides: { frequency: '10m', delay: null, lookbackPeriod: null },
+      });
 
       await client.installByType({} as KibanaRequest, 'service', { frequency: '5m' });
 
+      // seeded with the type default first...
       expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('service', {
-        frequency: '5m',
+        frequency: '10m',
         delay: null,
         lookbackPeriod: null,
+      });
+      // ...then the caller's override is applied on top
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('service', {
+        logExtractionOverrides: { frequency: '5m', delay: null, lookbackPeriod: null },
       });
       expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'service', frequency: '5m' })
       );
+    });
+
+    it('applies non-cadence fields to the shared global config while bootstrapping, without leaking cadence into it', async () => {
+      mockEngineDescriptorClient.getAll.mockResolvedValue([]);
+      mockGlobalStateClient.find.mockResolvedValue(undefined);
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue({
+        type: 'service',
+        status: 'started',
+        logExtractionOverrides: { frequency: '10m', delay: null, lookbackPeriod: null },
+      });
+
+      await client.installByType({} as KibanaRequest, 'service', {
+        fieldHistoryLength: 25,
+        frequency: '5m',
+      });
+
+      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logsExtraction: expect.objectContaining({ fieldHistoryLength: 25, frequency: '1m' }),
+        })
+      );
+    });
+
+    it('applies non-cadence fields to the shared global config when adding a type to an existing store', async () => {
+      mockEngineDescriptorClient.getAll.mockResolvedValue([
+        { type: 'host', status: 'started', logExtractionOverrides: noOverride },
+      ]);
+      mockGlobalStateClient.find.mockResolvedValue({
+        historySnapshot: {},
+        logsExtraction: { frequency: '1m', fieldHistoryLength: 10 },
+      });
+
+      await client.installByType({} as KibanaRequest, 'service', { fieldHistoryLength: 25 });
+
+      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logsExtraction: expect.objectContaining({ fieldHistoryLength: 25 }),
+        })
+      );
+    });
+
+    it('does not touch the shared global config when only cadence fields are supplied to an existing store', async () => {
+      mockEngineDescriptorClient.getAll.mockResolvedValue([
+        { type: 'host', status: 'started', logExtractionOverrides: noOverride },
+      ]);
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue({
+        type: 'service',
+        status: 'started',
+        logExtractionOverrides: { frequency: '10m', delay: null, lookbackPeriod: null },
+      });
+
+      await client.installByType({} as KibanaRequest, 'service', { frequency: '5m' });
+
+      expect(mockGlobalStateClient.init).not.toHaveBeenCalled();
     });
 
     it('is idempotent when the type is already installed', async () => {

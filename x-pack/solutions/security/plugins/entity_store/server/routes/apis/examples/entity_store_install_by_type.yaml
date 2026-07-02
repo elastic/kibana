@@ -9,10 +9,17 @@ requestBody:
             logExtraction: {}
         installByTypeCustomCadenceExample:
           summary: "Install a single entity type with a custom cadence"
-          description: "Install the Service engine with a custom frequency, overriding its built-in 10 minute default for this type only."
+          description: "Install the Service engine with a custom frequency, distinct from its built-in 10 minute default, for this type only."
           value:
             logExtraction:
               frequency: "5m"
+        installByTypeFullLogExtractionExample:
+          summary: "Install with both shared and per-type settings"
+          description: "Install the Service engine with a custom cadence for this type only (frequency), plus a shared setting applied the same way as POST /install (fieldHistoryLength, which affects every entity type, not just Service)."
+          value:
+            logExtraction:
+              frequency: "5m"
+              fieldHistoryLength: 20
 responses:
   201:
     description: "Indicates the entity type was successfully installed."

@@ -421,18 +421,19 @@ export class AssetManagerClient {
   }
 
   /**
-   * Installs a single entity type. Behaves like `init` scoped to just this type: if the
+   * Installs a single entity type. Accepts the same `logExtraction` shape as `init` — but
+   * scoped to one type: cadence fields (`frequency`, `delay`, `lookbackPeriod`) become this
+   * type's per-type override, while every other field (index patterns, volume limits, etc.)
+   * is applied to the shared global config exactly as the store-wide install would. If the
    * store isn't installed yet, this bootstraps the whole Entity Store (shared indices/
-   * templates, global state, EUID scripts, shared history-snapshot/status-report tasks)
-   * for this one type; if the store is already installed by other types, only this type
-   * is added. A no-op (returns `false`) if this type is already installed. Any caller-
-   * supplied cadence fields win over the type's built-in default (e.g. Service/Generic's
-   * reduced cadence); fields left unset still seed the type's default.
+   * templates, global state, EUID scripts, shared history-snapshot/status-report tasks) for
+   * this one type; if the store is already installed by other types, only this type is
+   * added. A no-op (returns `false`) if this type is already installed.
    */
   public async installByType(
     request: KibanaRequest,
     type: EntityType,
-    cadenceOverride?: CadenceOverridePatch
+    logsExtractionParams?: LogExtractionInstallParams
   ): Promise<boolean> {
     const { status, engines } = await this.getStatus();
 
@@ -440,25 +441,39 @@ export class AssetManagerClient {
       return false;
     }
 
+    const { frequency, delay, lookbackPeriod, ...nonCadenceParams } = logsExtractionParams ?? {};
+    const cadenceOverride: CadenceOverridePatch = {
+      ...(frequency !== undefined && { frequency }),
+      ...(delay !== undefined && { delay }),
+      ...(lookbackPeriod !== undefined && { lookbackPeriod }),
+    };
+
     if (status === ENTITY_STORE_STATUS.NOT_INSTALLED) {
-      await this.init(request, [type]);
-      if (cadenceOverride && Object.keys(cadenceOverride).length > 0) {
-        await this.updateByType(request, type, cadenceOverride);
+      await this.init(request, [type], nonCadenceParams);
+    } else {
+      if (Object.keys(nonCadenceParams).length > 0) {
+        const existingState = await this.globalStateClient.find();
+        const logsExtraction = resolveLogsExtractionOnInstall(
+          existingState?.logsExtraction,
+          nonCadenceParams
+        );
+        await this.globalStateClient.init({ logsExtraction });
       }
-      return true;
+      const globalConfig = await this.getLogExtractionConfig();
+      const installed = await this.install(type, DEFAULT_LOG_EXTRACTION_OVERRIDES[type]);
+      if (installed) {
+        const effectiveConfig = mergeCadenceOverrides(
+          globalConfig,
+          DEFAULT_LOG_EXTRACTION_OVERRIDES[type]
+        );
+        await this.start(request, type, effectiveConfig);
+      }
     }
 
-    const overridesToSeed = mergeOverrideFields(
-      DEFAULT_LOG_EXTRACTION_OVERRIDES[type],
-      cadenceOverride
-    );
-    const installed = await this.install(type, overridesToSeed);
-    if (installed) {
-      const globalConfig = await this.getLogExtractionConfig();
-      const effectiveConfig = mergeCadenceOverrides(globalConfig, overridesToSeed);
-      await this.start(request, type, effectiveConfig);
+    if (Object.keys(cadenceOverride).length > 0) {
+      await this.updateByType(request, type, cadenceOverride);
     }
-    return installed;
+    return true;
   }
 
   /**

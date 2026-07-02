@@ -18,6 +18,7 @@ import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 interface StatusEngine {
   type: string;
   frequency: string;
+  fieldHistoryLength: number;
 }
 interface StatusResponseBody {
   status: string;
@@ -118,6 +119,62 @@ apiTest.describe('Entity Store per-entity-type API tests', { tag: ENTITY_STORE_T
 
       const status = await getStatus(apiClient);
       expect(status.engines.find((e) => e.type === 'service')?.frequency).toBe('5m');
+    }
+  );
+
+  apiTest(
+    'install/{entityType} applies non-cadence fields to the shared config while bootstrapping',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL_BY_TYPE('service'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: { frequency: '5m', fieldHistoryLength: 25 } },
+      });
+      expect(response.statusCode).toBe(201);
+
+      // add a second type to see that fieldHistoryLength was applied store-wide, not just to service
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL_BY_TYPE('host'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+
+      const status = await getStatus(apiClient);
+      const service = status.engines.find((e) => e.type === 'service');
+      const host = status.engines.find((e) => e.type === 'host');
+      expect(service?.frequency).toBe('5m');
+      expect(service?.fieldHistoryLength).toBe(25);
+      // host has no cadence override of its own, but does inherit the shared fieldHistoryLength
+      expect(host?.frequency).toBe('1m');
+      expect(host?.fieldHistoryLength).toBe(25);
+    }
+  );
+
+  apiTest(
+    'install/{entityType} applies non-cadence fields to the shared config, affecting already-installed types too',
+    async ({ apiClient }) => {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { entityTypes: ['host'] },
+      });
+
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL_BY_TYPE('service'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: { frequency: '5m', fieldHistoryLength: 25 } },
+      });
+      expect(response.statusCode).toBe(201);
+
+      const status = await getStatus(apiClient);
+      const service = status.engines.find((e) => e.type === 'service');
+      const host = status.engines.find((e) => e.type === 'host');
+      // service gets its own cadence override plus the shared setting
+      expect(service?.frequency).toBe('5m');
+      expect(service?.fieldHistoryLength).toBe(25);
+      // host, installed earlier, keeps its own cadence but picks up the shared setting change
+      expect(host?.frequency).toBe('1m');
+      expect(host?.fieldHistoryLength).toBe(25);
     }
   );
 
