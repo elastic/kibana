@@ -123,31 +123,39 @@ export const SCOUT_TESTS_ONLY_IGNORE_PATTERNS: readonly string[] = [
  * Path globs that uniquely identify a Scout test scope — i.e. a directory
  * containing a Playwright config and its co-located tests/fixtures/helpers.
  *
- * A "scope" is `<package-root>/test/(scout|scout_<custom>)/(api|ui)`, owning at
+ * A "scope" is `<package-root>/test/(scout|scout_<custom>)[/<namespace>]/(api|ui)`, owning at
  * most two configs:
  *   - <scope>/playwright.config.ts          (single-thread, tests under tests/)
  *   - <scope>/parallel.playwright.config.ts (parallel, tests under parallel_tests/)
  *
- * The `.meta/(api|ui)` variant covers auto-generated manifests that belong to
- * the matching scope. Both patterns derive their `(api|ui)` and `scout(_*,)`
- * segments from `SCOUT_TEST_CATEGORIES` and the same brace-expansion idiom used
- * by `SCOUT_CONFIG_MANIFEST_PATH_GLOB` so they all stay in sync.
+ * The optional `<namespace>` segment is a single-level sub-directory directly under
+ * the scout root (e.g. `test/scout/detection_engine/ui/`). It enables a single
+ * plugin to have multiple independent Playwright configs — one per logical team
+ * namespace — while still sharing the same server configuration.
+ *
+ * The `.meta/(api|ui)` variant covers auto-generated manifests. For namespace configs
+ * the manifest lives at `test/scout/<namespace>/.meta/(api|ui)/`.
+ *
+ * Both patterns derive their `(api|ui)` and `scout(_*,)` segments from
+ * `SCOUT_TEST_CATEGORIES` and the same brace-expansion idiom used by
+ * `SCOUT_CONFIG_MANIFEST_PATH_GLOB` so they all stay in sync.
  */
 export const SCOUT_TESTS_ONLY_SCOPE_GLOBS: readonly string[] = [
   `**/test/scout{_*,}/{${SCOUT_TEST_CATEGORIES.join(',')}}/**`,
+  `**/test/scout{_*,}/*/{${SCOUT_TEST_CATEGORIES.join(',')}}/**`,
   `**/test/scout{_*,}/.meta/{${SCOUT_TEST_CATEGORIES.join(',')}}/**`,
+  `**/test/scout{_*,}/*/.meta/{${SCOUT_TEST_CATEGORIES.join(',')}}/**`,
 ];
 
 /**
- * Captures `<prefix>/test/(scout|scout_<custom>)/(api|ui)/<rest?>` and the
- * `.meta/` variant `<prefix>/test/(scout|scout_<custom>)/.meta/(api|ui)/<rest?>`.
+ * Captures `<prefix>/test/scout{_*}[/<namespace>]/(api|ui)/<rest?>` and its `.meta/` variant.
+ * A negative lookahead prevents `.meta` from being captured as a namespace; backtracking
+ * prevents `api`/`ui` from being captured as a namespace.
  *
- * Capture groups: 1=prefix, 2=scoutDir, 3=category (api|ui), 4=rest (optional).
- * The category alternation is derived from `SCOUT_TEST_CATEGORIES` for parity
- * with the rest of this file.
+ * Capture groups: 1=prefix, 2=scoutDir, 3=namespace (optional), 4=category (api|ui), 5=rest (optional).
  */
 export const SCOUT_TEST_SCOPE_PATTERN = new RegExp(
-  `^(.+?)\\/test\\/(scout(?:_[^/]+)?)\\/(?:\\.meta\\/)?(${SCOUT_TEST_CATEGORIES.join(
+  `^(.+?)\\/test\\/(scout(?:_[^/]+)?)(?:\\/(?!\\.meta)([^/]+))?\\/(?:\\.meta\\/)?(${SCOUT_TEST_CATEGORIES.join(
     '|'
   )})(?:\\/(.*))?$`
 );
