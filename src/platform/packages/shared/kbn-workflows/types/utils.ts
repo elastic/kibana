@@ -13,7 +13,7 @@ import type {
   EsWorkflowCreate,
   HttpMethod,
   InternalConnectorContract,
-  StepStabilityLevel,
+  StabilityLevel,
   TerminalExecutionStatus,
   WorkflowStepExecutionDto,
 } from './v1';
@@ -57,6 +57,7 @@ export function isInProgressStatus(status: ExecutionStatus) {
   return (
     status === ExecutionStatus.RUNNING ||
     status === ExecutionStatus.PENDING ||
+    status === ExecutionStatus.QUEUED ||
     status === ExecutionStatus.WAITING ||
     status === ExecutionStatus.WAITING_FOR_INPUT ||
     status === ExecutionStatus.WAITING_FOR_CHILD
@@ -108,5 +109,5 @@ export const isHttpMethod = (method: string): method is HttpMethod =>
 export const isBuiltInStepProperty = (property: string): property is BuiltInStepProperty =>
   BuiltInStepProperties.includes(property as BuiltInStepProperty);
 
-export const getBuiltInStepStability = (type: string): StepStabilityLevel | undefined =>
+export const getBuiltInStepStability = (type: string): StabilityLevel | undefined =>
   getBuiltInStepDefinition(type)?.stability;

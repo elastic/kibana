@@ -11,12 +11,18 @@ import {
   KnowledgeIndicatorClient,
   type KnowledgeIndicatorClientDeps,
 } from './knowledge_indicator_client';
-import { computeFeatureUuid } from '@kbn/streams-schema';
-import { type StoredFeatureKnowledgeIndicator, type StoredTombstone } from '../data_stream';
+import { computeFeatureUuid } from '@kbn/significant-events-schema';
+import {
+  type StoredFeatureKnowledgeIndicator,
+  type StoredQueryKnowledgeIndicator,
+  type StoredTombstone,
+} from '../data_stream';
+import type { SignificantEventsAlertingContext } from '../../../significant_events/alerting/significant_events_alerting_context';
+import { ALERTS_READER_V1 } from '../../../significant_events/alerting/alerts_reader';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
 
-jest.mock('../../../sig_events/latest_source_query', () => {
-  const actual = jest.requireActual('../../../sig_events/latest_source_query');
+jest.mock('../../../significant_events/latest_source_query', () => {
+  const actual = jest.requireActual('../../../significant_events/latest_source_query');
   return {
     ...actual,
     executeAndDecodeSource: jest.fn(),
@@ -33,7 +39,7 @@ jest.mock('./bulk_with_inference_fallback', () => {
   };
 });
 
-import { executeAndDecodeSource } from '../../../sig_events/latest_source_query';
+import { executeAndDecodeSource } from '../../../significant_events/latest_source_query';
 
 const STREAM = 'logs-app';
 
@@ -77,6 +83,16 @@ function createComputedFeatureDoc(): StoredFeatureKnowledgeIndicator {
   });
 }
 
+function createAlertingContext(
+  rulesManagementClient: SignificantEventsAlertingContext['rulesClient']
+): SignificantEventsAlertingContext {
+  return {
+    alertingV2Active: false,
+    alertsReader: ALERTS_READER_V1,
+    rulesClient: rulesManagementClient,
+  };
+}
+
 function makeClient(): {
   client: KnowledgeIndicatorClient;
   create: jest.Mock;
@@ -91,15 +107,19 @@ function makeClient(): {
   const deps: KnowledgeIndicatorClientDeps = {
     dataStreamClient,
     esClient: {} as KnowledgeIndicatorClientDeps['esClient'],
-    rulesManagementClient: {
-      createRule: jest.fn().mockResolvedValue(undefined),
-      updateRule: jest.fn().mockResolvedValue(undefined),
-      bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
-    },
     soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
     logger,
   };
-  const client = new KnowledgeIndicatorClient(deps);
+  const rulesManagementClient = {
+    createRule: jest.fn().mockResolvedValue(undefined),
+    updateRule: jest.fn().mockResolvedValue(undefined),
+    bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+  };
+  const client = new KnowledgeIndicatorClient(
+    deps,
+    true,
+    createAlertingContext(rulesManagementClient)
+  );
   return { client, create, runEsql: executeAndDecodeSource as jest.Mock, logger };
 }
 
@@ -419,6 +439,108 @@ describe('KnowledgeIndicatorClient.getExcludedFeatures', () => {
   });
 });
 
+describe('KnowledgeIndicatorClient.bulk — lifecycle (expires_at)', () => {
+  function createIndexFeatureOp(
+    slug = 'feat-1',
+    expiresAt?: string
+  ): Extract<Parameters<KnowledgeIndicatorClient['bulk']>[1][number], { index: unknown }> {
+    return {
+      index: {
+        feature: {
+          id: slug,
+          stream_name: STREAM,
+          type: 'entity',
+          description: 'desc',
+          properties: {},
+          confidence: 80,
+          ...(expiresAt !== undefined ? { expires_at: expiresAt } : {}),
+        },
+      },
+    };
+  }
+
+  it('index op without expires_at → durable (no prior read, no expires_at stored)', async () => {
+    const { client, create, runEsql } = makeClient();
+
+    await client.bulk(STREAM, [createIndexFeatureOp('feat-1')]);
+
+    // No ES|QL call: bulk never reads priors
+    expect(runEsql).not.toHaveBeenCalled();
+    const [{ documents }] = create.mock.calls[0];
+    const written = documents[0] as StoredFeatureKnowledgeIndicator;
+    expect(written.expires_at).toBeUndefined();
+  });
+
+  it('explicit expires_at → stored as-is, no prior read', async () => {
+    const { client, create, runEsql } = makeClient();
+    const explicitDeadline = '2099-12-31T00:00:00.000Z';
+
+    await client.bulk(STREAM, [createIndexFeatureOp('feat-1', explicitDeadline)]);
+
+    expect(runEsql).not.toHaveBeenCalled();
+    const [{ documents }] = create.mock.calls[0];
+    const written = documents[0] as StoredFeatureKnowledgeIndicator;
+    expect(written.expires_at).toBe(explicitDeadline);
+  });
+
+  it('exclude with managed prior → inherits managed (fresh expires_at)', async () => {
+    const { client, create, runEsql } = makeClient();
+    const prior = createFeatureDoc({ expires_at: '2026-01-01T00:00:00.000Z' });
+    // prepareExcludes fetches prior for the exclude op
+    runEsql.mockResolvedValueOnce({ hits: [prior] });
+
+    await client.bulk(STREAM, [{ exclude: { id: prior.id } }]);
+
+    const [{ documents }] = create.mock.calls[0];
+    const written = documents[0] as StoredFeatureKnowledgeIndicator;
+    expect(written.excluded).toBe(true);
+    expect(written.expires_at).toBeDefined();
+    expect(written.expires_at! > '2026-01-01T00:00:00.000Z').toBe(true);
+  });
+
+  it('exclude with durable prior → no expires_at', async () => {
+    const { client, create, runEsql } = makeClient();
+    const prior = createFeatureDoc({});
+    delete (prior as Partial<StoredFeatureKnowledgeIndicator>).expires_at;
+    runEsql.mockResolvedValueOnce({ hits: [prior] });
+
+    await client.bulk(STREAM, [{ exclude: { id: prior.id } }]);
+
+    const [{ documents }] = create.mock.calls[0];
+    const written = documents[0] as StoredFeatureKnowledgeIndicator;
+    expect(written.excluded).toBe(true);
+    expect(written.expires_at).toBeUndefined();
+  });
+
+  it('restore with managed prior → inherits managed (fresh expires_at)', async () => {
+    const { client, create, runEsql } = makeClient();
+    const prior = createFeatureDoc({ excluded: true, expires_at: '2026-01-01T00:00:00.000Z' });
+    runEsql.mockResolvedValueOnce({ hits: [prior] });
+
+    await client.bulk(STREAM, [{ restore: { id: prior.id } }]);
+
+    const [{ documents }] = create.mock.calls[0];
+    const written = documents[0] as StoredFeatureKnowledgeIndicator;
+    expect(written.excluded).toBeUndefined();
+    expect(written.expires_at).toBeDefined();
+    expect(written.expires_at! > '2026-01-01T00:00:00.000Z').toBe(true);
+  });
+
+  it('restore with durable prior → no expires_at', async () => {
+    const { client, create, runEsql } = makeClient();
+    const prior = createFeatureDoc({ excluded: true });
+    delete (prior as Partial<StoredFeatureKnowledgeIndicator>).expires_at;
+    runEsql.mockResolvedValueOnce({ hits: [prior] });
+
+    await client.bulk(STREAM, [{ restore: { id: prior.id } }]);
+
+    const [{ documents }] = create.mock.calls[0];
+    const written = documents[0] as StoredFeatureKnowledgeIndicator;
+    expect(written.excluded).toBeUndefined();
+    expect(written.expires_at).toBeUndefined();
+  });
+});
+
 describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
   function makeClientWithSearch(): {
     client: KnowledgeIndicatorClient;
@@ -436,15 +558,19 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
     const deps: KnowledgeIndicatorClientDeps = {
       dataStreamClient,
       esClient: { search } as unknown as KnowledgeIndicatorClientDeps['esClient'],
-      rulesManagementClient: {
-        createRule: jest.fn().mockResolvedValue(undefined),
-        updateRule: jest.fn().mockResolvedValue(undefined),
-        bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
-      },
       soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
       logger,
     };
-    const client = new KnowledgeIndicatorClient(deps);
+    const rulesManagementClient = {
+      createRule: jest.fn().mockResolvedValue(undefined),
+      updateRule: jest.fn().mockResolvedValue(undefined),
+      bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+    };
+    const client = new KnowledgeIndicatorClient(
+      deps,
+      true,
+      createAlertingContext(rulesManagementClient)
+    );
     return { client, runEsql: executeAndDecodeSource as jest.Mock, search };
   }
 
@@ -594,5 +720,146 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
     });
 
     expect(hits).toHaveLength(0);
+  });
+});
+
+function createQueryDoc(
+  overrides: Partial<StoredQueryKnowledgeIndicator> = {}
+): StoredQueryKnowledgeIndicator {
+  return {
+    '@timestamp': '2026-01-01T00:00:00.000Z',
+    id: 'query-1',
+    type: KI_TYPE_QUERY,
+    'stream.name': STREAM,
+    title: 'Error query',
+    description: 'desc',
+    query: {
+      esql: 'FROM logs-app | WHERE error == true',
+      query_type: 'match',
+      rule_backed: false,
+      rule_id: 'rule-abc',
+    },
+    ...overrides,
+  };
+}
+
+describe('KnowledgeIndicatorClient.keepAlivePersistentIndicators', () => {
+  const LAST_REFRESHED_BEFORE = '2026-06-01T00:00:00.000Z';
+
+  it('re-emits durable features with a fresh @timestamp and no expires_at', async () => {
+    const { client, create, runEsql } = makeClient();
+    const durableFeature = createFeatureDoc();
+    runEsql.mockResolvedValueOnce({ hits: [durableFeature] });
+
+    const result = await client.keepAlivePersistentIndicators(STREAM, {
+      lastRefreshedBefore: LAST_REFRESHED_BEFORE,
+    });
+
+    expect(result).toEqual({ refreshed: 1 });
+    expect(create).toHaveBeenCalledTimes(1);
+    const [{ documents }] = create.mock.calls[0];
+    expect(documents).toHaveLength(1);
+    const written = documents[0] as StoredFeatureKnowledgeIndicator;
+    expect(written.id).toBe(durableFeature.id);
+    expect(written.type).toBe(KI_TYPE_FEATURE);
+    expect(written.expires_at).toBeUndefined();
+    expect(written['@timestamp']).not.toBe(durableFeature['@timestamp']);
+    expect(written.feature).toEqual(durableFeature.feature);
+  });
+
+  it('preserves excluded marker on durable excluded features', async () => {
+    const { client, create, runEsql } = makeClient();
+    const durableExcluded = createFeatureDoc({ excluded: true });
+    runEsql.mockResolvedValueOnce({ hits: [durableExcluded] });
+
+    await client.keepAlivePersistentIndicators(STREAM, {
+      lastRefreshedBefore: LAST_REFRESHED_BEFORE,
+    });
+
+    const [{ documents }] = create.mock.calls[0];
+    const written = documents[0] as StoredFeatureKnowledgeIndicator;
+    expect(written.excluded).toBe(true);
+    expect(written.expires_at).toBeUndefined();
+  });
+
+  it('keeps alive an excluded managed feature, preserving excluded and rolling expires_at forward with @timestamp', async () => {
+    const { client, create, runEsql } = makeClient();
+    const managedExpiresAt = '2026-07-01T00:00:00.000Z';
+    const excludedManaged = createFeatureDoc({ excluded: true, expires_at: managedExpiresAt });
+    runEsql.mockResolvedValueOnce({ hits: [excludedManaged] });
+
+    const result = await client.keepAlivePersistentIndicators(STREAM, {
+      lastRefreshedBefore: LAST_REFRESHED_BEFORE,
+    });
+
+    expect(result).toEqual({ refreshed: 1 });
+    const [{ documents }] = create.mock.calls[0];
+    const written = documents[0] as StoredFeatureKnowledgeIndicator;
+    expect(written.excluded).toBe(true);
+    expect(written['@timestamp']).not.toBe(excludedManaged['@timestamp']);
+    // expires_at is TTL-bearing, so it rolls forward with the refreshed
+    // @timestamp rather than preserving the now-stale original value.
+    const { expires_at: rolledExpiresAt } = written;
+    expect(rolledExpiresAt).toBeDefined();
+    expect(rolledExpiresAt).not.toBe(managedExpiresAt);
+    const ttlMs =
+      new Date(rolledExpiresAt ?? 0).getTime() - new Date(written['@timestamp']).getTime();
+    expect(ttlMs).toBeCloseTo(30 * 24 * 60 * 60 * 1000, -4);
+  });
+
+  it('re-emits durable queries with a fresh @timestamp, no expires_at, and preserves rule_backed/rule_id', async () => {
+    const { client, create, runEsql } = makeClient();
+    const durableQuery = createQueryDoc({
+      query: {
+        esql: 'FROM logs-app | WHERE error == true',
+        query_type: 'match',
+        rule_backed: true,
+        rule_id: 'rule-xyz',
+      },
+    });
+    runEsql.mockResolvedValueOnce({ hits: [durableQuery] });
+
+    const result = await client.keepAlivePersistentIndicators(STREAM, {
+      lastRefreshedBefore: LAST_REFRESHED_BEFORE,
+    });
+
+    expect(result).toEqual({ refreshed: 1 });
+    const [{ documents }] = create.mock.calls[0];
+    expect(documents).toHaveLength(1);
+    const written = documents[0] as StoredQueryKnowledgeIndicator;
+    expect(written.id).toBe(durableQuery.id);
+    expect(written.type).toBe(KI_TYPE_QUERY);
+    expect(written.expires_at).toBeUndefined();
+    expect(written['@timestamp']).not.toBe(durableQuery['@timestamp']);
+    expect(written.query.rule_backed).toBe(true);
+    expect(written.query.rule_id).toBe('rule-xyz');
+  });
+
+  it('is a no-op when fetchLatestRevisions returns nothing', async () => {
+    const { client, create, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    const result = await client.keepAlivePersistentIndicators(STREAM, {
+      lastRefreshedBefore: LAST_REFRESHED_BEFORE,
+    });
+
+    expect(result).toEqual({ refreshed: 0 });
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('includes the durable-or-excluded predicate and olderThan in the postGrouping WHERE passed to ES|QL', async () => {
+    const { client, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await client.keepAlivePersistentIndicators(STREAM, {
+      lastRefreshedBefore: LAST_REFRESHED_BEFORE,
+    });
+
+    expect(runEsql).toHaveBeenCalledTimes(1);
+    const query = runEsql.mock.calls[0][1] as { print: () => string };
+    const printed = query.print();
+    expect(printed).toContain('expires_at IS NULL');
+    expect(printed).toMatch(/excluded ==/i);
+    expect(printed).toContain(LAST_REFRESHED_BEFORE);
   });
 });

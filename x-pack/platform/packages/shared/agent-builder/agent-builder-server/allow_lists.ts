@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common/tools';
+import {
+  platformCoreTools,
+  platformCoreCasesTools,
+  platformStreamsSigEventsTools,
+} from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 
 /**
@@ -15,6 +19,8 @@ import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // platform core tools are registered from the agent builder plugin so will trigger a review anyway
   ...Object.values(platformCoreTools),
+  // Cases CRUD tools, registered by the Cases plugin
+  ...Object.values(platformCoreCasesTools),
   // Streams / Significant Events
   ...Object.values(platformStreamsSigEventsTools),
 
@@ -110,6 +116,10 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'data-exploration',
   'visualization-creation',
   'graph-creation',
+  'agent-builder-traces',
+
+  // Platform – Cases
+  'cases-management',
 
   // Platform – Alerting
   'rule-management',
@@ -124,6 +134,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-management',
   'significant-events-memory',
   'significant-events-management',
+  'streams-investigation-management',
   'knowledge-indicators-management',
   'ki-identification-management',
   'streams-memory-synthesis',
@@ -141,6 +152,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'entity-analytics',
   'alert-analysis',
   'detection-rule-edit',
+  'recommend-prebuilt-rules',
   'threat-hunting',
   'find-security-rules',
   'pci-compliance',
@@ -160,6 +172,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   `${internalNamespaces.search}.use-case-library`,
   `${internalNamespaces.search}.elasticsearch-tutorial`,
   'skill-authoring',
+  'connector-authoring',
 ] as const;
 
 export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];

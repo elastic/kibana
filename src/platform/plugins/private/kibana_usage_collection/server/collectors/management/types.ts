@@ -47,6 +47,7 @@ export interface UsageStats {
   'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmEnableTableSearchBar': boolean;
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
+  'observability:apmTraceLogsDefaultColumns': string[];
   'observability:logSources': string[];
   'observability:newLogsOverview': boolean;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
@@ -56,7 +57,15 @@ export interface UsageStats {
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
   'agentBuilder:bashSupport': boolean;
+  'contextEngine:enabled': boolean;
   'agentBuilder:uiamOAuthClientManagement': boolean;
+  'agentBuilder:tracing:enabled': boolean;
+  'agentBuilder:tracing:includeLlmResponses': boolean;
+  'agentBuilder:tracing:includeRealIds': boolean;
+  'agentBuilder:tracing:includeRealNames': boolean;
+  'agentBuilder:tracing:includeSystemPrompt': boolean;
+  'agentBuilder:tracing:includeToolDetails': boolean;
+  'agentBuilder:tracing:includeUserPrompts': boolean;
   'workflows:experimentalFeatures': boolean;
   'workflows:ui:enabled': boolean;
   'workflows:ui:showManagedWorkflows': boolean;
