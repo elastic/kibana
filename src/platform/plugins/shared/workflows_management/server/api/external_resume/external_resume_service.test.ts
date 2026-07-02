@@ -324,6 +324,29 @@ describe('resumeWorkflowExecutionExternallyWithInput', () => {
       { resumedBy: 'api_key:api-key-id' }
     );
   });
+
+  it('ignores non-schema query params on waitForInput GET resume', async () => {
+    await resumeWorkflowExecutionExternallyViaGet(workflowsService, {
+      executionId: 'exec-1',
+      spaceId: 'default',
+      apiKey: ENCODED_API_KEY,
+      query: {
+        apiKey: ENCODED_API_KEY,
+        severity: 'high',
+        approved: 'true',
+        injected: 'value',
+      },
+    });
+
+    const engine = await workflowsService.getWorkflowsExecutionEngine();
+    expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
+      'exec-1',
+      'default',
+      { severity: 'high' },
+      undefined,
+      { resumedBy: 'api_key:api-key-id' }
+    );
+  });
 });
 
 describe('getExternalResumeFormPage', () => {

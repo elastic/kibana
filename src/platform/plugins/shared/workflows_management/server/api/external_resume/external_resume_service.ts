@@ -105,7 +105,7 @@ export async function resumeWorkflowExecutionExternallyViaGet(
 
   if (stepExecution.stepType === 'waitForInput') {
     const schema = getStepInputSchema(stepExecution.input);
-    const queryInput = getExternalResumeInputFromQuery(query);
+    const queryInput = getExternalResumeInputFromQuery(query, schema);
     if (Object.keys(queryInput).length === 0) {
       throw new ExternalResumeError(
         'Query-param resume requires at least one schema field; use the form link instead.',
@@ -358,11 +358,15 @@ function getStepInputSchema(input: unknown): JsonModelSchemaType | undefined {
   return undefined;
 }
 
-function getExternalResumeInputFromQuery(query: Record<string, unknown>): Record<string, unknown> {
+function getExternalResumeInputFromQuery(
+  query: Record<string, unknown>,
+  schema: JsonModelSchemaType | undefined
+): Record<string, unknown> {
+  const allowed = new Set(Object.keys(schema?.properties ?? {}));
   const input: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(query)) {
-    if (key !== 'apiKey') {
+    if (key !== 'apiKey' && allowed.has(key)) {
       input[key] = Array.isArray(value) ? value[0] : value;
     }
   }
