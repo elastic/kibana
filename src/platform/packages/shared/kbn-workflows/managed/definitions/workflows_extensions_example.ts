@@ -18,7 +18,7 @@ export interface ExampleManagedWorkflowTemplateValues extends ManagedWorkflowTem
 export const EXAMPLE_MANAGED_WORKFLOW = {
   id: EXAMPLE_MANAGED_WORKFLOW_ID,
   pluginId: 'workflowsExtensionsExample',
-  version: 1,
+  version: 2,
   billable: false,
   visibility: {
     selectors: ['rule_action'],

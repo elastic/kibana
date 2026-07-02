@@ -30,7 +30,7 @@ const SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT = {
 export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 4,
+  version: 3,
   billable: false,
   yaml: DETECTION_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
