@@ -16,7 +16,7 @@ import {
   DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
   DEFAULT_QUALITY_ISSUE_SORT_FIELD,
 } from '@kbn/dataset-quality-plugin/common/constants';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import rison from '@kbn/rison';
 import querystring from 'querystring';

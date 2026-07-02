@@ -6,7 +6,7 @@
  */
 
 import chroma from 'chroma-js';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { FittingFunction, XYCurveType } from '@kbn/lens-plugin/public';
 import type { DebugState } from '@elastic/charts';

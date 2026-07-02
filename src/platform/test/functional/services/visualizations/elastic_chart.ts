@@ -9,7 +9,7 @@
 
 import type { DebugState } from '@elastic/charts';
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../../ftr_provider_context';
 

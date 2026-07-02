@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // This concatenates lines of multi-line string into a single line.
