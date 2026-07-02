@@ -10,6 +10,7 @@ import { useRouteMatch, useLocation } from 'react-router-dom';
 
 import { EuiEmptyPrompt, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 
 import {
@@ -17,7 +18,7 @@ import {
   IS_AGENTLESS_QUERY_PARAM,
 } from '../../../../../../common/constants';
 
-import { Loading } from '../../../components';
+import { Loading, Error } from '../../../components';
 import type { EditPackagePolicyFrom } from '../create_package_policy_page/types';
 
 import { CreatePackagePolicySinglePage } from '../create_package_policy_page/single_page_layout';
@@ -70,7 +71,12 @@ export const CopyPackagePolicyPage = memo(() => {
     [search]
   );
 
-  const { item: sourcePolicy, isLoading } = useCopyPackagePolicyData(packagePolicyId, {
+  const {
+    item: sourcePolicy,
+    isLoading,
+    isError,
+    error,
+  } = useCopyPackagePolicyData(packagePolicyId, {
     isAgentless,
   });
   // Agentless deployments have no user-facing agent policy, so skip the agent-policy read for them.
@@ -95,6 +101,30 @@ export const CopyPackagePolicyPage = memo(() => {
       return 'copy-from-integrations-policy-list';
     }
   }, [search]);
+
+  // Without this, a failed source-policy read leaves `isLoading` false and `sourcePolicy`
+  // undefined, which would otherwise render the loading spinner forever with no recovery path.
+  if (isError) {
+    return (
+      <ContentWrapper justifyContent="center" alignItems="center">
+        <Error
+          title={
+            <FormattedMessage
+              id="xpack.fleet.copyPackagePolicyPage.loadingErrorTitle"
+              defaultMessage="Unable to load the integration policy to copy"
+            />
+          }
+          error={
+            error instanceof Error
+              ? error
+              : i18n.translate('xpack.fleet.copyPackagePolicyPage.loadingErrorGenericMessage', {
+                  defaultMessage: 'An error occurred while loading the integration policy.',
+                })
+          }
+        />
+      </ContentWrapper>
+    );
+  }
 
   if (isLoading || !sourcePolicy) {
     return (
