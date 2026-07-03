@@ -25,6 +25,12 @@ const createContext = (overrides: Partial<ApiEndpointContext> = {}): ApiEndpoint
 });
 
 describe('API_ENDPOINTS', () => {
+  describe('labels', () => {
+    it('labels the Elasticsearch endpoint as Elasticsearch by default', () => {
+      expect(getEndpoint('elasticsearch').label).toBe('Elasticsearch');
+    });
+  });
+
   describe('getUrl', () => {
     describe('Elasticsearch URL', () => {
       it('uses the Elasticsearch URL when the managed OTLP service is unavailable on non-Serverless deployments', () => {

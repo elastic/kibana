@@ -21,6 +21,7 @@ export interface ApiEndpointContext {
 export interface ApiEndpointDefinition {
   id: ApiEndpointId;
   label: string;
+  getLabel?: (context: ApiEndpointContext) => string;
   logo?: SupportedLogo;
   euiIconType?: EuiIconType;
   getUrl: (context: ApiEndpointContext) => string | undefined;
@@ -31,6 +32,27 @@ const normalizeEndpointUrl = (url?: string): string | undefined => {
   const trimmedUrl = url?.trim();
   return trimmedUrl ? trimTrailingSlashes(trimmedUrl) : undefined;
 };
+const getManagedElasticsearchUrl = ({
+  isManagedOtlpServiceAvailable,
+  managedOtlpServiceUrl,
+}: ApiEndpointContext): string | undefined => {
+  const managedUrl = normalizeEndpointUrl(managedOtlpServiceUrl);
+
+  return isManagedOtlpServiceAvailable && managedUrl ? `${managedUrl}/_es` : undefined;
+};
+
+const elasticsearchLabel = i18n.translate(
+  'xpack.observability_onboarding.apiEndpoints.elasticsearch.label',
+  {
+    defaultMessage: 'Elasticsearch',
+  }
+);
+const elasticsearchBulkLabel = i18n.translate(
+  'xpack.observability_onboarding.apiEndpoints.elasticsearchBulk.label',
+  {
+    defaultMessage: 'Elasticsearch bulk',
+  }
+);
 
 export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
   {
@@ -74,16 +96,16 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
   },
   {
     id: ApiEndpointId.Elasticsearch,
-    label: i18n.translate('xpack.observability_onboarding.apiEndpoints.elasticsearch.label', {
-      defaultMessage: 'Elasticsearch',
-    }),
+    label: elasticsearchLabel,
+    getLabel: (context) =>
+      getManagedElasticsearchUrl(context) ? elasticsearchBulkLabel : elasticsearchLabel,
     euiIconType: 'logoElasticsearch',
-    getUrl: ({ isManagedOtlpServiceAvailable, managedOtlpServiceUrl, elasticsearchUrl }) => {
-      const managedUrl = normalizeEndpointUrl(managedOtlpServiceUrl);
-
-      if (isManagedOtlpServiceAvailable && managedUrl) {
-        return `${managedUrl}/_es`;
+    getUrl: (context) => {
+      const managedUrl = getManagedElasticsearchUrl(context);
+      if (managedUrl) {
+        return managedUrl;
       }
+      const { elasticsearchUrl } = context;
       const fallbackUrl = normalizeEndpointUrl(elasticsearchUrl);
 
       return fallbackUrl;

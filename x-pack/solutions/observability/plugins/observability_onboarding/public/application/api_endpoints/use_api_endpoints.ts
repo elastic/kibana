@@ -58,7 +58,7 @@ export function useApiEndpoints(): {
 
     return API_ENDPOINTS.map((definition) => ({
       id: definition.id,
-      label: definition.label,
+      label: definition.getLabel?.(endpointContext) ?? definition.label,
       logo: definition.logo,
       euiIconType: definition.euiIconType,
       url: definition.getUrl(endpointContext),
