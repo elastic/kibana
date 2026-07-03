@@ -10,6 +10,7 @@ import pMap from 'p-map';
 
 import type { EsAssetReference } from '../../../types';
 import { ElasticsearchAssetType } from '../../../types';
+import { isUserSettingsTemplate } from '../elasticsearch/template/utils';
 
 /**
  * Checks whether a single ES asset exists. Returns true if the asset is present, false if it is
@@ -21,15 +22,21 @@ async function esAssetExists(
   { id, type }: EsAssetReference
 ): Promise<boolean> {
   switch (type) {
+    case ElasticsearchAssetType.componentTemplate: {
+      // `@custom` component templates are placeholders reserved for user customization and are
+      // intentionally never created in ES at install time (see installDataStreamComponentTemplates).
+      // Their absence is expected, not a failed install.
+      if (isUserSettingsTemplate(id)) {
+        return true;
+      }
+      return esClient.cluster.existsComponentTemplate({ name: id });
+    }
     case ElasticsearchAssetType.ingestPipeline: {
       const res = await esClient.ingest.getPipeline({ id }, { ignore: [404], meta: true });
       return res.statusCode !== 404;
     }
     case ElasticsearchAssetType.indexTemplate: {
       return esClient.indices.existsIndexTemplate({ name: id });
-    }
-    case ElasticsearchAssetType.componentTemplate: {
-      return esClient.cluster.existsComponentTemplate({ name: id });
     }
     case ElasticsearchAssetType.transform: {
       const res = await esClient.transform.getTransform(

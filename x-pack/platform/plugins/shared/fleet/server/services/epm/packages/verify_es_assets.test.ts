@@ -77,9 +77,7 @@ describe('verifyEsAssetsExist', () => {
 
     const missing = await verifyEsAssetsExist(esClient, refs, logger);
     expect(missing).toEqual([]);
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('treating as present')
-    );
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('treating as present'));
   });
 
   it('returns empty array for an empty refs list', async () => {
@@ -138,5 +136,16 @@ describe('verifyEsAssetsExist', () => {
     expect(esClient.cluster.existsComponentTemplate).toHaveBeenCalledWith({
       name: 'missing-comp',
     });
+  });
+
+  it('treats @custom component templates as always present without calling ES', async () => {
+    const refs: EsAssetReference[] = [
+      makeRef(ElasticsearchAssetType.componentTemplate, 'logs@custom'),
+      makeRef(ElasticsearchAssetType.componentTemplate, 'logs-nginx.access@custom'),
+    ];
+
+    const missing = await verifyEsAssetsExist(esClient, refs, makeLogger());
+    expect(missing).toEqual([]);
+    expect(esClient.cluster.existsComponentTemplate).not.toHaveBeenCalled();
   });
 });
