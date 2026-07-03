@@ -58,6 +58,14 @@ describe('isPlaceholderRuleText', () => {
     expect(isPlaceholderRuleText('{"attachmentLabel": "Rule"}')).toBe(true);
   });
 
+  it('returns true for empty-string name and query (untouched form synced to chat)', () => {
+    expect(isPlaceholderRuleText('{"name":"","query":""}')).toBe(true);
+  });
+
+  it('returns true for whitespace-only name and query', () => {
+    expect(isPlaceholderRuleText('{"name":"  ","query":"\\n"}')).toBe(true);
+  });
+
   it('returns false when name is present', () => {
     expect(isPlaceholderRuleText('{"name": "My Rule"}')).toBe(false);
   });

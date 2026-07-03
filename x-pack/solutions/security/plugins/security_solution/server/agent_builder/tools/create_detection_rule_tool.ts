@@ -48,16 +48,17 @@ const mintRuleAttachmentId = (): string => `air:${uuidv4().replace(/-/g, '')}`;
 
 /**
  * A placeholder card has no real rule content — its `text` field deserialises to
- * an object with no `name` and no `query`. Every chat entry point seeds one of
- * these (e.g. `create_rule_menu` uses `text: "{}"`) so the first create fills it
- * rather than creating a second card alongside a phantom empty one.
+ * an object whose `name` and `query` are absent or blank. Chat entry points seed
+ * these two ways: `create_rule_menu` uses `text: "{}"`, while the form→chat sync
+ * of an untouched rule form pushes `{"name":"","query":"", ...}`. Both must be
+ * consumed by the first create rather than leaving a phantom empty card behind.
  */
 export const isPlaceholderRuleText = (text: string): boolean => {
   try {
-    const parsed = JSON.parse(text);
+    const parsed = JSON.parse(text) as Record<string, unknown>;
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return false;
-    const hasName = typeof (parsed as Record<string, unknown>).name === 'string';
-    const hasQuery = typeof (parsed as Record<string, unknown>).query === 'string';
+    const hasName = typeof parsed.name === 'string' && parsed.name.trim() !== '';
+    const hasQuery = typeof parsed.query === 'string' && parsed.query.trim() !== '';
     return !hasName && !hasQuery;
   } catch {
     return false;
