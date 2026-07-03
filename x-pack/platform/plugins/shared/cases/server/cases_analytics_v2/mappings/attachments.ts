@@ -153,14 +153,21 @@ export const ATTACHMENTS_INDEX_MAPPING: MappingTypeMapping = {
 
         // Stringified unified `data` blob. The unified shape allows
         // arbitrary plugin-defined value content (Lens viz state, user
-        // comment, persistable state, etc.). `ignore_above: 32766`
-        // matches the `keyword` upper bound; payloads exceeding that
-        // get truncated rather than rejected.
-        data_json: { type: 'keyword', ignore_above: 32766 },
+        // comment, persistable state, etc.). `wildcard` (not `keyword`)
+        // so there is no length cap: a `keyword` silently drops values
+        // over `ignore_above` from the index and doc values, which would
+        // make large attachment payloads (Lens/dashboard viz state, bulk
+        // content) return `null` in ES|QL. `wildcard` stores the full
+        // value with no per-value limit and is purpose-built for large,
+        // opaque strings queried with grep-style predicates — exactly
+        // this field's access pattern. We never aggregate or sort on it
+        // (the curated extracts below serve faceting). Matches the
+        // activity surface's `action.payload_json`.
+        data_json: { type: 'wildcard' },
 
         // Stringified unified `metadata` blob. Same rationale as
         // `data_json`; arbitrary plugin-defined per attachment type.
-        metadata_json: { type: 'keyword', ignore_above: 32766 },
+        metadata_json: { type: 'wildcard' },
 
         // ----- Curated extracts -----
 
