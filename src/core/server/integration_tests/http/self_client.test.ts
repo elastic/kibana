@@ -86,7 +86,7 @@ const startServer = async (
     },
     async (context, req, res) => {
       try {
-        await started.httpStart!.self.asScoped(req).fetch('/\\evil.com/steal');
+        await started.httpStart!.selfClient.asScoped(req).fetch('/\\evil.com/steal');
       } catch (error) {
         return res.ok({ body: { error: (error as Error).message } });
       }
@@ -114,7 +114,7 @@ const startServer = async (
 
       try {
         const body = await started
-          .httpStart!.self.asScoped(req)
+          .httpStart!.selfClient.asScoped(req)
           .fetch<DepthResponse>(`/self/depth/${req.params.remaining - 1}`);
 
         return res.ok({ body });
@@ -149,7 +149,7 @@ const startServer = async (
     async (context, req, res) => {
       try {
         const response = await started
-          .httpStart!.self.asScoped(req)
+          .httpStart!.selfClient.asScoped(req)
           .fetch<{ url: string; host?: string }>('/self/target_url', { asResponse: true });
 
         return res.ok({

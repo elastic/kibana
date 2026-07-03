@@ -24,7 +24,7 @@ function registerFunction(
   const scopedClient = { fetch };
   const coreStart = {
     http: {
-      self: {
+      selfClient: {
         asScoped: jest.fn().mockReturnValue(scopedClient),
       },
     },
@@ -83,7 +83,7 @@ describe('kibana tool', () => {
       signal
     );
 
-    expect(coreStart.http.self.asScoped).toHaveBeenCalledWith(resources.request);
+    expect(coreStart.http.selfClient.asScoped).toHaveBeenCalledWith(resources.request);
     expect(fetch).toHaveBeenCalledWith('/api/apm/agent_keys', {
       method: 'POST',
       query: { type: 'dashboard' },

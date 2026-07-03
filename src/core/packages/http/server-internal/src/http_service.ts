@@ -245,7 +245,7 @@ export class HttpService
       ...pick(internalSetup, ['auth', 'basePath', 'getServerInfo', 'staticAssets']),
       generateOas: (args: GenerateOasArgs) => this.generateOas(args),
       isListening: () => this.httpServer.isListening(),
-      self: createInternalHttpSelfClient({
+      selfClient: createInternalHttpSelfClient({
         authRequestHeaders: internalSetup.authRequestHeaders,
         basePath: internalSetup.basePath,
         getServerInfo: internalSetup.getServerInfo,

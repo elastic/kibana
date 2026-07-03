@@ -473,7 +473,7 @@ export interface HttpServiceStart {
   /**
    * Make outbound HTTP calls to Kibana's own APIs on behalf of the current request user.
    */
-  self: HttpSelfService;
+  selfClient: HttpSelfService;
 }
 
 /**

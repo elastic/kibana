@@ -49,7 +49,7 @@ type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 type InternalStaticAssetsMocked = jest.Mocked<InternalHttpServiceSetup['staticAssets']>;
 type StaticAssetsMocked = jest.Mocked<IStaticAssets>;
 type AuthMocked = jest.Mocked<InternalHttpServiceSetup['auth']>;
-type SelfMocked = jest.Mocked<HttpSelfService> & {
+type SelfClientMocked = jest.Mocked<HttpSelfService> & {
   asScoped: jest.MockedFunction<HttpSelfService['asScoped']>;
 };
 
@@ -79,7 +79,7 @@ export type InternalHttpServiceSetupMock = jest.Mocked<
 export type HttpServiceStartMock = jest.Mocked<HttpServiceStart> & {
   basePath: BasePathMocked;
   staticAssets: StaticAssetsMocked;
-  self: SelfMocked;
+  selfClient: SelfClientMocked;
 };
 export type InternalHttpServiceStartMock = jest.Mocked<InternalHttpServiceStart> & {
   basePath: BasePathMocked;
@@ -127,7 +127,7 @@ const createAuthHeaderStorageMock = () => {
   return mock;
 };
 
-const createSelfMock = (): SelfMocked =>
+const createSelfClientMock = (): SelfClientMocked =>
   lazyObject({
     asScoped: jest.fn().mockReturnValue({
       fetch: jest.fn(),
@@ -264,7 +264,7 @@ const createStartContractMock = () => {
     auth: createAuthMock(),
     basePath: createBasePathMock(),
     getServerInfo: jest.fn(),
-    self: createSelfMock(),
+    selfClient: createSelfClientMock(),
     staticAssets: {
       getPluginAssetHref: jest.fn().mockImplementation((assetPath: string) => assetPath),
       prependPublicUrl: jest.fn().mockImplementation((pathname: string) => pathname),

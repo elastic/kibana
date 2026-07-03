@@ -69,7 +69,7 @@ export function registerKibanaFunction({
       } as const;
 
       try {
-        const response = await core.http.self.asScoped(request).fetch(pathname, fetchOptions);
+        const response = await core.http.selfClient.asScoped(request).fetch(pathname, fetchOptions);
 
         logger.info(
           `Called Kibana API by forwarding request from "${
