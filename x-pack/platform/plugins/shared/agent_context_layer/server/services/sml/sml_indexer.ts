@@ -26,7 +26,7 @@ import type {
 } from './types';
 import { createSmlStorage, smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
-import { SmlUnregisteredTypeError } from './sml_errors';
+import { SmlUnregisteredTypeError, SmlPermissionsConflictError } from './sml_errors';
 
 export interface SmlIndexerDeps {
   registry: SmlTypeRegistry;
@@ -176,6 +176,7 @@ class SmlIndexerImpl implements SmlIndexer {
         contextLogger,
         chunks: params.content!,
         createdAt: params.createdAt,
+        requestedPermissions: params.permissions,
       });
       return;
     }
@@ -336,6 +337,7 @@ class SmlIndexerImpl implements SmlIndexer {
     contextLogger,
     chunks,
     createdAt,
+    requestedPermissions,
   }: {
     originId: string;
     attachmentType: string;
@@ -345,6 +347,7 @@ class SmlIndexerImpl implements SmlIndexer {
     contextLogger: Logger;
     chunks: SmlChunk[];
     createdAt?: string;
+    requestedPermissions?: SmlPermissions;
   }): Promise<void> {
     const originUri = `${attachmentType}://${originId}`;
     if (chunks.length === 0) {
@@ -391,12 +394,15 @@ class SmlIndexerImpl implements SmlIndexer {
         definition,
         originId,
         context,
+        requestedPermissions,
       });
     } catch (error) {
+      const reason =
+        error instanceof SmlPermissionsConflictError
+          ? `caller-supplied permissions conflict with type '${definition?.id ?? attachmentType}'`
+          : `type '${definition?.id ?? attachmentType}' getPermissions threw`;
       this.logger.warn(
-        `SML indexer: type '${
-          definition?.id ?? attachmentType
-        }' getPermissions threw for origin '${originId}' — aborting content-mode write to avoid producing un-gated chunks: ${
+        `SML indexer: ${reason} for origin '${originId}' — aborting content-mode write to avoid producing un-gated chunks: ${
           (error as Error).message
         }`
       );
@@ -425,56 +431,49 @@ class SmlIndexerImpl implements SmlIndexer {
 
   /**
    * Resolve the {@link SmlPermissions} to stamp on every chunk for an
-   * origin. Called **once per origin** before any ES mutation, so a hook
-   * failure can abort the write without leaving the origin in a
-   * half-deleted state.
+   * origin. Called **once per origin** before any ES mutation
    *
-   * - Registered type with `getPermissions` → the hook's result is used
-   *   (with arrays defensively defaulted to `[]` so the stored document
-   *   always has fully-shaped inner arrays). **A throw is propagated**
-   *   to the caller — see below.
-   * - Registered type without `getPermissions` → empty `SmlPermissions`.
-   *   This is an explicit opt-in by the SML type author signalling that
-   *   the data is space-readable.
-   * - Unregistered type (`definition === undefined`) → empty
-   *   `SmlPermissions`. Only reachable via content-mode writes;
-   *   origin-mode rejects unregistered types upstream via
-   *   {@link SmlUnregisteredTypeError}. The warn line announcing the
-   *   namespace is emitted by `indexManualChunks` once per process per
-   *   type so this helper can stay quiet on the hot path.
-   *
-   * **Fail-closed on `getPermissions` throw.** When `getPermissions`
-   * throws, the error propagates before any ES mutation. Callers see this:
-   *
-   * - Origin-mode crawler: the task runner logs and reschedules on the
-   *   next crawl tick. The origin keeps its previous chunks intact (the
-   *   throw lands before `deleteChunks` runs — see `indexAttachment`).
-   * - Workflow step: surfaced as a step `error` result.
-   * - HTTP upsert route: bubbles to a 500.
-   *
-   * The trade-off is intentional: a transient blip becomes a visible
-   * write failure rather than an invisible privilege escalation.
+   * - If only a hook is present, it wins.
+   * - If only `requestedPermissions` is supplied, they are used.
+   * - If both a hook is present AND `requestedPermissions` are supplied, an error is thrown.
+   * - If neither, permissions are left empty.
    */
   private async resolvePermissionsForOrigin({
     definition,
     originId,
     context,
+    requestedPermissions,
   }: {
     definition: SmlTypeDefinition | undefined;
     originId: string;
     context: SmlContext;
+    requestedPermissions?: SmlPermissions;
   }): Promise<SmlPermissions> {
-    if (!definition || !definition.getPermissions) {
-      return { kibana: { privileges: [] }, elasticsearch: { indices: [] } };
+    if (definition && definition.getPermissions) {
+      if (requestedPermissions) {
+        throw new SmlPermissionsConflictError(
+          `attachmentType '${definition.id}' derives permissions via getPermissions() and does not accept a caller-supplied 'permissions' value for origin '${originId}'.`
+        );
+      }
+
+      // Intentionally NOT wrapped in try/catch — see fail-closed note in
+      // the JSDoc. Logging here is the caller's job (so origin-mode and
+      // content-mode can frame the failure with their own context).
+      const result = await definition.getPermissions(originId, context);
+      return {
+        kibana: { privileges: result.kibana?.privileges ?? [] },
+        elasticsearch: { indices: result.elasticsearch?.indices ?? [] },
+      };
     }
-    // Intentionally NOT wrapped in try/catch — see fail-closed note in
-    // the JSDoc. Logging here is the caller's job (so origin-mode and
-    // content-mode can frame the failure with their own context).
-    const result = await definition.getPermissions(originId, context);
-    return {
-      kibana: { privileges: result.kibana?.privileges ?? [] },
-      elasticsearch: { indices: result.elasticsearch?.indices ?? [] },
-    };
+
+    if (requestedPermissions) {
+      return {
+        kibana: { privileges: requestedPermissions.kibana?.privileges ?? [] },
+        elasticsearch: { indices: requestedPermissions.elasticsearch?.indices ?? [] },
+      };
+    }
+
+    return { kibana: { privileges: [] }, elasticsearch: { indices: [] } };
   }
 
   private buildIndexOp({

@@ -8,18 +8,18 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiDataGridColumn, EuiThemeComputed } from '@elastic/eui';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPageHeader,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
   logicalCSS,
   useEuiTheme,
 } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { RenderDocumentViewCallback, SortOrder } from '@kbn/unified-data-table';
 import {
@@ -69,6 +69,16 @@ import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
 
 const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' };
+
+const getEpisodesListMenu = ({ manageRulesHref }: { manageRulesHref: string }): AppHeaderMenu => ({
+  primaryActionItem: {
+    id: 'manageRules',
+    label: i18n.EPISODES_LIST_MANAGE_RULES,
+    iconType: 'gear',
+    href: manageRulesHref,
+    testId: 'alertingV2EpisodesListManageRules',
+  },
+});
 
 const ALERT_EPISODES_TABLE_SETTINGS: UnifiedDataTableSettings = {
   columns: {
@@ -374,6 +384,14 @@ export const AlertEpisodesListPage = () => {
     [rulesCache, isLoadingRules, rowHeight, services.userProfile]
   );
 
+  const episodesMenu = useMemo(
+    () =>
+      getEpisodesListMenu({
+        manageRulesHref: services.http.basePath.prepend(paths.ruleList),
+      }),
+    [services.http.basePath]
+  );
+
   return (
     <div
       data-test-subj="alertingV2EpisodesListPage"
@@ -385,30 +403,12 @@ export const AlertEpisodesListPage = () => {
         min-width: 0;
       `}
     >
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={
-          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false} component="span">
-              {i18n.EPISODES_LIST_PAGE_TITLE}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} component="span">
-              <ExperimentalBadge />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        rightSideItems={[
-          <EuiButton
-            key="manage-rules"
-            color="text"
-            size="s"
-            iconType="gear"
-            href={services.http.basePath.prepend(paths.ruleList)}
-            data-test-subj="alertingV2EpisodesListManageRules"
-          >
-            {i18n.EPISODES_LIST_MANAGE_RULES}
-          </EuiButton>,
-        ]}
+      <AppHeader
+        sticky={false}
+        title={i18n.EPISODES_LIST_PAGE_TITLE}
+        titleAppend={<ExperimentalBadge />}
+        padding={{ bleed: 'l' }}
+        menu={episodesMenu}
       />
       <EuiSpacer size="m" />
 
