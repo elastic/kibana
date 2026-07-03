@@ -320,7 +320,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables UI treatments surfacing rules whose MITRE ATT&CK mappings drift
    * from the locally stored kibana mappings after a MITRE version bump.
    */
-  mitreAttackUpdatesUIEnabled: false,
+  mitreAttackUpdatesUIEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

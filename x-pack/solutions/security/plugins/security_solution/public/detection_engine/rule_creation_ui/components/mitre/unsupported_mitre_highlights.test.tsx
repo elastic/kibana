@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { AddMitreAttackThreat } from '.';
@@ -319,5 +319,71 @@ describe('AddMitreAttackThreat - renamed MITRE entity handling', () => {
     // Reassigned technique is still in the dataset, so we don't mislead users
     // by flagging it as removed.
     expect(screen.queryByText(/"T002" is not in the currently supported MITRE/)).toBeNull();
+  });
+});
+
+describe('AddMitreAttackThreat - normalizing drifted names on interaction', () => {
+  const renderWithSpy = (threats: Threats) => {
+    const setValue = jest.fn();
+    const Component = () => {
+      const field = useFormFieldMock<unknown>({ value: threats, label: 'MITRE', setValue });
+      return (
+        <AddMitreAttackThreat
+          dataTestSubj="dataTestSubj"
+          idAria="idAria"
+          isDisabled={false}
+          field={field}
+        />
+      );
+    };
+    render(<Component />, { wrapper: TestProviders });
+    return { setValue };
+  };
+
+  it('rewrites drifted names to the current dataset when the user revises the section', async () => {
+    const threats: Threats = [
+      {
+        framework: MITRE_FRAMEWORK,
+        // Same id as the dataset, but the saved name/reference predate a rename.
+        tactic: { id: 'TA001', name: 'Tactic Old Name', reference: 'https://old/' },
+        technique: [],
+      },
+    ];
+
+    const { setValue } = renderWithSpy(threats);
+
+    // Wait for the lazy dataset to load so normalization has data to work with.
+    expect(await screen.findByText('Tactic 1')).toBeInTheDocument();
+
+    // Any interaction with the section (here, adding another tactic) commits the
+    // normalized payload.
+    fireEvent.click(screen.getByTestId('addMitreAttackTactic'));
+
+    expect(setValue).toHaveBeenCalledTimes(1);
+    const nextThreats = setValue.mock.calls[0][0] as Threats;
+    // The existing (drifted) tactic adopts the current dataset name and reference...
+    expect(nextThreats[0].tactic).toEqual({
+      id: 'TA001',
+      name: 'Tactic 1',
+      reference: 'https://example.com/TA001',
+    });
+    // ...and a fresh placeholder tactic was appended (and left untouched).
+    expect(nextThreats[1].tactic.name).toBe('none');
+  });
+
+  it('does not rewrite the section when it is only opened, never revised', async () => {
+    const threats: Threats = [
+      {
+        framework: MITRE_FRAMEWORK,
+        tactic: { id: 'TA001', name: 'Tactic Old Name', reference: 'https://old/' },
+        technique: [],
+      },
+    ];
+
+    const { setValue } = renderWithSpy(threats);
+
+    // Rendering + lazy dataset load must not trigger any write to the field.
+    expect(await screen.findByText('Tactic 1')).toBeInTheDocument();
+    expect(setValue).not.toHaveBeenCalled();
   });
 });
