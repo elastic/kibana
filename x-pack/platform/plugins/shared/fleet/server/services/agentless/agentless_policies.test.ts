@@ -1259,6 +1259,9 @@ describe('AgentlessPoliciesService', () => {
       expect(result[0].hasErrors).toBe(true);
       // Only the human-readable message is exposed (the internal input key is dropped).
       expect(result[0].errors).toEqual([{ message: 'bad var' }]);
+      // Contract: `proposedPolicy` is withheld on any migration error (apply path is
+      // "edited payloads only" — the incomplete/unsafe config must not be applied as-is).
+      expect(result[0].proposedPolicy).toBeUndefined();
     });
 
     it('should surface a non-throwing fatal dry-run item statusCode and message', async () => {

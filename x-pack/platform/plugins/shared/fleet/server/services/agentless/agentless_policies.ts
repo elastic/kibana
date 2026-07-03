@@ -865,11 +865,12 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
 
   /**
    * Projects the package-policy dry-run diff into the clean agentless shape. Instead of
-   * exposing the raw `[PackagePolicy, DryRunPackagePolicy]` diff, it returns the migrated
-   * config as a consumable {@link AgentlessPolicy} (`proposedPolicy`) plus the current and
-   * proposed versions and any migration errors. The proposed policy is a `NewPackagePolicy`
-   * (no saved-object id/timestamps), so it is overlaid onto the current stored package
-   * policy to recover the metadata `packagePolicyToAgentlessPolicy` needs.
+   * exposing the raw `[PackagePolicy, DryRunPackagePolicy]` diff, it returns the current and
+   * proposed versions and any migration errors, plus — only when the migration is clean
+   * (`hasErrors: false`) — the migrated config as a consumable {@link AgentlessPolicy}
+   * (`proposedPolicy`). The proposed policy is a `NewPackagePolicy` (no saved-object
+   * id/timestamps), so it is overlaid onto the current stored package policy to recover the
+   * metadata `packagePolicyToAgentlessPolicy` needs.
    */
   private projectUpgradeDryRunDiff(
     id: string,
@@ -891,8 +892,11 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
 
     const [currentPackagePolicy, proposedPackagePolicy] = diff.diff;
 
+    // Only return `proposedPolicy` when the dry-run is clean. On errors the proposed config is
+    // incomplete, so we send just the error summary. It's meant to be edited and saved via PUT,
+    // not applied as-is — to apply an upgrade untouched, use `_upgrade`.
     let proposedPolicy: AgentlessPolicy | undefined;
-    if (currentPackagePolicy && proposedPackagePolicy) {
+    if (!diff.hasErrors && currentPackagePolicy && proposedPackagePolicy) {
       proposedPolicy = packagePolicyToAgentlessPolicy({
         ...currentPackagePolicy,
         ...proposedPackagePolicy,

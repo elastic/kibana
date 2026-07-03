@@ -369,7 +369,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: AGENTLESS_POLICIES_ROUTES.UPGRADE_DRYRUN_PATTERN,
       summary: 'Preview an agentless policies upgrade',
       description:
-        'Preview upgrading multiple agentless policies without applying any change. By default the target is the installed package version; pass `pkgVersion` to preview a migration to a specific (for example, not-yet-installed) version. Each result returns the migrated config as a consumable agentless policy (`proposedPolicy`) plus the current/proposed version and any migration errors.',
+        'Preview upgrading multiple agentless policies without applying any change. Targets the installed package version by default; pass `pkgVersion` to preview a specific (for example, not-yet-installed) version. Each result returns the current/proposed version and any migration errors, plus — only on a clean dry-run (`hasErrors: false`) — the migrated `proposedPolicy`. `proposedPolicy` is for the edit-and-upgrade flow (edit it, then save via the update (PUT) endpoint); to apply an upgrade as-is, use `_upgrade`.',
       options: {
         tags: ['oas-tag:Fleet agentless policies'],
         availability: {

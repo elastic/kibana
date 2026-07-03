@@ -15,12 +15,12 @@ requestBody:
             pkgVersion: 1.6.0
 responses:
   200:
-    description: 'Indicates a successful response. Each item previews the migrated policy as a consumable agentless policy; a missing or non-agentless id is reported as a per-item failure (`hasErrors: true` + `statusCode`) without failing the batch. Inspect every item.'
+    description: 'Indicates a successful response. Each clean item (`hasErrors: false`) previews the migrated policy as a consumable agentless policy (`proposedPolicy`); a missing or non-agentless id, or a migration error, is reported as a per-item failure (`hasErrors: true`, with `proposedPolicy` omitted) without failing the batch. Inspect every item.'
     content:
       application/json:
         examples:
           upgradeAgentlessPoliciesDryRunResponseExample:
-            description: 'Example dry-run response with the proposed (migrated) policy. `proposedPolicy` can be fed back into the update (PUT) endpoint.'
+            description: 'Example clean dry-run response (`hasErrors: false`) with the proposed (migrated) policy. `proposedPolicy` is intended for the edit-and-upgrade flow: edit it and submit the edited payload to the update (PUT) endpoint. To apply without edits, use the `_upgrade` endpoint instead.'
             value:
               - id: d52a7812-5736-4fdc-aed8-72152afa1ffa
                 name: ess_billing-1

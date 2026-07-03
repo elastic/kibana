@@ -417,12 +417,12 @@ export const BulkUpgradeAgentlessPoliciesResponseSchema = schema.arrayOf(
 );
 
 /**
- * Per-policy result of an upgrade dry-run. Instead of exposing the underlying
- * `[PackagePolicy, DryRunPackagePolicy]` diff (Fleet internals), it returns the
- * migrated config as a clean {@link AgentlessPolicy} in `proposedPolicy`, designed so
- * it can be fed straight into the agentless PUT (`sendUpdateAgentlessPolicy`) for the
- * UI edit-and-upgrade flow. `currentVersion`/`proposedVersion` and `hasErrors`/`errors`
- * summarize the change without leaking internal input/stream shapes.
+ * Per-policy result of an upgrade dry-run. Rather than leaking the raw Fleet-internal
+ * `[PackagePolicy, DryRunPackagePolicy]` diff, it summarizes the change via
+ * `currentVersion`/`proposedVersion` and `hasErrors`/`errors`. Only on a clean dry-run
+ * (`hasErrors: false`) does it also include the migrated config as a clean {@link AgentlessPolicy}
+ * in `proposedPolicy`, meant to be edited and saved via the agentless PUT — not applied as-is
+ * (to apply an upgrade untouched, use `_upgrade`). On error, `proposedPolicy` is omitted.
  */
 export const AgentlessPolicyUpgradeDryRunResultSchema = schema.object(
   {
@@ -443,6 +443,9 @@ export const AgentlessPolicyUpgradeDryRunResultSchema = schema.object(
         meta: { description: 'The package version the policy would be upgraded to.' },
       })
     ),
+    // Returned only when the dry-run is clean (`hasErrors: false`); omitted on migration errors.
+    // Intended for the edit-and-upgrade flow (edit it, then submit via PUT), not a no-edit apply
+    // of `_upgrade`. See the schema-level doc comment above for the full contract.
     proposedPolicy: schema.maybe(AgentlessPolicySchema),
     errors: schema.maybe(
       schema.arrayOf(
