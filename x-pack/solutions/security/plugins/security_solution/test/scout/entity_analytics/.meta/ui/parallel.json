@@ -1,5 +1,5 @@
 {
-  "sha1": "a62620024e99efe9f7facf0617e8307042e968c9",
+  "sha1": "9165ccf209011c967f7adde9c0c776e3eda7f426",
   "tests": [
     {
       "id": "2bb84514b03b333-1054e603e578b92",
@@ -47,7 +47,7 @@
     {
       "id": "ce3dfe1f158bf48-7bb8ab11fb6ca19",
       "title": "Entity analytics management page - Engine Status tab Engine Status tab is hidden when entity store is not installed",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -56,14 +56,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/engine_status_management.spec.ts",
-        "line": 24,
+        "line": 27,
         "column": 14
       }
     },
     {
       "id": "ce3dfe1f158bf48-25a846b1aa8d23d",
       "title": "Entity analytics management page - Engine Status tab Engine Status tab appears after enabling entity analytics and shows components table",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -72,7 +72,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/engine_status_management.spec.ts",
-        "line": 37,
+        "line": 40,
         "column": 14
       }
     },
@@ -88,7 +88,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 41,
+        "line": 43,
         "column": 14
       }
     },
@@ -104,14 +104,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 48,
+        "line": 50,
         "column": 14
       }
     },
     {
       "id": "3bb3aaf0bd60039-b93bd625239b571",
       "title": "Entity analytics management page should init and disable entity analytics",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -120,8 +120,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 57,
-        "column": 14
+        "line": 63,
+        "column": 15
       }
     },
     {
@@ -136,7 +136,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 94,
+        "line": 86,
         "column": 14
       }
     },
@@ -152,7 +152,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 105,
+        "line": 97,
         "column": 14
       }
     },
@@ -168,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 116,
+        "line": 108,
         "column": 14
       }
     },
@@ -182,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/privileges_management.spec.ts",
-        "line": 37,
+        "line": 38,
         "column": 14
       }
     },
@@ -196,14 +196,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/privileges_management.spec.ts",
-        "line": 50,
+        "line": 51,
         "column": 14
       }
     },
     {
       "id": "145fe3f007ebf4a-4d3a81e2c9a2ebd",
       "title": "Entity analytics management page - Risk Score tab Risk Score tab is selected by default",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -212,14 +212,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 42,
+        "line": 43,
         "column": 14
       }
     },
     {
       "id": "145fe3f007ebf4a-0d4aa171beff992",
       "title": "Entity analytics management page - Risk Score tab should show preview error panel when API fails",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -228,14 +228,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 50,
+        "line": 51,
         "column": 14
       }
     },
     {
       "id": "145fe3f007ebf4a-ed4dbcbf851573b",
       "title": "Entity analytics management page - Risk Score tab should show save bar when toggling retain checkbox",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -244,14 +244,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 71,
+        "line": 72,
         "column": 14
       }
     },
     {
       "id": "145fe3f007ebf4a-f58e084bddd50df",
       "title": "Entity analytics management page - Risk Score tab should show save bar when toggling closed alerts switch",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -267,7 +267,7 @@
     {
       "id": "145fe3f007ebf4a-ca0f8d19aa15832",
       "title": "Entity analytics management page - Risk Score tab should discard changes when clicking discard button",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -276,14 +276,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 107,
+        "line": 106,
         "column": 14
       }
     },
     {
       "id": "145fe3f007ebf4a-02f079bc2cd45e2",
       "title": "Entity analytics management page - Risk Score tab should save changes and persist after page reload",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -292,7 +292,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 130,
+        "line": 128,
         "column": 14
       }
     }
