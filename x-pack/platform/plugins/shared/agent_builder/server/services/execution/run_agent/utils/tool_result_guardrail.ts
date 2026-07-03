@@ -12,7 +12,10 @@ import {
   estimateTokens,
   truncateTokens,
 } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
-import { getToolCallDirPath, getToolCallEntryAbsolutePath } from '../../runner/store/volumes/tool_results/utils';
+import {
+  getToolCallDirPath,
+  getToolCallEntryAbsolutePath,
+} from '../../runner/store/volumes/tool_results/utils';
 
 /**
  * Default per-tool-call token budget, used when no explicit value has been

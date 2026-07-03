@@ -8,7 +8,10 @@
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolResult } from '@kbn/agent-builder-common';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
-import { getToolCallDirPath, getToolCallEntryAbsolutePath } from '../../runner/store/volumes/tool_results/utils';
+import {
+  getToolCallDirPath,
+  getToolCallEntryAbsolutePath,
+} from '../../runner/store/volumes/tool_results/utils';
 import { buildGuardedToolContent } from './tool_result_guardrail';
 
 const otherResult = (data: unknown): ToolResult => ({
@@ -58,7 +61,10 @@ describe('buildGuardedToolContent', () => {
   });
 
   it('counts multiple results as a whole and merges them when their combined size is over budget', () => {
-    const results = [otherResult({ text: 'a'.repeat(200) }), otherResult({ text: 'b'.repeat(200) })];
+    const results = [
+      otherResult({ text: 'a'.repeat(200) }),
+      otherResult({ text: 'b'.repeat(200) }),
+    ];
     // Individually each result is small, but combined they exceed a tiny budget.
     const content = buildGuardedToolContent({
       results,
