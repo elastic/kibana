@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { globalSetupHook, tags } from '@kbn/scout';
+import { globalSetupHook } from '@kbn/scout';
 import { LOGSTASH_FUNCTIONAL_ARCHIVE } from '../fixtures/constants';
 
 /**
@@ -21,7 +21,7 @@ import { LOGSTASH_FUNCTIONAL_ARCHIVE } from '../fixtures/constants';
  */
 globalSetupHook(
   'Ingest ES data for Background Search UI tests',
-  { tag: [...tags.stateful.classic] },
+  { tag: '@local-stateful-classic' },
   async ({ esArchiver }) => {
     await esArchiver.loadIfNeeded(LOGSTASH_FUNCTIONAL_ARCHIVE);
   }
