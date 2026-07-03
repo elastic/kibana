@@ -397,7 +397,7 @@ export const DataStreamDetailSummary: React.FunctionComponent<DataStreamDetailSu
 
             const shouldShowPhaseCounts = !isServerless;
             const phasesLabel = shouldShowPhaseCounts
-              ? getDlmDataPhasesLabel(phaseCount || 1)
+              ? getDlmDataPhasesLabel(phaseCount)
               : undefined;
 
             const downsampleCount = phaseEntries.filter(
