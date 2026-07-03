@@ -29,6 +29,9 @@ ruleTester.run('@kbn/eslint/no_viz_naming', rule, {
     // string literals without viz are fine
     { code: "const key = 'visEditor';" },
     { code: 'if ("visOriginatingApp" in ctx) {}' },
+    // lowercase "viz" after "i" is fine to avoid false positives like relativize
+    { code: 'const relativize = true;' },
+    { code: 'const key = "objectivize";' },
   ],
   invalid: [
     {

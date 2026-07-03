@@ -10,14 +10,16 @@
 /** @typedef {import("eslint").Rule.RuleModule} Rule */
 /** @typedef {import("eslint").Rule.RuleFixer} Fixer */
 
-const VIZ_PATTERN = /[Vv]iz/;
+const VIZ_PATTERN = /(?<!i)viz|Viz/;
 
 /**
  * Replace "viz" with "vis" and "Viz" with "Vis" in a string.
+ * Lowercase "viz" preceded by "i" is left unchanged to avoid false positives
+ * in words formed from "-ive" adjectives, such as "relativize".
  * @param {string} name
  * @returns {string}
  */
-const fixName = (name) => name.replace(/Viz/g, 'Vis').replace(/viz/g, 'vis');
+const fixName = (name) => name.replace(/Viz/g, 'Vis').replace(/(?<!i)viz/g, 'vis');
 
 /** @type {Rule} */
 module.exports = {
