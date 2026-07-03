@@ -87,7 +87,9 @@ describe('ServiceMapPopoverTitleBadges', () => {
           serviceAnomalyStats: {
             anomalyScore: 90,
             detectorType: AnomalyDetectorType.txFailureRate,
+            anomalyEnvironment: 'production',
           },
+          agentName: 'nodejs',
         })}
       />
     );
@@ -101,16 +103,16 @@ describe('ServiceMapPopoverTitleBadges', () => {
     );
   });
 
-  it('redirects to the mobile-services overview tab when on a mobile service map route', () => {
-    mockUseApmRoutePath.mockReturnValue('/mobile-services/{serviceName}/service-map');
-
+  it('redirects to the mobile-services overview tab for mobile agents', () => {
     render(
       <ServiceMapPopoverTitleBadges
         nodeData={serviceNodeData({
           serviceAnomalyStats: {
             anomalyScore: 90,
             detectorType: AnomalyDetectorType.txFailureRate,
+            anomalyEnvironment: 'production',
           },
+          agentName: 'ios/swift',
         })}
       />
     );
@@ -119,25 +121,6 @@ describe('ServiceMapPopoverTitleBadges', () => {
     expect(mockNavigateToUrl).toHaveBeenCalledWith(
       expect.stringContaining('/app/apm/mobile-services/{serviceName}/overview')
     );
-  });
-
-  it('strips the map kuery filter from the anomalies redirect URL', () => {
-    render(
-      <ServiceMapPopoverTitleBadges
-        nodeData={serviceNodeData({
-          serviceAnomalyStats: {
-            anomalyScore: 90,
-            detectorType: AnomalyDetectorType.txFailureRate,
-          },
-        })}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId('apmAnomaliesBadge'));
-
-    const navigatedUrl = mockNavigateToUrl.mock.calls[0][0] as string;
-    const kuery = new URLSearchParams(navigatedUrl.split('?')[1]).get('kuery');
-    expect(kuery).toBe('');
   });
 
   it('renders the anomalies badge alongside the alerts badge in the same row', () => {

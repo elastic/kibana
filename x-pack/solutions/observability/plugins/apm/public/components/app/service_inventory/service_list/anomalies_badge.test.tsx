@@ -35,13 +35,18 @@ const regularClickProps: AnomaliesBadgeNavigationProps = {
   serviceName: 'opbeans-java',
   agentName: 'nodejs',
   query: baseQuery,
+  anomalyEnvironment: 'production',
 };
 
 const mobileClickProps: AnomaliesBadgeNavigationProps = {
   serviceName: 'opbeans-android',
   agentName: 'android/java',
   query: baseQuery,
+  anomalyEnvironment: 'mobile',
 };
+
+const CRITICAL_SEVERITY = 82;
+const MAJOR_SEVERITY = 72;
 
 function renderBadge(ui: React.ReactElement) {
   return render(<MockApmPluginContextWrapper>{ui}</MockApmPluginContextWrapper>);
@@ -61,13 +66,15 @@ async function getTooltipText(): Promise<string | null | undefined> {
 
 describe('AnomaliesBadge', () => {
   it('names the anomalous detector in the tooltip when a detectorType is provided', async () => {
-    renderBadge(<AnomaliesBadge score={82} detectorType={AnomalyDetectorType.txFailureRate} />);
+    renderBadge(
+      <AnomaliesBadge score={CRITICAL_SEVERITY} detectorType={AnomalyDetectorType.txFailureRate} />
+    );
 
     expect(await getTooltipText()).toBe('Anomaly score (max.): 82.00 - Failed transaction rate');
   });
 
   it('falls back to a score-only tooltip when no detectorType is provided', async () => {
-    renderBadge(<AnomaliesBadge score={82} detectorType={undefined} />);
+    renderBadge(<AnomaliesBadge score={CRITICAL_SEVERITY} detectorType={undefined} />);
 
     expect(await getTooltipText()).toBe('Anomaly score (max.): 82.00');
   });
@@ -80,10 +87,10 @@ describe('AnomaliesBadge', () => {
     );
   });
 
-  it('links to the regular service overview with kuery stripped', () => {
+  it('links to the regular service overview with proper params', () => {
     renderBadge(
       <AnomaliesBadge
-        score={82}
+        score={CRITICAL_SEVERITY}
         detectorType={AnomalyDetectorType.txLatency}
         navigationProps={{
           ...regularClickProps,
@@ -93,21 +100,38 @@ describe('AnomaliesBadge', () => {
     );
 
     const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
-    expect(href).toContain('/services/opbeans-java/overview');
-    expect(href).not.toContain('foo');
+    const [pathname, search] = href!.split('?');
+
+    expect(pathname).toContain('/services/opbeans-java/overview');
+    expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
+      kuery: '',
+      anomalyThreshold: 'critical',
+      environment: 'production',
+    });
   });
 
-  it('links to the mobile service overview for a mobile agent', () => {
+  it('links to the mobile service overview for a mobile agent with proper params', () => {
     renderBadge(
-      <AnomaliesBadge score={82} detectorType={undefined} navigationProps={mobileClickProps} />
+      <AnomaliesBadge
+        score={MAJOR_SEVERITY}
+        detectorType={undefined}
+        navigationProps={mobileClickProps}
+      />
     );
 
     const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
-    expect(href).toContain('/mobile-services/opbeans-android/overview');
+    const [pathname, search] = href!.split('?');
+
+    expect(pathname).toContain('/mobile-services/opbeans-android/overview');
+    expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
+      kuery: '',
+      anomalyThreshold: 'major',
+      environment: 'mobile',
+    });
   });
 
   it('renders as non-interactive when interactionProps is not provided', () => {
-    renderBadge(<AnomaliesBadge score={82} detectorType={undefined} />);
+    renderBadge(<AnomaliesBadge score={CRITICAL_SEVERITY} detectorType={undefined} />);
 
     expect(screen.getByTestId('apmAnomaliesBadge').closest('a')).toBeNull();
   });
@@ -126,7 +150,7 @@ describe('AnomaliesBadge', () => {
     expect(() =>
       render(
         <AnomaliesBadge
-          score={82}
+          score={CRITICAL_SEVERITY}
           detectorType={undefined}
           navigationProps={regularClickProps}
           navigateOnClick

@@ -102,6 +102,7 @@ function setupMocks({
   // `undefined` here would trigger this destructuring default even when the
   // caller explicitly passes `agentName: undefined`.
   agentName = 'nodejs' as AgentName | null,
+  anomalyEnvironment = 'production',
 }: {
   isAlertingAvailable?: boolean;
   canReadAlerts?: boolean;
@@ -113,6 +114,7 @@ function setupMocks({
   mostCriticalSloStatus?: { status: string; count: number };
   serviceName?: string;
   agentName?: AgentName | null;
+  anomalyEnvironment?: string;
 } = {}) {
   mockUseApmPluginContext.mockReturnValue({
     core: {
@@ -153,7 +155,7 @@ function setupMocks({
       status: FETCH_STATUS.SUCCESS,
     })
     .mockReturnValueOnce({
-      data: { anomalyScore },
+      data: { anomalyScore, anomalyEnvironment },
       status: FETCH_STATUS.SUCCESS,
     });
 

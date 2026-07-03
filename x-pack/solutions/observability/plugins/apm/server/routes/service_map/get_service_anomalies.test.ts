@@ -119,6 +119,7 @@ describe('getServiceAnomalies', () => {
         actualValue: 100,
         anomalyScore: 90,
         detectorType: AnomalyDetectorType.txFailureRate,
+        anomalyEnvironment: 'production',
       },
     ]);
   });
@@ -155,6 +156,7 @@ describe('getServiceAnomalies', () => {
         actualValue: 100,
         anomalyScore: 90,
         detectorType: AnomalyDetectorType.txFailureRate,
+        anomalyEnvironment: 'production',
       },
     ]);
   });
@@ -186,6 +188,7 @@ describe('getServiceAnomalies', () => {
         actualValue: 100,
         anomalyScore: 20,
         detectorType: AnomalyDetectorType.txThroughput,
+        anomalyEnvironment: 'production',
       },
     ]);
   });

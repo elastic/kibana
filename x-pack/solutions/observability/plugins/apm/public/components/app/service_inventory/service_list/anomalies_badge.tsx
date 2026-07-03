@@ -140,7 +140,7 @@ export function AnomaliesBadge({
       : undefined;
 
   const onClick =
-    href && navigateOnClick
+    href && navigateOnClick && !!navigateToUrl
       ? (e: React.MouseEvent | React.KeyboardEvent) => {
           navigateToUrl(href);
         }
