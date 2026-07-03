@@ -100,8 +100,23 @@ export interface InternalChromeStart extends ChromeStart {
       ChildrenId extends string = Id
     >(
       id: SolutionId,
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
+      /**
+       * Id of the plugin that owns the navigation tree. Enables the dev-mode
+       * navigation-dependency cross-check for the tree's `link` references.
+       */
+      ownerPluginId?: string
     ): void;
+
+    /**
+     * Emits the `link` targets referenced by the current project navigation tree,
+     * along with the id of the plugin that owns the tree. Only emits when an owner
+     * was provided to {@link initNavigation}. Consumed by Core to warn about
+     * undeclared cross-plugin navigation dependencies.
+     *
+     * @internal
+     */
+    getNavTreeDependencies$(): Observable<{ ownerPluginId: string; linkTargets: string[] }>;
 
     /** Get an observable of the resolved project navigation tree and active nodes. */
     getNavigation$(): Observable<{

@@ -193,7 +193,11 @@ export class NavigationPublicPlugin
     if (!this.activeSolutionId || !this.chrome) return;
     const def = this.solutionNavDefinitions.get(this.activeSolutionId);
     if (!def) return;
-    this.chrome.project.initNavigation(this.activeSolutionId, def.navigationTree$);
+    this.chrome.project.initNavigation(
+      this.activeSolutionId,
+      def.navigationTree$,
+      def.ownerPluginId
+    );
   }
 
   private initiateChromeStyleAndSideNav(

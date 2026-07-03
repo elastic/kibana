@@ -31,6 +31,7 @@ import {
   skipWhile,
   filter,
   of,
+  EMPTY,
   switchMap,
   shareReplay,
   catchError,
@@ -39,7 +40,7 @@ import type { Location, History } from 'history';
 import deepEqual from 'react-fast-compare';
 import type { Logger } from '@kbn/logging';
 
-import { findActiveNodes, stripQueryParams } from './utils';
+import { collectNavTreeLinks, findActiveNodes, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
 import { getCloudLinks } from './cloud_links';
 import { applyCustomization, type ParsedNavigation } from './apply_customization';
@@ -77,6 +78,7 @@ export class ProjectNavigationService {
     const currentNavSource$ = new BehaviorSubject<{
       id: SolutionId;
       navTreeDefinition$: Observable<NavigationTreeDefinition>;
+      ownerPluginId?: string;
     } | null>(null);
     const kibanaName$ = new BehaviorSubject<string | undefined>(undefined);
     const cloudLinks$ = new BehaviorSubject<CloudLinks>({});
@@ -146,6 +148,21 @@ export class ProjectNavigationService {
       shareReplay(1)
     );
 
+    // Raw `link` targets referenced by the active nav tree, tagged with the owning
+    // plugin. Only produced when a source declares an owner; consumed by Core's
+    // dev-mode navigation-dependency cross-check.
+    const navTreeDependencies$ = currentNavSource$.pipe(
+      switchMap((source) => {
+        if (!source?.ownerPluginId) return EMPTY;
+        const { ownerPluginId } = source;
+        return source.navTreeDefinition$.pipe(
+          map((def) => ({ ownerPluginId, linkTargets: collectNavTreeLinks(def) }))
+        );
+      }),
+      takeUntil(this.stop$),
+      shareReplay(1)
+    );
+
     // Reset custom breadcrumbs when the active navigation path changes
     navigation$
       .pipe(
@@ -187,7 +204,8 @@ export class ProjectNavigationService {
       },
       initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
         id: SolutionId,
-        navTreeDefinition$: Observable<NavigationTreeDefinition<LinkId>>
+        navTreeDefinition$: Observable<NavigationTreeDefinition<LinkId>>,
+        ownerPluginId?: string
       ) => {
         if (currentNavSource$.getValue()?.id === id) return;
         // Customization has a single writer: the navigation plugin, which seeds
@@ -195,9 +213,11 @@ export class ProjectNavigationService {
         currentNavSource$.next({
           id,
           navTreeDefinition$: navTreeDefinition$ as Observable<NavigationTreeDefinition>,
+          ownerPluginId,
         });
       },
       getNavigation$: () => navigation$,
+      getNavTreeDependencies$: () => navTreeDependencies$,
       setProjectBreadcrumbs: (
         breadcrumbs: ChromeBreadcrumb | ChromeBreadcrumb[],
         params?: Partial<ChromeSetProjectBreadcrumbsParams>

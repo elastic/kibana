@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, EMPTY, of } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
@@ -132,6 +132,7 @@ const createStartContractMock = () => {
       setCloudUrls: jest.fn(),
       setKibanaName: jest.fn(),
       initNavigation: jest.fn(),
+      getNavTreeDependencies$: jest.fn().mockReturnValue(EMPTY),
       setBreadcrumbs: jest.fn(),
       getBreadcrumbs$: jest.fn().mockReturnValue(new BehaviorSubject([])),
       getNavigation$: jest.fn().mockReturnValue(new BehaviorSubject({} as any)),

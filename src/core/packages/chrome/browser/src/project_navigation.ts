@@ -274,6 +274,13 @@ export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = App
   navigationTree$: Observable<NavigationTreeDefinition<LinkId>>;
   /** Optional icon for the solution navigation to render in the select dropdown. */
   icon?: IconType;
+  /**
+   * Id of the plugin that owns this navigation tree. When provided, Core cross-checks
+   * (in dev builds) that every app referenced by the tree's `link` nodes is owned by a
+   * plugin declared as a dependency of `ownerPluginId`, surfacing implicit navigation
+   * dependencies (see https://github.com/elastic/kibana/issues/66682).
+   */
+  ownerPluginId?: string;
 }
 
 export type SolutionNavigationDefinitions = {

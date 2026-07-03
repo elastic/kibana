@@ -23,7 +23,15 @@ export interface ServerlessPluginStart {
     breadcrumbs: ChromeBreadcrumb | ChromeBreadcrumb[],
     params?: Partial<ChromeSetProjectBreadcrumbsParams>
   ) => void;
-  initNavigation(id: SolutionId, navigationTree$: Observable<NavigationTreeDefinition>): void;
+  initNavigation(
+    id: SolutionId,
+    navigationTree$: Observable<NavigationTreeDefinition>,
+    /**
+     * Id of the plugin that owns the navigation tree. Enables Core's dev-mode
+     * navigation-dependency cross-check for the tree's `link` references.
+     */
+    ownerPluginId?: string
+  ): void;
   getNavigationCards$(
     roleManagementEnabled?: boolean,
     extendCardNavDefinitions?: Record<string, CardNavExtensionDefinition>
