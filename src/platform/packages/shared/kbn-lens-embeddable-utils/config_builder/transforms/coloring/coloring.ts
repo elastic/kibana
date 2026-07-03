@@ -92,24 +92,24 @@ function fromOpenBoundsToContinuity({
 }
 
 /**
- * Builds the Lens palette state for a named palette.
- * - `stops` are empty since the palette service owns the individual bands at render time
- * We only need to specify:
- * - the `steps`: the number of bands to use for the palette,
- * - the `rangeType`: which is always `percentage` for named palettes, except for legacy metric charts
- *   and single-value metric charts which use `absolute`,
- * - and the `continuity`: what open-ended bounds to use.
+ * Builds the Lens palette state for a named palette. The palette service owns the actual
+ * bands at render time, so `stops`/`colorStops` are left empty and only three things matter:
+ * - `steps`: how many bands to split the domain into (`numberOfBands`).
+ * - `rangeType`: `percent` by default, or `number` when `useNumericRange` is `true`. Named
+ *   palettes color a percentage domain; single-value charts (single-value metric charts and
+ * legacy metric) opt into a numeric one.
+ * - `continuity`: which ends of the domain are open.
  */
 function buildNamedPaletteLensState({
   palette,
   continuity,
   numberOfBands,
-  rangeType,
+  useNumericRange,
 }: {
   palette: string;
   continuity: PaletteContinuity;
   numberOfBands: number;
-  rangeType: 'absolute' | 'percentage';
+  useNumericRange: boolean;
 }): PaletteOutput<CustomPaletteParams> {
   return {
     type: 'palette',
@@ -118,7 +118,7 @@ function buildNamedPaletteLensState({
       name: palette,
       progression: 'fixed', // to be removed
       reverse: false, // always applied to steps during transform
-      rangeType: paletteRangeCompat.toState(rangeType),
+      rangeType: useNumericRange ? 'number' : 'percent',
       stops: [],
       colorStops: [],
       continuity,
@@ -129,67 +129,72 @@ function buildNamedPaletteLensState({
 }
 
 /**
- * Transforms a named (`dynamic_palette`) palette.
- * - `rangeType` defaults to `percentage`. Single-value charts (metric without
- *    a max or breakdown, and legacy metric) pass `absolute` instead, since they
- *    color a single value across an absolute range where percentages are meaningless.
- * - `numberOfBands` is used to split the domain. This is the default number of bands used per chart.
- * - `continuity` is derived from the open-ended bounds.
+ * API -> Lens state for a named (`dynamic_palette`) palette.
+ * - `continuity` is derived from the API's `open_above`/`open_below` bounds.
+ * - `numberOfBands` is the per-chart default band count used to split the domain.
+ * - `useNumericRange` defaults to `false` (`percent`). Single-value charts (metric without
+ *   a max or breakdown, and legacy metric) pass `true` (`number`) instead, since they color a
+ *   single value across an absolute range where percentages are meaningless.
  */
 function fromColorByValuePaletteAPIToLensState(
   config: ColorByValuePaletteType,
   numberOfBands: number = DEFAULT_COLOR_STEPS,
-  rangeType: 'absolute' | 'percentage' = 'percentage'
+  useNumericRange: boolean = false
 ): PaletteOutput<CustomPaletteParams> {
   const { palette, open_above: openAbove, open_below: openBelow } = config;
   return buildNamedPaletteLensState({
     palette,
     continuity: fromOpenBoundsToContinuity({ open_above: openAbove, open_below: openBelow }),
     numberOfBands,
-    rangeType,
+    useNumericRange,
   });
 }
 
 /**
- * Transforms a deprecated `legacy_dynamic` palette the same way as a named
- * palette (no per-band stops).
- * - `palette` name drives rendering.
- * - `numberOfBands` comes from `steps.length`.
- * - `rangeType` comes from `range`.
- * - `continuity` is derived from the outer step bounds.
+ * API -> Lens state for a deprecated `legacy_dynamic` palette. Rebuilt as a named palette
+ * (no per-band stops), reading only the `palette` name and the outer bounds of `steps`:
+ * - `continuity` is derived from the first/last step bounds.
+ * - `numberOfBands` and `rangeType` come from the arguments (`numberOfBands`, `useNumericRange`);
+ *   the config's own `steps` count and `range` are ignored.
  * - The `shift` flag is ignored.
  */
 function fromLegacyColorByValueAPIToLensState(
-  config: Extract<ColorByValueType, { type: 'legacy_dynamic' }>
+  config: Extract<ColorByValueType, { type: 'legacy_dynamic' }>,
+  numberOfBands: number = DEFAULT_COLOR_STEPS,
+  useNumericRange: boolean = false
 ): PaletteOutput<CustomPaletteParams> {
-  const { palette, range, steps } = config;
+  const { palette, steps } = config;
   const rangeMin = steps.at(0)?.gte ?? null;
   const rangeMax = steps.at(-1)?.lt ?? steps.at(-1)?.lte ?? null;
   return buildNamedPaletteLensState({
     palette,
     continuity: getContinuity(rangeMin, rangeMax),
-    numberOfBands: steps.length,
-    rangeType: range,
+    numberOfBands,
+    useNumericRange,
   });
 }
 
 /**
- * Translates a Lens API color by value palette into the Lens state palette.
+ * API -> Lens state entry point for color by value. Routes on the config `type`:
+ * - `dynamic_palette` / `legacy_dynamic` -> a named palette whose bands are owned by the
+ *   palette service (`numberOfBands` and `useNumericRange` configure the band count and range).
+ * - `dynamic` -> a `custom` palette with explicit per-band `stops`/`colorStops` and numeric
+ *   `rangeMin`/`rangeMax` derived from the steps; `numberOfBands`/`useNumericRange` do not apply.
  */
 export function fromColorByValueAPIToLensState(
   config?: ColorByValueType,
   numberOfBands?: number,
-  rangeType?: 'absolute' | 'percentage'
+  useNumericRange: boolean = false
 ): PaletteOutput<CustomPaletteParams> | undefined {
   if (!config) return;
 
   if (config.type === 'dynamic_palette') {
-    return fromColorByValuePaletteAPIToLensState(config, numberOfBands, rangeType);
+    return fromColorByValuePaletteAPIToLensState(config, numberOfBands, useNumericRange);
   }
 
   // `legacy_dynamic` is parse-only (deprecated) and is rebuilt as a named palette.
   if (config.type === 'legacy_dynamic') {
-    return fromLegacyColorByValueAPIToLensState(config);
+    return fromLegacyColorByValueAPIToLensState(config, numberOfBands, useNumericRange);
   }
 
   const stops = config.steps.map(
@@ -237,6 +242,13 @@ export function getRangeValue(value?: number | null): number | null {
   return value;
 }
 
+/**
+ * Lens state -> API for color by value; inverse of {@link fromColorByValueAPIToLensState}.
+ * - A named (non-custom) palette becomes a `dynamic_palette`: per-band stops are dropped and
+ *   `continuity` is re-expressed as `open_above`/`open_below` bounds.
+ * - A customs palette becomes a `dynamic` config, rematerializing each stop as a
+ *   `{ gte, lt | lte, color }` step and applying `reverse` to the stop colors first.
+ */
 export function fromColorByValueLensStateToAPI(
   config: PaletteOutput<CustomPaletteParams> | undefined
 ): ColorByValueType | undefined {
@@ -377,7 +389,7 @@ function mapSerializedValueFromAPI(value: SerializableValueType): unknown {
  *   - `match` with `matchEntireWord: true` -> bare pattern string; lowercased
  *     when `matchCase` is falsy (matcher lowercases the rule side on lookup).
  * Other shapes (`match` with `matchEntireWord: false`, `regex`, `range`) are not
- * renderable and are silently dropped.=
+ * renderable and are silently dropped.
  *
  * Round-trip rebuilds everything as `type: 'raw'` (see `fromRulesAPIToLensState`).
  * Render-equivalent for editor-produced match rules, since both reduce to the

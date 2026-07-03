@@ -213,7 +213,7 @@ describe('Color util transforms', () => {
         expect(result?.params?.maxSteps).toBe(DEFAULT_COLOR_STEPS);
       });
 
-      it('should map the "absolute" range type to the "number" lens range type', () => {
+      it('should use numeric range type when useNumericRange is true', () => {
         const colorByValue: ColorByValueType = {
           type: 'dynamic_palette',
           palette: 'status',
@@ -221,7 +221,7 @@ describe('Color util transforms', () => {
           open_below: false,
         };
 
-        const result = fromColorByValueAPIToLensState(colorByValue, 3, 'absolute');
+        const result = fromColorByValueAPIToLensState(colorByValue, 3, true);
 
         expect(result?.params?.rangeType).toBe('number');
       });
@@ -262,7 +262,7 @@ describe('Color util transforms', () => {
           ],
         };
 
-        const result = fromColorByValueAPIToLensState(colorByValue);
+        const result = fromColorByValueAPIToLensState(colorByValue, 3);
 
         expect(result).toEqual({
           type: 'palette',
@@ -276,7 +276,6 @@ describe('Color util transforms', () => {
             colorStops: [],
             // open above: last step has no upper bound
             continuity: 'above',
-            // band count derived from steps.length
             steps: 3,
             maxSteps: DEFAULT_COLOR_STEPS,
           },
@@ -297,13 +296,45 @@ describe('Color util transforms', () => {
         const shifted = fromColorByValueAPIToLensState({
           ...base,
           shift: true,
-        } as ColorByValueType);
+        });
         const unshifted = fromColorByValueAPIToLensState({
           ...base,
           shift: false,
-        } as ColorByValueType);
+        });
 
         expect(shifted).toEqual(unshifted);
+      });
+
+      it('should ignore the rangeType and the number of steps and use the default per chart values passed as arguments', () => {
+        const colorByValue: ColorByValueType = {
+          type: 'legacy_dynamic',
+          range: 'absolute',
+          palette: 'temperature',
+          shift: false,
+          steps: [
+            { color: 'red', gte: 0, lt: 50 },
+            { color: 'green', gte: 50, lt: 90 },
+            { color: 'blue', gte: 90 },
+          ],
+        };
+
+        const result = fromColorByValueAPIToLensState(colorByValue, 4);
+
+        expect(result).toEqual({
+          type: 'palette',
+          name: 'temperature',
+          params: {
+            name: 'temperature',
+            progression: 'fixed',
+            reverse: false,
+            rangeType: 'percent', // default range type for named palettes
+            stops: [],
+            colorStops: [],
+            continuity: 'above',
+            steps: 4, // the number of bands defined as argument
+            maxSteps: DEFAULT_COLOR_STEPS,
+          },
+        } satisfies PaletteOutput<CustomPaletteParams>);
       });
 
       it('should derive continuity from the outer step bounds', () => {
@@ -317,7 +348,7 @@ describe('Color util transforms', () => {
             { color: 'blue', gte: 50, lte: 100 },
           ],
         };
-        expect(fromColorByValueAPIToLensState(bounded)?.params).toMatchObject({
+        expect(fromColorByValueAPIToLensState(bounded, 2, true)?.params).toMatchObject({
           rangeType: 'number',
           continuity: 'none',
           steps: 2,
