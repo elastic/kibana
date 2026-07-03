@@ -8,10 +8,7 @@
 import { encode as encodeRison } from '@kbn/rison';
 import type { KibanaUrl, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  STACK_ALERTS_PAGE_PATH,
-  STACK_ALERTS_PAGE_TEST_SUBJECTS,
-} from '../constants';
+import { STACK_ALERTS_PAGE_PATH, STACK_ALERTS_PAGE_TEST_SUBJECTS } from '../constants';
 
 const {
   TABLE_LOADED,

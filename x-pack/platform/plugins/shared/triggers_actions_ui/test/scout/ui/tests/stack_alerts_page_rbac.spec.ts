@@ -9,11 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { KibanaRole } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  STACK_ALERTS_INDEX,
-  STACK_ALERTS_INDEX_PATTERN,
-  test,
-} from '../fixtures';
+import { STACK_ALERTS_INDEX, STACK_ALERTS_INDEX_PATTERN, test } from '../fixtures';
 
 /**
  * RBAC tests for the Stack alerts page.
