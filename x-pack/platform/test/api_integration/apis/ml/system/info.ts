@@ -104,10 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
       // assert it is a string rather than pinning it to a single architecture.
       const { model_platform_variant: modelPlatformVariant, ...defaults } = resp.defaults;
       if (modelPlatformVariant !== undefined) {
-        expect(modelPlatformVariant).to.be.a(
-          'string',
-          'defaults.model_platform_variant should be a string when present'
-        );
+        expect(modelPlatformVariant).to.be.a('string');
       }
 
       // the remaining defaults should always be the same
