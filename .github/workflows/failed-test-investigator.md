@@ -107,7 +107,7 @@ safe-outputs:
   add-labels:
     allowed:
       - failure:ai-fixable
-      - failure:test-design
+      - failure:test-needs-update
       - failure:test-environment
       - failure:application
       - failure:ci-environment
@@ -168,7 +168,7 @@ Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong in
 
 Add exactly one classification label to the issue that matches the chosen `classification`:
 
-- `failure:test-design`: when `classification` is `test-design`
+- `failure:test-needs-update`: when `classification` is `test-design`
 - `failure:test-environment`: when `classification` is `test-environment`
 - `failure:application`: when `classification` is `application`
 - `failure:ci-environment`: when `classification` is `ci-environment`
