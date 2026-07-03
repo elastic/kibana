@@ -200,7 +200,8 @@
       "configPath": "src/platform/packages/shared/kbn-evals-suite-workflows/playwright.config.ts",
       "tags": ["platform", "workflows"],
       "ciLabels": ["evals:workflows"],
-      "serverConfigSet": "evals_workflows"
+      "serverConfigSet": "evals_workflows",
+      "stepTimeoutInMinutes": 180
     },
     {
       "id": "pci-compliance",
