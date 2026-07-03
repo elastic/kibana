@@ -10,7 +10,7 @@ import type { Client as ESClient } from '@elastic/elasticsearch';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import { createCase, deleteAllCaseItems, getAuthWithSuperUser } from '../../../../common/lib/api';
-import { DATA_VIEW_ID_PREFIX, resetV2 } from './helpers';
+import { ACTIVITY_INDEX, CASE_INDEX, DATA_VIEW_ID_PREFIX, resetV2 } from './helpers';
 
 /**
  * Verifies the per-space data view model:
@@ -63,9 +63,11 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(space1View.namespaces).to.eql(['space1']);
       expect(space2View.namespaces).to.eql(['space2']);
 
-      // Both views point at the same cluster-level index.
-      expect(space1View['index-pattern'].title).to.eql('.cases');
-      expect(space2View['index-pattern'].title).to.eql('.cases');
+      // Both views point at the same cluster-level indices — the managed
+      // view spans `.cases` and `.cases-activity` (comma-separated title).
+      const expectedTitle = `${CASE_INDEX},${ACTIVITY_INDEX}`;
+      expect(space1View['index-pattern'].title).to.eql(expectedTitle);
+      expect(space2View['index-pattern'].title).to.eql(expectedTitle);
     });
 
     it('is idempotent: repeated cases requests in the same space do not create duplicates', async () => {

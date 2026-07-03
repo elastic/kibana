@@ -8,13 +8,11 @@
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiButton,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPageHeader,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -22,6 +20,8 @@ import {
   type EuiBasicTableColumn,
   type EuiTableSelectionType,
 } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { css } from '@emotion/react';
 import type {
   ActionPolicyBulkAction,
@@ -59,6 +59,29 @@ import { ActionPolicyActionsCell } from './components/action_policy_actions_cell
 import { UpdateApiKeyConfirmationModal } from './components/update_api_key_confirmation_modal';
 
 const DEFAULT_PER_PAGE = 20;
+
+const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
+  'xpack.alertingV2.actionPoliciesList.pageTitle',
+  {
+    defaultMessage: 'Action Policies',
+  }
+);
+
+const getActionPoliciesListMenu = ({
+  navigateToCreate,
+}: {
+  navigateToCreate: () => void;
+}): AppHeaderMenu => ({
+  primaryActionItem: {
+    id: 'createActionPolicy',
+    label: i18n.translate('xpack.alertingV2.actionPoliciesList.createPolicyButton', {
+      defaultMessage: 'Create policy',
+    }),
+    iconType: 'plusInCircle',
+    run: navigateToCreate,
+    testId: 'createActionPolicyButton',
+  },
+});
 
 const descriptionTextStyle = css`
   text-overflow: ellipsis;
@@ -119,9 +142,9 @@ export const ListActionPoliciesPage = () => {
     setSelectedPolicies([]);
   }, []);
 
-  const navigateToCreate = () => {
+  const navigateToCreate = useCallback(() => {
     navigateToUrl(basePath.prepend(paths.actionPolicyCreate));
-  };
+  }, [navigateToUrl, basePath]);
 
   const navigateToEdit = (id: string) => {
     navigateToUrl(basePath.prepend(paths.actionPolicyEdit(id)));
@@ -429,30 +452,19 @@ export const ListActionPoliciesPage = () => {
 
   const errorMessage = isError && error ? error.message : null;
 
+  const actionPoliciesMenu = useMemo(
+    () => getActionPoliciesListMenu({ navigateToCreate }),
+    [navigateToCreate]
+  );
+
   return (
     <>
-      <EuiPageHeader
-        pageTitle={
-          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false} component="span">
-              <FormattedMessage
-                id="xpack.alertingV2.actionPoliciesList.pageTitle"
-                defaultMessage="Action Policies"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} component="span">
-              <ExperimentalBadge />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        rightSideItems={[
-          <EuiButton key="create-policy" onClick={navigateToCreate} fill>
-            <FormattedMessage
-              id="xpack.alertingV2.actionPoliciesList.createPolicyButton"
-              defaultMessage="Create policy"
-            />
-          </EuiButton>,
-        ]}
+      <AppHeader
+        sticky={false}
+        title={ACTION_POLICIES_LIST_PAGE_TITLE}
+        titleAppend={<ExperimentalBadge />}
+        padding={{ bleed: 'l' }}
+        menu={actionPoliciesMenu}
       />
       <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
         <EuiSpacer size="m" />

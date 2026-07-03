@@ -12,6 +12,10 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { isOccConflictError, OccWriter } from '@kbn/occ';
 import type { WorkflowExecutionEngineModel, WorkflowYaml } from '@kbn/workflows';
+import {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
+} from '@kbn/workflows/managed';
 import type {
   ManagedWorkflowDefinition,
   ManagedWorkflowId,
@@ -36,6 +40,15 @@ jest.mock('@kbn/workflows/managed', () => ({
   getManagedWorkflowDefinition: (id: string) =>
     mockManagedWorkflowDefinitions.find((definition) => definition.id === id),
   getManagedWorkflowDefinitions: () => [...mockManagedWorkflowDefinitions],
+  getManagedWorkflowSelectorVisibilityContext: (selector: string) => `selector:${selector}`,
+  getManagedWorkflowSolutionVisibilityContext: (solution: string) => `solution:${solution}`,
+  getManagedWorkflowVisibilityContexts: (visibility?: {
+    selectors?: string[];
+    solutions?: string[];
+  }) => [
+    ...(visibility?.selectors ?? []).map((selector) => `selector:${selector}`),
+    ...(visibility?.solutions ?? []).map((solution) => `solution:${solution}`),
+  ],
 }));
 
 const PLUGIN_ID = 'testPlugin';
@@ -80,6 +93,7 @@ const createDefinition = (
     pluginId?: string;
     version?: number;
     billable?: boolean;
+    visibility?: ManagedWorkflowDefinition['visibility'];
     yaml?: string;
     management?: Partial<ManagedWorkflowManagement>;
   } = {}
@@ -88,6 +102,7 @@ const createDefinition = (
   pluginId: overrides.pluginId ?? PLUGIN_ID,
   version: overrides.version ?? 1,
   billable: overrides.billable ?? false,
+  visibility: overrides.visibility,
   yaml: overrides.yaml ?? workflowYaml(),
   management: {
     ...defaultManagement,
@@ -134,6 +149,7 @@ const createWorkflowSource = (overrides: Partial<WorkflowProperties> = {}): Work
   managedTemplateValues: null,
   originManagedWorkflowId: WORKFLOW_ID,
   lifecycle: 'static',
+  managedVisibilityContexts: [],
   deleted_at: null,
   valid: true,
   created_at: '2024-01-01T00:00:00.000Z',
@@ -462,6 +478,23 @@ describe('ManagedWorkflowsService', () => {
 
       const indexedDocument = getIndexedDocument(crudService);
       expect(indexedDocument.billable).toBe(true);
+    });
+
+    it('persists managed workflow visibility metadata', async () => {
+      const definition = createDefinition({
+        visibility: { selectors: ['rule_action'], solutions: ['security'] },
+      });
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      const indexedDocument = getIndexedDocument(crudService);
+      expect(indexedDocument.managedVisibilityContexts).toEqual([
+        getManagedWorkflowSelectorVisibilityContext('rule_action'),
+        getManagedWorkflowSolutionVisibilityContext('security'),
+      ]);
     });
 
     it('sets document.version to 1 on managed create when versioning is enabled', async () => {
