@@ -87,7 +87,7 @@ const createMockEsqlQuery = ({ hasToolEvidence }: { hasToolEvidence: boolean }) 
   });
 };
 
-describe('trace groundedness evaluator integration', () => {
+describe('trace evaluators integration', () => {
   const setupRoute = ({ esqlQuery, prompt }: { esqlQuery: jest.Mock; prompt: jest.Mock }) => {
     const router = httpServiceMock.createRouter();
     const versionedRouter = router.versioned as MockedVersionedRouter;
@@ -343,7 +343,7 @@ describe('trace groundedness evaluator integration', () => {
     ]);
   });
 
-  it('returns 400 when correctness evaluator is called without reference_data.expected', async () => {
+  it('returns 400 when correctness evaluator is called with invalid reference data', async () => {
     const { handler, context } = setupRoute({
       esqlQuery: createMockEsqlQuery({ hasToolEvidence: true }),
       prompt: jest.fn(),
@@ -364,9 +364,9 @@ describe('trace groundedness evaluator integration', () => {
     );
 
     expect(response.status).toBe(400);
-    expect(response.payload).toEqual({
-      message: 'reference_data.expected is required for evaluator "correctness"',
-    });
+    expect(response.payload.message).toContain(
+      'Invalid reference_data for evaluator "correctness"'
+    );
   });
 
   it('enforces manage privilege in evaluator evaluate route security config', async () => {
