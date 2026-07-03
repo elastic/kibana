@@ -86,6 +86,8 @@ dependsOn:
   - '@kbn/workflows'
   - '@kbn/core-spaces-common'
   - '@kbn/spaces-plugin'
+  - '@kbn/cps'
+  - '@kbn/cps-utils'
   - '@kbn/licensing-types'
   - '@kbn/licensing-plugin'
   - '@kbn/lens-embeddable-utils'
