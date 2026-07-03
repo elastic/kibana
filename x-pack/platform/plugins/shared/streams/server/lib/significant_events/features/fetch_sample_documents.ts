@@ -13,7 +13,7 @@ import type { FeatureWithFilter } from '@kbn/significant-events-schema';
 import { getDiverseSampleDocuments, getSampleDocumentsEsql } from '@kbn/ai-tools';
 import { conditionToESQLAst } from '@kbn/streamlang';
 import { getEntityFilters } from './get_entity_filters';
-import { parseError } from '../../../streams/errors/parse_error';
+import { parseError } from '../../streams/errors/parse_error';
 
 const EMPTY_SAMPLE: { hits: Array<SearchHit<Record<string, unknown>>> } = { hits: [] };
 
