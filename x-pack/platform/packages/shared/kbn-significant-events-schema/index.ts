@@ -30,7 +30,6 @@ export type {
   LifecycleDetection,
   SignificantEventsGetResponse,
   SignificantEventsQueriesGenerationResult,
-  SignificantEventsQueriesGenerationTaskResult,
   SignificantEventsResponse,
 } from './src/api/significant_events';
 
