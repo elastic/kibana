@@ -134,4 +134,3 @@ describe('Index template TabSummary', () => {
     expect(within(detail).queryByTestId('iconTip')).not.toBeInTheDocument();
   });
 });
-

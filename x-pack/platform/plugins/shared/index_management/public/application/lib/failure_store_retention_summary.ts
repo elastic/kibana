@@ -31,7 +31,11 @@ export const buildFailureStoreRetentionSummary = (
   },
   behavior: 'data_stream' | 'index_template',
   labels: BuildFailureStoreRetentionSummaryLabels,
-  { showPhaseCounts, finitePhaseCount = 2, infinitePhaseCount = 1 }: BuildFailureStoreRetentionSummaryOptions
+  {
+    showPhaseCounts,
+    finitePhaseCount = 2,
+    infinitePhaseCount = 1,
+  }: BuildFailureStoreRetentionSummaryOptions
 ): string => {
   if (!enabled) {
     return labels.disabledLabel;
@@ -56,9 +60,13 @@ export const buildFailureStoreRetentionSummary = (
     !retentionDisabled && hasFiniteRetention ? getRetentionPeriod(retention) : labels.infiniteLabel;
 
   const phaseCount =
-    !retentionDisabled && hasFiniteRetention ? finitePhaseCount : showPhaseCounts ? infinitePhaseCount : undefined;
-  const phasesLabel = showPhaseCounts && phaseCount != null ? getDlmDataPhasesLabel(phaseCount) : undefined;
+    !retentionDisabled && hasFiniteRetention
+      ? finitePhaseCount
+      : showPhaseCounts
+      ? infinitePhaseCount
+      : undefined;
+  const phasesLabel =
+    showPhaseCounts && phaseCount != null ? getDlmDataPhasesLabel(phaseCount) : undefined;
 
   return [retentionLabel, phasesLabel].filter(Boolean).join(' · ');
 };
-

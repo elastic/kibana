@@ -83,4 +83,3 @@ describe('Component template TabSummary', () => {
     expect(tooltip.getAttribute('data-content')).toMatch(/30 days/i);
   });
 });
-
