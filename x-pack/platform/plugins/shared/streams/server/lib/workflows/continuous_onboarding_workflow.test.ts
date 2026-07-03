@@ -45,11 +45,11 @@ describe('continuous_onboarding.yaml stays in sync with constants', () => {
   });
 
   it('uses the correct timeout', () => {
-    assertYamlContains(`timeout: "${COORDINATOR_INTERVAL_MINUTES - 1}m"`);
+    assertYamlContains(`timeout: '${COORDINATOR_INTERVAL_MINUTES - 1}m'`);
   });
 
   it('uses the correct coordinator interval', () => {
-    assertYamlContains(`every: "${COORDINATOR_INTERVAL_MINUTES}m"`);
+    assertYamlContains(`every: '${COORDINATOR_INTERVAL_MINUTES}m'`);
   });
 
   it('uses the correct maxScheduledStreams input', () => {
@@ -82,7 +82,7 @@ describe('continuous_onboarding.yaml stays in sync with constants', () => {
   });
 
   it('uses the correct poll delay duration', () => {
-    assertYamlContains(`duration: "${POLL_DELAY_SECONDS}s"`);
+    assertYamlContains(`duration: '${POLL_DELAY_SECONDS}s'`);
   });
 
   it('calls the eligibility endpoint with the correct query params', () => {
@@ -101,7 +101,7 @@ describe('continuous_onboarding.yaml stays in sync with constants', () => {
 
   it('starts onboarding via workflow.executeAsync for the managed onboarding workflow', () => {
     assertYamlContains('type: workflow.executeAsync');
-    assertYamlContains('workflow-id: "system-streams-ki-onboarding"');
+    assertYamlContains("workflow-id: 'system-streams-ki-onboarding'");
   });
 
   it('runs both features identification and queries generation', () => {

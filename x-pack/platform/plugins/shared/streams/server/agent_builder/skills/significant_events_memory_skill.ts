@@ -14,7 +14,7 @@ import content from './significant_events_memory.skill.md.text';
 export const createSignificantEventsMemorySkill = (options: MemoryToolsOptions) =>
   defineSkillType({
     id: 'significant-events-memory',
-    name: 'memory',
+    name: 'significant-events-memory',
     basePath: 'skills/platform/streams',
     description,
     content,
