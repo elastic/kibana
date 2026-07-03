@@ -29,7 +29,10 @@ permissions:
 
 # Activation rules:
 # - Manual runs always activate.
-# - `kickoff`: a `kibanamachine`-authored PR is opened with (or labeled) `flaky-test-fixer`.
+# - `kickoff`: any PR is opened with (or labeled) `flaky-test-fixer`. Applying that
+#   label requires write access, so this is the gate — the PR author is not checked.
+#   NOTE: not checking the author is a temporary measure for testing; tighten it
+#   back (e.g. to the `kibanamachine` fixer identity) once the flow is validated.
 # - `process_results`: the Flaky Test Runner posts its `## Flaky Test Runner Stats`
 #   comment on a PR we are actively validating (`flaky-fix-check:started`). The
 #   workflow removes `running` when it reaches a terminal verdict, so the label's
@@ -40,7 +43,6 @@ if: >-
     github.event_name == 'workflow_dispatch' ||
     (
       github.event_name == 'pull_request_target' &&
-      github.event.pull_request.user.login == 'kibanamachine' &&
       (
         (github.event.action == 'labeled' && github.event.label.name == 'flaky-test-fixer') ||
         (github.event.action == 'opened' && contains(github.event.pull_request.labels.*.name, 'flaky-test-fixer'))
@@ -145,6 +147,9 @@ safe-outputs:
   add-comment:
     max: 3
     target: *pr_number
+    # Post as `kibanamachine` so the `/flaky` comment triggers `trigger-flaky.yml`
+    # (GITHUB_TOKEN comments don't fire workflows, and that gate only accepts kibanamachine/members).
+    github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
   add-labels:
     allowed:
       - flaky-fix-check:started
