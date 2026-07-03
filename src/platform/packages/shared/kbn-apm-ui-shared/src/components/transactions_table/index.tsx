@@ -52,7 +52,7 @@ interface TransactionsTableProps {
   remainingTransactionsCellTooltipContent?: React.ReactNode;
   showSparklines?: boolean;
   errorMessage?: string;
-  'data-test-subj'?: string;
+  'data-test-subj': string;
 }
 
 function shouldFetchServer({
