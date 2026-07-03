@@ -47,8 +47,5 @@ export const spaceTest = spaceBaseTest.extend<
 export {
   SESSION_API_PATH,
   DELAYED_5S_DASHBOARD_TITLE,
-  LENS_BASIC_KBN_ARCHIVE,
   DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE,
-  DEFAULT_TIME_FROM,
-  DEFAULT_TIME_TO,
 } from './constants';

@@ -14,15 +14,9 @@ export const LOGSTASH_FUNCTIONAL_ARCHIVE =
 // Kibana archive paths — loaded per-space in spaceTest.beforeAll.
 export const DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE =
   'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard_async/async_search.json';
-export const LENS_BASIC_KBN_ARCHIVE =
-  'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json';
 
 // Title used to locate the dashboard after a per-space load (IDs differ per space).
 export const DELAYED_5S_DASHBOARD_TITLE = 'Delayed 5s';
 
 // Internal session management API path.
 export const SESSION_API_PATH = '/internal/session';
-
-// Default logstash time range (data exists in this window).
-export const DEFAULT_TIME_FROM = 'Sep 19, 2015 @ 06:31:44.000';
-export const DEFAULT_TIME_TO = 'Sep 23, 2015 @ 18:31:44.000';
