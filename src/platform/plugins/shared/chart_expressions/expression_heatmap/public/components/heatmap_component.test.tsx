@@ -24,10 +24,7 @@ import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 import type { HeatmapRenderProps, HeatmapArguments } from '../../common';
-import HeatmapComponent, {
-  computeMinIntervalFromData,
-  getDateFormatPattern,
-} from './heatmap_component';
+import HeatmapComponent, { getDateFormatPattern } from './heatmap_component';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
@@ -684,10 +681,14 @@ describe('HeatmapComponent', function () {
         type: 'datatable',
         meta: { type: 'esql' },
         columns: [
-          { id: 'timestamp', name: 'timestamp', meta: { type: 'date' } },
+          {
+            id: 'timestamp',
+            name: 'timestamp',
+            meta: { type: 'date', esMeta: { bucket: { interval: 1, unit: 'minute' } } },
+          },
           { id: 'category', name: 'category', meta: { type: 'string' } },
           { id: 'value', name: 'value', meta: { type: 'number' } },
-        ],
+        ] satisfies Datatable['columns'],
         rows: [
           { timestamp: '2024-01-01T00:00:00.000Z', category: 'A', value: 10 },
           { timestamp: '2024-01-01T00:01:00.000Z', category: 'A', value: 20 },
@@ -738,36 +739,9 @@ describe('HeatmapComponent', function () {
       expect(heatmapComponent.prop('xScale')).toEqual(
         expect.objectContaining({
           type: 'time',
+          interval: { type: 'calendar', unit: 'm', value: 1 },
         })
       );
-    });
-  });
-
-  describe('computeMinIntervalFromData', () => {
-    it('computes minimum interval from timestamp data', () => {
-      const timestampData = [
-        { x: 1000, y: 'a', value: 1 },
-        { x: 2000, y: 'a', value: 2 },
-        { x: 3500, y: 'b', value: 3 },
-      ];
-      expect(computeMinIntervalFromData(timestampData, 'x')).toBe(1000);
-    });
-
-    it('returns undefined for insufficient data', () => {
-      const singleRow = [{ x: 1000, y: 'a', value: 1 }];
-      expect(computeMinIntervalFromData(singleRow, 'x')).toBeUndefined();
-    });
-
-    it('returns undefined for empty data', () => {
-      expect(computeMinIntervalFromData([], 'x')).toBeUndefined();
-    });
-
-    it('returns undefined when xAccessor is not provided', () => {
-      const timestampData = [
-        { x: 1000, y: 'a', value: 1 },
-        { x: 2000, y: 'a', value: 2 },
-      ];
-      expect(computeMinIntervalFromData(timestampData, undefined)).toBeUndefined();
     });
   });
 

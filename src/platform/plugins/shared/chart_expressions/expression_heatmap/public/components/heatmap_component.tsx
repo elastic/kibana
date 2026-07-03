@@ -105,70 +105,28 @@ function shiftAndNormalizeStops(
 }
 
 /**
- * Computes the minimum interval between adjacent x values in the data.
- * Used for ES|QL queries without explicit interval metadata.
- *
- * @param data - The heatmap chart data (with timestamps already converted to numbers)
- * @param xAccessor - The x-axis accessor key
- * @returns The minimum interval in milliseconds, or undefined if cannot be computed
- */
-export function computeMinIntervalFromData(
-  data: Array<Record<string, string | number>>,
-  xAccessor: string | undefined
-): number | undefined {
-  if (!xAccessor || data.length < 2) {
-    return undefined;
-  }
-
-  // Extract numeric timestamps (already converted from date strings)
-  const timestamps = data.reduce((acc, curr) => {
-    if (curr[xAccessor] !== null && typeof curr[xAccessor] === 'number') {
-      acc.add(curr[xAccessor]);
-    }
-    return acc;
-  }, new Set<number>());
-
-  const sortedTimestamps = Array.from(timestamps).sort((a, b) => a - b);
-
-  if (sortedTimestamps.length < 2) {
-    return undefined;
-  }
-
-  // Compute minimum interval between adjacent values
-  let minInterval = Number.MAX_SAFE_INTEGER;
-  for (let i = 1; i < sortedTimestamps.length; i++) {
-    const interval = Math.abs(sortedTimestamps[i] - sortedTimestamps[i - 1]);
-    if (interval > 0) {
-      minInterval = Math.min(minInterval, interval);
-    }
-  }
-
-  return minInterval < Number.MAX_SAFE_INTEGER ? minInterval : undefined;
-}
-
-/**
  * Computes the appropriate x-axis scale for the heatmap.
- * Handles traditional aggregations with interval metadata and ES|QL queries that require computed intervals.
+ * Handles traditional aggregations and ES|QL queries with computed intervals.
  *
  * @param xScaleType - The explicit scale type from grid config
- * @param isTimeBasedSwimLane - Whether this is a time-based swimlane (traditional aggregations)
+ * @param isTimeBasedSwimLane - Whether this is a time-based swimlane
  * @param chartData - The heatmap chart data
- * @param xAxisColumn - The x-axis column metadata
- * @param dateHistogramMeta - Date histogram metadata from traditional aggregations
- * @param parseEsInterval - Function to parse Elasticsearch interval strings
- * @returns The computed xScale configuration
+ * @param dateHistogramMeta - Date histogram metadata (interval) from getDateHistogramMeta
+ * @param parseEsInterval - Parses an interval into a fixed/calendar ES interval (strict)
+ * @param parseInterval - Parses an interval into a moment Duration (lenient, moment-based)
+ * @returns The computed xScale configuration and the interval in milliseconds (when time-based)
  */
 function computeXScale(
   xScaleType: string | undefined,
   isTimeBasedSwimLane: boolean,
   chartData: Array<Record<string, string | number>>,
-  xAxisColumn: DatatableColumn | undefined,
   dateHistogramMeta: { interval?: string } | undefined,
-  parseEsInterval: (interval: string) => { type: string; unit: string; value: number } | null
-): HeatmapSpec['xScale'] {
+  parseEsInterval: (interval: string) => { type: string; unit: string; value: number } | null,
+  parseInterval: (interval: string) => moment.Duration | null
+): { scale: HeatmapSpec['xScale']; intervalMs?: number } {
   // Fallback to ordinal scale for single row or default
   if (chartData.length <= 1) {
-    return { type: ScaleType.Ordinal };
+    return { scale: { type: ScaleType.Ordinal } };
   }
 
   // Determine if we should use time scale
@@ -176,48 +134,60 @@ function computeXScale(
 
   if (shouldUseTimeScale) {
     const dateInterval = dateHistogramMeta?.interval;
-    const esInterval = dateInterval ? parseEsInterval(dateInterval) : undefined;
+    const intervalMs = dateInterval ? parseInterval(dateInterval)?.asMilliseconds() : undefined;
+
+    // parseEsInterval yields the fixed/calendar shape elastic-charts wants, but rejects some
+    // intervals ES|QL can produce, so guard against it and fall back to intervalMs below.
+    let esInterval: ReturnType<typeof parseEsInterval> | undefined;
+    try {
+      esInterval = dateInterval ? parseEsInterval(dateInterval) : undefined;
+    } catch {
+      esInterval = undefined;
+    }
 
     if (esInterval) {
-      // Traditional aggregations with interval metadata
       return {
-        type: ScaleType.Time,
-        interval:
-          esInterval.type === 'fixed'
-            ? {
-                type: 'fixed',
-                unit: esInterval.unit as ESFixedIntervalUnit,
-                value: esInterval.value,
-              }
-            : {
-                type: 'calendar',
-                unit: esInterval.unit as ESCalendarIntervalUnit,
-                value: esInterval.value,
-              },
+        scale: {
+          type: ScaleType.Time,
+          interval:
+            esInterval.type === 'fixed'
+              ? {
+                  type: 'fixed',
+                  unit: esInterval.unit as ESFixedIntervalUnit,
+                  value: esInterval.value,
+                }
+              : {
+                  type: 'calendar',
+                  unit: esInterval.unit as ESCalendarIntervalUnit,
+                  value: esInterval.value,
+                },
+        },
+        intervalMs,
       };
-    } else if (xScaleType === 'time') {
-      // ES|QL queries without interval metadata - compute interval from data
-      // this need to infer the interval from the data table is temporary. Once Elasticsearch returns
-      // the interval metadata for ES|QL queries, we can simplify
-      const computedInterval = computeMinIntervalFromData(chartData, xAxisColumn?.id);
-      if (computedInterval) {
-        return {
+    }
+
+    // Any other interval we could only measure in milliseconds: fall back to a fixed millisecond
+    // interval derived from the same bucket metadata.
+    if (intervalMs) {
+      return {
+        scale: {
           type: ScaleType.Time,
           interval: {
             type: 'fixed',
             unit: 'ms',
-            value: computedInterval,
+            value: intervalMs,
           },
-        };
-      }
-      // Fallback to Linear if we can't compute an interval
-      return { type: ScaleType.Linear };
+        },
+        intervalMs,
+      };
     }
+    // Fallback to Linear if we can't compute an interval
+    return { scale: { type: ScaleType.Linear } };
   } else if (xScaleType === 'linear') {
-    return { type: ScaleType.Linear };
+    return { scale: { type: ScaleType.Linear } };
   }
 
-  return { type: ScaleType.Ordinal };
+  return { scale: { type: ScaleType.Ordinal } };
 }
 
 function computeColorRanges(
@@ -418,15 +388,14 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       }
     }
 
-    const xScale = computeXScale(
+    const { scale: xScale, intervalMs: xIntervalMs } = computeXScale(
       args.gridConfig.xScaleType,
       isTimeBasedSwimLane,
       chartData,
-      xAxisColumn,
       dateHistogramMeta,
-      search.aggs.parseEsInterval
+      search.aggs.parseEsInterval,
+      search.aggs.parseInterval
     );
-
     const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
       datatables: [formattedTable.table],
     });
@@ -440,10 +409,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         isEsqlMode &&
         xAxisMeta?.type === 'date' &&
         xScale.type === ScaleType.Time &&
-        xScale.interval?.unit === 'ms' &&
+        xIntervalMs != null &&
         uiSettings
       ) {
-        const pattern = getDateFormatPattern(xScale.interval.value, uiSettings);
+        const pattern = getDateFormatPattern(xIntervalMs, uiSettings);
         if (pattern) {
           return formatFactory({
             id: 'date',
@@ -455,7 +424,15 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       }
 
       return formatFactory(xAxisMeta?.params);
-    }, [formatFactory, xAxisMeta?.params, xAxisMeta?.type, xScale, uiSettings, isEsqlMode]);
+    }, [
+      formatFactory,
+      xAxisMeta?.params,
+      xAxisMeta?.type,
+      xScale,
+      xIntervalMs,
+      uiSettings,
+      isEsqlMode,
+    ]);
 
     const hasTooltipActions = interactive && !isEsqlMode;
 
@@ -562,10 +539,14 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         const { x, y } = e;
 
         if (isTimeBasedSwimLane) {
+          const isEsql = table.meta?.type === ESQL_TABLE_TYPE;
           const context: BrushEvent['data'] = {
             range: x as number[],
             table,
             column: xAxisColumnIndex,
+            ...(isEsql
+              ? { timeFieldName: xAxisColumn?.meta.sourceParams?.sourceField?.toString() }
+              : {}),
           };
           onSelectRange(context);
         } else {
@@ -907,16 +888,15 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                   : [settingsThemeOverrides]),
               ]}
               baseTheme={chartBaseTheme}
-              xDomain={{
-                min:
-                  dateHistogramMeta && dateHistogramMeta.timeRange
-                    ? new Date(dateHistogramMeta.timeRange.from).getTime()
-                    : NaN,
-                max:
-                  dateHistogramMeta && dateHistogramMeta.timeRange
-                    ? new Date(dateHistogramMeta.timeRange.to).getTime()
-                    : NaN,
-              }}
+              xDomain={
+                dateHistogramMeta?.domain ??
+                (dateHistogramMeta?.timeRange
+                  ? {
+                      min: new Date(dateHistogramMeta.timeRange.from).getTime(),
+                      max: new Date(dateHistogramMeta.timeRange.to).getTime(),
+                    }
+                  : { min: NaN, max: NaN })
+              }
               onBrushEnd={interactive ? (onBrushEnd as BrushEndListener) : undefined}
               ariaLabel={args.ariaLabel}
               ariaUseDefaultSummary={!args.ariaLabel}

@@ -10,7 +10,7 @@ import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { getDateHistogramTextBased } from '../../defs/date_histogram';
 
-const dateHistogram = getDateHistogramTextBased(createDatatableUtilitiesMock, () => 'UTC');
+const dateHistogram = getDateHistogramTextBased(createDatatableUtilitiesMock);
 
 const buildBucketColumn = (
   params: Record<string, string | boolean>,
