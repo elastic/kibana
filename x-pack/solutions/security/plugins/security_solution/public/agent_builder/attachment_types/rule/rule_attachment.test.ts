@@ -12,15 +12,14 @@ import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { RULES_FEATURE_LATEST } from '@kbn/security-solution-features/constants';
 import { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
+import { createRuleAttachmentDefinition, registerRuleAttachment } from './rule_attachment';
 import {
-  createRuleAttachmentDefinition,
   getRuleIdFromEditFormPath,
   isAttachmentRuleOpenOnFormPage,
   isOnRuleFormPage,
   isRuleFormOpenForCard,
-  registerRuleAttachment,
   shouldShowViewRuleButton,
-} from './rule_attachment';
+} from './helpers';
 import { buildRuleActionButtons } from './rule_action_buttons';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 

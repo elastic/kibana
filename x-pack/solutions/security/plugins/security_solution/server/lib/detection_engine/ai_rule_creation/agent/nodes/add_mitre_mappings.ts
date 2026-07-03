@@ -25,7 +25,7 @@ import type {
   ThreatTechnique,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 
-export interface MitreMappingSelectionResponse {
+interface MitreMappingSelectionResponse {
   tactics: string[]; // Array of tactic IDs like ["TA0001", "TA0002"]
   techniques: Array<{
     id: string;

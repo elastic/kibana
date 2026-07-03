@@ -352,7 +352,6 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
                 success: true,
                 rule: ruleWithoutIds,
                 attachment_id: resolvedAttachmentId,
-                isNewCard,
                 ...(resultVersion !== undefined && { version: resultVersion }),
               },
             },

@@ -256,7 +256,7 @@ describe('createDetectionRuleTool', () => {
     // Branch 2: empty placeholder seed → consume it (no phantom card)
     // -----------------------------------------------------------------
     describe('placeholder seed consumption (no attachment_id + empty seed present)', () => {
-      it('updates the constant-id seed and returns isNewCard=false', async () => {
+      it('updates the constant-id seed instead of adding a new card', async () => {
         const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
           modelProvider: mockModelProvider,
           events: mockEvents,
@@ -293,7 +293,6 @@ describe('createDetectionRuleTool', () => {
                 success: true,
                 rule: mockRule,
                 attachment_id: SECURITY_RULE_ATTACHMENT_ID,
-                isNewCard: false,
                 version: 1,
               },
             },
@@ -337,7 +336,7 @@ describe('createDetectionRuleTool', () => {
     // -----------------------------------------------------------------
     // Branch 3: no placeholder → mint a fresh uuid
     // -----------------------------------------------------------------
-    describe('fresh create — no attachment_id, no placeholder (isNewCard=true)', () => {
+    describe('fresh create — no attachment_id, no placeholder (adds a new card)', () => {
       it('mints a new hyphen-free id and calls add()', async () => {
         const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
           modelProvider: mockModelProvider,
@@ -364,14 +363,13 @@ describe('createDetectionRuleTool', () => {
           string,
           unknown
         >;
-        expect(resultData.isNewCard).toBe(true);
 
         // Minted id must be hyphen-free (no markdown-shatter risk)
         expect(typeof resultData.attachment_id).toBe('string');
         expect(resultData.attachment_id as string).not.toContain('-');
       });
 
-      it('returns success result with attachmentId, version, and isNewCard=true', async () => {
+      it('returns success result with attachmentId and version', async () => {
         const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
           modelProvider: mockModelProvider,
           events: mockEvents,
@@ -390,7 +388,6 @@ describe('createDetectionRuleTool', () => {
           unknown
         >;
         expect(resultData.success).toBe(true);
-        expect(resultData.isNewCard).toBe(true);
         expect(resultData.version).toBe(1);
         expect(mockIterativeAgent.invoke).toHaveBeenCalledWith({ userQuery });
       });
@@ -420,7 +417,6 @@ describe('createDetectionRuleTool', () => {
           string,
           unknown
         >;
-        expect(data1.isNewCard).toBe(false);
         expect(data1.attachment_id).toBe(SECURITY_RULE_ATTACHMENT_ID);
         expect(ctx1.attachments.add).not.toHaveBeenCalled();
 
@@ -450,7 +446,6 @@ describe('createDetectionRuleTool', () => {
           string,
           unknown
         >;
-        expect(data2.isNewCard).toBe(true);
         expect(data2.attachment_id).not.toBe(SECURITY_RULE_ATTACHMENT_ID);
         expect(ctx2.attachments.update).not.toHaveBeenCalled();
       });
@@ -459,7 +454,7 @@ describe('createDetectionRuleTool', () => {
     // -----------------------------------------------------------------
     // Branch 1: attachment_id provided → update in place
     // -----------------------------------------------------------------
-    describe('query rewrite — attachment_id provided (isNewCard=false)', () => {
+    describe('query rewrite — attachment_id provided (updates in place)', () => {
       it('reads the rule from the attachment and calls update(attachment_id)', async () => {
         const existingAttachmentId = 'air:existingcard';
         const existingRuleJson = JSON.stringify({
@@ -504,7 +499,6 @@ describe('createDetectionRuleTool', () => {
           string,
           unknown
         >;
-        expect(resultData.isNewCard).toBe(false);
         expect(resultData.attachment_id).toBe(existingAttachmentId);
         expect(resultData.version).toBe(2);
       });
@@ -578,40 +572,6 @@ describe('createDetectionRuleTool', () => {
             data: expect.not.objectContaining({ ruleId: expect.anything() }),
           })
         );
-      });
-
-      it('returns isNewCard=false for an update', async () => {
-        const existingAttachmentId = 'air:existingcard';
-        const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider,
-          events: mockEvents,
-        });
-        (context.attachments.getAttachmentRecord as jest.Mock).mockImplementation((id: string) =>
-          id === existingAttachmentId
-            ? {
-                id: existingAttachmentId,
-                type: SecurityAgentBuilderAttachments.rule,
-                current_version: 1,
-                versions: [{ version: 1, data: { text: '{}' } }],
-              }
-            : undefined
-        );
-        (context.attachments.update as jest.Mock).mockResolvedValue({
-          id: existingAttachmentId,
-          current_version: 2,
-        });
-
-        const result = await tool.handler(
-          { user_query: userQuery, attachment_id: existingAttachmentId },
-          context
-        );
-
-        expect(isToolHandlerStandardReturn(result)).toBe(true);
-        const resultData = (result as ToolHandlerStandardReturn).results[0].data as Record<
-          string,
-          unknown
-        >;
-        expect(resultData.isNewCard).toBe(false);
       });
     });
 
