@@ -17,6 +17,27 @@ export const REMOTE_SEARCH_TYPE = {
 
 export type RemoteSearchType = (typeof REMOTE_SEARCH_TYPE)[keyof typeof REMOTE_SEARCH_TYPE];
 
+/**
+ * Resolves how a remote source should be labelled. Cross-project search (CPS)
+ * takes precedence over cross-cluster search (CCS); returns `undefined` when the
+ * source is neither, i.e. purely local.
+ */
+export function getRemoteSearchType({
+  cpsHasLinkedProjects,
+  ccsHasRemoteClusters,
+}: {
+  cpsHasLinkedProjects?: boolean;
+  ccsHasRemoteClusters?: boolean;
+}): RemoteSearchType | undefined {
+  if (cpsHasLinkedProjects) {
+    return REMOTE_SEARCH_TYPE.CPS;
+  }
+  if (ccsHasRemoteClusters) {
+    return REMOTE_SEARCH_TYPE.CCS;
+  }
+  return undefined;
+}
+
 export interface StreamLinkContentProps {
   name: string | undefined;
   existsLocally: boolean | undefined;

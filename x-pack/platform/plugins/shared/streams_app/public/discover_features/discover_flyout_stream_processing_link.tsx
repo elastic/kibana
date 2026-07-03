@@ -26,7 +26,11 @@ import {
   adaptDocToResolverInputs,
   useResolvedDefinitionName,
 } from './use_resolved_definition_name';
-import { REMOTE_SEARCH_TYPE, type RemoteSearchType } from './stream_link_content';
+import {
+  getRemoteSearchType,
+  REMOTE_SEARCH_TYPE,
+  type RemoteSearchType,
+} from './stream_link_content';
 import { useCcsHasRemoteClusters } from './use_ccs_has_remote_clusters';
 
 export interface DiscoverFlyoutStreamProcessingLinkProps {
@@ -58,11 +62,7 @@ export function DiscoverFlyoutStreamProcessingLink({
     ccsHasRemoteClusters,
   });
 
-  const remoteSearchType = cpsHasLinkedProjects
-    ? REMOTE_SEARCH_TYPE.CPS
-    : ccsHasRemoteClusters
-    ? REMOTE_SEARCH_TYPE.CCS
-    : undefined;
+  const remoteSearchType = getRemoteSearchType({ cpsHasLinkedProjects, ccsHasRemoteClusters });
 
   if (loading) return <EuiLoadingSpinner size="s" />;
 
