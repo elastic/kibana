@@ -105,6 +105,7 @@ export type InferenceEndpointWithDisplayCreatorMetadata = InferenceEndpointWithM
 export interface CspRegion {
   csp: string;
   region: string;
+  geo?: string;
 }
 
 export interface RegionPolicyBody {
@@ -119,11 +120,6 @@ export interface RegionPolicyResponse {
   created_by?: string;
   updated_at?: string;
   updated_by?: string;
-}
-
-export interface AvailabilityRegions {
-  regions: CspRegion[];
-  geos: string[];
 }
 
 export enum EisModelStatus {

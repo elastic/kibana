@@ -39,8 +39,7 @@ import {
 import { useEisModels } from '../../hooks/use_eis_models';
 import {
   getAvailableRegions,
-  REGION_DISPLAY_NAMES,
-  REGION_ZONE,
+  GEO_TO_ZONE,
   ZONE_DISPLAY_NAMES,
   ZONE_ORDER,
 } from '../../utils/eis_utils';
@@ -91,7 +90,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     const byZone = new Map<string, CspRegion[]>();
     for (const r of availableRegions) {
       const key = regionKey(r);
-      const zoneId = REGION_ZONE[key] ?? 'other';
+      const zoneId = (r.geo ? GEO_TO_ZONE[r.geo] : undefined) ?? 'other';
       const list = byZone.get(zoneId) ?? [];
       list.push(r);
       byZone.set(zoneId, list);
@@ -450,7 +449,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
                       <div css={regionListStyles}>
                         {zone.regions.map((r) => {
                           const key = regionKey(r);
-                          const displayName = REGION_DISPLAY_NAMES[key] ?? r.region;
+                          const displayName = r.region;
                           return (
                             <div key={key} css={regionRowStyles}>
                               <EuiCheckbox

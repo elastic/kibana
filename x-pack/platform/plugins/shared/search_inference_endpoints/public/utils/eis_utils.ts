@@ -11,12 +11,7 @@ import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import {
-  type EisInferenceEndpoint,
-  EisModelStatus,
-  type AvailabilityRegions,
-  type CspRegion,
-} from '../../common/types';
+import { type EisInferenceEndpoint, EisModelStatus, type CspRegion } from '../../common/types';
 import {
   isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
@@ -320,112 +315,25 @@ export const CSP_DISPLAY_NAMES: Record<string, string> = {
 };
 
 /**
- * Maps a `csp::region` key to a human-readable region display name.
- * Falls back to the raw region code when no entry is found.
+ * Maps an EIS `geo` value to the zone ID used in the region picker.
+ * EIS uses short codes ("us", "eu", "apac"); unknown values fall back to "other".
  */
-export const REGION_DISPLAY_NAMES: Record<string, string> = {
-  // Asia Pacific
-  'aws::ap-east-1': 'AP East (Hong Kong)',
-  'aws::ap-northeast-1': 'AP Northeast (Tokyo)',
-  'aws::ap-northeast-2': 'AP Northeast (Seoul)',
-  'aws::ap-northeast-3': 'AP Northeast (Osaka)',
-  'aws::ap-south-1': 'AP South (Mumbai)',
-  'aws::ap-south-2': 'AP South (Hyderabad)',
-  'aws::ap-southeast-1': 'AP Southeast (Singapore)',
-  'aws::ap-southeast-2': 'AP Southeast (Sydney)',
-  'aws::ap-southeast-3': 'AP Southeast (Jakarta)',
-  'aws::ap-southeast-4': 'AP Southeast (Melbourne)',
-  // Europe
-  'aws::eu-central-1': 'EU Central (Frankfurt)',
-  'aws::eu-central-2': 'EU Central (Zurich)',
-  'aws::eu-north-1': 'EU North (Stockholm)',
-  'aws::eu-south-1': 'EU South (Milan)',
-  'aws::eu-south-2': 'EU South (Spain)',
-  'aws::eu-west-1': 'EU West (Ireland)',
-  'aws::eu-west-2': 'EU West (London)',
-  'aws::eu-west-3': 'EU West (Paris)',
-  // Middle East & Africa
-  'aws::af-south-1': 'Africa South (Cape Town)',
-  'aws::il-central-1': 'Israel Central (Tel Aviv)',
-  'aws::me-central-1': 'ME Central (UAE)',
-  'aws::me-south-1': 'ME South (Bahrain)',
-  // North America
-  'aws::ca-central-1': 'Canada Central (Montréal)',
-  'aws::ca-west-1': 'Canada West (Calgary)',
-  'aws::us-east-1': 'US East (N. Virginia)',
-  'aws::us-east-2': 'US East (Ohio)',
-  'aws::us-west-1': 'US West (N. California)',
-  'aws::us-west-2': 'US West (Oregon)',
-  // South America
-  'aws::sa-east-1': 'SA East (São Paulo)',
-};
-
-/**
- * Maps a `csp::region` key to a geographic zone ID used in the region picker.
- * Regions not listed here are placed under the catch-all 'other' zone.
- */
-export const REGION_ZONE: Record<string, string> = {
-  // Asia Pacific
-  'aws::ap-east-1': 'asiaPacific',
-  'aws::ap-northeast-1': 'asiaPacific',
-  'aws::ap-northeast-2': 'asiaPacific',
-  'aws::ap-northeast-3': 'asiaPacific',
-  'aws::ap-south-1': 'asiaPacific',
-  'aws::ap-south-2': 'asiaPacific',
-  'aws::ap-southeast-1': 'asiaPacific',
-  'aws::ap-southeast-2': 'asiaPacific',
-  'aws::ap-southeast-3': 'asiaPacific',
-  'aws::ap-southeast-4': 'asiaPacific',
-  // Europe
-  'aws::eu-central-1': 'europe',
-  'aws::eu-central-2': 'europe',
-  'aws::eu-north-1': 'europe',
-  'aws::eu-south-1': 'europe',
-  'aws::eu-south-2': 'europe',
-  'aws::eu-west-1': 'europe',
-  'aws::eu-west-2': 'europe',
-  'aws::eu-west-3': 'europe',
-  // Middle East & Africa
-  'aws::af-south-1': 'middleEast',
-  'aws::il-central-1': 'middleEast',
-  'aws::me-central-1': 'middleEast',
-  'aws::me-south-1': 'middleEast',
-  // North America
-  'aws::ca-central-1': 'northAmerica',
-  'aws::ca-west-1': 'northAmerica',
-  'aws::us-east-1': 'northAmerica',
-  'aws::us-east-2': 'northAmerica',
-  'aws::us-west-1': 'northAmerica',
-  'aws::us-west-2': 'northAmerica',
-  // South America
-  'aws::sa-east-1': 'southAmerica',
+export const GEO_TO_ZONE: Record<string, string> = {
+  us: 'northAmerica',
+  eu: 'europe',
+  apac: 'asiaPacific',
 };
 
 /** Maps a zone ID to its display name shown in the region picker. */
 export const ZONE_DISPLAY_NAMES: Record<string, string> = {
   asiaPacific: 'Asia Pacific',
   europe: 'Europe',
-  middleEast: 'Middle East & Africa',
   northAmerica: 'North America',
-  southAmerica: 'South America',
   other: 'Other',
 };
 
 /** Ordered list of zone IDs for display in the region picker. */
-export const ZONE_ORDER = [
-  'asiaPacific',
-  'europe',
-  'middleEast',
-  'northAmerica',
-  'southAmerica',
-  'other',
-] as const;
-
-const isAvailabilityRegions = (value: unknown): value is AvailabilityRegions => {
-  if (!value || typeof value !== 'object') return false;
-  const v = value as Record<string, unknown>;
-  return Array.isArray(v.regions) && Array.isArray(v.geos);
-};
+export const ZONE_ORDER = ['asiaPacific', 'europe', 'northAmerica', 'other'] as const;
 
 const isCspRegion = (value: unknown): value is CspRegion => {
   if (!value || typeof value !== 'object') return false;
@@ -434,7 +342,7 @@ const isCspRegion = (value: unknown): value is CspRegion => {
 };
 
 /**
- * Aggregates all unique CSP regions from EIS endpoint `availability_regions` metadata.
+ * Aggregates all unique CSP regions from EIS endpoint `regions` metadata.
  * The returned list is deduplicated (by csp+region key) and sorted alphabetically.
  */
 export const getAvailableRegions = (endpoints: EisInferenceEndpoint[]): CspRegion[] => {
@@ -443,10 +351,10 @@ export const getAvailableRegions = (endpoints: EisInferenceEndpoint[]): CspRegio
 
   for (const ep of endpoints) {
     if (!ep.metadata) continue;
-    const raw = (ep.metadata as Record<string, unknown>).availability_regions;
-    if (!isAvailabilityRegions(raw)) continue;
+    const regions = (ep.metadata as Record<string, unknown>).regions;
+    if (!Array.isArray(regions)) continue;
 
-    for (const r of raw.regions) {
+    for (const r of regions) {
       if (!isCspRegion(r)) continue;
       const key = `${r.csp}::${r.region}`;
       if (!seen.has(key)) {

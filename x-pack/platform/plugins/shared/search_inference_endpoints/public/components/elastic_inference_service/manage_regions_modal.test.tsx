@@ -45,8 +45,8 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 
 // Two regions in different zones: North America and Europe
 const twoTestRegions = [
-  { csp: 'aws', region: 'us-east-1' },
-  { csp: 'aws', region: 'eu-west-1' },
+  { csp: 'aws', region: 'us-east-1', geo: 'us' },
+  { csp: 'gcp', region: 'europe-west1', geo: 'eu' },
 ];
 
 const endpointWithRegions = {
@@ -55,10 +55,7 @@ const endpointWithRegions = {
   task_type: 'text_embedding' as const,
   service_settings: { model_id: 'test-model' },
   metadata: {
-    availability_regions: {
-      regions: twoTestRegions,
-      geos: ['us', 'eu'],
-    },
+    regions: twoTestRegions,
   },
 };
 
@@ -137,7 +134,7 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      // us-east-1 → North America zone, eu-west-1 → Europe zone
+      // us-east-1 → North America zone, europe-west1 → Europe zone
       expect(screen.getByTestId('manageRegionsZone-northAmerica')).toBeInTheDocument();
       expect(screen.getByTestId('manageRegionsZone-europe')).toBeInTheDocument();
     });
@@ -182,7 +179,7 @@ describe('ManageRegionsModal', () => {
         expect(usEast.checked).toBe(true);
 
         const euWest = screen.getByTestId(
-          'manageRegionsCheckbox-aws::eu-west-1'
+          'manageRegionsCheckbox-gcp::europe-west1'
         ) as HTMLInputElement;
         expect(euWest.checked).toBe(false);
       });
@@ -209,7 +206,7 @@ describe('ManageRegionsModal', () => {
         expect(usEast.checked).toBe(true);
 
         const euWest = screen.getByTestId(
-          'manageRegionsCheckbox-aws::eu-west-1'
+          'manageRegionsCheckbox-gcp::europe-west1'
         ) as HTMLInputElement;
         expect(euWest.checked).toBe(true);
       });
@@ -337,7 +334,7 @@ describe('ManageRegionsModal', () => {
       fireEvent.click(screen.getByTestId('manageRegionsSaveButton'));
 
       expect(mockSaveMutate).toHaveBeenCalledWith(
-        { allowed_regions: [{ csp: 'aws', region: 'eu-west-1' }] },
+        { allowed_regions: [{ csp: 'gcp', region: 'europe-west1' }] },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
