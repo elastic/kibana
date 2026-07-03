@@ -120,11 +120,11 @@ export const ThresholdExpression = ({
           data-test-subj="thresholdPopover"
           description={comparators[comparator].text}
           value={
-            <>
+            <span style={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.xs }}>
               {(threshold || []).slice(0, numRequiredThresholds).join(` ${andThresholdText} `) +
                 unit}
               {badge}
-            </>
+            </span>
           }
           isActive={Boolean(alertThresholdPopoverOpen || hasThresholdError)}
           onClick={() => {
