@@ -74,10 +74,18 @@ export const DETAIL_PAGE_SIZE_MAX = 100;
 // String length ceilings (`maxLength`) for `schema.string` — DoS protection.
 // ---------------------------------------------------------------------------
 
-// Entity, document and graph-node identifiers (Kibana saved-object IDs,
-// Elasticsearch _id fields, UUID format). ES enforces a 512-byte document-ID
+// Single entity / document identifiers (Kibana saved-object IDs, Elasticsearch
+// _id fields, UUID format, entity EUIDs). ES enforces a 512-byte document-ID
 // limit; UUIDs are 36 chars. 512 is generous but safe across all ES ID formats.
 export const ENTITY_ID_MAX_LENGTH = 512;
+
+// Composite graph node/edge identifiers are *derived* from entity IDs, not raw
+// IDs: edge ids are `a(<source>)-b(<target>)` and group/label node ids nest
+// those (e.g. `grp(a(<euid>)-b(<euid>))`, `label(<action>)ln(<edge-id>)...`),
+// so a single id can embed two or more `ENTITY_ID_MAX_LENGTH` values plus
+// wrapper/action text. 8192 comfortably covers the deepest nesting the graph
+// builder produces while remaining bounded for DoS protection.
+export const GRAPH_NODE_ID_MAX_LENGTH = 8192;
 
 // Elasticsearch index / data-stream names are capped at 255 bytes.
 export const INDEX_NAME_MAX_LENGTH = 255;
@@ -293,7 +301,7 @@ export const nodeShapeSchema = schema.oneOf([
 ]);
 
 export const nodeBaseDataSchema = schema.object({
-  id: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
+  id: schema.string({ maxLength: GRAPH_NODE_ID_MAX_LENGTH }),
   label: schema.maybe(schema.string({ maxLength: LABEL_MAX_LENGTH })),
   icon: schema.maybe(schema.string({ maxLength: ENUM_LIKE_MAX_LENGTH })),
 });
@@ -368,9 +376,9 @@ export const relationshipNodeDataSchema = schema.allOf([
 ]);
 
 export const edgeDataSchema = schema.object({
-  id: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
-  source: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
-  target: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
+  id: schema.string({ maxLength: GRAPH_NODE_ID_MAX_LENGTH }),
+  source: schema.string({ maxLength: GRAPH_NODE_ID_MAX_LENGTH }),
+  target: schema.string({ maxLength: GRAPH_NODE_ID_MAX_LENGTH }),
   color: edgeColorSchema,
   type: schema.maybe(schema.oneOf([schema.literal('solid'), schema.literal('dashed')])),
 });
