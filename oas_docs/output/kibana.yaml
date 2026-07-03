@@ -29319,6 +29319,7 @@ paths:
                 value:
                   cloud_connector:
                     cloud_connector_id: existing-aws-connector-id
+                    enabled: true
                     target_csp: aws
                   description: CSPM integration for AWS reusing existing cloud connector
                   inputs:
@@ -29353,6 +29354,7 @@ paths:
                 description: Example request to create agentless policy with AWS cloud connector
                 value:
                   cloud_connector:
+                    enabled: true
                     target_csp: aws
                   description: CSPM integration for AWS with cloud connector
                   inputs:
@@ -29387,6 +29389,7 @@ paths:
                 description: Example request to create agentless policy with Azure cloud connector
                 value:
                   cloud_connector:
+                    enabled: true
                     target_csp: azure
                   description: CSPM integration for Azure with cloud connector
                   inputs:
@@ -29881,6 +29884,7 @@ paths:
                 description: Example request to attach an AWS cloud connector to an agentless policy on update. Because `PUT` is full-replace, the `cloud_connector` block must be present on every subsequent update or the connector is detached.
                 value:
                   cloud_connector:
+                    enabled: true
                     target_csp: aws
                   description: CSPM integration for AWS with cloud connector
                   inputs:
@@ -29962,6 +29966,7 @@ paths:
                 value:
                   cloud_connector:
                     cloud_connector_id: existing-aws-connector-id
+                    enabled: true
                     target_csp: aws
                   description: CSPM integration for AWS reusing existing cloud connector
                   inputs:
@@ -84709,20 +84714,20 @@ components:
           type: object
           properties:
             cloud_connector_id:
-              description: ID of an existing cloud connector to reuse. If not provided, a new connector is created.
+              description: 'ID of an existing cloud connector to reuse. If not provided, a new connector is created. Requires `enabled: true` and cannot be combined with `name`.'
               maxLength: 256
               type: string
             enabled:
               default: false
-              description: Set to `true` to enable cloud connectors for this policy.
+              description: Set to `true` to attach a cloud connector to this policy. Must be `true` to set any of `cloud_connector_id`, `name`, or `target_csp`.
               type: boolean
             name:
-              description: Name for the cloud connector. If not provided, a name is generated automatically from the credentials.
+              description: 'Name for a new cloud connector. If not provided, a name is generated automatically from the credentials. Requires `enabled: true` and only applies when creating a new connector (cannot be combined with `cloud_connector_id`).'
               maxLength: 255
               minLength: 1
               type: string
             target_csp:
-              description: Target cloud service provider. If not provided, the provider is detected automatically from the inputs.
+              description: 'Target cloud service provider. If not provided, the provider is detected automatically from the inputs. Requires `enabled: true`.'
               enum:
                 - aws
                 - azure
