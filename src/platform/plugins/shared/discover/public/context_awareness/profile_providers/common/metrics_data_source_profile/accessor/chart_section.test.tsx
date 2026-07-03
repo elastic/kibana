@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { ReplaySubject } from 'rxjs';
+import { act, render } from '@testing-library/react';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import type {
   ChartSectionProps,
@@ -18,6 +18,8 @@ import type {
   UnifiedHistogramFetchParams,
   UnifiedHistogramServices,
 } from '@kbn/unified-histogram/types';
+import type { MetricsAggregationSettings } from '@kbn/unified-chart-section-viewer';
+import { METRICS_AGGREGATION_SETTINGS_DEFAULTS } from '@kbn/unified-chart-section-viewer';
 import { createChartSection } from './chart_section';
 import type { ChartSectionConfiguration } from '../../../../types';
 import { DataSourceCategory } from '../../../../profiles';
@@ -27,7 +29,7 @@ import {
   useInternalStateDispatch,
 } from '../../../../../application/main/state_management/redux';
 import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
-import type { ContextAwarenessToolkitActions } from '../../../../toolkit';
+import type { ContextAwarenessToolkit, ContextAwarenessToolkitActions } from '../../../../toolkit';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../toolkit';
 
 type UnifiedGridProps = ChartSectionProps & {
@@ -41,6 +43,8 @@ type UnifiedGridProps = ChartSectionProps & {
     docLinks?: { links: { query: { queryESQL: string } } };
     logger?: unknown;
   };
+  aggregationSettings?: MetricsAggregationSettings;
+  onAggregationSettingsChange?: (update: Partial<MetricsAggregationSettings>) => void;
 };
 
 let unifiedGridProps: UnifiedGridProps | undefined;
@@ -50,7 +54,24 @@ jest.mock('@kbn/unified-chart-section-viewer', () => ({
     unifiedGridProps = props;
     return null;
   },
+  METRICS_AGGREGATION_SETTINGS_DEFAULTS: {
+    counterAggregation: 'sum',
+    gaugeAggregation: 'avg',
+    histogramPercentile: 'p95',
+  },
 }));
+
+const createFakeAggregationAdapter = (initialState: MetricsAggregationSettings) => {
+  const subject = new BehaviorSubject(initialState);
+  return {
+    getState: () => subject.getValue(),
+    getState$: () => subject.asObservable(),
+    setState: (state: MetricsAggregationSettings) => subject.next(state),
+    updateState: jest.fn((update: Partial<MetricsAggregationSettings>) =>
+      subject.next({ ...subject.getValue(), ...update })
+    ),
+  };
+};
 
 jest.mock('../../../../../application/main/state_management/redux', () => ({
   internalStateActions: {
@@ -110,6 +131,7 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
   const toolkitActions: ContextAwarenessToolkitActions = {
     addFilter: jest.fn(),
   };
+  const aggregationAdapter = createFakeAggregationAdapter(METRICS_AGGREGATION_SETTINGS_DEFAULTS);
   const getChartSection = createChartSection();
 
   if (!getChartSection) {
@@ -123,6 +145,9 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
       toolkit: {
         ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         actions: toolkitActions,
+        getStateAdapter: jest.fn(
+          () => aggregationAdapter
+        ) as unknown as ContextAwarenessToolkit['getStateAdapter'],
       },
     }
   );
@@ -139,7 +164,7 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
 
   render(<>{config.renderChartSection(createChartSectionProps(overrides))}</>);
 
-  return { toolkitActions };
+  return { toolkitActions, aggregationAdapter };
 };
 
 describe('MetricsExperienceGridWrapper', () => {
@@ -205,5 +230,21 @@ describe('MetricsExperienceGridWrapper', () => {
     const { toolkitActions } = renderChartSection();
 
     expect(unifiedGridProps?.actions).toBe(toolkitActions);
+  });
+
+  it('passes the resolved aggregation settings to UnifiedMetricsExperienceGrid', () => {
+    renderChartSection();
+
+    expect(unifiedGridProps?.aggregationSettings).toEqual(METRICS_AGGREGATION_SETTINGS_DEFAULTS);
+  });
+
+  it('updates the aggregation state adapter when onAggregationSettingsChange is invoked', () => {
+    const { aggregationAdapter } = renderChartSection();
+
+    act(() => {
+      unifiedGridProps?.onAggregationSettingsChange?.({ counterAggregation: 'max' });
+    });
+
+    expect(aggregationAdapter.updateState).toHaveBeenCalledWith({ counterAggregation: 'max' });
   });
 });
