@@ -169,19 +169,49 @@ describe('UserActionsFilterBar', () => {
 
     expect(onParamsChange).toHaveBeenCalledWith({
       ...defaultParams,
-      author: 'participant_1',
+      authors: ['participant_1'],
     });
   });
 
-  it('resets the author filter back to "All" when re-selected', async () => {
-    renderBar({ ...defaultParams, author: 'participant_1' });
+  it('adds a second author to an already selected author', async () => {
+    renderBar({ ...defaultParams, authors: ['participant_1'] });
 
     await userEvent.click(screen.getByTestId('user-actions-filter-bar-author-button'));
-    await userEvent.click(await screen.findByTestId('user-actions-filter-bar-author-option-all'));
+    await userEvent.click(
+      await screen.findByTestId('user-actions-filter-bar-author-option-participant_2')
+    );
 
     expect(onParamsChange).toHaveBeenCalledWith({
       ...defaultParams,
-      author: undefined,
+      authors: ['participant_1', 'participant_2'],
+    });
+  });
+
+  it('removes one of several selected authors while keeping the others', async () => {
+    renderBar({ ...defaultParams, authors: ['participant_1', 'participant_2'] });
+
+    await userEvent.click(screen.getByTestId('user-actions-filter-bar-author-button'));
+    await userEvent.click(
+      await screen.findByTestId('user-actions-filter-bar-author-option-participant_1')
+    );
+
+    expect(onParamsChange).toHaveBeenCalledWith({
+      ...defaultParams,
+      authors: ['participant_2'],
+    });
+  });
+
+  it('resets the author filter back to "All" when the only selected author is deselected', async () => {
+    renderBar({ ...defaultParams, authors: ['participant_1'] });
+
+    await userEvent.click(screen.getByTestId('user-actions-filter-bar-author-button'));
+    await userEvent.click(
+      await screen.findByTestId('user-actions-filter-bar-author-option-participant_1')
+    );
+
+    expect(onParamsChange).toHaveBeenCalledWith({
+      ...defaultParams,
+      authors: undefined,
     });
   });
 
@@ -225,15 +255,20 @@ describe('UserActionsFilterBar', () => {
       expect(clearFilters).toBeEnabled();
     });
 
-    it('resets type, author, and search when clicked', async () => {
-      renderBar({ ...defaultParams, type: 'action', author: 'participant_1', search: 'foo' });
+    it('resets type, authors, and search when clicked', async () => {
+      renderBar({
+        ...defaultParams,
+        type: 'action',
+        authors: ['participant_1'],
+        search: 'foo',
+      });
 
       await userEvent.click(screen.getByTestId('user-actions-filter-bar-clear-filters'));
 
       expect(onParamsChange).toHaveBeenCalledWith({
         ...defaultParams,
         type: 'all',
-        author: undefined,
+        authors: undefined,
         search: undefined,
       });
     });

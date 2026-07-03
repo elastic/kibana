@@ -94,7 +94,7 @@ export const CaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
       setPersistedFilters({
         type: params.type,
         sortOrder: params.sortOrder,
-        author: params.author,
+        authors: params.authors,
       });
       setUserActivityQueryParams({ ...params, page: 1 });
     },

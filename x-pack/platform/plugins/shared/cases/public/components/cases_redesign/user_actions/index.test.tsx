@@ -147,7 +147,7 @@ describe('UserActions (redesign)', () => {
       renderWithTestingProviders(
         <UserActions
           {...defaultProps}
-          userActivityQueryParams={{ ...userActivityQueryParams, author: 'elastic' }}
+          userActivityQueryParams={{ ...userActivityQueryParams, authors: ['elastic'] }}
         />
       );
 

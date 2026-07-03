@@ -89,7 +89,7 @@ describe('UseFindCaseUserActions', () => {
     );
   });
 
-  it('calls the API with search and author parameters', async () => {
+  it('calls the API with search and authors parameters', async () => {
     const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
 
     renderHook(
@@ -102,7 +102,7 @@ describe('UseFindCaseUserActions', () => {
             page: 1,
             perPage: 5,
             search: 'hello world',
-            author: 'elastic',
+            authors: ['elastic'],
           },
           isEnabled
         ),
@@ -118,7 +118,7 @@ describe('UseFindCaseUserActions', () => {
           page: 1,
           perPage: 5,
           search: 'hello world',
-          author: 'elastic',
+          authors: ['elastic'],
         },
         expect.any(AbortSignal)
       )

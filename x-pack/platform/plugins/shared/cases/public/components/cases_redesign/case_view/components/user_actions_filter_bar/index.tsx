@@ -60,9 +60,9 @@ export const UserActionsFilterBar = React.memo<UserActionsFilterBarProps>(
       [params, onParamsChange]
     );
 
-    const handleAuthorChange = useCallback(
-      (author?: string) => {
-        onParamsChange({ ...params, author });
+    const handleAuthorsChange = useCallback(
+      (authors: string[]) => {
+        onParamsChange({ ...params, authors: authors.length ? authors : undefined });
       },
       [params, onParamsChange]
     );
@@ -93,7 +93,7 @@ export const UserActionsFilterBar = React.memo<UserActionsFilterBarProps>(
 
     const handleClearFilters = useCallback(() => {
       setSearchInputValue('');
-      onParamsChange({ ...params, type: 'all', author: undefined, search: undefined });
+      onParamsChange({ ...params, type: 'all', authors: undefined, search: undefined });
     }, [params, onParamsChange]);
 
     return (
@@ -120,8 +120,8 @@ export const UserActionsFilterBar = React.memo<UserActionsFilterBarProps>(
               />
               <AuthorFilter
                 caseId={caseId}
-                author={params.author}
-                onAuthorChange={handleAuthorChange}
+                authors={params.authors}
+                onAuthorsChange={handleAuthorsChange}
                 isLoading={isLoading}
               />
               <SortFilter

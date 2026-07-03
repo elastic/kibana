@@ -183,7 +183,32 @@ describe('useLastPage', () => {
         },
         userActivityQueryParams: {
           ...userActivityQueryParams,
-          author: 'elastic',
+          authors: ['elastic'],
+        },
+      })
+    );
+
+    expect(result.current).toEqual({
+      lastPage: 1,
+    });
+  });
+
+  it('returns 1 when multiple authors are selected, regardless of stats', async () => {
+    const { result } = renderHook(() =>
+      useLastPage({
+        userActionsStats: {
+          total: 38,
+          totalDeletions: 0,
+          totalHiddenCommentUpdates: 0,
+          totalComments: 17,
+          totalCommentDeletions: 0,
+          totalCommentCreations: 10,
+          totalOtherActions: 21,
+          totalOtherActionDeletions: 0,
+        },
+        userActivityQueryParams: {
+          ...userActivityQueryParams,
+          authors: ['elastic', 'other'],
         },
       })
     );

@@ -17,9 +17,10 @@ import * as i18n from './translations';
 
 export const AUTHOR_FILTER_ID = 'userActionsAuthor';
 
-// Sentinel option value representing "no author filter", distinct from any
-// real username.
-const ALL_AUTHORS_VALUE = '__all__';
+// Stable reference so `authors`'s useMemo dependents don't recompute on every
+// render just because the caller passes `undefined` (which would otherwise
+// default to a brand new array each time).
+const EMPTY_AUTHORS: string[] = [];
 
 type AuthorOption = EuiSelectableOption<{ value: string }>;
 
@@ -34,7 +35,7 @@ interface AuthorEntry {
 /**
  * Builds the de-duplicated, alphabetically sorted list of author entries from
  * the case's participants (the users who have created user actions on the
- * case). The BE `author` filter matches on `created_by.username`, so entries
+ * case). The BE `authors` filter matches on `created_by.username`, so entries
  * without a username can't be filtered on and are dropped.
  */
 const buildAuthorEntries = (participants: UserWithProfileInfo[]): AuthorEntry[] => {
@@ -52,18 +53,17 @@ const buildAuthorEntries = (participants: UserWithProfileInfo[]): AuthorEntry[] 
 interface AuthorFilterProps {
   caseId: string;
   isLoading?: boolean;
-  author?: string;
-  onAuthorChange: (author?: string) => void;
+  authors?: string[];
+  onAuthorsChange: (authors: string[]) => void;
 }
 
 /**
- * Single-selection author filter dropdown (mirroring `TypeFilter` /
- * `SortFilter`). The user_actions `_find` `author` query param accepts only
- * one username, so this is a plain "All / one author" selectable list rather
- * than a multi-select.
+ * Multi-selection author filter dropdown (mirroring `TypeFilter` /
+ * `SortFilter`). Selected authors are OR'd together server-side by the
+ * user_actions `_find` `authors` query param.
  */
 export const AuthorFilter = React.memo<AuthorFilterProps>(
-  ({ caseId, author, onAuthorChange, isLoading = false }) => {
+  ({ caseId, authors = EMPTY_AUTHORS, onAuthorsChange, isLoading = false }) => {
     const { data: caseUsers, isLoading: isLoadingCaseUsers } = useGetCaseUsers(caseId);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopover = useCallback(() => setIsPopoverOpen((prevValue) => !prevValue), []);
@@ -75,41 +75,35 @@ export const AuthorFilter = React.memo<AuthorFilterProps>(
     );
 
     const options = useMemo<AuthorOption[]>(
-      () => [
-        {
-          label: i18n.ALL_AUTHORS,
-          value: ALL_AUTHORS_VALUE,
-          checked: !author ? 'on' : undefined,
-          'data-test-subj': 'user-actions-filter-bar-author-option-all',
-        },
-        ...authorEntries.map(({ key, label }) => ({
+      () =>
+        authorEntries.map(({ key, label }) => ({
           label,
           value: key,
-          checked: author === key ? ('on' as const) : undefined,
+          checked: authors.includes(key) ? ('on' as const) : undefined,
           'data-test-subj': `user-actions-filter-bar-author-option-${key}`,
         })),
-      ],
-      [author, authorEntries]
+      [authors, authorEntries]
     );
 
     const onChange = useCallback(
       (newOptions: AuthorOption[]) => {
-        const selected = newOptions.find((option) => option.checked === 'on');
-        if (selected) {
-          const newAuthor = selected.value === ALL_AUTHORS_VALUE ? undefined : selected.value;
-          if (newAuthor !== author) {
-            onAuthorChange(newAuthor);
-          }
-        }
-        closePopover();
+        const selected = newOptions
+          .filter((option) => option.checked === 'on')
+          .map((option) => option.value);
+        onAuthorsChange(selected);
       },
-      [author, onAuthorChange, closePopover]
+      [onAuthorsChange]
     );
 
     const selectedLabel = useMemo(() => {
-      if (!author) return i18n.ALL_AUTHORS;
-      return authorEntries.find((entry) => entry.key === author)?.label ?? i18n.UNKNOWN_AUTHOR;
-    }, [author, authorEntries]);
+      if (authors.length === 0) return i18n.ALL_AUTHORS;
+      if (authors.length === 1) {
+        return (
+          authorEntries.find((entry) => entry.key === authors[0])?.label ?? i18n.UNKNOWN_AUTHOR
+        );
+      }
+      return i18n.AUTHORS_SELECTED(authors.length);
+    }, [authors, authorEntries]);
 
     const isDisabled = isLoading || isLoadingCaseUsers;
 
@@ -123,7 +117,7 @@ export const AuthorFilter = React.memo<AuthorFilterProps>(
             iconType="arrowDown"
             onClick={togglePopover}
             isSelected={isPopoverOpen}
-            hasActiveFilters={Boolean(author)}
+            hasActiveFilters={authors.length > 0}
             isLoading={isDisabled}
             isDisabled={isDisabled}
           >
@@ -138,7 +132,7 @@ export const AuthorFilter = React.memo<AuthorFilterProps>(
       >
         <EuiSelectable<{ value: string }>
           options={options}
-          singleSelection="always"
+          singleSelection={false}
           searchable
           searchProps={{
             placeholder: i18n.AUTHOR,

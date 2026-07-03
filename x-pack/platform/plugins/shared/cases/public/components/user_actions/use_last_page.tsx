@@ -10,6 +10,7 @@ import { useMemo } from 'react';
 
 import type { CaseUserActionsStats } from '../../containers/types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
+import { hasSearchOrAuthorFilter } from '../user_actions_activity_bar/utils';
 
 export const useLastPage = ({
   userActivityQueryParams,
@@ -29,7 +30,7 @@ export const useLastPage = ({
     // Returning 1 here disables the separate last-page fetch and lets the
     // infinite query alone paginate through the filtered results using the
     // `total` returned by the API.
-    if (userActivityQueryParams.search || userActivityQueryParams.author) {
+    if (hasSearchOrAuthorFilter(userActivityQueryParams)) {
       return 1;
     }
 

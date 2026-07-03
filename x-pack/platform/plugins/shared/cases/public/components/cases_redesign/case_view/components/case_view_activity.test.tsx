@@ -270,6 +270,29 @@ describe('Case View Page activity tab (redesign)', () => {
     });
   });
 
+  it('should save the authors filter selection in localstorage', async () => {
+    useGetCaseUserActionsStatsMock.mockReturnValue({ data: userActionsStats, isLoading: false });
+
+    renderWithTestingProviders(<CaseViewActivity {...caseProps} />);
+
+    await userEvent.click(await screen.findByTestId('user-actions-filter-bar-author-button'));
+    await userEvent.click(
+      await screen.findByTestId(
+        `user-actions-filter-bar-author-option-${caseUsers.participants[0].user.username}`
+      )
+    );
+
+    await waitFor(() => {
+      expect(localStorage.getItem(localStorageKey)).toBe(
+        JSON.stringify({
+          type: 'all',
+          sortOrder: 'asc',
+          authors: [caseUsers.participants[0].user.username],
+        })
+      );
+    });
+  });
+
   describe('filter activity', () => {
     beforeEach(() => {
       jest.clearAllMocks();
@@ -351,6 +374,30 @@ describe('Case View Page activity tab (redesign)', () => {
         caseData.id,
         { ...userActivityQueryParams, type: 'action', page: lastPageForHistory },
         true
+      );
+    });
+
+    it('should call user action hooks correctly when filtering by author', async () => {
+      renderWithTestingProviders(<CaseViewActivity {...caseProps} />);
+
+      const author = caseUsers.participants[0].user.username as string;
+
+      await userEvent.click(await screen.findByTestId('user-actions-filter-bar-author-button'));
+      await userEvent.click(
+        await screen.findByTestId(`user-actions-filter-bar-author-option-${author}`)
+      );
+
+      // Filtering (like searching) collapses pagination into a single
+      // infinite query that fetches every page, including the last.
+      expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+        caseData.id,
+        { ...userActivityQueryParams, authors: [author] },
+        true
+      );
+      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+        caseData.id,
+        { ...userActivityQueryParams, authors: [author] },
+        false
       );
     });
   });

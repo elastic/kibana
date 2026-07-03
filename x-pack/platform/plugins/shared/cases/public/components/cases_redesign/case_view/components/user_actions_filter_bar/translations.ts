@@ -26,6 +26,12 @@ export const UNKNOWN_AUTHOR = i18n.translate('xpack.cases.userActionsFilterBar.u
   defaultMessage: 'Unknown',
 });
 
+export const AUTHORS_SELECTED = (count: number) =>
+  i18n.translate('xpack.cases.userActionsFilterBar.authorsSelected', {
+    defaultMessage: '{count} selected',
+    values: { count },
+  });
+
 export const CLEAR_FILTERS = i18n.translate('xpack.cases.userActionsFilterBar.clearFilters', {
   defaultMessage: 'Clear filters',
 });

@@ -15,7 +15,7 @@ export interface UserActivityParams {
   page: number;
   perPage: number;
   search?: string;
-  author?: string;
+  authors?: string[];
 }
 
 /**
@@ -26,5 +26,5 @@ export interface UserActivityParams {
 export interface UserActivityFilters {
   type: UserActivityFilter;
   sortOrder: UserActivitySortOrder;
-  author?: string;
+  authors?: string[];
 }

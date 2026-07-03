@@ -10,6 +10,7 @@ import type { InternalFindCaseUserActions, CaseUserActionTypeWithAll } from '../
 import { findCaseUserActions } from './api';
 import type { ServerError } from '../types';
 import { useCasesToast } from '../common/use_cases_toast';
+import { hasSearchOrAuthorFilter } from '../components/user_actions_activity_bar/utils';
 import { ERROR_TITLE } from './translations';
 import { casesQueriesKeys } from './constants';
 
@@ -20,7 +21,7 @@ export const useInfiniteFindCaseUserActions = (
     sortOrder: 'asc' | 'desc';
     perPage: number;
     search?: string;
-    author?: string;
+    authors?: string[];
   },
   isEnabled: boolean
 ) => {
@@ -30,7 +31,7 @@ export const useInfiniteFindCaseUserActions = (
   // When searching or filtering by author, `useLastPage` doesn't fetch a
   // separate last page (its totals aren't reliable for filtered results), so
   // the infinite query needs to fetch every page itself, including the last.
-  const shouldFetchAllPages = Boolean(params.search || params.author);
+  const shouldFetchAllPages = hasSearchOrAuthorFilter(params);
 
   return useInfiniteQuery<InternalFindCaseUserActions, ServerError>(
     casesQueriesKeys.caseUserActions(caseId, params),

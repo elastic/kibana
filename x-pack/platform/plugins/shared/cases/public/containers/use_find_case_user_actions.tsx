@@ -21,7 +21,7 @@ export const useFindCaseUserActions = (
     page: number;
     perPage: number;
     search?: string;
-    author?: string;
+    authors?: string[];
   },
   isEnabled: boolean
 ) => {

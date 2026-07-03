@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { hasActiveUserActivityFilter } from './utils';
+import { hasActiveUserActivityFilter, hasSearchOrAuthorFilter } from './utils';
 import type { UserActivityParams } from './types';
 
 describe('hasActiveUserActivityFilter', () => {
@@ -26,7 +26,13 @@ describe('hasActiveUserActivityFilter', () => {
   });
 
   it('returns true when an author filter is applied', () => {
-    expect(hasActiveUserActivityFilter({ ...baseParams, author: 'elastic' })).toBe(true);
+    expect(hasActiveUserActivityFilter({ ...baseParams, authors: ['elastic'] })).toBe(true);
+  });
+
+  it('returns true when multiple authors are applied', () => {
+    expect(hasActiveUserActivityFilter({ ...baseParams, authors: ['elastic', 'other'] })).toBe(
+      true
+    );
   });
 
   it('returns true when a search term is applied', () => {
@@ -37,7 +43,33 @@ describe('hasActiveUserActivityFilter', () => {
     expect(hasActiveUserActivityFilter({ ...baseParams, search: '' })).toBe(false);
   });
 
-  it('returns false when author is an empty string', () => {
-    expect(hasActiveUserActivityFilter({ ...baseParams, author: '' })).toBe(false);
+  it('returns false when authors is an empty array', () => {
+    expect(hasActiveUserActivityFilter({ ...baseParams, authors: [] })).toBe(false);
+  });
+});
+
+describe('hasSearchOrAuthorFilter', () => {
+  it('returns false when neither search nor authors are set', () => {
+    expect(hasSearchOrAuthorFilter({})).toBe(false);
+  });
+
+  it('returns true when search is set', () => {
+    expect(hasSearchOrAuthorFilter({ search: 'hello' })).toBe(true);
+  });
+
+  it('returns false when search is an empty string', () => {
+    expect(hasSearchOrAuthorFilter({ search: '' })).toBe(false);
+  });
+
+  it('returns true when authors has at least one entry', () => {
+    expect(hasSearchOrAuthorFilter({ authors: ['elastic'] })).toBe(true);
+  });
+
+  it('returns false when authors is an empty array', () => {
+    expect(hasSearchOrAuthorFilter({ authors: [] })).toBe(false);
+  });
+
+  it('returns true when both search and authors are set', () => {
+    expect(hasSearchOrAuthorFilter({ search: 'hello', authors: ['elastic'] })).toBe(true);
   });
 });
