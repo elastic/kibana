@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { pick } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { SkipRuleInstallReason } from '../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -23,6 +24,7 @@ import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import type { RuleSignatureId, RuleVersion } from '../../../../../../common/api/detection_engine';
+import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { excludeLicenseRestrictedRules } from '../../logic/utils';
 
 export const performRuleInstallationHandler = async (
@@ -56,7 +58,7 @@ export const performRuleInstallationHandler = async (
       rule_id: RuleSignatureId;
       version: RuleVersion;
     }> = [];
-    const ruleErrors = [];
+    const ruleErrors: Array<PromisePoolError<{ rule_id: string; name?: string }>> = [];
     const installedRules: InstalledRuleBasicInfo[] = [];
     const skippedRules: SkippedRuleInstall[] = [];
 
@@ -116,8 +118,10 @@ export const performRuleInstallationHandler = async (
         rules: ruleAssets,
         bulkCount: ruleInstallQueue.length,
       });
-      installedRules.push(...results);
-      ruleErrors.push(...errors);
+      installedRules.push(...results.map((rule) => pick(rule, ['id', 'rule_id', 'version'])));
+      ruleErrors.push(
+        ...errors.map(({ item, error }) => ({ item: pick(item, ['rule_id', 'name']), error }))
+      );
     }
 
     const { error: timelineInstallationError } = await performTimelinesInstallation(
