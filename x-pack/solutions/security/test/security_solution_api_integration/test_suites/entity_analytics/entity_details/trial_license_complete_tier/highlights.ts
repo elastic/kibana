@@ -227,7 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
         assetCriticality: [
           {
             '@timestamp': [expect.any(String)],
-            'asset.criticality': ['high_impact'],
+            'asset.criticality': ['High Impact'],
             'host.name': [expect.any(String)],
           },
         ],
@@ -238,12 +238,12 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 contribution_score: [expect.any(String)],
                 description: [expect.any(String)],
-                risk_score: ['21'],
+                risk_score: ['21.00'],
                 timestamp: [expect.any(String)],
               },
             ],
             asset_criticality_contribution_score: expect.any(String),
-            score: [expect.any(Number)],
+            score: [expect.any(String)],
           },
         ],
         vulnerabilities: [
