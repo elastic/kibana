@@ -7,47 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { REPO_ROOT } from "@kbn/repo-info";
-import path from "node:path";
+import { REPO_ROOT } from '@kbn/repo-info';
+import path from 'node:path';
 
-export const SCOUT_OUTPUT_ROOT = path.resolve(REPO_ROOT, ".scout");
+export const SCOUT_OUTPUT_ROOT = path.resolve(REPO_ROOT, '.scout');
 
 // Servers
 
-export const SCOUT_SERVERS_ROOT = path.resolve(SCOUT_OUTPUT_ROOT, "servers");
+export const SCOUT_SERVERS_ROOT = path.resolve(SCOUT_OUTPUT_ROOT, 'servers');
 
 // Reporting
 
-export const SCOUT_REPORT_OUTPUT_ROOT = path.resolve(
-  SCOUT_OUTPUT_ROOT,
-  "reports",
-);
+export const SCOUT_REPORT_OUTPUT_ROOT = path.resolve(SCOUT_OUTPUT_ROOT, 'reports');
 export const SCOUT_TEST_CONFIG_STATS_PATH = path.resolve(
   SCOUT_OUTPUT_ROOT,
-  "test_config_stats.json",
+  'test_config_stats.json'
 );
 
 // Scout definitions
 
 export const SCOUT_PLAYWRIGHT_CONFIGS_PATH = path.resolve(
   SCOUT_OUTPUT_ROOT,
-  "test_configs",
-  "scout_playwright_configs.json",
+  'test_configs',
+  'scout_playwright_configs.json'
 );
 
 export const PLATFORM_AND_SOLUTION_SCOUT_ROOT_PATH_GLOB =
-  "{src/platform,src/core,x-pack/**}/{plugins,packages}/**/test/scout{_*,}";
+  '{src/platform,src/core,x-pack/**}/{plugins,packages}/**/test/scout{_*,}';
 
-export const EXAMPLE_PLUGIN_SCOUT_ROOT_PATH_GLOB =
-  "{examples,x-pack/examples}/**/test/scout{_*,}";
+export const EXAMPLE_PLUGIN_SCOUT_ROOT_PATH_GLOB = '{examples,x-pack/examples}/**/test/scout{_*,}';
 
-export const CORE_MODULE_SCOUT_ROOT_PATH_GLOB = "src/core/test/scout{_*,}";
+export const CORE_MODULE_SCOUT_ROOT_PATH_GLOB = 'src/core/test/scout{_*,}';
 
 export const TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB = `{${[
   PLATFORM_AND_SOLUTION_SCOUT_ROOT_PATH_GLOB,
   EXAMPLE_PLUGIN_SCOUT_ROOT_PATH_GLOB,
   CORE_MODULE_SCOUT_ROOT_PATH_GLOB,
-].join(",")}}`;
+].join(',')}}`;
 
 export const TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX = new RegExp(
   `(?:src|x-pack)` +
@@ -55,24 +51,24 @@ export const TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX = new RegExp(
     `\/(plugins|packages)` + // 3: plugin or package
     `\/?(shared|private|)` + // 4: artifact visibility
     `\/([\\w|-]+(?:\\/[\\w|-]+)*)` + // 5: plugin/package name (supports nested paths like vis_types/timelion)
-    `\/test\/scout(?:_([^\\/]*))?`, // 6: custom target config set name
+    `\/test\/scout(?:_([^\\/]*))?` // 6: custom target config set name
 );
 
-export const SCOUT_TEST_CATEGORIES = ["api", "ui"];
+export const SCOUT_TEST_CATEGORIES = ['api', 'ui'];
 
 export const SCOUT_CONFIG_PATH_GLOB =
   TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB +
-  `/{,*/}{${SCOUT_TEST_CATEGORIES.join(",")}}/{,*.}playwright.config.ts`;
+  `/{,*/}{${SCOUT_TEST_CATEGORIES.join(',')}}/{,*.}playwright.config.ts`;
 
 export const SCOUT_CONFIG_PATH_REGEX = new RegExp(
   TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX.source +
-    `\/(${SCOUT_TEST_CATEGORIES.join("|")})` + // 7: Scout test category
-    `\/(\\w*)\\.?playwright\\.config\\.ts`, // 8: Scout config type
+    `\/(${SCOUT_TEST_CATEGORIES.join('|')})` + // 7: Scout test category
+    `\/(\\w*)\\.?playwright\\.config\\.ts` // 8: Scout config type
 );
 
 export const SCOUT_CONFIG_MANIFEST_PATH_GLOB =
   TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB +
-  `/{,*/}.meta/{${SCOUT_TEST_CATEGORIES.join(",")}}/*.json`;
+  `/{,*/}.meta/{${SCOUT_TEST_CATEGORIES.join(',')}}/*.json`;
 
 /**
  * Playwright configs under top-level `examples/` and `x-pack/examples/` (developer example plugins).
@@ -81,8 +77,8 @@ export const SCOUT_CONFIG_MANIFEST_PATH_GLOB =
  */
 export const SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX = new RegExp(
   `^(examples|x-pack/examples)/([^/]+)/test/scout(?:_([^/]*))?(?:/([^/]+))?/(${SCOUT_TEST_CATEGORIES.join(
-    "|",
-  )})/(\\w*)\\.?playwright\\.config\\.ts$`,
+    '|'
+  )})/(\\w*)\\.?playwright\\.config\\.ts$`
 );
 
 /**
@@ -102,16 +98,12 @@ export const SCOUT_UNIFIED_CONFIG_PATH_REGEX = new RegExp(
     `)` +
     `/test/scout(?:_(?<serverConfigSet>[^/]*))?` +
     `(?:/(?<namespace>[^/]+))?` +
-    `/(?<testCategory>${SCOUT_TEST_CATEGORIES.join("|")})` +
-    `/(?<testConfigType>\\w*)\\.?playwright\\.config\\.ts$`,
+    `/(?<testCategory>${SCOUT_TEST_CATEGORIES.join('|')})` +
+    `/(?<testConfigType>\\w*)\\.?playwright\\.config\\.ts$`
 );
 
 // Scout CI
-export const SCOUT_CI_CONFIG_PATH = path.resolve(
-  REPO_ROOT,
-  ".buildkite",
-  "scout_ci_config.yml",
-);
+export const SCOUT_CI_CONFIG_PATH = path.resolve(REPO_ROOT, '.buildkite', 'scout_ci_config.yml');
 
 // Selective testing — patterns used by the Scout selective-testing resolver.
 
@@ -122,9 +114,9 @@ export const SCOUT_CI_CONFIG_PATH = path.resolve(
  * schedule any Playwright config to run.
  */
 export const SCOUT_TESTS_ONLY_IGNORE_PATTERNS: readonly string[] = [
-  "**/README*",
-  "**/*.md",
-  "**/CHANGELOG*",
+  '**/README*',
+  '**/*.md',
+  '**/CHANGELOG*',
 ];
 
 /**
@@ -149,10 +141,10 @@ export const SCOUT_TESTS_ONLY_IGNORE_PATTERNS: readonly string[] = [
  * `SCOUT_CONFIG_MANIFEST_PATH_GLOB` so they all stay in sync.
  */
 export const SCOUT_TESTS_ONLY_SCOPE_GLOBS: readonly string[] = [
-  `**/test/scout{_*,}/{${SCOUT_TEST_CATEGORIES.join(",")}}/**`,
-  `**/test/scout{_*,}/*/{${SCOUT_TEST_CATEGORIES.join(",")}}/**`,
-  `**/test/scout{_*,}/.meta/{${SCOUT_TEST_CATEGORIES.join(",")}}/**`,
-  `**/test/scout{_*,}/*/.meta/{${SCOUT_TEST_CATEGORIES.join(",")}}/**`,
+  `**/test/scout{_*,}/{${SCOUT_TEST_CATEGORIES.join(',')}}/**`,
+  `**/test/scout{_*,}/*/{${SCOUT_TEST_CATEGORIES.join(',')}}/**`,
+  `**/test/scout{_*,}/.meta/{${SCOUT_TEST_CATEGORIES.join(',')}}/**`,
+  `**/test/scout{_*,}/*/.meta/{${SCOUT_TEST_CATEGORIES.join(',')}}/**`,
 ];
 
 /**
@@ -164,8 +156,8 @@ export const SCOUT_TESTS_ONLY_SCOPE_GLOBS: readonly string[] = [
  */
 export const SCOUT_TEST_SCOPE_PATTERN = new RegExp(
   `^(.+?)\\/test\\/(scout(?:_[^/]+)?)(?:\\/(?!\\.meta)([^/]+))?\\/(?:\\.meta\\/)?(${SCOUT_TEST_CATEGORIES.join(
-    "|",
-  )})(?:\\/(.*))?$`,
+    '|'
+  )})(?:\\/(.*))?$`
 );
 
 /**
@@ -174,18 +166,18 @@ export const SCOUT_TEST_SCOPE_PATTERN = new RegExp(
  * other contents.
  */
 export const CRITICAL_FILES_SCOUT: readonly string[] = [
-  "package.json",
-  "yarn.lock",
-  "tsconfig.json",
-  ".node-version",
-  ".nvmrc",
-  "src/setup_node_env/**/*",
-  "packages/kbn-babel-preset/**/*",
-  "src/platform/packages/shared/kbn-repo-info/**/*",
-  "src/platform/packages/shared/kbn-scout/**/*",
-  "src/platform/packages/private/kbn-scout-reporting/**/*",
-  "scripts/scout.js",
-  ".buildkite/scripts/steps/test/scout/**/*",
-  ".buildkite/pipeline-utils/affected-packages/**/*.{ts,js,sh}",
-  ".buildkite/pipeline-utils/ci-stats/**/*.{ts,js}",
+  'package.json',
+  'yarn.lock',
+  'tsconfig.json',
+  '.node-version',
+  '.nvmrc',
+  'src/setup_node_env/**/*',
+  'packages/kbn-babel-preset/**/*',
+  'src/platform/packages/shared/kbn-repo-info/**/*',
+  'src/platform/packages/shared/kbn-scout/**/*',
+  'src/platform/packages/private/kbn-scout-reporting/**/*',
+  'scripts/scout.js',
+  '.buildkite/scripts/steps/test/scout/**/*',
+  '.buildkite/pipeline-utils/affected-packages/**/*.{ts,js,sh}',
+  '.buildkite/pipeline-utils/ci-stats/**/*.{ts,js}',
 ];
