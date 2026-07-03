@@ -44,7 +44,18 @@ export const AlertEpisodeTimeline = ({
   isLoadingMore,
 }: AlertEpisodeTimelineProps) => {
   const { euiTheme } = useEuiTheme();
-  const renderedEntries = entries.map((item, idx) => {
+
+  const lastActionIndex = entries.reduce(
+    (lastIdx, item, idx) => (item.kind === 'action' ? idx : lastIdx),
+    -1
+  );
+  // Actions are paginated but status/severity changes are always loaded in full, so hide
+  // anything older than the oldest loaded action while more can still load — otherwise the
+  // next page would insert content between entries that are already visible, instead of
+  // only ever revealing more below.
+  const visibleEntries = hasMore ? entries.slice(0, lastActionIndex + 1) : entries;
+
+  const renderedEntries = visibleEntries.map((item, idx) => {
     if (item.kind === 'action') {
       return (
         <AlertEpisodeTimelineActionComment
@@ -133,17 +144,7 @@ export const AlertEpisodeTimeline = ({
   });
 
   if (hasMore) {
-    // Only actions are paginated, so insert after the oldest loaded action rather than at
-    // the bottom, to avoid implying there's more status/severity history to load too.
-    const lastActionIndex = entries.reduce(
-      (lastIdx, item, idx) => (item.kind === 'action' ? idx : lastIdx),
-      -1
-    );
-    const insertAt = lastActionIndex === -1 ? renderedEntries.length : lastActionIndex + 1;
-
-    renderedEntries.splice(
-      insertAt,
-      0,
+    renderedEntries.push(
       <EuiComment
         key="load-more"
         className={LOAD_MORE_ITEM_CLASS_NAME}
@@ -177,7 +178,6 @@ export const AlertEpisodeTimeline = ({
 
   return (
     <EuiCommentList
-      gutterSize="l"
       css={css`
         /* EuiTimelineItemEvent renders as a bare div with flex:1 and no min-width:0,
            causing wide content (e.g. long tag lists) to expand the row past its container.
@@ -187,20 +187,15 @@ export const AlertEpisodeTimeline = ({
           min-width: 0;
         }
 
-        /* Fade the (normally solid) connecting line to transparent at this row's vertical
-           center — roughly where the button sits — and back to solid by its bottom edge, so
-           the line itself signals the breakpoint instead of a marker icon. "100% - gutter"
-           is this row's own bottom edge, since the icon column's pseudo-element also extends
-           through the trailing gutter gap into the next item (see EUI's euiTimelineStyles). */
+        /* The load-more row is always the last item, so EUI's own :last-child rule already
+           shrinks its connecting-line segment to span only from its top down to its own
+           vertical center (see euiTimelineStyles) — which is where the button sits. Fading
+           that segment to transparent makes the line itself signal the breakpoint, instead
+           of a marker icon. */
         .${LOAD_MORE_ITEM_CLASS_NAME} > [class*='euiTimelineItemIcon-']::before {
           border-left: none;
           width: ${euiTheme.border.width.thick};
-          background-image: linear-gradient(
-            to bottom,
-            ${euiTheme.border.color} 0%,
-            transparent calc((100% - ${euiTheme.size.l}) / 2),
-            ${euiTheme.border.color} calc(100% - ${euiTheme.size.l})
-          );
+          background-image: linear-gradient(to bottom, ${euiTheme.border.color}, transparent);
         }
       `}
     >

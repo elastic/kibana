@@ -53,35 +53,48 @@ describe('AlertEpisodeTimeline', () => {
     expect(screen.queryByTestId('alertingV2TimelineLoadMore')).not.toBeInTheDocument();
   });
 
-  it('places the load-more control right after the oldest loaded action, not at the bottom of the whole list', () => {
+  it('hides status/severity entries older than the oldest loaded action while more can load', () => {
     // Newest-first: an action, then a complete (non-paginated) state entry that is OLDER than
-    // the action. Only the action feed is paginated, so the control must sit between them —
-    // not below the state entry, which would wrongly suggest more state history exists.
+    // the action. Only the action feed is paginated, so while more can still load, the older
+    // state entry is hidden — otherwise a later page could insert content between entries
+    // that are already visible, instead of only ever revealing more below the control.
     renderTimeline(
       [makeAction('a1', '2024-01-01T00:02:00.000Z'), makeStateChange('2024-01-01T00:00:00.000Z')],
       { hasMore: true }
     );
 
     const listItems = document.querySelectorAll('ol[role="list"] > li');
-    expect(listItems).toHaveLength(3);
+    expect(listItems).toHaveLength(2);
     expect(listItems[0]).toHaveAttribute('data-timestamp', '2024-01-01T00:02:00.000Z');
+    // The load-more control always sits at the bottom now that older entries are hidden.
     expect(
       within(listItems[1] as HTMLElement).getByTestId('alertingV2TimelineLoadMore')
     ).toBeInTheDocument();
-    // The connecting line fades out/in around this breakpoint (via a dedicated class),
-    // signaling this point in the timeline has unloaded data.
+    // The connecting line fades out at this breakpoint (via a dedicated class), signaling
+    // this point in the timeline has unloaded data.
     expect(listItems[1]).toHaveClass('alertingV2TimelineLoadMoreItem');
-    expect(listItems[2]).toHaveAttribute('data-test-subj', 'alertingV2TimelineEntry');
-    expect(listItems[2]).toHaveAttribute('data-timestamp', '2024-01-01T00:00:00.000Z');
   });
 
-  it('falls back to appending the load-more control at the end when there are no loaded actions', () => {
-    renderTimeline([makeStateChange('2024-01-01T00:00:00.000Z')], { hasMore: true });
+  it('reveals previously-hidden entries once there is nothing more to load', () => {
+    renderTimeline(
+      [makeAction('a1', '2024-01-01T00:02:00.000Z'), makeStateChange('2024-01-01T00:00:00.000Z')],
+      { hasMore: false }
+    );
 
     const listItems = document.querySelectorAll('ol[role="list"] > li');
     expect(listItems).toHaveLength(2);
+    expect(listItems[1]).toHaveAttribute('data-test-subj', 'alertingV2TimelineEntry');
+    expect(listItems[1]).toHaveAttribute('data-timestamp', '2024-01-01T00:00:00.000Z');
+    expect(screen.queryByTestId('alertingV2TimelineLoadMore')).not.toBeInTheDocument();
+  });
+
+  it('hides everything but the load-more control when no actions have loaded yet', () => {
+    renderTimeline([makeStateChange('2024-01-01T00:00:00.000Z')], { hasMore: true });
+
+    const listItems = document.querySelectorAll('ol[role="list"] > li');
+    expect(listItems).toHaveLength(1);
     expect(
-      within(listItems[1] as HTMLElement).getByTestId('alertingV2TimelineLoadMore')
+      within(listItems[0] as HTMLElement).getByTestId('alertingV2TimelineLoadMore')
     ).toBeInTheDocument();
   });
 });
