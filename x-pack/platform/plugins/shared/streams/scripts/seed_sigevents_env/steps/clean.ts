@@ -11,7 +11,6 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { SeedContext } from '../types';
 import type { ConnectionConfig } from '../lib/get_connection_config';
 import { kibanaRequest } from '../lib/kibana';
-import { cleanTasks } from './seed_tasks';
 
 async function deleteByMatchAll(esClient: Client, index: string, log: ToolingLog): Promise<void> {
   try {
@@ -78,13 +77,6 @@ export async function cleanSeedData(
   if (queryIds.length > 0) {
     log.info(`clean: deleted ${queryIds.length} query/queries from stream "${ctx.streamName}"`);
   }
-
-  // Insights — wipe directly via ES (avoids the Kibana list+bulk-delete round-trip
-  // which triggers a route-level bug when no query params are present).
-  await deleteByMatchAll(esClient, '.kibana_streams_insights-*', log);
-
-  log.info('clean: deleting seeded task docs');
-  await cleanTasks(ctx, esClient, log);
 
   log.info(`clean: deleting data stream "${ctx.streamName}"`);
   try {

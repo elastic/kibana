@@ -65,7 +65,7 @@ const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListPr
   );
 
   return (
-    <ul css={styles.list}>
+    <ul css={[styles.list, styles.scroller]}>
       {options.map((option, index) => (
         <PanelListItem
           key={`${option.start}-${option.end}-${index}`}
@@ -202,12 +202,12 @@ export function MainPanel() {
 
   return (
     <PanelContainer data-test-subj="dateRangePickerMainPanel">
-      <PanelBody>
-        <PanelBodySection spacingSide="none">
+      <PanelBody fill>
+        <PanelBodySection spacingSide="none" css={styles.presetsArea}>
           {timeRange.value === '' && <DocumentationButton />}
           <PresetsRecentTabs />
         </PanelBodySection>
-        <PanelBodySection spacingSide="none" css={styles.stickyBottom}>
+        <PanelBodySection spacingSide="none" css={styles.bottomSection}>
           <hr css={dividerStyles.root} />
           <SubPanelMenu />
         </PanelBodySection>

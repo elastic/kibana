@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import {
@@ -314,6 +315,7 @@ export const SecuritySideNav: React.FC = () => {
   const {
     uiSettings,
     settings: { client },
+    featureFlags: { getBooleanValue },
   } = useKibana().services;
 
   const chatExperience = useObservable(client.get$(AI_CHAT_EXPERIENCE_TYPE));
@@ -323,6 +325,7 @@ export const SecuritySideNav: React.FC = () => {
   const isClassicNavExternalLinksEnabled = useIsExperimentalFeatureEnabled(
     'securityClassicNavExternalLinks'
   );
+  const isAgentBuilderNavAtTop = getBooleanValue(AGENT_BUILDER_NAV_AT_TOP_FLAG, false);
   const items = useSolutionSideNavItems(chatExperience, isClassicNavExternalLinksEnabled);
   const selectedId = useSelectedId();
   const panelTopOffset = usePanelTopOffset();
@@ -337,9 +340,16 @@ export const SecuritySideNav: React.FC = () => {
       chatExperience,
       enableAlertsAndAttacksAlignment,
       isNewEAHomePageEnabled,
-      isClassicNavExternalLinksEnabled
+      isClassicNavExternalLinksEnabled,
+      isAgentBuilderNavAtTop
     );
-  }, [uiSettings, isNewEAHomePageEnabled, chatExperience, isClassicNavExternalLinksEnabled]);
+  }, [
+    uiSettings,
+    isNewEAHomePageEnabled,
+    chatExperience,
+    isAgentBuilderNavAtTop,
+    isClassicNavExternalLinksEnabled,
+  ]);
 
   if (!items) {
     return <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />;

@@ -10,6 +10,8 @@ import type { SavedObjectsExportTransformContext } from '@kbn/core/server';
 import { handleExport } from './export';
 import { mockCases } from '../../mocks';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import { CASE_ATTACHMENT_SAVED_OBJECT } from '../../../common/constants';
+import { getAttachmentsAndUserActionsForCases } from './utils';
 
 jest.mock('./utils', () => {
   return {
@@ -21,6 +23,9 @@ describe('case export', () => {
   const testRequest = httpServerMock.createFakeKibanaRequest({});
   const testContext: SavedObjectsExportTransformContext = { request: testRequest };
   const logger = loggingSystemMock.createLogger();
+  const config = {
+    attachments: { enabled: true },
+  } as never;
   const testCases: CaseSavedObjectTransformed[] = mockCases.map((_case, idx) => ({
     ..._case,
     attributes: {
@@ -36,6 +41,7 @@ describe('case export', () => {
       // @ts-ignore: mock objects are not matching persisted objects
       objects: testCases,
       logger,
+      config,
     });
 
     const containsIncrementalId = exported.some((exportedCase) => {
@@ -47,4 +53,36 @@ describe('case export', () => {
 
     expect(containsIncrementalId).toBeFalsy();
   });
+
+  it.each([
+    ['flag on', { attachments: { enabled: true } } as never],
+    ['flag off', { attachments: { enabled: false } } as never],
+  ])(
+    'includes cases-attachments in the scoped client and export query regardless of the feature flag (%s)',
+    async (_label, configForCase) => {
+      const coreSetup = coreMock.createSetup();
+
+      await handleExport({
+        context: testContext,
+        coreSetup,
+        // @ts-ignore: mock objects are not matching persisted objects
+        objects: testCases,
+        logger,
+        config: configForCase,
+      });
+
+      const [coreStart] = await coreSetup.getStartServices();
+
+      expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(
+        testRequest,
+        expect.objectContaining({
+          includedHiddenTypes: expect.arrayContaining([CASE_ATTACHMENT_SAVED_OBJECT]),
+        })
+      );
+      expect(getAttachmentsAndUserActionsForCases).toHaveBeenCalledWith(
+        expect.anything(),
+        testCases.map((testCase) => testCase.id)
+      );
+    }
+  );
 });
