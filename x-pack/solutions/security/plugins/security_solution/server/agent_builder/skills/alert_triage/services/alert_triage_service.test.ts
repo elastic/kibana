@@ -336,5 +336,26 @@ describe('prioritizeAlerts', () => {
       expect(hasIdsClause).toBe(false);
       expect(hasRangeClause).toBe(true);
     });
+
+    it('sizes the fetch to cover the full selection when more ids than maxAlerts are supplied', async () => {
+      const { esClient, search } = createEsClient({ alerts: [criticalLateralMovementHit] });
+      const alertIds = Array.from({ length: 250 }, (_, i) => `alert-${i}`);
+      await prioritizeAlerts({ ...defaultArgs, maxAlerts: 100, esClient, alertIds });
+
+      const alertSearchCall = search.mock.calls.find(([params]) =>
+        (params as { index: string }).index.startsWith('.alerts-security.')
+      );
+      expect((alertSearchCall![0] as { size: number }).size).toBe(250);
+    });
+
+    it('keeps size at maxAlerts on the queue-scan path (no ids)', async () => {
+      const { esClient, search } = createEsClient({ alerts: [criticalLateralMovementHit] });
+      await prioritizeAlerts({ ...defaultArgs, maxAlerts: 100, esClient });
+
+      const alertSearchCall = search.mock.calls.find(([params]) =>
+        (params as { index: string }).index.startsWith('.alerts-security.')
+      );
+      expect((alertSearchCall![0] as { size: number }).size).toBe(100);
+    });
   });
 });

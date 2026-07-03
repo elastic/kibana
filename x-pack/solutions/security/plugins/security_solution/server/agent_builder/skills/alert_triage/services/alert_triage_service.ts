@@ -357,7 +357,7 @@ export const prioritizeAlerts = async ({
 }: AlertTriageParams): Promise<TriageResult> => {
   const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
-  const hasExplicitIds = alertIds != null && alertIds.length > 0;
+  const explicitIds = alertIds != null && alertIds.length > 0 ? alertIds : undefined;
 
   const workflowShouldClauses =
     workflowStatus === 'open+acknowledged'
@@ -371,8 +371,8 @@ export const prioritizeAlerts = async ({
   // so we score exactly those and skip the queue-status/time-window filters — otherwise a
   // selected alert that is acknowledged/closed or older than the window would be silently
   // dropped. The queue-scan path (no ids) applies both filters as usual.
-  const filterClauses: Array<Record<string, unknown>> = hasExplicitIds
-    ? [{ ids: { values: alertIds } }]
+  const filterClauses: Array<Record<string, unknown>> = explicitIds
+    ? [{ ids: { values: explicitIds } }]
     : [
         {
           bool: {
@@ -390,9 +390,14 @@ export const prioritizeAlerts = async ({
         },
       ];
 
+  // On the explicit-ids path, size the request to cover the whole selection so a selection
+  // larger than maxAlerts is not truncated by risk_score (which would silently drop selected
+  // alerts). alertIds is bounded to 500 by the tool schema, so this stays within a safe cap.
+  const size = explicitIds ? Math.max(maxAlerts, explicitIds.length) : maxAlerts;
+
   const result = await esClient.search({
     index: alertsIndex,
-    size: maxAlerts,
+    size,
     query: {
       bool: {
         filter: filterClauses,
