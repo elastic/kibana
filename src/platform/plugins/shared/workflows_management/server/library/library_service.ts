@@ -10,8 +10,10 @@
 import type { Logger } from '@kbn/core/server';
 import type { Template, TemplateBody } from '@kbn/workflows-library';
 
+import { LibraryBundleReader } from './library_bundle_reader';
 import type { LibraryHealth } from './library_cache';
 import { LibraryFetcher } from './library_fetcher';
+import type { LibrarySource } from './library_source';
 import type { WorkflowsManagementConfig } from '../config';
 
 interface LibraryServiceDeps {
@@ -28,38 +30,48 @@ export interface TemplateFilters {
 }
 
 /**
- * Entry point used by route handlers. Owns a {@link LibraryFetcher} for
- * retrieval and applies in-memory filtering on top of the catalog the
- * fetcher returns. Keeping filter logic here (instead of inside the
- * fetcher) keeps the fetcher focused on HTTP + freshness; the service is
- * the natural home for business-level read concerns like
+ * Entry point used by route handlers. Owns a {@link LibrarySource} for
+ * retrieval and applies in-memory filtering on top of the catalog the source
+ * returns. The source is chosen from config: a `bundlePath` selects the local
+ * {@link LibraryBundleReader} (air-gapped deployments), otherwise the HTTP
+ * {@link LibraryFetcher} (the default CDN path). Keeping filter logic here
+ * (instead of inside the source) keeps each source focused on retrieval; the
+ * service is the natural home for business-level read concerns like
  * solution/category/search filters.
  */
 export class LibraryService {
-  private readonly fetcher: LibraryFetcher;
+  private readonly source: LibrarySource;
 
   constructor(deps: LibraryServiceDeps) {
     const logger = deps.logger.get('library');
-    this.fetcher = new LibraryFetcher({
-      registryUrl: deps.config.library.registryUrl,
-      kibanaVersion: deps.kibanaVersion,
-      isServerless: deps.isServerless,
-      ttlMs: deps.config.library.ttlMs,
-      logger,
-    });
+    const { bundlePath, registryUrl, ttlMs } = deps.config.library;
+    this.source = bundlePath
+      ? new LibraryBundleReader({
+          bundlePath,
+          kibanaVersion: deps.kibanaVersion,
+          isServerless: deps.isServerless,
+          logger,
+        })
+      : new LibraryFetcher({
+          registryUrl,
+          kibanaVersion: deps.kibanaVersion,
+          isServerless: deps.isServerless,
+          ttlMs,
+          logger,
+        });
   }
 
   async listTemplates(filters?: TemplateFilters): Promise<Template[]> {
-    const templates = await this.fetcher.listTemplates();
+    const templates = await this.source.listTemplates();
     return filterTemplates(templates, filters);
   }
 
   async getTemplate(slug: string): Promise<TemplateBody> {
-    return this.fetcher.getTemplate(slug);
+    return this.source.getTemplate(slug);
   }
 
   getHealth(): LibraryHealth {
-    return this.fetcher.getHealth();
+    return this.source.getHealth();
   }
 }
 

@@ -42,6 +42,7 @@ import { internalSigEventsDetectionsRoutes } from './internal/significant_events
 import { internalSigEventsDetectionsWorkflowRoutes } from './internal/significant_events/detections/workflow_route';
 import { internalSigEventsDiscoveriesRoutes } from './internal/significant_events/discoveries/route';
 import { internalSigEventsEventsRoutes } from './internal/significant_events/events/route';
+import { keepAliveRoutes } from './internal/significant_events/knowledge_indicators/keep_alive_route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -71,6 +72,7 @@ export const streamsRouteRepository = {
   ...internalSigEventsDetectionsWorkflowRoutes,
   ...internalSigEventsDiscoveriesRoutes,
   ...internalSigEventsEventsRoutes,
+  ...keepAliveRoutes,
   ...storageStatsRoutes,
   // public APIs
   ...docCountsRoutes,
