@@ -39,11 +39,9 @@ export default function ({ getService }: FtrProviderContext) {
     }
 
     before(async () => {
-      // This role is required...
-      // 1. So the test user can create an API key to use during testing
-      // 2. So the API key the user creates is able to get it's own information (e.g. associated profile UID)
+      // manage_own_api_key is required so that the test user can create an API key
       await security.role.create(testRoleName, {
-        elasticsearch: { cluster: ['manage_own_api_key', 'read_security'] },
+        elasticsearch: { cluster: ['manage_own_api_key'] },
       });
       await security.user.create(testUserName, {
         password: 'changeme',
@@ -58,7 +56,15 @@ export default function ({ getService }: FtrProviderContext) {
         .post('/internal/security/api_key')
         .set('Cookie', sessionCookie!.cookieString())
         .set('kbn-xsrf', 'xxx')
-        .send({ name: 'test-api-key', role_descriptors: {} })
+        .send({
+          name: 'test-api-key',
+          role_descriptors: {
+            'read-only-role': {
+              cluster: [], // No read_security or manage_own_api_key cluster privileges are needed to retrieve associated profile UID
+              indices: [{ names: ['*'], privileges: ['read'] }],
+            },
+          },
+        })
         .expect(200);
       apiKey = response.body;
 
