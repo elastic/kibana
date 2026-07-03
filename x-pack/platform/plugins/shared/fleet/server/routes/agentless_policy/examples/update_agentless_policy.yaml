@@ -98,6 +98,7 @@ requestBody:
             description: CSPM integration for AWS with cloud connector
             namespace: default
             cloud_connector:
+              enabled: true
               target_csp: aws
             inputs:
               cspm-cloudbeat/cis_aws:
@@ -134,6 +135,7 @@ requestBody:
             description: CSPM integration for AWS reusing existing cloud connector
             namespace: default
             cloud_connector:
+              enabled: true
               target_csp: aws
               cloud_connector_id: 'existing-aws-connector-id'
             inputs:

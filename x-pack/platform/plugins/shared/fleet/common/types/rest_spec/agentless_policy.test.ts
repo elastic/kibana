@@ -49,5 +49,64 @@ describe('agentless policy request schemas', () => {
         })
       ).not.toThrow();
     });
+
+    // `enabled` defaults to false, so attach-only fields without an explicit `enabled: true`
+    // would silently detach the connector. Reject the contradiction with a 400 instead.
+    it.each([
+      ['create', CreateAgentlessPolicyRequestSchema.body],
+      ['update', UpdateAgentlessPolicyRequestSchema.body],
+    ])(
+      'should reject attach-only fields when enabled is not true on %s',
+      (_name, bodySchema) => {
+        for (const cloudConnector of [
+          { cloud_connector_id: 'cc-1' },
+          { enabled: false, cloud_connector_id: 'cc-1' },
+          { name: 'my-connector' },
+          { target_csp: 'aws' },
+        ]) {
+          expect(() =>
+            bodySchema.validate({ ...validBody, cloud_connector: cloudConnector })
+          ).toThrow(/enabled must be true/);
+        }
+      }
+    );
+
+    it.each([
+      ['create', CreateAgentlessPolicyRequestSchema.body],
+      ['update', UpdateAgentlessPolicyRequestSchema.body],
+    ])('should accept a disabled connector with no attach fields on %s', (_name, bodySchema) => {
+      expect(() =>
+        bodySchema.validate({ ...validBody, cloud_connector: { enabled: false } })
+      ).not.toThrow();
+    });
+
+    // `cloud_connector_id` reuses an existing connector; `name` only applies when creating a new
+    // one, so passing both is a silent no-op for `name`. Reject the contradiction instead.
+    it.each([
+      ['create', CreateAgentlessPolicyRequestSchema.body],
+      ['update', UpdateAgentlessPolicyRequestSchema.body],
+    ])('should reject name together with cloud_connector_id on %s', (_name, bodySchema) => {
+      expect(() =>
+        bodySchema.validate({
+          ...validBody,
+          cloud_connector: { enabled: true, cloud_connector_id: 'cc-1', name: 'my-connector' },
+        })
+      ).toThrow(/name cannot be set together with cloud_connector_id/);
+    });
+
+    it.each([
+      ['create', CreateAgentlessPolicyRequestSchema.body],
+      ['update', UpdateAgentlessPolicyRequestSchema.body],
+    ])(
+      'should accept reusing a connector by id with a matching target_csp on %s',
+      (_name, bodySchema) => {
+        expect(() =>
+          bodySchema.validate({
+            ...validBody,
+            cloud_connector: { enabled: true, cloud_connector_id: 'cc-1', target_csp: 'aws' },
+          })
+        ).not.toThrow();
+      }
+    );
   });
 });
