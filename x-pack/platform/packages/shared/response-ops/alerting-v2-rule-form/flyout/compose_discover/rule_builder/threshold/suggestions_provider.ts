@@ -6,13 +6,15 @@
  */
 
 import type { SuggestionsProvider } from '../shared/suggestions/types';
+import { createLabelSuggestionsProvider } from '../shared/suggestions/create_label_suggestions_provider';
 import type { EvaluationDefinition, StatDefinition } from './form_types';
 import { getAvailableMetricLabels } from './form_types';
 
 /**
  * Builds a suggestions provider offering the metric labels (stats + other evaluations)
  * available to reference from an evaluation expression, excluding the evaluation's own label
- * to avoid self-reference.
+ * to avoid self-reference. Token filtering, prefix matching and selection handling are generic
+ * and live in `createLabelSuggestionsProvider`.
  */
 export const createMetricSuggestionsProvider = (
   stats: StatDefinition[],
@@ -23,11 +25,5 @@ export const createMetricSuggestionsProvider = (
     (label) => label !== excludeLabel
   );
 
-  return ({ selectionStart, selectionEnd }) =>
-    labels.map((label) => ({
-      type: 'metric',
-      text: label,
-      start: selectionStart,
-      end: selectionEnd,
-    }));
+  return createLabelSuggestionsProvider(labels, 'metric');
 };

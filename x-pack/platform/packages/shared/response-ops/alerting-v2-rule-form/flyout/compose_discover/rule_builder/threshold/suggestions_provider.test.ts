@@ -42,3 +42,6 @@ describe('createMetricSuggestionsProvider', () => {
     expect(suggestions.every((s) => s.start === 8 && s.end === 8)).toBe(true);
   });
 });
+
+// Token filtering, prefix matching and selection handling are generic behavior, covered in
+// create_label_suggestions_provider.test.ts.
