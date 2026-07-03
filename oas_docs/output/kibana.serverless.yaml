@@ -11459,7 +11459,7 @@ paths:
             -F 'service_name="foo"' \
             -F 'service_version="1.0.0"' \
             -F 'bundle_filepath="/test/e2e/general-usecase/bundle.js"' \
-            -F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"' 
+            -F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"'
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -15247,7 +15247,7 @@ paths:
                   query: |
                     FROM logs-abc*
                     | STATS count = COUNT(*), min_timestamp = MIN(@timestamp)
-                    | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW()) 
+                    | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW())
                     | KEEP event_rate
               example6:
                 summary: Patch indicator match rule
@@ -16205,7 +16205,7 @@ paths:
 
         Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
 
-        The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
+        The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once.
         The edit action is idempotent, meaning that if you add a tag to a rule that already has that tag, no changes are made. The same is true for other edit actions, for example removing an index pattern that is not specified in a rule will not result in any changes. The only exception is the `add_rule_actions` and `set_rule_actions` action, which is non-idempotent. This means that if you add or set a rule action to a rule that already has that action, a new action is created with a new unique ID.
         > warn
         > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
@@ -16847,7 +16847,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 5m
                             language: kuery
                             license: ''
@@ -16909,7 +16909,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -17021,7 +17021,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -17108,7 +17108,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -17205,7 +17205,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 5m
                             language: kuery
                             license: ''
@@ -18258,7 +18258,7 @@ paths:
                     deleted: 0,
                     failures: []
                     noops: 0,
-                    requests_per_second: '-1,'
+                    requests_per_second: -1,
                     retries:
                       bulk: 0,
                       search: 0
@@ -19379,7 +19379,7 @@ paths:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
                     scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-                    scriptInput: '--path= /usr/log/exec.log'
+                    scriptInput: --path= /usr/log/exec.log
               MDE:
                 description: Microsoft Defender Endpoint runscript
                 summary: Run a script against a Microsoft Defender Endpoint agent
@@ -19388,7 +19388,7 @@ paths:
                   endpoint_ids:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
-                    args: '-param1 value1 -param2 value2'
+                    args: -param1 value1 -param2 value2
                     scriptName: my-script.ps1
               SentinelOne:
                 description: SentinelOne runscript
@@ -19399,7 +19399,7 @@ paths:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
                     scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-                    scriptInput: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
+                    scriptInput: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
             schema:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_RunScriptRouteRequestBody'
         required: true
@@ -21309,7 +21309,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -21437,7 +21437,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -21659,7 +21659,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_PlatformErrorResponse'
@@ -21925,7 +21928,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type: Invalid enum value. Expected ''agnostic'' | ''single'', received ''foo'''
+                    message: "[request query]: namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'foo'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -22245,7 +22248,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -22666,7 +22669,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -23299,7 +23302,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -23434,7 +23437,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -23578,7 +23581,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_PlatformErrorResponse'
@@ -41030,7 +41036,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -45929,7 +45938,7 @@ paths:
                       type: array
                     query:
                       description: Query to filter the bulk action.
-                      example: 'status: ''inactive'''
+                      example: "status: 'inactive'"
                       type: string
                 update:
                   description: Array of anonymization fields to update.
@@ -47398,7 +47407,7 @@ paths:
                       type: array
                     query:
                       description: Query to filter the bulk action.
-                      example: 'status: ''inactive'''
+                      example: "status: 'inactive'"
                       type: string
                 update:
                   description: List of prompts to be updated.
@@ -62143,7 +62152,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''invalid'' supplied to: sortBy'
+                    message: "Invalid value 'invalid' supplied to: sortBy"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -62252,7 +62261,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: indicator/type'
+                    message: "Invalid value 'foo' supplied to: indicator/type"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -62343,7 +62352,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: list'
+                    message: "Invalid value 'foo' supplied to: list"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -62430,7 +62439,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: taskId'
+                    message: "Invalid value 'foo' supplied to: taskId"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -62519,7 +62528,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: purgePolicy/purgeType'
+                    message: "Invalid value 'foo' supplied to: purgePolicy/purgeType"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -62590,7 +62599,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: list/0/sloId'
+                    message: "Invalid value 'foo' supplied to: list/0/sloId"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -62647,7 +62656,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: id'
+                    message: "Invalid value 'foo' supplied to: id"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -62768,7 +62777,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: id'
+                    message: "Invalid value 'foo' supplied to: id"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -62893,7 +62902,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: indicator/type'
+                    message: "Invalid value 'foo' supplied to: indicator/type"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -63000,7 +63009,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: id'
+                    message: "Invalid value 'foo' supplied to: id"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -63070,7 +63079,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: id'
+                    message: "Invalid value 'foo' supplied to: id"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -63140,7 +63149,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: id'
+                    message: "Invalid value 'foo' supplied to: id"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -64988,7 +64997,10 @@ components:
       summary: Two anomaly detection jobs required synchronization in this example.
       value:
         error: Unauthorized
-        message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]]: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]"
+        message: |-
+          [security_exception
+          	Root causes:
+          		security_exception: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]]: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]
         statusCode: 401
     Machine_learning_APIs_mlSyncExample:
       summary: Two anomaly detection jobs required synchronization in this example.
@@ -68429,7 +68441,7 @@ components:
             - categorical
           type: string
         palette:
-          description: 'Color palette name. Accepted values: ''default'', ''elastic_line_optimized'', ''severity'', ''eui_amsterdam'', ''kibana_v7_legacy'', ''elastic_brand_2023''. Defaults to `default`.'
+          description: "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`."
           type: string
         unassigned:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_unassignedColorSchema'
@@ -68775,7 +68787,7 @@ components:
           description: The index of the color in the palette.
           type: number
         palette:
-          description: 'Color palette name. Accepted values: ''default'', ''elastic_line_optimized'', ''severity'', ''eui_amsterdam'', ''kibana_v7_legacy'', ''elastic_brand_2023''. Defaults to `default`.'
+          description: "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`."
           type: string
         type:
           enum:
@@ -76032,7 +76044,7 @@ components:
             - gradient
           type: string
         palette:
-          description: 'Color palette name. Accepted values: ''default'', ''elastic_line_optimized'', ''severity'', ''eui_amsterdam'', ''kibana_v7_legacy'', ''elastic_brand_2023''. Defaults to `default`.'
+          description: "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`."
           type: string
         sort:
           description: Sort direction
@@ -82154,7 +82166,7 @@ components:
           description: When `true`, displays the icon for the secondary value.
           type: boolean
         palette:
-          description: 'Color palette name. Accepted values: ''default'', ''elastic_line_optimized'', ''severity'', ''eui_amsterdam'', ''kibana_v7_legacy'', ''elastic_brand_2023''. Defaults to `default`.'
+          description: "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`."
           type: string
         to:
           enum:
@@ -82174,7 +82186,7 @@ components:
           description: When `true`, displays the icon for the secondary value.
           type: boolean
         palette:
-          description: 'Color palette name. Accepted values: ''default'', ''elastic_line_optimized'', ''severity'', ''eui_amsterdam'', ''kibana_v7_legacy'', ''elastic_brand_2023''. Defaults to `default`.'
+          description: "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`."
           type: string
         to:
           enum:
@@ -111049,7 +111061,7 @@ components:
         - value
     Security_Detections_API_BulkActionEditPayloadSchedule:
       description: |
-        Overwrites schedule of rules. 
+        Overwrites schedule of rules.
 
         - `set_schedule` sets a schedule for rules. If the same schedule already exists for a rule, no changes are made.
 
@@ -115082,8 +115094,8 @@ components:
       description: |
         The rule's version number.
 
-        - For prebuilt rules it represents the version of the rule's content in the source [detection-rules](https://github.com/elastic/detection-rules) repository (and the corresponding `security_detection_engine` Fleet package that is used for distributing prebuilt rules). 
-        - For custom rules it is set to `1` when the rule is created. 
+        - For prebuilt rules it represents the version of the rule's content in the source [detection-rules](https://github.com/elastic/detection-rules) repository (and the corresponding `security_detection_engine` Fleet package that is used for distributing prebuilt rules).
+        - For custom rules it is set to `1` when the rule is created.
         > info
         > It is not incremented on each update. Compare this to the `revision` field.
       minimum: 1
@@ -115803,7 +115815,7 @@ components:
         - field: field from the event indices on which the rule runs
         - type: must be mapping
         - value: field from the Elasticsearch threat index
-          
+
         You can use Boolean and and or logic to define the conditions for when matching fields and values generate alerts. Sibling entries objects are evaluated using or logic, whereas multiple entries in a single entries object use and logic. See Example of Threat Match rule which uses both `and` and `or` logic.
       items:
         type: object
@@ -117841,7 +117853,7 @@ components:
               - 10.0.2.15
               - fe80::21a6:63d3:d70e:e3ad
               - 127.0.0.1
-              - '::1'
+              - ::1
             mac:
               - 08:00:27:b1:1d:5a
             name: WinDev2104Eval
@@ -117877,7 +117889,7 @@ components:
           - endpoint-id-1
         parameters:
           scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-          scriptInput: '--some-parameter some-value'
+          scriptInput: --some-parameter some-value
       properties:
         scriptId:
           description: The script ID from the scripts library that will be executed.
@@ -118561,7 +118573,7 @@ components:
       properties: {}
     Security_Endpoint_Management_API_Kuery:
       description: A KQL string.
-      example: 'united.endpoint.host.os.name : ''Windows'''
+      example: "united.endpoint.host.os.name : 'Windows'"
       type: string
     Security_Endpoint_Management_API_MDERunScriptParameters:
       description: Parameters for Run Script response action against Microsoft Defender Endpoint agent type.
@@ -118570,7 +118582,7 @@ components:
         endpoint_ids:
           - endpoint-id-1
         parameters:
-          args: '-param1 value1 -param2 value2'
+          args: -param1 value1 -param2 value2
           scriptName: my-script.ps1
       properties:
         args:
@@ -118784,7 +118796,7 @@ components:
                 id: 0cfead88e2024bd8a27476352b5ab264
                 ip:
                   - 127.0.0.1
-                  - '::1'
+                  - ::1
                   - 10.0.2.15
                   - fe80::2ac7:8e15:b957:2fa1
                 mac:
@@ -118868,7 +118880,7 @@ components:
                   - 10.0.2.15
                   - fe80::21a6:63d3:d70e:e3ad
                   - 127.0.0.1
-                  - '::1'
+                  - ::1
                 mac:
                   - 08:00:27:b1:1d:5a
                 name: WinDev2104Eval
@@ -119398,7 +119410,7 @@ components:
           - endpoint-id-1
         parameters:
           scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-          scriptInput: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
+          scriptInput: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
       properties:
         scriptId:
           description: The script ID from SentinelOne scripts library that will be executed.
@@ -123844,7 +123856,7 @@ components:
           example: Bad Request
           type: string
         message:
-          example: 'Invalid value ''foo'' supplied to: [...]'
+          example: "Invalid value 'foo' supplied to: [...]"
           type: string
         statusCode:
           example: 400
@@ -123861,7 +123873,10 @@ components:
           example: Unauthorized
           type: string
         message:
-          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
+          example: |-
+            [security_exception
+            	Root causes:
+            		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
           type: string
         statusCode:
           example: 401
@@ -123878,7 +123893,10 @@ components:
           example: Forbidden
           type: string
         message:
-          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]"
+          example: |-
+            [security_exception
+            	Root causes:
+            		security_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]
           type: string
         statusCode:
           example: 403
@@ -126385,7 +126403,7 @@ components:
           items:
             type: string
           description: |
-            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format 
+            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format
         message:
           type: string
           description: The email message text. Markdown format is supported.
