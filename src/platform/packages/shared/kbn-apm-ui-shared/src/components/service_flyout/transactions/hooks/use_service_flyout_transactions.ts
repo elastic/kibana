@@ -90,6 +90,11 @@ export function useServiceFlyoutTransactions({
   }, [dataSourceError, notifications.toasts]);
 
   const [maxCountExceeded, setMaxCountExceeded] = useState(false);
+
+  useEffect(() => {
+    setMaxCountExceeded(false);
+  }, [serviceName, environment, start, end, transactionType]);
+
   const serverSearchQuery = maxCountExceeded ? searchQuery : '';
 
   const { value: response, loading: isLoading } = useAbortableAsync(
@@ -152,7 +157,7 @@ export function useServiceFlyoutTransactions({
   return {
     items,
     isLoading: isLoading || isDataSourceLoading,
-    maxCountExceeded: response?.maxCountExceeded ?? false,
+    maxCountExceeded,
     hasActiveAlerts: response?.hasActiveAlerts ?? false,
     error: dataSourceError,
   };
