@@ -81689,7 +81689,7 @@ components:
           maxItems: 500
           type: array
         is_approximate:
-          description: When `true`, ES|QL panels use approximate execution for faster, estimated results.
+          description: When `true`, ES|QL visualizations that use `STATS` run with [approximate execution](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) for faster, estimated results.
           type: boolean
         options:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-options'
