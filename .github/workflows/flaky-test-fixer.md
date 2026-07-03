@@ -53,11 +53,7 @@ tools:
 
 # Bootstrap Kibana on the self-hosted runner, in a pre-agent step that runs on the
 # host (before `awf` starts the sandboxed agent), so `node_modules` and
-# `@kbn/setup-node-env` exist and the agent can run `node scripts/eslint` /
-# `node scripts/type_check` to verify its fix. This step is not subject to the agent
-# firewall below, so the `kibana` runner reaches the Yarn registry and bazel cache
-# natively — no extra domains need allowlisting for the sandboxed agent, whose own
-# verification commands run offline against the already-installed node_modules.
+# `@kbn/setup-node-env` exist and the agent can lint and type check the fix.
 runs-on: kibana
 steps:
   - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
