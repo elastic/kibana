@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
@@ -283,7 +283,7 @@ export class SyntheticsPrivateLocation {
       ),
     ]);
 
-    const policiesToUpdate: NewPackagePolicyWithId[] = [];
+    const policiesToUpdate: UpdatePackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
     const policiesToDelete: string[] = [];
 
@@ -312,7 +312,7 @@ export class SyntheticsPrivateLocation {
             }
 
             if (hasPolicy) {
-              policiesToUpdate.push({ ...newPolicy, id: currId } as NewPackagePolicyWithId);
+              policiesToUpdate.push({ ...newPolicy, id: currId } as UpdatePackagePolicyWithId);
             } else {
               policiesToCreate.push({ ...newPolicy, id: currId } as NewPackagePolicyWithId);
             }
@@ -394,7 +394,7 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async updatePolicyBulk(policiesToUpdate: NewPackagePolicyWithId[]) {
+  async updatePolicyBulk(policiesToUpdate: UpdatePackagePolicyWithId[]) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
     const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
     if (policiesToUpdate.length > 0) {
