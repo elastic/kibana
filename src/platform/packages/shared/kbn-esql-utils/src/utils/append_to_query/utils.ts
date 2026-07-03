@@ -98,9 +98,9 @@ export function appendToESQLQuery(baseESQLQuery: string, appendedText: string): 
 export function buildJoinedFilter(
   fields: string[] | undefined,
   buildClause: (field: string) => string,
-  separator: ' AND ' | ' OR ' = ' AND '
+  separator: 'AND' | 'OR' = 'AND'
 ): string {
-  return fields?.map(buildClause).join(separator) ?? '';
+  return fields?.map(buildClause).join(` ${separator} `) ?? '';
 }
 
 /**

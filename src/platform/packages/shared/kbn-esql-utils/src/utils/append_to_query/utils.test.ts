@@ -49,7 +49,7 @@ describe('buildJoinedFilter', () => {
   });
 
   it('joins multiple clauses with OR when the separator is provided', () => {
-    expect(buildJoinedFilter(['a', 'b'], clause, ' OR ')).toBe('a IS NOT NULL OR b IS NOT NULL');
+    expect(buildJoinedFilter(['a', 'b'], clause, 'OR')).toBe('a IS NOT NULL OR b IS NOT NULL');
   });
 });
 
