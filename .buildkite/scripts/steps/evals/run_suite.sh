@@ -210,20 +210,22 @@ EOF
         #    weekly green. EIS subject models stay hard-gating; only the
         #    litellm-* lane is soft_fail, so a weaker OSS model underperforming
         #    doesn't red the weekly. Additive-lane contract, scoped to the lane.
-        # 2. Cross-team suites (significant-events, agent-builder-dashboards)
-        #    have their own owners, Slack channels, and hard gate on the
-        #    pipeline default branch. On iteration branches (e.g. the security
-        #    LLM performance matrix branch) their EIS failures are out of scope
-        #    for that branch's DoD and would otherwise red an already-green
-        #    security run. Soft-fail them ONLY off the default branch, so their
-        #    owners keep the hard gate on main and the iteration build isn't
-        #    blocked by separately-owned, out-of-scope failures.
+        # 2. Cross-team suites (significant-events, agent-builder-dashboards,
+        #    streams) have their own owners, Slack channels, and hard gate on
+        #    the pipeline default branch. On iteration branches (e.g. the
+        #    security LLM performance matrix branch) their EIS failures are out
+        #    of scope for that branch's DoD and would otherwise red an
+        #    already-green security run (e.g. streams pipeline_suggestion fails
+        #    on the exploratory eis-openai-gpt-oss-120b OSS lane). Soft-fail
+        #    them ONLY off the default branch, so their owners keep the hard
+        #    gate on main and the iteration build isn't blocked by
+        #    separately-owned, out-of-scope failures.
         should_soft_fail="false"
         if [[ "$connector_id" == litellm-* ]]; then
           should_soft_fail="true"
         fi
         EVAL_DEFAULT_BRANCH="${BUILDKITE_PIPELINE_DEFAULT_BRANCH:-main}"
-        case " significant-events agent-builder-dashboards " in
+        case " significant-events agent-builder-dashboards streams " in
           *" ${EVAL_SUITE_ID} "*)
             if [[ "${BUILDKITE_BRANCH:-}" != "${EVAL_DEFAULT_BRANCH}" ]]; then
               should_soft_fail="true"
