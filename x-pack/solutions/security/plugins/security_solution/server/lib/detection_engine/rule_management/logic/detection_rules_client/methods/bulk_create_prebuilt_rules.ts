@@ -29,46 +29,6 @@ interface BulkCreatePrebuiltRulesOptions {
   args: BulkCreatePrebuiltRulesArgs;
 }
 
-const validateRules = async (
-  rules: PrebuiltRuleAsset[],
-  mlAuthz: MlAuthz
-): Promise<{
-  validRules: PrebuiltRuleAsset[];
-  errors: BulkCreatePrebuiltRulesResult['errors'];
-}> => {
-  const errors: BulkCreatePrebuiltRulesResult['errors'] = [];
-
-  const checkedTypes = new Set<string>();
-  const mlAuthErrorByType = new Map<string, Error>();
-  for (const rule of rules) {
-    if (!checkedTypes.has(rule.type)) {
-      checkedTypes.add(rule.type);
-      try {
-        await validateMlAuth(mlAuthz, rule.type);
-      } catch (e) {
-        mlAuthErrorByType.set(rule.type, e instanceof Error ? e : new Error(String(e)));
-      }
-    }
-  }
-
-  const validRules: PrebuiltRuleAsset[] = [];
-  for (const rule of rules) {
-    const mlError = mlAuthErrorByType.get(rule.type);
-    if (mlError) {
-      errors.push({ item: rule, error: mlError });
-    } else if (!(rule.type in ruleTypeMappings)) {
-      errors.push({
-        item: rule,
-        error: new Error(`Unsupported rule type: ${rule.type}`),
-      });
-    } else {
-      validRules.push(rule);
-    }
-  }
-
-  return { validRules, errors };
-};
-
 export const bulkCreatePrebuiltRules = async ({
   actionsClient,
   rulesClient,
@@ -81,9 +41,6 @@ export const bulkCreatePrebuiltRules = async ({
 
   if (rules.length === 0) return { results, errors };
 
-  const { validRules, errors: validationErrors } = await validateRules(rules, mlAuthz);
-  errors.push(...validationErrors);
-
   const itemById = new Map<string, PrebuiltRuleAsset>();
   const bulkInputs: Array<{
     data: ReturnType<typeof convertRuleResponseToAlertingRule> & {
@@ -94,21 +51,36 @@ export const bulkCreatePrebuiltRules = async ({
     options: { id: string };
   }> = [];
 
-  for (const rule of validRules) {
-    const id = uuidv4();
+  for (const rule of rules) {
+    let mlAuthError: Error | undefined;
     try {
-      const alertTypeId = ruleTypeMappings[rule.type as keyof typeof ruleTypeMappings];
-      const ruleWithDefaults = applyRuleDefaults({ ...rule, immutable: true });
-      const data = {
-        ...convertRuleResponseToAlertingRule(ruleWithDefaults, actionsClient),
-        alertTypeId,
-        consumer: SERVER_APP_ID,
-        enabled: rule.enabled ?? false,
-      };
-      itemById.set(id, rule);
-      bulkInputs.push({ data, options: { id } });
+      // MlAuthz caches the underlying capability check and short-circuits non-ML
+      // types instantly, so calling this per-rule (instead of deduping by type) is cheap.
+      await validateMlAuth(mlAuthz, rule.type);
     } catch (e) {
-      errors.push({ item: rule, error: e instanceof Error ? e : new Error(String(e)) });
+      mlAuthError = e instanceof Error ? e : new Error(String(e));
+    }
+
+    if (mlAuthError) {
+      errors.push({ item: rule, error: mlAuthError });
+    } else if (!(rule.type in ruleTypeMappings)) {
+      errors.push({ item: rule, error: new Error(`Unsupported rule type: ${rule.type}`) });
+    } else {
+      const id = uuidv4();
+      try {
+        const alertTypeId = ruleTypeMappings[rule.type as keyof typeof ruleTypeMappings];
+        const ruleWithDefaults = applyRuleDefaults({ ...rule, immutable: true });
+        const data = {
+          ...convertRuleResponseToAlertingRule(ruleWithDefaults, actionsClient),
+          alertTypeId,
+          consumer: SERVER_APP_ID,
+          enabled: rule.enabled ?? false,
+        };
+        itemById.set(id, rule);
+        bulkInputs.push({ data, options: { id } });
+      } catch (e) {
+        errors.push({ item: rule, error: e instanceof Error ? e : new Error(String(e)) });
+      }
     }
   }
 
