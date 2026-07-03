@@ -10,12 +10,12 @@
 import { getSourceTypeKey, getSourceTypeLabel } from './utils';
 
 describe('getSourceTypeLabel', () => {
-  it('returns External for External type', () => {
-    expect(getSourceTypeLabel('External')).toBe('External');
+  it('returns External data for External type', () => {
+    expect(getSourceTypeLabel('External')).toBe('External data');
   });
 
-  it('returns External for lowercase external', () => {
-    expect(getSourceTypeLabel('external')).toBe('External');
+  it('returns External data for lowercase external', () => {
+    expect(getSourceTypeLabel('external')).toBe('External data');
   });
 
   it('returns Index as the fallback', () => {
