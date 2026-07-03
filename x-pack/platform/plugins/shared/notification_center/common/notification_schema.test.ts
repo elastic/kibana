@@ -8,11 +8,7 @@
 import { notificationWriteSchema, notificationReadSchema } from './notification_schema';
 import type { Notification, NotificationInput, NotificationDocument } from './types';
 
-/**
- * A producer submission: no `@timestamp` (the Notification Center stamps that on
- * ingest). `satisfies` keeps the literal types (so `severity`/`cta` stay present)
- * while still checking the shape against {@link NotificationInput}.
- */
+/** A producer submission — no `@timestamp` (NC stamps it on ingest). */
 const validInput = {
   notification_id: 'inference:my-endpoint:deprecated',
   event_timestamp: '2026-06-17T00:00:00.000Z',
@@ -192,9 +188,7 @@ describe('notificationReadSchema', () => {
 });
 
 describe('NotificationDocument typing', () => {
-  // These assertions are enforced at type-check time; the runtime body only
-  // exists so the compiler sees the types exercised. They guard the invariant
-  // that `submit()` cannot index a document without stamping `@timestamp`.
+  // compile-time guard: a validated write payload is not a document without @timestamp
   it('requires @timestamp that a producer NotificationInput does not carry', () => {
     const stamped: NotificationDocument = {
       ...notificationWriteSchema.parse(validInput),
@@ -202,7 +196,7 @@ describe('NotificationDocument typing', () => {
     };
     expect(stamped['@timestamp']).toBeDefined();
 
-    // @ts-expect-error — a validated write payload alone is not a document: `@timestamp` is missing.
+    // @ts-expect-error — write payload lacks @timestamp, so it is not a NotificationDocument
     const unstamped: NotificationDocument = notificationWriteSchema.parse(validInput);
     expect(unstamped).toBeDefined();
   });
