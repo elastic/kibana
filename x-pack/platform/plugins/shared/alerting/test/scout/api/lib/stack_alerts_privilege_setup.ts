@@ -5,30 +5,20 @@
  * 2.0.
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
+import type {
+  ApiClientFixture,
+  RequestAuthFixture,
+  RoleApiCredentials,
+  SamlAuth,
+} from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { ApiClientFixture } from '@kbn/scout/src/playwright/fixtures/scope/worker';
 import {
   COMMON_HEADERS,
   ES_QUERY_DEFAULT_INSTANCE_ID,
   ES_QUERY_DEFAULT_INSTANCE_ID_ENCODED,
+  ES_QUERY_RULE_PARAMS,
 } from '../fixtures/constants';
 import { waitForSuccessfulEventLogEntry } from './wait_for_successful_event_log';
-
-const ES_QUERY_PARAMS = {
-  index: ['.kibana-event-log-*'],
-  timeField: '@timestamp',
-  esQuery: '{\n  "query":{\n    "match_all" : {}\n  }\n}',
-  size: 100,
-  timeWindowSize: 5,
-  timeWindowUnit: 'm',
-  thresholdComparator: '>',
-  threshold: [0],
-  searchType: 'esQuery',
-  excludeHitsFromPreviousRun: true,
-  aggType: 'count',
-  groupBy: 'all',
-};
 
 const INDEX_THRESHOLD_PARAMS = {
   aggType: 'count',
@@ -53,7 +43,7 @@ export const RULE_SPECS: RuleSpec[] = [
   {
     ruleTypeId: '.es-query',
     consumer: 'stackAlerts',
-    params: ES_QUERY_PARAMS,
+    params: ES_QUERY_RULE_PARAMS,
     enabled: true,
   },
   {
@@ -78,8 +68,8 @@ export interface StackAlertsPrivilegeState {
 
 export const setupStackAlertsPrivilegeTests = async (
   apiClient: ApiClientFixture,
-  requestAuth: { getApiKey: Function },
-  samlAuth: { asInteractiveUser: Function }
+  requestAuth: RequestAuthFixture,
+  samlAuth: SamlAuth
 ): Promise<StackAlertsPrivilegeState> => {
   const adminCreds = await requestAuth.getApiKey('admin');
   const createdRules: Array<{ ruleTypeId: string; ruleId: string }> = [];

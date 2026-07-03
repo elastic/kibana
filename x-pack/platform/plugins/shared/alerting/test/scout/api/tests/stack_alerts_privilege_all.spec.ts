@@ -63,7 +63,6 @@ apiTest.describe('Stack alerts privilege - all privilege', { tag: tags.deploymen
 
   apiTest('cannot update a rule', async ({ apiClient }) => {
     const rule = state.createdRules[0];
-    if (!rule) return;
     const spec = RULE_SPECS.find((s) => s.ruleTypeId === rule.ruleTypeId);
     const response = await apiClient.put(`api/alerting/rule/${rule.ruleId}`, {
       headers: { ...COMMON_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
@@ -81,7 +80,6 @@ apiTest.describe('Stack alerts privilege - all privilege', { tag: tags.deploymen
 
   apiTest('cannot delete a rule', async ({ apiClient }) => {
     const rule = state.createdRules[0];
-    if (!rule) return;
     const response = await apiClient.delete(`api/alerting/rule/${rule.ruleId}`, {
       headers: { ...COMMON_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
       responseType: 'json',
@@ -91,7 +89,6 @@ apiTest.describe('Stack alerts privilege - all privilege', { tag: tags.deploymen
 
   apiTest('cannot mute all alerts on a rule', async ({ apiClient }) => {
     const rule = state.createdRules[0];
-    if (!rule) return;
     const response = await apiClient.post(`api/alerting/rule/${rule.ruleId}/_mute_all`, {
       headers: { ...COMMON_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
     });
@@ -100,7 +97,6 @@ apiTest.describe('Stack alerts privilege - all privilege', { tag: tags.deploymen
 
   apiTest('cannot snooze a rule', async ({ apiClient }) => {
     const rule = state.createdRules[0];
-    if (!rule) return;
     const response = await apiClient.post(`internal/alerting/rule/${rule.ruleId}/_snooze`, {
       headers: { ...COMMON_HEADERS, ...withAllPrivilegeCookieHeader },
       body: {
@@ -120,8 +116,7 @@ apiTest.describe('Stack alerts privilege - all privilege', { tag: tags.deploymen
 
   for (const spec of RULE_SPECS) {
     apiTest(`can mute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
-      const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
-      if (!rule) return;
+      const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
       const response = await apiClient.post(
         `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
         { headers: { ...COMMON_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader } }
@@ -130,8 +125,7 @@ apiTest.describe('Stack alerts privilege - all privilege', { tag: tags.deploymen
     });
 
     apiTest(`can unmute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
-      const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
-      if (!rule) return;
+      const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
       const response = await apiClient.post(
         `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
         { headers: { ...COMMON_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader } }
