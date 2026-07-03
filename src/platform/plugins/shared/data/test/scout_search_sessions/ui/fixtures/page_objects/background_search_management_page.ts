@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { ScoutPage } from '@kbn/scout';
 
 /**
  * Page object for the Background Search management UI at
