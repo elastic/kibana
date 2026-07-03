@@ -7,8 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fs from 'fs';
+import Os from 'os';
+import Path from 'path';
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+
+const SMART_RETRY_PROBE_MARKER_PATH = Path.join(
+  Os.tmpdir(),
+  'kibana_ftr_smart_retry_probe_failed_once'
+);
+
+const isSmartRetryEnabled = () => /^(1|true)$/.test(process.env.FTR_SMART_RETRY_ENABLED ?? '');
+
+const shouldFailSmartRetryProbe = () => {
+  if (!isSmartRetryEnabled()) {
+    return false;
+  }
+
+  const { BUILDKITE_RETRY_COUNT: buildkiteRetryCount } = process.env;
+
+  if (buildkiteRetryCount !== undefined) {
+    return buildkiteRetryCount === '0';
+  }
+
+  if (Fs.existsSync(SMART_RETRY_PROBE_MARKER_PATH)) {
+    Fs.rmSync(SMART_RETRY_PROBE_MARKER_PATH, { force: true });
+    return false;
+  }
+
+  Fs.writeFileSync(SMART_RETRY_PROBE_MARKER_PATH, 'failed once\n', 'utf8');
+  return true;
+};
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -41,6 +72,13 @@ export default function ({ getService }: FtrProviderContext) {
         message: 'Unused URLs cleanup task has finished.',
         deletedCount: 5,
       });
+    });
+
+    it('recovers on smart retry', () => {
+      // Probe FTR_SMART_RETRY by failing only on the first smart-retry-enabled attempt.
+      if (shouldFailSmartRetryProbe()) {
+        throw new Error('FTR smart retry probe failed intentionally on the first attempt');
+      }
     });
   });
 }
