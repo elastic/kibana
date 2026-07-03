@@ -8,7 +8,8 @@
 import React, { useState } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EvaluationExpressionField } from './evaluation_expression_field';
-import { Aggregation, EvaluationDefinition } from './form_types';
+import type { EvaluationDefinition } from './form_types';
+import { Aggregation } from './form_types';
 
 const stats = [
   { id: 's1', label: 'count', aggregation: Aggregation.COUNT },
@@ -16,9 +17,7 @@ const stats = [
 ];
 const evaluations = [{ id: 'e1', label: 'error_rate', expression: 'errors / count' }];
 
-const ControlledField: React.FC<{ evaluation: EvaluationDefinition }> = ({
-  evaluation,
-}) => {
+const ControlledField: React.FC<{ evaluation: EvaluationDefinition }> = ({ evaluation }) => {
   const [value, setValue] = useState(evaluation.expression);
   return (
     <EvaluationExpressionField

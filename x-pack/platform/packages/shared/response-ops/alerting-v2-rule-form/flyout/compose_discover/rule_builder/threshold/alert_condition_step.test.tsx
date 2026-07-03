@@ -888,7 +888,7 @@ describe('RuleBuilderAlertConditionStep', () => {
         expect(screen.queryByText(/References unknown/)).not.toBeInTheDocument();
 
         act(() => {
-          jest.advanceTimersByTime(300);
+          jest.advanceTimersByTime(500);
         });
 
         expect(screen.getByText('References unknown label: unknown_field')).toBeInTheDocument();
