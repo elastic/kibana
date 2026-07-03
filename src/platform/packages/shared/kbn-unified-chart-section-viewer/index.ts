@@ -31,4 +31,7 @@ export type {
 } from './src/types';
 export {
   METRICS_AGGREGATION_SETTINGS_DEFAULTS,
+  SIMPLE_AGGREGATION_OPTIONS,
+  HISTOGRAM_PERCENTILE_OPTIONS,
+  HISTOGRAM_PERCENTILE_VALUES,
 } from './src/common/utils/aggregation_settings';
