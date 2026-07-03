@@ -323,4 +323,39 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
       expect(dashboardState).not.toHaveProperty('project_routing');
     });
   });
+
+  describe('isApproximate', () => {
+    test('should include isApproximate in dashboardState when set to true', () => {
+      const input: DashboardSavedObjectAttributes = {
+        panelsJSON: JSON.stringify([]),
+        optionsJSON: JSON.stringify({}),
+        kibanaSavedObjectMeta: {},
+        title: 'my title',
+        isApproximate: true,
+      };
+      const { dashboardState } = transformDashboardOut(
+        input,
+        undefined,
+        undefined,
+        getDashboardStateSchema(false)
+      );
+      expect(dashboardState.isApproximate).toBe(true);
+    });
+
+    test('should not include isApproximate when it is undefined', () => {
+      const input: DashboardSavedObjectAttributes = {
+        panelsJSON: JSON.stringify([]),
+        optionsJSON: JSON.stringify({}),
+        kibanaSavedObjectMeta: {},
+        title: 'my title',
+      };
+      const { dashboardState } = transformDashboardOut(
+        input,
+        undefined,
+        undefined,
+        getDashboardStateSchema(false)
+      );
+      expect(dashboardState).not.toHaveProperty('isApproximate');
+    });
+  });
 });

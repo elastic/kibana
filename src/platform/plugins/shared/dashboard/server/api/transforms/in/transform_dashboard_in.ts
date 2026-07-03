@@ -40,6 +40,7 @@ export const transformDashboardIn = (
       time_range,
       refresh_interval,
       project_routing,
+      isApproximate,
       ...rest
     } = dashboardState;
 
@@ -82,6 +83,7 @@ export const transformDashboardIn = (
         : { timeRestore: false }),
       kibanaSavedObjectMeta: { searchSourceJSON },
       ...(project_routing !== undefined && { projectRouting: project_routing }),
+      ...(isApproximate !== undefined && { isApproximate }),
     };
 
     return {
