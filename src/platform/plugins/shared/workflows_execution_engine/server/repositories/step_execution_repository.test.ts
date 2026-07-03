@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { WORKFLOWS_STEP_EXECUTIONS_DS } from '@kbn/workflows';
 import { StepExecutionRepository } from './step_execution_repository';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 const TARGET_INDEX = '.ds-.workflows-step-executions-2026.06.22-000001';
 const NEXT_INDEX = '.ds-.workflows-step-executions-2026.06.22-000002';
@@ -31,7 +31,7 @@ describe('StepExecutionRepository', () => {
         getDataStream: jest.fn().mockResolvedValue({
           data_streams: [
             {
-              name: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+              name: WORKFLOWS_STEP_EXECUTIONS_DS,
               indices: [{ index_name: TARGET_INDEX }, { index_name: NEXT_INDEX }],
             },
           ],
@@ -67,7 +67,7 @@ describe('StepExecutionRepository', () => {
       expect(esClient.bulk).toHaveBeenCalledWith({
         refresh: false,
         operations: [
-          { create: { _index: WORKFLOWS_STEP_EXECUTIONS_INDEX, _id: 'step-1' } },
+          { create: { _index: WORKFLOWS_STEP_EXECUTIONS_DS, _id: 'step-1' } },
           expect.objectContaining({
             id: 'step-1',
             stepId: 'my-step',
@@ -228,7 +228,7 @@ describe('StepExecutionRepository', () => {
       const result = await underTest.getStepExecutionsByIds(['step-1']);
 
       expect(esClient.search).toHaveBeenCalledWith({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+        index: WORKFLOWS_STEP_EXECUTIONS_DS,
         seq_no_primary_term: true,
         query: { ids: { values: ['step-1'] } },
         size: 1,

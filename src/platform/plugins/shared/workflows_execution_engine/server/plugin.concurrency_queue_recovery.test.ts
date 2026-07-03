@@ -14,9 +14,6 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { ConcreteTaskInstance, TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
-jest.mock('../common', () => ({
-  createIndexes: jest.fn().mockResolvedValue(undefined),
-}));
 jest.mock('./lib/check_license', () => ({
   checkLicense: jest.fn().mockResolvedValue(undefined),
 }));

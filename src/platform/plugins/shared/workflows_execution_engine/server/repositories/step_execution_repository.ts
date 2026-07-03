@@ -9,7 +9,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
-import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus, WORKFLOWS_STEP_EXECUTIONS_DS } from '@kbn/workflows';
 import type { DocumentUpdate } from './bulk_update_documents';
 import { bulkUpdateDocuments } from './bulk_update_documents';
 import type { DocumentVersionsById, EsDocumentVersion } from './document_version';
@@ -17,7 +17,7 @@ import { extractVersionFromBulkItem } from './document_version';
 import type { VersionedDocument } from './get_doc_by_id';
 import { getDocumentsById } from './get_doc_by_id';
 import { resolveWriteIndex } from './resolve_write_index';
-import { WORKFLOWS_STEP_EXECUTIONS_DS } from '../../common';
+import type { StepExecutionsDataStreamClient } from './step_executions_data_stream';
 
 export type StepExecutionField = keyof EsWorkflowStepExecution;
 
@@ -36,7 +36,10 @@ export type StepExecutionWrite =
 export class StepExecutionRepository {
   private dataStreamName = WORKFLOWS_STEP_EXECUTIONS_DS;
 
-  constructor(private esClient: ElasticsearchClient) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private dataStreamClient: StepExecutionsDataStreamClient
+  ) {}
 
   /**
    * Resolves the current write index backing the step executions alias.
@@ -192,10 +195,10 @@ export class StepExecutionRepository {
     });
 
     const updateWrites: Array<DocumentUpdate<Partial<EsWorkflowStepExecution>>> = [];
-    const createOperations: object[] = [];
+    const createDocuments: Array<{ _id: string } & Partial<EsWorkflowStepExecution>> = [];
     for (const write of writes) {
       const { doc, operation } = write;
-      const id = doc.id;
+      const id = doc.id as string;
       const timestamp = doc.startedAt ?? new Date().toISOString();
       const document = {
         ...doc,
@@ -205,15 +208,7 @@ export class StepExecutionRepository {
       if (operation === 'update') {
         updateWrites.push({ doc: document, version: write.version });
       } else {
-        createOperations.push(
-          {
-            create: {
-              _index: this.dataStreamName,
-              _id: id,
-            },
-          },
-          document
-        );
+        createDocuments.push({ _id: id, ...document });
       }
     }
 
@@ -227,11 +222,13 @@ export class StepExecutionRepository {
       failureVerb: 'upsert',
     });
 
-    if (createOperations.length === 0) {
+    if (createDocuments.length === 0) {
       return updateVersions;
     }
 
-    const bulkResponse = await this.esClient.bulk({ refresh: false, operations: createOperations });
+    const bulkResponse = await this.dataStreamClient.create({
+      documents: createDocuments,
+    });
 
     if (bulkResponse.errors) {
       const erroredDocuments = bulkResponse.items

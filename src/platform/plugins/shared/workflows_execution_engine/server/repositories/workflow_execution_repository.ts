@@ -14,17 +14,21 @@ import {
   ConcurrencySlotOccupyingExecutionStatuses,
   ExecutionStatus,
   NonTerminalExecutionStatuses,
+  WORKFLOWS_EXECUTIONS_DS,
 } from '@kbn/workflows';
 import { bulkUpdateDocuments, resolveVersions } from './bulk_update_documents';
 import type { DocumentVersionsById, EsDocumentVersion } from './document_version';
 import { getDocumentsById } from './get_doc_by_id';
 import { resolveWriteIndex } from './resolve_write_index';
-import { WORKFLOWS_EXECUTIONS_DS } from '../../common';
+import type { WorkflowExecutionsDataStreamClient } from './workflow_executions_data_stream';
 
 export class WorkflowExecutionRepository {
   private dataStreamName = WORKFLOWS_EXECUTIONS_DS;
 
-  constructor(private esClient: ElasticsearchClient) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private dataStreamClient: WorkflowExecutionsDataStreamClient
+  ) {}
 
   private isNotFoundError(error: unknown): boolean {
     return (
@@ -133,11 +137,12 @@ export class WorkflowExecutionRepository {
     }
 
     const doc = this.withTimestamp(workflowExecution);
-    await this.esClient.create<Partial<EsWorkflowExecution>>({
-      index: this.dataStreamName,
-      id: workflowExecution.id,
-      refresh: options.refresh ?? false,
-      document: doc,
+
+    await this.dataStreamClient.create({
+      // The data stream client's document type is derived structurally from the
+      // (cast) index mappings and does not line up with the richer domain type
+      // `EsWorkflowExecution`; bridge it the same way the mappings are bridged.
+      documents: [{ _id: workflowExecution.id, ...doc }] as Array<{ _id: string }>,
     });
 
     return doc;
@@ -169,10 +174,10 @@ export class WorkflowExecutionRepository {
     });
 
     const docs = executions.map((execution) => this.withTimestamp(execution));
-    const bulkResponse = await this.esClient.bulk({
+
+    const bulkResponse = await this.dataStreamClient.create({
+      documents: docs.map((doc) => ({ _id: doc.id, ...doc })) as Array<{ _id: string }>,
       refresh: options.refresh ?? false,
-      index: this.dataStreamName,
-      operations: docs.flatMap((doc) => [{ create: { _id: doc.id } }, doc]),
     });
 
     return bulkResponse.items.map((item, idx) => {

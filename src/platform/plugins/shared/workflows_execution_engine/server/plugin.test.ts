@@ -17,12 +17,12 @@ import {
   ExecutionStatus,
   NonTerminalExecutionStatuses,
   TerminalExecutionStatuses,
+  WORKFLOWS_EXECUTIONS_DS,
 } from '@kbn/workflows';
 import { checkAndSkipIfExistingScheduledExecution } from './execution_functions';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { WORKFLOW_SCHEDULED_TASK_TYPE } from './workflow_task_manager/types';
-import { WORKFLOWS_EXECUTIONS_INDEX } from '../common';
 
 const TEST_BACKING_INDEX = '.ds-.workflows-executions-2026.06.22-000001';
 
@@ -130,7 +130,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
 
       expect(result).toBe(false);
       expect(esClient.search).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         query: {
           bool: {
             filter: [
@@ -191,7 +191,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       expect(esClient.index).toHaveBeenCalledTimes(1);
       expect(esClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: WORKFLOWS_EXECUTIONS_INDEX,
+          index: WORKFLOWS_EXECUTIONS_DS,
           refresh: false,
           id: expect.any(String),
           document: expect.objectContaining({
@@ -594,7 +594,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       expect(esClient.update).not.toHaveBeenCalled(); // Don't mark as failed
       expect(esClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: WORKFLOWS_EXECUTIONS_INDEX,
+          index: WORKFLOWS_EXECUTIONS_DS,
           document: expect.objectContaining({
             status: ExecutionStatus.SKIPPED,
           }),

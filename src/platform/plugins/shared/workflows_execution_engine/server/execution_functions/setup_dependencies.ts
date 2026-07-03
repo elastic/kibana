@@ -10,6 +10,7 @@
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { WorkflowRepository } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
+import { setupRepositories } from './setup_repositories';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
@@ -20,8 +21,6 @@ import {
   mergeEmitterWorkflowIntoEventChainVisited,
 } from '../lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
-import { StepExecutionRepository } from '../repositories/step_execution_repository';
-import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
 import { setWorkflowEventChainContext } from '../trigger_events/event_context/event_chain_context';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
@@ -48,8 +47,9 @@ export async function setupDependencies(
   // Get ES client from core services (guaranteed to be available at task execution time)
   const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
 
-  const workflowExecutionRepository = new WorkflowExecutionRepository(internalEsClient);
-  const stepExecutionRepository = new StepExecutionRepository(internalEsClient);
+  const { workflowExecutionRepository, stepExecutionRepository } = await setupRepositories(
+    coreStart
+  );
   const workflowRepository = new WorkflowRepository({
     esClient: internalEsClient,
     logger,

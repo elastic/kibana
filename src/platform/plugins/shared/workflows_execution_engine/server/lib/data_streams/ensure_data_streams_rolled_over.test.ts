@@ -12,7 +12,7 @@ jest.mock('./roll_data_stream_if_required', () => ({
 }));
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '@kbn/workflows';
+import { WORKFLOWS_EXECUTIONS_DS, WORKFLOWS_STEP_EXECUTIONS_DS } from '@kbn/workflows';
 import { ensureWorkflowsDataStreamsRolledOver } from './ensure_data_streams_rolled_over';
 import { rollDataStreamIfRequired } from './roll_data_stream_if_required';
 import { WORKFLOWS_EXECUTION_LOGS_DATA_STREAM } from '../../repositories/logs_repository/constants';
@@ -67,7 +67,7 @@ describe('ensureWorkflowsDataStreamsRolledOver', () => {
       expect.objectContaining({
         logger: mockLogger,
         esClient: mockEsClient,
-        dataStreamName: WORKFLOWS_EXECUTIONS_INDEX,
+        dataStreamName: WORKFLOWS_EXECUTIONS_DS,
         targetManagedIndexMappingsVersion: WORKFLOWS_EXECUTIONS_MANAGED_INDEX_MAPPINGS_VERSION,
       })
     );
@@ -75,7 +75,7 @@ describe('ensureWorkflowsDataStreamsRolledOver', () => {
       expect.objectContaining({
         logger: mockLogger,
         esClient: mockEsClient,
-        dataStreamName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+        dataStreamName: WORKFLOWS_STEP_EXECUTIONS_DS,
         targetManagedIndexMappingsVersion: WORKFLOWS_STEP_EXECUTIONS_MANAGED_INDEX_MAPPINGS_VERSION,
       })
     );

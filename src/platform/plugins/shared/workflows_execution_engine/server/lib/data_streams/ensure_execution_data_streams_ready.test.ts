@@ -9,7 +9,7 @@
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '@kbn/workflows';
+import { WORKFLOWS_EXECUTIONS_DS, WORKFLOWS_STEP_EXECUTIONS_DS } from '@kbn/workflows';
 import {
   ensureExecutionDataStreamsReady,
   resetEnsureExecutionDataStreamsReadyForTests,
@@ -55,10 +55,10 @@ describe('ensureExecutionDataStreamsReady', () => {
     expect(initializeWorkflowExecutionsClient).toHaveBeenCalledWith(dataStreams);
     expect(initializeStepExecutionsClient).toHaveBeenCalledWith(dataStreams);
     expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
-      name: WORKFLOWS_EXECUTIONS_INDEX,
+      name: WORKFLOWS_EXECUTIONS_DS,
     });
     expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
-      name: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      name: WORKFLOWS_STEP_EXECUTIONS_DS,
     });
     expect(esClient.indices.putDataLifecycle).not.toHaveBeenCalled();
   });

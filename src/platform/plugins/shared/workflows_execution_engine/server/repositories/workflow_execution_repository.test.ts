@@ -11,9 +11,9 @@ import {
   ConcurrencySlotOccupyingExecutionStatuses,
   ExecutionStatus,
   NonTerminalExecutionStatuses,
+  WORKFLOWS_EXECUTIONS_DS,
 } from '@kbn/workflows';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
-import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
 const TEST_BACKING_INDEX = '.ds-.workflows-executions-2026.06.22-000001';
 
@@ -65,7 +65,7 @@ describe('WorkflowExecutionRepository', () => {
       const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'default' };
       const result = await repository.createWorkflowExecution(workflowExecution);
       expect(esClient.create).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         id: '1',
         refresh: false,
         document: expect.objectContaining({
@@ -115,7 +115,7 @@ describe('WorkflowExecutionRepository', () => {
       expect(esClient.bulk).toHaveBeenCalledTimes(1);
       expect(esClient.bulk).toHaveBeenCalledWith({
         refresh: 'wait_for',
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         operations: [
           { create: { _id: 'e1' } },
           expect.objectContaining({ ...executions[0], '@timestamp': expect.any(String) }),
@@ -258,7 +258,7 @@ describe('WorkflowExecutionRepository', () => {
       const result = await repository.getWorkflowExecutionById('exec-missing', 'space1');
 
       expect(esClient.search).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         seq_no_primary_term: true,
         query: { ids: { values: ['exec-missing'] } },
         size: 1,
@@ -422,7 +422,7 @@ describe('WorkflowExecutionRepository', () => {
       const result = await repository.searchWorkflowExecutions(query);
 
       expect(esClient.search).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         query,
         size: 10,
       });
@@ -439,7 +439,7 @@ describe('WorkflowExecutionRepository', () => {
       const result = await repository.searchWorkflowExecutions(query, 5);
 
       expect(esClient.search).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         query,
         size: 5,
       });
@@ -460,7 +460,7 @@ describe('WorkflowExecutionRepository', () => {
       const result = await repository.searchWorkflowExecutions(query, 20);
 
       expect(esClient.search).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         query,
         size: 20,
       });
@@ -477,7 +477,7 @@ describe('WorkflowExecutionRepository', () => {
       const result = await repository.hasRunningExecution('workflow-1', 'default');
 
       expect(esClient.search).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         size: 0,
         terminate_after: 1,
         track_total_hits: true,
@@ -517,7 +517,7 @@ describe('WorkflowExecutionRepository', () => {
       const result = await repository.hasRunningExecution('workflow-1', 'default', 'scheduled');
 
       expect(esClient.search).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         size: 0,
         terminate_after: 1,
         track_total_hits: true,
@@ -570,7 +570,7 @@ describe('WorkflowExecutionRepository', () => {
       const result = await repository.getRunningExecutionsByWorkflowId('workflow-1', 'default');
 
       expect(esClient.search).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         size: 1,
         terminate_after: 1,
         query: {
@@ -613,7 +613,7 @@ describe('WorkflowExecutionRepository', () => {
       );
 
       expect(esClient.search).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         size: 1,
         terminate_after: 1,
         query: {
@@ -705,7 +705,7 @@ describe('WorkflowExecutionRepository', () => {
       const result = await repository.getRunningExecutionsByConcurrencyGroup('server-1', 'default');
 
       expect(esClient.search).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         query: {
           bool: {
             filter: [
@@ -746,7 +746,7 @@ describe('WorkflowExecutionRepository', () => {
       await repository.getRunningExecutionsByConcurrencyGroup('server-1', 'default', 'exec-1');
 
       expect(esClient.search).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         query: {
           bool: {
             filter: [
@@ -1132,7 +1132,7 @@ describe('WorkflowExecutionRepository', () => {
 
   describe('findNonTerminalExecutionIdsByWorkflowIdPage', () => {
     const baseSearchExpectation = {
-      index: WORKFLOWS_EXECUTIONS_INDEX,
+      index: WORKFLOWS_EXECUTIONS_DS,
       query: {
         bool: {
           filter: [
@@ -1378,7 +1378,7 @@ describe('WorkflowExecutionRepository', () => {
       );
 
       expect(esClient.count).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         query: {
           bool: {
             filter: [
@@ -1413,7 +1413,7 @@ describe('WorkflowExecutionRepository', () => {
       );
 
       expect(esClient.search).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         size: 1,
         query: {
           bool: {

@@ -48,10 +48,10 @@ import {
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
+import { setupRepositories } from './execution_functions/setup_repositories';
 import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
 import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
-import { ensureExecutionDataStreamsReady } from './lib/data_streams/ensure_execution_data_streams_ready';
 import { getAuthenticatedUser } from './lib/get_user';
 import {
   resolveExhaustedWorkflowRunTask,
@@ -62,9 +62,8 @@ import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execu
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
-import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { initializeStepExecutionsDataStream } from './repositories/step_executions_data_stream';
-import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import type { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { initializeWorkflowExecutionsDataStream } from './repositories/workflow_executions_data_stream';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
@@ -150,6 +149,7 @@ export class WorkflowsExecutionEnginePlugin
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
   private concurrencyManager!: ConcurrencyManager;
+  private workflowExecutionRepository: WorkflowExecutionRepository;
   private setupDependencies?: SetupDependencies;
   private coreSetup?: CoreSetup<
     WorkflowsExecutionEnginePluginStartDeps,
@@ -243,7 +243,6 @@ export class WorkflowsExecutionEnginePlugin
                 await core.getStartServices();
               await checkLicense(pluginsStart.licensing);
 
-              await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
                 coreStart,
@@ -253,9 +252,8 @@ export class WorkflowsExecutionEnginePlugin
                 config,
               };
 
-              const esClient = coreStart.elasticsearch.client.asInternalUser;
-              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-              const stepExecutionRepository = new StepExecutionRepository(esClient);
+              const { workflowExecutionRepository, stepExecutionRepository } =
+                await setupRepositories(coreStart);
 
               const interruptedOutcome = await resolveInterruptedWorkflowRunTask({
                 workflowExecutionRepository,
@@ -367,7 +365,6 @@ export class WorkflowsExecutionEnginePlugin
                 await core.getStartServices();
               await checkLicense(pluginsStart.licensing);
 
-              await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
                 coreStart,
@@ -377,9 +374,8 @@ export class WorkflowsExecutionEnginePlugin
                 config,
               };
 
-              const esClient = coreStart.elasticsearch.client.asInternalUser;
-              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-              const stepExecutionRepository = new StepExecutionRepository(esClient);
+              const { workflowExecutionRepository, stepExecutionRepository } =
+                await setupRepositories(coreStart);
 
               const interruptedOutcome = await resolveInterruptedWorkflowResumeTask({
                 workflowExecutionRepository,
@@ -486,7 +482,6 @@ export class WorkflowsExecutionEnginePlugin
               const [coreStart, pluginsStart] = await core.getStartServices();
               await checkLicense(pluginsStart.licensing);
 
-              await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
                 coreStart,
@@ -498,8 +493,8 @@ export class WorkflowsExecutionEnginePlugin
               const esClient = coreStart.elasticsearch.client.asInternalUser;
 
               const workflowRepository = new WorkflowRepository({ esClient, logger });
-              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-              const stepExecutionRepository = new StepExecutionRepository(esClient);
+              const { workflowExecutionRepository, stepExecutionRepository } =
+                await setupRepositories(coreStart);
 
               const workflow = await workflowRepository.getWorkflow(workflowId, spaceId, {
                 includeGlobal: true,
@@ -669,7 +664,6 @@ export class WorkflowsExecutionEnginePlugin
           return {
             run: async () => {
               const [coreStart] = await core.getStartServices();
-              await this.initialize(coreStart);
               const esClient = coreStart.elasticsearch.client.asInternalUser;
 
               const migrations = [
@@ -751,12 +745,15 @@ export class WorkflowsExecutionEnginePlugin
 
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
-    const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
     const workflowRepository = new WorkflowRepository({ esClient, logger: this.logger });
-    this.concurrencyManager = new ConcurrencyManager(
-      workflowTaskManager,
-      workflowExecutionRepository
-    );
+    void (async () => {
+      const { workflowExecutionRepository } = await setupRepositories(coreStart);
+      this.workflowExecutionRepository = workflowExecutionRepository;
+      this.concurrencyManager = new ConcurrencyManager(
+        workflowTaskManager,
+        workflowExecutionRepository
+      );
+    })();
 
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,
@@ -822,8 +819,6 @@ export class WorkflowsExecutionEnginePlugin
       workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
     }> => {
-      await this.initialize(coreStart);
-
       await ensureWorkflowEnabled(workflow, (context.spaceId as string | undefined) || 'default');
 
       const authenticatedUser = await getAuthenticatedUser(
@@ -842,7 +837,7 @@ export class WorkflowsExecutionEnginePlugin
 
       await maybeDrainConcurrencyQueueBeforeEnqueue({
         workflowExecution,
-        workflowExecutionRepository,
+        workflowExecutionRepository: this.workflowExecutionRepository,
         workflowTaskManager,
         logger: this.logger,
         failureLogLabel: 'Concurrency queue drain before enqueue failed',
@@ -853,11 +848,11 @@ export class WorkflowsExecutionEnginePlugin
       // When a check will run, the caller dictates the strategy: manual/UI paths use
       // refresh:true (immediate, no latency for the user); async paths use refresh:'wait_for'
       // (piggybacks on the scheduled cycle, lower cluster cost).
-      await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
+      await this.workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
         refresh: workflowExecution.concurrencyGroupKey ? options.refresh : false,
       });
 
-      return { workflowExecution, repository: workflowExecutionRepository };
+      return { workflowExecution, repository: this.workflowExecutionRepository };
     };
 
     // Helper function to create a task instance
@@ -921,7 +916,7 @@ export class WorkflowsExecutionEnginePlugin
 
       const inputsValid = await validateWorkflowInputs(
         workflowExecution,
-        workflowExecutionRepository,
+        this.workflowExecutionRepository,
         this.logger,
         coreStart,
         dependencies
@@ -940,7 +935,7 @@ export class WorkflowsExecutionEnginePlugin
             workflowExecutionId: workflowExecution.id,
             spaceId: workflowExecution.spaceId,
             request,
-            workflowExecutionRepository,
+            workflowExecutionRepository: this.workflowExecutionRepository,
             workflowTaskManager,
             logger: this.logger,
           });
@@ -1008,7 +1003,7 @@ export class WorkflowsExecutionEnginePlugin
             workflowExecutionId: workflowExecution.id,
             spaceId: workflowExecution.spaceId,
             request,
-            workflowExecutionRepository,
+            workflowExecutionRepository: this.workflowExecutionRepository,
             workflowTaskManager,
             logger: this.logger,
           });
@@ -1043,7 +1038,6 @@ export class WorkflowsExecutionEnginePlugin
       }
 
       await checkLicense(plugins.licensing);
-      await this.initialize(coreStart);
 
       const authenticatedUser = await getAuthenticatedUser(
         request,
@@ -1074,8 +1068,6 @@ export class WorkflowsExecutionEnginePlugin
         workflowExecution: Partial<EsWorkflowExecution>;
       }
       const prepared: PreparedItem[] = [];
-
-      await this.initialize(coreStart);
 
       for (let idx = 0; idx < items.length; idx++) {
         const item = items[idx];
@@ -1110,7 +1102,7 @@ export class WorkflowsExecutionEnginePlugin
       // Bulk write all prepared executions in a single _bulk call.
       // `refresh: 'wait_for'` matches the single-item scheduleWorkflow path
       // so downstream concurrency checks see the freshly-written docs.
-      const bulkWriteResults = await workflowExecutionRepository.bulkCreateWorkflowExecutions(
+      const bulkWriteResults = await this.workflowExecutionRepository.bulkCreateWorkflowExecutions(
         prepared.map((p) => p.workflowExecution),
         { refresh: 'wait_for' }
       );
@@ -1178,7 +1170,7 @@ export class WorkflowsExecutionEnginePlugin
           workflowExecutionId: p.workflowExecution.id as string,
           spaceId: p.workflowExecution.spaceId ?? 'default',
           request,
-          workflowExecutionRepository,
+          workflowExecutionRepository: this.workflowExecutionRepository,
           workflowTaskManager,
           logger: this.logger,
         });
@@ -1189,7 +1181,7 @@ export class WorkflowsExecutionEnginePlugin
           for (const p of bucket) {
             await maybeDrainConcurrencyQueueBeforeEnqueue({
               workflowExecution: p.workflowExecution,
-              workflowExecutionRepository,
+              workflowExecutionRepository: this.workflowExecutionRepository,
               workflowTaskManager,
               logger: this.logger,
               failureLogLabel: 'Bulk concurrency queue drain failed',
@@ -1223,7 +1215,6 @@ export class WorkflowsExecutionEnginePlugin
     ) => {
       await checkLicense(plugins.licensing);
 
-      await this.initialize(coreStart);
       await ensureWorkflowEnabled(workflow, workflow.spaceId || 'default');
 
       const spaceId = workflow.spaceId || 'default';
@@ -1247,7 +1238,7 @@ export class WorkflowsExecutionEnginePlugin
       });
       workflowExecution.stepId = stepId;
 
-      await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+      await this.workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
       const taskInstance = {
         id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
@@ -1284,13 +1275,12 @@ export class WorkflowsExecutionEnginePlugin
       schedulingRequest
     ) => {
       await checkLicense(plugins.licensing);
-      await this.initialize(coreStart);
 
       await cancelWorkflow({
         workflowExecutionId,
         spaceId,
         schedulingRequest,
-        workflowExecutionRepository,
+        workflowExecutionRepository: this.workflowExecutionRepository,
         workflowTaskManager,
         logger: this.logger,
       });
@@ -1302,17 +1292,17 @@ export class WorkflowsExecutionEnginePlugin
       schedulingRequest,
     }) => {
       await checkLicense(plugins.licensing);
-      await this.initialize(coreStart);
 
       let searchAfter: estypes.SortResults | undefined;
 
       do {
-        const page = await workflowExecutionRepository.findNonTerminalExecutionIdsByWorkflowIdPage({
-          spaceId,
-          workflowId,
-          size: BULK_CANCEL_PAGE_SIZE,
-          searchAfter,
-        });
+        const page =
+          await this.workflowExecutionRepository.findNonTerminalExecutionIdsByWorkflowIdPage({
+            spaceId,
+            workflowId,
+            size: BULK_CANCEL_PAGE_SIZE,
+            searchAfter,
+          });
 
         if (page.results.length === 0) {
           break;
@@ -1345,8 +1335,7 @@ export class WorkflowsExecutionEnginePlugin
     ) => {
       await checkLicense(plugins.licensing);
 
-      await this.initialize(coreStart);
-      const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+      const workflowExecution = await this.workflowExecutionRepository.getWorkflowExecutionById(
         executionId,
         spaceId
       );
@@ -1402,7 +1391,7 @@ export class WorkflowsExecutionEnginePlugin
       request
     ) => {
       if (context) {
-        await workflowExecutionRepository.updateWorkflowExecution({
+        await this.workflowExecutionRepository.updateWorkflowExecution({
           id: executionId,
           context,
         });
@@ -1450,6 +1439,7 @@ export class WorkflowsExecutionEnginePlugin
       logger: this.logger,
       config: this.config.eventDriven,
       triggerEventsClientPromise,
+      workflowExecutionRepository: this.workflowExecutionRepository,
     });
 
     const triggerEvents: TriggerEventsContract = {
@@ -1477,11 +1467,6 @@ export class WorkflowsExecutionEnginePlugin
   }
 
   public stop() {}
-
-  private async initialize(coreStart: CoreStart): Promise<void> {
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
-    await ensureExecutionDataStreamsReady(coreStart.dataStreams, esClient);
-  }
 
   /**
    * Reused local wrapper for evaluating the concurrency group key for a workflow execution.

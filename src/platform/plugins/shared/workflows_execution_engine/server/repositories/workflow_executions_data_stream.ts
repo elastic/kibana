@@ -7,18 +7,64 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataStreamsSetup, DataStreamsStart } from '@kbn/core-data-streams-server';
-import type { MappingsDefinition } from '@kbn/es-mappings';
+import type {
+  DataStreamsSetup,
+  DataStreamsStart,
+  IDataStreamClient,
+} from '@kbn/core-data-streams-server';
+import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
+import { mappings } from '@kbn/es-mappings';
 import { WORKFLOWS_EXECUTIONS_DS } from '@kbn/workflows';
-import {
-  WORKFLOWS_EXECUTIONS_DS_MAPPINGS,
-  WORKFLOWS_EXECUTIONS_MANAGED_INDEX_MAPPINGS_VERSION,
-} from '../../common/workflow_executions_index';
+import { TOKEN_USAGE_MAPPING } from './step_executions_data_stream';
 
-export { WORKFLOWS_EXECUTIONS_MANAGED_INDEX_MAPPINGS_VERSION };
+export const PLUGIN_ID = 'workflowsExecutionEngine';
+export const PLUGIN_NAME = 'Workflows Execution Engine';
 
-const workflowExecutionsMappings =
-  WORKFLOWS_EXECUTIONS_DS_MAPPINGS as unknown as MappingsDefinition;
+export const WORKFLOWS_EXECUTIONS_MANAGED_INDEX_MAPPINGS_VERSION = 1;
+
+export const WORKFLOWS_EXECUTIONS_DS_MAPPINGS = {
+  dynamic: false,
+  properties: {
+    '@timestamp': mappings.date(),
+    spaceId: mappings.keyword(),
+    id: mappings.keyword(),
+    workflowId: mappings.keyword(),
+    managed: mappings.boolean(),
+    managedBy: mappings.keyword(),
+    originManagedWorkflowId: mappings.keyword(),
+    managedVersion: mappings.long(),
+    status: mappings.keyword(),
+    workflowDefinition: mappings.object({
+      enabled: false,
+      properties: {},
+    }),
+    createdAt: mappings.date(),
+    isTestRun: mappings.boolean(),
+    // Only exists in single step test executions
+    stepId: mappings.keyword(),
+    createdBy: mappings.keyword(),
+    executedBy: mappings.keyword(),
+    startedAt: mappings.date(),
+    finishedAt: mappings.date(),
+    duration: mappings.long(),
+    triggeredBy: mappings.keyword(),
+    eventChainDepth: mappings.long(),
+    eventChainVisitedWorkflowIds: mappings.keyword(),
+    dispatchEventId: mappings.keyword(),
+    concurrencyGroupKey: mappings.keyword(),
+    // Aggregated token usage across all token-consuming steps, accumulated
+    // incrementally as each step finishes.
+    usage: TOKEN_USAGE_MAPPING,
+    version: mappings.long(),
+  },
+} satisfies MappingsDefinition;
+
+export type EsWorkflowExecutionEntry = GetFieldsOf<typeof WORKFLOWS_EXECUTIONS_DS_MAPPINGS>;
+
+export type WorkflowExecutionsDataStreamClient = IDataStreamClient<
+  typeof WORKFLOWS_EXECUTIONS_DS_MAPPINGS,
+  EsWorkflowExecutionEntry
+>;
 
 // Note: Bump the version when you make changes to the definition.
 export const initializeWorkflowExecutionsDataStream = (coreDataStreams: DataStreamsSetup): void => {
@@ -27,7 +73,7 @@ export const initializeWorkflowExecutionsDataStream = (coreDataStreams: DataStre
     version: 1,
     hidden: true,
     template: {
-      mappings: workflowExecutionsMappings,
+      mappings: WORKFLOWS_EXECUTIONS_DS_MAPPINGS,
     },
   });
 };

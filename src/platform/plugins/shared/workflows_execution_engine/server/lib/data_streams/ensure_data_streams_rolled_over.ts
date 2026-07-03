@@ -8,9 +8,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { WORKFLOWS_EXECUTIONS_DS } from '@kbn/workflows';
+import { WORKFLOWS_EXECUTIONS_DS, WORKFLOWS_STEP_EXECUTIONS_DS } from '@kbn/workflows';
 import { rollDataStreamIfRequired } from './roll_data_stream_if_required';
-import { WORKFLOWS_STEP_EXECUTIONS_DS } from '../../../common';
 import { WORKFLOWS_EXECUTION_LOGS_DATA_STREAM } from '../../repositories/logs_repository/constants';
 import { WORKFLOWS_LOGS_MANAGED_INDEX_MAPPINGS_VERSION } from '../../repositories/logs_repository/data_stream';
 import { WORKFLOWS_STEP_EXECUTIONS_MANAGED_INDEX_MAPPINGS_VERSION } from '../../repositories/step_executions_data_stream';

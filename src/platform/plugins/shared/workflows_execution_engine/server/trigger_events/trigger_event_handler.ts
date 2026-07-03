@@ -59,6 +59,7 @@ export type EmitEvent = (params: EmitEventParams) => Promise<void>;
 export interface TriggerEventHandlerDeps {
   coreStart: CoreStart;
   workflowRepository: WorkflowRepository;
+  workflowExecutionRepository: WorkflowExecutionRepository;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   spaces: SpacesServiceStart | undefined;
   scheduleWorkflow: ScheduleWorkflow;
@@ -171,8 +172,7 @@ export class TriggerEventHandler {
     const coreStart = deps.coreStart;
     this.telemetryClient = new WorkflowExecutionTelemetryClient(coreStart.analytics, deps.logger);
 
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
-    this.workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+    this.workflowExecutionRepository = deps.workflowExecutionRepository;
     this.triggerEventsClientPromise =
       deps.triggerEventsClientPromise ?? initializeTriggerEventsClient(coreStart.dataStreams);
   }
