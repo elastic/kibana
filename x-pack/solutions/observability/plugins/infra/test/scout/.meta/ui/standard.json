@@ -1,5 +1,5 @@
 {
-  "sha1": "dc96f680abbb685e6d1c4e51fda21b58e6281a93",
+  "sha1": "1e3b03d7beebba8d142d6a3eedb51b0de65b26da",
   "tests": [
     {
       "id": "f4c048e25988cb5-605d7a7bf19c60f",
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 63,
+        "line": 90,
         "column": 9
       }
     },
@@ -29,7 +29,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 103,
+        "line": 130,
         "column": 9
       }
     },
@@ -45,7 +45,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 117,
+        "line": 144,
         "column": 9
       }
     },
@@ -61,7 +61,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 131,
+        "line": 158,
         "column": 9
       }
     },
@@ -77,7 +77,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 146,
+        "line": 173,
         "column": 9
       }
     },
@@ -93,7 +93,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 161,
+        "line": 188,
         "column": 9
       }
     },
@@ -109,7 +109,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 174,
+        "line": 201,
         "column": 9
       }
     },
@@ -125,14 +125,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 201,
+        "line": 228,
         "column": 9
       }
     },
     {
       "id": "429b26b1a93be7d-b4cd1ee38b3f8ad",
       "title": "Hosts Page - Empty State should show onboarding page when no data is present",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -141,7 +141,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_empty_state.spec.ts",
-        "line": 23,
+        "line": 22,
         "column": 9
       }
     },

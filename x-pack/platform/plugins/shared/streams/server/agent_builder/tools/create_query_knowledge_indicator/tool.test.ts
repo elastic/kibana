@@ -45,7 +45,7 @@ describe('ki_query_create tool', () => {
     });
 
     expect(tool.id).toBe(STREAMS_CREATE_QUERY_KNOWLEDGE_INDICATOR_TOOL_ID);
-    expect(tool.id).toBe('platform.streams.sig_events.ki_query_create');
+    expect(tool.id).toBe('platform.sig_events.ki_query_create');
   });
 
   it('uses always confirmation policy with custom prompt', async () => {
@@ -142,7 +142,7 @@ describe('ki_query_create tool', () => {
         },
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(queryClient),
         licensing: {},
-        uiSettingsClient: {},
+        uiSettingsClient: { get: jest.fn().mockResolvedValue(false) },
       } as unknown as RouteHandlerScopedClients;
     }) as unknown as jest.MockedFunction<GetScopedClients>;
 
@@ -198,7 +198,7 @@ describe('ki_query_create tool', () => {
         },
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(queryClient),
         licensing: {},
-        uiSettingsClient: {},
+        uiSettingsClient: { get: jest.fn().mockResolvedValue(false) },
       } as unknown as RouteHandlerScopedClients;
     }) as unknown as jest.MockedFunction<GetScopedClients>;
 
