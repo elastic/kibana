@@ -6,16 +6,14 @@
  */
 
 /**
- * Alerts-tab navigation helpers for the Service Map.
+ * Alerts-tab navigation helper for the Service Map.
  *
- * These hooks resolve the service-scoped alerts-tab destination from the
- * current map route while preserving the shared time range / environment params
- * and **stripping `kuery`** (alerts aggregate across all visible services, so a
+ * Resolves the service-scoped alerts-tab destination from the current map
+ * route while preserving the shared time range / environment params and
+ * **stripping `kuery`** (alerts aggregate across all visible services, so a
  * node-scoped click would otherwise carry the map's service-name filter into a
  * destination where it yields zero results).
  *
- *  - `useServiceMapAlertsTabHref` — returns a plain href for anchor-style use.
- *  - `useServiceMapAlertsTabNavigate` — returns an SPA-navigation click handler.
  *  - `useServiceMapAlertsNavigateFactory` — returns a `MakeAlertsNavigateHandler`
  *    factory injected through `ServiceMapAlertsNavigateProvider` so the shared
  *    `ServiceNode` can produce per-service click handlers without itself
@@ -31,26 +29,7 @@ import type { KeyboardEvent, MouseEvent } from 'react';
 import { useCallback } from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import type { MakeAlertsNavigateHandler } from '../../shared/service_map/service_map_alerts_navigate_context';
-import {
-  useServiceMapTabHref,
-  useServiceMapTabHrefBuilder,
-  useServiceMapTabNavigate,
-} from './use_service_map_tab_href';
-
-/**
- * Alerts tab URL for a service on the service map, matching the service header
- * badge destination for the current map context (global, service detail, mobile).
- */
-export function useServiceMapAlertsTabHref(serviceName: string) {
-  return useServiceMapTabHref('alerts', serviceName);
-}
-
-/**
- * SPA navigation to the alerts tab (avoids full page reload from a plain anchor href).
- */
-export function useServiceMapAlertsTabNavigate(serviceName: string) {
-  return useServiceMapTabNavigate('alerts', serviceName);
-}
+import { useServiceMapTabHrefBuilder } from './use_service_map_tab_href';
 
 /**
  * Factory used by `ServiceMapAlertsNavigateProvider` to expose a per-service

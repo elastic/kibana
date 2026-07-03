@@ -7,11 +7,7 @@
 
 import type { MouseEvent } from 'react';
 import { renderHook, act } from '@testing-library/react';
-import {
-  useServiceMapAlertsTabHref,
-  useServiceMapAlertsTabNavigate,
-  useServiceMapAlertsNavigateFactory,
-} from './use_service_map_alerts_tab_href';
+import { useServiceMapAlertsNavigateFactory } from './use_service_map_alerts_tab_href';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
@@ -59,75 +55,6 @@ const serviceMapQuery = {
   offset: '15m',
   serviceGroup: '',
 };
-
-describe('useServiceMapAlertsTabHref', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockedUseApmRouter.mockReturnValue({ link: mockedLink } as unknown as ReturnType<
-      typeof useApmRouter
-    >);
-    mockedUseAnyOfApmParams.mockReturnValue({ query: serviceMapQuery } as unknown as ReturnType<
-      typeof useAnyOfApmParams
-    >);
-    mockedUseApmRoutePath.mockReturnValue(
-      '/service-map' as unknown as ReturnType<typeof useApmRoutePath>
-    );
-  });
-
-  // The shared map-context resolution, param pass-through and kuery stripping
-  // are covered in `use_service_map_tab_href.test.ts`; this only guards that
-  // the alerts wrapper targets the `alerts` tab.
-  it('builds a link to the alerts tab and resets the map kuery', () => {
-    const { result } = renderHook(() => useServiceMapAlertsTabHref('opbeans-node'));
-
-    expect(result.current).toContain('/app/apm/services/opbeans-node/alerts');
-    const search = new URL(`http://x${result.current}`).searchParams;
-    expect(search.get('kuery')).toBe('');
-  });
-});
-
-describe('useServiceMapAlertsTabNavigate', () => {
-  const navigateToUrl = jest.fn();
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockedUseApmRouter.mockReturnValue({ link: mockedLink } as unknown as ReturnType<
-      typeof useApmRouter
-    >);
-    mockedUseAnyOfApmParams.mockReturnValue({ query: serviceMapQuery } as unknown as ReturnType<
-      typeof useAnyOfApmParams
-    >);
-    mockedUseApmRoutePath.mockReturnValue(
-      '/service-map' as unknown as ReturnType<typeof useApmRoutePath>
-    );
-    mockedUseApmPluginContext.mockReturnValue({
-      core: { application: { navigateToUrl } },
-    } as unknown as ReturnType<typeof useApmPluginContext>);
-  });
-
-  it('navigates to the kuery-stripped alerts URL on click', () => {
-    const { result } = renderHook(() => useServiceMapAlertsTabNavigate('opbeans-node'));
-
-    const event = {
-      preventDefault: jest.fn(),
-      stopPropagation: jest.fn(),
-    } as unknown as MouseEvent;
-
-    act(() => {
-      result.current(event);
-    });
-
-    expect(event.preventDefault).toHaveBeenCalled();
-    expect(event.stopPropagation).toHaveBeenCalled();
-    expect(navigateToUrl).toHaveBeenCalledTimes(1);
-
-    const href = navigateToUrl.mock.calls[0][0] as string;
-    expect(href).toContain('/app/apm/services/opbeans-node/alerts');
-    const search = new URL(`http://x${href}`).searchParams;
-    expect(search.get('kuery')).toBe('');
-    expect(search.get('environment')).toBe('production');
-  });
-});
 
 describe('useServiceMapAlertsNavigateFactory', () => {
   const navigateToUrl = jest.fn();
