@@ -16,8 +16,11 @@ import {
   MAX_SML_CONTENT_LENGTH,
   MAX_SML_TAG_LENGTH,
   MAX_SML_TAGS_PER_DOCUMENT,
+  MAX_SML_PERMISSIONS_NAME_LENGTH,
+  MAX_SML_PERMISSIONS_ENTRIES,
 } from '../../common/constants';
-import type { SmlChunk, SmlService } from '../services/sml/types';
+import { SmlPermissionsConflictError } from '../services/sml/errors';
+import type { SmlChunk, SmlPermissions, SmlService } from '../services/sml/types';
 import { isVisibleInSpace } from '../services/sml/sml_service';
 import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
 import { WRITE_SECURITY, toSmlHttpItem, withSmlFeatureFlag } from './common';
@@ -26,10 +29,13 @@ import { WRITE_SECURITY, toSmlHttpItem, withSmlFeatureFlag } from './common';
  * `PUT /internal/agent_context_layer/sml/{type}/{originId}`
  *
  * Writes a manual chunk via `indexAttachment` content-mode (same path as the
- * workflow step). Permissions are stamped by the indexer from `getPermissions`;
- * callers cannot supply them. The write replaces all existing chunks for the
- * origin ("claim the origin" semantic). Omitting `tags` clears them — PUT is
- * a full-document replace, not a merge.
+ * workflow step). The write replaces all existing chunks for the origin
+ * ("claim the origin" semantic). Omitting `tags` clears them — PUT is a
+ * full-document replace, not a merge.
+ *
+ * `permissions` mirrors the workflow step's `contextEngine.addEntry` input:
+ * applies only when `type` has no `getPermissions` hook. Supplying it for a
+ * hook-backed type throws {@link SmlPermissionsConflictError}, mapped below to 409.
  *
  * Cross-space guard: origins invisible from the caller's space return 404.
  * Per-chunk privilege guard: caller must hold read access to every existing
@@ -65,8 +71,7 @@ export const registerUpsertRoute = ({
           }),
           originId: schema.string({ minLength: 1, maxLength: MAX_SML_ORIGIN_ID_LENGTH }),
         }),
-        // `permissions` are not accepted from the body — callers cannot override the
-        // indexer's getPermissions gate. `type` and `originId` are URL params only.
+        // `type` and `originId` are URL params only — never accepted from the body.
         body: schema.object({
           title: schema.string({ minLength: 1, maxLength: MAX_SML_TITLE_LENGTH }),
           content: schema.string({ maxLength: MAX_SML_CONTENT_LENGTH }),
@@ -92,6 +97,48 @@ export const registerUpsertRoute = ({
               }
             )
           ),
+          permissions: schema.maybe(
+            schema.object(
+              {
+                elasticsearch: schema.maybe(
+                  schema.object({
+                    indices: schema.maybe(
+                      schema.arrayOf(
+                        schema.object({
+                          name: schema.string({
+                            minLength: 1,
+                            maxLength: MAX_SML_PERMISSIONS_NAME_LENGTH,
+                          }),
+                        }),
+                        { maxSize: MAX_SML_PERMISSIONS_ENTRIES }
+                      )
+                    ),
+                  })
+                ),
+                kibana: schema.maybe(
+                  schema.object({
+                    privileges: schema.maybe(
+                      schema.arrayOf(
+                        schema.object({
+                          name: schema.string({
+                            minLength: 1,
+                            maxLength: MAX_SML_PERMISSIONS_NAME_LENGTH,
+                          }),
+                        }),
+                        { maxSize: MAX_SML_PERMISSIONS_ENTRIES }
+                      )
+                    ),
+                  })
+                ),
+              },
+              {
+                meta: {
+                  description:
+                    'Permissions to stamp on the written chunk when `type` has no getPermissions hook. Rejected if the type derives permissions via getPermissions.',
+                },
+              }
+            )
+          ),
         }),
       },
       options: { access: 'internal' },
@@ -105,6 +152,10 @@ export const registerUpsertRoute = ({
           title: string;
           content: string;
           tags?: string[];
+          permissions?: {
+            elasticsearch?: { indices?: Array<{ name: string }> };
+            kibana?: { privileges?: Array<{ name: string }> };
+          };
         };
         const coreContext = await ctx.core;
         const esClient = coreContext.elasticsearch.client;
@@ -153,6 +204,15 @@ export const registerUpsertRoute = ({
           isVisibleInSpace(d.spaces, spaceId)
         )?.created_at;
 
+        // Fold in empty arrays for any omitted half, as the workflow step does.
+        const permissions: SmlPermissions | undefined =
+          body.permissions !== undefined
+            ? {
+                kibana: { privileges: body.permissions.kibana?.privileges ?? [] },
+                elasticsearch: { indices: body.permissions.elasticsearch?.indices ?? [] },
+              }
+            : undefined;
+
         await sml.indexAttachment({
           originId,
           attachmentType: type,
@@ -163,6 +223,7 @@ export const registerUpsertRoute = ({
           logger,
           content: [chunk],
           createdAt: existingCreatedAt,
+          ...(permissions !== undefined ? { permissions } : {}),
         });
 
         // Re-read to return the indexer-stamped state (permissions, created_at, chunk ids).
@@ -174,6 +235,12 @@ export const registerUpsertRoute = ({
         };
         return response.ok({ body: responseBody });
       } catch (error) {
+        // Client input error (caller supplied `permissions` for a type whose
+        // `getPermissions` hook is authoritative) — not a server fault.
+        if (error instanceof SmlPermissionsConflictError) {
+          logger.warn(`SML upsert permissions conflict: ${error.message}`);
+          return response.conflict({ body: { message: error.message } });
+        }
         logger.error(`SML upsert route error: ${(error as Error).message}`);
         throw error;
       }
