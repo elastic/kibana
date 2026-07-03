@@ -12,12 +12,12 @@ import {
   featureUpsertSchema,
   type Feature,
 } from '@kbn/significant-events-schema';
-import { searchModeSchema } from '../../../utils/search_mode';
-import { createServerRoute } from '../../../create_server_route';
-import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import { StatusError } from '../../../../lib/streams/errors/status_error';
-import type { KIBulkOperation } from '../../../../lib/streams/ki';
+import { searchModeSchema } from '../../../../utils/search_mode';
+import { createServerRoute } from '../../../../create_server_route';
+import { assertSignificantEventsAccess } from '../../../../utils/assert_significant_events_access';
+import { STREAMS_API_PRIVILEGES } from '../../../../../../common/constants';
+import { StatusError } from '../../../../../lib/streams/errors/status_error';
+import type { KIBulkOperation } from '../../../../../lib/streams/ki';
 
 const MAX_INPUT_STRING_LENGTH = 255;
 
@@ -389,7 +389,7 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
   },
 });
 
-export const featureRoutes = {
+export const internalSignificantEventsKIFeatureRoutes = {
   ...upsertFeatureRoute,
   ...deleteFeatureRoute,
   ...listFeaturesRoute,

@@ -11,15 +11,15 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
 } from '@kbn/management-settings-ids';
-import { createServerRoute } from '../../../create_server_route';
-import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
+import { createServerRoute } from '../../../../create_server_route';
+import { assertSignificantEventsAccess } from '../../../../utils/assert_significant_events_access';
+import { FeatureNotEnabledError } from '../../../../../lib/streams/errors/feature_not_enabled_error';
 import {
   STREAMS_API_PRIVILEGES,
   MIN_EXTRACTION_INTERVAL_HOURS,
-} from '../../../../../common/constants';
+} from '../../../../../../common/constants';
 
-const putSignificantEventsSettingsBodySchema = z.object({
+const putContinuousKiExtractionSettingsBodySchema = z.object({
   continuousKiExtraction: z.object({
     enabled: z.boolean().optional(),
     intervalHours: z.number().min(MIN_EXTRACTION_INTERVAL_HOURS).optional(),
@@ -27,8 +27,8 @@ const putSignificantEventsSettingsBodySchema = z.object({
   }),
 });
 
-export const putSignificantEventsSettingsRoute = createServerRoute({
-  endpoint: 'PUT /internal/streams/_significant_events/settings',
+export const putContinuousKIExtractionSettingsRoute = createServerRoute({
+  endpoint: 'PUT /internal/streams/_knowledge_indicators/continuous_ki_extraction/settings',
   options: {
     access: 'internal',
     summary: 'Update continuous KI extraction settings',
@@ -41,7 +41,7 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     },
   },
   params: z.object({
-    body: putSignificantEventsSettingsBodySchema,
+    body: putContinuousKiExtractionSettingsBodySchema,
   }),
   handler: async ({
     params,
@@ -115,6 +115,6 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
   },
 });
 
-export const internalSignificantEventsSettingsRoutes = {
-  ...putSignificantEventsSettingsRoute,
+export const internalSignificantEventsKIContinuousKIExtractionRoutes = {
+  ...putContinuousKIExtractionSettingsRoute,
 };

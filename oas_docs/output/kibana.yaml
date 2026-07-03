@@ -66427,7 +66427,7 @@ paths:
           content:
             application/json:
               examples:
-                significantEvents:
+                queryOccurrences:
                   value:
                     aggregated_occurrences:
                       - count: 42
@@ -66436,7 +66436,7 @@ paths:
                         date: '2025-01-15T11:00:00.000Z'
                       - count: 7
                         date: '2025-01-15T12:00:00.000Z'
-                    significant_events:
+                    queries:
                       - change_points:
                           type:
                             spike:
