@@ -7,37 +7,17 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  testData,
-  convertToLensByTitle,
-  getImportedDashboardId,
-  setupLogstashOpenInLensDefaults,
-} from '../../../fixtures';
+import { testData, convertToLensByTitle, createOpenInLensSuiteSetup } from '../../../fixtures';
 
 spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.stateful.classic }, () => {
-  let goalDashboardId: string;
-
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    const imported = await scoutSpace.savedObjects.load(
-      testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.GOAL
-    );
-    goalDashboardId = getImportedDashboardId(
-      imported,
-      testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.GOAL
-    );
-
-    await setupLogstashOpenInLensDefaults(scoutSpace);
+  const openInLensSuite = createOpenInLensSuiteSetup({
+    archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.GOAL,
+    dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.GOAL,
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.openDashboardWithIdInEditMode(goalDashboardId);
-  });
-
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.beforeAll(openInLensSuite.beforeAll);
+  spaceTest.beforeEach(openInLensSuite.beforeEach);
+  spaceTest.afterAll(openInLensSuite.afterAll);
 
   spaceTest('should convert to Lens', async ({ pageObjects }) => {
     const { dashboard, lens } = pageObjects;

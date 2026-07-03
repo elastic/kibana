@@ -11,37 +11,20 @@ import {
   testData,
   canConvertToLensByTitle,
   convertToLensByTitle,
-  enableElasticChartDebug,
+  createOpenInLensSuiteSetup,
   getChartDebugData,
-  getImportedDashboardId,
-  setupLogstashOpenInLensDefaults,
 } from '../../../fixtures';
 
 spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.stateful.classic }, () => {
-  let xyDashboardId: string;
-
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    const imported = await scoutSpace.savedObjects.load(
-      testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.XY
-    );
-    xyDashboardId = getImportedDashboardId(
-      imported,
-      testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.XY
-    );
-
-    await setupLogstashOpenInLensDefaults(scoutSpace);
+  const openInLensSuite = createOpenInLensSuiteSetup({
+    archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.XY,
+    dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.XY,
+    enableChartDebug: true,
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, context, pageObjects }) => {
-    await enableElasticChartDebug(context);
-    await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.openDashboardWithIdInEditMode(xyDashboardId);
-  });
-
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.beforeAll(openInLensSuite.beforeAll);
+  spaceTest.beforeEach(openInLensSuite.beforeEach);
+  spaceTest.afterAll(openInLensSuite.afterAll);
 
   spaceTest('should check Convert to Lens action availability', async ({ pageObjects }) => {
     const { dashboard } = pageObjects;

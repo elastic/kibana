@@ -12,8 +12,7 @@ import {
   testData,
   canConvertToLensByTitle,
   convertToLensByTitle,
-  getImportedDashboardId,
-  setupLogstashOpenInLensDefaults,
+  createOpenInLensSuiteSetup,
 } from '../../../fixtures';
 
 /** Returns the selected option labels from a combo box inside the dimension editor flyout. */
@@ -32,29 +31,14 @@ const getDimensionFlyoutComboBoxSelectedOptions = async (
 };
 
 spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.stateful.classic }, () => {
-  let tableDashboardId: string;
-
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    const imported = await scoutSpace.savedObjects.load(
-      testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.TABLE
-    );
-    tableDashboardId = getImportedDashboardId(
-      imported,
-      testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.TABLE
-    );
-
-    await setupLogstashOpenInLensDefaults(scoutSpace);
+  const openInLensSuite = createOpenInLensSuiteSetup({
+    archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.TABLE,
+    dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.TABLE,
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.openDashboardWithIdInEditMode(tableDashboardId);
-  });
-
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.beforeAll(openInLensSuite.beforeAll);
+  spaceTest.beforeEach(openInLensSuite.beforeEach);
+  spaceTest.afterAll(openInLensSuite.afterAll);
 
   spaceTest('should not allow converting of unsupported aggregations', async ({ pageObjects }) => {
     const { dashboard } = pageObjects;

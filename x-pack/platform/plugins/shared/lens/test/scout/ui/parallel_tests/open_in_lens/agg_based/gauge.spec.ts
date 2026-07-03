@@ -12,37 +12,20 @@ import {
   testData,
   canConvertToLensByTitle,
   convertToLensByTitle,
-  enableElasticChartDebug,
+  createOpenInLensSuiteSetup,
   getChartDebugData,
-  getImportedDashboardId,
-  setupLogstashOpenInLensDefaults,
 } from '../../../fixtures';
 
 spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.stateful.classic }, () => {
-  let gaugeDashboardId: string;
-
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    const imported = await scoutSpace.savedObjects.load(
-      testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.GAUGE
-    );
-    gaugeDashboardId = getImportedDashboardId(
-      imported,
-      testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.GAUGE
-    );
-
-    await setupLogstashOpenInLensDefaults(scoutSpace);
+  const openInLensSuite = createOpenInLensSuiteSetup({
+    archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.GAUGE,
+    dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.GAUGE,
+    enableChartDebug: true,
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, context, pageObjects }) => {
-    await enableElasticChartDebug(context);
-    await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.openDashboardWithIdInEditMode(gaugeDashboardId);
-  });
-
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.beforeAll(openInLensSuite.beforeAll);
+  spaceTest.beforeEach(openInLensSuite.beforeEach);
+  spaceTest.afterAll(openInLensSuite.afterAll);
 
   spaceTest('should convert to Lens', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;

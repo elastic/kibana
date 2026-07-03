@@ -5,48 +5,19 @@
  * 2.0.
  */
 
-/**
- * TSVB Open in Lens — Scout migration coverage notes
- *
- * These tests verify that TSVB panels convert correctly to Lens (conversion logic only).
- * The following flows are NOT yet covered and should be added:
- *
- * TODO: Save & return to dashboard — does the converted panel persist after saving?
- * TODO: Replace in dashboard — does the converted Lens panel replace the original TSVB panel?
- * TODO: Save to library — can the converted visualization be saved as a library item?
- */
-
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  testData,
-  getImportedDashboardId,
-  setupLogstashOpenInLensDefaults,
-} from '../../../fixtures';
+import { testData, createOpenInLensSuiteSetup } from '../../../fixtures';
 
 spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }, () => {
-  let dashboardId: string;
-
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    const imported = await scoutSpace.savedObjects.load(
-      testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.TSVB.GAUGE
-    );
-    dashboardId = getImportedDashboardId(
-      imported,
-      testData.DASHBOARD_TITLES.OPEN_IN_LENS.TSVB.GAUGE
-    );
-    await setupLogstashOpenInLensDefaults(scoutSpace);
+  const openInLensSuite = createOpenInLensSuiteSetup({
+    archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.TSVB.GAUGE,
+    dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.TSVB.GAUGE,
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.openDashboardWithIdInEditMode(dashboardId);
-  });
-
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.beforeAll(openInLensSuite.beforeAll);
+  spaceTest.beforeEach(openInLensSuite.beforeEach);
+  spaceTest.afterAll(openInLensSuite.afterAll);
 
   // Negative cases grouped — these don't navigate away from the dashboard,
   // so they can share one browser context via test.step().

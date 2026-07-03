@@ -5,51 +5,26 @@
  * 2.0.
  */
 
-/**
- * TSVB Open in Lens — Scout migration coverage notes
- *
- * These tests verify that TSVB panels convert correctly to Lens (conversion logic only).
- * The following flows are NOT yet covered and should be added:
- *
- * TODO: Save & return to dashboard — does the converted panel persist after saving?
- * TODO: Replace in dashboard — does the converted Lens panel replace the original TSVB panel?
- * TODO: Save to library — can the converted visualization be saved as a library item?
- */
-
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  testData,
-  getImportedDashboardId,
-  setupLogstashOpenInLensDefaults,
-} from '../../../fixtures';
+import { testData, createOpenInLensSuiteSetup } from '../../../fixtures';
 
 // FLAKY: https://github.com/elastic/kibana/issues/179307
 // These tests were historically skipped in stateful FTR (describe.skip).
 // Using test.fixme() until stability is confirmed in Scout.
 spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnostic }, () => {
-  let dashboard1Id: string;
-  let dashboard2Id: string;
-
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    const imported = await scoutSpace.savedObjects.load(
-      testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.TSVB.DASHBOARD
-    );
-    dashboard1Id = getImportedDashboardId(
-      imported,
-      testData.DASHBOARD_TITLES.OPEN_IN_LENS.TSVB.DASHBOARD_1
-    );
-    dashboard2Id = getImportedDashboardId(
-      imported,
-      testData.DASHBOARD_TITLES.OPEN_IN_LENS.TSVB.DASHBOARD_2
-    );
-    await setupLogstashOpenInLensDefaults(scoutSpace);
+  const openInLensSuite = createOpenInLensSuiteSetup({
+    archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.TSVB.DASHBOARD,
+    dashboardTitles: [
+      testData.DASHBOARD_TITLES.OPEN_IN_LENS.TSVB.DASHBOARD_1,
+      testData.DASHBOARD_TITLES.OPEN_IN_LENS.TSVB.DASHBOARD_2,
+    ],
+    openDashboardBeforeEach: false,
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.beforeAll(openInLensSuite.beforeAll);
+  spaceTest.beforeEach(openInLensSuite.beforeEach);
+  spaceTest.afterAll(openInLensSuite.afterAll);
 
   // https://github.com/elastic/kibana/issues/179307
   spaceTest.fixme(
@@ -58,7 +33,9 @@ spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnost
       await browserAuth.loginAsAdmin();
       const { dashboard, lens } = pageObjects;
 
-      await dashboard.openDashboardWithIdInEditMode(dashboard1Id);
+      await dashboard.openDashboardWithIdInEditMode(
+        openInLensSuite.getDashboardId(testData.DASHBOARD_TITLES.OPEN_IN_LENS.TSVB.DASHBOARD_1)
+      );
 
       const originalPanelCount = await dashboard.getPanelCount();
 
@@ -103,7 +80,9 @@ spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnost
       await browserAuth.loginAsAdmin();
       const { dashboard, lens } = pageObjects;
 
-      await dashboard.openDashboardWithIdInEditMode(dashboard2Id);
+      await dashboard.openDashboardWithIdInEditMode(
+        openInLensSuite.getDashboardId(testData.DASHBOARD_TITLES.OPEN_IN_LENS.TSVB.DASHBOARD_2)
+      );
 
       // Save to library first
       await dashboard.saveToLibrary(visTitle);
