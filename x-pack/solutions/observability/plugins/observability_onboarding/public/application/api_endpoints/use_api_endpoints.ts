@@ -22,13 +22,13 @@ export interface ResolvedApiEndpoint {
   logo?: SupportedLogo;
   euiIconType?: EuiIconType;
   url?: string;
+  usesManagedInput: boolean;
 }
 
 export function useApiEndpoints(): {
   endpoints: ResolvedApiEndpoint[];
   isLoading: boolean;
   isError: boolean;
-  hasManagedOtlpServiceUrl: boolean;
 } {
   const {
     services: {
@@ -63,6 +63,7 @@ export function useApiEndpoints(): {
       logo: definition.logo,
       euiIconType: definition.euiIconType,
       url: definition.getUrl(endpointContext),
+      usesManagedInput: definition.usesManagedInput(endpointContext),
     }));
   }, [
     data?.elasticsearchUrl,
@@ -76,6 +77,5 @@ export function useApiEndpoints(): {
     endpoints,
     isLoading: isPending(status),
     isError: status === FETCH_STATUS.FAILURE,
-    hasManagedOtlpServiceUrl: Boolean(data?.managedOtlpServiceUrl?.trim()),
   };
 }

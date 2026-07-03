@@ -44,7 +44,7 @@ export const ApiEndpoints = () => {
   } = useKibana<ObservabilityOnboardingAppServices>();
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
-  const { endpoints, isLoading, isError, hasManagedOtlpServiceUrl } = useApiEndpoints();
+  const { endpoints, isLoading, isError } = useApiEndpoints();
   const { encodedApiKeys, creatingEndpointId, createApiKey } = useApiKeys();
   const canCreateApiKey = Boolean(application.capabilities.api_keys?.save);
   const [selectedEndpointId, setSelectedEndpointId] = useState<string | undefined>(undefined);
@@ -62,13 +62,16 @@ export const ApiEndpoints = () => {
   const selectedEndpoint =
     endpoints.find((endpoint) => endpoint.id === selectedEndpointId) ?? endpoints[0];
 
+  const selectedEndpointUsesManagedInput = selectedEndpoint.usesManagedInput;
   const openInApiKeysLabel = i18n.translate(
     'xpack.observability_onboarding.apiEndpoints.openInApiKeys',
     { defaultMessage: 'Open in API keys' }
   );
   const learnMoreLink = (
     <EuiLink
-      href={hasManagedOtlpServiceUrl ? MANAGED_INPUTS_DOCS_LINK : DIRECT_ENDPOINTS_DOCS_LINK}
+      href={
+        selectedEndpointUsesManagedInput ? MANAGED_INPUTS_DOCS_LINK : DIRECT_ENDPOINTS_DOCS_LINK
+      }
       target="_blank"
       external
       data-test-subj="observabilityOnboardingApiEndpointsLearnMore"
@@ -93,7 +96,7 @@ export const ApiEndpoints = () => {
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
           <p>
-            {hasManagedOtlpServiceUrl ? (
+            {selectedEndpointUsesManagedInput ? (
               <FormattedMessage
                 id="xpack.observability_onboarding.apiEndpoints.managedInputsSubtitle"
                 defaultMessage="Send data to your deployment's managed inputs, using an API key. {learnMoreLink}"

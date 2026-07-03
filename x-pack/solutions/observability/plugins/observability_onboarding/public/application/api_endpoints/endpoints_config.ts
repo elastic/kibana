@@ -24,6 +24,7 @@ export interface ApiEndpointDefinition {
   logo?: SupportedLogo;
   euiIconType?: EuiIconType;
   getUrl: (context: ApiEndpointContext) => string | undefined;
+  usesManagedInput: (context: ApiEndpointContext) => boolean;
 }
 
 const trimTrailingSlashes = (url: string): string => url.replace(/\/+$/, '');
@@ -53,6 +54,8 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
       defaultMessage: 'Prometheus',
     }),
     logo: 'prometheus',
+    usesManagedInput: ({ isServerless, managedOtlpServiceUrl, managedOtlpPrwEndpointEnabled }) =>
+      Boolean(managedOtlpServiceUrl) && (isServerless || managedOtlpPrwEndpointEnabled),
     getUrl: ({
       isServerless,
       managedOtlpServiceUrl,
@@ -76,6 +79,8 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
       defaultMessage: 'OpenTelemetry',
     }),
     logo: 'opentelemetry',
+    usesManagedInput: ({ isManagedOtlpServiceAvailable, managedOtlpServiceUrl }) =>
+      isManagedOtlpServiceAvailable && Boolean(managedOtlpServiceUrl),
     getUrl: ({ isManagedOtlpServiceAvailable, managedOtlpServiceUrl, elasticsearchUrl }) => {
       if (isManagedOtlpServiceAvailable && managedOtlpServiceUrl) {
         return managedOtlpServiceUrl;
@@ -90,6 +95,7 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
     id: ApiEndpointId.Elasticsearch,
     label: elasticsearchLabel,
     euiIconType: 'logoElasticsearch',
+    usesManagedInput: (context) => Boolean(getManagedElasticsearchUrl(context)),
     getUrl: (context) => {
       const managedUrl = getManagedElasticsearchUrl(context);
       if (managedUrl) {

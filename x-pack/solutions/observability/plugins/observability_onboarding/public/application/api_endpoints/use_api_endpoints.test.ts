@@ -94,20 +94,31 @@ describe('useApiEndpoints', () => {
     expect(findEndpoint(result, 'elasticsearch')?.url).toBe('https://otlp.example.com:443/_es');
   });
 
-  it('reports managed OTLP availability when the managed OTLP URL is configured', () => {
+  it('reports the OpenTelemetry endpoint as a managed input when the managed service is available', () => {
     const { result } = setup({
+      isManagedOtlpServiceAvailable: true,
       managedOtlpServiceUrl: 'https://otlp.example.com:443',
     });
 
-    expect(result.current.hasManagedOtlpServiceUrl).toBe(true);
+    expect(findEndpoint(result, 'opentelemetry')?.usesManagedInput).toBe(true);
   });
 
-  it('reports managed OTLP as unavailable when the managed OTLP URL is blank', () => {
+  it('reports the Elasticsearch endpoint as direct when the managed OTLP URL is blank', () => {
     const { result } = setup({
       managedOtlpServiceUrl: '   ',
     });
 
-    expect(result.current.hasManagedOtlpServiceUrl).toBe(false);
+    expect(findEndpoint(result, 'elasticsearch')?.usesManagedInput).toBe(false);
+  });
+
+  it('reports the Prometheus endpoint as direct when managed PRW is disabled', () => {
+    const { result } = setup({
+      isManagedOtlpServiceAvailable: true,
+      managedOtlpPrwEndpointEnabled: false,
+      managedOtlpServiceUrl: 'https://otlp.example.com:443',
+    });
+
+    expect(findEndpoint(result, 'prometheus')?.usesManagedInput).toBe(false);
   });
 
   it('labels the managed Elasticsearch-compatible endpoint as Elasticsearch when the managed OTLP URL is configured', () => {

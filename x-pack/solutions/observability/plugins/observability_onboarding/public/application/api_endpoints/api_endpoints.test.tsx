@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApiEndpointId } from '../../../common/api_endpoints';
@@ -54,11 +54,11 @@ describe('ApiEndpoints', () => {
           label: 'Elasticsearch',
           euiIconType: 'logoElasticsearch',
           url: 'https://otlp.example.com:443/_es',
+          usesManagedInput: true,
         },
       ],
       isLoading: false,
       isError: false,
-      hasManagedOtlpServiceUrl: true,
     });
     mockUseApiKeys.mockReturnValue({
       encodedApiKeys: {},
@@ -109,11 +109,11 @@ describe('ApiEndpoints', () => {
           label: 'Prometheus',
           logo: 'prometheus',
           url: 'http://localhost:9200/_prometheus/api/v1/write',
+          usesManagedInput: false,
         },
       ],
       isLoading: false,
       isError: false,
-      hasManagedOtlpServiceUrl: false,
     });
 
     const { container } = renderApiEndpoints();
@@ -125,5 +125,43 @@ describe('ApiEndpoints', () => {
       screen.getByText(/Access your deployment's endpoints and API keys directly./)
     ).toBeInTheDocument();
     expect(learnMoreLink).toHaveAttribute('href', 'https://ela.st/connect-deployment-endpoints');
+  });
+
+  it('updates the helper text to match the selected endpoint type', () => {
+    mockUseApiEndpoints.mockReturnValue({
+      endpoints: [
+        {
+          id: ApiEndpointId.Prometheus,
+          label: 'Prometheus',
+          logo: 'prometheus',
+          url: 'http://localhost:9200/_prometheus/api/v1/write',
+          usesManagedInput: false,
+        },
+        {
+          id: ApiEndpointId.OpenTelemetry,
+          label: 'OpenTelemetry',
+          logo: 'opentelemetry',
+          url: 'https://managed-otlp.example.elastic.dev:443',
+          usesManagedInput: true,
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+
+    const { container } = renderApiEndpoints();
+
+    expect(
+      screen.getByText(/Access your deployment's endpoints and API keys directly./)
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('tab', { name: /OpenTelemetry/ }));
+
+    expect(
+      screen.getByText(/Send data to your deployment's managed inputs, using an API key./)
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-test-subj="observabilityOnboardingApiEndpointsLearnMore"]')
+    ).toHaveAttribute('href', 'https://www.elastic.co/docs/reference/opentelemetry/managed-inputs');
   });
 });
