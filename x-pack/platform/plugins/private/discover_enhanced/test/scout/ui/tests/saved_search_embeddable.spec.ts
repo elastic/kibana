@@ -29,6 +29,20 @@ const createSavedSearch = async (
         searchSourceJSON:
           '{"highlightAll":true,"version":true,"query":{"language":"lucene","query":""},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
       },
+      tabs: [
+        {
+          id: 'my_tab',
+          label: 'My Tab',
+          attributes: {
+            columns: ['agent', 'bytes', 'clientip'],
+            sort: [['@timestamp', 'desc']],
+            kibanaSavedObjectMeta: {
+              searchSourceJSON:
+                '{"highlightAll":true,"version":true,"query":{"language":"lucene","query":""},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+            },
+          },
+        },
+      ],
     },
     references: [
       {
@@ -74,7 +88,7 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
       SAVED_SEARCH_TITLE,
       testData.DATA_VIEW_ID.LOGSTASH
     );
-    await pageObjects.dashboard.addPanelFromLibrary(SAVED_SEARCH_TITLE);
+    await pageObjects.dashboard.addSavedSearch(SAVED_SEARCH_TITLE);
     await page.testSubj.locator('savedSearchTotalDocuments').waitFor({
       state: 'visible',
     });
