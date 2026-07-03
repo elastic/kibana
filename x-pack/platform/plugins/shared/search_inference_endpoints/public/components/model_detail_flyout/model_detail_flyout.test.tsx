@@ -10,6 +10,19 @@ import { render, screen, fireEvent, within } from '@testing-library/react';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 import { ModelDetailFlyout } from './model_detail_flyout';
+import { useKibana } from '../../hooks/use_kibana';
+import { INFERENCE_PREFERENCES_FEATURE_FLAG_ID } from '../../../common/constants';
+
+jest.mock('../../hooks/use_kibana');
+
+const mockUseKibana = useKibana as jest.Mock;
+
+const mockUiSettings = (inferencePreferencesEnabled: boolean = false) => ({
+  get: jest.fn((key: string, defaultValue?: unknown) => {
+    if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return inferencePreferencesEnabled;
+    return defaultValue;
+  }),
+});
 
 const MODEL_ID = 'test-model';
 
@@ -29,7 +42,10 @@ describe('ModelDetailFlyout', () => {
   const onDeleteEndpoint = jest.fn();
   const onCopyEndpointId = jest.fn();
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseKibana.mockReturnValue({ services: { uiSettings: mockUiSettings() } });
+  });
 
   const renderFlyout = (
     modelId = MODEL_ID,
