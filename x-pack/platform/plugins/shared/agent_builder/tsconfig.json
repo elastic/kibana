@@ -73,6 +73,7 @@
     "@kbn/lens-plugin",
     "@kbn/license-management-plugin",
     "@kbn/scout",
+    "@kbn/mock-idp-utils",
     "@kbn/management-plugin",
     "@kbn/share-plugin",
     "@kbn/unsaved-changes-prompt",

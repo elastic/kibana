@@ -683,4 +683,179 @@ export class AgentBuilderApp {
     const input = this.page.testSubj.locator('agentBuilderEmbeddableConversationSearch');
     await input.clear();
   }
+
+  async navigateToMcpClients() {
+    await this.page.gotoApp('agent_builder/manage/tools/mcp_clients');
+    await this.page.testSubj
+      .locator('agentBuilderMcpClientsListPage')
+      .waitFor({ state: 'visible', timeout: 60_000 });
+  }
+
+  async openManageMcpClientsFromMenu() {
+    await this.openManageMcpMenu();
+    await this.page.testSubj
+      .locator('agentBuilderManageMcpClientsMenuItem')
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click('agentBuilderManageMcpClientsMenuItem');
+    await this.page.testSubj
+      .locator('agentBuilderMcpClientsListPage')
+      .waitFor({ state: 'visible', timeout: 60_000 });
+  }
+
+  async isMcpClientInList(clientId: string): Promise<boolean> {
+    const row = this.page.testSubj.locator(`agentBuilderMcpClientsListRow-${clientId}`);
+    return (await row.count()) > 0;
+  }
+
+  async waitForMcpClientRow(clientId: string) {
+    await this.page.testSubj
+      .locator(`agentBuilderMcpClientsListRow-${clientId}`)
+      .waitFor({ state: 'visible', timeout: 60_000 });
+  }
+
+  async isMcpClientsEmptyStateVisible(): Promise<boolean> {
+    return this.page.testSubj.locator('mcpClientsEmptyStateAddButton').isVisible();
+  }
+
+  private mcpClientsSearchInput() {
+    const listPage = subj('agentBuilderMcpClientsListPage');
+    return this.page.locator(`${listPage} input[type="search"]`);
+  }
+
+  async searchMcpClients(term: string) {
+    const search = this.mcpClientsSearchInput();
+    await search.click();
+    await search.fill('');
+    await search.pressSequentially(term, { delay: 15 });
+  }
+
+  async clearMcpClientsSearch() {
+    const search = this.mcpClientsSearchInput();
+    await search.click();
+    await search.fill('');
+  }
+
+  async filterMcpClientsByStatus(statusLabel: 'Active' | 'Revoked') {
+    const search = this.page.testSubj.locator('mcpClientsTableSearch');
+    await search.getByRole('button', { name: 'Status' }).click();
+    await this.page.getByRole('option', { name: statusLabel }).click();
+    await this.page.keyboard.press('Escape');
+  }
+
+  async openMcpClientCreate() {
+    await this.page.testSubj.click('mcpClientsAddButton');
+    await this.page.testSubj
+      .locator('agentBuilderMcpClientCreatePage')
+      .waitFor({ state: 'visible', timeout: 60_000 });
+  }
+
+  async openMcpClientCreateFromEmptyState() {
+    await this.page.testSubj.click('mcpClientsEmptyStateAddButton');
+    await this.page.testSubj
+      .locator('agentBuilderMcpClientCreatePage')
+      .waitFor({ state: 'visible', timeout: 60_000 });
+  }
+
+  async fillMcpClientName(name: string) {
+    await this.page.testSubj.fill('mcpClientNameInput', name);
+  }
+
+  async selectMcpClientLogo(label: string = 'MCP client logo') {
+    const combo = this.page.testSubj.locator('mcpClientLogoSelect');
+    await combo.click();
+    const option = this.page.getByRole('option', { name: label });
+    await option.waitFor({ state: 'visible', timeout: 60_000 });
+    await option.click();
+    await expect(combo.getByText(label, { exact: false })).toBeVisible({ timeout: 60_000 });
+  }
+
+  async setMcpClientConfidential(confidential: boolean) {
+    const checkbox = this.page.testSubj.locator('mcpClientConfidentialCheckbox');
+    const isChecked = await checkbox.isChecked();
+    if (isChecked !== confidential) {
+      await this.page.locator('label[for="mcpClientConfidential"]').click();
+    }
+  }
+
+  async submitMcpClientCreate() {
+    await this.page.testSubj.click('mcpClientCreateButton');
+  }
+
+  async waitForMcpClientDetailsModal() {
+    await this.page.testSubj
+      .locator('mcpClientDetailsModal')
+      .waitFor({ state: 'visible', timeout: 60_000 });
+  }
+
+  async mcpClientDetailsModalContainsText(text: string): Promise<boolean> {
+    const modalText = await this.page.testSubj.locator('mcpClientDetailsModal').innerText();
+    return modalText.includes(text);
+  }
+
+  async mcpClientDetailsModalHasSecretField(): Promise<boolean> {
+    const modal = this.page.testSubj.locator('mcpClientDetailsModal');
+    return (await modal.getByText('MCP client secret', { exact: false }).count()) > 0;
+  }
+
+  async closeMcpClientDetails() {
+    await this.dismissToasts();
+    await this.page.testSubj.click('mcpClientDetailsCloseButton');
+  }
+
+  private async dismissToasts() {
+    for (const closeButton of await this.page.testSubj.locator('toastCloseButton').all()) {
+      await closeButton.click().catch(() => {});
+    }
+  }
+
+  async openMcpClientDetailsFlyout(clientId: string) {
+    await this.page.testSubj.click(`mcpClientsListNameLink-${clientId}`);
+    await this.page.testSubj
+      .locator('mcpClientDetailsFlyout')
+      .waitFor({ state: 'visible', timeout: 60_000 });
+  }
+
+  async mcpClientDetailsFlyoutContainsText(text: string): Promise<boolean> {
+    const flyoutText = await this.page.testSubj.locator('mcpClientDetailsFlyout').innerText();
+    return flyoutText.includes(text);
+  }
+
+  async openMcpClientDetailsFlyoutByName(clientName: string) {
+    await this.page.getByRole('button', { name: clientName, exact: true }).click();
+    await this.page.testSubj
+      .locator('mcpClientDetailsFlyout')
+      .waitFor({ state: 'visible', timeout: 60_000 });
+  }
+
+  async mcpClientDetailsFlyoutHasLogo(): Promise<boolean> {
+    return (
+      (await this.page.testSubj
+        .locator('mcpClientDetailsFlyout')
+        .locator(subj('mcpClientLogo'))
+        .count()) > 0
+    );
+  }
+
+  async openMcpClientRevokeModal(clientId: string) {
+    await this.page.testSubj.click(`agentBuilderMcpClientsListActions-${clientId}`);
+    await this.page.testSubj
+      .locator(`mcpClientRevokeAction-${clientId}`)
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click(`mcpClientRevokeAction-${clientId}`);
+    await this.page.testSubj
+      .locator('mcpClientRevokeModal')
+      .waitFor({ state: 'visible', timeout: 60_000 });
+  }
+
+  async confirmMcpClientRevoke(clientName: string) {
+    await this.page.testSubj.fill('mcpClientRevokeConfirmInput', clientName);
+    await this.page.testSubj.click('mcpClientRevokeConfirmButton');
+    await this.page.testSubj
+      .locator('mcpClientRevokeModal')
+      .waitFor({ state: 'detached', timeout: 60_000 });
+  }
+
+  async getMcpClientRowStatus(clientId: string): Promise<string> {
+    return this.page.testSubj.locator(`agentBuilderMcpClientsListRow-${clientId}`).innerText();
+  }
 }
