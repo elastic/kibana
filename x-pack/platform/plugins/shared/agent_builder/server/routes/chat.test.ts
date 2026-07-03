@@ -15,6 +15,7 @@ import {
   promptResponseEntrySchema,
   registerChatRoutes,
 } from './chat';
+import { isChatCallbackRequestBodyPayload } from '../../common/http_api/chat_callback';
 
 describe('promptResponseEntrySchema', () => {
   it('accepts the confirmation variant', () => {
@@ -86,7 +87,7 @@ describe('callbackConversePayloadSchema', () => {
     agent_id: 'agent-1',
     input: 'Hello',
     source: {
-      type: 'slack',
+      type: ConversationSourceType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
     },
     callback: {
@@ -124,7 +125,7 @@ describe('callbackConversePayloadSchema', () => {
       callbackConversePayloadSchema.validate({
         ...basePayload,
         source: {
-          type: 'slack',
+          type: ConversationSourceType.Slack,
           external_conversation_id: 'x'.repeat(1025),
         },
       })
@@ -151,6 +152,11 @@ describe('callbackConversePayloadSchema', () => {
         },
       })
     ).toThrow(/url/);
+  });
+
+  it('identifies callback request payloads', () => {
+    expect(isChatCallbackRequestBodyPayload(basePayload)).toBe(true);
+    expect(isChatCallbackRequestBodyPayload({ agent_id: 'agent-1', input: 'Hello' })).toBe(false);
   });
 });
 

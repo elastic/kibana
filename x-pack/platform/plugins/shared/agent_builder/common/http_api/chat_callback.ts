@@ -19,6 +19,12 @@ export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
   };
 }
 
+export const isChatCallbackRequestBodyPayload = (
+  payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload
+): payload is ChatCallbackRequestBodyPayload => {
+  return 'callback' in payload;
+};
+
 export type ChatCallbackStatus =
   | ExecutionStatus.scheduled
   | ExecutionStatus.completed

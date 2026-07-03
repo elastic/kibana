@@ -32,6 +32,7 @@ import type {
   ChatCallbackAcceptedResponse,
   ChatCallbackRequestBodyPayload,
 } from '../../common/http_api/chat_callback';
+import { isChatCallbackRequestBodyPayload } from '../../common/http_api/chat_callback';
 import { internalApiPath, publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
@@ -367,20 +368,46 @@ export function registerChatRoutes({
     }
   };
 
+  /**
+   * Derives execution options shared by all converse routes.
+   * Public requests may opt into local or Task Manager execution with _execution_mode,
+   * while callback requests always use Task Manager and carry callback metadata/source.
+   */
+  const resolveExecutionOptions = (
+    payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload
+  ): {
+    useTaskManager: boolean | undefined;
+    metadata: Record<string, string> | undefined;
+    source: ConversationSource | undefined;
+  } => {
+    if (isChatCallbackRequestBodyPayload(payload)) {
+      return {
+        useTaskManager: true,
+        metadata: {
+          callback_url: payload.callback.url,
+        },
+        source: payload.source,
+      };
+    }
+
+    const { _execution_mode: executionMode } = payload;
+
+    return {
+      useTaskManager:
+        executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined,
+      metadata: undefined,
+      source: undefined,
+    };
+  };
+
   const executeAgent = async ({
     payload,
     request,
     executionService,
-    source,
-    metadata,
-    useTaskManagerOverride,
   }: {
-    payload: ChatRequestBodyPayload;
+    payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload;
     request: KibanaRequest;
     executionService: AgentExecutionService;
-    source?: ConversationSource;
-    metadata?: Record<string, string>;
-    useTaskManagerOverride?: boolean;
   }) => {
     const {
       agent_id: agentId,
@@ -394,14 +421,10 @@ export function registerChatRoutes({
       browser_api_tools: browserApiTools,
       configuration_overrides: configurationOverrides,
       action,
-      _execution_mode: executionMode,
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
-
-    const useTaskManager =
-      useTaskManagerOverride ??
-      (executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined);
+    const { useTaskManager, metadata, source } = resolveExecutionOptions(payload);
 
     return executionService.executeAgent({
       mode: AgentExecutionMode.conversation,
@@ -575,11 +598,6 @@ export function registerChatRoutes({
           payload,
           request,
           executionService,
-          source: payload.source,
-          metadata: {
-            callback_url: payload.callback.url,
-          },
-          useTaskManagerOverride: true,
         });
 
         return response.accepted<ChatCallbackAcceptedResponse>({
