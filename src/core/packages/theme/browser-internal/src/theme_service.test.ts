@@ -17,6 +17,7 @@ import {
 
 import { firstValueFrom } from 'rxjs';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
+import type { CoreTheme } from '@kbn/core-theme-browser';
 import { ThemeService } from './theme_service';
 
 declare global {
@@ -266,6 +267,99 @@ describe('ThemeService', () => {
         darkMode: true,
         name: 'borealis',
       });
+    });
+  });
+
+  describe('#setDarkMode', () => {
+    beforeEach(() => {
+      // base theme is light; `dark-1.css` / `light-1.css` let us assert stylesheet swaps
+      injectedMetadata.getTheme.mockReturnValue({
+        version: 'v8',
+        name: 'borealis',
+        darkMode: false,
+        stylesheetPaths: {
+          dark: ['dark-1.css'],
+          default: ['light-1.css'],
+        },
+      });
+    });
+
+    it('applies the new theme when switching from light to dark', () => {
+      const { setDarkMode, getTheme } = themeService.setup({ injectedMetadata });
+
+      // ignore the side effects performed during setup itself
+      setDarkModeMock.mockClear();
+      createStyleSheetMock.mockClear();
+
+      setDarkMode(true);
+
+      expect(setDarkModeMock).toHaveBeenCalledTimes(1);
+      expect(setDarkModeMock).toHaveBeenCalledWith(true);
+
+      expect(createStyleSheetMock).toHaveBeenCalledTimes(1);
+      expect(createStyleSheetMock).toHaveBeenCalledWith({ href: 'dark-1.css' });
+
+      expect(window.__kbnThemeTag__).toEqual('borealisdark');
+      expect(getTheme()).toEqual({ darkMode: true, name: 'borealis' });
+    });
+
+    it('emits the updated theme on `theme$`', () => {
+      const { setDarkMode, theme$ } = themeService.setup({ injectedMetadata });
+
+      const emissions: CoreTheme[] = [];
+      const subscription = theme$.subscribe((theme) => emissions.push(theme));
+
+      setDarkMode(true);
+
+      expect(emissions).toEqual([
+        { darkMode: false, name: 'borealis' },
+        { darkMode: true, name: 'borealis' },
+      ]);
+
+      subscription.unsubscribe();
+    });
+
+    it('is a no-op when the requested mode matches the current one', () => {
+      const { setDarkMode, theme$ } = themeService.setup({ injectedMetadata });
+
+      setDarkModeMock.mockClear();
+      createStyleSheetMock.mockClear();
+
+      let emissionCount = 0;
+      const subscription = theme$.subscribe(() => emissionCount++);
+      // BehaviorSubject replays the current value on subscription
+      expect(emissionCount).toBe(1);
+
+      setDarkMode(false);
+
+      expect(setDarkModeMock).not.toHaveBeenCalled();
+      expect(createStyleSheetMock).not.toHaveBeenCalled();
+      expect(emissionCount).toBe(1);
+
+      subscription.unsubscribe();
+    });
+  });
+
+  describe('#stop', () => {
+    it('completes the `theme$` observable', () => {
+      injectedMetadata.getTheme.mockReturnValue({
+        version: 'v8',
+        name: 'borealis',
+        darkMode: false,
+        stylesheetPaths: {
+          dark: [],
+          default: [],
+        },
+      });
+
+      const { theme$ } = themeService.setup({ injectedMetadata });
+
+      let completed = false;
+      theme$.subscribe({ complete: () => (completed = true) });
+
+      themeService.stop();
+
+      expect(completed).toBe(true);
     });
   });
 });
