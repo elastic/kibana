@@ -320,27 +320,6 @@ describe('AttackDiscovery', () => {
   });
 
   describe('`enableAlertsAndAttacksAlignment` feature', () => {
-    it('renders callout about new Attacks page when feature is enabled', () => {
-      mockUseKibanaReturnValue.services.uiSettings.get.mockImplementation((key) => {
-        if (key === ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING) {
-          return true;
-        }
-        return false;
-      });
-
-      render(
-        <TestProviders>
-          <Router history={historyMock}>
-            <UpsellingProvider upsellingService={mockUpselling}>
-              <AttackDiscoveryPage />
-            </UpsellingProvider>
-          </Router>
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId(CALLOUT_TEST_DATA_ID)).toBeInTheDocument();
-    });
-
     it('does not render callout about new Attacks page when feature is disabled', () => {
       mockUseKibanaReturnValue.services.uiSettings.get.mockImplementation((key) => {
         if (key === ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING) {

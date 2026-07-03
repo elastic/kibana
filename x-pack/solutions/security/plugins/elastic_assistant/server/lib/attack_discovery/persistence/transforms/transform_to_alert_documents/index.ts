@@ -108,6 +108,7 @@ export const transformToBaseAlertDocument = ({
   alertsParams,
   publicBaseUrl,
   spaceId,
+  timestamp,
 }: {
   alertDocId: string;
   alertInstanceId: string;
@@ -115,6 +116,7 @@ export const transformToBaseAlertDocument = ({
   alertsParams: Omit<CreateAttackDiscoveryAlertsParams, 'attackDiscoveries' | 'generationUuid'>;
   publicBaseUrl?: string;
   spaceId: string;
+  timestamp?: string;
 }): AttackDiscoveryAlertDocumentBase => {
   const { alertsContextCount, anonymizedAlerts, apiConfig, connectorName, replacements } =
     alertsParams;
@@ -137,7 +139,7 @@ export const transformToBaseAlertDocument = ({
       alertIds,
       anonymizedAlerts,
     }),
-    [ALERT_URL]: getAlertUrl({ alertDocId, basePath: publicBaseUrl, spaceId }),
+    [ALERT_URL]: getAlertUrl({ alertDocId, basePath: publicBaseUrl, spaceId, timestamp }),
 
     // Attack discovery fields
     [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: alertIds,
@@ -224,6 +226,7 @@ export const transformToAlertDocuments = ({
       attackDiscovery,
       alertsParams: restParams,
       spaceId,
+      timestamp: now.toISOString(),
     });
 
     return {

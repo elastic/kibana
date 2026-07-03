@@ -54,7 +54,7 @@ export const attackDiscoveryScheduleExecutor = async ({
   publicBaseUrl,
   telemetry,
 }: AttackDiscoveryScheduleExecutorParams) => {
-  const { params, rule, services, spaceId } = options;
+  const { params, rule, services, spaceId, startedAt } = options;
   const { alertsClient, actionsClient, savedObjectsClient, scopedClusterClient } = services;
   if (!alertsClient) {
     throw new AlertsClientError();
@@ -216,6 +216,7 @@ export const attackDiscoveryScheduleExecutor = async ({
           alertsParams,
           publicBaseUrl,
           spaceId,
+          timestamp: startedAt.toISOString(),
         });
 
         const { alertIds, timestamp, mitreAttackTactics } = attackDiscovery;

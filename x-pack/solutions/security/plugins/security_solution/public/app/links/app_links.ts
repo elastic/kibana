@@ -78,7 +78,13 @@ export const getFilteredLinks = async (
     dashboardsLinks,
     enableAlertsAndAttacksAlignment ? alertDetectionsLinks : alertsLink,
     alertSummaryLink,
-    ...(enableAlertsAndAttacksAlignment ? [] : [attackDiscoveryLinks]),
+    // When the new Attacks page is enabled, we hide the legacy Attack Discovery link
+    // from both the side navigation and the global navigation. However, we keep it in
+    // the appLinks array so that SecurityRoutePageWrapper still considers the route
+    // authorized/available, allowing our custom redirect logic in routes.tsx to execute.
+    ...(enableAlertsAndAttacksAlignment
+      ? [{ ...attackDiscoveryLinks, sideNavDisabled: true, globalNavPosition: undefined }]
+      : [attackDiscoveryLinks]),
     findingsLinks,
     casesLinks,
     filteredConfigurationsLinks,
