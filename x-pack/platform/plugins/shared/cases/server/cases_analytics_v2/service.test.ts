@@ -12,10 +12,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { CasesAnalyticsV2Service, V2_NOOP_DATA_VIEW_REFRESHER } from './service';
 import { V2_NOOP_WRITER, type CasesAnalyticsV2WriterContract } from './writer';
-import {
-  V2_NOOP_ACTIVITY_WRITER,
-  type CasesActivityV2WriterContract,
-} from './writer/activity';
+import { V2_NOOP_ACTIVITY_WRITER, type CasesActivityV2WriterContract } from './writer/activity';
 import {
   V2_NOOP_ATTACHMENTS_WRITER,
   type CasesAttachmentsV2WriterContract,
@@ -139,7 +136,7 @@ describe('CasesAnalyticsV2Service', () => {
     // implicitly create a mis-mapped `.cases*` index (auto_create_index).
     // Observable via the ES client — a real writer reaches `esClient.index`,
     // a no-op never does.
-    const buildService = () =>
+    const buildStartedService = () =>
       new CasesAnalyticsV2Service({
         logger: loggerMock.create(),
         enabled: true,
@@ -170,7 +167,7 @@ describe('CasesAnalyticsV2Service', () => {
     it('swaps in both real writers when both indices bootstrap', async () => {
       (ensureCaseIndex as jest.Mock).mockResolvedValue(undefined);
       (ensureActivityIndex as jest.Mock).mockResolvedValue(undefined);
-      const service = buildService();
+      const service = buildStartedService();
       const esClient = await startService(service);
 
       service.getWriter().upsertCase(makeCase('c-1'));
@@ -184,7 +181,7 @@ describe('CasesAnalyticsV2Service', () => {
     it('keeps the case writer a no-op when .cases bootstrap fails', async () => {
       (ensureCaseIndex as jest.Mock).mockRejectedValue(new Error('shard limit'));
       (ensureActivityIndex as jest.Mock).mockResolvedValue(undefined);
-      const service = buildService();
+      const service = buildStartedService();
       const esClient = await startService(service);
 
       service.getWriter().upsertCase(makeCase('c-1')); // gated → no ES write
@@ -198,7 +195,7 @@ describe('CasesAnalyticsV2Service', () => {
     it('keeps the activity writer a no-op when .cases-activity bootstrap fails', async () => {
       (ensureCaseIndex as jest.Mock).mockResolvedValue(undefined);
       (ensureActivityIndex as jest.Mock).mockRejectedValue(new Error('shard limit'));
-      const service = buildService();
+      const service = buildStartedService();
       const esClient = await startService(service);
 
       service.getWriter().upsertCase(makeCase('c-1')); // live
