@@ -115,7 +115,7 @@ apiTest.describe(
         // is a placeholder: a real end-to-end bypass failure would be caught by the exact 400
         // xsrf-rejection body asserted below, since the request must never reach the route
         // handler that would otherwise attempt to invalidate the id against Elasticsearch.
-        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+        const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
 
         const response = await apiClient.post('internal/security/api_key/invalidate', {
           headers: { ...cookieHeader, ...INTERNAL_ORIGIN_HEADER },
