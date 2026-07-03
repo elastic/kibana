@@ -220,14 +220,19 @@ export function resolveInitialFocus(
  */
 export function getOptionDisplayLabel(
   option: TimeRangeBoundsOption,
-  options?: Pick<TimeRangeTransformOptions, 'timePrecision'>
+  options?: Pick<TimeRangeTransformOptions, 'timePrecision' | 'presets' | 'dateFormat' | 'locale'>
 ): string {
-  if (option.label && textToTimeRange(option.label).isNaturalLanguage) {
+  // Pass only `locale` to the parser: callers hand in the full `transformOptions`,
+  // and its `presets` would let the option's own label self-match as "natural language".
+  if (
+    option.label &&
+    textToTimeRange(option.label, { locale: options?.locale }).isNaturalLanguage
+  ) {
     return option.label;
   }
 
   const text = `${option.start} ${DATE_RANGE_INPUT_DELIMITER} ${option.end}`;
-  const timeRange = textToTimeRange(text);
+  const timeRange = textToTimeRange(text, options);
   return timeRangeToDisplayText(timeRange, options);
 }
 
@@ -278,8 +283,16 @@ export function getOptionShorthand(option: TimeRangeBoundsOption): string | null
  *    bounds verbatim (rounding included) so that re-applying the text yields
  *    exactly the stored range — no unintended precision or rounding change.
  */
-export function getOptionInputText(option: TimeRangeBoundsOption): string {
-  if (option.label && textToTimeRange(option.label).isNaturalLanguage) {
+export function getOptionInputText(
+  option: TimeRangeBoundsOption,
+  options?: Pick<TimeRangeTransformOptions, 'locale'>
+): string {
+  // Pass only `locale` to the parser: callers hand in the full `transformOptions`,
+  // and its `presets` would let the option's own label self-match as "natural language".
+  if (
+    option.label &&
+    textToTimeRange(option.label, { locale: options?.locale }).isNaturalLanguage
+  ) {
     return option.label;
   }
 

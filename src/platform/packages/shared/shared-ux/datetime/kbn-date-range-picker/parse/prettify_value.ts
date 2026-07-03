@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
 import { DATE_RANGE_INPUT_DELIMITER, DEFAULT_DATE_FORMAT } from '../constants';
 import type { TimePrecision, TimeRangeBoundsOption } from '../types';
 import { applyTimePrecision } from '../format';
-import { PARSER_DELIMITERS, buildDelimiterPattern, textToTimeRange } from './parse_text';
+import { buildDelimiterPattern, getCompiledGrammar } from './locale_grammar';
+import { textToTimeRange } from './parse_text';
 
 /**
  * Simplifies a dateMath value string into a compact shorthand suitable for
@@ -34,16 +36,20 @@ import { PARSER_DELIMITERS, buildDelimiterPattern, textToTimeRange } from './par
 const DATEMATH_OFFSET_RE = /^(now)?([+-])(\d+)([a-zA-Z]+)(\/[smhdwMy])?$/;
 
 /**
- * Builds the full set of delimiter patterns by combining the parser's
- * configured delimiters, the universal dash, and an optional consumer delimiter.
- *
- * TODO use constant for dash delimiter (need to solve taking the parser into account)
+ * Builds the full set of delimiter patterns by combining the active grammar's
+ * delimiters (English ⊕ locale, plus the universal dash), the protocol-level
+ * `DATE_RANGE_INPUT_DELIMITER`, and an optional consumer delimiter.
  */
-const getDelimiterPatterns = (extraDelimiter?: string): RegExp[] => {
-  const delimiters = [...PARSER_DELIMITERS, DATE_RANGE_INPUT_DELIMITER, '-'];
-  if (extraDelimiter) delimiters.push(extraDelimiter);
+const getDelimiterPatterns = (
+  extraDelimiter: string | undefined,
+  locale: string | undefined
+): RegExp[] => {
+  const compiled = getCompiledGrammar(locale ?? i18n.getLocale());
+  const extraPatterns = [DATE_RANGE_INPUT_DELIMITER, ...(extraDelimiter ? [extraDelimiter] : [])]
+    .map(buildDelimiterPattern)
+    .filter((p): p is RegExp => p !== null);
 
-  return delimiters.map(buildDelimiterPattern).filter((p): p is RegExp => p !== null);
+  return [...compiled.delimiterPatterns, ...extraPatterns];
 };
 
 /**
@@ -90,6 +96,8 @@ export interface PrettifyValueOptions {
   extraDelimiter?: string;
   /** Presets to match against — if the value's bounds match a preset, its label is used. */
   presets?: TimeRangeBoundsOption[];
+  /** Locale used to recognise the value's delimiter. @default `i18n.getLocale()` */
+  locale?: string;
 }
 
 /**
@@ -104,12 +112,15 @@ export interface PrettifyValueOptions {
 const matchPresetBounds = (
   start: string,
   end: string,
-  presets: TimeRangeBoundsOption[]
+  presets: TimeRangeBoundsOption[],
+  locale: string | undefined
 ): string | null => {
   const match = presets.find((p) => p.start === start && p.end === end);
   if (!match?.label) return null;
 
-  return textToTimeRange(match.label).isNaturalLanguage ? match.label : null;
+  // Pass only `locale` to the parser: including `presets` would let the matched
+  // preset's own label self-match as "natural language".
+  return textToTimeRange(match.label, { locale }).isNaturalLanguage ? match.label : null;
 };
 
 /**
@@ -123,8 +134,8 @@ export const prettifyValue = (value: string, options?: PrettifyValueOptions): st
   const trimmed = value.trim();
   if (!trimmed) return value;
 
-  const { extraDelimiter, presets = [] } = options ?? {};
-  const patterns = getDelimiterPatterns(extraDelimiter);
+  const { extraDelimiter, presets = [], locale } = options ?? {};
+  const patterns = getDelimiterPatterns(extraDelimiter, locale);
 
   // Try splitting on delimiters
   for (const pattern of patterns) {
@@ -136,7 +147,7 @@ export const prettifyValue = (value: string, options?: PrettifyValueOptions): st
 
       // Check if bounds match a preset label
       if (presets.length > 0) {
-        const presetLabel = matchPresetBounds(start, end, presets);
+        const presetLabel = matchPresetBounds(start, end, presets, locale);
         if (presetLabel) return presetLabel;
       }
 

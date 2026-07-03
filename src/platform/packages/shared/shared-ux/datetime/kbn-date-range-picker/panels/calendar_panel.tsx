@@ -27,9 +27,9 @@ import { useDateRangePickerContext } from '../date_range_picker_context';
 
 /** Calendar-based date selection panel. */
 export function CalendarPanel() {
-  const { applyRange, onPresetSave, setText, text, timeRange, calendarOptions, settings } =
+  const { applyRange, onPresetSave, setText, text, timeRange, calendarOptions, transformOptions } =
     useDateRangePickerContext();
-  const timePrecision = settings.timePrecision ?? 's';
+  const timePrecision = transformOptions.timePrecision ?? 's';
   const saveAsPresetCheckboxId = useGeneratedHtmlId({ prefix: 'saveAsPreset' });
 
   const [pendingFrom, setPendingFrom] = useState<Date | null>(null);
@@ -151,11 +151,11 @@ export function CalendarPanel() {
             startOffset: null,
             endOffset: null,
           },
-          { timePrecision }
+          transformOptions
         ),
       });
     }
-  }, [applyRange, onPresetSave, saveAsPreset, timeRange, timePrecision]);
+  }, [applyRange, onPresetSave, saveAsPreset, timeRange, timePrecision, transformOptions]);
 
   const applyButton = (
     <EuiButton
