@@ -7,17 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Fs from 'fs';
-import Os from 'os';
-import Path from 'path';
-
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-
-const SMART_RETRY_PROBE_MARKER_PATH = Path.join(
-  Os.tmpdir(),
-  'kibana_ftr_smart_retry_probe_failed_once'
-);
 
 const isSmartRetryEnabled = () => /^(1|true)$/.test(process.env.FTR_SMART_RETRY_ENABLED ?? '');
 
@@ -26,19 +17,7 @@ const shouldFailSmartRetryProbe = () => {
     return false;
   }
 
-  const { BUILDKITE_RETRY_COUNT: buildkiteRetryCount } = process.env;
-
-  if (buildkiteRetryCount !== undefined) {
-    return buildkiteRetryCount === '0';
-  }
-
-  if (Fs.existsSync(SMART_RETRY_PROBE_MARKER_PATH)) {
-    Fs.rmSync(SMART_RETRY_PROBE_MARKER_PATH, { force: true });
-    return false;
-  }
-
-  Fs.writeFileSync(SMART_RETRY_PROBE_MARKER_PATH, 'failed once\n', 'utf8');
-  return true;
+  return (process.env.BUILDKITE_RETRY_COUNT ?? '0') === '0';
 };
 
 export default function ({ getService }: FtrProviderContext) {
