@@ -92,8 +92,9 @@ function fromOpenBoundsToContinuity({
 }
 
 /**
- * Builds the Lens palette state for a named palette. The palette service owns the actual
- * bands at render time, so `stops`/`colorStops` are left empty and only three things matter:
+ * Builds the Lens palette state for a named palette. A named palette doesn't need to
+ * have per-band `stops`/`colorStops`: its colors are derived at render time from the
+ * palette id + `steps` (see `getOverridePaletteColors`). Only three things matter:
  * - `steps`: how many bands to split the domain into (`numberOfBands`).
  * - `rangeType`: `percent` by default, or `number` when `useNumericRange` is `true`. Named
  *   palettes color a percentage domain; single-value charts (single-value metric charts and
@@ -119,8 +120,6 @@ function buildNamedPaletteLensState({
       progression: 'fixed', // to be removed
       reverse: false, // always applied to steps during transform
       rangeType: useNumericRange ? 'number' : 'percent',
-      stops: [],
-      colorStops: [],
       continuity,
       steps: numberOfBands,
       maxSteps: Math.max(DEFAULT_COLOR_STEPS, numberOfBands),
