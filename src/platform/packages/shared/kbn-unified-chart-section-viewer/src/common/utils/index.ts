@@ -18,3 +18,4 @@ export * from './metric_unit/normalize_unit';
 export * from './metric_unit/resolve_metric_unit';
 export * from './fields';
 export * from './user_messages';
+export * from './aggregation_settings';

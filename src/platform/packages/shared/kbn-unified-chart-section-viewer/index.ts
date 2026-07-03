@@ -25,4 +25,10 @@ export type {
   Dimension,
   MetricUnit,
   UnifiedMetricsGridProps,
+  MetricsAggregationSettings,
+  SimpleAggregation,
+  HistogramPercentile,
 } from './src/types';
+export {
+  METRICS_AGGREGATION_SETTINGS_DEFAULTS,
+} from './src/common/utils/aggregation_settings';

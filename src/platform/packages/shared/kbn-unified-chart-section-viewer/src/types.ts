@@ -22,6 +22,15 @@ interface ChartSectionActions {
   updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
 }
 
+export type SimpleAggregation = 'avg' | 'sum' | 'min' | 'max';
+export type HistogramPercentile = 'p50' | 'p75' | 'p90' | 'p95' | 'p99';
+
+export interface MetricsAggregationSettings {
+  counterAggregation: SimpleAggregation;
+  gaugeAggregation: SimpleAggregation;
+  histogramPercentile: HistogramPercentile;
+}
+
 export interface UnifiedMetricsGridProps extends ChartSectionProps {
   actions: ChartSectionActions;
   /**
@@ -42,6 +51,16 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
    * cross-plugin features such as the Streams flyout field section and ErrorCallout.
    */
   externalServices?: ExternalServices;
+  /**
+   * Current per-`metric_type` aggregation overrides (counter/gauge/histogram).
+   * Falls back to `METRICS_AGGREGATION_SETTINGS_DEFAULTS` when not provided by the host.
+   */
+  aggregationSettings?: MetricsAggregationSettings;
+  /**
+   * Optional callback used to push aggregation setting changes back to the host
+   * (e.g. Discover's persistent profile state).
+   */
+  onAggregationSettingsChange?: (update: Partial<MetricsAggregationSettings>) => void;
 }
 
 export interface Dimension {
