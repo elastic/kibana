@@ -33,7 +33,11 @@ const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) =>
 
 const InternalUnifiedMetricsExperienceGridWithState = (props: UnifiedMetricsGridProps) => {
   return (
-    <MetricsExperienceStateProvider profileId={props.profileId}>
+    <MetricsExperienceStateProvider
+      profileId={props.profileId}
+      aggregationSettings={props.aggregationSettings}
+      onAggregationSettingsChange={props.onAggregationSettingsChange}
+    >
       <InternalUnifiedMetricsExperienceGrid {...props} />
     </MetricsExperienceStateProvider>
   );

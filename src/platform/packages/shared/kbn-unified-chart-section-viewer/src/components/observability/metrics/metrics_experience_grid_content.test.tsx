@@ -18,6 +18,7 @@ import type {
 } from '@kbn/unified-histogram/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ParsedMetricItem, MetricUnit, Dimension } from '../../../types';
+import { METRICS_AGGREGATION_SETTINGS_DEFAULTS } from '../../../common/utils/aggregation_settings';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
@@ -126,6 +127,8 @@ describe('MetricsExperienceGridContent', () => {
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
       profileId: 'test-profile-id',
+      aggregationSettings: METRICS_AGGREGATION_SETTINGS_DEFAULTS,
+      onAggregationSettingsChange: jest.fn(),
     });
 
     usePaginationMock.mockReturnValue({
@@ -189,6 +192,8 @@ describe('MetricsExperienceGridContent', () => {
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
       profileId: 'test-profile-id',
+      aggregationSettings: METRICS_AGGREGATION_SETTINGS_DEFAULTS,
+      onAggregationSettingsChange: jest.fn(),
     });
 
     const cpuMetricItems = allFieldsSomeWithCpu.filter((f) => f.metricName.includes('cpu'));
