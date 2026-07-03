@@ -233,7 +233,7 @@ export class LensApp {
   }
 
   async setPalette(paletteId: string, isLegacy: boolean) {
-    await this.openPalettePanel();
+    await this.openPalettePanelFlyout();
 
     const paletteModeToggle = this.page.testSubj.locator('lns_colorMappingOrLegacyPalette_switch');
     const targetValue = isLegacy ? 'true' : 'false';
@@ -249,10 +249,10 @@ export class LensApp {
       await this.page.testSubj.click(`kbnColoring_ColorMapping_Palette-${paletteId}`);
     }
 
-    await this.closePalettePanel();
+    await this.closePalettePanelFlyout();
   }
 
-  async closePalettePanel() {
+  async closePalettePanelFlyout() {
     await this.page.testSubj.click('lns-indexPattern-SettingWithSiblingFlyoutBack');
     await expect(
       this.page.testSubj.locator('lns-indexPattern-SettingWithSiblingFlyoutBack')
@@ -496,8 +496,8 @@ export class LensApp {
     return data;
   }
 
-  /** Opens the palette panel for the currently active dimension. */
-  async openPalettePanel() {
+  /** Opens the palette panel flyout for the currently active dimension. */
+  async openPalettePanelFlyout() {
     await this.page.testSubj.click('lns_colorEditing_trigger');
     await this.page.testSubj.locator('lns-palettePanelFlyout').waitFor({
       state: 'visible',
