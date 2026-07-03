@@ -23,7 +23,6 @@
  * is no role-name collision when running in parallel.
  */
 
-import { tags } from '@kbn/scout';
 import type { KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
@@ -60,7 +59,7 @@ const roleDashboardWithBackgroundSearch: KibanaRole = {
 
 spaceTest.describe(
   'Background Search management — permissions',
-  { tag: [...tags.stateful.classic] },
+  { tag: '@local-stateful-classic' },
   () => {
     spaceTest(
       'management is NOT accessible to users without store_search_session privilege',

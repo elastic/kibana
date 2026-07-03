@@ -30,7 +30,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { KbnClient } from '@kbn/scout';
 import {
@@ -76,7 +75,7 @@ async function deleteAllBackgroundSearches(kbnClient: KbnClient, spaceId: string
   );
 }
 
-spaceTest.describe('Background Search management UI', { tag: [...tags.stateful.classic] }, () => {
+spaceTest.describe('Background Search management UI', { tag: '@local-stateful-classic' }, () => {
   // Dashboard ID varies per space (createNewCopies:true assigns a new ID on each load).
   // We capture it from the load response in beforeAll.
   let dashboardId: string;
