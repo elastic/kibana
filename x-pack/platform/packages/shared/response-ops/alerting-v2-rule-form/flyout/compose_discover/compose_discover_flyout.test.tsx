@@ -970,6 +970,71 @@ describe('ComposeDiscoverFlyout', () => {
         recovery: { segment: '| WHERE count < 50' },
       });
     });
+
+    it('commits subsequent recovery edits when manualSplitEnabled is stale from alert condition', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'composed',
+          base: 'FROM logs-*',
+          breach: { segment: '| WHERE count > 100' },
+        });
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      fireEvent.click(screen.getByTestId('composeDiscoverNext'));
+
+      const getLatestFormProps = (): FormProps =>
+        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+
+      act(() => {
+        getLatestFormProps().onRecoveryTypeChange('custom');
+      });
+
+      const firstRecoveryEdit: RuleQuery = {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+        recovery: { segment: '| WHERE count < 50' },
+      };
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(firstRecoveryEdit);
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+      expect(readCommittedQuery?.()).toEqual(firstRecoveryEdit);
+
+      act(() => {
+        getLatestFormProps().dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 1, isAlert: true });
+      });
+
+      const secondRecoveryEdit: RuleQuery = {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+        recovery: { segment: '| WHERE count < 10' },
+      };
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(secondRecoveryEdit);
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      expect(readCommittedQuery?.()).toEqual(secondRecoveryEdit);
+    });
   });
 
   describe('manual split mode', () => {

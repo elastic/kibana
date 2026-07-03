@@ -783,10 +783,8 @@ export function ComposeDiscoverFlyout({
     if (shouldRunHeuristicSplit) {
       const split = splitResultToRuleQuery(getBreachQuery(sandboxQuery)).query;
       queryToCommit = resolveUnifiedAlertApplyQuery(sandboxQuery, split);
-      setSandboxQuery(queryToCommit);
-    } else if (uiState.manualSplitEnabled && isAlert) {
-      queryToCommit = resolveUnifiedAlertApplyQuery(methods.getValues('query'), sandboxQuery);
     }
+    setSandboxQuery(queryToCommit);
 
     methods.setValue('query', queryToCommit, { shouldDirty: true });
     methods.setValue('timeField', sandboxTimeField, { shouldDirty: true });
