@@ -10,6 +10,7 @@ import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_n
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { resolveConnectorForSignificantEventsDiscovery } from '../../../utils/resolve_connector_for_feature';
 
 const significantEventsDiscoveryExecuteRoute = createServerRoute({
   endpoint: 'POST /internal/streams/significant_events/discovery/_execute',
@@ -54,9 +55,14 @@ const significantEventsDiscoveryExecuteRoute = createServerRoute({
     const { body } = params;
 
     if (body.action === 'trigger') {
+      const connectorId = await resolveConnectorForSignificantEventsDiscovery({
+        searchInferenceEndpoints: server.searchInferenceEndpoints,
+        request,
+      });
       const { executionId, isNew } = await significantEventsDiscoveryClient.run({
         request,
         spaceId,
+        inputs: { agentConnectorId: connectorId },
       });
       if (isNew) {
         telemetry.trackSignificantEventsDiscoveryTriggered({

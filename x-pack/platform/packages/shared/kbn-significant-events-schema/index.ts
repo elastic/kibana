@@ -31,8 +31,6 @@ export type {
   QueryWithOccurrences,
   QueryOccurrencesResponse,
   SignificantEventsQueriesGenerationResult,
-  SignificantEventsQueriesGenerationTaskResult,
-  SignificantEventsResponse,
 } from './src/api/significant_events';
 
 export { generatedSignificantEventQuerySchema } from './src/api/significant_events';
