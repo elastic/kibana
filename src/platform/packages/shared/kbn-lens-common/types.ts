@@ -612,7 +612,7 @@ export interface InitializationOptions {
 export type VisualizeEditorContext<T extends LensConfiguration = LensConfiguration> = {
   savedObjectId?: string;
   embeddableId?: string;
-  vizEditorOriginatingAppUrl?: string;
+  visEditorOriginatingAppUrl?: string;
   legacyEditorOriginatingApp?: string;
   originatingApp?: string;
   originatingPath?: string;
