@@ -10,6 +10,9 @@ import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-
 
 // this pages follows versioning interface strategy https://docs.elastic.dev/kibana-dev-docs/versioning-interfaces
 
+// Fleet namespace max length is 1024 characters
+const NAMESPACE_MAX_LENGTH = 1024;
+
 export const getComplianceDashboardSchema = schema.object({
   policy_template: schema.oneOf([
     schema.literal(CSPM_POLICY_TEMPLATE),
@@ -18,5 +21,5 @@ export const getComplianceDashboardSchema = schema.object({
 });
 
 export const getComplianceDashboardQuerySchema = schema.object({
-  namespace: schema.maybe(schema.string()),
+  namespace: schema.maybe(schema.string({ maxLength: NAMESPACE_MAX_LENGTH })),
 });

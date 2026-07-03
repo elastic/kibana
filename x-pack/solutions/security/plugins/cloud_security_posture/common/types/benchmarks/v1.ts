@@ -30,6 +30,10 @@ export interface Benchmark {
 
 export const DEFAULT_BENCHMARKS_PER_PAGE = 20;
 export const BENCHMARK_PACKAGE_POLICY_PREFIX = 'package_policy.';
+
+// Fleet package policy name max length matches the general label/name limit
+const PACKAGE_POLICY_NAME_MAX_LENGTH = 1024;
+
 export const benchmarksQueryParamsSchema = schema.object({
   /**
    * The page of objects to return
@@ -78,7 +82,7 @@ export const benchmarksQueryParamsSchema = schema.object({
   /**
    * Benchmark filter
    */
-  package_policy_name: schema.maybe(schema.string()),
+  package_policy_name: schema.maybe(schema.string({ maxLength: PACKAGE_POLICY_NAME_MAX_LENGTH })),
 });
 
 export type BenchmarksQueryParams = TypeOf<typeof benchmarksQueryParamsSchema>;
