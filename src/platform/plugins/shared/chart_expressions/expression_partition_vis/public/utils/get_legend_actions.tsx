@@ -124,29 +124,34 @@ export const getLegendActions = (
 
     const panelItems: EuiContextMenuPanelDescriptor['items'] = [];
 
-    if (!isComputedColumnFilterable) {
-      if (warningMessage) {
-        panelItems.push(
-          {
-            name: filterForValueLabel,
-            'data-test-subj': `legend-${title}-filterIn`,
-            icon: <EuiIcon type="plusCircle" size="m" aria-hidden={true} />,
-            disabled: true,
-            onClick: () => {},
-          },
-          {
-            name: filterOutValueLabel,
-            'data-test-subj': `legend-${title}-filterOut`,
-            icon: <EuiIcon type="minusCircle" size="m" aria-hidden={true} />,
-            disabled: true,
-            onClick: () => {},
-          },
-          {
-            renderItem: () => <PopoverFooterMessage message={warningMessage} />,
-          }
-        );
-      }
-    } else if (!hasFilterCellAction(compatibleCellActions) && isFilterable && filterData) {
+    if (!isComputedColumnFilterable && warningMessage) {
+      panelItems.push(
+        {
+          name: filterForValueLabel,
+          'data-test-subj': `legend-${title}-filterIn`,
+          icon: <EuiIcon type="plusCircle" size="m" aria-hidden={true} />,
+          disabled: true,
+          onClick: () => {},
+        },
+        {
+          name: filterOutValueLabel,
+          'data-test-subj': `legend-${title}-filterOut`,
+          icon: <EuiIcon type="minusCircle" size="m" aria-hidden={true} />,
+          disabled: true,
+          onClick: () => {},
+        },
+        {
+          renderItem: () => <PopoverFooterMessage message={warningMessage} />,
+        }
+      );
+    }
+
+    if (
+      isComputedColumnFilterable &&
+      !hasFilterCellAction(compatibleCellActions) &&
+      isFilterable &&
+      filterData
+    ) {
       panelItems.push(
         {
           name: filterForValueLabel,

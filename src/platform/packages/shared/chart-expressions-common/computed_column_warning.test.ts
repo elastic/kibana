@@ -16,7 +16,7 @@ function buildColumn(overrides: Partial<DatatableColumn> = {}): DatatableColumn 
     name: 'speed_category',
     meta: { type: 'string' },
     ...overrides,
-  } as DatatableColumn;
+  };
 }
 
 describe('isFilterableColumnSet', () => {
@@ -32,7 +32,7 @@ describe('isFilterableColumnSet', () => {
     expect(isFilterableColumnSet([column])).toBe(false);
   });
 
-  it('is true for a RENAMEd column, even with a custom label', () => {
+  it('is true for a RENAMED column, even with a custom label', () => {
     const column = buildColumn({
       name: 'My Renamed Label',
       isComputedColumn: true,
@@ -107,7 +107,7 @@ describe('getFilterDrilldownWarningMessage', () => {
     expect(getFilterDrilldownWarningMessage([column])).toBeDefined();
   });
 
-  it('does not warn for a RENAMEd column, even with a custom label', () => {
+  it('does not warn for a RENAMED column, even with a custom label', () => {
     // RENAME old_field AS speed_category — isSourceFieldFilterable is true because sourceField
     // points at the still-addressable underlying field, so filtering remains possible
     // regardless of any custom label.
