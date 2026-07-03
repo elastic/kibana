@@ -63,7 +63,7 @@ export type {
   InternalConnectorContract,
   DynamicConnectorContract,
   BaseConnectorContract,
-  StepStabilityLevel,
+  StabilityLevel,
   HttpMethod,
   EditorHandlers,
   EditorHandlersConfig,
@@ -93,6 +93,7 @@ export {
   WorkflowExecutionSortFields,
   TerminalExecutionStatuses,
   NonTerminalExecutionStatuses,
+  ConcurrencySlotOccupyingExecutionStatuses,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
   // shared constants

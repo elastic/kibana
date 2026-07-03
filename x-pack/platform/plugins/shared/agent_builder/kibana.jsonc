@@ -46,6 +46,7 @@
     ],
     "optionalPlugins": [
       "cloud",
+      "cps",
       "evals",
       "licenseManagement",
       "security",

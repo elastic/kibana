@@ -20,6 +20,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { registerLocators } from './locator/register_locators';
 import { buildAgentBuilderDeepLinks, registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
@@ -73,6 +74,7 @@ import {
   clearSidebarRuntimeContext,
 } from './sidebar';
 import { storageKeys } from './application/storage_keys';
+import { AGENTBUILDER_APP_ID } from '../common/features';
 
 export class AgentBuilderPlugin
   implements
@@ -151,6 +153,11 @@ export class AgentBuilderPlugin
   ): AgentBuilderPluginStart {
     const { http } = core;
     const { licensing, inference } = startDependencies;
+
+    startDependencies.cps?.cpsManager?.registerAppAccess(
+      AGENTBUILDER_APP_ID,
+      () => ProjectRoutingAccess.READONLY
+    );
 
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService({ http });
