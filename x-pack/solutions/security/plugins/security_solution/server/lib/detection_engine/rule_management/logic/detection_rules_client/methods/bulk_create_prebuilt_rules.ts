@@ -112,8 +112,11 @@ export const bulkCreatePrebuiltRules = async ({
     }
   } catch (err) {
     const wrappedError = err instanceof Error ? err : new Error(String(err));
-    for (const asset of itemById.values()) {
-      errors.push({ item: asset, error: wrappedError });
+    for (const { options } of bulkInputs) {
+      const asset = options?.id ? itemById.get(options.id) : undefined;
+      if (asset) {
+        errors.push({ item: asset, error: wrappedError });
+      }
     }
   }
 
