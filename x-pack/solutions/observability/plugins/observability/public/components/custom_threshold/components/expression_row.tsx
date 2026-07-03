@@ -36,25 +36,22 @@ import { CUSTOM_EQUATION, LABEL_HELP_MESSAGE, LABEL_LABEL } from '../i18n_string
 import { decimalToPct, pctToDecimal } from '../helpers/corrected_percent_convert';
 import { isPercent } from '../helpers/threshold_unit';
 
-// Wide enough to fit "Warning" + the remove icon so both the Alert and
-// Warning rows reserve identical space and their boxes stay aligned,
-// regardless of which badge is actually shown.
-const SEVERITY_BADGE_GUTTER_WIDTH = 130;
+// Fixed width for the badge slot on both the Alert and Warning rows so the
+// two threshold boxes end at the same x-position — "Warning" plus the remove
+// icon is wider than "Alert" alone, so without a shared fixed width the two
+// rows visibly misalign.
+const SEVERITY_BADGE_SLOT_WIDTH = 110;
 
-// Overlays a badge on the right edge of a fullWidth threshold expression
-// rather than sharing the row with it, so the expression keeps its original
-// fullWidth look. The expression's own content area is padded by the same
-// amount the badge is reserved, so its value can never render underneath it.
 const ThresholdRowWithBadge: React.FC<{ expression: React.ReactNode; badge: React.ReactNode }> = ({
   expression,
   badge,
 }) => (
-  <div style={{ position: 'relative' }}>
-    <div style={{ paddingRight: SEVERITY_BADGE_GUTTER_WIDTH }}>{expression}</div>
-    <div style={{ position: 'absolute', top: '50%', right: 0, transform: 'translateY(-50%)' }}>
+  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexItem grow>{expression}</EuiFlexItem>
+    <EuiFlexItem grow={false} style={{ width: SEVERITY_BADGE_SLOT_WIDTH }}>
       {badge}
-    </div>
-  </div>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 );
 
 interface ExpressionRowProps {
