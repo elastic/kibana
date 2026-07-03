@@ -101541,7 +101541,7 @@ components:
               ilm_policy:
                 maxLength: 1024
                 type: string
-          description: Per-namespace managed settings (e.g. ILM policy) for this package. Keyed by namespace name.
+          description: Per-namespace managed settings (for example, ILM policy) for this package. Keyed by namespace name.
           type: object
       title: update_package_request
       type: object
