@@ -401,16 +401,9 @@ describe('useFleetServerHostsForm', () => {
 
     await testRenderer.waitFor(() => {
       expect(onSuccess).toBeCalled();
-      expect(testRenderer.startServices.http.put).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          secrets: expect.objectContaining({
-            ssl: expect.objectContaining({
-              key: null,
-            }),
-          }),
-        })
-      );
+      const [, options] = testRenderer.startServices.http.put.mock.calls[0];
+      const body = JSON.parse(options.body);
+      expect(body.secrets?.ssl?.key).toBeNull();
     });
   });
 
@@ -443,17 +436,10 @@ describe('useFleetServerHostsForm', () => {
 
     await testRenderer.waitFor(() => {
       expect(onSuccess).toBeCalled();
-      expect(testRenderer.startServices.http.put).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          secrets: expect.objectContaining({
-            ssl: expect.objectContaining({
-              key: null,
-              es_key: { id: 'secret-es-key-id-456' },
-            }),
-          }),
-        })
-      );
+      const [, options] = testRenderer.startServices.http.put.mock.calls[0];
+      const body = JSON.parse(options.body);
+      expect(body.secrets?.ssl?.key).toBeNull();
+      expect(body.secrets?.ssl?.es_key).toEqual({ id: 'secret-es-key-id-456' });
     });
   });
 });
