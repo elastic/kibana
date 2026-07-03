@@ -35,7 +35,11 @@ interface DataStreamsStatsResponseShape {
 }
 
 interface DataStreamMetaResponseShape {
-  data_streams?: Array<{ name: string; creation_date?: number }>;
+  data_streams?: Array<{
+    name: string;
+    creation_date?: number;
+    maximum_timestamp?: number | null;
+  }>;
 }
 
 interface CompositeAggShape {
@@ -102,9 +106,10 @@ const fetchVolumeByStreamDay = async (
 /**
  * Fetch last-event time and volume health for all SIEM data streams.
  *
- * - `lastEventMs` comes from `_data_stream/_stats.maximum_timestamp`, which is
- *   pre-computed by Elasticsearch and requires no query-time aggregation (aligned
- *   with the Dataset Quality data source).
+ * - `lastEventMs` on stateful comes from `_data_stream/_stats` (`dataStreamsStats`)
+ *   `maximum_timestamp` (pre-computed, cheap). On serverless `_data_stream/_stats` is
+ *   unavailable, so `getDataStream({ verbose: true })` computes `maximum_timestamp` at
+ *   request time instead.
  * - Volume fields (`lastFullDayDocs`, `baseline7dAvg`, `volumeDropPct`) are
  *   computed from a paginated composite aggregation over the past 8 days, which
  *   covers every backing index regardless of count (no 1000-index cap that would
@@ -119,26 +124,60 @@ const fetchVolumeByStreamDay = async (
  */
 export const fetchIndexHealth = async ({
   esClient,
+  isServerless,
   logger,
 }: {
   esClient: ElasticsearchClient;
+  isServerless: boolean;
   logger?: Logger;
 }): Promise<Record<string, IndexHealthEntry>> => {
   const now = Date.now();
   const bootstrapCutoff = now - SILENCE_BOOTSTRAP_DAYS * 24 * 60 * 60 * 1000;
 
-  const [statsResponse, dataStreamResponse] = await Promise.all([
-    // 1. Pre-computed maximum_timestamp per data stream (cheap — no query-time scan)
-    esClient.indices.dataStreamsStats({ name: ['logs-*', 'metrics-*'] }),
+  const creationDateByStream = new Map<string, number>();
+  const lastEventByStream = new Map<string, number | null>();
 
-    // 2. Data stream metadata — used to guard young streams by creation_date
-    esClient.indices.getDataStream({
+  if (isServerless) {
+    const dataStreamResponse = await esClient.indices.getDataStream({
       name: ['logs-*', 'metrics-*'],
-      filter_path: ['data_streams.name', 'data_streams.creation_date'],
-    }),
-  ]);
+      verbose: true,
+      filter_path: [
+        'data_streams.name',
+        'data_streams.creation_date',
+        'data_streams.maximum_timestamp',
+      ],
+    });
 
-  // 3. Daily doc-count volume per data stream, via a paginated composite aggregation.
+    for (const ds of (dataStreamResponse as unknown as DataStreamMetaResponseShape).data_streams ??
+      []) {
+      if (ds.creation_date != null) {
+        creationDateByStream.set(ds.name, ds.creation_date);
+      }
+      lastEventByStream.set(ds.name, ds.maximum_timestamp ?? null);
+    }
+  } else {
+    const [statsResponse, dataStreamResponse] = await Promise.all([
+      esClient.indices.dataStreamsStats({ name: ['logs-*', 'metrics-*'] }),
+      esClient.indices.getDataStream({
+        name: ['logs-*', 'metrics-*'],
+        filter_path: ['data_streams.name', 'data_streams.creation_date'],
+      }),
+    ]);
+
+    for (const ds of (dataStreamResponse as unknown as DataStreamMetaResponseShape).data_streams ??
+      []) {
+      if (ds.creation_date != null) {
+        creationDateByStream.set(ds.name, ds.creation_date);
+      }
+    }
+
+    for (const ds of (statsResponse as unknown as DataStreamsStatsResponseShape).data_streams ??
+      []) {
+      lastEventByStream.set(ds.data_stream, ds.maximum_timestamp ?? null);
+    }
+  }
+
+  // Daily doc-count volume per data stream, via a paginated composite aggregation.
   const volumeByStreamDay = await fetchVolumeByStreamDay(esClient, logger);
 
   // Day boundaries (UTC midnight). Yesterday is the last complete day; the baseline
@@ -149,21 +188,6 @@ export const fetchIndexHealth = async ({
     { length: 7 },
     (_, i) => startOfTodayUtc - (i + 2) * MS_PER_DAY
   );
-
-  // Build creation date map: dataStreamName → creationDateMs
-  const creationDateByStream = new Map<string, number>();
-  for (const ds of (dataStreamResponse as unknown as DataStreamMetaResponseShape).data_streams ??
-    []) {
-    if (ds.creation_date != null) {
-      creationDateByStream.set(ds.name, ds.creation_date);
-    }
-  }
-
-  // Build lastEventMs map: dataStreamName → epoch ms (from pre-computed maximum_timestamp)
-  const lastEventByStream = new Map<string, number | null>();
-  for (const ds of (statsResponse as unknown as DataStreamsStatsResponseShape).data_streams ?? []) {
-    lastEventByStream.set(ds.data_stream, ds.maximum_timestamp ?? null);
-  }
 
   // Build final result keyed by data stream name
   const result: Record<string, IndexHealthEntry> = {};

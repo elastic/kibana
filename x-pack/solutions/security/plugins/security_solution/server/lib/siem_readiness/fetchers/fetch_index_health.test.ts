@@ -73,9 +73,10 @@ const makeEsClient = ({
         })),
       }),
       getDataStream: jest.fn().mockResolvedValue({
-        data_streams: Object.entries(creationDates).map(([name, creation_date]) => ({
-          name,
-          creation_date,
+        data_streams: streams.map((s) => ({
+          name: s.name,
+          creation_date: creationDates[s.name],
+          maximum_timestamp: s.maximum_timestamp ?? null,
         })),
       }),
     },
@@ -94,14 +95,31 @@ describe('fetchIndexHealth', () => {
   afterEach(() => jest.restoreAllMocks());
 
   describe('lastEventMs and silenceMs from maximum_timestamp', () => {
-    it('reads lastEventMs from _data_stream/_stats maximum_timestamp', async () => {
+    it('reads lastEventMs from dataStreamsStats maximum_timestamp on stateful', async () => {
       const lastEventMs = NOW - 10 * 60 * 1000; // 10 min ago
       const esClient = makeEsClient({
         streams: [{ name: 'logs-endpoint.events-default', maximum_timestamp: lastEventMs }],
         creationDates: { 'logs-endpoint.events-default': BOOTSTRAP_CUTOFF - 1 },
       });
 
-      const result = await fetchIndexHealth({ esClient });
+      const result = await fetchIndexHealth({ esClient, isServerless: false });
+      expect(esClient.indices.dataStreamsStats).toHaveBeenCalled();
+      expect(result['logs-endpoint.events-default'].lastEventMs).toBe(lastEventMs);
+      expect(result['logs-endpoint.events-default'].silenceMs).toBe(NOW - lastEventMs);
+    });
+
+    it('reads lastEventMs from getDataStream verbose on serverless', async () => {
+      const lastEventMs = NOW - 10 * 60 * 1000;
+      const esClient = makeEsClient({
+        streams: [{ name: 'logs-endpoint.events-default', maximum_timestamp: lastEventMs }],
+        creationDates: { 'logs-endpoint.events-default': BOOTSTRAP_CUTOFF - 1 },
+      });
+
+      const result = await fetchIndexHealth({ esClient, isServerless: true });
+      expect(esClient.indices.dataStreamsStats).not.toHaveBeenCalled();
+      expect(esClient.indices.getDataStream).toHaveBeenCalledWith(
+        expect.objectContaining({ verbose: true })
+      );
       expect(result['logs-endpoint.events-default'].lastEventMs).toBe(lastEventMs);
       expect(result['logs-endpoint.events-default'].silenceMs).toBe(NOW - lastEventMs);
     });
@@ -112,7 +130,7 @@ describe('fetchIndexHealth', () => {
         creationDates: { 'logs-new.stream-default': BOOTSTRAP_CUTOFF - 1 },
       });
 
-      const result = await fetchIndexHealth({ esClient });
+      const result = await fetchIndexHealth({ esClient, isServerless: false });
       expect(result['logs-new.stream-default'].lastEventMs).toBeNull();
       expect(result['logs-new.stream-default'].silenceMs).toBeNull();
     });
@@ -130,7 +148,7 @@ describe('fetchIndexHealth', () => {
         }),
       });
 
-      const result = await fetchIndexHealth({ esClient });
+      const result = await fetchIndexHealth({ esClient, isServerless: false });
       expect(result['logs-young-default'].lastFullDayDocs).toBeNull();
       expect(result['logs-young-default'].baseline7dAvg).toBeNull();
       expect(result['logs-young-default'].volumeDropPct).toBeNull();
@@ -147,7 +165,7 @@ describe('fetchIndexHealth', () => {
         }),
       });
 
-      const result = await fetchIndexHealth({ esClient });
+      const result = await fetchIndexHealth({ esClient, isServerless: false });
       expect(result['logs-old-default'].lastFullDayDocs).toBe(10);
       expect(result['logs-old-default'].baseline7dAvg).toBe(100);
     });
@@ -166,7 +184,7 @@ describe('fetchIndexHealth', () => {
         }),
       });
 
-      const result = await fetchIndexHealth({ esClient });
+      const result = await fetchIndexHealth({ esClient, isServerless: false });
       expect(result['logs-drop-default'].volumeDropPct).toBe(90);
     });
 
@@ -180,7 +198,7 @@ describe('fetchIndexHealth', () => {
         }),
       });
 
-      const result = await fetchIndexHealth({ esClient });
+      const result = await fetchIndexHealth({ esClient, isServerless: false });
       expect(result['logs-spike-default'].volumeDropPct).toBe(0);
     });
 
@@ -194,7 +212,7 @@ describe('fetchIndexHealth', () => {
         }),
       });
 
-      const result = await fetchIndexHealth({ esClient });
+      const result = await fetchIndexHealth({ esClient, isServerless: false });
       expect(result['logs-zero-default'].volumeDropPct).toBeNull();
     });
 
@@ -210,7 +228,7 @@ describe('fetchIndexHealth', () => {
         }),
       });
 
-      const result = await fetchIndexHealth({ esClient });
+      const result = await fetchIndexHealth({ esClient, isServerless: false });
       expect(result['logs-sparse-default'].baseline7dAvg).toBeCloseTo(500 / 7, 5);
       // drop = round((71.43 - 70) / 71.43 * 100) = 2
       expect(result['logs-sparse-default'].volumeDropPct).toBe(2);
@@ -231,7 +249,7 @@ describe('fetchIndexHealth', () => {
         }),
       });
 
-      const result = await fetchIndexHealth({ esClient });
+      const result = await fetchIndexHealth({ esClient, isServerless: false });
       expect(result[streamName]).toBeDefined();
       expect(result[streamName].lastFullDayDocs).toBe(50);
       expect(result[streamName].baseline7dAvg).toBe(100);
@@ -254,7 +272,7 @@ describe('fetchIndexHealth', () => {
         ],
       });
 
-      const result = await fetchIndexHealth({ esClient });
+      const result = await fetchIndexHealth({ esClient, isServerless: false });
       expect(result[streamName].lastFullDayDocs).toBe(50);
       expect(result[streamName].baseline7dAvg).toBe(100);
     });
@@ -289,7 +307,7 @@ describe('fetchIndexHealth', () => {
         ],
       });
 
-      const result = await fetchIndexHealth({ esClient });
+      const result = await fetchIndexHealth({ esClient, isServerless: false });
       expect(result['logs-quiet-default'].lastFullDayDocs).toBe(5);
       expect(result['logs-quiet-default'].baseline7dAvg).toBe(100);
       expect(result['logs-quiet-default'].volumeDropPct).toBe(95);

@@ -63,6 +63,33 @@ describe('getContinuity', () => {
       expect(result.status).toBe('healthy');
       expect(result.actionableFindings).toHaveLength(0);
     });
+
+    it('returns actionsRequired on serverless when a pipeline is silent', async () => {
+      mockFetchPipelines.mockResolvedValueOnce([
+        makePipeline({
+          name: 'silent-pipeline',
+          statsAvailable: false,
+          docsCount: 0,
+          failedDocsCount: 0,
+          isSilent: true,
+          silenceMs: 4 * 60 * 60 * 1000,
+        }),
+      ]);
+      const result = await getContinuity({ esClient, isServerless: true, logger });
+      expect(result.status).toBe('actionsRequired');
+      expect(result.actionableFindings).toHaveLength(1);
+      expect(result.actionableFindings[0].type).toBe('silence');
+    });
+
+    it('returns healthy on serverless with no silence/volume issues and notes failure-rate', async () => {
+      mockFetchPipelines.mockResolvedValueOnce([
+        makePipeline({ statsAvailable: false, docsCount: 0, failedDocsCount: 0 }),
+      ]);
+      const result = await getContinuity({ esClient, isServerless: true, logger });
+      expect(result.status).toBe('healthy');
+      expect(result.summary).toContain('Failure-rate is not evaluated in serverless');
+      expect(result.actionableFindings).toHaveLength(0);
+    });
   });
 
   describe('items', () => {

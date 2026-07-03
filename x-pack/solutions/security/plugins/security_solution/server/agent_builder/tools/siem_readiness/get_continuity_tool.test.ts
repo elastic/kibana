@@ -291,4 +291,47 @@ describe('getContinuityTool', () => {
       expect(agentItemNames).toEqual(sharedFilterNames);
     });
   });
+
+  describe('handler — serverless', () => {
+    const serverlessTool = getContinuityTool(mockCore, mockLogger, true);
+
+    it('reports actionsRequired when a silence finding is present', async () => {
+      mockGetContinuity.mockResolvedValueOnce(
+        makePayload({
+          status: 'actionsRequired',
+          summary: '1 silent across 1 active pipelines.',
+          items: [
+            {
+              name: 'endpoint-pipeline',
+              indices: [ENDPOINT_INDEX],
+              docsCount: 0,
+              failedDocsCount: 0,
+              statsAvailable: false,
+              isSilent: true,
+            },
+          ],
+          actionableFindings: [
+            {
+              severity: 'CRITICAL',
+              type: 'silence',
+              message: 'Data stream serving pipeline endpoint-pipeline has gone silent',
+              resource: 'endpoint-pipeline',
+            },
+          ],
+        })
+      );
+
+      const result = (await serverlessTool.handler(
+        {},
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const data = (result.results[0] as OtherResult<ContinuityPayload>).data;
+      expect(data.status).toBe('actionsRequired');
+      expect(data.summary).toContain('1 silent');
+      expect(data.summary).toContain('Failure-rate is not evaluated in serverless');
+      expect(data.actionableFindings).toHaveLength(1);
+      expect(data.actionableFindings![0].category).toBe('Endpoint');
+    });
+  });
 });

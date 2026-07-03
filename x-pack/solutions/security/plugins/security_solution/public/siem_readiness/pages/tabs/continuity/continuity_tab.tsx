@@ -161,6 +161,66 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
   }, [openNewCaseFlyout, caseDescription]);
 
   // Table columns
+  const issueColumn: EuiBasicTableColumn<PipelineInfoWithStatus> = useMemo(
+    () => ({
+      field: 'continuityDataFlowHealth',
+      name: i18n.translate('xpack.securitySolution.siemReadiness.continuity.column.issue', {
+        defaultMessage: 'Issue',
+      }),
+      sortable: true,
+      render: (continuityDataFlowHealth: PipelineDataFlowHealth, item: PipelineInfoWithStatus) => {
+        if (continuityDataFlowHealth === 'silent') {
+          const tooltip =
+            item.silenceMs != null
+              ? i18n.translate(
+                  'xpack.securitySolution.siemReadiness.continuity.health.silentTooltip',
+                  {
+                    defaultMessage: 'No events received for {hours}h',
+                    values: { hours: Math.round(item.silenceMs / (60 * 60 * 1000)) },
+                  }
+                )
+              : undefined;
+          const badge = (
+            <EuiBadge color="danger">
+              {i18n.translate('xpack.securitySolution.siemReadiness.continuity.health.silent', {
+                defaultMessage: 'Silent',
+              })}
+            </EuiBadge>
+          );
+          return tooltip ? <EuiToolTip content={tooltip}>{badge}</EuiToolTip> : badge;
+        }
+        if (continuityDataFlowHealth === 'volume_drop_critical') {
+          return (
+            <EuiBadge color="danger">
+              {i18n.translate(
+                'xpack.securitySolution.siemReadiness.continuity.health.volumeDropCritical',
+                { defaultMessage: 'Volume drop (critical)' }
+              )}
+            </EuiBadge>
+          );
+        }
+        if (continuityDataFlowHealth === 'volume_drop_warning') {
+          return (
+            <EuiBadge color="warning">
+              {i18n.translate('xpack.securitySolution.siemReadiness.continuity.health.volumeDrop', {
+                defaultMessage: 'Volume drop',
+              })}
+            </EuiBadge>
+          );
+        }
+        return (
+          <EuiBadge color="success">
+            {i18n.translate('xpack.securitySolution.siemReadiness.continuity.health.healthy', {
+              defaultMessage: 'Healthy',
+            })}
+          </EuiBadge>
+        );
+      },
+      width: statsAvailable ? '20%' : '30%',
+    }),
+    [statsAvailable]
+  );
+
   const columns: Array<EuiBasicTableColumn<PipelineInfoWithStatus>> = useMemo(
     () => [
       {
@@ -170,7 +230,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         }),
         sortable: true,
         truncateText: true,
-        width: statsAvailable ? '25%' : '70%',
+        width: statsAvailable ? '25%' : '40%',
       },
       ...(statsAvailable
         ? [
@@ -228,70 +288,9 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
               },
               width: '15%',
             } as EuiBasicTableColumn<PipelineInfoWithStatus>,
-            {
-              field: 'continuityDataFlowHealth',
-              name: i18n.translate('xpack.securitySolution.siemReadiness.continuity.column.issue', {
-                defaultMessage: 'Issue',
-              }),
-              sortable: true,
-              render: (
-                continuityDataFlowHealth: PipelineDataFlowHealth,
-                item: PipelineInfoWithStatus
-              ) => {
-                if (continuityDataFlowHealth === 'silent') {
-                  const tooltip =
-                    item.silenceMs != null
-                      ? i18n.translate(
-                          'xpack.securitySolution.siemReadiness.continuity.health.silentTooltip',
-                          {
-                            defaultMessage: 'No events received for {hours}h',
-                            values: { hours: Math.round(item.silenceMs / (60 * 60 * 1000)) },
-                          }
-                        )
-                      : undefined;
-                  const badge = (
-                    <EuiBadge color="danger">
-                      {i18n.translate(
-                        'xpack.securitySolution.siemReadiness.continuity.health.silent',
-                        { defaultMessage: 'Silent' }
-                      )}
-                    </EuiBadge>
-                  );
-                  return tooltip ? <EuiToolTip content={tooltip}>{badge}</EuiToolTip> : badge;
-                }
-                if (continuityDataFlowHealth === 'volume_drop_critical') {
-                  return (
-                    <EuiBadge color="danger">
-                      {i18n.translate(
-                        'xpack.securitySolution.siemReadiness.continuity.health.volumeDropCritical',
-                        { defaultMessage: 'Volume drop (critical)' }
-                      )}
-                    </EuiBadge>
-                  );
-                }
-                if (continuityDataFlowHealth === 'volume_drop_warning') {
-                  return (
-                    <EuiBadge color="warning">
-                      {i18n.translate(
-                        'xpack.securitySolution.siemReadiness.continuity.health.volumeDrop',
-                        { defaultMessage: 'Volume drop' }
-                      )}
-                    </EuiBadge>
-                  );
-                }
-                return (
-                  <EuiBadge color="success">
-                    {i18n.translate(
-                      'xpack.securitySolution.siemReadiness.continuity.health.healthy',
-                      { defaultMessage: 'Healthy' }
-                    )}
-                  </EuiBadge>
-                );
-              },
-              width: '20%',
-            } as EuiBasicTableColumn<PipelineInfoWithStatus>,
           ]
         : []),
+      issueColumn,
       {
         field: 'name' as const,
         name: i18n.translate('xpack.securitySolution.siemReadiness.continuity.column.actions', {
@@ -324,7 +323,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         ],
       },
     ],
-    [basePath, statsAvailable]
+    [basePath, statsAvailable, issueColumn]
   );
 
   // Render function for accordion extra action (right side badges/stats)
@@ -454,7 +453,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
                 'xpack.securitySolution.siemReadiness.continuity.statsUnavailable.body',
                 {
                   defaultMessage:
-                    'Pipeline ingestion stats (docs ingested, failed docs, failure rate) are not available in serverless mode. Pipelines are listed below for reference.',
+                    'Pipeline failure-rate stats (docs ingested, failed docs, failure rate) are not available in serverless mode. Silence and volume-drop status are shown in the Issue column.',
                 }
               )}
             </p>

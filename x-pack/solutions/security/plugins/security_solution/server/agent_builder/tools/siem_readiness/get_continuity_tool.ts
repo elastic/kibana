@@ -13,7 +13,6 @@ import type { Logger } from '@kbn/logging';
 import type { MainCategories } from '@kbn/siem-readiness';
 import {
   getIndexCategoryMap,
-  isCriticalFailureRate,
   filterPipelinesByCategories,
   enrichFindings,
 } from '@kbn/siem-readiness';
@@ -36,7 +35,7 @@ export const getContinuityTool = (
   id: SIEM_READINESS_CONTINUITY_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Retrieves SIEM ingest pipeline continuity health. Returns active pipelines with document counts, failure rates, and which indices they serve — filtered to pipelines that serve categorized SIEM indices. Includes an overall health status (healthy / actionsRequired / noData) and actionable findings for: (1) pipelines with critical failure rates, (2) data streams that have gone silent (no events received beyond the category-specific threshold), and (3) data streams showing a significant volume drop versus the 7-day baseline. Each actionable finding includes blast radius data (affectedRules, affectedTactics, affectedPlatform) and a type field (pipeline_failure | silence | volume_drop_warning | volume_drop_critical). When presenting any finding, always show these as explicit labeled fields: Affected Platform, Affected Rules, Affected Tactics.',
+    'Retrieves SIEM ingest pipeline continuity health. Returns active pipelines with document counts, failure rates, and which indices they serve — filtered to pipelines that serve categorized SIEM indices. Includes an overall health status (healthy / actionsRequired / noData) and actionable findings for: (1) pipelines with critical failure rates, (2) data streams that have gone silent (no events received beyond the category-specific threshold), and (3) data streams showing a significant volume drop versus the 7-day baseline. Each actionable finding includes blast radius data (affectedRules, affectedTactics, affectedPlatform) and a type field (pipeline_failure | silence | volume_drop_warning | volume_drop_critical). When presenting any finding, always show these as explicit labeled fields: Affected Platform, Affected Rules, Affected Tactics. On serverless, silence and volume-drop checks are evaluated; pipeline failure-rate (nodes.stats) is not available.',
   schema,
   tags: ['security', 'siem-readiness', 'continuity'],
   availability: {
@@ -97,21 +96,42 @@ export const getContinuityTool = (
           return category ? { ...finding, category } : finding;
         });
 
-      const failingCount = categorizedItems.filter(
-        (p) => p.statsAvailable && isCriticalFailureRate(p.failedDocsCount, p.docsCount)
-      ).length;
       const filteredStatus =
         categorizedItems.length === 0
           ? ('noData' as const)
-          : failingCount > 0
+          : enrichedFindings.length > 0
           ? ('actionsRequired' as const)
           : ('healthy' as const);
-      const filteredSummary =
-        filteredStatus === 'noData'
-          ? 'No ingest pipeline statistics available for categorized indices.'
-          : failingCount > 0
-          ? `${failingCount} of ${categorizedItems.length} active pipelines have critical failure rates.`
+
+      const serverlessFailureRateNote = isServerless
+        ? ' Failure-rate is not evaluated in serverless.'
+        : '';
+
+      let filteredSummary: string;
+      if (filteredStatus === 'noData') {
+        filteredSummary = 'No ingest pipeline statistics available for categorized indices.';
+      } else if (enrichedFindings.length === 0) {
+        filteredSummary = isServerless
+          ? `All ${categorizedItems.length} active ingest pipelines are healthy.${serverlessFailureRateNote}`
           : `All ${categorizedItems.length} active ingest pipelines are functioning properly, with no document failures.`;
+      } else {
+        const silentCount = enrichedFindings.filter((f) => f.type === 'silence').length;
+        const dropCritical = enrichedFindings.filter(
+          (f) => f.type === 'volume_drop_critical'
+        ).length;
+        const dropWarning = enrichedFindings.filter((f) => f.type === 'volume_drop_warning').length;
+        const failureCount = enrichedFindings.filter((f) => f.type === 'pipeline_failure').length;
+
+        const parts: string[] = [];
+        if (silentCount) parts.push(`${silentCount} silent`);
+        if (dropCritical) parts.push(`${dropCritical} critical volume drop`);
+        if (dropWarning) parts.push(`${dropWarning} volume drop warning`);
+        if (failureCount) parts.push(`${failureCount} pipeline failure`);
+
+        filteredSummary = `${parts.join(', ')} across ${
+          categorizedItems.length
+        } active pipelines.${serverlessFailureRateNote}`;
+      }
 
       return {
         results: [

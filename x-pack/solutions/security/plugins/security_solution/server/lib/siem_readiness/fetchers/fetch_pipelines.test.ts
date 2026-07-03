@@ -96,7 +96,13 @@ const makeEsClient = ({
           maximum_timestamp,
         })),
       }),
-      getDataStream: jest.fn().mockResolvedValue({ data_streams: [] }),
+      getDataStream: jest.fn().mockResolvedValue({
+        data_streams: Object.entries(lastEventByStream).map(([name, maximum_timestamp]) => ({
+          name,
+          maximum_timestamp,
+          creation_date: Date.now() - 30 * 24 * 60 * MINUTE,
+        })),
+      }),
     },
     nodes: {
       stats: jest.fn().mockResolvedValue({
@@ -244,5 +250,32 @@ describe('fetchPipelines - per-category silence threshold', () => {
     expect(searchSpy.categoriesSearchCalled).toBe(true);
     expect(pipe?.categories).toEqual(['Application/SaaS']);
     expect(pipe?.isSilent).toBe(false);
+  });
+});
+
+describe('fetchPipelines - serverless silence and volume', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('populates silence health on serverless without calling nodes.stats', async () => {
+    const now = Date.now();
+    const esClient = makeEsClient({
+      indexToPipeline: { 'idx-endpoint': 'pipe-endpoint' },
+      pipelineCounts: { 'pipe-endpoint': 5 },
+      lastEventByStream: { 'idx-endpoint': now - 45 * MINUTE },
+    });
+
+    const result = await fetchPipelines({
+      esClient,
+      isServerless: true,
+      logger,
+      categoriesData: buildCategoriesData({ 'idx-endpoint': 'Endpoint' }),
+    });
+
+    expect(esClient.nodes.stats).not.toHaveBeenCalled();
+
+    const pipe = result.find((p) => p.name === 'pipe-endpoint');
+    expect(pipe?.statsAvailable).toBe(false);
+    expect(pipe?.isSilent).toBe(true);
+    expect(pipe?.silenceMs).toBeGreaterThan(30 * MINUTE);
   });
 });

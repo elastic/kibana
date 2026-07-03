@@ -91,7 +91,12 @@ export const getContinuity = async ({
       ? ('actionsRequired' as const)
       : ('healthy' as const);
 
-  const summary = buildContinuitySummary(status, pipelines.length, actionableFindings);
+  const summary = buildContinuitySummary(
+    status,
+    pipelines.length,
+    actionableFindings,
+    isServerless
+  );
 
   return { status, summary, items: pipelines, actionableFindings };
 };
@@ -99,10 +104,16 @@ export const getContinuity = async ({
 const buildContinuitySummary = (
   status: string,
   pipelineCount: number,
-  findings: ActionableFinding[]
+  findings: ActionableFinding[],
+  isServerless: boolean
 ): string => {
-  if (status === 'noData') return 'No active ingest pipelines found.';
-  if (findings.length === 0) return `All ${pipelineCount} active ingest pipelines are healthy.`;
+  if (status === 'noData') {
+    return 'No active ingest pipelines found.';
+  }
+  if (findings.length === 0) {
+    const base = `All ${pipelineCount} active ingest pipelines are healthy.`;
+    return isServerless ? `${base} Failure-rate is not evaluated in serverless.` : base;
+  }
 
   const silentCount = findings.filter((f) => f.type === 'silence').length;
   const dropCritical = findings.filter((f) => f.type === 'volume_drop_critical').length;

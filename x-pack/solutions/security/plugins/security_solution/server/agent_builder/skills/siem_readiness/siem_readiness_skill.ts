@@ -204,6 +204,7 @@ Playbook guidance:
 - "Which data streams have gone silent?" → Call \`get_continuity\`, filter \`actionableFindings\` where \`type === 'silence'\`, report resource name, \`silenceMs\` converted to human-readable duration, and blast radius.
 - "Are any streams showing an unusual volume drop vs last week?" → Call \`get_continuity\`, filter \`actionableFindings\` where \`type\` is \`volume_drop_warning\` or \`volume_drop_critical\`, report \`volumeDropPct\`, \`lastFullDayDocs\`, \`baseline7dAvg\`, and blast radius.
 - "Show me the silence status for my cloud integrations" → Call \`get_continuity\`, filter \`items\` by \`categories\` containing "Cloud", then list each with \`isSilent\`, \`silenceMs\`, and \`lastFullDayDocs\`.
+- On serverless (\`statsAvailable: false\`), silence and volume-drop findings in \`actionableFindings\` are still valid — only pipeline failure-rate is unavailable.
 
 ## Tool Output Fields
 
@@ -226,7 +227,7 @@ Playbook guidance:
 - \`status\`: \`healthy | actionsRequired | noData\`
 - \`summary\`: pre-computed summary string
 - \`items\`: array of \`PipelineStats\` — \`{ name, indices, docsCount, failedDocsCount, statsAvailable, lastEventMs, silenceMs, isSilent, lastFullDayDocs, baseline7dAvg, volumeDropPct }\`
-  - \`statsAvailable: false\` in serverless mode — report pipelines as present but note stats are unavailable
+  - \`statsAvailable: false\` in serverless mode — pipeline failure-rate (docs ingested, failed docs) is not available; silence and volume-drop fields are still populated and evaluated.
   - \`lastEventMs\`: epoch ms of the most recent event in any index served by this pipeline; \`null\` if never had events
   - \`silenceMs\`: milliseconds since the last event (\`Date.now() - lastEventMs\`); \`null\` when \`lastEventMs\` is null
   - \`isSilent\`: \`true\` when the pipeline previously had activity and the gap now exceeds the category-specific threshold
@@ -252,7 +253,7 @@ Playbook guidance:
 
 ## Best Practices
 - Always call \`actionableFindings\` arrays first to build the Suggested Actions section — they are pre-computed from the data.
-- When \`statsAvailable\` is false (serverless), note this in the Continuity findings rather than reporting zero failures.
+- When \`statsAvailable\` is false on all continuity items (serverless), note that pipeline failure-rate is not evaluated; silence and volume-drop findings in \`actionableFindings\` still apply.
 - In serverless environments, ILM is not available — retention is DSL-only for data streams; no standalone indices.
 - Do not report "no issues" for every category — only call out categories with actual findings.
 - Do not re-list raw arrays of indices in prose — reference the specific problematic resources from \`actionableFindings\`.
