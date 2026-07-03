@@ -50,3 +50,4 @@ jszip
 @opentelemetry/exporter-logs-otlp-proto
 @opentelemetry/otlp-transformer
 just-bash
+copy-webpack-plugin

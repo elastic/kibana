@@ -33,7 +33,8 @@ export const command = {
     await moonRun(':build-webpack', {
       pipe: !quiet,
       noCache: !cache,
-      passAlongArgs: dist ? ['--dist'] : undefined,
+      // webpack configs read NODE_ENV; it's also a cache input so dev/dist outputs don't collide
+      env: dist ? { NODE_ENV: 'production' } : undefined,
       quiet,
     });
 

@@ -9,6 +9,7 @@
 
 const Path = require('path');
 const webpack = require('webpack');
+const CopyPlugin = require('copy-webpack-plugin');
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -19,6 +20,30 @@ const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const WEBPACK_SRC = require.resolve('webpack');
 
 const { REPO_ROOT } = require('@kbn/repo-info');
+
+// Sources copied alongside the webpack bundle so the built package is self-contained for the dist build.
+const BUILD_SOURCE_PATHS = {
+  include: ['index.js', 'src/**/*'],
+  exclude: [
+    '**/test_helpers.ts',
+    '**/*.config.js',
+    '**/*.mock.*',
+    '**/*.test.*',
+    '**/*.stories.*',
+    '**/__snapshots__/**',
+    '**/integration_tests/**',
+    '**/mocks/**',
+    '**/scripts/**',
+    '**/storybook/**',
+    '**/test_fixtures/**',
+    '**/test_helpers/**',
+  ],
+};
+const PACKAGE_BUILD_DIR = Path.resolve(
+  REPO_ROOT,
+  'target/build',
+  Path.relative(REPO_ROOT, __dirname)
+);
 
 /** @returns {import('webpack').Configuration} */
 module.exports = (_, argv) => {
@@ -187,6 +212,15 @@ module.exports = (_, argv) => {
 
     plugins: [
       new NodeLibsBrowserPlugin(),
+      new CopyPlugin({
+        patterns: BUILD_SOURCE_PATHS.include.map((from) => ({
+          from,
+          to: PACKAGE_BUILD_DIR,
+          context: __dirname,
+          globOptions: { ignore: BUILD_SOURCE_PATHS.exclude, dot: false },
+          noErrorOnMissing: true,
+        })),
+      }),
       new CleanWebpackPlugin({
         protectWebpackAssets: false,
         cleanAfterEveryBuildPatterns: [

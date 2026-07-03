@@ -3,6 +3,7 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/common/rewrite_moon_cache_paths.sh
 
 echo "--- yarn install and bootstrap"
 
@@ -30,6 +31,7 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
       mkdir -p ./.moon/cache
       echo "Extracting moon-cache.tar.zst to ./.moon/cache"
       tar -xf ~/moon-cache.tar.zst -I zstd -C ./
+      rewrite_moon_cache_paths ".moon/cache" "$(pwd)"
     fi
     .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
   fi

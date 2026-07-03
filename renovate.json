@@ -39,6 +39,7 @@
       "matchDepNames": [
         "autoprefixer",
         "clean-webpack-plugin",
+        "copy-webpack-plugin",
         "css-loader",
         "mini-css-extract-plugin",
         "sass-loader",

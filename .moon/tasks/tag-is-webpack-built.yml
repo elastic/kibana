@@ -1,0 +1,66 @@
+$schema: https://moonrepo.dev/schemas/tasks.json
+
+inheritedBy:
+  tags:
+    - is-webpack-built
+
+fileGroups:
+  src:
+    - version_dependencies.txt
+
+tasks:
+  extract-version-dependencies:
+    command: node
+    args:
+      - $workspaceRoot/scripts/extract_version_dependencies.js
+      - $projectSource/version_dependencies.txt
+    env:
+      CI_STATS_DISABLED: 'true'
+    inputs:
+      - /package.json
+      - /yarn.lock
+    outputs:
+      - version_dependencies.txt
+    options:
+      runFromWorkspaceRoot: true
+
+  build-webpack:
+    command: webpack-cli
+    args:
+      - '--config'
+      - $projectRoot/webpack.config.js
+      - '--stats=errors-only'
+    deps:
+      - ~:extract-version-dependencies
+      - '^:build-webpack'
+    inputs:
+      - '@group(src)'
+      - package.json
+      - webpack.config.js
+      - $NODE_ENV
+    outputs:
+      - /target/build/$projectSource
+    options:
+      runFromWorkspaceRoot: true
+
+  watch-webpack:
+    type: run
+    command: webpack-cli
+    args:
+      - '--config'
+      - $projectRoot/webpack.config.js
+      - '--watch'
+      - '--stats=minimal'
+    deps:
+      - ~:extract-version-dependencies
+      - '^:build-webpack'
+    inputs:
+      - '@group(src)'
+      - package.json
+      - webpack.config.js
+      - $NODE_ENV
+    outputs:
+      - /target/build/$projectSource
+    options:
+      persistent: true
+      runFromWorkspaceRoot: true
