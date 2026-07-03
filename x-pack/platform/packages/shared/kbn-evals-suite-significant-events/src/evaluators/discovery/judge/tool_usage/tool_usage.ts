@@ -27,7 +27,7 @@ export const createToolUsageEvaluator = (): DiscoveryJudgeEvaluator => ({
     // when only one of several fully-evidenced discoveries is missing queries.
     const anyDiscoveryNeedsKiSearch = discoveries.some((d) => {
       const evidences = d.evidences ?? [];
-      return evidences.length === 0 || evidences.some((e) => e.esql_query == null);
+      return evidences.length === 0 || evidences.some((e) => e.esql_query == null || e.esql_query === '');
     });
     const allEvidencesHaveQuery = discoveries.length > 0 && !anyDiscoveryNeedsKiSearch;
 
