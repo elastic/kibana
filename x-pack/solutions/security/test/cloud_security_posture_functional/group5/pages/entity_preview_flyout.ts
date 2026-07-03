@@ -51,8 +51,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         // Ignore if index doesn't exist
       }
 
-      // Enable asset inventory setting
-      await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
+      // Enable asset inventory and entity store v2 settings
+      await kibanaServer.uiSettings.update({
+        'securitySolution:enableAssetInventory': true,
+        'securitySolution:entityStoreEnableV2': true,
+      });
 
       // Initialize security-solution-default data-view (required by entity store)
       const dataView = dataViewRouteHelpersFactory(supertest);
@@ -80,8 +83,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       // Clean up entity store resources
       await uninstallEntityStoreV2({ supertest, logger });
 
-      // Disable asset inventory setting
-      await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': false });
+      // Disable asset inventory and entity store v2 settings
+      await kibanaServer.uiSettings.update({
+        'securitySolution:enableAssetInventory': false,
+        'securitySolution:entityStoreEnableV2': false,
+      });
 
       // Delete alerts
       await es.deleteByQuery({
