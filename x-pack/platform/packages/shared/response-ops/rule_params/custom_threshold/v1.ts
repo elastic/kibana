@@ -54,7 +54,10 @@ const customCriterion = schema.object({
           description:
             'The threshold value that is used with the `warningComparator`. If the `warningComparator` is `between`, you must specify the boundary values.',
         },
-      })
+      }),
+      // At most two values are ever meaningful: a single threshold, or the
+      // [lower, upper] pair for the `between`/`notBetween` comparators.
+      { maxSize: 2 }
     )
   ),
   warningComparator: schema.maybe(oneOfLiterals(comparators)),
