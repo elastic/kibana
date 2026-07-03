@@ -32,6 +32,7 @@ import {
 import type { ParsedMetricItem, Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
+import { METRICS_AGGREGATION_SETTINGS_DEFAULTS } from '../../../common/utils/aggregation_settings';
 
 jest.mock('./context/metrics_experience_state_provider');
 jest.mock('@kbn/ebt-tools', () => ({
@@ -258,6 +259,8 @@ describe('MetricsExperienceGrid', () => {
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
       profileId: 'test-profile-id',
+      aggregationSettings: METRICS_AGGREGATION_SETTINGS_DEFAULTS,
+      onAggregationSettingsChange: jest.fn(),
     });
 
     useFetchMetricsDataMock.mockReturnValue({
@@ -433,6 +436,8 @@ describe('MetricsExperienceGrid', () => {
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
       profileId: 'test-profile-id',
+      aggregationSettings: METRICS_AGGREGATION_SETTINGS_DEFAULTS,
+      onAggregationSettingsChange: jest.fn(),
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -479,6 +484,8 @@ describe('MetricsExperienceGrid', () => {
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
       profileId: 'test-profile-id',
+      aggregationSettings: METRICS_AGGREGATION_SETTINGS_DEFAULTS,
+      onAggregationSettingsChange: jest.fn(),
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -520,6 +527,8 @@ describe('MetricsExperienceGrid', () => {
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
         profileId: 'test-profile-id',
+        aggregationSettings: METRICS_AGGREGATION_SETTINGS_DEFAULTS,
+        onAggregationSettingsChange: jest.fn(),
       });
 
       // Stream's universe only has `host.name`; `environment` is mapped but
@@ -560,6 +569,8 @@ describe('MetricsExperienceGrid', () => {
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
         profileId: 'test-profile-id',
+        aggregationSettings: METRICS_AGGREGATION_SETTINGS_DEFAULTS,
+        onAggregationSettingsChange: jest.fn(),
       });
 
       useFetchMetricsDataMock.mockReturnValue({
@@ -605,6 +616,8 @@ describe('MetricsExperienceGrid', () => {
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
         profileId: 'test-profile-id',
+        aggregationSettings: METRICS_AGGREGATION_SETTINGS_DEFAULTS,
+        onAggregationSettingsChange: jest.fn(),
       });
 
       const { getByTestId } = render(
@@ -621,6 +634,47 @@ describe('MetricsExperienceGrid', () => {
       // to the breakdownField prop change — not by the toolbar handler directly.
       expect(onPageChange).not.toHaveBeenCalled();
       expect(onBreakdownFieldChange).toHaveBeenCalledWith(dimensions[0].name);
+    });
+  });
+
+  describe('aggregation settings flyout', () => {
+    it('opens the flyout when the edit button is clicked and forwards a selection change', () => {
+      const onAggregationSettingsChange = jest.fn();
+
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [],
+        onDimensionsChange: jest.fn(),
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+        flyoutState: undefined,
+        onFlyoutStateChange: jest.fn(),
+        onFlyoutSelectedTabChange: jest.fn(),
+        profileId: 'test-profile-id',
+        aggregationSettings: METRICS_AGGREGATION_SETTINGS_DEFAULTS,
+        onAggregationSettingsChange,
+      });
+
+      const { getByTestId, queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+        wrapper: IntlProvider,
+      });
+
+      expect(queryByTestId('metricsExperienceAggregationSettingsFlyout')).not.toBeInTheDocument();
+
+      act(() => {
+        getByTestId('metricsExperienceEditAggregationsButton').click();
+      });
+
+      expect(getByTestId('metricsExperienceAggregationSettingsFlyout')).toBeInTheDocument();
+
+      act(() => {
+        getByTestId('metricsExperienceAggregationSettingsCounterOption-max').click();
+      });
+
+      expect(onAggregationSettingsChange).toHaveBeenCalledWith({ counterAggregation: 'max' });
     });
   });
 });

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect } from 'react';
-import { keys } from '@elastic/eui';
+import React, { useCallback, useEffect, useState } from 'react';
+import { EuiButtonIcon, EuiToolTip, keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
@@ -20,6 +20,7 @@ import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from '../../toolbar/right_side_actions/search_button';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import { ChartSectionSearchError } from '../../chart_section_search_error/chart_section_search_error';
+import { AggregationSettingsFlyout } from '../../flyout';
 import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
 import {
   useDimensionsWipe,
@@ -53,7 +54,23 @@ export const MetricsExperienceGrid = ({
     onDimensionsChange,
     onPageChange,
     profileId,
+    aggregationSettings,
+    onAggregationSettingsChange,
   } = useMetricsExperienceState();
+
+  const [isAggregationSettingsFlyoutOpen, setIsAggregationSettingsFlyoutOpen] = useState(false);
+  const openAggregationSettingsFlyout = useCallback(
+    () => setIsAggregationSettingsFlyoutOpen(true),
+    []
+  );
+  const closeAggregationSettingsFlyout = useCallback(
+    () => setIsAggregationSettingsFlyoutOpen(false),
+    []
+  );
+
+  const editAggregationsLabel = i18n.translate('metricsExperience.editAggregationsButton', {
+    defaultMessage: 'Edit metric aggregations',
+  });
 
   const {
     metricItems,
@@ -160,44 +177,65 @@ export const MetricsExperienceGrid = ({
   }
 
   return (
-    <ChartsGrid
-      id="metricsExperienceGrid"
-      toolbarCss={chartToolbarCss}
-      toolbar={{
-        toggleActions,
-        leftSide: leftSideActions,
-        rightSide: rightSideActions,
-        additionalControls: {
-          prependRight: (
-            <SearchButton
-              isFullscreen={isFullscreen}
-              value={searchTerm}
-              onSearchTermChange={onSearchTermChange}
-              onKeyDown={onKeyDown}
-              data-test-subj="metricsExperienceGridToolbarSearch"
-            />
-          ),
-        },
-      }}
-      toolbarWrapAt={isFullscreen ? 'l' : 'xl'}
-      isComponentVisible={isComponentVisible}
-      isFullscreen={isFullscreen}
-      onKeyDown={onKeyDown}
-    >
-      <MetricsExperienceGridContent
-        metricItems={filteredMetricItems}
-        activeDimensions={activeDimensions}
-        services={services}
-        discoverFetch$={discoverFetch$}
-        fetchParams={fetchParams}
-        onBrushEnd={onBrushEnd}
-        onFilter={onFilter}
-        actions={actions}
-        histogramCss={histogramCss}
-        isDiscoverLoading={isDiscoverLoading}
-        isTabSelected={isTabSelected}
-      />
-    </ChartsGrid>
+    <>
+      <ChartsGrid
+        id="metricsExperienceGrid"
+        toolbarCss={chartToolbarCss}
+        toolbar={{
+          toggleActions,
+          leftSide: leftSideActions,
+          rightSide: rightSideActions,
+          additionalControls: {
+            prependRight: (
+              <>
+                <SearchButton
+                  isFullscreen={isFullscreen}
+                  value={searchTerm}
+                  onSearchTermChange={onSearchTermChange}
+                  onKeyDown={onKeyDown}
+                  data-test-subj="metricsExperienceGridToolbarSearch"
+                />
+                <EuiToolTip content={editAggregationsLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="pencil"
+                    aria-label={editAggregationsLabel}
+                    onClick={openAggregationSettingsFlyout}
+                    data-test-subj="metricsExperienceEditAggregationsButton"
+                    size="s"
+                    color="text"
+                  />
+                </EuiToolTip>
+              </>
+            ),
+          },
+        }}
+        toolbarWrapAt={isFullscreen ? 'l' : 'xl'}
+        isComponentVisible={isComponentVisible}
+        isFullscreen={isFullscreen}
+        onKeyDown={onKeyDown}
+      >
+        <MetricsExperienceGridContent
+          metricItems={filteredMetricItems}
+          activeDimensions={activeDimensions}
+          services={services}
+          discoverFetch$={discoverFetch$}
+          fetchParams={fetchParams}
+          onBrushEnd={onBrushEnd}
+          onFilter={onFilter}
+          actions={actions}
+          histogramCss={histogramCss}
+          isDiscoverLoading={isDiscoverLoading}
+          isTabSelected={isTabSelected}
+        />
+      </ChartsGrid>
+      {isAggregationSettingsFlyoutOpen && (
+        <AggregationSettingsFlyout
+          aggregationSettings={aggregationSettings}
+          onAggregationSettingsChange={onAggregationSettingsChange}
+          onClose={closeAggregationSettingsFlyout}
+        />
+      )}
+    </>
   );
 };
 
