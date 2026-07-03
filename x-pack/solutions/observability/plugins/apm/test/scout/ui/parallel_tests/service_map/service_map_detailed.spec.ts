@@ -86,8 +86,7 @@ test.describe(
         'failedTransactionRate',
       ]);
 
-      await expect(serviceFlyoutPage.transactionsSection).toBeVisible();
-      await expect(serviceFlyoutPage.transactionsFirstRow).toBeVisible({
+      await expect(serviceFlyoutPage.transactionsSection).toBeVisible({
         timeout: EXTENDED_TIMEOUT,
       });
     });

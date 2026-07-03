@@ -132,7 +132,11 @@ export function TransactionsTable({
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={dataTestSubj}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      data-test-subj={isLoading ? `${dataTestSubj}-loading` : `${dataTestSubj}-loaded`}
+    >
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>

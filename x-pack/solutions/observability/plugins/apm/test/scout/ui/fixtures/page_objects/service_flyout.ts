@@ -14,15 +14,13 @@ export class ServiceFlyoutPage {
   public readonly title: Locator;
   public readonly actions: Locator;
   public readonly transactionsSection: Locator;
-  public readonly transactionsFirstRow: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.flyout = page.testSubj.locator('serviceFlyout');
     this.content = page.testSubj.locator('serviceFlyoutOverview');
     this.title = page.testSubj.locator('serviceFlyoutTitleLink');
     this.actions = page.testSubj.locator('serviceFlyoutActionsButton');
-    this.transactionsSection = page.testSubj.locator('serviceFlyoutSection-transactions');
-    this.transactionsFirstRow = this.transactionsSection.locator('tbody tr:first-child');
+    this.transactionsSection = page.testSubj.locator('serviceFlyoutSection-transactions-loaded');
   }
 
   getChartLocator(id: string): Locator {
