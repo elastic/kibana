@@ -25,31 +25,23 @@ export async function applyIlmPolicyChange(
     return;
   }
 
+  // No-op check: avoid an API round trip if the stale local copy already matches.
   const existingSettings =
     'installationInfo' in packageInfo
       ? packageInfo.installationInfo?.namespace_customization_settings ?? {}
       : {};
-
   const existingIlmPolicy = existingSettings[trimmed]?.ilm_policy;
   if (existingIlmPolicy === ilmPolicy) {
     return;
   }
 
-  // Build next settings: update (or remove) only the current namespace's ilm_policy
-  const nextSettings: typeof existingSettings = { ...existingSettings };
-  if (ilmPolicy) {
-    nextSettings[trimmed] = { ...existingSettings[trimmed], ilm_policy: ilmPolicy };
-  } else {
-    const { ilm_policy: _removed, ...rest } = existingSettings[trimmed] ?? {};
-    if (Object.keys(rest).length > 0) {
-      nextSettings[trimmed] = rest;
-    } else {
-      delete nextSettings[trimmed];
-    }
-  }
+  // Send only the changed namespace. The server merges per-namespace so other namespaces'
+  // settings are preserved even if the local packageInfo is stale (concurrent-update safety).
+  // An empty object signals "clear all managed settings for this namespace".
+  const nsSettings: { ilm_policy?: string } = ilmPolicy ? { ilm_policy: ilmPolicy } : {};
 
   const { error } = await sendUpdatePackage(pkgName, pkgVersion, {
-    namespace_customization_settings: nextSettings,
+    namespace_customization_settings: { [trimmed]: nsSettings },
   });
 
   if (error) {

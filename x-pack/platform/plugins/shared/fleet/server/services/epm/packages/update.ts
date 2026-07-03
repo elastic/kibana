@@ -107,25 +107,33 @@ export async function updatePackage(
     // Namespaces already scheduled for ILM clearing (e.g. from the opt-out path above).
     const alreadyScheduled = new Set(ilmPolicyChanges.map((c) => c.namespace));
 
-    // The stored settings are fully replaced, so diff against the union of old and new
-    // namespaces: a namespace omitted from the payload (or whose ilm_policy is removed)
-    // must also emit a clear change so its Fleet-managed component templates are torn down
-    // and the SO / cluster state don't diverge.
-    const allNamespaces = new Set([
-      ...Object.keys(oldSettings),
-      ...Object.keys(newNamespaceCustomizationSettings),
-    ]);
-    for (const namespace of allNamespaces) {
+    // Per-namespace merge: the client sends only the namespace(s) that changed. Namespaces
+    // absent from the payload are preserved unchanged, preventing a stale client snapshot
+    // from silently overwriting concurrent changes made by another user or tab.
+    // An empty settings object ({}) for a namespace clears all managed settings for it.
+    const baseSettings =
+      updateAttrs.namespace_customization_settings ??
+      installedPackage.attributes.namespace_customization_settings ??
+      {};
+    const mergedSettings: NonNullable<Installation['namespace_customization_settings']> = {
+      ...baseSettings,
+    };
+    for (const [namespace, nsSettings] of Object.entries(newNamespaceCustomizationSettings)) {
       if (alreadyScheduled.has(namespace)) {
         continue;
       }
       const oldIlmPolicy = oldSettings[namespace]?.ilm_policy;
-      const newIlmPolicy = newNamespaceCustomizationSettings[namespace]?.ilm_policy;
+      const newIlmPolicy = nsSettings?.ilm_policy;
       if (oldIlmPolicy !== newIlmPolicy) {
         ilmPolicyChanges.push({ namespace, ilmPolicy: newIlmPolicy });
       }
+      if (nsSettings && Object.keys(nsSettings).length > 0) {
+        mergedSettings[namespace] = nsSettings;
+      } else {
+        delete mergedSettings[namespace];
+      }
     }
-    updateAttrs.namespace_customization_settings = newNamespaceCustomizationSettings;
+    updateAttrs.namespace_customization_settings = mergedSettings;
   }
 
   if (updateAttrs.namespace_customization_settings !== undefined) {

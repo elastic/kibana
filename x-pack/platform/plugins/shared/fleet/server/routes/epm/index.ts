@@ -1874,7 +1874,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       path: EPM_API_ROUTES.ILM_POLICIES_PATTERN,
       security: READ_PACKAGE_INFO_SECURITY,
       summary: `Get available ILM policies`,
-      description: `Returns the list of user-created ILM policies and whether the current user has the manage_ilm cluster privilege.`,
+      description: `Returns the list of user-created ILM policies and whether the current user has the \`manage_ilm\` cluster privilege.`,
       options: {
         tags: ['internal', 'oas-tag:Elastic Package Manager (EPM)'],
         availability: {

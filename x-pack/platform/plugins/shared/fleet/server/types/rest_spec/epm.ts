@@ -791,7 +791,17 @@ export const UpdatePackageRequestSchema = {
       ),
       namespace_customization_settings: schema.maybe(
         schema.recordOf(
-          schema.string({ maxLength: 100 }),
+          schema.string({
+            maxLength: 100,
+            validate: (v) => {
+              if (!v.length) {
+                return 'Must not be empty';
+              }
+              if (!/^[a-z0-9_]+$/.test(v)) {
+                return 'Must only contain lowercase letters, numbers, and underscores';
+              }
+            },
+          }),
           // `unknowns: 'allow'` keeps this forward-compatible: future namespace-scoped settings
           // can be accepted without breaking older clients/nodes.
           schema.object(
@@ -803,7 +813,7 @@ export const UpdatePackageRequestSchema = {
           {
             meta: {
               description:
-                'Per-namespace managed settings (e.g. ILM policy) for this package. Keyed by namespace name.',
+                'Per-namespace managed settings (for example, ILM policy) for this package. Keyed by namespace name.',
             },
           }
         )

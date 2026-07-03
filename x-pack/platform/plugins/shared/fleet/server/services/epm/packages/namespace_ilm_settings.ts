@@ -230,6 +230,7 @@ async function syncSetIlmPolicy({
 }) {
   const logger = appContextService.getLogger();
   const updatedIndexTemplates: IndexTemplateEntry[] = [];
+  const createdComponentTemplates: string[] = [];
 
   await pMap(
     dataStreams,
@@ -259,6 +260,9 @@ async function syncSetIlmPolicy({
         { logger }
       );
       logger.debug(`[syncIlmPolicy] Created/updated ILM component template ${nsTemplateName}`);
+      // Track here (before the index-template check) so templates created when the namespace
+      // index template is absent are still recorded in installed_es (r3518659890).
+      createdComponentTemplates.push(nsTemplateName);
 
       // Patch the namespace index template's composed_of to reference the component template
       const nsIndexTemplate = await fetchNamespaceTemplate(
@@ -309,29 +313,22 @@ async function syncSetIlmPolicy({
     { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
   );
 
-  if (updatedIndexTemplates.length === 0) {
+  if (createdComponentTemplates.length === 0) {
     return;
   }
 
   if (abortController) throwIfAborted(abortController);
 
-  // Rollover existing data streams so new backing indices pick up the ILM policy
-  try {
-    await updateCurrentWriteIndices(esClient, logger, updatedIndexTemplates);
-  } catch (err: unknown) {
-    if ((err as { meta?: { statusCode?: number } })?.meta?.statusCode !== 404) {
-      throw err;
-    }
-    logger.debug(`[syncIlmPolicy] No existing data streams to roll over for ${packageName}`);
-  }
-
-  // Track the new component templates in installed_es
+  // Track the new component templates in installed_es BEFORE rollover so a rollover
+  // failure doesn't prevent tracking (r3518806806). Uses createdComponentTemplates rather
+  // than updatedIndexTemplates so templates created when the namespace index template was
+  // absent are also recorded (r3518659890).
   const freshInstallation = await getInstallation({
     savedObjectsClient: soClient,
     pkgName: packageName,
   });
-  const assetsToAdd = updatedIndexTemplates.map(({ templateName }) => ({
-    id: templateName,
+  const assetsToAdd = createdComponentTemplates.map((id) => ({
+    id,
     type: ElasticsearchAssetType.componentTemplate,
   }));
   await updateEsAssetReferences(soClient, packageName, freshInstallation?.installed_es ?? [], {
@@ -339,6 +336,18 @@ async function syncSetIlmPolicy({
   });
 
   summary.updatedTemplates = updatedIndexTemplates.map(({ templateName }) => templateName);
+
+  // Rollover existing data streams so new backing indices pick up the ILM policy
+  if (updatedIndexTemplates.length > 0) {
+    try {
+      await updateCurrentWriteIndices(esClient, logger, updatedIndexTemplates);
+    } catch (err: unknown) {
+      if ((err as { meta?: { statusCode?: number } })?.meta?.statusCode !== 404) {
+        throw err;
+      }
+      logger.debug(`[syncIlmPolicy] No existing data streams to roll over for ${packageName}`);
+    }
+  }
 }
 
 async function syncClearIlmPolicy({
@@ -439,6 +448,18 @@ async function syncClearIlmPolicy({
   // Delete the ILM component templates
   await deleteComponentTemplates(esClient, deletedTemplateNames);
 
+  // Remove the component templates from installed_es tracking BEFORE rollover so a rollover
+  // failure doesn't leave deleted templates still tracked in installed_es (r3518806806).
+  const assetsToRemove = deletedTemplateNames.map((id) => ({
+    id,
+    type: ElasticsearchAssetType.componentTemplate,
+  }));
+  await updateEsAssetReferences(soClient, packageName, currentInstallation?.installed_es ?? [], {
+    assetsToRemove,
+  });
+
+  summary.removedTemplates = deletedTemplateNames;
+
   if (abortController) throwIfAborted(abortController);
 
   // Rollover so the ILM policy no longer applies to new backing indices
@@ -452,17 +473,6 @@ async function syncClearIlmPolicy({
       logger.debug(`[syncIlmPolicy] No existing data streams to roll over for ${packageName}`);
     }
   }
-
-  // Remove the component templates from installed_es tracking
-  const assetsToRemove = deletedTemplateNames.map((id) => ({
-    id,
-    type: ElasticsearchAssetType.componentTemplate,
-  }));
-  await updateEsAssetReferences(soClient, packageName, currentInstallation?.installed_es ?? [], {
-    assetsToRemove,
-  });
-
-  summary.removedTemplates = deletedTemplateNames;
 }
 
 /**

@@ -24,13 +24,12 @@ import {
 } from './namespace_ilm_settings';
 
 jest.mock('./get');
-jest.mock('../elasticsearch/template/template', () => {
-  const actual = jest.requireActual('../elasticsearch/template/template');
-  return {
-    ...actual,
-    updateCurrentWriteIndices: jest.fn(),
-  };
-});
+jest.mock('../elasticsearch/template/template', () => ({
+  generateNamespaceTemplateName: jest.fn(
+    (templateName: string, namespace: string) => `${templateName}@namespace.${namespace}`
+  ),
+  updateCurrentWriteIndices: jest.fn(),
+}));
 jest.mock('../elasticsearch/template/remove');
 jest.mock('./es_assets_reference');
 jest.mock('../../app_context');
@@ -333,6 +332,43 @@ describe('syncIlmPolicy — set', () => {
     });
 
     expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+    // Component template was still created and must be tracked in installed_es (r3518659890)
+    expect(mockedUpdateEsAssetReferences).toHaveBeenCalledWith(
+      soClient,
+      'nginx',
+      [],
+      expect.objectContaining({
+        assetsToAdd: [
+          {
+            id: 'logs-nginx.access@namespace.production',
+            type: ElasticsearchAssetType.componentTemplate,
+          },
+        ],
+      })
+    );
+  });
+
+  it('tracks the component template in installed_es before attempting rollover (r3518806806)', async () => {
+    mockInstalledPackage();
+    mockedGetInstallation.mockResolvedValue({ installed_es: [] } as any);
+    const esClient = makeEsClientWithNamespaceTemplate();
+
+    await syncIlmPolicy({
+      soClient,
+      esClient,
+      packageName: 'nginx',
+      namespace: 'production',
+      ilmPolicy: 'my-policy',
+    });
+
+    // Verify that tracking (updateEsAssetReferences) was invoked and that its invocation
+    // order comes before rollover (updateCurrentWriteIndices). Jest records a monotonically
+    // increasing invocationCallOrder across all mocks in the test run.
+    expect(mockedUpdateEsAssetReferences).toHaveBeenCalled();
+    expect(mockedUpdateCurrentWriteIndices).toHaveBeenCalled();
+    const trackOrder = mockedUpdateEsAssetReferences.mock.invocationCallOrder[0];
+    const rolloverOrder = mockedUpdateCurrentWriteIndices.mock.invocationCallOrder[0];
+    expect(trackOrder).toBeLessThan(rolloverOrder);
   });
 });
 
