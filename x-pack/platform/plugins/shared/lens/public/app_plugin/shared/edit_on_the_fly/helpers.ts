@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { esql } from '@elastic/esql';
 import {
   getIndexPatternFromESQLQuery,
   getESQLAdHocDataview,
@@ -30,7 +31,7 @@ import type {
   DatasourceMap,
   VisualizationMap,
 } from '@kbn/lens-common';
-import { appendTimeBucketToEsqlQuery } from '@kbn/lens-common';
+import { appendTimeBucketToEsqlQuery, queryHasStatsCommand } from '@kbn/lens-common';
 
 import { suggestionsApi } from '../../../lens_suggestions_api';
 import { readUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
@@ -271,10 +272,6 @@ const preserveTrendlineLayer = (
   const newDsState = getTextBasedDsState(attrs);
   if (!newDsState) return;
 
-  const trendlineQuery = prevTrendlineLayer.timeField
-    ? { esql: appendTimeBucketToEsqlQuery(query.esql, prevTrendlineLayer.timeField) }
-    : prevTrendlineLayer.query;
-
   // Sync trendline metric columns from the new main layer.
   // The visualization state links main accessors to trendline accessors
   // (e.g. metricAccessor → trendlineMetricAccessor). We update the
@@ -288,13 +285,34 @@ const preserveTrendlineLayer = (
     { from: newVis.breakdownByAccessor, to: prevVis.trendlineBreakdownByAccessor },
   ];
 
+  const sourceQueryHasStats = queryHasStatsCommand(query.esql);
+  const metricFields =
+    !sourceQueryHasStats && newMainLayer
+      ? accessorPairs
+          .map(({ from }) => newMainLayer.columns.find((c) => c.columnId === from))
+          .filter((c): c is TextBasedLayerColumn => Boolean(c))
+          .map((c) => c.fieldName)
+      : undefined;
+
+  const trendlineQuery = prevTrendlineLayer.timeField
+    ? {
+        esql: appendTimeBucketToEsqlQuery(query.esql, prevTrendlineLayer.timeField, metricFields),
+      }
+    : prevTrendlineLayer.query;
+
   let updatedColumns = prevTrendlineLayer.columns;
   if (newMainLayer) {
     for (const { from, to } of accessorPairs) {
       if (!from || !to) continue;
       const sourceCol = newMainLayer.columns.find((c) => c.columnId === from);
       if (!sourceCol) continue;
-      const newCol: TextBasedLayerColumn = { ...sourceCol, columnId: to };
+      const newCol: TextBasedLayerColumn = {
+        ...sourceCol,
+        columnId: to,
+        ...(!sourceQueryHasStats && {
+          fieldName: `AVG(${esql.col(sourceCol.fieldName)})`,
+        }),
+      };
       const exists = updatedColumns.some((c) => c.columnId === to);
       updatedColumns = exists
         ? updatedColumns.map((c) => (c.columnId === to ? newCol : c))
