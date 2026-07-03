@@ -80,7 +80,7 @@ export const AiPanelComponent = ({
           title={
             <h3>
               {i18n.translate('xpack.aiPanel.aiUnavailable.title', {
-                defaultMessage: 'AI not available',
+                defaultMessage: 'Set up an AI connector to use this panel',
               })}
             </h3>
           }
@@ -88,7 +88,7 @@ export const AiPanelComponent = ({
             <p>
               {i18n.translate('xpack.aiPanel.aiUnavailable.body', {
                 defaultMessage:
-                  'This panel requires an AI connector to generate content. Contact your administrator to configure one.',
+                  'This panel generates content using AI. Ask your administrator to configure an AI connector in Stack Management.',
               })}
             </p>
           }

@@ -8,7 +8,6 @@
 import {
   EuiAccordion,
   EuiBadge,
-  EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -25,17 +24,13 @@ import {
   EuiTextArea,
   EuiTitle,
   useEuiTheme,
-  type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
-import { HANDLEBARS_LANG_ID } from '@kbn/code-editor';
-import { ESQLLangEditor } from '@kbn/esql/public';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
-import { getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
-import { getServices } from '../services';
-import { fetchEsqlData } from '../utils/fetch_esql_data';
+import React from 'react';
+import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
+import { EsqlPreviewSection } from './esql_preview_section';
 
 const EXAMPLE_PROMPTS = [
   i18n.translate('xpack.aiPanel.editFlyout.example1', {
@@ -45,19 +40,11 @@ const EXAMPLE_PROMPTS = [
     defaultMessage: 'Status board with color-coded thresholds (green / yellow / red)',
   }),
   i18n.translate('xpack.aiPanel.editFlyout.example3', {
-    defaultMessage: 'Top 5 items ranked by value with horizontal percentage bars',
-  }),
-  i18n.translate('xpack.aiPanel.editFlyout.example4', {
     defaultMessage: 'Timeline of events grouped by category with counts',
   }),
 ];
 
-interface PreviewData {
-  columns: Array<{ name: string; type: string }>;
-  rows: unknown[][];
-}
-
-interface EditAiPanelFlyoutProps {
+export interface EditAiPanelFlyoutProps {
   prompt: string;
   esqlQuery: string | undefined;
   template: string | undefined;
@@ -75,75 +62,20 @@ export const EditAiPanelFlyout = ({
   onClose,
 }: EditAiPanelFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
-  const [draftPrompt, setDraftPrompt] = useState(prompt);
-  const [draftEsqlQuery, setDraftEsqlQuery] = useState(esqlQuery ?? '');
-  const [draftTemplate, setDraftTemplate] = useState(template ?? '');
-  const [detectedTimeField, setDetectedTimeField] = useState<string | undefined>(undefined);
-  const [isAiAvailable, setIsAiAvailable] = useState<boolean | undefined>(undefined);
-
-  useEffect(() => {
-    getServices()
-      .core.http.get<{ connectors: unknown[] }>('/internal/inference/connectors')
-      .then((res) => setIsAiAvailable(res.connectors.length > 0))
-      .catch(() => setIsAiAvailable(false));
-  }, []);
-
-  useEffect(() => {
-    if (!draftEsqlQuery.trim()) {
-      setDetectedTimeField(undefined);
-      return;
-    }
-    getESQLTimeFieldFromQuery({ query: draftEsqlQuery, http: getServices().core.http }).then(
-      setDetectedTimeField
-    );
-  }, [draftEsqlQuery]);
-
-  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
-  const [previewData, setPreviewData] = useState<PreviewData | null>(null);
-  const [previewError, setPreviewError] = useState<string | null>(null);
-
-  const handlePreview = async () => {
-    if (!draftEsqlQuery.trim()) return;
-    setIsPreviewLoading(true);
-    setPreviewData(null);
-    setPreviewError(null);
-    try {
-      const controller = new AbortController();
-      const result = await fetchEsqlData(
-        getServices().search,
-        getServices().core.http,
-        draftEsqlQuery,
-        timeRange,
-        controller.signal
-      );
-      setPreviewData({ columns: result.columns, rows: (result.values ?? []).slice(0, 10) });
-    } catch (err) {
-      setPreviewError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setIsPreviewLoading(false);
-    }
-  };
-
-  const tableColumns: Array<EuiBasicTableColumn<Record<string, unknown>>> =
-    previewData?.columns.map((col) => ({
-      field: col.name,
-      name: col.name,
-      truncateText: true,
-      width: '140px',
-      render: (val: unknown) => {
-        const str = String(val ?? '');
-        return str.length > 30 ? `${str.slice(0, 30)}…` : str;
-      },
-    })) ?? [];
-
-  const tableItems: Array<Record<string, unknown>> =
-    previewData?.rows.map((row, i) => {
-      const item: Record<string, unknown> = { _id: String(i) };
-      previewData.columns.forEach((col, j) => {
-        item[col.name] = row[j];
-      });
-      return item;
-    }) ?? [];
+  const {
+    draftPrompt,
+    setDraftPrompt,
+    draftEsqlQuery,
+    setDraftEsqlQuery,
+    draftTemplate,
+    setDraftTemplate,
+    detectedTimeField,
+    isAiAvailable,
+    isPreviewLoading,
+    previewData,
+    previewError,
+    handlePreview,
+  } = useEditFlyoutState({ prompt, esqlQuery, template, timeRange });
 
   return (
     <EuiFlyout onClose={onClose} size="m" type="push" aria-labelledby="editAiPanelFlyoutTitle">
@@ -225,111 +157,16 @@ export const EditAiPanelFlyout = ({
         {esqlQuery && (
           <>
             <EuiSpacer size="l" />
-
-            <EuiAccordion
-              id="editAiPanelEsqlSection"
-              buttonContent={
-                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="database" aria-hidden={true} />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      <strong>
-                        {i18n.translate('xpack.aiPanel.editFlyout.dataSourceLabel', {
-                          defaultMessage: 'Data source (ES|QL)',
-                        })}
-                      </strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
+            <EsqlPreviewSection
+              draftEsqlQuery={draftEsqlQuery}
+              onQueryChange={setDraftEsqlQuery}
+              detectedTimeField={detectedTimeField}
+              isPreviewLoading={isPreviewLoading}
+              previewData={previewData}
+              previewError={previewError}
+              onPreview={handlePreview}
               initialIsOpen={Boolean(esqlQuery)}
-              paddingSize="s"
-            >
-              <ESQLLangEditor
-                query={{ esql: draftEsqlQuery }}
-                onTextLangQueryChange={(q) => {
-                  setDraftEsqlQuery(q.esql ?? '');
-                  setPreviewData(null);
-                  setPreviewError(null);
-                }}
-                onTextLangQuerySubmit={async () => {}}
-                editorIsInline
-                hasOutline
-                hideRunQueryButton
-                hideQueryHistory
-                disableAutoFocus
-                initialState={{ editorHeight: 120 }}
-                errors={[]}
-              />
-
-              <EuiSpacer size="s" />
-
-              {draftEsqlQuery.trim() && !detectedTimeField && (
-                <EuiCallOut
-                  size="s"
-                  color="primary"
-                  title={i18n.translate('xpack.aiPanel.editFlyout.timeRangeHint', {
-                    defaultMessage:
-                      'To connect to the dashboard time picker, add a WHERE clause with named time parameters. Example: WHERE dateField >= ?_tstart AND dateField < ?_tend',
-                  })}
-                  announceOnMount
-                />
-              )}
-
-              <EuiSpacer size="s" />
-
-              <EuiButton
-                size="s"
-                fill
-                color="primary"
-                iconType="play"
-                onClick={handlePreview}
-                isLoading={isPreviewLoading}
-                disabled={!draftEsqlQuery.trim()}
-              >
-                {i18n.translate('xpack.aiPanel.editFlyout.previewData', {
-                  defaultMessage: 'Preview data',
-                })}
-              </EuiButton>
-
-              {previewError && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiCallOut color="danger" size="s" title={previewError} announceOnMount />
-                </>
-              )}
-
-              {previewData && previewData.rows.length === 0 && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiCallOut
-                    size="s"
-                    color="warning"
-                    title={i18n.translate('xpack.aiPanel.editFlyout.noRows', {
-                      defaultMessage: 'Query returned no rows for the current time range.',
-                    })}
-                    announceOnMount
-                  />
-                </>
-              )}
-
-              {previewData && previewData.rows.length > 0 && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiBasicTable<Record<string, unknown>>
-                    tableCaption={i18n.translate('xpack.aiPanel.editFlyout.previewCaption', {
-                      defaultMessage: 'ES|QL query preview',
-                    })}
-                    items={tableItems}
-                    rowHeader="_id"
-                    columns={tableColumns}
-                    compressed
-                  />
-                </>
-              )}
-            </EuiAccordion>
+            />
           </>
         )}
 
@@ -380,7 +217,7 @@ export const EditAiPanelFlyout = ({
               })}
             >
               <CodeEditor
-                languageId={HANDLEBARS_LANG_ID}
+                languageId="liquid"
                 value={draftTemplate}
                 onChange={setDraftTemplate}
                 options={{

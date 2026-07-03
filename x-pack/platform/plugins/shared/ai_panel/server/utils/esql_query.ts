@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import dateMath from '@kbn/datemath';
+import { getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 
 // Sanitizes a cell value before it is included in an LLM prompt.
 // Strips HTML angle brackets, newlines, and Liquid template delimiters ({{ and {%)
@@ -40,7 +41,7 @@ export async function runEsqlQuery(
   esqlQuery: string,
   timeRange?: { from: string; to: string } | null
 ): Promise<EsqlQueryResult> {
-  const hasTimeParams = esqlQuery.includes('?_tstart') || esqlQuery.includes('?_tend');
+  const hasTimeParams = getTimeFieldFromESQLQuery(esqlQuery) !== undefined;
 
   const esqlParams =
     hasTimeParams && timeRange

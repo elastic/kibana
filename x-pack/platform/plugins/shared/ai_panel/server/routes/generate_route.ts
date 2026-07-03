@@ -7,16 +7,14 @@
 
 import { PassThrough } from 'stream';
 import { schema } from '@kbn/config-schema';
-import type { IRouter, CoreSetup, IUiSettingsClient, KibanaRequest } from '@kbn/core/server';
+import type { IRouter, CoreSetup } from '@kbn/core/server';
 import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import { runEsqlQuery, sanitizeCellValue } from '../utils/esql_query';
 import type { EsqlColumn } from '../utils/esql_query';
 import { columnNamesToKeys } from '../../common/utils';
 
 const SOCKET_TIMEOUT_MS = 5 * 60 * 1000;
-const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 const MAX_HTML_BYTES = 500_000;
 
 const CSP_META = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">`;
@@ -119,32 +117,6 @@ interface StartDeps {
   inference: InferenceServerStart;
 }
 
-async function resolveConnectorId({
-  uiSettingsClient,
-  inference,
-  request,
-}: {
-  uiSettingsClient: IUiSettingsClient;
-  inference: InferenceServerStart;
-  request: KibanaRequest;
-}): Promise<string | undefined> {
-  try {
-    const defaultSetting = await uiSettingsClient.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
-    if (defaultSetting && defaultSetting !== NO_DEFAULT_CONNECTOR) {
-      return defaultSetting;
-    }
-  } catch {
-    // UI setting may not be registered
-  }
-  try {
-    const connector = await inference.getDefaultConnector(request);
-    return connector?.connectorId;
-  } catch {
-    // no connectors available
-  }
-  return undefined;
-}
-
 export function registerGenerateRoute(
   router: IRouter,
   getStartServices: CoreSetup<StartDeps>['getStartServices']
@@ -175,14 +147,11 @@ export function registerGenerateRoute(
       const { prompt, esqlQuery, timeRange, colorMode } = request.body;
       const core = await context.core;
 
-      const connectorId = await resolveConnectorId({
-        uiSettingsClient: core.uiSettings.client,
-        inference,
-        request,
-      });
-      if (!connectorId) {
+      const connector = await inference.getDefaultConnector(request).catch(() => undefined);
+      if (!connector) {
         return response.badRequest({ body: 'No inference connector configured' });
       }
+      const { connectorId } = connector;
 
       const passThrough = new PassThrough();
       const abortController = new AbortController();

@@ -55,8 +55,8 @@ export function useAiPanelHtml({
   const htmlRef = useRef('');
   htmlRef.current = html;
 
-  const savedTemplateRef = useRef(savedTemplate);
-  savedTemplateRef.current = savedTemplate;
+  const selfWriteCountRef = useRef(0);
+  const acknowledgedWriteCountRef = useRef(0);
 
   const onTemplateChangeRef = useRef(onTemplateChange);
   useEffect(() => {
@@ -64,6 +64,11 @@ export function useAiPanelHtml({
   }, [onTemplateChange]);
 
   useEffect(() => {
+    if (selfWriteCountRef.current > acknowledgedWriteCountRef.current) {
+      acknowledgedWriteCountRef.current = selfWriteCountRef.current;
+      return;
+    }
+
     if (!prompt) {
       setIsLoading(false);
       return;
@@ -74,7 +79,7 @@ export function useAiPanelHtml({
     abortRef.current = controller;
     accRef.current = '';
 
-    const template = savedTemplateRef.current;
+    const template = savedTemplate;
 
     // Fast path — static panel with stored HTML.
     if (template && !esqlQuery) {
@@ -141,9 +146,11 @@ export function useAiPanelHtml({
           return;
         }
         rendered = fillTemplate(cleaned, esqlData.columns, esqlData.values ?? []);
+        selfWriteCountRef.current++;
         onTemplateChangeRef.current(cleaned);
       } else if (!esqlQuery) {
         rendered = prepareHtml(accRef.current);
+        selfWriteCountRef.current++;
         onTemplateChangeRef.current(rendered);
       } else {
         return;
@@ -200,7 +207,7 @@ export function useAiPanelHtml({
       stopInterval();
       controller.abort();
     };
-  }, [embeddableId, prompt, esqlQuery, timeRange, generationVersion, colorMode]);
+  }, [embeddableId, prompt, esqlQuery, timeRange, generationVersion, savedTemplate, colorMode]);
 
   return { html, isLoading, error, isAiUnavailable };
 }
