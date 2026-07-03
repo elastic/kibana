@@ -72,6 +72,9 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
 
     expect(result.current.entries).toEqual([]);
     expect(runEsqlAsyncSearchMock).not.toHaveBeenCalled();
+    // A disabled React Query v4 query reports isLoading: true forever, which would wrongly
+    // gate the timeline behind a perpetual spinner. isInitialLoading is false here instead.
+    expect(result.current.isLoading).toBe(false);
   });
 
   it('loads the first page and maps rows', async () => {

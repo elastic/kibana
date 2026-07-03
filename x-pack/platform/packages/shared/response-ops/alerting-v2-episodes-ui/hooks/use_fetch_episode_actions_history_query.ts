@@ -75,7 +75,9 @@ export const useFetchEpisodeActionsHistoryQuery = ({
 
   return {
     entries,
-    isLoading: query.isLoading,
+    // isLoading stays true forever for a disabled query in React Query v4 (e.g. no groupHash
+    // yet); isInitialLoading is false in that case, only true while actually fetching.
+    isLoading: query.isInitialLoading,
     isError: query.isError,
     fetchNextPage: query.fetchNextPage,
     hasNextPage: query.hasNextPage ?? false,
