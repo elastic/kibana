@@ -67,6 +67,36 @@ const putSignificantEventsSettingsBodySchema = z.object({
   scheduledDiscovery: scheduledDiscoverySettingsSchema.optional(),
 });
 
+// Maps each numeric `scheduledDiscovery` config field to its per-space UI setting
+// id and the default applied when neither the request nor the stored settings
+// provide a value. Drives both persistence and workflow config resolution below
+// so the field/setting-id/default triple lives in exactly one place.
+const SCHEDULED_DISCOVERY_NUMERIC_SETTINGS = {
+  detectionIntervalMinutes: {
+    settingId:
+      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
+    defaultValue: DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
+  },
+  reviewIntervalMinutes: {
+    settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
+    defaultValue: DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
+  },
+  discoveryBatchSize: {
+    settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
+    defaultValue: DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
+  },
+  triageBatchSize: {
+    settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
+    defaultValue: DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
+  },
+  maxReviewPasses: {
+    settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
+    defaultValue: DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
+  },
+} as const;
+
+type ScheduledDiscoveryNumericField = keyof typeof SCHEDULED_DISCOVERY_NUMERIC_SETTINGS;
+
 export const putSignificantEventsSettingsRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/_significant_events/settings',
   options: {
@@ -128,28 +158,13 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
       spaceUpdates[OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED] =
         scheduledDiscovery.enabled;
     }
-    if (scheduledDiscovery?.detectionIntervalMinutes !== undefined) {
-      spaceUpdates[
-        OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES
-      ] = scheduledDiscovery.detectionIntervalMinutes;
-    }
-    if (scheduledDiscovery?.reviewIntervalMinutes !== undefined) {
-      spaceUpdates[
-        OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES
-      ] = scheduledDiscovery.reviewIntervalMinutes;
-    }
-    if (scheduledDiscovery?.discoveryBatchSize !== undefined) {
-      spaceUpdates[
-        OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE
-      ] = scheduledDiscovery.discoveryBatchSize;
-    }
-    if (scheduledDiscovery?.triageBatchSize !== undefined) {
-      spaceUpdates[OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE] =
-        scheduledDiscovery.triageBatchSize;
-    }
-    if (scheduledDiscovery?.maxReviewPasses !== undefined) {
-      spaceUpdates[OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES] =
-        scheduledDiscovery.maxReviewPasses;
+    for (const field of Object.keys(
+      SCHEDULED_DISCOVERY_NUMERIC_SETTINGS
+    ) as ScheduledDiscoveryNumericField[]) {
+      const value = scheduledDiscovery?.[field];
+      if (value !== undefined) {
+        spaceUpdates[SCHEDULED_DISCOVERY_NUMERIC_SETTINGS[field].settingId] = value;
+      }
     }
 
     const previousGlobalValues: Record<string, boolean | number | string> = {};
@@ -174,6 +189,17 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
       }
       await uiSettingsClient.setMany(spaceUpdates);
     }
+
+    // Resolve a scheduled discovery config value, preferring the incoming request,
+    // then the stored per-space setting, then the built-in default.
+    const resolveScheduledConfigValue = (field: ScheduledDiscoveryNumericField): number => {
+      const { settingId, defaultValue } = SCHEDULED_DISCOVERY_NUMERIC_SETTINGS[field];
+      return (
+        (spaceUpdates[settingId] as number | undefined) ??
+        (spaceSettings[settingId] as number | undefined) ??
+        defaultValue
+      );
+    };
 
     // Only reconcile the workflow on an actual enabled-state transition so the
     // legacy and managed workflows never run at the same time. Interval/excluded
@@ -244,46 +270,11 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
           request,
           spaceId,
           config: {
-            detectionIntervalMinutes:
-              (spaceUpdates[
-                OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES
-              ] as number | undefined) ??
-              (spaceSettings[
-                OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES
-              ] as number | undefined) ??
-              DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
-            reviewIntervalMinutes:
-              (spaceUpdates[
-                OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES
-              ] as number | undefined) ??
-              (spaceSettings[
-                OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES
-              ] as number | undefined) ??
-              DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
-            discoveryBatchSize:
-              (spaceUpdates[
-                OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE
-              ] as number | undefined) ??
-              (spaceSettings[
-                OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE
-              ] as number | undefined) ??
-              DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
-            triageBatchSize:
-              (spaceUpdates[
-                OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE
-              ] as number | undefined) ??
-              (spaceSettings[
-                OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE
-              ] as number | undefined) ??
-              DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
-            maxReviewPasses:
-              (spaceUpdates[
-                OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES
-              ] as number | undefined) ??
-              (spaceSettings[
-                OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES
-              ] as number | undefined) ??
-              DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
+            detectionIntervalMinutes: resolveScheduledConfigValue('detectionIntervalMinutes'),
+            reviewIntervalMinutes: resolveScheduledConfigValue('reviewIntervalMinutes'),
+            discoveryBatchSize: resolveScheduledConfigValue('discoveryBatchSize'),
+            triageBatchSize: resolveScheduledConfigValue('triageBatchSize'),
+            maxReviewPasses: resolveScheduledConfigValue('maxReviewPasses'),
           },
         });
       }
