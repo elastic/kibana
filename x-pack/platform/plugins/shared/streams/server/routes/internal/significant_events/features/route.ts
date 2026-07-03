@@ -7,8 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
-import type { TaskResult } from '@kbn/streams-schema';
-import type { IdentifyFeaturesResult } from '@kbn/significant-events-schema';
 import {
   baseFeatureSchema,
   featureUpsertSchema,
@@ -19,20 +17,9 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
-import {
-  type FeaturesIdentificationTaskParams,
-  getFeaturesIdentificationTaskId,
-  FEATURES_IDENTIFICATION_TASK_TYPE,
-} from '../../../../lib/tasks/task_definitions/features_identification';
-import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
-import { handleTaskAction } from '../../../utils/task_helpers';
 import type { KIBulkOperation } from '../../../../lib/streams/ki';
 
 const MAX_INPUT_STRING_LENGTH = 255;
-
-export type FeaturesIdentificationTaskResult = TaskResult<IdentifyFeaturesResult>;
-
-const dateFromString = z.string().transform((input) => new Date(input));
 
 export const upsertFeatureRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/features',
@@ -56,15 +43,13 @@ export const upsertFeatureRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ acknowledged: boolean }> => {
-    const { getKnowledgeIndicatorClient, licensing, uiSettingsClient, streamsClient } =
-      await getScopedClients({
-        request,
-      });
+    const scopedClients = await getScopedClients({ request });
+    const { licensing, uiSettingsClient, streamsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
-    const kiClient = await getKnowledgeIndicatorClient();
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const { id, expires_at, ...baseBody } = params.body;
 
     if (id) {
@@ -119,15 +104,13 @@ export const deleteFeatureRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ acknowledged: boolean }> => {
-    const { getKnowledgeIndicatorClient, licensing, uiSettingsClient, streamsClient } =
-      await getScopedClients({
-        request,
-      });
+    const scopedClients = await getScopedClients({ request });
+    const { licensing, uiSettingsClient, streamsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
-    const kiClient = await getKnowledgeIndicatorClient();
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     await kiClient.bulk(params.path.name, [{ delete: { type: 'feature', id: params.path.id } }]);
 
     return { acknowledged: true };
@@ -162,15 +145,13 @@ export const listFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ features: Feature[] }> => {
-    const { getKnowledgeIndicatorClient, licensing, uiSettingsClient, streamsClient } =
-      await getScopedClients({
-        request,
-      });
+    const scopedClients = await getScopedClients({ request });
+    const { licensing, uiSettingsClient, streamsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
-    const kiClient = await getKnowledgeIndicatorClient();
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const {
       query,
       search_mode: searchMode,
@@ -211,17 +192,20 @@ export const listAllFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ features: Feature[] }> => {
-    const { getKnowledgeIndicatorClient, licensing, uiSettingsClient, streamsClient } =
-      await getScopedClients({
-        request,
-      });
+    const scopedClients = await getScopedClients({
+      request,
+    });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({
+      server,
+      licensing: scopedClients.licensing,
+      uiSettingsClient: scopedClients.uiSettingsClient,
+    });
 
-    const streams = await streamsClient.listStreams();
+    const streams = await scopedClients.streamsClient.listStreams();
     const streamNames = streams.map((stream) => stream.name);
 
-    const kiClient = await getKnowledgeIndicatorClient();
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const {
       query,
       search_mode: searchMode,
@@ -282,10 +266,10 @@ export const bulkFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ acknowledged: boolean }> => {
-    const { getKnowledgeIndicatorClient, streamsClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const scopedClients = await getScopedClients({
+      request,
+    });
+    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -296,7 +280,7 @@ export const bulkFeaturesRoute = createServerRoute({
 
     await streamsClient.ensureStream(name);
 
-    const kiClient = await getKnowledgeIndicatorClient();
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const kiOps: KIBulkOperation[] = operations.map((op) =>
       'delete' in op ? { delete: { type: 'feature' as const, id: op.delete.id } } : op
     );
@@ -339,13 +323,14 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     server,
     logger,
   }): Promise<{ succeeded: number; failed: number; skipped: number }> => {
-    const { getKnowledgeIndicatorClient, licensing, uiSettingsClient } = await getScopedClients({
+    const scopedClients = await getScopedClients({
       request,
     });
+    const { licensing, uiSettingsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const kiClient = await getKnowledgeIndicatorClient();
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
     // Resolve UUID → stream_name server-side. UUIDs not found in storage are
     // idempotent no-ops counted as `skipped` (matching the queries endpoint
@@ -404,110 +389,6 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
   },
 });
 
-/** @deprecated Use GET /internal/streams/{name}/onboarding/_status instead. Will be removed in a follow-up. */
-export const featuresStatusRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{name}/features/_status',
-  options: {
-    access: 'internal',
-    summary: 'Check the status of feature identification',
-    description:
-      'Feature identification happens as a background task, this endpoints allows the user to check the status of this task. This endpoints combine with POST /internal/streams/{name}/features/_task which manages the task lifecycle.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    path: z.object({ name: z.string() }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<FeaturesIdentificationTaskResult> => {
-    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
-      request,
-    });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const { name } = params.path;
-    await streamsClient.ensureStream(name);
-
-    return taskClient.getStatus<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
-      getFeaturesIdentificationTaskId(name)
-    );
-  },
-});
-
-/** @deprecated Use POST /internal/streams/{name}/onboarding/_execute instead. Will be removed in a follow-up. */
-export const featuresTaskRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/features/_task',
-  options: {
-    access: 'internal',
-    summary: 'Identify features in a stream',
-    description:
-      'Identify features in a stream with an LLM, this happens as a background task and this endpoint manages the task lifecycle.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    path: z.object({ name: z.string() }),
-    body: taskActionSchema({
-      from: dateFromString,
-      to: dateFromString,
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<FeaturesIdentificationTaskResult> => {
-    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
-      request,
-    });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const {
-      path: { name },
-      body,
-    } = params;
-    await streamsClient.ensureStream(name);
-
-    const taskId = getFeaturesIdentificationTaskId(name);
-
-    const actionParams =
-      body.action === 'schedule'
-        ? ({
-            action: body.action,
-            scheduleConfig: {
-              taskType: FEATURES_IDENTIFICATION_TASK_TYPE,
-              taskId,
-              params: {
-                start: body.from.getTime(),
-                end: body.to.getTime(),
-                streamName: name,
-              },
-              request,
-            },
-          } as const)
-        : ({ action: body.action } as const);
-
-    return handleTaskAction<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>({
-      taskClient,
-      taskId,
-      ...actionParams,
-    });
-  },
-});
-
 export const featureRoutes = {
   ...upsertFeatureRoute,
   ...deleteFeatureRoute,
@@ -515,6 +396,4 @@ export const featureRoutes = {
   ...listAllFeaturesRoute,
   ...bulkFeaturesRoute,
   ...bulkFeaturesAcrossStreamsRoute,
-  ...featuresStatusRoute,
-  ...featuresTaskRoute,
 };

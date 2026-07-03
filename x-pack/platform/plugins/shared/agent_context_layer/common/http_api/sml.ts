@@ -106,10 +106,16 @@ export interface SmlHttpItem {
 }
 
 /**
- * Response body for `GET /internal/agent_context_layer/sml/{id}`.
+ * Response body for `GET /internal/agent_context_layer/sml/{originId}`.
+ *
+ * Returns every chunk written under the origin (the workflow step's
+ * content mode can write multiple chunks per origin, the crawler may
+ * write one, etc.). Consumers iterate; ordering is not guaranteed.
+ * `items` is empty (not 404) is impossible — when no chunks exist or
+ * none are visible to the caller, the route returns 404 directly.
  */
 export interface SmlGetHttpResponse {
-  item: SmlHttpItem;
+  items: SmlHttpItem[];
 }
 
 /**
@@ -133,19 +139,30 @@ export interface SmlListHttpResponse {
 }
 
 /**
- * Response body for `PUT /internal/agent_context_layer/sml/{id}`.
+ * Response body for `PUT /internal/agent_context_layer/sml/{originId}`.
+ *
+ * PUT writes a single manual chunk under `originId` via the indexer's
+ * content mode. The indexer wipes every existing chunk for the origin
+ * (regardless of `ingestion_method`) before writing — HTTP PUT therefore
+ * effectively claims ownership of the origin and replaces any
+ * crawler-written chunks for it. `items` reflects what the indexer
+ * actually persisted (currently always one entry for the HTTP path).
  */
 export interface SmlUpsertHttpResponse {
-  item: SmlHttpItem;
-  /** Whether the document was newly created (vs. updated in place). */
+  items: SmlHttpItem[];
+  /** Whether the origin was newly created (vs. replacing existing chunks). */
   created: boolean;
 }
 
 /**
- * Response body for `DELETE /internal/agent_context_layer/sml/{id}`.
+ * Response body for `DELETE /internal/agent_context_layer/sml/{originId}`.
+ *
+ * DELETE removes every chunk for the origin (manual + crawled) via the
+ * indexer's `deleteAttachment({ ingestionMethod: 'all' })`. Mirrors PUT's
+ * "claim the origin" semantic in reverse.
  */
 export interface SmlDeleteHttpResponse {
-  id: string;
+  origin_id: string;
   deleted: boolean;
 }
 
