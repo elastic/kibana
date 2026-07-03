@@ -129,13 +129,13 @@ export interface BulkCreatePrebuiltRulesArgs {
   bulkCount?: number;
 }
 
+export interface BulkCreatePrebuiltRulesResult {
+  results: BulkCreatePrebuiltRulesResultItem[];
+  errors: Array<{ item: PrebuiltRuleAsset; error: Error }>;
+}
+
 export interface BulkCreatePrebuiltRulesResultItem {
   id: string;
   rule_id: string;
   version: number;
-}
-
-export interface BulkCreatePrebuiltRulesResult {
-  results: BulkCreatePrebuiltRulesResultItem[];
-  errors: Array<{ item: PrebuiltRuleAsset; error: Error }>;
 }
