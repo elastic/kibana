@@ -10,8 +10,8 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { v4 } from 'uuid';
-import { i18n } from '@kbn/i18n';
 import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat/events';
+import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { monaco } from '@kbn/monaco';
