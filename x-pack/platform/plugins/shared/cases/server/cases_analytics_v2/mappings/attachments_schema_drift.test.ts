@@ -7,9 +7,12 @@
 
 import type { MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
-import { CASE_ATTACHMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+} from '../../../common/constants';
 import { AttachmentType } from '../../../common/types/domain';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 import type {
   AttachmentPersistedAttributes,
   UnifiedAttachmentAttributes,
@@ -189,6 +192,7 @@ const FIXTURES = {
     metadata: { actionType: 'isolate' },
   } as unknown as Partial<UnifiedAttachmentAttributes>),
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   externalReference_legacy: makeLegacySO('extref-legacy', {
     type: AttachmentType.externalReference,
     externalReferenceAttachmentTypeId: '.files',
@@ -198,20 +202,51 @@ const FIXTURES = {
   } as unknown as Partial<AttachmentPersistedAttributes>),
   // Distinct unified subtype from `actions_unified` so neither fixture
   // shares a `type` value — keeps each Layer 2 assertion unambiguous.
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   externalReference_unified: makeUnifiedSO('extref-unified', {
     type: 'files',
     attachmentId: 'file-1',
     metadata: { filename: 'evidence.pdf', mimeType: 'application/pdf' },
   } as unknown as Partial<UnifiedAttachmentAttributes>),
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   persistableState_legacy: makeLegacySO('ps-legacy', {
     type: AttachmentType.persistableState,
     persistableStateAttachmentTypeId: '.lens',
-    persistableStateAttachmentState: { visualizationType: 'lnsXY', state: { datasourceStates: {} } },
+    persistableStateAttachmentState: {
+      visualizationType: 'lnsXY',
+      state: { datasourceStates: {} },
+    },
   } as unknown as Partial<AttachmentPersistedAttributes>),
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   persistableState_unified: makeUnifiedSO('ps-unified', {
     type: 'lens',
     data: { visualizationType: 'lnsXY', state: { datasourceStates: {} } },
+  } as unknown as Partial<UnifiedAttachmentAttributes>),
+
+  // `event` is a legacy reference subtype (external events by id). It shares
+  // the alert family but stores its ids under `eventId`; the doc-builder must
+  // capture that into `attachment.attachment_id`.
+  event_legacy: makeLegacySO('event-legacy', {
+    type: AttachmentType.event,
+    eventId: 'event-1',
+  } as unknown as Partial<AttachmentPersistedAttributes>),
+
+  // Newer unified-only reference types (no legacy v1 equivalent). Each
+  // references an external saved object by id via `attachmentId`:
+  // `dashboard` → a `dashboard` SO, `discoverSession` → a `search` SO. The
+  // doc-builder captures the referenced id into `attachment.attachment_id`
+  // and the type into `attachment.type` — handled by the generic unified
+  // reference path, no per-type code required.
+  dashboard_unified: makeUnifiedSO('dashboard-unified', {
+    type: 'dashboard',
+    attachmentId: 'dashboard-1',
+    metadata: { title: 'Ops overview' },
+  } as unknown as Partial<UnifiedAttachmentAttributes>),
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  discoverSession_unified: makeUnifiedSO('discover-unified', {
+    type: 'discoverSession',
+    attachmentId: 'search-1',
   } as unknown as Partial<UnifiedAttachmentAttributes>),
 } as const;
 
@@ -220,16 +255,13 @@ const FIXTURES = {
 describe('attachments mapping covers every doc-builder field for every fixture', () => {
   const mappedPaths = collectMappedPaths(ATTACHMENTS_INDEX_MAPPING);
 
-  it.each(Object.entries(FIXTURES))(
-    'fixture=%s emits only mapped fields',
-    (_label, so) => {
-      const doc = buildAttachmentDoc(
-        so as SavedObject<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>
-      );
-      const missing = flatten(doc).filter((p) => !isCovered(p, mappedPaths));
-      expect(missing).toEqual([]);
-    }
-  );
+  it.each(Object.entries(FIXTURES))('fixture=%s emits only mapped fields', (_label, so) => {
+    const doc = buildAttachmentDoc(
+      so as SavedObject<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>
+    );
+    const missing = flatten(doc).filter((p) => !isCovered(p, mappedPaths));
+    expect(missing).toEqual([]);
+  });
 });
 
 // ----- Layer 2: per-subtype curated extracts -----
@@ -299,6 +331,23 @@ describe('per-subtype curated extracts', () => {
     const doc = buildAttachmentDoc(FIXTURES.persistableState_legacy);
     expect(doc.attachment.persistable_state?.type_id).toBe('.lens');
   });
+
+  it('event (legacy): captures eventId into attachment.attachment_id', () => {
+    const doc = buildAttachmentDoc(FIXTURES.event_legacy);
+    expect(doc.attachment.attachment_id).toEqual(['event-1']);
+  });
+
+  it('dashboard (unified reference): captures the referenced dashboard id + type', () => {
+    const doc = buildAttachmentDoc(FIXTURES.dashboard_unified);
+    expect(doc.attachment.type).toBe('dashboard');
+    expect(doc.attachment.attachment_id).toEqual(['dashboard-1']);
+  });
+
+  it('discoverSession (unified reference): captures the referenced search id + type', () => {
+    const doc = buildAttachmentDoc(FIXTURES.discoverSession_unified);
+    expect(doc.attachment.type).toBe('discoverSession');
+    expect(doc.attachment.attachment_id).toEqual(['search-1']);
+  });
 });
 
 // ----- Layer 3: every legacy subtype has a fixture -----
@@ -308,9 +357,8 @@ describe('every legacy AttachmentType has at least one fixture', () => {
     const fixtureSubtypeKeys = Object.keys(FIXTURES)
       .filter((k) => k.endsWith('_legacy'))
       .map((k) => k.replace('_legacy', ''));
-    // `event` is intentionally excluded — it shares the alert builder
-    // path on both legacy and unified sides; alert coverage is sufficient.
-    const expectedSubtypes = Object.values(AttachmentType).filter((t) => t !== 'event');
+    // Every legacy AttachmentType now has a fixture, including `event`.
+    const expectedSubtypes = Object.values(AttachmentType);
     for (const subtype of expectedSubtypes) {
       expect(fixtureSubtypeKeys).toContain(subtype);
     }
@@ -320,12 +368,15 @@ describe('every legacy AttachmentType has at least one fixture', () => {
 // ----- Cases.id denormalization sanity -----
 
 describe('cases.id is denormalized from references[case]', () => {
-  it.each(Object.entries(FIXTURES))('fixture=%s carries cases.id from the SO reference', (_label, so) => {
-    const doc = buildAttachmentDoc(
-      so as SavedObject<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>
-    );
-    expect(doc.cases.id).toBe('case-1');
-  });
+  it.each(Object.entries(FIXTURES))(
+    'fixture=%s carries cases.id from the SO reference',
+    (_label, so) => {
+      const doc = buildAttachmentDoc(
+        so as SavedObject<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>
+      );
+      expect(doc.cases.id).toBe('case-1');
+    }
+  );
 });
 
 // ----- @timestamp + ownership pass-through -----
