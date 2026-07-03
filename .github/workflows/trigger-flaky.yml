@@ -40,7 +40,7 @@ jobs:
           # command — validating and extracting the configs in one step.
           # Pattern: type:path[:count] where path cannot contain .., start with ./ or /, or end with /
           config_token='(ftrConfig|scoutConfig|config):[a-zA-Z0-9_-]+([/.][a-zA-Z0-9_-]+)*(:[0-9]+)?'
-          if [[ ! "$COMMENT_BODY" =~ ^/flaky[[:space:]]+(${config_token}([[:space:]]+${config_token})*) ]]; then
+          if [[ ! "$COMMENT_BODY" =~ ^/flaky[[:blank:]]+(${config_token}([[:blank:]]+${config_token})*) ]]; then
             echo "::error::Invalid comment format. Use: /flaky <type>:<config>[:count] [<type>:<config>[:count] ...]"
             echo "::error::Where <type> is one of: ftrConfig, scoutConfig, config"
             echo "::error::And <count> is an optional positive integer"
