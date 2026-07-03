@@ -1,0 +1,47 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        upgradeAgentlessPoliciesRequestExample:
+          description: 'Bulk upgrade agentless policies to their installed package version'
+          value:
+            policyIds:
+              - d52a7812-5736-4fdc-aed8-72152afa1ffa
+              - aws-policy-12345
+responses:
+  200:
+    description: 'Indicates a successful response. Each item reports the per-policy upgrade outcome; inspect every item''s `success` flag. A missing or non-agentless id is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch.'
+    content:
+      application/json:
+        examples:
+          upgradeAgentlessPoliciesResponseExample:
+            description: 'Example response where every policy was upgraded'
+            value:
+              - id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                name: ess_billing-1
+                success: true
+              - id: aws-policy-12345
+                name: cspm-aws-policy
+                success: true
+          upgradeAgentlessPoliciesPartialFailureResponseExample:
+            description: 'Example response where one policy upgraded and another id was missing or not an agentless policy (the batch still returns 200)'
+            value:
+              - id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                name: ess_billing-1
+                success: true
+              - id: aws-policy-12345
+                success: false
+                statusCode: 404
+                body:
+                  message: 'Agentless policy aws-policy-12345 not found'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

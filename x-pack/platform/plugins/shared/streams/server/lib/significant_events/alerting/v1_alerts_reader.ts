@@ -96,6 +96,7 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
       (response.aggregations?.by_rule as { buckets?: RawRuleBucket[] })?.buckets ?? [];
 
     return {
+      took: response.took,
       by_rule: {
         buckets: rawBuckets.map((bucket) => this.enrichChangePointBucket(bucket, ruleMetadata)),
       },
