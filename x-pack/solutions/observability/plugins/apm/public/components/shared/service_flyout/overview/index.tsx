@@ -201,11 +201,9 @@ export function ServiceFlyoutOverview({
         </EuiFlexItem>
         {isSystemMetricsLoading ? (
           <EuiFlexItem data-test-subj="serviceFlyoutSection-infrastructureMetricsSkeleton">
-            <>
-              <EuiSkeletonTitle size="xs" />
-              <EuiSpacer size="s" />
-              <EuiSkeletonText lines={2} />
-            </>
+            <EuiSkeletonTitle size="xs" />
+            <EuiSpacer size="s" />
+            <EuiSkeletonText lines={2} />
           </EuiFlexItem>
         ) : hasSystemMetrics ? (
           <EuiFlexItem>
