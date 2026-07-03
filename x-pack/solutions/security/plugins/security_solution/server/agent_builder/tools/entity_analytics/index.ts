@@ -22,6 +22,10 @@ export {
   SECURITY_UPDATE_WATCHLIST_TOOL_ID,
   updateWatchlistTool,
 } from './watchlists';
+export {
+  entityAnalyticsUiLinkTool,
+  ENTITY_ANALYTICS_UI_LINK_TOOL_ID,
+} from './ui_link/entity_analytics_ui_link_tool';
 export { listLeadsTool, SECURITY_LIST_LEADS_TOOL_ID } from './leads/list_leads_tool';
 export { generateLeadsTool, SECURITY_GENERATE_LEADS_TOOL_ID } from './leads/generate_leads_tool';
 export { dismissLeadTool, SECURITY_DISMISS_LEAD_TOOL_ID } from './leads/dismiss_lead_tool';

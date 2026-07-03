@@ -20,6 +20,7 @@ import {
   removeEntitiesFromWatchlistTool,
   searchEntitiesTool,
   updateWatchlistTool,
+  entityAnalyticsUiLinkTool,
   generateLeadsTool,
   listLeadsTool,
   dismissLeadTool,
@@ -69,6 +70,7 @@ export const registerTools = async (
   agentBuilder.tools.register(removeEntitiesFromWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(updateWatchlistTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(entityAnalyticsUiLinkTool(core));
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {
     agentBuilder.tools.register(runRulePreviewTool(rulePreviewDeps));

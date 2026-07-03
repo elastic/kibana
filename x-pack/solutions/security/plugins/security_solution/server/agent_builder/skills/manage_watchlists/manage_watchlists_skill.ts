@@ -13,6 +13,7 @@ import {
   SECURITY_LIST_WATCHLISTS_TOOL_ID,
   SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
   SECURITY_UPDATE_WATCHLIST_TOOL_ID,
+  ENTITY_ANALYTICS_UI_LINK_TOOL_ID,
 } from '../../tools';
 
 const content = `
@@ -117,6 +118,43 @@ User: "Remove user:jsmith123 from the Privileged Users watchlist."
 1. Call \`security.list_watchlists\` with \`nameContains: "Privileged Users"\` to resolve the id.
 2. Call \`security.remove_entities_from_watchlist\` with \`{ watchlistId: "<id>", entityIds: ["user:jsmith123"] }\`. Confirm.
 3. On accept, report the result. If the entity is reported as \`not_found\` with the "Entity not manually assigned" message, explain that the entity is on the watchlist via an entity source and direct the user to the UI to reconfigure that source.
+
+## UI-only operations — redirect, do not call a tool
+
+Two watchlist operations are intentionally **not** performed in chat because they live in the watchlist **edit flyout** and this skill's tools don't cover them: **configuring the entity source** and **uploading a CSV** of members. (Editing the name, description, or risk modifier is **not** UI-only — \`security.update_watchlist\` handles those.)
+
+For these intents, **decline the action** and point the user to the right place in the UI. Three things in one short reply: what you can't do in chat, why (one short clause — "the CSV upload lives in the editor", "entity-source configuration lives in the flyout"), and where to go — a clickable markdown link.
+
+**How to produce the link.** Call \`security.entity_analytics_ui_link\` and render the \`url\` it returns as \`[title](url)\`. **Never** hand-write or guess the URL — always call \`security.entity_analytics_ui_link\`. \`security.entity_analytics_ui_link\` is **not** a mutation, so calling it for a redirect is expected; do **not** call the mutating tools (\`create\` / \`update\` / \`delete\` / \`add_entities\` / \`remove_entities\`). Do **not** prompt for confirmation, and do **not** claim the operation succeeded.
+
+### Redirect intents
+
+Both of these open the watchlist's **edit flyout** (\`intent: 'watchlist_edit'\`):
+
+- **Configure the entity source** for a watchlist — the persistent source that keeps members in sync from a query, index, or rule. The tools here only do **one-time** add/remove; a source that stays in sync is UI-only.
+- **Upload a CSV** of watchlist members — the flyout's "CSV Data Source" adds members in bulk from a file. The tools here take an explicit id list only; a file upload is UI-only.
+
+### Destination
+
+- **The user named a specific watchlist** (by name or id) → call \`security.entity_analytics_ui_link\` with \`intent: 'watchlist_edit'\` and \`watchlist: '<name or id>'\`, then render the returned \`url\` — it opens that watchlist's edit flyout. Pass the watchlist **name straight from the user's prompt** (or an id if you already have one); \`security.entity_analytics_ui_link\` resolves either to the correct watchlist, so you do **not** need to call \`security.list_watchlists\` first. If the tool returns an error (name not found or ambiguous), relay it and offer the \`watchlists_list\` link so the user can pick.
+- **No specific watchlist** ("open the watchlists page") → call \`security.entity_analytics_ui_link\` with \`intent: 'watchlists_list'\` and render the returned \`url\` — the bare Watchlists tab.
+
+### Examples
+
+User: "Upload a CSV of members to the Privileged Users watchlist."
+
+1. Call \`security.entity_analytics_ui_link\` with \`{ intent: 'watchlist_edit', watchlist: 'Privileged Users' }\` (pass the name as-is; the tool resolves it).
+2. Render the returned \`url\` in a decline-and-redirect reply:
+   > "I can't upload a CSV to a watchlist from chat — that runs through the watchlist editor. Open the editor: [Edit Privileged Users](<url from security.entity_analytics_ui_link>)."
+
+User: "Configure the entity source for the High Risk Hosts watchlist."
+
+1. Call \`security.entity_analytics_ui_link\` with \`{ intent: 'watchlist_edit', watchlist: 'High Risk Hosts' }\` and explain the tools do one-time membership only:
+   > "I can't configure a watchlist's entity source from chat — my tools only do one-time add/remove. Open the editor to set up a persistent source: [Edit High Risk Hosts](<url from security.entity_analytics_ui_link>)."
+
+User: "Open the watchlists page so I can pick one to edit."
+
+1. Call \`security.entity_analytics_ui_link\` with \`{ intent: 'watchlists_list' }\` and render the returned \`url\`: [Watchlists](<url from security.entity_analytics_ui_link>).
 `;
 
 export const manageWatchlistsSkill = defineSkillType({
@@ -133,5 +171,6 @@ export const manageWatchlistsSkill = defineSkillType({
     SECURITY_DELETE_WATCHLIST_TOOL_ID,
     SECURITY_ADD_ENTITIES_TO_WATCHLIST_TOOL_ID,
     SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
+    ENTITY_ANALYTICS_UI_LINK_TOOL_ID,
   ],
 });

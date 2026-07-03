@@ -18,6 +18,7 @@ import {
   SECURITY_GET_ENTITY_TOOL_ID,
   SECURITY_LIST_WATCHLISTS_TOOL_ID,
   SECURITY_SEARCH_ENTITIES_TOOL_ID,
+  ENTITY_ANALYTICS_UI_LINK_TOOL_ID,
 } from '../../tools';
 
 // Feature flag controlling whether our tools try to dynamically generate ESQL queries based on the question asked of
@@ -25,6 +26,7 @@ import {
 export const FF_DYNAMICALLY_GENERATE_ESQL = false;
 
 const ENTITY_RISK_SCORE_SIGNIFICANT_CHANGE_THRESHOLD = 20; // Define a threshold for significant risk score change
+
 export interface EntityAnalyticsSkillsContext {
   isEntityStoreV2Enabled: boolean;
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
@@ -130,6 +132,81 @@ Rules:
 - If they mean the **built-in Security → Entity Analytics** experience (same IA as the product **Entity Analytics** page): phrases like **show / open / view / display / bring up** the **Entity Analytics** **dashboard**, **home**, **overview**, or **landing** page → call \`attachments.add\` with \`security.entity_analytics_dashboard\`. This is a **snapshot of that product page** in chat Canvas — **not** composing a **new Kibana saved Dashboard** (Lens panels, \`dashboard-management\` skill). Do **not** wait for the user to say "create"; **show/open/view** that page is enough.
 - **Does not** apply when the user only says **show**/**tell me**/**what are** together with **risky**/**riskiest**/**top** **hosts**, **users**, **entities** without naming the **Entity Analytics** product page — those are list/ranking asks satisfied by the \`security.entity\` attachment that \`security.search_entities\` emits automatically.
 - Only use Kibana dashboard composition when they clearly want a **new or edited Kibana Dashboard** saved object (panels, Lens, \`manage_dashboard\`, etc.) — not merely the word "dashboard" next to "Entity Analytics".
+
+## UI-guided navigation — when to redirect instead of acting
+
+Some Entity Analytics operations are intentionally **not performed in chat**: destructive lifecycle changes, bulk / CSV uploads, and configuration that lives in dedicated UI flows. For these intents, **decline the action** and point the user to the right place in the UI with a link.
+
+**How to produce the link.** Call \`security.entity_analytics_ui_link\` with the matching \`intent\` (and params). It returns a single \`url\`. Render that \`url\` in your reply as a markdown link \`[title](url)\`. **Never** hand-write or guess the URL — always use the \`url\` the tool returns.
+
+**Output shape.** Three things, in one short reply:
+
+1. What you can't do in chat (one sentence).
+2. Why (one short clause — "lives in the management UI", "needs a CSV upload", "the editing flyout exposes the full configuration").
+3. **Where to go** — the markdown link built from the \`security.entity_analytics_ui_link\` result.
+
+Do **not** call any *mutating* tool, do **not** prompt for confirmation, and do **not** claim the operation succeeded. The user clicks the link and performs the action themselves. (\`security.entity_analytics_ui_link\` is not a mutation — it only builds a link — and \`security.get_entity\` may be called first to resolve the entity for the resolution intent.)
+
+### Entity Analytics — enable / disable & clear all data
+
+Redirect when the user asks to:
+
+- **enable** / **disable** / **turn on** / **turn off** **Entity Analytics**
+- **clear** / **delete** / **reset** **all entity data**
+
+These are the global controls at the **top of the Entity Analytics management page**.
+
+Call \`security.entity_analytics_ui_link\` with \`intent: 'entity_analytics_settings'\` and render the returned \`url\`.
+
+Example reply: "I can't enable or disable Entity Analytics from chat — that's the switch at the top of the [Entity Analytics management page](<url from security.entity_analytics_ui_link>), where you can also clear all entity data."
+
+### Risk engine — scoring configuration & re-score
+
+Redirect when the user asks to:
+
+- **configure** / **change settings** for risk scoring (alert filters, retainment, schedule, closed-alert handling, etc.)
+- **re-score now** / **force a re-score** / **run the risk engine** — the tab has a **Run** button that triggers the risk engine on demand
+
+Call \`security.entity_analytics_ui_link\` with \`intent: 'risk_engine_settings'\` and render the returned \`url\`.
+
+Example reply: "I can't change the risk scoring settings from chat — that's managed on the Risk Score page. Open the [Risk Score settings](<url from security.entity_analytics_ui_link>) to reconfigure scoring or trigger a re-score via the Run button."
+
+### Asset criticality — bulk / CSV operations
+
+Redirect when the user asks to:
+
+- **upload a CSV** of asset criticalities
+- **bulk-set** / **bulk-import** / **bulk-update** criticality across many entities
+
+Call \`security.entity_analytics_ui_link\` with \`intent: 'asset_criticality_bulk'\` and render the returned \`url\`.
+
+Example reply: "I can't import a criticality CSV from chat — that runs through the Asset Criticality page. Open the [Asset Criticality upload](<url from security.entity_analytics_ui_link>) to upload your file."
+
+### Entity resolution / merge
+
+Resolution has **two** redirect paths — pick by whether the ask is about **one** entity or **many**:
+
+**Single entity** — "merge **this** entity", "add **this host/user** to a resolution group", "resolve **that** entity". This opens the entity's **Resolution** panel ("Add entities to resolution group") in its expandable flyout, so you need the entity first:
+
+1. If you don't already have the entity's \`entity.type\` and \`entity.id\` from a prior \`security.get_entity\` call, call \`security.get_entity\` now (do **not** call any mutating tool).
+2. Call \`security.entity_analytics_ui_link\` with \`intent: 'entity_resolution'\`, \`entityType\` (\`host\` | \`user\` | \`service\`), \`entityId\` (\`entity.id\`), and — when you have it — \`entityName\` (\`entity.name\`).
+3. Render the returned \`url\` as a markdown link.
+
+Example reply (host entity named \`myserver\`): "I can't merge entities from chat — open the [Resolution panel for myserver](<url from security.entity_analytics_ui_link>) to add it to a resolution group."
+
+**Bulk / CSV** — "**bulk**-link entities", "**import a CSV** of resolutions", "link **many** entities to resolution targets". This is the CSV import on the Entity Resolution management tab (no specific entity needed):
+
+- Call \`security.entity_analytics_ui_link\` with \`intent: 'entity_resolution_bulk'\` and render the returned \`url\`.
+
+Example reply: "I can't bulk-link entities from chat — that runs through a CSV import on the [Entity Resolution page](<url from security.entity_analytics_ui_link>)."
+
+### Entity store / engine status
+
+Redirect when the user asks to **see the status** of the **entity store** / **entity engines** ("is the entity store running", "entity engine status", "show entity store health").
+
+Call \`security.entity_analytics_ui_link\` with \`intent: 'engine_status'\` and render the returned \`url\`.
+
+Example reply: "You can check that on the [Entity Store status page](<url from security.entity_analytics_ui_link>)."
 
 ## When to Use This Skill
 
@@ -616,6 +693,7 @@ ${ctx.isEntityStoreV2Enabled ? entityStoreV2Content : legacyContent}
             SECURITY_GET_ENTITY_TOOL_ID,
             SECURITY_LIST_WATCHLISTS_TOOL_ID,
             SECURITY_SEARCH_ENTITIES_TOOL_ID,
+            ENTITY_ANALYTICS_UI_LINK_TOOL_ID,
           ]
         : [],
   });

@@ -24,6 +24,8 @@ export {
   SECURITY_ADD_ENTITIES_TO_WATCHLIST_TOOL_ID,
   removeEntitiesFromWatchlistTool,
   SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
+  entityAnalyticsUiLinkTool,
+  ENTITY_ANALYTICS_UI_LINK_TOOL_ID,
 } from './entity_analytics';
 export {
   attackDiscoverySearchTool,
