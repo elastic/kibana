@@ -71,13 +71,19 @@ describe('recover_esql end-to-end (real build_config + real graph)', () => {
       getDefaultModel: jest.fn().mockResolvedValue({ chatModel: { invoke } }),
     } as unknown as ModelProvider;
     mockedValidateEsqlQuery.mockResolvedValue(undefined);
+    // A visual-only edit: the generator keeps the seeded query unchanged and
+    // returns its result columns so the graph never re-executes it.
+    mockedGenerateEsql.mockResolvedValue({
+      query: RECOVERED_ESQL,
+      results: { columns: [{ name: 'response.keyword', type: 'keyword' }] },
+    } as unknown as Awaited<ReturnType<typeof generateEsql>>);
     mockedExecuteEsql.mockResolvedValue({
       columns: [{ name: 'response.keyword', type: 'keyword' }],
       values: [],
     } as unknown as Awaited<ReturnType<typeof executeEsql>>);
   });
 
-  it('reuses the ES|QL embedded in the edited spec instead of regenerating', async () => {
+  it('seeds regeneration with the ES|QL embedded in the edited spec', async () => {
     const result = await buildVegaConfig({
       nlQuery: 'make the bars steelblue',
       existingSpec,
@@ -87,14 +93,20 @@ describe('recover_esql end-to-end (real build_config + real graph)', () => {
       esClient,
     });
 
-    // Recovery kicked in: the generator was never asked for a new query.
-    expect(mockedGenerateEsql).not.toHaveBeenCalled();
-    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('Reusing the ES|QL'));
-
-    // The recovered query was validated by execution and carried into the output.
-    expect(mockedExecuteEsql).toHaveBeenCalledWith(
-      expect.objectContaining({ query: RECOVERED_ESQL })
+    // Recovery kicked in: the query embedded in the spec was recovered and fed
+    // to the generator as edit context rather than reused verbatim, so a
+    // data-changing edit can still modify it.
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('Recovered ES|QL from the existing Vega spec')
     );
+    expect(mockedGenerateEsql).toHaveBeenCalledWith(
+      expect.objectContaining({
+        nlQuery: expect.stringContaining(RECOVERED_ESQL),
+      })
+    );
+
+    // The generator kept the query for this visual-only edit, so it is carried
+    // into the output and bound back into the normalized spec's data source.
     expect(result.esqlQuery).toBe(RECOVERED_ESQL);
     expect(JSON.parse(result.spec).data).toEqual({
       url: { '%type%': 'esql', query: RECOVERED_ESQL },
