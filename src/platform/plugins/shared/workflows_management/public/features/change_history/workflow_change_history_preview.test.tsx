@@ -18,6 +18,7 @@ import { renderWorkflowChangeHistoryPreview } from './workflow_change_history_pr
 jest.mock('@kbn/workflows-ui', () => ({
   useWorkflowsMonacoTheme: jest.fn(),
   WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
+  WORKFLOW_READ_ONLY_MONACO_OPTIONS: { folding: true },
 }));
 
 jest.mock('./apply_workflow_yaml_validation_to_editor', () => ({
