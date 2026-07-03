@@ -41,7 +41,6 @@ import type {
 } from './types';
 import { registerSystemActions } from './components/system_actions';
 import { registerAnalytics } from './analytics';
-import { getObservablesFromEcs } from './client/helpers/get_observables_from_ecs';
 
 /**
  * @public
@@ -75,8 +74,6 @@ export class CasesUiPlugin
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
     const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
     const unifiedAttachmentTypeRegistry = this.unifiedAttachmentTypeRegistry;
-
-    registerInternalAttachments(unifiedAttachmentTypeRegistry);
 
     const config = this.initializerContext.config.get<CasesUiConfigType>();
     registerCaseFileKinds(config.files, plugins.files);
@@ -145,6 +142,11 @@ export class CasesUiPlugin
   public start(core: CoreStart, plugins: CasesPublicStartDependencies): CasesPublicStart {
     const config = this.initializerContext.config.get<CasesUiConfigType>();
 
+    registerInternalAttachments(this.unifiedAttachmentTypeRegistry, {
+      hasDashboardPluginEnabled: Boolean(plugins.dashboard),
+      hasMapsPluginEnabled: Boolean(plugins.maps),
+    });
+
     KibanaServices.init({
       ...core,
       ...plugins,
@@ -177,6 +179,17 @@ export class CasesUiPlugin
         storage: this.storage,
       }
     );
+
+    if (plugins.agentBuilder) {
+      void import('./agent_builder').then(({ registerCasesAgentBuilderAttachments }) => {
+        if (plugins.agentBuilder) {
+          registerCasesAgentBuilderAttachments({
+            attachments: plugins.agentBuilder.attachments,
+            application: core.application,
+          });
+        }
+      });
+    }
 
     return {
       config: {
@@ -227,7 +240,6 @@ export class CasesUiPlugin
         getUICapabilities,
         getRuleIdFromEvent,
         groupAlertsByRule,
-        getObservablesFromEcs,
       },
     };
   }

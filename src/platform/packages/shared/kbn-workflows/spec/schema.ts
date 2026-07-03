@@ -80,15 +80,75 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
   return schema;
 }
 
-export const CollisionStrategySchema = z.enum(['cancel-in-progress', 'drop']);
+export const CollisionStrategySchema = z
+  .enum(['cancel-in-progress', 'drop', 'queue'])
+  .describe(
+    'How to handle collisions when max concurrent runs is exceeded: `drop`, `cancel-in-progress` or `queue`.'
+  );
 export type CollisionStrategy = z.infer<typeof CollisionStrategySchema>;
 
+export const DEFAULT_CONCURRENCY_QUEUE_SIZE = 100;
+export const DEFAULT_CONCURRENCY_QUEUE_TTL = '24h';
+
 export const ConcurrencySettingsSchema = z.object({
-  key: z.string().optional(), // Concurrency group identifier e.g., '{{ event.host.name }}'
-  strategy: CollisionStrategySchema.optional(), // 'drop' or 'cancel-in-progress'
-  max: z.number().int().min(1).optional(), // Max concurrent runs per concurrency group
+  key: z
+    .string()
+    .max(512)
+    .optional()
+    .describe(
+      'Liquid template that groups executions into a concurrency bucket (e.g. `{{ event.host.name }}`).'
+    ),
+  strategy: CollisionStrategySchema.optional(),
+  max: z
+    .number()
+    .int()
+    .min(1)
+    .optional()
+    .describe('Maximum concurrent runs allowed per concurrency group.'),
+  'queue-size': z
+    .number()
+    .int()
+    .min(1)
+    .optional()
+    .describe(
+      'Only applies when strategy is `queue`. Maximum backlog size before new runs are skipped (default: `100`).'
+    ),
+  'queue-ttl': DurationSchema.optional().describe(
+    'Only applies when strategy is `queue`. Max time a run may stay queued before it is skipped (default: `24h`).'
+  ),
 });
 export type ConcurrencySettings = z.infer<typeof ConcurrencySettingsSchema>;
+
+export const LIQUID_PARSE_LIMIT_MAX = 600_000;
+export const LIQUID_RENDER_LIMIT_MAX = 2_000;
+export const LIQUID_MEMORY_LIMIT_MAX = 60_000_000;
+
+export const LiquidSettingsSchema = z.object({
+  parseLimit: z
+    .number()
+    .int()
+    .min(1)
+    .max(LIQUID_PARSE_LIMIT_MAX)
+    .optional()
+    .describe('Liquid parse character limit. Defaults to 150000; maximum is 600000.'),
+  renderLimit: z
+    .number()
+    .int()
+    .min(1)
+    .max(LIQUID_RENDER_LIMIT_MAX)
+    .optional()
+    .describe('Liquid render time limit in milliseconds. Defaults to 1000; maximum is 2000.'),
+  memoryLimit: z
+    .number()
+    .int()
+    .min(1)
+    .max(LIQUID_MEMORY_LIMIT_MAX)
+    .optional()
+    .describe(
+      'Liquid memory operation limit for array and string operations. Defaults to 15000000; maximum is 60000000.'
+    ),
+});
+export type LiquidSettings = z.infer<typeof LiquidSettingsSchema>;
 
 export const WorkflowSettingsSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
@@ -96,6 +156,7 @@ export const WorkflowSettingsSchema = z.object({
   timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
   concurrency: ConcurrencySettingsSchema.optional(),
   'max-step-size': ByteSizeSchema.optional(), // e.g., '10mb', '15MB', '1gb'
+  liquid: LiquidSettingsSchema.optional(),
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
 
