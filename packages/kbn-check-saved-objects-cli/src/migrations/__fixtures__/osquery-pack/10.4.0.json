@@ -9,8 +9,8 @@
           "query": "select * from processes;",
           "interval": 3600,
           "timeout": 300,
-          "schedule_id": { "$match": "uuid" },
-          "start_date": { "$match": "string" }
+          "schedule_id": "3730bf67-45c1-4e2d-9eb1-6dc285099660",
+          "start_date": "2024-01-01T00:00:00.000Z"
         }
       ],
       "enabled": true,
@@ -30,8 +30,8 @@
           "query": "select * from processes;",
           "interval": 3600,
           "timeout": 300,
-          "schedule_id": { "$match": "uuid" },
-          "start_date": { "$match": "string" }
+          "schedule_id": "3730bf67-45c1-4e2d-9eb1-6dc285099660",
+          "start_date": "2024-01-01T00:00:00.000Z"
         }
       ],
       "enabled": true,
