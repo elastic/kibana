@@ -70,6 +70,36 @@ const GRAPH_MESSAGES_MAX_SIZE = 100;
 // at most this many records (matches the `page.size` ceiling).
 export const DETAIL_PAGE_SIZE_MAX = 100;
 
+// ---------------------------------------------------------------------------
+// String length ceilings (`maxLength`) for `schema.string` — DoS protection.
+// ---------------------------------------------------------------------------
+
+// Entity, document and graph-node identifiers (Kibana saved-object IDs,
+// Elasticsearch _id fields, UUID format). ES enforces a 512-byte document-ID
+// limit; UUIDs are 36 chars. 512 is generous but safe across all ES ID formats.
+export const ENTITY_ID_MAX_LENGTH = 512;
+
+// Elasticsearch index / data-stream names are capped at 255 bytes.
+export const INDEX_NAME_MAX_LENGTH = 255;
+
+// ISO 8601 datetime strings are at most 29 chars ("2024-01-01T00:00:00.000Z");
+// epoch-ms as a string is 13 digits. 32 covers all valid forms with headroom.
+export const TIMESTAMP_STRING_MAX_LENGTH = 32;
+
+// Enum-like display strings (entity type, sub_type, icon name) whose longest
+// member is well under 64 characters; 64 gives generous headroom.
+export const ENUM_LIKE_MAX_LENGTH = 64;
+
+// Free-text display strings (entity name, rule name, label, tag). Generous
+// ceiling that comfortably fits all realistic values.
+export const LABEL_MAX_LENGTH = 1024;
+
+// IPv4 (15 chars) and IPv6 (39 chars, "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff").
+export const IP_ADDRESS_MAX_LENGTH = 39;
+
+// ISO 3166-1 alpha-2 country codes are 2 chars; 10 allows for extended variants.
+export const COUNTRY_CODE_MAX_LENGTH = 10;
+
 /**
  * CPS project routing expressions accepted by the Graph API.
  * Values mirror `@kbn/cps-server-utils` (server-only package); declared here so the
@@ -86,7 +116,7 @@ export type ProjectRouting = typeof PROJECT_ROUTING_ORIGIN | typeof PROJECT_ROUT
  * (relevant when opening graph from entity flyout).
  */
 export const entityIdSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
   isOrigin: schema.boolean(),
 });
 
@@ -94,20 +124,34 @@ export const graphRequestSchema = schema.object({
   nodesLimit: schema.maybe(schema.number()),
   showUnknownTarget: schema.maybe(schema.boolean()),
   query: schema.object({
-    pinnedIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: PINNED_IDS_MAX_SIZE })),
-    // Origin event IDs - optional, may be empty when opening from entity flyout
-    originEventIds: schema.maybe(
-      schema.arrayOf(schema.object({ id: schema.string(), isAlert: schema.boolean() }), {
-        maxSize: ORIGIN_EVENT_IDS_MAX_SIZE,
+    pinnedIds: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }), {
+        maxSize: PINNED_IDS_MAX_SIZE,
       })
     ),
+    // Origin event IDs - optional, may be empty when opening from entity flyout
+    originEventIds: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          id: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
+          isAlert: schema.boolean(),
+        }),
+        {
+          maxSize: ORIGIN_EVENT_IDS_MAX_SIZE,
+        }
+      )
+    ),
     // TODO: use zod for range validation instead of config schema
-    start: schema.oneOf([schema.number(), schema.string()]),
-    end: schema.oneOf([schema.number(), schema.string()]),
+    start: schema.oneOf([
+      schema.number(),
+      schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH }),
+    ]),
+    end: schema.oneOf([schema.number(), schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH })]),
     indexPatterns: schema.maybe(
       schema.arrayOf(
         schema.string({
           minLength: 1,
+          maxLength: INDEX_NAME_MAX_LENGTH,
           validate: (value) => {
             if (!INDEX_PATTERN_REGEX.test(value)) {
               return `Invalid index pattern: ${value}. Contains illegal characters.`;
@@ -158,9 +202,9 @@ export const DOCUMENT_TYPE_ALERT = 'alert' as const;
 export const DOCUMENT_TYPE_ENTITY = 'entity' as const;
 
 export const entitySchema = schema.object({
-  name: schema.maybe(schema.string()),
-  type: schema.maybe(schema.string()),
-  sub_type: schema.maybe(schema.string()),
+  name: schema.maybe(schema.string({ maxLength: LABEL_MAX_LENGTH })),
+  type: schema.maybe(schema.string({ maxLength: ENUM_LIKE_MAX_LENGTH })),
+  sub_type: schema.maybe(schema.string({ maxLength: ENUM_LIKE_MAX_LENGTH })),
   engine_type: schema.maybe(
     schema.oneOf([
       schema.literal('host'),
@@ -171,7 +215,11 @@ export const entitySchema = schema.object({
   ),
   host: schema.maybe(
     schema.object({
-      ip: schema.maybe(schema.arrayOf(schema.string(), { maxSize: IPS_MAX_SIZE })),
+      ip: schema.maybe(
+        schema.arrayOf(schema.string({ maxLength: IP_ADDRESS_MAX_LENGTH }), {
+          maxSize: IPS_MAX_SIZE,
+        })
+      ),
     })
   ),
   availableInEntityStore: schema.maybe(schema.boolean()),
@@ -179,21 +227,21 @@ export const entitySchema = schema.object({
 });
 
 export const nodeDocumentDataSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
   type: schema.oneOf([
     schema.literal(DOCUMENT_TYPE_EVENT),
     schema.literal(DOCUMENT_TYPE_ALERT),
     schema.literal(DOCUMENT_TYPE_ENTITY),
   ]),
-  index: schema.maybe(schema.string()),
+  index: schema.maybe(schema.string({ maxLength: INDEX_NAME_MAX_LENGTH })),
   event: schema.maybe(
     schema.object({
-      id: schema.string(),
+      id: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
     })
   ),
   alert: schema.maybe(
     schema.object({
-      ruleName: schema.maybe(schema.string()),
+      ruleName: schema.maybe(schema.string({ maxLength: LABEL_MAX_LENGTH })),
     })
   ),
   entity: schema.maybe(entitySchema),
@@ -245,9 +293,9 @@ export const nodeShapeSchema = schema.oneOf([
 ]);
 
 export const nodeBaseDataSchema = schema.object({
-  id: schema.string(),
-  label: schema.maybe(schema.string()),
-  icon: schema.maybe(schema.string()),
+  id: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
+  label: schema.maybe(schema.string({ maxLength: LABEL_MAX_LENGTH })),
+  icon: schema.maybe(schema.string({ maxLength: ENUM_LIKE_MAX_LENGTH })),
 });
 
 export const entityNodeDataSchema = schema.allOf([
@@ -261,11 +309,17 @@ export const entityNodeDataSchema = schema.allOf([
       schema.literal('rectangle'),
       schema.literal('diamond'),
     ]),
-    tag: schema.maybe(schema.string()),
+    tag: schema.maybe(schema.string({ maxLength: LABEL_MAX_LENGTH })),
     count: schema.maybe(schema.number()),
-    ips: schema.maybe(schema.arrayOf(schema.string(), { maxSize: IPS_MAX_SIZE })),
+    ips: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: IP_ADDRESS_MAX_LENGTH }), {
+        maxSize: IPS_MAX_SIZE,
+      })
+    ),
     countryCodes: schema.maybe(
-      schema.arrayOf(schema.string(), { maxSize: COUNTRY_CODES_MAX_SIZE })
+      schema.arrayOf(schema.string({ maxLength: COUNTRY_CODE_MAX_LENGTH }), {
+        maxSize: COUNTRY_CODES_MAX_SIZE,
+      })
     ),
     documentsData: schema.maybe(
       schema.arrayOf(nodeDocumentDataSchema, { maxSize: DOCUMENTS_DATA_MAX_SIZE })
@@ -284,14 +338,20 @@ export const labelNodeDataSchema = schema.allOf([
   nodeBaseDataSchema,
   schema.object({
     shape: schema.literal('label'),
-    parentId: schema.maybe(schema.string()),
+    parentId: schema.maybe(schema.string({ maxLength: ENTITY_ID_MAX_LENGTH })),
     color: nodeColorSchema,
-    ips: schema.maybe(schema.arrayOf(schema.string(), { maxSize: IPS_MAX_SIZE })),
+    ips: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: IP_ADDRESS_MAX_LENGTH }), {
+        maxSize: IPS_MAX_SIZE,
+      })
+    ),
     count: schema.maybe(schema.number()),
     uniqueEventsCount: schema.maybe(schema.number()),
     uniqueAlertsCount: schema.maybe(schema.number()),
     countryCodes: schema.maybe(
-      schema.arrayOf(schema.string(), { maxSize: COUNTRY_CODES_MAX_SIZE })
+      schema.arrayOf(schema.string({ maxLength: COUNTRY_CODE_MAX_LENGTH }), {
+        maxSize: COUNTRY_CODES_MAX_SIZE,
+      })
     ),
     documentsData: schema.maybe(
       schema.arrayOf(nodeDocumentDataSchema, { maxSize: DOCUMENTS_DATA_MAX_SIZE })
@@ -303,14 +363,14 @@ export const relationshipNodeDataSchema = schema.allOf([
   nodeBaseDataSchema,
   schema.object({
     shape: schema.literal('relationship'),
-    parentId: schema.maybe(schema.string()),
+    parentId: schema.maybe(schema.string({ maxLength: ENTITY_ID_MAX_LENGTH })),
   }),
 ]);
 
 export const edgeDataSchema = schema.object({
-  id: schema.string(),
-  source: schema.string(),
-  target: schema.string(),
+  id: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
+  source: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
+  target: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
   color: edgeColorSchema,
   type: schema.maybe(schema.oneOf([schema.literal('solid'), schema.literal('dashed')])),
 });

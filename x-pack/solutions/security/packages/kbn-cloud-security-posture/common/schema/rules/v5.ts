@@ -27,13 +27,33 @@ export type {
   BulkActionBenchmarkRulesResponse,
 } from './v4';
 
+// ---------------------------------------------------------------------------
+// String length ceilings for rules schemas — DoS protection.
+// ---------------------------------------------------------------------------
+
+// Rule/benchmark identifiers (IDs, rego_rule_id, benchmark version, rule number).
+// Typical values are UUIDs (36 chars) or short slugs; 256 is generous but safe.
+const RULE_ID_MAX_LENGTH = 256;
+
+// Rule name, section name, and other short display labels.
+const RULE_NAME_MAX_LENGTH = 1_024;
+
+// Version strings (e.g. "1.4.1", "v1.0.0") — 64 chars is very generous.
+const RULE_VERSION_MAX_LENGTH = 64;
+
+// Elasticsearch simple_query_string for rule search — 2 KB is generous.
+const RULE_SEARCH_MAX_LENGTH = 2_048;
+
+// Saved-object field name strings ("metadata.name", "metadata.section", etc.).
+const FIELD_NAME_MAX_LENGTH = 256;
+
 export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
 
 export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * An Elasticsearch simple_query_string
    */
-  search: schema.maybe(schema.string()),
+  search: schema.maybe(schema.string({ maxLength: RULE_SEARCH_MAX_LENGTH })),
 
   /**
    * The page of objects to return
@@ -49,7 +69,9 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
    *  Fields to retrieve from CspBenchmarkRule saved object
    */
   // maxSize is set to 50 to cover all available fields with room for future additions
-  fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
+  fields: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: FIELD_NAME_MAX_LENGTH }), { maxSize: 50 })
+  ),
 
   /**
    *  The fields to perform the parsed query against.
@@ -104,18 +126,30 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * benchmark version
    */
-  benchmarkVersion: schema.maybe(schema.string()),
+  benchmarkVersion: schema.maybe(schema.string({ maxLength: RULE_VERSION_MAX_LENGTH })),
 
   /**
    * rule section
    */
   // maxSize is set to 100 as there are limited sections per benchmark
   section: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })])
+    schema.oneOf([
+      schema.string({ maxLength: RULE_NAME_MAX_LENGTH }),
+      schema.arrayOf(schema.string({ maxLength: RULE_NAME_MAX_LENGTH }), {
+        minSize: 1,
+        maxSize: 100,
+      }),
+    ])
   ),
   // maxSize is set to 100 as there are limited rules per benchmark
   ruleNumber: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })])
+    schema.oneOf([
+      schema.string({ maxLength: RULE_ID_MAX_LENGTH }),
+      schema.arrayOf(schema.string({ maxLength: RULE_ID_MAX_LENGTH }), {
+        minSize: 1,
+        maxSize: 100,
+      }),
+    ])
   ),
 });
 
