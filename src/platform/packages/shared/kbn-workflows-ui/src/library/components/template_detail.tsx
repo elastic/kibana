@@ -85,7 +85,8 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(({ slug, onLoaded 
   }
 
   const { metadata } = data;
-  const solutions = metadata.solutions ?? Object.keys(SOLUTION_ICONS); // No solutions means all solutions are supported
+  // No specific solutions listed means all solutions are supported
+  const solutions = metadata.solutions?.length ? metadata.solutions : Object.keys(SOLUTION_ICONS);
 
   return (
     <EuiFlexGroup

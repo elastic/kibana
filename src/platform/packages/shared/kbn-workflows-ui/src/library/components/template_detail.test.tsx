@@ -87,7 +87,7 @@ describe('TemplateDetail', () => {
 
   it('should render humanized category badges and the solution badge under their labels', () => {
     renderDetail();
-    expect(screen.getByText('Solution:')).toBeInTheDocument();
+    expect(screen.getByText('Solutions:')).toBeInTheDocument();
     expect(screen.getByText('Categories:')).toBeInTheDocument();
     expect(screen.getByText('Threat Intel')).toBeInTheDocument();
     expect(screen.getByText('Enrichment')).toBeInTheDocument();
