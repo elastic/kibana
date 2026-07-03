@@ -199,7 +199,6 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
 
   const isLoading = isPolicyLoading || isEndpointsLoading;
   const isError = isPolicyError || isEndpointsError;
-  const isBusy = isSaving;
   const isAllExpanded = expandedZones.size === zoneGroups.length;
 
   return (
@@ -498,7 +497,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
       <EuiModalFooter>
         <EuiButtonEmpty
           onClick={onClose}
-          isDisabled={isBusy}
+          isDisabled={isSaving}
           data-test-subj="manageRegionsCancelButton"
         >
           {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.cancel', {
@@ -509,7 +508,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
         <EuiButton
           fill
           onClick={handleSave}
-          isDisabled={isBusy || isLoading || totalSelected === 0}
+          isDisabled={isSaving || isLoading || totalSelected === 0}
           isLoading={isSaving}
           data-test-subj="manageRegionsSaveButton"
         >
