@@ -295,7 +295,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
             {displayWarningThreshold && (
               <>
                 {criticalThresholdExpression}
-                <EuiSpacer size="xs" />
                 {/* Not a flex sibling: EuiExpression's "columns" display sizes its
                     description column as a percentage of its OWN container, so
                     sharing this row with another flex item (even grow={false})
