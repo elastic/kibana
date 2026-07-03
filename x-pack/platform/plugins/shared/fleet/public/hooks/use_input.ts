@@ -86,7 +86,7 @@ export function useInput(
   };
 }
 
-type MaybeSecret = string | { id: string } | null | undefined;
+type MaybeSecret = string | { id: string } | undefined;
 
 export function useSecretInput(
   initialValue: MaybeSecret,

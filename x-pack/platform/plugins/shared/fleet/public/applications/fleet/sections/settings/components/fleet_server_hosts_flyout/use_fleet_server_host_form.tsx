@@ -211,13 +211,13 @@ export function useFleetServerHostsForm(
   );
 
   const sslKeySecretInput = useSecretInput(
-    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key,
+    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key ?? undefined,
     undefined,
     isEditDisabled
   );
 
   const sslESKeySecretInput = useSecretInput(
-    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.es_key,
+    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.es_key ?? undefined,
     undefined,
     isEditDisabled
   );
@@ -239,7 +239,7 @@ export function useFleetServerHostsForm(
     isEditDisabled
   );
   const sslAgentKeySecretInput = useSecretInput(
-    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.agent_key,
+    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.agent_key ?? undefined,
     undefined,
     isEditDisabled
   );

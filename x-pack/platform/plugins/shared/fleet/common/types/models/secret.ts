@@ -31,8 +31,10 @@ export type SOSecret =
   | {
       id: string;
       hash?: string;
-    }
-  | null;
+    };
+
+/** SOSecret extended with null to signal explicit clearing of a secret on update. */
+export type SOSecretOrNull = SOSecret | null;
 
 // this is used in the top level secret_refs array on package and agent policies
 export interface SecretReference {
