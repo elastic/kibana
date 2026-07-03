@@ -92,22 +92,18 @@ export const MultiJobActionsMenu: FC<Props> = ({
 
   const anyJobsBlocked = jobs.some((j) => j.blocked !== undefined);
 
+  const managementActionsLabel = i18n.translate(
+    'xpack.ml.jobsList.multiJobActionsMenu.managementActionsAriaLabel',
+    { defaultMessage: 'Management actions' }
+  );
+
   const button = (
-    <EuiToolTip
-      content={i18n.translate('xpack.ml.jobsList.multiJobActionsMenu.managementActionsAriaLabel', {
-        defaultMessage: 'Management actions',
-      })}
-    >
+    <EuiToolTip content={managementActionsLabel} disableScreenReaderOutput>
       <EuiButtonIcon
         size="s"
         onClick={onButtonClick}
         iconType="gear"
-        aria-label={i18n.translate(
-          'xpack.ml.jobsList.multiJobActionsMenu.managementActionsAriaLabel',
-          {
-            defaultMessage: 'Management actions',
-          }
-        )}
+        aria-label={managementActionsLabel}
         color="text"
         disabled={
           anyJobsBlocked ||

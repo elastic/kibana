@@ -109,6 +109,46 @@ template-metadata:
     expect(result.metadata).not.toHaveProperty('someFutureField');
   });
 
+  const TEMPLATE_WITH_UNKNOWN_INSTALL_FIELD = `
+template-metadata:
+  slug: future-install
+  version: "1.0.0"
+  availability: ">=9.5.0"
+  name: "Future install"
+  description: "Adds unknown keys inside the nested install block."
+  categories: [utility]
+  install:
+    someFutureInstallKey: hello
+    form:
+      - name: api-key
+        inputType: text
+        someFutureFieldKey: hello
+        options:
+          - value: a
+            label: A
+            someFutureOptionKey: hello
+`;
+
+  it('should reject unknown nested `install` fields (strict mode)', () => {
+    expect.assertions(2);
+    try {
+      parseTemplateYaml(TEMPLATE_WITH_UNKNOWN_INSTALL_FIELD);
+    } catch (err) {
+      expect(err).toBeInstanceOf(TemplateParseError);
+      expect((err as TemplateParseError).reason).toBe('invalid-metadata');
+    }
+  });
+
+  it('should strip unknown nested `install` fields in lenient mode (forward-compat)', () => {
+    const result = parseTemplateYaml(TEMPLATE_WITH_UNKNOWN_INSTALL_FIELD, { lenient: true });
+
+    expect(result.metadata.slug).toBe('future-install');
+    expect(result.metadata.install).not.toHaveProperty('someFutureInstallKey');
+    expect(result.metadata.install?.form[0]).not.toHaveProperty('someFutureFieldKey');
+    expect(result.metadata.install?.form[0].options?.[0]).not.toHaveProperty('someFutureOptionKey');
+    expect(result.metadata.install?.form[0]).toMatchObject({ name: 'api-key', inputType: 'text' });
+  });
+
   it('should throw `invalid-yaml` when the YAML is malformed', () => {
     expect.assertions(2);
     try {
