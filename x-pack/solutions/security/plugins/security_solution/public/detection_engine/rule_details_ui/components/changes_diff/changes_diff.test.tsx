@@ -104,6 +104,39 @@ describe('RuleChangesDiff', () => {
     expect(getByTestId('ruleChangesHistoryDiff')).toHaveTextContent('Imported Rule');
   });
 
+  it('renders no-diff callout for rule_upgrade that upgraded a pre-tracking rule (created_at !== updated_at)', () => {
+    const item = createRuleChangeHistoryItem({
+      action: 'rule_upgrade',
+      rule: {
+        name: 'Upgraded Rule',
+        created_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-06-01T00:00:00.000Z',
+      } as RuleResponse,
+      old_values: null,
+    });
+
+    const { getByTestId } = renderComponent({ item });
+
+    expect(getByTestId('ruleChangesHistoryNoDiffCallout')).toBeInTheDocument();
+  });
+
+  it('renders insertion without no-diff callout for rule_upgrade with matching timestamps (created_at === updated_at)', () => {
+    const item = createRuleChangeHistoryItem({
+      action: 'rule_upgrade',
+      rule: {
+        name: 'Upgraded Rule',
+        created_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-01-01T00:00:00.000Z',
+      } as RuleResponse,
+      old_values: null,
+    });
+
+    const { getByTestId, queryByTestId } = renderComponent({ item });
+
+    expect(queryByTestId('ruleChangesHistoryNoDiffCallout')).not.toBeInTheDocument();
+    expect(getByTestId('ruleChangesHistoryDiff')).toHaveTextContent('Upgraded Rule');
+  });
+
   it('renders no-diff callout for rule_revert action with no old_values', () => {
     const item = createRuleChangeHistoryItem({
       action: 'rule_revert',

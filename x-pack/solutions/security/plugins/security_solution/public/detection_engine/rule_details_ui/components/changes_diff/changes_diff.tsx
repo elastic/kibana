@@ -23,6 +23,7 @@ import * as i18n from './translations';
 
 const EDIT_ACTIONS_REQUIRING_PRIOR_STATE: string[] = [
   RuleChangeTrackingAction.ruleUpdate,
+  SecurityRuleChangeTrackingAction.ruleUpgrade,
   SecurityRuleChangeTrackingAction.ruleImport,
   SecurityRuleChangeTrackingAction.ruleRevert,
 ];
