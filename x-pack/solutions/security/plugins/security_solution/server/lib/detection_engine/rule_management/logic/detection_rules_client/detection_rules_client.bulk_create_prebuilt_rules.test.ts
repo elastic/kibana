@@ -84,11 +84,11 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
   it('calls bulkCreateRules with correct parameters', async () => {
     const params = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-1' };
 
-    rulesClient.bulkCreateRules.mockResolvedValue({
-      successfulIds: [expect.any(String)],
+    rulesClient.bulkCreateRules.mockImplementation(async ({ rules: inputRules }) => ({
+      successfulIds: inputRules.map((r) => getOptionsId(r)),
       errors: [],
-      total: 1,
-    });
+      total: inputRules.length,
+    }));
 
     await detectionRulesClient.bulkCreatePrebuiltRules({ rules: [params] });
 
@@ -198,11 +198,11 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
         valid: type !== 'machine_learning',
       }));
 
-    rulesClient.bulkCreateRules.mockResolvedValue({
-      successfulIds: [expect.any(String)],
+    rulesClient.bulkCreateRules.mockImplementation(async ({ rules: inputRules }) => ({
+      successfulIds: inputRules.map((r) => getOptionsId(r)),
       errors: [],
-      total: 1,
-    });
+      total: inputRules.length,
+    }));
 
     const result = await detectionRulesClient.bulkCreatePrebuiltRules({
       rules: [queryRule, mlRule],
@@ -313,11 +313,11 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
       rule_id: 'bad-rule',
     };
 
-    rulesClient.bulkCreateRules.mockResolvedValue({
-      successfulIds: [expect.any(String)],
+    rulesClient.bulkCreateRules.mockImplementation(async ({ rules: inputRules }) => ({
+      successfulIds: inputRules.map((r) => getOptionsId(r)),
       errors: [],
-      total: 1,
-    });
+      total: inputRules.length,
+    }));
 
     const result = await detectionRulesClient.bulkCreatePrebuiltRules({
       rules: [validRule, badRule],
@@ -346,11 +346,11 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
       return realImpl(...args);
     });
 
-    rulesClient.bulkCreateRules.mockResolvedValue({
-      successfulIds: [expect.any(String)],
+    rulesClient.bulkCreateRules.mockImplementation(async ({ rules: inputRules }) => ({
+      successfulIds: inputRules.map((r) => getOptionsId(r)),
       errors: [],
-      total: 1,
-    });
+      total: inputRules.length,
+    }));
 
     const result = await detectionRulesClient.bulkCreatePrebuiltRules({
       rules: [goodRule, badRule],
