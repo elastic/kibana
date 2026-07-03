@@ -331,7 +331,10 @@ export function useFleetServerHostsForm(
             },
             ...((sslKeySecretInput.hasChanged ||
               sslESKeySecretInput.hasChanged ||
-              sslAgentKeySecretInput.hasChanged) && {
+              sslAgentKeySecretInput.hasChanged ||
+              (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key ||
+              (fleetServerHost as FleetServerHost)?.secrets?.ssl?.es_key ||
+              (fleetServerHost as FleetServerHost)?.secrets?.ssl?.agent_key) && {
               secrets: {
                 ssl: {
                   key: sslKeySecretInput.hasChanged
