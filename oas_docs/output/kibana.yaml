@@ -7041,12 +7041,15 @@ paths:
                               - severity_equals
                             type: string
                           value:
-                            description: 'The target severity level: critical, high, medium, low, or info.'
+                            description: 'The target severity level. One of: critical, major, high, medium, minor, low, warning, info.'
                             enum:
                               - critical
+                              - major
                               - high
                               - medium
+                              - minor
                               - low
+                              - warning
                               - info
                             type: string
                         required:
