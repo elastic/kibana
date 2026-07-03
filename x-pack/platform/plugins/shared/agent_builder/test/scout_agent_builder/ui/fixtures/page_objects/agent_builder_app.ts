@@ -777,8 +777,17 @@ export class AgentBuilderApp {
     }
   }
 
-  async submitMcpClientCreate() {
-    await this.page.testSubj.click('mcpClientCreateButton');
+  async submitMcpClientCreate(): Promise<string> {
+    const [response] = await Promise.all([
+      this.page.waitForResponse(
+        (res) =>
+          res.url().includes('/internal/security/oauth/clients') &&
+          res.request().method() === 'POST'
+      ),
+      this.page.testSubj.click('mcpClientCreateButton'),
+    ]);
+    const { id }: { id: string } = await response.json();
+    return id;
   }
 
   async waitForMcpClientDetailsModal() {

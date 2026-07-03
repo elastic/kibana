@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID } from '@kbn/management-settings-ids';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
@@ -20,9 +21,12 @@ test.describe(
   { tag: [...tags.serverless.search] },
   () => {
     let authHeaders: Record<string, string>;
-    const seededClientIds: string[] = [];
+    const createdClientIds: string[] = [];
 
-    test.beforeAll(async ({ samlAuth }) => {
+    test.beforeAll(async ({ kbnClient, samlAuth }) => {
+      await kbnClient.uiSettings.update({
+        [AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID]: true,
+      });
       authHeaders = await createUiamAuthHeaders(samlAuth);
     });
 
@@ -30,9 +34,12 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ apiClient }) => {
-      await Promise.all(seededClientIds.map((id) => revokeOAuthClient(apiClient, authHeaders, id)));
-      seededClientIds.length = 0;
+    test.afterAll(async ({ apiClient, kbnClient }) => {
+      await Promise.all(
+        createdClientIds.map((id) => revokeOAuthClient(apiClient, authHeaders, id))
+      );
+      createdClientIds.length = 0;
+      await kbnClient.uiSettings.unset(AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID);
     });
 
     test('opens the MCP Clients page from the Manage MCP menu', async ({ page, pageObjects }) => {
@@ -52,7 +59,8 @@ test.describe(
       await pageObjects.agentBuilder.openMcpClientCreate();
       await pageObjects.agentBuilder.fillMcpClientName(clientName);
       await pageObjects.agentBuilder.selectMcpClientLogo();
-      await pageObjects.agentBuilder.submitMcpClientCreate();
+      const clientId = await pageObjects.agentBuilder.submitMcpClientCreate();
+      createdClientIds.push(clientId);
 
       await pageObjects.agentBuilder.waitForMcpClientDetailsModal();
       expect(await pageObjects.agentBuilder.mcpClientDetailsModalContainsText('Client ID')).toBe(
@@ -83,7 +91,8 @@ test.describe(
       await pageObjects.agentBuilder.openMcpClientCreate();
       await pageObjects.agentBuilder.fillMcpClientName(clientName);
       await pageObjects.agentBuilder.setMcpClientConfidential(true);
-      await pageObjects.agentBuilder.submitMcpClientCreate();
+      const clientId = await pageObjects.agentBuilder.submitMcpClientCreate();
+      createdClientIds.push(clientId);
 
       await pageObjects.agentBuilder.waitForMcpClientDetailsModal();
       expect(await pageObjects.agentBuilder.mcpClientDetailsModalHasSecretField()).toBe(true);
@@ -101,7 +110,7 @@ test.describe(
         clientName: activeName,
         clientType: 'public',
       });
-      seededClientIds.push(active.id);
+      createdClientIds.push(active.id);
 
       await pageObjects.agentBuilder.navigateToMcpClients();
       await pageObjects.agentBuilder.waitForMcpClientRow(active.id);
@@ -124,7 +133,7 @@ test.describe(
         clientName,
         clientType: 'public',
       });
-      seededClientIds.push(client.id);
+      createdClientIds.push(client.id);
 
       await pageObjects.agentBuilder.navigateToMcpClients();
       await pageObjects.agentBuilder.searchMcpClients(clientName);
@@ -147,7 +156,7 @@ test.describe(
         clientName,
         clientType: 'public',
       });
-      seededClientIds.push(client.id);
+      createdClientIds.push(client.id);
 
       await pageObjects.agentBuilder.navigateToMcpClients();
       await pageObjects.agentBuilder.searchMcpClients(clientName);
