@@ -89,10 +89,13 @@ export const useAgentBuilderRuleCreation = ({
 }: UseAgentBuilderRuleCreationParams): UseAgentBuilderRuleCreationResult => {
   const { services } = useKibana();
   const { agentBuilder, aiRuleCreation, telemetry } = services;
-  const { addSuccess } = useAppToasts();
+  const { addSuccess, addWarning } = useAppToasts();
   const isAiRuleUpdateRef = useRef(false);
   const [isSyncActive, setIsSyncActive] = useState(false);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  // The sync effect re-fires on every form edit, so a persistent failure would stack toasts;
+  // warn once and re-arm only after a sync succeeds again.
+  const hasWarnedSyncFailureRef = useRef(false);
   // Rule id for form→agent syncs: page-lifetime on edit pages, cleared on conversation switch.
   const syncRuleIdRef = useRef<string | undefined>(existingRuleId);
   const existingRuleIdRef = useRef(existingRuleId);
@@ -341,8 +344,24 @@ export const useAgentBuilderRuleCreation = ({
                 )),
           ruleIdForSync
         );
+        hasWarnedSyncFailureRef.current = false;
       } catch (e) {
-        window.console.error('form→chat sync error:', e);
+        if (!hasWarnedSyncFailureRef.current) {
+          hasWarnedSyncFailureRef.current = true;
+          addWarning({
+            title: i18n.translate(
+              'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationSyncFailedTitle',
+              { defaultMessage: 'Rule edits are not syncing to the chat' }
+            ),
+            text: i18n.translate(
+              'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationSyncFailedText',
+              {
+                defaultMessage:
+                  'The rule form could not be shared with the AI chat. Your rule is unaffected, but the chat may show an outdated version.',
+              }
+            ),
+          });
+        }
       }
     }, SYNC_DEBOUNCE_MS);
 
@@ -358,6 +377,7 @@ export const useAgentBuilderRuleCreation = ({
     actionTypeRegistry,
     addRuleAttachment,
     getRuleIdForSync,
+    addWarning,
   ]);
 
   return { isAiRuleUpdateRef };
