@@ -33,14 +33,79 @@ export const bulkCreatePrebuiltRules = async ({
   actionsClient,
   rulesClient,
   mlAuthz,
-  args,
+  args: { rules, changeTracking },
 }: BulkCreatePrebuiltRulesOptions): Promise<BulkCreatePrebuiltRulesResult> => {
-  const { rules } = args;
+  if (rules.length === 0) return { results: [], errors: [] };
+
+  const {
+    bulkInputs,
+    itemById,
+    errors: buildBulkInputErrors,
+  } = await buildBulkInputs({ actionsClient, mlAuthz, rules });
+
+  if (bulkInputs.length === 0) return { results: [], errors: buildBulkInputErrors };
+
   const results: BulkCreatePrebuiltRulesResult['results'] = [];
+  const errors: BulkCreatePrebuiltRulesResult['errors'] = [...buildBulkInputErrors];
+
+  try {
+    const { successfulIds, errors: bulkErrors } = await rulesClient.bulkCreateRules<RuleParams>({
+      rules: bulkInputs,
+      changeTracking: {
+        action: SecurityRuleChangeTrackingAction.ruleInstall,
+        ...changeTracking,
+        metadata: { bulkCount: rules.length, ...changeTracking?.metadata },
+      },
+    });
+
+    // Alerting echoes back the options.id we supplied, so itemById.get() always
+    // resolves. The guards below satisfy TypeScript's Map.get() return type.
+    for (const id of successfulIds) {
+      const asset = itemById.get(id);
+      if (asset) {
+        results.push({ id, rule_id: asset.rule_id, version: asset.version });
+      }
+    }
+
+    for (const err of bulkErrors) {
+      const item = itemById.get(err.rule.id);
+      if (item) {
+        errors.push({
+          item,
+          error: Object.assign(
+            new Error(err.message),
+            err.status != null ? { statusCode: err.status } : {}
+          ),
+        });
+      }
+    }
+  } catch (err) {
+    const wrappedError = err instanceof Error ? err : new Error(String(err));
+    for (const { options } of bulkInputs) {
+      const asset = options?.id ? itemById.get(options.id) : undefined;
+      if (asset) {
+        errors.push({ item: asset, error: wrappedError });
+      }
+    }
+  }
+
+  return { results, errors };
+};
+
+const buildBulkInputs = async ({
+  actionsClient,
+  mlAuthz,
+  rules,
+}: {
+  actionsClient: ActionsClient;
+  mlAuthz: MlAuthz;
+  rules: BulkCreatePrebuiltRulesArgs['rules'];
+}): Promise<{
+  errors: BulkCreatePrebuiltRulesResult['errors'];
+  itemById: Map<string, PrebuiltRuleAsset>;
+  bulkInputs: BulkCreateRulesParams<RuleParams>['rules'];
+}> => {
   const errors: BulkCreatePrebuiltRulesResult['errors'] = [];
-
-  if (rules.length === 0) return { results, errors };
-
   const itemById = new Map<string, PrebuiltRuleAsset>();
   const bulkInputs: BulkCreateRulesParams<RuleParams>['rules'] = [];
 
@@ -77,48 +142,5 @@ export const bulkCreatePrebuiltRules = async ({
     }
   }
 
-  if (bulkInputs.length === 0) return { results, errors };
-
-  try {
-    const { successfulIds, errors: bulkErrors } = await rulesClient.bulkCreateRules<RuleParams>({
-      rules: bulkInputs,
-      changeTracking: {
-        action: SecurityRuleChangeTrackingAction.ruleInstall,
-        ...args.changeTracking,
-        metadata: { bulkCount: rules.length, ...args.changeTracking?.metadata },
-      },
-    });
-
-    // Alerting echoes back the options.id we supplied, so itemById.get() always
-    // resolves. The guards below satisfy TypeScript's Map.get() return type.
-    for (const id of successfulIds) {
-      const asset = itemById.get(id);
-      if (asset) {
-        results.push({ id, rule_id: asset.rule_id, version: asset.version });
-      }
-    }
-
-    for (const err of bulkErrors) {
-      const item = itemById.get(err.rule.id);
-      if (item) {
-        errors.push({
-          item,
-          error: Object.assign(
-            new Error(err.message),
-            err.status != null ? { statusCode: err.status } : {}
-          ),
-        });
-      }
-    }
-  } catch (err) {
-    const wrappedError = err instanceof Error ? err : new Error(String(err));
-    for (const { options } of bulkInputs) {
-      const asset = options?.id ? itemById.get(options.id) : undefined;
-      if (asset) {
-        errors.push({ item: asset, error: wrappedError });
-      }
-    }
-  }
-
-  return { results, errors };
+  return { bulkInputs, itemById, errors };
 };
