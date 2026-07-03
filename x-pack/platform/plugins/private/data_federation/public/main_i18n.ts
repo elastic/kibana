@@ -51,7 +51,7 @@ export const mainTranslations = {
       editActionUnsupportedTypeDescription: i18n.translate(
         'xpack.dataFederation.table.editActionUnsupportedTypeDescription',
         {
-          defaultMessage: 'This data source type is not supported for editing in this view',
+          defaultMessage: 'This data source type is not supported for editing in this view.',
         }
       ),
       deleteAction: i18n.translate('xpack.dataFederation.table.deleteAction', {
