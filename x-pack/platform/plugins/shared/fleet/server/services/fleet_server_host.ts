@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import pMap from 'p-map';
 
 import type {
@@ -345,6 +345,22 @@ class FleetServerHostService {
     const updateData: Partial<FleetServerHostSOAttributes> = {
       ...omit(data, ['ssl', 'secrets']),
     };
+
+    if (originalItem.is_preconfigured && !options?.fromPreconfiguration) {
+      const allowEditFields = originalItem.allow_edit ?? [];
+      const allKeys = Object.keys(data) as Array<keyof FleetServerHost>;
+      for (const key of allKeys) {
+        if (
+          (!!originalItem[key] || !!data[key]) &&
+          !allowEditFields.includes(key) &&
+          !isEqual(originalItem[key], data[key])
+        ) {
+          throw new FleetServerHostUnauthorizedError(
+            `Preconfigured Fleet Server host ${id} ${key} cannot be updated outside of the Kibana config file.`
+          );
+        }
+      }
+    }
 
     if (data.is_preconfigured && !options?.fromPreconfiguration) {
       throw new FleetServerHostUnauthorizedError(

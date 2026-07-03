@@ -97,8 +97,8 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 
 Use operations[] to:
 1. set metadata
-2. add panels (resolved panel configs or visualizations from natural language)
-3. edit existing Lens or markdown panel content
+2. add panels (resolved panel configs, or Lens/Vega visualizations from a natural-language query — pick the engine with the panel "renderer" field; defaults to Lens)
+3. edit existing Lens, Vega, or markdown panel content
 4. update panel layouts without changing content
 5. add / remove sections, including inline section panels during add_section
 6. remove panels`,

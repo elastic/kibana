@@ -29,6 +29,7 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/appex-ai-infra',
     'elastic/appex-qa',
     'elastic/appex-sharedux',
+    'elastic/context-eng',
     'elastic/docs',
     'elastic/eui-team',
     'elastic/fleet',
