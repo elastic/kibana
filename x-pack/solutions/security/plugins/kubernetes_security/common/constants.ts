@@ -59,6 +59,14 @@ export const DEFAULT_FILTER = {
   },
 };
 
+// String length ceilings (maxLength) for schema.string — DoS protection.
+// ES index name/pattern limit per Elasticsearch specification.
+export const INDEX_NAME_MAX_LENGTH = 255;
+// JSON-serialized query DSL passed as a URL query parameter and parsed server-side.
+export const QUERY_DSL_MAX_LENGTH = 4096;
+// Arbitrary fill value for missing field values in ES multi-terms aggregations.
+export const MISSING_VALUE_MAX_LENGTH = 1024;
+
 export const DEFAULT_FILTER_QUERY = JSON.stringify({
   bool: {
     must: [],

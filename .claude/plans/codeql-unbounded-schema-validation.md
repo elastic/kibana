@@ -39,10 +39,10 @@ in the flagged schemas. This is hardening — PRs are `backport:skip`, `release_
 - [x] Validate (targeted — fast): `node scripts/eslint --fix <changed files>` and `node scripts/type_check --project x-pack/solutions/security/plugins/session_view/tsconfig.json`. Run `node scripts/jest` on any co-located `*.test.ts` you touched. Fix all errors before marking done.
 
 ### Task 4: Bound kubernetes_security routes and cloud_defend schema
-- [ ] Bound the request schemas in `plugins/kubernetes_security/server/routes/multi_terms_aggregate.ts`, `aggregate.ts`, `count.ts`
-- [ ] Bound all unbounded strings/arrays in `plugins/cloud_defend/common/schemas/v1.ts`
-- [ ] Add a justifying comment for each new ceiling; use named `const`s
-- [ ] Validate (targeted — fast): `node scripts/eslint --fix <changed files>`, `node scripts/type_check --project x-pack/solutions/security/plugins/kubernetes_security/tsconfig.json`, and `node scripts/type_check --project x-pack/solutions/security/plugins/cloud_defend/tsconfig.json`. Run `node scripts/jest` on any co-located `*.test.ts` you touched. Fix all errors before marking done.
+- [x] Bound the request schemas in `plugins/kubernetes_security/server/routes/multi_terms_aggregate.ts`, `aggregate.ts`, `count.ts`
+- [x] Bound all unbounded strings/arrays in `plugins/cloud_defend/common/schemas/v1.ts`
+- [x] Add a justifying comment for each new ceiling; use named `const`s
+- [x] Validate (targeted — fast): `node scripts/eslint --fix <changed files>`, `node scripts/type_check --project x-pack/solutions/security/plugins/kubernetes_security/tsconfig.json`, and `node scripts/type_check --project x-pack/solutions/security/plugins/cloud_defend/tsconfig.json`. Run `node scripts/jest` on any co-located `*.test.ts` you touched. Fix all errors before marking done.
 
 ### Task 5: Bound security_solution entity analytics schemas (config-schema + zod)
 - [ ] Bound config-schema strings/arrays in `plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/snapshot/state.ts`, `tasks/health/state.ts`, `tasks/field_retention_enrichment/state.ts`, `tasks/data_view_refresh/state.ts`
