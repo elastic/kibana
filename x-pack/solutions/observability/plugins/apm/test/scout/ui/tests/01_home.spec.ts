@@ -7,13 +7,14 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { test, testData } from '../../fixtures';
-import { ENVIRONMENT_ALL, EXTENDED_TIMEOUT } from '../../fixtures/constants';
+import { test, testData } from '../fixtures';
+import { ENVIRONMENT_ALL, EXTENDED_TIMEOUT } from '../fixtures/constants';
 
 test.describe('APM home page', { tag: tags.stateful.classic }, () => {
   // `observability:enableComparisonByDefault` controls whether the APM root
-  // redirect appends `comparisonEnabled=true`. It is a global advanced setting,
-  // so we enable it for this suite and reset it afterwards.
+  // redirect appends `comparisonEnabled=true`. It is a global advanced setting;
+  // the sequential lane (workers: 1) guarantees no sibling suite reads or writes
+  // it while this suite has it enabled. We reset it afterwards.
   test.beforeAll(async ({ uiSettings }) => {
     await uiSettings.set({ 'observability:enableComparisonByDefault': true });
   });

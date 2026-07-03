@@ -7,15 +7,17 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { test } from '../../fixtures';
-import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
+import { test } from '../fixtures';
+import { EXTENDED_TIMEOUT } from '../fixtures/constants';
 
 const APM_INDICES_SAVED_OBJECT_TYPE = 'apm-indices';
 const APM_INDICES_SAVED_OBJECT_ID = 'apm-indices';
 
 // Pointing every APM index at a pattern that matches nothing forces the no-data
-// screen. This mutates a global setting (the `apm-indices` saved object), so the
-// suite is restricted to the stateful classic lane and restores defaults after.
+// screen. This mutates the global `apm-indices` saved object, so the suite lives
+// in the sequential lane (dedicated server, workers: 1) where it can't blank out
+// APM data for the parallel data suites. It runs last in this lane and restores
+// defaults afterwards.
 const NON_MATCHING_INDICES = {
   error: 'foo-*',
   onboarding: 'foo-*',
@@ -49,7 +51,7 @@ test.describe('APM no data screen', { tag: tags.stateful.classic }, () => {
     pageObjects: { navigationPage },
   }) => {
     await navigationPage.gotoApm('/');
-    await expect(page.getByText('Add data')).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+    await expect(page.getByTestId('noDataDefaultActionButton')).toBeVisible({ timeout: EXTENDED_TIMEOUT });
   });
 
   test('bypasses the no data screen on settings pages', async ({

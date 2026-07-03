@@ -7,8 +7,8 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { test } from '../../fixtures';
-import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
+import { test } from '../fixtures';
+import { EXTENDED_TIMEOUT } from '../fixtures/constants';
 
 const PAGES = [
   { name: 'service inventory', path: '/services' },
@@ -16,8 +16,9 @@ const PAGES = [
   { name: 'service map', path: '/service-map' },
 ];
 
-// `observability:enableComparisonByDefault` is a global advanced setting, so the
-// suite runs only on the stateful classic lane and resets the value afterwards.
+// `observability:enableComparisonByDefault` is a global advanced setting that this
+// suite flips per test. It lives in the sequential lane (workers: 1) so its writes
+// can't race the `01_home` suite, and resets the value afterwards.
 test.describe('Comparison feature flag', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
