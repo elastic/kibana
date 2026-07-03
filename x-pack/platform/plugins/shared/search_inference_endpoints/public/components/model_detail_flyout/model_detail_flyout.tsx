@@ -39,7 +39,13 @@ import { AddEndpointModal } from './add_endpoint_modal';
 import { ModelEndpointRow } from './model_endpoint_row';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { EventType } from '../../analytics/constants';
-import { getModelEOLDate, getModelReleaseDate, getModelStatus } from '../../utils/eis_utils';
+import {
+  getModelEOLDate,
+  getModelReleaseDate,
+  getModelStatus,
+  getRegionZoneCounts,
+} from '../../utils/eis_utils';
+import type { EisInferenceEndpoint } from '../../../common/types';
 import { EisModelStatus } from '../../types';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
 
@@ -79,6 +85,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     modelMetadata,
     modelReleaseDate,
     modelEOLDate,
+    regionZoneCounts,
   } = useMemo(() => {
     const filtered = allEndpoints.filter((ep) => getModelId(ep) === modelId);
 
@@ -98,6 +105,10 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       modelMetadata: endpointModelMetadata,
       modelReleaseDate: getModelReleaseDate(endpointModelMetadata)?.format('l') ?? '--',
       modelEOLDate: getModelEOLDate(endpointModelMetadata)?.format('l') ?? '--',
+      regionZoneCounts: getRegionZoneCounts(
+        filtered as EisInferenceEndpoint[],
+        allEndpoints as EisInferenceEndpoint[]
+      ),
     };
   }, [allEndpoints, modelId]);
 
@@ -154,6 +165,24 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       }),
       description: modelEOLDate,
     },
+    ...(regionZoneCounts.length > 0
+      ? [
+          {
+            title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.regionsLabel', {
+              defaultMessage: 'Regions',
+            }),
+            description: (
+              <EuiBadgeGroup data-test-subj="flyoutRegionBadges">
+                {regionZoneCounts.map(({ geo, modelCount, totalCount }) => (
+                  <EuiBadge key={geo} data-test-subj={`flyoutRegionBadge-${geo}`}>
+                    {`${geo.toUpperCase()} (${modelCount}/${totalCount})`}
+                  </EuiBadge>
+                ))}
+              </EuiBadgeGroup>
+            ),
+          },
+        ]
+      : []),
     {
       title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.documentationLabel', {
         defaultMessage: 'Documentation',

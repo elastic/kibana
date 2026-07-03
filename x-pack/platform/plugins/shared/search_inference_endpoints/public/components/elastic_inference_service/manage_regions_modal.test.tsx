@@ -135,8 +135,8 @@ describe('ManageRegionsModal', () => {
       );
 
       // us-east-1 → North America zone, europe-west1 → Europe zone
-      expect(screen.getByTestId('manageRegionsZone-northAmerica')).toBeInTheDocument();
-      expect(screen.getByTestId('manageRegionsZone-europe')).toBeInTheDocument();
+      expect(screen.getByTestId('manageRegionsZone-us')).toBeInTheDocument();
+      expect(screen.getByTestId('manageRegionsZone-eu')).toBeInTheDocument();
     });
 
     it('shows the correct "X of Y selected" summary', async () => {
@@ -169,8 +169,8 @@ describe('ManageRegionsModal', () => {
       );
 
       // Expand North America zone to see its checkboxes
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-northAmerica'));
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-europe'));
+      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-us'));
+      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-eu'));
 
       await waitFor(() => {
         const usEast = screen.getByTestId(
@@ -196,8 +196,8 @@ describe('ManageRegionsModal', () => {
       );
 
       // Expand both zones
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-northAmerica'));
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-europe'));
+      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-us'));
+      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-eu'));
 
       await waitFor(() => {
         const usEast = screen.getByTestId(
@@ -222,7 +222,7 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-northAmerica'));
+      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-us'));
 
       await waitFor(() => {
         const checkbox = screen.getByTestId(
@@ -314,7 +314,7 @@ describe('ManageRegionsModal', () => {
       );
 
       // Expand North America and uncheck us-east-1
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-northAmerica'));
+      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-us'));
 
       await waitFor(() => {
         const checkbox = screen.getByTestId(

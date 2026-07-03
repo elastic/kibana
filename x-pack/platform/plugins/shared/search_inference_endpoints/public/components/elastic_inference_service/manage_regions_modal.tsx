@@ -37,12 +37,7 @@ import {
   useDeleteRegionPolicy,
 } from '../../hooks/use_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
-import {
-  getAvailableRegions,
-  GEO_TO_ZONE,
-  ZONE_DISPLAY_NAMES,
-  ZONE_ORDER,
-} from '../../utils/eis_utils';
+import { getAvailableRegions, GEO_TO_DISPLAY_NAME, GEO_ORDER } from '../../utils/eis_utils';
 
 interface ManageRegionsModalProps {
   onClose: () => void;
@@ -51,7 +46,7 @@ interface ManageRegionsModalProps {
 const regionKey = (r: CspRegion) => `${r.csp}::${r.region}`;
 
 interface ZoneGroup {
-  zoneId: string;
+  geo: string;
   displayName: string;
   regions: CspRegion[];
 }
@@ -87,20 +82,19 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
   }, [isPolicyLoading, isEndpointsLoading, syncedFromPolicy, policy, availableRegions]);
 
   const zoneGroups = useMemo((): ZoneGroup[] => {
-    const byZone = new Map<string, CspRegion[]>();
+    const byGeo = new Map<string, CspRegion[]>();
     for (const r of availableRegions) {
-      const key = regionKey(r);
-      const zoneId = (r.geo ? GEO_TO_ZONE[r.geo] : undefined) ?? 'other';
-      const list = byZone.get(zoneId) ?? [];
+      const geo = r.geo ?? 'other';
+      const list = byGeo.get(geo) ?? [];
       list.push(r);
-      byZone.set(zoneId, list);
+      byGeo.set(geo, list);
     }
-    return [...ZONE_ORDER]
-      .filter((z) => byZone.has(z))
-      .map((zoneId) => ({
-        zoneId,
-        displayName: ZONE_DISPLAY_NAMES[zoneId] ?? zoneId,
-        regions: byZone.get(zoneId)!,
+    return [...GEO_ORDER]
+      .filter((geo) => byGeo.has(geo))
+      .map((geo) => ({
+        geo,
+        displayName: GEO_TO_DISPLAY_NAME[geo] ?? geo,
+        regions: byGeo.get(geo)!,
       }));
   }, [availableRegions]);
 
@@ -161,7 +155,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     if (expandedZones.size === zoneGroups.length) {
       setExpandedZones(new Set());
     } else {
-      setExpandedZones(new Set(zoneGroups.map((z) => z.zoneId)));
+      setExpandedZones(new Set(zoneGroups.map((z) => z.geo)));
     }
   }, [expandedZones.size, zoneGroups]);
 
@@ -170,9 +164,9 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
   }, [availableRegions]);
 
   const handleSave = useCallback(() => {
-    const allowedRegions: CspRegion[] = availableRegions.filter((r) =>
-      checkedKeys.has(regionKey(r))
-    );
+    const allowedRegions = availableRegions
+      .filter((r) => checkedKeys.has(regionKey(r)))
+      .map(({ csp, region }) => ({ csp, region }));
     // All regions selected == no restrictions; use delete to clear any existing policy
     if (allowedRegions.length === availableRegions.length) {
       deletePolicy(undefined, { onSuccess: onClose });
@@ -362,11 +356,11 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
               const checkedCount = zoneKeys.filter((k) => checkedKeys.has(k)).length;
               const isZoneChecked = checkedCount === zone.regions.length;
               const isZoneIndeterminate = checkedCount > 0 && checkedCount < zone.regions.length;
-              const isExpanded = expandedZones.has(zone.zoneId);
-              const zoneCheckboxId = `zone-checkbox-${zone.zoneId}`;
+              const isExpanded = expandedZones.has(zone.geo);
+              const zoneCheckboxId = `zone-checkbox-${zone.geo}`;
 
               return (
-                <div key={zone.zoneId} data-test-subj={`manageRegionsZone-${zone.zoneId}`}>
+                <div key={zone.geo} data-test-subj={`manageRegionsZone-${zone.geo}`}>
                   <div css={zoneRowStyles}>
                     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
                       <EuiFlexItem grow={false}>
@@ -376,7 +370,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
                           indeterminate={isZoneIndeterminate}
                           onChange={() => handleToggleZone(zone)}
                           label={<strong>{zone.displayName}</strong>}
-                          data-test-subj={`manageRegionsZoneCheckbox-${zone.zoneId}`}
+                          data-test-subj={`manageRegionsZoneCheckbox-${zone.geo}`}
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
@@ -419,7 +413,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
                             >
                               <EuiButtonIcon
                                 iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
-                                onClick={() => handleToggleExpand(zone.zoneId)}
+                                onClick={() => handleToggleExpand(zone.geo)}
                                 aria-label={
                                   isExpanded
                                     ? i18n.translate(
@@ -437,7 +431,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
                                         }
                                       )
                                 }
-                                data-test-subj={`manageRegionsZoneToggle-${zone.zoneId}`}
+                                data-test-subj={`manageRegionsZoneToggle-${zone.geo}`}
                               />
                             </EuiToolTip>
                           </EuiFlexItem>

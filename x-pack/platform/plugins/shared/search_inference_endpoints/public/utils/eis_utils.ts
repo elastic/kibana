@@ -307,33 +307,62 @@ export function getModelDeprecatedMessage(deprecatedFormattedDate: string | null
       );
 }
 
-/** Map from CSP identifier to human-readable cloud provider name. */
-export const CSP_DISPLAY_NAMES: Record<string, string> = {
-  aws: 'Amazon Web Services (AWS)',
-  azure: 'Microsoft Azure',
-  gcp: 'Google Cloud Platform (GCP)',
-};
-
 /**
- * Maps an EIS `geo` value to the zone ID used in the region picker.
+ * Maps an EIS `geo` code directly to its display name in the region picker.
  * EIS uses short codes ("us", "eu", "apac"); unknown values fall back to "other".
  */
-export const GEO_TO_ZONE: Record<string, string> = {
-  us: 'northAmerica',
-  eu: 'europe',
-  apac: 'asiaPacific',
-};
-
-/** Maps a zone ID to its display name shown in the region picker. */
-export const ZONE_DISPLAY_NAMES: Record<string, string> = {
-  asiaPacific: 'Asia Pacific',
-  europe: 'Europe',
-  northAmerica: 'North America',
+export const GEO_TO_DISPLAY_NAME: Record<string, string> = {
+  apac: 'Asia Pacific',
+  eu: 'Europe',
+  us: 'North America',
   other: 'Other',
 };
 
-/** Ordered list of zone IDs for display in the region picker. */
-export const ZONE_ORDER = ['asiaPacific', 'europe', 'northAmerica', 'other'] as const;
+/** Ordered list of EIS geo codes for display in the region picker. */
+export const GEO_ORDER = ['apac', 'eu', 'us', 'other'] as const;
+
+export interface RegionZoneCount {
+  geo: string;
+  modelCount: number;
+  totalCount: number;
+}
+
+const countRegionsPerGeo = (endpoints: EisInferenceEndpoint[]): Map<string, Set<string>> => {
+  const byGeo = new Map<string, Set<string>>();
+  for (const ep of endpoints) {
+    if (!ep.metadata) continue;
+    const regions = (ep.metadata as Record<string, unknown>).regions;
+    if (!Array.isArray(regions)) continue;
+    for (const r of regions) {
+      if (!isCspRegion(r)) continue;
+      const geo = r.geo ?? 'other';
+      const set = byGeo.get(geo) ?? new Set<string>();
+      set.add(`${r.csp}::${r.region}`);
+      byGeo.set(geo, set);
+    }
+  }
+  return byGeo;
+};
+
+/**
+ * Computes per-zone region availability counts for a specific model relative to
+ * all EIS models, for use in the model detail flyout region badges.
+ *
+ * Returns entries only for zones where the model has at least one available region.
+ */
+export const getRegionZoneCounts = (
+  modelEndpoints: EisInferenceEndpoint[],
+  allEisEndpoints: EisInferenceEndpoint[]
+): RegionZoneCount[] => {
+  const modelByGeo = countRegionsPerGeo(modelEndpoints);
+  const allByGeo = countRegionsPerGeo(allEisEndpoints);
+
+  return GEO_ORDER.map((geo) => ({
+    geo,
+    modelCount: modelByGeo.get(geo)?.size ?? 0,
+    totalCount: allByGeo.get(geo)?.size ?? 0,
+  })).filter(({ modelCount }) => modelCount > 0);
+};
 
 const isCspRegion = (value: unknown): value is CspRegion => {
   if (!value || typeof value !== 'object') return false;
