@@ -192,7 +192,7 @@ describe('<AttackFlyout />', () => {
   it('renders the overview tab content by default', () => {
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={createAttackHit()} onAttackUpdated={jest.fn()} />
+        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
       </TestProviders>
     );
 
@@ -205,7 +205,7 @@ describe('<AttackFlyout />', () => {
   it('renders the table tab content when the table tab is selected', () => {
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={createAttackHit()} onAttackUpdated={jest.fn()} />
+        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
       </TestProviders>
     );
 
@@ -218,7 +218,7 @@ describe('<AttackFlyout />', () => {
   it('renders the json tab content when the json tab is selected', () => {
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={createAttackHit()} onAttackUpdated={jest.fn()} />
+        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
       </TestProviders>
     );
 
