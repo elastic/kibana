@@ -12,25 +12,33 @@ describe('formatLookupResourcesContext', () => {
     expect(formatLookupResourcesContext([])).toBe('');
   });
 
-  it('should return an empty string when lookups have no fields', () => {
-    expect(
-      formatLookupResourcesContext([
-        { type: 'lookup', name: 'no_fields', content: 'lookup_default_no_fields' },
-      ])
-    ).toBe('');
+  it('should format a lookup header when lookups have no fields', () => {
+    const result = formatLookupResourcesContext([
+      { type: 'lookup', name: 'no_fields', content: 'lookup_default_no_fields' },
+    ]);
+
+    expect(result).toContain('<lookup_resources>');
+    expect(result).toContain(
+      '<lookup_resource source_name="no_fields" index="lookup_default_no_fields">'
+    );
+    expect(result).not.toContain('<fields>');
   });
 
-  it('should return an empty string when lookups have empty fields', () => {
-    expect(
-      formatLookupResourcesContext([
-        {
-          type: 'lookup',
-          name: 'empty_fields',
-          content: 'lookup_default_empty_fields',
-          fields: [],
-        },
-      ])
-    ).toBe('');
+  it('should format a lookup header when lookups have empty fields', () => {
+    const result = formatLookupResourcesContext([
+      {
+        type: 'lookup',
+        name: 'empty_fields',
+        content: 'lookup_default_empty_fields',
+        fields: [],
+      },
+    ]);
+
+    expect(result).toContain('<lookup_resources>');
+    expect(result).toContain(
+      '<lookup_resource source_name="empty_fields" index="lookup_default_empty_fields">'
+    );
+    expect(result).not.toContain('<fields>');
   });
 
   it('should return an empty string when lookups have empty content', () => {

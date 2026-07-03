@@ -146,6 +146,37 @@ describe('getTranslateQueryNode', () => {
     );
   });
 
+  it('should preserve lookup resource context when field metadata is unavailable', async () => {
+    const node = getTranslateQueryNode(mockParams);
+    const state = {
+      ...baseState,
+      resources: {
+        lookup: [
+          {
+            type: 'lookup',
+            name: 'threat_intel_ip',
+            content: 'lookup_default_threat_intel_ip',
+          },
+        ],
+      },
+    } as TranslateDashboardPanelState;
+
+    await node(state, {});
+
+    expect(mockTranslateFn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        knowledgeBase: expect.stringContaining(
+          '<lookup_resource source_name="threat_intel_ip" index="lookup_default_threat_intel_ip">'
+        ),
+      })
+    );
+    expect(mockTranslateFn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        knowledgeBase: expect.not.stringContaining('<fields>'),
+      })
+    );
+  });
+
   it('should combine resolved resource context and lookup resources in the knowledge base', async () => {
     const indexResourceContext = 'resolved index mapping and sampled values';
     mockFormatResourceWithSampledValues.mockReturnValue(indexResourceContext);

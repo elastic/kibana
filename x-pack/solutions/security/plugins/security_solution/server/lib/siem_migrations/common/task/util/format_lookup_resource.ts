@@ -9,7 +9,7 @@ import type { EnrichedLookupResource } from './enrich_lookup_resources';
 
 export const formatLookupResourcesContext = (lookups: EnrichedLookupResource[]): string => {
   const resourceBlocks = lookups
-    .filter((lookup) => lookup.content && lookup.fields?.length)
+    .filter((lookup) => lookup.content)
     .map((lookup) => {
       const fields = (lookup.fields ?? [])
         .map(
@@ -19,13 +19,16 @@ export const formatLookupResourcesContext = (lookups: EnrichedLookupResource[]):
             )}" />`
         )
         .join('\n');
+      const fieldsBlock = fields
+        ? `
+<fields>
+${fields}
+</fields>`
+        : '';
 
       return `<lookup_resource source_name="${escapeXmlAttribute(
         lookup.name
-      )}" index="${escapeXmlAttribute(lookup.content)}">
-<fields>
-${fields}
-</fields>
+      )}" index="${escapeXmlAttribute(lookup.content)}">${fieldsBlock}
 </lookup_resource>`;
     });
 
