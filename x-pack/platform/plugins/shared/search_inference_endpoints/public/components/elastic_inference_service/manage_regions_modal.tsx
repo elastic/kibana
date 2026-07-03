@@ -190,10 +190,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     const allowedRegions = availableRegions
       .filter((r) => checkedKeys.has(regionKey(r)))
       .map(({ csp, region }) => ({ csp, region }));
-    // Always PUT the explicit list — even when all regions are selected.
-    // DELETE means "no policy, any future regions are also allowed by default",
-    // whereas PUT with the full list means only those explicit regions are allowed
-    // and newly added regions won't be permitted until the user updates preferences.
+
     savePolicy({ allowed_regions: allowedRegions }, { onSuccess: onClose });
   }, [availableRegions, checkedKeys, savePolicy, onClose]);
 
