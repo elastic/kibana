@@ -175,7 +175,7 @@ function WorkflowGraphNodePreview({
   label: string;
   palette: NodePalette;
   renderStepIcon?: ReturnType<typeof useWorkflowGraphActions>['renderStepIcon'];
-  iconType: string | React.ComponentType<unknown>;
+  iconType: string | React.ComponentType<{}>;
 }) {
   return (
     <>
@@ -307,7 +307,7 @@ function WorkflowGraphNodeRetryBadge({
           paddingTop: 4,
           paddingBottom: 4,
           borderRadius: 999,
-          background: euiTheme.colors.warningSubdued,
+          background: euiTheme.colors.warning,
           color: euiTheme.colors.warningText,
           fontFamily: euiTheme.font.family,
           fontSize: 12,
