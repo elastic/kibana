@@ -205,11 +205,16 @@ EOF
 
         # Gating decision, emitted once to avoid duplicate `soft_fail` YAML keys.
         #
-        # 1. Additive OSS/LiteLLM subject models are exploratory: they emit
-        #    scores to the matrix (OSS-facing signal) but must NOT gate the
-        #    weekly green. EIS subject models stay hard-gating; only the
-        #    litellm-* lane is soft_fail, so a weaker OSS model underperforming
-        #    doesn't red the weekly. Additive-lane contract, scoped to the lane.
+        # 1. Additive OSS subject models are exploratory: they emit scores to
+        #    the matrix (OSS-facing signal) but must NOT gate the weekly green.
+        #    Frontier EIS subject models (Claude, Gemini, GPT-5, ...) stay
+        #    hard-gating. Both OSS lanes are soft_fail: the litellm-* gateway
+        #    lane AND the EIS-served open-weights gpt-oss lane
+        #    (eis-openai-gpt-oss-*), which is an OSS model that underperforms on
+        #    quality thresholds (e.g. streams pipeline_suggestion, agent-builder
+        #    prebuilt-rule recommendation) and would otherwise red an
+        #    already-green frontier run. Weaker OSS models underperforming must
+        #    not red the weekly. Additive-lane contract, scoped to the OSS lanes.
         # 2. Cross-team suites (significant-events, agent-builder-dashboards,
         #    streams) have their own owners, Slack channels, and hard gate on
         #    the pipeline default branch. On iteration branches (e.g. the
@@ -221,7 +226,7 @@ EOF
         #    gate on main and the iteration build isn't blocked by
         #    separately-owned, out-of-scope failures.
         should_soft_fail="false"
-        if [[ "$connector_id" == litellm-* ]]; then
+        if [[ "$connector_id" == litellm-* || "$connector_id" == eis-openai-gpt-oss-* ]]; then
           should_soft_fail="true"
         fi
         EVAL_DEFAULT_BRANCH="${BUILDKITE_PIPELINE_DEFAULT_BRANCH:-main}"
