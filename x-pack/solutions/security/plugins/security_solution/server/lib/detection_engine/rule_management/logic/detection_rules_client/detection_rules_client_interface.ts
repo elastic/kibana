@@ -126,13 +126,7 @@ export interface RestoreRuleFromHistoryArgs {
 
 export interface BulkCreatePrebuiltRulesArgs {
   rules: PrebuiltRuleAsset[];
-  /**
-   * Total number of rules being installed across all batches, when the caller
-   * splits a large install into multiple bulkCreatePrebuiltRules calls. Used
-   * as change-tracking metadata instead of this call's own batch size, so the
-   * tracked count reflects the size of the overall install, not one batch.
-   */
-  bulkCount?: number;
+  changeTracking?: SecurityRuleChangeTracking<never>;
 }
 
 export interface BulkCreatePrebuiltRulesResult {

@@ -116,7 +116,7 @@ export const performRuleInstallationHandler = async (
       const { assets: ruleAssets } = await ruleAssetsClient.fetchAssetsByVersion(batch);
       const { results, errors } = await detectionRulesClient.bulkCreatePrebuiltRules({
         rules: ruleAssets,
-        bulkCount: ruleInstallQueue.length,
+        changeTracking: { metadata: { bulkCount: ruleInstallQueue.length } },
       });
       installedRules.push(...results.map((rule) => pick(rule, ['id', 'rule_id', 'version'])));
       ruleErrors.push(

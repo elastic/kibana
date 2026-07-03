@@ -91,7 +91,8 @@ export const bulkCreatePrebuiltRules = async ({
       rules: bulkInputs,
       changeTracking: {
         action: SecurityRuleChangeTrackingAction.ruleInstall,
-        metadata: { bulkCount: args.bulkCount ?? rules.length },
+        ...args.changeTracking,
+        metadata: { bulkCount: rules.length, ...args.changeTracking?.metadata },
       },
     });
 

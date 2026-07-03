@@ -411,7 +411,10 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
       total: 3,
     });
 
-    await detectionRulesClient.bulkCreatePrebuiltRules({ rules, bulkCount: 1000 });
+    await detectionRulesClient.bulkCreatePrebuiltRules({
+      rules,
+      changeTracking: { metadata: { bulkCount: 1000 } },
+    });
 
     expect(rulesClient.bulkCreateRules).toHaveBeenCalledWith(
       expect.objectContaining({
