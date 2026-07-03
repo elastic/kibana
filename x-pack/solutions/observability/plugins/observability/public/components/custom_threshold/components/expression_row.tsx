@@ -183,10 +183,18 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       badge={
         displayWarningThreshold && (
           <EuiHealth color="danger" style={{ marginLeft: 8 }}>
-            <FormattedMessage
-              id="xpack.observability.customThreshold.rule.alertFlyout.criticalThreshold"
-              defaultMessage="Alert"
-            />
+            <span>
+              <FormattedMessage
+                id="xpack.observability.customThreshold.rule.alertFlyout.criticalThreshold"
+                defaultMessage="Alert"
+              />{' '}
+              <span style={{ fontSize: '0.8em', opacity: 0.65 }}>
+                <FormattedMessage
+                  id="xpack.observability.customThreshold.rule.alertFlyout.criticalThresholdSeverityLabel"
+                  defaultMessage="(severity: critical)"
+                />
+              </span>
+            </span>
           </EuiHealth>
         )
       }
