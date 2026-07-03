@@ -61,7 +61,7 @@ jest.mock('../../../lib/kibana', () => {
         },
       },
     }),
-    useUiSetting: mockUseUiSetting,
+    useUiSetting: (...args: Parameters<typeof mockUseUiSetting>) => mockUseUiSetting(...args),
   };
 });
 jest.mock('../../../../flyout_v2/shared/components/flyout_provider', () => ({
