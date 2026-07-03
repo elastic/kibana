@@ -176,17 +176,18 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
   const bulkSelectionMutation = useMutation<
     RuleAttachmentSelection,
     RuleAttachmentError,
-    BulkSelectionAction
+    { action: BulkSelectionAction; query: string }
   >({
     mutationKey: [...RULE_ATTACHMENT_SELECTION_QUERY_KEY, normalizedRuleQuery],
-    mutationFn: async () => {
-      return fetchAlertAnalysisWorkflowRuleAttachmentSelection({
-        http,
-        search: normalizedRuleQuery,
-      });
+    // Take the query as a mutation variable rather than closing over normalizedRuleQuery: react-query
+    // rebinds onSuccess to the latest render's options even while a mutation is in flight, so a
+    // closed-over value would reflect a search the user typed after clicking this button, not the
+    // one the fetch below actually ran against.
+    mutationFn: async ({ query }) => {
+      return fetchAlertAnalysisWorkflowRuleAttachmentSelection({ http, search: query });
     },
-    onSuccess: ({ attachedRuleIds, ruleIds }, action) => {
-      setBulkSelection({ query: normalizedRuleQuery, attachedRuleIds, ruleIds });
+    onSuccess: ({ attachedRuleIds, ruleIds }, { action, query }) => {
+      setBulkSelection({ query, attachedRuleIds, ruleIds });
 
       setSelectedRuleIds(action === 'select' ? [...new Set([...attachedRuleIds, ...ruleIds])] : []);
     },
@@ -560,7 +561,12 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                     disabled={bulkSelectionButtonDisabled}
                     iconType="pagesSelect"
                     isLoading={bulkSelectionMutation.isLoading}
-                    onClick={() => bulkSelectionMutation.mutate(bulkSelectionButtonAction)}
+                    onClick={() =>
+                      bulkSelectionMutation.mutate({
+                        action: bulkSelectionButtonAction,
+                        query: normalizedRuleQuery,
+                      })
+                    }
                     size="s"
                   >
                     {bulkSelectionButtonAction === 'select' ? (

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -298,5 +298,93 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
         new Set([...PAGE_1_RULES.map((rule) => rule.id), ...PAGE_2_RULES.map((rule) => rule.id)])
       );
     });
+  });
+
+  it('does not tag a bulk selection with a search typed after it was dispatched', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('Rule 1')).toBeInTheDocument();
+    });
+
+    const MALWARE_RULE = {
+      id: 'malware-rule-1',
+      name: 'Malware Rule',
+      enabled: true,
+      attached: false,
+    };
+
+    // Defer the selection fetch so this test can change the search query before it resolves.
+    let resolveSelectionFetch: (value: unknown) => void = () => {};
+    const selectionPromise = new Promise((resolve) => {
+      resolveSelectionFetch = resolve;
+    });
+
+    coreStart.http.fetch.mockImplementation(async (...args: unknown[]) => {
+      const [path, options] = args as [
+        string,
+        { method?: string; query?: Record<string, unknown>; body?: string }
+      ];
+
+      if (path === ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE) {
+        return selectionPromise;
+      }
+
+      if (path === ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE) {
+        const body = options?.body ? JSON.parse(options.body) : {};
+        return body.search === 'malware'
+          ? { total: 1, attached: 0 }
+          : { total: TOTAL_RULES, attached: ATTACHED_RULES };
+      }
+
+      if (path === ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE) {
+        const search = (options?.query?.search as string) ?? '';
+        const page = (options?.query?.page as number) ?? 1;
+        const rules =
+          search === 'malware' ? [MALWARE_RULE] : page === 1 ? PAGE_1_RULES : PAGE_2_RULES;
+        return {
+          page,
+          perPage: PER_PAGE,
+          total: search === 'malware' ? 1 : TOTAL_RULES,
+          attached: search === 'malware' ? 0 : ATTACHED_RULES,
+          rules,
+        };
+      }
+
+      return {};
+    });
+
+    // Click "Select all" while the search box is still empty; the selection fetch it triggers
+    // won't resolve until resolveSelectionFetch is called below.
+    await userEvent.click(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentSelectAllButton'));
+
+    // Change the search before the pending selection fetch above resolves.
+    const searchField = screen.getByTestId('alertAnalysisWorkflowRuleAttachmentQuery');
+    fireEvent.change(searchField, { target: { value: 'malware' } });
+    fireEvent.keyDown(searchField, { key: 'Enter' });
+
+    await waitFor(() => {
+      expect(screen.getByText('Malware Rule')).toBeInTheDocument();
+    });
+
+    // Resolve the fetch, which actually ran against the *original* (empty) search.
+    resolveSelectionFetch({
+      total: TOTAL_RULES,
+      attached: ATTACHED_RULES,
+      selectable: TOTAL_RULES - ATTACHED_RULES,
+      attachedRuleIds: PAGE_1_RULES.map((rule) => rule.id),
+      ruleIds: PAGE_2_RULES.map((rule) => rule.id),
+    });
+
+    // Wait for a signal that only appears once onSuccess has actually run (the selected-count
+    // text updates to the resolved ids), before checking the button label below. Otherwise a
+    // waitFor on the button label alone can pass on a stale, pre-resolution render.
+    await waitFor(() => {
+      expect(screen.getByText(`Selected ${TOTAL_RULES} rules`)).toBeInTheDocument();
+    });
+
+    // The resolved selection belongs to the old search, not "malware", so the single
+    // currently-displayed "malware" match must not be reported as fully selected.
+    expect(screen.getByText('Select all 1 rule')).toBeInTheDocument();
   });
 });
