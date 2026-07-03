@@ -25,7 +25,7 @@ export const disableRuleStepCommonDefinition: BaseStepDefinition<
   }),
   description: i18n.translate('xpack.securitySolution.workflows.steps.disableRule.description', {
     defaultMessage:
-      'Disable one or more detection rules. The whole step fails if any selected rule fails (including "not found"); to handle outcomes per rule, use foreach over a search result.',
+      'Disable one or more detection rules. Succeeds when at least one selected rule is disabled, reporting any per-rule failures in `errors`; fails only when every selected rule fails (including "not found"). To handle outcomes per rule, use foreach over a search result.',
   }),
   category: StepCategory.KibanaSecurity,
   inputSchema: disableRuleInputSchema,
@@ -35,7 +35,7 @@ export const disableRuleStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.disableRule.documentation.details',
       {
         defaultMessage:
-          'Disables detection rules selected by `ids` (rule UUIDs) or by a KQL `query`. Exactly one selector must be provided. Returns a summary with succeeded/failed/skipped counts.',
+          'Disables detection rules selected by `ids` (rule UUIDs) or by a KQL `query`. Exactly one selector must be provided. Returns a summary with succeeded/failed/skipped counts, plus an `errors` array describing each rule that failed on a partial success.',
       }
     ),
     examples: [

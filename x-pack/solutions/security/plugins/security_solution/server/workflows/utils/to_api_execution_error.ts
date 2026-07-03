@@ -9,7 +9,7 @@ import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 
 /**
- * Normalizes an error thrown while calling a detection-engine API from an alert workflow step
+ * Normalizes an error thrown while calling a detection-engine API from a security workflow step
  * into an `ExecutionError`.
  *
  * `callKibanaApi` throws `KibanaApiCallError` on any non-2xx response. We persist only the safe
@@ -18,9 +18,9 @@ import { ExecutionError } from '@kbn/workflows/server';
  * need the partial-success body can `catch (e) { if (e instanceof KibanaApiCallError) ... }`.
  *
  * @param error  The caught error.
- * @param action Short verb phrase for the failure message, e.g. `set alert tags`.
+ * @param action Short verb phrase for the failure message, e.g. `set alert tags`, `enable rules`.
  */
-export const toAlertApiExecutionError = (error: unknown, action: string): ExecutionError => {
+export const toApiExecutionError = (error: unknown, action: string): ExecutionError => {
   if (error instanceof ExecutionError) {
     return error;
   }

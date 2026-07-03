@@ -7,17 +7,17 @@
 
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
-import { toAlertApiExecutionError } from './to_alert_api_execution_error';
+import { toApiExecutionError } from './to_api_execution_error';
 
-describe('toAlertApiExecutionError', () => {
+describe('toApiExecutionError', () => {
   it('returns the same ExecutionError instance untouched', () => {
     const original = new ExecutionError({ type: 'ApiError', message: 'boom' });
 
-    expect(toAlertApiExecutionError(original, 'set alert tags')).toBe(original);
+    expect(toApiExecutionError(original, 'set alert tags')).toBe(original);
   });
 
   it('maps a KibanaApiCallError to an ExecutionError that persists only the scalar status', () => {
-    const error = toAlertApiExecutionError(
+    const error = toApiExecutionError(
       new KibanaApiCallError({
         status: 500,
         headers: { 'x-leaky-header': 'header-value' },
@@ -39,7 +39,7 @@ describe('toAlertApiExecutionError', () => {
   });
 
   it('wraps a generic Error using its message', () => {
-    const error = toAlertApiExecutionError(new Error('Network error'), 'assign alert');
+    const error = toApiExecutionError(new Error('Network error'), 'assign alert');
 
     expect(error).toBeInstanceOf(ExecutionError);
     expect(error.toSerializableObject()).toMatchObject({
@@ -49,7 +49,7 @@ describe('toAlertApiExecutionError', () => {
   });
 
   it('falls back to a generic message for non-Error throwables', () => {
-    const error = toAlertApiExecutionError('some string', 'set attack status');
+    const error = toApiExecutionError('some string', 'set attack status');
 
     expect(error.toSerializableObject()).toMatchObject({
       type: 'ApiError',

@@ -6,10 +6,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { BulkActionBase } from '../../../api/detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
+import {
+  BulkActionBase,
+  NormalizedRuleError,
+} from '../../../api/detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
 
 /**
- * Selector for a set of rules used by enable / disable style bulk actions.
+ * Selector for a set of rules targeted by a bulk action.
  *
  * Re-uses the `ids` / `query` shapes from the API's `BulkActionBase`. The
  * "exactly one of" rule is documented but NOT enforced by the generated zod
@@ -25,16 +28,15 @@ export const bulkRuleSelectorSchema = BulkActionBase.pick({
 });
 
 /**
- * Common response summary returned by `_bulk_action` for enable / disable.
- *
- * No `success` field: the step throws on failure, so a returned value already
- * means the API call succeeded. Use the per-rule counters to branch.
+ * Summary of a `_bulk_action` result: per-rule counters plus the `errors` for
+ * any rules that failed.
  */
 export const bulkRuleSummaryOutputSchema = z.object({
   succeeded: z.number().int().nonnegative(),
   failed: z.number().int().nonnegative(),
   skipped: z.number().int().nonnegative(),
   total: z.number().int().nonnegative(),
+  errors: z.array(NormalizedRuleError).optional(),
 });
 
 export type BulkRuleSelector = z.infer<typeof bulkRuleSelectorSchema>;
