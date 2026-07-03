@@ -31,7 +31,8 @@ import { EndpointField } from './endpoint_field';
 import { useApiEndpoints } from './use_api_endpoints';
 import { useApiKeys } from './use_api_keys';
 
-const LEARN_MORE_LINK = 'https://ela.st/connect-deployment-endpoints';
+const DIRECT_ENDPOINTS_DOCS_LINK = 'https://ela.st/connect-deployment-endpoints';
+const MANAGED_INPUTS_DOCS_LINK = 'https://www.elastic.co/docs/reference/opentelemetry/managed-inputs';
 
 const API_ENDPOINTS_SECTION_ID = 'apiEndpoints';
 const TITLE_ID = `${API_ENDPOINTS_SECTION_ID}Title`;
@@ -42,7 +43,7 @@ export const ApiEndpoints = () => {
   } = useKibana<ObservabilityOnboardingAppServices>();
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
-  const { endpoints, isLoading, isError } = useApiEndpoints();
+  const { endpoints, isLoading, isError, hasManagedOtlpServiceUrl } = useApiEndpoints();
   const { encodedApiKeys, creatingEndpointId, createApiKey } = useApiKeys();
   const canCreateApiKey = Boolean(application.capabilities.api_keys?.save);
   const [selectedEndpointId, setSelectedEndpointId] = useState<string | undefined>(undefined);
@@ -64,6 +65,18 @@ export const ApiEndpoints = () => {
     'xpack.observability_onboarding.apiEndpoints.openInApiKeys',
     { defaultMessage: 'Open in API keys' }
   );
+  const learnMoreLink = (
+    <EuiLink
+      href={hasManagedOtlpServiceUrl ? MANAGED_INPUTS_DOCS_LINK : DIRECT_ENDPOINTS_DOCS_LINK}
+      target="_blank"
+      external
+      data-test-subj="observabilityOnboardingApiEndpointsLearnMore"
+    >
+      {i18n.translate('xpack.observability_onboarding.apiEndpoints.learnMore', {
+        defaultMessage: 'Learn more',
+      })}
+    </EuiLink>
+  );
 
   return (
     <>
@@ -79,24 +92,19 @@ export const ApiEndpoints = () => {
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
           <p>
-            <FormattedMessage
-              id="xpack.observability_onboarding.apiEndpoints.subtitle"
-              defaultMessage="Access your deployment's endpoints and API keys directly. {learnMoreLink}"
-              values={{
-                learnMoreLink: (
-                  <EuiLink
-                    href={LEARN_MORE_LINK}
-                    target="_blank"
-                    external
-                    data-test-subj="observabilityOnboardingApiEndpointsLearnMore"
-                  >
-                    {i18n.translate('xpack.observability_onboarding.apiEndpoints.learnMore', {
-                      defaultMessage: 'Learn more',
-                    })}
-                  </EuiLink>
-                ),
-              }}
-            />
+            {hasManagedOtlpServiceUrl ? (
+              <FormattedMessage
+                id="xpack.observability_onboarding.apiEndpoints.managedInputsSubtitle"
+                defaultMessage="Send data to your deployment's managed inputs, using an API key. {learnMoreLink}"
+                values={{ learnMoreLink }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.observability_onboarding.apiEndpoints.subtitle"
+                defaultMessage="Access your deployment's endpoints and API keys directly. {learnMoreLink}"
+                values={{ learnMoreLink }}
+              />
+            )}
           </p>
         </EuiText>
         <EuiSpacer size="l" />

@@ -28,6 +28,7 @@ export function useApiEndpoints(): {
   endpoints: ResolvedApiEndpoint[];
   isLoading: boolean;
   isError: boolean;
+  hasManagedOtlpServiceUrl: boolean;
 } {
   const {
     services: {
@@ -58,7 +59,7 @@ export function useApiEndpoints(): {
 
     return API_ENDPOINTS.map((definition) => ({
       id: definition.id,
-      label: definition.getLabel?.(endpointContext) ?? definition.label,
+      label: definition.label,
       logo: definition.logo,
       euiIconType: definition.euiIconType,
       url: definition.getUrl(endpointContext),
@@ -71,5 +72,10 @@ export function useApiEndpoints(): {
     managedOtlpPrwEndpointEnabled,
   ]);
 
-  return { endpoints, isLoading: isPending(status), isError: status === FETCH_STATUS.FAILURE };
+  return {
+    endpoints,
+    isLoading: isPending(status),
+    isError: status === FETCH_STATUS.FAILURE,
+    hasManagedOtlpServiceUrl: Boolean(data?.managedOtlpServiceUrl?.trim()),
+  };
 }

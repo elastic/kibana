@@ -21,7 +21,6 @@ export interface ApiEndpointContext {
 export interface ApiEndpointDefinition {
   id: ApiEndpointId;
   label: string;
-  getLabel?: (context: ApiEndpointContext) => string;
   logo?: SupportedLogo;
   euiIconType?: EuiIconType;
   getUrl: (context: ApiEndpointContext) => string | undefined;
@@ -44,12 +43,6 @@ const elasticsearchLabel = i18n.translate(
   'xpack.observability_onboarding.apiEndpoints.elasticsearch.label',
   {
     defaultMessage: 'Elasticsearch',
-  }
-);
-const elasticsearchBulkLabel = i18n.translate(
-  'xpack.observability_onboarding.apiEndpoints.elasticsearchBulk.label',
-  {
-    defaultMessage: 'Elasticsearch bulk',
   }
 );
 
@@ -96,8 +89,6 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
   {
     id: ApiEndpointId.Elasticsearch,
     label: elasticsearchLabel,
-    getLabel: (context) =>
-      getManagedElasticsearchUrl(context) ? elasticsearchBulkLabel : elasticsearchLabel,
     euiIconType: 'logoElasticsearch',
     getUrl: (context) => {
       const managedUrl = getManagedElasticsearchUrl(context);
