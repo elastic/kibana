@@ -65,9 +65,9 @@ Do **not** use this skill when:
   } first just to build a query.
    - Only for genuinely complex aggregations or joins you want to control precisely: pre-generate with ${
      platformCoreTools.generateEsql
-   }, optionally validate the shape with ${
-     platformCoreTools.executeEsql
-   }, then hand the query to ${platformCoreTools.createVisualization} via \`esql\`.
+   }, optionally validate the shape with ${platformCoreTools.executeEsql}, then hand the query to ${
+    platformCoreTools.createVisualization
+  } via \`esql\`.
 
 3. **Call ${platformCoreTools.createVisualization}**
    - Provide:
