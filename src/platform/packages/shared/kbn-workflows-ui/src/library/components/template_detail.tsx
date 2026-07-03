@@ -100,7 +100,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(({ slug, onLoaded 
           <EuiFlexItem grow={false} css={{ width: '30%' }}>
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false} wrap>
+                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="l">
                       <h1>{metadata.name}</h1>
