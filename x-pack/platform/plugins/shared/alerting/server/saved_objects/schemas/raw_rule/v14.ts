@@ -28,10 +28,7 @@ const rawRuleSnoozeConditionSchema = schema.oneOf([
   }),
   schema.object({
     type: schema.literal('severity_equals'),
-    // Derived from the canonical severity list so accepted values can't drift
-    // from `kibana.alert.severity` producers. The field is a superset that
-    // includes warning/minor/major (emitted today by the APM anomaly rule),
-    // not only the primary critical/high/medium/low/info levels.
+    // Widened to the full severity superset.
     value: schema.oneOf(
       ALERT_SEVERITY_VALUES.map((severity) => schema.literal(severity)) as [Type<AlertSeverity>]
     ),
