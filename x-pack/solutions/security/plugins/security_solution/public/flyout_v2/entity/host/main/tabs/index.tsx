@@ -13,7 +13,7 @@ import { EntityStoreTableTab } from '../../../../../flyout/entity_details/shared
 import type { EntityStoreRecord } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { OverviewTab, type OverviewTabProps } from './overview_tab';
 
-export interface HostTabType extends EntityPanelTabType {
+interface HostTabType extends EntityPanelTabType {
   /** Content rendered when this tab is selected. */
   content: ReactElement;
 }
