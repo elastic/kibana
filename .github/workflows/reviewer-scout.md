@@ -128,6 +128,11 @@ safe-outputs:
     footer: false
   resolve-pull-request-review-thread:
     max: 10
+    # The default GITHUB_TOKEN (a GitHub App integration token) cannot resolve
+    # review threads via the GraphQL `resolveReviewThread` mutation and fails with
+    # "Resource not accessible by integration". Use the kibanamachine user PAT,
+    # which authenticates as a real user with write access and can resolve threads.
+    github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
 ---
 
 # Scout Test Reviewer
@@ -139,5 +144,6 @@ Using the imported reviewer instructions:
 - This reviewer's own gh-aw workflow id is `reviewer-scout`. Use it as "this reviewer's own workflow id" when matching review threads to resolve.
 
 For dispatched follow-up runs, use this context:
+
 - PR number: `${{ github.event.inputs.pr_number }}`
 - Comment id: `${{ github.event.inputs.comment_id }}`
