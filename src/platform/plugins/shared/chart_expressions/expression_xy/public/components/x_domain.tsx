@@ -91,13 +91,13 @@ export const getXDomain = (
   datatableUtilitites: DatatableUtilitiesService,
   layers: CommonXYDataLayerConfig[],
   minInterval: number | undefined,
-  isTimeViz: boolean,
+  isTimeVis: boolean,
   isHistogram: boolean,
   hasBars: boolean,
   timeZone: string,
   xExtent?: AxisExtentConfigResult
 ) => {
-  if (!isTimeViz) {
+  if (!isTimeVis) {
     const baseDomain = isHistogram ? { minInterval, min: NaN, max: NaN } : undefined;
 
     if (isFullyQualified(baseDomain)) {
