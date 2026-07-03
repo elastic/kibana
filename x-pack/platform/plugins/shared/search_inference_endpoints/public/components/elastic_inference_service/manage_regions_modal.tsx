@@ -228,7 +228,10 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           <>
             <EuiCallOut
               announceOnMount={false}
-              title={i18n.translate({ defaultMessage: 'Failed to load region data' })}
+              title={i18n.translate(
+                'xpack.searchInferenceEndpoints.manageRegions.errorCallout.title',
+                { defaultMessage: 'Failed to load region data' }
+              )}
               color="danger"
               iconType="error"
               data-test-subj="manageRegionsErrorCallout"
