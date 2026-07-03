@@ -705,7 +705,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       : undefined;
 
     // Batched agentless guard: missing or non-agentless ids become per-policy 404
-    // failures rather than failing the whole batch 
+    // failures rather than failing the whole batch
     const { agentlessPackagePolicies, guardFailures } = await this.partitionAgentlessPolicyIds(
       policyIds
     );
