@@ -11,18 +11,19 @@ if [[ "${BOOTSTRAP_ALWAYS_FORCE_INSTALL:-}" ]]; then
   BOOTSTRAP_PARAMS+=(--force-install)
 fi
 
-# Use the packages that are baked into the agent image, if they exist, as a cache
-# But only for agents not mounting the workspace on a local ssd or in memory
-# It actually ends up being slower to move all of the tiny files between the disks vs extracting archives from the yarn cache
+# Use packages baked into the agent image as a cache, but only when the workspace
+# is not on local ssd or in memory — moving many small files between disks is
+# slower than linking from the pnpm store.
 if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
   if [[ -d ~/.kibana/node_modules ]]; then
     echo "Using ~/.kibana/node_modules as a starting point"
     mv ~/.kibana/node_modules ./
   fi
-  if [[ -d ~/.kibana/.yarn-local-mirror ]]; then
-    echo "Using ~/.kibana/.yarn-local-mirror as a starting point"
-    mv ~/.kibana/.yarn-local-mirror ./
+  if [[ -d ~/.kibana/pnpm-store ]]; then
+    echo "Using ~/.kibana/pnpm-store as a starting point"
+    mv ~/.kibana/pnpm-store ./.pnpm-store
   fi
+  export npm_config_store_dir="$KIBANA_DIR/.pnpm-store"
   # Check if there's a cache artifact uploaded from a previous step
   if [[ -z "${KBN_BOOTSTRAP_NO_PREBUILT:-}" ]]; then
     if download_tmp_artifact moon-cache.tar.zst "$HOME" "$BUILDKITE_BUILD_ID" false; then

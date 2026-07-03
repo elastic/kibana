@@ -35,6 +35,7 @@ overrides:
   globby>fast-glob: 3.3.3
   hoist-non-react-statics: 3.3.2
   isomorphic-fetch>node-fetch: 2.7.0
+  module-replacements: 2.3.2
   pixelmatch: 5.3.0
   qs: 6.15.2
   remark-parse>trim: 1.0.1
@@ -21634,8 +21635,8 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  module-replacements@2.11.0:
-    resolution: {integrity: sha512-j5sNQm3VCpQQ7nTqGeOZtoJtV3uKERgCBm9QRhmGRiXiqkf7iRFOkfxdJRZWLkqYY8PNf4cDQF/WfXUYLENrRA==}
+  module-replacements@2.3.2:
+    resolution: {integrity: sha512-dK8FQwOCU0rKuqtS2kWIU6It0XrE8qYZWtDT6fK4BQPtcspQ9EjWo2V0hob2d6G1wvQ21q+b1HFHOp3E/0cQTg==}
 
   moment-duration-format@2.3.2:
     resolution: {integrity: sha512-cBMXjSW+fjOb4tyaVHuaVE/A5TqkukDWiOfxxAjY+PEqmmBQlLwn+8OzwPiG3brouXKY5Un4pBjAeB6UToXHaQ==}
@@ -37719,7 +37720,7 @@ snapshots:
   eslint-plugin-depend@0.12.0:
     dependencies:
       fd-package-json: 1.2.0
-      module-replacements: 2.11.0
+      module-replacements: 2.3.2
       semver: 7.8.0
 
   eslint-plugin-es@3.0.1(eslint@8.57.0):
@@ -42150,7 +42151,7 @@ snapshots:
       requirejs: 2.3.8
       requirejs-config-file: 4.0.0
 
-  module-replacements@2.11.0: {}
+  module-replacements@2.3.2: {}
 
   moment-duration-format@2.3.2: {}
 

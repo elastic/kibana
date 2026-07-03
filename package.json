@@ -2237,6 +2237,7 @@
       "globby>fast-glob": "3.3.3",
       "hoist-non-react-statics": "3.3.2",
       "isomorphic-fetch>node-fetch": "2.7.0",
+      "module-replacements": "2.3.2",
       "pixelmatch": "5.3.0",
       "qs": "6.15.2",
       "remark-parse>trim": "1.0.1",

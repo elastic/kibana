@@ -155,6 +155,9 @@ report.asciidoc
 # Yarn local mirror content
 .yarn-local-mirror
 
+# pnpm content store (seeded from CI agent image cache)
+.pnpm-store
+
 # Bazel | TODO: Remove later
 .ijwb
 /bazel

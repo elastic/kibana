@@ -35,7 +35,7 @@ regenerate_gh_aw_locks() {
   gh aw lint
 }
 
-echo --- Deduplicate yarn.lock
+echo --- Deduplicate pnpm-lock.yaml
 cmd="node scripts/yarn_deduplicate.js && pnpm kbn bootstrap && node scripts/yarn_deduplicate.js"
 eval "$cmd"
 
