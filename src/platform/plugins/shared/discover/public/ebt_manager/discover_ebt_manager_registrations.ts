@@ -169,7 +169,6 @@ export const registerDiscoverEBTManagerAnalytics = (
         type: 'keyword',
         _meta: {
           description: 'The fetch implementation used for the query request',
-          optional: true,
         },
       },
       [DISCOVER_QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND]: {

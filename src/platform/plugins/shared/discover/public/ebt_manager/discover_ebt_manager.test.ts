@@ -14,8 +14,7 @@ import { registerDiscoverEBTManagerAnalytics } from './discover_ebt_manager_regi
 import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import type { Request as InspectedRequest } from '@kbn/inspector-plugin/public';
-import { RequestStatus } from '@kbn/inspector-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import * as queryAnalysisUtils from './query_analysis_utils';
 import { NON_ECS_FIELD } from './scoped_discover_ebt_manager';
 import {
@@ -45,6 +44,21 @@ describe('DiscoverEBTManager', () => {
       }),
     }),
   } as unknown as FieldsMetadataPublicStart;
+
+  const createRequestAdapterWithRequests = (
+    requestDefinitions: Array<{ id: string; name: string; json: object }>
+  ) => {
+    const requestAdapter = new RequestAdapter();
+
+    for (const requestDefinition of requestDefinitions) {
+      requestAdapter
+        .start(requestDefinition.name, { id: requestDefinition.id }, 300)
+        .json(requestDefinition.json)
+        .ok({});
+    }
+
+    return requestAdapter;
+  };
 
   beforeEach(() => {
     discoverEBTContextManager = new DiscoverEBTManager();
@@ -176,7 +190,6 @@ describe('DiscoverEBTManager', () => {
             type: 'keyword',
             _meta: {
               description: 'The fetch implementation used for the query request',
-              optional: true,
             },
           },
           querySourceCommand: {
@@ -1056,16 +1069,10 @@ describe('DiscoverEBTManager', () => {
 
       jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
 
-      const tracker = scopedManager.trackQueryPerformanceEvent('testQueryEvent', {
-        esql: 'FROM logs-* | LIMIT 10',
-      });
-
-      const requests: InspectedRequest[] = [
+      const requestAdapter = createRequestAdapterWithRequests([
         {
           id: '0',
           name: 'request 0',
-          startTime: 0,
-          status: RequestStatus.OK,
           json: {
             query: {
               bool: {
@@ -1077,8 +1084,6 @@ describe('DiscoverEBTManager', () => {
         {
           id: '1',
           name: 'request 1',
-          startTime: 0,
-          status: RequestStatus.OK,
           json: {
             query: {
               multi_match: {
@@ -1088,17 +1093,20 @@ describe('DiscoverEBTManager', () => {
             },
           },
         },
-      ];
+      ]);
 
-      tracker.reportEvent(
-        {
-          queryRangeSeconds: 300,
-          requests,
+      const tracker = scopedManager.trackQueryPerformanceEvent({
+        eventName: 'testQueryEvent',
+        query: {
+          esql: 'FROM logs-* | LIMIT 10',
         },
-        {
-          meta: { fetchType: 'fetchTextBased', foo: 'bar' },
-        }
-      );
+        timeRange: {
+          from: '2024-01-01T00:00:00.000Z',
+          to: '2024-01-01T00:05:00.000Z',
+        },
+      });
+
+      tracker.reportEvent({ requestAdapter });
 
       expect(reportPerformanceMetricEvent).toHaveBeenCalledWith(coreSetupMock.analytics, {
         eventName: 'testQueryEvent',
@@ -1109,7 +1117,6 @@ describe('DiscoverEBTManager', () => {
         value2: 2, // 1 match_phrase + 1 multi_match type=phrase
         meta: {
           fetchType: 'fetchTextBased',
-          foo: 'bar',
           multi_match_types: ['match_phrase', 'phrase'],
         },
       });
@@ -1139,13 +1146,18 @@ describe('DiscoverEBTManager', () => {
 
       jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
 
-      const tracker = scopedManager.trackQueryPerformanceEvent('testQueryEvent', {
-        esql: 'PROMQL index=metrics step=1m start=?_tstart end=?_tend (avg(cpu_usage))',
+      const tracker = scopedManager.trackQueryPerformanceEvent({
+        eventName: 'testQueryEvent',
+        query: {
+          esql: 'PROMQL index=metrics step=1m start=?_tstart end=?_tend (avg(cpu_usage))',
+        },
+        timeRange: {
+          from: '2024-01-01T00:00:00.000Z',
+          to: '2024-01-01T00:05:00.000Z',
+        },
       });
 
-      tracker.reportEvent({
-        queryRangeSeconds: 300,
-      });
+      tracker.reportEvent({ requestAdapter: undefined });
 
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
         'discover_query_performance',
@@ -1155,6 +1167,7 @@ describe('DiscoverEBTManager', () => {
           queryRangeSeconds: 300,
           phraseQueryCount: 0,
           multiMatchTypes: [],
+          fetchType: 'fetchTextBased',
           querySourceCommand: 'PROMQL',
         }
       );
@@ -1171,14 +1184,19 @@ describe('DiscoverEBTManager', () => {
 
       jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
 
-      const tracker = scopedManager.trackQueryPerformanceEvent('testQueryEvent', {
-        language: 'kuery',
-        query: 'message: test',
+      const tracker = scopedManager.trackQueryPerformanceEvent({
+        eventName: 'testQueryEvent',
+        query: {
+          language: 'kuery',
+          query: 'message: test',
+        },
+        timeRange: {
+          from: '2024-01-01T00:00:00.000Z',
+          to: '2024-01-01T00:05:00.000Z',
+        },
       });
 
-      tracker.reportEvent({
-        queryRangeSeconds: 300,
-      });
+      tracker.reportEvent({ requestAdapter: undefined });
 
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
         'discover_query_performance',
@@ -1188,6 +1206,7 @@ describe('DiscoverEBTManager', () => {
           queryRangeSeconds: 300,
           phraseQueryCount: 0,
           multiMatchTypes: [],
+          fetchType: 'fetchDocuments',
         }
       );
     });
@@ -1202,32 +1221,41 @@ describe('DiscoverEBTManager', () => {
       scopedManager.setAsActiveManager();
 
       const analyzeSpy = jest.spyOn(queryAnalysisUtils, 'analyzeMultiMatchTypesRequest');
+      jest.spyOn(window.performance, 'now').mockReturnValue(250);
 
-      const request: InspectedRequest = {
-        id: '0',
-        name: 'test request',
-        startTime: 0,
-        status: RequestStatus.OK,
-        json: {
-          query: {
-            bool: {
-              must: [{ match_phrase: { message: 'foo bar' } }],
+      const requestAdapter = createRequestAdapterWithRequests([
+        {
+          id: '0',
+          name: 'test request',
+          json: {
+            query: {
+              bool: {
+                must: [{ match_phrase: { message: 'foo bar' } }],
+              },
             },
           },
         },
-      };
+      ]);
 
-      const tracker1 = scopedManager.trackQueryPerformanceEvent('testQueryEvent1', undefined);
-      tracker1.reportEvent({
-        queryRangeSeconds: 300,
-        requests: [request],
+      const tracker1 = scopedManager.trackQueryPerformanceEvent({
+        eventName: 'testQueryEvent1',
+        query: undefined,
+        timeRange: {
+          from: '2024-01-01T00:00:00.000Z',
+          to: '2024-01-01T00:05:00.000Z',
+        },
       });
+      tracker1.reportEvent({ requestAdapter });
 
-      const tracker2 = scopedManager.trackQueryPerformanceEvent('testQueryEvent2', undefined);
-      tracker2.reportEvent({
-        queryRangeSeconds: 300,
-        requests: [request],
+      const tracker2 = scopedManager.trackQueryPerformanceEvent({
+        eventName: 'testQueryEvent2',
+        query: undefined,
+        timeRange: {
+          from: '2024-01-01T00:00:00.000Z',
+          to: '2024-01-01T00:05:00.000Z',
+        },
       });
+      tracker2.reportEvent({ requestAdapter });
 
       expect(analyzeSpy).toHaveBeenCalledTimes(1);
 
