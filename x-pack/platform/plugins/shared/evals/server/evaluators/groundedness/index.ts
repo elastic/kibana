@@ -5,24 +5,12 @@
  * 2.0.
  */
 
-import type { ToolChoice } from '@kbn/inference-common';
-import pRetry from 'p-retry';
+import { runLlmJudge } from '../llm_judge';
 import type { EvaluatorDefinition } from '../types';
 import { IncompleteGroundednessEvidenceError, extractGroundednessEvidence } from './extractor';
 import { LlmGroundednessEvaluationPrompt } from './prompt';
 import { calculateGroundednessScore } from './scoring';
 import type { GroundednessAnalysis } from './types';
-
-const getGroundednessAnalysis = (response: {
-  toolCalls?: Array<{ function: { arguments: unknown } }>;
-}): GroundednessAnalysis | undefined => {
-  const firstToolCall = response.toolCalls?.[0];
-  if (!firstToolCall) {
-    return undefined;
-  }
-
-  return firstToolCall.function.arguments as GroundednessAnalysis;
-};
 
 export const groundednessEvaluator: EvaluatorDefinition = {
   name: 'groundedness',
@@ -55,29 +43,16 @@ export const groundednessEvaluator: EvaluatorDefinition = {
       throw error;
     }
 
-    const response = await pRetry(
-      async () => {
-        return inferenceClient.prompt({
-          prompt: LlmGroundednessEvaluationPrompt,
-          input: {
-            user_query: evidence.user_query,
-            agent_response: evidence.agent_response,
-            tool_call_history: JSON.stringify(evidence.tool_call_history),
-          },
-          toolChoice: {
-            function: 'analyze',
-          } as ToolChoice,
-        });
+    const analysis = await runLlmJudge<GroundednessAnalysis>({
+      inferenceClient,
+      prompt: LlmGroundednessEvaluationPrompt,
+      toolName: 'analyze',
+      input: {
+        user_query: evidence.user_query,
+        agent_response: evidence.agent_response,
+        tool_call_history: JSON.stringify(evidence.tool_call_history),
       },
-      {
-        retries: 3,
-      }
-    );
-
-    const analysis = getGroundednessAnalysis(response);
-    if (!analysis) {
-      throw new Error('No tool call in judge response');
-    }
+    });
 
     return {
       scores: [

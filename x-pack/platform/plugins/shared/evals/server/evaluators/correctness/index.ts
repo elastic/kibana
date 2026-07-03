@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { ToolChoice } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
-import pRetry from 'p-retry';
 import { extractChatEvidence } from '../chat_evidence';
+import { runLlmJudge } from '../llm_judge';
 import type { EvaluatorDefinition } from '../types';
 import { LlmCorrectnessEvaluationPrompt } from './prompt';
 import {
@@ -17,17 +16,6 @@ import {
   calculateRelevanceScore,
 } from './scoring';
 import type { CorrectnessAnalysis } from './types';
-
-const getCorrectnessAnalysis = (response: {
-  toolCalls?: Array<{ function: { arguments: unknown } }>;
-}): CorrectnessAnalysis | undefined => {
-  const firstToolCall = response.toolCalls?.[0];
-  if (!firstToolCall) {
-    return undefined;
-  }
-
-  return firstToolCall.function.arguments as CorrectnessAnalysis;
-};
 
 const referenceDataSchema = z.object({
   expected: z
@@ -51,29 +39,16 @@ export const correctnessEvaluator: EvaluatorDefinition<z.infer<typeof referenceD
 
     const chatEvidence = await extractChatEvidence(trace);
 
-    const response = await pRetry(
-      async () => {
-        return inferenceClient.prompt({
-          prompt: LlmCorrectnessEvaluationPrompt,
-          input: {
-            user_query: chatEvidence.user_query,
-            agent_response: chatEvidence.agent_response,
-            ground_truth_response: referenceData!.expected,
-          },
-          toolChoice: {
-            function: 'analyze',
-          } as ToolChoice,
-        });
+    const analysis = await runLlmJudge<CorrectnessAnalysis>({
+      inferenceClient,
+      prompt: LlmCorrectnessEvaluationPrompt,
+      toolName: 'analyze',
+      input: {
+        user_query: chatEvidence.user_query,
+        agent_response: chatEvidence.agent_response,
+        ground_truth_response: referenceData!.expected,
       },
-      {
-        retries: 3,
-      }
-    );
-
-    const analysis = getCorrectnessAnalysis(response);
-    if (!analysis) {
-      throw new Error('No tool call in judge response');
-    }
+    });
 
     return {
       scores: [
