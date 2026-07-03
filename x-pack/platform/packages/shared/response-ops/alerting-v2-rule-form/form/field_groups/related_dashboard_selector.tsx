@@ -28,6 +28,7 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { useController, useFormContext } from 'react-hook-form';
 import { useRuleFormServices } from '../contexts';
+import { OptionalFieldLabel } from '../components/optional_field_label';
 import type { FormValues } from '../types';
 import {
   resolveDashboardsByIds,
@@ -332,14 +333,7 @@ export const RelatedDashboardSelector: React.FC = () => {
           </span>
         }
         fullWidth
-        labelAppend={
-          <EuiText size="xs">
-            <FormattedMessage
-              id="xpack.alertingV2.ruleForm.artifactFieldOptional"
-              defaultMessage="optional"
-            />
-          </EuiText>
-        }
+        labelAppend={OptionalFieldLabel}
       >
         <RelatedDashboardsComboBox
           dashboard={dashboard}

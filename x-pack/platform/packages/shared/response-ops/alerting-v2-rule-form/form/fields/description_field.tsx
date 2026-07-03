@@ -11,6 +11,7 @@ import { EuiFormRow, EuiTextArea } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { useRuleFormMeta } from '../contexts';
+import { OptionalFieldLabel } from '../components/optional_field_label';
 
 const DESCRIPTION_ROW_ID = 'ruleV2FormDescriptionField';
 
@@ -28,6 +29,7 @@ export const DescriptionField = () => {
           label={i18n.translate('xpack.alertingV2.ruleForm.descriptionLabel', {
             defaultMessage: 'Description',
           })}
+          labelAppend={OptionalFieldLabel}
           fullWidth
           isInvalid={!!error}
           error={error?.message}
@@ -40,7 +42,7 @@ export const DescriptionField = () => {
             isInvalid={!!error}
             compressed={layout === 'flyout'}
             placeholder={i18n.translate('xpack.alertingV2.ruleForm.descriptionPlaceholder', {
-              defaultMessage: 'Add an optional description for this rule...',
+              defaultMessage: 'Add a description for this rule...',
             })}
             data-test-subj="ruleDescriptionInput"
           />

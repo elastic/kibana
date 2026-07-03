@@ -38,8 +38,14 @@ describe('DescriptionField', () => {
     render(<DescriptionField />, { wrapper: createFormWrapper() });
 
     expect(
-      screen.getByPlaceholderText('Add an optional description for this rule...')
+      screen.getByPlaceholderText('Add a description for this rule...')
     ).toBeInTheDocument();
+  });
+
+  it('renders the optional field label', () => {
+    render(<DescriptionField />, { wrapper: createFormWrapper() });
+
+    expect(screen.getByTestId('form-optional-field-label')).toHaveTextContent('optional');
   });
 
   it('updates value when user types in textarea', async () => {
