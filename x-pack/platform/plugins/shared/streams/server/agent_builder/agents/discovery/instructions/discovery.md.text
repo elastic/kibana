@@ -417,5 +417,3 @@ Translate your investigation findings into this structured format. Output discip
   - **Ceiling**: 90+ requires all three: `p_value ≤ 0.01`, ≥2 confirmed evidences, KI backing present. Do not exceed 85 when any evidence is empty or any query was skipped.
 
 </output_properties>
-
-

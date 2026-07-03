@@ -8,7 +8,7 @@
 import type { Evaluator, Example } from '@kbn/evals';
 import { selectEvaluators } from '@kbn/evals';
 
-/** One analyst invocation in a sequential "detections over time" run. */
+/** One discovery agent invocation in a sequential "detections over time" run. */
 export interface ContinuationCycle {
   /** rule_name of the detection fed this cycle — for human-readable explanations only. */
   ruleName?: string;
@@ -92,7 +92,7 @@ export function scoreContinuationStability(
   };
 }
 
-/** Output shape produced by the sequential "continuation over time" analyst task. */
+/** Output shape produced by the sequential "continuation over time" discovery agent. */
 export interface ContinuationStabilityOutput {
   cycles: ContinuationCycle[];
 }

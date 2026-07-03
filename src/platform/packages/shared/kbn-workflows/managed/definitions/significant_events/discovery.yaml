@@ -391,8 +391,8 @@ steps:
   - name: snapshot_discoveries
     type: data.set
     with:
-      discoveries: '${{ steps.run_analyst_agent.output.structured_output.discoveries }}'
-      conversation_id: '{{ steps.run_analyst_agent.output.conversation_id }}'
+      discoveries: '${{ steps.run_discovery_agent.output.structured_output.discoveries }}'
+      conversation_id: '{{ steps.run_discovery_agent.output.conversation_id }}'
 
   - name: foreach_discovery
     type: foreach
@@ -512,7 +512,7 @@ steps:
     # Skip handled-stamping if the agent failed, so its detections are retried next cycle.
     if: >-
       ${{ steps.compute_stamp_rule_uuids.output.stamp_rule_uuids.size > 0
-      and steps.run_analyst_agent.error == null }}
+      and steps.run_discovery_agent.error == null }}
     type: elasticsearch.request
     with:
       method: POST
