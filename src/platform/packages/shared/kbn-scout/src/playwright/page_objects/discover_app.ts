@@ -190,7 +190,7 @@ export class DiscoverApp {
 
   async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
     await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
-    await this.page.testSubj.hover('dscHideSidebarButton'); // cancel tooltips
+    await this.page.mouse.move(0, 0); // cancel tooltips
     await this.waitForDiscoverPage();
     await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
   }
@@ -664,6 +664,11 @@ export class DiscoverApp {
 
   async getEsqlQueryValue(nthIndex: number = 0): Promise<string> {
     return this.codeEditor.getCodeEditorValue(nthIndex);
+  }
+
+  async openSidebar() {
+    await this.page.testSubj.locator('dscShowSidebarButton').click();
+    await this.waitUntilFieldListHasCountOfFields();
   }
 
   async addBreakdownFieldFromSidebar(
