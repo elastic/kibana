@@ -69,6 +69,7 @@ export function DateRangePickerControl() {
     onInputChange,
     width,
     disabled,
+    readOnly,
     isLoading,
     settings,
     hasAutoRefresh,
@@ -237,6 +238,7 @@ export function DateRangePickerControl() {
         compressed={compressed}
         isInvalid={isInvalid}
         isDisabled={disabled}
+        readOnly={readOnly}
         isLoading={isLoading}
         fullWidth={width !== 'auto'}
         clear={isEditing && text !== '' ? { onClick: onInputClear } : undefined}
@@ -264,7 +266,7 @@ export function DateRangePickerControl() {
             controlOnly
             value={text}
             isInvalid={isInvalid}
-            disabled={disabled}
+            disabled={disabled || readOnly}
             fullWidth={width !== 'auto'}
             onChange={handleInputChange}
             onKeyDown={onInputKeyDown}
@@ -302,14 +304,14 @@ export function DateRangePickerControl() {
               aria-label={collapsed ? displayText : undefined}
               onClick={onButtonClick}
               isInvalid={isInvalid}
-              disabled={disabled}
+              disabled={disabled || readOnly}
               compressed={compressed}
             >
               {!collapsed && (
                 <DateRangeValueDisplay
                   displayText={displayText}
                   onPartClick={handleDisplayPartClick}
-                  disabled={disabled}
+                  disabled={disabled || readOnly}
                 />
               )}
               {!hideBadge && (
