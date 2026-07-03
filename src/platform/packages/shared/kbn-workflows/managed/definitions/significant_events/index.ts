@@ -12,6 +12,12 @@ import DISCOVERY_YAML from './discovery.yaml';
 import ORCHESTRATOR_YAML from './orchestrator.yaml';
 import TRIAGE_YAML from './triage.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
+export {
+  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW,
+  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW,
+  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+} from './scheduled';
 
 export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID = 'system-significant-events-detection';
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID = 'system-significant-events-discovery';
@@ -39,7 +45,7 @@ export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW = {
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 3,
+  version: 4,
   billable: false,
   yaml: DISCOVERY_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
@@ -48,7 +54,7 @@ export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW = {
 export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 1,
+  version: 2,
   billable: false,
   yaml: ORCHESTRATOR_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
@@ -57,7 +63,7 @@ export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW = {
 export const SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 4,
+  version: 5,
   billable: false,
   yaml: TRIAGE_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,

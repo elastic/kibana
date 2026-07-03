@@ -42,8 +42,11 @@ interface BaseLifecyclePhaseProps {
   onUpgradeEnterprise?: () => void;
   showDefaultRepositoryCallout?: boolean;
   onCreateDefaultRepository?: () => void;
+  createDefaultRepositoryHref?: string;
   onRefreshDefaultRepository?: () => void;
   isRefreshingDefaultRepository?: boolean;
+  /** Stable schema phase id (e.g. 'frozen'). Separate from `label` which is a localized string. */
+  name?: string;
   label: string;
   minAge?: string;
   onClick?: () => void;
@@ -89,8 +92,10 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
     onUpgradeEnterprise,
     showDefaultRepositoryCallout = false,
     onCreateDefaultRepository,
+    createDefaultRepositoryHref,
     onRefreshDefaultRepository,
     isRefreshingDefaultRepository,
+    name: nameProp,
     label,
     minAge,
     onClick,
@@ -109,17 +114,20 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
   } = props;
   const isDelete = props.isDelete === true;
   const prefix = testSubjPrefix ? `${testSubjPrefix}-` : '';
+  // Use the stable schema id for frozen-specific logic: the label is a localized display string
+  // (e.g. "Frozen" in English, translated in other locales) and is unreliable for comparisons.
+  const phaseId = nameProp ?? label.toLowerCase();
 
   const phaseColor = isDelete ? phaseColors.delete : color;
   const showWarningIcon =
     !isDelete &&
-    label === 'frozen' &&
+    phaseId === 'frozen' &&
     ((showEnterpriseCallout && Boolean(onUpgradeEnterprise)) || showDefaultRepositoryCallout);
 
   const handleClick = () => {
     if (isEditLifecycleFlyoutOpen) {
       // When the flyout is open, navigate to this phase instead of showing the popover
-      onEditPhase?.(label);
+      onEditPhase?.(phaseId);
       return;
     }
     setIsPopoverOpen(!isPopoverOpen);
@@ -134,9 +142,10 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
   const showAgeBadge = minAge !== undefined && !isZeroAge(minAge);
   const showSearchableSnapshot =
     !isDelete &&
-    ((label === 'cold' && searchableSnapshot !== undefined) ||
-      (label === 'frozen' && (searchableSnapshot !== undefined || showDefaultRepositoryCallout)));
-  const canShowReadOnlyRow = !isDelete && (label === 'hot' || label === 'warm' || label === 'cold');
+    ((phaseId === 'cold' && searchableSnapshot !== undefined) ||
+      (phaseId === 'frozen' && (searchableSnapshot !== undefined || showDefaultRepositoryCallout)));
+  const canShowReadOnlyRow =
+    !isDelete && (phaseId === 'hot' || phaseId === 'warm' || phaseId === 'cold');
   const readOnlyValue = isReadOnly
     ? i18n.translate('xpack.streams.streamDetailLifecycle.readOnlyEnabled', {
         defaultMessage: 'Enabled',
@@ -209,7 +218,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
                       data-test-subj={`lifecyclePhase-${label}-editButton`}
                       onClick={() => {
                         closePopover();
-                        onEditPhase(label ?? '');
+                        onEditPhase(phaseId);
                       }}
                     >
                       {i18n.translate('xpack.streams.streamDetailLifecycle.editPhaseButtonLabel', {
@@ -219,7 +228,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
                   </EuiFlexItem>
                 )}
 
-                {label !== 'hot' && onRemovePhase && (
+                {phaseId !== 'hot' && onRemovePhase && (
                   <EuiFlexItem grow={false}>
                     {isRemoveDisabled && removeDisabledReason ? (
                       <EuiToolTip content={removeDisabledReason}>
@@ -265,7 +274,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
                           data-test-subj={`lifecyclePhase-${label}-removeButton`}
                           onClick={() => {
                             closePopover();
-                            onRemovePhase(label ?? '');
+                            onRemovePhase(phaseId);
                           }}
                         />
                       </EuiToolTip>
@@ -281,7 +290,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
         style={{ width: '300px' }}
         data-test-subj={`${prefix}lifecyclePhase-${label}-popoverContent`}
       >
-        {!isDelete && label === 'frozen' && showEnterpriseCallout && onUpgradeEnterprise && (
+        {!isDelete && phaseId === 'frozen' && showEnterpriseCallout && onUpgradeEnterprise && (
           <FrozenEnterpriseRequiredCallout
             onUpgradeEnterprise={onUpgradeEnterprise}
             calloutTestSubj={`${prefix}lifecyclePhase-${label}-enterpriseRequiredCallout`}
@@ -381,9 +390,10 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
             </EuiText>
             <EuiSpacer size="s" />
 
-            {label === 'frozen' && showDefaultRepositoryCallout ? (
+            {phaseId === 'frozen' && showDefaultRepositoryCallout ? (
               <FrozenDefaultRepositoryRequiredCallout
                 onCreateDefaultRepository={onCreateDefaultRepository}
+                createDefaultRepositoryHref={createDefaultRepositoryHref}
                 onRefresh={onRefreshDefaultRepository}
                 isRefreshing={isRefreshingDefaultRepository}
                 calloutTestSubj={`${prefix}lifecyclePhase-${label}-defaultRepositoryRequiredCallout`}
