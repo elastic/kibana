@@ -4,4 +4,5 @@ type: feature
 products:
 - product: cloud-serverless
   target: 2026-07-02
-title: Rule suggestion skill
+title: Add rule suggestion skill for Elastic Security
+description: "Adds an Agent Builder skill that recommends prebuilt detection rules based on your environment."
