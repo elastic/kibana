@@ -14,7 +14,7 @@ import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { createAppContextStartContractMock, createPackagePolicyServiceMock } from '../../mocks';
-import { getPackageInfo } from '../epm/packages';
+import { getInstallation, getPackageInfo } from '../epm/packages';
 import { appContextService, cloudConnectorService } from '..';
 import { agentPolicyService } from '../agent_policy';
 import { agentlessAgentService } from '../agents/agentless_agent';
@@ -1177,6 +1177,111 @@ describe('AgentlessPoliciesService', () => {
           statusCode: 404,
           body: { message: 'Agentless policy x not found' },
         },
+      ]);
+    });
+
+    it('should short-circuit an already-latest policy to a no-op success without calling bulkUpgrade', async () => {
+      packagePolicyService.getByIDs.mockResolvedValue([
+        buildAgentlessPackagePolicy({
+          id: 'a',
+          name: 'A',
+          package: { name: 'pkg', version: '1.0.0' },
+        }),
+      ]);
+      // Installed version matches the policy version, so there is nothing to upgrade.
+      jest.mocked(getInstallation).mockResolvedValue({ version: '1.0.0' } as any);
+
+      const result = await createService().bulkUpgradeAgentlessPolicies(['a']);
+
+      expect(packagePolicyService.bulkUpgrade).not.toHaveBeenCalled();
+      // Idempotent-success without the redeploy churn.
+      expect(result).toEqual([{ id: 'a', name: 'A', success: true }]);
+    });
+
+    it('should forward only non-latest ids to the engine and keep no-ops in request order', async () => {
+      // 'a' is already latest (no-op), 'b' needs an upgrade, 'c' is missing (guard 404).
+      packagePolicyService.getByIDs.mockResolvedValue([
+        buildAgentlessPackagePolicy({
+          id: 'a',
+          name: 'A',
+          package: { name: 'pkg', version: '1.0.0' },
+        }),
+        buildAgentlessPackagePolicy({
+          id: 'b',
+          name: 'B',
+          package: { name: 'pkg', version: '0.9.0' },
+        }),
+      ]);
+      jest.mocked(getInstallation).mockResolvedValue({ version: '1.0.0' } as any);
+      packagePolicyService.bulkUpgrade.mockResolvedValue([{ id: 'b', name: 'B', success: true }]);
+
+      const result = await createService().bulkUpgradeAgentlessPolicies(['a', 'b', 'c']);
+
+      // Only the non-latest id reaches the shared engine.
+      expect(packagePolicyService.bulkUpgrade).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        ['b'],
+        expect.objectContaining({})
+      );
+      expect(result).toEqual([
+        { id: 'a', name: 'A', success: true },
+        { id: 'b', name: 'B', success: true },
+        {
+          id: 'c',
+          success: false,
+          statusCode: 404,
+          body: { message: 'Agentless policy c not found' },
+        },
+      ]);
+    });
+
+    it('should forward to the engine when the package is not installed (no resolved version)', async () => {
+      packagePolicyService.getByIDs.mockResolvedValue([
+        buildAgentlessPackagePolicy({
+          id: 'a',
+          name: 'A',
+          package: { name: 'pkg', version: '1.0.0' },
+        }),
+      ]);
+      // No installation resolved -> let the engine surface its "package not installed" error.
+      jest.mocked(getInstallation).mockResolvedValue(undefined as any);
+      packagePolicyService.bulkUpgrade.mockResolvedValue([{ id: 'a', name: 'A', success: true }]);
+
+      await createService().bulkUpgradeAgentlessPolicies(['a']);
+
+      expect(packagePolicyService.bulkUpgrade).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        ['a'],
+        expect.objectContaining({})
+      );
+    });
+
+    it('should forward a policy ahead of the installed version to the engine (not a no-op)', async () => {
+      packagePolicyService.getByIDs.mockResolvedValue([
+        buildAgentlessPackagePolicy({
+          id: 'a',
+          name: 'A',
+          package: { name: 'pkg', version: '2.0.0' },
+        }),
+      ]);
+      // Installed is older than the policy -> engine returns its ineligible-for-upgrade error.
+      jest.mocked(getInstallation).mockResolvedValue({ version: '1.0.0' } as any);
+      packagePolicyService.bulkUpgrade.mockResolvedValue([
+        { id: 'a', name: 'A', success: false, statusCode: 400, body: { message: 'ineligible' } },
+      ]);
+
+      const result = await createService().bulkUpgradeAgentlessPolicies(['a']);
+
+      expect(packagePolicyService.bulkUpgrade).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        ['a'],
+        expect.objectContaining({})
+      );
+      expect(result).toEqual([
+        { id: 'a', name: 'A', success: false, statusCode: 400, body: { message: 'ineligible' } },
       ]);
     });
   });

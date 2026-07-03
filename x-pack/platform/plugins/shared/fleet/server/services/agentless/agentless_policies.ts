@@ -15,7 +15,9 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-import { omit } from 'lodash';
+import { omit, uniq } from 'lodash';
+import pMap from 'p-map';
+import semverEq from 'semver/functions/eq';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type {
@@ -50,10 +52,11 @@ import {
 import type { PackagePolicyClient } from '../package_policy_service';
 
 import { agentPolicyService } from '../agent_policy';
-import { getPackageInfo } from '../epm/packages';
+import { getInstallation, getPackageInfo } from '../epm/packages';
 import { runWithCache } from '../epm/packages/cache';
 import { appContextService, cloudConnectorService } from '..';
 import { FleetNotFoundError, PackagePolicyRequestError } from '../../errors';
+import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 } from '../../constants';
 
 import type { PackageInfo } from '../../types';
 import {
@@ -702,45 +705,43 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       : undefined;
 
     // Batched agentless guard: missing or non-agentless ids become per-policy 404
-    // failures rather than failing the whole batch (mirrors package-policy bulk upgrade,
-    // which collects per-policy failures into the result array).
-    const { agentlessIds, guardFailures } = await this.partitionAgentlessPolicyIds(policyIds);
+    // failures rather than failing the whole batch 
+    const { agentlessPackagePolicies, guardFailures } = await this.partitionAgentlessPolicyIds(
+      policyIds
+    );
 
     const results: BulkUpgradeAgentlessPolicyResult[] = [...guardFailures];
 
-    if (agentlessIds.length === 0) {
+    if (agentlessPackagePolicies.length === 0) {
       return results;
     }
 
-    // Reuse the package-policy bulk upgrade engine: it resolves the installed target
-    // version, applies the eligibility guard, migrates the existing config onto the new
-    // schema (`updatePackageInputs`), persists the saved objects and emits upgrade
-    // telemetry. Like the package-policy path, the live reconcile (deploy) is scheduled
-    // as a background task and the deployment-sync task is the backstop, so `success`
-    // reflects the saved-object upgrade, not that the workload is already running the
-    // new version. Deploying synchronously here would not scale (up to 1000 external
-    // calls per request) and would duplicate the deploy the engine already schedules.
-    //
-    // Known limitation (parity with package-policy): this migrates the package policy
-    // config only. It does NOT re-derive the backing agent policy's agentless config
-    // (resources) or ownership `global_data_tags` from the new package manifest — only
-    // create / PUT do that. If a new package version changes those agent-policy-level
-    // fields, the update (PUT) endpoint must be used to pick them up. Tracked as a follow-up.
-    const upgradeResults = await this.packagePolicyService.bulkUpgrade(
-      this.soClient,
-      this.esClient,
-      agentlessIds,
-      { user }
+    // Skip already-latest policies: report `success: true` without the engine's needless SO re-persist + redeploy churn.
+    const { upgradeIds, noopResults } = await this.partitionAlreadyLatestPolicies(
+      agentlessPackagePolicies
     );
+    results.push(...noopResults);
 
-    for (const result of upgradeResults) {
-      results.push({
-        id: result.id,
-        name: result.name,
-        success: result.success,
-        statusCode: result.statusCode,
-        body: result.body,
-      });
+    if (upgradeIds.length > 0) {
+      // Reuse the package-policy bulk upgrade engine: it migrates the config and persists the
+      // saved objects. `success` reflects that SO upgrade; the deploy is scheduled in the
+      // background (like package-policy), not run synchronously here.
+      const upgradeResults = await this.packagePolicyService.bulkUpgrade(
+        this.soClient,
+        this.esClient,
+        upgradeIds,
+        { user }
+      );
+
+      for (const result of upgradeResults) {
+        results.push({
+          id: result.id,
+          name: result.name,
+          success: result.success,
+          statusCode: result.statusCode,
+          body: result.body,
+        });
+      }
     }
 
     // Return results in the caller's requested order (guard failures and engine
@@ -755,7 +756,9 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
   ): Promise<AgentlessPolicyUpgradeDryRunResponse> {
     this.logger.debug(`Computing upgrade dry-run for ${policyIds.length} agentless policies`);
 
-    const { agentlessIds, guardFailures } = await this.partitionAgentlessPolicyIds(policyIds);
+    const { agentlessPackagePolicies, guardFailures } = await this.partitionAgentlessPolicyIds(
+      policyIds
+    );
 
     // A guard failure (missing / non-agentless) is surfaced as a dry-run item with
     // `hasErrors: true` plus the per-policy statusCode/body, keeping the response a flat
@@ -768,7 +771,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       body: failure.body,
     }));
 
-    if (agentlessIds.length === 0) {
+    if (agentlessPackagePolicies.length === 0) {
       return results;
     }
 
@@ -776,7 +779,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     // batch (matches the package-policy dry-run handler), avoiding repeated fetches when
     // policies share a package.
     await runWithCache(async () => {
-      for (const id of agentlessIds) {
+      for (const { id } of agentlessPackagePolicies) {
         try {
           // `pkgVersion` lets the caller preview a migration to a not-yet-installed target
           // version (the UI computes the dry-run before installing the new package). When
@@ -822,20 +825,14 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
   }
 
   /**
-   * Splits the requested ids into agentless ids (safe to upgrade) and per-policy guard
-   * failures. Missing and non-agentless package policies are both collapsed into a 404
-   * failure so this endpoint never confirms the existence of, or operates on, regular
-   * Fleet package policies — the batched equivalent of {@link getExistingAgentlessPackagePolicy}.
-   *
-   * This performs one bulk `getByIDs` purely for the agentless guard. It is intentionally
-   * separate from (and slightly redundant with) the fetch that `bulkUpgrade` /
-   * `getUpgradeDryRunDiff` do internally: the guard must reject non-agentless ids *before*
-   * anything is handed to the shared engine, and the engine owns its own fetch for version
-   * resolution and chunking. The cost is a single extra batched read, which is the price of
-   * reusing the shared upgrade engine rather than re-implementing it here.
+   * Splits the requested ids into agentless package policies and per-policy 404 guard failures.
+   * Missing and non-agentless policies both become a 404 so this endpoint never operates on
+   * regular Fleet package policies (batched equivalent of {@link getExistingAgentlessPackagePolicy}).
+   * Returns the full policies (not just ids) so callers can reuse the loaded package name/version
+   * (e.g. the already-latest short-circuit) without a second `getByIDs`.
    */
   private async partitionAgentlessPolicyIds(policyIds: string[]): Promise<{
-    agentlessIds: string[];
+    agentlessPackagePolicies: PackagePolicy[];
     guardFailures: BulkUpgradeAgentlessPolicyResult[];
   }> {
     const packagePolicies = await this.packagePolicyService.getByIDs(this.soClient, policyIds, {
@@ -843,7 +840,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     });
     const packagePolicyById = new Map(packagePolicies.map((pp) => [pp.id, pp]));
 
-    const agentlessIds: string[] = [];
+    const agentlessPackagePolicies: PackagePolicy[] = [];
     const guardFailures: BulkUpgradeAgentlessPolicyResult[] = [];
 
     for (const id of policyIds) {
@@ -857,10 +854,61 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         });
         continue;
       }
-      agentlessIds.push(id);
+      agentlessPackagePolicies.push(packagePolicy);
     }
 
-    return { agentlessIds, guardFailures };
+    return { agentlessPackagePolicies, guardFailures };
+  }
+
+  /**
+   * Splits guarded agentless policies into ids that need a real upgrade and no-op results for
+   * policies already at the installed package version.
+   */
+  private async partitionAlreadyLatestPolicies(agentlessPackagePolicies: PackagePolicy[]): Promise<{
+    upgradeIds: string[];
+    noopResults: BulkUpgradeAgentlessPolicyResult[];
+  }> {
+    const packageNames = uniq(
+      agentlessPackagePolicies
+        .map((pp) => pp.package?.name)
+        .filter((name): name is string => typeof name === 'string')
+    );
+
+    const installedVersionByPackage = new Map<string, string>();
+    await pMap(
+      packageNames,
+      async (pkgName) => {
+        const installation = await getInstallation({
+          savedObjectsClient: this.soClient,
+          pkgName,
+        });
+        if (installation) {
+          installedVersionByPackage.set(pkgName, installation.version);
+        }
+      },
+      { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
+    );
+
+    const upgradeIds: string[] = [];
+    const noopResults: BulkUpgradeAgentlessPolicyResult[] = [];
+
+    for (const packagePolicy of agentlessPackagePolicies) {
+      const installedVersion = installedVersionByPackage.get(packagePolicy.package?.name ?? '');
+      const policyVersion = packagePolicy.package?.version;
+      if (installedVersion && policyVersion && semverEq(installedVersion, policyVersion)) {
+        noopResults.push({ id: packagePolicy.id, name: packagePolicy.name, success: true });
+      } else {
+        upgradeIds.push(packagePolicy.id);
+      }
+    }
+
+    if (noopResults.length > 0) {
+      this.logger.debug(
+        `Skipping ${noopResults.length} already-latest agentless policies (no-op, no redeploy)`
+      );
+    }
+
+    return { upgradeIds, noopResults };
   }
 
   /**

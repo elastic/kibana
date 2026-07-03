@@ -936,6 +936,23 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.map((item) => item.id).sort()).to.eql([policyId1, policyId2].sort());
       });
 
+      it('should be a genuine no-op (idempotent success, no revision bump) when already at the installed version', async () => {
+        const policyId = uuidv4();
+        await createTestAgentlessPolicy(policyId, `test_agentless-${Date.now()}`);
+
+        // The policy is created at the installed version (1.0.0), so `_upgrade` has nothing
+        // to do. It must stay idempotent-success without re-persisting the saved object.
+        const before = await apiClient.getPackagePolicy(policyId);
+        const revisionBefore = before.item.revision;
+
+        const res = await apiClient.bulkUpgradeAgentlessPolicies([policyId]);
+        expect(res.length).to.be(1);
+        expect(res[0].success).to.be(true);
+
+        const after = await apiClient.getPackagePolicy(policyId);
+        expect(after.item.revision).to.be(revisionBefore);
+      });
+
       it('should return 200 with per-policy failures for missing/non-agentless ids while upgrading valid ids', async () => {
         const policyId = uuidv4();
         await createTestAgentlessPolicy(policyId, `test_agentless-${Date.now()}`);
