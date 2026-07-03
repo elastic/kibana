@@ -16,32 +16,21 @@ import type { Notification } from '../../common/types';
 /** The append-only data stream backing the Notification Center. */
 export const NOTIFICATION_DATA_STREAM_NAME = '.kibana-notification-center' as const;
 
-/**
- * Retention ceiling for the data stream. Finer per-severity TTLs are enforced
- * by the Notification Center cleanup task.
- */
+/** Retention ceiling; per-severity TTLs are enforced by the cleanup task. */
 export const NOTIFICATION_DATA_RETENTION = '180d' as const;
 
-/**
- * Mappings for the notification data stream. Only fields being queried
- * are mapped; display-only fields (`title`, `description`, `cta`) stay in
- * `_source`.
- */
+/** Only queried fields are mapped; `title`/`description`/`cta` stay in `_source`. */
 export const notificationDataStreamMappings = {
-  // keep the stream forward-compatible
+  // keep the stream forward-compatible with fields added by newer nodes
   dynamic: false,
   properties: {
-    /** Ingest time; drives ordering and retention. */
+    /** Ingest time, stamped on write by NC — never producer-supplied. */
     '@timestamp': mappings.date(),
-    /** Deterministic idempotency key; collapse field at query time. */
+    /** Idempotency key; the collapse field at query time. */
     notification_id: mappings.keyword(),
-    /** Time of the underlying notification event. */
     event_timestamp: mappings.date(),
-    /** Registered notification type, e.g. `inferenceModelStatus`. */
     type: mappings.keyword(),
-    /** App id of the producing application, e.g. `inference`. */
     source_app_id: mappings.keyword(),
-    /** Severity tier; drives severity-based retention. */
     severity: mappings.keyword(),
   },
 } satisfies MappingsDefinition;
@@ -53,7 +42,7 @@ export const notificationDataStreamMappings = {
 export const registerNotificationDataStream = (dataStreams: DataStreamsSetup) => {
   return dataStreams.registerDataStream({
     name: NOTIFICATION_DATA_STREAM_NAME,
-    // bump version to make a new field queryable.
+    // bump on any mapping or lifecycle change
     version: 1,
     hidden: true,
     template: {
@@ -67,20 +56,15 @@ export const registerNotificationDataStream = (dataStreams: DataStreamsSetup) =>
 };
 
 /**
- * A data stream client whose document type is the canonical {@link Notification}
- * (the zod schema is the source of truth). Binding the mappings and the schema
- * type here forces `Notification` to satisfy the mapping's field contract at
- * compile time — the write path in #14979 relies on this coupling.
+ * Data stream client typed with the canonical {@link Notification}; binding the
+ * schema type to the mappings enforces their field contract at compile time.
  */
 export type NotificationDataStreamClient = IDataStreamClient<
   typeof notificationDataStreamMappings,
   Notification
 >;
 
-/**
- * Resolves the notification data stream client at start/request time. The write
- * and read logic that uses it lands in #14979 / #14980.
- */
+/** Resolves the core-cached client. Call at the ES-operation site, not once up front. */
 export const getNotificationDataStreamClient = (
   dataStreams: DataStreamsStart
 ): Promise<NotificationDataStreamClient> =>

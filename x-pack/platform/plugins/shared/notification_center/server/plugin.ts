@@ -39,12 +39,9 @@ export class NotificationCenterPlugin
   public setup(
     core: CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>
   ): NotificationCenterPluginSetup {
-    // Reached only when the plugin is enabled; core gates the whole plugin on
-    // `xpack.notificationCenter.enabled` (default false).
+    // core gates the plugin on xpack.notificationCenter.enabled; setup runs only when enabled
     this.logger.debug('Setting up Notification Center plugin');
 
-    // Eagerly install the data stream's index template and mappings. The data
-    // stream itself is created lazily on the first notification write.
     registerNotificationDataStream(core.dataStreams);
 
     return {};

@@ -81,8 +81,7 @@ describe('registerNotificationDataStream', () => {
     });
 
     it('binds the canonical Notification type to the mapping contract', () => {
-      // Compile-time proof: the mapping's declared fields must be satisfied by the
-      // zod-inferred document type, or the write path in #14979 will not type-check.
+      // compile-time proof (no-op at runtime): Notification must satisfy the mapped fields
       expectAssignable<GetFieldsOf<typeof notificationDataStreamMappings>>({} as Notification);
     });
   });
