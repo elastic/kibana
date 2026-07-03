@@ -10,9 +10,7 @@ import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiCallOut,
-  EuiCheckbox,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,53 +22,29 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UseEuiTheme } from '@elastic/eui';
-import type { CspRegion } from '../../../common/types';
 import { useRegionPolicy, useSaveRegionPolicy } from '../../hooks/use_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
 import {
   getAvailableRegions,
   getGeoDisplayName,
   GEO_ORDER,
-  REGION_DISPLAY_NAMES,
+  regionKey,
 } from '../../utils/eis_utils';
+import { RegionZoneList } from './region_zone_list';
+import type { ZoneGroup } from './region_zone_list';
 
 interface ManageRegionsModalProps {
   onClose: () => void;
 }
 
-const regionKey = (r: CspRegion) => `${r.csp}::${r.region}`;
-
 const modalStyles = ({ euiTheme }: UseEuiTheme) => css`
   min-width: ${euiTheme.base * 35}px;
 `;
-
-const zoneRowStyles = ({ euiTheme }: UseEuiTheme) => css`
-  padding: ${euiTheme.size.s} ${euiTheme.size.s};
-  border: ${euiTheme.border.thin};
-  border-radius: ${euiTheme.border.radius.medium};
-  margin-bottom: ${euiTheme.size.xs};
-`;
-
-const regionRowStyles = ({ euiTheme }: UseEuiTheme) => css`
-  padding: ${euiTheme.size.xs} 0;
-`;
-
-const regionListStyles = ({ euiTheme }: UseEuiTheme) => css`
-  padding: ${euiTheme.size.s} ${euiTheme.size.xl};
-  border-top: ${euiTheme.border.thin};
-`;
-
-interface ZoneGroup {
-  geo: string;
-  displayName: string;
-  regions: CspRegion[];
-}
 
 export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose }) => {
   const modalTitleId = useGeneratedHtmlId();
@@ -105,7 +79,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
   }, [isPolicyLoading, isEndpointsLoading, syncedFromPolicy, policy, availableRegions]);
 
   const zoneGroups = useMemo((): ZoneGroup[] => {
-    const byGeo = new Map<string, CspRegion[]>();
+    const byGeo = new Map<string, typeof availableRegions>();
     for (const r of availableRegions) {
       const geo = r.geo ?? 'other';
       const list = byGeo.get(geo) ?? [];
@@ -375,118 +349,14 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
 
             <EuiSpacer size="s" />
 
-            {/* Zone accordion list */}
-            {zoneGroups.map((zone) => {
-              const zoneKeys = zone.regions.map(regionKey);
-              const checkedCount = zoneKeys.filter((k) => checkedKeys.has(k)).length;
-              const isZoneChecked = checkedCount === zone.regions.length;
-              const isZoneIndeterminate = checkedCount > 0 && checkedCount < zone.regions.length;
-              const isExpanded = expandedZones.has(zone.geo);
-              const zoneCheckboxId = `zone-checkbox-${zone.geo}`;
-
-              return (
-                <div key={zone.geo} data-test-subj={`manageRegionsZone-${zone.geo}`}>
-                  <div css={zoneRowStyles}>
-                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
-                      <EuiFlexItem grow={false}>
-                        <EuiCheckbox
-                          id={zoneCheckboxId}
-                          checked={isZoneChecked}
-                          indeterminate={isZoneIndeterminate}
-                          onChange={() => handleToggleZone(zone)}
-                          label={<strong>{zone.displayName}</strong>}
-                          data-test-subj={`manageRegionsZoneCheckbox-${zone.geo}`}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                          <EuiFlexItem grow={false}>
-                            <EuiText size="s" color="subdued">
-                              {i18n.translate(
-                                'xpack.searchInferenceEndpoints.manageRegions.zoneCount',
-                                {
-                                  defaultMessage:
-                                    '{checked} of {total, plural, one {# region} other {# regions}}',
-                                  values: {
-                                    checked: checkedCount,
-                                    total: zone.regions.length,
-                                  },
-                                }
-                              )}
-                            </EuiText>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiToolTip
-                              content={
-                                isExpanded
-                                  ? i18n.translate(
-                                      'xpack.searchInferenceEndpoints.manageRegions.collapseZone',
-                                      {
-                                        defaultMessage: 'Collapse {zone}',
-                                        values: { zone: zone.displayName },
-                                      }
-                                    )
-                                  : i18n.translate(
-                                      'xpack.searchInferenceEndpoints.manageRegions.expandZone',
-                                      {
-                                        defaultMessage: 'Expand {zone}',
-                                        values: { zone: zone.displayName },
-                                      }
-                                    )
-                              }
-                              disableScreenReaderOutput
-                            >
-                              <EuiButtonIcon
-                                iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
-                                onClick={() => handleToggleExpand(zone.geo)}
-                                aria-label={
-                                  isExpanded
-                                    ? i18n.translate(
-                                        'xpack.searchInferenceEndpoints.manageRegions.collapseZone',
-                                        {
-                                          defaultMessage: 'Collapse {zone}',
-                                          values: { zone: zone.displayName },
-                                        }
-                                      )
-                                    : i18n.translate(
-                                        'xpack.searchInferenceEndpoints.manageRegions.expandZone',
-                                        {
-                                          defaultMessage: 'Expand {zone}',
-                                          values: { zone: zone.displayName },
-                                        }
-                                      )
-                                }
-                                data-test-subj={`manageRegionsZoneToggle-${zone.geo}`}
-                              />
-                            </EuiToolTip>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-
-                    {isExpanded && (
-                      <div css={regionListStyles}>
-                        {zone.regions.map((r) => {
-                          const key = regionKey(r);
-                          const displayName = REGION_DISPLAY_NAMES[key] ?? r.region;
-                          return (
-                            <div key={key} css={regionRowStyles}>
-                              <EuiCheckbox
-                                id={`region-${key}`}
-                                label={displayName}
-                                checked={checkedKeys.has(key)}
-                                onChange={() => handleToggleRegion(key)}
-                                data-test-subj={`manageRegionsCheckbox-${key}`}
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            <RegionZoneList
+              zoneGroups={zoneGroups}
+              checkedKeys={checkedKeys}
+              expandedZones={expandedZones}
+              onToggleRegion={handleToggleRegion}
+              onToggleZone={handleToggleZone}
+              onToggleExpand={handleToggleExpand}
+            />
           </>
         )}
       </EuiModalBody>

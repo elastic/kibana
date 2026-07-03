@@ -432,3 +432,5 @@ export const getAvailableRegions = (endpoints: EisInferenceEndpoint[]): CspRegio
     return cspCmp !== 0 ? cspCmp : a.region.localeCompare(b.region);
   });
 };
+
+export const regionKey = (r: CspRegion): string => `${r.csp}::${r.region}`;
