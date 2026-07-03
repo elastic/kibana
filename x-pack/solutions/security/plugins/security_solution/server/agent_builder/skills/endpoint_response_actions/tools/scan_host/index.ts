@@ -43,6 +43,19 @@ export const scanHostTool = (
     type: ToolType.builtin,
     description: `Scans a file or folder path on a host for malware using the endpoint's existing Elastic Defend policy. The action is dispatched through the Elastic Defend Response Actions service. Requires explicit analyst confirmation before dispatch.`,
     schema: scanHostSchema,
+    // HITL gate enforced by the framework, not skill prose: the runner prompts
+    // the analyst for confirmation before every dispatch.
+    confirmation: {
+      askUser: 'always',
+      getConfirmation: ({ toolParams }) => ({
+        title: 'Run malware scan?',
+        message: `This will scan \`${(toolParams.path as string) ?? 'the specified path'}\` on **${
+          (toolParams.hostName as string) ?? 'the host'
+        }** for malware.`,
+        color: 'warning',
+        confirm_text: 'Run scan',
+      }),
+    },
     handler: async (params, { logger, request, runContext, spaceId }) => {
       try {
         const hostName = params.hostName as string;

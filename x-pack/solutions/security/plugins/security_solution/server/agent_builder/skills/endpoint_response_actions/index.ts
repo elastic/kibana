@@ -52,22 +52,23 @@ part of this skill yet — do not attempt them.
 ### 1. Parse Intent
 Identify the action type from the analyst's message:
 - **list** / **show** / **which endpoints** / **available hosts** → use \`list_endpoints\` tool (read-only)
-- **isolate** / **quarantine** / **contain** / **disconnect** → use \`isolate_host\` tool (WRITE — confirm first)
-- **release** / **unisolate** / **reconnect** → use \`unisolate_host\` tool (WRITE — confirm first)
+- **isolate** / **quarantine** / **contain** / **disconnect** → use \`isolate_host\` tool (WRITE — platform-confirmed)
+- **release** / **unisolate** / **reconnect** → use \`unisolate_host\` tool (WRITE — platform-confirmed)
 - **status** / **check** / **is isolated** → use \`get_endpoint_status\` tool (read-only)
 - **processes** / **running processes** / **what is running** → use \`running_processes\` tool (read-only)
-- **scan** / **scan for malware** / **check path** → use \`scan\` tool (WRITE — confirm first)
+- **scan** / **scan for malware** / **check path** → use \`scan\` tool (WRITE — platform-confirmed)
 
-### 2. Confirm Before Acting (Write Actions Only)
-Write actions (\`isolate_host\`, \`unisolate_host\`, \`scan\`) ALWAYS require explicit
-human confirmation before dispatch:
-- Present the target host name (and, for \`scan\`, the exact path to be scanned)
-- State the expected impact clearly (e.g. "this will disconnect the host from the network")
-- Wait for explicit analyst confirmation ("yes"/"confirm"/"go ahead") before calling the tool
-- Never dispatch a write action on inference alone
+### 2. Write Actions Are Confirmed by the Platform
+Write actions (\`isolate_host\`, \`unisolate_host\`, \`scan\`) are gated by an
+automatic confirmation prompt enforced by Agent Builder: when you call one of
+these tools the analyst is shown a confirmation card and the action dispatches
+only if they accept. You do NOT need to run your own confirmation step or wait
+for a "yes" in chat — call the tool directly with the resolved host (and, for
+\`scan\`, the path), and let the platform gate the dispatch. If the analyst
+declines, report that the action was cancelled.
 
 Read-only actions (\`list_endpoints\`, \`get_endpoint_status\`, \`running_processes\`)
-execute immediately without a confirmation step.
+are not gated and execute immediately.
 
 ### 3. Execute and Report
 - Call the appropriate tool
@@ -90,7 +91,7 @@ execute immediately without a confirmation step.
 
 ## Best Practices
 - When the analyst asks to see available endpoints, use \`list_endpoints\` first
-- Always confirm host identity before executing write actions
+- Always verify host identity before executing write actions
 - Always verify current status with \`get_endpoint_status\` before isolate/release
 - Keep the analyst informed with progress updates`;
 

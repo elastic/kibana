@@ -32,6 +32,20 @@ export const isolateHostTool = (
     type: ToolType.builtin,
     description: `Isolates a host by its hostname. Isolation disconnects the endpoint from the network to contain a potential threat. The action is dispatched through the Elastic Defend Response Actions service.`,
     schema: isolateHostSchema,
+    // HITL gate enforced by the framework, not skill prose: the runner prompts
+    // the analyst for confirmation before every dispatch. `always` (not `once`)
+    // so each host isolation is confirmed individually.
+    confirmation: {
+      askUser: 'always',
+      getConfirmation: ({ toolParams }) => ({
+        title: 'Isolate host?',
+        message: `This will disconnect **${
+          (toolParams.hostName as string) ?? 'the host'
+        }** from the network. Only Elastic Defend will retain connectivity.`,
+        color: 'danger',
+        confirm_text: 'Isolate host',
+      }),
+    },
     handler: async (params, { logger, request, runContext, spaceId }) => {
       try {
         const hostName = params.hostName as string;

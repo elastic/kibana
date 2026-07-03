@@ -58,6 +58,18 @@ describe('isolateHostTool', () => {
     });
   });
 
+  describe('confirmation policy', () => {
+    it('gates every dispatch with an always-on danger confirmation prompt', async () => {
+      const tool = isolateHostTool(mockEndpointAppContextService);
+      expect(tool.confirmation?.askUser).toBe('always');
+      const prompt = await tool.confirmation?.getConfirmation?.({
+        toolParams: { hostName: 'my-host' },
+      });
+      expect(prompt?.color).toBe('danger');
+      expect(prompt?.message).toContain('my-host');
+    });
+  });
+
   describe('handler', () => {
     let tool: ReturnType<typeof isolateHostTool>;
 
