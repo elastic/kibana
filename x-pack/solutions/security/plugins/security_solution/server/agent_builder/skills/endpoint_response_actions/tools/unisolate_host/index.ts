@@ -32,6 +32,19 @@ export const unisolateHostTool = (
     type: ToolType.builtin,
     description: `Un-isolates a host by its hostname. Re-establishes network connectivity on an endpoint that was previously isolated. The action is dispatched through the Elastic Defend Response Actions service.`,
     schema: unisolateHostSchema,
+    // HITL gate enforced by the framework, not skill prose: the runner prompts
+    // the analyst for confirmation before every dispatch.
+    confirmation: {
+      askUser: 'always',
+      getConfirmation: ({ toolParams }) => ({
+        title: 'Release host from isolation?',
+        message: `This will reconnect **${
+          (toolParams.hostName as string) ?? 'the host'
+        }** to the network.`,
+        color: 'warning',
+        confirm_text: 'Release host',
+      }),
+    },
     handler: async (params, { logger, request, runContext, spaceId }) => {
       try {
         const hostName = params.hostName as string;

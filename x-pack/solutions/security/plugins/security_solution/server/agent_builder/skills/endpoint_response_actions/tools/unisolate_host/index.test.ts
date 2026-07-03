@@ -58,6 +58,18 @@ describe('unisolateHostTool', () => {
     });
   });
 
+  describe('confirmation policy', () => {
+    it('gates every dispatch with an always-on confirmation prompt', async () => {
+      const tool = unisolateHostTool(mockEndpointAppContextService);
+      expect(tool.confirmation?.askUser).toBe('always');
+      const prompt = await tool.confirmation?.getConfirmation?.({
+        toolParams: { hostName: 'my-host' },
+      });
+      expect(prompt?.color).toBe('warning');
+      expect(prompt?.message).toContain('my-host');
+    });
+  });
+
   describe('handler', () => {
     let tool: ReturnType<typeof unisolateHostTool>;
 

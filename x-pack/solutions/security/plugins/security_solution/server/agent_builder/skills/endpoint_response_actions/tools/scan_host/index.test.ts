@@ -51,6 +51,17 @@ describe('scanHostTool', () => {
     expect(tool.description).toContain('confirmation');
   });
 
+  it('gates every dispatch with an always-on confirmation prompt naming host and path', async () => {
+    const tool = scanHostTool(service);
+    expect(tool.confirmation?.askUser).toBe('always');
+    const prompt = await tool.confirmation?.getConfirmation?.({
+      toolParams: { hostName: 'my-host', path: '/tmp' },
+    });
+    expect(prompt?.color).toBe('warning');
+    expect(prompt?.message).toContain('my-host');
+    expect(prompt?.message).toContain('/tmp');
+  });
+
   it('returns insufficient_privileges and does not dispatch when caller lacks canWriteScanOperations', async () => {
     service.getEndpointAuthz = jest
       .fn()
