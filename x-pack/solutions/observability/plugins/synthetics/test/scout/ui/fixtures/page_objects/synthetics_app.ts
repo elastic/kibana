@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage, KibanaUrl, Locator } from '@kbn/scout-oblt';
+import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { FormMonitorType } from '../constants';
 
@@ -467,7 +468,12 @@ export class SyntheticsAppPage {
   }
 
   getDefaultConnectorsComboBox() {
-    return this.page.components.comboBox('default-connectors-input-loaded');
+    // Kept on EuiComboBoxWrapper: this combo's data-test-subj is dynamic
+    // (default-connectors-input-{loading|loaded}) and it re-fetches after each
+    // selection, so the minimal EuiComboBoxObject's fixed "-loaded" selector reads
+    // an empty selection during the reload. The wrapper waits for the element to
+    // settle. TODO: migrate once the EUI helper handles dynamic/async-state combos.
+    return new EuiComboBoxWrapper(this.page, { dataTestSubj: 'default-connectors-input-loaded' });
   }
 
   isEuiFormFieldInValid(locator: Locator): Promise<boolean> {
