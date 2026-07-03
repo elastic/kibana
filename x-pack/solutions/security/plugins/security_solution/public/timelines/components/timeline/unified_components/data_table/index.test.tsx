@@ -73,7 +73,7 @@ jest.mock('../../../../../common/lib/kibana', () => {
         },
       },
     }),
-    useUiSetting: mockUseUiSetting,
+    useUiSetting: (...args: Parameters<typeof mockUseUiSetting>) => mockUseUiSetting(...args),
   };
 });
 
