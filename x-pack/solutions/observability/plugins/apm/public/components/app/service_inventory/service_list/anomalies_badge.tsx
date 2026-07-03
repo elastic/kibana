@@ -132,14 +132,15 @@ export function AnomaliesBadge({ score, detectorType, navigationProps }: Anomali
       ? i18n.translate('xpack.apm.anomaliesBadge.tooltip.unknown', {
           defaultMessage: 'No anomaly score is available for the selected time range.',
         })
-      : detectorType !== undefined
-      ? i18n.translate('xpack.apm.anomaliesBadge.tooltip.scoreWithDetector', {
-          defaultMessage: 'Anomaly score (max.): {score} - {detector}',
-          values: { score: score.toFixed(2), detector: getApmMlDetectorLabel(detectorType) },
-        })
       : i18n.translate('xpack.apm.anomaliesBadge.tooltip.score', {
-          defaultMessage: 'Anomaly score (max.): {score}',
-          values: { score: score.toFixed(2) },
+          defaultMessage:
+            'Anomaly score (max.): {score}{detectorType, select, none {} other { - {detectorLabel}}}{hasHref, select, true { - Click to view more} other {}}',
+          values: {
+            score: score.toFixed(2),
+            detectorType: detectorType ?? 'none',
+            detectorLabel: detectorType !== undefined ? getApmMlDetectorLabel(detectorType) : '',
+            hasHref: href !== undefined ? 'true' : 'false',
+          },
         });
 
   const roleProps = href ? { href } : { role: 'img', 'aria-label': text };
