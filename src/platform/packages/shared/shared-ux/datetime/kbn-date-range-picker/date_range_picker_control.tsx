@@ -204,8 +204,10 @@ export function DateRangePickerControl() {
   const wrapperRestrictedStyles = css`
     inline-size: var(--kbnDateRangePickerWidthRestricted, 21.25rem);
   `;
+  // `29rem` might seem too large, but it fits a
+  // string like "Jun 15, 2026, 00:00:00 to Jun 17, 2026, 23:59:59"
   const wrapperAutoInputStyles = css`
-    inline-size: var(--kbnDateRangePickerInputWidthAuto, 24rem);
+    inline-size: var(--kbnDateRangePickerInputWidthAuto, 29rem);
   `;
   const tooltipStyles = css`
     max-inline-size: min(58ch, 90vw);
