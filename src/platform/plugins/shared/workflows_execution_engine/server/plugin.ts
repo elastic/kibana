@@ -62,9 +62,15 @@ import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execu
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
-import { initializeStepExecutionsDataStream } from './repositories/step_executions_data_stream';
+import {
+  initializeStepExecutionsClient,
+  initializeStepExecutionsDataStream,
+} from './repositories/step_executions_data_stream';
 import type { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
-import { initializeWorkflowExecutionsDataStream } from './repositories/workflow_executions_data_stream';
+import {
+  initializeWorkflowExecutionsClient,
+  initializeWorkflowExecutionsDataStream,
+} from './repositories/workflow_executions_data_stream';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
 import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
@@ -665,6 +671,12 @@ export class WorkflowsExecutionEnginePlugin
             run: async () => {
               const [coreStart] = await core.getStartServices();
               const esClient = coreStart.elasticsearch.client.asInternalUser;
+              const workflowDsClient = await initializeWorkflowExecutionsClient(
+                coreStart.dataStreams
+              );
+              const workflowStepDsClient = await initializeStepExecutionsClient(
+                coreStart.dataStreams
+              );
 
               const migrations = [
                 {
@@ -677,27 +689,55 @@ export class WorkflowsExecutionEnginePlugin
                 },
               ];
 
-              const tasks = migrations.map(async ({ sourceIndex, destIndex }) => {
-                const indexExists = await esClient.indices.exists({
-                  index: sourceIndex,
-                });
+              const results: unknown[] = [];
 
-                if (!indexExists) {
-                  return Promise.resolve();
-                }
-
-                await esClient.reindex({
-                  wait_for_completion: false,
-                  source: {
+              for (const { sourceIndex, destIndex } of migrations) {
+                try {
+                  const indexExists = await esClient.indices.exists({
                     index: sourceIndex,
-                  },
-                  dest: {
-                    index: destIndex,
-                  },
-                });
-              });
+                  });
 
-              await Promise.all(tasks);
+                  if (indexExists) {
+                    const asyncReindex = await esClient.reindex({
+                      wait_for_completion: false,
+                      conflicts: 'proceed',
+                      source: {
+                        index: sourceIndex,
+                        size: 3,
+                      },
+                      dest: {
+                        index: destIndex,
+                      },
+                      script: {
+                        lang: 'painless',
+                        source: `
+                        ctx._id = ctx._source.id;
+                        if (ctx._source.createdAt == null) {
+                          ctx._source['@timestamp'] = ctx._source.startedAt;
+                          return;
+                        }
+                        ctx._source['@timestamp'] = ctx._source.createdAt;
+                      `,
+                      },
+                    });
+
+                    while (!abortController.signal.aborted) {
+                      const task = await esClient.tasks.get({
+                        task_id: asyncReindex.task as string,
+                      });
+
+                      if (task.completed) {
+                        results.push(task);
+                        break;
+                      }
+
+                      await new Promise((resolve) => setTimeout(resolve, 1000));
+                    }
+                  }
+                } catch (error) {
+                  results.push({ error: error.message });
+                }
+              }
 
               await Promise.all(
                 migrations.map(({ sourceIndex }) =>
