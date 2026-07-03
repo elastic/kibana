@@ -9,11 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { LENS_FORMAT_NUMBER_DECIMALS_DEFAULT, LENS_FORMAT_COMPACT_DEFAULT } from './constants';
-import {
-  dslDurationFormatSchema,
-  esqlDurationFormatSchema,
-  legacyDurationFormatSchema,
-} from './duration_units';
+import { durationFormatSchema, legacyDurationFormatSchema } from './duration_units';
 
 const numericFormatSchema = schema.object(
   {
@@ -118,16 +114,16 @@ const customFormatSchema = schema.object(
 );
 
 /**
- * Format configuration for DSL-based visualizations.
- * Accepts both GA short-form enums and legacy free-form strings for the `duration` type.
- * The strict GA schema is validated first; legacy strings are accepted as a fallback
- * while `asCode.useGASchemas` is disabled (default during Tech Preview).
+ * Format configuration for dimension values.
+ * Accepts both GA and legacy unit names for the `duration` type so that neither is rejected at
+ * the HTTP validation layer. The route handlers enforce exactly one set at runtime based on the
+ * `asCode.useGASchemas` feature flag.
  */
 export const formatTypeSchema = schema.oneOf(
   [
     numericFormatSchema,
     byteFormatSchema,
-    dslDurationFormatSchema,
+    durationFormatSchema,
     legacyDurationFormatSchema,
     customFormatSchema,
   ],
@@ -140,37 +136,9 @@ export const formatTypeSchema = schema.oneOf(
   }
 );
 
-/**
- * Format configuration for ES|QL-based visualizations.
- * Accepts both GA short-form enums and legacy free-form strings for the `duration` type.
- */
-export const esqlFormatTypeSchema = schema.oneOf(
-  [
-    numericFormatSchema,
-    byteFormatSchema,
-    esqlDurationFormatSchema,
-    legacyDurationFormatSchema,
-    customFormatSchema,
-  ],
-  {
-    meta: {
-      id: 'esqlFormatType',
-      title: 'ES|QL Format Type',
-      description: 'Number display format for ES|QL dimension values.',
-    },
-  }
-);
-
 export const formatSchema = {
   /**
    * Format configuration
    */
   format: schema.maybe(formatTypeSchema),
-};
-
-export const esqlFormatSchema = {
-  /**
-   * Format configuration for ES|QL columns
-   */
-  format: schema.maybe(esqlFormatTypeSchema),
 };

@@ -8,7 +8,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { esqlFormatTypeSchema, formatTypeSchema, formatSchema } from './format';
+import { durationFormatSchema } from './duration_units';
+import { formatTypeSchema, formatSchema } from './format';
 
 describe('Format Schemas', () => {
   describe('numericFormat', () => {
@@ -129,7 +130,7 @@ describe('Format Schemas', () => {
       expect(validated).toEqual(input);
     });
 
-    it('validates fine-grained DSL input units', () => {
+    it('validates fine-grained input units', () => {
       const input = {
         type: 'duration' as const,
         from: 'us',
@@ -141,11 +142,11 @@ describe('Format Schemas', () => {
     });
   });
 
-  describe('durationFormat — legacy string values (backward compat)', () => {
-    it('accepts legacy verbose input unit strings via legacy fallback schema', () => {
+  describe('durationFormat — legacy unit names (accepted at HTTP layer)', () => {
+    it('accepts legacy `m` for minutes', () => {
       const input = {
         type: 'duration' as const,
-        from: 'seconds',
+        from: 'm',
         to: 'humanize',
       };
 
@@ -153,18 +154,7 @@ describe('Format Schemas', () => {
       expect(validated).toEqual(input);
     });
 
-    it('accepts legacy `m` for minutes', () => {
-      const input = {
-        type: 'duration' as const,
-        from: 'ms',
-        to: 'm',
-      };
-
-      const validated = formatTypeSchema.validate(input);
-      expect(validated).toEqual(input);
-    });
-
-    it('accepts legacy `humanizePrecise` output string', () => {
+    it('accepts legacy `humanizePrecise` output name', () => {
       const input = {
         type: 'duration' as const,
         from: 'ms',
@@ -175,64 +165,33 @@ describe('Format Schemas', () => {
       expect(validated).toEqual(input);
     });
 
-    it('accepts legacy `asMinutes` output string', () => {
+    it('rejects verbose long-form unit names in the GA duration schema', () => {
+      const input = {
+        type: 'duration' as const,
+        from: 'seconds',
+        to: 'humanize',
+      };
+
+      expect(() => durationFormatSchema.validate(input)).toThrow();
+    });
+
+    it('rejects Lens state output names like `asMinutes` in the GA duration schema', () => {
       const input = {
         type: 'duration' as const,
         from: 'ms',
         to: 'asMinutes',
       };
 
-      const validated = formatTypeSchema.validate(input);
-      expect(validated).toEqual(input);
+      expect(() => durationFormatSchema.validate(input)).toThrow();
     });
 
-    it('throws on missing required `to` field even for legacy schema', () => {
+    it('throws on missing required `to` field', () => {
       const input = {
         type: 'duration' as const,
         from: 'ms',
       };
 
       expect(() => formatTypeSchema.validate(input)).toThrow();
-    });
-  });
-
-  describe('esqlDurationFormat', () => {
-    it('validates ES|QL duration format with GA enum values', () => {
-      const input = {
-        type: 'duration' as const,
-        from: 'mo',
-        to: 'auto-approximate',
-      };
-
-      const validated = esqlFormatTypeSchema.validate(input);
-      expect(validated).toEqual(input);
-    });
-
-    it('accepts legacy verbose strings via legacy fallback schema', () => {
-      const input = {
-        type: 'duration' as const,
-        from: 'months',
-        to: 'humanize',
-      };
-
-      const validated = esqlFormatTypeSchema.validate(input);
-      expect(validated).toEqual(input);
-    });
-
-    it('rejects fine-grained units for ES|QL with strict validation', () => {
-      // Fine-grained units are not accepted by either the ES|QL GA schema OR
-      // the legacy schema (legacy schema accepts any string so this passes)
-      // This test verifies the ES|QL GA strict schema rejects 'us'
-      const input = {
-        type: 'duration' as const,
-        from: 'us',
-        to: 'ms',
-      };
-
-      // 'us' is accepted by the legacy fallback schema (string type)
-      // so the overall esqlFormatTypeSchema allows it
-      const validated = esqlFormatTypeSchema.validate(input);
-      expect(validated).toEqual(input);
     });
   });
 
