@@ -42,8 +42,13 @@ export class BackgroundSearchManagementPage {
     return this.table.getByTestId('searchSessionsRow');
   }
 
-  async getRowCount(): Promise<number> {
-    return this.rows().count();
+  /**
+   * Retrying assertion that the table has exactly `count` rows. Prefer this over a
+   * one-shot count read: the table re-fetches asynchronously (on refresh or the 10 s
+   * auto-refresh), so it can momentarily render 0 rows mid-reload.
+   */
+  async expectRowCount(count: number, timeout = 30_000) {
+    await expect(this.rows()).toHaveCount(count, { timeout });
   }
 
   async waitForEmptyTable(timeout = 30_000) {
@@ -51,24 +56,28 @@ export class BackgroundSearchManagementPage {
   }
 
   /**
-   * Wait for the first row's status badge to reach `targetStatus`.
+   * Wait for the row's status badge to reach `targetStatus`.
+   *
+   * These row-scoped helpers assume the single-session-per-space invariant: each
+   * parallel worker owns its space, so the table holds exactly one row. The test-subj
+   * locators therefore resolve uniquely. If a second row ever appears, Playwright's
+   * strict-mode check fails loudly rather than silently acting on an arbitrary row —
+   * which is why we deliberately do not use `.first()` here (also disallowed by the
+   * `playwright/no-nth-methods` lint rule).
+   *
    * The management page auto-refreshes every 10 s when the server is started with
    * `--data.search.sessions.management.refreshInterval=10s`.
    */
-  async waitForFirstRowStatus(targetStatus: string, timeout = 60_000) {
+  async waitForRowStatus(targetStatus: string, timeout = 60_000) {
     const badge = this.table.getByTestId('sessionManagementStatusLabel');
     await expect(badge).toHaveAttribute('data-test-status', targetStatus, { timeout });
   }
 
-  async getFirstRowName(): Promise<string> {
-    return this.table.getByTestId('sessionManagementNameCol').innerText();
-  }
-
-  async getFirstRowExpires(): Promise<string> {
+  async getRowExpires(): Promise<string> {
     return this.table.getByTestId('sessionManagementExpiresCol').innerText();
   }
 
-  async renameFirstRow(newName: string) {
+  async renameRow(newName: string) {
     await this.table.getByTestId('sessionManagementActionsCol').click();
     await this.page.testSubj.click('sessionManagementPopoverAction-rename');
     const input = this.page.testSubj.locator('editNameInput');
@@ -77,13 +86,13 @@ export class BackgroundSearchManagementPage {
     await this.page.testSubj.click('confirmEditName');
   }
 
-  async deleteFirstRow() {
+  async deleteRow() {
     await this.table.getByTestId('sessionManagementActionsCol').click();
     await this.page.testSubj.click('sessionManagementPopoverAction-delete');
     await this.page.testSubj.click('confirmModalConfirmButton');
   }
 
-  async viewFirstRow() {
+  async viewRow() {
     await this.table.getByTestId('sessionManagementNameLink').click();
   }
 }

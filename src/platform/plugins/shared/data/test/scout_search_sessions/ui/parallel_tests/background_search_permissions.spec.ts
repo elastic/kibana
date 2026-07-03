@@ -90,7 +90,15 @@ spaceTest.describe(
         const navLinks = await pageObjects.collapsibleNav.getNavLinks();
         expect(navLinks).toContain('Stack Management');
 
-        await expect(page.testSubj.locator('search_sessions')).toBeVisible();
+        // Mirror the original FTR assertion (managementMenu had exactly one section
+        // `{ kibana: ['search_sessions'] }`): with only `store_search_session`, the
+        // management side nav must expose Background Search and nothing else.
+        const managementAppLinks = page.testSubj
+          .locator('mgtSideBarNav')
+          .locator('a.euiSideNavItemButton');
+        await expect(managementAppLinks).toHaveCount(1);
+        await expect(managementAppLinks).toHaveAttribute('data-test-subj', 'search_sessions');
+        await expect(managementAppLinks).toContainText('Background Search');
       }
     );
   }

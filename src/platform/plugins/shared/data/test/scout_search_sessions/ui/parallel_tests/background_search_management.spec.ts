@@ -166,27 +166,27 @@ spaceTest.describe('Background Search management UI', { tag: [...tags.stateful.c
 
           // Management page auto-refreshes every 10 s (server arg).
           // Allow up to 60 s for the background search to transition to "complete".
-          await pageObjects.backgroundSearchManagement.waitForFirstRowStatus('complete', 60_000);
+          await pageObjects.backgroundSearchManagement.waitForRowStatus('complete', 60_000);
         }
       );
 
       await spaceTest.step('rename the background search and verify details', async () => {
-        await pageObjects.backgroundSearchManagement.renameFirstRow(searchName);
+        await pageObjects.backgroundSearchManagement.renameRow(searchName);
 
         // Trigger a manual refresh so the new name is reflected without waiting
         // for the 10-second auto-refresh interval.
         await page.testSubj.click('sessionManagementRefreshBtn');
 
-        expect(await pageObjects.backgroundSearchManagement.getRowCount()).toBe(1);
+        await pageObjects.backgroundSearchManagement.expectRowCount(1);
         await expect(page.testSubj.locator('sessionManagementNameCol')).toHaveText(searchName, {
           timeout: 15_000,
         });
-        const expires = await pageObjects.backgroundSearchManagement.getFirstRowExpires();
+        const expires = await pageObjects.backgroundSearchManagement.getRowExpires();
         expect(expires).not.toBe('--');
       });
 
       await spaceTest.step('navigate back to the dashboard via the management link', async () => {
-        await pageObjects.backgroundSearchManagement.viewFirstRow();
+        await pageObjects.backgroundSearchManagement.viewRow();
 
         await expect(
           page.testSubj.locator('embeddablePanelHeading-SumofBytesbyExtension(Delayed5s)')
@@ -201,8 +201,8 @@ spaceTest.describe('Background Search management UI', { tag: [...tags.stateful.c
         // Trigger an explicit refresh to wait for the initial data load.
         await pageObjects.backgroundSearchManagement.refresh();
 
-        expect(await pageObjects.backgroundSearchManagement.getRowCount()).toBe(1);
-        await pageObjects.backgroundSearchManagement.deleteFirstRow();
+        await pageObjects.backgroundSearchManagement.expectRowCount(1);
+        await pageObjects.backgroundSearchManagement.deleteRow();
         await pageObjects.backgroundSearchManagement.waitForEmptyTable(30_000);
       });
     }
