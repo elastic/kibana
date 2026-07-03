@@ -401,8 +401,11 @@ describe('useFleetServerHostsForm', () => {
 
     await testRenderer.waitFor(() => {
       expect(onSuccess).toBeCalled();
-      const [, options] = testRenderer.startServices.http.put.mock.calls[0];
-      const body = JSON.parse(options.body);
+      const [, putOptions] = testRenderer.startServices.http.put.mock.calls[0] as unknown as [
+        string,
+        { body: string }
+      ];
+      const body = JSON.parse(putOptions.body);
       expect(body.secrets?.ssl?.key).toBeNull();
     });
   });
@@ -436,8 +439,11 @@ describe('useFleetServerHostsForm', () => {
 
     await testRenderer.waitFor(() => {
       expect(onSuccess).toBeCalled();
-      const [, options] = testRenderer.startServices.http.put.mock.calls[0];
-      const body = JSON.parse(options.body);
+      const [, putOptions] = testRenderer.startServices.http.put.mock.calls[0] as unknown as [
+        string,
+        { body: string }
+      ];
+      const body = JSON.parse(putOptions.body);
       expect(body.secrets?.ssl?.key).toBeNull();
       expect(body.secrets?.ssl?.es_key).toEqual({ id: 'secret-es-key-id-456' });
     });
