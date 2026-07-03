@@ -80,7 +80,8 @@ Query process and network indices ordered by @timestamp ASC.
 Return earliest host, timestamp, indicator, and delivery-vector hypothesis.
 
 ### 4. Attack timeline
-Merge process, file, network, and registry events for the host in the time window; sort chronologically.
+Merge process, file, network, and registry events for the host in the time window; sort by \`@timestamp\` ascending.
+Present the answer as an explicit chronological timeline — an ordered, timestamp-labeled sequence of events scoped to the named host — not a prose paragraph. If telemetry is sparse or unavailable, still lay out the ordered reconstruction as a timeline skeleton (the sequence of stages to expect for that host), so the response remains a scoped chronological narrative.
 
 ### 5. Lateral movement
 Trace outbound internal connections from source host; correlate with process creation on destinations.
