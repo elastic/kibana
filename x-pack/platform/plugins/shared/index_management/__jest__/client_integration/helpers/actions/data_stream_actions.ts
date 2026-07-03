@@ -240,31 +240,10 @@ export const createDataStreamDetailPanelActions = () => {
     return screen.queryByTestId('ilmPolicyLink');
   };
 
-  const findIndexTemplateLink = () => {
-    return screen.queryByTestId('indexTemplateLink');
-  };
-
   const findIlmPolicyDetail = () => {
     // The successful ingest lifecycle now surfaces the ILM policy as a link; when there is no
     // ILM policy the link is absent.
     return screen.queryByTestId('ilmPolicyLink');
-  };
-
-  const findDataRetentionDetail = () => {
-    return screen.queryByTestId('successfulIngestLifecycleDetail');
-  };
-
-  const findFailureStoreDetail = () => {
-    return screen.queryByTestId('failedIngestLifecycleDetail');
-  };
-
-  const findFailureStoreRetentionDetail = () => {
-    return screen.queryByTestId('failedIngestLifecycleDetail');
-  };
-
-  const clickIndexTemplateLink = () => {
-    const link = screen.getByTestId('indexTemplateLink');
-    fireEvent.click(link);
   };
 
   return {
@@ -272,12 +251,7 @@ export const createDataStreamDetailPanelActions = () => {
     findDetailPanel,
     findDetailPanelTitle,
     findIlmPolicyLink,
-    findIndexTemplateLink,
     findIlmPolicyDetail,
-    findDataRetentionDetail,
-    findFailureStoreDetail,
-    findFailureStoreRetentionDetail,
-    clickIndexTemplateLink,
   };
 };
 
