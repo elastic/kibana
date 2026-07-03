@@ -62,8 +62,11 @@ export const DEFAULT_FILTER = {
 // String length ceilings (maxLength) for schema.string — DoS protection.
 // ES index name/pattern limit per Elasticsearch specification.
 export const INDEX_NAME_MAX_LENGTH = 255;
-// JSON-serialized query DSL passed as a URL query parameter and parsed server-side.
-export const QUERY_DSL_MAX_LENGTH = 4096;
+// JSON-serialized ES bool query DSL passed as a query parameter and parsed server-side.
+// This carries the global KQL/filter bar serialized to Elasticsearch DSL, so a filter with
+// many clauses (e.g. an "is one of" with dozens of values) can expand well past a KQL string.
+// Sized generously (32 KB) to avoid rejecting legitimate power-user filters while still bounding input.
+export const QUERY_DSL_MAX_LENGTH = 32768;
 // Arbitrary fill value for missing field values in ES multi-terms aggregations.
 export const MISSING_VALUE_MAX_LENGTH = 1024;
 
