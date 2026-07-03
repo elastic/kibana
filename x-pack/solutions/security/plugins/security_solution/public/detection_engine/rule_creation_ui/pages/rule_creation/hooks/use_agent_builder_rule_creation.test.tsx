@@ -40,7 +40,8 @@ jest.mock('../../../../common/helpers', () => ({
 
 const SYNC_DEBOUNCE_MS = 500;
 
-const makeForm = () => ({ updateFieldValues: jest.fn() } as unknown as FormHook<never, never>);
+const makeForm = <T extends object>() =>
+  ({ updateFieldValues: jest.fn() } as unknown as FormHook<T, T>);
 
 /** Conversation attachment as delivered by activeConversation$ (versioned shape). */
 const makeRuleAttachment = ({ id = 'card-1', origin }: { id?: string; origin?: string } = {}) => ({
@@ -59,10 +60,10 @@ describe('useAgentBuilderRuleCreation', () => {
   let addSuccess: jest.Mock;
   let addWarning: jest.Mock;
   let forms: {
-    defineStepForm: FormHook<never, never>;
-    aboutStepForm: FormHook<never, never>;
-    scheduleStepForm: FormHook<never, never>;
-    actionsStepForm: FormHook<never, never>;
+    defineStepForm: FormHook<DefineStepRule, DefineStepRule>;
+    aboutStepForm: FormHook<AboutStepRule, AboutStepRule>;
+    scheduleStepForm: FormHook<ScheduleStepRule, ScheduleStepRule>;
+    actionsStepForm: FormHook<ActionsStepRule, ActionsStepRule>;
   };
 
   const renderTestHook = (
@@ -92,10 +93,10 @@ describe('useAgentBuilderRuleCreation', () => {
     addSuccess = jest.fn();
     addWarning = jest.fn();
     forms = {
-      defineStepForm: makeForm(),
-      aboutStepForm: makeForm(),
-      scheduleStepForm: makeForm(),
-      actionsStepForm: makeForm(),
+      defineStepForm: makeForm<DefineStepRule>(),
+      aboutStepForm: makeForm<AboutStepRule>(),
+      scheduleStepForm: makeForm<ScheduleStepRule>(),
+      actionsStepForm: makeForm<ActionsStepRule>(),
     };
     mockFormatRule.mockReturnValue({ name: '' });
     mockGetStepsData.mockReturnValue({
