@@ -113,12 +113,16 @@ Open a single draft PR with the smallest possible test-side fix for this flaky-t
 
 `${{ env.REQUESTED_BY }}` triggered this run — the user who applied `ai:fix-flaky`, or the manual dispatcher. @-mention them (`@${{ env.REQUESTED_BY }}`) in both the outcome comment and the PR body so they hear the result, but **only if it is a real user account**: if `${{ env.REQUESTED_BY }}` ends with `[bot]` or is `kibanamachine`, omit the mention (and the "Requested by" line) entirely.
 
+## Environment
+
+Kibana is already bootstrapped for you — `node_modules` and `@kbn/setup-node-env` are installed on the runner before you start. **Do not run `yarn kbn bootstrap`** (it would be redundant and the sandbox has no access to the package registries). Just run the Kibana CLIs directly, e.g. `node scripts/eslint <files>` and `node scripts/type_check --project <tsconfig>`.
+
 ## Steps
 
 1. Read the investigator's comment on the issue for the suspected root cause and proposed fix. If no action is needed, skip to step 6.
 2. Read the failing test and the helpers, fixtures, and page objects it imports.
 3. Apply the smallest test-side patch that addresses the root cause.
-4. Run the test locally until it passes.
+4. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check` (and, for a Jest test, run it with `node scripts/jest`). FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here — the Flaky Fix Verifier runs those against your PR, so rely on lint/type checks for those.
 5. Open the PR (see "PR format" below).
 6. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 
@@ -140,7 +144,7 @@ Open a single draft PR with the smallest possible test-side fix for this flaky-t
 
   #### Verified locally
 
-  <bullet list of what you successfully ran on this branch — e.g. `yarn kbn bootstrap`, `node scripts/check --profile agent`, the targeted test passed N times in a row, etc. Include the exact commands.>
+  <bullet list of what you successfully ran on this branch — e.g. `node scripts/eslint <files>`, `node scripts/type_check --project <tsconfig>`, `node scripts/jest <test>`, etc. Include the exact commands.>
 
   #### Not verified locally
 
