@@ -11,10 +11,7 @@ import type { CasesAnalyticsV2WriterContract } from '../writer';
 import type { CasesActivityV2WriterContract } from '../writer/activity';
 import type { CasesAttachmentsV2WriterContract } from '../writer/attachments';
 import { runReconciliation, type RunReconciliationResult } from './runner';
-import {
-  runActivityReconciliation,
-  type RunActivityReconciliationResult,
-} from './activity_runner';
+import { runActivityReconciliation, type RunActivityReconciliationResult } from './activity_runner';
 import {
   ATTACHMENT_SOURCE_TYPES,
   runAttachmentsReconciliation,
@@ -65,7 +62,8 @@ export interface RunFullResetDeps {
   pageDelayMs: number;
   /**
    * Optional progress callback fired after each runner page completes.
-   * `phase` discriminates which surface is currently being walked, and
+   * `phase` discriminates which surface the completed page belongs to
+   * (the surfaces are walked concurrently), and
    * `processed` is the cumulative count for that surface so the caller
    * (the reset task) can write live counts without per-page bookkeeping.
    *
@@ -73,10 +71,7 @@ export interface RunFullResetDeps {
    * `bulkUpdateState`) themselves so the per-page semantics here stay
    * obvious.
    */
-  onProgress?: (info: {
-    phase: 'cases' | 'activity' | 'attachments';
-    processed: number;
-  }) => void;
+  onProgress?: (info: { phase: 'cases' | 'activity' | 'attachments'; processed: number }) => void;
   logger: Logger;
 }
 
@@ -150,73 +145,103 @@ export async function runFullReset({
   onProgress,
   logger,
 }: RunFullResetDeps): Promise<RunFullResetResult> {
-  // Cases first, then activity, then attachments. Same ordering as the
-  // periodic task: a `LOOKUP JOIN .cases ON cases.id` from any
-  // post-fact-table consumer sees the joined case row at least as
-  // up-to-date as the activity / attachment row that referenced it.
-  let casesResult: RunReconciliationResult | null = null;
-  let casesError: unknown = null;
-  try {
-    casesResult = await runReconciliation({
-      savedObjectsClient,
-      writer,
-      logger,
-      lastRunAt: undefined,
-      pageDelayMs,
-      // Wrap the surface-agnostic runner callback to attach a phase tag.
-      // Keeps the runners themselves unaware of which surface they're
-      // serving.
-      onPageComplete: ({ processed }) => onProgress?.({ phase: 'cases', processed }),
-    });
-  } catch (err) {
-    casesError = err;
-    logger.warn(
-      `reset: full cases re-walk failed mid-flight: ${
-        err instanceof Error ? err.message : String(err)
-      }. Index is partially populated; the cases cursor is left unset so the next periodic tick will fall back to a full walk and recover the missing docs.`
-    );
-  }
+  // Walk the three surfaces CONCURRENTLY. They write to independent indices
+  // and open independent PITs, so there's no ordering dependency during a
+  // full rebuild — the "cases first" ordering the periodic tick keeps for
+  // `LOOKUP JOIN .cases` freshness is unnecessary here because the backfill
+  // converges once all three finish (a brief window where an activity /
+  // attachment row's joined case row isn't there yet is fine mid-rebuild).
+  // Running them in parallel makes the reset wall-clock the single slowest
+  // surface instead of the sum of all three, so attachments no longer waits
+  // behind cases + activity. Each walk swallows its own error into the
+  // matching `*Error` var, so `Promise.all` never rejects; per-surface
+  // isolation and cursor seeding are preserved.
+  //
+  // Note: `onProgress` still tags each page with its surface so the reset
+  // task can route the cumulative count to the right per-surface
+  // `*_processed` field — those stay accurate under parallelism. The reset
+  // task's coarse `phase` field stays `'running'` for the whole walk (it no
+  // longer names a single "current" surface, since all three walk at once);
+  // the per-surface counts are the source of truth for progress.
+  // Each surface returns its own `{ result, error }` so the outcome is read
+  // off the typed `Promise.all` tuple rather than reassigning outer `let`s
+  // from inside the closures (which defeats TS control-flow narrowing).
+  const [casesOutcome, activityOutcome, attachmentsOutcome] = await Promise.all([
+    (async (): Promise<{ result: RunReconciliationResult | null; error: unknown }> => {
+      try {
+        const result = await runReconciliation({
+          savedObjectsClient,
+          writer,
+          logger,
+          lastRunAt: undefined,
+          pageDelayMs,
+          // Wrap the surface-agnostic runner callback to attach a phase tag.
+          // Keeps the runners themselves unaware of which surface they're
+          // serving.
+          onPageComplete: ({ processed }) => onProgress?.({ phase: 'cases', processed }),
+        });
+        return { result, error: null };
+      } catch (err) {
+        logger.warn(
+          `reset: full cases re-walk failed mid-flight: ${
+            err instanceof Error ? err.message : String(err)
+          }. Index is partially populated; the cases cursor is left unset so the next periodic tick will fall back to a full walk and recover the missing docs.`
+        );
+        return { result: null, error: err };
+      }
+    })(),
+    (async (): Promise<{ result: RunActivityReconciliationResult | null; error: unknown }> => {
+      try {
+        const result = await runActivityReconciliation({
+          savedObjectsClient,
+          activityWriter,
+          logger,
+          lastRunAt: undefined,
+          pageDelayMs,
+          onPageComplete: ({ processed }) => onProgress?.({ phase: 'activity', processed }),
+        });
+        return { result, error: null };
+      } catch (err) {
+        logger.warn(
+          `reset: full activity re-walk failed mid-flight: ${
+            err instanceof Error ? err.message : String(err)
+          }. Activity index is partially populated; the activity cursor is left unset so the next periodic tick will fall back to a full walk and recover the missing docs.`
+        );
+        return { result: null, error: err };
+      }
+    })(),
+    (async (): Promise<{
+      result: RunAttachmentsReconciliationResult | null;
+      error: unknown;
+    }> => {
+      try {
+        const result = await runAttachmentsReconciliation({
+          savedObjectsClient,
+          attachmentsWriter,
+          logger,
+          lastRunAt: undefined,
+          pageDelayMs,
+          sourceTypes: attachmentSourceTypes,
+          onPageComplete: ({ processed }) => onProgress?.({ phase: 'attachments', processed }),
+        });
+        return { result, error: null };
+      } catch (err) {
+        logger.warn(
+          `reset: full attachments re-walk failed mid-flight: ${
+            err instanceof Error ? err.message : String(err)
+          }. Attachments index is partially populated; the attachments cursor is left unset so the next periodic tick will fall back to a full walk and recover the missing docs.`
+        );
+        return { result: null, error: err };
+      }
+    })(),
+  ]);
 
-  let activityResult: RunActivityReconciliationResult | null = null;
-  let activityError: unknown = null;
-  try {
-    activityResult = await runActivityReconciliation({
-      savedObjectsClient,
-      activityWriter,
-      logger,
-      lastRunAt: undefined,
-      pageDelayMs,
-      onPageComplete: ({ processed }) => onProgress?.({ phase: 'activity', processed }),
-    });
-  } catch (err) {
-    activityError = err;
-    logger.warn(
-      `reset: full activity re-walk failed mid-flight: ${
-        err instanceof Error ? err.message : String(err)
-      }. Activity index is partially populated; the activity cursor is left unset so the next periodic tick will fall back to a full walk and recover the missing docs.`
-    );
-  }
-
-  let attachmentsResult: RunAttachmentsReconciliationResult | null = null;
-  let attachmentsError: unknown = null;
-  try {
-    attachmentsResult = await runAttachmentsReconciliation({
-      savedObjectsClient,
-      attachmentsWriter,
-      logger,
-      lastRunAt: undefined,
-      pageDelayMs,
-      sourceTypes: attachmentSourceTypes,
-      onPageComplete: ({ processed }) => onProgress?.({ phase: 'attachments', processed }),
-    });
-  } catch (err) {
-    attachmentsError = err;
-    logger.warn(
-      `reset: full attachments re-walk failed mid-flight: ${
-        err instanceof Error ? err.message : String(err)
-      }. Attachments index is partially populated; the attachments cursor is left unset so the next periodic tick will fall back to a full walk and recover the missing docs.`
-    );
-  }
+  const casesResult = casesOutcome.result;
+  const casesError = casesOutcome.error;
+  const activityResult = activityOutcome.result;
+  const activityError = activityOutcome.error;
+  const attachmentsResult = attachmentsOutcome.result;
+  const attachmentsError = attachmentsOutcome.error;
 
   // Per-surface cursor: the walk's tick-start timestamp on success, or
   // `null` on failure. Seeding `null` clears the persisted cursor so

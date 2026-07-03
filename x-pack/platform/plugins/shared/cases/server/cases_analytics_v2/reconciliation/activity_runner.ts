@@ -16,11 +16,11 @@ import type { CasesActivityV2WriterContract } from '../writer/activity';
  * User-action SOs fetched per ES round-trip. Matched to the cases runner's
  * page size. The per-page sync CPU is dominated by `JSON.stringify` over
  * the polymorphic `payload` field, which can be large for bulk-attachment
- * or push payloads — 100 keeps the worst-case sync span between event-loop
- * yields bounded; throughput is limited by ES bulk roundtrip latency, not
- * page count.
+ * or push payloads — 250 keeps the worst-case sync span between event-loop
+ * yields bounded while cutting round-trips; throughput is limited by ES
+ * bulk roundtrip latency, not page count.
  */
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 250;
 
 /**
  * SO-namespaces value meaning "every namespace". Same rationale as in the

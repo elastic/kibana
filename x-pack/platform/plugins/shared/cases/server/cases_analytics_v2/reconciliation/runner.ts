@@ -13,11 +13,12 @@ import type { CasePersistedAttributes } from '../../common/types/case';
 import type { CasesAnalyticsV2WriterContract } from '../writer';
 
 /**
- * Number of case SOs fetched per ES round-trip. Small enough that Task
- * Manager's task-runtime budget stays comfortable even on cases with heavy
- * `extended_fields` payloads.
+ * Number of case SOs fetched per ES round-trip. 250 balances fewer
+ * round-trips (faster backfill / reset) against keeping Task Manager's
+ * task-runtime budget and per-page memory comfortable even on cases with
+ * heavy `extended_fields` payloads.
  */
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 250;
 
 /**
  * SO-namespaces value meaning "every namespace". The runner's SO client is

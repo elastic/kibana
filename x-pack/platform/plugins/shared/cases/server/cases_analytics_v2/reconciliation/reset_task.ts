@@ -63,21 +63,25 @@ export const RESET_TASK_ID = 'cases-analyticsV2-reset';
  *
  * On total failure (every surface threw) the runner throws instead of
  * returning, which preserves the SO with the most recent throttled
- * write — so `phase` and the per-surface `*_processed` counts still
- * reflect how far the walks got.
+ * write — so the per-surface `*_processed` counts still reflect how far
+ * each concurrent walk got before the throw.
  */
 export interface ResetTaskState {
   /**
-   * Surface currently being walked. Mid-run: `'cases'` / `'activity'`
-   * / `'attachments'`. Final-state write: `'completed'`. On total
-   * failure the SO is preserved with the surface that died.
+   * Coarse task phase. `'running'` while the walk is in flight,
+   * `'completed'` on the final-state write. The three surfaces are
+   * walked concurrently, so there is no single "surface currently being
+   * walked" to report here — per-surface progress lives in the
+   * `*_processed` counts below. On total failure the SO is preserved
+   * with `phase: 'running'` (the last throttled write before the throw).
    */
-  phase: 'cases' | 'activity' | 'attachments' | 'completed' | null;
+  phase: 'running' | 'completed' | null;
   /**
-   * Cumulative cases-surface processed count. Updates live during the
-   * cases walk via the throttled progress writer; frozen at its final
-   * value once a later surface starts. `null` until the first cases
-   * page completes.
+   * Cumulative cases-surface processed count. Updates live throughout
+   * the walk via the throttled progress writer. Because the three
+   * surfaces run concurrently, this advances alongside
+   * `activity_processed` and `attachments_processed` rather than one
+   * surface at a time. `null` until the first cases page completes.
    */
   cases_processed: number | null;
   /** Cumulative activity-surface processed count. Same lifecycle as `cases_processed`. */
@@ -223,7 +227,7 @@ export function registerResetTask({
           // reads from this same reference (no copy) so each flush
           // captures whatever the most recent page reported.
           const liveState: ResetTaskState = {
-            phase: 'cases',
+            phase: 'running',
             cases_processed: null,
             activity_processed: null,
             attachments_processed: null,
@@ -260,7 +264,7 @@ export function registerResetTask({
 
           try {
             // Initial flush so `/state.active_reset.state` shows
-            // `phase: 'cases', started_at: ...` immediately rather than
+            // `phase: 'running', started_at: ...` immediately rather than
             // the placeholder `{}` Task Manager wrote at schedule time.
             // The first `onProgress` callback would also fire this
             // (leading edge), but the first page can be slow on a cold
@@ -280,7 +284,10 @@ export function registerResetTask({
               pageDelayMs,
               logger,
               onProgress: ({ phase, processed }) => {
-                liveState.phase = phase;
+                // The three surfaces walk concurrently, so `phase` here is
+                // only the per-page discriminator for routing the count to
+                // the right surface — the top-level `liveState.phase` stays
+                // `'running'` for the whole walk (see `ResetTaskState.phase`).
                 if (phase === 'cases') {
                   liveState.cases_processed = processed;
                 } else if (phase === 'activity') {

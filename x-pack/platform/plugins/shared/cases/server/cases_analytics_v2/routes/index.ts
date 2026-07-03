@@ -38,18 +38,20 @@ import type { CasesAttachmentsV2WriterContract } from '../writer/attachments';
  * — Task Manager auto-deletes one-shot tasks on success, so `null`
  * means either "no reset has ever been scheduled" or "the last reset
  * succeeded and was cleaned up". A populated value with
- * `status: 'failed'` is the administrator's signal that the last reset
- * threw on the cases walk; the periodic task continues to fill in the
+ * `status: 'failed'` is the administrator's signal that every surface's
+ * walk threw (total failure); the periodic task continues to fill in the
  * gap regardless.
  *
  * `state` evolves over the task's lifetime:
  *   - At schedule time (before any throttled write): `{}`.
- *   - During the walk: `phase`, `cases_processed`, and `started_at`
- *     populate progressively via the reset task's wall-clock-throttled
- *     progress writer.
+ *   - During the walk: `phase: 'running'`, `started_at`, and all three
+ *     `*_processed` counts populate progressively via the reset task's
+ *     wall-clock-throttled progress writer. The surfaces are walked
+ *     concurrently, so the three counts advance together rather than one
+ *     at a time.
  *   - At task completion: full `ResetTaskState` written by Task
  *     Manager from the runner's return value, including `cases_cursor`,
- *     `completed_at`, and any error message.
+ *     `completed_at`, and any per-surface error message.
  */
 interface ActiveResetSnapshot {
   task_id: string;
@@ -256,7 +258,8 @@ export const registerCasesAnalyticsV2Routes = ({
             // the type layer; the shape is owned by this task type's
             // runner. While `idle`, state is `{}`; while `running`,
             // the throttled progress writer pushes partial state every
-            // ~30s (`phase`, `cases_processed`, `started_at`); after
+            // ~30s (`phase: 'running'`, the three `*_processed` counts,
+            // `started_at`); after
             // the runner returns, state is a populated `ResetTaskState`
             // (or the partial mid-walk state on a thrown failure).
             state: (resetTask.state ?? {}) as Partial<ResetTaskState> | Record<string, never>,

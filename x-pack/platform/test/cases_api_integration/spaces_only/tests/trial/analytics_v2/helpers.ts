@@ -439,7 +439,7 @@ export interface V2StateBody {
    * is scheduled, or when the most recent reset succeeded (Task
    * Manager auto-removes one-shot tasks on success). A non-null
    * snapshot with `status: 'failed'` is the administrator's signal that
-   * the backfill walk threw on both surfaces.
+   * every surface's walk threw (total failure).
    */
   active_reset: {
     task_id: string;
@@ -449,18 +449,19 @@ export interface V2StateBody {
     /**
      * Mirrors `ResetTaskState` in `reset_task.ts`. Updated live by
      * the reset task's wall-clock-throttled progress writer (every
-     * ~30s during the walk): `phase`, `cases_processed`,
-     * `activity_processed`, and `started_at` populate
-     * progressively. `cases_cursor`, `activity_cursor`,
-     * `completed_at`, `cases_error`, and `activity_error` only land
-     * in the final write at task completion.
+     * ~30s during the walk): `phase: 'running'`, `started_at`, and the
+     * three `*_processed` counts populate progressively. The surfaces
+     * walk concurrently, so the three counts advance together rather
+     * than one at a time. The `*_cursor` fields, `completed_at`, and
+     * the `*_error` fields only land in the final write at task
+     * completion.
      */
     state: ActiveResetState;
   } | null;
 }
 
 export interface ActiveResetState {
-  phase?: 'cases' | 'activity' | 'attachments' | 'completed' | null;
+  phase?: 'running' | 'completed' | null;
   cases_processed?: number | null;
   activity_processed?: number | null;
   attachments_processed?: number | null;

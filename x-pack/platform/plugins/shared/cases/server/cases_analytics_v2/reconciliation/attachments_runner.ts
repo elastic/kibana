@@ -23,13 +23,13 @@ import type {
 
 /**
  * Number of attachment SOs fetched per ES round-trip. Matched to the
- * cases + activity runners so a single Task Manager tick budget covers
- * a similar number of docs across surfaces. Attachments can carry
- * larger `data` / `metadata` blobs than user actions, but the
- * `JSON.stringify` cost is bounded by the mapping's `ignore_above`
- * truncation in the doc-builder.
+ * cases + activity runners (250) so a single Task Manager tick budget
+ * covers a similar number of docs across surfaces while cutting
+ * round-trips. Attachments can carry larger `data` / `metadata` blobs
+ * than user actions, but the `JSON.stringify` cost is bounded by the
+ * mapping's `ignore_above` truncation in the doc-builder.
  */
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 250;
 
 /**
  * SO-namespaces value meaning "every namespace". Same rationale as in
