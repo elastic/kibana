@@ -126,7 +126,7 @@ export const documentationPanelTexts = {
     'sharedUXPackages.dateRangePicker.documentationPanel.combinationsBody',
     {
       defaultMessage:
-        'Custom time ranges are combinations of the aforementioned formats, e.g. `now to Fri, 1 Dec 2025 00:00:00 GMT` or `-12d to now`.',
+        'Custom ranges are combinations of the aforementioned formats, e.g. `now to Fri, 1 Dec 2025 00:00:00 GMT` or `-12d to now`.',
     }
   ),
   detailedDocumentationLink: i18n.translate(
@@ -137,7 +137,7 @@ export const documentationPanelTexts = {
 
 export const customTimeRangePanelTexts = {
   heading: i18n.translate('sharedUXPackages.dateRangePicker.customTimeRangePanel.heading', {
-    defaultMessage: 'Custom time range',
+    defaultMessage: 'Custom range',
   }),
   startDateLabel: i18n.translate(
     'sharedUXPackages.dateRangePicker.customTimeRangePanel.startDateLabel',
@@ -335,7 +335,7 @@ export const mainPanelTexts = {
   ),
   customTimeRangePanelTitle: i18n.translate(
     'sharedUXPackages.dateRangePicker.mainPanel.customTimeRangePanelTitle',
-    { defaultMessage: 'Custom time range' }
+    { defaultMessage: 'Custom range' }
   ),
   savePresetTooltip: i18n.translate(
     'sharedUXPackages.dateRangePicker.mainPanel.savePresetTooltip',
