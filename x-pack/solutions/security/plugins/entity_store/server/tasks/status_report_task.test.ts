@@ -34,10 +34,6 @@ const NAMESPACE = 'default';
 const METADATA_INDEX = getMetadataEntitiesDataStreamName(NAMESPACE);
 const LATEST_INDEX = getLatestEntitiesIndexName(NAMESPACE);
 
-// ---------------------------------------------------------------------------
-// getResolutionState unit tests
-// ---------------------------------------------------------------------------
-
 const makeSearchResponse = ({
   resolvedDocCount,
   resolutionGroupsValue,
@@ -152,10 +148,6 @@ describe('getResolutionState', () => {
     );
   });
 });
-
-// ---------------------------------------------------------------------------
-// runTask integration tests
-// ---------------------------------------------------------------------------
 
 describe('status report task — usage, resolution state & metadata telemetry', () => {
   let logger: MockedLogger;
