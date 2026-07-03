@@ -75,17 +75,7 @@ export const deriveStateChangeEntries = (eventRows: StateChangeSourceRow[]): Sta
   for (const row of eventRows) {
     const status = row['episode.status'];
     const eventCount = row.event_count ?? 1;
-    if (prevStatus === undefined) {
-      entries.push({
-        kind: 'state_change',
-        timestamp: row['@timestamp'],
-        newStatus: status,
-        prevStatus: undefined,
-        prevEventCount: 0,
-      });
-      prevStatus = status;
-      runCount = eventCount;
-    } else if (status !== prevStatus) {
+    if (status !== prevStatus) {
       entries.push({
         kind: 'state_change',
         timestamp: row['@timestamp'],
@@ -122,17 +112,7 @@ export const deriveSeverityChangeEntries = (
 
     const normalizedSeverity = normalizeEpisodeSeverity(severity);
     const eventCount = row.event_count ?? 1;
-    if (prevSeverity === undefined) {
-      entries.push({
-        kind: 'severity_change',
-        timestamp: row['@timestamp'],
-        newSeverity: normalizedSeverity,
-        prevSeverity: undefined,
-        prevEventCount: 0,
-      });
-      prevSeverity = normalizedSeverity;
-      runCount = eventCount;
-    } else if (normalizedSeverity !== prevSeverity) {
+    if (normalizedSeverity !== prevSeverity) {
       entries.push({
         kind: 'severity_change',
         timestamp: row['@timestamp'],
