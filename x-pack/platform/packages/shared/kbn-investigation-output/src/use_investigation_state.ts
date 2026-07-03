@@ -63,53 +63,6 @@ type SettledInvestigation =
   | { status: 'failed'; error: string }
   | { status: 'unavailable'; error: string };
 
-/**
- * Terminal investigation results keyed by execution id. Executions never change once terminal,
- * so this saves a full-output execution fetch every time a row remounts (each investigation in
- * a flyout list mounts its own hook, and flyouts are reopened often). `unavailable` results are
- * deliberately not cached — they may be transient (e.g. a privilege granted later).
- */
-const MAX_CACHE_ENTRIES = 100;
-const settledInvestigationCache = new Map<string, SettledInvestigation>();
-
-const cacheSettled = (executionId: string, settled: SettledInvestigation): void => {
-  if (settled.status === 'unavailable') {
-    return;
-  }
-  if (settledInvestigationCache.size >= MAX_CACHE_ENTRIES) {
-    const oldestKey = settledInvestigationCache.keys().next().value;
-    if (oldestKey !== undefined) {
-      settledInvestigationCache.delete(oldestKey);
-    }
-  }
-  settledInvestigationCache.set(executionId, settled);
-};
-
-/** Exposed for tests. */
-export const clearSettledInvestigationCache = (): void => {
-  settledInvestigationCache.clear();
-};
-
-/**
- * Applies a live progress snapshot on top of the previous one. Snapshots are documented to be
- * complete (never a delta), but that invariant is only enforced by the agent's instructions —
- * if a snapshot drops a previously reported hypothesis, keep it instead of letting it vanish
- * from the UI mid-investigation.
- */
-const applySnapshot = (
-  previous: InvestigationState | undefined,
-  next: InvestigationState
-): InvestigationState => {
-  if (!previous) {
-    return next;
-  }
-  const nextCandidates = new Set(next.hypotheses.map((hypothesis) => hypothesis.candidate));
-  const dropped = previous.hypotheses.filter(
-    (hypothesis) => !nextCandidates.has(hypothesis.candidate)
-  );
-  return dropped.length === 0 ? next : { ...next, hypotheses: [...next.hypotheses, ...dropped] };
-};
-
 export interface UseInvestigationStateResult {
   /** Latest known investigation state: live snapshots while running, persisted once complete. */
   state?: InvestigationState;
@@ -126,7 +79,7 @@ export interface UseInvestigationStateResult {
  *
  * - While the investigation runs, follows the agent execution's live event stream
  *   (`GET /internal/agent_builder/executions/{executionId}/follow`); each event carries the
- *   full current state (validated, and reconciled so hypotheses never silently vanish).
+ *   full current state (validated).
  * - When the stream ends (or the caller already knows the run is over), reads the persisted
  *   final result via `WorkflowApi` — but only trusts it once the workflow execution itself is
  *   terminal. A stream error on a still-running execution (the agent execution may not exist
@@ -170,17 +123,6 @@ export function useInvestigationState({
     setSettled(undefined);
     setIsFollowing(false);
 
-    const cached = settledInvestigationCache.get(executionId);
-    if (cached) {
-      if (cached.status === 'complete') {
-        setState(cached.state);
-        setSettled({ status: 'complete' });
-      } else {
-        setSettled({ status: cached.status, error: cached.error });
-      }
-      return;
-    }
-
     let cancelled = false;
     let retryTimer: ReturnType<typeof setTimeout> | undefined;
     let subscription: Subscription | undefined;
@@ -191,7 +133,6 @@ export function useInvestigationState({
       if (cancelled) {
         return;
       }
-      cacheSettled(executionId, result);
       setIsFollowing(false);
       if (result.status === 'complete') {
         setState(result.state);
@@ -296,7 +237,7 @@ export function useInvestigationState({
             if (isToolUiEvent(event, INVESTIGATION_PROGRESS_UI_EVENT)) {
               const parsed = investigationStateSchema.safeParse(event.data.data);
               if (parsed.success) {
-                setState((previous) => applySnapshot(previous, parsed.data));
+                setState(parsed.data);
               }
             }
           },

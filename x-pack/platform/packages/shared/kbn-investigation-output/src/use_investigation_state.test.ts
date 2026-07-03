@@ -11,7 +11,7 @@ import type { Observable } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import { INVESTIGATION_PROGRESS_UI_EVENT } from '@kbn/significant-events-schema';
-import { useInvestigationState, clearSettledInvestigationCache } from './use_investigation_state';
+import { useInvestigationState } from './use_investigation_state';
 
 let mockEvents$: Observable<unknown>;
 const mockGetExecution = jest.fn();
@@ -55,7 +55,6 @@ describe('useInvestigationState', () => {
     mockSubject = new Subject();
     mockEvents$ = mockSubject;
     mockGetExecution.mockReset();
-    clearSettledInvestigationCache();
   });
 
   const createHttp = () => ({ get: jest.fn().mockResolvedValue({}) } as unknown as HttpSetup);
@@ -254,7 +253,7 @@ describe('useInvestigationState', () => {
       });
     });
 
-    it('keeps hypotheses that a later snapshot silently drops', async () => {
+    it('replaces the previous state wholesale with each snapshot', async () => {
       const http = createHttp();
       const { result } = renderHook(() =>
         useInvestigationState({ http, executionId: 'exec-1', isRunning: true })
@@ -272,7 +271,7 @@ describe('useInvestigationState', () => {
       await waitFor(() => {
         expect(result.current.state?.summary).toBe('partial');
       });
-      expect(result.current.state?.hypotheses).toEqual([hypothesisB, hypothesisA]);
+      expect(result.current.state?.hypotheses).toEqual([hypothesisB]);
     });
 
     it('prefers the fetched final result over the last live value on stream completion', async () => {
@@ -365,32 +364,6 @@ describe('useInvestigationState', () => {
       });
       expect(result.current.state).toEqual(validState);
       expect(result.current.error).toBeUndefined();
-    });
-  });
-
-  describe('caching', () => {
-    it('serves a terminal result from cache without refetching', async () => {
-      mockGetExecution.mockResolvedValue(
-        completedExecutionWithOutput({ message: 'ok', structured_output: validState })
-      );
-      const http = createHttp();
-
-      const first = renderHook(() =>
-        useInvestigationState({ http, executionId: 'exec-1', isRunning: false })
-      );
-      await waitFor(() => {
-        expect(first.result.current.status).toBe('complete');
-      });
-      first.unmount();
-      expect(mockGetExecution).toHaveBeenCalledTimes(1);
-
-      const second = renderHook(() =>
-        useInvestigationState({ http, executionId: 'exec-1', isRunning: false })
-      );
-
-      expect(second.result.current.status).toBe('complete');
-      expect(second.result.current.state).toEqual(validState);
-      expect(mockGetExecution).toHaveBeenCalledTimes(1);
     });
   });
 });
