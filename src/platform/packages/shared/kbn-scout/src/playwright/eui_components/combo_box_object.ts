@@ -97,24 +97,33 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
     await this.inputWrapper.click();
     await this.searchField.fill(value);
 
-    // Wait for the filtered list to render at least one real option. Gating on the
-    // presence of an option (not on its text) is truncation-proof — see above.
-    const options = this.optionsList().getByRole('option');
-    try {
-      await expect.poll(() => options.count(), { timeout }).toBeGreaterThan(0);
-    } catch (error) {
-      if (!create) {
-        throw error;
-      }
-      // No matching option (free-text combo, or empty serverless suggestions) —
-      // commit the typed value via onCreateOption.
+    if (create) {
+      // The combo accepts custom values (onCreateOption). Commit the typed value
+      // directly — EUI selects an exact match or creates it. This must NOT fall
+      // through to the keyboard path below: on an async combo the pre-filter
+      // (stale) options are still present right after typing, so ArrowDown+Enter
+      // would select a wrong, stale suggestion instead of the typed value.
       await this.searchField.press('Enter');
       await this.searchField.blur();
       return;
     }
 
-    await this.searchField.press('ArrowDown');
-    await this.searchField.press('Enter');
+    // Match the option by its accessible name. EUI keeps the full label accessible
+    // even when the visible text is middle-truncated while filtering, and exact:false
+    // tolerates a trailing type badge (e.g. a Lens field "bytes Number"). Crucially,
+    // waiting for the NAMED option also waits out async / server-side filtering: the
+    // poll only passes once the real match renders, so we never keyboard-select a
+    // stale pre-filter suggestion.
+    const option = this.optionsList().getByRole('option', { name: value });
+    await expect.poll(() => option.count(), { timeout }).toBeGreaterThan(0);
+    if ((await option.count()) === 1) {
+      await option.click();
+    } else {
+      // Multiple substring matches (or a duplicate label) — keyboard-select the
+      // highlighted (first filtered) match; avoids the nth-methods banned in kbn-scout.
+      await this.searchField.press('ArrowDown');
+      await this.searchField.press('Enter');
+    }
     await this.searchField.blur();
   }
 

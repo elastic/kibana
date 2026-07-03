@@ -45,7 +45,6 @@ export class ServiceMapPage {
   public readonly serviceMapEmbeddable: Locator;
   public readonly serviceMapEditorSaveButton: Locator;
   public readonly serviceMapEditorServiceNameComboBox: KbnComboBoxObject;
-  public readonly serviceMapEditorEnvironmentComboBoxInput: Locator;
   public readonly serviceMapEditorKueryInput: Locator;
   public readonly serviceMapViewFullMapButton: Locator;
   public readonly dashboardEmbeddablePanel: Locator;
@@ -92,9 +91,6 @@ export class ServiceMapPage {
     this.serviceMapEditorEnvironmentComboBoxLoading = page.testSubj.locator(
       'apmServiceMapEditorEnvironmentComboBoxLoading'
     );
-    this.serviceMapEditorEnvironmentComboBoxInput = page.testSubj
-      .locator('apmServiceMapEditorEnvironmentComboBox')
-      .locator('[data-test-subj="comboBoxInput"]');
     this.serviceMapEditorKueryInput = page.testSubj.locator('apmServiceMapEditorKueryInput');
     this.serviceMapViewFullMapButton = page.testSubj.locator('serviceMapViewFullMapButton');
     this.dashboardEmbeddablePanel = page.testSubj.locator('embeddablePanel');
@@ -156,8 +152,15 @@ export class ServiceMapPage {
   }
 
   async selectServiceMapEditorEnvironment(environment: string) {
-    await this.serviceMapEditorEnvironmentComboBoxInput.click();
-    await this.page.keyboard.type(environment, { delay: 50 });
+    // `asPlainText` async combo that defaults to "All". Use fill() (replaces the
+    // existing text — raw keyboard.type would append → "Allstaging") and then click
+    // the option by name: this waits for the async list to filter to the exact
+    // option before selecting, avoiding a keyboard pick of a stale suggestion.
+    const searchInput = this.page.testSubj
+      .locator('apmServiceMapEditorEnvironmentComboBox')
+      .locator('[data-test-subj="comboBoxSearchInput"]');
+    await searchInput.click();
+    await searchInput.fill(environment);
     const environmentOption = this.page.getByRole('option', { name: environment });
     await environmentOption.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await environmentOption.click();
