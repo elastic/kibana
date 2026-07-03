@@ -48720,7 +48720,7 @@ paths:
       summary: Export live query results
       tags:
         - Security Osquery API
-      x-state: Added in 9.5.0
+      x-state: Generally available; Added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
