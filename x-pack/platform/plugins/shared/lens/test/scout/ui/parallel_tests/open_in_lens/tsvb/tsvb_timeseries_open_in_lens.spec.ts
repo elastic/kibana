@@ -18,17 +18,24 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData, getImportedDashboardId } from '../../../fixtures';
+import {
+  testData,
+  getImportedDashboardId,
+  setupLogstashOpenInLensDefaults,
+} from '../../../fixtures';
 
 spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnostic }, () => {
   let dashboardId: string;
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
-    const imported = await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.TSVB_TIMESERIES);
-    dashboardId = getImportedDashboardId(imported, testData.TSVB_DASHBOARDS.TIMESERIES);
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
-    await scoutSpace.uiSettings.setDefaultTime(testData.LOGSTASH_IN_RANGE_DATES);
-    await scoutSpace.uiSettings.set({ 'dateFormat:tz': 'UTC' });
+    const imported = await scoutSpace.savedObjects.load(
+      testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.TSVB.TIMESERIES
+    );
+    dashboardId = getImportedDashboardId(
+      imported,
+      testData.DASHBOARD_TITLES.OPEN_IN_LENS.TSVB.TIMESERIES
+    );
+    await setupLogstashOpenInLensDefaults(scoutSpace);
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -48,7 +55,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
 
     await spaceTest.step('invalid panel has no Convert to Lens action', async () => {
       const hasAction = await dashboard.panelHasAction(
-        testData.CONVERT_TO_LENS_ACTION,
+        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Timeseries -  Invalid panel'
       );
       expect(hasAction).toBe(false);
@@ -56,7 +63,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
 
     await spaceTest.step('unsupported aggregations have no Convert to Lens action', async () => {
       const hasAction = await dashboard.panelHasAction(
-        testData.CONVERT_TO_LENS_ACTION,
+        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Timeseries -  Unsupported aggregations'
       );
       expect(hasAction).toBe(false);
@@ -64,7 +71,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
 
     await spaceTest.step('count aggregation has Convert to Lens action', async () => {
       const hasAction = await dashboard.panelHasAction(
-        testData.CONVERT_TO_LENS_ACTION,
+        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Timeseries -  Basic'
       );
       expect(hasAction).toBe(true);
@@ -73,7 +80,10 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
 
   spaceTest('should convert basic timeseries to Lens', async ({ page, pageObjects }) => {
     const { dashboard } = pageObjects;
-    await dashboard.clickPanelAction(testData.CONVERT_TO_LENS_ACTION, 'Timeseries -  Basic');
+    await dashboard.clickPanelAction(
+      testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
+      'Timeseries -  Basic'
+    );
     await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
     const dimensions = page.testSubj.locator('lns-dimensionTrigger');
@@ -82,7 +92,10 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
 
   spaceTest('should preserve app filters in Lens', async ({ page, pageObjects }) => {
     const { dashboard } = pageObjects;
-    await dashboard.clickPanelAction(testData.CONVERT_TO_LENS_ACTION, 'Timeseries - With filter');
+    await dashboard.clickPanelAction(
+      testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
+      'Timeseries - With filter'
+    );
     await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
     expect(await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'css' })).toBe(true);
@@ -90,7 +103,10 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
 
   spaceTest('should preserve query in Lens', async ({ page, pageObjects }) => {
     const { dashboard } = pageObjects;
-    await dashboard.clickPanelAction(testData.CONVERT_TO_LENS_ACTION, 'Timeseries - With query');
+    await dashboard.clickPanelAction(
+      testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
+      'Timeseries - With query'
+    );
     await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
     await expect(page.testSubj.locator('queryInput')).toHaveValue('machine.os : ios');
@@ -99,7 +115,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
   spaceTest('should draw a reference line', async ({ page, pageObjects }) => {
     const { dashboard } = pageObjects;
     await dashboard.clickPanelAction(
-      testData.CONVERT_TO_LENS_ACTION,
+      testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Timeseries -  Reference line'
     );
     await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
@@ -127,7 +143,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
   spaceTest('should convert metric agg with params', async ({ page, pageObjects }) => {
     const { dashboard } = pageObjects;
     await dashboard.clickPanelAction(
-      testData.CONVERT_TO_LENS_ACTION,
+      testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Timeseries -  Agg with params'
     );
     await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
@@ -141,7 +157,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
     async ({ page, pageObjects }) => {
       const { dashboard } = pageObjects;
       await dashboard.clickPanelAction(
-        testData.CONVERT_TO_LENS_ACTION,
+        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Timeseries -  Parent pipeline agg'
       );
       await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
@@ -160,7 +176,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
     async ({ page, pageObjects }) => {
       const { dashboard } = pageObjects;
       await dashboard.clickPanelAction(
-        testData.CONVERT_TO_LENS_ACTION,
+        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Timeseries - Sibling pipeline agg'
       );
       await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
@@ -179,7 +195,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
     async ({ page, pageObjects }) => {
       const { dashboard } = pageObjects;
       await dashboard.clickPanelAction(
-        testData.CONVERT_TO_LENS_ACTION,
+        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Timeseries - Ignore global filters series'
       );
       await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
@@ -192,7 +208,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
     async ({ page, pageObjects }) => {
       const { dashboard } = pageObjects;
       await dashboard.clickPanelAction(
-        testData.CONVERT_TO_LENS_ACTION,
+        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Timeseries - Ignore global filters panel'
       );
       await expect(page.testSubj.locator('xyVisChart')).toBeVisible();

@@ -18,7 +18,11 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData, getImportedDashboardId } from '../../../fixtures';
+import {
+  testData,
+  getImportedDashboardId,
+  setupLogstashOpenInLensDefaults,
+} from '../../../fixtures';
 
 // FLAKY: https://github.com/elastic/kibana/issues/179307
 // These tests were historically skipped in stateful FTR (describe.skip).
@@ -28,12 +32,18 @@ spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnost
   let dashboard2Id: string;
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
-    const imported = await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.TSVB_DASHBOARD);
-    dashboard1Id = getImportedDashboardId(imported, testData.TSVB_DASHBOARDS.DASHBOARD_1);
-    dashboard2Id = getImportedDashboardId(imported, testData.TSVB_DASHBOARDS.DASHBOARD_2);
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
-    await scoutSpace.uiSettings.setDefaultTime(testData.LOGSTASH_IN_RANGE_DATES);
-    await scoutSpace.uiSettings.set({ 'dateFormat:tz': 'UTC' });
+    const imported = await scoutSpace.savedObjects.load(
+      testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.TSVB.DASHBOARD
+    );
+    dashboard1Id = getImportedDashboardId(
+      imported,
+      testData.DASHBOARD_TITLES.OPEN_IN_LENS.TSVB.DASHBOARD_1
+    );
+    dashboard2Id = getImportedDashboardId(
+      imported,
+      testData.DASHBOARD_TITLES.OPEN_IN_LENS.TSVB.DASHBOARD_2
+    );
+    await setupLogstashOpenInLensDefaults(scoutSpace);
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -62,7 +72,10 @@ spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnost
       await dashboard.expectTimeRangeBadgeExists();
 
       // Convert to Lens
-      await dashboard.clickPanelAction(testData.CONVERT_TO_LENS_ACTION, 'My TSVB to Lens vis 1');
+      await dashboard.clickPanelAction(
+        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
+        'My TSVB to Lens vis 1'
+      );
       await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
       const dimensions = page.testSubj.locator('lns-dimensionTrigger');
@@ -108,7 +121,7 @@ spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnost
       await dashboard.expectTimeRangeBadgeExists();
 
       // Convert to Lens
-      await dashboard.clickPanelAction(testData.CONVERT_TO_LENS_ACTION, visTitle);
+      await dashboard.clickPanelAction(testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION, visTitle);
       await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
       const dimensions = page.testSubj.locator('lns-dimensionTrigger');

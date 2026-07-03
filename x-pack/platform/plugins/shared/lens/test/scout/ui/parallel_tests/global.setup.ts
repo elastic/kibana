@@ -9,5 +9,5 @@ import { globalSetupHook } from '@kbn/scout';
 import { testData } from '../fixtures';
 
 globalSetupHook('Setup environment for Lens tests', async ({ esArchiver }) => {
-  await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
+  await esArchiver.loadIfNeeded(testData.ES_ARCHIVE_PATHS.LOGSTASH);
 });

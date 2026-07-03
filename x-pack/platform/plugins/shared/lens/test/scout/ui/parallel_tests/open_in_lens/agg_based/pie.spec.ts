@@ -16,6 +16,7 @@ import {
   enableElasticChartDebug,
   getChartDebugData,
   getImportedDashboardId,
+  setupLogstashOpenInLensDefaults,
 } from '../../../fixtures';
 
 function getPieChartLabels(debugState: DebugState): string[] {
@@ -43,15 +44,14 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.stateful.c
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     const imported = await scoutSpace.savedObjects.load(
-      testData.KBN_ARCHIVES.OPEN_IN_LENS_AGG_BASED.PIE
+      testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.PIE
     );
-    pieDashboardId = getImportedDashboardId(imported, testData.OPEN_IN_LENS_DASHBOARDS.PIE);
+    pieDashboardId = getImportedDashboardId(
+      imported,
+      testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.PIE
+    );
 
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
-    await scoutSpace.uiSettings.set({
-      'dateFormat:tz': 'UTC',
-      'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
-    });
+    await setupLogstashOpenInLensDefaults(scoutSpace);
   });
 
   spaceTest.beforeEach(async ({ browserAuth, context, pageObjects }) => {

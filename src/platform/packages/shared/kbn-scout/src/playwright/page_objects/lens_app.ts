@@ -506,7 +506,7 @@ export class LensApp {
   }
 
   /** Reads color-stop values and colors from the currently open palette panel. */
-  async getPaletteColorStops() {
+  async getPaletteColorStops(expectedStopsCount?: number) {
     const palettePanel = this.page.testSubj.locator('lns-palettePanelFlyout');
     const stopInputsLocator = palettePanel.locator(
       '[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]'
@@ -540,6 +540,9 @@ export class LensApp {
       .poll(
         async () => {
           const stopCount = await stopInputsLocator.count();
+          if (expectedStopsCount !== undefined) {
+            return stopCount === expectedStopsCount;
+          }
           if (stopCount === 0) {
             return false;
           }

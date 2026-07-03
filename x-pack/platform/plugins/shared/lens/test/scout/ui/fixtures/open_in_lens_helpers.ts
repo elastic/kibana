@@ -8,16 +8,33 @@
 import type { DebugState } from '@elastic/charts';
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 
+import { DATA_TEST_SUBJECTS, LOGSTASH_TIME_RANGE, DATA_VIEW_IDS } from './constants';
+
 interface ElasticChartDebugContext {
   addInitScript: (script: () => void) => Promise<{ dispose: () => Promise<void> }>;
 }
-
-const CONVERT_TO_LENS_ACTION = 'embeddablePanelAction-ACTION_EDIT_IN_LENS';
 
 export interface ImportedSavedObject {
   id: string;
   type: string;
   title: string;
+}
+
+interface LogstashOpenInLensSetupContext {
+  uiSettings: {
+    setDefaultIndex: (dataViewName: string) => Promise<void>;
+    set: (values: Record<string, string>) => Promise<void>;
+    setDefaultTime: (range: { from: string; to: string }) => Promise<void>;
+  };
+}
+
+/** Sets common Logstash UI settings used by the open-in-Lens dashboard fixtures. */
+export async function setupLogstashOpenInLensDefaults({
+  uiSettings,
+}: LogstashOpenInLensSetupContext): Promise<void> {
+  await uiSettings.setDefaultIndex(DATA_VIEW_IDS.LOGSTASH);
+  await uiSettings.setDefaultTime(LOGSTASH_TIME_RANGE);
+  await uiSettings.set({ 'dateFormat:tz': 'UTC' });
 }
 
 /** Resolves a dashboard id after `scoutSpace.savedObjects.load()` (createNewCopies assigns new ids). */
@@ -39,7 +56,7 @@ export async function convertToLensByTitle(
   { dashboard }: Pick<PageObjects, 'dashboard'>,
   panelTitle: string
 ): Promise<void> {
-  await dashboard.clickPanelAction(CONVERT_TO_LENS_ACTION, panelTitle);
+  await dashboard.clickPanelAction(DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION, panelTitle);
 }
 
 /**
@@ -50,7 +67,7 @@ export async function canConvertToLensByTitle(
   { dashboard }: Pick<PageObjects, 'dashboard'>,
   panelTitle: string
 ): Promise<boolean> {
-  return dashboard.panelHasAction(CONVERT_TO_LENS_ACTION, panelTitle);
+  return dashboard.panelHasAction(DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION, panelTitle);
 }
 
 /** Enables elastic-charts debug state for subsequent page loads in this browser context. */

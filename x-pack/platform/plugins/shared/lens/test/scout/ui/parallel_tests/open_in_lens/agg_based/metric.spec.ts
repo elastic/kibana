@@ -12,6 +12,7 @@ import {
   canConvertToLensByTitle,
   convertToLensByTitle,
   getImportedDashboardId,
+  setupLogstashOpenInLensDefaults,
 } from '../../../fixtures';
 
 spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.stateful.classic }, () => {
@@ -19,15 +20,14 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.statefu
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     const imported = await scoutSpace.savedObjects.load(
-      testData.KBN_ARCHIVES.OPEN_IN_LENS_AGG_BASED.METRIC
+      testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.METRIC
     );
-    metricDashboardId = getImportedDashboardId(imported, testData.OPEN_IN_LENS_DASHBOARDS.METRIC);
+    metricDashboardId = getImportedDashboardId(
+      imported,
+      testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.METRIC
+    );
 
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
-    await scoutSpace.uiSettings.set({
-      'dateFormat:tz': 'UTC',
-      'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
-    });
+    await setupLogstashOpenInLensDefaults(scoutSpace);
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {

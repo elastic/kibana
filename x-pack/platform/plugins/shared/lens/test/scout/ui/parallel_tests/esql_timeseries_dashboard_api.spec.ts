@@ -136,9 +136,9 @@ spaceTest.describe(
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.set({
-        defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
+        defaultIndex: testData.DATA_VIEW_IDS.LOGSTASH,
         'dateFormat:tz': 'UTC',
-        'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
+        'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_TIME_RANGE.from}", "to": "${testData.LOGSTASH_TIME_RANGE.to}"}`,
       });
     });
 

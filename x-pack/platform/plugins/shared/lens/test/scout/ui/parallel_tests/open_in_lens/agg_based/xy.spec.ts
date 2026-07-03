@@ -14,6 +14,7 @@ import {
   enableElasticChartDebug,
   getChartDebugData,
   getImportedDashboardId,
+  setupLogstashOpenInLensDefaults,
 } from '../../../fixtures';
 
 spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.stateful.classic }, () => {
@@ -21,15 +22,14 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.stateful.cl
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     const imported = await scoutSpace.savedObjects.load(
-      testData.KBN_ARCHIVES.OPEN_IN_LENS_AGG_BASED.XY
+      testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.XY
     );
-    xyDashboardId = getImportedDashboardId(imported, testData.OPEN_IN_LENS_DASHBOARDS.XY);
+    xyDashboardId = getImportedDashboardId(
+      imported,
+      testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.XY
+    );
 
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
-    await scoutSpace.uiSettings.set({
-      'dateFormat:tz': 'UTC',
-      'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
-    });
+    await setupLogstashOpenInLensDefaults(scoutSpace);
   });
 
   spaceTest.beforeEach(async ({ browserAuth, context, pageObjects }) => {
