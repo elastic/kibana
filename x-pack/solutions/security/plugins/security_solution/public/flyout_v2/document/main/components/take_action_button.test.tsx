@@ -13,6 +13,7 @@ import { useAddToCaseActions } from '../../../../detections/components/alerts_ta
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useAlertAssigneesActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
 import { useAlertTagsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
+import { useAlertExceptionActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { useHostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
@@ -29,6 +30,9 @@ jest.mock(
 jest.mock('../../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions');
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
+);
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions'
 );
 jest.mock('../../../../common/hooks/is_in_security_app');
 jest.mock(
@@ -64,6 +68,13 @@ jest.mock('../hooks/use_explore_actions', () => ({
   useExploreActions: (...args: unknown[]) => mockUseExploreActions(...args),
 }));
 
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu',
+  () => ({
+    AddExceptionFlyoutWrapper: () => <div data-test-subj="addExceptionFlyoutWrapper" />,
+  })
+);
+
 const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
   runWorkflowMenuItem: [],
   runAlertWorkflowPanel: [],
@@ -90,6 +101,7 @@ const mockUseAddToCaseActions = useAddToCaseActions as jest.Mock;
 const mockUseAlertsActions = useAlertsActions as jest.Mock;
 const mockUseAlertAssigneesActions = useAlertAssigneesActions as jest.Mock;
 const mockUseAlertTagsActions = useAlertTagsActions as jest.Mock;
+const mockUseAlertExceptionActions = useAlertExceptionActions as jest.Mock;
 
 const createMockHit = (
   flattened: Record<string, unknown> = {},
@@ -146,6 +158,7 @@ describe('<TakeActionButton />', () => {
       alertAssigneesPanels: [],
     });
     mockUseAlertTagsActions.mockReturnValue({ alertTagsItems: [], alertTagsPanels: [] });
+    mockUseAlertExceptionActions.mockReturnValue({ exceptionActionItems: [] });
     mockUseInvestigateInTimeline.mockReturnValue({ investigateInTimelineActionItems: [] });
     mockUseIsInSecurityApp.mockReturnValue(true);
     mockUseRunAlertWorkflowPanel.mockReturnValue({
@@ -302,6 +315,49 @@ describe('<TakeActionButton />', () => {
         refetch: mockOnAlertUpdated,
       })
     );
+  });
+
+  describe('isEndpointAlert detection', () => {
+    it('should be true when module=endpoint and kind=alert', () => {
+      const alertHit = createMockHit({
+        'event.kind': 'signal',
+        'kibana.alert.original_event.module': 'endpoint',
+        'kibana.alert.original_event.kind': ['alert'],
+      });
+
+      renderTakeActionButton({ ...defaultProps, hit: alertHit });
+
+      expect(mockUseAlertExceptionActions).toHaveBeenCalledWith(
+        expect.objectContaining({ isEndpointAlert: true })
+      );
+    });
+
+    it('should be false when module=endpoint but kind is not alert', () => {
+      const alertHit = createMockHit({
+        'event.kind': 'signal',
+        'kibana.alert.original_event.module': 'endpoint',
+        'kibana.alert.original_event.kind': ['metric'],
+      });
+
+      renderTakeActionButton({ ...defaultProps, hit: alertHit });
+
+      expect(mockUseAlertExceptionActions).toHaveBeenCalledWith(
+        expect.objectContaining({ isEndpointAlert: false })
+      );
+    });
+
+    it('should be false when module is missing', () => {
+      const alertHit = createMockHit({
+        'event.kind': 'signal',
+        'kibana.alert.original_event.kind': ['alert'],
+      });
+
+      renderTakeActionButton({ ...defaultProps, hit: alertHit });
+
+      expect(mockUseAlertExceptionActions).toHaveBeenCalledWith(
+        expect.objectContaining({ isEndpointAlert: false })
+      );
+    });
   });
 
   it('should call useRunAlertWorkflowPanel with ecsData and closePopover', () => {
