@@ -325,6 +325,39 @@ export function resolveUnit(text: string, aliases: Record<string, TimeUnit>): Ti
   return aliases[text] ?? aliases[text.toLowerCase()];
 }
 
+/** Lowercased literal words of a `{count} {unit}` template (e.g. "vor", "from", "now"). */
+const extractTemplateWords = (template: string): string[] =>
+  template
+    .replace(/\{count}|\{unit}/g, ' ')
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
+
+const phraseWordsCache = new WeakMap<LocaleGrammar, ReadonlySet<string>>();
+
+/**
+ * The literal words of `grammar`'s duration/instant templates — direction
+ * words ("last", "letzte") and instant markers ("ago", "vor", "in") —
+ * lowercased. Lets callers attribute an ambiguous unit word (e.g. "minute",
+ * valid in both English and German) to the language of the phrase around it;
+ * see `resolveUnitSource` in `modify_range_parts.ts`.
+ */
+export function getPhraseWords(grammar: LocaleGrammar): ReadonlySet<string> {
+  const cached = phraseWordsCache.get(grammar);
+  if (cached) return cached;
+
+  const words = new Set(
+    [
+      ...grammar.durationTemplates.past,
+      ...grammar.durationTemplates.future,
+      ...grammar.instantTemplates.past,
+      ...grammar.instantTemplates.future,
+    ].flatMap(extractTemplateWords)
+  );
+  phraseWordsCache.set(grammar, words);
+  return words;
+}
+
 const compiledCache = new Map<string, CompiledGrammar>();
 
 function compileMergedGrammar(locale: LocaleGrammar | undefined): CompiledGrammar {

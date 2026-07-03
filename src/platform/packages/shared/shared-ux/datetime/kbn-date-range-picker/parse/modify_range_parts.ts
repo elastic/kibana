@@ -16,6 +16,7 @@ import {
   ENGLISH_GRAMMAR,
   getActiveGrammar,
   getCompiledGrammar,
+  getPhraseWords,
   resolveUnit,
   type LocaleGrammar,
 } from './locale_grammar';
@@ -160,19 +161,44 @@ const modifyRelativeDirection = (
   return undefined;
 };
 
-/** Resolves `text` to a canonical unit and the grammar whose word list it belongs to. */
+/** Words from the phrase's other parts (direction word / instant marker), lowercased. */
+const getPhraseContextWords = (part: RangePart, parts: RangePart[]): string[] =>
+  parts
+    .filter(
+      (candidate) =>
+        candidate.rangeIndex === part.rangeIndex &&
+        (candidate.kind === 'relative-direction' || candidate.kind === 'literal')
+    )
+    .flatMap((candidate) => candidate.text.toLowerCase().split(/\s+/));
+
+/**
+ * Resolves `text` to a canonical unit and the grammar whose word list it
+ * belongs to. A surface form valid in both English and the active locale
+ * (e.g. "minute", shared by English/German/French) is attributed via the
+ * phrase's other words — "letzte 1 minute" is German, "last 1 minute" is
+ * English. When those are ambiguous too ("in 1 minute" is a valid English AND
+ * German instant), the active locale wins: the entire UI is rendered in it,
+ * so it is the likelier language of the input.
+ */
 const resolveUnitSource = (
   text: string,
-  locale: string | undefined
+  locale: string | undefined,
+  contextWords: string[]
 ): { unit: TimeUnit; grammar: LocaleGrammar } | undefined => {
-  const englishUnit = resolveUnit(text, ENGLISH_GRAMMAR.unitAliases);
-  if (englishUnit) return { unit: englishUnit, grammar: ENGLISH_GRAMMAR };
-
   const activeGrammar = getActiveGrammar(locale);
-  if (activeGrammar === ENGLISH_GRAMMAR) return undefined;
+  const englishUnit = resolveUnit(text, ENGLISH_GRAMMAR.unitAliases);
+  const localeUnit =
+    activeGrammar === ENGLISH_GRAMMAR ? undefined : resolveUnit(text, activeGrammar.unitAliases);
 
-  const localeUnit = resolveUnit(text, activeGrammar.unitAliases);
-  return localeUnit ? { unit: localeUnit, grammar: activeGrammar } : undefined;
+  if (localeUnit === undefined) {
+    return englishUnit ? { unit: englishUnit, grammar: ENGLISH_GRAMMAR } : undefined;
+  }
+  if (englishUnit === undefined) return { unit: localeUnit, grammar: activeGrammar };
+
+  const isEnglishPhrase = contextWords.some((word) => getPhraseWords(ENGLISH_GRAMMAR).has(word));
+  const isLocalePhrase = contextWords.some((word) => getPhraseWords(activeGrammar).has(word));
+  if (isEnglishPhrase && !isLocalePhrase) return { unit: englishUnit, grammar: ENGLISH_GRAMMAR };
+  return { unit: localeUnit, grammar: activeGrammar };
 };
 
 const modifyRelativeUnit = (
@@ -192,7 +218,7 @@ const modifyRelativeUnit = (
     return nextUnit ? splicePart(text, part, nextUnit) : undefined;
   }
 
-  const source = resolveUnitSource(part.text, locale);
+  const source = resolveUnitSource(part.text, locale, getPhraseContextWords(part, parts));
   if (!source) return undefined;
 
   const nextUnit = getNextCycleValue(RELATIVE_UNIT_CYCLE, source.unit, action);
@@ -200,9 +226,19 @@ const modifyRelativeUnit = (
 
   const currentValue = getRelativeValue(part, parts);
   if (currentValue === undefined) return undefined;
-  const unitWords = source.grammar.unitWords[nextUnit];
-  const nextText = currentValue === 1 ? unitWords.singular : unitWords.plural;
-  return splicePart(text, part, nextText);
+
+  // Instant phrases carry no direction word (their "vor"/"ago"/"in" marker is
+  // a non-navigable literal) and take the grammar's instant agreement
+  // overrides (e.g. German dative "vor 15 Tagen", never nominative "Tage").
+  const isInstantPhrase = !parts.some(
+    (candidate) =>
+      candidate.rangeIndex === part.rangeIndex && candidate.kind === 'relative-direction'
+  );
+  const plurality = currentValue === 1 ? 'singular' : 'plural';
+  const override = isInstantPhrase
+    ? source.grammar.generation?.instantUnitWords?.[nextUnit]?.[plurality]
+    : undefined;
+  return splicePart(text, part, override ?? source.grammar.unitWords[nextUnit][plurality]);
 };
 
 const modifyRoundingUnit = (
@@ -300,7 +336,10 @@ const modifyAbsoluteTimezone = (
  * Applies an arrow-key modification to a selected range part. Relative
  * direction/unit words are resolved against `locale` merged with English —
  * whichever language the part's CURRENT text belongs to is preserved (a part
- * already typed in English is never silently translated into the active locale).
+ * already typed in English is never silently translated into the active
+ * locale). A word valid in both languages is attributed via the phrase's
+ * other words, and a fully ambiguous phrase falls to the active locale — see
+ * {@link resolveUnitSource}.
  */
 export function applyPartModification(
   text: string,
