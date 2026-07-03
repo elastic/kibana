@@ -70,13 +70,25 @@ export const sendBulkUpgradeAgentlessPolicies = (policyIds: string[]) => {
   });
 };
 
-export const sendUpgradeAgentlessPoliciesDryRun = (policyIds: string[]) => {
+export const sendUpgradeAgentlessPoliciesDryRun = (policyIds: string[], pkgVersion?: string) => {
   return sendRequestForRq<AgentlessPolicyUpgradeDryRunResponse>({
     path: agentlessPolicyRouteService.getUpgradeDryRunPath(),
     method: 'post',
     version: API_VERSIONS.public.v1,
-    body: JSON.stringify({ policyIds }),
+    body: JSON.stringify(pkgVersion ? { policyIds, pkgVersion } : { policyIds }),
   });
+};
+
+export const useUpgradeAgentlessPoliciesDryRunQuery = (
+  policyIds: string[],
+  pkgVersion?: string,
+  { enabled }: Partial<{ enabled: boolean }> = {}
+) => {
+  return useQuery<AgentlessPolicyUpgradeDryRunResponse, RequestError>(
+    ['upgradeAgentlessPoliciesDryRun', policyIds, pkgVersion],
+    () => sendUpgradeAgentlessPoliciesDryRun(policyIds, pkgVersion),
+    { enabled }
+  );
 };
 
 export const useBulkGetAgentlessPolicyThroughput = (policyIds: string[]) => {

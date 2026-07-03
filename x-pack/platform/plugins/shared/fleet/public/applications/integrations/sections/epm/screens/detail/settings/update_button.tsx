@@ -28,6 +28,7 @@ import type {
   UpgradePackagePolicyDryRunResponse,
   PackagePolicy,
 } from '../../../../../types';
+import type { AgentlessPolicyUpgradeDryRunResponse } from '../../../../../../../../common/types/rest_spec/agentless_policy';
 import { InstallStatus } from '../../../../../types';
 import {
   useInstallPackage,
@@ -37,11 +38,14 @@ import {
   useLink,
   useUpgradePackagePoliciesMutation,
   useBulkGetAgentPoliciesQuery,
+  sendBulkUpgradeAgentlessPolicies,
 } from '../../../../../hooks';
 
 interface UpdateButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'version'> {
   dryRunData?: UpgradePackagePolicyDryRunResponse | null;
+  agentlessDryRunData?: AgentlessPolicyUpgradeDryRunResponse | null;
   packagePolicyIds?: string[];
+  agentlessPolicyIds?: string[];
   agentPolicyIds: string[];
   isUpgradingPackagePolicies?: boolean;
   setIsUpgradingPackagePolicies?: React.Dispatch<React.SetStateAction<boolean>>;
@@ -71,9 +75,11 @@ interface UpdateButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'versio
 
 export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   dryRunData,
+  agentlessDryRunData,
   isUpgradingPackagePolicies = false,
   name,
   packagePolicyIds = [],
+  agentlessPolicyIds = [],
   agentPolicyIds = [],
   setIsUpgradingPackagePolicies = () => {},
   title,
@@ -99,11 +105,24 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
 
   const { data: agentPolicyData } = useBulkGetAgentPoliciesQuery(agentPolicyIds, { full: true });
 
-  const packagePolicyCount = useMemo(() => packagePolicyIds.length, [packagePolicyIds]);
+  const agentBasedPolicyCount = packagePolicyIds.length;
+  const agentlessPolicyCount = agentlessPolicyIds.length;
+  const packagePolicyCount = useMemo(
+    () => agentBasedPolicyCount + agentlessPolicyCount,
+    [agentBasedPolicyCount, agentlessPolicyCount]
+  );
+  // Only break the count down by deployment mode when the integration actually has both kinds.
+  const hasMixedPolicyTypes = agentBasedPolicyCount > 0 && agentlessPolicyCount > 0;
 
   function isStringArray(arr: unknown | string[]): arr is string[] {
     return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
   }
+
+  // Count agents across both agent-based and agentless policies for this integration.
+  const allPolicyIds = useMemo(
+    () => [...packagePolicyIds, ...agentlessPolicyIds],
+    [packagePolicyIds, agentlessPolicyIds]
+  );
 
   const agentCount = useMemo(() => {
     if (!agentPolicyData?.items) return 0;
@@ -111,19 +130,23 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     return agentPolicyData.items.reduce((acc, item) => {
       const existingPolicies = item?.package_policies
         ? isStringArray(item.package_policies)
-          ? (item.package_policies as string[]).filter((p) => packagePolicyIds.includes(p))
-          : (item.package_policies as PackagePolicy[]).filter((p) =>
-              packagePolicyIds.includes(p.id)
-            )
+          ? (item.package_policies as string[]).filter((p) => allPolicyIds.includes(p))
+          : (item.package_policies as PackagePolicy[]).filter((p) => allPolicyIds.includes(p.id))
         : [];
       return (acc += existingPolicies.length > 0 && item?.agents ? item?.agents : 0);
     }, 0);
-  }, [agentPolicyData, packagePolicyIds]);
+  }, [agentPolicyData, allPolicyIds]);
 
-  const conflictCount = useMemo(
-    () => dryRunData?.filter((item) => item.hasErrors).length,
-    [dryRunData]
-  );
+  const conflictCount = useMemo(() => {
+    const packagePolicyConflicts = dryRunData?.filter((item) => item.hasErrors).length ?? 0;
+    // For agentless, `hasErrors` covers both config-migration conflicts (carry `errors`) and
+    // guard failures (carry `statusCode`, e.g. a policy deleted mid-flight). Only the former is a
+    // real "conflict" the user resolves; guard failures are excluded from the conflict count.
+    const agentlessConflicts =
+      agentlessDryRunData?.filter((item) => item.hasErrors && item.statusCode === undefined)
+        .length ?? 0;
+    return packagePolicyConflicts + agentlessConflicts;
+  }, [dryRunData, agentlessDryRunData]);
 
   const handleUpgradePackagePoliciesChange = useCallback(() => {
     setUpgradePackagePolicies((prev) => !prev);
@@ -168,61 +191,150 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
       return;
     }
 
-    // Only upgrade policies that don't have conflicts
+    // Only upgrade agent-based policies that don't have conflicts (package-policy dry-run shape:
+    // conflicts are keyed by the nested `diff[0].id`).
     const packagePolicyIdsToUpdate = packagePolicyIds.filter(
       (id) => !dryRunData?.find((dryRunRecord) => dryRunRecord.diff?.[0].id === id)?.hasErrors
     );
 
-    if (!packagePolicyIdsToUpdate.length) {
+    // Agentless policies upgrade through the agentless API. The agentless dry-run shape exposes a
+    // top-level `id`/`hasErrors`, so conflicts are matched directly by id.
+    const agentlessIdsToUpgrade = agentlessPolicyIds.filter(
+      (id) => !agentlessDryRunData?.find((dryRunRecord) => dryRunRecord.id === id)?.hasErrors
+    );
+
+    if (!packagePolicyIdsToUpdate.length && !agentlessIdsToUpgrade.length) {
       setIsUpgradingPackagePolicies(false);
       navigateToNewSettingsPage();
+      return;
     }
 
-    try {
-      await upgradePackagePoliciesMutation.mutateAsync({
-        packagePolicyIds: packagePolicyIdsToUpdate,
-      });
-      notifications.toasts.addSuccess({
-        title: toMountPoint(
-          <FormattedMessage
-            id="xpack.fleet.integrations.packageUpdateSuccessTitle"
-            defaultMessage="Updated {title} and upgraded policies"
-            values={{ title }}
-          />,
-          startServices
-        ),
-        text: toMountPoint(
-          <FormattedMessage
-            id="xpack.fleet.integrations.packageUpdateSuccessDescription"
-            defaultMessage="Successfully updated {title} and upgraded policies"
-            values={{ title }}
-          />,
-          startServices
-        ),
-      });
+    const upgradeAgentBasedPolicies = async (): Promise<boolean> => {
+      if (!packagePolicyIdsToUpdate.length) {
+        return true;
+      }
+      try {
+        await upgradePackagePoliciesMutation.mutateAsync({
+          packagePolicyIds: packagePolicyIdsToUpdate,
+        });
+        notifications.toasts.addSuccess({
+          title: toMountPoint(
+            <FormattedMessage
+              id="xpack.fleet.integrations.packageUpdateSuccessTitle"
+              defaultMessage="Updated {title} and upgraded agent-based policies"
+              values={{ title }}
+            />,
+            startServices
+          ),
+          text: toMountPoint(
+            <FormattedMessage
+              id="xpack.fleet.integrations.packageUpdateSuccessDescription"
+              defaultMessage="Successfully updated {title} and upgraded agent-based policies"
+              values={{ title }}
+            />,
+            startServices
+          ),
+        });
+        return true;
+      } catch (error) {
+        notifications.toasts.addError(error, {
+          title: i18n.translate(
+            'xpack.fleet.integrations.settings.errorUpdatingPoliciesToast.title',
+            {
+              defaultMessage: 'Error updating agent-based policies',
+            }
+          ),
+          toastMessage: i18n.translate(
+            'xpack.fleet.integrations.settings.errorUpdatingPoliciesToast.message',
+            {
+              defaultMessage:
+                'Agent-based integration policies need to be manually updated. \n Error: {error}',
+              values: {
+                error: error.message,
+              },
+            }
+          ),
+        });
+        return false;
+      }
+    };
 
-      navigateToNewSettingsPage();
-    } catch (error) {
-      notifications.toasts.addError(error, {
-        title: i18n.translate(
-          'xpack.fleet.integrations.settings.errorUpdatingPoliciesToast.title',
-          {
-            defaultMessage: 'Error updating policies',
-          }
-        ),
-        toastMessage: i18n.translate(
-          'xpack.fleet.integrations.settings.errorUpdatingPoliciesToast.message',
-          {
-            defaultMessage: 'Integrations policies, need to be manually updated. \n Error: {error}',
-            values: {
-              error: error.message,
-            },
-          }
-        ),
-      });
-      setIsUpgradingPackagePolicies(false);
-      navigateToNewSettingsPage();
-    }
+    const upgradeAgentlessPolicies = async (): Promise<boolean> => {
+      if (!agentlessIdsToUpgrade.length) {
+        return true;
+      }
+      try {
+        const results = await sendBulkUpgradeAgentlessPolicies(agentlessIdsToUpgrade);
+        const failed = results.filter((result) => !result.success);
+        if (failed.length > 0) {
+          notifications.toasts.addWarning({
+            title: i18n.translate(
+              'xpack.fleet.integrations.settings.errorUpdatingAgentlessPoliciesToast.title',
+              {
+                defaultMessage: 'Error updating agentless policies',
+              }
+            ),
+            text: i18n.translate(
+              'xpack.fleet.integrations.settings.errorUpdatingAgentlessPoliciesToast.message',
+              {
+                defaultMessage:
+                  '{failedCount, plural, one {# agentless policy} other {# agentless policies}} could not be upgraded and need to be manually updated.',
+                values: { failedCount: failed.length },
+              }
+            ),
+          });
+          return false;
+        }
+        notifications.toasts.addSuccess({
+          title: toMountPoint(
+            <FormattedMessage
+              id="xpack.fleet.integrations.agentlessPackageUpdateSuccessTitle"
+              defaultMessage="Updated {title} and upgraded agentless policies"
+              values={{ title }}
+            />,
+            startServices
+          ),
+          text: toMountPoint(
+            <FormattedMessage
+              id="xpack.fleet.integrations.agentlessPackageUpdateSuccessDescription"
+              defaultMessage="Successfully updated {title} and upgraded agentless policies"
+              values={{ title }}
+            />,
+            startServices
+          ),
+        });
+        return true;
+      } catch (error) {
+        notifications.toasts.addError(error, {
+          title: i18n.translate(
+            'xpack.fleet.integrations.settings.errorUpdatingAgentlessPoliciesToast.title',
+            {
+              defaultMessage: 'Error updating agentless policies',
+            }
+          ),
+          toastMessage: i18n.translate(
+            'xpack.fleet.integrations.settings.errorUpdatingAgentlessPoliciesToast.exceptionMessage',
+            {
+              defaultMessage:
+                'Agentless integration policies need to be manually updated. \n Error: {error}',
+              values: {
+                error: error.message,
+              },
+            }
+          ),
+        });
+        return false;
+      }
+    };
+
+    // Toasts (success/warning/error) are surfaced inside each helper. Regardless of the outcome we
+    // must clear the upgrading flag before navigating: the destination is the new (now latest)
+    // version where `updateAvailable` is false, so a lingering flag would keep the button rendered
+    // in a permanent loading (gray) state.
+    await Promise.all([upgradeAgentBasedPolicies(), upgradeAgentlessPolicies()]);
+
+    setIsUpgradingPackagePolicies(false);
+    navigateToNewSettingsPage();
   }, [
     isUpgradingPackagePolicies,
     setIsUpgradingPackagePolicies,
@@ -232,7 +344,9 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     title,
     upgradePackagePoliciesMutation,
     packagePolicyIds,
+    agentlessPolicyIds,
     dryRunData,
+    agentlessDryRunData,
     notifications.toasts,
     startServices,
     navigateToNewSettingsPage,
@@ -318,6 +432,35 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
             ),
           }}
         />
+        {hasMixedPolicyTypes && (
+          <>
+            <EuiSpacer size="m" />
+            <FormattedMessage
+              id="xpack.fleet.integrations.settings.confirmUpdateModal.policyTypeBreakdown"
+              defaultMessage="This includes {agentBasedCountText} and {agentlessCountText}."
+              values={{
+                agentBasedCountText: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.fleet.integrations.confirmUpdateModal.body.agentBasedPolicyCount"
+                      defaultMessage="{agentBasedPolicyCount, plural, one {# agent-based policy} other {# agent-based policies}}"
+                      values={{ agentBasedPolicyCount }}
+                    />
+                  </strong>
+                ),
+                agentlessCountText: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.fleet.integrations.confirmUpdateModal.body.agentlessPolicyCount"
+                      defaultMessage="{agentlessPolicyCount, plural, one {# agentless policy} other {# agentless policies}}"
+                      values={{ agentlessPolicyCount }}
+                    />
+                  </strong>
+                ),
+              }}
+            />
+          </>
+        )}
       </>
     </EuiConfirmModal>
   );

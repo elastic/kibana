@@ -32,6 +32,7 @@ import {
   useLink,
   useStartServices,
   useUpgradePackagePolicyDryRunQuery,
+  useUpgradeAgentlessPoliciesDryRunQuery,
   useUpdatePackageMutation,
   useAuthz,
 } from '../../../../../hooks';
@@ -143,8 +144,22 @@ export const SettingsPage: React.FC<Props> = memo(
       error: changelogError,
     } = useChangelog(name, latestVersion, version);
 
+    // Agentless package policies must upgrade through the agentless API, not the
+    // (deprecated-for-agentless) package-policy API. Partition by `supports_agentless`
+    // so each set goes to its own upgrade + dry-run endpoint.
+    const agentlessPolicyIds = useMemo(
+      () =>
+        packagePoliciesData?.items
+          .filter((packagePolicy) => packagePolicy.supports_agentless === true)
+          .map(({ id }) => id) ?? [],
+      [packagePoliciesData]
+    );
+
     const packagePolicyIds = useMemo(
-      () => packagePoliciesData?.items.map(({ id }) => id),
+      () =>
+        packagePoliciesData?.items
+          .filter((packagePolicy) => packagePolicy.supports_agentless !== true)
+          .map(({ id }) => id) ?? [],
       [packagePoliciesData]
     );
 
@@ -154,10 +169,18 @@ export const SettingsPage: React.FC<Props> = memo(
     );
 
     const { data: dryRunData } = useUpgradePackagePolicyDryRunQuery(
-      packagePolicyIds ?? [],
+      packagePolicyIds,
       latestVersion,
       {
-        enabled: packagePolicyIds && packagePolicyIds.length > 0,
+        enabled: packagePolicyIds.length > 0,
+      }
+    );
+
+    const { data: agentlessDryRunData } = useUpgradeAgentlessPoliciesDryRunQuery(
+      agentlessPolicyIds,
+      latestVersion,
+      {
+        enabled: agentlessPolicyIds.length > 0,
       }
     );
 
@@ -424,7 +447,9 @@ export const SettingsPage: React.FC<Props> = memo(
                           version={latestVersion}
                           agentPolicyIds={agentPolicyIds}
                           packagePolicyIds={packagePolicyIds}
+                          agentlessPolicyIds={agentlessPolicyIds}
                           dryRunData={dryRunData}
+                          agentlessDryRunData={agentlessDryRunData}
                           isUpgradingPackagePolicies={isUpgradingPackagePolicies}
                           setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
                           startServices={startServices}
