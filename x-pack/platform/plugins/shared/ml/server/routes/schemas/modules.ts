@@ -102,6 +102,7 @@ export const setupModuleBodySchema = schema.object({
   ),
   projectRouting: schema.maybe(
     schema.string({
+      maxLength: 10000,
       meta: {
         description:
           'Project routing value. This will be added to the datafeed configuration for each datafeed created by the module (optional).',

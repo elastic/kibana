@@ -21,7 +21,7 @@ export const categorizationFieldValidationSchema = {
   analyzer: schema.any(),
   runtimeMappings: runtimeMappingsSchema,
   indicesOptions: indicesOptionsSchema,
-  projectRouting: schema.maybe(schema.string()),
+  projectRouting: schema.maybe(schema.string({ maxLength: 10000 })),
 };
 
 export const basicChartSchema = {
@@ -36,7 +36,7 @@ export const basicChartSchema = {
   splitFieldValue: schema.nullable(schema.string({ maxLength: 10000 })),
   runtimeMappings: schema.maybe(runtimeMappingsSchema),
   indicesOptions: schema.maybe(indicesOptionsSchema),
-  projectRouting: schema.maybe(schema.string()),
+  projectRouting: schema.maybe(schema.string({ maxLength: 10000 })),
 };
 
 export const populationChartSchema = {
@@ -51,7 +51,7 @@ export const populationChartSchema = {
   splitFieldValue: schema.maybe(schema.nullable(schema.string({ maxLength: 10000 }))),
   runtimeMappings: schema.maybe(runtimeMappingsSchema),
   indicesOptions: schema.maybe(indicesOptionsSchema),
-  projectRouting: schema.maybe(schema.string()),
+  projectRouting: schema.maybe(schema.string({ maxLength: 10000 })),
 };
 
 export const forceStartDatafeedSchema = schema.object({
@@ -172,12 +172,15 @@ export const bulkCreateSchema = schema.oneOf([
 ]);
 
 export const bulkUpdateProjectRoutingSchema = schema.object({
-  projectRouting: schema.string(),
+  projectRouting: schema.string({ maxLength: 10000 }),
   jobIds: schema.maybe(
-    schema.arrayOf(schema.string(), { maxSize: 10000, meta: { description: 'Job IDs to update.' } })
+    schema.arrayOf(schema.string({ maxLength: 10000 }), {
+      maxSize: 10000,
+      meta: { description: 'Job IDs to update.' },
+    })
   ),
   jobGroups: schema.maybe(
-    schema.arrayOf(schema.string(), {
+    schema.arrayOf(schema.string({ maxLength: 10000 }), {
       maxSize: 10000,
       meta: { description: 'Filter jobs by groups.' },
     })
