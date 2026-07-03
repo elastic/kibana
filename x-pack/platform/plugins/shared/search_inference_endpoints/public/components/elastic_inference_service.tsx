@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiPageTemplate } from '@elastic/eui';
@@ -19,8 +19,6 @@ export const ElasticInferenceService = () => {
   useBreadcrumbs(ELASTIC_INFERENCE_SERVICE_BREADCRUMB);
 
   const [isManageRegionsOpen, setIsManageRegionsOpen] = useState(false);
-  const handleOpenManageRegions = useCallback(() => setIsManageRegionsOpen(true), []);
-  const handleCloseManageRegions = useCallback(() => setIsManageRegionsOpen(false), []);
 
   return (
     <KibanaPageTemplate
@@ -29,7 +27,7 @@ export const ElasticInferenceService = () => {
       grow={false}
       data-test-subj="eisModelsPage"
     >
-      <ElasticInferenceServiceModelsHeader onManageRegions={handleOpenManageRegions} />
+      <ElasticInferenceServiceModelsHeader onManageRegions={() => setIsManageRegionsOpen(true)} />
       <EuiPageTemplate.Section
         className="eui-yScroll"
         data-test-subj="eisModelsPageMain"
@@ -37,7 +35,7 @@ export const ElasticInferenceService = () => {
       >
         <ElasticInferenceServiceModelsPage />
       </EuiPageTemplate.Section>
-      {isManageRegionsOpen && <ManageRegionsModal onClose={handleCloseManageRegions} />}
+      {isManageRegionsOpen && <ManageRegionsModal onClose={() => setIsManageRegionsOpen(false)} />}
     </KibanaPageTemplate>
   );
 };
