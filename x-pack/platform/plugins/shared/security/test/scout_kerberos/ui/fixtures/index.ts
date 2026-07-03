@@ -16,7 +16,15 @@ import { SPNEGO_TOKEN } from './constants';
 export const test = baseTest.extend({
   page: async ({ page }, use) => {
     await page.route('**/*', async (route) => {
-      const response = await route.fetch({ maxRedirects: 0 });
+      let response;
+      try {
+        response = await route.fetch({ maxRedirects: 0 });
+      } catch {
+        // Static assets (e.g. rspack bundle chunks) can produce network errors during fetch
+        // interception. Fall back to normal browser handling — they don't need SPNEGO auth.
+        await route.continue();
+        return;
+      }
       if (
         response.status() === 401 &&
         response.headers()['www-authenticate']?.toLowerCase().includes('negotiate')
