@@ -15,11 +15,7 @@ export interface AiRuleCreationSession {
   applyCount: number;
 }
 
-/**
- * Links the attachment to its saved rule via `origin` and invalidates the conversation so the
- * card reflects the saved state in-session. Supplied by the inline attachment's framework
- * callback; the save handler calls it once the rule is persisted.
- */
+/** Links the attachment to its saved rule via `origin`; called by the save handler once persisted. */
 export type UpdateAttachmentOriginFn = (origin: string) => Promise<unknown>;
 
 export interface SaveRuleRequest {
@@ -98,7 +94,6 @@ export class AiRuleCreationService {
     this.savingSubject.next(next);
   };
 
-  /** Returns true if the given attachment is currently being saved, or (no arg) if any save is in progress. */
   public getIsSaving = (attachmentId?: string): boolean => {
     const current = this.savingSubject.getValue();
     return attachmentId !== undefined ? current.has(attachmentId) : current.size > 0;

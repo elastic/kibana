@@ -38,13 +38,9 @@ interface AddMitreMappingsNodeParams {
   events?: ToolEventEmitter;
 }
 
-/**
- * Validates and formats the MITRE mapping response according to the Threat schema
- */
 export const formatMitreMapping = (response: MitreMappingSelectionResponse): Array<Threat> => {
   const threatMappings: Array<Threat> = [];
 
-  // Group techniques by tactic
   const tacticsMap = new Map<string, MitreTactic>();
   tactics.forEach((tactic: MitreTactic) => {
     tacticsMap.set(tactic.id, tactic);
@@ -63,14 +59,12 @@ export const formatMitreMapping = (response: MitreMappingSelectionResponse): Arr
   for (const tacticId of response.tactics || []) {
     const tacticData = tacticsMap.get(tacticId);
     if (tacticData) {
-      // Find techniques that belong to this tactic and validate them against imported data
       const relevantTechniques = (response.techniques || [])
         .map((tech: MitreMappingSelectionResponse['techniques'][0]) => {
           const techData = techniquesMap.get(tech.id);
           if (!techData) {
             return null;
           }
-          // Check if technique belongs to this tactic
           const belongsToTactic = techData.tactics.some(
             (t: string) => t.toLowerCase().replaceAll('-', '') === tacticData.value.toLowerCase()
           );
@@ -81,7 +75,6 @@ export const formatMitreMapping = (response: MitreMappingSelectionResponse): Arr
         })
         .filter((item) => item !== null);
 
-      // Format techniques with subtechniques using data from imports
       const formattedTechniques = relevantTechniques.map(({ techData, subtechniqueIds }) => {
         const formatted: ThreatTechnique = {
           id: techData.id,
@@ -89,7 +82,6 @@ export const formatMitreMapping = (response: MitreMappingSelectionResponse): Arr
           reference: techData.reference,
         };
 
-        // Add subtechniques if present - validate and get data from imports
         if (subtechniqueIds.length > 0) {
           const formattedSubtechniques = subtechniqueIds
             .map((subId: string) => {
@@ -97,7 +89,6 @@ export const formatMitreMapping = (response: MitreMappingSelectionResponse): Arr
               if (!subData) {
                 return null;
               }
-              // Verify subtechnique belongs to the parent technique
               if (subData.techniqueId !== techData.id) {
                 return null;
               }

@@ -52,9 +52,7 @@ export type AddRuleAttachmentToChatButtonProps = (
   | AddRuleAttachmentFromRuleResponseProps
 ) & {
   pathway: AgentBuilderAddToChatTelemetry['pathway'];
-  /** When true the button is rendered but non-interactive (e.g. non-ES|QL rule type selected). */
   disabled?: boolean;
-  /** Tooltip shown when the button is disabled. */
   disabledTooltip?: string;
 };
 

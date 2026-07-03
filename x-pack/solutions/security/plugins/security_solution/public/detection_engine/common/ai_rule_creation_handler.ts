@@ -83,8 +83,7 @@ export const createAiRuleCreationHandler = ({
 
   const saveSub = aiRuleCreation.saveRuleRequest$
     .pipe(
-      // Saves for different cards run concurrently; requestSaveRule drops a re-click on a card
-      // whose save is already in flight, so same-card requests can't overlap.
+      // Different cards save concurrently; requestSaveRule drops same-card re-clicks.
       mergeMap(async ({ rule, attachmentId, updateOrigin }) => {
         const parseResult = EsqlRuleCreateProps.safeParse(rule);
         if (!parseResult.success) {
@@ -102,9 +101,7 @@ export const createAiRuleCreationHandler = ({
         }
 
         try {
-          // Capture at request time, not after the await: closing the chat while the API call is
-          // in flight emits `null` on activeConversation$, which would skip origin linking for a
-          // conversation that existed when the user clicked save.
+          // Captured before the await: closing chat mid-save nulls activeConversationId.
           const convId = activeConversationId;
           let saved: RuleResponse;
           const savedRuleId = rule.id;
@@ -129,8 +126,7 @@ export const createAiRuleCreationHandler = ({
                 })
           );
 
-          // Deactivate so a post-save form edit can't clobber the attachment before the next AI
-          // round reactivates sync.
+          // A post-save form edit must not clobber the attachment.
           aiRuleCreation.deactivateFormSync();
 
           const targetAttachmentId = attachmentId ?? SECURITY_RULE_ATTACHMENT_ID;
@@ -145,13 +141,11 @@ export const createAiRuleCreationHandler = ({
             exact: false,
           });
           if (isUpdate) {
-            // Push to cache immediately so rule details page reflects changes without waiting for refetch.
             securitySolutionQueryClient.setQueryData(
               ['GET', DETECTION_ENGINE_RULES_URL, saved.id],
               transformInput(saved)
             );
-            // refetchType: 'none' prevents a background refetch that would race with the
-            // setQueryData above; the cache already has the authoritative saved data.
+            // 'none': a background refetch would race the setQueryData above.
             securitySolutionQueryClient.invalidateQueries(['GET', DETECTION_ENGINE_RULES_URL], {
               exact: false,
               refetchType: 'none',
@@ -169,16 +163,13 @@ export const createAiRuleCreationHandler = ({
             },
           });
 
-          // Link the freshly-created card to its saved rule via `origin`, and do it LAST: the
-          // framework `updateOrigin` callback persists the origin AND invalidates the conversation,
-          // re-fetching server state, so the card durably flips to "Update" in-session. `origin`
-          // is the reload-safe source of truth for the button.
+          // Link the new card to its saved rule via `origin` (the reload-safe source of truth
+          // for the Update button); updateOrigin also invalidates the conversation.
           if (convId && !isUpdate && updateOrigin) {
             try {
               await updateOrigin(saved.id);
             } catch {
-              // Non-fatal: the rule is saved. Warn because the card may still read "Create rule",
-              // and a second click would create a duplicate.
+              // Non-fatal, but the card may still read "Create rule" — a second click would duplicate.
               notifications.toasts.addWarning({
                 title: i18n.translate(
                   'xpack.securitySolution.saveRuleHandler.originLinkFailedTitle',
@@ -197,8 +188,7 @@ export const createAiRuleCreationHandler = ({
             }
           }
 
-          // Cleared LAST: the save button stays disabled until origin linking has settled, so a
-          // rapid second click can't fire another create while the card still reads "Create rule".
+          // Cleared last so the button stays disabled until origin linking has settled.
           aiRuleCreation.clearSaving(attachmentId);
         } catch (err) {
           aiRuleCreation.clearSaving(attachmentId);

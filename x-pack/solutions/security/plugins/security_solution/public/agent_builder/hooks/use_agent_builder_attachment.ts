@@ -10,47 +10,24 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { useKibana } from '../../common/lib/kibana/use_kibana';
 
 export interface UseAgentBuilderAttachmentParams {
-  /**
-   * Optional stable ID for the attachment. When provided, the platform will
-   * replace any existing attachment with the same ID instead of creating a new one.
-   * Falls back to `${attachmentType}-${Date.now()}` when omitted.
-   */
+  /** Stable ID — the platform replaces an existing attachment with the same ID instead of creating a new one. */
   attachmentId?: string;
-  /**
-   * Type of attachment (e.g., 'alert', 'attack_discovery')
-   */
   attachmentType: string;
-  /**
-   * Data for the attachment. Optional when `origin` is provided.
-   */
+  /** Optional when `origin` is provided. */
   attachmentData?: Record<string, unknown>;
   /**
-   * Saved-object ID that links this attachment to its source. When set, the platform
-   * can call the server-side `resolve` to refresh stale data and the card intent is
-   * derived from this field rather than from the attachment data.
+   * Saved-object ID linking the attachment to its source. When set, the platform can call the
+   * server-side `resolve` to refresh stale data, and card intent derives from this field.
    */
   origin?: string;
-  /**
-   * Prompt/input text for the agent builder conversation
-   */
   attachmentPrompt?: string;
-  /**
-   * Short description shown alongside the attachment in the conversation.
-   */
   attachmentDescription?: string;
 }
 
 export interface UseAgentBuilderAttachmentResult {
-  /**
-   * Function to open the agent builder flyout with attachments and prefilled conversation
-   */
   openAgentBuilderFlyout: () => void;
 }
 
-/**
- * Hook to handle agent builder attachment functionality.
- * Opens a conversation flyout with attachments and prefilled conversation.
- */
 export const useAgentBuilderAttachment = ({
   attachmentId,
   attachmentType,

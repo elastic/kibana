@@ -24,9 +24,6 @@ import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
 
-/**
- * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
- */
 type UnknownAttachmentWithLabel = Attachment<
   string,
   { attachmentLabel?: string } & Record<string, unknown>
@@ -59,15 +56,8 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
   getIcon: () => icon,
 });
 
-/**
- * Registers the baseline attachment UI definitions that do not require Security Solution runtime
- * context:
- *   - `security.alert` — label + icon only (no rich renderer yet).
- *
- * The rich `security.entity` renderer (card/table + Canvas) is installed via the separate
- * {@link registerEntityAttachment} entry point so the plugin's `start()` can supply
- * `application`, `chrome`, `agentBuilder`, and the lazy Redux/services bundle.
- */
+// Baseline definitions that need no Security Solution runtime context; the rich `security.entity`
+// renderer registers separately via registerEntityAttachment once `start()` can supply services.
 export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceStartContract) => {
   attachments.addAttachmentType<UnknownAttachmentWithLabel>(
     ALERT_ATTACHMENT_CONFIG.type,
@@ -92,17 +82,9 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
 };
 
 /**
- * Registers the rich `security.entity` attachment renderer (entity card for a single entity,
- * entity table with per-row Explore links for multiple, Canvas preview for single host/user/
- * service). Callable from `plugin.tsx#start()` alongside `registerRuleAttachment` /
- * `registerEntityAnalyticsDashboardAttachment` once the Security sub-plugins and services are
- * available.
- *
- * The lazy `security_entity_attachment_rich` chunk keeps bundle impact at zero until the first
- * `security.entity` attachment is rendered. The `security.entity` attachment itself is only
- * ever emitted by the Entity Store V2 tools (`security.get_entity` /
- * `security.search_entities`), which are gated on `entityAnalyticsEntityStoreV2`, so non-V2
- * environments never exercise this renderer even though it's registered unconditionally.
+ * Rich `security.entity` renderer. Lazy chunk keeps bundle impact at zero until first render;
+ * registration is unconditional, but the attachment is only emitted by Entity Store V2 tools
+ * (gated on `entityAnalyticsEntityStoreV2`), so non-V2 environments never exercise it.
  */
 export const registerEntityAttachment = ({
   attachments,

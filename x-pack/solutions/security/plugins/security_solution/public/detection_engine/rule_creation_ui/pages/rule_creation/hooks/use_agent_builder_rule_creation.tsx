@@ -49,8 +49,7 @@ const ruleDefaultMetadataFields = {
 
 const SYNC_DEBOUNCE_MS = 500;
 
-// Adapts a `VersionedAttachment` (data lives under `versions[]`) to the `{ data }` shape the rule
-// helpers read.
+// Adapts a `VersionedAttachment` to the `{ data, origin }` view the rule helpers read.
 const versionedAttachmentView = (attachment: { versions?: unknown; origin?: string }) => ({
   data: getLatestVersion(attachment as never)?.data,
   origin: attachment.origin,
@@ -73,11 +72,9 @@ const findRuleAttachment = (
     : undefined) ?? attachments.find((a) => a.type === SecurityAgentBuilderAttachments.rule);
 
 /**
- * Saved-rule id the form is syncing against — the single source of truth for identity.
- * Present means the sync updates that saved rule; absent means it drafts a new one.
- * Derived from the conversation's rule card (its `origin`), or the page's rule when there is
- * no card. A card without `origin` is a fresh draft and must NOT inherit the edit page's rule
- * id — a create-intent chat on an edit page stays a create.
+ * Saved-rule id the form syncs against: the card's `origin`, or the page's rule when there is
+ * no card. A card without `origin` must NOT inherit the edit page's rule id — a create-intent
+ * chat on an edit page stays a create.
  */
 const resolveSyncRuleId = (
   attachment: ConversationAttachment | undefined,
@@ -123,15 +120,13 @@ export const useAgentBuilderRuleCreation = ({
   const { agentBuilder, aiRuleCreation, telemetry } = services;
   const { addSuccess, addWarning } = useAppToasts();
   const isAiRuleUpdateRef = useRef(false);
-  // Activation is driven by explicit user actions (Add to chat, applying a card, binding to this
-  // rule's card in an open conversation) — never by merely visiting the page.
+  // Activated by explicit user actions only — never by merely visiting the page.
   const isSyncActive = useObservable(aiRuleCreation.formSyncActive$, false);
   // Warn once per failure streak; re-armed by the next successful sync.
   const hasWarnedSyncFailureRef = useRef(false);
   // Saved-rule id the sync targets (see resolveSyncRuleId). Present ⇔ the sync is an update.
   const syncRuleIdRef = useRef<string | undefined>(pageRuleId);
 
-  // Reset sync state when the form closes.
   useEffect(() => {
     return () => {
       aiRuleCreation.deactivateFormSync();
@@ -185,8 +180,7 @@ export const useAgentBuilderRuleCreation = ({
       if (!agentBuilder?.addAttachment) {
         return;
       }
-      // The saved-rule id lives in the attachment's top-level `origin` (the source of truth for the
-      // "Update" button); include it on the push so syncing form edits never drops the link.
+      // `origin` links the card to its saved rule; include it so form syncs never drop the link.
       const ruleId = savedRuleId ?? syncRuleIdRef.current;
       const targetId = aiRuleCreation.getBoundAttachmentId() ?? SECURITY_RULE_ATTACHMENT_ID;
       const attachment: AttachmentInput = {
@@ -220,7 +214,6 @@ export const useAgentBuilderRuleCreation = ({
         durationSinceSessionStartMs: Date.now() - session.startTimestamp,
       });
 
-      // An update sync adopts the saved rule's own id when the applied rule carries one.
       const ruleIdForSync = syncRuleIdRef.current ? rule.id ?? syncRuleIdRef.current : undefined;
       if (ruleIdForSync) {
         syncRuleIdRef.current = ruleIdForSync;
@@ -233,8 +226,7 @@ export const useAgentBuilderRuleCreation = ({
       scheduleStepForm.updateFieldValues(stepsData.scheduleRuleData);
       actionsStepForm.updateFieldValues(stepsData.ruleActionsData);
 
-      // Push directly to the attachment — the form sync effect may not re-run if isSyncActive is
-      // already true or the ES|QL editor ignores updateFieldValues (uncontrolled input).
+      // Direct push — the debounced sync may not fire (ES|QL editor ignores updateFieldValues).
       addRuleAttachment(rule, rule.name || '', ruleIdForSync);
 
       if (!silent) {

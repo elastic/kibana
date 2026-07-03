@@ -27,29 +27,20 @@ interface BuildRuleActionButtonsParams {
   aiRuleCreation: AiRuleCreationService;
   application: ApplicationStart;
   uiSettings: IUiSettingsClient;
-  /** Drives the primary button label: 'create' stays "Create rule", 'update' becomes "Update rule". */
   intent: RuleAttachmentIntent;
-  /** Saved-rule id — PATCH target for update-intent saves and "View rule" link. */
   ruleId: string | undefined;
-  /** The attachment card id — threaded into save requests and "Open in form" for per-card targeting. */
   attachmentId: string;
-  /** Whether to show a "View rule" link — true when the rule is saved and not already being viewed. */
   showViewRule: boolean;
-  /**
-   * True when the card's target form page is already open. The apply button always renders —
-   * it's the only chat→form path — but the label switches to "Apply to form" since clicking it
-   * applies in place instead of navigating.
-   */
+  /** When the target form is already open the apply button applies in place instead of navigating. */
   isRuleFormOpen: boolean;
   /**
    * Framework callback that links the attachment to its saved rule via `origin` and invalidates
-   * the conversation so the card reflects the saved state in-session. Threaded into the save
-   * request and called once the rule is persisted.
+   * the conversation. Threaded into the save request and called once the rule is persisted.
    */
   updateOrigin: (origin: string) => Promise<unknown>;
 }
 
-/** Builds action buttons for a rule attachment. Called from `getActionButtons` (not a hook). */
+// Called from `getActionButtons` (not a hook).
 export const buildRuleActionButtons = ({
   rule,
   aiRuleCreation,

@@ -35,7 +35,6 @@ export type RuleAttachment = Attachment<
 export const isOnRuleFormPage = (pathname: string): boolean =>
   pathname.includes(RULES_PATH) && (pathname.includes('/create') || pathname.includes('/edit'));
 
-/** Rule id encoded in a rule edit URL (`…/rules/id/<ruleId>/edit`). */
 export const getRuleIdFromEditFormPath = (pathname: string): string | undefined => {
   if (!pathname.includes(RULES_PATH) || !pathname.includes('/edit')) {
     return undefined;
@@ -44,10 +43,6 @@ export const getRuleIdFromEditFormPath = (pathname: string): string | undefined 
   return match ? decodeURIComponent(match[1]) : undefined;
 };
 
-/**
- * True when the open create/edit form is already showing this saved rule (same id in the URL).
- * Used to hide redundant "View rule" — not when the form is for a different rule.
- */
 export const isAttachmentRuleOpenOnFormPage = (
   attachmentRuleId: string | undefined,
   pathname: string
@@ -62,7 +57,6 @@ export const isAttachmentRuleOpenOnFormPage = (
   return formRuleId !== undefined && formRuleId === attachmentRuleId;
 };
 
-/** True when the user is already viewing the details page for this specific rule. */
 const isOnRuleDetailsPage = (ruleId: string, pathname: string): boolean => {
   if (!pathname.includes(RULES_PATH)) return false;
   const match = pathname.match(/\/id\/([^/]+)/);
@@ -71,7 +65,6 @@ const isOnRuleDetailsPage = (ruleId: string, pathname: string): boolean => {
   return pathRuleId === ruleId && !pathname.includes('/edit');
 };
 
-/** Whether "View rule" should appear for an update-intent attachment with this rule id. */
 export const shouldShowViewRuleButton = (
   attachmentRuleId: string | undefined,
   pathname: string
@@ -82,13 +75,8 @@ export const shouldShowViewRuleButton = (
   return !isOnRuleDetailsPage(attachmentRuleId, pathname);
 };
 
-/**
- * True when the card's target form page is already open (create form for create-intent, this
- * rule's edit form for update-intent). The apply button always renders — with chat→form auto-sync
- * removed, clicking it is the only way to pull card content into the form — but when the form is
- * already open the click applies in place instead of navigating, so the label switches to
- * "Apply to form".
- */
+// When the card's target form is already open, the apply button applies in place instead of
+// navigating, and its label switches to "Apply to form".
 export const isRuleFormOpenForCard = (
   intent: RuleAttachmentIntent,
   attachmentRuleId: string | undefined,
@@ -100,18 +88,10 @@ export const isRuleFormOpenForCard = (
   return isAttachmentRuleOpenOnFormPage(attachmentRuleId, pathname);
 };
 
-/**
- * Saved-rule id from the attachment. Lives in the attachment's top-level `origin` (set after save
- * and persisted server-side), the single source of truth — used for navigation and the save target.
- */
+// `origin` (set after save, persisted server-side) is the source of truth for identity and intent.
 export const getRuleIdFromAttachment = (attachment: RuleAttachment): string | undefined =>
   attachment.origin ?? undefined;
 
-/**
- * Effective intent for the button. Driven entirely by `origin`: a saved rule is linked via
- * `origin` (set after save, persisted, durable across reloads), so origin present means 'update';
- * absent means 'create'.
- */
 export const getRuleAttachmentIntent = (attachment: RuleAttachment): RuleAttachmentIntent =>
   attachment.origin ? 'update' : 'create';
 

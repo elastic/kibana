@@ -33,25 +33,18 @@ import type { RuleAttachmentData } from '../attachments/rule';
 
 export const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = securityTool('create_detection_rule');
 
-/** Type guard on the stored `type` field; narrows `data` to {@link RuleAttachmentData}. */
 const isRuleAttachment = (
   attachment: VersionedAttachment
 ): attachment is VersionedAttachment<SecurityAgentBuilderAttachments.rule, RuleAttachmentData> =>
   attachment.type === SecurityAgentBuilderAttachments.rule;
 
-/**
- * Mint a hyphen-free attachment id for new rule cards so the model-assembled
- * `<render_attachment>` tag can't markdown-shatter (hyphens in ids can break
- * autolink parsing). Prefix `air:` keeps it human-readable and autolink-safe.
- */
+/** Hyphen-free id: hyphens in a model-assembled `<render_attachment>` tag can break autolinking. */
 const mintRuleAttachmentId = (): string => `air:${uuidv4().replace(/-/g, '')}`;
 
 /**
- * A placeholder card has no real rule content — its `text` field deserialises to
- * an object whose `name` and `query` are absent or blank. Chat entry points seed
- * these two ways: `create_rule_menu` uses `text: "{}"`, while the form→chat sync
- * of an untouched rule form pushes `{"name":"","query":"", ...}`. Both must be
- * consumed by the first create rather than leaving a phantom empty card behind.
+ * A placeholder card has no real rule content (`name`/`query` absent or blank) — entry points
+ * seed `"{}"`, an untouched form syncs `{"name":"","query":""}`. Both must be consumed by the
+ * first create rather than leaving a phantom empty card behind.
  */
 export const isPlaceholderRuleText = (text: string): boolean => {
   try {
@@ -178,9 +171,8 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
 
         const [coreStart] = await core.getStartServices();
 
-        // Mirror the UI gate (RULES_UI_EDIT_PRIVILEGE): the DE routes enforce authz on save,
-        // but without this a user with agent-builder access and no rule-edit rights could
-        // still invoke generation from chat.
+        // Mirror the UI gate: without this, agent-builder access without rule-edit rights
+        // could still invoke generation from chat (the DE routes only enforce authz on save).
         const { canEditRules } = await calculateRulesAuthz({ coreStart, request });
         if (!canEditRules) {
           return {
@@ -300,9 +292,8 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
 
         const attachmentDescription = `Rule: ${result.rule.name}`;
 
-        // Identity lives in the attachment's top-level `origin` (set after save), not in the
-        // payload. `origin` persists across `update()` on the same attachment id, so a query
-        // rewrite of a saved rule stays "Update" without any per-version carry-forward here.
+        // Identity lives in the attachment's `origin`, which persists across update() —
+        // a query rewrite of a saved rule stays "Update" without per-version carry-forward.
         const attachmentData: Record<string, unknown> = {
           text: JSON.stringify(ruleWithoutIds),
           attachmentLabel: result.rule.name,
@@ -323,8 +314,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
                 description: attachmentDescription,
               });
 
-          // update() returns undefined if the id vanished mid-invoke — fail rather than
-          // report success with no version.
+          // update() returns undefined if the id vanished mid-invoke.
           if (!persisted) {
             throw new Error(`Failed to persist rule attachment "${resolvedAttachmentId}"`);
           }
