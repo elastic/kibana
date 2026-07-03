@@ -49,7 +49,9 @@ export class WaitForInputStepImpl implements NodeImplementation {
           ...(withConfig.message !== undefined && {
             message: ctx.renderValueAccordingToContext(withConfig.message),
           }),
-          ...(withConfig.schema !== undefined && { schema: withConfig.schema }),
+          ...(withConfig.schema !== undefined && {
+            schema: ctx.renderValueAccordingToContext(withConfig.schema),
+          }),
         });
       }
       this.workflowLogger.logDebug(`Step '${this.node.stepId}' is waiting for human input`, {
