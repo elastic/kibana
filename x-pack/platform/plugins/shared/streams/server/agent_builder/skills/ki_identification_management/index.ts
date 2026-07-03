@@ -7,7 +7,7 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
-import type { GetScopedClients } from '../../../routes/types';
+import type { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationCancelTool } from '../../tools/ki_identification_cancel/tool';
 import { createKiIdentificationStartTool } from '../../tools/ki_identification_start/tool';
 import { createKiIdentificationStatusTool } from '../../tools/ki_identification_status/tool';
@@ -15,11 +15,11 @@ import description from './description.text';
 import content from './skill.md.text';
 
 export const createKiIdentificationManagementSkill = ({
-  getScopedClients,
   telemetry,
+  streamsKIsOnboardingClient,
 }: {
-  getScopedClients: GetScopedClients;
   telemetry: EbtTelemetryClient;
+  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
 }) =>
   defineSkillType({
     id: 'ki-identification-management',
@@ -28,8 +28,8 @@ export const createKiIdentificationManagementSkill = ({
     description,
     content,
     getInlineTools: () => [
-      createKiIdentificationCancelTool({ getScopedClients }),
-      createKiIdentificationStartTool({ getScopedClients, telemetry }),
-      createKiIdentificationStatusTool({ getScopedClients }),
+      createKiIdentificationCancelTool({ streamsKIsOnboardingClient }),
+      createKiIdentificationStartTool({ telemetry, streamsKIsOnboardingClient }),
+      createKiIdentificationStatusTool({ streamsKIsOnboardingClient }),
     ],
   });

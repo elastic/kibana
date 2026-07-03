@@ -210,7 +210,7 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
               display="block"
               panelStyle={{ width: POPOVER_WIDTH }}
             >
-              <EuiContextMenuPanel size="s" items={items} />
+              <EuiContextMenuPanel items={items} />
             </EuiPopover>
           </EuiFormControlLayout>
         </EuiFlexItem>

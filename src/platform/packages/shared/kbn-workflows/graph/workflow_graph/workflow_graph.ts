@@ -13,6 +13,7 @@ import { createTypedGraph } from './create_typed_graph';
 import type { WorkflowSettings, WorkflowYaml } from '../..';
 import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
 import type { GraphNodeUnion } from '../types';
+import { isEnterWorkflowTimeoutZone } from '../types/guards';
 
 /**
  * A class that encapsulates the logic of workflow graph operations and provides
@@ -175,6 +176,16 @@ export class WorkflowGraph {
     return successors.map((id) => this.graph.node(id));
   }
 
+  /** Workflow settings timeout from the workflow-level enter-timeout-zone node, if present. */
+  public getWorkflowLevelTimeout(): string | undefined {
+    for (const node of this.getAllNodes()) {
+      if (isEnterWorkflowTimeoutZone(node)) {
+        return node.timeout;
+      }
+    }
+    return undefined;
+  }
+
   public getAllPredecessors(nodeId: string): GraphNodeUnion[] {
     const visited = new Set<string>();
     const collectPredecessors = (predNodeId: string) => {
@@ -193,14 +204,7 @@ export class WorkflowGraph {
     return Array.from(visited).map((id) => this.graph.node(id));
   }
 
-  /**
-   * Returns the set of unique child stepIds contained within a compound step
-   * (foreach, while, if, switch, etc.), excluding the compound step itself.
-   *
-   * Results are cached because the graph is immutable after construction and
-   * this method may be called on every loop exit (including inner loops that
-   * exit once per outer iteration).
-   */
+  /** Inner stepIds for a compound step (excluding that step). Cached. */
   public getInnerStepIds(compoundStepId: string): Set<string> {
     const cached = this.innerStepIdsCache.get(compoundStepId);
     if (cached) {

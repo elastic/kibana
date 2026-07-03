@@ -93,6 +93,8 @@ function createServiceMapAlertBadgeTest(alertIndex: string) {
       });
       await serviceMapPage.waitForMapToLoad();
       await serviceMapPage.dismissPopoverIfOpen();
+      // Close the options menu so its expanded panel can't overlap the badge after fitView.
+      await serviceMapPage.closeOptionsPanelIfOpen();
       await serviceMapPage.settleServiceMapLayout();
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);

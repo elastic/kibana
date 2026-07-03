@@ -55,6 +55,7 @@ type PanelProps = Pick<
  */
 export function LensRenderer({
   title,
+  description,
   withDefaultActions,
   extraActions,
   showInspector,
@@ -87,6 +88,7 @@ export function LensRenderer({
   const searchSessionId$ = useObservableVariable(searchSessionId);
   const hideTitle$ = useObservableVariable(hidePanelTitles);
   const esqlVariables$ = useObservableVariable(props.esqlVariables);
+  const isApproximate$ = useObservableVariable(props.isApproximate);
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
   const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);
@@ -100,7 +102,9 @@ export function LensRenderer({
     return rest;
   }, [props.attributes]);
   const initialStateRef = useRef<LensSerializedState>(
-    props.attributes ? { attributes: cleanedAttributes } : createEmptyLensState(null, title)
+    props.attributes
+      ? { attributes: cleanedAttributes, description }
+      : createEmptyLensState(null, title, description)
   );
 
   const searchApi = useSearchApi({ query, filters, timeRange });
@@ -126,6 +130,14 @@ export function LensRenderer({
       lensApi.updateOverrides(props.overrides);
     }
   }, [lensApi, cleanedAttributes, props.overrides]);
+
+  // workaround: `description` is not currently exposed as an observable so we manually keep it in sync here
+  // Revisit if the Lens API aligns `description` with the observable pattern in the future.
+  useEffect(() => {
+    if (lensApi) {
+      lensApi.setDescription(description);
+    }
+  }, [lensApi, description]);
 
   useEffect(() => {
     if (syncColors != null && settings.syncColors$.getValue() !== syncColors) {
@@ -176,6 +188,7 @@ export function LensRenderer({
           getSerializedStateForChild: () => transformToApiConfig(initialStateRef.current),
           forceDSL,
           esqlVariables$,
+          isApproximate$,
           hideTitle$,
           reload$, // trigger a reload (replacement for deprecated searchSessionId)
         } satisfies LensParentApi)

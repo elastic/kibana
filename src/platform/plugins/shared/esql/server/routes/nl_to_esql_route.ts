@@ -7,19 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { schema } from '@kbn/config-schema';
-import type {
-  CoreSetup,
-  IRouter,
-  IUiSettingsClient,
-  PluginInitializerContext,
-} from '@kbn/core/server';
+import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { generateEsql, generateEsqlCompletion } from '@kbn/agent-builder-genai-utils';
-import type { ScopedModel } from '@kbn/agent-builder-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+import type { EsqlServerPluginStart } from '../types';
+import { createScopedModel, resolveConnectorId } from './helpers';
 
 const MAX_NL_INSTRUCTION_LENGTH = 2000;
 
@@ -38,54 +31,6 @@ const buildNlToEsqlAdditionalContext = (currentQuery: string): string => {
     currentQuery,
     '</current_query>',
   ].join('\n');
-};
-
-import type { EsqlServerPluginStart } from '../types';
-
-const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
-
-const createScopedModel = async ({
-  inference,
-  request,
-  connectorId,
-}: {
-  inference: InferenceServerStart;
-  request: KibanaRequest;
-  connectorId: string;
-}): Promise<ScopedModel> => {
-  const chatModel = await inference.getChatModel({ request, connectorId, chatModelOptions: {} });
-  const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
-  const connector = await inference.getConnectorById(connectorId, request);
-
-  return { connector, chatModel, inferenceClient };
-};
-
-const resolveConnectorId = async ({
-  uiSettingsClient,
-  inference,
-  request,
-}: {
-  uiSettingsClient: IUiSettingsClient;
-  inference: InferenceServerStart;
-  request: KibanaRequest;
-}): Promise<string | undefined> => {
-  try {
-    const defaultSetting = await uiSettingsClient.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
-    if (defaultSetting && defaultSetting !== NO_DEFAULT_CONNECTOR) {
-      return defaultSetting;
-    }
-  } catch {
-    // UI setting may not be registered, fall through
-  }
-
-  try {
-    const connector = await inference.getDefaultConnector(request);
-    return connector?.connectorId;
-  } catch {
-    // no connectors available
-  }
-
-  return undefined;
 };
 
 export const registerNLtoESQLRoute = (
@@ -116,18 +61,18 @@ export const registerNLtoESQLRoute = (
         const { nlInstruction, currentQuery, isCompletion } = request.body;
         const core = await requestHandlerContext.core;
         const client = core.elasticsearch.client.asCurrentUser;
-        const [, { inference }] = await getStartServices();
+        const [, { inference, searchInferenceEndpoints }] = await getStartServices();
 
         const connectorId = await resolveConnectorId({
-          uiSettingsClient: core.uiSettings.client,
           inference,
           request,
+          searchInferenceEndpoints,
         });
 
         if (!connectorId) {
           return response.badRequest({
             body: {
-              message: 'No AI connector configured. Please set up a connector to use this feature.',
+              message: 'No AI connector available.',
             },
           });
         }

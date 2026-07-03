@@ -13,9 +13,17 @@ import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, GENERAL_CASES_OWNER } fro
 // ----------------Unified attachment types-------------------------
 export const COMMENT_ATTACHMENT_TYPE = 'comment';
 export const SECURITY_EVENT_ATTACHMENT_TYPE = 'security.event';
+export const SECURITY_ALERT_ATTACHMENT_TYPE = 'security.alert';
+export const OBSERVABILITY_ALERT_ATTACHMENT_TYPE = 'observability.alert';
+export const STACK_ALERT_ATTACHMENT_TYPE = 'stack.alert';
 export const SECURITY_ENDPOINT_ATTACHMENT_TYPE = 'security.endpoint';
 export const FILE_ATTACHMENT_TYPE = 'file';
 export const LENS_ATTACHMENT_TYPE = 'lens';
+export const OSQUERY_ATTACHMENT_TYPE = 'osquery';
+export const INDICATOR_ATTACHMENT_TYPE = 'security.indicator';
+// type with no legacy v1 equivalent, so it is intentionally absent from the legacy maps.
+export const SECURITY_ENTITY_ATTACHMENT_TYPE = 'security.entity';
+export const SECURITY_TIMELINE_ATTACHMENT_TYPE = 'security.timeline';
 
 export const ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE = 'ml.anomaly_swimlane';
 export const ML_ANOMALY_CHARTS_ATTACHMENT_TYPE = 'ml.anomaly_charts';
@@ -23,6 +31,18 @@ export const ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE = 'ml.single_metric_viewer'
 export const AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE = 'aiops.change_point_chart';
 export const AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE = 'aiops.pattern_analysis';
 export const AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE = 'aiops.log_rate_analysis';
+
+export const DASHBOARD_ATTACHMENT_TYPE = 'dashboard';
+export const DISCOVER_SESSION_ATTACHMENT_TYPE = 'discoverSession';
+export const MAP_ATTACHMENT_TYPE = 'map';
+
+/**
+ * Saved-object type identifiers as understood by core saved-objects and the
+ * management `_find` API.
+ */
+export const DASHBOARD_SO_TYPE = 'dashboard';
+export const MAP_SO_TYPE = 'map';
+export const DISCOVER_SESSION_SO_TYPE = 'search';
 
 // ----------------Legacy attachment types-------------------------
 export const LEGACY_ACTIONS_TYPE = 'actions';
@@ -33,6 +53,7 @@ export const LEGACY_PERSISTABLE_STATE_TYPE = 'persistableState';
 export const LEGACY_USER_TYPE = 'user';
 
 export const LEGACY_FILE_ATTACHMENT_TYPE = '.files';
+export const LEGACY_INDICATOR_ATTACHMENT_TYPE = 'indicator';
 
 export const LEGACY_LENS_ATTACHMENT_TYPE = '.lens';
 export const LEGACY_ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE = 'ml_anomaly_swimlane';
@@ -49,6 +70,8 @@ export const LEGACY_AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE = 'aiopsLogRateAnaly
 export const EXTERNAL_REFERENCE_TYPE_MAP: Record<string, string> = {
   endpoint: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   [LEGACY_FILE_ATTACHMENT_TYPE]: FILE_ATTACHMENT_TYPE,
+  [OSQUERY_ATTACHMENT_TYPE]: OSQUERY_ATTACHMENT_TYPE,
+  [LEGACY_INDICATOR_ATTACHMENT_TYPE]: INDICATOR_ATTACHMENT_TYPE,
 } as const;
 
 export const LEGACY_ATTACHMENT_TYPES = new Set([
@@ -63,8 +86,18 @@ export const LEGACY_ATTACHMENT_TYPES = new Set([
 export const UNIFIED_ATTACHMENT_TYPES = new Set([
   COMMENT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   FILE_ATTACHMENT_TYPE,
+  OSQUERY_ATTACHMENT_TYPE,
+  INDICATOR_ATTACHMENT_TYPE,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
+  SECURITY_TIMELINE_ATTACHMENT_TYPE,
+  DASHBOARD_ATTACHMENT_TYPE,
+  DISCOVER_SESSION_ATTACHMENT_TYPE,
+  MAP_ATTACHMENT_TYPE,
 ]);
 
 export const PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP: Record<string, string> = {
@@ -95,6 +128,8 @@ export const PERSISTABLE_ATTACHMENT_TYPES = new Set<string>(
  */
 export const LEGACY_TO_UNIFIED_MAP: Record<string, string> = {
   [LEGACY_USER_TYPE]: COMMENT_ATTACHMENT_TYPE,
+  // Note: `actions` is folded into `security.endpoint`
+  [LEGACY_ACTIONS_TYPE]: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
 } as const;
 
 /**
@@ -103,8 +138,13 @@ export const LEGACY_TO_UNIFIED_MAP: Record<string, string> = {
 export const UNIFIED_TO_LEGACY_MAP: Record<string, string> = {
   [COMMENT_ATTACHMENT_TYPE]: LEGACY_USER_TYPE,
   [SECURITY_EVENT_ATTACHMENT_TYPE]: LEGACY_EVENT_TYPE,
+  [SECURITY_ALERT_ATTACHMENT_TYPE]: LEGACY_ALERT_TYPE,
+  [OBSERVABILITY_ALERT_ATTACHMENT_TYPE]: LEGACY_ALERT_TYPE,
+  [STACK_ALERT_ATTACHMENT_TYPE]: LEGACY_ALERT_TYPE,
   [SECURITY_ENDPOINT_ATTACHMENT_TYPE]: LEGACY_EXTERNAL_REFERENCE_TYPE,
   [FILE_ATTACHMENT_TYPE]: LEGACY_EXTERNAL_REFERENCE_TYPE,
+  [OSQUERY_ATTACHMENT_TYPE]: LEGACY_EXTERNAL_REFERENCE_TYPE,
+  [INDICATOR_ATTACHMENT_TYPE]: LEGACY_EXTERNAL_REFERENCE_TYPE,
 } as const;
 
 /**
@@ -113,6 +153,8 @@ export const UNIFIED_TO_LEGACY_MAP: Record<string, string> = {
 export const UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP: Record<string, string> = {
   [SECURITY_ENDPOINT_ATTACHMENT_TYPE]: 'endpoint',
   [FILE_ATTACHMENT_TYPE]: LEGACY_FILE_ATTACHMENT_TYPE,
+  [OSQUERY_ATTACHMENT_TYPE]: OSQUERY_ATTACHMENT_TYPE,
+  [INDICATOR_ATTACHMENT_TYPE]: LEGACY_INDICATOR_ATTACHMENT_TYPE,
 } as const;
 
 /**
@@ -121,9 +163,19 @@ export const UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP: Record<string, string> = {
 export const MIGRATED_ATTACHMENT_TYPES = new Set<string>([
   COMMENT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   FILE_ATTACHMENT_TYPE,
+  OSQUERY_ATTACHMENT_TYPE,
+  INDICATOR_ATTACHMENT_TYPE,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
+  SECURITY_TIMELINE_ATTACHMENT_TYPE,
   ...PERSISTABLE_ATTACHMENT_TYPES,
+  DASHBOARD_ATTACHMENT_TYPE,
+  DISCOVER_SESSION_ATTACHMENT_TYPE,
+  MAP_ATTACHMENT_TYPE,
 ]);
 
 export const OWNER_TO_PREFIX_MAP: Partial<Record<string, string>> = {

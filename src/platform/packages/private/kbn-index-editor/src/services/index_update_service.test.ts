@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { BehaviorSubject } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { ROW_PLACEHOLDER_PREFIX } from '../constants';
 import { IndexUpdateService } from './index_update_service';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -24,9 +26,13 @@ import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { LOOKUP_INDEX_RECREATE_ROUTE } from '@kbn/esql-types';
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLAdHocDataview: jest.fn(),
-}));
+jest.mock('@kbn/esql-utils', () => {
+  const actual = jest.requireActual('@kbn/esql-utils');
+  return {
+    ...actual,
+    getESQLAdHocDataview: jest.fn(),
+  };
+});
 
 describe('IndexUpdateService', () => {
   let http: HttpStart;
@@ -68,23 +74,23 @@ describe('IndexUpdateService', () => {
     it('emits ESQL query with metadata once the index is created', async () => {
       service.setIndexName('my-index');
       service.setIndexCreated(true);
-      service.setQstr('200');
+      service.setFilterQuery({ query: '200', language: 'kuery' });
       service.setSort([['@timestamp' as any, 'desc']]);
 
       const query = await firstValueFrom(service.esqlQuery$);
 
       expect(query.toLowerCase()).toBe(
-        'from "my-index" metadata _id, _source | where qstr("*200* or 200") | limit 1000 | sort @timestamp desc'
+        'from "my-index" metadata _id, _source | where kql("200") | limit 1000 | sort @timestamp desc'
       );
     });
 
     it('emits Discover ESQL query without metadata', async () => {
       service.setIndexName('logs-*');
-      service.setQstr('ERROR');
+      service.setFilterQuery({ query: 'host.name: "test"', language: 'kuery' });
 
       const query = await firstValueFrom(service.esqlDiscoverQuery$);
 
-      expect(query).toBe('FROM "logs-*" | WHERE QSTR("*ERROR* OR ERROR") | LIMIT 1000');
+      expect(query).toBe('FROM "logs-*" | WHERE KQL("host.name: \\"test\\"") | LIMIT 1000');
     });
   });
 
@@ -117,6 +123,25 @@ describe('IndexUpdateService', () => {
 
       const afterAdd = await firstValueFrom(service.hasUnsavedChanges$);
       expect(afterAdd).toBe(false);
+    });
+
+    it('clears unsaved changes when an edited value is reverted to its original', async () => {
+      // Seed a fetched document so edits can be compared against the stored value
+      const docsSubject = (service as unknown as { _docs$: BehaviorSubject<DataTableRecord[]> })
+        ._docs$;
+      docsSubject.next([
+        { id: '1', raw: { name: 'Boris' }, flattened: { name: 'Boris' } } as DataTableRecord,
+      ]);
+
+      // Editing the value to something new marks the doc as dirty
+      service.updateDoc('1', { name: 'DBoris' });
+      expect(await firstValueFrom(service.hasUnsavedChanges$)).toBe(true);
+      expect(service.isDirtyRow('1')).toBe(true);
+
+      // Reverting the value back to the original clears the dirty state
+      service.updateDoc('1', { name: 'Boris' });
+      expect(await firstValueFrom(service.hasUnsavedChanges$)).toBe(false);
+      expect(service.isDirtyRow('1')).toBe(false);
     });
 
     it('does not mark unsaved changes if the only change is deleting a placeholder row', async () => {

@@ -1,10 +1,10 @@
 {
-  "sha1": "59ca65ba6e0751c16cf1946cf916707fd9e2ba14",
+  "sha1": "1e3b03d7beebba8d142d6a3eedb51b0de65b26da",
   "tests": [
     {
       "id": "f4c048e25988cb5-605d7a7bf19c60f",
       "title": "Hosts Page - Flyout Overview Tab - KPI charts and collapsible sections",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -13,46 +13,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 62,
+        "line": 90,
         "column": 9
       }
     },
     {
       "id": "f4c048e25988cb5-35a9aa41665f195",
       "title": "Hosts Page - Flyout Overview Tab - Services section",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 102,
-        "column": 9
-      }
-    },
-    {
-      "id": "f4c048e25988cb5-d9d5a1fb8867828",
-      "title": "Hosts Page - Flyout Metadata Tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 116,
-        "column": 9
-      }
-    },
-    {
-      "id": "f4c048e25988cb5-45117973f50ff3b",
-      "title": "Hosts Page - Flyout Metrics Tab",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -66,41 +34,41 @@
       }
     },
     {
+      "id": "f4c048e25988cb5-d9d5a1fb8867828",
+      "title": "Hosts Page - Flyout Metadata Tab",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
+        "line": 144,
+        "column": 9
+      }
+    },
+    {
+      "id": "f4c048e25988cb5-45117973f50ff3b",
+      "title": "Hosts Page - Flyout Metrics Tab",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
+        "line": 158,
+        "column": 9
+      }
+    },
+    {
       "id": "f4c048e25988cb5-f6e05596318ee58",
       "title": "Hosts Page - Flyout Processes Tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 145,
-        "column": 9
-      }
-    },
-    {
-      "id": "f4c048e25988cb5-da68e3d67e89a90",
-      "title": "Hosts Page - Flyout Logs Tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 160,
-        "column": 9
-      }
-    },
-    {
-      "id": "f4c048e25988cb5-9ceded1164e0270",
-      "title": "Hosts Page - Flyout Open as page and return",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -114,9 +82,9 @@
       }
     },
     {
-      "id": "f4c048e25988cb5-58869cff261d35c",
-      "title": "Hosts Page - Flyout Dashboards Tab",
-      "expectedStatus": "passed",
+      "id": "f4c048e25988cb5-da68e3d67e89a90",
+      "title": "Hosts Page - Flyout Logs Tab",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -125,7 +93,39 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 200,
+        "line": 188,
+        "column": 9
+      }
+    },
+    {
+      "id": "f4c048e25988cb5-9ceded1164e0270",
+      "title": "Hosts Page - Flyout Open as page and return",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
+        "line": 201,
+        "column": 9
+      }
+    },
+    {
+      "id": "f4c048e25988cb5-58869cff261d35c",
+      "title": "Hosts Page - Flyout Dashboards Tab",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
+        "line": 228,
         "column": 9
       }
     },
@@ -237,7 +237,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/no_data_inventory.spec.ts",
-        "line": 22,
+        "line": 45,
         "column": 9
       }
     }

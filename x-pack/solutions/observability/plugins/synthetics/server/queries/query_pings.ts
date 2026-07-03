@@ -18,6 +18,7 @@ import type {
 } from '../../common/runtime_types';
 import type { SyntheticsEsClient } from '../lib';
 import { getRemoteMonitorInfo } from '../lib/remote_result_utils';
+import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
 import { SUMMARY_FILTER } from '../../common/constants/client_defaults';
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -53,10 +54,12 @@ export async function queryPings<F>(
     pageIndex,
     locations,
     excludedLocations,
+    remoteName,
   } = params;
   const size = sizeParam ?? DEFAULT_PAGE_SIZE;
 
   const searchBody = {
+    index: getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices),
     size,
     from: pageIndex !== undefined ? pageIndex * size : 0,
     ...(index ? { from: index * size } : {}),

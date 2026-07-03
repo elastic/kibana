@@ -24,11 +24,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
-  AgentVisibility,
-  VISIBILITY_BADGE_COLOR,
-  VISIBILITY_ICON,
+  AgentAccessControlMode,
+  AGENT_BUILDER_UI_EBT,
+  ACCESS_CONTROL_MODE_BADGE_COLOR,
+  ACCESS_CONTROL_MODE_ICON,
   type AgentDefinition,
 } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
@@ -48,14 +50,14 @@ const { editDetails: flyoutLabels } = labels.agentOverview;
 interface EditDetailsFlyoutProps {
   agent: AgentDefinition;
   onClose: () => void;
-  canChangeVisibility: boolean;
+  canChangeAccessControlMode: boolean;
   showWorkflowSection: boolean;
 }
 
 export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
   agent,
   onClose,
-  canChangeVisibility,
+  canChangeAccessControlMode,
   showWorkflowSection,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -71,7 +73,10 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
       avatar_symbol: agent.avatar_symbol ?? '',
       avatar_color: agent.avatar_color ?? '',
       labels: agent.labels ?? [],
-      visibility: agent.visibility ?? AgentVisibility.Private,
+      access_control: agent.access_control ?? {
+        access_mode: AgentAccessControlMode.Private,
+        entries: [],
+      },
       configuration: {
         enable_elastic_capabilities: agent.configuration?.enable_elastic_capabilities ?? false,
         workflow_ids: agent.configuration?.workflow_ids ?? [],
@@ -91,7 +96,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
         avatar_symbol: data.avatar_symbol || undefined,
         avatar_color: data.avatar_color || undefined,
         labels: data.labels,
-        visibility: data.visibility,
+        access_control: data.access_control,
         configuration: {
           enable_elastic_capabilities: data.configuration.enable_elastic_capabilities,
           workflow_ids: data.configuration.workflow_ids,
@@ -109,7 +114,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
     },
   });
 
-  const isShared = (agent.visibility as AgentVisibility) === AgentVisibility.Shared;
+  const isShared = agent.access_control?.access_mode === AgentAccessControlMode.Shared;
 
   const contentPadding = css`
     padding: ${euiTheme.size.s};
@@ -140,8 +145,8 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
                   <span>
                     {flyoutLabels.sharedWarningPrefix}
                     <EuiBadge
-                      iconType={VISIBILITY_ICON[AgentVisibility.Shared]}
-                      color={VISIBILITY_BADGE_COLOR[AgentVisibility.Shared]}
+                      iconType={ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Shared]}
+                      color={ACCESS_CONTROL_MODE_BADGE_COLOR[AgentAccessControlMode.Shared]}
                     >
                       {flyoutLabels.sharedWarningBadge}
                     </EuiBadge>
@@ -157,7 +162,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
             <IdentificationSection />
 
             <EuiHorizontalRule margin="xl" />
-            <AccessSection canChangeVisibility={canChangeVisibility} />
+            <AccessSection canChangeAccessControlMode={canChangeAccessControlMode} />
 
             <EuiHorizontalRule margin="xl" />
             <CustomizationSection showWorkflowSection={showWorkflowSection} />
@@ -173,7 +178,15 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose} data-test-subj="editDetailsCancelButton">
+              <EuiButtonEmpty
+                onClick={onClose}
+                data-test-subj="editDetailsCancelButton"
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.flyout,
+                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.EDIT_FLYOUT_CANCEL,
+                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                })}
+              >
                 {flyoutLabels.cancelButton}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -184,6 +197,11 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
                 isLoading={updateMutation.isLoading}
                 isDisabled={!formState.isDirty}
                 data-test-subj="editDetailsSaveButton"
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.flyout,
+                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.EDIT_FLYOUT_SAVE,
+                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                })}
               >
                 {flyoutLabels.saveButton}
               </EuiButton>

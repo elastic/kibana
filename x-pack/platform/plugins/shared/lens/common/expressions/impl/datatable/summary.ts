@@ -95,9 +95,9 @@ export function computeSummaryRowForColumn(
   const summaryValue = computeFinalValue(columnArgs.summaryRow, columnArgs.columnId, table.rows);
   // ignore the column formatter for the count case
   if (columnArgs.summaryRow === 'count') {
-    return defaultFormatter.convert(summaryValue);
+    return defaultFormatter.convertToText(summaryValue);
   }
-  return formatters[getOriginalId(columnArgs.columnId)].convert(summaryValue);
+  return formatters[getOriginalId(columnArgs.columnId)].convertToText(summaryValue);
 }
 
 function computeFinalValue(

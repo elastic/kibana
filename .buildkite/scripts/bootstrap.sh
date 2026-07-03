@@ -31,6 +31,7 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
       echo "Extracting moon-cache.tar.zst to ./.moon/cache"
       tar -xf ~/moon-cache.tar.zst -I zstd -C ./
     fi
+    .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
   fi
 fi
 

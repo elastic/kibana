@@ -7,22 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
-import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { schema } from '@kbn/config-schema';
 import { once } from 'lodash';
+
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { schema } from '@kbn/config-schema';
+import type { VersionedRouter } from '@kbn/core-http-server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+
+import { trackCreateDashboardAction, trackUpdateDashboardAction } from '../../user_activity';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
+import { writeErrorHandler } from '../write_error_handler';
 import { getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
-import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { writeErrorHandler } from '../write_error_handler';
 
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
   usageCounter: UsageCounter | undefined,
-  isDashboardAppRequest: boolean
+  isDashboardAppRequest: boolean,
+  logger: Logger
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const updateRoute = router.put({
@@ -35,18 +39,26 @@ export function registerUpdateRoute(
   // Route is registered during setup and before all plugins have registered embeddable schemas.
   // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
   const getCachedDashboardStateSchema = once(() => {
-    return getDashboardStateSchema(isDashboardAppRequest);
+    return getDashboardStateSchema(false);
   });
 
   updateRoute.addVersion(
     {
       version: routeVersion,
+      options: {
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).updateDashboardOASOperationObject,
+      },
       validate: () => ({
         request: {
           params: schema.object({
             // Can not validate id at route level
             // existing dashboards may have invalid "as code" ids
-            id: schema.string(),
+            id: schema.string({
+              meta: {
+                description: 'The unique ID of the dashboard to be created or updated',
+              },
+            }),
           }),
           body: getDashboardStateSchema(isDashboardAppRequest),
         },
@@ -82,9 +94,16 @@ export function registerUpdateRoute(
             req.serverTiming,
             isDashboardAppRequest
           );
-          return operation === 'create' ? res.created({ body }) : res.ok({ body });
+          if (operation === 'create') {
+            // do not await tracking actions
+            void trackCreateDashboardAction(body, req).catch(); // do nothing on throw
+            return res.created({ body });
+          } else {
+            void trackUpdateDashboardAction(body, req).catch();
+            return res.ok({ body });
+          }
         } catch (e) {
-          return writeErrorHandler(e, res);
+          return writeErrorHandler(e, res, logger, req);
         }
       })
   );

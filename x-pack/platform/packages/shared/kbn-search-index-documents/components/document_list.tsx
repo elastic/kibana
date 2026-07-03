@@ -165,7 +165,6 @@ export const DocumentList: React.FC<DocumentListProps> = ({
               anchorPosition="downLeft"
             >
               <EuiContextMenuPanel
-                size="s"
                 items={[
                   <EuiContextMenuItem
                     key="10 rows"

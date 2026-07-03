@@ -102,15 +102,16 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
           {addVariableButtonTitle}
         </EuiButtonEmpty>
       ) : (
-        <EuiButtonIcon
-          id={`${paramsProperty}AddVariableButton`}
-          data-test-subj={`${paramsProperty}AddVariableButton`}
-          title={addVariableButtonTitle}
-          onClick={() => setIsVariablesPopoverOpen(true)}
-          iconType="indexOpen"
-          aria-label={i18n.ADD_VARIABLE_POPOVER_BUTTON}
-          disabled={!messageVariables?.length}
-        />
+        <EuiToolTip content={addVariableButtonTitle} disableScreenReaderOutput>
+          <EuiButtonIcon
+            id={`${paramsProperty}AddVariableButton`}
+            data-test-subj={`${paramsProperty}AddVariableButton`}
+            onClick={() => setIsVariablesPopoverOpen(true)}
+            iconType="indexOpen"
+            aria-label={i18n.ADD_VARIABLE_POPOVER_BUTTON}
+            disabled={!messageVariables?.length}
+          />
+        </EuiToolTip>
       ),
     [addVariableButtonTitle, messageVariables?.length, paramsProperty, showButtonTitle]
   );
@@ -190,7 +191,6 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
         listProps={{
           rowHeight: 70,
           showIcons: false,
-          paddingSize: 'none',
           textWrap: 'wrap',
         }}
         loadingMessage={i18n.LOADING_VARIABLES}

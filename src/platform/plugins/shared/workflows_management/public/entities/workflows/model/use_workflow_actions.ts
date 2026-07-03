@@ -17,6 +17,7 @@ import type {
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowListDto,
+  WorkflowYaml,
 } from '@kbn/workflows';
 import type { BulkCreateWorkflowsResponse } from '@kbn/workflows-ui';
 import { useRunWorkflow, useWorkflowsApi } from '@kbn/workflows-ui';
@@ -34,6 +35,8 @@ type HttpError = IHttpFetchError<ResponseErrorBody>;
 export interface UpdateWorkflowParams {
   id: string;
   workflow: Partial<WorkflowDetailDto>;
+  /** Workflow definition from list/detail cache; used for enable/disable telemetry metadata. */
+  workflowDefinition?: Partial<WorkflowYaml> | null;
   isBulkAction?: boolean;
   bulkActionCount?: number;
   /**
@@ -152,6 +155,7 @@ export function useWorkflowActions() {
       telemetry.reportWorkflowUpdated({
         workflowId: variables.id,
         workflowUpdate: variables.workflow,
+        workflowDefinition: variables.workflowDefinition,
         hasValidationErrors: false,
         validationErrorCount: 0,
         isBulkAction: variables.isBulkAction ?? false,
@@ -168,6 +172,7 @@ export function useWorkflowActions() {
       telemetry.reportWorkflowUpdated({
         workflowId: variables.id,
         workflowUpdate: variables.workflow,
+        workflowDefinition: variables.workflowDefinition,
         hasValidationErrors: false,
         validationErrorCount: 0,
         isBulkAction: variables.isBulkAction ?? false,
@@ -253,7 +258,10 @@ export function useWorkflowActions() {
     },
   });
 
-  const runWorkflow = useRunWorkflow<{ triggerTab?: WorkflowTriggerTab }>({
+  const runWorkflow = useRunWorkflow<{
+    triggerTab?: WorkflowTriggerTab;
+    hasCustomEventTrigger?: boolean;
+  }>({
     onSuccess: (_, variables) => {
       const inputCount = Object.keys(variables.inputs || {}).length;
 
@@ -265,6 +273,7 @@ export function useWorkflowActions() {
         origin: 'workflow_list',
         error: undefined,
         triggerTab: variables.triggerTab,
+        hasCustomEventTrigger: variables.hasCustomEventTrigger,
       });
 
       // FIX: ensure workflow execution document is created at the end of the mutation
@@ -284,6 +293,7 @@ export function useWorkflowActions() {
         origin: 'workflow_list',
         error: errorObj,
         triggerTab: variables.triggerTab,
+        hasCustomEventTrigger: variables.hasCustomEventTrigger,
       });
     },
   });

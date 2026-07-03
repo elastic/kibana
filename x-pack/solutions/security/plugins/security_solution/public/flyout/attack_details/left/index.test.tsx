@@ -78,8 +78,8 @@ jest.mock('../hooks/use_header_data', () => ({
 
 jest.mock('../hooks/use_attack_entities_lists', () => ({
   useAttackEntitiesLists: jest.fn().mockReturnValue({
-    userEntityIdentifiers: [],
-    hostEntityIdentifiers: [],
+    userEntityEntries: [],
+    hostEntityEntries: [],
     loading: false,
     error: false,
   }),

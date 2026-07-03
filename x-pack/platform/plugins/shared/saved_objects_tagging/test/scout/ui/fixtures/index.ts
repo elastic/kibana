@@ -23,6 +23,8 @@ export const KBN_ARCHIVES = {
   VISUALIZE:
     'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/visualize/data.json',
   MAPS: 'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/maps/data.json',
+  BULK_ASSIGN:
+    'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign/data.json',
 } as const;
 
 export const ES_ARCHIVES = {

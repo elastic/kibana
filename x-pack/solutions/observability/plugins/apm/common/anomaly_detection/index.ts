@@ -9,12 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { getSeverityType } from '@kbn/ml-anomaly-utils/get_severity_type';
 import { getSeverityColor as mlGetSeverityColor } from '@kbn/ml-anomaly-utils/get_severity_color';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
-export interface ServiceAnomalyStats {
-  transactionType?: string;
-  anomalyScore?: number;
-  actualValue?: number;
-  jobId?: string;
-}
+export type { ServiceAnomalyStats } from '@kbn/apm-types';
 
 export function getSeverity(score: number | undefined) {
   if (score === undefined) {

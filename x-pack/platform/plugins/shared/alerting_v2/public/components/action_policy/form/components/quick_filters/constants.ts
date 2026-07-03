@@ -12,6 +12,12 @@ export interface QuickFiltersProps {
 
 export const POPOVER_PANEL_STYLE = { maxWidth: 360 };
 
+/**
+ * Action policies only target alert-kind rules, so the quick filters restrict
+ * the rules and tags they surface to `kind: 'alert'`.
+ */
+export const ALERT_KIND_FILTER = 'kind:alert';
+
 export const SELECTABLE_LIST_PROPS = {
   isVirtualized: false as const,
   textWrap: 'wrap' as const,

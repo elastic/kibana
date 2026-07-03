@@ -45,7 +45,12 @@ export class TagsTable {
     return Promise.all(
       rows.map(async (row) => {
         const nameCell = row.locator('[data-test-subj="tagsTableRowTagName"]');
-        const descriptionCell = row.locator('[data-test-subj="tagsTableRowDescription"]');
+        // Read from the inner `.euiTableCellContent` div to exclude EUI's visually hidden
+        // tabular-copy markers (U+21A6 "↦" / U+21B5 "↵" spans appended to the `<td>`) which
+        // `innerText()` picks up and which `.trim()` cannot remove (they are not whitespace).
+        const descriptionCell = row
+          .locator('[data-test-subj="tagsTableRowDescription"]')
+          .locator('.euiTableCellContent');
         const connectionsLocator = row.locator('[data-test-subj="tagsTableRowConnectionsLink"]');
 
         const [rawName, rawDescription, connectionCount] = await Promise.all([
@@ -95,21 +100,24 @@ export class TagsTable {
     return this.bulkActionsButton.isVisible();
   }
 
-  async openCollapsedRowMenu(tagName: string) {
+  // portal: action rendered in EUI portal (collapsed menu); inline: rendered on the row.
+  async clickRowAction(tagName: string, action: string, location: 'portal' | 'inline' = 'inline') {
+    const testSubj = `tagsTableAction-${action}`;
+    const actionLocator =
+      location === 'portal'
+        ? this.page.locator('[data-euiportal="true"]').locator(`[data-test-subj="${testSubj}"]`)
+        : this.rowByName(tagName).locator(`[data-test-subj="${testSubj}"]`);
+
+    await actionLocator.waitFor({ state: 'visible' });
+    await actionLocator.click();
+  }
+
+  async clickCollapsedRowAction(tagName: string, action: string) {
     const row = this.rowByName(tagName);
     const collapseBtn = row.locator('[data-test-subj="euiCollapsedItemActionsButton"]');
     await collapseBtn.waitFor({ state: 'visible' });
     await collapseBtn.click();
-  }
-
-  // The action is scoped to the EUI portal where the collapsed-menu items render, to avoid
-  // matching the always-present inline row buttons that share the same
-  // data-test-subj.
-  async clickRowAction(action: string) {
-    await this.page
-      .locator('[data-euiportal="true"]')
-      .locator(`[data-test-subj="tagsTableAction-${action}"]`)
-      .click();
+    await this.clickRowAction(tagName, action, 'portal');
   }
 
   rowByName(tagName: string): Locator {
@@ -152,7 +160,6 @@ export class TagsTable {
     return (await inlineAction.count()) > 0;
   }
 
-  // FTR-equivalent of the connection-count parsing in parseTableRow.
   private async parseConnectionCount(connectionsLocator: Locator) {
     if ((await connectionsLocator.count()) === 0) {
       return undefined;

@@ -9,22 +9,26 @@ import React from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
+import { getEbtProps } from '@kbn/ebt-click';
 import { css } from '@emotion/react';
 import { labels } from '../../../utils/i18n';
 import { AgentAvatar } from '../../common/agent_avatar';
-import { AgentVisibilityBadge } from '../list/agent_visibility_badge';
+import { AgentAccessControlModeBadge } from '../list/agent_access_control_mode_badge';
 import { AgentDescription } from './agent_description';
+import { accessSummaryManageButton } from '../access/access_i18n';
 
 const { agentOverview: overviewLabels } = labels;
 
@@ -33,6 +37,8 @@ export interface AgentHeaderProps {
   docsUrl?: string;
   canEditAgent: boolean;
   onEditDetails: () => void;
+  canManageAccess?: boolean;
+  onManageAccess?: () => void;
 }
 
 export const AgentHeader: React.FC<AgentHeaderProps> = ({
@@ -40,6 +46,8 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
   docsUrl,
   canEditAgent,
   onEditDetails,
+  canManageAccess,
+  onManageAccess,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -83,21 +91,31 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
                     <EuiFlexItem grow={false} css={textSubduedStyles}>
                       <EuiCopy textToCopy={agent.id}>
                         {(copy) => (
-                          <EuiButtonIcon
-                            iconType="copy"
-                            onClick={copy}
-                            size="xs"
-                            aria-label={overviewLabels.copyIdAriaLabel}
-                            data-test-subj="agentOverviewCopyId"
-                            css={textSubduedStyles}
-                          />
+                          <EuiToolTip
+                            content={overviewLabels.copyIdAriaLabel}
+                            disableScreenReaderOutput
+                          >
+                            <EuiButtonIcon
+                              iconType="copy"
+                              onClick={copy}
+                              size="xs"
+                              aria-label={overviewLabels.copyIdAriaLabel}
+                              data-test-subj="agentOverviewCopyId"
+                              css={textSubduedStyles}
+                              {...getEbtProps({
+                                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                                action: AGENT_BUILDER_UI_EBT.action.agentOverview.COPY_ID,
+                                detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                              })}
+                            />
+                          </EuiToolTip>
                         )}
                       </EuiCopy>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <AgentVisibilityBadge agent={agent} />
+                  <AgentAccessControlModeBadge agent={agent} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexGroup>
@@ -112,6 +130,11 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
                 iconType="question"
                 size="s"
                 data-test-subj="agentOverviewDocsLink"
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.DOCS_LINK,
+                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                })}
               >
                 {overviewLabels.docsLink}
               </EuiButtonEmpty>
@@ -122,8 +145,23 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
                 size="s"
                 onClick={onEditDetails}
                 data-test-subj="agentOverviewEditDetailsButton"
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.EDIT_DETAILS,
+                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                })}
               >
                 {overviewLabels.editDetailsButton}
+              </EuiButtonEmpty>
+            )}
+            {canManageAccess && onManageAccess && (
+              <EuiButtonEmpty
+                iconType="lockOpen"
+                size="s"
+                onClick={onManageAccess}
+                data-test-subj="agentOverviewManageAccessButton"
+              >
+                {accessSummaryManageButton}
               </EuiButtonEmpty>
             )}
           </EuiFlexGroup>

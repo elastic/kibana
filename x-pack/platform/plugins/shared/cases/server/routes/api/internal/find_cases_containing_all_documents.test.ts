@@ -10,12 +10,19 @@ import { processCase } from './find_cases_containing_all_documents';
 
 describe('findCasesContainingAllDocuments', () => {
   describe('processCase', () => {
-    it('returns null when required alert not found', async () => {
-      const casesClient = {
+    const buildCasesClient = (
+      overrides: {
+        documents?: Array<{ id: string }>;
+      } = {}
+    ) =>
+      ({
         attachments: {
-          getAllDocumentsAttachedToCase: jest.fn().mockResolvedValue([]),
+          getAllDocumentsAttachedToCase: jest.fn().mockResolvedValue(overrides.documents ?? []),
         },
-      } as unknown as CasesClient;
+      } as unknown as CasesClient);
+
+    it('returns null when required alert not found', async () => {
+      const casesClient = buildCasesClient();
 
       const result = await processCase(casesClient, 'case-id', new Set(['alert-id']));
       expect(casesClient.attachments.getAllDocumentsAttachedToCase).toHaveBeenCalled();
@@ -23,65 +30,28 @@ describe('findCasesContainingAllDocuments', () => {
     });
 
     it('returns case id when all alerts are present', async () => {
-      const casesClient = {
-        attachments: {
-          getAllDocumentsAttachedToCase: jest.fn().mockResolvedValue([{ id: 'alert-id' }]),
-        },
-      } as unknown as CasesClient;
+      const casesClient = buildCasesClient({ documents: [{ id: 'alert-id' }] });
 
       const result = await processCase(casesClient, 'case-id', new Set(['alert-id']));
       expect(result).toBe('case-id');
       expect(casesClient.attachments.getAllDocumentsAttachedToCase).toHaveBeenCalledTimes(1);
+    });
+
+    it('targets both cases-comments alert/event ids and cases-attachments attachmentId', async () => {
+      const casesClient = buildCasesClient({ documents: [{ id: 'alert-id' }] });
+
+      await processCase(casesClient, 'case-id', new Set(['alert-id']));
 
       const {
         calls: [params],
       } = jest.mocked(casesClient.attachments.getAllDocumentsAttachedToCase).mock;
 
-      expect(params).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "caseId": "case-id",
-            "filter": Object {
-              "arguments": Array [
-                Object {
-                  "arguments": Array [
-                    Object {
-                      "isQuoted": false,
-                      "type": "literal",
-                      "value": "cases-comments.attributes.eventId",
-                    },
-                    Object {
-                      "isQuoted": false,
-                      "type": "literal",
-                      "value": "alert-id",
-                    },
-                  ],
-                  "function": "is",
-                  "type": "function",
-                },
-                Object {
-                  "arguments": Array [
-                    Object {
-                      "isQuoted": false,
-                      "type": "literal",
-                      "value": "cases-comments.attributes.alertId",
-                    },
-                    Object {
-                      "isQuoted": false,
-                      "type": "literal",
-                      "value": "alert-id",
-                    },
-                  ],
-                  "function": "is",
-                  "type": "function",
-                },
-              ],
-              "function": "or",
-              "type": "function",
-            },
-          },
-        ]
-      `);
+      const filter = JSON.stringify(params[0].filter);
+      expect(filter).toContain('cases-comments.attributes.alertId');
+      expect(filter).toContain('cases-comments.attributes.eventId');
+      expect(filter).toContain('cases-attachments.attributes.attachmentId');
+      // type/owner restriction is handled by the attachment service, not the route
+      expect(filter).not.toContain('cases-attachments.attributes.type');
     });
   });
 });

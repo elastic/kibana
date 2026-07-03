@@ -20,7 +20,11 @@ export interface ModuleDiscoveryInfo {
   name: string;
   group: string;
   type: 'plugin' | 'package';
-  /** Set when using --affected-modules: true if this module's @kbn/ ID is in the affected set */
+  /**
+   * Set when --code-changes is provided: true if this module's @kbn/ ID is in
+   * the affected set (or if it owns an affected config in the tests-only fast
+   * path). Used to drive the "affected " prefix on Buildkite step labels.
+   */
   isAffected?: boolean;
   configs: {
     path: string;

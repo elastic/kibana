@@ -10,6 +10,7 @@ import type { Streams } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { RedirectTo } from '../../../redirect_to';
 import type { ManagementTabs } from './wrapper';
 import { Wrapper } from './wrapper';
@@ -22,27 +23,29 @@ import { useStreamsDetailManagementTabs } from './use_streams_detail_management_
 import { StreamDetailDataQuality } from '../../../stream_data_quality';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
-import { ClassicAdvancedView } from './advanced_view/classic_advanced_view';
 import { ClassicStreamPartitioning } from '../stream_detail_routing/classic_stream_partitioning';
+import { LifecycleTabLabel } from './lifecycle_tab_label_with_actions';
+import { StreamDetailCanvas } from '../stream_detail_canvas';
 
 const classicStreamManagementSubTabs = [
   'overview',
-  'retention',
+  'lifecycle',
   'partitioning',
   'processing',
-  'advanced',
   'dataQuality',
   'significantEvents',
   'schemaEditor',
   'schema',
   'attachments',
+  'canvas',
 ] as const;
 
 type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[number];
 
 const tabRedirects: Record<string, { newTab: ClassicStreamManagementSubTab }> = {
+  advanced: { newTab: 'overview' },
   schemaEditor: { newTab: 'schema' },
-  lifecycle: { newTab: 'retention' },
+  retention: { newTab: 'lifecycle' },
   enrich: { newTab: 'processing' },
 };
 
@@ -58,11 +61,17 @@ export function ClassicStreamDetailManagement({
   refreshDefinition: () => void;
 }) {
   const {
+    core: { notifications },
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
+  const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
 
   const {
-    features: { queryStreams },
+    features: { canvas, queryStreams },
   } = useStreamsPrivileges();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
@@ -106,23 +115,18 @@ export function ClassicStreamDetailManagement({
     }),
   };
 
-  tabs.retention = {
+  tabs.lifecycle = {
     content: (
       <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
     ),
     label: (
-      <EuiToolTip
-        content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
-          defaultMessage:
-            'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
-        })}
-      >
-        <span data-test-subj="retentionTab" tabIndex={0}>
-          {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-            defaultMessage: 'Retention',
-          })}
-        </span>
-      </EuiToolTip>
+      <LifecycleTabLabel
+        definition={definition}
+        showActions={tab === 'lifecycle'}
+        indexTemplateName={definition.elasticsearch_assets?.indexTemplate}
+        notifications={notifications}
+        share={share}
+      />
     ),
   };
 
@@ -176,35 +180,28 @@ export function ClassicStreamDetailManagement({
     }),
   };
 
+  if (canvas.enabled) {
+    tabs.canvas = {
+      content: <StreamDetailCanvas streamName={definition.stream.name} />,
+      label: i18n.translate('xpack.streams.streamDetailView.canvasTab', {
+        defaultMessage: 'Canvas',
+      }),
+    };
+  }
+
   if (otherTabs.significantEvents) {
     tabs.significantEvents = otherTabs.significantEvents;
   }
 
-  if (definition.privileges.manage || definition.replicated) {
-    tabs.advanced = {
-      content: (
-        <ClassicAdvancedView definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: (
-        <EuiToolTip
-          content={i18n.translate('xpack.streams.managementTab.advanced.tooltip', {
-            defaultMessage:
-              'View technical details about this classic stream’s underlying index setup',
-          })}
-        >
-          <span tabIndex={0}>
-            {i18n.translate('xpack.streams.streamDetailView.advancedTab', {
-              defaultMessage: 'Advanced',
-            })}
-          </span>
-        </EuiToolTip>
-      ),
-    };
-  }
-
   if (tab === 'partitioning' && !queryStreams.enabled) {
     return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'retention' } }} />
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'lifecycle' } }} />
+    );
+  }
+
+  if (tab === 'canvas' && !canvas.enabled) {
+    return (
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
     );
   }
 

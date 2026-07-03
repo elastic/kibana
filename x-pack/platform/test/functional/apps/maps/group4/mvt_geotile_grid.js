@@ -9,6 +9,11 @@ import expect from '@kbn/expect';
 
 const MB_VECTOR_SOURCE_ID = 'g1xkv';
 
+/**
+ * Purpose: MVT geotile smoke test
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getPageObjects, getService }) {
   const { maps } = getPageObjects(['maps']);
   const inspector = getService('inspector');

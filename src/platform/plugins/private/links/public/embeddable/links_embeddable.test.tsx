@@ -130,6 +130,40 @@ async function buildLinksEmbeddable(state: LinksEmbeddableState) {
 }
 
 describe('getLinksEmbeddableFactory', () => {
+  describe('anyStateChange$', () => {
+    let embeddableApi: LinksApi;
+    beforeEach((done) => {
+      buildLinksEmbeddable({
+        title: 'my links',
+        description: 'just a few links',
+        hide_title: false,
+        hide_border: false,
+        ref_id: '123',
+      })
+        .then(({ api }) => {
+          embeddableApi = api;
+          done();
+        })
+        .catch(done);
+    });
+
+    test('should not emit on subscribe and emit when any state changes', (done) => {
+      embeddableApi.anyStateChange$.subscribe(() => {
+        try {
+          const { title } = embeddableApi.serializeState();
+          expect(title).toBe('cute puppies');
+        } catch (error) {
+          // title assertion fails when
+          // anyStateChange$ emits on subscribe
+          done(error);
+          return;
+        }
+        done();
+      });
+      embeddableApi.setTitle('cute puppies');
+    });
+  });
+
   describe('by reference embeddable', () => {
     const byRefState: LinksEmbeddableState = {
       title: 'my links',

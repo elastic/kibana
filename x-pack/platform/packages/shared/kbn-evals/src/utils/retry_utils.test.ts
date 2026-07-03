@@ -15,12 +15,11 @@ function makeStatusError(status: number, message = `HTTP ${status}`) {
   return err;
 }
 
-// Mirrors the real `KbnClientRequesterError` shape: only `axiosError.status`
-// survives `clean()`, so the retry layer must read from there.
+// Mirrors the real `KbnClientRequesterError` shape: `.status` is the HTTP status code.
 function makeKbnClientRequesterError(status: number, message = `HTTP ${status}`) {
-  const err = new Error(message) as Error & { axiosError: { status: number } };
+  const err = new Error(message) as Error & { status: number };
   err.name = 'KbnClientRequesterError';
-  err.axiosError = { status };
+  err.status = status;
   return err;
 }
 
@@ -67,7 +66,7 @@ describe('withRetry', () => {
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
-  it('retries when status is exposed via axiosError (KbnClientRequesterError shape)', async () => {
+  it('retries KbnClientRequesterError with .status', async () => {
     const fn = jest
       .fn()
       .mockRejectedValueOnce(makeKbnClientRequesterError(503))
@@ -77,7 +76,7 @@ describe('withRetry', () => {
     expect(fn).toHaveBeenCalledTimes(2);
   });
 
-  it('does NOT retry on terminal status exposed via axiosError', async () => {
+  it('does NOT retry on terminal KbnClientRequesterError status', async () => {
     const err = makeKbnClientRequesterError(413, 'Payload Too Large');
     const fn = jest.fn().mockRejectedValue(err);
     await expect(withRetry(fn, fastRetryOptions)).rejects.toBe(err);

@@ -9,7 +9,6 @@ import {
   EVALS_EXAMPLE_SCORES_URL,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
-  EVALUATIONS_INDEX_PATTERN,
   MAX_SCORES_PER_QUERY,
   buildExampleScoresQuery,
   SCORES_SORT_ORDER,
@@ -47,11 +46,9 @@ export const registerGetExampleScoresRoute = ({ router, logger }: RouteDependenc
       async (context, request, response) => {
         try {
           const { exampleId } = request.params;
-          const coreContext = await context.core;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
+          const evalsContext = await context.evals;
 
-          const searchResponse = await esClient.search({
-            index: EVALUATIONS_INDEX_PATTERN,
+          const searchResponse = await evalsContext.evaluationScoreService.search({
             query: buildExampleScoresQuery(exampleId),
             sort: EXAMPLE_SCORES_SORT_ORDER,
             size: MAX_SCORES_PER_QUERY,

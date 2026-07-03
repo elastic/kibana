@@ -537,6 +537,7 @@ const addDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
     Location.COMPLETION,
     Location.RERANK,
     Location.JOIN,
@@ -550,7 +551,7 @@ const divDefinition: FunctionDefinition = {
   name: EsqlFunctionNames.DIV,
   description: i18n.translate('kbn-esql-language.esql.definitions.div', {
     defaultMessage:
-      'Divide one value by another. For numeric operands, if either field is multivalued\nthen the result is `null`.\nnote = "Division of two integer types will yield an integer result, rounding towards 0. "\n+ "If you need floating point division, `Cast (::)` one of the arguments to a `DOUBLE`.\nFor dense_vector operations, both arguments should be dense_vectors. Inequal vector dimensions generate null result.\n',
+      'Divide one value by another. For numeric operands, if either field is multivalued\nthen the result is `null`.',
   }),
   preview: false,
   alias: undefined,
@@ -854,6 +855,7 @@ const divDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
     Location.COMPLETION,
     Location.RERANK,
     Location.JOIN,
@@ -1374,7 +1376,9 @@ const equalsDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -1384,7 +1388,9 @@ const equalsDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'right',
@@ -1402,7 +1408,9 @@ const equalsDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -1412,7 +1420,9 @@ const equalsDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'right',
@@ -1431,6 +1441,7 @@ const equalsDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
     Location.COMPLETION,
     Location.RERANK,
     Location.JOIN,
@@ -1798,7 +1809,9 @@ const greaterThanDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -1808,7 +1821,9 @@ const greaterThanDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'right',
@@ -1826,7 +1841,9 @@ const greaterThanDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -1836,7 +1853,9 @@ const greaterThanDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'right',
@@ -1855,6 +1874,7 @@ const greaterThanDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
     Location.COMPLETION,
     Location.RERANK,
     Location.JOIN,
@@ -2222,7 +2242,9 @@ const greaterThanOrEqualDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -2232,7 +2254,9 @@ const greaterThanOrEqualDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'right',
@@ -2250,7 +2274,9 @@ const greaterThanOrEqualDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -2260,7 +2286,9 @@ const greaterThanOrEqualDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'right',
@@ -2279,6 +2307,7 @@ const greaterThanOrEqualDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
     Location.COMPLETION,
     Location.RERANK,
     Location.JOIN,
@@ -3595,7 +3624,9 @@ const lessThanDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -3605,7 +3636,9 @@ const lessThanDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'right',
@@ -3623,7 +3656,9 @@ const lessThanDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -3633,7 +3668,9 @@ const lessThanDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'right',
@@ -3652,6 +3689,7 @@ const lessThanDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
     Location.COMPLETION,
     Location.RERANK,
     Location.JOIN,
@@ -4019,7 +4057,9 @@ const lessThanOrEqualDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4029,7 +4069,9 @@ const lessThanOrEqualDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'right',
@@ -4047,7 +4089,9 @@ const lessThanOrEqualDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4057,7 +4101,9 @@ const lessThanOrEqualDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'right',
@@ -4076,6 +4122,7 @@ const lessThanOrEqualDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
     Location.COMPLETION,
     Location.RERANK,
     Location.JOIN,
@@ -4169,7 +4216,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'boolean',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4188,7 +4237,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4207,7 +4258,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'date',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4226,7 +4279,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4245,7 +4300,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'date_nanos',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4264,7 +4321,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4283,7 +4342,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4302,7 +4363,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4321,7 +4384,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4340,7 +4405,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4359,7 +4426,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4378,7 +4447,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4397,7 +4468,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4416,7 +4489,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4435,7 +4510,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'ip',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4454,7 +4531,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4473,7 +4552,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4492,7 +4573,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4511,7 +4594,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4530,7 +4615,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4549,7 +4636,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4568,7 +4657,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4587,7 +4678,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4606,7 +4699,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4625,7 +4720,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4644,7 +4741,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4663,7 +4762,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'unsigned_long',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4682,7 +4783,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4701,7 +4804,9 @@ const matchOperatorDefinition: FunctionDefinition = {
           type: 'version',
           optional: false,
           description: 'Value to find in the provided field.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4906,6 +5011,7 @@ const modDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
     Location.COMPLETION,
     Location.RERANK,
     Location.JOIN,
@@ -5223,6 +5329,7 @@ const mulDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
     Location.COMPLETION,
     Location.RERANK,
     Location.JOIN,
@@ -5297,405 +5404,6 @@ const negDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS],
-  examples: [],
-};
-
-// Do not edit this manually... generated by scripts/generate_function_definitions.ts
-const notInDefinition: FunctionDefinition = {
-  type: FunctionDefinitionTypes.OPERATOR,
-  name: EsqlFunctionNames.NOT_IN,
-  description: i18n.translate('kbn-esql-language.esql.definitions.not_in', {
-    defaultMessage:
-      'The `NOT IN` operator allows testing whether a field or expression does *not* equal any element in a list of literals, fields or expressions.',
-  }),
-  preview: false,
-  alias: undefined,
-  signatures: [
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'boolean',
-          optional: false,
-          description: 'An expression.',
-        },
-        {
-          name: 'right',
-          type: 'boolean[]',
-          optional: false,
-          description: 'A list of items.',
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'cartesian_point',
-          optional: false,
-          description: 'An expression.',
-        },
-        {
-          name: 'right',
-          type: 'cartesian_point[]',
-          optional: false,
-          description: 'A list of items.',
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'cartesian_shape',
-          optional: false,
-          description: 'An expression.',
-        },
-        {
-          name: 'right',
-          type: 'cartesian_shape[]',
-          optional: false,
-          description: 'A list of items.',
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'double',
-          optional: false,
-          description: 'An expression.',
-        },
-        {
-          name: 'right',
-          type: 'double[]',
-          optional: false,
-          description: 'A list of items.',
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'geo_point',
-          optional: false,
-          description: 'An expression.',
-        },
-        {
-          name: 'right',
-          type: 'geo_point[]',
-          optional: false,
-          description: 'A list of items.',
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'geo_shape',
-          optional: false,
-          description: 'An expression.',
-        },
-        {
-          name: 'right',
-          type: 'geo_shape[]',
-          optional: false,
-          description: 'A list of items.',
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'integer',
-          optional: false,
-          description: 'An expression.',
-        },
-        {
-          name: 'right',
-          type: 'integer[]',
-          optional: false,
-          description: 'A list of items.',
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'ip',
-          optional: false,
-          description: 'An expression.',
-        },
-        {
-          name: 'right',
-          type: 'ip[]',
-          optional: false,
-          description: 'A list of items.',
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'keyword',
-          optional: false,
-          description: 'An expression.',
-        },
-        {
-          name: 'right',
-          type: 'keyword[]',
-          optional: false,
-          description: 'A list of items.',
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'keyword',
-          optional: false,
-          description: 'An expression.',
-        },
-        {
-          name: 'right',
-          type: 'text[]',
-          optional: false,
-          description: 'A list of items.',
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'long',
-          optional: false,
-          description: 'An expression.',
-        },
-        {
-          name: 'right',
-          type: 'long[]',
-          optional: false,
-          description: 'A list of items.',
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'text',
-          optional: false,
-          description: 'An expression.',
-        },
-        {
-          name: 'right',
-          type: 'keyword[]',
-          optional: false,
-          description: 'A list of items.',
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'text',
-          optional: false,
-          description: 'An expression.',
-        },
-        {
-          name: 'right',
-          type: 'text[]',
-          optional: false,
-          description: 'A list of items.',
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'version',
-          optional: false,
-          description: 'An expression.',
-        },
-        {
-          name: 'right',
-          type: 'version[]',
-          optional: false,
-          description: 'A list of items.',
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-  ],
-  locationsAvailable: [
-    Location.EVAL,
-    Location.WHERE,
-    Location.SORT,
-    Location.ROW,
-    Location.STATS_WHERE,
-    Location.COMPLETION,
-    Location.RERANK,
-    Location.JOIN,
-  ],
-  examples: [],
-};
-
-// Do not edit this manually... generated by scripts/generate_function_definitions.ts
-const notLikeDefinition: FunctionDefinition = {
-  type: FunctionDefinitionTypes.OPERATOR,
-  name: EsqlFunctionNames.NOT_LIKE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.not_like', {
-    defaultMessage:
-      'Use `LIKE` to filter data based on string patterns using wildcards. `LIKE`\nusually acts on a field placed on the left-hand side of the operator, but it can\nalso act on a constant (literal) expression. The right-hand side of the operator\nrepresents the pattern.\n\nThe following wildcard characters are supported:\n\n* `*` matches zero or more characters.\n* `?` matches one character.',
-  }),
-  preview: false,
-  alias: undefined,
-  signatures: [
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'keyword',
-          optional: false,
-          description: 'A literal expression.',
-        },
-        {
-          name: 'pattern',
-          type: 'keyword',
-          optional: false,
-          description: 'Pattern.',
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'text',
-          optional: false,
-          description: 'A literal expression.',
-        },
-        {
-          name: 'pattern',
-          type: 'keyword',
-          optional: false,
-          description: 'Pattern.',
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-  ],
-  locationsAvailable: [
-    Location.EVAL,
-    Location.WHERE,
-    Location.SORT,
-    Location.ROW,
-    Location.STATS_WHERE,
-    Location.COMPLETION,
-    Location.RERANK,
-    Location.JOIN,
-  ],
-  examples: [],
-};
-
-// Do not edit this manually... generated by scripts/generate_function_definitions.ts
-const notRlikeDefinition: FunctionDefinition = {
-  type: FunctionDefinitionTypes.OPERATOR,
-  name: EsqlFunctionNames.NOT_RLIKE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.not_rlike', {
-    defaultMessage:
-      'Use `RLIKE` to filter data based on string patterns using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
-  }),
-  preview: false,
-  alias: undefined,
-  signatures: [
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'keyword',
-          optional: false,
-          description: 'A literal value.',
-        },
-        {
-          name: 'pattern',
-          type: 'keyword',
-          optional: false,
-          description: 'A regular expression.',
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'text',
-          optional: false,
-          description: 'A literal value.',
-        },
-        {
-          name: 'pattern',
-          type: 'keyword',
-          optional: false,
-          description: 'A regular expression.',
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-  ],
-  locationsAvailable: [
-    Location.EVAL,
-    Location.WHERE,
-    Location.SORT,
-    Location.ROW,
-    Location.STATS_WHERE,
-    Location.COMPLETION,
-    Location.RERANK,
-    Location.JOIN,
-  ],
   examples: [],
 };
 
@@ -6212,7 +5920,9 @@ const notEqualsDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -6222,7 +5932,9 @@ const notEqualsDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'right',
@@ -6240,7 +5952,9 @@ const notEqualsDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -6250,7 +5964,9 @@ const notEqualsDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'text',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'right',
@@ -6269,6 +5985,406 @@ const notEqualsDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
+    Location.COMPLETION,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const notInDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.OPERATOR,
+  name: EsqlFunctionNames.NOT_IN,
+  description: i18n.translate('kbn-esql-language.esql.definitions.not_in', {
+    defaultMessage:
+      'The `NOT IN` operator allows testing whether a field or expression does *not* equal any element in a list of literals, fields or expressions.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'boolean',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'boolean[]',
+          optional: false,
+          description: 'A list of items.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'cartesian_point',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'cartesian_point[]',
+          optional: false,
+          description: 'A list of items.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'cartesian_shape',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'cartesian_shape[]',
+          optional: false,
+          description: 'A list of items.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'double',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'double[]',
+          optional: false,
+          description: 'A list of items.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geo_point',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'geo_point[]',
+          optional: false,
+          description: 'A list of items.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geo_shape',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'geo_shape[]',
+          optional: false,
+          description: 'A list of items.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'integer',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'integer[]',
+          optional: false,
+          description: 'A list of items.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'ip',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'ip[]',
+          optional: false,
+          description: 'A list of items.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'keyword',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'keyword[]',
+          optional: false,
+          description: 'A list of items.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'keyword',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'text[]',
+          optional: false,
+          description: 'A list of items.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'long',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'long[]',
+          optional: false,
+          description: 'A list of items.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'keyword[]',
+          optional: false,
+          description: 'A list of items.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'text[]',
+          optional: false,
+          description: 'A list of items.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'version',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'version[]',
+          optional: false,
+          description: 'A list of items.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.WHERE,
+    Location.SORT,
+    Location.ROW,
+    Location.STATS_WHERE,
+    Location.COMPLETION,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const notLikeDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.OPERATOR,
+  name: EsqlFunctionNames.NOT_LIKE,
+  description: i18n.translate('kbn-esql-language.esql.definitions.not_like', {
+    defaultMessage:
+      'Use `LIKE` to filter data based on string patterns using wildcards. `LIKE`\nusually acts on a field placed on the left-hand side of the operator, but it can\nalso act on a constant (literal) expression. The right-hand side of the operator\nrepresents the pattern.\n\nThe following wildcard characters are supported:\n\n* `*` matches zero or more characters.\n* `?` matches one character.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'str',
+          type: 'keyword',
+          optional: false,
+          description: 'A literal expression.',
+        },
+        {
+          name: 'pattern',
+          type: 'keyword',
+          optional: false,
+          description: 'Pattern.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'str',
+          type: 'text',
+          optional: false,
+          description: 'A literal expression.',
+        },
+        {
+          name: 'pattern',
+          type: 'keyword',
+          optional: false,
+          description: 'Pattern.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.WHERE,
+    Location.SORT,
+    Location.ROW,
+    Location.STATS_WHERE,
+    Location.COMPLETION,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const notRlikeDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.OPERATOR,
+  name: EsqlFunctionNames.NOT_RLIKE,
+  description: i18n.translate('kbn-esql-language.esql.definitions.not_rlike', {
+    defaultMessage:
+      'Use `RLIKE` to filter data based on string patterns using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'str',
+          type: 'keyword',
+          optional: false,
+          description: 'A literal value.',
+        },
+        {
+          name: 'pattern',
+          type: 'keyword',
+          optional: false,
+          description: 'A regular expression.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'str',
+          type: 'text',
+          optional: false,
+          description: 'A literal value.',
+        },
+        {
+          name: 'pattern',
+          type: 'keyword',
+          optional: false,
+          description: 'A regular expression.',
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.WHERE,
+    Location.SORT,
+    Location.ROW,
+    Location.STATS_WHERE,
     Location.COMPLETION,
     Location.RERANK,
     Location.JOIN,
@@ -6811,6 +6927,7 @@ const subDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
     Location.COMPLETION,
     Location.RERANK,
     Location.JOIN,
@@ -6833,10 +6950,10 @@ export const operatorFunctionDefinitions = [
   modDefinition,
   mulDefinition,
   negDefinition,
+  notEqualsDefinition,
   notInDefinition,
   notLikeDefinition,
   notRlikeDefinition,
-  notEqualsDefinition,
   rlikeDefinition,
   subDefinition,
 ];

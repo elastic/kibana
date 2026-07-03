@@ -8,18 +8,20 @@
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiButton,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiPageHeader,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
   type EuiTableSelectionType,
 } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { css } from '@emotion/react';
 import type {
   ActionPolicyBulkAction,
@@ -30,8 +32,10 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { ExperimentalBadge } from '../../components/experimental_badge';
 import { ActionPolicyDestinationsSummary } from '../../components/action_policy/action_policy_destinations_summary';
+import { PopoverItems } from '../../components/popover_items';
 import { ActionPolicySnoozePopover } from '../../components/action_policy/action_policy_snooze_popover';
 import { ActionPolicyStateBadge } from '../../components/action_policy/action_policy_state_badge';
 import { DeleteActionPolicyConfirmModal } from '../../components/action_policy/delete_confirmation_modal';
@@ -39,6 +43,7 @@ import { ActionPolicyDetailsFlyout } from '../../components/action_policy/detail
 import { paths } from '../../constants';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useBulkActionActionPolicies } from '../../hooks/use_bulk_action_action_policies';
+import { useBulkGetUserProfiles } from '../../hooks/use_bulk_get_user_profiles';
 import { useCreateActionPolicy } from '../../hooks/use_create_action_policy';
 import { useDeleteActionPolicy } from '../../hooks/use_delete_action_policy';
 import { useDisableActionPolicy } from '../../hooks/use_disable_action_policy';
@@ -47,12 +52,36 @@ import { useFetchActionPolicies } from '../../hooks/use_fetch_action_policies';
 import { useSnoozeActionPolicy } from '../../hooks/use_snooze_action_policy';
 import { useUnsnoozeActionPolicy } from '../../hooks/use_unsnooze_action_policy';
 import { useUpdateActionPolicyApiKey } from '../../hooks/use_update_action_policy_api_key';
+import { resolveDisplayName } from '../../utils/resolve_display_name';
 import { ActionPoliciesBulkActions } from './components/action_policies_bulk_actions';
 import { ActionPoliciesSearchBar } from './components/action_policies_search_bar';
 import { ActionPolicyActionsCell } from './components/action_policy_actions_cell';
 import { UpdateApiKeyConfirmationModal } from './components/update_api_key_confirmation_modal';
 
 const DEFAULT_PER_PAGE = 20;
+
+const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
+  'xpack.alertingV2.actionPoliciesList.pageTitle',
+  {
+    defaultMessage: 'Action Policies',
+  }
+);
+
+const getActionPoliciesListMenu = ({
+  navigateToCreate,
+}: {
+  navigateToCreate: () => void;
+}): AppHeaderMenu => ({
+  primaryActionItem: {
+    id: 'createActionPolicy',
+    label: i18n.translate('xpack.alertingV2.actionPoliciesList.createPolicyButton', {
+      defaultMessage: 'Create policy',
+    }),
+    iconType: 'plusInCircle',
+    run: navigateToCreate,
+    testId: 'createActionPolicyButton',
+  },
+});
 
 const descriptionTextStyle = css`
   text-overflow: ellipsis;
@@ -69,7 +98,7 @@ export const ListActionPoliciesPage = () => {
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [search, setSearch] = useState('');
   const [enabled, setEnabled] = useState('');
-  const [sortField, setSortField] = useState<'name' | 'updatedAt' | 'updatedByUsername'>('name');
+  const [sortField, setSortField] = useState<'name' | 'updatedAt'>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [policyToDelete, setPolicyToDelete] = useState<ActionPolicyResponse | null>(null);
@@ -113,9 +142,9 @@ export const ListActionPoliciesPage = () => {
     setSelectedPolicies([]);
   }, []);
 
-  const navigateToCreate = () => {
+  const navigateToCreate = useCallback(() => {
     navigateToUrl(basePath.prepend(paths.actionPolicyCreate));
-  };
+  }, [navigateToUrl, basePath]);
 
   const navigateToEdit = (id: string) => {
     navigateToUrl(basePath.prepend(paths.actionPolicyEdit(id)));
@@ -127,7 +156,6 @@ export const ListActionPoliciesPage = () => {
     const data: CreateActionPolicyData = {
       name: `${name} [clone]`,
       description,
-      type: 'global',
       destinations,
       groupingMode: groupingMode ?? 'per_episode',
       ...(tags != null && { tags }),
@@ -163,9 +191,17 @@ export const ListActionPoliciesPage = () => {
     setPage(0);
   }, []);
 
-  const items = data?.items ?? [];
+  const items = useMemo(() => data?.items ?? [], [data?.items]);
   const total = data?.total ?? 0;
   const policyToView = policyToViewId ? items.find((p) => p.id === policyToViewId) ?? null : null;
+
+  const updatedByUids = useMemo(
+    () => items.map((policy) => policy.updatedBy).filter((uid): uid is string => Boolean(uid)),
+    [items]
+  );
+
+  const { data: updatedByProfileByUid, isLoading: isLoadingUpdatedByProfiles } =
+    useBulkGetUserProfiles({ uids: updatedByUids });
 
   const onTableChange = ({
     page: tablePage,
@@ -177,7 +213,7 @@ export const ListActionPoliciesPage = () => {
     }
 
     if (sort) {
-      setSortField(sort.field as 'name' | 'updatedAt' | 'updatedByUsername');
+      setSortField(sort.field as 'name' | 'updatedAt');
       setSortDirection(sort.direction);
     }
   };
@@ -231,6 +267,7 @@ export const ListActionPoliciesPage = () => {
   const columns: Array<EuiBasicTableColumn<ActionPolicyResponse>> = [
     {
       field: 'name',
+      minWidth: '100px',
       name: (
         <FormattedMessage
           id="xpack.alertingV2.actionPoliciesList.column.name"
@@ -270,6 +307,7 @@ export const ListActionPoliciesPage = () => {
     },
     {
       field: 'tags',
+      width: '180px',
       name: (
         <FormattedMessage
           id="xpack.alertingV2.actionPoliciesList.column.tags"
@@ -278,14 +316,34 @@ export const ListActionPoliciesPage = () => {
       ),
       render: (tags: string[] | null) => {
         if (!tags || tags.length === 0) return null;
+        const visibleCount = 1;
+        const overflowCount = tags.length - visibleCount;
         return (
-          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-            {tags.map((tag) => (
-              <EuiFlexItem grow={false} key={tag}>
-                <EuiBadge color="hollow">{tag}</EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+          <PopoverItems
+            items={tags}
+            numberOfItemsToDisplay={visibleCount}
+            popoverTitle={i18n.translate(
+              'xpack.alertingV2.actionPoliciesList.column.tags.popoverTitle',
+              { defaultMessage: 'Tags' }
+            )}
+            popoverButtonTitle={`+${overflowCount}`}
+            dataTestPrefix="actionPolicyTags"
+            renderItem={(tag) => (
+              <EuiToolTip key={tag} content={tag} position="top">
+                <EuiBadge
+                  color="hollow"
+                  title=""
+                  css={{
+                    maxWidth: 150,
+                    minWidth: 0,
+                    '.euiBadge__text': { minWidth: 0 },
+                  }}
+                >
+                  {tag}
+                </EuiBadge>
+              </EuiToolTip>
+            )}
+          />
         );
       },
     },
@@ -301,8 +359,7 @@ export const ListActionPoliciesPage = () => {
       render: (updatedAt: string) => moment(updatedAt).format(dateTimeFormat),
     },
     {
-      field: 'updatedByUsername',
-      sortable: true,
+      field: 'updatedBy',
       width: '200px',
       name: (
         <FormattedMessage
@@ -310,6 +367,15 @@ export const ListActionPoliciesPage = () => {
           defaultMessage="Updated by"
         />
       ),
+      render: (updatedBy: string | null) => {
+        if (!updatedBy) {
+          return null;
+        }
+        if (isLoadingUpdatedByProfiles) {
+          return <EuiLoadingSpinner size="s" />;
+        }
+        return resolveDisplayName(updatedBy, updatedByProfileByUid, updatedBy);
+      },
     },
     {
       field: 'enabled',
@@ -338,7 +404,7 @@ export const ListActionPoliciesPage = () => {
           defaultMessage="Notify"
         />
       ),
-      width: '120px',
+      width: '50px',
       render: (_snoozedUntil: string | undefined, policy: ActionPolicyResponse) => {
         if (!policy.enabled) {
           return null;
@@ -386,23 +452,19 @@ export const ListActionPoliciesPage = () => {
 
   const errorMessage = isError && error ? error.message : null;
 
+  const actionPoliciesMenu = useMemo(
+    () => getActionPoliciesListMenu({ navigateToCreate }),
+    [navigateToCreate]
+  );
+
   return (
     <>
-      <EuiPageHeader
-        pageTitle={
-          <FormattedMessage
-            id="xpack.alertingV2.actionPoliciesList.pageTitle"
-            defaultMessage="Action Policies"
-          />
-        }
-        rightSideItems={[
-          <EuiButton key="create-policy" onClick={navigateToCreate} fill>
-            <FormattedMessage
-              id="xpack.alertingV2.actionPoliciesList.createPolicyButton"
-              defaultMessage="Create policy"
-            />
-          </EuiButton>,
-        ]}
+      <AppHeader
+        sticky={false}
+        title={ACTION_POLICIES_LIST_PAGE_TITLE}
+        titleAppend={<ExperimentalBadge />}
+        padding={{ bleed: 'l' }}
+        menu={actionPoliciesMenu}
       />
       <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
         <EuiSpacer size="m" />
@@ -483,6 +545,7 @@ export const ListActionPoliciesPage = () => {
             loading={isFetching}
             pagination={pagination}
             responsiveBreakpoint={false}
+            scrollableInline={true}
             css={css`
               .euiTableHeaderMobile .euiCheckbox {
                 display: none;

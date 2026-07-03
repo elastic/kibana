@@ -157,6 +157,7 @@ export {
   defaultInferenceEndpoints,
   InferenceEndpointProvider,
   elasticModelIds,
+  type EisInferenceEndpointMetadata,
 } from './src/inference_endpoints';
 
 export {

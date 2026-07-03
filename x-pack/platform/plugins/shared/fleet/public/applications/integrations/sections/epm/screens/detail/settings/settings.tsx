@@ -43,7 +43,9 @@ import {
 } from '../../../../../constants';
 import { SideBarColumn } from '../../../components/side_bar_column';
 import { BulkActionContextProvider } from '../../installed_integrations/hooks/use_bulk_actions_context';
-import { KeepPoliciesUpToDateSwitch } from '../components';
+import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
+
+import { KeepPoliciesUpToDateSwitch, NamespaceCustomizationSection } from '../components';
 import { useChangelog } from '../hooks';
 
 import { ExperimentalFeaturesService } from '../../../../../services';
@@ -160,8 +162,69 @@ export const SettingsPage: React.FC<Props> = memo(
     );
 
     const updatePackageMutation = useUpdatePackageMutation();
+    const updateNamespaceCustomizationMutation = useUpdatePackageMutation();
 
     const { notifications } = useStartServices();
+    const { allowedNamespacePrefixes } = useSpaceSettingsContext();
+
+    const installationInfo =
+      'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
+
+    const namespaceCustomizationEnabledFor = useMemo(
+      () => installationInfo?.namespace_customization_enabled_for ?? [],
+      [installationInfo?.namespace_customization_enabled_for]
+    );
+
+    const handleNamespaceCustomizationChange = useCallback(
+      (next: string[]) => {
+        updateNamespaceCustomizationMutation.mutate(
+          {
+            pkgName: packageInfo.name,
+            pkgVersion: packageInfo.version,
+            body: {
+              namespace_customization_enabled_for: next,
+            },
+          },
+          {
+            onSuccess: () => {
+              notifications.toasts.addSuccess({
+                title: i18n.translate('xpack.fleet.integrations.integrationSaved', {
+                  defaultMessage: 'Integration settings saved',
+                }),
+                text: i18n.translate(
+                  'xpack.fleet.integrations.namespaceCustomizationSavedSuccess',
+                  {
+                    defaultMessage: 'Applying changes to namespace index templates for {title}.',
+                    values: { title },
+                  }
+                ),
+              });
+            },
+            onError: (error) => {
+              notifications.toasts.addError(error, {
+                title: i18n.translate('xpack.fleet.integrations.integrationSavedError', {
+                  defaultMessage: 'Error saving integration settings',
+                }),
+                toastMessage: i18n.translate(
+                  'xpack.fleet.integrations.namespaceCustomizationError',
+                  {
+                    defaultMessage: 'Error updating namespace index templates for {title}',
+                    values: { title },
+                  }
+                ),
+              });
+            },
+          }
+        );
+      },
+      [
+        notifications.toasts,
+        packageInfo.name,
+        packageInfo.version,
+        title,
+        updateNamespaceCustomizationMutation,
+      ]
+    );
 
     const shouldShowKeepPoliciesUpToDateSwitch = useMemo(() => {
       return KEEP_POLICIES_UP_TO_DATE_PACKAGES.some((pkg) => pkg.name === name);
@@ -317,6 +380,19 @@ export const SettingsPage: React.FC<Props> = memo(
                         checked={keepPoliciesUpToDateSwitchValue}
                         onChange={handleKeepPoliciesUpToDateSwitchChange}
                         disabled={isShowKeepPoliciesUpToDateSwitchDisabled}
+                      />
+                      <EuiSpacer size="l" />
+                    </>
+                  )}
+
+                  {installationInfo && (
+                    <>
+                      <NamespaceCustomizationSection
+                        savedNamespaces={namespaceCustomizationEnabledFor}
+                        allowedNamespacePrefixes={allowedNamespacePrefixes}
+                        disabled={!authz.integrations.writePackageSettings}
+                        isSubmitting={updateNamespaceCustomizationMutation.isLoading}
+                        onSave={handleNamespaceCustomizationChange}
                       />
                       <EuiSpacer size="l" />
                     </>

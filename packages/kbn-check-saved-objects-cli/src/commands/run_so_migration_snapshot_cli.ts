@@ -43,7 +43,7 @@ export const runSoMigrationSnapshotCli = () => {
       const snapshot = await takeSnapshot(types);
 
       await mkdir(dirname(outputPath), { recursive: true });
-      await writeFile(outputPath, JSON.stringify(snapshot, null, 2), { encoding: 'utf-8' });
+      await writeFile(outputPath, JSON.stringify(snapshot), { encoding: 'utf-8' });
 
       log.info('Snapshot successfully taken to: ' + outputPath);
     },

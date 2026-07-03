@@ -11,6 +11,8 @@ import { WorkflowTemplatingEngine } from './templating_engine';
 
 describe('WorkflowTemplatingEngine', () => {
   let templatingEngine: WorkflowTemplatingEngine;
+  const liquidLimitErrorMessage =
+    'Liquid template rendering exceeded a workflow limit. Reduce the template size, simplify loops or filters, reduce the rendered output size, or override the limit in workflow settings and try again.';
 
   beforeEach(() => {
     templatingEngine = new WorkflowTemplatingEngine();
@@ -175,6 +177,41 @@ describe('WorkflowTemplatingEngine', () => {
       const context = { nullValue: null };
       const result = templatingEngine.render(template, context);
       expect(result).toBe('');
+    });
+  });
+
+  describe('sha256 filter', () => {
+    it('should return the SHA-256 hex digest (Shopify reference vector)', () => {
+      const template = '{{ text | sha256 }}';
+      const context = { text: 'Polyjuice' };
+      const result = templatingEngine.render(template, context);
+      expect(result).toBe('44ac1d7a2936e30a5de07082fd65d6fe9b1fb658a1a98bfe65bc5959beac5dd0');
+    });
+
+    it('should coerce null and undefined to empty string', () => {
+      const template = '{{ value | sha256 }}';
+      expect(templatingEngine.render(template, { value: null })).toBe(
+        'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+      );
+      expect(templatingEngine.render(template, { value: undefined })).toBe(
+        'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+      );
+    });
+  });
+
+  describe('hmac_sha256 filter', () => {
+    it('should return the HMAC-SHA256 hex digest (Shopify reference vector)', () => {
+      const template = '{{ text | hmac_sha256: key }}';
+      const context = { text: 'Polyjuice', key: 'Polina' };
+      const result = templatingEngine.render(template, context);
+      expect(result).toBe('8e0d5d65cff1242a4af66c8f4a32854fd5fb80edcc8aabe9b302b29c7c71dc20');
+    });
+
+    it('should stringify numeric secret keys', () => {
+      const template = '{{ text | hmac_sha256: key }}';
+      const context = { text: 'test', key: 12345 };
+      const result = templatingEngine.render(template, context);
+      expect(result).toMatch(/^[0-9a-f]{64}$/);
     });
   });
 
@@ -798,13 +835,36 @@ describe('WorkflowTemplatingEngine', () => {
       it('should reject templates exceeding parse limit', () => {
         expect(() => {
           templatingEngine.render('x'.repeat(200_000), {});
-        }).toThrow('parse length limit exceeded');
+        }).toThrow(liquidLimitErrorMessage);
       });
 
       it('should reject templates that allocate too much memory', () => {
         expect(() => {
           templatingEngine.render('{% for i in (1..20000000) %}{{ i }}{% endfor %}', {});
-        }).toThrow('memory alloc limit exceeded');
+        }).toThrow(liquidLimitErrorMessage);
+      });
+
+      it('should reject templates exceeding render limit', () => {
+        const engine = new WorkflowTemplatingEngine({
+          liquidSettings: {
+            renderLimit: 1,
+          },
+        });
+
+        expect(() => {
+          engine.render('{% for i in (1..1000000) %}{% assign value = i %}{% endfor %}', {});
+        }).toThrow(liquidLimitErrorMessage);
+      });
+
+      it('should use workflow liquid settings when provided', () => {
+        const template = 'x'.repeat(160_000);
+        const engine = new WorkflowTemplatingEngine({
+          liquidSettings: {
+            parseLimit: 200_000,
+          },
+        });
+
+        expect(engine.render(template, {})).toBe(template);
       });
     });
 

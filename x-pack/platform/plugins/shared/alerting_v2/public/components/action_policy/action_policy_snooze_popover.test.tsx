@@ -10,33 +10,25 @@ import { render, screen } from '@testing-library/react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPolicySnoozePopover } from './action_policy_snooze_popover';
 
-const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => {
-  const { createdByUsername = null, updatedByUsername = null, ...restOverrides } = overrides;
-
-  return {
-    id: 'policy-1',
-    name: 'Test policy',
-    description: '',
-    type: 'global',
-    ruleId: null,
-    enabled: true,
-    matcher: null,
-    groupBy: null,
-    tags: null,
-    groupingMode: null,
-    throttle: null,
-    snoozedUntil: null,
-    destinations: [],
-    auth: { owner: 'elastic', createdByUser: true },
-    createdBy: 'elastic',
-    createdByUsername,
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedBy: 'elastic',
-    updatedByUsername,
-    updatedAt: '2026-01-01T00:00:00.000Z',
-    ...restOverrides,
-  };
-};
+const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
+  id: 'policy-1',
+  name: 'Test policy',
+  description: '',
+  enabled: true,
+  matcher: null,
+  groupBy: null,
+  tags: null,
+  groupingMode: null,
+  throttle: null,
+  snoozedUntil: null,
+  destinations: [],
+  auth: { owner: 'elastic', createdByUser: true },
+  createdBy: 'elastic',
+  createdAt: '2026-01-01T00:00:00.000Z',
+  updatedBy: 'elastic',
+  updatedAt: '2026-01-01T00:00:00.000Z',
+  ...overrides,
+});
 
 const defaultProps = {
   onSnooze: jest.fn(),

@@ -9,7 +9,7 @@ import React, { lazy } from 'react';
 
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
-import { waitFor, screen } from '@testing-library/react';
+import { waitFor, screen, within } from '@testing-library/react';
 import CreateConnectorFlyout from '.';
 import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
@@ -96,6 +96,39 @@ describe('CreateConnectorFlyout', () => {
     );
 
     expect(await screen.findByTestId(`${actionTypeModel.id}-card`)).toBeInTheDocument();
+  });
+
+  it('renders the feature filter with options derived from loaded action types', async () => {
+    appMockRenderer.render(
+      <CreateConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        onConnectorCreated={onConnectorCreated}
+        onTestConnector={onTestConnector}
+      />
+    );
+
+    const comboBox = await screen.findByTestId('createConnectorsModalFeatureFilter');
+    await userEvent.click(within(comboBox).getByRole('combobox'));
+
+    expect(await screen.findByText('Alerting')).toBeInTheDocument();
+    expect(screen.getByText('Security Solution')).toBeInTheDocument();
+  });
+
+  it('pre-selects and disables the feature filter when featureId prop is provided', async () => {
+    appMockRenderer.render(
+      <CreateConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        onConnectorCreated={onConnectorCreated}
+        onTestConnector={onTestConnector}
+        featureId="alerting"
+      />
+    );
+
+    const comboBox = await screen.findByTestId('createConnectorsModalFeatureFilter');
+    expect(within(comboBox).getByTitle('Alerting')).toBeInTheDocument();
+    expect(within(comboBox).getByRole('combobox')).toBeDisabled();
   });
 
   it('shows the correct buttons without an action type selected', async () => {
@@ -841,43 +874,6 @@ describe('CreateConnectorFlyout', () => {
 
       expect(onConnectorCreated).toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
-    });
-  });
-
-  describe('spec connector', () => {
-    const specActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
-      id: 'spec-connector',
-      source: 'spec',
-      actionConnectorFields: lazy(() => import('../connector_mock')),
-    });
-
-    beforeEach(() => {
-      actionTypeRegistry.get.mockReturnValue(specActionTypeModel);
-      actionTypeRegistry.has.mockReturnValue(true);
-
-      loadActionTypes.mockResolvedValue([
-        {
-          id: specActionTypeModel.id,
-          name: 'Test spec connector',
-          enabledInConfig: true,
-          enabledInLicense: true,
-          minimumLicenseRequired: 'basic' as const,
-          supportedFeatureIds: ['alerting', 'siem'],
-        },
-      ]);
-    });
-
-    it('does not show the save and test', async () => {
-      appMockRenderer.render(
-        <CreateConnectorFlyout
-          actionTypeRegistry={actionTypeRegistry}
-          onClose={onClose}
-          onConnectorCreated={onConnectorCreated}
-          onTestConnector={onTestConnector}
-        />
-      );
-
-      expect(screen.queryByTestId('create-connector-flyout-save-test-btn')).not.toBeInTheDocument();
     });
   });
 });

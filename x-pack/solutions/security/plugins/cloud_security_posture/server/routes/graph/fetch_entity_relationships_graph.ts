@@ -9,23 +9,28 @@ import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { ENTITY_RELATIONSHIP_FIELDS } from '@kbn/cloud-security-posture-common/constants';
-import { type EuidSourceFields, GRAPH_ACTOR_EUID_SOURCE_FIELDS } from './constants';
 import {
-  checkIfEntitiesIndexLookupMode,
+  type EuidSourceFields,
+  GRAPH_ACTOR_EUID_SOURCE_FIELDS,
+  TYPED_ENTITY_PREFIXES,
+} from './constants';
+import {
   concatJsonObjectPropertyBool,
-  concatJsonObjectPropertyEsqlExpr,
   concatJsonObjectPropertyString,
   concatJsonObjectPropertyEsqlExprSafe,
   JSON_OBJECT_END,
   JSON_OBJECT_SEPARATOR,
   JSON_OBJECT_START,
   concatJsonObjectPropertyEsqlExprAsString,
+  buildPinnedEsql,
 } from './utils';
-import type { EntityId, EntityRecord, RelationshipEdge } from './types';
+import type { EntityId, EntityRecord, RelationshipEsqlRow } from './types';
 
 interface BuildRelationshipsEsqlQueryParams {
   indexName: string;
   relationshipFields: readonly string[];
+  entityIds: EntityId[];
+  pinnedIds?: string[];
 }
 
 const RESOLUTION_RELATIONSHIP_FIELD = 'resolution.resolved_to' as const;
@@ -48,12 +53,18 @@ const buildRelationshipTargetsEval = (field: string): string => {
  * Builds ES|QL query for fetching entity relationships from the generic entities index.
  * Uses FORK to expand each relationship field and aggregates results.
  * The filter is applied via the DSL filter parameter.
- * Uses LOOKUP JOIN to enrich target entity metadata.
- * Note: This function should only be called when the entities index is in lookup mode.
+ * Target enrichment is applied later in TypeScript via fetchEntityEnrichment.
+ *
+ * After FORK expansion each row is filtered to only include relationships where the actor
+ * or the target is one of the originally requested entity IDs. This prevents entities
+ * fetched because they point TO a requested entity (via the DSL should clauses) from
+ * leaking their unrelated outbound relationships into the result set.
  */
 const buildRelationshipsEsqlQuery = ({
   indexName,
   relationshipFields,
+  entityIds,
+  pinnedIds,
 }: BuildRelationshipsEsqlQueryParams): string => {
   const targetsEval = relationshipFields
     .map((field) => buildRelationshipTargetsEval(field))
@@ -67,6 +78,12 @@ const buildRelationshipsEsqlQuery = ({
     })
     .join('\n');
 
+  // Restrict rows to only those where the actor or target is one of the requested entity IDs.
+  // Without this, entities fetched because they point TO a requested entity would expose all
+  // of their own outbound relationships, not just the ones touching the requested entity.
+  const idParams = entityIds.map((_, idx) => `?entityId${idx}`).join(', ');
+  const relevantEntityFilter = `TO_STRING(entity.id) IN (${idParams}) OR _target_id IN (${idParams})`;
+
   return `SET unmapped_fields="nullify";
 FROM ${indexName}
 | EVAL _source_source_fields = ${buildSourceFieldsJson(GRAPH_ACTOR_EUID_SOURCE_FIELDS)}
@@ -75,30 +92,8 @@ FROM ${indexName}
 | FORK
 ${forkBranches}
 | WHERE _target_id != ""
-// Store source entity fields before lookup (they get overwritten by target entity fields)
-| INLINE STATS _source_host_ip = VALUES(TO_STRING(host.ip)) // Extract host IPs as string type
-| RENAME _source_id = entity.id
-| RENAME _source_name = entity.name
-| RENAME _source_type = entity.type
-| RENAME _source_sub_type = entity.sub_type
-| RENAME _source_engine_metadata_type = entity.EngineMetadata.Type
-// Lookup target entity metadata
-| EVAL entity.id = _target_id
-| LOOKUP JOIN ${indexName} ON entity.id
-| EVAL _target_source_fields = ${buildSourceFieldsJson(GRAPH_ACTOR_EUID_SOURCE_FIELDS)}
-| INLINE STATS _target_host_ip = VALUES(TO_STRING(host.ip)) // Extract host IPs as string type
-| RENAME _target_name = entity.name
-| RENAME _target_type = entity.type
-| RENAME _target_sub_type = entity.sub_type
-| RENAME _target_engine_metadata_type = entity.EngineMetadata.Type
-// Restore source entity fields
-| RENAME entity.id = _source_id
-| RENAME entity.name = _source_name
-| RENAME entity.type = _source_type
-| RENAME entity.sub_type = _source_sub_type
-| RENAME host.ip = _source_host_ip
-| RENAME entity.EngineMetadata.Type = _source_engine_metadata_type
-// Build enriched actors doc data with entity metadata (from the queried entity)
+| WHERE ${relevantEntityFilter}
+// Build actors doc data with entity metadata (from the entity store source entity)
 | EVAL actorDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprSafe('id', 'entity.id')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', 'entity')},
@@ -118,74 +113,55 @@ ${forkBranches}
       CASE(
         host.ip IS NOT NULL,
         CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
-          "\\"ip\\":[\\"", MV_CONCAT(host.ip, "\\",\\""), "\\"]",
+          "\\"ip\\":[\\"", MV_CONCAT(TO_STRING(host.ip), "\\",\\""), "\\"]",
           ${JSON_OBJECT_END}),
         ""
       ),
       ${JSON_OBJECT_SEPARATOR}, _source_source_fields,
     ${JSON_OBJECT_END},
   ${JSON_OBJECT_END})
-// Build enriched targets doc data with entity metadata
+// Target entity data built by TypeScript enrichment
 | EVAL targetDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprSafe('id', '_target_id')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', 'entity')},
-    ${JSON_OBJECT_SEPARATOR}, "\\"entity\\":", ${JSON_OBJECT_START},
-      ${concatJsonObjectPropertyEsqlExpr(
-        'availableInEntityStore',
-        'CASE(_target_name IS NOT NULL OR _target_type IS NOT NULL, "true", "false")'
-      )},
-      CASE(_target_name IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('name', '_target_name')}), ""),
-      CASE(_target_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('type', '_target_type')}), ""),
-      CASE(_target_sub_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('sub_type', '_target_sub_type')}), ""),
-      CASE(
-        _target_host_ip IS NOT NULL,
-        CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
-          "\\"ip\\":[\\"", MV_CONCAT(_target_host_ip, "\\",\\""), "\\"]",
-          ${JSON_OBJECT_END}),
-        ""
-      ),
-      CASE(_target_engine_metadata_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString(
-          'engine_type',
-          '_target_engine_metadata_type'
-        )}), ""),
-      ${JSON_OBJECT_SEPARATOR}, _target_source_fields,
-    ${JSON_OBJECT_END},
   ${JSON_OBJECT_END})
-// Group by actor entity, relationship, and target type/subtype (for target grouping)
-// This ensures targets with the same type are grouped together
+| EVAL actorId = TO_STRING(entity.id),
+  targetId = TO_STRING(_target_id)
+// Per-row actor → target mapping ("<actorId>\\n<targetId>"), collected via VALUES so that after
+// STATS drops targetId (and actorId) from the group key we can still recover which actor pointed
+// at which target. regroupRelationships uses this to split a merged same-type-actor row back into
+// distinct relationship nodes when the actors point at different target sets — mirroring how
+// fetch_events_graph uses targetDocMap to attribute targets to documents.
+| EVAL actorTargetMap = CONCAT(actorId, "\\n", targetId)
+| RENAME \`entity.type\` AS actorEntityType,
+  \`entity.sub_type\` AS actorEntitySubType,
+  \`entity.name\` AS actorEntityName,
+  \`host.ip\` AS actorHostIps
+${buildPinnedEsql(['actorId', 'targetId'], pinnedIds)}
+// Pre-aggregate by the actor TYPE dimensions (NOT raw actorId — entity.id is unique per
+// actor, so keying on it would never merge same-type actors). targetId is NOT a group key
+// either: keying on it would emit one row per target and prevent same-type targets from
+// collapsing into a single grouped target node. Instead every target that a same-(type, rel,
+// pinned) actor group points at is collected via VALUES(targetId), and regroupRelationships
+// performs the final split/merge by target type/sub-type (only known after the follow-up
+// enrichment query) — mirroring how fetch_events_graph collects targetEntityId + targetDocMap.
+// actorIds is collected via VALUES so the merged node's actorNodeId/actorIds[] can be rebuilt.
+// actorEntityName uses MV_FIRST to preserve the prior single-name-per-node output.
 | STATS badge = COUNT(*),
-  // Actor entity grouping
-  actorIds = VALUES(entity.id),
-  actorNodeId = CASE(
-    MV_COUNT(VALUES(entity.id)) == 1, TO_STRING(VALUES(entity.id)),
-    MD5(MV_CONCAT(MV_SORT(VALUES(entity.id)), ","))
-  ),
-  actorIdsCount = COUNT_DISTINCT(entity.id),
-  actorsDocData = VALUES(actorDocData),
-  actorEntityType = VALUES(entity.type),
-  actorEntitySubType = VALUES(entity.sub_type),
-  actorEntityName = VALUES(entity.name),
-  actorHostIps = VALUES(host.ip),
-  // Target entity grouping - targets with same type/subtype are grouped
-  targetIds = VALUES(_target_id),
-  targetNodeId = CASE(
-    MV_COUNT(VALUES(_target_id)) == 1, TO_STRING(VALUES(_target_id)),
-    MD5(MV_CONCAT(MV_SORT(VALUES(_target_id)), ","))
-  ),
-  targetIdsCount = COUNT_DISTINCT(_target_id),
-  targetsDocData = VALUES(targetDocData),
-  targetEntityName = VALUES(_target_name),
-  targetHostIps = VALUES(_target_host_ip)
-    BY entity.id, relationship, targetEntityType = _target_type, targetEntitySubType = _target_sub_type
-// Compute relationshipNodeId for deduplication (similar to labelNodeId for events)
-// Multiple records with different target types share the same relationshipNodeId
-| EVAL relationshipNodeId = CONCAT(TO_STRING(entity.id), "-", relationship)
-// Sort by relationship alphabetically to ensure deterministic ordering
-| SORT relationship ASC`;
+  actorIds = VALUES(actorId),
+  targetIds = VALUES(targetId),
+  actorTargetMap = VALUES(actorTargetMap),
+  actorEntityName = MV_FIRST(VALUES(actorEntityName)),
+  actorHostIps = VALUES(actorHostIps),
+  actorDocData = VALUES(actorDocData),
+  targetDocData = VALUES(targetDocData)
+    BY actorEntityType,
+      actorEntitySubType,
+      relationship,
+      pinned
+| EVAL pinnedSort = CASE(pinned IS NULL, 1, 0)
+| SORT relationship ASC, pinnedSort ASC
+| DROP pinnedSort`;
 };
 
 /**
@@ -239,61 +215,58 @@ const buildRelationshipDslFilter = (entityIds: EntityId[]) => {
 /**
  * Fetches entity relationships from the generic entities index.
  * Queries for all relationship types for entities matching the provided entityIds.
- * Note: Relationships are only available in v2 entity store with lookup mode enabled.
+ * Note: Relationships require the v2 entity store; returns an empty result if the
+ * entities index does not exist.
  */
 export const fetchEntityRelationships = async ({
   esClient,
   logger,
   entityIds,
   spaceId,
+  entityStoreIndexExists,
+  pinnedIds,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
   entityIds: EntityId[];
   spaceId: string;
-}): Promise<EsqlToRecords<RelationshipEdge>> => {
-  const indexName = getEntitiesLatestIndexName(spaceId);
-
-  // Relationships require v2 entity store with lookup mode for LOOKUP JOIN enrichment
-  const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
-  if (!isLookupIndexAvailable) {
-    logger.debug(
-      `Entities index [${indexName}] is not in lookup mode, skipping relationship fetch`
-    );
+  entityStoreIndexExists: boolean;
+  pinnedIds?: string[];
+}): Promise<EsqlToRecords<RelationshipEsqlRow>> => {
+  if (!entityStoreIndexExists) {
     return { columns: [], records: [] };
   }
 
+  const indexName = getEntitiesLatestIndexName(spaceId);
   logger.trace(`Fetching relationships from index [${indexName}] for ${entityIds.length} entities`);
 
   const query = buildRelationshipsEsqlQuery({
     indexName,
     relationshipFields: ENTITY_RELATIONSHIP_FIELDS,
+    entityIds,
+    pinnedIds,
   });
   const filter = buildRelationshipDslFilter(entityIds);
+  const params = [
+    ...entityIds.map((entity, idx) => ({ [`entityId${idx}`]: entity.id })),
+    ...(pinnedIds ?? []).map((id, idx) => ({ [`pinned_id${idx}`]: id })),
+  ];
 
   logger.trace(`Relationships ES|QL query: ${query}`);
   logger.trace(`Relationships filter: ${JSON.stringify(filter)}`);
 
-  try {
-    const response = await esClient.asCurrentUser.helpers
-      .esql({
-        columnar: false,
-        filter,
-        query,
-      })
-      .toRecords<RelationshipEdge>();
+  const response = await esClient.asCurrentUser.helpers
+    .esql({
+      columnar: false,
+      filter,
+      query,
+      params,
+    })
+    .toRecords<RelationshipEsqlRow>();
 
-    logger.trace(`Fetched [${response.records.length}] relationship records`);
+  logger.trace(`Fetched [${response.records.length}] relationship records`);
 
-    return response;
-  } catch (error) {
-    // If the index doesn't exist, return empty result
-    if (error.statusCode === 404) {
-      logger.debug(`Entities index ${indexName} does not exist, skipping relationship fetch`);
-      return { columns: [], records: [] };
-    }
-    throw error;
-  }
+  return response;
 };
 
 export const fetchEntities = async ({
@@ -301,13 +274,15 @@ export const fetchEntities = async ({
   logger,
   entityIds,
   spaceId,
+  entityStoreIndexExists,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
   entityIds: EntityId[];
   spaceId: string;
+  entityStoreIndexExists: boolean;
 }): Promise<EsqlToRecords<EntityRecord>> => {
-  if (entityIds.length === 0) {
+  if (entityIds.length === 0 || !entityStoreIndexExists) {
     return { columns: [], records: [] };
   }
 
@@ -351,29 +326,17 @@ export const fetchEntities = async ({
     | KEEP id, name, type, sub_type, docData`;
   logger.trace(`Entities ES|QL query: ${esqlQuery}`);
 
-  try {
-    const response = await esClient.asCurrentUser.helpers
-      .esql({
-        columnar: false,
-        query: esqlQuery,
-        // @ts-ignore - types are not up to date
-        params: [...entityIds.map((entity, idx) => ({ [`entityId${idx}`]: entity.id }))],
-      })
-      .toRecords<EntityRecord>();
+  const response = await esClient.asCurrentUser.helpers
+    .esql({
+      columnar: false,
+      query: esqlQuery,
+      params: entityIds.map((entity, idx) => ({ [`entityId${idx}`]: entity.id })),
+    })
+    .toRecords<EntityRecord>();
 
-    logger.trace(`Fetched [${response.records.length}] entity records`);
-    return response;
-  } catch (error) {
-    // If the index doesn't exist, return empty result
-    if (error.statusCode === 404) {
-      logger.debug(`Entities index ${indexName} does not exist, skipping entities fetch`);
-      return { columns: [], records: [] };
-    }
-    throw error;
-  }
+  logger.trace(`Fetched [${response.records.length}] entity records`);
+  return response;
 };
-
-const TYPED_ENTITY_PREFIXES = ['user', 'host', 'service'];
 
 const buildSourceFieldsJson = (fields: EuidSourceFields): string => {
   const properties = Object.keys(fields)

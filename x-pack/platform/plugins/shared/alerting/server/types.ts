@@ -43,6 +43,7 @@ import type { TaskPriority } from '@kbn/task-manager-plugin/server';
 import type { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import type { AlertingServerSetup, AlertingServerStart } from './plugin';
 import type { RulesClient } from './rules_client';
+import type { RuleQueryInspectorFn } from './rule_query_inspector/types';
 import type {
   RulesSettingsClient,
   RulesSettingsFlappingClient,
@@ -397,6 +398,12 @@ export interface RuleType<
    * Alerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table.
    */
   internallyManaged?: boolean;
+  /**
+   * Optional function that returns the Elasticsearch query this rule type executes.
+   * When provided, the query inspector API exposes the query (and optionally its response)
+   * for debugging and investigation purposes.
+   */
+  queryInspector?: RuleQueryInspectorFn;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

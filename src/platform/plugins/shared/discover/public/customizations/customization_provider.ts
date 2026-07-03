@@ -35,6 +35,7 @@ import { createTabAppStateObservable } from '../application/main/state_managemen
 import { createTabPersistableStateObservable } from '../application/main/state_management/utils/create_tab_persistable_state_observable';
 import type { DiscoverServices } from '../build_services';
 import {
+  fromSavedObjectTabToAppState,
   fromSavedSearchToSavedObjectTab,
   internalStateActions,
   selectTabRuntimeState,
@@ -102,13 +103,14 @@ export const getExtendedDiscoverStateContainer = ({
       getState: internalState.getState,
     }),
   getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => {
+    const persistedTab = fromSavedSearchToSavedObjectTab({
+      tab: getCurrentTab(),
+      savedSearch: newSavedSearch,
+      services,
+    });
     return getInitialAppState({
-      initialUrlState: undefined,
-      persistedTab: fromSavedSearchToSavedObjectTab({
-        tab: getCurrentTab(),
-        savedSearch: newSavedSearch,
-        services,
-      }),
+      initialUrlState: fromSavedObjectTabToAppState({ tab: persistedTab }),
+      persistedTab,
       dataView: newSavedSearch.searchSource.getField('index'),
       services,
     });

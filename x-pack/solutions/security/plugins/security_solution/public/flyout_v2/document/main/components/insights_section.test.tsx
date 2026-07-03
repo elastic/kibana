@@ -73,7 +73,9 @@ jest.mock('./prevalence_overview', () => ({
 jest.mock('./threat_intelligence_overview', () => ({
   ThreatIntelligenceOverview: () => <div data-test-subj="threatIntelligenceOverviewMock" />,
 }));
-
+jest.mock('./entities_overview', () => ({
+  EntitiesOverview: () => <div data-test-subj="entitiesOverviewMock" />,
+}));
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
     id: '1',

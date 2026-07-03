@@ -45,7 +45,6 @@ interface TestDataLatest {
 type TestData = TestDataPivot | TestDataLatest;
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
   describe('starting', function () {
@@ -109,7 +108,6 @@ export default function ({ getService }: FtrProviderContext) {
     ];
 
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
       await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
 
       for (const testData of testDataList) {

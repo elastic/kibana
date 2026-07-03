@@ -163,7 +163,6 @@ export const CreateIntegrationSideCardButton = React.memo(() => {
                   defaultMessage="Use AI to create a new one or {uploadLink}"
                   values={{
                     uploadLink: (
-                      // eslint-disable-next-line @elastic/eui/href-or-on-click
                       <EuiLink
                         href={uploadHref}
                         onClick={navigateToUpload}

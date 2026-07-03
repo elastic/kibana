@@ -8,12 +8,13 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import type { EsWorkflowExecution, WorkflowSettings } from '@kbn/workflows';
+import type { EsWorkflowExecution } from '@kbn/workflows';
 import { WorkflowRepository } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
+import { defaultWorkflowSettings } from '../default_workflow_settings';
 import {
   extractEventChainDepthFromExecution,
   extractEventChainVisitedWorkflowIdsFromExecution,
@@ -33,10 +34,6 @@ import { WorkflowExecutionState } from '../workflow_context_manager/workflow_exe
 
 import { WorkflowEventLoggerService } from '../workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
-
-const defaultWorkflowSettings: WorkflowSettings = {
-  timeout: '6h',
-};
 
 export async function setupDependencies(
   workflowRunId: string,

@@ -8,7 +8,6 @@
 import Boom from '@hapi/boom';
 import type {
   ActionPolicyResponse,
-  ActionPolicyType,
   CreateActionPolicyData,
   ThrottleStrategy,
   UpdateActionPolicyData,
@@ -16,22 +15,21 @@ import type {
 import { needsInterval } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
+import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 
 const isoDateTimeString = z.string().datetime();
 
 export function validateDateString(dateString: string): void {
   const result = isoDateTimeString.safeParse(dateString);
   if (!result.success) {
-    throw Boom.badRequest(`Invalid date string - "${dateString}" is not a valid ISO datetime`);
+    throw Boom.badRequest(`Invalid date string - "${dateString}" is not a valid ISO datetime`, {
+      code: ALERTING_V2_ERROR_CODES.INVALID_DATE_STRING,
+      details: { value: dateString },
+    });
   }
 }
 
 const normalizeNullableField = <T>(value: T | null | undefined): T | null => value ?? null;
-
-const resolveRuleIdForType = (
-  type: ActionPolicyType,
-  ruleId: string | null | undefined
-): string | null => (type === 'single_rule' ? ruleId ?? null : null);
 
 const resolveNextNullableField = <T>(
   value: T | null | undefined,
@@ -69,26 +67,20 @@ export const buildCreateActionPolicyAttributes = ({
   data,
   auth,
   createdBy,
-  createdByUsername,
   createdAt,
   updatedBy,
-  updatedByUsername,
   updatedAt,
 }: {
   data: CreateActionPolicyData;
   auth: ActionPolicySavedObjectAttributes['auth'];
   createdBy: string | null;
-  createdByUsername: string | null;
   createdAt: string;
   updatedBy: string | null;
-  updatedByUsername: string | null;
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
     name: data.name,
     description: data.description,
-    type: data.type,
-    ruleId: resolveRuleIdForType(data.type, data.ruleId),
     enabled: true,
     destinations: data.destinations,
     matcher: data.matcher ?? null,
@@ -99,10 +91,8 @@ export const buildCreateActionPolicyAttributes = ({
     snoozedUntil: null,
     auth,
     createdBy,
-    createdByUsername,
     createdAt,
     updatedBy,
-    updatedByUsername,
     updatedAt,
   };
 };
@@ -112,21 +102,17 @@ export const buildUpdateActionPolicyAttributes = ({
   update,
   auth,
   updatedBy,
-  updatedByUsername,
   updatedAt,
 }: {
   existing: ActionPolicySavedObjectAttributes;
   update: UpdateActionPolicyData;
   auth: ActionPolicySavedObjectAttributes['auth'];
   updatedBy: string | null;
-  updatedByUsername: string | null;
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
     name: update.name ?? existing.name,
     description: update.description ?? existing.description,
-    type: existing.type,
-    ruleId: resolveRuleIdForType(existing.type, existing.ruleId),
     enabled: existing.enabled,
     destinations: update.destinations ?? existing.destinations,
     matcher: resolveNextNullableField(update.matcher, existing.matcher),
@@ -137,9 +123,7 @@ export const buildUpdateActionPolicyAttributes = ({
     snoozedUntil: normalizeNullableField(existing.snoozedUntil),
     auth,
     createdBy: existing.createdBy,
-    createdByUsername: existing.createdByUsername,
     updatedBy,
-    updatedByUsername,
     createdAt: existing.createdAt,
     updatedAt,
   };
@@ -159,8 +143,6 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     version,
     name: attributes.name,
     description: attributes.description,
-    type: attributes.type,
-    ruleId: resolveRuleIdForType(attributes.type, attributes.ruleId),
     enabled: attributes.enabled,
     destinations: attributes.destinations,
     matcher: normalizeNullableField(attributes.matcher),
@@ -171,10 +153,8 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     snoozedUntil: normalizeNullableField(attributes.snoozedUntil),
     auth: toAuthResponse(attributes.auth),
     createdBy: attributes.createdBy,
-    createdByUsername: attributes.createdByUsername,
     createdAt: attributes.createdAt,
     updatedBy: attributes.updatedBy,
-    updatedByUsername: attributes.updatedByUsername,
     updatedAt: attributes.updatedAt,
   };
 };

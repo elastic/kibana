@@ -5,10 +5,17 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { Logger } from '@kbn/core/server';
 import type { MemoryService } from '../../../lib/memory';
+import type { GetScopedClients } from '../../../routes/types';
+import type { StreamsServer } from '../../../types';
 
 export interface MemoryToolsOptions {
-  getMemoryService: () => MemoryService;
+  getMemoryService: (esClient: ElasticsearchClient) => MemoryService;
   getSecurity: () => SecurityServiceStart;
+  getScopedClients: GetScopedClients;
+  server: StreamsServer;
+  logger: Logger;
 }

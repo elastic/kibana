@@ -131,7 +131,12 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
               { defaultMessage: 'Manage collection options' }
             )}
             button={
-              <EuiButton iconType="chevronSingleDown" iconSide="right" onClick={togglePopover}>
+              <EuiButton
+                data-test-subj="enterpriseSearchAnalyticsCollectionToolbarManageButton"
+                iconType="chevronSingleDown"
+                iconSide="right"
+                onClick={togglePopover}
+              >
                 <FormattedMessage
                   id="xpack.enterpriseSearch.analytics.collectionsView.manageButton"
                   defaultMessage="Manage"
@@ -146,7 +151,6 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
             <EuiContextMenuPanel>
               <EuiContextMenuItem
                 icon="link"
-                size="s"
                 data-telemetry-id={'entSearch-analytics-overview-toolbar-integrate-tracker-link'}
                 onClick={() =>
                   navigateToUrl(
@@ -164,7 +168,6 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
 
               <EuiContextMenuItem
                 icon="database"
-                size="s"
                 href={manageDatastreamUrl}
                 data-telemetry-id={'entSearch-analytics-overview-toolbar-manage-datastream-link'}
               >
@@ -178,7 +181,6 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
                 <EuiContextMenuItem
                   icon="chartArea"
                   href={discoverLink}
-                  size="s"
                   data-telemetry-id={'entSearch-analytics-overview-toolbar-manage-discover-link'}
                 >
                   <FormattedMessage
@@ -190,6 +192,7 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
 
               <EuiPopoverFooter paddingSize="m">
                 <EuiButton
+                  data-test-subj="enterpriseSearchAnalyticsCollectionToolbarDeleteCollectionButton"
                   type="submit"
                   color="danger"
                   fullWidth

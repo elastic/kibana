@@ -87,6 +87,9 @@ export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
   return (
     <EuiPopover
       id={popoverId}
+      aria-label={i18n.translate('xpack.slo.sloManagementBulkActions.popoverAriaLabel', {
+        defaultMessage: 'Bulk actions for selected SLOs',
+      })}
       panelPaddingSize="none"
       button={
         <EuiButtonEmpty
@@ -111,7 +114,6 @@ export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
     >
       <EuiContextMenu
         initialPanelId={0}
-        size="s"
         panels={panels}
         data-test-subj="detailsCollapsedActionPanel"
       />

@@ -48,6 +48,7 @@ export {
   ContentListWrapper,
   buildContentListSearch,
   buildContentListUrlRegex,
+  ListingTable,
 } from './src/playwright/page_objects';
 export type { ContentListUrlState } from './src/playwright/page_objects';
 
@@ -72,6 +73,7 @@ export type {
   BrowserAuthFixture,
   RequestAuthFixture,
   SamlAuth,
+  ScoutSpaceParallelFixture,
   SpaceSolutionView,
 } from './src/playwright';
 

@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { CASE_SAVED_OBJECT, CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import type { Template } from '../../../common/types/domain/template/v1';
+import { FieldType } from '../../../common/types/domain/template/fields';
 
 export interface ExtendedFieldFilter {
   label: string;
@@ -53,9 +54,26 @@ const ES_TYPE_TO_RUNTIME_TYPE: Record<string, RuntimeType> = {
 const mapToRuntimeType = (esType: string): RuntimeType =>
   ES_TYPE_TO_RUNTIME_TYPE[esType] ?? 'keyword';
 
-const CHECKBOX_GROUP = 'CHECKBOX_GROUP';
-const USER_PICKER = 'USER_PICKER';
-const DATE_PICKER = 'DATE_PICKER';
+const { CHECKBOX_GROUP, USER_PICKER, DATE_PICKER, INPUT_NUMBER, INPUT_TEXT, TEXTAREA } = FieldType;
+
+const FLATTENED_FIELD_PATH = `${CASE_SAVED_OBJECT}.${CASE_EXTENDED_FIELDS}`;
+
+/**
+ * Controls that require a painless runtime script because their stored values
+ * can't be queried directly on the flattened mapping:
+ * - CHECKBOX_GROUP: stores JSON arrays like '["A","B"]' as a single token
+ * - USER_PICKER: stores JSON objects, needs regex to extract names
+ * - INPUT_NUMBER: flattened fields can't do numeric range/comparison
+ * - INPUT_TEXT / TEXTAREA: need substring matching; flattened fields don't support wildcard queries
+ */
+const needsRuntimeScript = (control: string, esType: string): boolean =>
+  control === CHECKBOX_GROUP ||
+  control === USER_PICKER ||
+  control === INPUT_NUMBER ||
+  control === INPUT_TEXT ||
+  control === TEXTAREA ||
+  mapToRuntimeType(esType) === 'long' ||
+  mapToRuntimeType(esType) === 'double';
 
 // Flattened fields require params._source access; doc[] is always empty for subfields.
 const buildPainlessScript = (
@@ -72,7 +90,7 @@ const buildPainlessScript = (
     `def so = params._source.get(${soType});` +
     `if (so == null) { return; }` +
     `def ef = so.get(${efKey});` +
-    `if (ef == null) { return; }` +
+    `if (ef == null || !(ef instanceof Map)) { return; }` +
     `def rawVal = ef.get(${fieldKey});` +
     `if (rawVal == null) { return; }` +
     `def raw = rawVal.toString();`;
@@ -137,25 +155,15 @@ export const resolveExtendedFieldFilters = (
   });
 };
 
-/** Parses a date string (MM/DD/YYYY, YYYY-MM-DD, or ISO 8601) into a full-day UTC range [gte, lt). */
+/** Parses an ISO 8601 date string (YYYY-MM-DD or full ISO timestamp) into a full-day UTC range [gte, lt). */
 export const parseDateFilterToRange = (value: string): { gte: string; lt: string } | undefined => {
-  let year: number;
-  let month: number;
-  let day: number;
+  const isoPart = value.slice(0, 10);
+  const isoMatch = isoPart.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!isoMatch) return undefined;
 
-  const mdyMatch = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-  if (mdyMatch) {
-    month = parseInt(mdyMatch[1], 10);
-    day = parseInt(mdyMatch[2], 10);
-    year = parseInt(mdyMatch[3], 10);
-  } else {
-    const isoPart = value.slice(0, 10);
-    const isoMatch = isoPart.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (!isoMatch) return undefined;
-    year = parseInt(isoMatch[1], 10);
-    month = parseInt(isoMatch[2], 10);
-    day = parseInt(isoMatch[3], 10);
-  }
+  const year = parseInt(isoMatch[1], 10);
+  const month = parseInt(isoMatch[2], 10);
+  const day = parseInt(isoMatch[3], 10);
 
   if (month < 1 || month > 12 || day < 1 || day > 31 || year < 1000 || year > 9999) {
     return undefined;
@@ -178,51 +186,30 @@ export const parseDateFilterToRange = (value: string): { gte: string; lt: string
   return { gte: start.toISOString(), lt: end.toISOString() };
 };
 
-/** Builds ES runtime field mappings for each resolved extended field filter group. */
+/** Builds ES runtime field mappings only for filters that can't use the flattened mapping directly. */
 export const buildExtendedFieldRuntimeMappings = (
   resolvedFilterGroups: ResolvedExtendedFieldFilter[][]
 ): Record<string, estypes.MappingRuntimeField> => {
   const runtimeMappings: Record<string, estypes.MappingRuntimeField> = {};
 
   for (const { storageKey, esType, control } of resolvedFilterGroups.flat()) {
-    // DATE_PICKER: use keyword type (not date) to preserve ISO string format and avoid epoch-ms conversion.
-    // For all other controls, map esType to runtime type (with keyword as fallback for unknown types).
-    const runtimeType = control === DATE_PICKER ? 'keyword' : mapToRuntimeType(esType);
-    runtimeMappings[`ef_${storageKey}`] = {
-      type: runtimeType,
-      script: {
-        source: buildPainlessScript(storageKey, runtimeType, control),
-      },
-    };
+    if (needsRuntimeScript(control, esType)) {
+      const runtimeType = control === DATE_PICKER ? 'keyword' : mapToRuntimeType(esType);
+      runtimeMappings[`ef_${storageKey}`] = {
+        type: runtimeType,
+        script: {
+          source: buildPainlessScript(storageKey, runtimeType, control),
+        },
+      };
+    }
   }
 
   return runtimeMappings;
 };
 
-const buildSingleFilterClause = ({
-  storageKey,
-  value,
-  esType,
-  control,
-  templateVersions,
-}: ResolvedExtendedFieldFilter): estypes.QueryDslQueryContainer | null => {
-  const fieldName = `ef_${storageKey}`;
-
-  let valueClause: estypes.QueryDslQueryContainer;
-  if (control === DATE_PICKER) {
-    const range = parseDateFilterToRange(value);
-    if (range == null) return null;
-    valueClause = { range: { [fieldName]: range } };
-  } else {
-    const runtimeType = mapToRuntimeType(esType);
-    const typedValue = runtimeType === 'long' || runtimeType === 'double' ? Number(value) : value;
-    // Skip filter if numeric conversion produced NaN (invalid input for numeric field)
-    if (typeof typedValue === 'number' && isNaN(typedValue)) return null;
-    valueClause = { term: { [fieldName]: { value: typedValue } } };
-  }
-
-  // Build filter for template (id, version) pairs
-  // Each pair must match BOTH id AND version
+const buildTemplateVersionFilter = (
+  templateVersions: Array<{ id: string; version: number }>
+): estypes.QueryDslQueryContainer => {
   const templateVersionFilters = templateVersions.map(({ id, version }) => ({
     bool: {
       must: [
@@ -232,14 +219,73 @@ const buildSingleFilterClause = ({
     },
   }));
 
-  const templateFilter: estypes.QueryDslQueryContainer = {
+  return {
     bool: {
       should: templateVersionFilters,
       minimum_should_match: 1,
     },
   };
+};
 
-  return { bool: { filter: [valueClause, templateFilter] } };
+const isFreeTextControl = (control: string): boolean =>
+  control === INPUT_TEXT || control === TEXTAREA;
+
+const escapeWildcard = (s: string): string => s.replace(/[\\*?]/g, (c) => `\\${c}`);
+
+const buildFlattenedFilterClause = ({
+  storageKey,
+  value,
+  control,
+}: ResolvedExtendedFieldFilter): estypes.QueryDslQueryContainer | null => {
+  const flattenedField = `${FLATTENED_FIELD_PATH}.${storageKey}`;
+
+  if (control === DATE_PICKER) {
+    const range = parseDateFilterToRange(value);
+    if (range == null) return null;
+    return { range: { [flattenedField]: range } };
+  }
+
+  return { term: { [flattenedField]: value } };
+};
+
+const buildRuntimeFilterClause = ({
+  storageKey,
+  value,
+  esType,
+  control,
+}: ResolvedExtendedFieldFilter): estypes.QueryDslQueryContainer | null => {
+  const fieldName = `ef_${storageKey}`;
+
+  if (control === DATE_PICKER) {
+    const range = parseDateFilterToRange(value);
+    if (range == null) return null;
+    return { range: { [fieldName]: range } };
+  }
+
+  if (isFreeTextControl(control)) {
+    return {
+      wildcard: { [fieldName]: { value: `*${escapeWildcard(value)}*`, case_insensitive: true } },
+    };
+  }
+
+  const runtimeType = mapToRuntimeType(esType);
+  const typedValue = runtimeType === 'long' || runtimeType === 'double' ? Number(value) : value;
+  if (typeof typedValue === 'number' && isNaN(typedValue)) return null;
+  return { term: { [fieldName]: { value: typedValue } } };
+};
+
+const buildSingleFilterClause = (
+  filter: ResolvedExtendedFieldFilter
+): estypes.QueryDslQueryContainer | null => {
+  const { esType, control, templateVersions } = filter;
+
+  const valueClause = needsRuntimeScript(control, esType)
+    ? buildRuntimeFilterClause(filter)
+    : buildFlattenedFilterClause(filter);
+
+  if (valueClause == null) return null;
+
+  return { bool: { filter: [valueClause, buildTemplateVersionFilter(templateVersions)] } };
 };
 
 export const buildExtendedFieldFilterClauses = (
@@ -385,55 +431,93 @@ export const resolveFieldLabelSearch = (
   return results;
 };
 
-/** Builds runtime field mappings for field-label existence queries. */
+/** Builds runtime field mappings only for field-label existence queries that need scripts. */
 export const buildFieldLabelRuntimeMappings = (
   resolvedLabels: ResolvedFieldLabelFilter[]
 ): Record<string, estypes.MappingRuntimeField> => {
   const runtimeMappings: Record<string, estypes.MappingRuntimeField> = {};
 
   for (const { storageKey, esType, control } of resolvedLabels) {
-    const runtimeType = control === DATE_PICKER ? 'keyword' : mapToRuntimeType(esType);
-    runtimeMappings[`ef_${storageKey}`] = {
-      type: runtimeType,
-      script: {
-        source: buildPainlessScript(storageKey, runtimeType, control),
-      },
-    };
+    if (needsRuntimeScript(control, esType)) {
+      const runtimeType = control === DATE_PICKER ? 'keyword' : mapToRuntimeType(esType);
+      runtimeMappings[`ef_${storageKey}`] = {
+        type: runtimeType,
+        script: {
+          source: buildPainlessScript(storageKey, runtimeType, control),
+        },
+      };
+    }
   }
 
   return runtimeMappings;
 };
 
+export const EF_ALL_VALUES_FIELD = `${CASE_SAVED_OBJECT}.ef_all_values`;
+
+/**
+ * Builds a runtime field mapping that tokenizes ALL extended field values
+ * on whitespace, enabling word-level partial matching across every extended field.
+ */
+export const buildAllExtendedFieldValuesRuntimeMapping = (): Record<
+  string,
+  estypes.MappingRuntimeField
+> => ({
+  [EF_ALL_VALUES_FIELD]: {
+    type: 'keyword',
+    script: {
+      source: buildAllValuesTokenizingScript(),
+    },
+  },
+});
+
+const buildAllValuesTokenizingScript = (): string => {
+  const soType = `'${CASE_SAVED_OBJECT}'`;
+  const efKey = `'${CASE_EXTENDED_FIELDS}'`;
+
+  return (
+    `if (params._source == null) { return; }` +
+    `def so = params._source.get(${soType});` +
+    `if (so == null) { return; }` +
+    `def ef = so.get(${efKey});` +
+    `if (ef == null || !(ef instanceof Map)) { return; }` +
+    `for (def entry : ef.entrySet()) {` +
+    `if (entry.getValue() != null) {` +
+    `def raw = entry.getValue().toString();` +
+    `def nm = /"name":"([^"]*)"/.matcher(raw);` +
+    `boolean found = false;` +
+    `while (nm.find()) { found = true; def t = nm.group(1).trim().toLowerCase(Locale.ROOT); if (!t.isEmpty()) { emit(t); } }` +
+    `if (!found) {` +
+    `def cleaned = /[\\[\\]"{}]/.matcher(raw).replaceAll('').trim();` +
+    `for (def word : /[\\s,=]+/.split(cleaned)) {` +
+    `def t = word.trim().toLowerCase(Locale.ROOT);` +
+    `if (!t.isEmpty()) { emit(t); }` +
+    `}` +
+    `}` +
+    `}` +
+    `}`
+  );
+};
+
 /**
  * Builds ES query clauses that check for the existence of extended fields
  * (field has any value), scoped to the correct template versions.
+ * Uses the flattened mapping directly when possible, falling back to
+ * runtime fields for controls that need scripts.
  * All clauses are OR'd — any matching label is sufficient.
  */
 export const buildFieldLabelExistsClauses = (
   resolvedLabels: ResolvedFieldLabelFilter[]
 ): estypes.QueryDslQueryContainer[] =>
   resolvedLabels.flatMap((resolved): estypes.QueryDslQueryContainer[] => {
-    const fieldName = `ef_${resolved.storageKey}`;
+    const fieldName = needsRuntimeScript(resolved.control, resolved.esType)
+      ? `ef_${resolved.storageKey}`
+      : `${FLATTENED_FIELD_PATH}.${resolved.storageKey}`;
 
     const existsClause: estypes.QueryDslQueryContainer = {
       exists: { field: fieldName },
     };
 
-    const templateVersionFilters = resolved.templateVersions.map(({ id, version }) => ({
-      bool: {
-        must: [
-          { term: { 'cases.template.id': id } },
-          { term: { 'cases.template.version': version } },
-        ],
-      },
-    }));
-
-    const templateFilter: estypes.QueryDslQueryContainer = {
-      bool: {
-        should: templateVersionFilters,
-        minimum_should_match: 1,
-      },
-    };
-
-    return [{ bool: { filter: [existsClause, templateFilter] } }];
+    return [
+      { bool: { filter: [existsClause, buildTemplateVersionFilter(resolved.templateVersions)] } },
+    ];
   });

@@ -127,7 +127,7 @@ item={{
 | Prop | Type | Description |
 |------|------|-------------|
 | `isReadOnly` | `boolean` | When `true`, disables selection and editing actions. |
-| `features` | `ContentListFeatures` | Opt-in feature configuration. Supports `urlSync` (enabled by default; pass `false` to opt out), `sorting` (field list + initial sort), `pagination` (initial page size), `tags` (tag facet provider), `starred` (favorites service required), and `userProfiles` (user profile facet provider). |
+| `features` | `ContentListFeatures` | Opt-in feature configuration. Supports `urlSync` (enabled by default; pass `false` to opt out), `sorting` (field list + initial sort), `pagination` (initial page size), `tags` (tag facet provider), `starred` (favorites service required), `userProfiles` (user profile facet provider), and `contentEditor` (`{ open }` callback that powers `<Action.ContentEditor />` — the row icon self-skips when omitted). |
 | `services` | `ContentListServices` | External service integrations. Supports `favorites` (for starred toggling), `tags` (for tag filter popovers), and `userProfiles` (for `createdBy` avatars and filter popovers). |
 
 ### URL Persistence
@@ -190,7 +190,7 @@ Manages runtime data using a reducer pattern with React Query for data fetching.
 
 | Hook | Returns | Purpose |
 |------|---------|---------|
-| `useContentListConfig()` | Full config + `supports` flags | Access configuration and check feature support. |
+| `useContentListConfig()` | Full config + `supports` flags | Access configuration and check feature support. `supports` includes `sorting`, `pagination`, `search`, `selection`, `tags`, `starred`, and `userProfiles`. Use these to gate UI rendering. The Content Editor flyout is wired separately on `features.contentEditor.open`, which `<Action.ContentEditor />` reads directly — when no `open` is supplied the action self-skips. |
 
 #### State
 

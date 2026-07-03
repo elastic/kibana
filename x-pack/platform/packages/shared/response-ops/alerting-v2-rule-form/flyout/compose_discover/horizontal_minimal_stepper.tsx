@@ -8,6 +8,7 @@
 import React from 'react';
 import { ClassNames } from '@emotion/react';
 import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useHorizontalMinimalStepperStyles } from './horizontal_minimal_stepper.styles';
 
 /** Mirrors the status subset used by EuiStepsHorizontal. */
@@ -59,7 +60,10 @@ export const HorizontalMinimalStepper: React.FC<HorizontalMinimalStepperProps> =
       gutterSize="s"
       responsive={false}
       role="group"
-      aria-label={`Step ${displayIndex + 1} of ${total}: ${currentTitle}`}
+      aria-label={i18n.translate('xpack.alertingV2.composeDiscover.stepper.stepProgressAriaLabel', {
+        defaultMessage: 'Step {current} of {total}: {title}',
+        values: { current: displayIndex + 1, total, title: currentTitle },
+      })}
     >
       {/* Step indicators — decorative, described by the group aria-label.
           ClassNames converts SerializedStyles → real CSS class names so we can
@@ -88,7 +92,17 @@ export const HorizontalMinimalStepper: React.FC<HorizontalMinimalStepperProps> =
 
       {/* N / N counter */}
       <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued" aria-label={`Step ${displayIndex + 1} of ${total}`}>
+        <EuiText
+          size="xs"
+          color="subdued"
+          aria-label={i18n.translate(
+            'xpack.alertingV2.composeDiscover.stepper.stepCounterAriaLabel',
+            {
+              defaultMessage: 'Step {current} of {total}',
+              values: { current: displayIndex + 1, total },
+            }
+          )}
+        >
           {displayIndex + 1} / {total}
         </EuiText>
       </EuiFlexItem>

@@ -95,10 +95,8 @@ export const CategoryTable: FC<Props> = ({
       width: '40px',
       isExpander: true,
       render: (item: Category) => (
-        <EuiButtonIcon
-          data-test-subj="aiopsLogPatternsColumnsButton"
-          onClick={() => toggleDetails(item)}
-          aria-label={
+        <EuiToolTip
+          content={
             itemIdToExpandedRowMap[item.key]
               ? i18n.translate('xpack.aiops.logCategorization.column.collapseRow', {
                   defaultMessage: 'Collapse',
@@ -107,8 +105,23 @@ export const CategoryTable: FC<Props> = ({
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={itemIdToExpandedRowMap[item.key] ? 'chevronSingleDown' : 'chevronSingleRight'}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="aiopsLogPatternsColumnsButton"
+            onClick={() => toggleDetails(item)}
+            aria-label={
+              itemIdToExpandedRowMap[item.key]
+                ? i18n.translate('xpack.aiops.logCategorization.column.collapseRow', {
+                    defaultMessage: 'Collapse',
+                  })
+                : i18n.translate('xpack.aiops.logCategorization.column.expandRow', {
+                    defaultMessage: 'Expand',
+                  })
+            }
+            iconType={itemIdToExpandedRowMap[item.key] ? 'chevronSingleDown' : 'chevronSingleRight'}
+          />
+        </EuiToolTip>
       ),
       'data-test-subj': 'aiopsLogPatternsExpandRowToggle',
     },

@@ -240,7 +240,6 @@ export const SourceFieldSection = ({ indexMode }: { indexMode?: IndexMode }) => 
             componentProps={{
               euiFieldProps: {
                 fullWidth: false,
-                hasDividers: true,
                 'data-test-subj': 'sourceValueField',
                 options: sourceValueOptions,
               },

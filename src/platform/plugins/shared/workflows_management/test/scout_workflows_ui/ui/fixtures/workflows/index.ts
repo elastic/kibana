@@ -12,6 +12,7 @@ export { getCreateGetUpdateCaseWorkflowYaml } from './create_get_update_case';
 export {
   getListTestWorkflowYaml,
   getTestRunWorkflowYaml,
+  getTestRunEventTabWorkflowYaml,
   getWorkflowWithLoopYaml,
   getIterationLoopWorkflowYaml,
   getManyIterationsWorkflowYaml,
@@ -24,6 +25,8 @@ export {
   getWorkflowWithCommentedVariablesYaml,
   getScrollTestWorkflowYaml,
   getLongRunningCancellationWorkflowYaml,
+  getMultiStepGraphWorkflowYaml,
+  getBrokenGraphWorkflowYaml,
 } from './console_workflows';
 export {
   TEST_ALERTS_INDEX,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import pMap from 'p-map';
 
 import type {
@@ -13,9 +13,9 @@ import type {
   SavedObjectsClientContract,
   SavedObject,
 } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, isSavedObjectErrorResult } from '@kbn/core/server';
 
-import { normalizeHostsForAgents } from '../../common/services';
+import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
 import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
@@ -85,6 +85,8 @@ class FleetServerHostService {
     const logger = appContextService.getLogger();
     const data: FleetServerHostSOAttributes = { ...omit(fleetServerHost, ['ssl', 'secrets']) };
 
+    validateFleetSavedObjectId(options?.id);
+
     if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
       throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
         `Fleet server host needs encrypted saved object api key to be set`
@@ -143,6 +145,95 @@ class FleetServerHostService {
         res.id
       );
     return savedObjectToFleetServerHost(retrievedSo);
+  }
+
+  // Returns void rather than FleetServerHost[]: preconfiguration callers don't use the return value,
+  // so we skip the post-create decrypt re-fetch that create() requires.
+  public async bulkCreateForPreconfiguration(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    hosts: Array<NewFleetServerHost & { id: string; secretHashes?: Record<string, any> }>,
+    options?: { fromPreconfiguration?: boolean }
+  ): Promise<void> {
+    if (hosts.length === 0) return;
+
+    if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+      throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
+        `Fleet server host needs encrypted saved object api key to be set`
+      );
+    }
+
+    // Handle default deduplication once: if any incoming host is_default, unset the current default
+    const newDefaultHost = hosts.find((h) => h.is_default);
+    if (newDefaultHost) {
+      const currentDefault = await this.getDefaultFleetServerHost();
+      if (currentDefault && currentDefault.id !== newDefaultHost.id) {
+        await this.update(
+          soClient,
+          esClient,
+          currentDefault.id,
+          { is_default: false },
+          { fromPreconfiguration: options?.fromPreconfiguration }
+        );
+      }
+    }
+
+    // Prepare attributes for each host in parallel
+    const hostDataList = await Promise.all(
+      hosts.map(async ({ id, secretHashes, ...fleetServerHost }) => {
+        const data: FleetServerHostSOAttributes = {
+          ...omit(fleetServerHost, ['ssl', 'secrets']),
+        };
+
+        if (fleetServerHost.host_urls) {
+          data.host_urls = fleetServerHost.host_urls.map(normalizeHostsForAgents);
+        }
+        if (fleetServerHost.ssl) {
+          data.ssl = JSON.stringify(fleetServerHost.ssl);
+        }
+
+        if (await isSecretStorageEnabled(esClient, soClient)) {
+          const { fleetServerHost: withSecrets } = await extractAndWriteFleetServerHostsSecrets({
+            fleetServerHost,
+            esClient,
+            secretHashes: fleetServerHost.is_preconfigured ? secretHashes : undefined,
+          });
+          if (withSecrets.secrets) {
+            data.secrets = withSecrets.secrets as FleetServerHostSOAttributes['secrets'];
+          }
+        } else {
+          if (
+            (!fleetServerHost.ssl?.key && fleetServerHost.secrets?.ssl?.key) ||
+            (!fleetServerHost.ssl?.es_key && fleetServerHost.secrets?.ssl?.es_key) ||
+            (!fleetServerHost.ssl?.agent_key && fleetServerHost.secrets?.ssl?.agent_key)
+          ) {
+            data.ssl = JSON.stringify({
+              ...fleetServerHost.ssl,
+              ...fleetServerHost.secrets?.ssl,
+            });
+          }
+        }
+
+        return { id, data };
+      })
+    );
+
+    const res = await this.soClient.bulkCreate<FleetServerHostSOAttributes>(
+      hostDataList.map(({ id, data }) => ({
+        type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+        id,
+        attributes: data,
+      })),
+      { overwrite: true }
+    );
+
+    const logger = appContextService.getLogger();
+    for (const so of res.saved_objects) {
+      if (isSavedObjectErrorResult(so)) {
+        throw so.error;
+      }
+      logger.debug(`Created fleet server host ${so.id}`);
+    }
   }
 
   public async get(id: string): Promise<FleetServerHost> {
@@ -254,6 +345,22 @@ class FleetServerHostService {
     const updateData: Partial<FleetServerHostSOAttributes> = {
       ...omit(data, ['ssl', 'secrets']),
     };
+
+    if (originalItem.is_preconfigured && !options?.fromPreconfiguration) {
+      const allowEditFields = originalItem.allow_edit ?? [];
+      const allKeys = Object.keys(data) as Array<keyof FleetServerHost>;
+      for (const key of allKeys) {
+        if (
+          (!!originalItem[key] || !!data[key]) &&
+          !allowEditFields.includes(key) &&
+          !isEqual(originalItem[key], data[key])
+        ) {
+          throw new FleetServerHostUnauthorizedError(
+            `Preconfigured Fleet Server host ${id} ${key} cannot be updated outside of the Kibana config file.`
+          );
+        }
+      }
+    }
 
     if (data.is_preconfigured && !options?.fromPreconfiguration) {
       throw new FleetServerHostUnauthorizedError(

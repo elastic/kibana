@@ -14,9 +14,17 @@ import {
   isInlineCast,
   isParamLiteral,
 } from '@elastic/esql';
-import type { ESQLAst, ESQLAstAllCommands, ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
+import type {
+  ESQLAst,
+  ESQLAstAllCommands,
+  ESQLAstItem,
+  ESQLColumn,
+  ESQLFunction,
+  ESQLIdentifier,
+} from '@elastic/esql/types';
 import type { PromQLFunction } from '@elastic/esql';
 import { errors, getFunctionDefinition } from '..';
+import { isTypeConversionFunction } from '../functions';
 import { FunctionDefinitionTypes } from '../../../../..';
 import { getLocationInfo } from '../../../registry/location';
 import { isTimeseriesSourceCommand } from '../timeseries_check';
@@ -112,6 +120,14 @@ class FunctionValidator {
       return;
     }
 
+    // Return early so the source-incompatibility error takes priority over the generic
+    // "not allowed here" check below — the location may technically match, but the function
+    // is invalid regardless because the pipeline source is TS.
+    if (isTimeseriesSourceCommand(this.ast) && this.definition.tsdbCompatible === false) {
+      this.report(errors.tsdbIncompatibleFunction(this.fn));
+      return;
+    }
+
     if (!this.allowedHere) {
       this.report(errors.functionNotAllowedHere(this.fn, this.location.displayName));
     }
@@ -137,13 +153,14 @@ class FunctionValidator {
     return this.hintKindAt(position) === 'aggregation';
   }
 
-  private validateAggregationArg(arg: ESQLAstItem): void {
+  private validateAggregationArg(arg: ESQLAstItem, rawArg: ESQLAstItem): void {
     const isAggCall =
       isFunctionExpression(arg) &&
       getFunctionDefinition(arg.name)?.type === FunctionDefinitionTypes.AGG;
 
     if (!isAggCall) {
-      this.report(errors.expectedAggregationArgument(this.fn));
+      const location = Array.isArray(rawArg) ? this.fn.location : rawArg.location;
+      this.report(errors.expectedAggregationArgument(this.fn, location));
     }
 
     if (isFunctionExpression(arg)) {
@@ -185,8 +202,11 @@ class FunctionValidator {
     }
 
     // Validate column arguments
-    const columnsToValidate = [];
+    const columnsToValidate: Array<ESQLColumn | ESQLIdentifier> = [];
     const flatArgs = this.fn.args.flat();
+    const skipUnsupportedOrConflictingColumnValidation = isTypeConversionFunction(
+      this.definition.name
+    );
     for (let i = 0; i < flatArgs.length; i++) {
       const arg = flatArgs[i];
       if (
@@ -199,7 +219,9 @@ class FunctionValidator {
     }
 
     const columnMessages = columnsToValidate.flatMap((arg) => {
-      return new ColumnValidator(arg, this.context, this.parentCommand.name).validate();
+      return new ColumnValidator(arg, this.context, this.parentCommand.name, {
+        skipUnsupportedOrConflictingColumnValidation,
+      }).validate();
     });
 
     this.report(...columnMessages);
@@ -235,10 +257,11 @@ class FunctionValidator {
 
     const flatArgs = this.fn.args.flat();
     for (let i = 0; i < flatArgs.length; i++) {
-      const arg = removeInlineCasts(flatArgs[i]);
+      const rawArg = flatArgs[i];
+      const arg = removeInlineCasts(rawArg);
 
       if (this.expectsAggregationAt(i)) {
-        this.validateAggregationArg(arg);
+        this.validateAggregationArg(arg, rawArg);
         continue;
       }
 

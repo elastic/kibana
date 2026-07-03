@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import type { ServiceAnomaliesResponse } from '@kbn/apm-types';
 import { MarkerType } from '@xyflow/react';
-import { transformToReactFlow } from './transform_to_react_flow';
-import type { ServiceMapRawResponse, ServiceMapSpan, ServicesResponse } from './types';
-import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
-import type { GroupedNodeData } from './types';
 import { DEFAULT_EDGE_COLOR } from './constants';
+import { transformToReactFlow } from './transform_to_react_flow';
+import type {
+  GroupedNodeData,
+  ServiceMapRawResponse,
+  ServiceMapSpan,
+  ServicesResponse,
+} from './types';
 
 // Helper to create a minimal raw response
 function createMockRawResponse(

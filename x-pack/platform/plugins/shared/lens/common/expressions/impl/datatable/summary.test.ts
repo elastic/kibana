@@ -28,8 +28,8 @@ describe('Summary row helpers', () => {
     rows: [{ myColumn: 'myString' }],
   };
 
-  const defaultFormatter = { convert: (x) => x } as IFieldFormat;
-  const customNumericFormatter = { convert: (x: number) => x.toFixed(2) } as IFieldFormat;
+  const defaultFormatter = { convertToText: (x) => x } as IFieldFormat;
+  const customNumericFormatter = { convertToText: (x: number) => x.toFixed(2) } as IFieldFormat;
 
   describe('getFinalSummaryConfiguration', () => {
     it('should return the base configuration for an unconfigured column', () => {

@@ -92,15 +92,29 @@ export class UpdateSLO {
           getSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
         );
       } catch (err) {
-        this.logger.debug(
-          `Cannot update the SLO summary pipeline [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}]. ${err}`
-        );
+        this.logger.warn('Cannot update the SLO summary pipeline. Rolling back.', {
+          service: { name: 'update_slo' },
+          labels: {
+            slo_id: updatedSlo.id,
+            indicator_type: updatedSlo.indicator.type,
+            error_type: 'update_failed',
+          },
+          error: err,
+        });
 
         await asyncForEach(rollbackOperations.reverse(), async (operation) => {
           try {
             await operation();
           } catch (rollbackErr) {
-            this.logger.debug(`Rollback operation failed. ${rollbackErr}`);
+            this.logger.warn('Rollback operation failed.', {
+              service: { name: 'update_slo' },
+              labels: {
+                slo_id: updatedSlo.id,
+                indicator_type: updatedSlo.indicator.type,
+                error_type: 'rollback_failed',
+              },
+              error: rollbackErr,
+            });
           }
         });
 
@@ -157,15 +171,29 @@ export class UpdateSLO {
         this.summaryTransformManager.start(updatedSummaryTransformId),
       ]);
     } catch (err) {
-      this.logger.debug(
-        `Cannot update the SLO [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}]. Rolling back. ${err}`
-      );
+      this.logger.warn('Cannot update the SLO. Rolling back.', {
+        service: { name: 'update_slo' },
+        labels: {
+          slo_id: updatedSlo.id,
+          indicator_type: updatedSlo.indicator.type,
+          error_type: 'update_failed',
+        },
+        error: err,
+      });
 
       await asyncForEach(rollbackOperations.reverse(), async (operation) => {
         try {
           await operation();
         } catch (rollbackErr) {
-          this.logger.debug(`Rollback operation failed. ${rollbackErr}`);
+          this.logger.warn('Rollback operation failed.', {
+            service: { name: 'update_slo' },
+            labels: {
+              slo_id: updatedSlo.id,
+              indicator_type: updatedSlo.indicator.type,
+              error_type: 'rollback_failed',
+            },
+            error: rollbackErr,
+          });
         }
       });
 
@@ -211,13 +239,17 @@ export class UpdateSLO {
 
       await Promise.all([this.deleteRollupData(slo), this.deleteSummaryData(slo)]);
     } catch (err) {
-      // Don't block the update on cleanup failures, but surface them in logs so
-      // stale transforms and orphan summary documents become diagnosable.
-      // SDH #6202.
       this.logger.warn(
-        `Failed to clean up resources for previous revision of SLO ` +
-          `[id=${slo.id}, revision=${slo.revision}]. ` +
-          `Old resources may continue producing data. ${err}`
+        'Failed to clean up resources for previous SLO revision. Old resources may continue producing data.',
+        {
+          service: { name: 'update_slo' },
+          labels: {
+            slo_id: slo.id,
+            indicator_type: slo.indicator.type,
+            error_type: 'cleanup_failed',
+          },
+          error: err,
+        }
       );
     }
   }

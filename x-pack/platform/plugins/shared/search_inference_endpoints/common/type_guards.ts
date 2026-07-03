@@ -7,6 +7,7 @@
 
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import type {
+  EisInferenceEndpoint,
   InferenceEndpointWithMetadata,
   InferenceEndpointWithDisplayNameMetadata,
   InferenceEndpointWithDisplayCreatorMetadata,
@@ -31,6 +32,9 @@ export function isInferenceEndpointWithKibanaConnectorHeuristic(
   const properties = endpoint.metadata?.heuristics?.properties;
   return Array.isArray(properties) && properties.includes(KIBANA_CONNECTOR_HEURISTIC);
 }
+
+export const isEisEndpoint = (ep: InferenceInferenceEndpointInfo): ep is EisInferenceEndpoint =>
+  ep.service === 'elastic';
 
 export function isInferenceEndpointWithMetadata(
   endpoint: InferenceInferenceEndpointInfo

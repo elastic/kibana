@@ -8,12 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import type { ApmRuleType } from '@kbn/rule-data-utils';
 import { useMemo } from 'react';
+import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
 import { getManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { useAlertSloActions } from '../../../../hooks/use_alert_slo_actions';
 import type { TableActions } from '../../../shared/managed_table';
 import type { IndexType } from '../../../shared/links/discover_links/get_esql_query';
+import { SERVICE_INVENTORY_EBT_ELEMENTS } from '../ebt_constants';
 
 interface UseServiceActionsParams {
   openAlertFlyout: (ruleType: ApmRuleType, serviceName: string) => void;
@@ -40,6 +42,11 @@ export function useServiceActions({
             defaultMessage: 'Open traces in Discover',
           }),
           href: (item) => getDiscoverHref(item, 'traces'),
+          ebt: {
+            action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
+            element: SERVICE_INVENTORY_EBT_ELEMENTS.ROW_ACTIONS,
+            detail: 'traces',
+          },
         },
         {
           id: 'servicesTable-openLogsInDiscover',
@@ -47,6 +54,11 @@ export function useServiceActions({
             defaultMessage: 'Open logs in Discover',
           }),
           href: (item) => getDiscoverHref(item, 'error'),
+          ebt: {
+            action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
+            element: SERVICE_INVENTORY_EBT_ELEMENTS.ROW_ACTIONS,
+            detail: 'logs',
+          },
         },
       ],
     });

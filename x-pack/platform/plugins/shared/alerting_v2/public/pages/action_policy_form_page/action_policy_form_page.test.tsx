@@ -130,8 +130,6 @@ const EXISTING_POLICY: ActionPolicyResponse = {
   version: 'WzEsMV0=',
   name: 'Critical production alerts',
   description: 'Routes critical alerts',
-  type: 'global',
-  ruleId: null,
   enabled: true,
   matcher: 'data.severity : "critical"',
   groupBy: ['host.name', 'service.name'],
@@ -141,10 +139,8 @@ const EXISTING_POLICY: ActionPolicyResponse = {
   snoozedUntil: null,
   destinations: [{ type: 'workflow', id: 'workflow-2' }],
   createdBy: 'elastic',
-  createdByUsername: 'elastic',
   createdAt: '2026-03-01T10:00:00.000Z',
   updatedBy: 'elastic',
-  updatedByUsername: 'elastic',
   updatedAt: '2026-03-01T10:00:00.000Z',
   auth: {
     owner: 'elastic',
@@ -207,7 +203,6 @@ describe('ActionPolicyFormPage', () => {
           {
             name: 'Policy from test',
             description: 'Description from test',
-            type: 'global',
             groupingMode: 'per_episode',
             throttle: { strategy: 'on_status_change', interval: null },
             destinations: [{ type: 'workflow', id: 'workflow-1' }],

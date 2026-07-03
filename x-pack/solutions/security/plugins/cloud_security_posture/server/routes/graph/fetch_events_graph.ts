@@ -15,6 +15,8 @@ import {
   DOCUMENT_TYPE_ENTITY,
   INDEX_PATTERN_REGEX,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+
 import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
 import {
   getEuidEsqlEvaluation,
@@ -22,30 +24,27 @@ import {
 } from '@kbn/entity-store/common/domain/euid';
 import {
   concatJsonObjectPropertyEsqlExprSafe,
-  buildEntityEnrichment,
-  checkIfEntitiesIndexLookupMode,
-  concatJsonObjectPropertyBool,
   JSON_OBJECT_START,
   JSON_OBJECT_END,
   JSON_OBJECT_SEPARATOR,
   concatJsonObjectPropertyEsqlExprAsString,
   concatJsonObjectPropertyString,
+  buildPinnedEsql,
 } from './utils';
 import {
   type EuidSourceFields,
   GRAPH_ACTOR_EUID_SOURCE_FIELDS,
   GRAPH_TARGET_EUID_SOURCE_FIELDS,
+  TYPED_ENTITY_PREFIXES,
 } from './constants';
 import { getTargetEuidEsqlEvaluation } from './target_euid';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
-import type { EsQuery, OriginEventId, EventEdge } from './types';
+import type { EsQuery, OriginEventId, EventEsqlRow } from './types';
 
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
   originEventIds: OriginEventId[];
   originAlertIds: OriginEventId[];
-  isLookupIndexAvailable: boolean;
-  spaceId: string;
   alertsMappingsIncluded: boolean;
   pinnedIds?: string[];
 }
@@ -53,6 +52,11 @@ interface BuildEsqlQueryParams {
 /**
  * Fetches events/alerts from logs and alerts indices.
  * This is the core event fetching logic used by fetchGraph.
+ *
+ * CPS: the caller-supplied `projectRouting` is forwarded as-is to ES|QL, so both
+ * logs and alerts fan out across linked projects under the same routing. This
+ * matches the rest of the alert flyout (Analyzer, Prevalence, Correlations),
+ * which already show remote alerts as contextual data.
  */
 export const fetchEvents = async ({
   esClient,
@@ -65,6 +69,7 @@ export const fetchEvents = async ({
   spaceId,
   esQuery,
   pinnedIds,
+  projectRouting,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
@@ -76,7 +81,8 @@ export const fetchEvents = async ({
   spaceId: string;
   esQuery?: EsQuery;
   pinnedIds?: string[];
-}): Promise<EsqlToRecords<EventEdge>> => {
+  projectRouting?: ProjectRouting;
+}): Promise<EsqlToRecords<EventEsqlRow>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
 
   // FROM clause currently doesn't support parameters, Therefore, we validate the index patterns to prevent injection attacks.
@@ -89,39 +95,43 @@ export const fetchEvents = async ({
     }
   });
 
-  const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
   const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
     indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
   );
+
+  const filter = buildDslFilter(
+    originEventIds.map((originEventId) => originEventId.id),
+    showUnknownTarget,
+    start,
+    end,
+    esQuery
+  );
+
+  const params = [
+    ...originEventIds.map((originEventId, idx) => ({ [`og_id${idx}`]: originEventId.id })),
+    ...originAlertIds.map((originEventId, idx) => ({ [`og_alrt_id${idx}`]: originEventId.id })),
+    ...(pinnedIds ?? []).map((id, idx) => ({ [`pinned_id${idx}`]: id })),
+  ];
 
   const query = buildEsqlQuery({
     indexPatterns,
     originEventIds,
     originAlertIds,
-    isLookupIndexAvailable,
-    spaceId,
     alertsMappingsIncluded,
     pinnedIds,
   });
 
-  logger.trace(`Executing query [${query}]`);
+  logger.trace(`Executing events query [project_routing: ${projectRouting ?? 'default'}]`);
 
-  const eventIds = originEventIds.map((originEventId) => originEventId.id);
-  return await esClient.asCurrentUser.helpers
+  return esClient.asCurrentUser.helpers
     .esql({
       columnar: false,
-      filter: buildDslFilter(eventIds, showUnknownTarget, start, end, esQuery),
+      filter,
       query,
-      // @ts-ignore - types are not up to date
-      params: [
-        ...originEventIds.map((originEventId, idx) => ({ [`og_id${idx}`]: originEventId.id })),
-        ...originEventIds
-          .filter((originEventId) => originEventId.isAlert)
-          .map((originEventId, idx) => ({ [`og_alrt_id${idx}`]: originEventId.id })),
-        ...(pinnedIds ?? []).map((id, idx) => ({ [`pinned_id${idx}`]: id })),
-      ],
+      params,
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
     })
-    .toRecords<EventEdge>();
+    .toRecords<EventEsqlRow>();
 };
 
 const buildDslFilter = (
@@ -205,7 +215,7 @@ const buildV2ActorResolution = (): string => {
   // entity.id is excluded: its EUID is the raw value (no CONCAT),
   // and multi-value is handled by the downstream MV_EXPAND actorEntityId.
   const typedActorFields = Object.keys(GRAPH_ACTOR_EUID_SOURCE_FIELDS)
-    .filter((f) => TYPED_ENTITY_PREFIXES.includes(f))
+    .filter((f) => (TYPED_ENTITY_PREFIXES as readonly string[]).includes(f))
     .map((f) => GRAPH_ACTOR_EUID_SOURCE_FIELDS[f as keyof EuidSourceFields])
     .flat();
   const mvExpandStatements = typedActorFields
@@ -225,7 +235,7 @@ const buildV2ActorResolution = (): string => {
     evalParts.push(userFieldEvaluationsEsql);
   }
   typedEntityTypes.forEach((type) => {
-    evalParts.push(`_actor_${type}_euid = ${getEuidEsqlEvaluation(type)}`);
+    evalParts.push(getEuidEsqlEvaluation(type, `_actor_${type}_euid`));
   });
 
   // Use raw entity.id directly (not saved variable) since buildSaveSourceFieldsEsql
@@ -255,7 +265,7 @@ const buildV2TargetResolution = (): string => {
   // entity.target.id is excluded: its EUID is the raw value (no CONCAT),
   // and multi-value is handled by the downstream MV_EXPAND targetEntityId.
   const typedTargetFields = Object.keys(GRAPH_TARGET_EUID_SOURCE_FIELDS)
-    .filter((f) => TYPED_ENTITY_PREFIXES.includes(f))
+    .filter((f) => (TYPED_ENTITY_PREFIXES as readonly string[]).includes(f))
     .map((f) => GRAPH_TARGET_EUID_SOURCE_FIELDS[f as keyof EuidSourceFields])
     .flat();
   const mvExpandStatements = typedTargetFields
@@ -263,10 +273,9 @@ const buildV2TargetResolution = (): string => {
     .map((field) => `| MV_EXPAND \`${field}\``)
     .join('\n');
 
-  const targetEvalParts = ALL_ENTITY_TYPES.map((type) => {
-    const targetEuidEval = getTargetEuidEsqlEvaluation(type);
-    return `_target_${type}_euid = ${targetEuidEval}`;
-  });
+  const targetEvalParts = ALL_ENTITY_TYPES.map((type) =>
+    getTargetEuidEsqlEvaluation(type, `_target_${type}_euid`)
+  );
 
   const appendStatements = [
     '| EVAL targetEntityId = TO_STRING(null)',
@@ -286,28 +295,6 @@ const buildV2TargetResolution = (): string => {
   return `${mvExpandStatements}
 | EVAL ${targetEvalParts.join(',\n  ')}
 ${appendStatements}`;
-};
-
-/**
- * Generates ESQL statement for evaluating pinned IDs.
- * Checks _id, actorEntityId (computed EUID), all actor raw source fields,
- * targetEntityId (computed EUID), and all target raw source fields.
- * When a raw source field matches, pinned is set to the computed EUID so
- * grouping is correct.
- */
-const buildPinnedEsql = (pinnedIds?: string[]): string => {
-  if (!pinnedIds || pinnedIds.length === 0) {
-    return '| EVAL pinned = TO_STRING(null)';
-  }
-
-  const pinnedParamsStr = pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ');
-
-  return `| EVAL pinned = CASE(
-    _id IN (${pinnedParamsStr}), _id,
-    actorEntityId IN (${pinnedParamsStr}), actorEntityId,
-    targetEntityId IN (${pinnedParamsStr}), targetEntityId,
-    null
-  )`;
 };
 
 /**
@@ -346,8 +333,6 @@ const buildSaveSourceFieldsEsql = (): string => {
     .join(', ');
   return `| EVAL ${assignments}`;
 };
-
-const TYPED_ENTITY_PREFIXES = ['user', 'host', 'service'];
 
 /**
  * Generates an ESQL CONCAT fragment that builds a JSON "sourceFields" object.
@@ -402,76 +387,10 @@ const buildActorSourceFieldsEsql = (): string =>
 const buildTargetSourceFieldsEsql = (): string =>
   buildSourceFieldsJson(GRAPH_TARGET_EUID_SOURCE_FIELDS, 'targetEntityId');
 
-/**
- * Generates ESQL statements for building entity fields with enrichment data.
- * This is used when entity store enrichment is available (via LOOKUP JOIN).
- * Uses REPLACE to fix "{," pattern that occurs when first property is null.
- */
-const buildEnrichedEntityFieldsEsql = (): string => {
-  return `// Construct actor and target entities data
-// Build entity field conditionally - only include fields that have values
-// Put required fields first (no comma prefix), optional fields use comma prefix
-| EVAL actorEntityField = CASE(
-    actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
-    CONCAT("\\"entity\\":",
-    ${JSON_OBJECT_START},
-      ${concatJsonObjectPropertyBool('availableInEntityStore', true)},
-      CASE(actorEntityName IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('name', 'actorEntityName')}), ""),
-      CASE(actorEntityType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('type', 'actorEntityType')}), ""),
-      CASE(actorEntitySubType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('sub_type', 'actorEntitySubType')}), ""),
-      CASE(actorEntityEngineType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('engine_type', 'actorEntityEngineType')}), ""),
-      CASE(
-        actorHostIp IS NOT NULL,
-        CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":",
-        ${JSON_OBJECT_START},
-          "\\"ip\\":[\\"", MV_CONCAT(actorHostIp, "\\",\\""), "\\"]",
-        ${JSON_OBJECT_END}), ""),
-      ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
-    ${JSON_OBJECT_END}),
-    CONCAT("\\"entity\\":", ${JSON_OBJECT_START},
-      ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
-      ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
-    ${JSON_OBJECT_END})
-  )
-| EVAL targetEntityField = CASE(
-    targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
-    CONCAT("\\"entity\\":",
-    ${JSON_OBJECT_START},
-      ${concatJsonObjectPropertyBool('availableInEntityStore', true)},
-      CASE(targetEntityName IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('name', 'targetEntityName')}), ""),
-      CASE(targetEntityType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('type', 'targetEntityType')}), ""),
-      CASE(targetEntitySubType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('sub_type', 'targetEntitySubType')}), ""),
-      CASE(targetEntityEngineType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('engine_type', 'targetEntityEngineType')}), ""),
-      CASE(
-        targetHostIp IS NOT NULL,
-        CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":",
-        ${JSON_OBJECT_START},
-          "\\"ip\\":[\\"", MV_CONCAT(targetHostIp, "\\",\\""), "\\"]",
-        ${JSON_OBJECT_END}), ""),
-      ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
-    ${JSON_OBJECT_END}),
-    CONCAT("\\"entity\\":",
-    ${JSON_OBJECT_START},
-      ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
-      ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
-    ${JSON_OBJECT_END})
-  )`;
-};
-
 const buildEsqlQuery = ({
   indexPatterns,
   originEventIds,
   originAlertIds,
-  isLookupIndexAvailable,
-  spaceId,
   alertsMappingsIncluded,
   pinnedIds,
 }: BuildEsqlQueryParams): string => {
@@ -486,50 +405,24 @@ ${buildV2TargetResolution()}
 ${buildSaveSourceFieldsEsql()}
 | MV_EXPAND actorEntityId
 | MV_EXPAND targetEntityId
-${buildPinnedEsql(pinnedIds)}
-${
-  isLookupIndexAvailable
-    ? `
-${buildEntityEnrichment(isLookupIndexAvailable, spaceId)}
-
-${buildEnrichedEntityFieldsEsql()}
-`
-    : `
-| EVAL actorEntityField = CONCAT("\\"entity\\":",
-  ${JSON_OBJECT_START},
-    ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
-    ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
-  ${JSON_OBJECT_END})
-| EVAL targetEntityField = CONCAT("\\"entity\\":",
-  ${JSON_OBJECT_START},
-    ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
-    ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
-  ${JSON_OBJECT_END})
-// Fallback to null string with non-enriched entity metadata
-| EVAL actorEntityName = TO_STRING(null)
-| EVAL actorEntityType = TO_STRING(null)
-| EVAL actorEntitySubType = TO_STRING(null)
-| EVAL actorHostIp = TO_STRING(null)
-| EVAL actorEntityEngineType = TO_STRING(null)
-| EVAL targetEntityName = TO_STRING(null)
-| EVAL targetEntityType = TO_STRING(null)
-| EVAL targetEntitySubType = TO_STRING(null)
-| EVAL targetHostIp = TO_STRING(null)
-| EVAL targetEntityEngineType = TO_STRING(null)
-`
-}
-// Create actor and target data with entity data
-
+${buildPinnedEsql(['_id', 'actorEntityId', 'targetEntityId'], pinnedIds)}
+// Create actor and target data - entity object built by TypeScript enrichment
 | EVAL actorDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprAsString('id', 'actorEntityId')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
-    ${JSON_OBJECT_SEPARATOR}, actorEntityField,
+    ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
   ${JSON_OBJECT_END})
 | EVAL targetDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprAsString('id', 'COALESCE(targetEntityId, "")')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
-    ${JSON_OBJECT_SEPARATOR}, targetEntityField,
+    ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
   ${JSON_OBJECT_END})
+// Per-target → source-document mapping ("<targetEntityId>\\n<_id>"), collected via VALUES so
+// that after STATS drops targetEntityId from the group key we can still attribute each target
+// to the document(s) that referenced it. regroupEvents uses this to compute each target-type
+// group's own docIds, which keeps label nodes split by document exactly as they would be if the
+// query still grouped by targetEntityId.
+| EVAL targetDocMap = CONCAT(COALESCE(targetEntityId, ""), "\\n", _id)
 
 // Map host and source values to enriched contextual data
 | EVAL sourceIps = source.ip
@@ -537,19 +430,20 @@ ${buildEnrichedEntityFieldsEsql()}
 // Origin event and alerts allow us to identify the start position of graph traversal
 | EVAL isOrigin = ${
     originEventIds.length > 0
-      ? `COALESCE(event.id in (${originEventIds
+      ? `CASE (event.id IS NOT NULL AND event.id != "", event.id in (${originEventIds
           .map((_id, idx) => `?og_id${idx}`)
           .join(', ')}), false)`
       : 'false'
   }
 | EVAL isOriginAlert = ${
     originAlertIds.length > 0
-      ? `COALESCE(isOrigin AND event.id in (${originAlertIds
+      ? `CASE (event.id IS NOT NULL AND event.id != "", isOrigin AND event.id in (${originAlertIds
           .map((_id, idx) => `?og_alrt_id${idx}`)
           .join(', ')}), false)`
       : 'false'
   }
 | EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"
+| EVAL action = event.action
 // Aggregate document's data for popover expansion and metadata enhancements
 // We format it as JSON string, the best alternative so far. Tried to use tuple using MV_APPEND
 // but it flattens the data and we lose the structure
@@ -568,46 +462,25 @@ ${buildEnrichedEntityFieldsEsql()}
         : ''
     }
   "}")
+// Pre-aggregate by the dimensions available WITHOUT entity-store enrichment:
+// action, isOrigin/isOriginAlert/pinned. Actor/target entity IDs and type/sub-type
+// are NOT used here as group keys — IDs are collected via VALUES() and type/sub-type
+// are not available (entity-store join is CPS-unsafe). The follow-up enrichment query
+// supplies type/sub-type and regroupEvents performs the final type-level merge in TypeScript.
 | STATS badge = COUNT(*),
-  uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, _id, null)),
-  uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, _id, null)),
   isAlert = MV_MAX(VALUES(isAlert)),
   docs = VALUES(docData),
+  docIds = VALUES(_id),
+  alertDocIds = VALUES(CASE(isAlert, _id, null)),
+  nonAlertDocIds = VALUES(CASE(isAlert, null, _id)),
   sourceIps = MV_DEDUPE(VALUES(sourceIps)),
   sourceCountryCodes = MV_DEDUPE(VALUES(sourceCountryCodes)),
-  // label node ID based on document IDs - ensures deduplication by documents, not actor-target pairs
-  labelNodeId = CASE(
-    MV_COUNT(VALUES(_id)) == 1, TO_STRING(VALUES(_id)),
-    MD5(MV_CONCAT(MV_SORT(VALUES(_id)), ","))
-  ),
-  // actor attributes
-  actorNodeId = CASE(
-    // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple
-    MV_COUNT(VALUES(actorEntityId)) == 1, TO_STRING(VALUES(actorEntityId)),
-    MD5(MV_CONCAT(MV_SORT(VALUES(actorEntityId)), ","))
-  ),
-  actorIdsCount = COUNT_DISTINCT(actorEntityId),
-  actorEntityName = VALUES(actorEntityName),
-  actorHostIps = VALUES(actorHostIp),
-  actorsDocData = VALUES(actorDocData),
-  // target attributes
-  targetNodeId = CASE(
-    // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple
-    COUNT_DISTINCT(targetEntityId) == 0, null,
-    CASE(
-      MV_COUNT(VALUES(targetEntityId)) == 1, TO_STRING(VALUES(targetEntityId)),
-      MD5(MV_CONCAT(MV_SORT(VALUES(targetEntityId)), ","))
-    )
-  ),
-  targetIdsCount = COUNT_DISTINCT(targetEntityId),
-  targetEntityName = VALUES(targetEntityName),
-  targetHostIps = VALUES(targetHostIp),
-  targetsDocData = VALUES(targetDocData)
-    BY action = event.action,
-      actorEntityType,
-      actorEntitySubType,
-      targetEntityType,
-      targetEntitySubType,
+  actorEntityId = MV_DEDUPE(VALUES(actorEntityId)),
+  targetEntityId = MV_DEDUPE(VALUES(targetEntityId)),
+  actorDocData = VALUES(actorDocData),
+  targetDocData = VALUES(targetDocData),
+  targetDocMap = VALUES(targetDocMap)
+    BY action,
       isOrigin,
       isOriginAlert,
       pinned

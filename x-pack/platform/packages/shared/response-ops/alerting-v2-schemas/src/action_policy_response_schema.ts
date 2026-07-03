@@ -10,7 +10,6 @@ import { durationSchema } from './common';
 import {
   groupingModeSchema,
   actionPolicyDestinationSchema,
-  actionPolicyTypeSchema,
   throttleStrategySchema,
 } from './action_policy_data_schema';
 
@@ -19,11 +18,6 @@ export const actionPolicyResponseSchema = z.object({
   version: z.string().optional().describe('The version, used for optimistic concurrency control.'),
   name: z.string().describe('The name of the action policy.'),
   description: z.string().describe('A description of the action policy.'),
-  type: actionPolicyTypeSchema.describe('The action policy type.'),
-  ruleId: z
-    .string()
-    .nullable()
-    .describe('The linked rule id when type is "single_rule"; null otherwise.'),
   enabled: z.boolean().describe('Whether the action policy is enabled.'),
   destinations: z.array(actionPolicyDestinationSchema).describe('The list of destinations.'),
   matcher: z.string().nullable().describe('A KQL query to match alerts, or null to match all.'),
@@ -59,10 +53,8 @@ export const actionPolicyResponseSchema = z.object({
     })
     .describe('Authentication and ownership information.'),
   createdBy: z.string().nullable().describe('The user ID who created the action policy.'),
-  createdByUsername: z.string().nullable().describe('The username of the creator.'),
   createdAt: z.string().describe('The ISO datetime when the action policy was created.'),
   updatedBy: z.string().nullable().describe('The user ID who last updated the action policy.'),
-  updatedByUsername: z.string().nullable().describe('The username of the last updater.'),
   updatedAt: z.string().describe('The ISO datetime when the action policy was last updated.'),
 });
 

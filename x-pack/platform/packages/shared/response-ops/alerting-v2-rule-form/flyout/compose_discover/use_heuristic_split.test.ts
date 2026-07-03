@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { splitQuery, guessRecoveryBlock } from './use_heuristic_split';
+import {
+  splitQuery,
+  guessRecoveryBlock,
+  discoverQueryToComposed,
+  resolveUnifiedAlertApplyQuery,
+  splitResultToRuleQuery,
+} from './use_heuristic_split';
 
 // ── splitQuery ────────────────────────────────────────────────────────────────
 
@@ -25,13 +31,58 @@ describe('splitQuery', () => {
   });
 
   describe('no STATS segment', () => {
-    it('returns none confidence and puts the whole query as alertBlock when there is no STATS', () => {
-      const query = 'FROM logs-* | WHERE count > 0';
+    it('returns base = full query when no STATS and no WHERE', () => {
+      const query = 'FROM logs-* | LIMIT 100';
       const result = splitQuery(query);
       expect(result.confidence).toBe('none');
       expect(result.reason).toBe('no_stats');
-      expect(result.alertBlock).toBe(query.trim());
-      expect(result.base).toBe('');
+      expect(result.base).toBe(query.trim());
+      expect(result.alertBlock).toBe('');
+    });
+
+    it('splits after the last non-WHERE before the trailing WHERE', () => {
+      const query = 'FROM logs-* | WHERE status_code >= 500';
+      const result = splitQuery(query);
+      expect(result.confidence).toBe('low');
+      expect(result.reason).toBe('where_without_stats');
+      expect(result.base).toBe('FROM logs-*');
+      expect(result.alertBlock).toBe('| WHERE status_code >= 500');
+    });
+
+    it('groups consecutive trailing WHEREs into the alert block', () => {
+      const query = 'FROM logs-* | WHERE a > 1 | WHERE b > 2 | WHERE c > 3';
+      const result = splitQuery(query);
+      expect(result.confidence).toBe('low');
+      expect(result.reason).toBe('where_without_stats');
+      expect(result.base).toBe('FROM logs-*');
+      expect(result.alertBlock).toBe('| WHERE a > 1 | WHERE b > 2 | WHERE c > 3');
+    });
+
+    it('splits after the last non-WHERE when a non-WHERE precedes the trailing chain', () => {
+      const query = 'FROM logs-* | WHERE env == "prod" | EVAL x = 1 | WHERE error_rate > 0.05';
+      const result = splitQuery(query);
+      expect(result.confidence).toBe('low');
+      expect(result.reason).toBe('where_without_stats');
+      expect(result.base).toBe('FROM logs-* | WHERE env == "prod" | EVAL x = 1');
+      expect(result.alertBlock).toBe('| WHERE error_rate > 0.05');
+    });
+
+    it('preserves FROM as base when the only piped command is WHERE', () => {
+      const query = 'FROM logs-* | WHERE x > 1';
+      const result = splitQuery(query);
+      expect(result.confidence).toBe('low');
+      expect(result.reason).toBe('where_without_stats');
+      expect(result.base).toBe('FROM logs-*');
+      expect(result.alertBlock).toBe('| WHERE x > 1');
+    });
+
+    it('sweeps a trailing non-WHERE (LIMIT) into the alert block when it follows a WHERE', () => {
+      const query = 'FROM logs-* | WHERE x > 1 | LIMIT 10';
+      const result = splitQuery(query);
+      expect(result.confidence).toBe('low');
+      expect(result.reason).toBe('where_without_stats');
+      expect(result.base).toBe('FROM logs-*');
+      expect(result.alertBlock).toBe('| WHERE x > 1 | LIMIT 10');
     });
   });
 
@@ -103,12 +154,42 @@ describe('splitQuery', () => {
     });
   });
 
+  describe('round-trip idempotency (join + re-split)', () => {
+    it('round-trips a STATS + WHERE query through join and re-split', () => {
+      const { base, alertBlock } = splitQuery('FROM logs-* | STATS c = COUNT(*) | WHERE c > 5');
+      const reassembled = [base, alertBlock].filter(Boolean).join('\n');
+      const resplit = splitQuery(reassembled);
+      expect(resplit.base).toBe(base);
+      expect(resplit.alertBlock).toBe(alertBlock);
+    });
+
+    it('round-trips a multi-pipe query', () => {
+      const { base, alertBlock } = splitQuery(
+        'FROM logs-* | EVAL x = 1 | STATS c = COUNT(*) BY host | WHERE c > 10 | SORT c DESC'
+      );
+      const reassembled = [base, alertBlock].filter(Boolean).join('\n');
+      const resplit = splitQuery(reassembled);
+      expect(resplit.base).toBe(base);
+      expect(resplit.alertBlock).toBe(alertBlock);
+    });
+
+    it('round-trips a WHERE-only (no STATS) query', () => {
+      const { base, alertBlock } = splitQuery('FROM logs-* | EVAL x = 1 | WHERE x > 0');
+      const reassembled = [base, alertBlock].filter(Boolean).join('\n');
+      const resplit = splitQuery(reassembled);
+      expect(resplit.base).toBe(base);
+      expect(resplit.alertBlock).toBe(alertBlock);
+    });
+  });
+
   describe('reason field', () => {
-    it('reason is no_stats when no STATS found', () => {
-      // FROM logs-* has no pipe at all so tokeniseSegments yields one segment (FROM) with no STATS
+    it('reason is no_stats when neither STATS nor WHERE found', () => {
       expect(splitQuery('FROM logs-*').reason).toBe('no_stats');
-      // FROM logs-* | WHERE x > 1 has a WHERE but still no STATS
-      expect(splitQuery('FROM logs-* | WHERE x > 1').reason).toBe('no_stats');
+      expect(splitQuery('FROM logs-* | LIMIT 10').reason).toBe('no_stats');
+    });
+
+    it('reason is where_without_stats when WHERE but no STATS', () => {
+      expect(splitQuery('FROM logs-* | WHERE x > 1').reason).toBe('where_without_stats');
     });
 
     it('reason is no_where when STATS present but no WHERE', () => {
@@ -124,6 +205,20 @@ describe('splitQuery', () => {
 });
 
 // ── guessRecoveryBlock ────────────────────────────────────────────────────────
+
+describe('discoverQueryToComposed', () => {
+  it('splits a WHERE clause into base and breach segment', () => {
+    const result = discoverQueryToComposed('FROM logs-* | WHERE status == "error" | LIMIT 10');
+    expect(result.base).toBe('FROM logs-*');
+    expect(result.breach.segment).toContain('WHERE');
+  });
+
+  it('leaves breach segment empty when query has no WHERE', () => {
+    const result = discoverQueryToComposed('FROM logs-* | LIMIT 10');
+    expect(result.base).toBe('FROM logs-* | LIMIT 10');
+    expect(result.breach.segment).toBe('');
+  });
+});
 
 describe('guessRecoveryBlock', () => {
   it('flips > to <', () => {
@@ -153,10 +248,12 @@ describe('guessRecoveryBlock', () => {
     expect(result).toBe('| WHERE count >= 100');
   });
 
-  // Intentionally a naive per-operator flip, NOT De Morgan's logical negation.
-  // True negation of (a > 1 AND b < 2) would be (a <= 1 OR b >= 2), but
-  // guessRecoveryBlock only flips operators and preserves connectives. This is
-  // fine as a heuristic seed — users refine the result in the Recovery editor.
+  /*
+   * Intentionally a naive per-operator flip, NOT De Morgan's logical negation.
+   * True negation of (a > 1 AND b < 2) would be (a <= 1 OR b >= 2), but
+   * guessRecoveryBlock only flips operators and preserves connectives. This is
+   * fine as a heuristic seed — users refine the result in the Recovery editor.
+   */
   it('handles multiple operators in one expression', () => {
     const result = guessRecoveryBlock('| WHERE a > 1 AND b < 2');
     expect(result).toBe('| WHERE a < 1 AND b > 2');
@@ -169,5 +266,136 @@ describe('guessRecoveryBlock', () => {
 
   it('returns the input unchanged for an empty string', () => {
     expect(guessRecoveryBlock('')).toBe('');
+  });
+});
+
+// ── splitResultToRuleQuery ──────────────────────────────────────────────────
+
+describe('splitResultToRuleQuery', () => {
+  it('returns a composed query with outcome "success" when base and alert are found', () => {
+    const { query, outcome } = splitResultToRuleQuery(
+      'FROM logs-*\n| STATS count = COUNT(*) BY host.name\n| WHERE count > 100'
+    );
+
+    expect(outcome).toBe('success');
+    expect(query.format).toBe('composed');
+    if (query.format !== 'composed') throw new Error('expected composed');
+    expect(query.base).toContain('STATS');
+    expect(query.breach.segment).toContain('WHERE count > 100');
+  });
+
+  it('returns a standalone query with outcome "no_alert_condition" when there is no WHERE', () => {
+    const fullQuery = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name';
+    const { query, outcome } = splitResultToRuleQuery(fullQuery);
+
+    expect(outcome).toBe('no_alert_condition');
+    expect(query.format).toBe('standalone');
+    if (query.format !== 'standalone') throw new Error('expected standalone');
+    // The whole pipeline becomes the breach query — every returned row is a breach.
+    expect(query.breach.query).toBe(fullQuery);
+  });
+
+  it('returns outcome "empty" for an empty query', () => {
+    const { query, outcome } = splitResultToRuleQuery('   ');
+
+    expect(outcome).toBe('empty');
+    expect(query.format).toBe('composed');
+    if (query.format !== 'composed') throw new Error('expected composed');
+    expect(query.base).toBe('');
+    expect(query.breach.segment).toBe('');
+  });
+
+  it('returns outcome "split_failed" when the heuristic cannot isolate a base', () => {
+    // A leading-WHERE-only pipeline has no non-WHERE base command.
+    const { query, outcome } = splitResultToRuleQuery('| WHERE count > 100');
+
+    expect(outcome).toBe('split_failed');
+    expect(query.format).toBe('composed');
+    if (query.format !== 'composed') throw new Error('expected composed');
+    expect(query.base).toBe('');
+    expect(query.breach.segment).toContain('WHERE count > 100');
+  });
+
+  it('never produces a duplicated base when re-applied to its own joined output', () => {
+    const first = splitResultToRuleQuery(
+      'FROM logs-*\n| STATS count = COUNT(*) BY host.name\n| WHERE count > 100'
+    );
+    if (first.query.format !== 'composed') throw new Error('expected composed');
+    const joined = `${first.query.base}\n${first.query.breach.segment}`;
+    const second = splitResultToRuleQuery(joined);
+
+    expect(second.query.format).toBe('composed');
+    if (second.query.format !== 'composed') throw new Error('expected composed');
+    expect(second.query.base).toBe(first.query.base);
+    expect(second.query.breach.segment).toBe(first.query.breach.segment);
+  });
+});
+
+// ── resolveUnifiedAlertApplyQuery ───────────────────────────────────────────
+
+describe('resolveUnifiedAlertApplyQuery', () => {
+  const recoverySegment = { segment: '| WHERE count < 100' };
+  const recoveryQuery = { query: 'FROM logs-* | WHERE count < 100' };
+
+  it('preserves composed recovery when split stays composed', () => {
+    const sandbox = {
+      format: 'composed' as const,
+      base: 'FROM logs-*',
+      breach: { segment: '| WHERE count > 100' },
+      recovery: recoverySegment,
+    };
+    const split = {
+      format: 'composed' as const,
+      base: 'FROM logs-*',
+      breach: { segment: '| WHERE count > 100' },
+    };
+    expect(resolveUnifiedAlertApplyQuery(sandbox, split)).toEqual({
+      ...split,
+      recovery: recoverySegment,
+    });
+  });
+
+  it('preserves standalone recovery when split stays standalone', () => {
+    const sandbox = {
+      format: 'standalone' as const,
+      breach: { query: 'FROM logs-*' },
+      recovery: recoveryQuery,
+    };
+    const split = {
+      format: 'standalone' as const,
+      breach: { query: 'FROM logs-*' },
+    };
+    expect(resolveUnifiedAlertApplyQuery(sandbox, split)).toEqual({
+      ...split,
+      recovery: recoveryQuery,
+    });
+  });
+
+  it('drops recovery when format changes from standalone to composed', () => {
+    const sandbox = {
+      format: 'standalone' as const,
+      breach: { query: 'FROM logs-*' },
+      recovery: recoveryQuery,
+    };
+    const split = {
+      format: 'composed' as const,
+      base: 'FROM logs-*',
+      breach: { segment: '| WHERE count > 100' },
+    };
+    expect(resolveUnifiedAlertApplyQuery(sandbox, split)).toEqual(split);
+  });
+
+  it('drops recovery when format changes from composed to standalone', () => {
+    const sandbox = {
+      format: 'composed' as const,
+      base: 'FROM logs-*',
+      breach: { segment: '' },
+      recovery: recoverySegment,
+    };
+    const split = {
+      format: 'standalone' as const,
+      breach: { query: 'FROM logs-*' },
+    };
+    expect(resolveUnifiedAlertApplyQuery(sandbox, split)).toEqual(split);
   });
 });

@@ -12,7 +12,7 @@ import React from 'react';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { useKibana } from '../../hooks/use_kibana';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { FeedbackButton } from '../../pages/slos/components/common/feedback_button';
+import { InspectorHeaderLink } from '../inspect/inspector_header_link';
 
 export function HeaderMenu(): React.ReactElement | null {
   const { http, theme, docLinks } = useKibana().services;
@@ -26,7 +26,7 @@ export function HeaderMenu(): React.ReactElement | null {
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <EuiHeaderLinks gutterSize="xs">
-            <FeedbackButton />
+            <InspectorHeaderLink />
             <EuiHeaderLink
               color="primary"
               href={http.basePath.prepend('/app/observability/annotations')}

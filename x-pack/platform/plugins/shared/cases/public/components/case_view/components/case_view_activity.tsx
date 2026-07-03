@@ -26,11 +26,11 @@ import { useGetCaseConnectors } from '../../../containers/use_get_case_connector
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
-import type { CaseUICustomField, UseFetchAlertData } from '../../../../common/ui/types';
+import type { CaseUICustomField } from '../../../../common/ui/types';
 import type { EditConnectorProps } from '../../edit_connector';
 import { EditConnector } from '../../edit_connector';
-import type { CasesNavigation } from '../../links';
 import { StatusActionButton } from '../../status/button';
+import { CaseViewAttachButton } from './case_view_attach_button';
 import { EditTags } from './edit_tags';
 import { UserActions } from '../../user_actions';
 import { UserList } from './user_list';
@@ -46,8 +46,6 @@ import type {
   UserActivityParams,
   UserActivitySortOrder,
 } from '../../user_actions_activity_bar/types';
-import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
-import { CaseViewTabs } from '../case_view_tabs';
 import { Description } from '../../description';
 import { EditCategory } from './edit_category';
 import { parseCaseUsers } from '../../utils';
@@ -55,26 +53,13 @@ import { CustomFields } from './custom_fields';
 import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { TemplateFields } from './template_fields';
+import { GlobalCaseFields } from './global_case_fields';
 import { useStatusAction } from '../../actions/status/use_status_action';
 import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
 
 const LOCALSTORAGE_SORT_ORDER_KEY = 'cases.userActivity.sortOrder';
 
-export const CaseViewActivity = ({
-  ruleDetailsNavigation,
-  caseData,
-  searchTerm,
-  actionsNavigation,
-  showAlertDetails,
-  useFetchAlertData,
-}: {
-  ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
-  caseData: CaseUI;
-  actionsNavigation?: CasesNavigation<string, 'configurable'>;
-  showAlertDetails?: (alertId: string, index: string) => void;
-  useFetchAlertData: UseFetchAlertData;
-  searchTerm?: string;
-}) => {
+export const CaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
   const [sortOrder, setSortOrder] = useCasesLocalStorage<UserActivitySortOrder>(
     LOCALSTORAGE_SORT_ORDER_KEY,
     'asc'
@@ -232,11 +217,6 @@ export const CaseViewActivity = ({
           max-width: 75%;
         `}
       >
-        <CaseViewTabs
-          caseData={caseData}
-          activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY}
-          searchTerm={searchTerm}
-        />
         <EuiSpacer size="l" />
         <Description
           isLoadingDescription={isLoadingDescription}
@@ -262,13 +242,9 @@ export const CaseViewActivity = ({
               <UserActions
                 userProfiles={userProfiles}
                 currentUserProfile={currentUserProfile}
-                getRuleDetailsHref={ruleDetailsNavigation?.href}
-                onRuleDetailsClick={ruleDetailsNavigation?.onClick}
                 caseConnectors={caseConnectors}
                 data={caseData}
                 casesConfiguration={casesConfiguration}
-                actionsNavigation={actionsNavigation}
-                onShowAlertDetails={showAlertDetails}
                 onUpdateField={onUpdateField}
                 statusActionButton={
                   permissions.update ? (
@@ -283,7 +259,8 @@ export const CaseViewActivity = ({
                     />
                   ) : null
                 }
-                useFetchAlertData={useFetchAlertData}
+                // Permission gating lives inside `CaseViewAttachButton`.
+                attachActionButton={<CaseViewAttachButton caseData={caseData} />}
                 userActivityQueryParams={userActivityQueryParams}
                 userActionsStats={userActionsStats}
               />
@@ -360,12 +337,10 @@ export const CaseViewActivity = ({
             onSubmit={onSubmitCustomField}
           />
           {isTemplatesV2Enabled && (
-            <TemplateFields
-              caseData={caseData}
-              onUpdateField={onUpdateField}
-              isLoading={isLoading}
-              loadingKey={loadingKey}
-            />
+            <EuiFlexItem grow={false}>
+              <TemplateFields caseData={caseData} onUpdateField={onUpdateField} />
+              <GlobalCaseFields caseData={caseData} onUpdateField={onUpdateField} />
+            </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>

@@ -10,34 +10,25 @@ import type { Condition, StreamlangDSL } from '@kbn/streamlang';
 import type { RoutingStatus, Streams } from '@kbn/streams-schema';
 import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema';
 import {
-  getImpactLevel,
-  type Insight,
-  type InsightImpactLevel,
-} from '@kbn/streams-schema/src/insights';
-import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
 } from '@kbn/management-settings-ids';
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
-
-export type { Insight };
-
-export interface InsightBulkIndexOp {
-  index: Insight;
-}
-
-export interface InsightBulkDeleteOp {
-  delete: { id: string };
-}
-
-export type InsightBulkOperation = InsightBulkIndexOp | InsightBulkDeleteOp;
+import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../../../../common/feature_flags';
+import { COMMON_API_HEADERS } from '../fixtures/constants';
 
 export interface StreamsTestApiService {
   enable: () => Promise<void>;
   disable: () => Promise<void>;
   isEnabled: () => Promise<boolean>;
+  runSignificantEventsDiscovery: () => Promise<{ executionId: string }>;
+  cancelSignificantEventsDiscovery: () => Promise<{ executionId: string | null }>;
+  getSignificantEventsDiscoveryStatus: () => Promise<{
+    status: string;
+    executionId: string | null;
+  }>;
   listStreams: () => Promise<{ streams: Streams.all.Definition[] }>;
   getStream: (streamName: string) => Promise<IngestStream.all.GetResponse>;
   createStream: (streamName: string, body: Streams.all.UpsertRequest) => Promise<void>;
@@ -70,6 +61,8 @@ export interface StreamsTestApiService {
   disableQueryStreams: () => Promise<void>;
   enableSignificantEvents: () => Promise<void>;
   disableSignificantEvents: () => Promise<void>;
+  enableMemory: () => Promise<void>;
+  disableMemory: () => Promise<void>;
   enableWiredStreamViews: () => Promise<void>;
   disableWiredStreamViews: () => Promise<void>;
   enableDraftStreams: () => Promise<void>;
@@ -83,15 +76,6 @@ export interface StreamsTestApiService {
   deleteEsqlView: (viewName: string) => Promise<void>;
   runEsql: (query: string) => Promise<{ columns: Array<{ name: string }>; values: unknown[][] }>;
   cleanupTestStreams: (prefix?: string) => Promise<void>;
-  // Insights API
-  listInsights: (filters?: {
-    impact?: InsightImpactLevel[];
-  }) => Promise<{ insights: Insight[]; total: number }>;
-  getInsight: (id: string) => Promise<{ insight: Insight }>;
-  saveInsight: (id: string, input: Insight) => Promise<{ insight: Insight }>;
-  deleteInsight: (id: string) => Promise<{ acknowledged: boolean }>;
-  bulkInsights: (operations: InsightBulkOperation[]) => Promise<{ acknowledged: boolean }>;
-  cleanupTestInsights: () => Promise<void>;
 }
 
 export function getStreamsTestApiService({
@@ -334,6 +318,36 @@ export function getStreamsTestApiService({
       });
     },
 
+    async enableMemory() {
+      await measurePerformanceAsync(log, 'streamsTestApi.enableMemory', async () => {
+        await kbnClient.request({
+          path: '/internal/core/_settings',
+          method: 'PUT',
+          headers: COMMON_API_HEADERS,
+          body: {
+            'feature_flags.overrides': {
+              [STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG]: true,
+            },
+          },
+        });
+      });
+    },
+
+    async disableMemory() {
+      await measurePerformanceAsync(log, 'streamsTestApi.disableMemory', async () => {
+        await kbnClient.request({
+          path: '/internal/core/_settings',
+          method: 'PUT',
+          headers: COMMON_API_HEADERS,
+          body: {
+            'feature_flags.overrides': {
+              [STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG]: false,
+            },
+          },
+        });
+      });
+    },
+
     async enableWiredStreamViews() {
       await measurePerformanceAsync(log, 'streamsTestApi.enableWiredStreamViews', async () => {
         await kbnClient.uiSettings.update({
@@ -413,80 +427,48 @@ export function getStreamsTestApiService({
       });
     },
 
-    // Insights API methods
-    async listInsights(filters?: { impact?: InsightImpactLevel[] }) {
-      return measurePerformanceAsync(log, 'streamsTestApi.listInsights', async () => {
-        const query = new URLSearchParams();
-        if (filters?.impact?.length) query.set('impact', filters.impact.join(','));
-        const queryString = query.toString();
-        const path = `/internal/streams/_insights${queryString ? `?${queryString}` : ''}`;
-        const response = await kbnClient.request({
-          method: 'GET',
-          path,
-        });
-        return response.data as { insights: Insight[]; total: number };
-      });
-    },
-
-    async getInsight(id: string) {
-      return measurePerformanceAsync(log, 'streamsTestApi.getInsight', async () => {
-        const response = await kbnClient.request({
-          method: 'GET',
-          path: `/internal/streams/_insights/${id}`,
-        });
-        return response.data as { insight: Insight };
-      });
-    },
-
-    async saveInsight(id: string, input: Insight) {
-      return measurePerformanceAsync(log, 'streamsTestApi.saveInsight', async () => {
-        const body: Insight = {
-          ...input,
-          id,
-          generated_at: input.generated_at ?? new Date().toISOString(),
-          impact_level: input.impact_level ?? getImpactLevel(input.impact),
-        };
-        const response = await kbnClient.request({
-          method: 'PUT',
-          path: `/internal/streams/_insights/${id}`,
-          body,
-        });
-        return response.data as { insight: Insight };
-      });
-    },
-
-    async deleteInsight(id: string) {
-      return measurePerformanceAsync(log, 'streamsTestApi.deleteInsight', async () => {
-        const response = await kbnClient.request({
-          method: 'DELETE',
-          path: `/internal/streams/_insights/${id}`,
-        });
-        return response.data as { acknowledged: boolean };
-      });
-    },
-
-    async bulkInsights(operations: InsightBulkOperation[]) {
-      return measurePerformanceAsync(log, 'streamsTestApi.bulkInsights', async () => {
-        const response = await kbnClient.request({
-          method: 'POST',
-          path: '/internal/streams/_insights/_bulk',
-          body: { operations },
-        });
-        return response.data as { acknowledged: boolean };
-      });
-    },
-
-    async cleanupTestInsights() {
-      await measurePerformanceAsync(log, 'streamsTestApi.cleanupTestInsights', async () => {
-        try {
-          const { insights } = await this.listInsights();
-          if (insights.length > 0) {
-            await this.bulkInsights(insights.map((insight) => ({ delete: { id: insight.id } })));
-          }
-        } catch (error) {
-          log.debug(`Failed to cleanup insights: ${error}`);
+    async runSignificantEventsDiscovery() {
+      return measurePerformanceAsync(
+        log,
+        'streamsTestApi.runSignificantEventsDiscovery',
+        async () => {
+          const response = await kbnClient.request({
+            method: 'POST',
+            path: '/internal/streams/significant_events/discovery/_execute',
+            body: { action: 'trigger' },
+          });
+          return response.data as { executionId: string };
         }
-      });
+      );
+    },
+
+    async cancelSignificantEventsDiscovery() {
+      return measurePerformanceAsync(
+        log,
+        'streamsTestApi.cancelSignificantEventsDiscovery',
+        async () => {
+          const response = await kbnClient.request({
+            method: 'POST',
+            path: '/internal/streams/significant_events/discovery/_execute',
+            body: { action: 'cancel' },
+          });
+          return response.data as { executionId: string | null };
+        }
+      );
+    },
+
+    async getSignificantEventsDiscoveryStatus() {
+      return measurePerformanceAsync(
+        log,
+        'streamsTestApi.getSignificantEventsDiscoveryStatus',
+        async () => {
+          const response = await kbnClient.request({
+            method: 'GET',
+            path: '/internal/streams/significant_events/discovery/_status',
+          });
+          return response.data as { status: string; executionId: string | null };
+        }
+      );
     },
   };
 }

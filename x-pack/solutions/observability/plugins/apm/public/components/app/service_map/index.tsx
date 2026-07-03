@@ -6,11 +6,20 @@
  */
 
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  useEuiTheme,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useLayoutEffect, useMemo, useRef, useState, useCallback } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import { cx } from '@emotion/css';
+import type { BoolQuery } from '@kbn/es-query';
 import {
   useServiceMapFullScreen,
   applyServiceMapFullScreenBodyClasses,
@@ -36,7 +45,8 @@ import { useServiceMap } from './use_service_map';
 import { useServiceMapBadges } from './use_service_map_badges';
 import { getServiceMapBadgesEnd } from './get_service_map_badges_end';
 import { ServiceMapGraph } from './graph';
-import { ServiceMapSloFlyoutProvider } from './service_map_slo_flyout_context';
+import { ServiceMapSloFlyoutProvider } from '../../shared/service_map/service_map_slo_flyout_context';
+import { useServiceMapSearchContext } from './service_map_search_context';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -57,13 +67,18 @@ export function ServiceMapHome() {
     query: { environment, kuery, rangeFrom, rangeTo, serviceGroup },
   } = useApmParams('/service-map');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { esQuery } = useServiceMapSearchContext();
+
   return (
     <ServiceMap
       environment={environment}
       kuery={kuery}
       start={start}
       end={end}
+      rangeFrom={rangeFrom}
+      rangeTo={rangeTo}
       serviceGroupId={serviceGroup}
+      esQuery={esQuery ?? undefined}
     />
   );
 }
@@ -76,8 +91,19 @@ export function ServiceMapServiceDetail() {
     '/mobile-services/{serviceName}/service-map'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { esQuery } = useServiceMapSearchContext();
 
-  return <ServiceMap environment={environment} kuery={kuery} start={start} end={end} />;
+  return (
+    <ServiceMap
+      environment={environment}
+      kuery={kuery}
+      start={start}
+      end={end}
+      rangeFrom={rangeFrom}
+      rangeTo={rangeTo}
+      esQuery={esQuery ?? undefined}
+    />
+  );
 }
 
 export function ServiceMap({
@@ -85,13 +111,20 @@ export function ServiceMap({
   kuery,
   start,
   end,
+  rangeFrom,
+  rangeTo,
   serviceGroupId,
+  esQuery,
 }: {
   environment: Environment;
   kuery: string;
   start: string;
   end: string;
+  /** Raw (possibly relative) URL range — forwarded to "Add to dashboard" for dashboard time seeding. */
+  rangeFrom?: string;
+  rangeTo?: string;
   serviceGroupId?: string;
+  esQuery?: { bool: BoolQuery };
 }) {
   const license = useLicenseContext();
   const serviceName = useServiceName();
@@ -109,7 +142,9 @@ export function ServiceMap({
             rangeFrom: query.rangeFrom,
             rangeTo: query.rangeTo,
             environment: query.environment,
-            kuery: query.kuery,
+            // Drop kuery when navigating to the full map — filtering moves to
+            // the Controls API / filter bar on the destination page.
+            kuery: '',
             comparisonEnabled: query.comparisonEnabled,
             offset: query.offset,
             serviceGroup: 'serviceGroup' in query ? query.serviceGroup ?? '' : '',
@@ -127,6 +162,7 @@ export function ServiceMap({
     end,
     serviceGroupId,
     serviceName,
+    esQuery,
   });
 
   const { ref, height } = useRefDimensions();
@@ -231,6 +267,31 @@ export function ServiceMap({
     );
   }
 
+  // Any other fetch failure: surface a real error instead of falling through to an empty graph,
+  // which reads as "no data" (review #2). Mirrors the embeddable's error callout.
+  if (status === FETCH_STATUS.FAILURE) {
+    return (
+      <PromptContainer>
+        <EuiCallOut
+          announceOnMount
+          color="danger"
+          iconType="warning"
+          title={i18n.translate('xpack.apm.serviceMap.errorTitle', {
+            defaultMessage: 'Unable to load service map',
+          })}
+          data-test-subj="serviceMapError"
+        >
+          <p>
+            {i18n.translate('xpack.apm.serviceMap.errorDescription', {
+              defaultMessage:
+                'There was a problem loading the service map. Try refreshing the view.',
+            })}
+          </p>
+        </EuiCallOut>
+      </PromptContainer>
+    );
+  }
+
   if (status === FETCH_STATUS.SUCCESS) {
     onPageReady({
       customMetrics: {
@@ -275,6 +336,9 @@ export function ServiceMap({
               kuery={kuery}
               start={start}
               end={end}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              serviceGroupId={serviceGroupId}
               isFullscreen={isFullscreen}
               onToggleFullscreen={onToggleFullscreen}
               fullMapHref={fullMapHref}

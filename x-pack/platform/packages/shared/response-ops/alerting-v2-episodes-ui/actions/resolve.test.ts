@@ -61,6 +61,19 @@ describe('createResolveAction', () => {
     ).toBe(false);
   });
 
+  it('compatible when last_deactivate_action is activate even if episode.status is stale INACTIVE', () => {
+    expect(
+      createResolveAction(makeDeps()).isCompatible({
+        episodes: [
+          makeEpisode({
+            'episode.status': ALERT_EPISODE_STATUS.INACTIVE, // stale — not yet refreshed from ES
+            last_deactivate_action: 'activate',
+          }),
+        ],
+      })
+    ).toBe(true);
+  });
+
   it('not compatible on empty selection', () => {
     expect(createResolveAction(makeDeps()).isCompatible({ episodes: [] })).toBe(false);
   });

@@ -10,6 +10,7 @@
 import { readFileSync } from 'fs';
 import type { ListrTask } from 'listr2';
 import type { Task, TaskContext } from '../types';
+import { validateNoVirtualVersionDowngrade } from '../../snapshots';
 import { checkRemovedTypes } from './check_removed_types';
 import { validateNewTypes } from './validate_new_types';
 import { validateUpdatedTypes } from './validate_updated_types';
@@ -31,6 +32,10 @@ export const validateSOChanges: Task = (ctx, task) => {
     {
       title: 'Check removed SO types',
       task: checkRemovedTypes,
+    },
+    {
+      title: 'Ensure no virtual-version downgrade',
+      task: () => validateNoVirtualVersionDowngrade({ from: ctx.from!, to: ctx.to! }),
     },
     {
       title: 'Validate new SO types',

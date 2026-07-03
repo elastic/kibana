@@ -180,10 +180,6 @@ export class AgentBuilderApp {
     return (await loc.count()) > 0;
   }
 
-  async clickThinkingToggle() {
-    await this.page.testSubj.click('agentBuilderThinkingToggle');
-  }
-
   async clickNewConversationButton() {
     await this.page.testSubj.click('agentBuilderSidebarNewConversationButton');
   }
@@ -218,10 +214,6 @@ export class AgentBuilderApp {
       { timeout: 60_000 }
     );
     return newTitle;
-  }
-
-  async getThinkingDetails() {
-    return this.page.testSubj.locator('agentBuilderThinkingPanel').innerText();
   }
 
   async clickRetryButton() {

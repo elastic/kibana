@@ -1,5 +1,4 @@
 [
-  "alerting_notification_policy",
   "apm-services-telemetry",
   "application_usage_transactional",
   "background-session",

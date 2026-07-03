@@ -60,7 +60,13 @@ export const ES_VALID_SAMPLE_STEPS = [
       timeout: '30s',
       track_total_hits: true,
       _source: ['message', 'timestamp'],
-      sort: 'timestamp:desc',
+      sort: [
+        {
+          '@timestamp': {
+            order: 'desc',
+          },
+        },
+      ],
       highlight: {
         fields: {
           message: {},

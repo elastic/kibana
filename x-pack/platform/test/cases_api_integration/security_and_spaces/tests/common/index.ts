@@ -34,7 +34,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./configure/post_configure'));
     loadTestFile(require.resolve('./internal/metrics/get_case_metrics'));
     loadTestFile(require.resolve('./internal/metrics/get_case_metrics_alerts'));
-    loadTestFile(require.resolve('./internal/metrics/get_case_metrics_actions'));
     loadTestFile(require.resolve('./internal/metrics/get_case_metrics_connectors'));
     loadTestFile(require.resolve('./internal/metrics/get_cases_metrics'));
 
@@ -57,6 +56,9 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
 
     loadTestFile(require.resolve('./attachments_framework/external_references.ts'));
     loadTestFile(require.resolve('./attachments_framework/persistable_state.ts'));
+    loadTestFile(require.resolve('./attachments_framework/osquery.ts'));
+    loadTestFile(require.resolve('./attachments_framework/endpoint.ts'));
+    loadTestFile(require.resolve('./attachments_framework/indicator.ts'));
 
     /**
      * Cases client

@@ -42,6 +42,7 @@ export const ManageCustomPipelineActions: React.FC<ManageCustomPipelineProps> = 
       )}
       button={
         <EuiButtonEmpty
+          data-test-subj="enterpriseSearchManageCustomPipelineActionsManageButton"
           buttonRef={buttonRef}
           size="s"
           iconType="chevronSingleDown"
@@ -60,7 +61,6 @@ export const ManageCustomPipelineActions: React.FC<ManageCustomPipelineProps> = 
       anchorPosition="downRight"
     >
       <EuiContextMenuPanel
-        size="s"
         items={[
           <EuiContextMenuItem onClick={onRevertClick} icon="trash" css={revertContextMenuItemCSS}>
             {i18n.translate(

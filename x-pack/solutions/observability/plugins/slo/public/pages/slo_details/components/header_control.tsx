@@ -211,6 +211,9 @@ export function HeaderControl({ slo }: Props) {
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate('xpack.slo.sloDetailsHeaderControl.popoverAriaLabel', {
+          defaultMessage: 'SLO details actions',
+        })}
         data-test-subj="sloDetailsHeaderControlPopover"
         button={
           <EuiButton
@@ -228,9 +231,9 @@ export function HeaderControl({ slo }: Props) {
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}
+        panelPaddingSize="none"
       >
         <EuiContextMenuPanel
-          size="m"
           items={[
             <EuiContextMenuItem
               key="edit"

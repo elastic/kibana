@@ -6,6 +6,7 @@
  */
 
 import { Parser } from '@elastic/esql';
+import type { RuleQuery } from '../../form/types';
 
 export type SplitConfidence = 'high' | 'low' | 'none';
 
@@ -17,23 +18,31 @@ export interface SplitResult {
    * Machine-readable reason for the confidence level, useful for downstream
    * branching without string-matching the human-readable messages.
    *
-   * - 'no_stats'        — no STATS segment found; cannot identify a base query
-   * - 'no_where'        — STATS found but no WHERE after it; alert block is absent
-   * - 'split_succeeded' — both STATS and a post-STATS WHERE were found
+   * - 'no_stats'           — no STATS and no WHERE; entire query is base
+   * - 'no_where'           — STATS found but no WHERE after it; alert block is absent
+   * - 'split_succeeded'    — both STATS and a post-STATS WHERE were found
+   * - 'where_without_stats' — no STATS but a WHERE exists; split at the last WHERE
    */
-  reason: 'no_stats' | 'no_where' | 'split_succeeded';
+  reason: 'no_stats' | 'no_where' | 'split_succeeded' | 'where_without_stats';
 }
 
 /**
  * Splits an ES|QL query into a base portion and an alert-condition block
  * using the ANTLR-based AST parser from `@elastic/esql`.
  *
- * Strategy: find the last STATS command and the first WHERE after it.
- * Everything up to and including STATS is the base query. Everything from
- * that WHERE onward is the alert block (including its leading pipe).
+ * Heuristic (three rules, evaluated in order):
  *
- * Because splitting is performed against the real AST, pipes inside string
- * literals, comments, or other lexical contexts are handled correctly.
+ * 1. If there is at least one WHERE after a STATS, split directly before
+ *    the first WHERE after the last STATS.
+ * 2. If there is at least one WHERE but no STATS, split directly after
+ *    the last non-WHERE command that precedes the last WHERE. Consecutive
+ *    trailing WHEREs all become part of the alert block.
+ * 3. Otherwise (no WHERE, or only WHEREs before a STATS), we cannot
+ *    determine the split — the entire query is the base, alert block is
+ *    empty.
+ *
+ * Parsing uses the real AST, so pipes inside string literals, comments,
+ * or other lexical contexts are handled correctly.
  */
 export function splitQuery(query: string): SplitResult {
   if (!query.trim()) {
@@ -56,7 +65,48 @@ export function splitQuery(query: string): SplitResult {
   }
 
   if (lastStatsIdx === -1) {
-    return { base: '', alertBlock: query.trim(), confidence: 'none', reason: 'no_stats' };
+    /*
+     * No STATS — find the last non-WHERE command that precedes the last WHERE.
+     * All commands from that point onward (a trailing chain of WHEREs, possibly
+     * interspersed with SORT/LIMIT/EVAL tail commands) become the alert block.
+     */
+    let lastWhereIdx = -1;
+    for (let j = commands.length - 1; j >= 0; j--) {
+      if (commands[j].name === 'where') {
+        lastWhereIdx = j;
+        break;
+      }
+    }
+
+    if (lastWhereIdx === -1) {
+      return { base: query.trim(), alertBlock: '', confidence: 'none', reason: 'no_stats' };
+    }
+
+    // Walk backwards from the last WHERE to find the last non-WHERE before it.
+    let splitAfterIdx = -1;
+    for (let j = lastWhereIdx - 1; j >= 0; j--) {
+      if (commands[j].name !== 'where') {
+        splitAfterIdx = j;
+        break;
+      }
+    }
+
+    // If every command up to the last WHERE is also a WHERE, there's no base.
+    if (splitAfterIdx === -1) {
+      return { base: '', alertBlock: query.trim(), confidence: 'none', reason: 'no_stats' };
+    }
+
+    // Split directly after the last non-WHERE command preceding the trailing WHERE chain.
+    const firstAlertCmd = commands[splitAfterIdx + 1];
+    const splitPos = query.lastIndexOf('|', firstAlertCmd.location.min);
+    const cutAt = splitPos >= 0 ? splitPos : firstAlertCmd.location.min;
+
+    return {
+      base: query.slice(0, cutAt).trim(),
+      alertBlock: query.slice(cutAt).trim(),
+      confidence: 'low',
+      reason: 'where_without_stats',
+    };
   }
 
   let firstWhereAfterStats = -1;
@@ -79,6 +129,92 @@ export function splitQuery(query: string): SplitResult {
   const alertBlock = query.slice(cutAt).trim();
 
   return { base, alertBlock, confidence: 'high', reason: 'split_succeeded' };
+}
+
+/** Splits a full ES|QL query (e.g. from Discover) into composed base + breach segment. */
+export function discoverQueryToComposed(inlinedQuery: string): {
+  format: 'composed';
+  base: string;
+  breach: { segment: string };
+} {
+  const { base, alertBlock } = splitQuery(inlinedQuery);
+  return { format: 'composed', base, breach: { segment: alertBlock } };
+}
+
+/**
+ * Outcome of splitting a unified query for the form summary:
+ *
+ * - 'success'            — base and alert condition both identified
+ * - 'no_alert_condition' — base defined, no alert condition (every row is a breach)
+ * - 'split_failed'       — heuristic could not isolate a base (empty base)
+ * - 'empty'              — no query entered
+ */
+export type SplitOutcome = 'success' | 'no_alert_condition' | 'split_failed' | 'empty';
+
+export interface SplitRuleQueryResult {
+  query: RuleQuery;
+  outcome: SplitOutcome;
+}
+
+/**
+ * Maps a unified ES|QL query into the rule query shape for an alert rule,
+ * alongside an outcome that drives the form summary copy/callouts.
+ *
+ * - `success` (base + alert condition) → `composed` (base + breach segment).
+ * - `no_alert_condition` (base only, no WHERE) → `standalone`: the whole query
+ *   is the breach query, so every returned row is a breach. The rule data schema
+ *   permits `alert + standalone` (only `signal` is forced to standalone), so this
+ *   is a first-class, savable rule rather than a blocked dead-end.
+ * - `split_failed` / `empty` → `composed` so the summary can flag the state; these
+ *   do not produce a savable base-only rule.
+ */
+export function splitResultToRuleQuery(fullQuery: string): SplitRuleQueryResult {
+  const { base, alertBlock } = splitQuery(fullQuery);
+
+  const hasBase = base.trim().length > 0;
+  const hasAlert = alertBlock.trim().length > 0;
+
+  if (hasBase && hasAlert) {
+    return {
+      query: { format: 'composed', base, breach: { segment: alertBlock } },
+      outcome: 'success',
+    };
+  }
+  if (hasBase) {
+    return {
+      query: { format: 'standalone', breach: { query: base } },
+      outcome: 'no_alert_condition',
+    };
+  }
+
+  const query: RuleQuery = { format: 'composed', base, breach: { segment: alertBlock } };
+  return { query, outcome: hasAlert ? 'split_failed' : 'empty' };
+}
+
+/**
+ * After a create-mode unified-editor Apply, merges heuristic split output with
+ * any recovery block from the sandbox when the query format is unchanged.
+ * A format change (e.g. standalone no_where → composed after adding WHERE) drops recovery.
+ */
+export function resolveUnifiedAlertApplyQuery(
+  sandboxQuery: RuleQuery,
+  splitResult: RuleQuery
+): RuleQuery {
+  if (
+    splitResult.format === 'composed' &&
+    sandboxQuery.format === 'composed' &&
+    sandboxQuery.recovery
+  ) {
+    return { ...splitResult, recovery: sandboxQuery.recovery };
+  }
+  if (
+    splitResult.format === 'standalone' &&
+    sandboxQuery.format === 'standalone' &&
+    sandboxQuery.recovery
+  ) {
+    return { ...splitResult, recovery: sandboxQuery.recovery };
+  }
+  return splitResult;
 }
 
 /**

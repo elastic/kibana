@@ -9,12 +9,25 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { RuleCanvasContent } from './rule_canvas_content';
 
+const mockUpsertRule = jest.fn().mockResolvedValue({});
+const mockNavigateToUrl = jest.fn();
+const mockAddSuccess = jest.fn();
+const mockPrepend = (path: string) => `/base${path}`;
+
 jest.mock('@kbn/core-di-browser', () => ({
-  Context: {
-    Provider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  },
-  useService: () => ({}),
   CoreStart: (key: string) => key,
+  useService: (token: unknown) => {
+    if (token === 'application') {
+      return { navigateToUrl: mockNavigateToUrl };
+    }
+    if (token === 'http') {
+      return { basePath: { prepend: mockPrepend } };
+    }
+    if (token === 'notifications') {
+      return { toasts: { addSuccess: mockAddSuccess } };
+    }
+    return { upsertRule: mockUpsertRule };
+  },
 }));
 
 jest.mock('../../components/rule_details/rule_context', () => ({
@@ -29,24 +42,13 @@ jest.mock('../../components/rule_details/sidebar/rule_sidebar', () => ({
   RuleSidebar: () => <div data-test-subj="mockRuleSidebar" />,
 }));
 
-const createMockServices = () => ({
-  rulesApi: {
-    createRule: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
-    updateRule: jest.fn().mockResolvedValue({}),
-  } as any,
-  application: {
-    navigateToUrl: jest.fn(),
-  } as any,
-  basePath: {
-    prepend: (path: string) => `/base${path}`,
-  } as any,
-  notifications: {
-    toasts: { addSuccess: jest.fn(), addError: jest.fn() },
-  } as any,
-  container: {} as any,
-});
+jest.mock('../../services/rules_api', () => ({
+  RulesApi: Symbol('RulesApi'),
+}));
 
-const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}) => ({
+const createAttachment = (
+  overrides: { origin?: string; enabled?: boolean; dataId?: string } = {}
+) => ({
   id: 'att-1',
   type: 'rule' as const,
   versions: [],
@@ -57,17 +59,17 @@ const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}
     metadata: { name: 'My Rule', tags: ['tag1'], description: 'A test rule' },
     schedule: { every: '5m' },
     time_field: '@timestamp',
-    evaluation: { query: { kql: 'host.name: *' } },
+    query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
     state_transition: null,
     enabled: overrides.enabled,
+    ...(overrides.dataId ? { id: overrides.dataId } : {}),
   } as any,
 });
 
 const renderCanvas = (
-  overrides: { origin?: string; enabled?: boolean } = {},
+  overrides: { origin?: string; enabled?: boolean; dataId?: string } = {},
   callbackOverrides: Record<string, jest.Mock> = {}
 ) => {
-  const services = createMockServices();
   const attachment = createAttachment(overrides);
   const registerActionButtons = jest.fn();
   const updateOrigin = jest.fn().mockResolvedValue(undefined);
@@ -80,13 +82,11 @@ const renderCanvas = (
       registerActionButtons={callbackOverrides.registerActionButtons ?? registerActionButtons}
       updateOrigin={callbackOverrides.updateOrigin ?? updateOrigin}
       closeCanvas={closeCanvas}
-      {...services}
     />
   );
 
   return {
     ...result,
-    services,
     registerActionButtons: callbackOverrides.registerActionButtons ?? registerActionButtons,
     updateOrigin: callbackOverrides.updateOrigin ?? updateOrigin,
     attachment,
@@ -99,6 +99,10 @@ const getLastRegisteredButtons = (registerActionButtons: jest.Mock) => {
 };
 
 describe('RuleCanvasContent', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('rendering', () => {
     it('renders the RuleSidebar', () => {
       const { getByTestId } = renderCanvas();
@@ -124,19 +128,23 @@ describe('RuleCanvasContent', () => {
       expect(buttons.find((b) => b.label === 'Update Rule')).toBeUndefined();
     });
 
-    it('Create rule handler calls createRule and updateOrigin', async () => {
+    it('Create rule handler calls upsertRule and updateOrigin', async () => {
       const updateOrigin = jest.fn().mockResolvedValue(undefined);
-      const { services, registerActionButtons } = renderCanvas({}, { updateOrigin });
+      const { registerActionButtons } = renderCanvas(
+        { dataId: 'pre-assigned-id' },
+        { updateOrigin }
+      );
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
       const createButton = buttons.find((b) => b.label === 'Create rule')!;
       await createButton.handler();
 
-      expect(services.rulesApi.createRule).toHaveBeenCalledWith(
+      expect(mockUpsertRule).toHaveBeenCalledWith(
+        'pre-assigned-id',
         expect.objectContaining({ kind: 'signal' })
       );
-      expect(updateOrigin).toHaveBeenCalledWith('new-rule-id');
-      expect(services.notifications.toasts.addSuccess).toHaveBeenCalled();
+      expect(updateOrigin).toHaveBeenCalledWith('pre-assigned-id');
+      expect(mockAddSuccess).toHaveBeenCalled();
     });
   });
 
@@ -159,32 +167,28 @@ describe('RuleCanvasContent', () => {
       expect(buttons.find((b) => b.label === 'Create rule')).toBeUndefined();
     });
 
-    it('Update Rule handler calls updateRule with the rule id', async () => {
-      const { services, registerActionButtons, attachment } = renderCanvas({
-        origin: 'rule-123',
-      });
+    it('Update Rule handler calls upsertRule with the origin id', async () => {
+      const { registerActionButtons, attachment } = renderCanvas({ origin: 'rule-123' });
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
       const updateButton = buttons.find((b) => b.label === 'Update Rule')!;
       await updateButton.handler();
 
-      expect(services.rulesApi.updateRule).toHaveBeenCalledWith(
+      expect(mockUpsertRule).toHaveBeenCalledWith(
         'rule-123',
         expect.objectContaining({ metadata: attachment.data.metadata })
       );
-      expect(services.notifications.toasts.addSuccess).toHaveBeenCalled();
+      expect(mockAddSuccess).toHaveBeenCalled();
     });
 
     it('View in Rules handler navigates to the rule detail page', () => {
-      const { services, registerActionButtons } = renderCanvas({ origin: 'rule-123' });
+      const { registerActionButtons } = renderCanvas({ origin: 'rule-123' });
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
       const viewButton = buttons.find((b) => b.label === 'View in Rules')!;
       viewButton.handler();
 
-      expect(services.application.navigateToUrl).toHaveBeenCalledWith(
-        expect.stringContaining('rule-123')
-      );
+      expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('rule-123'));
     });
   });
 

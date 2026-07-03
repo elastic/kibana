@@ -13,6 +13,7 @@ import type {
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -25,14 +26,19 @@ import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extens
 import type { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-assistant-management-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 
 export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
   ConversationSidebarRef,
   OpenConversationSidebarReturn,
+  PublicEmbeddableConversationProps,
+  PublicEmbeddableConversationInputProps,
+  EmbeddableConversationInputRef,
 } from '@kbn/agent-builder-browser';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -59,10 +65,13 @@ export interface AgentBuilderStartDependencies {
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  embeddable: EmbeddableStart;
   cloud: CloudStart;
   share: SharePluginStart;
   uiActions: UiActionsStart;
   spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  cps?: CPSPluginStart;
 }
