@@ -181,6 +181,19 @@ describe('ExpressionRow', () => {
       );
     });
 
+    it('opens the warning threshold value popover immediately after the toggle is clicked', async () => {
+      const { wrapper, update } = await setup(baseExpression);
+
+      expect(wrapper.find('[data-test-subj="comparatorOptionsComboBox"]').exists()).toBe(false);
+
+      wrapper
+        .find('button[data-test-subj="o11yExpressionRowAddWarningThresholdButton"]')
+        .simulate('click');
+      await update();
+
+      expect(wrapper.find('[data-test-subj="comparatorOptionsComboBox"]').exists()).toBe(true);
+    });
+
     it('renders both threshold rows with Alert/Warning badges once a warning threshold exists', async () => {
       const { wrapper } = await setup({
         ...baseExpression,

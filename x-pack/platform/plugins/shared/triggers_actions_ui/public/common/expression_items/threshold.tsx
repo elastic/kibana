@@ -47,6 +47,11 @@ export interface ThresholdExpressionProps {
     | 'rightDown';
   display?: 'fullWidth' | 'inline';
   unit?: string;
+  // Open the value popover as soon as this expression mounts, e.g. when a
+  // caller adds a new, previously-hidden threshold row and wants to guide
+  // the user straight to filling it in rather than leaving it looking like
+  // an unexplained invalid state. Only affects the initial render.
+  initialPopoverOpen?: boolean;
 }
 
 export const ThresholdExpression = ({
@@ -59,9 +64,10 @@ export const ThresholdExpression = ({
   threshold = [],
   popupPosition,
   unit = '',
+  initialPopoverOpen = false,
 }: ThresholdExpressionProps) => {
   const comparators = customComparators ?? builtInComparators;
-  const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(false);
+  const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(initialPopoverOpen);
   const [comparator, setComparator] = useState<string>(thresholdComparator);
   const [numRequiredThresholds, setNumRequiredThresholds] = useState<number>(
     comparators[thresholdComparator].requiredValues

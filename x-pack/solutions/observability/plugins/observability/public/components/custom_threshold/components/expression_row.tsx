@@ -172,6 +172,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       updateThreshold={updateThreshold}
       errors={(errors.critical as IErrorObject) ?? {}}
       isMetricPct={isMetricPct}
+      fullWidth={!displayWarningThreshold}
     />
   );
 
@@ -183,6 +184,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       updateThreshold={updateWarningThreshold}
       errors={(errors.warning as IErrorObject) ?? {}}
       isMetricPct={isMetricPct}
+      fullWidth={false}
+      initialPopoverOpen
     />
   );
 
@@ -337,8 +340,26 @@ const ThresholdElement: React.FC<{
   isMetricPct: boolean;
   comparator: MetricExpression['comparator'];
   errors: IErrorObject;
+  // fullWidth is appropriate for a single, standalone threshold row; once a
+  // warning threshold is also shown, both rows need to stay compact so the
+  // Alert/Warning badge can sit next to them instead of being pushed off to
+  // the far right of a row that's already claimed the full row width.
+  fullWidth?: boolean;
+  // Only relevant when this row can be toggled on/off (the warning row):
+  // open the value popover immediately on mount so the newly-added row isn't
+  // left showing an empty, unexplained invalid state.
+  initialPopoverOpen?: boolean;
   // eslint-disable-next-line react/function-component-definition
-}> = ({ updateComparator, updateThreshold, threshold, isMetricPct, comparator, errors }) => {
+}> = ({
+  updateComparator,
+  updateThreshold,
+  threshold,
+  isMetricPct,
+  comparator,
+  errors,
+  fullWidth = true,
+  initialPopoverOpen,
+}) => {
   const displayedThreshold = useMemo(() => {
     if (isMetricPct) return threshold.map((v) => decimalToPct(v));
     return threshold;
@@ -359,7 +380,8 @@ const ThresholdElement: React.FC<{
         onChangeSelectedThresholdComparator={updateComparator}
         onChangeSelectedThreshold={updateThreshold}
         errors={errors}
-        display="fullWidth"
+        display={fullWidth ? 'fullWidth' : 'inline'}
+        initialPopoverOpen={initialPopoverOpen}
         unit={isMetricPct ? '%' : ''}
       />
     </>

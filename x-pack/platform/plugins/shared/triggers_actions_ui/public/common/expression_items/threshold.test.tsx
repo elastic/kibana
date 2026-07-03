@@ -174,4 +174,31 @@ describe('threshold expression', () => {
     expect(thresholdInput.value).toBe('0');
     expect(thresholdInput).not.toBeInvalid();
   });
+
+  it('does not open the popover by default', () => {
+    renderWithIntl(
+      <ThresholdExpression
+        thresholdComparator={'>'}
+        errors={{ threshold0: [], threshold1: [] }}
+        onChangeSelectedThreshold={jest.fn()}
+        onChangeSelectedThresholdComparator={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId('comparatorOptionsComboBox')).not.toBeInTheDocument();
+  });
+
+  it('opens the popover on mount when initialPopoverOpen is set', () => {
+    renderWithIntl(
+      <ThresholdExpression
+        thresholdComparator={'>'}
+        errors={{ threshold0: [], threshold1: [] }}
+        onChangeSelectedThreshold={jest.fn()}
+        onChangeSelectedThresholdComparator={jest.fn()}
+        initialPopoverOpen
+      />
+    );
+
+    expect(screen.getByTestId('comparatorOptionsComboBox')).toBeInTheDocument();
+  });
 });
