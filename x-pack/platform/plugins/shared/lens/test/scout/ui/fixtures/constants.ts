@@ -25,12 +25,12 @@ export const KBN_ARCHIVE_PATHS = {
   ESQL_CONVERSION_DASHBOARD: `${LENS_SCOUT_FIXTURES_DIR}/esql_conversion_dashboard.json`,
   OPEN_IN_LENS: {
     TSVB: {
-      METRIC: `${LENS_SCOUT_FIXTURES_DIR}/tsvb_metric.json`,
-      GAUGE: `${LENS_SCOUT_FIXTURES_DIR}/tsvb_gauge.json`,
-      TIMESERIES: `${LENS_SCOUT_FIXTURES_DIR}/tsvb_timeseries.json`,
-      TOP_N: `${LENS_SCOUT_FIXTURES_DIR}/tsvb_top_n.json`,
-      TABLE: `${LENS_SCOUT_FIXTURES_DIR}/tsvb_table.json`,
-      DASHBOARD: `${LENS_SCOUT_FIXTURES_DIR}/tsvb_dashboard.json`,
+      METRIC: `${OPEN_IN_LENS_KBN_ARCHIVES_DIR}/tsvb/metric.json`,
+      GAUGE: `${OPEN_IN_LENS_KBN_ARCHIVES_DIR}/tsvb/gauge.json`,
+      TIMESERIES: `${OPEN_IN_LENS_KBN_ARCHIVES_DIR}/tsvb/timeseries.json`,
+      TOP_N: `${OPEN_IN_LENS_KBN_ARCHIVES_DIR}/tsvb/top_n.json`,
+      TABLE: `${OPEN_IN_LENS_KBN_ARCHIVES_DIR}/tsvb/table.json`,
+      DASHBOARD: `${OPEN_IN_LENS_KBN_ARCHIVES_DIR}/tsvb/dashboard.json`,
     },
     AGG_BASED: {
       METRIC: `${OPEN_IN_LENS_KBN_ARCHIVES_DIR}/agg_based/metric.json`,
